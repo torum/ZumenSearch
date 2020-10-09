@@ -1,0 +1,18 @@
+﻿<Application x:Class="RepsCore.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:RepsCore"
+             xmlns:vms="clr-namespace:RepsCore.ViewModels"
+             xmlns:common="clr-namespace:RepsCore.Common"
+             StartupUri="Views\MainWindow.xaml"
+             Startup="AppOnStartup">
+    <Application.Resources>
+
+        <!-- データコンテキスト -->
+        <vms:MainViewModel x:Key="MainViewModel" />
+
+        <!-- BooleanToVisibilityConverterの、 Collapsed 版　-->
+        <common:BoolToVisibilityCollapsedConverter x:Key="BoolToVisibilityCollapsedConverter" TrueValue="Visible" FalseValue="Collapsed" />
+        
+    </Application.Resources>
+</Application>
