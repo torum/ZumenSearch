@@ -13,6 +13,9 @@
 
         <!-- BooleanToVisibilityConverterの、 Collapsed 版　-->
         <common:BoolToVisibilityCollapsedConverter x:Key="BoolToVisibilityCollapsedConverter" TrueValue="Visible" FalseValue="Collapsed" />
-        
+
+        <!-- EnumToBoolConverter ラジオボタンとEnumのバインディング用 -->
+        <common:EnumToBoolConverter x:Key="EnumBooleanConverter"/>
+
     </Application.Resources>
 </Application>

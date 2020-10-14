@@ -22,27 +22,49 @@ using Microsoft.Data.Sqlite;
 namespace RepsCore.ViewModels
 {
 
-    #region == Rentのクラス ==
+    /// 検索と一覧で、RENTとRENTLIVINGテーブルをJOINして
+    /// 
+    ///
+
+
 
     /// <summary>
-    /// 物件のクラス
+    /// 物件の種別などの enum （ViewのXAMLで参照するのでここで定義）
+    /// </summary>
+
+    // 賃貸物件のタイプ（住居用・事業用・駐車場）
+    public enum RentTypes
+    {
+        RentLiving, RentBussiness, RentParking
+    }
+
+    // 物件種別（アパート・マンション・一戸建て・他）
+    public enum RentLivingKinds
+    {
+        Apartment, Mansion, House, Other
+    }
+
+    #region == Rent及び派生するクラス ==
+
+    /// <summary>
+    /// 物件の（基底）クラス
     /// </summary>
     public class Rent : ViewModelBase
     {
         // GUID and Primary Key
-        private string _id;
-        public string ID
+        private string _rent_id;
+        public string Rent_ID
         {
             get
             {
-                return _id;
+                return _rent_id;
             }
             set
             {
-                if (_id == value) return;
+                if (_rent_id == value) return;
 
-                _id = value;
-                this.NotifyPropertyChanged("ID");
+                _rent_id = value;
+                this.NotifyPropertyChanged("Rent_ID");
             }
         }
 
@@ -60,11 +82,6 @@ namespace RepsCore.ViewModels
                 _name = value;
                 this.NotifyPropertyChanged("Name");
             }
-        }
-
-        public enum RentTypes
-        {
-            RentLiving, RentBussiness, RentParking
         }
 
         public Dictionary<RentTypes, string> RentTypeToLabel { get; } = new Dictionary<RentTypes, string>()
@@ -175,6 +192,114 @@ namespace RepsCore.ViewModels
         }
     }
 
+    /// <summary>
+    /// 賃貸住居用物件のクラス
+    /// </summary>
+    public class RentLiving : Rent
+    {
+        private string _rentLiving_ID;
+        public string RentLiving_ID
+        {
+            get
+            {
+                return _rentLiving_ID;
+            }
+            set
+            {
+                if (_rentLiving_ID == value) return;
+
+                _rentLiving_ID = value;
+                this.NotifyPropertyChanged("RentLiving_ID");
+            }
+
+        }
+
+        public Dictionary<RentLivingKinds, string> RentLivingKindsToLabel { get; } = new Dictionary<RentLivingKinds, string>()
+        {
+            {RentLivingKinds.Apartment, "アパート"},
+            {RentLivingKinds.Mansion, "マンション"},
+            {RentLivingKinds.House, "一戸建て"},
+            {RentLivingKinds.Other, "その他"},
+        };
+
+        public Dictionary<string, RentLivingKinds> StringToRentLivingKinds { get; } = new Dictionary<string, RentLivingKinds>()
+        {
+            {"Apartment", RentLivingKinds.Apartment},
+            {"Mansion", RentLivingKinds.Mansion},
+            {"House", RentLivingKinds.House},
+            {"Other", RentLivingKinds.Other},
+        };
+
+        // 賃貸住居用物件種別　アパート・マンション・戸建て・他
+        private RentLivingKinds _kind;
+        public RentLivingKinds Kind
+        {
+            get
+            {
+                return _kind;
+            }
+            set
+            {
+                if (_kind == value) return;
+
+                _kind = value;
+                this.NotifyPropertyChanged("Kind");
+            }
+        }
+
+        // 地上n階建て
+        private int _floors;
+        public int Floors
+        {
+            get
+            {
+                return _floors;
+            }
+            set
+            {
+                if (_floors == value) return;
+
+                _floors = value;
+                this.NotifyPropertyChanged("Floors");
+            }
+        }
+
+        // 地下n階建て
+        private int _floorsBasement;
+        public int FloorsBasement
+        {
+            get
+            {
+                return _floorsBasement;
+            }
+            set
+            {
+                if (_floorsBasement == value) return;
+
+                _floorsBasement = value;
+                this.NotifyPropertyChanged("FloorsBasement");
+            }
+        }
+
+        // 築年
+        private int _builtYear;
+        public int BuiltYear
+        {
+            get
+            {
+                return _builtYear;
+            }
+            set
+            {
+                if (_builtYear == value) return;
+
+                _builtYear = value;
+                this.NotifyPropertyChanged("BuiltYear");
+            }
+        }
+
+    }
+
     #endregion
 
     public class MainViewModel : ViewModelBase
@@ -255,43 +380,43 @@ namespace RepsCore.ViewModels
 
         #region == 物件関連のクラス ==
 
-        // 賃貸物件　新規追加用のクラス
-        private Rent _rentNew = new Rent();
-        public Rent RentNew
+        // 賃貸物件住居用　新規追加用のクラス
+        private RentLiving _rentLivingNew = new RentLiving();
+        public RentLiving RentLivingNew
         {
             get
             {
-                return _rentNew;
+                return _rentLivingNew;
             }
             set
             {
-                if (_rentNew == value) return;
+                if (_rentLivingNew == value) return;
 
-                _rentNew = value;
-                this.NotifyPropertyChanged("RentNew");
+                _rentLivingNew = value;
+                this.NotifyPropertyChanged("RentLivingNew");
             }
         }
 
-        // 賃貸物件　編集更新用のクラス
-        private Rent _rentEdit = new Rent();
-        public Rent RentEdit
+        // 賃貸物件住居用　編集更新用のクラス
+        private RentLiving _rentLivingEdit = new RentLiving();
+        public RentLiving RentLivingEdit
         {
             get
             {
-                return _rentEdit;
+                return _rentLivingEdit;
             }
             set
             {
-                if (_rentEdit == value) return;
+                if (_rentLivingEdit == value) return;
 
-                _rentEdit = value;
-                this.NotifyPropertyChanged("RentEdit");
+                _rentLivingEdit = value;
+                this.NotifyPropertyChanged("RentLivingEdit");
             }
         }
 
-        // 賃貸物件　編集一覧用のコレクション
-        private ObservableCollection<Rent> _editRents = new ObservableCollection<Rent>();
-        public ObservableCollection<Rent> EditRents
+        // 賃貸物件住居用　編集一覧用のコレクション
+        private ObservableCollection<RentLiving> _editRents = new ObservableCollection<RentLiving>();
+        public ObservableCollection<RentLiving> EditRents
         {
             get { return this._editRents; }
         }
@@ -316,8 +441,8 @@ namespace RepsCore.ViewModels
             }
         }
 
-        private Rent _rentLivingEditSelectedItem;
-        public Rent RentLivingEditSelectedItem
+        private RentLiving _rentLivingEditSelectedItem;
+        public RentLiving RentLivingEditSelectedItem
         {
             get
             {
@@ -354,7 +479,7 @@ namespace RepsCore.ViewModels
             #region == DB のイニシャライズ ==
 
             // DB file path のセット
-            _dataBaseFilePath = System.Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + System.IO.Path.DirectorySeparatorChar + "SqliteDB.db";
+            _dataBaseFilePath = System.Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + System.IO.Path.DirectorySeparatorChar + _appName + ".db";
 
 
             // Create a table if not exists.
@@ -371,16 +496,95 @@ namespace RepsCore.ViewModels
 
                     using (var tableCmd = connection.CreateCommand())
                     {
-                        tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS Rent (" +
-                                "ID TEXT NOT NULL PRIMARY KEY," +
+                        // トランザクション開始
+                        tableCmd.Transaction = connection.BeginTransaction();
+                        try
+                        {
+                            // メインの賃貸物件「インデックス」テーブル
+                            tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS Rent (" +
+                                "Rent_ID TEXT NOT NULL PRIMARY KEY," +
                                 "Name TEXT NOT NULL," +
                                 "Type TEXT NOT NULL," +
                                 "PostalCode TEXT NOT NULL," +
                                 "Location TEXT NOT NULL," +
-                                "TrainStation1 TEXT NOT NULL," +
-                                "TrainStation2 TEXT NOT NULL)";
+                                "LocationHiddenPart TEXT," +
+                                "GeoLocationLatitude TEXT," +
+                                "GeoLocationLongitude TEXT," +
+                                "TrainStation1 TEXT," +
+                                "TrainStation2 TEXT)";
+                            tableCmd.ExecuteNonQuery();
 
-                        tableCmd.ExecuteNonQuery();
+                            // 賃貸住居用物件の「建物」テーブル
+                            tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS RentLiving (" +
+                                "RentLiving_ID TEXT NOT NULL PRIMARY KEY," +
+                                "Rent_ID TEXT NOT NULL," +
+                                "Kind TEXT NOT NULL," +
+                                "Floors INTEGER NOT NULL," +
+                                "FloorsBasement INTEGER," +
+                                "BuiltYear INTEGER NOT NULL," +
+                                "FOREIGN KEY (Rent_ID) REFERENCES Rent(Rent_ID)" + 
+                                " )";
+                            tableCmd.ExecuteNonQuery();
+
+                            // 賃貸住居用物件の「写真」テーブル
+                            tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS RentLivingPicture (" +
+                                "RentLivingPicture_ID TEXT NOT NULL PRIMARY KEY," +
+                                "RentLiving_ID TEXT NOT NULL," +
+                                "Rent_ID TEXT NOT NULL," +
+                                "Picture BLOB NOT NULL," +
+                                "FOREIGN KEY (Rent_ID) REFERENCES Rent(Rent_ID)," +
+                                "FOREIGN KEY (RentLiving_ID) REFERENCES RentLiving(RentLiving_ID)" + 
+                                " )";
+                            tableCmd.ExecuteNonQuery();
+
+                            // 賃貸住居用物件の「図面」テーブル
+                            tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS RentLivingPdf (" +
+                                "RentLivingPicture_ID TEXT NOT NULL PRIMARY KEY," +
+                                "RentLiving_ID TEXT NOT NULL," +
+                                "Rent_ID TEXT NOT NULL," +
+                                "Pdf BLOB NOT NULL," +
+                                "FOREIGN KEY (Rent_ID) REFERENCES Rent(Rent_ID)," +
+                                "FOREIGN KEY (RentLiving_ID) REFERENCES RentLiving(RentLiving_ID)" + 
+                                " )";
+                            tableCmd.ExecuteNonQuery();
+
+                            // 賃貸住居用物件の「部屋」テーブル
+                            tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS RentLivingListing (" +
+                                "RentLivingListing_ID TEXT NOT NULL PRIMARY KEY," +
+                                "RentLiving_ID TEXT NOT NULL," +
+                                "Rent_ID TEXT NOT NULL," +
+                                "RoomNumber TEXT," +
+                                "Price INTEGER NOT NULL," +
+                                "Madori TEXT NOT NULL," +
+                                "FOREIGN KEY (Rent_ID) REFERENCES Rent(Rent_ID)," +
+                                "FOREIGN KEY (RentLiving_ID) REFERENCES RentLiving(RentLiving_ID)" + 
+                                " )";
+                            tableCmd.ExecuteNonQuery();
+
+                            // 賃貸住居用物件の「部屋」の「写真」テーブル
+                            tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS RentLivingListingPicture (" +
+                                "RentLivingListingPicture_ID TEXT NOT NULL PRIMARY KEY," +
+                                "RentLivingListing_ID TEXT NOT NULL," +
+                                "RentLiving_ID TEXT NOT NULL," +
+                                "Rent_ID TEXT NOT NULL," +
+                                "Picture BLOB NOT NULL," +
+                                "FOREIGN KEY (Rent_ID) REFERENCES Rent(Rent_ID)," +
+                                "FOREIGN KEY (RentLiving_ID) REFERENCES RentLiving(RentLiving_ID)," +
+                                "FOREIGN KEY (RentLivingListing_ID) REFERENCES RentLivingListing(RentLivingListing_ID)" +
+                                " )";
+                            tableCmd.ExecuteNonQuery();
+
+                            // トランザクションコミット
+                            tableCmd.Transaction.Commit();
+                        }
+                        catch (Exception e)
+                        {
+                            // トランザクションのロールバック
+                            tableCmd.Transaction.Rollback();
+
+                            System.Diagnostics.Debug.WriteLine(e.Message);
+                            //TODO 
+                        }
                     }
                 }
                 catch (System.Reflection.TargetInvocationException ex)
@@ -639,6 +843,18 @@ namespace RepsCore.ViewModels
         }
         public void RentLivingNewCommand_Execute()
         {
+            // RentNewオブジェクトをクリアというかイニシャライズ
+            RentLivingNew.Rent_ID = Guid.NewGuid().ToString();
+            RentLivingNew.Type = RentTypes.RentLiving;
+            RentLivingNew.Name = "";
+            RentLivingNew.PostalCode = "";
+            RentLivingNew.Location = "";
+            RentLivingNew.TrainStation1 = "";
+            RentLivingNew.TrainStation2 = "";
+
+            RentLivingNew.RentLiving_ID = Guid.NewGuid().ToString();
+            // TODO: 残りもクリアする。
+
             if (!ShowRentLivingNew) ShowRentLivingNew = true;
         }
 
@@ -651,10 +867,15 @@ namespace RepsCore.ViewModels
         {
             try
             {
-                RentNew.ID = Guid.NewGuid().ToString();
-                RentNew.Type = Rent.RentTypes.RentLiving;
+                // 念のため？
+                RentLivingNew.Rent_ID = Guid.NewGuid().ToString();
+                RentLivingNew.Type = RentTypes.RentLiving;
 
-                string sql = String.Format("INSERT INTO Rent (ID, Name, Type, PostalCode, Location, TrainStation1, TrainStation2) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}')", RentNew.ID, RentNew.Name, RentNew.Type.ToString(), RentNew.PostalCode, RentNew.Location, RentNew.TrainStation1, RentNew.TrainStation2);
+                RentLivingNew.RentLiving_ID = Guid.NewGuid().ToString();
+
+                string sqlInsertIntoRent = String.Format("INSERT INTO Rent (Rent_ID, Name, Type, PostalCode, Location, TrainStation1, TrainStation2) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}')", RentLivingNew.Rent_ID, RentLivingNew.Name, RentLivingNew.Type.ToString(), RentLivingNew.PostalCode, RentLivingNew.Location, RentLivingNew.TrainStation1, RentLivingNew.TrainStation2);
+
+                string sqlInsertIntoRentLiving = String.Format("INSERT INTO RentLiving (RentLiving_ID, Rent_ID, Kind, Floors, FloorsBasement, BuiltYear) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}')", RentLivingNew.RentLiving_ID, RentLivingNew.Rent_ID, RentLivingNew.Kind.ToString(), RentLivingNew.Floors, RentLivingNew.FloorsBasement, RentLivingNew.BuiltYear);
 
                 using (var connection = new SqliteConnection(connectionStringBuilder.ConnectionString))
                 {
@@ -665,36 +886,34 @@ namespace RepsCore.ViewModels
                         cmd.Transaction = connection.BeginTransaction();
                         try
                         {
-                            cmd.CommandText = sql;
-                            var result = cmd.ExecuteNonQuery();
+                            // Rentテーブルへ追加
+                            cmd.CommandText = sqlInsertIntoRent;
+                            var InsertIntoRentResult = cmd.ExecuteNonQuery();
+                            /*
                             if (result != 1)
                             {
                                 // TODO
                             }
-                            cmd.Transaction.Commit();
-
-                            /*
-                            Rent r = new Rent();
-                            r.ID = RentNew.ID;
-                            r.Name = RentNew.Name;
-                            r.Type = r.StringToRentType[Convert.ToString(reader["Type"])];
-                            r.PostalCode = RentNew.PostalCode;
-                            r.Location = RentNew.Location;
-                            r.TrainStation1 = RentNew.TrainStation1;
-                            r.TrainStation2 = RentNew.TrainStation2;
-
-                            _editRents.Add(r);
                             */
+
+                            // RentLivingテーブルへ追加
+                            cmd.CommandText = sqlInsertIntoRentLiving;
+                            var InsertIntoRentLivingResult = cmd.ExecuteNonQuery();
+
+
+                            //　コミット
+                            cmd.Transaction.Commit();
 
                             // 編集を非表示に（閉じる）
                             if (ShowRentLivingNew) ShowRentLivingNew = false;
                         }
                         catch (Exception e)
                         {
+                            // ロールバック
                             cmd.Transaction.Rollback();
 
                             System.Diagnostics.Debug.WriteLine(e.Message);
-                            //TODO 
+                            //TODO エラー通知
                         }
                     }
                 }
@@ -749,7 +968,7 @@ namespace RepsCore.ViewModels
 
                 using (var cmd = connection.CreateCommand())
                 {
-
+                    // TODO JOIN
                     cmd.CommandText = "SELECT * FROM Rent";
 
                     using (var reader = cmd.ExecuteReader())
@@ -757,16 +976,16 @@ namespace RepsCore.ViewModels
                         while (reader.Read())
                         {
 
-                            Rent r = new Rent();
-                            r.ID = Convert.ToString(reader["ID"]);
-                            r.Name = Convert.ToString(reader["Name"]);
-                            r.Type = r.StringToRentType[Convert.ToString(reader["Type"])];
-                            r.PostalCode = Convert.ToString(reader["PostalCode"]);
-                            r.Location = Convert.ToString(reader["Location"]);
-                            r.TrainStation1 = Convert.ToString(reader["TrainStation1"]);
-                            r.TrainStation2 = Convert.ToString(reader["TrainStation2"]);
+                            RentLiving rl = new RentLiving();
+                            rl.Rent_ID = Convert.ToString(reader["Rent_ID"]);
+                            rl.Name = Convert.ToString(reader["Name"]);
+                            rl.Type = rl.StringToRentType[Convert.ToString(reader["Type"])];
+                            rl.PostalCode = Convert.ToString(reader["PostalCode"]);
+                            rl.Location = Convert.ToString(reader["Location"]);
+                            rl.TrainStation1 = Convert.ToString(reader["TrainStation1"]);
+                            rl.TrainStation2 = Convert.ToString(reader["TrainStation2"]);
 
-                            _editRents.Add(r);
+                            _editRents.Add(rl);
 
                         }
                     }
@@ -797,7 +1016,7 @@ namespace RepsCore.ViewModels
 
                 using (var cmd = connection.CreateCommand())
                 {
-
+                    // TODO JOIN
                     cmd.CommandText = "SELECT * FROM Rent WHERE Name Like '%" + RentLivingEditSearchText + "%'";
 
                     using (var reader = cmd.ExecuteReader())
@@ -805,16 +1024,16 @@ namespace RepsCore.ViewModels
                         while (reader.Read())
                         {
 
-                            Rent r = new Rent();
-                            r.ID = Convert.ToString(reader["ID"]);
-                            r.Name = Convert.ToString(reader["Name"]);
-                            r.Type = r.StringToRentType[Convert.ToString(reader["Type"])];
-                            r.PostalCode = Convert.ToString(reader["PostalCode"]);
-                            r.Location = Convert.ToString(reader["Location"]);
-                            r.TrainStation1 = Convert.ToString(reader["TrainStation1"]);
-                            r.TrainStation2 = Convert.ToString(reader["TrainStation2"]);
+                            RentLiving rl = new RentLiving();
+                            rl.Rent_ID = Convert.ToString(reader["Rent_ID"]);
+                            rl.Name = Convert.ToString(reader["Name"]);
+                            rl.Type = rl.StringToRentType[Convert.ToString(reader["Type"])];
+                            rl.PostalCode = Convert.ToString(reader["PostalCode"]);
+                            rl.Location = Convert.ToString(reader["Location"]);
+                            rl.TrainStation1 = Convert.ToString(reader["TrainStation1"]);
+                            rl.TrainStation2 = Convert.ToString(reader["TrainStation2"]);
 
-                            _editRents.Add(r);
+                            _editRents.Add(rl);
 
                         }
                     }
@@ -839,12 +1058,12 @@ namespace RepsCore.ViewModels
             if (RentLivingEditSelectedItem != null)
             {
                 // 選択アイテムのデータを一旦編集オブジェクトに格納
-                RentEdit.ID = RentLivingEditSelectedItem.ID;
-                RentEdit.Name = RentLivingEditSelectedItem.Name;
-                RentEdit.PostalCode = RentLivingEditSelectedItem.PostalCode;
-                RentEdit.Location = RentLivingEditSelectedItem.Location;
-                RentEdit.TrainStation1 = RentLivingEditSelectedItem.TrainStation1;
-                RentEdit.TrainStation2 = RentLivingEditSelectedItem.TrainStation2;
+                RentLivingEdit.Rent_ID = RentLivingEditSelectedItem.Rent_ID;
+                RentLivingEdit.Name = RentLivingEditSelectedItem.Name;
+                RentLivingEdit.PostalCode = RentLivingEditSelectedItem.PostalCode;
+                RentLivingEdit.Location = RentLivingEditSelectedItem.Location;
+                RentLivingEdit.TrainStation1 = RentLivingEditSelectedItem.TrainStation1;
+                RentLivingEdit.TrainStation2 = RentLivingEditSelectedItem.TrainStation2;
 
                 // TODO Open DB and SELECT !!
 
@@ -878,7 +1097,9 @@ namespace RepsCore.ViewModels
             {
                 // 編集オブジェクトに格納されている更新された情報をDBへ更新
 
-                string sql = String.Format("UPDATE Rent SET Name = '{1}', Type = '{2}', PostalCode = '{3}', Location = '{4}', TrainStation1 = '{5}', TrainStation2 = '{6}' WHERE ID = '{0}'", RentEdit.ID, RentEdit.Name, RentEdit.Type.ToString(), RentEdit.PostalCode, RentEdit.Location, RentEdit.TrainStation1, RentEdit.TrainStation2);
+                // TODO 
+
+                string sql = String.Format("UPDATE Rent SET Name = '{1}', Type = '{2}', PostalCode = '{3}', Location = '{4}', TrainStation1 = '{5}', TrainStation2 = '{6}' WHERE Rent_ID = '{0}'", RentLivingEdit.Rent_ID, RentLivingEdit.Name, RentLivingEdit.Type.ToString(), RentLivingEdit.PostalCode, RentLivingEdit.Location, RentLivingEdit.TrainStation1, RentLivingEdit.TrainStation2);
 
                 using (var connection = new SqliteConnection(connectionStringBuilder.ConnectionString))
                 {
@@ -898,11 +1119,11 @@ namespace RepsCore.ViewModels
                             cmd.Transaction.Commit();
 
                             // 編集オブジェクトに格納された情報を、選択アイテムに更新（Listviewの情報が更新されるー＞DBから読み込みし直さなくて良くなる）
-                            RentLivingEditSelectedItem.Name = RentEdit.Name;
-                            RentLivingEditSelectedItem.PostalCode = RentEdit.PostalCode;
-                            RentLivingEditSelectedItem.Location = RentEdit.Location;
-                            RentLivingEditSelectedItem.Location = RentEdit.TrainStation1;
-                            RentLivingEditSelectedItem.Location = RentEdit.TrainStation2;
+                            RentLivingEditSelectedItem.Name = RentLivingEdit.Name;
+                            RentLivingEditSelectedItem.PostalCode = RentLivingEdit.PostalCode;
+                            RentLivingEditSelectedItem.Location = RentLivingEdit.Location;
+                            RentLivingEditSelectedItem.Location = RentLivingEdit.TrainStation1;
+                            RentLivingEditSelectedItem.Location = RentLivingEdit.TrainStation2;
 
                             // 編集画面を非表示に
                             if (ShowRentLivingEdit) ShowRentLivingEdit = false;
@@ -975,7 +1196,7 @@ namespace RepsCore.ViewModels
             {
                 // 選択アイテムのデータを削除
 
-                string sql = String.Format("DELETE FROM Rent WHERE ID = '{0}'", RentLivingEditSelectedItem.ID);
+                string sql = String.Format("DELETE FROM Rent WHERE Rent_ID = '{0}'", RentLivingEditSelectedItem.Rent_ID);
 
                 using (var connection = new SqliteConnection(connectionStringBuilder.ConnectionString))
                 {
