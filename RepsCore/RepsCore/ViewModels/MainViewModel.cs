@@ -8,29 +8,42 @@ using System.Windows.Controls;
 using System.Xml;
 using System.Xml.Linq;
 using System.Windows.Data;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.Windows.Input;
 using System.IO;
 using System.ComponentModel;
 using RepsCore.Common;
 using System.Collections.ObjectModel;
+using System.Text;
 using System.Linq;
 using System.Media;
 using System.Windows.Threading;
 //using System.Data.SQLite;
 using Microsoft.Data.Sqlite;
+using System.Windows.Media.Imaging;
+
+/// TODO:
+/// 部屋（複数）を追加・編集・削除する機能
+/// 条件検索
+/// 建物にPDFのファイルを追加
+/// 入力補助（住所・〒・Geo）
+/// 元付け・オーナー管理
+/// エラー処理、及びログ保存
+
+
+/// 履歴：
+/// エラーイベントとエラー表示機能の実装。
+/// 画像ファイルの追加。
+/// 
+
 
 namespace RepsCore.ViewModels
 {
-
-    /// 検索と一覧で、RENTとRENTLIVINGテーブルをJOINして
-    /// 
-    ///
-
-
-
     /// <summary>
-    /// 物件の種別などの enum （ViewのXAMLで参照するのでここで定義）
+    /// 物件の種別などの Enum （ViewのXAMLで参照するのでここで定義）
     /// </summary>
+    #region == グローバル定数 ==
 
     // 賃貸物件のタイプ（住居用・事業用・駐車場）
     public enum RentTypes
@@ -38,13 +51,18 @@ namespace RepsCore.ViewModels
         RentLiving, RentBussiness, RentParking
     }
 
-    // 物件種別（アパート・マンション・一戸建て・他）
+    // 賃貸住居用物件種別（アパート・マンション・一戸建て・他）
     public enum RentLivingKinds
     {
         Apartment, Mansion, House, Other
     }
 
-    #region == Rent及び派生するクラス ==
+    #endregion
+
+    /// <summary>
+    /// 賃貸物件のRent・Section、及び派生クラス
+    /// </summary>
+    #region == Rent・Section、及びその派生クラス ==
 
     /// <summary>
     /// 物件の（基底）クラス
@@ -193,7 +211,7 @@ namespace RepsCore.ViewModels
     }
 
     /// <summary>
-    /// 賃貸住居用物件のクラス
+    /// 賃貸住居用物件のクラス（建物）
     /// </summary>
     public class RentLiving : Rent
     {
@@ -211,10 +229,89 @@ namespace RepsCore.ViewModels
                 _rentLiving_ID = value;
                 this.NotifyPropertyChanged("RentLiving_ID");
             }
-
         }
 
-        public Dictionary<RentLivingKinds, string> RentLivingKindsToLabel { get; } = new Dictionary<RentLivingKinds, string>()
+        private string _rentLivingPicture_ID; //TODO temp
+        public string RentLivingPicture_ID
+        {
+            get
+            {
+                return _rentLivingPicture_ID;
+            }
+            set
+            {
+                if (_rentLivingPicture_ID == value) return;
+
+                _rentLivingPicture_ID = value;
+                this.NotifyPropertyChanged("RentLivingPicture_ID");
+            }
+        }
+
+        private byte[] _pictureThumbW200xData;
+        public byte[] PictureThumbW200xData
+        {
+            get
+            {
+                return _pictureThumbW200xData;
+            }
+            set
+            {
+                if (_pictureThumbW200xData == value) return;
+
+                _pictureThumbW200xData = value;
+                this.NotifyPropertyChanged("PictureThumbW200xData");
+            }
+        }
+
+        private byte[] _pictureData;
+        public byte[] PictureData
+        {
+            get
+            {
+                return _pictureData;
+            }
+            set
+            {
+                if (_pictureData == value) return;
+
+                _pictureData = value;
+                this.NotifyPropertyChanged("PictureData");
+            }
+        }
+
+        private string _pictureFileExt;
+        public string PictureFileExt
+        {
+            get
+            {
+                return _pictureFileExt;
+            }
+            set
+            {
+                if (_pictureFileExt == value) return;
+
+                _pictureFileExt = value;
+                this.NotifyPropertyChanged("PictureFileExt");
+            }
+        }
+
+        private ImageSource _picture;
+        public ImageSource Picture
+        {
+            get
+            {
+                return _picture;
+            }
+            set
+            {
+                if (_picture == value) return;
+
+                _picture = value;
+                this.NotifyPropertyChanged("Picture");
+            }
+        }
+
+        public Dictionary<RentLivingKinds, string> RentLivingKindToLabel { get; } = new Dictionary<RentLivingKinds, string>()
         {
             {RentLivingKinds.Apartment, "アパート"},
             {RentLivingKinds.Mansion, "マンション"},
@@ -222,7 +319,7 @@ namespace RepsCore.ViewModels
             {RentLivingKinds.Other, "その他"},
         };
 
-        public Dictionary<string, RentLivingKinds> StringToRentLivingKinds { get; } = new Dictionary<string, RentLivingKinds>()
+        public Dictionary<string, RentLivingKinds> StringToRentLivingKind { get; } = new Dictionary<string, RentLivingKinds>()
         {
             {"Apartment", RentLivingKinds.Apartment},
             {"Mansion", RentLivingKinds.Mansion},
@@ -300,22 +397,169 @@ namespace RepsCore.ViewModels
 
     }
 
+    /// <summary>
+    /// 賃貸住居用物件の編集用クラス
+    /// </summary>
+    public class RentLivingEditing: RentLiving
+    {
+        private string _pictureFilePath;
+        public string PictureFilePath
+        {
+            get
+            {
+                return _pictureFilePath;
+            }
+            set
+            {
+                if (_pictureFilePath == value) return;
+
+                _pictureFilePath = value;
+                this.NotifyPropertyChanged("PictureFilePath");
+            }
+        }
+    }
+
+    /// <summary>
+    /// 賃貸住居用物件のクラス（部屋）
+    /// </summary>
+    public class RentLivingSection : ViewModelBase
+    {
+        private string _rentLivingSection_ID;
+        public string RentLivingSection_ID
+        {
+            get
+            {
+                return _rentLivingSection_ID;
+            }
+            set
+            {
+                if (_rentLivingSection_ID == value) return;
+
+                _rentLivingSection_ID = value;
+                this.NotifyPropertyChanged("RentLivingSection_ID");
+            }
+        }
+
+        private string _rentLiving_ID;
+        public string RentLiving_ID
+        {
+            get
+            {
+                return _rentLiving_ID;
+            }
+            set
+            {
+                if (_rentLiving_ID == value) return;
+
+                _rentLiving_ID = value;
+                this.NotifyPropertyChanged("RentLiving_ID");
+            }
+        }
+
+        private string _rent_ID;
+        public string Rent_ID
+        {
+            get
+            {
+                return _rent_ID;
+            }
+            set
+            {
+                if (_rent_ID == value) return;
+
+                _rent_ID = value;
+                this.NotifyPropertyChanged("Rent_ID");
+            }
+        }
+
+        private string _rentLivingSectionRoomNumber;
+        public string RentLivingSectionRoomNumber
+        {
+            get
+            {
+                return _rentLivingSectionRoomNumber;
+            }
+            set
+            {
+                if (_rentLivingSectionRoomNumber == value) return;
+
+                _rentLivingSectionRoomNumber = value;
+                this.NotifyPropertyChanged("RentLivingSectionRoomNumber");
+            }
+        }
+
+        private int _rentLivingSectionPrice;
+        public int RentLivingSectionPrice
+        {
+            get
+            {
+                return _rentLivingSectionPrice;
+            }
+            set
+            {
+                if (_rentLivingSectionPrice == value) return;
+
+                _rentLivingSectionPrice = value;
+                this.NotifyPropertyChanged("RentLivingSectionPrice");
+            }
+        }
+
+        private string _rentLivingSectionMadori; // TODO 1K, 2K...
+        public string RentLivingSectionMadori
+        {
+            get
+            {
+                return _rentLivingSectionMadori;
+            }
+            set
+            {
+                if (_rentLivingSectionMadori == value) return;
+
+                _rentLivingSectionMadori = value;
+                this.NotifyPropertyChanged("RentLivingSectionMadori");
+            }
+        }
+    }
+
+
     #endregion
 
+    /// <summary>
+    /// 情報保持・表示用のMyErrorクラス
+    /// </summary>
+    #region == エラー情報保持・表示用クラス ==
+
+    public class MyError
+    {
+        public string ErrType { get; set; } // eg "API, DB, other"
+        public int ErrCode { get; set; } // HTTP ERROR CODE?
+        public string ErrText { get; set; } // API error code translated via dictionaly.
+        public string ErrPlace { get; set; } // eg RESTのPATH。
+        public string ErrPlaceParent { get; set; } // ?
+        public DateTime ErrDatetime { get; set; }
+        public string ErrDescription { get; set; } // 自前の補足説明。
+    }
+
+    #endregion
+
+    /// <summary>
+    /// メインのビューモデル
+    /// </summary>
     public class MainViewModel : ViewModelBase
     {
+
         #region == 基本 ==
 
-        // Application version
-        private string _appVer = "0.0.0.1";
+        // Application version.
+        private const string _appVer = "0.0.0.1";
 
-        // Application name
-        private string _appName = "RepsCore";
+        // Application name.
+        private const string _appName = "RepsCore";
 
-        // Application config file folder
-        private string _appDeveloper = "torum";
+        // Application config file folder name aka "publisher".
+        private const string _appDeveloper = "torum";
 
-        // Application Window Title
+        // Application Window Title.
         public string AppTitle
         {
             get
@@ -328,61 +572,23 @@ namespace RepsCore.ViewModels
 
         #region == データベース ==
 
-        // Sqlite DB file path
-        private string _dataBaseFilePath;
+        // Sqlite DB file path.
+        private readonly string _dataBaseFilePath;
         public string DataBaseFilePath
         {
             get { return _dataBaseFilePath; }
         }
 
-        // SqliteConnectionStringBuilder
-        public SqliteConnectionStringBuilder connectionStringBuilder;// = new SqliteConnectionStringBuilder();
+        // SqliteConnectionStringBuilder.
+        public SqliteConnectionStringBuilder connectionStringBuilder;
 
         #endregion
 
-        #region == 表示フラグ ==
+        #region == 物件関連オブジェクト ==
 
-        // RL新規追加画面の表示フラグ
-        private bool _showRentLivingNew = false;
-        public bool ShowRentLivingNew
-        {
-            get
-            {
-                return _showRentLivingNew;
-            }
-            set
-            {
-                if (_showRentLivingNew == value) return;
-
-                _showRentLivingNew = value;
-                this.NotifyPropertyChanged("ShowRentLivingNew");
-            }
-        }
-
-        // RL新規追加画面の表示フラグ
-        private bool _showRentLivingEdit = false;
-        public bool ShowRentLivingEdit
-        {
-            get
-            {
-                return _showRentLivingEdit;
-            }
-            set
-            {
-                if (_showRentLivingEdit == value) return;
-
-                _showRentLivingEdit = value;
-                this.NotifyPropertyChanged("ShowRentLivingEdit");
-            }
-        }
-
-        #endregion
-
-        #region == 物件関連のクラス ==
-
-        // 賃貸物件住居用　新規追加用のクラス
-        private RentLiving _rentLivingNew = new RentLiving();
-        public RentLiving RentLivingNew
+        // 賃貸物件住居用　新規追加用のクラスオブジェクト
+        private RentLivingEditing _rentLivingNew = new RentLivingEditing();
+        public RentLivingEditing RentLivingNew
         {
             get
             {
@@ -397,9 +603,9 @@ namespace RepsCore.ViewModels
             }
         }
 
-        // 賃貸物件住居用　編集更新用のクラス
-        private RentLiving _rentLivingEdit = new RentLiving();
-        public RentLiving RentLivingEdit
+        // 賃貸物件住居用　編集更新用のクラスオブジェクト
+        private RentLivingEditing _rentLivingEdit = new RentLivingEditing();
+        public RentLivingEditing RentLivingEdit
         {
             get
             {
@@ -423,8 +629,147 @@ namespace RepsCore.ViewModels
 
         #endregion
 
+        #region == 表示切替のフラグ ==
+
+        private int _showRentLivingTabActiveIndex = 0;
+        public int ShowRentLivingTabActiveIndex
+        {
+            get
+            {
+                return _showRentLivingTabActiveIndex;
+            }
+            set
+            {
+                if (_showRentLivingTabActiveIndex == value) return;
+
+                _showRentLivingTabActiveIndex = value;
+                this.NotifyPropertyChanged("ShowRentLivingTabActiveIndex");
+
+            }
+        }
+
+        // RL検索一覧画面の表示フラグ
+        private bool _showRentLivingSearchList = true;
+        public bool ShowRentLivingSearchList
+        {
+            get
+            {
+                return _showRentLivingSearchList;
+            }
+            set
+            {
+                if (_showRentLivingSearchList == value) return;
+
+                _showRentLivingSearchList = value;
+                this.NotifyPropertyChanged("ShowRentLivingSearchList");
+
+                if (_showRentLivingSearchList)
+                {
+                    ShowRentLivingTabActiveIndex = 0;
+
+                    ShowRentLivingNew = false;
+                    ShowRentLivingEdit = false;
+                }
+
+            }
+        }
+
+        // RL新規追加画面の表示フラグ
+        private bool _showRentLivingNew = false;
+        public bool ShowRentLivingNew
+        {
+            get
+            {
+                return _showRentLivingNew;
+            }
+            set
+            {
+                if (_showRentLivingNew == value) return;
+
+                _showRentLivingNew = value;
+                this.NotifyPropertyChanged("ShowRentLivingNew");
+
+                ShowRentLivingSearchList = !_showRentLivingNew;
+
+                if (_showRentLivingNew)
+                {
+                    ShowRentLivingTabActiveIndex = 1;
+
+                    ShowRentLivingSearchList = false;
+                    ShowRentLivingEdit = false;
+                }
+
+            }
+        }
+
+        // RL部屋新規追加画面の表示フラグ
+        private bool _showRentLivingSectionNew = false;
+        public bool ShowRentLivingSectionNew
+        {
+            get
+            {
+                return _showRentLivingSectionNew;
+            }
+            set
+            {
+                if (_showRentLivingSectionNew == value) return;
+
+                _showRentLivingSectionNew = value;
+                this.NotifyPropertyChanged("ShowRentLivingSectionNew");
+            }
+        }
+
+        // RL編集画面の表示フラグ
+        private bool _showRentLivingEdit = false;
+        public bool ShowRentLivingEdit
+        {
+            get
+            {
+                return _showRentLivingEdit;
+            }
+            set
+            {
+                if (_showRentLivingEdit == value) return;
+
+                _showRentLivingEdit = value;
+                this.NotifyPropertyChanged("ShowRentLivingEdit");
+
+                ShowRentLivingSearchList = !_showRentLivingEdit;
+
+                if (_showRentLivingEdit)
+                {
+                    ShowRentLivingTabActiveIndex = 2;
+
+                    ShowRentLivingSearchList = false;
+                    ShowRentLivingNew = false;
+                }
+
+            }
+        }
+
+        // エラー通知表示フラグ
+        private bool _showErrorDialog = false;
+        public bool ShowErrorDialog
+        {
+            get
+            {
+                return _showErrorDialog;
+            }
+            set
+            {
+                if (_showErrorDialog == value) return;
+
+                _showErrorDialog = value;
+                this.NotifyPropertyChanged("ShowErrorDialog");
+            }
+        }
+
+
+        #endregion
+
         #region == その他のプロパティ ==
 
+        // 賃貸住居用編集画面の検索文字列
         private string _rentLivingEditSearchText;
         public string RentLivingEditSearchText
         {
@@ -441,6 +786,7 @@ namespace RepsCore.ViewModels
             }
         }
 
+        // 賃貸住居用編集画面の検索結果一覧リストビューの選択されたオブジェクトを保持
         private RentLiving _rentLivingEditSelectedItem;
         public RentLiving RentLivingEditSelectedItem
         {
@@ -456,31 +802,106 @@ namespace RepsCore.ViewModels
                 this.NotifyPropertyChanged("RentLivingEditSelectedItem");
             }
         }
+        
+        #endregion
+
+        #region == エラー通知やログ関連 ==
+
+        private StringBuilder _errorText = new StringBuilder();
+        public string ErrorText
+        {
+            get
+            {
+                return _errorText.ToString();
+            }
+            set
+            {
+                _errorText.Insert(0, value + Environment.NewLine);
+                this.NotifyPropertyChanged("ErrorText");
+            }
+        }
+
+        // エラーのリスト TODO: ログ保存
+        private ObservableCollection<MyError> _errors = new ObservableCollection<MyError>();
+        public ObservableCollection<MyError> Errors
+        {
+            get { return this._errors; }
+        }
 
         #endregion
 
-        #region == コマンド ==
+        #region == コマンドの宣言 ==
 
+        // 新規賃貸住居用　物件追加（画面表示）
         public ICommand RentLivingNewCommand { get; }
+        // 新規賃貸住居用　物件追加処理
         public ICommand RentLivingNewAddCommand { get; }
+        // 新規賃貸住居用　物件追加キャンセル
         public ICommand RentLivingNewCancelCommand { get; }
+        // 新規賃貸住居用　物件の部屋追加（画面表示）
+        public ICommand RentLivingNewSectionCommand { get; }
+        // 新規賃貸住居用　物件の部屋追加処理
+        public ICommand RentLivingNewSectionAddCommand { get; }
+        // 新規賃貸住居用　物件の部屋追加キャンセル
+        public ICommand RentLivingNewSectionCancelCommand { get; }
+        // 賃貸住居用　物件管理、一覧
         public ICommand RentLivingEditListCommand { get; }
+        // 賃貸住居用　物件管理、検索
         public ICommand RentLivingEditSearchCommand { get; }
+        // 賃貸住居用　物件管理、選択編集（画面表示）
         public ICommand RentLivingEditSelectedEditCommand { get; }
+        // 賃貸住居用　物件管理、選択編集、更新処理
         public ICommand RentLivingEditSelectedEditUpdateCommand { get; }
+        // 賃貸住居用　物件管理、選択編集、更新キャンセル
         public ICommand RentLivingEditSelectedEditCancelCommand { get; }
+        // 賃貸住居用　物件管理、選択編集、PDF表示
         public ICommand RentLivingEditSelectedViewCommand { get; }
+        // 賃貸住居用　物件管理、選択編集、削除
         public ICommand RentLivingEditSelectedDeleteCommand { get; }
+        // エラー通知画面のクローズ
+        public ICommand CloseErrorCommand { get; }
 
         #endregion
 
+        /// <summary>
+        /// メインのビューモデルのコンストラクタ
+        /// </summary>
         public MainViewModel()
         {
-            #region == DB のイニシャライズ ==
+            // エラーイベントにサブスクライブ
+            ErrorOccured += new MyErrorEvent(OnError);
+
+            #region == コマンドのイニシャライズ ==
+
+            // 賃貸住居用新規物件
+            RentLivingNewCommand = new RelayCommand(RentLivingNewCommand_Execute, RentLivingNewCommand_CanExecute);
+            RentLivingNewAddCommand = new RelayCommand(RentLivingNewAddCommand_Execute, RentLivingNewAddCommand_CanExecute);
+            RentLivingNewCancelCommand = new RelayCommand(RentLivingNewCancelCommand_Execute, RentLivingNewCancelCommand_CanExecute);
+            // 賃貸住居用新規部屋
+            RentLivingNewSectionCommand = new RelayCommand(RentLivingNewSectionCommand_Execute, RentLivingNewSectionCommand_CanExecute);
+            RentLivingNewSectionAddCommand = new RelayCommand(RentLivingNewSectionAddCommand_Execute, RentLivingNewSectionAddCommand_CanExecute);
+            RentLivingNewSectionCancelCommand = new RelayCommand(RentLivingNewSectionCancelCommand_Execute, RentLivingNewSectionCancelCommand_CanExecute);
+            // 賃貸住居用管理一覧
+            RentLivingEditListCommand = new RelayCommand(RentLivingEditListCommand_Execute, RentLivingEditListCommand_CanExecute);
+            // 賃貸住居用管理検索
+            RentLivingEditSearchCommand = new RelayCommand(RentLivingEditSearchCommand_Execute, RentLivingEditSearchCommand_CanExecute);
+            // 賃貸住居用管理選択編集
+            RentLivingEditSelectedEditCommand = new RelayCommand(RentLivingEditSelectedEditCommand_Execute, RentLivingEditSelectedEditCommand_CanExecute);
+            RentLivingEditSelectedEditUpdateCommand = new RelayCommand(RentLivingEditSelectedEditUpdateCommand_Execute, RentLivingEditSelectedEditUpdateCommand_CanExecute);
+            RentLivingEditSelectedEditCancelCommand = new RelayCommand(RentLivingEditSelectedEditCancelCommand_Execute, RentLivingEditSelectedEditCancelCommand_CanExecute);
+            // 賃貸住居用管理選択表示
+            RentLivingEditSelectedViewCommand = new RelayCommand(RentLivingEditSelectedViewCommand_Execute, RentLivingEditSelectedViewCommand_CanExecute);
+            // 賃貸住居用管理選択削除
+            RentLivingEditSelectedDeleteCommand = new RelayCommand(RentLivingEditSelectedDeleteCommand_Execute, RentLivingEditSelectedDeleteCommand_CanExecute);
+            // エラー通知画面
+            CloseErrorCommand = new RelayCommand(CloseErrorCommand_Execute, CloseErrorCommand_CanExecute);
+            
+            #endregion
+
+            #region == SQLite DB のイニシャライズ ==
 
             // DB file path のセット
-            _dataBaseFilePath = System.Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + System.IO.Path.DirectorySeparatorChar + _appName + ".db";
-
+            _dataBaseFilePath = System.Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + System.IO.Path.DirectorySeparatorChar + _appName + ".database";
 
             // Create a table if not exists.
             connectionStringBuilder = new SqliteConnectionStringBuilder
@@ -522,7 +943,7 @@ namespace RepsCore.ViewModels
                                 "Floors INTEGER NOT NULL," +
                                 "FloorsBasement INTEGER," +
                                 "BuiltYear INTEGER NOT NULL," +
-                                "FOREIGN KEY (Rent_ID) REFERENCES Rent(Rent_ID)" + 
+                                "FOREIGN KEY (Rent_ID) REFERENCES Rent(Rent_ID)" +
                                 " )";
                             tableCmd.ExecuteNonQuery();
 
@@ -531,9 +952,11 @@ namespace RepsCore.ViewModels
                                 "RentLivingPicture_ID TEXT NOT NULL PRIMARY KEY," +
                                 "RentLiving_ID TEXT NOT NULL," +
                                 "Rent_ID TEXT NOT NULL," +
-                                "Picture BLOB NOT NULL," +
+                                "PictureData BLOB NOT NULL," +
+                                "PictureThumbW200xData BLOB NOT NULL," +
+                                "PictureFileExt TEXT NOT NULL," +
                                 "FOREIGN KEY (Rent_ID) REFERENCES Rent(Rent_ID)," +
-                                "FOREIGN KEY (RentLiving_ID) REFERENCES RentLiving(RentLiving_ID)" + 
+                                "FOREIGN KEY (RentLiving_ID) REFERENCES RentLiving(RentLiving_ID)" +
                                 " )";
                             tableCmd.ExecuteNonQuery();
 
@@ -542,35 +965,35 @@ namespace RepsCore.ViewModels
                                 "RentLivingPicture_ID TEXT NOT NULL PRIMARY KEY," +
                                 "RentLiving_ID TEXT NOT NULL," +
                                 "Rent_ID TEXT NOT NULL," +
-                                "Pdf BLOB NOT NULL," +
+                                "PdfData BLOB NOT NULL," +
                                 "FOREIGN KEY (Rent_ID) REFERENCES Rent(Rent_ID)," +
-                                "FOREIGN KEY (RentLiving_ID) REFERENCES RentLiving(RentLiving_ID)" + 
+                                "FOREIGN KEY (RentLiving_ID) REFERENCES RentLiving(RentLiving_ID)" +
                                 " )";
                             tableCmd.ExecuteNonQuery();
 
                             // 賃貸住居用物件の「部屋」テーブル
-                            tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS RentLivingListing (" +
-                                "RentLivingListing_ID TEXT NOT NULL PRIMARY KEY," +
+                            tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS RentLivingSection(" +
+                                "RentLivingSection_ID TEXT NOT NULL PRIMARY KEY," +
                                 "RentLiving_ID TEXT NOT NULL," +
                                 "Rent_ID TEXT NOT NULL," +
                                 "RoomNumber TEXT," +
                                 "Price INTEGER NOT NULL," +
                                 "Madori TEXT NOT NULL," +
                                 "FOREIGN KEY (Rent_ID) REFERENCES Rent(Rent_ID)," +
-                                "FOREIGN KEY (RentLiving_ID) REFERENCES RentLiving(RentLiving_ID)" + 
+                                "FOREIGN KEY (RentLiving_ID) REFERENCES RentLiving(RentLiving_ID)" +
                                 " )";
                             tableCmd.ExecuteNonQuery();
 
-                            // 賃貸住居用物件の「部屋」の「写真」テーブル
-                            tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS RentLivingListingPicture (" +
-                                "RentLivingListingPicture_ID TEXT NOT NULL PRIMARY KEY," +
-                                "RentLivingListing_ID TEXT NOT NULL," +
+                            // 賃貸住居用物件の「部屋の写真」テーブル
+                            tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS RentLivingSectionPicture (" +
+                                "RentLivingSectionPicture_ID TEXT NOT NULL PRIMARY KEY," +
+                                "RentLivingSection_ID TEXT NOT NULL," +
                                 "RentLiving_ID TEXT NOT NULL," +
                                 "Rent_ID TEXT NOT NULL," +
-                                "Picture BLOB NOT NULL," +
+                                "PictureData BLOB NOT NULL," +
                                 "FOREIGN KEY (Rent_ID) REFERENCES Rent(Rent_ID)," +
                                 "FOREIGN KEY (RentLiving_ID) REFERENCES RentLiving(RentLiving_ID)," +
-                                "FOREIGN KEY (RentLivingListing_ID) REFERENCES RentLivingListing(RentLivingListing_ID)" +
+                                "FOREIGN KEY (RentLivingSection_ID) REFERENCES RentLivingListing(RentLivingSection_ID)" +
                                 " )";
                             tableCmd.ExecuteNonQuery();
 
@@ -606,27 +1029,11 @@ namespace RepsCore.ViewModels
 
             }
 
-
-            #endregion
-
-            #region == コマンドのイニシャライズ ==
-
-            RentLivingNewCommand = new RelayCommand(RentLivingNewCommand_Execute, RentLivingNewCommand_CanExecute);
-            RentLivingNewAddCommand = new RelayCommand(RentLivingNewAddCommand_Execute, RentLivingNewAddCommand_CanExecute);
-            RentLivingNewCancelCommand = new RelayCommand(RentLivingNewCancelCommand_Execute, RentLivingNewCancelCommand_CanExecute);
-            RentLivingEditListCommand = new RelayCommand(RentLivingEditListCommand_Execute, RentLivingEditListCommand_CanExecute);
-            RentLivingEditSearchCommand = new RelayCommand(RentLivingEditSearchCommand_Execute, RentLivingEditSearchCommand_CanExecute);
-            RentLivingEditSelectedEditCommand = new RelayCommand(RentLivingEditSelectedEditCommand_Execute, RentLivingEditSelectedEditCommand_CanExecute);
-            RentLivingEditSelectedEditUpdateCommand = new RelayCommand(RentLivingEditSelectedEditUpdateCommand_Execute, RentLivingEditSelectedEditUpdateCommand_CanExecute);
-            RentLivingEditSelectedEditCancelCommand = new RelayCommand(RentLivingEditSelectedEditCancelCommand_Execute, RentLivingEditSelectedEditCancelCommand_CanExecute);
-            RentLivingEditSelectedViewCommand = new RelayCommand(RentLivingEditSelectedViewCommand_Execute, RentLivingEditSelectedViewCommand_CanExecute);
-            RentLivingEditSelectedDeleteCommand = new RelayCommand(RentLivingEditSelectedDeleteCommand_Execute, RentLivingEditSelectedDeleteCommand_CanExecute);
-            
             #endregion
 
         }
 
-        #region == イベント系 ==
+        #region == イベント ==
 
         // 起動時の処理
         public void OnWindowLoaded(object sender, RoutedEventArgs e)
@@ -830,11 +1237,87 @@ namespace RepsCore.ViewModels
 
         #endregion
 
-        #region == メソッド ==
+        #region == エラーイベント ==
+
+        // デリゲート
+        public delegate void MyErrorEvent(MyError err);
+
+        // エラーイベント
+        public event MyErrorEvent ErrorOccured;
+
+        // エラーイベントの実装
+        private void OnError(MyError err)
+        {
+            if (err == null) { return; }
+
+            if (Application.Current == null) { return; }
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                // リストに追加。TODO：あとあとログ保存等
+                _errors.Insert(0, err);
+
+                ErrorText = String.Format("エラー：{3}、エラー内容 {4}、 タイプ {1}、発生箇所 {2}、発生時刻 {0}", err.ErrDatetime.ToString(), err.ErrType, err.ErrPlace, err.ErrText, err.ErrDescription);
+
+            });
+
+            // エラーの表示
+            ShowErrorDialog = true;
+        }
 
         #endregion
 
-        #region == コマンド ==
+        #region == メソッド ==
+
+        // バイト配列をImageオブジェクトに変換
+        public System.Drawing.Image ByteArrayToImage(byte[] b)
+        {
+            ImageConverter imgconv = new ImageConverter();
+            System.Drawing.Image img = (System.Drawing.Image)imgconv.ConvertFrom(b);
+            return img;
+        }
+
+        // Imageオブジェクトをバイト配列に変換
+        public byte[] ImageToByteArray(System.Drawing.Image img)
+        {
+            ImageConverter imgconv = new ImageConverter();
+            byte[] b = (byte[])imgconv.ConvertTo(img, typeof(byte[]));
+            return b;
+        }
+
+        // バイト配列をBitmapImageオブジェクトに変換（Imageに表示するSource）
+        public BitmapImage BitmapImageFromBytes(Byte[] bytes)
+        {
+            using (var stream = new MemoryStream(bytes))
+            {
+                BitmapImage bmimage = new BitmapImage();
+                bmimage.BeginInit();
+                bmimage.CacheOption = BitmapCacheOption.OnLoad;
+                bmimage.StreamSource = stream;
+                bmimage.EndInit();
+                return bmimage;
+            }
+        }
+
+        // System.Drawing.Image をBitmapImageオブジェクトに変換
+        public BitmapImage BitmapImageFromImage(System.Drawing.Image img, ImageFormat imf)
+        {
+            using (var ms = new MemoryStream())
+            {
+                img.Save(ms, imf);
+                ms.Seek(0, SeekOrigin.Begin);
+
+                BitmapImage bitmapImage = new BitmapImage();
+                bitmapImage.BeginInit();
+                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                bitmapImage.StreamSource = ms;
+                bitmapImage.EndInit();
+                return bitmapImage;
+            }
+        }
+
+        #endregion
+
+        #region == コマンドの実装 ==
 
         // 賃貸住居用物件、追加画面表示
         public bool RentLivingNewCommand_CanExecute()
@@ -856,15 +1339,71 @@ namespace RepsCore.ViewModels
             // TODO: 残りもクリアする。
 
             if (!ShowRentLivingNew) ShowRentLivingNew = true;
+
         }
 
         // 賃貸住居用物件、追加 (INSERT)
         public bool RentLivingNewAddCommand_CanExecute()
         {
-            return true;
+            // 物件名必須
+            if (string.IsNullOrEmpty(RentLivingNew.Name))
+                return false;
+            else
+                return true;
         }
         public void RentLivingNewAddCommand_Execute()
         {
+            // TODO: 入力チェック
+
+
+            // 写真画像の追加があるかどうかチェック
+            bool isPicturePresent = false;
+            if (!string.IsNullOrEmpty(RentLivingNew.PictureFilePath))
+                isPicturePresent = true;
+
+            if (isPicturePresent)
+            {
+                string fileName = RentLivingNew.PictureFilePath.Trim();
+
+                FileInfo fi = new FileInfo(fileName);
+                if (fi.Exists)
+                {
+                    // 画像データの読み込み
+                    byte[] ImageData;
+                    FileStream fs = new FileStream(fileName, FileMode.Open, FileAccess.Read);
+                    //BinaryReader br = new BinaryReader(fs);
+                    //ImageData = br.ReadBytes((int)fs.Length);
+                    //br.Close();
+                    System.Drawing.Image img = System.Drawing.Image.FromStream(fs, false, false); // 検証なしが早い。https://www.atmarkit.co.jp/ait/articles/0706/07/news139.html
+
+                    ImageData = ImageToByteArray(img);
+
+                    // サムネイル画像の作成
+                    System.Drawing.Image thumbImg = img.GetThumbnailImage(200, 150, () => false, IntPtr.Zero);
+                    byte[] ImageThumbData = ImageToByteArray(thumbImg);
+
+                    fs.Close();
+
+                    RentLivingNew.PictureData = ImageData;
+                    RentLivingNew.PictureThumbW200xData = ImageThumbData;
+                    RentLivingNew.PictureFileExt = fi.Extension;
+                }
+                else
+                {
+                    isPicturePresent = false;
+
+                    // エラーイベント発火
+                    MyError er = new MyError();
+                    er.ErrType = "File";
+                    er.ErrCode = 0;
+                    er.ErrText = "「" + "File Does Not Exist" + "」";
+                    er.ErrDescription = fileName + " ファイルが存在しません。";
+                    er.ErrDatetime = DateTime.Now;
+                    er.ErrPlace = "MainViewModel::RentLivingNewAddCommand_Execute()";
+                    ErrorOccured?.Invoke(er);
+                }
+            }
+
             try
             {
                 // 念のため？
@@ -872,10 +1411,16 @@ namespace RepsCore.ViewModels
                 RentLivingNew.Type = RentTypes.RentLiving;
 
                 RentLivingNew.RentLiving_ID = Guid.NewGuid().ToString();
+                RentLivingNew.RentLivingPicture_ID = Guid.NewGuid().ToString();
 
-                string sqlInsertIntoRent = String.Format("INSERT INTO Rent (Rent_ID, Name, Type, PostalCode, Location, TrainStation1, TrainStation2) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}')", RentLivingNew.Rent_ID, RentLivingNew.Name, RentLivingNew.Type.ToString(), RentLivingNew.PostalCode, RentLivingNew.Location, RentLivingNew.TrainStation1, RentLivingNew.TrainStation2);
+                string sqlInsertIntoRent = String.Format("INSERT INTO Rent (Rent_ID, Name, Type, PostalCode, Location, TrainStation1, TrainStation2) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}')",
+                    RentLivingNew.Rent_ID, RentLivingNew.Name, RentLivingNew.Type.ToString(), RentLivingNew.PostalCode, RentLivingNew.Location, RentLivingNew.TrainStation1, RentLivingNew.TrainStation2);
 
-                string sqlInsertIntoRentLiving = String.Format("INSERT INTO RentLiving (RentLiving_ID, Rent_ID, Kind, Floors, FloorsBasement, BuiltYear) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}')", RentLivingNew.RentLiving_ID, RentLivingNew.Rent_ID, RentLivingNew.Kind.ToString(), RentLivingNew.Floors, RentLivingNew.FloorsBasement, RentLivingNew.BuiltYear);
+                string sqlInsertIntoRentLiving = String.Format("INSERT INTO RentLiving (RentLiving_ID, Rent_ID, Kind, Floors, FloorsBasement, BuiltYear) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}')",
+                    RentLivingNew.RentLiving_ID, RentLivingNew.Rent_ID, RentLivingNew.Kind.ToString(), RentLivingNew.Floors, RentLivingNew.FloorsBasement, RentLivingNew.BuiltYear);
+
+                string sqlInsertIntoRentLivingPicture = String.Format("INSERT INTO RentLivingPicture (RentLivingPicture_ID, RentLiving_ID, Rent_ID, PictureData, PictureThumbW200xData, PictureFileExt) VALUES ('{0}', '{1}', '{2}', @0, @1, '{5}')",
+                    RentLivingNew.RentLivingPicture_ID, RentLivingNew.RentLiving_ID, RentLivingNew.Rent_ID, RentLivingNew.PictureData, RentLivingNew.PictureThumbW200xData, RentLivingNew.PictureFileExt);
 
                 using (var connection = new SqliteConnection(connectionStringBuilder.ConnectionString))
                 {
@@ -889,22 +1434,44 @@ namespace RepsCore.ViewModels
                             // Rentテーブルへ追加
                             cmd.CommandText = sqlInsertIntoRent;
                             var InsertIntoRentResult = cmd.ExecuteNonQuery();
-                            /*
-                            if (result != 1)
+                            if (InsertIntoRentResult != 1)
                             {
-                                // TODO
+                                // これいる?
                             }
-                            */
 
                             // RentLivingテーブルへ追加
                             cmd.CommandText = sqlInsertIntoRentLiving;
                             var InsertIntoRentLivingResult = cmd.ExecuteNonQuery();
+                            if (InsertIntoRentLivingResult != 1)
+                            {
+                                // これいる?
+                            }
+
+                            if (isPicturePresent)
+                            {
+                                // 物件画像の追加
+                                cmd.CommandText = sqlInsertIntoRentLivingPicture;
+
+                                SqliteParameter parameter1 = new SqliteParameter("@0", System.Data.DbType.Binary);
+                                parameter1.Value = RentLivingNew.PictureData;
+                                cmd.Parameters.Add(parameter1);
+
+                                SqliteParameter parameter2 = new SqliteParameter("@1", System.Data.DbType.Binary);
+                                parameter2.Value = RentLivingNew.PictureThumbW200xData;
+                                cmd.Parameters.Add(parameter2);
+
+                                var InsertIntoRentLivingPictureResult = cmd.ExecuteNonQuery();
+                                if (InsertIntoRentLivingResult != 1)
+                                {
+                                    // これいる?
+                                }
+                            }
 
 
                             //　コミット
                             cmd.Transaction.Commit();
 
-                            // 編集を非表示に（閉じる）
+                            // 追加画面を非表示に（閉じる）
                             if (ShowRentLivingNew) ShowRentLivingNew = false;
                         }
                         catch (Exception e)
@@ -912,29 +1479,40 @@ namespace RepsCore.ViewModels
                             // ロールバック
                             cmd.Transaction.Rollback();
 
-                            System.Diagnostics.Debug.WriteLine(e.Message);
-                            //TODO エラー通知
+                            System.Diagnostics.Debug.WriteLine(e.Message + " @MainViewModel::RentLivingNewAddCommand_Execute()");
+
+                            // エラーイベント発火
+                            MyError er = new MyError();
+                            er.ErrType = "DB";
+                            er.ErrCode = 0;
+                            er.ErrText = "「" + e.Message + "」";
+                            er.ErrDescription = "賃貸住居用物件の新規追加 (INSERT)で、データベースに追加する処理でエラーが発生し、ロールバックしました。";
+                            er.ErrDatetime = DateTime.Now;
+                            er.ErrPlace = "MainViewModel::RentLivingNewAddCommand_Execute()";
+                            ErrorOccured?.Invoke(er);
                         }
                     }
                 }
             }
             catch (System.Reflection.TargetInvocationException ex)
             {
+                System.Diagnostics.Debug.WriteLine("Opps. TargetInvocationException@MainViewModel::RentLivingNewAddCommand_Execute()");
                 throw ex.InnerException;
             }
             catch (System.InvalidOperationException ex)
             {
+                System.Diagnostics.Debug.WriteLine("Opps. InvalidOperationException@MainViewModel::RentLivingNewAddCommand_Execute()");
                 throw ex.InnerException;
             }
             catch (Exception e)
             {
                 if (e.InnerException != null)
                 {
-                    System.Diagnostics.Debug.WriteLine(e.InnerException.Message);
+                    System.Diagnostics.Debug.WriteLine(e.InnerException.Message + " @MainViewModel::RentLivingNewAddCommand_Execute()");
                 }
                 else
                 {
-                    System.Diagnostics.Debug.WriteLine(e.Message);
+                    System.Diagnostics.Debug.WriteLine(e.Message + " @MainViewModel::RentLivingNewAddCommand_Execute()");
                 }
             }
         }
@@ -950,6 +1528,36 @@ namespace RepsCore.ViewModels
             if (ShowRentLivingNew) ShowRentLivingNew = false;
 
             // TODO RentNew をクリアする。
+        }
+
+        // 賃貸住居用物件、部屋の追加画面表示
+        public bool RentLivingNewSectionCommand_CanExecute()
+        {
+            return true;
+        }
+        public void RentLivingNewSectionCommand_Execute()
+        {
+            ShowRentLivingSectionNew = true;
+        }
+
+        // 賃貸住居用物件、部屋の追加 (INSERT)
+        public bool RentLivingNewSectionAddCommand_CanExecute()
+        {
+            return true;
+        }
+        public void RentLivingNewSectionAddCommand_Execute()
+        {
+
+        }
+
+        // 賃貸住居用物件、部屋の追加キャンセル
+        public bool RentLivingNewSectionCancelCommand_CanExecute()
+        {
+            return true;
+        }
+        public void RentLivingNewSectionCancelCommand_Execute()
+        {
+            ShowRentLivingSectionNew = false;
         }
 
         // 賃貸住居用物件、一覧
@@ -1055,19 +1663,80 @@ namespace RepsCore.ViewModels
         }
         public void RentLivingEditSelectedEditCommand_Execute()
         {
+            // TODO RentLivingEditを一旦すべてクリアというか初期化しておきたい。
+            RentLivingEdit.Picture = null;
+            RentLivingEdit.PictureFilePath = "";
+
             if (RentLivingEditSelectedItem != null)
             {
+                var rentid = RentLivingEditSelectedItem.Rent_ID;
                 // 選択アイテムのデータを一旦編集オブジェクトに格納
-                RentLivingEdit.Rent_ID = RentLivingEditSelectedItem.Rent_ID;
-                RentLivingEdit.Name = RentLivingEditSelectedItem.Name;
-                RentLivingEdit.PostalCode = RentLivingEditSelectedItem.PostalCode;
-                RentLivingEdit.Location = RentLivingEditSelectedItem.Location;
-                RentLivingEdit.TrainStation1 = RentLivingEditSelectedItem.TrainStation1;
-                RentLivingEdit.TrainStation2 = RentLivingEditSelectedItem.TrainStation2;
+                //RentLivingEdit.Rent_ID = RentLivingEditSelectedItem.Rent_ID;
+                //RentLivingEdit.Name = RentLivingEditSelectedItem.Name;
+                //RentLivingEdit.PostalCode = RentLivingEditSelectedItem.PostalCode;
+                //RentLivingEdit.Location = RentLivingEditSelectedItem.Location;
+                //RentLivingEdit.TrainStation1 = RentLivingEditSelectedItem.TrainStation1;
+                //RentLivingEdit.TrainStation2 = RentLivingEditSelectedItem.TrainStation2;
 
-                // TODO Open DB and SELECT !!
+                using (var connection = new SqliteConnection(connectionStringBuilder.ConnectionString))
+                {
+                    connection.Open();
 
+                    using (var cmd = connection.CreateCommand())
+                    {
+                        cmd.Transaction = connection.BeginTransaction();
 
+                        cmd.CommandText = String.Format("SELECT * FROM Rent INNER JOIN RentLiving ON Rent.Rent_ID = RentLiving.Rent_ID WHERE Rent.Rent_ID = '{0}'", rentid);
+                        using (var reader = cmd.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                RentLivingEdit.Rent_ID = rentid;
+                                RentLivingEdit.Name = Convert.ToString(reader["Name"]);
+                                RentLivingEdit.Type = RentLivingEdit.StringToRentType[Convert.ToString(reader["Type"])];
+                                RentLivingEdit.PostalCode = Convert.ToString(reader["PostalCode"]);
+                                RentLivingEdit.Location = Convert.ToString(reader["Location"]);
+                                RentLivingEdit.TrainStation1 = Convert.ToString(reader["TrainStation1"]);
+                                RentLivingEdit.TrainStation2 = Convert.ToString(reader["TrainStation2"]);
+
+                                RentLivingEdit.RentLiving_ID = Convert.ToString(reader["RentLiving_ID"]);
+                                RentLivingEdit.Kind = RentLivingEdit.StringToRentLivingKind[Convert.ToString(reader["Kind"])];
+                                RentLivingEdit.Floors = Convert.ToInt32(reader["Floors"]);
+                                RentLivingEdit.FloorsBasement = Convert.ToInt32(reader["FloorsBasement"]);
+                                RentLivingEdit.BuiltYear = Convert.ToInt32(reader["BuiltYear"]);
+
+                            }
+                        }
+
+                        cmd.CommandText = String.Format("SELECT * FROM RentLivingPicture WHERE Rent_ID = '{0}'", rentid);
+                        using (var reader = cmd.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                RentLivingEdit.RentLivingPicture_ID = Convert.ToString(reader["RentLivingPicture_ID"]);
+
+                                byte[] imageBytes = (byte[])reader["PictureData"];
+                                RentLivingEdit.PictureData = imageBytes;
+
+                                byte[] imageThumbBytes = (byte[])reader["PictureThumbW200xData"];
+                                RentLivingEdit.PictureThumbW200xData = imageThumbBytes;
+                                /*
+                                byte[] imageBytes = new byte[0];
+                                if (reader["PictureData"] != null && !Convert.IsDBNull(reader["PictureData"]))
+                                {
+                                    imageBytes = (byte[])(reader["PictureData"]);
+                                }
+                                */
+
+                                RentLivingEdit.PictureFileExt = Convert.ToString(reader["PictureFileExt"]);
+
+                                RentLivingEdit.Picture = BitmapImageFromBytes(imageBytes);
+                            }
+                        }
+
+                        cmd.Transaction.Commit();
+                    }
+                }
 
 
                 // 編集画面の表示
@@ -1088,18 +1757,83 @@ namespace RepsCore.ViewModels
             }
             else
             {
-                return true;
+                // 物件名必須
+                if (string.IsNullOrEmpty(RentLivingEdit.Name))
+                    return false;
+                else
+                    return true;
             }
         }
         public void RentLivingEditSelectedEditUpdateCommand_Execute()
         {
+            // TODO: 入力チェック
+
             if (RentLivingEditSelectedItem != null)
             {
+
+                // 写真画像の追加があるかどうかチェック
+                bool isPicturePresent = false;
+                if (!string.IsNullOrEmpty(RentLivingEdit.PictureFilePath))
+                    isPicturePresent = true;
+
+                if (isPicturePresent)
+                {
+                    string fileName = RentLivingEdit.PictureFilePath.Trim();
+
+                    FileInfo fi = new FileInfo(fileName);
+                    if (fi.Exists)
+                    {
+                        // 画像データの読み込み
+                        byte[] ImageData;
+                        FileStream fs = new FileStream(fileName, FileMode.Open, FileAccess.Read);
+                        //BinaryReader br = new BinaryReader(fs);
+                        //ImageData = br.ReadBytes((int)fs.Length);
+                        //br.Close();
+                        System.Drawing.Image img = System.Drawing.Image.FromStream(fs, false, false); // 検証なしが早い。https://www.atmarkit.co.jp/ait/articles/0706/07/news139.html
+
+                        ImageData = ImageToByteArray(img);
+
+                        // サムネイル画像の作成
+                        System.Drawing.Image thumbImg = img.GetThumbnailImage(200, 150, () => false, IntPtr.Zero);
+                        byte[] ImageThumbData = ImageToByteArray(thumbImg);
+
+                        fs.Close();
+
+                        RentLivingEdit.PictureData = ImageData;
+                        RentLivingEdit.PictureThumbW200xData = ImageThumbData;
+                        RentLivingEdit.PictureFileExt = fi.Extension;
+
+                        RentLivingEdit.PictureFilePath = "";
+                    }
+                    else
+                    {
+                        isPicturePresent = false;
+
+                        // エラーイベント発火
+                        MyError er = new MyError();
+                        er.ErrType = "File";
+                        er.ErrCode = 0;
+                        er.ErrText = "「" + "File Does Not Exist" + "」";
+                        er.ErrDescription = fileName + " ファイルが存在しません。";
+                        er.ErrDatetime = DateTime.Now;
+                        er.ErrPlace = "MainViewModel::RentLivingEditSelectedEditUpdateCommand_Execute()";
+                        ErrorOccured?.Invoke(er);
+                    }
+                }
+
+
                 // 編集オブジェクトに格納されている更新された情報をDBへ更新
 
-                // TODO 
+                string sqlUpdateRent = String.Format("UPDATE Rent SET Name = '{1}', Type = '{2}', PostalCode = '{3}', Location = '{4}', TrainStation1 = '{5}', TrainStation2 = '{6}' WHERE Rent_ID = '{0}'",
+                    RentLivingEdit.Rent_ID, RentLivingEdit.Name, RentLivingEdit.Type.ToString(), RentLivingEdit.PostalCode, RentLivingEdit.Location, RentLivingEdit.TrainStation1, RentLivingEdit.TrainStation2);
 
-                string sql = String.Format("UPDATE Rent SET Name = '{1}', Type = '{2}', PostalCode = '{3}', Location = '{4}', TrainStation1 = '{5}', TrainStation2 = '{6}' WHERE Rent_ID = '{0}'", RentLivingEdit.Rent_ID, RentLivingEdit.Name, RentLivingEdit.Type.ToString(), RentLivingEdit.PostalCode, RentLivingEdit.Location, RentLivingEdit.TrainStation1, RentLivingEdit.TrainStation2);
+                string sqlUpdateRentLiving = String.Format("UPDATE RentLiving SET Kind = '{1}', Floors = '{2}', FloorsBasement = '{3}', BuiltYear = '{4}' WHERE RentLiving_ID = '{0}'",
+                    RentLivingEdit.RentLiving_ID, RentLivingEdit.Kind.ToString(), RentLivingEdit.Floors, RentLivingEdit.FloorsBasement, RentLivingEdit.BuiltYear);
+
+                string sqlUpdateRentLivingPicture = String.Format("UPDATE RentLivingPicture SET PictureData = @0, PictureThumbW200xData = @1, PictureFileExt = '{5}' WHERE RentLivingPicture_ID = '{0}'",
+                    RentLivingEdit.RentLivingPicture_ID, RentLivingEdit.RentLiving_ID, RentLivingEdit.Rent_ID, RentLivingEdit.PictureData, RentLivingEdit.PictureThumbW200xData, RentLivingEdit.PictureFileExt);
+
+                // TODO 
 
                 using (var connection = new SqliteConnection(connectionStringBuilder.ConnectionString))
                 {
@@ -1110,20 +1844,49 @@ namespace RepsCore.ViewModels
                         cmd.Transaction = connection.BeginTransaction();
                         try
                         {
-                            cmd.CommandText = sql;
+                            cmd.CommandText = sqlUpdateRent;
                             var result = cmd.ExecuteNonQuery();
+                            if (result != 1)
+                            {
+                                // TODO 
+                            }
+
+                            cmd.CommandText = sqlUpdateRentLiving;
+                            result = cmd.ExecuteNonQuery();
                             if (result != 1)
                             {
                                 // TODO
                             }
+
+                            if (isPicturePresent)
+                            {
+                                // 物件画像の追加
+                                cmd.CommandText = sqlUpdateRentLivingPicture;
+
+                                SqliteParameter parameter1 = new SqliteParameter("@0", System.Data.DbType.Binary);
+                                parameter1.Value = RentLivingEdit.PictureData;
+                                cmd.Parameters.Add(parameter1);
+
+                                SqliteParameter parameter2 = new SqliteParameter("@1", System.Data.DbType.Binary);
+                                parameter2.Value = RentLivingEdit.PictureThumbW200xData;
+                                cmd.Parameters.Add(parameter2);
+
+                                result = cmd.ExecuteNonQuery();
+                                if (result != 1)
+                                {
+                                    // これいる?
+                                }
+                            }
+
+
                             cmd.Transaction.Commit();
 
-                            // 編集オブジェクトに格納された情報を、選択アイテムに更新（Listviewの情報が更新されるー＞DBから読み込みし直さなくて良くなる）
+                            // 編集オブジェクトに格納された情報を、選択アイテムに更新（Listviewの情報が更新されるー＞DBからSelectして一覧を読み込みし直さなくて良くなる）
                             RentLivingEditSelectedItem.Name = RentLivingEdit.Name;
                             RentLivingEditSelectedItem.PostalCode = RentLivingEdit.PostalCode;
                             RentLivingEditSelectedItem.Location = RentLivingEdit.Location;
-                            RentLivingEditSelectedItem.Location = RentLivingEdit.TrainStation1;
-                            RentLivingEditSelectedItem.Location = RentLivingEdit.TrainStation2;
+                            RentLivingEditSelectedItem.TrainStation1 = RentLivingEdit.TrainStation1;
+                            RentLivingEditSelectedItem.TrainStation2 = RentLivingEdit.TrainStation2;
 
                             // 編集画面を非表示に
                             if (ShowRentLivingEdit) ShowRentLivingEdit = false;
@@ -1132,8 +1895,17 @@ namespace RepsCore.ViewModels
                         {
                             cmd.Transaction.Rollback();
 
-                            System.Diagnostics.Debug.WriteLine(e.Message);
-                            //TODO 
+                            System.Diagnostics.Debug.WriteLine(e.Message + " @MainViewModel::RentLivingEditSelectedEditUpdateCommand_Execute()");
+
+                            // エラーイベント発火
+                            MyError er = new MyError();
+                            er.ErrType = "DB";
+                            er.ErrCode = 0;
+                            er.ErrText = "「" + e.Message + "」";
+                            er.ErrDescription = "賃貸住居用物件の選択アイテム編集更新 (UPDATE)で、データベースを更新する処理でエラーが発生し、ロールバックしました。";
+                            er.ErrDatetime = DateTime.Now;
+                            er.ErrPlace = "MainViewModel::RentLivingEditSelectedEditUpdateCommand_Execute()";
+                            ErrorOccured?.Invoke(er);
                         }
                     }
                 }
@@ -1156,7 +1928,6 @@ namespace RepsCore.ViewModels
         {
             if (ShowRentLivingEdit) ShowRentLivingEdit = false;
         }
-
 
         // 賃貸住居用物件、選択アイテム表示(PDFとか)
         public bool RentLivingEditSelectedViewCommand_CanExecute()
@@ -1196,7 +1967,9 @@ namespace RepsCore.ViewModels
             {
                 // 選択アイテムのデータを削除
 
-                string sql = String.Format("DELETE FROM Rent WHERE Rent_ID = '{0}'", RentLivingEditSelectedItem.Rent_ID);
+                string sqlRentTable = String.Format("DELETE FROM Rent WHERE Rent_ID = '{0}'", RentLivingEditSelectedItem.Rent_ID);
+
+                string sqlRentLivingTable = String.Format("DELETE FROM RentLiving WHERE Rent_ID = '{0}'", RentLivingEditSelectedItem.Rent_ID);
 
                 using (var connection = new SqliteConnection(connectionStringBuilder.ConnectionString))
                 {
@@ -1207,12 +1980,16 @@ namespace RepsCore.ViewModels
                         cmd.Transaction = connection.BeginTransaction();
                         try
                         {
-                            cmd.CommandText = sql;
+                            cmd.CommandText = sqlRentLivingTable;
                             var result = cmd.ExecuteNonQuery();
-                            if (result != 1)
-                            {
-                                // TODO
-                            }
+
+
+                            cmd.CommandText = sqlRentTable;
+                            result = cmd.ExecuteNonQuery();
+
+                            // TODO その他の外部キー依存しているテーブルからも削除
+
+
                             cmd.Transaction.Commit();
 
                             // 一覧から削除
@@ -1226,18 +2003,37 @@ namespace RepsCore.ViewModels
                         {
                             cmd.Transaction.Rollback();
 
-                            System.Diagnostics.Debug.WriteLine(e.Message);
-                            //TODO 
+                            System.Diagnostics.Debug.WriteLine(e.Message + " @RentLivingEditSelectedDeleteCommand_Execute()");
+
+                            // エラーイベント発火
+                            MyError er = new MyError();
+                            er.ErrType = "DB";
+                            er.ErrCode = 0;
+                            er.ErrText = "「" + e.Message + "」";
+                            er.ErrDescription = "賃貸住居用物件の選択アイテム削除（DELETE）で、データベースを更新する処理でエラーが発生し、ロールバックしました。";
+                            er.ErrDatetime = DateTime.Now;
+                            er.ErrPlace = "MainViewModel::RentLivingEditSelectedDeleteCommand_Execute()";
+                            ErrorOccured?.Invoke(er);
                         }
                     }
                 }
             }
         }
 
+
+        // エラー通知画面を閉じる
+        public bool CloseErrorCommand_CanExecute()
+        {
+            return true;
+        }
+        public void CloseErrorCommand_Execute()
+        {
+            ShowErrorDialog = false;
+        }
+
+        
+
+        #endregion
+
     }
-
-
-
-    #endregion
-
 }

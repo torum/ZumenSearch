@@ -11,7 +11,35 @@
         Title="{Binding AppTitle}" 
         Height="450" Width="800">
     <Grid>
-        <TabControl HorizontalAlignment="Stretch" VerticalAlignment="Stretch" TabStripPlacement="Left">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        
+        <!-- エラー通知エリア -->
+        <Grid Visibility="{Binding ShowErrorDialog, Converter={StaticResource BoolToVisibilityCollapsedConverter}}" Background="#FFDFD991">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="50"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBox Padding="3" Margin="6" Text="{Binding ErrorText,Mode=OneWay}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" HorizontalScrollBarVisibility="Disabled"
+VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch"></TextBox>
+            <Button x:Name="ButtonCloseErrorDialog" FontFamily="Segoe UI Symbol" Content="&#57610;" Command="{Binding CloseErrorCommand}" Grid.Row="0" Grid.Column="1" Width="24" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center">
+            </Button>
+            <!-- Symbol Enum
+             https://docs.microsoft.com/en-us/uwp/api/windows.ui.xaml.controls.symbol?view=winrt-19041
+            -->
+        </Grid>
+
+        <TabControl Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" TabStripPlacement="Left">
             
             <TabItem Header="検索">
                 <Grid Background="#FFE5E5E5">
@@ -149,249 +177,258 @@
                         
                         <TabItem Header="賃貸住居">
 
-                            <Grid>
+                            <TabControl HorizontalAlignment="Stretch" VerticalAlignment="Stretch" TabStripPlacement="Top" Margin="6" SelectedIndex="{Binding ShowRentLivingTabActiveIndex, Mode=TwoWay}">
+                                <TabItem Header="検索・一覧" Visibility="{Binding ShowRentLivingSearchList, Converter={StaticResource BoolToVisibilityCollapsedConverter}}">
 
-                                <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="50"/>
-                                        <RowDefinition Height="50"/>
-                                        <RowDefinition Height="*"/>
-                                        <RowDefinition Height="50"/>
-                                    </Grid.RowDefinitions>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-
-                                    <Grid Grid.Row="0">
+                                    <Grid Visibility="{Binding ShowRentLivingSearchList, Converter={StaticResource BoolToVisibilityCollapsedConverter}}">
                                         <Grid.RowDefinitions>
-                                            <RowDefinition/>
+                                            <RowDefinition Height="50"/>
+                                            <RowDefinition Height="50"/>
+                                            <RowDefinition Height="*"/>
                                         </Grid.RowDefinitions>
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
 
-                                        <Button x:Name="ButtonAddRL" Content="新規追加" Command="{Binding RentLivingNewCommand}" Grid.Row="0" Grid.Column="0" Width="100" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                        <Grid Grid.Row="0">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition/>
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
 
-                                    </Grid>
+                                            <TextBox Text="{Binding RentLivingEditSearchText, UpdateSourceTrigger=PropertyChanged}" Grid.Row="0" Grid.Column="0" Width="212" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"></TextBox>
 
-                                    <Grid Grid.Row="1">
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition/>
-                                        </Grid.RowDefinitions>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
+                                            <Button x:Name="ButtonSearchEditRL" Content="検索" Command="{Binding RentLivingEditSearchCommand}" Grid.Row="0" Grid.Column="1" Width="100" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
 
-                                        <TextBox Text="{Binding RentLivingEditSearchText, UpdateSourceTrigger=PropertyChanged}" Grid.Row="0" Grid.Column="0" Width="212" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"></TextBox>
+                                            <Button x:Name="ButtonListEditRL" Content="一覧" Command="{Binding RentLivingEditListCommand}" Grid.Row="0" Grid.Column="2" Width="100" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
 
-                                        <Button x:Name="ButtonSearchEditRL" Content="検索" Command="{Binding RentLivingEditSearchCommand}" Grid.Row="0" Grid.Column="1" Width="100" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center">
-                                        </Button>
+                                        </Grid>
 
-                                        <Button x:Name="ButtonListEditRL" Content="一覧" Command="{Binding RentLivingEditListCommand}" Grid.Row="0" Grid.Column="2" Width="100" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center">
-                                        </Button>
+                                        <Grid Grid.Row="1">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition/>
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
 
-                                    </Grid>
+                                            <Button x:Name="ButtonAddRL" Content="新規追加" Command="{Binding RentLivingNewCommand}" Grid.Row="0" Grid.Column="0" Width="100" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"/>
 
-                                    <Grid x:Name="RentLivingEditListViewDummy" Grid.Row="2" Grid.Column="0" Visibility="Hidden" Margin="0 0 27 0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="50"/>
-                                            <ColumnDefinition Width="2*"/>
-                                            <ColumnDefinition Width="100" />
-                                            <ColumnDefinition Width="4*"/>
-                                            <ColumnDefinition Width="2*"/>
-                                            <ColumnDefinition Width="2*"/>
-                                        </Grid.ColumnDefinitions>
+                                            <Button x:Name="ButtonEditRL" Content="編集" Command="{Binding RentLivingEditSelectedEditCommand}" Grid.Row="0" Grid.Column="1" Width="100" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
 
-                                        <!--  This is the hidden helper Field which is used to bind to, using the "Fill" column of the helper grid  -->
-                                        <Grid x:Name="RLEWidth0" Grid.Column="0" />
-                                        <Grid x:Name="RLEWidth1" Grid.Column="1" />
-                                        <Grid x:Name="RLEWidth2" Grid.Column="2" />
-                                        <Grid x:Name="RLEWidth3" Grid.Column="3" />
-                                        <Grid x:Name="RLEWidth4" Grid.Column="4" />
-                                        <Grid x:Name="RLEWidth5" Grid.Column="5" />
-                                    </Grid>
+                                            <Button x:Name="ButtonViewRL" Content="表示" Command="{Binding RentLivingEditSelectedViewCommand}" Grid.Row="0" Grid.Column="2" Width="100" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
 
-                                    <ListView Grid.Row="2" Grid.Column="0" x:Name="RentLivingEditListView" Background="Transparent" ItemsSource="{Binding EditRents}" SelectedItem="{Binding RentLivingEditSelectedItem, Mode=TwoWay}" SelectionMode="Extended" common:GridViewSort.AutoSort="True" common:GridViewSort.ShowSortGlyph="True" IsSynchronizedWithCurrentItem="True" AlternationCount="2" MinHeight="80" BorderThickness="0" Padding="0 0 0 0" Margin="0 0 0 0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Visible">
-                                        <ListView.Resources>
-                                            <ContextMenu x:Key="RLEditItemContextMenu">
-                                                <MenuItem Header="選択アイテム">
-
-                                                </MenuItem>
-                                            </ContextMenu>
-                                        </ListView.Resources>
-                                        <ListView.ItemContainerStyle>
-                                            <Style TargetType="ListViewItem">
-                                                <Setter Property="Margin" Value="1 0 0 0"/>
-                                                <Setter Property="Padding" Value="0 1 0 1"/>
-                                                <Setter Property="HorizontalContentAlignment" Value="Center"/>
-                                                <Setter Property="ContextMenu" Value="{StaticResource RLEditItemContextMenu}" />
-                                            </Style>
-                                        </ListView.ItemContainerStyle>
-
-                                        <ListView.View>
-                                            <GridView>
-                                                <GridViewColumn Header="ID" Width="{Binding ElementName=RLEWidth0, Path=ActualWidth}">
-                                                    <GridViewColumn.CellTemplate>
-                                                        <DataTemplate>
-                                                            <TextBlock x:Name="RLID" Text="{Binding Rent_ID, Mode=OneWay}" Padding="3"/>
-                                                        </DataTemplate>
-                                                    </GridViewColumn.CellTemplate>
-                                                </GridViewColumn>
-
-                                                <GridViewColumn Header="物件名" Width="{Binding ElementName=RLEWidth1, Path=ActualWidth}">
-                                                    <GridViewColumn.CellTemplate>
-                                                        <DataTemplate>
-                                                            <TextBlock x:Name="RLName" Text="{Binding Name, Mode=OneWay}" Padding="3"/>
-                                                        </DataTemplate>
-                                                    </GridViewColumn.CellTemplate>
-                                                </GridViewColumn>
-
-                                                <GridViewColumn Header="〒" Width="{Binding ElementName=RLEWidth2, Path=ActualWidth}">
-                                                    <GridViewColumn.CellTemplate>
-                                                        <DataTemplate>
-                                                            <TextBlock x:Name="RLName" Text="{Binding PostalCode, Mode=OneWay}" Padding="3"/>
-                                                        </DataTemplate>
-                                                    </GridViewColumn.CellTemplate>
-                                                </GridViewColumn>
-
-                                                <GridViewColumn Header="所在地" Width="{Binding ElementName=RLEWidth3, Path=ActualWidth}">
-                                                    <GridViewColumn.CellTemplate>
-                                                        <DataTemplate>
-                                                            <TextBlock x:Name="RLLocation" Text="{Binding Location, Mode=OneWay}" Padding="3"/>
-                                                        </DataTemplate>
-                                                    </GridViewColumn.CellTemplate>
-                                                </GridViewColumn>
-
-                                                <GridViewColumn Header="最寄り駅1" Width="{Binding ElementName=RLEWidth4, Path=ActualWidth}">
-                                                    <GridViewColumn.CellTemplate>
-                                                        <DataTemplate>
-                                                            <TextBlock x:Name="RLStation1" Text="{Binding TrainStation1, Mode=OneWay}" Padding="3"/>
-                                                        </DataTemplate>
-                                                    </GridViewColumn.CellTemplate>
-                                                </GridViewColumn>
-
-                                                <GridViewColumn Header="最寄り駅2" Width="{Binding ElementName=RLEWidth5, Path=ActualWidth}">
-                                                    <GridViewColumn.CellTemplate>
-                                                        <DataTemplate>
-                                                            <TextBlock x:Name="RLStation2" Text="{Binding TrainStation2, Mode=OneWay}" Padding="3"/>
-                                                        </DataTemplate>
-                                                    </GridViewColumn.CellTemplate>
-                                                </GridViewColumn>
-                                            </GridView>
-                                        </ListView.View>
-
-                                    </ListView>
-
-                                    <Grid Grid.Row="3" HorizontalAlignment="Right">
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition/>
-                                        </Grid.RowDefinitions>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
-
-                                        <Button x:Name="ButtonEditRL" Content="編集" Command="{Binding RentLivingEditSelectedEditCommand}" Grid.Row="0" Grid.Column="1" Width="100" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center">
-                                        </Button>
-
-                                        <Button x:Name="ButtonViewRL" Content="表示" Command="{Binding RentLivingEditSelectedViewCommand}" Grid.Row="0" Grid.Column="2" Width="100" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center">
-                                        </Button>
-
-                                        <Button x:Name="ButtonDeleteRL" Content="削除" Command="{Binding RentLivingEditSelectedDeleteCommand}" Grid.Row="0" Grid.Column="3" Width="100" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center">
-                                        </Button>
-                                    </Grid>
-
-                                </Grid>
-
-                                <!-- 賃貸物件住居用の追加 -->
-                                <Grid x:Name="GridNewAddRL" Visibility="{Binding ShowRentLivingNew, Converter={StaticResource BoolToVisibilityCollapsedConverter}}" Background="#FFE5E5E5">
-                                    <ScrollViewer>
-                                        <StackPanel>
+                                            <Button x:Name="ButtonDeleteRL" Content="削除" Command="{Binding RentLivingEditSelectedDeleteCommand}" Grid.Row="0" Grid.Column="3" Width="100" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
                                             
-                                            <Label Content="物件名："/>
-                                            <TextBox Text="{Binding RentLivingNew.Name}" Width="212" Padding="3" Margin="6 0 6 6" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
-                                            <Label Content="〒："/>
-                                            <TextBox Text="{Binding RentLivingNew.PostalCode}" Width="212" Padding="3" Margin="6 0 6 6" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
-                                            <Label Content="所在地："/>
-                                            <TextBox Text="{Binding RentLivingNew.Location}" Width="212" Padding="3" Margin="6 0 6 6" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
-                                            <Label Content="最寄り駅１："/>
-                                            <TextBox Text="{Binding RentLivingNew.TrainStation1}" Width="212" Padding="3" Margin="6 0 6 6" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
-                                            <Label Content="最寄り駅２："/>
-                                            <TextBox Text="{Binding RentLivingNew.TrainStation2}" Width="212" Padding="3" Margin="6 0 6 6" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                        </Grid>
+
+                                        <Grid x:Name="RentLivingEditListViewDummy" Grid.Row="2" Grid.Column="0" Visibility="Hidden" Margin="0 0 27 0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="50"/>
+                                                <ColumnDefinition Width="2*"/>
+                                                <ColumnDefinition Width="100" />
+                                                <ColumnDefinition Width="4*"/>
+                                                <ColumnDefinition Width="2*"/>
+                                                <ColumnDefinition Width="2*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <!--  This is the hidden helper Field which is used to bind to, using the "Fill" column of the helper grid  -->
+                                            <Grid x:Name="RLEWidth0" Grid.Column="0" />
+                                            <Grid x:Name="RLEWidth1" Grid.Column="1" />
+                                            <Grid x:Name="RLEWidth2" Grid.Column="2" />
+                                            <Grid x:Name="RLEWidth3" Grid.Column="3" />
+                                            <Grid x:Name="RLEWidth4" Grid.Column="4" />
+                                            <Grid x:Name="RLEWidth5" Grid.Column="5" />
+                                        </Grid>
+
+                                        <ListView Grid.Row="2" Grid.Column="0" x:Name="RentLivingEditListView" Background="Transparent" ItemsSource="{Binding EditRents}" SelectedItem="{Binding RentLivingEditSelectedItem, Mode=TwoWay}" SelectionMode="Extended" common:GridViewSort.AutoSort="True" common:GridViewSort.ShowSortGlyph="True" IsSynchronizedWithCurrentItem="True" AlternationCount="2" MinHeight="80" BorderThickness="0" Padding="0 0 0 0" Margin="0 0 0 0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Visible">
+                                            <ListView.Resources>
+                                                <ContextMenu x:Key="RLEditItemContextMenu">
+                                                    <MenuItem Header="選択アイテム">
+
+                                                    </MenuItem>
+                                                </ContextMenu>
+                                            </ListView.Resources>
+                                            <ListView.ItemContainerStyle>
+                                                <Style TargetType="ListViewItem">
+                                                    <Setter Property="Margin" Value="1 0 0 0"/>
+                                                    <Setter Property="Padding" Value="0 1 0 1"/>
+                                                    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                                    <Setter Property="ContextMenu" Value="{StaticResource RLEditItemContextMenu}" />
+                                                </Style>
+                                            </ListView.ItemContainerStyle>
+
+                                            <ListView.View>
+                                                <GridView>
+                                                    <GridViewColumn Header="ID" Width="{Binding ElementName=RLEWidth0, Path=ActualWidth}">
+                                                        <GridViewColumn.CellTemplate>
+                                                            <DataTemplate>
+                                                                <TextBlock x:Name="RLID" Text="{Binding Rent_ID, Mode=OneWay}" Padding="3"/>
+                                                            </DataTemplate>
+                                                        </GridViewColumn.CellTemplate>
+                                                    </GridViewColumn>
+
+                                                    <GridViewColumn Header="物件名" Width="{Binding ElementName=RLEWidth1, Path=ActualWidth}">
+                                                        <GridViewColumn.CellTemplate>
+                                                            <DataTemplate>
+                                                                <TextBlock x:Name="RLName" Text="{Binding Name, Mode=OneWay}" Padding="3"/>
+                                                            </DataTemplate>
+                                                        </GridViewColumn.CellTemplate>
+                                                    </GridViewColumn>
+
+                                                    <GridViewColumn Header="〒" Width="{Binding ElementName=RLEWidth2, Path=ActualWidth}">
+                                                        <GridViewColumn.CellTemplate>
+                                                            <DataTemplate>
+                                                                <TextBlock x:Name="RLName" Text="{Binding PostalCode, Mode=OneWay}" Padding="3"/>
+                                                            </DataTemplate>
+                                                        </GridViewColumn.CellTemplate>
+                                                    </GridViewColumn>
+
+                                                    <GridViewColumn Header="所在地" Width="{Binding ElementName=RLEWidth3, Path=ActualWidth}">
+                                                        <GridViewColumn.CellTemplate>
+                                                            <DataTemplate>
+                                                                <TextBlock x:Name="RLLocation" Text="{Binding Location, Mode=OneWay}" Padding="3"/>
+                                                            </DataTemplate>
+                                                        </GridViewColumn.CellTemplate>
+                                                    </GridViewColumn>
+
+                                                    <GridViewColumn Header="最寄り駅1" Width="{Binding ElementName=RLEWidth4, Path=ActualWidth}">
+                                                        <GridViewColumn.CellTemplate>
+                                                            <DataTemplate>
+                                                                <TextBlock x:Name="RLStation1" Text="{Binding TrainStation1, Mode=OneWay}" Padding="3"/>
+                                                            </DataTemplate>
+                                                        </GridViewColumn.CellTemplate>
+                                                    </GridViewColumn>
+
+                                                    <GridViewColumn Header="最寄り駅2" Width="{Binding ElementName=RLEWidth5, Path=ActualWidth}">
+                                                        <GridViewColumn.CellTemplate>
+                                                            <DataTemplate>
+                                                                <TextBlock x:Name="RLStation2" Text="{Binding TrainStation2, Mode=OneWay}" Padding="3"/>
+                                                            </DataTemplate>
+                                                        </GridViewColumn.CellTemplate>
+                                                    </GridViewColumn>
+                                                </GridView>
+                                            </ListView.View>
+
+                                        </ListView>
+
+                                    </Grid>
+                                    
+                                </TabItem>
+                                <TabItem Header="新規追加" Visibility="{Binding ShowRentLivingNew, Converter={StaticResource BoolToVisibilityCollapsedConverter}}">
+
+                                    <!-- 賃貸物件住居用の追加 -->
+                                    <Grid x:Name="GridNewAddRL" Visibility="{Binding ShowRentLivingNew, Converter={StaticResource BoolToVisibilityCollapsedConverter}}" Background="#FFE5E5E5">
+                                        <ScrollViewer>
+                                            <StackPanel>
+
+                                                <Label Content="物件名："/>
+                                                <TextBox Text="{Binding RentLivingNew.Name}" Width="212" Padding="3" Margin="6 0 6 6" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                <Label Content="〒："/>
+                                                <TextBox Text="{Binding RentLivingNew.PostalCode}" Width="212" Padding="3" Margin="6 0 6 6" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                <Label Content="所在地："/>
+                                                <TextBox Text="{Binding RentLivingNew.Location}" Width="212" Padding="3" Margin="6 0 6 6" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                <Label Content="最寄り駅１："/>
+                                                <TextBox Text="{Binding RentLivingNew.TrainStation1}" Width="212" Padding="3" Margin="6 0 6 6" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                <Label Content="最寄り駅２："/>
+                                                <TextBox Text="{Binding RentLivingNew.TrainStation2}" Width="212" Padding="3" Margin="6 0 6 6" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
 
 
-                                            <GroupBox Header="物件種別" Margin="10" Padding="10">
-                                                <StackPanel Orientation="Horizontal">
-                                                    <RadioButton x:Name="RadioButtonRLKindApart" Content="アパート" GroupName="RentLivingKind" IsChecked="{Binding Path=RentLivingNew.Kind, ConverterParameter={x:Static vms:RentLivingKinds.Apartment}, Converter={StaticResource EnumBooleanConverter}}" Margin="3"/>
-                                                    <RadioButton x:Name="RadioButtonRLKindMansion" Content="マンション" GroupName="RentLivingKind" IsChecked="{Binding Path=RentLivingNew.Kind, ConverterParameter={x:Static vms:RentLivingKinds.Mansion}, Converter={StaticResource EnumBooleanConverter}}" Margin="3"/>
-                                                    <RadioButton x:Name="RadioButtonRLKindHouse" Content="戸建て" GroupName="RentLivingKind" IsChecked="{Binding Path=RentLivingNew.Kind, ConverterParameter={x:Static vms:RentLivingKinds.House}, Converter={StaticResource EnumBooleanConverter}}" Margin="3"/>
-                                                    <RadioButton x:Name="RadioButtonRLKindOther" Content="その他" GroupName="RentLivingKind" IsChecked="{Binding Path=RentLivingNew.Kind, ConverterParameter={x:Static vms:RentLivingKinds.Other}, Converter={StaticResource EnumBooleanConverter}}" Margin="3"/>
-                                                </StackPanel>
-                                            </GroupBox>
-                                            <Label Content="階建て："/>
-                                            <TextBox Text="{Binding RentLivingNew.Floors}" Width="212" Padding="3" Margin="6 0 6 6" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
-                                            <Label Content="地下階数："/>
-                                            <TextBox Text="{Binding RentLivingNew.FloorsBasement}" Width="212" Padding="3" Margin="6 0 6 6" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
-                                            <Label Content="築年（例 2007）："/>
-                                            <TextBox Text="{Binding RentLivingNew.BuiltYear}" Width="212" Padding="3" Margin="6 0 6 6" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                <GroupBox Header="物件種別" Margin="10" Padding="10">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <RadioButton x:Name="RadioButtonRLKindApart" Content="アパート" GroupName="RentLivingKind" IsChecked="{Binding Path=RentLivingNew.Kind, ConverterParameter={x:Static vms:RentLivingKinds.Apartment}, Converter={StaticResource EnumBooleanConverter}}" Margin="3"/>
+                                                        <RadioButton x:Name="RadioButtonRLKindMansion" Content="マンション" GroupName="RentLivingKind" IsChecked="{Binding Path=RentLivingNew.Kind, ConverterParameter={x:Static vms:RentLivingKinds.Mansion}, Converter={StaticResource EnumBooleanConverter}}" Margin="3"/>
+                                                        <RadioButton x:Name="RadioButtonRLKindHouse" Content="戸建て" GroupName="RentLivingKind" IsChecked="{Binding Path=RentLivingNew.Kind, ConverterParameter={x:Static vms:RentLivingKinds.House}, Converter={StaticResource EnumBooleanConverter}}" Margin="3"/>
+                                                        <RadioButton x:Name="RadioButtonRLKindOther" Content="その他" GroupName="RentLivingKind" IsChecked="{Binding Path=RentLivingNew.Kind, ConverterParameter={x:Static vms:RentLivingKinds.Other}, Converter={StaticResource EnumBooleanConverter}}" Margin="3"/>
+                                                    </StackPanel>
+                                                </GroupBox>
+                                                <Label Content="階建て："/>
+                                                <TextBox Text="{Binding RentLivingNew.Floors}" Width="212" Padding="3" Margin="6 0 6 6" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                <Label Content="地下階数："/>
+                                                <TextBox Text="{Binding RentLivingNew.FloorsBasement}" Width="212" Padding="3" Margin="6 0 6 6" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                <Label Content="築年（例 2007）："/>
+                                                <TextBox Text="{Binding RentLivingNew.BuiltYear}" Width="212" Padding="3" Margin="6 0 6 6" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
 
-                                            <!-- 建物写真と募集図面PDFの追加 -->
+                                                <!-- 建物写真と募集図面PDFの追加 -->
+                                                <GroupBox Header="物件外観写真" Margin="10" Padding="10">
+                                                    <StackPanel>
+                                                        <Button x:Name="ButtonOpenPictureFileAdd" Click="ButtonOpenPictureFileAdd_Click">外観写真の登録</Button>
+                                                        <Image x:Name="ImagePreviewPictureAdd" Width="200" Source="{Binding RentLivingNew.Picture}"></Image>
+                                                    </StackPanel>
+                                                </GroupBox>
 
-                                            <Button x:Name="ButtonNewAddRL" Content="賃貸住居用物件（建物）の追加"  Command="{Binding RentLivingNewAddCommand}" Width="212" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center">
-                                            </Button>
-                                            <Button x:Name="ButtonNewCancelRL" Content="キャンセル"  Command="{Binding RentLivingNewCancelCommand}" Width="212" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center">
-                                            </Button>
-                                        </StackPanel>
-                                    </ScrollViewer>
+                                                <!-- 部屋の追加 -->
 
-                                </Grid>
-
-                                <Grid x:Name="GridEditUpdateRL" Visibility="{Binding ShowRentLivingEdit, Converter={StaticResource BoolToVisibilityCollapsedConverter}}" Background="#FFE5E5E5">
-                                    <StackPanel>
-                                        <Label Content="物件名："/>
-                                        <TextBox Text="{Binding RentLivingEdit.Name}" Width="212" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
-                                        <Label Content="〒："/>
-                                        <TextBox Text="{Binding RentLivingEdit.PostalCode}" Width="212" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
-                                        <Label Content="所在地："/>
-                                        <TextBox Text="{Binding RentLivingEdit.Location}" Width="212" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
-                                        <Label Content="最寄り駅１："/>
-                                        <TextBox Text="{Binding RentLivingEdit.TrainStation1}" Width="212" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
-                                        <Label Content="最寄り駅２："/>
-                                        <TextBox Text="{Binding RentLivingEdit.TrainStation2}" Width="212" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
-
-
-                                        <GroupBox Header="物件種別" Margin="10" Padding="10">
-                                            <StackPanel Orientation="Horizontal">
-                                                <RadioButton x:Name="RadioButtonRLKindApartEdit" Content="アパート" GroupName="RentLivingKind" IsChecked="{Binding Path=RentLivingEdit.Kind, ConverterParameter={x:Static vms:RentLivingKinds.Apartment}, Converter={StaticResource EnumBooleanConverter}}" Margin="3"/>
-                                                <RadioButton x:Name="RadioButtonRLKindMansionEdit" Content="マンション" GroupName="RentLivingKind" IsChecked="{Binding Path=RentLivingEdit.Kind, ConverterParameter={x:Static vms:RentLivingKinds.Mansion}, Converter={StaticResource EnumBooleanConverter}}" Margin="3"/>
-                                                <RadioButton x:Name="RadioButtonRLKindHouseEdit" Content="戸建て" GroupName="RentLivingKind" IsChecked="{Binding Path=RentLivingEdit.Kind, ConverterParameter={x:Static vms:RentLivingKinds.House}, Converter={StaticResource EnumBooleanConverter}}" Margin="3"/>
-                                                <RadioButton x:Name="RadioButtonRLKindOtherEdit" Content="その他" GroupName="RentLivingKind" IsChecked="{Binding Path=RentLivingEdit.Kind, ConverterParameter={x:Static vms:RentLivingKinds.Other}, Converter={StaticResource EnumBooleanConverter}}" Margin="3"/>
+                                                <Button x:Name="ButtonNewAddRL" Content="賃貸住居用物件（建物）の追加"  Command="{Binding RentLivingNewAddCommand}" Width="212" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                                </Button>
+                                                <Button x:Name="ButtonNewCancelRL" Content="キャンセル"  Command="{Binding RentLivingNewCancelCommand}" Width="212" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                                </Button>
                                             </StackPanel>
-                                        </GroupBox>
-                                        <Label Content="階建て："/>
-                                        <TextBox Text="{Binding RentLivingEdit.Floors}" Width="212" Padding="3" Margin="6 0 6 6" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
-                                        <Label Content="地下階数："/>
-                                        <TextBox Text="{Binding RentLivingEdit.FloorsBasement}" Width="212" Padding="3" Margin="6 0 6 6" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
-                                        <Label Content="築年（例 2007）："/>
-                                        <TextBox Text="{Binding RentLivingEdit.BuiltYear}" Width="212" Padding="3" Margin="6 0 6 6" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                        </ScrollViewer>
+                                    </Grid>
+
+                                </TabItem>
+                                <TabItem Header="編集" Visibility="{Binding ShowRentLivingEdit, Converter={StaticResource BoolToVisibilityCollapsedConverter}}">
+
+                                    <!-- 賃貸物件住居用の更新 -->
+                                    <Grid x:Name="GridEditUpdateRL" Visibility="{Binding ShowRentLivingEdit, Converter={StaticResource BoolToVisibilityCollapsedConverter}}" Background="#FFE5E5E5">
+                                        <ScrollViewer>
+                                            <StackPanel>
+                                                <Label Content="物件名："/>
+                                                <TextBox Text="{Binding RentLivingEdit.Name}" Width="212" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                <Label Content="〒："/>
+                                                <TextBox Text="{Binding RentLivingEdit.PostalCode}" Width="212" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                <Label Content="所在地："/>
+                                                <TextBox Text="{Binding RentLivingEdit.Location}" Width="212" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                <Label Content="最寄り駅１："/>
+                                                <TextBox Text="{Binding RentLivingEdit.TrainStation1}" Width="212" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                <Label Content="最寄り駅２："/>
+                                                <TextBox Text="{Binding RentLivingEdit.TrainStation2}" Width="212" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
 
 
-                                        <Button x:Name="ButtonEditUpdateRL" Content="更新"  Command="{Binding RentLivingEditSelectedEditUpdateCommand}" Width="212" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center">
-                                        </Button>
-                                        <Button x:Name="ButtonEditCancelRL" Content="キャンセル"  Command="{Binding RentLivingEditSelectedEditCancelCommand}" Width="212" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center">
-                                        </Button>
-                                    </StackPanel>
-                                </Grid>
+                                                <GroupBox Header="物件種別" Margin="10" Padding="10">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <RadioButton x:Name="RadioButtonRLKindApartEdit" Content="アパート" GroupName="RentLivingKind" IsChecked="{Binding Path=RentLivingEdit.Kind, ConverterParameter={x:Static vms:RentLivingKinds.Apartment}, Converter={StaticResource EnumBooleanConverter}}" Margin="3"/>
+                                                        <RadioButton x:Name="RadioButtonRLKindMansionEdit" Content="マンション" GroupName="RentLivingKind" IsChecked="{Binding Path=RentLivingEdit.Kind, ConverterParameter={x:Static vms:RentLivingKinds.Mansion}, Converter={StaticResource EnumBooleanConverter}}" Margin="3"/>
+                                                        <RadioButton x:Name="RadioButtonRLKindHouseEdit" Content="戸建て" GroupName="RentLivingKind" IsChecked="{Binding Path=RentLivingEdit.Kind, ConverterParameter={x:Static vms:RentLivingKinds.House}, Converter={StaticResource EnumBooleanConverter}}" Margin="3"/>
+                                                        <RadioButton x:Name="RadioButtonRLKindOtherEdit" Content="その他" GroupName="RentLivingKind" IsChecked="{Binding Path=RentLivingEdit.Kind, ConverterParameter={x:Static vms:RentLivingKinds.Other}, Converter={StaticResource EnumBooleanConverter}}" Margin="3"/>
+                                                    </StackPanel>
+                                                </GroupBox>
+                                                <Label Content="階建て："/>
+                                                <TextBox Text="{Binding RentLivingEdit.Floors}" Width="212" Padding="3" Margin="6 0 6 6" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                <Label Content="地下階数："/>
+                                                <TextBox Text="{Binding RentLivingEdit.FloorsBasement}" Width="212" Padding="3" Margin="6 0 6 6" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                <Label Content="築年（例 2007）："/>
+                                                <TextBox Text="{Binding RentLivingEdit.BuiltYear}" Width="212" Padding="3" Margin="6 0 6 6" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
 
-                            </Grid>
+                                                <!-- 建物写真と募集図面PDFの更新 -->
+                                                <GroupBox Header="物件外観写真" Margin="10" Padding="10">
+                                                    <StackPanel>
+                                                        <Button x:Name="ButtonOpenPictureFileEdit" Click="ButtonOpenPictureFileEdit_Click">外観写真の変更</Button>
+                                                        <Image x:Name="ImagePreviewPictureEdit" Width="200" Source="{Binding RentLivingEdit.Picture, Mode=TwoWay}"></Image>
+                                                    </StackPanel>
+                                                </GroupBox>
+
+                                                <Button x:Name="ButtonEditUpdateRL" Content="更新"  Command="{Binding RentLivingEditSelectedEditUpdateCommand}" Width="212" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                                </Button>
+                                                <Button x:Name="ButtonEditCancelRL" Content="キャンセル"  Command="{Binding RentLivingEditSelectedEditCancelCommand}" Width="212" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                                </Button>
+
+                                            </StackPanel>
+                                        </ScrollViewer>
+                                    </Grid>
+
+                                </TabItem>
+                            </TabControl>
+
                         </TabItem>
                         
                         <TabItem Header="賃貸事業">

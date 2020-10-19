@@ -69,7 +69,7 @@ namespace RepsCore.ViewModels
             _ErrorMessages[propertyName] = errorMessage;
         }
 
-        protected void ClearErrror(string propertyName)
+        protected void ClearError(string propertyName)
         {
             if (_ErrorMessages.ContainsKey(propertyName))
                 //_ErrorMessages.Remove(propertyName);
