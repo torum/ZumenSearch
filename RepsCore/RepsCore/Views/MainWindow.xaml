@@ -47,7 +47,7 @@ VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch"></TextBox>
 
                     <TabControl Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" TabStripPlacement="Top" Margin="6">
                         
-                        <TabItem Header="賃貸住居">
+                        <TabItem Header="賃貸物件検索">
 
                             <Grid>
                                 <Grid.RowDefinitions>
@@ -516,10 +516,12 @@ VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch"></TextBox>
             <TabItem Header="事業用" Padding="6">
 
             </TabItem>
-
+            
+            <!--
             <TabItem Header="駐車場" Padding="6">
 
             </TabItem>
+            -->
 
             <TabItem Header="元付け" Padding="6">
 

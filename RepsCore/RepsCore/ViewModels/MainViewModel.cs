@@ -78,7 +78,7 @@ namespace RepsCore.ViewModels
     #region == Rent・Section等、及びその派生クラス ==
 
     /// <summary>
-    /// 物件の基底クラス
+    /// 物件（建物等）の基底クラス
     /// </summary>
     public class Rent : ViewModelBase
     {
@@ -210,7 +210,7 @@ namespace RepsCore.ViewModels
     }
 
     /// <summary>
-    /// 賃貸住居用物件のクラス（建物）
+    /// 賃貸住居用の物件クラス（建物）
     /// </summary>
     public class RentLiving : Rent
     {
@@ -354,7 +354,7 @@ namespace RepsCore.ViewModels
     }
 
     /// <summary>
-    /// 賃貸住居用物件のクラス（部屋）
+    /// 賃貸住居用の部屋クラス
     /// </summary>
     public class RentLivingSection : Section
     {
@@ -376,6 +376,7 @@ namespace RepsCore.ViewModels
             }
         }
 
+        // 部屋番号
         private string _rentLivingSectionRoomNumber;
         public string RentLivingSectionRoomNumber
         {
@@ -392,6 +393,7 @@ namespace RepsCore.ViewModels
             }
         }
 
+        // 賃料
         private int _rentLivingSectionPrice;
         public int RentLivingSectionPrice
         {
@@ -408,6 +410,7 @@ namespace RepsCore.ViewModels
             }
         }
 
+        // 間取り
         private string _rentLivingSectionMadori; // TODO 1K, 2K...
         public string RentLivingSectionMadori
         {
@@ -432,6 +435,9 @@ namespace RepsCore.ViewModels
         }
     }
 
+    /// <summary>
+    /// 物件の写真クラス
+    /// </summary>
     public class RentPicture : ViewModelBase
     {
         protected string _rentPicture_id;
@@ -532,6 +538,9 @@ namespace RepsCore.ViewModels
 
     }
 
+    /// <summary>
+    /// 賃貸住居用物件の写真クラス（外観等）
+    /// </summary>
     public class RentLivingPicture : RentPicture
     {
         public RentLivingPicture(string rentid, string rentlivingid, string rentlivingpictureid)
@@ -565,11 +574,11 @@ namespace RepsCore.ViewModels
 
     /// <summary>
     /// IO Dialog Service
-    /// https://stackoverflow.com/questions/28707039/trying-to-understand-using-a-service-to-open-a-dialog?noredirect=1&lq=1
     /// </summary>
     #region == IO Dialog Serviceダイアログ表示用クラス ==
 
     /// TODO: サービスのインジェクションは・・・とりあえずしない。
+    /// https://stackoverflow.com/questions/28707039/trying-to-understand-using-a-service-to-open-a-dialog?noredirect=1&lq=1
 
     public interface IOpenDialogService
     {
@@ -2140,7 +2149,6 @@ namespace RepsCore.ViewModels
 
         }
 
-
         // 賃貸住居用　物件管理、選択編集、選択アイテム編集更新（UPDATE）
         public ICommand RentLivingEditSelectedEditUpdateCommand { get; }
         public bool RentLivingEditSelectedEditUpdateCommand_CanExecute()
@@ -2158,134 +2166,130 @@ namespace RepsCore.ViewModels
         {
 
             if (RentLivingEdit == null) return;
+            if (RentLivingEditSelectedItem == null) return;
 
             // TODO: 入力チェック
 
-            if (RentLivingEditSelectedItem != null)
+            // 編集オブジェクトに格納されている更新された情報をDBへ更新
+
+            string sqlUpdateRent = String.Format("UPDATE Rent SET Name = '{1}', Type = '{2}', PostalCode = '{3}', Location = '{4}', TrainStation1 = '{5}', TrainStation2 = '{6}' WHERE Rent_ID = '{0}'",
+                RentLivingEdit.Rent_ID, RentLivingEdit.Name, RentLivingEdit.Type.ToString(), RentLivingEdit.PostalCode, RentLivingEdit.Location, RentLivingEdit.TrainStation1, RentLivingEdit.TrainStation2);
+
+            string sqlUpdateRentLiving = String.Format("UPDATE RentLiving SET Kind = '{1}', Floors = '{2}', FloorsBasement = '{3}', BuiltYear = '{4}' WHERE RentLiving_ID = '{0}'",
+                RentLivingEdit.RentLiving_ID, RentLivingEdit.Kind.ToString(), RentLivingEdit.Floors, RentLivingEdit.FloorsBasement, RentLivingEdit.BuiltYear);
+
+            // TODO 
+
+            using (var connection = new SqliteConnection(connectionStringBuilder.ConnectionString))
             {
+                connection.Open();
 
-                // 編集オブジェクトに格納されている更新された情報をDBへ更新
-
-                string sqlUpdateRent = String.Format("UPDATE Rent SET Name = '{1}', Type = '{2}', PostalCode = '{3}', Location = '{4}', TrainStation1 = '{5}', TrainStation2 = '{6}' WHERE Rent_ID = '{0}'",
-                    RentLivingEdit.Rent_ID, RentLivingEdit.Name, RentLivingEdit.Type.ToString(), RentLivingEdit.PostalCode, RentLivingEdit.Location, RentLivingEdit.TrainStation1, RentLivingEdit.TrainStation2);
-
-                string sqlUpdateRentLiving = String.Format("UPDATE RentLiving SET Kind = '{1}', Floors = '{2}', FloorsBasement = '{3}', BuiltYear = '{4}' WHERE RentLiving_ID = '{0}'",
-                    RentLivingEdit.RentLiving_ID, RentLivingEdit.Kind.ToString(), RentLivingEdit.Floors, RentLivingEdit.FloorsBasement, RentLivingEdit.BuiltYear);
-
-
-                // TODO 
-
-                using (var connection = new SqliteConnection(connectionStringBuilder.ConnectionString))
+                using (var cmd = connection.CreateCommand())
                 {
-                    connection.Open();
-
-                    using (var cmd = connection.CreateCommand())
+                    cmd.Transaction = connection.BeginTransaction();
+                    try
                     {
-                        cmd.Transaction = connection.BeginTransaction();
-                        try
+                        cmd.CommandText = sqlUpdateRent;
+                        var result = cmd.ExecuteNonQuery();
+                        if (result != 1)
                         {
-                            cmd.CommandText = sqlUpdateRent;
-                            var result = cmd.ExecuteNonQuery();
-                            if (result != 1)
-                            {
-                                // TODO 
-                            }
+                            // TODO 
+                        }
 
-                            cmd.CommandText = sqlUpdateRentLiving;
-                            result = cmd.ExecuteNonQuery();
-                            if (result != 1)
-                            {
-                                // TODO
-                            }
-
-                            if (RentLivingEdit.RentLivingPictures.Count > 0)
-                            {
-                                foreach (var pic in RentLivingEdit.RentLivingPictures)
-                                {
-                                    if (pic.IsNew)
-                                    {
-                                        string sqlInsertIntoRentLivingPicture = String.Format("INSERT INTO RentLivingPicture (RentLivingPicture_ID, RentLiving_ID, Rent_ID, PictureData, PictureThumbW200xData, PictureFileExt) VALUES ('{0}', '{1}', '{2}', @0, @1, '{5}')",
-                                            pic.RentPicture_ID, RentLivingNew.RentLiving_ID, RentLivingNew.Rent_ID, pic.PictureData, pic.PictureThumbW200xData, pic.PictureFileExt);
-
-                                        // 物件画像の追加
-                                        cmd.CommandText = sqlInsertIntoRentLivingPicture;
-                                        // ループなので、前のパラメーターをクリアする。
-                                        cmd.Parameters.Clear();
-
-                                        SqliteParameter parameter1 = new SqliteParameter("@0", System.Data.DbType.Binary);
-                                        parameter1.Value = pic.PictureData;
-                                        cmd.Parameters.Add(parameter1);
-
-                                        SqliteParameter parameter2 = new SqliteParameter("@1", System.Data.DbType.Binary);
-                                        parameter2.Value = pic.PictureThumbW200xData;
-                                        cmd.Parameters.Add(parameter2);
-
-                                        result = cmd.ExecuteNonQuery();
-                                        if (result > 0)
-                                        {
-                                            pic.IsNew = false;
-                                            pic.IsModified = false;
-                                        }
-                                    }
-                                    else if (pic.IsModified)
-                                    {
-                                        string sqlUpdateRentLivingPicture = String.Format("UPDATE RentLivingPicture SET PictureData = @0, PictureThumbW200xData = @1, PictureFileExt = '{5}' WHERE RentLivingPicture_ID = '{0}'",
-                                            pic.RentPicture_ID, RentLivingEdit.RentLiving_ID, RentLivingEdit.Rent_ID, pic.PictureData, pic.PictureThumbW200xData, pic.PictureFileExt);
-
-                                        // 物件画像の更新
-                                        cmd.CommandText = sqlUpdateRentLivingPicture;
-                                        // ループなので、前のパラメーターをクリアする。
-                                        cmd.Parameters.Clear();
-
-                                        SqliteParameter parameter1 = new SqliteParameter("@0", System.Data.DbType.Binary);
-                                        parameter1.Value = pic.PictureData;
-                                        cmd.Parameters.Add(parameter1);
-
-                                        SqliteParameter parameter2 = new SqliteParameter("@1", System.Data.DbType.Binary);
-                                        parameter2.Value = pic.PictureThumbW200xData;
-                                        cmd.Parameters.Add(parameter2);
-
-                                        result = cmd.ExecuteNonQuery();
-                                        if (result > 0)
-                                        {
-                                            pic.IsNew = false;
-                                            pic.IsModified = false;
-                                        }
-                                    }
-
-                                }
-                            }
-
-
-                            cmd.Transaction.Commit();
-
-                            // 編集オブジェクトに格納された情報を、選択アイテムに更新（Listviewの情報が更新されるー＞DBからSelectして一覧を読み込みし直さなくて良くなる）
-                            RentLivingEditSelectedItem.Name = RentLivingEdit.Name;
-                            RentLivingEditSelectedItem.PostalCode = RentLivingEdit.PostalCode;
-                            RentLivingEditSelectedItem.Location = RentLivingEdit.Location;
-                            RentLivingEditSelectedItem.TrainStation1 = RentLivingEdit.TrainStation1;
-                            RentLivingEditSelectedItem.TrainStation2 = RentLivingEdit.TrainStation2;
+                        cmd.CommandText = sqlUpdateRentLiving;
+                        result = cmd.ExecuteNonQuery();
+                        if (result != 1)
+                        {
                             // TODO
-
-                            // 編集画面を非表示に
-                            if (ShowRentLivingEdit) ShowRentLivingEdit = false;
                         }
-                        catch (Exception e)
+
+                        if (RentLivingEdit.RentLivingPictures.Count > 0)
                         {
-                            cmd.Transaction.Rollback();
+                            foreach (var pic in RentLivingEdit.RentLivingPictures)
+                            {
+                                if (pic.IsNew)
+                                {
+                                    string sqlInsertIntoRentLivingPicture = String.Format("INSERT INTO RentLivingPicture (RentLivingPicture_ID, RentLiving_ID, Rent_ID, PictureData, PictureThumbW200xData, PictureFileExt) VALUES ('{0}', '{1}', '{2}', @0, @1, '{5}')",
+                                        pic.RentPicture_ID, RentLivingEdit.RentLiving_ID, RentLivingEdit.Rent_ID, pic.PictureData, pic.PictureThumbW200xData, pic.PictureFileExt);
 
-                            System.Diagnostics.Debug.WriteLine(e.Message + " @MainViewModel::RentLivingEditSelectedEditUpdateCommand_Execute()");
+                                    // 物件画像の追加
+                                    cmd.CommandText = sqlInsertIntoRentLivingPicture;
+                                    // ループなので、前のパラメーターをクリアする。
+                                    cmd.Parameters.Clear();
 
-                            // エラーイベント発火
-                            MyError er = new MyError();
-                            er.ErrType = "DB";
-                            er.ErrCode = 0;
-                            er.ErrText = "「" + e.Message + "」";
-                            er.ErrDescription = "賃貸住居用物件の選択アイテム編集更新 (UPDATE)で、データベースを更新する処理でエラーが発生し、ロールバックしました。";
-                            er.ErrDatetime = DateTime.Now;
-                            er.ErrPlace = "MainViewModel::RentLivingEditSelectedEditUpdateCommand_Execute()";
-                            ErrorOccured?.Invoke(er);
+                                    SqliteParameter parameter1 = new SqliteParameter("@0", System.Data.DbType.Binary);
+                                    parameter1.Value = pic.PictureData;
+                                    cmd.Parameters.Add(parameter1);
+
+                                    SqliteParameter parameter2 = new SqliteParameter("@1", System.Data.DbType.Binary);
+                                    parameter2.Value = pic.PictureThumbW200xData;
+                                    cmd.Parameters.Add(parameter2);
+
+                                    result = cmd.ExecuteNonQuery();
+                                    if (result > 0)
+                                    {
+                                        pic.IsNew = false;
+                                        pic.IsModified = false;
+                                    }
+                                }
+                                else if (pic.IsModified)
+                                {
+                                    string sqlUpdateRentLivingPicture = String.Format("UPDATE RentLivingPicture SET PictureData = @0, PictureThumbW200xData = @1, PictureFileExt = '{5}' WHERE RentLivingPicture_ID = '{0}'",
+                                        pic.RentPicture_ID, RentLivingEdit.RentLiving_ID, RentLivingEdit.Rent_ID, pic.PictureData, pic.PictureThumbW200xData, pic.PictureFileExt);
+
+                                    // 物件画像の更新
+                                    cmd.CommandText = sqlUpdateRentLivingPicture;
+                                    // ループなので、前のパラメーターをクリアする。
+                                    cmd.Parameters.Clear();
+
+                                    SqliteParameter parameter1 = new SqliteParameter("@0", System.Data.DbType.Binary);
+                                    parameter1.Value = pic.PictureData;
+                                    cmd.Parameters.Add(parameter1);
+
+                                    SqliteParameter parameter2 = new SqliteParameter("@1", System.Data.DbType.Binary);
+                                    parameter2.Value = pic.PictureThumbW200xData;
+                                    cmd.Parameters.Add(parameter2);
+
+                                    result = cmd.ExecuteNonQuery();
+                                    if (result > 0)
+                                    {
+                                        pic.IsNew = false;
+                                        pic.IsModified = false;
+                                    }
+                                }
+
+                            }
                         }
+
+
+                        cmd.Transaction.Commit();
+
+                        // 編集オブジェクトに格納された情報を、選択アイテムに更新（Listviewの情報が更新されるー＞DBからSelectして一覧を読み込みし直さなくて良くなる）
+                        RentLivingEditSelectedItem.Name = RentLivingEdit.Name;
+                        RentLivingEditSelectedItem.PostalCode = RentLivingEdit.PostalCode;
+                        RentLivingEditSelectedItem.Location = RentLivingEdit.Location;
+                        RentLivingEditSelectedItem.TrainStation1 = RentLivingEdit.TrainStation1;
+                        RentLivingEditSelectedItem.TrainStation2 = RentLivingEdit.TrainStation2;
+                        // TODO
+
+                        // 編集画面を非表示に
+                        if (ShowRentLivingEdit) ShowRentLivingEdit = false;
+                    }
+                    catch (Exception e)
+                    {
+                        cmd.Transaction.Rollback();
+
+                        System.Diagnostics.Debug.WriteLine(e.Message + " @MainViewModel::RentLivingEditSelectedEditUpdateCommand_Execute()");
+
+                        // エラーイベント発火
+                        MyError er = new MyError();
+                        er.ErrType = "DB";
+                        er.ErrCode = 0;
+                        er.ErrText = "「" + e.Message + "」";
+                        er.ErrDescription = "賃貸住居用物件の選択アイテム編集更新 (UPDATE)で、データベースを更新する処理でエラーが発生し、ロールバックしました。";
+                        er.ErrDatetime = DateTime.Now;
+                        er.ErrPlace = "MainViewModel::RentLivingEditSelectedEditUpdateCommand_Execute()";
+                        ErrorOccured?.Invoke(er);
                     }
                 }
             }
