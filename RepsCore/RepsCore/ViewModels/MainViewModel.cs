@@ -32,25 +32,30 @@ using System.Windows.Documents;
 /// //////////////////////////////////////////////////////////
 
 /// TODO:
-/// 部屋（複数）を追加・編集・削除
-/// 条件検索
+/// 部屋の削除と複製
+/// 部屋の写真
 /// 建物にPDFのファイルを追加
-/// 入力補助・入力チェック
-/// 住所・〒・Geo関連のデータ
 /// 元付け・オーナー管理
+/// 住所・〒・Geo関連のデータ
+/// 各項目を整備
+/// 条件検索
+/// 入力補助・入力チェック
 /// エラー処理、及びログ保存
 /// 
 
-/// 後で・検討中：
-/// RentLivingNewとRentLivingEditの区別をRentLivingEditに統一して、IsNewで切り替える? Sectionも？UserControl化?
-/// 画像データのビットマップ形式へ統一？
-
-
 /// 履歴：
+/// 部屋情報の追加と編集。
 /// 部屋情報の追加の画面遷移。
 /// エラーイベントとエラー表示機能の実装。
 /// 画像ファイルの追加。
 /// 
+
+/// 後で・検討中：
+/// Modelsに基底クラス定義やデータ操作をリストラクチャーする。
+/// DBファイルの拡張子＞.db
+/// configやDBファイルのパスなどはconstでまとめて一か所に定義しておく。
+/// 建物や部屋の新規と編集の画面を共通化・・・するかどうか・・・UserControl化?
+/// 画像データのビットマップ形式へ統一？
 
 
 namespace RepsCore.ViewModels
@@ -331,118 +336,6 @@ namespace RepsCore.ViewModels
     }
 
     /// <summary>
-    /// 部屋・区画等の基底クラス
-    /// </summary>
-    public class Section : ViewModelBase
-    {
-        protected string _rent_ID;
-        public string Rent_ID
-        {
-            get
-            {
-                return _rent_ID;
-            }
-        }
-
-        private bool _isVacant;
-        public bool IsVacant {
-            get
-            {
-                return _isVacant;
-            }
-            set
-            {
-                if (_isVacant == value) return;
-
-                _isVacant = value;
-                this.NotifyPropertyChanged("IsVacant");
-            }
-        }
-    }
-
-    /// <summary>
-    /// 賃貸住居用の部屋クラス
-    /// </summary>
-    public class RentLivingSection : Section
-    {
-        protected string _rentLiving_ID;
-        public string RentLiving_ID
-        {
-            get
-            {
-                return _rentLiving_ID;
-            }
-        }
-
-        protected string _rentLivingSection_ID;
-        public string RentLivingSection_ID
-        {
-            get
-            {
-                return _rentLivingSection_ID;
-            }
-        }
-
-        // 部屋番号
-        private string _rentLivingSectionRoomNumber;
-        public string RentLivingSectionRoomNumber
-        {
-            get
-            {
-                return _rentLivingSectionRoomNumber;
-            }
-            set
-            {
-                if (_rentLivingSectionRoomNumber == value) return;
-
-                _rentLivingSectionRoomNumber = value;
-                this.NotifyPropertyChanged("RentLivingSectionRoomNumber");
-            }
-        }
-
-        // 賃料
-        private int _rentLivingSectionPrice;
-        public int RentLivingSectionPrice
-        {
-            get
-            {
-                return _rentLivingSectionPrice;
-            }
-            set
-            {
-                if (_rentLivingSectionPrice == value) return;
-
-                _rentLivingSectionPrice = value;
-                this.NotifyPropertyChanged("RentLivingSectionPrice");
-            }
-        }
-
-        // 間取り
-        private string _rentLivingSectionMadori; // TODO 1K, 2K...
-        public string RentLivingSectionMadori
-        {
-            get
-            {
-                return _rentLivingSectionMadori;
-            }
-            set
-            {
-                if (_rentLivingSectionMadori == value) return;
-
-                _rentLivingSectionMadori = value;
-                this.NotifyPropertyChanged("RentLivingSectionMadori");
-            }
-        }
-
-        public RentLivingSection(string rentid, string rentlivingid, string sectionid)
-        {
-            this._rent_ID = rentid;
-            this._rentLiving_ID = rentlivingid;
-            this._rentLivingSection_ID = sectionid;
-        }
-    }
-
-    /// <summary>
     /// 物件の写真クラス
     /// </summary>
     public class RentPicture : ViewModelBase
@@ -559,6 +452,128 @@ namespace RepsCore.ViewModels
         }
     }
 
+
+    /// <summary>
+    /// 部屋・区画等の基底クラス
+    /// </summary>
+    public class Section : ViewModelBase
+    {
+        protected string _rent_ID;
+        public string Rent_ID
+        {
+            get
+            {
+                return _rent_ID;
+            }
+        }
+
+        private bool _isVacant;
+        public bool IsVacant
+        {
+            get
+            {
+                return _isVacant;
+            }
+            set
+            {
+                if (_isVacant == value) return;
+
+                _isVacant = value;
+                this.NotifyPropertyChanged("IsVacant");
+            }
+        }
+
+
+        // 新規に追加（Insert）
+        public bool IsNew { get; set; }
+
+        // 変更があった
+        public bool IsDirty { get; set; }
+
+    }
+
+    /// <summary>
+    /// 賃貸住居用の部屋クラス
+    /// </summary>
+    public class RentLivingSection : Section
+    {
+        protected string _rentLiving_ID;
+        public string RentLiving_ID
+        {
+            get
+            {
+                return _rentLiving_ID;
+            }
+        }
+
+        protected string _rentLivingSection_ID;
+        public string RentLivingSection_ID
+        {
+            get
+            {
+                return _rentLivingSection_ID;
+            }
+        }
+
+        // 部屋番号
+        private string _rentLivingSectionRoomNumber;
+        public string RentLivingSectionRoomNumber
+        {
+            get
+            {
+                return _rentLivingSectionRoomNumber;
+            }
+            set
+            {
+                if (_rentLivingSectionRoomNumber == value) return;
+
+                _rentLivingSectionRoomNumber = value;
+                this.NotifyPropertyChanged("RentLivingSectionRoomNumber");
+            }
+        }
+
+        // 賃料
+        private int _rentLivingSectionPrice;
+        public int RentLivingSectionPrice
+        {
+            get
+            {
+                return _rentLivingSectionPrice;
+            }
+            set
+            {
+                if (_rentLivingSectionPrice == value) return;
+
+                _rentLivingSectionPrice = value;
+                this.NotifyPropertyChanged("RentLivingSectionPrice");
+            }
+        }
+
+        // 間取り
+        private string _rentLivingSectionMadori; // TODO 1K, 2K...
+        public string RentLivingSectionMadori
+        {
+            get
+            {
+                return _rentLivingSectionMadori;
+            }
+            set
+            {
+                if (_rentLivingSectionMadori == value) return;
+
+                _rentLivingSectionMadori = value;
+                this.NotifyPropertyChanged("RentLivingSectionMadori");
+            }
+        }
+
+        public RentLivingSection(string rentid, string rentlivingid, string sectionid)
+        {
+            this._rent_ID = rentid;
+            this._rentLiving_ID = rentlivingid;
+            this._rentLivingSection_ID = sectionid;
+        }
+    }
+
     #endregion
 
     /// <summary>
@@ -655,9 +670,65 @@ namespace RepsCore.ViewModels
         #endregion
 
         #region == 物件関連オブジェクト ==
-        
+
+        // 賃貸住居用物件　管理　一覧
+        public ObservableCollection<RentLiving> EditRents { get; } = new ObservableCollection<RentLiving>();
+
+        // 賃貸住居用 管理　検索結果・一覧リストビューの選択されたオブジェクトを保持
+        private RentLiving _rentLivingEditSelectedItem;
+        public RentLiving RentLivingEditSelectedItem
+        {
+            get
+            {
+                return _rentLivingEditSelectedItem;
+            }
+            set
+            {
+                if (_rentLivingEditSelectedItem == value) return;
+
+                _rentLivingEditSelectedItem = value;
+                this.NotifyPropertyChanged("RentLivingEditSelectedItem");
+            }
+        }
+
+
+        // 賃貸住居用 管理　新規物件追加の部屋一覧の選択されたSectionオブジェクトを保持
+        private RentLivingSection _rentLivingNewSectionSelectedItem;
+        public RentLivingSection RentLivingNewSectionSelectedItem
+        {
+            get
+            {
+                return _rentLivingNewSectionSelectedItem;
+            }
+            set
+            {
+                if (_rentLivingNewSectionSelectedItem == value) return;
+
+                _rentLivingNewSectionSelectedItem = value;
+                this.NotifyPropertyChanged("RentLivingNewSectionSelectedItem");
+            }
+        }
+
+        // 賃貸住居用 管理　物件編集の部屋一覧の選択されたSectionオブジェクトを保持
+        private RentLivingSection _rentLivingEditSectionSelectedItem;
+        public RentLivingSection RentLivingEditSectionSelectedItem
+        {
+            get
+            {
+                return _rentLivingEditSectionSelectedItem;
+            }
+            set
+            {
+                if (_rentLivingEditSectionSelectedItem == value) return;
+
+                _rentLivingEditSectionSelectedItem = value;
+                this.NotifyPropertyChanged("RentLivingEditSectionSelectedItem");
+            }
+        }
+
+
         // 賃貸物件住居用　新規追加用のクラスオブジェクト
-        private RentLiving _rentLivingNew;
+        private RentLiving _rentLivingNew = new RentLiving(Guid.NewGuid().ToString(), Guid.NewGuid().ToString());
         public RentLiving RentLivingNew
         {
             get
@@ -674,7 +745,7 @@ namespace RepsCore.ViewModels
         }
         
         // 賃貸物件住居用　編集更新用のクラスオブジェクト
-        private RentLiving _rentLivingEdit;
+        private RentLiving _rentLivingEdit = new RentLiving(Guid.NewGuid().ToString(), Guid.NewGuid().ToString());
         public RentLiving RentLivingEdit
         {
             get
@@ -689,12 +760,73 @@ namespace RepsCore.ViewModels
                 this.NotifyPropertyChanged("RentLivingEdit");
             }
         }
-        
-        // 賃貸物件住居用　編集一覧用のコレクション
-        private ObservableCollection<RentLiving> _editRents = new ObservableCollection<RentLiving>();
-        public ObservableCollection<RentLiving> EditRents
+
+        // 新規RLの新規部屋クラスオブジェクト
+        private RentLivingSection _rentLivingNewSectionNew = new RentLivingSection(Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString());
+        public RentLivingSection RentLivingNewSectionNew
         {
-            get { return this._editRents; }
+            get
+            {
+                return _rentLivingNewSectionNew;
+            }
+            set
+            {
+                if (_rentLivingNewSectionNew == value) return;
+
+                _rentLivingNewSectionNew = value;
+                this.NotifyPropertyChanged("RentLivingNewSectionNew");
+            }
+        }
+
+        // 
+        private RentLivingSection _rentLivingNewSectionEdit = new RentLivingSection(Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString());
+        public RentLivingSection RentLivingNewSectionEdit
+        {
+            get
+            {
+                return _rentLivingNewSectionEdit;
+            }
+            set
+            {
+                if (_rentLivingNewSectionEdit == value) return;
+
+                _rentLivingNewSectionEdit = value;
+                this.NotifyPropertyChanged("RentLivingNewSectionEdit");
+            }
+        }
+
+        // 編集RLの新規部屋クラスオブジェクト
+        private RentLivingSection _rentLivingEditSectionNew = new RentLivingSection(Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString());
+        public RentLivingSection RentLivingEditSectionNew
+        {
+            get
+            {
+                return _rentLivingEditSectionNew;
+            }
+            set
+            {
+                if (_rentLivingEditSectionNew == value) return;
+
+                _rentLivingEditSectionNew = value;
+                this.NotifyPropertyChanged("RentLivingEditSectionNew");
+            }
+        }
+
+        // 
+        private RentLivingSection _rentLivingEditSectionEdit = new RentLivingSection(Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString());
+        public RentLivingSection RentLivingEditSectionEdit
+        {
+            get
+            {
+                return _rentLivingEditSectionEdit;
+            }
+            set
+            {
+                if (_rentLivingEditSectionEdit == value) return;
+
+                _rentLivingEditSectionEdit = value;
+                this.NotifyPropertyChanged("RentLivingEditSectionEdit");
+            }
         }
 
         #endregion
@@ -1051,22 +1183,6 @@ namespace RepsCore.ViewModels
             }
         }
 
-        // 賃貸住居用編集画面の検索結果一覧リストビューの選択されたオブジェクトを保持
-        private RentLiving _rentLivingEditSelectedItem;
-        public RentLiving RentLivingEditSelectedItem
-        {
-            get
-            {
-                return _rentLivingEditSelectedItem;
-            }
-            set
-            {
-                if (_rentLivingEditSelectedItem == value) return;
-
-                _rentLivingEditSelectedItem = value;
-                this.NotifyPropertyChanged("RentLivingEditSelectedItem");
-            }
-        }
         
         #endregion
 
@@ -1095,8 +1211,12 @@ namespace RepsCore.ViewModels
 
         #endregion
 
+        #region == ダイアログ（サービス） ==
+
         //private IOpenDialogService openDialogService;
         private OpenDialogService _openDialogService = new OpenDialogService();
+        
+        #endregion
 
         /// <summary>
         /// メインのビューモデルのコンストラクタ
@@ -1683,7 +1803,7 @@ namespace RepsCore.ViewModels
         public void RentLivingEditSearchCommand_Execute()
         {
             // Firest, clear it.
-            _editRents.Clear();
+            EditRents.Clear();
 
             using (var connection = new SqliteConnection(connectionStringBuilder.ConnectionString))
             {
@@ -1707,7 +1827,7 @@ namespace RepsCore.ViewModels
                             rl.TrainStation1 = Convert.ToString(reader["TrainStation1"]);
                             rl.TrainStation2 = Convert.ToString(reader["TrainStation2"]);
 
-                            _editRents.Add(rl);
+                            EditRents.Add(rl);
 
                         }
                     }
@@ -1724,7 +1844,7 @@ namespace RepsCore.ViewModels
         public void RentLivingEditListCommand_Execute()
         {
             // Firest, clear it.
-            _editRents.Clear();
+            EditRents.Clear();
 
             try
             {
@@ -1750,7 +1870,7 @@ namespace RepsCore.ViewModels
                                 rl.TrainStation1 = Convert.ToString(reader["TrainStation1"]);
                                 rl.TrainStation2 = Convert.ToString(reader["TrainStation2"]);
 
-                                _editRents.Add(rl);
+                                EditRents.Add(rl);
 
                             }
                         }
@@ -1785,7 +1905,7 @@ namespace RepsCore.ViewModels
 
         }
 
-        // RL編集　物件管理、一覧選択アイテム表示(PDFとか)
+        // RL　物件管理、一覧選択アイテム表示(PDFとか)
         public ICommand RentLivingEditSelectedViewCommand { get; }
         public bool RentLivingEditSelectedViewCommand_CanExecute()
         {
@@ -1806,7 +1926,7 @@ namespace RepsCore.ViewModels
             // TODO view
         }
 
-        // RL編集　物件管理、一覧選択アイテム削除（DELETE）
+        // RL　物件管理、一覧選択アイテム削除（DELETE）
         public ICommand RentLivingEditSelectedDeleteCommand { get; }
         public bool RentLivingEditSelectedDeleteCommand_CanExecute()
         {
@@ -1851,7 +1971,7 @@ namespace RepsCore.ViewModels
                             cmd.Transaction.Commit();
 
                             // 一覧から削除
-                            if (_editRents.Remove(RentLivingEditSelectedItem))
+                            if (EditRents.Remove(RentLivingEditSelectedItem))
                             {
                                 RentLivingEditSelectedItem = null;
                             }
@@ -1892,7 +2012,6 @@ namespace RepsCore.ViewModels
             RentLivingNew = new RentLiving(Guid.NewGuid().ToString(), Guid.NewGuid().ToString());
 
             if (!ShowRentLivingNew) ShowRentLivingNew = true;
-
         }
 
         // RL新規　物件追加キャンセル
@@ -1981,11 +2100,26 @@ namespace RepsCore.ViewModels
                                             pic.IsNew = false;
                                             pic.IsModified = false;
                                         }
-                                        
                                     }
-
                                 }
+                            }
 
+                            // 部屋追加
+                            if (RentLivingNew.RentLivingSections.Count > 0)
+                            {
+                                foreach (var room in RentLivingNew.RentLivingSections)
+                                {
+                                    string sqlInsertIntoRentLivingSection = String.Format("INSERT INTO RentLivingSection (RentLivingSection_ID, RentLiving_ID, Rent_ID, RoomNumber, Price, Madori) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}')",
+                                            room.RentLivingSection_ID, RentLivingNew.RentLiving_ID, RentLivingNew.Rent_ID, room.RentLivingSectionRoomNumber, room.RentLivingSectionPrice, room.RentLivingSectionMadori);
+
+                                    cmd.CommandText = sqlInsertIntoRentLivingSection;
+                                    var InsertIntoRentLivingSectionResult = cmd.ExecuteNonQuery();
+                                    if (InsertIntoRentLivingSectionResult > 0)
+                                    {
+                                        room.IsNew = false;
+                                        room.IsDirty = false;
+                                    }
+                                }
                             }
 
                             //　コミット
@@ -2147,6 +2281,13 @@ namespace RepsCore.ViewModels
         }
         public void RentLivingNewSectionNewCommand_Execute()
         {
+            if (RentLivingNew == null) return;
+
+            // RentLivingNewSectionNew オブジェクトを用意
+            RentLivingNewSectionNew = new RentLivingSection(RentLivingNew.Rent_ID, RentLivingNew.RentLiving_ID, Guid.NewGuid().ToString());
+            RentLivingNewSectionNew.IsNew = true;
+            RentLivingNewSectionNew.IsDirty = false;
+
             if (!ShowRentLivingNewSectionNew) ShowRentLivingNewSectionNew = true;
         }
         // RL新規　部屋追加キャンセル
@@ -2160,7 +2301,7 @@ namespace RepsCore.ViewModels
             if (ShowRentLivingNewSectionNew) ShowRentLivingNewSectionNew = false;
         }
 
-        // RL新規　部屋追加処理 (INSERT)
+        // RL新規　部屋追加処理 (ADD to Collection)
         public ICommand RentLivingNewSectionAddCommand { get; }
         public bool RentLivingNewSectionAddCommand_CanExecute()
         {
@@ -2168,17 +2309,43 @@ namespace RepsCore.ViewModels
         }
         public void RentLivingNewSectionAddCommand_Execute()
         {
-            // TODO:
+            if (RentLivingNew == null) return;
+            if (RentLivingNewSectionNew == null) return;
+
+            // TODO: 入力チェック
+
+            // 物件オブジェクトの部屋コレクションに追加
+            RentLivingNew.RentLivingSections.Add(RentLivingNewSectionNew);
+
+            // 追加画面を閉じる
+            ShowRentLivingNewSectionNew = false;
         }
         
         // RL新規　部屋編集（画面表示）
         public ICommand RentLivingNewSectionEditCommand { get; }
         public bool RentLivingNewSectionEditCommand_CanExecute()
         {
-            return true;
+            if (RentLivingNewSectionSelectedItem != null)
+                return true;
+            else 
+                return false;
         }
         public void RentLivingNewSectionEditCommand_Execute()
         {
+            if (RentLivingNew == null) return;
+            if (RentLivingNewSectionSelectedItem == null) return;
+
+            // 
+            RentLivingNewSectionEdit = new RentLivingSection(RentLivingNewSectionSelectedItem.Rent_ID, RentLivingNewSectionSelectedItem.RentLiving_ID, RentLivingNewSectionSelectedItem.RentLivingSection_ID);
+
+            RentLivingNewSectionEdit.IsNew = false;
+            RentLivingNewSectionEdit.IsDirty = false;
+
+            RentLivingNewSectionEdit.RentLivingSectionRoomNumber = RentLivingNewSectionSelectedItem.RentLivingSectionRoomNumber;
+            RentLivingNewSectionEdit.RentLivingSectionMadori = RentLivingNewSectionSelectedItem.RentLivingSectionMadori;
+            RentLivingNewSectionEdit.RentLivingSectionPrice = RentLivingNewSectionSelectedItem.RentLivingSectionPrice;
+            // TODO: more to come
+
             if (!ShowRentLivingNewSectionEdit) ShowRentLivingNewSectionEdit = true;
         }
 
@@ -2193,7 +2360,7 @@ namespace RepsCore.ViewModels
             if (ShowRentLivingNewSectionEdit) ShowRentLivingNewSectionEdit = false;
         }
 
-        // RL新規　部屋更新処理 (Update)
+        // RL新規　部屋更新 (Update collection)
         public ICommand RentLivingNewSectionUpdateCommand { get; }
         public bool RentLivingNewSectionUpdateCommand_CanExecute()
         {
@@ -2201,7 +2368,26 @@ namespace RepsCore.ViewModels
         }
         public void RentLivingNewSectionUpdateCommand_Execute()
         {
-            // TODO:
+            if (RentLivingNew == null) return;
+            if (RentLivingNewSectionSelectedItem == null) return;
+
+            // TODO: 入力チェック
+
+            var found = RentLivingNew.RentLivingSections.FirstOrDefault(x => x.RentLivingSection_ID == RentLivingNewSectionEdit.RentLivingSection_ID);
+            if (found != null)
+            {
+                found.RentLivingSectionRoomNumber = RentLivingNewSectionEdit.RentLivingSectionRoomNumber;
+                found.RentLivingSectionMadori = RentLivingNewSectionEdit.RentLivingSectionMadori;
+                found.RentLivingSectionPrice = RentLivingNewSectionEdit.RentLivingSectionPrice;
+                // TODO: more to come
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine("THIS SHOULD NOT BE HAPPENING @RentLivingNewSectionUpdateCommand_Execute");
+            }
+
+            // 部屋編集画面を閉じる
+            ShowRentLivingNewSectionEdit = false;
         }
 
         #endregion
@@ -2286,7 +2472,26 @@ namespace RepsCore.ViewModels
                             }
                         }
 
-                        cmd.Transaction.Commit();
+
+                        cmd.CommandText = String.Format("SELECT * FROM RentLivingSection WHERE Rent_ID = '{0}'", RentLivingEditSelectedItem.Rent_ID);
+                        using (var reader = cmd.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                RentLivingSection room = new RentLivingSection(RentLivingEdit.Rent_ID, RentLivingEdit.RentLiving_ID, Convert.ToString(reader["RentLivingSection_ID"]));
+                                room.RentLivingSectionRoomNumber = Convert.ToString(reader["RoomNumber"]);
+                                room.RentLivingSectionMadori = Convert.ToString(reader["Madori"]);
+                                room.RentLivingSectionPrice = Convert.ToInt32(reader["Price"]);
+
+                                room.IsNew = false;
+                                room.IsDirty = false;
+
+                                RentLivingEdit.RentLivingSections.Add(room);
+                            }
+                        }
+
+
+                            cmd.Transaction.Commit();
                     }
                 }
 
@@ -2372,6 +2577,7 @@ namespace RepsCore.ViewModels
                             // TODO
                         }
 
+                        // 写真の追加または更新
                         if (RentLivingEdit.RentLivingPictures.Count > 0)
                         {
                             foreach (var pic in RentLivingEdit.RentLivingPictures)
@@ -2427,6 +2633,42 @@ namespace RepsCore.ViewModels
                                     }
                                 }
 
+                            }
+                        }
+
+                        // 部屋更新
+                        if (RentLivingEdit.RentLivingSections.Count > 0)
+                        {
+                            foreach (var room in RentLivingEdit.RentLivingSections)
+                            {
+                                if (room.IsNew)
+                                {
+                                    // 新規追加
+                                    string sqlInsertIntoRentLivingSection = String.Format("INSERT INTO RentLivingSection (RentLivingSection_ID, RentLiving_ID, Rent_ID, RoomNumber, Price, Madori) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}')",
+                                            room.RentLivingSection_ID, RentLivingEdit.RentLiving_ID, RentLivingEdit.Rent_ID, room.RentLivingSectionRoomNumber, room.RentLivingSectionPrice, room.RentLivingSectionMadori);
+
+                                    cmd.CommandText = sqlInsertIntoRentLivingSection;
+                                    var InsertIntoRentLivingSectionResult = cmd.ExecuteNonQuery();
+                                    if (InsertIntoRentLivingSectionResult > 0)
+                                    {
+                                        room.IsNew = false;
+                                        room.IsDirty = false;
+                                    }
+                                }
+                                else
+                                {
+                                    // 更新
+                                    string sqlUpdateRentLivingSection = String.Format("UPDATE RentLivingSection SET RoomNumber = '{1}', Price = '{2}', Madori = '{3}' WHERE RentLivingSection_ID = '{0}'",
+                                            room.RentLivingSection_ID, room.RentLivingSectionRoomNumber, room.RentLivingSectionPrice, room.RentLivingSectionMadori);
+                                    
+                                    cmd.CommandText = sqlUpdateRentLivingSection;
+                                    var UpdateoRentLivingSectionResult = cmd.ExecuteNonQuery();
+                                    if (UpdateoRentLivingSectionResult > 0)
+                                    {
+                                        //room.IsNew = false;
+                                        room.IsDirty = false;
+                                    }
+                                }
                             }
                         }
 
@@ -2652,8 +2894,7 @@ namespace RepsCore.ViewModels
         }
 
 
-
-        // RL新規　部屋追加（画面表示）
+        // RL編集　部屋追加（画面表示）
         public ICommand RentLivingEditSectionNewCommand { get; }
         public bool RentLivingEditSectionNewCommand_CanExecute()
         {
@@ -2661,9 +2902,18 @@ namespace RepsCore.ViewModels
         }
         public void RentLivingEditSectionNewCommand_Execute()
         {
+            if (RentLivingEdit == null) return;
+
+            // RentLivingEditSectionNew オブジェクトを用意
+            RentLivingEditSectionNew = new RentLivingSection(RentLivingNew.Rent_ID, RentLivingNew.RentLiving_ID, Guid.NewGuid().ToString());
+            
+            RentLivingEditSectionNew.IsNew = true;
+            RentLivingEditSectionNew.IsDirty = false;
+
             if (!ShowRentLivingEditSectionNew) ShowRentLivingEditSectionNew = true;
         }
-        // RL新規　部屋追加キャンセル
+        
+        // RL編集　部屋追加キャンセル
         public ICommand RentLivingEditSectionNewCancelCommand { get; }
         public bool RentLivingEditSectionNewCancelCommand_CanExecute()
         {
@@ -2674,7 +2924,7 @@ namespace RepsCore.ViewModels
             if (ShowRentLivingEditSectionNew) ShowRentLivingEditSectionNew = false;
         }
 
-        // RL新規　部屋追加処理 (INSERT)
+        // RL編集　部屋追加処理 (Add to the collection)
         public ICommand RentLivingEditSectionAddCommand { get; }
         public bool RentLivingEditSectionAddCommand_CanExecute()
         {
@@ -2682,21 +2932,47 @@ namespace RepsCore.ViewModels
         }
         public void RentLivingEditSectionAddCommand_Execute()
         {
-            // TODO:
+            if (RentLivingEdit == null) return;
+            if (RentLivingEditSectionNew == null) return;
+
+            // TODO: 入力チェック
+
+            // 物件オブジェクトの部屋コレクションに追加
+            RentLivingEdit.RentLivingSections.Add(RentLivingEditSectionNew);
+
+            // 追加画面を閉じる
+            ShowRentLivingEditSectionNew = false;
         }
 
-        // RL新規　部屋編集（画面表示）
+        // RL編集　部屋編集（画面表示）
         public ICommand RentLivingEditSectionEditCommand { get; }
         public bool RentLivingEditSectionEditCommand_CanExecute()
         {
-            return true;
+            if (RentLivingEditSectionSelectedItem != null)
+                return true;
+            else
+                return false;
         }
         public void RentLivingEditSectionEditCommand_Execute()
         {
+            if (RentLivingEdit == null) return;
+            if (RentLivingEditSectionSelectedItem == null) return;
+
+            // 
+            RentLivingEditSectionEdit = new RentLivingSection(RentLivingEditSectionSelectedItem.Rent_ID, RentLivingEditSectionSelectedItem.RentLiving_ID, RentLivingEditSectionSelectedItem.RentLivingSection_ID);
+
+            RentLivingEditSectionEdit.IsNew = false;
+            RentLivingEditSectionEdit.IsDirty = false;
+
+            RentLivingEditSectionEdit.RentLivingSectionRoomNumber = RentLivingEditSectionSelectedItem.RentLivingSectionRoomNumber;
+            RentLivingEditSectionEdit.RentLivingSectionMadori = RentLivingEditSectionSelectedItem.RentLivingSectionMadori;
+            RentLivingEditSectionEdit.RentLivingSectionPrice = RentLivingEditSectionSelectedItem.RentLivingSectionPrice;
+            // TODO: more to come
+
             if (!ShowRentLivingEditSectionEdit) ShowRentLivingEditSectionEdit = true;
         }
 
-        // RL新規　部屋編集キャンセル
+        // RL編集　部屋編集キャンセル
         public ICommand RentLivingEditSectionEditCancelCommand { get; }
         public bool RentLivingEditSectionEditCancelCommand_CanExecute()
         {
@@ -2707,7 +2983,7 @@ namespace RepsCore.ViewModels
             if (ShowRentLivingEditSectionEdit) ShowRentLivingEditSectionEdit = false;
         }
 
-        // RL新規　部屋更新処理 (Update)
+        // RL編集　部屋更新処理 (Update Collection)
         public ICommand RentLivingEditSectionUpdateCommand { get; }
         public bool RentLivingEditSectionUpdateCommand_CanExecute()
         {
@@ -2715,7 +2991,27 @@ namespace RepsCore.ViewModels
         }
         public void RentLivingEditSectionUpdateCommand_Execute()
         {
-            // TODO:
+            if (RentLivingEdit == null) return;
+            if (RentLivingEditSectionSelectedItem == null) return;
+
+            // TODO: 入力チェック
+
+            var found = RentLivingEdit.RentLivingSections.FirstOrDefault(x => x.RentLivingSection_ID == RentLivingEditSectionSelectedItem.RentLivingSection_ID);
+            if (found != null)
+            {
+                found.RentLivingSectionRoomNumber = RentLivingEditSectionEdit.RentLivingSectionRoomNumber;
+                found.RentLivingSectionMadori = RentLivingEditSectionEdit.RentLivingSectionMadori;
+                found.RentLivingSectionPrice = RentLivingEditSectionEdit.RentLivingSectionPrice;
+                // TODO: more to come
+
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine("THIS SHOULD NOT BE HAPPENING @RentLivingEditSectionUpdateCommand_Execute");
+            }
+
+            // 部屋編集画面を閉じる
+            ShowRentLivingEditSectionEdit = false;
         }
 
         #endregion

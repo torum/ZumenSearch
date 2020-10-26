@@ -437,7 +437,7 @@ VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch"></TextBox>
                                                         <Button Width="130" Margin="3" HorizontalAlignment="Left">部屋の削除</Button>
 
                                                     </StackPanel>
-                                                    <ListView  Margin="3" ItemsSource="{Binding RentLivingNew.RentLivingSections}">
+                                                    <ListView  Margin="3" ItemsSource="{Binding RentLivingNew.RentLivingSections}" SelectedItem="{Binding RentLivingNewSectionSelectedItem}">
                                                         <ListView.View>
                                                             <GridView>
                                                                 <GridViewColumn Header="ID" Width="120">
@@ -477,8 +477,17 @@ VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch"></TextBox>
                                             <TabItem Header="新規" Visibility="{Binding ShowRentLivingNewSectionNew, Converter={StaticResource BoolToVisibilityCollapsedConverter}}">
                                                 <ScrollViewer>
                                                     <StackPanel>
-                                                        
-                                                        <StackPanel Orientation="Horizontal">
+
+
+                                                        <Label Content="部屋番号："/>
+                                                        <TextBox Text="{Binding RentLivingNewSectionNew.RentLivingSectionRoomNumber}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                        <Label Content="間取り："/>
+                                                        <TextBox Text="{Binding RentLivingNewSectionNew.RentLivingSectionMadori}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                        <Label Content="賃料："/>
+                                                        <TextBox Text="{Binding RentLivingNewSectionNew.RentLivingSectionPrice}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+
+
+                                                        <StackPanel Orientation="Horizontal" Margin="3 12 3 3" HorizontalAlignment="Right">
                                                             <Button Width="130" Margin="3" HorizontalAlignment="Left" Command="{Binding RentLivingNewSectionAddCommand}">部屋の登録</Button>
                                                             <Button Width="130" Margin="3" HorizontalAlignment="Left" Command="{Binding RentLivingNewSectionNewCancelCommand}">キャンセル</Button>
                                                         </StackPanel>
@@ -491,7 +500,15 @@ VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch"></TextBox>
                                                 <ScrollViewer>
                                                     <StackPanel>
 
-                                                        <StackPanel Orientation="Horizontal">
+                                                        <Label Content="部屋番号："/>
+                                                        <TextBox Text="{Binding RentLivingNewSectionEdit.RentLivingSectionRoomNumber}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                        <Label Content="間取り："/>
+                                                        <TextBox Text="{Binding RentLivingNewSectionEdit.RentLivingSectionMadori}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                        <Label Content="賃料："/>
+                                                        <TextBox Text="{Binding RentLivingNewSectionEdit.RentLivingSectionPrice}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+
+
+                                                        <StackPanel Orientation="Horizontal" Margin="3 12 3 3" HorizontalAlignment="Right">
                                                             <Button Width="130" Margin="3" HorizontalAlignment="Left" Command="{Binding RentLivingNewSectionUpdateCommand}">部屋の更新</Button>
                                                             <Button Width="130" Margin="3" HorizontalAlignment="Left" Command="{Binding RentLivingNewSectionEditCancelCommand}">キャンセル</Button>
                                                         </StackPanel>
@@ -651,7 +668,7 @@ VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch"></TextBox>
                                                         <Button Width="130" Margin="3" HorizontalAlignment="Left">部屋の削除</Button>
 
                                                     </StackPanel>
-                                                    <ListView  Margin="3" ItemsSource="{Binding RentLivingEdit.RentLivingSections}">
+                                                    <ListView  Margin="3" ItemsSource="{Binding RentLivingEdit.RentLivingSections}" SelectedItem="{Binding RentLivingEditSectionSelectedItem}">
                                                         <ListView.View>
                                                             <GridView>
                                                                 <GridViewColumn Header="ID" Width="120">
@@ -691,7 +708,17 @@ VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch"></TextBox>
                                             <TabItem Header="新規" Visibility="{Binding ShowRentLivingEditSectionNew, Converter={StaticResource BoolToVisibilityCollapsedConverter}}">
                                                 <ScrollViewer>
                                                     <StackPanel>
-                                                        <StackPanel Orientation="Horizontal">
+
+
+                                                        <Label Content="部屋番号："/>
+                                                        <TextBox Text="{Binding RentLivingEditSectionNew.RentLivingSectionRoomNumber}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                        <Label Content="間取り："/>
+                                                        <TextBox Text="{Binding RentLivingEditSectionNew.RentLivingSectionMadori}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                        <Label Content="賃料："/>
+                                                        <TextBox Text="{Binding RentLivingEditSectionNew.RentLivingSectionPrice}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+
+
+                                                        <StackPanel Orientation="Horizontal" Margin="3 12 3 3" HorizontalAlignment="Right">
                                                             <Button Width="130" Margin="3" HorizontalAlignment="Left" Command="{Binding RentLivingEditSectionAddCommand}">部屋の登録</Button>
                                                             <Button Width="130" Margin="3" HorizontalAlignment="Left" Command="{Binding RentLivingEditSectionNewCancelCommand}">キャンセル</Button>
                                                         </StackPanel>
@@ -703,7 +730,15 @@ VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch"></TextBox>
                                                 <ScrollViewer>
                                                     <StackPanel>
 
-                                                        <StackPanel Orientation="Horizontal">
+                                                        <Label Content="部屋番号："/>
+                                                        <TextBox Text="{Binding RentLivingEditSectionEdit.RentLivingSectionRoomNumber}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                        <Label Content="間取り："/>
+                                                        <TextBox Text="{Binding RentLivingEditSectionEdit.RentLivingSectionMadori}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                        <Label Content="賃料："/>
+                                                        <TextBox Text="{Binding RentLivingEditSectionEdit.RentLivingSectionPrice}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+
+
+                                                        <StackPanel Orientation="Horizontal" Margin="3 12 3 3" HorizontalAlignment="Right">
                                                             <Button Width="130" Margin="3" HorizontalAlignment="Left" Command="{Binding RentLivingEditSectionUpdateCommand}">部屋の更新</Button>
                                                             <Button Width="130" Margin="3" HorizontalAlignment="Left" Command="{Binding RentLivingEditSectionEditCancelCommand}">キャンセル</Button>
                                                         </StackPanel>
@@ -738,7 +773,7 @@ VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch"></TextBox>
                                 </TabControl>
 
                                 <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
-                                    <Button x:Name="ButtonEditUpdateRL" Content="更新"  Command="{Binding RentLivingEditSelectedEditUpdateCommand}" Width="212" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                    <Button x:Name="ButtonEditUpdateRL" Content="賃貸住居用物件の更新"  Command="{Binding RentLivingEditSelectedEditUpdateCommand}" Width="212" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center">
                                     </Button>
                                     <Button x:Name="ButtonEditCancelRL" Content="キャンセル"  Command="{Binding RentLivingEditSelectedEditCancelCommand}" Width="212" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center">
                                     </Button>
