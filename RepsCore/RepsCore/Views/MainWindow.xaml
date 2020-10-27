@@ -179,7 +179,7 @@ VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch"></TextBox>
 
                     <TabControl HorizontalAlignment="Stretch" VerticalAlignment="Stretch" TabStripPlacement="Top" Margin="6" SelectedIndex="{Binding ShowRentLivingTabActiveIndex, Mode=TwoWay}">
 
-                        <TabItem Header="検索・一覧" Width="120" Visibility="{Binding ShowRentLivingSearchList, Converter={StaticResource BoolToVisibilityCollapsedConverter}}">
+                        <TabItem Header="物件一覧" Width="120" Visibility="{Binding ShowRentLivingSearchList, Converter={StaticResource BoolToVisibilityCollapsedConverter}}">
 
                             <Grid Visibility="{Binding ShowRentLivingSearchList, Converter={StaticResource BoolToVisibilityCollapsedConverter}}">
                                 <Grid.RowDefinitions>
@@ -325,19 +325,19 @@ VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch"></TextBox>
 
                         </TabItem>
 
-                        <TabItem Header="新規追加" Width="120" Visibility="{Binding ShowRentLivingNew, Converter={StaticResource BoolToVisibilityCollapsedConverter}}">
+                        <TabItem Header="物件新規追加" Width="120" Visibility="{Binding ShowRentLivingNew, Converter={StaticResource BoolToVisibilityCollapsedConverter}}">
 
                             <!-- 賃貸物件住居用の追加 -->
                             <Grid x:Name="GridNewAddRL">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="*"/>
-                                    <RowDefinition Height="50"/>
+                                    <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
 
-                                <TabControl Grid.Row="0" Margin="6">
+                                <TabControl Grid.Row="0">
                                     
                                     <TabItem Header="建物情報" Width="120">
                                         <ScrollViewer>
@@ -375,7 +375,6 @@ VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch"></TextBox>
                                                     <StackPanel HorizontalAlignment="Left">
                                                         <StackPanel Orientation="Horizontal">
                                                             <Button Width="130" Margin="3" Command="{Binding RentLivingNewPictureAddCommand}">写真の追加</Button>
-                                                            <Button Width="130" Margin="3" HorizontalAlignment="Left">写真の削除</Button>
                                                         </StackPanel>
 
                                                         <ListView ItemsSource="{Binding RentLivingNew.RentLivingPictures}" Height="160" Width="450" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
@@ -427,14 +426,14 @@ VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch"></TextBox>
 
                                         <TabControl SelectedIndex="{Binding ShowRentLivingNewSectionTabActiveIndex, Mode=TwoWay}">
 
-                                            <TabItem Header="一覧" Visibility="{Binding ShowRentLivingNewSectionList, Converter={StaticResource BoolToVisibilityCollapsedConverter}}">
+                                            <TabItem Header="部屋一覧" Visibility="{Binding ShowRentLivingNewSectionList, Converter={StaticResource BoolToVisibilityCollapsedConverter}}">
                                                 <StackPanel>
                                                     <StackPanel Orientation="Horizontal">
 
                                                         <Button Width="130" Margin="3" HorizontalAlignment="Left" Command="{Binding RentLivingNewSectionNewCommand}">部屋の追加</Button>
                                                         <Button Width="130" Margin="3" HorizontalAlignment="Left" Command="{Binding RentLivingNewSectionEditCommand}">部屋の編集</Button>
-                                                        <Button Width="130" Margin="3" HorizontalAlignment="Left">部屋の複製</Button>
-                                                        <Button Width="130" Margin="3" HorizontalAlignment="Left">部屋の削除</Button>
+                                                        <Button Width="130" Margin="3" HorizontalAlignment="Left" Command="{Binding RentLivingNewSectionDuplicateCommand}">部屋の複製</Button>
+                                                        <Button Width="130" Margin="3" HorizontalAlignment="Left" Command="{Binding RentLivingNewSectionDeleteCommand}">部屋の削除</Button>
 
                                                     </StackPanel>
                                                     <ListView  Margin="3" ItemsSource="{Binding RentLivingNew.RentLivingSections}" SelectedItem="{Binding RentLivingNewSectionSelectedItem}">
@@ -474,47 +473,163 @@ VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch"></TextBox>
                                                 </StackPanel>
                                             </TabItem>
 
-                                            <TabItem Header="新規" Visibility="{Binding ShowRentLivingNewSectionNew, Converter={StaticResource BoolToVisibilityCollapsedConverter}}">
-                                                <ScrollViewer>
-                                                    <StackPanel>
+                                            <TabItem Header="部屋新規登録" Visibility="{Binding ShowRentLivingNewSectionNew, Converter={StaticResource BoolToVisibilityCollapsedConverter}}">
+                                                <Grid>
 
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="*"/>
+                                                        <RowDefinition Height="Auto"/>
+                                                    </Grid.RowDefinitions>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
 
-                                                        <Label Content="部屋番号："/>
-                                                        <TextBox Text="{Binding RentLivingNewSectionNew.RentLivingSectionRoomNumber}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
-                                                        <Label Content="間取り："/>
-                                                        <TextBox Text="{Binding RentLivingNewSectionNew.RentLivingSectionMadori}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
-                                                        <Label Content="賃料："/>
-                                                        <TextBox Text="{Binding RentLivingNewSectionNew.RentLivingSectionPrice}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                    <ScrollViewer Grid.Row="0">
+                                                        <StackPanel>
 
+                                                            <Label Content="部屋番号："/>
+                                                            <TextBox Text="{Binding RentLivingNewSectionNew.RentLivingSectionRoomNumber}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                            <Label Content="間取り："/>
+                                                            <TextBox Text="{Binding RentLivingNewSectionNew.RentLivingSectionMadori}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                            <Label Content="賃料："/>
+                                                            <TextBox Text="{Binding RentLivingNewSectionNew.RentLivingSectionPrice}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
 
-                                                        <StackPanel Orientation="Horizontal" Margin="3 12 3 3" HorizontalAlignment="Right">
-                                                            <Button Width="130" Margin="3" HorizontalAlignment="Left" Command="{Binding RentLivingNewSectionAddCommand}">部屋の登録</Button>
-                                                            <Button Width="130" Margin="3" HorizontalAlignment="Left" Command="{Binding RentLivingNewSectionNewCancelCommand}">キャンセル</Button>
+                                                            <!-- 部屋写真 -->
+                                                            <GroupBox Header="部屋写真" Margin="10" Padding="10">
+                                                                <StackPanel HorizontalAlignment="Left">
+                                                                    <StackPanel Orientation="Horizontal">
+                                                                        <Button Width="130" Margin="3" Command="{Binding RentLivingNewSectionNewPictureAddCommand}">写真の追加</Button>
+                                                                    </StackPanel>
+
+                                                                    <ListView ItemsSource="{Binding RentLivingNewSectionNew.RentLivingSectionPictures}" Height="160" Width="450" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                                                        <ListView.Resources>
+                                                                            <ContextMenu x:Key="ATItemContextMenu">
+                                                                                <MenuItem Header="削除" Command="{Binding Path=DataContext.RentLivingNewSectionNewPictureDeleteCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItems, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
+                                                                                    <MenuItem.Resources>
+                                                                                        <ControlTemplate x:Key="CancelIcon">
+                                                                                            <Canvas Background="Transparent" >
+                                                                                                <Path Fill="#373737" Width="14.3775" Height="14" Canvas.Left="0.311264" Canvas.Top="0.500005" Stretch="Uniform" Data="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12C4,13.85 4.63,15.55 5.68,16.91L16.91,5.68C15.55,4.63 13.85,4 12,4M12,20A8,8 0 0,0 20,12C20,10.15 19.37,8.45 18.32,7.09L7.09,18.32C8.45,19.37 10.15,20 12,20Z" />
+                                                                                            </Canvas>
+                                                                                        </ControlTemplate>
+                                                                                    </MenuItem.Resources>
+                                                                                    <MenuItem.Icon>
+                                                                                        <ContentControl Template="{StaticResource CancelIcon}" />
+                                                                                    </MenuItem.Icon>
+                                                                                </MenuItem>
+                                                                            </ContextMenu>
+                                                                        </ListView.Resources>
+                                                                        <ListView.ItemContainerStyle>
+                                                                            <Style TargetType="ListViewItem">
+                                                                                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                                                                <Setter Property="ContextMenu" Value="{StaticResource ATItemContextMenu}" />
+                                                                            </Style>
+                                                                        </ListView.ItemContainerStyle>
+                                                                        <ListView.ItemsPanel>
+                                                                            <ItemsPanelTemplate>
+                                                                                <WrapPanel/>
+                                                                            </ItemsPanelTemplate>
+                                                                        </ListView.ItemsPanel>
+                                                                        <ListView.ItemTemplate>
+                                                                            <DataTemplate>
+                                                                                <Grid Width="200" Height="150">
+                                                                                    <Image Source="{Binding Picture}" Stretch="Uniform"></Image>
+                                                                                    <TextBlock Text="hoge"></TextBlock>
+                                                                                </Grid>
+                                                                            </DataTemplate>
+                                                                        </ListView.ItemTemplate>
+                                                                    </ListView>
+
+                                                                </StackPanel>
+                                                            </GroupBox>
+
                                                         </StackPanel>
-                                                        
+                                                    </ScrollViewer>
+
+                                                    <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="3 12 3 3" HorizontalAlignment="Right">
+                                                        <Button Width="130" Margin="6" Padding="6" HorizontalAlignment="Left" Command="{Binding RentLivingNewSectionAddCommand}">部屋の登録</Button>
+                                                        <Button Width="130" Margin="6" Padding="6" HorizontalAlignment="Left" Command="{Binding RentLivingNewSectionNewCancelCommand}">キャンセル</Button>
                                                     </StackPanel>
-                                                </ScrollViewer>
+
+                                                </Grid>
                                             </TabItem>
-                                            
-                                            <TabItem Header="編集" Visibility="{Binding ShowRentLivingNewSectionEdit, Converter={StaticResource BoolToVisibilityCollapsedConverter}}">
-                                                <ScrollViewer>
-                                                    <StackPanel>
 
-                                                        <Label Content="部屋番号："/>
-                                                        <TextBox Text="{Binding RentLivingNewSectionEdit.RentLivingSectionRoomNumber}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
-                                                        <Label Content="間取り："/>
-                                                        <TextBox Text="{Binding RentLivingNewSectionEdit.RentLivingSectionMadori}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
-                                                        <Label Content="賃料："/>
-                                                        <TextBox Text="{Binding RentLivingNewSectionEdit.RentLivingSectionPrice}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                            <TabItem Header="部屋編集更新" Visibility="{Binding ShowRentLivingNewSectionEdit, Converter={StaticResource BoolToVisibilityCollapsedConverter}}">
+                                                <Grid>
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="*"/>
+                                                        <RowDefinition Height="Auto"/>
+                                                    </Grid.RowDefinitions>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
 
+                                                    <ScrollViewer Grid.Row="0">
+                                                        <StackPanel>
 
-                                                        <StackPanel Orientation="Horizontal" Margin="3 12 3 3" HorizontalAlignment="Right">
-                                                            <Button Width="130" Margin="3" HorizontalAlignment="Left" Command="{Binding RentLivingNewSectionUpdateCommand}">部屋の更新</Button>
-                                                            <Button Width="130" Margin="3" HorizontalAlignment="Left" Command="{Binding RentLivingNewSectionEditCancelCommand}">キャンセル</Button>
+                                                            <Label Content="部屋番号："/>
+                                                            <TextBox Text="{Binding RentLivingNewSectionEdit.RentLivingSectionRoomNumber}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                            <Label Content="間取り："/>
+                                                            <TextBox Text="{Binding RentLivingNewSectionEdit.RentLivingSectionMadori}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                            <Label Content="賃料："/>
+                                                            <TextBox Text="{Binding RentLivingNewSectionEdit.RentLivingSectionPrice}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+
+                                                            <!-- 部屋写真 -->
+                                                            <GroupBox Header="部屋写真" Margin="10" Padding="10">
+                                                                <StackPanel HorizontalAlignment="Left">
+                                                                    <StackPanel Orientation="Horizontal">
+                                                                        <Button Width="130" Margin="3" Command="{Binding RentLivingNewSectionEditPictureAddCommand}">写真の追加</Button>
+                                                                    </StackPanel>
+
+                                                                    <ListView ItemsSource="{Binding RentLivingNewSectionEdit.RentLivingSectionPictures}" Height="160" Width="450" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                                                        <ListView.Resources>
+                                                                            <ContextMenu x:Key="ATItemContextMenu">
+                                                                                <MenuItem Header="削除" Command="{Binding Path=DataContext.RentLivingNewSectionEditPictureDeleteCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItems, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
+                                                                                    <MenuItem.Resources>
+                                                                                        <ControlTemplate x:Key="CancelIcon">
+                                                                                            <Canvas Background="Transparent" >
+                                                                                                <Path Fill="#373737" Width="14.3775" Height="14" Canvas.Left="0.311264" Canvas.Top="0.500005" Stretch="Uniform" Data="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12C4,13.85 4.63,15.55 5.68,16.91L16.91,5.68C15.55,4.63 13.85,4 12,4M12,20A8,8 0 0,0 20,12C20,10.15 19.37,8.45 18.32,7.09L7.09,18.32C8.45,19.37 10.15,20 12,20Z" />
+                                                                                            </Canvas>
+                                                                                        </ControlTemplate>
+                                                                                    </MenuItem.Resources>
+                                                                                    <MenuItem.Icon>
+                                                                                        <ContentControl Template="{StaticResource CancelIcon}" />
+                                                                                    </MenuItem.Icon>
+                                                                                </MenuItem>
+                                                                            </ContextMenu>
+                                                                        </ListView.Resources>
+                                                                        <ListView.ItemContainerStyle>
+                                                                            <Style TargetType="ListViewItem">
+                                                                                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                                                                <Setter Property="ContextMenu" Value="{StaticResource ATItemContextMenu}" />
+                                                                            </Style>
+                                                                        </ListView.ItemContainerStyle>
+                                                                        <ListView.ItemsPanel>
+                                                                            <ItemsPanelTemplate>
+                                                                                <WrapPanel/>
+                                                                            </ItemsPanelTemplate>
+                                                                        </ListView.ItemsPanel>
+                                                                        <ListView.ItemTemplate>
+                                                                            <DataTemplate>
+                                                                                <Grid Width="200" Height="150">
+                                                                                    <Image Source="{Binding Picture}" Stretch="Uniform"></Image>
+                                                                                    <TextBlock Text="hoge"></TextBlock>
+                                                                                </Grid>
+                                                                            </DataTemplate>
+                                                                        </ListView.ItemTemplate>
+                                                                    </ListView>
+
+                                                                </StackPanel>
+                                                            </GroupBox>
+
                                                         </StackPanel>
+                                                    </ScrollViewer>
 
+                                                    <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="3 12 3 3" HorizontalAlignment="Right">
+                                                        <Button Width="130" Margin="6" Padding="6" HorizontalAlignment="Left" Command="{Binding RentLivingNewSectionUpdateCommand}">部屋の更新</Button>
+                                                        <Button Width="130" Margin="6" Padding="6" HorizontalAlignment="Left" Command="{Binding RentLivingNewSectionEditCancelCommand}">キャンセル</Button>
                                                     </StackPanel>
-                                                </ScrollViewer>
+                                                </Grid>
+                                                
                                             </TabItem>
 
                                         </TabControl>
@@ -544,29 +659,26 @@ VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch"></TextBox>
                                 </TabControl>
 
                                 <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
-                                    <Button x:Name="ButtonNewAddRL" Content="賃貸住居用物件の登録"  Command="{Binding RentLivingNewAddCommand}" Width="212" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center">
-                                    </Button>
-                                    <Button x:Name="ButtonNewCancelRL" Content="キャンセル"  Command="{Binding RentLivingNewCancelCommand}" Width="212" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center">
-                                    </Button>
+                                    <Button Command="{Binding RentLivingNewAddCommand}" Width="200" Margin="6" Padding="6" VerticalAlignment="Center" HorizontalAlignment="Center">物件の登録</Button>
+                                    <Button Command="{Binding RentLivingNewCancelCommand}" Width="200" Margin="6" Padding="6" VerticalAlignment="Center" HorizontalAlignment="Center">キャンセル</Button>
                                 </StackPanel>
                             </Grid>
 
                         </TabItem>
 
-                        <TabItem Header="編集" Width="120" Visibility="{Binding ShowRentLivingEdit, Converter={StaticResource BoolToVisibilityCollapsedConverter}}">
+                        <TabItem Header="物件編集更新" Width="120" Visibility="{Binding ShowRentLivingEdit, Converter={StaticResource BoolToVisibilityCollapsedConverter}}">
                             
                             <!-- 賃貸物件住居用の編集 -->
                             <Grid x:Name="GridEditUpdateRL">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="*"/>
-                                    <RowDefinition Height="50"/>
+                                    <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
 
-
-                                <TabControl Grid.Row="0" Margin="6">
+                                <TabControl Grid.Row="0">
                                     
                                     <TabItem Header="建物情報" Width="120">
                                         <ScrollViewer>
@@ -603,7 +715,6 @@ VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch"></TextBox>
                                                     <StackPanel HorizontalAlignment="Left">
                                                         <StackPanel Orientation="Horizontal">
                                                             <Button Width="130" Margin="3" Command="{Binding RentLivingEditPictureAddCommand}">写真の追加</Button>
-                                                            <Button Width="130" Margin="3" HorizontalAlignment="Left">写真の削除</Button>
                                                         </StackPanel>
 
                                                         <ListView ItemsSource="{Binding RentLivingEdit.RentLivingPictures}" Height="160" Width="450" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
@@ -658,14 +769,14 @@ VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch"></TextBox>
 
                                         <TabControl SelectedIndex="{Binding ShowRentLivingEditSectionTabActiveIndex, Mode=TwoWay}">
 
-                                            <TabItem Header="一覧" Visibility="{Binding ShowRentLivingEditSectionList, Converter={StaticResource BoolToVisibilityCollapsedConverter}}">
+                                            <TabItem Header="部屋一覧" Visibility="{Binding ShowRentLivingEditSectionList, Converter={StaticResource BoolToVisibilityCollapsedConverter}}">
                                                 <StackPanel>
                                                     <StackPanel Orientation="Horizontal">
 
                                                         <Button Width="130" Margin="3" HorizontalAlignment="Left" Command="{Binding RentLivingEditSectionNewCommand}">部屋の追加</Button>
-                                                        <Button Width="130" Margin="3" HorizontalAlignment="Left" Command="{Binding RentLivingEditSectionEditCommand}">部屋の編集</Button> 
-                                                        <Button Width="130" Margin="3" HorizontalAlignment="Left">部屋の複製</Button>
-                                                        <Button Width="130" Margin="3" HorizontalAlignment="Left">部屋の削除</Button>
+                                                        <Button Width="130" Margin="3" HorizontalAlignment="Left" Command="{Binding RentLivingEditSectionEditCommand}">部屋の編集</Button>
+                                                        <Button Width="130" Margin="3" HorizontalAlignment="Left" Command="{Binding RentLivingEditSectionDuplicateCommand}">部屋の複製</Button>
+                                                        <Button Width="130" Margin="3" HorizontalAlignment="Left" Command="{Binding RentLivingEditSectionDeleteCommand}">部屋の削除</Button>
 
                                                     </StackPanel>
                                                     <ListView  Margin="3" ItemsSource="{Binding RentLivingEdit.RentLivingSections}" SelectedItem="{Binding RentLivingEditSectionSelectedItem}">
@@ -705,46 +816,164 @@ VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch"></TextBox>
                                                 </StackPanel>
                                             </TabItem>
 
-                                            <TabItem Header="新規" Visibility="{Binding ShowRentLivingEditSectionNew, Converter={StaticResource BoolToVisibilityCollapsedConverter}}">
-                                                <ScrollViewer>
-                                                    <StackPanel>
+                                            <TabItem Header="部屋新規登録" Visibility="{Binding ShowRentLivingEditSectionNew, Converter={StaticResource BoolToVisibilityCollapsedConverter}}">
+                                                <Grid>
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="*"/>
+                                                        <RowDefinition Height="Auto"/>
+                                                    </Grid.RowDefinitions>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
 
+                                                    <ScrollViewer Grid.Row="0">
+                                                        <StackPanel>
 
-                                                        <Label Content="部屋番号："/>
-                                                        <TextBox Text="{Binding RentLivingEditSectionNew.RentLivingSectionRoomNumber}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
-                                                        <Label Content="間取り："/>
-                                                        <TextBox Text="{Binding RentLivingEditSectionNew.RentLivingSectionMadori}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
-                                                        <Label Content="賃料："/>
-                                                        <TextBox Text="{Binding RentLivingEditSectionNew.RentLivingSectionPrice}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                            <Label Content="部屋番号："/>
+                                                            <TextBox Text="{Binding RentLivingEditSectionNew.RentLivingSectionRoomNumber}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                            <Label Content="間取り："/>
+                                                            <TextBox Text="{Binding RentLivingEditSectionNew.RentLivingSectionMadori}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                            <Label Content="賃料："/>
+                                                            <TextBox Text="{Binding RentLivingEditSectionNew.RentLivingSectionPrice}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
 
+                                                            <!-- 部屋写真 -->
+                                                            <GroupBox Header="部屋写真" Margin="10" Padding="10">
+                                                                <StackPanel HorizontalAlignment="Left">
+                                                                    <StackPanel Orientation="Horizontal">
+                                                                        <Button Width="130" Margin="3" Command="{Binding RentLivingEditSectionNewPictureAddCommand}">写真の追加</Button>
+                                                                    </StackPanel>
 
-                                                        <StackPanel Orientation="Horizontal" Margin="3 12 3 3" HorizontalAlignment="Right">
-                                                            <Button Width="130" Margin="3" HorizontalAlignment="Left" Command="{Binding RentLivingEditSectionAddCommand}">部屋の登録</Button>
-                                                            <Button Width="130" Margin="3" HorizontalAlignment="Left" Command="{Binding RentLivingEditSectionNewCancelCommand}">キャンセル</Button>
+                                                                    <ListView ItemsSource="{Binding RentLivingEditSectionNew.RentLivingSectionPictures}" Height="160" Width="450" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                                                        <ListView.Resources>
+                                                                            <ContextMenu x:Key="ATItemContextMenu">
+                                                                                <MenuItem Header="削除" Command="{Binding Path=DataContext.RentLivingEditSectionNewPictureDeleteCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItems, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
+                                                                                    <MenuItem.Resources>
+                                                                                        <ControlTemplate x:Key="CancelIcon">
+                                                                                            <Canvas Background="Transparent" >
+                                                                                                <Path Fill="#373737" Width="14.3775" Height="14" Canvas.Left="0.311264" Canvas.Top="0.500005" Stretch="Uniform" Data="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12C4,13.85 4.63,15.55 5.68,16.91L16.91,5.68C15.55,4.63 13.85,4 12,4M12,20A8,8 0 0,0 20,12C20,10.15 19.37,8.45 18.32,7.09L7.09,18.32C8.45,19.37 10.15,20 12,20Z" />
+                                                                                            </Canvas>
+                                                                                        </ControlTemplate>
+                                                                                    </MenuItem.Resources>
+                                                                                    <MenuItem.Icon>
+                                                                                        <ContentControl Template="{StaticResource CancelIcon}" />
+                                                                                    </MenuItem.Icon>
+                                                                                </MenuItem>
+                                                                            </ContextMenu>
+                                                                        </ListView.Resources>
+                                                                        <ListView.ItemContainerStyle>
+                                                                            <Style TargetType="ListViewItem">
+                                                                                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                                                                <Setter Property="ContextMenu" Value="{StaticResource ATItemContextMenu}" />
+                                                                            </Style>
+                                                                        </ListView.ItemContainerStyle>
+                                                                        <ListView.ItemsPanel>
+                                                                            <ItemsPanelTemplate>
+                                                                                <WrapPanel/>
+                                                                            </ItemsPanelTemplate>
+                                                                        </ListView.ItemsPanel>
+                                                                        <ListView.ItemTemplate>
+                                                                            <DataTemplate>
+                                                                                <Grid Width="200" Height="150">
+                                                                                    <Image Source="{Binding Picture}" Stretch="Uniform"></Image>
+                                                                                    <TextBlock Text="hoge"></TextBlock>
+                                                                                </Grid>
+                                                                            </DataTemplate>
+                                                                        </ListView.ItemTemplate>
+                                                                    </ListView>
+
+                                                                </StackPanel>
+                                                            </GroupBox>
+
                                                         </StackPanel>
+                                                    </ScrollViewer>
+
+                                                    <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="3 12 3 3" HorizontalAlignment="Right">
+                                                        <Button Width="130" Margin="6" Padding="6" HorizontalAlignment="Left" Command="{Binding RentLivingEditSectionAddCommand}">部屋の登録</Button>
+                                                        <Button Width="130" Margin="6" Padding="6" HorizontalAlignment="Left" Command="{Binding RentLivingEditSectionNewCancelCommand}">キャンセル</Button>
                                                     </StackPanel>
-                                                </ScrollViewer>
+                                                </Grid>
+                                                
                                             </TabItem>
                                             
-                                            <TabItem Header="編集" Visibility="{Binding ShowRentLivingEditSectionEdit, Converter={StaticResource BoolToVisibilityCollapsedConverter}}">
-                                                <ScrollViewer>
-                                                    <StackPanel>
+                                            <TabItem Header="部屋編集更新" Visibility="{Binding ShowRentLivingEditSectionEdit, Converter={StaticResource BoolToVisibilityCollapsedConverter}}">
+                                                <Grid>
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="*"/>
+                                                        <RowDefinition Height="Auto"/>
+                                                    </Grid.RowDefinitions>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
 
-                                                        <Label Content="部屋番号："/>
-                                                        <TextBox Text="{Binding RentLivingEditSectionEdit.RentLivingSectionRoomNumber}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
-                                                        <Label Content="間取り："/>
-                                                        <TextBox Text="{Binding RentLivingEditSectionEdit.RentLivingSectionMadori}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
-                                                        <Label Content="賃料："/>
-                                                        <TextBox Text="{Binding RentLivingEditSectionEdit.RentLivingSectionPrice}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                    <ScrollViewer Grid.Row="0">
+                                                        <StackPanel>
+
+                                                            <Label Content="部屋番号："/>
+                                                            <TextBox Text="{Binding RentLivingEditSectionEdit.RentLivingSectionRoomNumber}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                            <Label Content="間取り："/>
+                                                            <TextBox Text="{Binding RentLivingEditSectionEdit.RentLivingSectionMadori}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                            <Label Content="賃料："/>
+                                                            <TextBox Text="{Binding RentLivingEditSectionEdit.RentLivingSectionPrice}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+
+                                                            <!-- 部屋写真 -->
+                                                            <GroupBox Header="部屋写真" Margin="10" Padding="10">
+                                                                <StackPanel HorizontalAlignment="Left">
+                                                                    <StackPanel Orientation="Horizontal">
+                                                                        <Button Width="130" Margin="3" Command="{Binding RentLivingEditSectionEditPictureAddCommand}">写真の追加</Button>
+                                                                    </StackPanel>
+
+                                                                    <ListView ItemsSource="{Binding RentLivingEditSectionEdit.RentLivingSectionPictures}" Height="160" Width="450" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                                                        <ListView.Resources>
+                                                                            <ContextMenu x:Key="ATItemContextMenu">
+                                                                                <MenuItem Header="削除" Command="{Binding Path=DataContext.RentLivingEditSectionEditPictureDeleteCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItems, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
+                                                                                    <MenuItem.Resources>
+                                                                                        <ControlTemplate x:Key="CancelIcon">
+                                                                                            <Canvas Background="Transparent" >
+                                                                                                <Path Fill="#373737" Width="14.3775" Height="14" Canvas.Left="0.311264" Canvas.Top="0.500005" Stretch="Uniform" Data="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12C4,13.85 4.63,15.55 5.68,16.91L16.91,5.68C15.55,4.63 13.85,4 12,4M12,20A8,8 0 0,0 20,12C20,10.15 19.37,8.45 18.32,7.09L7.09,18.32C8.45,19.37 10.15,20 12,20Z" />
+                                                                                            </Canvas>
+                                                                                        </ControlTemplate>
+                                                                                    </MenuItem.Resources>
+                                                                                    <MenuItem.Icon>
+                                                                                        <ContentControl Template="{StaticResource CancelIcon}" />
+                                                                                    </MenuItem.Icon>
+                                                                                </MenuItem>
+                                                                            </ContextMenu>
+                                                                        </ListView.Resources>
+                                                                        <ListView.ItemContainerStyle>
+                                                                            <Style TargetType="ListViewItem">
+                                                                                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                                                                <Setter Property="ContextMenu" Value="{StaticResource ATItemContextMenu}" />
+                                                                            </Style>
+                                                                        </ListView.ItemContainerStyle>
+                                                                        <ListView.ItemsPanel>
+                                                                            <ItemsPanelTemplate>
+                                                                                <WrapPanel/>
+                                                                            </ItemsPanelTemplate>
+                                                                        </ListView.ItemsPanel>
+                                                                        <ListView.ItemTemplate>
+                                                                            <DataTemplate>
+                                                                                <Grid Width="200" Height="150">
+                                                                                    <Image Source="{Binding Picture}" Stretch="Uniform"></Image>
+                                                                                    <TextBlock Text="hoge"></TextBlock>
+                                                                                </Grid>
+                                                                            </DataTemplate>
+                                                                        </ListView.ItemTemplate>
+                                                                    </ListView>
+
+                                                                </StackPanel>
+                                                            </GroupBox>
 
 
-                                                        <StackPanel Orientation="Horizontal" Margin="3 12 3 3" HorizontalAlignment="Right">
-                                                            <Button Width="130" Margin="3" HorizontalAlignment="Left" Command="{Binding RentLivingEditSectionUpdateCommand}">部屋の更新</Button>
-                                                            <Button Width="130" Margin="3" HorizontalAlignment="Left" Command="{Binding RentLivingEditSectionEditCancelCommand}">キャンセル</Button>
                                                         </StackPanel>
+                                                    </ScrollViewer>
 
+                                                    <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="3 12 3 3" HorizontalAlignment="Right">
+                                                        <Button Width="130" Margin="6" Padding="6" HorizontalAlignment="Left" Command="{Binding RentLivingEditSectionUpdateCommand}">部屋の更新</Button>
+                                                        <Button Width="130" Margin="6" Padding="6" HorizontalAlignment="Left" Command="{Binding RentLivingEditSectionEditCancelCommand}">キャンセル</Button>
                                                     </StackPanel>
-                                                </ScrollViewer>
+
+                                                </Grid>
+
                                             </TabItem>
                                             
                                         </TabControl>
@@ -773,10 +1002,8 @@ VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch"></TextBox>
                                 </TabControl>
 
                                 <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
-                                    <Button x:Name="ButtonEditUpdateRL" Content="賃貸住居用物件の更新"  Command="{Binding RentLivingEditSelectedEditUpdateCommand}" Width="212" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center">
-                                    </Button>
-                                    <Button x:Name="ButtonEditCancelRL" Content="キャンセル"  Command="{Binding RentLivingEditSelectedEditCancelCommand}" Width="212" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center">
-                                    </Button>
+                                    <Button Command="{Binding RentLivingEditSelectedEditUpdateCommand}" Width="200" Margin="6" Padding="6" VerticalAlignment="Center" HorizontalAlignment="Center">物件の更新</Button>
+                                    <Button Command="{Binding RentLivingEditSelectedEditCancelCommand}" Width="200" Margin="6" Padding="6" VerticalAlignment="Center" HorizontalAlignment="Center">キャンセル</Button>
                                 </StackPanel>
                             </Grid>
 
