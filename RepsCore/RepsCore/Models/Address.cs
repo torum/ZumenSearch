@@ -369,8 +369,8 @@ namespace REMS.Models
             // CityParts.Clear();
             this.TownParts.Clear();
 
-            int tempPostalCode = 0;
-            int topPostalCode = 0;
+            //int tempPostalCode = 0;
+            //int topPostalCode = 0;
             /*
             // DBサーバへの接続情報
             var connectionString = ConfigurationManager.ConnectionStrings["TestDB"].ConnectionString;
@@ -437,7 +437,7 @@ namespace REMS.Models
                 return 0;
             }
 
-            string queryString = @"SELECT zip_code FROM Rems_ZipCode WHERE pref_city_town_joint LIKE @FullAddress";
+            //string queryString = @"SELECT zip_code FROM Rems_ZipCode WHERE pref_city_town_joint LIKE @FullAddress";
 
             int intPostalCode = 0;
             /*

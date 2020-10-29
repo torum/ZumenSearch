@@ -13,6 +13,7 @@ using System.Configuration;
 using System.Net;
 using System.Security.Cryptography;
 using System.Windows.Controls;
+using Microsoft.Win32;
 
 namespace RepsCore.ViewModels
 {
@@ -23,7 +24,10 @@ namespace RepsCore.ViewModels
     /// </summary>
     public abstract class ViewModelBase : INotifyPropertyChanged, IDataErrorInfo
     {
-        public ViewModelBase() { }
+        public ViewModelBase() 
+        {
+            
+        }
 
         #region == INotifyPropertyChanged ==
 

@@ -1,53 +1,50 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.Diagnostics;
-using System.Windows;
+﻿using Microsoft.Data.Sqlite;
 using Microsoft.Win32;
-using System.Windows.Media;
-using System.Windows.Controls;
-using System.Xml;
-using System.Xml.Linq;
-using System.Windows.Data;
+using RepsCore.Common;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.Windows.Input;
 using System.IO;
-using System.ComponentModel;
-using RepsCore.Common;
-using System.Collections.ObjectModel;
-using System.Text;
 using System.Linq;
-using System.Media;
-using System.Windows.Threading;
-//using System.Data.SQLite;
-using Microsoft.Data.Sqlite;
+using System.Text;
+using System.Windows;
+using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.IO.Enumeration;
-using System.Windows.Media.Effects;
-using System.Windows.Documents;
+using System.Xml;
+using System.Xml.Linq;
 
 /// ////////////////////////////////////////////////////////////
 /// //////////////まずは小さく造って大きく育てる////////////////
 /// ////////////////////////////////////////////////////////////
 
 /// ■ TODO:
-/// 編集画面で写真の削除（DBから）
-/// 部屋の写真を差し替え
-/// 部屋の複製で写真等も
-/// 部屋等でIsDirtyをしっかりと
-/// 建物にPDFのファイルを追加
-/// 元付け・オーナー管理
+///
+/// 区分所有かどうかで、図面の追加画面を変える。
+/// 
+/// 物件に、元付け・管理会社・オーナーの関連付け（区分所有を考慮して）
+/// 
 /// 住所・〒・Geo関連のデータ
+/// 
 /// 各項目を整備
+/// 
 /// 条件検索
 /// 入力補助・入力チェック
+/// 部屋等でIsDirtyをしっかりと
+///  
 /// エラー処理、及びログ保存
 /// Modelsに基底クラス定義やデータ操作をリストラクチャーする。
+/// 
 /// XMLでインポート・エクスポート
 /// RESTful API, Server, P2P and beyond...
 
 /// ● 履歴：
+/// 2020/10/30 金曜日: 元付け業者・管理会社・オーナーの追加、一覧、削除、編集。
+/// 2020/10/29 木曜日: 図面PDFの追加、一覧、削除、表示。編集画面でのDBから削除洩れ修正。
 /// 2020/10/28 水曜日: 部屋の写真の追加・削除。
 /// 2020/10/27 火曜日: 部屋の追加と編集、削除と複製。
 /// 2020/10/26 月曜日: 部屋の追加の画面遷移。
@@ -56,9 +53,13 @@ using System.Windows.Documents;
 /// 
 
 /// ◆ 後で・検討中： 
-/// 2020/10/27 火曜日: configやDBファイルのパスなどはconstでまとめて一か所に定義しておく。
-/// 建物や部屋の新規と編集の画面を共通化・・・するかどうか・・・UserControl化?
-/// 画像データのビットマップ形式へ統一？
+/// {あとで} PDFのデータは重いので、直近の一つを除いて？SELECTでデータ自体は読み込まないようにする。
+/// {あとで} 写真の「差し替え」機能
+/// {レイアウト} 写真の追加をタブに切り分ける?
+/// {レイアウト} 物件タブの中に部屋タブを入れる
+/// {あとで} 2020/10/27 火曜日: configやDBファイルのパスなどはconstでまとめて一か所に定義しておく。
+/// {あとで} 建物や部屋の新規と編集の画面を共通化(UserControl化)・・・するかどうか・・・?
+/// {あとで} 画像データのビットマップ形式へ統一？
 
 
 namespace RepsCore.ViewModels
@@ -78,6 +79,12 @@ namespace RepsCore.ViewModels
     public enum RentLivingKinds
     {
         Apartment, Mansion, House, Other
+    }
+    
+    // 一括所有の建物か、区分所有か
+    public enum RentOwnerships
+    {
+        All, Unit
     }
 
     #endregion
@@ -271,9 +278,29 @@ namespace RepsCore.ViewModels
                 this.NotifyPropertyChanged("Kind");
             }
         }
-        
-        // 物件写真一覧
-        public ObservableCollection<RentLivingPicture> RentLivingPictures { get; set; } = new ObservableCollection<RentLivingPicture>();
+
+        // 所有権（一棟所有・区分所有）
+        private RentOwnerships _ownership;
+        public RentOwnerships Ownership
+        {
+            get
+            {
+                return _ownership;
+            }
+            set
+            {
+                if (_ownership == value) return;
+
+                _ownership = value;
+                this.NotifyPropertyChanged("Ownership");
+            }
+        }
+
+        public Dictionary<string, RentOwnerships> StringToRentOwnership { get; } = new Dictionary<string, RentOwnerships>()
+        {
+            {"Unit", RentOwnerships.Unit},
+            {"All", RentOwnerships.All},
+        };
 
         // 地上n階建て
         private int _floors;
@@ -326,9 +353,25 @@ namespace RepsCore.ViewModels
             }
         }
 
+        // 物件写真一覧
+        public ObservableCollection<RentLivingPicture> RentLivingPictures { get; set; } = new ObservableCollection<RentLivingPicture>();
+
+        // 物件写真のDBへの更新時にDBから削除されるべき物件写真のIDリスト
+        public List<string> RentLivingPicturesToBeDeletedIDs = new List<string>();
+
+        // 図面一覧
+        public ObservableCollection<RentLivingZumenPDF> RentLivingZumenPDFs { get; set; } = new ObservableCollection<RentLivingZumenPDF>();
+
+        // 図面のDBへの更新時にDBから削除されるべき図面のIDリスト
+        public List<string> RentLivingZumenPdfToBeDeletedIDs = new List<string>();
+
         // 部屋一覧
         public ObservableCollection<RentLivingSection> RentLivingSections { get; set; } = new ObservableCollection<RentLivingSection>();
 
+        // DBへの更新時にDBから削除されるべき部屋のIDリスト
+        public List<string> RentLivingSectionToBeDeletedIDs = new List<string>();
+
+        // コンストラクタ
         public RentLiving (string rentid, string rentlivingid)
         {
             this._rent_id = rentid;
@@ -427,9 +470,11 @@ namespace RepsCore.ViewModels
             }
         }
 
-        public bool IsModified { get; set; }
-
+        // 新規追加された画像（要保存）
         public bool IsNew { get; set; }
+
+        // 画像が差し替えなど、変更された（要保存）
+        public bool IsModified { get; set; }
 
     }
 
@@ -453,6 +498,180 @@ namespace RepsCore.ViewModels
             this._rentLiving_id = rentlivingid;
 
             this._rentPicture_id = rentlivingpictureid;
+        }
+    }
+
+
+    /// <summary>
+    /// 図面の基底クラス
+    /// </summary>
+    public class RentZumenPDF : ViewModelBase
+    {
+        protected string _rentZumenPDF_id;
+        public string RentZumenPDF_ID
+        {
+            get
+            {
+                return _rentZumenPDF_id;
+            }
+        }
+
+        protected string _rent_id;
+        public string Rent_ID
+        {
+            get
+            {
+                return _rent_id;
+            }
+        }
+
+        private byte[] _pdfData;
+        public byte[] PDFData
+        {
+            get
+            {
+                return _pdfData;
+            }
+            set
+            {
+                if (_pdfData == value) return;
+
+                _pdfData = value;
+                this.NotifyPropertyChanged("PDFData");
+            }
+        }
+
+        // 登録日
+        protected DateTime _dateTimeAdded;
+        public DateTime DateTimeAdded
+        {
+            get
+            {
+                return _dateTimeAdded;
+            }
+            set
+            {
+                if (_dateTimeAdded == value) return;
+
+                _dateTimeAdded = value;
+                this.NotifyPropertyChanged("DateTimeAdded");
+            }
+        }
+
+        // 情報公開日
+        private DateTime _dateTimePublished;
+        public DateTime DateTimePublished
+        {
+            get
+            {
+                return _dateTimePublished;
+            }
+            set
+            {
+                if (_dateTimePublished == value) return;
+
+                _dateTimePublished = value;
+                this.NotifyPropertyChanged("DateTimePublished");
+
+                this.IsDirty = true;
+            }
+        }
+
+        // 最終確認日
+        private DateTime _dateTimeVerified;
+        public DateTime DateTimeVerified
+        {
+            get
+            {
+                return _dateTimeVerified;
+            }
+            set
+            {
+                if (_dateTimeVerified == value) return;
+
+                _dateTimeVerified = value;
+                this.NotifyPropertyChanged("DateTimeVerified");
+
+                this.IsDirty = true;
+            }
+        }
+
+        // ファイルサイズ
+        public long _fileSize;
+        public long FileSize
+        {
+            get
+            {
+                return _fileSize;
+            }
+            set
+            {
+                if (_fileSize == value) return;
+
+                _fileSize = value;
+                this.NotifyPropertyChanged("FileSize");
+                this.NotifyPropertyChanged("FileSizeLabel");
+            }
+        }
+
+        public string FileSizeLabel
+        {
+            get
+            {
+                if (FileSize > 0)
+                {
+                    string[] sizes = { "B", "KB", "MB", "GB", "TB" };
+                    double len = FileSize;
+                    int order = 0;
+                    while (len >= 1024 && order < sizes.Length - 1)
+                    {
+                        order++;
+                        len = len / 1024;
+                    }
+
+                    // Adjust the format string to your preferences. For example "{0:0.#}{1}" would
+                    // show a single decimal place, and no space.
+                    return String.Format("{0:0.##} {1}", len, sizes[order]);
+                }
+                else
+                {
+                    return "";
+                }
+
+
+            }
+        }
+
+        // 新規追加なので、DBにINSERTが必要
+        public bool IsNew { get; set; }
+
+        // 日付などが変更された（DBのUPDATEが必要）
+        public bool IsDirty { get; set; }
+    }
+
+    /// <summary>
+    /// 賃貸住居用物件の図面クラス
+    /// </summary>
+    public class RentLivingZumenPDF : RentZumenPDF
+    {
+        protected string _rentLiving_id;
+        public string RentLiving_ID
+        {
+            get
+            {
+                return _rentLiving_id;
+            }
+        }
+
+        public RentLivingZumenPDF(string rentid, string rentlivingid, string rentlivingzumenid)
+        {
+            this._rent_id = rentid;
+            this._rentLiving_id = rentlivingid;
+
+            this._rentZumenPDF_id = rentlivingzumenid;
+
+            // 一応
+            this._dateTimeAdded = DateTime.Now;
         }
     }
 
@@ -573,6 +792,9 @@ namespace RepsCore.ViewModels
         // 部屋写真コレクション
         public ObservableCollection<RentLivingSectionPicture> RentLivingSectionPictures { get; set; } = new ObservableCollection<RentLivingSectionPicture>();
 
+        // DBへの更新時にDBから削除されるべき部屋写真のIDリスト
+        public List<string> RentLivingSectionPicturesToBeDeletedIDs = new List<string>();
+
         public RentLivingSection(string rentid, string rentlivingid, string sectionid)
         {
             this._rent_ID = rentid;
@@ -669,9 +891,11 @@ namespace RepsCore.ViewModels
             }
         }
 
-        public bool IsModified { get; set; }
-
+        // 新規に追加されたので、まだDBに保存されていない。
         public bool IsNew { get; set; }
+
+        // 保存されていてIDは固定だが、内容が変更されているのでUPDATEが必要。
+        public bool IsModified { get; set; }
 
     }
 
@@ -708,6 +932,402 @@ namespace RepsCore.ViewModels
         }
     }
 
+
+    /// <summary>
+    /// 元付け業者クラス
+    /// </summary>
+    public class Agency : ViewModelBase
+    {
+        // GUID and Primary Key
+        protected string _agency_id;
+        public string Agency_ID
+        {
+            get
+            {
+                return _agency_id;
+            }
+        }
+
+        private string _name;
+        public string Name
+        {
+            get
+            {
+                return _name;
+            }
+            set
+            {
+                if (_name == value) return;
+
+                _name = value;
+                this.NotifyPropertyChanged("Name");
+            }
+        }
+
+        private string _branch;
+        public string Branch
+        {
+            get
+            {
+                return _branch;
+            }
+            set
+            {
+                if (_branch == value) return;
+
+                _branch = value;
+                this.NotifyPropertyChanged("Branch");
+            }
+        }
+
+        private string _telNumber;
+        public string TelNumber
+        {
+            get
+            {
+                return _telNumber;
+            }
+            set
+            {
+                if (_telNumber == value) return;
+
+                _telNumber = value;
+                this.NotifyPropertyChanged("TelNumber");
+            }
+        }
+
+        private string _faxNumber;
+        public string FaxNumber
+        {
+            get
+            {
+                return _faxNumber;
+            }
+            set
+            {
+                if (_faxNumber == value) return;
+
+                _faxNumber = value;
+                this.NotifyPropertyChanged("FaxNumber");
+            }
+        }
+
+        private string _postalCode;
+        public string PostalCode
+        {
+            get
+            {
+                return _postalCode;
+            }
+            set
+            {
+                if (_postalCode == value) return;
+
+                _postalCode = value;
+                this.NotifyPropertyChanged("PostalCode");
+            }
+        }
+
+        private string _address;
+        public string Address
+        {
+            get
+            {
+                return _address;
+            }
+            set
+            {
+                if (_address == value) return;
+
+                _address = value;
+                this.NotifyPropertyChanged("Address");
+            }
+        }
+
+        private string _memo;
+        public string Memo
+        {
+            get
+            {
+                return _memo;
+            }
+            set
+            {
+                if (_memo == value) return;
+
+                _memo = value;
+                this.NotifyPropertyChanged("Memo");
+            }
+        }
+
+        public bool IsNew { get; set; }
+
+        public bool IsDirty { get; set; }
+
+        public Agency(string agencyid)
+        {
+            this._agency_id = agencyid;
+        }
+    }
+
+    /// <summary>
+    /// 管理会社クラス
+    /// </summary>
+    public class MaintenanceCompany : ViewModelBase
+    {
+        // GUID and Primary Key
+        protected string _maintenanceCompany_id;
+        public string MaintenanceCompany_ID
+        {
+            get
+            {
+                return _maintenanceCompany_id;
+            }
+        }
+
+        private string _name;
+        public string Name
+        {
+            get
+            {
+                return _name;
+            }
+            set
+            {
+                if (_name == value) return;
+
+                _name = value;
+                this.NotifyPropertyChanged("Name");
+            }
+        }
+
+        private string _branch;
+        public string Branch
+        {
+            get
+            {
+                return _branch;
+            }
+            set
+            {
+                if (_branch == value) return;
+
+                _branch = value;
+                this.NotifyPropertyChanged("Branch");
+            }
+        }
+
+        private string _telNumber;
+        public string TelNumber
+        {
+            get
+            {
+                return _telNumber;
+            }
+            set
+            {
+                if (_telNumber == value) return;
+
+                _telNumber = value;
+                this.NotifyPropertyChanged("TelNumber");
+            }
+        }
+
+        private string _faxNumber;
+        public string FaxNumber
+        {
+            get
+            {
+                return _faxNumber;
+            }
+            set
+            {
+                if (_faxNumber == value) return;
+
+                _faxNumber = value;
+                this.NotifyPropertyChanged("FaxNumber");
+            }
+        }
+
+        private string _postalCode;
+        public string PostalCode
+        {
+            get
+            {
+                return _postalCode;
+            }
+            set
+            {
+                if (_postalCode == value) return;
+
+                _postalCode = value;
+                this.NotifyPropertyChanged("PostalCode");
+            }
+        }
+
+        private string _address;
+        public string Address
+        {
+            get
+            {
+                return _address;
+            }
+            set
+            {
+                if (_address == value) return;
+
+                _address = value;
+                this.NotifyPropertyChanged("Address");
+            }
+        }
+
+        private string _memo;
+        public string Memo
+        {
+            get
+            {
+                return _memo;
+            }
+            set
+            {
+                if (_memo == value) return;
+
+                _memo = value;
+                this.NotifyPropertyChanged("Memo");
+            }
+        }
+
+        public bool IsNew { get; set; }
+
+        public bool IsDirty { get; set; }
+
+        public MaintenanceCompany(string maintenanceCompanyid)
+        {
+            this._maintenanceCompany_id = maintenanceCompanyid;
+        }
+    }
+
+    /// <summary>
+    /// オーナークラス
+    /// </summary>
+    public class Owner : ViewModelBase
+    {
+        // GUID and Primary Key
+        protected string _owner_id;
+        public string Owner_ID
+        {
+            get
+            {
+                return _owner_id;
+            }
+        }
+
+        private string _name;
+        public string Name
+        {
+            get
+            {
+                return _name;
+            }
+            set
+            {
+                if (_name == value) return;
+
+                _name = value;
+                this.NotifyPropertyChanged("Name");
+            }
+        }
+
+        private string _telNumber;
+        public string TelNumber
+        {
+            get
+            {
+                return _telNumber;
+            }
+            set
+            {
+                if (_telNumber == value) return;
+
+                _telNumber = value;
+                this.NotifyPropertyChanged("TelNumber");
+            }
+        }
+
+        private string _faxNumber;
+        public string FaxNumber
+        {
+            get
+            {
+                return _faxNumber;
+            }
+            set
+            {
+                if (_faxNumber == value) return;
+
+                _faxNumber = value;
+                this.NotifyPropertyChanged("FaxNumber");
+            }
+        }
+
+        private string _postalCode;
+        public string PostalCode
+        {
+            get
+            {
+                return _postalCode;
+            }
+            set
+            {
+                if (_postalCode == value) return;
+
+                _postalCode = value;
+                this.NotifyPropertyChanged("PostalCode");
+            }
+        }
+
+        private string _address;
+        public string Address
+        {
+            get
+            {
+                return _address;
+            }
+            set
+            {
+                if (_address == value) return;
+
+                _address = value;
+                this.NotifyPropertyChanged("Address");
+            }
+        }
+
+        private string _memo;
+        public string Memo
+        {
+            get
+            {
+                return _memo;
+            }
+            set
+            {
+                if (_memo == value) return;
+
+                _memo = value;
+                this.NotifyPropertyChanged("Memo");
+            }
+        }
+        public bool IsNew { get; set; }
+
+        public bool IsDirty { get; set; }
+
+        public Owner(string ownerid)
+        {
+
+            this._owner_id = ownerid;
+        }
+    }
+
     #endregion
 
     /// <summary>
@@ -732,14 +1352,16 @@ namespace RepsCore.ViewModels
     /// IO Dialog Service
     /// </summary>
     #region == IO Dialog Serviceダイアログ表示用クラス ==
-
+    
     /// TODO: サービスのインジェクションは・・・とりあえずしない。
     /// https://stackoverflow.com/questions/28707039/trying-to-understand-using-a-service-to-open-a-dialog?noredirect=1&lq=1
-
+    /*
     public interface IOpenDialogService
     {
-        string[] GetOpenFileDialog(string title);
+        string[] GetOpenPictureFileDialog(string title, bool multi = true);
     }
+    */
+
     public class OpenDialogService// : IOpenDialogService
     {
 
@@ -754,6 +1376,21 @@ namespace RepsCore.ViewModels
             if (openFileDialog.ShowDialog() == true)
             {
                 return openFileDialog.FileNames;
+            }
+            return null;
+        }
+
+        public string GetOpenZumenPdfFileDialog(string title)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Multiselect = false;
+            openFileDialog.Filter = "PDFファイル (*.pdf)|*.pdf"; 
+            openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            openFileDialog.Title = title;
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                return openFileDialog.FileName;
             }
             return null;
         }
@@ -912,7 +1549,7 @@ namespace RepsCore.ViewModels
             }
         }
 
-        // 
+        // 新規RLの編集部屋クラスオブジェクト
         private RentLivingSection _rentLivingNewSectionEdit = new RentLivingSection(Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString());
         public RentLivingSection RentLivingNewSectionEdit
         {
@@ -946,7 +1583,7 @@ namespace RepsCore.ViewModels
             }
         }
 
-        // 
+        // 編集RLの編集部屋クラスオブジェクト
         private RentLivingSection _rentLivingEditSectionEdit = new RentLivingSection(Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString());
         public RentLivingSection RentLivingEditSectionEdit
         {
@@ -963,11 +1600,125 @@ namespace RepsCore.ViewModels
             }
         }
 
+
+        // 元付け業者　一覧
+        public ObservableCollection<Agency> Agencies { get; } = new ObservableCollection<Agency>();
+
+        // 元付け業者　一覧の選択されたオブジェクトを保持
+        private Agency _agenciesSelectedItem;
+        public Agency AgenciesSelectedItem
+        {
+            get
+            {
+                return _agenciesSelectedItem;
+            }
+            set
+            {
+                if (_agenciesSelectedItem == value) return;
+
+                _agenciesSelectedItem = value;
+                this.NotifyPropertyChanged("AgenciesSelectedItem");
+            }
+        }
+
+        // 元付け業者　編集用のクラスオブジェクト
+        private Agency _agencyEdit = new Agency(Guid.NewGuid().ToString());
+        public Agency AgencyEdit
+        {
+            get
+            {
+                return _agencyEdit;
+            }
+            set
+            {
+                if (_agencyEdit == value) return;
+
+                _agencyEdit = value;
+                this.NotifyPropertyChanged("AgencyEdit");
+            }
+        }
+
+
+        // 管理会社　一覧
+        public ObservableCollection<MaintenanceCompany> MaintenanceCompanies { get; } = new ObservableCollection<MaintenanceCompany>();
+
+        // 管理会社 一覧の選択されたオブジェクトを保持
+        private MaintenanceCompany _maintenanceCompaniesSelectedItem;
+        public MaintenanceCompany MaintenanceCompaniesSelectedItem
+        {
+            get
+            {
+                return _maintenanceCompaniesSelectedItem;
+            }
+            set
+            {
+                if (_maintenanceCompaniesSelectedItem == value) return;
+
+                _maintenanceCompaniesSelectedItem = value;
+                this.NotifyPropertyChanged("MaintenanceCompaniesSelectedItem");
+            }
+        }
+
+        // 管理会社　編集用のクラスオブジェクト
+        private MaintenanceCompany _maintenanceCompanyEdit = new MaintenanceCompany(Guid.NewGuid().ToString());
+        public MaintenanceCompany MaintenanceCompanyEdit
+        {
+            get
+            {
+                return _maintenanceCompanyEdit;
+            }
+            set
+            {
+                if (_maintenanceCompanyEdit == value) return;
+
+                _maintenanceCompanyEdit = value;
+                this.NotifyPropertyChanged("MaintenanceCompanyEdit");
+            }
+        }
+
+
+        // オーナー　管理　一覧
+        public ObservableCollection<Owner> Owners { get; } = new ObservableCollection<Owner>();
+
+        // オーナー 管理　一覧の選択されたオブジェクトを保持
+        private Owner _ownersSelectedItem;
+        public Owner OwnersSelectedItem
+        {
+            get
+            {
+                return _ownersSelectedItem;
+            }
+            set
+            {
+                if (_ownersSelectedItem == value) return;
+
+                _ownersSelectedItem = value;
+                this.NotifyPropertyChanged("OwnersSelectedItem");
+            }
+        }
+
+        // オーナー　編集用のクラスオブジェクト
+        private Owner _ownderEdit = new Owner(Guid.NewGuid().ToString());
+        public Owner OwnerEdit
+        {
+            get
+            {
+                return _ownderEdit;
+            }
+            set
+            {
+                if (_ownderEdit == value) return;
+
+                _ownderEdit = value;
+                this.NotifyPropertyChanged("OwnerEdit");
+            }
+        }
+
         #endregion
 
         #region == 表示切替のフラグ ==
 
-        // RL検索一覧・追加
+        // RL検索一覧・追加タブインデックス
         private int _showRentLivingTabActiveIndex = 0;
         public int ShowRentLivingTabActiveIndex
         {
@@ -1060,7 +1811,6 @@ namespace RepsCore.ViewModels
                 {
                     ShowRentLivingTabActiveIndex = 2;
 
-                    ShowRentLivingSearchList = false;
                     ShowRentLivingNew = false;
                 }
 
@@ -1068,7 +1818,7 @@ namespace RepsCore.ViewModels
         }
 
 
-        // RL新規物件の新規部屋
+        // RL新規物件の新規部屋タブインデックス
         private int _showRentLivingNewSectionTabActiveIndex = 0;
         public int ShowRentLivingNewSectionTabActiveIndex
         {
@@ -1174,7 +1924,7 @@ namespace RepsCore.ViewModels
         }
 
 
-        // RL編集物件の新規部屋
+        // RL編集物件の新規部屋タブインデックス
         private int _showRentLivingEditSectionTabActiveIndex = 0;
         public int ShowRentLivingEditSectionTabActiveIndex
         {
@@ -1279,6 +2029,213 @@ namespace RepsCore.ViewModels
         }
 
 
+        // 元付け業者Agency 検索一覧・追加・編集タブインデックス
+        private int _showAgencyTabActiveIndex = 0;
+        public int ShowAgencyTabActiveIndex
+        {
+            get
+            {
+                return _showAgencyTabActiveIndex;
+            }
+            set
+            {
+                if (_showAgencyTabActiveIndex == value) return;
+
+                _showAgencyTabActiveIndex = value;
+                this.NotifyPropertyChanged("ShowAgencyTabActiveIndex");
+            }
+        }
+
+        // 元付け業者Agency検索一覧画面の表示フラグ
+        private bool _showAgencySearchList = true;
+        public bool ShowAgencySearchList
+        {
+            get
+            {
+                return _showAgencySearchList;
+            }
+            set
+            {
+                if (_showAgencySearchList == value) return;
+
+                _showAgencySearchList = value;
+                this.NotifyPropertyChanged("ShowAgencySearchList");
+
+                if (_showAgencySearchList)
+                {
+                    ShowAgencyTabActiveIndex = 0;
+
+                    ShowAgencyEdit = false;
+                }
+
+            }
+
+        }
+        
+        // 元付け業者Agency新規追加画面の表示フラグ
+        private bool _showAgencyEdit = false;
+        public bool ShowAgencyEdit
+        {
+            get
+            {
+                return _showAgencyEdit;
+            }
+            set
+            {
+                if (_showAgencyEdit == value) return;
+
+                _showAgencyEdit = value;
+                this.NotifyPropertyChanged("ShowAgencyEdit");
+
+                ShowAgencySearchList = !_showAgencyEdit;
+
+                if (_showAgencyEdit)
+                {
+                    ShowAgencyTabActiveIndex = 1;
+                }
+
+            }
+        }
+
+
+        // 管理会社 検索一覧・追加・編集タブインデックス
+        private int _showMaintenanceCompanyTabActiveIndex = 0;
+        public int ShowMaintenanceCompanyTabActiveIndex
+        {
+            get
+            {
+                return _showMaintenanceCompanyTabActiveIndex;
+            }
+            set
+            {
+                if (_showMaintenanceCompanyTabActiveIndex == value) return;
+
+                _showMaintenanceCompanyTabActiveIndex = value;
+                this.NotifyPropertyChanged("ShowMaintenanceCompanyTabActiveIndex");
+            }
+        }
+
+        // 管理会社 検索一覧画面の表示フラグ
+        private bool _showMaintenanceCompanySearchList = true;
+        public bool ShowMaintenanceCompanySearchList
+        {
+            get
+            {
+                return _showMaintenanceCompanySearchList;
+            }
+            set
+            {
+                if (_showMaintenanceCompanySearchList == value) return;
+
+                _showMaintenanceCompanySearchList = value;
+                this.NotifyPropertyChanged("ShowMaintenanceCompanySearchList");
+
+                if (_showMaintenanceCompanySearchList)
+                {
+                    ShowMaintenanceCompanyTabActiveIndex = 0;
+
+                    ShowMaintenanceCompanyEdit = false;
+                }
+
+            }
+
+        }
+
+        // 管理会社 新規追加画面の表示フラグ
+        private bool _showMaintenanceCompanyEdit = false;
+        public bool ShowMaintenanceCompanyEdit
+        {
+            get
+            {
+                return _showMaintenanceCompanyEdit;
+            }
+            set
+            {
+                if (_showMaintenanceCompanyEdit == value) return;
+
+                _showMaintenanceCompanyEdit = value;
+                this.NotifyPropertyChanged("ShowMaintenanceCompanyEdit");
+
+                ShowMaintenanceCompanySearchList = !_showMaintenanceCompanyEdit;
+
+                if (_showMaintenanceCompanyEdit)
+                {
+                    ShowMaintenanceCompanyTabActiveIndex = 1;
+                }
+
+            }
+        }
+
+
+        // オーナー 検索一覧・追加・編集タブインデックス
+        private int _showOwnerTabActiveIndex = 0;
+        public int ShowOwnerTabActiveIndex
+        {
+            get
+            {
+                return _showOwnerTabActiveIndex;
+            }
+            set
+            {
+                if (_showOwnerTabActiveIndex == value) return;
+
+                _showOwnerTabActiveIndex = value;
+                this.NotifyPropertyChanged("ShowOwnerTabActiveIndex");
+            }
+        }
+
+        // オーナー 検索一覧画面の表示フラグ
+        private bool _showOwnerSearchList = true;
+        public bool ShowOwnerSearchList
+        {
+            get
+            {
+                return _showOwnerSearchList;
+            }
+            set
+            {
+                if (_showOwnerSearchList == value) return;
+
+                _showOwnerSearchList = value;
+                this.NotifyPropertyChanged("ShowOwnerSearchList");
+
+                if (_showOwnerSearchList)
+                {
+                    ShowOwnerTabActiveIndex = 0;
+
+                    ShowOwnerEdit = false;
+                }
+
+            }
+
+        }
+
+        // オーナー 新規追加画面の表示フラグ
+        private bool _showOwnerEdit = false;
+        public bool ShowOwnerEdit
+        {
+            get
+            {
+                return _showOwnerEdit;
+            }
+            set
+            {
+                if (_showOwnerEdit == value) return;
+
+                _showOwnerEdit = value;
+                this.NotifyPropertyChanged("ShowOwnerEdit");
+
+                ShowOwnerSearchList = !_showOwnerEdit;
+
+                if (_showOwnerEdit)
+                {
+                    ShowOwnerTabActiveIndex = 1;
+                }
+
+            }
+        }
+
+
         // エラー通知表示フラグ
         private bool _showErrorDialog = false;
         public bool ShowErrorDialog
@@ -1317,7 +2274,57 @@ namespace RepsCore.ViewModels
             }
         }
 
-        
+        // 業者検索 検索文字列
+        private string _agencySearchText;
+        public string AgencySearchText
+        {
+            get
+            {
+                return _agencySearchText;
+            }
+            set
+            {
+                if (_agencySearchText == value) return;
+
+                _agencySearchText = value;
+                this.NotifyPropertyChanged("AgencySearchText");
+            }
+        }
+
+        // 管理会社 検索文字列
+        private string _maintenanceCompanySearchText;
+        public string MaintenanceCompanySearchText
+        {
+            get
+            {
+                return _maintenanceCompanySearchText;
+            }
+            set
+            {
+                if (_maintenanceCompanySearchText == value) return;
+
+                _maintenanceCompanySearchText = value;
+                this.NotifyPropertyChanged("MaintenanceCompanySearchText");
+            }
+        }
+
+        // オーナー 検索文字列
+        private string _ownerSearchText;
+        public string OwnerSearchText
+        {
+            get
+            {
+                return _ownerSearchText;
+            }
+            set
+            {
+                if (_ownerSearchText == value) return;
+
+                _ownerSearchText = value;
+                this.NotifyPropertyChanged("OwnerSearchText");
+            }
+        }
+
         #endregion
 
         #region == エラー通知やログ関連 ==
@@ -1347,6 +2354,7 @@ namespace RepsCore.ViewModels
 
         #region == ダイアログ（サービス） ==
 
+        // サービスのインジェクションは・・・とりあえずしない。
         //private IOpenDialogService openDialogService;
         private OpenDialogService _openDialogService = new OpenDialogService();
         
@@ -1357,6 +2365,8 @@ namespace RepsCore.ViewModels
         /// </summary>
         public MainViewModel()// (IOpenDialogService openDialogService)
         {
+            //this._openDialogService = openDialogService;
+
             // エラーイベントにサブスクライブ
             ErrorOccured += new MyErrorEvent(OnError);
 
@@ -1377,11 +2387,25 @@ namespace RepsCore.ViewModels
             RentLivingNewAddCommand = new RelayCommand(RentLivingNewAddCommand_Execute, RentLivingNewAddCommand_CanExecute);
             RentLivingNewCancelCommand = new RelayCommand(RentLivingNewCancelCommand_Execute, RentLivingNewCancelCommand_CanExecute);
 
-            // RL 管理新規画像追加
+            // RL 管理新規画像追加と削除
             RentLivingNewPictureAddCommand = new RelayCommand(RentLivingNewPictureAddCommand_Execute, RentLivingNewPictureAddCommand_CanExecute);
             RentLivingNewPictureDeleteCommand = new GenericRelayCommand<object>(
                 param => RentLivingNewPictureDeleteCommand_Execute(param),
                 param => RentLivingNewPictureDeleteCommand_CanExecute());
+
+            // RL 管理新規　PDF追加と削除
+            RentLivingNewZumenPdfAddCommand = new RelayCommand(RentLivingNewZumenPdfAddCommand_Execute, RentLivingNewZumenPdfAddCommand_CanExecute);
+            RentLivingNewZumenPdfDeleteCommand = new GenericRelayCommand<object>(
+                param => RentLivingNewZumenPdfDeleteCommand_Execute(param),
+                param => RentLivingNewZumenPdfDeleteCommand_CanExecute());
+            // 表示
+            RentLivingNewZumenPdfShowCommand = new GenericRelayCommand<object>(
+                param => RentLivingNewZumenPdfShowCommand_Execute(param),
+                param => RentLivingNewZumenPdfShowCommand_CanExecute());
+            // 
+            RentLivingNewZumenPdfEnterCommand = new GenericRelayCommand<RentZumenPDF>(
+                param => RentLivingNewZumenPdfEnterCommand_Execute(param),
+                param => RentLivingNewZumenPdfEnterCommand_CanExecute());
 
             // RL 管理新規 部屋新規
             RentLivingNewSectionNewCommand = new RelayCommand(RentLivingNewSectionNewCommand_Execute, RentLivingNewSectionNewCommand_CanExecute);
@@ -1408,12 +2432,13 @@ namespace RepsCore.ViewModels
                 param => RentLivingNewSectionEditPictureDeleteCommand_CanExecute());
 
 
+
             // RL 管理一覧選択編集
             RentLivingEditSelectedEditCommand = new RelayCommand(RentLivingEditSelectedEditCommand_Execute, RentLivingEditSelectedEditCommand_CanExecute);
             RentLivingEditSelectedEditUpdateCommand = new RelayCommand(RentLivingEditSelectedEditUpdateCommand_Execute, RentLivingEditSelectedEditUpdateCommand_CanExecute);
             RentLivingEditSelectedEditCancelCommand = new RelayCommand(RentLivingEditSelectedEditCancelCommand_Execute, RentLivingEditSelectedEditCancelCommand_CanExecute);
 
-            // RL 管理編集 画像追加
+            // RL 管理編集 画像追加と削除、差し替え
             RentLivingEditPictureAddCommand = new RelayCommand(RentLivingEditPictureAddCommand_Execute, RentLivingEditPictureAddCommand_CanExecute);
             RentLivingEditPictureDeleteCommand = new GenericRelayCommand<object>(
                 param => RentLivingEditPictureDeleteCommand_Execute(param),
@@ -1421,6 +2446,21 @@ namespace RepsCore.ViewModels
             RentLivingEditPictureChangeCommand = new GenericRelayCommand<object>(
                 param => RentLivingEditPictureChangeCommand_Execute(param),
                 param => RentLivingEditPictureChangeCommand_CanExecute());
+
+            // RL 管理編集　PDF追加と削除
+            RentLivingEditZumenPdfAddCommand = new RelayCommand(RentLivingEditZumenPdfAddCommand_Execute, RentLivingEditZumenPdfAddCommand_CanExecute);
+            RentLivingEditZumenPdfDeleteCommand = new GenericRelayCommand<object>(
+                param => RentLivingEditZumenPdfDeleteCommand_Execute(param),
+                param => RentLivingEditZumenPdfDeleteCommand_CanExecute());
+            // 表示
+            RentLivingEditZumenPdfShowCommand = new GenericRelayCommand<object>(
+                param => RentLivingEditZumenPdfShowCommand_Execute(param),
+                param => RentLivingEditZumenPdfShowCommand_CanExecute());
+            // 
+            RentLivingEditZumenPdfEnterCommand = new GenericRelayCommand<RentZumenPDF>(
+                param => RentLivingEditZumenPdfEnterCommand_Execute(param),
+                param => RentLivingEditZumenPdfEnterCommand_CanExecute());
+            
 
             // RL 管理編集 新規部屋
             RentLivingEditSectionNewCommand = new RelayCommand(RentLivingEditSectionNewCommand_Execute, RentLivingEditSectionNewCommand_CanExecute);
@@ -1447,6 +2487,32 @@ namespace RepsCore.ViewModels
                 param => RentLivingEditSectionEditPictureDeleteCommand_CanExecute());
 
 
+            // 元付け業者
+            AgencySearchCommand = new RelayCommand(AgencySearchCommand_Execute, AgencySearchCommand_CanExecute);
+            AgencyListCommand = new RelayCommand(AgencyListCommand_Execute, AgencyListCommand_CanExecute);
+            AgencyNewCommand = new RelayCommand(AgencyNewCommand_Execute, AgencyNewCommand_CanExecute);
+            AgencySelectedEditCommand = new RelayCommand(AgencySelectedEditCommand_Execute, AgencySelectedEditCommand_CanExecute);
+            AgencySelectedDeleteCommand = new RelayCommand(AgencySelectedDeleteCommand_Execute, AgencySelectedDeleteCommand_CanExecute);
+            AgencyNewOrEditCancelCommand = new RelayCommand(AgencyNewOrEditCancelCommand_Execute, AgencyNewOrEditCancelCommand_CanExecute);
+            AgencyInsertOrUpdateCommand = new RelayCommand(AgencyInsertOrUpdateCommand_Execute, AgencyInsertOrUpdateCommand_CanExecute);
+
+            // 管理会社
+            MaintenanceCompanySearchCommand = new RelayCommand(MaintenanceCompanySearchCommand_Execute, MaintenanceCompanySearchCommand_CanExecute);
+            MaintenanceCompanyListCommand = new RelayCommand(MaintenanceCompanyListCommand_Execute, MaintenanceCompanyListCommand_CanExecute);
+            MaintenanceCompanyNewCommand = new RelayCommand(MaintenanceCompanyNewCommand_Execute, MaintenanceCompanyNewCommand_CanExecute);
+            MaintenanceCompanySelectedEditCommand = new RelayCommand(MaintenanceCompanySelectedEditCommand_Execute, MaintenanceCompanySelectedEditCommand_CanExecute);
+            MaintenanceCompanySelectedDeleteCommand = new RelayCommand(MaintenanceCompanySelectedDeleteCommand_Execute, MaintenanceCompanySelectedDeleteCommand_CanExecute);
+            MaintenanceCompanyNewOrEditCancelCommand = new RelayCommand(MaintenanceCompanyNewOrEditCancelCommand_Execute, MaintenanceCompanyNewOrEditCancelCommand_CanExecute);
+            MaintenanceCompanyInsertOrUpdateCommand = new RelayCommand(MaintenanceCompanyInsertOrUpdateCommand_Execute, MaintenanceCompanyInsertOrUpdateCommand_CanExecute);
+
+            // オーナー
+            OwnerSearchCommand = new RelayCommand(OwnerSearchCommand_Execute, OwnerSearchCommand_CanExecute);
+            OwnerListCommand = new RelayCommand(OwnerListCommand_Execute, OwnerListCommand_CanExecute);
+            OwnerNewCommand = new RelayCommand(OwnerNewCommand_Execute, OwnerNewCommand_CanExecute);
+            OwnerSelectedEditCommand = new RelayCommand(OwnerSelectedEditCommand_Execute, OwnerSelectedEditCommand_CanExecute);
+            OwnerSelectedDeleteCommand = new RelayCommand(OwnerSelectedDeleteCommand_Execute, OwnerSelectedDeleteCommand_CanExecute);
+            OwnerNewOrEditCancelCommand = new RelayCommand(OwnerNewOrEditCancelCommand_Execute, OwnerNewOrEditCancelCommand_CanExecute);
+            OwnerInsertOrUpdateCommand = new RelayCommand(OwnerInsertOrUpdateCommand_Execute, OwnerInsertOrUpdateCommand_CanExecute);
 
             // エラー通知画面を閉じる
             CloseErrorCommand = new RelayCommand(CloseErrorCommand_Execute, CloseErrorCommand_CanExecute);
@@ -1490,7 +2556,7 @@ namespace RepsCore.ViewModels
                                 "TrainStation2 TEXT)";
                             tableCmd.ExecuteNonQuery();
 
-                            // 賃貸住居用物件の「建物」テーブル
+                            // 賃貸住居用物件のテーブル
                             tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS RentLiving (" +
                                 "RentLiving_ID TEXT NOT NULL PRIMARY KEY," +
                                 "Rent_ID TEXT NOT NULL," +
@@ -1498,6 +2564,7 @@ namespace RepsCore.ViewModels
                                 "Floors INTEGER NOT NULL," +
                                 "FloorsBasement INTEGER," +
                                 "BuiltYear INTEGER NOT NULL," +
+                                "UnitOwnership TEXT NOT NULL," +
                                 "FOREIGN KEY (Rent_ID) REFERENCES Rent(Rent_ID)" +
                                 " )";
                             tableCmd.ExecuteNonQuery();
@@ -1516,11 +2583,15 @@ namespace RepsCore.ViewModels
                             tableCmd.ExecuteNonQuery();
 
                             // 賃貸住居用物件の「図面」テーブル
-                            tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS RentLivingPdf (" +
-                                "RentLivingPicture_ID TEXT NOT NULL PRIMARY KEY," +
+                            tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS RentLivingZumenPdf (" +
+                                "RentLivingZumenPdf_ID TEXT NOT NULL PRIMARY KEY," +
                                 "RentLiving_ID TEXT NOT NULL," +
                                 "Rent_ID TEXT NOT NULL," +
                                 "PdfData BLOB NOT NULL," +
+                                "DateTimeAdded TEXT NOT NULL," +
+                                "DateTimePublished TEXT NOT NULL," +
+                                "DateTimeVerified TEXT NOT NULL," +
+                                "FileSize REAL NOT NULL," +
                                 "FOREIGN KEY (Rent_ID) REFERENCES Rent(Rent_ID)," +
                                 "FOREIGN KEY (RentLiving_ID) REFERENCES RentLiving(RentLiving_ID)" +
                                 " )";
@@ -1551,6 +2622,44 @@ namespace RepsCore.ViewModels
                                 "FOREIGN KEY (Rent_ID) REFERENCES Rent(Rent_ID)," +
                                 "FOREIGN KEY (RentLiving_ID) REFERENCES RentLiving(RentLiving_ID)," +
                                 "FOREIGN KEY (RentLivingSection_ID) REFERENCES RentLivingSection(RentLivingSection_ID)" +
+                                " )";
+                            tableCmd.ExecuteNonQuery();
+
+                            // 元付け業者テーブル
+                            tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS Agency (" +
+                                "Agency_ID TEXT NOT NULL PRIMARY KEY," +
+                                "Name TEXT NOT NULL," +
+                                "Branch TEXT NOT NULL," +
+                                "TelNumber TEXT NOT NULL," +
+                                "FaxNumber TEXT NOT NULL," +
+                                "PostalCode TEXT NOT NULL," +
+                                "Address TEXT NOT NULL," +
+                                "Memo TEXT NOT NULL" +
+                                " )";
+                            tableCmd.ExecuteNonQuery();
+
+                            // 管理会社テーブル
+                            tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS MaintenanceCompany (" +
+                                "MaintenanceCompany_ID TEXT NOT NULL PRIMARY KEY," +
+                                "Name TEXT NOT NULL," +
+                                "Branch TEXT NOT NULL," +
+                                "TelNumber TEXT NOT NULL," +
+                                "FaxNumber TEXT NOT NULL," +
+                                "PostalCode TEXT NOT NULL," +
+                                "Address TEXT NOT NULL," +
+                                "Memo TEXT NOT NULL" +
+                                " )";
+                            tableCmd.ExecuteNonQuery();
+
+                            // オーナーテーブル
+                            tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS Owner (" +
+                                "Owner_ID TEXT NOT NULL PRIMARY KEY," +
+                                "Name TEXT NOT NULL," +
+                                "TelNumber TEXT NOT NULL," +
+                                "FaxNumber TEXT NOT NULL," +
+                                "PostalCode TEXT NOT NULL," +
+                                "Address TEXT NOT NULL," +
+                                "Memo TEXT NOT NULL" +
                                 " )";
                             tableCmd.ExecuteNonQuery();
 
@@ -1621,7 +2730,7 @@ namespace RepsCore.ViewModels
                 XDocument xdoc = XDocument.Load(AppConfigFilePath);
 
                 #region == ウィンドウ関連 ==
-
+                /*
                 if (sender is Window)
                 {
                     // Main Window element
@@ -1670,7 +2779,7 @@ namespace RepsCore.ViewModels
                         }
                     }
                 }
-
+                */
                 #endregion
 
             }
@@ -1710,7 +2819,7 @@ namespace RepsCore.ViewModels
             root.SetAttributeNode(attrs);
 
             #region == ウィンドウ関連 ==
-
+            /*
             if (sender is Window)
             {
                 // Main Window element
@@ -1784,7 +2893,7 @@ namespace RepsCore.ViewModels
                 root.AppendChild(mainWindow);
 
             }
-
+            */
             #endregion
 
             try
@@ -2240,15 +3349,16 @@ namespace RepsCore.ViewModels
                                 // これいる?
                             }
 
+                            // 写真追加
                             if (RentLivingNew.RentLivingPictures.Count > 0)
                             {
                                 foreach (var pic in RentLivingNew.RentLivingPictures)
                                 {
+                                    // 新規なので全てIsNewのはずだけど・・・
                                     if (pic.IsNew)
                                     {
                                         string sqlInsertIntoRentLivingPicture = String.Format("INSERT INTO RentLivingPicture (RentLivingPicture_ID, RentLiving_ID, Rent_ID, PictureData, PictureThumbW200xData, PictureFileExt) VALUES ('{0}', '{1}', '{2}', @0, @1, '{5}')",
                                             pic.RentPicture_ID, RentLivingNew.RentLiving_ID, RentLivingNew.Rent_ID, pic.PictureData, pic.PictureThumbW200xData, pic.PictureFileExt);
-
                                         
                                         // 物件画像の追加
                                         cmd.CommandText = sqlInsertIntoRentLivingPicture;
@@ -2269,6 +3379,31 @@ namespace RepsCore.ViewModels
                                             pic.IsNew = false;
                                             pic.IsModified = false;
                                         }
+                                    }
+                                }
+                            }
+
+                            if (RentLivingNew.RentLivingZumenPDFs.Count > 0)
+                            {
+                                foreach (var pdf in RentLivingNew.RentLivingZumenPDFs)
+                                {
+                                    string sqlInsertIntoRentLivingZumenPdf = String.Format("INSERT INTO RentLivingZumenPdf (RentLivingZumenPdf_ID, RentLiving_ID, Rent_ID, PdfData, DateTimeAdded, DateTimePublished, DateTimeVerified, FileSize) VALUES ('{0}', '{1}', '{2}', @0, '{4}', '{5}', '{6}', '{7}')",
+                                        pdf.RentZumenPDF_ID, RentLivingNew.RentLiving_ID, RentLivingNew.Rent_ID, pdf.PDFData, pdf.DateTimeAdded.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"), pdf.DateTimePublished.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"), pdf.DateTimeVerified.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"), pdf.FileSize);
+
+                                    // 図面の追加
+                                    cmd.CommandText = sqlInsertIntoRentLivingZumenPdf;
+                                    // ループなので、前のパラメーターをクリアする。
+                                    cmd.Parameters.Clear();
+
+                                    SqliteParameter parameter1 = new SqliteParameter("@0", System.Data.DbType.Binary);
+                                    parameter1.Value = pdf.PDFData;
+                                    cmd.Parameters.Add(parameter1);
+
+                                    var result = cmd.ExecuteNonQuery();
+                                    if (result > 0)
+                                    {
+                                        pdf.IsNew = false;
+                                        //pic.IsModified = false;
                                     }
                                 }
                             }
@@ -2536,6 +3671,8 @@ namespace RepsCore.ViewModels
             if (RentLivingNewSectionSelectedItem == null) return;
 
             // 
+            RentLivingNewSectionEdit = RentLivingNewSectionSelectedItem;
+            /*
             RentLivingNewSectionEdit = new RentLivingSection(RentLivingNewSectionSelectedItem.Rent_ID, RentLivingNewSectionSelectedItem.RentLiving_ID, RentLivingNewSectionSelectedItem.RentLivingSection_ID);
 
             RentLivingNewSectionEdit.IsNew = false;
@@ -2551,6 +3688,7 @@ namespace RepsCore.ViewModels
             {
                 RentLivingNewSectionEdit.RentLivingSectionPictures.Add(hoge);
             }
+            */
 
             if (!ShowRentLivingNewSectionEdit) ShowRentLivingNewSectionEdit = true;
         }
@@ -2579,6 +3717,7 @@ namespace RepsCore.ViewModels
 
             // TODO: 入力チェック
 
+            /*
             var found = RentLivingNew.RentLivingSections.FirstOrDefault(x => x.RentLivingSection_ID == RentLivingNewSectionEdit.RentLivingSection_ID);
             if (found != null)
             {
@@ -2598,6 +3737,7 @@ namespace RepsCore.ViewModels
             {
                 System.Diagnostics.Debug.WriteLine("THIS SHOULD NOT BE HAPPENING @RentLivingNewSectionUpdateCommand_Execute");
             }
+            */
 
             // 部屋編集画面を閉じる
             ShowRentLivingNewSectionEdit = false;
@@ -2693,8 +3833,9 @@ namespace RepsCore.ViewModels
                             rlpic.PictureData = ImageData;
                             rlpic.PictureThumbW200xData = ImageThumbData;
                             rlpic.PictureFileExt = fi.Extension;
-                            rlpic.IsModified = false;
+
                             rlpic.IsNew = true;
+                            rlpic.IsModified = false;
 
                             rlpic.Picture = BitmapImageFromImage(thumbImg, FileExtToImageFormat(rlpic.PictureFileExt));
 
@@ -2750,6 +3891,8 @@ namespace RepsCore.ViewModels
             foreach (var item in selectedList)
             {
                 RentLivingNewSectionNew.RentLivingSectionPictures.Remove(item);
+
+                // 新規部屋なので、DBにはまだ保存されていないはずなので、DBから削除する処理は不要。
             }
 
         }
@@ -2797,8 +3940,9 @@ namespace RepsCore.ViewModels
                             rlpic.PictureData = ImageData;
                             rlpic.PictureThumbW200xData = ImageThumbData;
                             rlpic.PictureFileExt = fi.Extension;
-                            rlpic.IsModified = false;
+
                             rlpic.IsNew = true;
+                            rlpic.IsModified = false;
 
                             rlpic.Picture = BitmapImageFromImage(thumbImg, FileExtToImageFormat(rlpic.PictureFileExt));
 
@@ -2854,10 +3998,147 @@ namespace RepsCore.ViewModels
             foreach (var item in selectedList)
             {
                 RentLivingNewSectionEdit.RentLivingSectionPictures.Remove(item);
+
+                // 新規部屋なので、DBにはまだ保存されていないはずなので、DBから削除する処理は不要。
+            }
+        }
+
+
+        // RL新規　物件の図面PDF追加
+        public ICommand RentLivingNewZumenPdfAddCommand { get; }
+        public bool RentLivingNewZumenPdfAddCommand_CanExecute()
+        {
+            return true;
+        }
+        public void RentLivingNewZumenPdfAddCommand_Execute()
+        {
+            if (RentLivingNew == null) return;
+
+            string fileName = _openDialogService.GetOpenZumenPdfFileDialog("図面の追加");
+
+            if (!string.IsNullOrEmpty(fileName))
+            {
+                FileInfo fi = new FileInfo(fileName.Trim());
+                if (fi.Exists)
+                {
+                    // 図面ファイルのPDFデータの読み込み
+                    byte[] PdfData;
+                    FileStream fs = new FileStream(fileName, FileMode.Open, FileAccess.Read);
+                    long len = fs.Length;
+
+                    BinaryReader br = new BinaryReader(fs);
+                    PdfData = br.ReadBytes((int)fs.Length);
+                    br.Close();
+
+                    RentLivingZumenPDF rlZumen = new RentLivingZumenPDF(RentLivingNew.Rent_ID, RentLivingNew.RentLiving_ID, Guid.NewGuid().ToString());
+                    rlZumen.PDFData = PdfData;
+                    rlZumen.FileSize = len;
+
+                    // TODO:
+                    //rlZumen.DateTimeAdded = DateTime.Now;
+                    rlZumen.DateTimePublished = DateTime.Now;
+                    rlZumen.DateTimeVerified = DateTime.Now;
+
+                    //rlZumen.IsModified = false;
+                    rlZumen.IsNew = true;
+
+                    RentLivingNew.RentLivingZumenPDFs.Add(rlZumen);
+
+                    fs.Close();
+                }
+                else
+                {
+                    // エラーイベント発火
+                    MyError er = new MyError();
+                    er.ErrType = "File";
+                    er.ErrCode = 0;
+                    er.ErrText = "「" + "File Does Not Exist" + "」";
+                    er.ErrDescription = fileName + " ファイルが存在しません。";
+                    er.ErrDatetime = DateTime.Now;
+                    er.ErrPlace = "MainViewModel::RentLivingNewZumenPdfAddCommand_Execute()";
+                    ErrorOccured?.Invoke(er);
+                }
+            }
+        }
+
+        // RL新規　物件の図面PDF削除
+        public ICommand RentLivingNewZumenPdfDeleteCommand { get; }
+        public bool RentLivingNewZumenPdfDeleteCommand_CanExecute()
+        {
+            return true;
+        }
+        public void RentLivingNewZumenPdfDeleteCommand_Execute(object obj)
+        {
+            if (obj == null) return;
+
+            if (RentLivingNew == null) return;
+
+            // 選択アイテム保持用
+            List<RentLivingZumenPDF> selectedList = new List<RentLivingZumenPDF>();
+
+            // System.Windows.Controls.SelectedItemCollection をキャストして、ループ
+            System.Collections.IList items = (System.Collections.IList)obj;
+            var collection = items.Cast<RentLivingZumenPDF>();
+
+            foreach (var item in collection)
+            {
+                // 削除リストに追加
+                selectedList.Add(item as RentLivingZumenPDF);
+            }
+
+            // 選択注文アイテムをループして、アイテムを削除する
+            foreach (var item in selectedList)
+            {
+                RentLivingNew.RentLivingZumenPDFs.Remove(item);
             }
 
         }
 
+        // RL編集　物件の図面PDF表示
+        public ICommand RentLivingNewZumenPdfShowCommand { get; }
+        public bool RentLivingNewZumenPdfShowCommand_CanExecute()
+        {
+            return true;
+        }
+        public void RentLivingNewZumenPdfShowCommand_Execute(object obj)
+        {
+            if (obj == null) return;
+            if (RentLivingNew == null) return;
+            
+            // System.Windows.Controls.SelectedItemCollection をキャストして、ループ
+            System.Collections.IList items = (System.Collections.IList)obj;
+            var collection = items.Cast<RentLivingZumenPDF>();
+
+            foreach (var item in collection)
+            {
+                byte[] pdfBytes = (item as RentLivingZumenPDF).PDFData;
+
+                File.WriteAllBytes(Path.GetTempPath() + Path.DirectorySeparatorChar + "temp.pdf", pdfBytes);
+
+                Process.Start(new ProcessStartInfo(Path.GetTempPath() + Path.DirectorySeparatorChar + "temp.pdf") { UseShellExecute = true });
+
+                break;
+            }
+            
+        }
+
+        // RL編集　物件の図面PDF表示（ダブルクリックやエンター押下で）
+        public ICommand RentLivingNewZumenPdfEnterCommand { get; }
+        public bool RentLivingNewZumenPdfEnterCommand_CanExecute()
+        {
+            return true;
+        }
+        public void RentLivingNewZumenPdfEnterCommand_Execute(RentZumenPDF obj)
+        {
+            if (obj == null) return;
+            if (RentLivingNew == null) return;
+
+            byte[] pdfBytes = (obj as RentZumenPDF).PDFData;
+
+            File.WriteAllBytes(Path.GetTempPath() + Path.DirectorySeparatorChar + "temp.pdf", pdfBytes);
+
+            Process.Start(new ProcessStartInfo(Path.GetTempPath() + Path.DirectorySeparatorChar + "temp.pdf") { UseShellExecute = true });
+        }
 
         #endregion
 
@@ -2940,6 +4221,42 @@ namespace RepsCore.ViewModels
                                 rlpic.Picture = BitmapImageFromBytes(imageThumbBytes);
 
                                 RentLivingEdit.RentLivingPictures.Add(rlpic);
+                            }
+                        }
+
+                        // 図面
+                        cmd.CommandText = String.Format("SELECT * FROM RentLivingZumenPdf WHERE Rent_ID = '{0}'", RentLivingEditSelectedItem.Rent_ID);
+                        using (var reader = cmd.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                RentLivingZumenPDF rlpdf = new RentLivingZumenPDF(RentLivingEdit.Rent_ID, RentLivingEdit.RentLiving_ID, Convert.ToString(reader["RentLivingZumenPdf_ID"]));
+
+                                byte[] pdfBytes = (byte[])reader["PdfData"];
+                                rlpdf.PDFData = pdfBytes;
+
+                                /*
+                                byte[] imageBytes = new byte[0];
+                                if (reader["PictureData"] != null && !Convert.IsDBNull(reader["PictureData"]))
+                                {
+                                    imageBytes = (byte[])(reader["PictureData"]);
+                                }
+                                */
+
+                                DateTime dt = new DateTime();
+
+                                dt = DateTime.Parse(Convert.ToString(reader["DateTimeAdded"]));
+                                rlpdf.DateTimeAdded = dt.ToLocalTime();
+                                dt = DateTime.Parse(Convert.ToString(reader["DateTimePublished"]));
+                                rlpdf.DateTimePublished = dt.ToLocalTime();
+                                dt = DateTime.Parse(Convert.ToString(reader["DateTimeVerified"]));
+                                rlpdf.DateTimeVerified = dt.ToLocalTime();
+
+                                rlpdf.FileSize = Convert.ToInt64(reader["FileSize"]);
+
+                                rlpdf.IsNew = false;
+
+                                RentLivingEdit.RentLivingZumenPDFs.Add(rlpdf);
                             }
                         }
 
@@ -3059,7 +4376,7 @@ namespace RepsCore.ViewModels
             string sqlUpdateRentLiving = String.Format("UPDATE RentLiving SET Kind = '{1}', Floors = '{2}', FloorsBasement = '{3}', BuiltYear = '{4}' WHERE RentLiving_ID = '{0}'",
                 RentLivingEdit.RentLiving_ID, RentLivingEdit.Kind.ToString(), RentLivingEdit.Floors, RentLivingEdit.FloorsBasement, RentLivingEdit.BuiltYear);
 
-            // TODO 
+            // TODO more to come
 
             using (var connection = new SqliteConnection(connectionStringBuilder.ConnectionString))
             {
@@ -3074,17 +4391,17 @@ namespace RepsCore.ViewModels
                         var result = cmd.ExecuteNonQuery();
                         if (result != 1)
                         {
-                            // TODO 
+                            // 
                         }
 
                         cmd.CommandText = sqlUpdateRentLiving;
                         result = cmd.ExecuteNonQuery();
                         if (result != 1)
                         {
-                            // TODO
+                            // 
                         }
 
-                        // 写真の追加または更新
+                        // 物件写真の追加または更新
                         if (RentLivingEdit.RentLivingPictures.Count > 0)
                         {
                             foreach (var pic in RentLivingEdit.RentLivingPictures)
@@ -3141,6 +4458,88 @@ namespace RepsCore.ViewModels
                                 }
 
                             }
+                        }
+
+                        // 物件写真の削除リストを処理
+                        if (RentLivingEdit.RentLivingPicturesToBeDeletedIDs.Count > 0)
+                        {
+                            foreach (var id in RentLivingEdit.RentLivingPicturesToBeDeletedIDs)
+                            {
+                                // 削除
+                                string sqlDeleteRentLivingPicture = String.Format("DELETE FROM RentLivingPicture WHERE RentLivingPicture_ID = '{0}'",
+                                        id);
+
+                                cmd.CommandText = sqlDeleteRentLivingPicture;
+                                var DelRentLivingPicResult = cmd.ExecuteNonQuery();
+                                if (DelRentLivingPicResult > 0)
+                                {
+                                    //
+                                }
+                            }
+                            RentLivingEdit.RentLivingPicturesToBeDeletedIDs.Clear();
+                        }
+
+                        // 図面の更新
+                        if (RentLivingEdit.RentLivingZumenPDFs.Count > 0)
+                        {
+                            foreach (var pdf in RentLivingEdit.RentLivingZumenPDFs)
+                            {
+                                if (pdf.IsNew)
+                                {
+                                    string sqlInsertIntoRentLivingZumen = String.Format("INSERT INTO RentLivingZumenPdf (RentLivingZumenPdf_ID, RentLiving_ID, Rent_ID, PdfData, DateTimeAdded, DateTimePublished, DateTimeVerified, FileSize) VALUES ('{0}', '{1}', '{2}', @0, '{4}', '{5}', '{6}', '{7}')",
+                                        pdf.RentZumenPDF_ID, RentLivingEdit.RentLiving_ID, RentLivingEdit.Rent_ID, pdf.PDFData, pdf.DateTimeAdded.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"), pdf.DateTimePublished.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"), pdf.DateTimeVerified.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"), pdf.FileSize);
+
+                                    // 図面の追加
+                                    cmd.CommandText = sqlInsertIntoRentLivingZumen;
+                                    // ループなので、前のパラメーターをクリアする。
+                                    cmd.Parameters.Clear();
+
+                                    SqliteParameter parameter1 = new SqliteParameter("@0", System.Data.DbType.Binary);
+                                    parameter1.Value = pdf.PDFData;
+                                    cmd.Parameters.Add(parameter1);
+
+                                    result = cmd.ExecuteNonQuery();
+                                    if (result > 0)
+                                    {
+                                        pdf.IsNew = false;
+                                        pdf.IsDirty = false;
+                                    }
+                                }
+                                else if (pdf.IsDirty)
+                                {
+                                    string sqlUpdateRentLivingZumen = String.Format("UPDATE RentLivingZumenPdf SET DateTimePublished = '{1}', DateTimeVerified = '{2}' WHERE RentLivingZumenPdf_ID = '{0}'",
+                                        pdf.RentZumenPDF_ID, pdf.DateTimePublished.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"), pdf.DateTimeVerified.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"), pdf.FileSize);
+
+                                    // 図面アトリビュート情報の更新
+                                    cmd.CommandText = sqlUpdateRentLivingZumen;
+
+                                    result = cmd.ExecuteNonQuery();
+                                    if (result > 0)
+                                    {
+                                        pdf.IsNew = false;
+                                        pdf.IsDirty = false;
+                                    }
+                                }
+                            }
+                        }
+
+                        // 図面の削除リストを処理
+                        if (RentLivingEdit.RentLivingZumenPdfToBeDeletedIDs.Count > 0)
+                        {
+                            foreach (var id in RentLivingEdit.RentLivingZumenPdfToBeDeletedIDs)
+                            {
+                                // 削除
+                                string sqlDeleteRentLivingPDF = String.Format("DELETE FROM RentLivingZumenPdf WHERE RentLivingZumenPdf_ID = '{0}'",
+                                        id);
+
+                                cmd.CommandText = sqlDeleteRentLivingPDF;
+                                var DelRentLivingPdfResult = cmd.ExecuteNonQuery();
+                                if (DelRentLivingPdfResult > 0)
+                                {
+                                    //
+                                }
+                            }
+                            RentLivingEdit.RentLivingZumenPdfToBeDeletedIDs.Clear();
                         }
 
                         // 部屋更新
@@ -3232,14 +4631,48 @@ namespace RepsCore.ViewModels
                                                 roompic.IsModified = false;
                                             }
                                         }
-
                                     }
                                 }
 
+                                // 部屋画像の削除リストを処理
+                                if (room.RentLivingSectionPicturesToBeDeletedIDs.Count > 0)
+                                {
+                                    foreach (var id in room.RentLivingSectionPicturesToBeDeletedIDs)
+                                    {
+                                        // 削除
+                                        string sqlDeleteRentLivingSectionPicture = String.Format("DELETE FROM RentLivingSectionPicture WHERE RentLivingSectionPicture_ID = '{0}'",
+                                                id);
+
+                                        cmd.CommandText = sqlDeleteRentLivingSectionPicture;
+                                        var UpdateoRentLivingSectionResult = cmd.ExecuteNonQuery();
+                                        if (UpdateoRentLivingSectionResult > 0)
+                                        {
+                                            //
+                                        }
+                                    }
+                                }
 
                             }
                         }
 
+                        // 部屋の削除リストを処理
+                        if (RentLivingEdit.RentLivingSectionToBeDeletedIDs.Count > 0)
+                        {
+                            foreach (var id in RentLivingEdit.RentLivingSectionToBeDeletedIDs)
+                            {
+                                // 削除
+                                string sqlDeleteRentLivingSection = String.Format("DELETE FROM RentLivingSection WHERE RentLivingSection_ID = '{0}'",
+                                        id);
+
+                                cmd.CommandText = sqlDeleteRentLivingSection;
+                                var DelRentLivingPdfResult = cmd.ExecuteNonQuery();
+                                if (DelRentLivingPdfResult > 0)
+                                {
+                                    //
+                                }
+                            }
+                            RentLivingEdit.RentLivingSectionToBeDeletedIDs.Clear();
+                        }
 
                         cmd.Transaction.Commit();
 
@@ -3376,6 +4809,17 @@ namespace RepsCore.ViewModels
             // 選択注文アイテムをループして、アイテムを削除する
             foreach (var item in selectedList)
             {
+                if (item.IsNew)
+                {
+                    // 新規画像なので、DBにはまだ保存されていないはずなので、DBから削除する処理は不要。
+                }
+                else
+                {
+                    // DBからも削除するために、削除リストに追加（後で削除）
+                    RentLivingEdit.RentLivingPicturesToBeDeletedIDs.Add(item.RentPicture_ID);
+                }
+
+                // 一覧から削除
                 RentLivingEdit.RentLivingPictures.Remove(item);
             }
 
@@ -3526,7 +4970,10 @@ namespace RepsCore.ViewModels
             if (RentLivingEdit == null) return;
             if (RentLivingEditSectionSelectedItem == null) return;
 
-            // 
+            //
+            RentLivingEditSectionEdit = RentLivingEditSectionSelectedItem;
+
+            /*
             RentLivingEditSectionEdit = new RentLivingSection(RentLivingEditSectionSelectedItem.Rent_ID, RentLivingEditSectionSelectedItem.RentLiving_ID, RentLivingEditSectionSelectedItem.RentLivingSection_ID);
 
             RentLivingEditSectionEdit.IsNew = false;
@@ -3542,6 +4989,7 @@ namespace RepsCore.ViewModels
             {
                 RentLivingEditSectionEdit.RentLivingSectionPictures.Add(hoge);
             }
+            */
 
             if (!ShowRentLivingEditSectionEdit) ShowRentLivingEditSectionEdit = true;
         }
@@ -3570,6 +5018,7 @@ namespace RepsCore.ViewModels
 
             // TODO: 入力チェック
 
+            /*
             var found = RentLivingEdit.RentLivingSections.FirstOrDefault(x => x.RentLivingSection_ID == RentLivingEditSectionSelectedItem.RentLivingSection_ID);
             if (found != null)
             {
@@ -3584,11 +5033,14 @@ namespace RepsCore.ViewModels
                 {
                     found.RentLivingSectionPictures.Add(hoge);
                 }
+
+
             }
             else
             {
                 System.Diagnostics.Debug.WriteLine("THIS SHOULD NOT BE HAPPENING @RentLivingEditSectionUpdateCommand_Execute");
             }
+            */
 
             // 部屋編集画面を閉じる
             ShowRentLivingEditSectionEdit = false;
@@ -3635,6 +5087,17 @@ namespace RepsCore.ViewModels
         {
             if (RentLivingEdit == null) return;
             if (RentLivingEditSectionSelectedItem == null) return;
+
+            //RentLivingSectionToBeDeletedIDs
+            if (RentLivingEditSectionSelectedItem.IsNew)
+            {
+                // 新規なので、DBにはまだ保存されていないはずなので、DBから削除する処理は不要。
+            }
+            else
+            {
+                // DBからも削除するために、削除リストに追加（後で削除）
+                RentLivingEdit.RentLivingSectionToBeDeletedIDs.Add(RentLivingEditSectionSelectedItem.RentLivingSection_ID);
+            }
 
             // 削除
             RentLivingEdit.RentLivingSections.Remove(RentLivingEditSectionSelectedItem);
@@ -3685,8 +5148,8 @@ namespace RepsCore.ViewModels
                             rlpic.PictureThumbW200xData = ImageThumbData;
                             rlpic.PictureFileExt = fi.Extension;
 
-                            rlpic.IsModified = false;
                             rlpic.IsNew = true;
+                            rlpic.IsModified = false;
 
                             rlpic.Picture = BitmapImageFromImage(thumbImg, FileExtToImageFormat(rlpic.PictureFileExt));
 
@@ -3742,10 +5205,9 @@ namespace RepsCore.ViewModels
             foreach (var item in selectedList)
             {
                 RentLivingEditSectionNew.RentLivingSectionPictures.Remove(item);
+
+                // 新規部屋なので、DBにはまだ保存されていないはずなので、DBから削除する処理は不要。
             }
-
-            // TODO: DBからも削除
-
         }
 
         // RL編集　編集部屋の画像追加
@@ -3848,12 +5310,1338 @@ namespace RepsCore.ViewModels
             // 選択注文アイテムをループして、アイテムを削除する
             foreach (var item in selectedList)
             {
+                if (item.IsNew)
+                {
+                    // 新規画像なので、DBにはまだ保存されていないはずなので、DBから削除する処理は不要。
+                }
+                else
+                {
+                    // DBからも削除するために、削除リストに追加（後で削除）
+                    RentLivingEditSectionEdit.RentLivingSectionPicturesToBeDeletedIDs.Add(item.RentSectionPicture_ID);
+                }
+
+                // 一覧から削除
                 RentLivingEditSectionEdit.RentLivingSectionPictures.Remove(item);
             }
 
-            // TODO: DBからも削除
+            
         }
 
+
+        // RL編集　物件の図面PDF追加
+        public ICommand RentLivingEditZumenPdfAddCommand { get; }
+        public bool RentLivingEditZumenPdfAddCommand_CanExecute()
+        {
+            return true;
+        }
+        public void RentLivingEditZumenPdfAddCommand_Execute()
+        {
+            if (RentLivingEdit == null) return;
+
+            string fileName = _openDialogService.GetOpenZumenPdfFileDialog("図面の追加");
+
+            if (!string.IsNullOrEmpty(fileName))
+            {
+                FileInfo fi = new FileInfo(fileName);
+                if (fi.Exists)
+                {
+                    // 図面ファイルのPDFデータの読み込み
+                    byte[] PdfData;
+                    FileStream fs = new FileStream(fileName, FileMode.Open, FileAccess.Read);
+                    long len = fs.Length;
+
+                    BinaryReader br = new BinaryReader(fs);
+                    PdfData = br.ReadBytes((int)fs.Length);
+                    br.Close();
+
+                    RentLivingZumenPDF rlZumen = new RentLivingZumenPDF(RentLivingEdit.Rent_ID, RentLivingEdit.RentLiving_ID, Guid.NewGuid().ToString());
+                    rlZumen.PDFData = PdfData;
+                    rlZumen.FileSize = len;
+
+                    // TODO:
+                    //rlZumen.DateTimeAdded = DateTime.Now;
+                    rlZumen.DateTimePublished = DateTime.Now;
+                    rlZumen.DateTimeVerified = DateTime.Now;
+
+                    rlZumen.IsDirty = false;
+                    rlZumen.IsNew = true;
+
+                    RentLivingEdit.RentLivingZumenPDFs.Add(rlZumen);
+
+                    fs.Close();
+                }
+                else
+                {
+                    // エラーイベント発火
+                    MyError er = new MyError();
+                    er.ErrType = "File";
+                    er.ErrCode = 0;
+                    er.ErrText = "「" + "File Does Not Exist" + "」";
+                    er.ErrDescription = fileName + " ファイルが存在しません。";
+                    er.ErrDatetime = DateTime.Now;
+                    er.ErrPlace = "MainViewModel::RentLivingEditZumenPdfAddCommand_Execute()";
+                    ErrorOccured?.Invoke(er);
+                }
+            }
+        }
+
+        // RL編集　物件の図面PDF削除
+        public ICommand RentLivingEditZumenPdfDeleteCommand { get; }
+        public bool RentLivingEditZumenPdfDeleteCommand_CanExecute()
+        {
+            return true;
+        }
+        public void RentLivingEditZumenPdfDeleteCommand_Execute(object obj)
+        {
+            if (obj == null) return;
+
+            if (RentLivingEdit == null) return;
+
+            // 選択アイテム保持用
+            List<RentLivingZumenPDF> selectedList = new List<RentLivingZumenPDF>();
+
+            // System.Windows.Controls.SelectedItemCollection をキャストして、ループ
+            System.Collections.IList items = (System.Collections.IList)obj;
+            var collection = items.Cast<RentLivingZumenPDF>();
+
+            foreach (var item in collection)
+            {
+                // 削除リストに追加
+                selectedList.Add(item as RentLivingZumenPDF);
+            }
+
+            // 選択注文アイテムをループして、アイテムを削除する
+            foreach (var item in selectedList)
+            {
+                if (item.IsNew)
+                {
+                    // 新規なので、DBにはまだ保存されていないはずなので、DBから削除する処理は不要。
+                }
+                else
+                {
+                    // DBからも削除するために、削除リストに追加（後で削除）
+                    RentLivingEdit.RentLivingZumenPdfToBeDeletedIDs.Add(item.RentZumenPDF_ID);
+                }
+
+                // 一覧から削除
+                RentLivingEdit.RentLivingZumenPDFs.Remove(item);
+            }
+
+        }
+
+        // RL編集　物件の図面PDF表示
+        public ICommand RentLivingEditZumenPdfShowCommand { get; }
+        public bool RentLivingEditZumenPdfShowCommand_CanExecute()
+        {
+            return true;
+        }
+        public void RentLivingEditZumenPdfShowCommand_Execute(object obj)
+        {
+            if (obj == null) return;
+            if (RentLivingEdit == null) return;
+
+            // System.Windows.Controls.SelectedItemCollection をキャストして、ループ
+            System.Collections.IList items = (System.Collections.IList)obj;
+            var collection = items.Cast<RentLivingZumenPDF>();
+
+            foreach (var item in collection)
+            {
+
+                using (var connection = new SqliteConnection(connectionStringBuilder.ConnectionString))
+                {
+                    connection.Open();
+
+                    using (var cmd = connection.CreateCommand())
+                    {
+                        cmd.CommandText = String.Format("SELECT PdfData FROM RentLivingZumenPdf WHERE RentLivingZumenPdf_ID = '{0}'", (item as RentLivingZumenPDF).RentZumenPDF_ID);
+                        using (var reader = cmd.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                byte[] pdfBytes = (byte[])reader["PdfData"];
+
+                                File.WriteAllBytes(Path.GetTempPath() + Path.DirectorySeparatorChar + "temp.pdf", pdfBytes);
+
+                                Process.Start(new ProcessStartInfo(Path.GetTempPath() + Path.DirectorySeparatorChar + "temp.pdf") { UseShellExecute = true });
+
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                break;
+
+            }
+        }
+
+        // RL編集　物件の図面PDF表示（ダブルクリックやエンター押下で）
+        public ICommand RentLivingEditZumenPdfEnterCommand { get; }
+        public bool RentLivingEditZumenPdfEnterCommand_CanExecute()
+        {
+            return true;
+        }
+        public void RentLivingEditZumenPdfEnterCommand_Execute(RentZumenPDF obj)
+        {
+            if (obj == null) return;
+            if (RentLivingEdit == null) return;
+
+            using (var connection = new SqliteConnection(connectionStringBuilder.ConnectionString))
+            {
+                connection.Open();
+
+                using (var cmd = connection.CreateCommand())
+                {
+                    cmd.CommandText = String.Format("SELECT PdfData FROM RentLivingZumenPdf WHERE RentLivingZumenPdf_ID = '{0}'", (obj as RentZumenPDF).RentZumenPDF_ID);
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            byte[] pdfBytes = (byte[])reader["PdfData"];
+
+                            File.WriteAllBytes(Path.GetTempPath() + Path.DirectorySeparatorChar + "temp.pdf", pdfBytes);
+
+                            Process.Start(new ProcessStartInfo(Path.GetTempPath() + Path.DirectorySeparatorChar + "temp.pdf") { UseShellExecute = true });
+
+                            break;
+                        }
+                    }
+                }
+            }
+
+
+        }
+
+
+
+        #endregion
+
+        #region == 元付け業者 ==
+
+        // 業者　管理、検索
+        public ICommand AgencySearchCommand { get; }
+        public bool AgencySearchCommand_CanExecute()
+        {
+            if (String.IsNullOrEmpty(AgencySearchText))
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+        public void AgencySearchCommand_Execute()
+        {
+            // Firest, clear it.
+            Agencies.Clear();
+
+            using (var connection = new SqliteConnection(connectionStringBuilder.ConnectionString))
+            {
+                connection.Open();
+
+                using (var cmd = connection.CreateCommand())
+                {
+                    cmd.CommandText = "SELECT * FROM Agency WHERE Name Like '%" + AgencySearchText + "%'";
+
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+
+                            Agency ag = new Agency(Convert.ToString(reader["Agency_ID"]));
+                            ag.Name = Convert.ToString(reader["Name"]);
+                            ag.Branch = Convert.ToString(reader["Branch"]);
+                            ag.PostalCode = Convert.ToString(reader["PostalCode"]);
+                            ag.Address = Convert.ToString(reader["Address"]);
+                            ag.TelNumber = Convert.ToString(reader["TelNumber"]);
+                            ag.FaxNumber = Convert.ToString(reader["FaxNumber"]);
+                            ag.Memo = Convert.ToString(reader["Memo"]);
+                            
+                            ag.IsNew = false;
+                            ag.IsDirty = false;
+
+                            Agencies.Add(ag);
+
+                        }
+                    }
+                }
+            }
+        }
+
+        // 業者　管理、一覧
+        public ICommand AgencyListCommand { get; }
+        public bool AgencyListCommand_CanExecute()
+        {
+            return true;
+        }
+        public void AgencyListCommand_Execute()
+        {
+            // Firest, clear it.
+            Agencies.Clear();
+
+            try
+            {
+                using (var connection = new SqliteConnection(connectionStringBuilder.ConnectionString))
+                {
+                    connection.Open();
+
+                    using (var cmd = connection.CreateCommand())
+                    {
+                        cmd.CommandText = "SELECT * FROM Agency";
+
+                        using (var reader = cmd.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+
+                                Agency ag = new Agency(Convert.ToString(reader["Agency_ID"]));
+                                ag.Name = Convert.ToString(reader["Name"]);
+                                ag.Branch = Convert.ToString(reader["Branch"]);
+                                ag.PostalCode = Convert.ToString(reader["PostalCode"]);
+                                ag.Address = Convert.ToString(reader["Address"]);
+                                ag.TelNumber = Convert.ToString(reader["TelNumber"]);
+                                ag.FaxNumber = Convert.ToString(reader["FaxNumber"]);
+                                ag.Memo = Convert.ToString(reader["Memo"]);
+
+                                ag.IsNew = false;
+                                ag.IsDirty = false;
+
+                                Agencies.Add(ag);
+
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                string errmessage;
+                if (e.InnerException != null)
+                {
+                    errmessage = e.InnerException.Message;
+                    System.Diagnostics.Debug.WriteLine(e.InnerException.Message + " @MainViewModel::AgencyListCommand_Execute()");
+                }
+                else
+                {
+                    errmessage = e.Message;
+                    System.Diagnostics.Debug.WriteLine("Exception:'" + e.Message + "' @MainViewModel::AgencyListCommand_Execute()");
+                }
+
+                // エラーイベント発火
+                MyError er = new MyError();
+                er.ErrType = "DB";
+                er.ErrCode = 0;
+                er.ErrText = "「" + errmessage + "」";
+                er.ErrDescription = "業者を一覧（SELECT）する処理でエラーが発生しました。";
+                er.ErrDatetime = DateTime.Now;
+                er.ErrPlace = "In " + e.Source + " from MainViewModel::AgencyListCommand_Execute()";
+                ErrorOccured?.Invoke(er);
+            }
+
+
+        }
+
+        // 業者　管理、一覧選択アイテム削除（DELETE）
+        public ICommand AgencySelectedDeleteCommand { get; }
+        public bool AgencySelectedDeleteCommand_CanExecute()
+        {
+            if (AgenciesSelectedItem != null)
+                return true;
+            else
+                return false;
+        }
+        public void AgencySelectedDeleteCommand_Execute()
+        {
+            if (AgenciesSelectedItem != null)
+            {
+                // 選択アイテムのデータを削除
+
+                string sqlDelete = String.Format("DELETE FROM Agency WHERE Agency_ID = '{0}'", AgenciesSelectedItem.Agency_ID);
+
+                using (var connection = new SqliteConnection(connectionStringBuilder.ConnectionString))
+                {
+                    connection.Open();
+
+                    using (var cmd = connection.CreateCommand())
+                    {
+                        cmd.Transaction = connection.BeginTransaction();
+                        try
+                        {
+
+                            cmd.CommandText = sqlDelete;
+                            var result = cmd.ExecuteNonQuery();
+
+                            cmd.Transaction.Commit();
+
+                            // 一覧から削除
+                            if (Agencies.Remove(AgenciesSelectedItem))
+                            {
+                                AgenciesSelectedItem = null;
+                            }
+
+                        }
+                        catch (Exception e)
+                        {
+                            cmd.Transaction.Rollback();
+
+                            System.Diagnostics.Debug.WriteLine(e.Message + " @AgencySelectedDeleteCommand_Execute()");
+
+                            // エラーイベント発火
+                            MyError er = new MyError();
+                            er.ErrType = "DB";
+                            er.ErrCode = 0;
+                            er.ErrText = "「" + e.Message + "」";
+                            er.ErrDescription = "データベースを更新する処理でエラーが発生し、ロールバックしました。";
+                            er.ErrDatetime = DateTime.Now;
+                            er.ErrPlace = "MainViewModel::AgencySelectedDeleteCommand_Execute()";
+                            ErrorOccured?.Invoke(er);
+                        }
+                    }
+                }
+            }
+        }
+
+        // 業者　追加（画面表示）
+        public ICommand AgencyNewCommand { get; }
+        public bool AgencyNewCommand_CanExecute()
+        {
+            return true;
+        }
+        public void AgencyNewCommand_Execute()
+        {
+            // Agencyオブジェクトを用意
+            AgencyEdit = new Agency(Guid.NewGuid().ToString())
+            {
+                IsNew = true,
+                IsDirty = false
+            };
+
+            ShowAgencyEdit = true;
+        }
+
+        // 業者　編集（画面表示）
+        public ICommand AgencySelectedEditCommand { get; }
+        public bool AgencySelectedEditCommand_CanExecute()
+        {
+            if (AgenciesSelectedItem != null)
+                return true;
+            else
+                return false;
+        }
+        public void AgencySelectedEditCommand_Execute()
+        {
+            if (AgenciesSelectedItem == null) return;
+
+            // Agencyオブジェクトを設定
+            AgencyEdit = AgenciesSelectedItem;
+
+            ShowAgencyEdit = true;
+        }
+
+        // 業者　追加・更新のキャンセル
+        public ICommand AgencyNewOrEditCancelCommand { get; }
+        public bool AgencyNewOrEditCancelCommand_CanExecute()
+        {
+            return true;
+        }
+        public void AgencyNewOrEditCancelCommand_Execute()
+        {
+            // 編集を非表示に（閉じる）
+            if (ShowAgencyEdit) ShowAgencyEdit = false;
+        }
+
+        // 業者　追加または更新処理(InsertOrUpdate)
+        public ICommand AgencyInsertOrUpdateCommand { get; }
+        public bool AgencyInsertOrUpdateCommand_CanExecute()
+        {
+            return true;
+        }
+        public void AgencyInsertOrUpdateCommand_Execute()
+        {
+            if (AgencyEdit == null) return;
+
+            // TODO: 入力チェック
+
+            if (AgencyEdit.IsNew)
+            {
+                // 新規追加
+                try
+                {
+                    string sqlInsertIntoAgency = String.Format("INSERT INTO Agency (Agency_ID, Name, Branch, PostalCode, Address, TelNumber, FaxNumber, Memo) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}', '{7}')",
+                        AgencyEdit.Agency_ID, AgencyEdit.Name, AgencyEdit.Branch, AgencyEdit.PostalCode, AgencyEdit.Address, AgencyEdit.TelNumber, AgencyEdit.FaxNumber, AgencyEdit.Memo);
+
+                    using (var connection = new SqliteConnection(connectionStringBuilder.ConnectionString))
+                    {
+                        connection.Open();
+
+                        using (var cmd = connection.CreateCommand())
+                        {
+                            cmd.Transaction = connection.BeginTransaction();
+                            try
+                            {
+                                // Agencyテーブルへ追加
+                                cmd.CommandText = sqlInsertIntoAgency;
+                                var Result = cmd.ExecuteNonQuery();
+                                if (Result != 1)
+                                {
+                                    AgencyEdit.IsNew = false;
+                                    AgencyEdit.IsDirty = false;
+                                }
+
+                                //　コミット
+                                cmd.Transaction.Commit();
+
+                                // 追加画面を非表示に（閉じる）
+                                ShowAgencyEdit = false;
+                            }
+                            catch (Exception e)
+                            {
+                                // ロールバック
+                                cmd.Transaction.Rollback();
+
+                                // エラーイベント発火
+                                MyError er = new MyError();
+                                er.ErrType = "DB";
+                                er.ErrCode = 0;
+                                er.ErrText = "「" + e.Message + "」";
+                                er.ErrDescription = "データベースに登録する処理でエラーが発生し、ロールバックしました。";
+                                er.ErrDatetime = DateTime.Now;
+                                er.ErrPlace = "MainViewModel::AgencyInsertOrUpdateCommand()";
+                                ErrorOccured?.Invoke(er);
+                            }
+                        }
+                    }
+                }
+                catch (System.Reflection.TargetInvocationException ex)
+                {
+                    System.Diagnostics.Debug.WriteLine("Opps. TargetInvocationException@MainViewModel::AgencyInsertOrUpdateCommand()");
+                    throw ex.InnerException;
+                }
+                catch (System.InvalidOperationException ex)
+                {
+                    System.Diagnostics.Debug.WriteLine("Opps. InvalidOperationException@MainViewModel::AgencyInsertOrUpdateCommand()");
+                    throw ex.InnerException;
+                }
+                catch (Exception e)
+                {
+                    if (e.InnerException != null)
+                    {
+                        System.Diagnostics.Debug.WriteLine(e.InnerException.Message + " @MainViewModel::AgencyInsertOrUpdateCommand()");
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine(e.Message + " @MainViewModel::AgencyInsertOrUpdateCommand()");
+                    }
+                }
+            }
+            else
+            {
+                // 更新
+
+                if (AgenciesSelectedItem == null) return;
+
+                // 編集オブジェクトに格納されている更新された情報をDBへ更新
+
+                string sqlUpdateAgency = String.Format("UPDATE Agency SET Name = '{1}', Branch = '{2}', PostalCode = '{3}', Address = '{4}', TelNumber = '{5}', FaxNumber = '{6}', Memo = '{7}' WHERE Agency_ID = '{0}'",
+                    AgencyEdit.Agency_ID, AgencyEdit.Name, AgencyEdit.Branch, AgencyEdit.PostalCode, AgencyEdit.Address, AgencyEdit.TelNumber, AgencyEdit.FaxNumber, AgencyEdit.Memo);
+
+                using (var connection = new SqliteConnection(connectionStringBuilder.ConnectionString))
+                {
+                    connection.Open();
+
+                    using (var cmd = connection.CreateCommand())
+                    {
+                        cmd.Transaction = connection.BeginTransaction();
+                        try
+                        {
+                            cmd.CommandText = sqlUpdateAgency;
+                            var result = cmd.ExecuteNonQuery();
+                            if (result != 1)
+                            {
+                                //AgencyEdit.IsNew = false;
+                                AgencyEdit.IsDirty = false;
+                            }
+
+                            cmd.Transaction.Commit();
+
+
+                            // 編集画面を非表示に
+                            ShowAgencyEdit = false;
+                        }
+                        catch (Exception e)
+                        {
+                            cmd.Transaction.Rollback();
+
+                            System.Diagnostics.Debug.WriteLine(e.Message + " @MainViewModel::AgencyInsertOrUpdateCommand_Execute()");
+
+                            // エラーイベント発火
+                            MyError er = new MyError();
+                            er.ErrType = "DB";
+                            er.ErrCode = 0;
+                            er.ErrText = "「" + e.Message + "」";
+                            er.ErrDescription = "元付け業者の編集更新 (UPDATE)でエラーが発生し、ロールバックしました。";
+                            er.ErrDatetime = DateTime.Now;
+                            er.ErrPlace = "MainViewModel::AgencyInsertOrUpdateCommand_Execute()";
+                            ErrorOccured?.Invoke(er);
+                        }
+                    }
+                }
+            }
+
+        }
+
+        #endregion
+
+        #region == 管理会社 ==
+
+        // 管理会社　検索
+        public ICommand MaintenanceCompanySearchCommand { get; }
+        public bool MaintenanceCompanySearchCommand_CanExecute()
+        {
+            if (String.IsNullOrEmpty(MaintenanceCompanySearchText))
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+        public void MaintenanceCompanySearchCommand_Execute()
+        {
+            // Firest, clear it.
+            MaintenanceCompanies.Clear();
+
+            using (var connection = new SqliteConnection(connectionStringBuilder.ConnectionString))
+            {
+                connection.Open();
+
+                using (var cmd = connection.CreateCommand())
+                {
+                    cmd.CommandText = "SELECT * FROM MaintenanceCompany WHERE Name Like '%" + MaintenanceCompanySearchText + "%'";
+
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+
+                            MaintenanceCompany mc = new MaintenanceCompany(Convert.ToString(reader["MaintenanceCompany_ID"]));
+                            mc.Name = Convert.ToString(reader["Name"]);
+                            mc.Branch = Convert.ToString(reader["Branch"]);
+                            mc.PostalCode = Convert.ToString(reader["PostalCode"]);
+                            mc.Address = Convert.ToString(reader["Address"]);
+                            mc.TelNumber = Convert.ToString(reader["TelNumber"]);
+                            mc.FaxNumber = Convert.ToString(reader["FaxNumber"]);
+                            mc.Memo = Convert.ToString(reader["Memo"]);
+
+                            mc.IsNew = false;
+                            mc.IsDirty = false;
+
+                            MaintenanceCompanies.Add(mc);
+
+                        }
+                    }
+                }
+            }
+        }
+
+        // 管理会社　一覧
+        public ICommand MaintenanceCompanyListCommand { get; }
+        public bool MaintenanceCompanyListCommand_CanExecute()
+        {
+            return true;
+        }
+        public void MaintenanceCompanyListCommand_Execute()
+        {
+            // Firest, clear it.
+            MaintenanceCompanies.Clear();
+
+            try
+            {
+                using (var connection = new SqliteConnection(connectionStringBuilder.ConnectionString))
+                {
+                    connection.Open();
+
+                    using (var cmd = connection.CreateCommand())
+                    {
+                        cmd.CommandText = "SELECT * FROM MaintenanceCompany";
+
+                        using (var reader = cmd.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+
+                                MaintenanceCompany mc = new MaintenanceCompany(Convert.ToString(reader["MaintenanceCompany_ID"]));
+                                mc.Name = Convert.ToString(reader["Name"]);
+                                mc.Branch = Convert.ToString(reader["Branch"]);
+                                mc.PostalCode = Convert.ToString(reader["PostalCode"]);
+                                mc.Address = Convert.ToString(reader["Address"]);
+                                mc.TelNumber = Convert.ToString(reader["TelNumber"]);
+                                mc.FaxNumber = Convert.ToString(reader["FaxNumber"]);
+                                mc.Memo = Convert.ToString(reader["Memo"]);
+
+                                mc.IsNew = false;
+                                mc.IsDirty = false;
+
+                                MaintenanceCompanies.Add(mc);
+
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                string errmessage;
+                if (e.InnerException != null)
+                {
+                    errmessage = e.InnerException.Message;
+                    System.Diagnostics.Debug.WriteLine(e.InnerException.Message + " @MainViewModel::MaintenanceCompanyListCommand_Execute()");
+                }
+                else
+                {
+                    errmessage = e.Message;
+                    System.Diagnostics.Debug.WriteLine("Exception:'" + e.Message + "' @MainViewModel::MaintenanceCompanyListCommand_Execute()");
+                }
+
+                // エラーイベント発火
+                MyError er = new MyError();
+                er.ErrType = "DB";
+                er.ErrCode = 0;
+                er.ErrText = "「" + errmessage + "」";
+                er.ErrDescription = "管理会社を一覧（SELECT）する処理でエラーが発生しました。";
+                er.ErrDatetime = DateTime.Now;
+                er.ErrPlace = "In " + e.Source + " from MainViewModel::MaintenanceCompanyListCommand_Execute()";
+                ErrorOccured?.Invoke(er);
+            }
+
+
+        }
+
+        // 管理会社　一覧選択アイテム削除（DELETE）
+        public ICommand MaintenanceCompanySelectedDeleteCommand { get; }
+        public bool MaintenanceCompanySelectedDeleteCommand_CanExecute()
+        {
+            if (MaintenanceCompaniesSelectedItem != null)
+                return true;
+            else
+                return false;
+        }
+        public void MaintenanceCompanySelectedDeleteCommand_Execute()
+        {
+            if (MaintenanceCompaniesSelectedItem != null)
+            {
+                // 選択アイテムのデータを削除
+
+                string sqlDelete = String.Format("DELETE FROM MaintenanceCompany WHERE MaintenanceCompany_ID = '{0}'", 
+                    MaintenanceCompaniesSelectedItem.MaintenanceCompany_ID);
+
+                using (var connection = new SqliteConnection(connectionStringBuilder.ConnectionString))
+                {
+                    connection.Open();
+
+                    using (var cmd = connection.CreateCommand())
+                    {
+                        cmd.Transaction = connection.BeginTransaction();
+                        try
+                        {
+
+                            cmd.CommandText = sqlDelete;
+                            var result = cmd.ExecuteNonQuery();
+
+                            cmd.Transaction.Commit();
+
+                            // 一覧から削除
+                            if (MaintenanceCompanies.Remove(MaintenanceCompaniesSelectedItem))
+                            {
+                                MaintenanceCompaniesSelectedItem = null;
+                            }
+
+                        }
+                        catch (Exception e)
+                        {
+                            cmd.Transaction.Rollback();
+
+                            System.Diagnostics.Debug.WriteLine(e.Message + " @MaintenanceCompanySelectedDeleteCommand_Execute()");
+
+                            // エラーイベント発火
+                            MyError er = new MyError();
+                            er.ErrType = "DB";
+                            er.ErrCode = 0;
+                            er.ErrText = "「" + e.Message + "」";
+                            er.ErrDescription = "データベースを更新する処理でエラーが発生し、ロールバックしました。";
+                            er.ErrDatetime = DateTime.Now;
+                            er.ErrPlace = "MainViewModel::MaintenanceCompanySelectedDeleteCommand_Execute()";
+                            ErrorOccured?.Invoke(er);
+                        }
+                    }
+                }
+            }
+        }
+
+        // 管理会社　追加（画面表示）
+        public ICommand MaintenanceCompanyNewCommand { get; }
+        public bool MaintenanceCompanyNewCommand_CanExecute()
+        {
+            return true;
+        }
+        public void MaintenanceCompanyNewCommand_Execute()
+        {
+            // MaintenanceCompany
+            MaintenanceCompanyEdit = new MaintenanceCompany(Guid.NewGuid().ToString())
+            {
+                IsNew = true,
+                IsDirty = false
+            };
+
+            ShowMaintenanceCompanyEdit = true;
+        }
+
+        // 管理会社　編集（画面表示）
+        public ICommand MaintenanceCompanySelectedEditCommand { get; }
+        public bool MaintenanceCompanySelectedEditCommand_CanExecute()
+        {
+            if (MaintenanceCompaniesSelectedItem != null)
+                return true;
+            else
+                return false;
+        }
+        public void MaintenanceCompanySelectedEditCommand_Execute()
+        {
+            if (MaintenanceCompaniesSelectedItem == null) return;
+
+            // MaintenanceCompanyオブジェクトを設定
+            MaintenanceCompanyEdit = MaintenanceCompaniesSelectedItem;
+
+            ShowMaintenanceCompanyEdit = true;
+        }
+
+        // 管理会社　追加・更新のキャンセル
+        public ICommand MaintenanceCompanyNewOrEditCancelCommand { get; }
+        public bool MaintenanceCompanyNewOrEditCancelCommand_CanExecute()
+        {
+            return true;
+        }
+        public void MaintenanceCompanyNewOrEditCancelCommand_Execute()
+        {
+            // 編集を非表示に（閉じる）
+            ShowMaintenanceCompanyEdit = false;
+        }
+
+        // 管理会社　追加または更新処理(InsertOrUpdate)
+        public ICommand MaintenanceCompanyInsertOrUpdateCommand { get; }
+        public bool MaintenanceCompanyInsertOrUpdateCommand_CanExecute()
+        {
+            return true;
+        }
+        public void MaintenanceCompanyInsertOrUpdateCommand_Execute()
+        {
+            if (MaintenanceCompanyEdit == null) return;
+
+            // TODO: 入力チェック
+
+            if (MaintenanceCompanyEdit.IsNew)
+            {
+                // 新規追加
+                try
+                {
+                    string sqlInsertInto = String.Format("INSERT INTO MaintenanceCompany (MaintenanceCompany_ID, Name, Branch, PostalCode, Address, TelNumber, FaxNumber, Memo) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}', '{7}')",
+                        MaintenanceCompanyEdit.MaintenanceCompany_ID, MaintenanceCompanyEdit.Name, MaintenanceCompanyEdit.Branch, MaintenanceCompanyEdit.PostalCode, MaintenanceCompanyEdit.Address, MaintenanceCompanyEdit.TelNumber, MaintenanceCompanyEdit.FaxNumber, MaintenanceCompanyEdit.Memo);
+
+                    using (var connection = new SqliteConnection(connectionStringBuilder.ConnectionString))
+                    {
+                        connection.Open();
+
+                        using (var cmd = connection.CreateCommand())
+                        {
+                            cmd.Transaction = connection.BeginTransaction();
+                            try
+                            {
+                                // テーブルへ追加
+                                cmd.CommandText = sqlInsertInto;
+                                var Result = cmd.ExecuteNonQuery();
+                                if (Result != 1)
+                                {
+                                    MaintenanceCompanyEdit.IsNew = false;
+                                    MaintenanceCompanyEdit.IsDirty = false;
+                                }
+
+                                //　コミット
+                                cmd.Transaction.Commit();
+
+                                // 追加画面を非表示に（閉じる）
+                                ShowMaintenanceCompanyEdit = false;
+                            }
+                            catch (Exception e)
+                            {
+                                // ロールバック
+                                cmd.Transaction.Rollback();
+
+                                // エラーイベント発火
+                                MyError er = new MyError();
+                                er.ErrType = "DB";
+                                er.ErrCode = 0;
+                                er.ErrText = "「" + e.Message + "」";
+                                er.ErrDescription = "データベースに登録する処理でエラーが発生し、ロールバックしました。";
+                                er.ErrDatetime = DateTime.Now;
+                                er.ErrPlace = "MainViewModel::MaintenanceCompanyInsertOrUpdateCommand_Execute()";
+                                ErrorOccured?.Invoke(er);
+                            }
+                        }
+                    }
+                }
+                catch (System.Reflection.TargetInvocationException ex)
+                {
+                    System.Diagnostics.Debug.WriteLine("Opps. TargetInvocationException@MainViewModel::MaintenanceCompanyInsertOrUpdateCommand_Execute()");
+                    throw ex.InnerException;
+                }
+                catch (System.InvalidOperationException ex)
+                {
+                    System.Diagnostics.Debug.WriteLine("Opps. InvalidOperationException@MainViewModel::MaintenanceCompanyInsertOrUpdateCommand_Execute()");
+                    throw ex.InnerException;
+                }
+                catch (Exception e)
+                {
+                    if (e.InnerException != null)
+                    {
+                        System.Diagnostics.Debug.WriteLine(e.InnerException.Message + " @MainViewModel::MaintenanceCompanyInsertOrUpdateCommand_Execute()");
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine(e.Message + " @MainViewModel::MaintenanceCompanyInsertOrUpdateCommand_Execute()");
+                    }
+                }
+            }
+            else
+            {
+                // 更新
+
+                if (MaintenanceCompaniesSelectedItem == null) return;
+
+                // 編集オブジェクトに格納されている更新された情報をDBへ更新
+
+                string sqlUpdate = String.Format("UPDATE MaintenanceCompany SET Name = '{1}', Branch = '{2}', PostalCode = '{3}', Address = '{4}', TelNumber = '{5}', FaxNumber = '{6}', Memo = '{7}' WHERE Agency_ID = '{0}'",
+                    MaintenanceCompanyEdit.MaintenanceCompany_ID, MaintenanceCompanyEdit.Name, MaintenanceCompanyEdit.Branch, MaintenanceCompanyEdit.PostalCode, MaintenanceCompanyEdit.Address, MaintenanceCompanyEdit.TelNumber, MaintenanceCompanyEdit.FaxNumber, MaintenanceCompanyEdit.Memo);
+
+                using (var connection = new SqliteConnection(connectionStringBuilder.ConnectionString))
+                {
+                    connection.Open();
+
+                    using (var cmd = connection.CreateCommand())
+                    {
+                        cmd.Transaction = connection.BeginTransaction();
+                        try
+                        {
+                            cmd.CommandText = sqlUpdate;
+                            var result = cmd.ExecuteNonQuery();
+                            if (result != 1)
+                            {
+                                //MaintenanceCompanyEdit.IsNew = false;
+                                MaintenanceCompanyEdit.IsDirty = false;
+                            }
+
+                            cmd.Transaction.Commit();
+
+
+                            // 編集画面を非表示に
+                            ShowMaintenanceCompanyEdit = false;
+                        }
+                        catch (Exception e)
+                        {
+                            cmd.Transaction.Rollback();
+
+                            System.Diagnostics.Debug.WriteLine(e.Message + " @MainViewModel::MaintenanceCompanyInsertOrUpdateCommand_Execute()");
+
+                            // エラーイベント発火
+                            MyError er = new MyError();
+                            er.ErrType = "DB";
+                            er.ErrCode = 0;
+                            er.ErrText = "「" + e.Message + "」";
+                            er.ErrDescription = "管理会社の編集更新 (UPDATE)でエラーが発生し、ロールバックしました。";
+                            er.ErrDatetime = DateTime.Now;
+                            er.ErrPlace = "MainViewModel::MaintenanceCompanyInsertOrUpdateCommand_Execute()";
+                            ErrorOccured?.Invoke(er);
+                        }
+                    }
+                }
+            }
+        }
+
+        #endregion
+
+        #region == オーナー ==
+
+        // オーナー　検索
+        public ICommand OwnerSearchCommand { get; }
+        public bool OwnerSearchCommand_CanExecute()
+        {
+            if (String.IsNullOrEmpty(OwnerSearchText))
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+        public void OwnerSearchCommand_Execute()
+        {
+            // Firest, clear it.
+            Owners.Clear();
+
+            using (var connection = new SqliteConnection(connectionStringBuilder.ConnectionString))
+            {
+                connection.Open();
+
+                using (var cmd = connection.CreateCommand())
+                {
+                    cmd.CommandText = "SELECT * FROM Owner WHERE Name Like '%" + OwnerSearchText + "%'";
+
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+
+                            Owner o = new Owner(Convert.ToString(reader["Owner_ID"]));
+                            o.Name = Convert.ToString(reader["Name"]);
+                            o.PostalCode = Convert.ToString(reader["PostalCode"]);
+                            o.Address = Convert.ToString(reader["Address"]);
+                            o.TelNumber = Convert.ToString(reader["TelNumber"]);
+                            o.FaxNumber = Convert.ToString(reader["FaxNumber"]);
+                            o.Memo = Convert.ToString(reader["Memo"]);
+
+                            o.IsNew = false;
+                            o.IsDirty = false;
+
+                            Owners.Add(o);
+
+                        }
+                    }
+                }
+            }
+        }
+
+        // オーナー　一覧
+        public ICommand OwnerListCommand { get; }
+        public bool OwnerListCommand_CanExecute()
+        {
+            return true;
+        }
+        public void OwnerListCommand_Execute()
+        {
+            // Firest, clear it.
+            Owners.Clear();
+
+            try
+            {
+                using (var connection = new SqliteConnection(connectionStringBuilder.ConnectionString))
+                {
+                    connection.Open();
+
+                    using (var cmd = connection.CreateCommand())
+                    {
+                        cmd.CommandText = "SELECT * FROM Owner";
+
+                        using (var reader = cmd.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+
+                                Owner o = new Owner(Convert.ToString(reader["Owner_ID"]));
+                                o.Name = Convert.ToString(reader["Name"]);
+                                o.PostalCode = Convert.ToString(reader["PostalCode"]);
+                                o.Address = Convert.ToString(reader["Address"]);
+                                o.TelNumber = Convert.ToString(reader["TelNumber"]);
+                                o.FaxNumber = Convert.ToString(reader["FaxNumber"]);
+                                o.Memo = Convert.ToString(reader["Memo"]);
+
+                                o.IsNew = false;
+                                o.IsDirty = false;
+
+                                Owners.Add(o);
+
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                string errmessage;
+                if (e.InnerException != null)
+                {
+                    errmessage = e.InnerException.Message;
+                    System.Diagnostics.Debug.WriteLine(e.InnerException.Message + " @MainViewModel::OwnerListCommand_Execute()");
+                }
+                else
+                {
+                    errmessage = e.Message;
+                    System.Diagnostics.Debug.WriteLine("Exception:'" + e.Message + "' @MainViewModel::OwnerListCommand_Execute()");
+                }
+
+                // エラーイベント発火
+                MyError er = new MyError();
+                er.ErrType = "DB";
+                er.ErrCode = 0;
+                er.ErrText = "「" + errmessage + "」";
+                er.ErrDescription = "オーナーを一覧（SELECT）する処理でエラーが発生しました。";
+                er.ErrDatetime = DateTime.Now;
+                er.ErrPlace = "In " + e.Source + " from MainViewModel::OwnerListCommand_Execute()";
+                ErrorOccured?.Invoke(er);
+            }
+
+
+        }
+
+        // オーナー　一覧選択アイテム削除（DELETE）
+        public ICommand OwnerSelectedDeleteCommand { get; }
+        public bool OwnerSelectedDeleteCommand_CanExecute()
+        {
+            if (OwnersSelectedItem != null)
+                return true;
+            else
+                return false;
+        }
+        public void OwnerSelectedDeleteCommand_Execute()
+        {
+            if (OwnersSelectedItem != null)
+            {
+                // 選択アイテムのデータを削除
+
+                string sqlDelete = String.Format("DELETE FROM Owner WHERE Owner_ID = '{0}'",
+                    OwnersSelectedItem.Owner_ID);
+
+                using (var connection = new SqliteConnection(connectionStringBuilder.ConnectionString))
+                {
+                    connection.Open();
+
+                    using (var cmd = connection.CreateCommand())
+                    {
+                        cmd.Transaction = connection.BeginTransaction();
+                        try
+                        {
+
+                            cmd.CommandText = sqlDelete;
+                            var result = cmd.ExecuteNonQuery();
+
+                            cmd.Transaction.Commit();
+
+                            // 一覧から削除
+                            if (Owners.Remove(OwnersSelectedItem))
+                            {
+                                OwnersSelectedItem = null;
+                            }
+
+                        }
+                        catch (Exception e)
+                        {
+                            cmd.Transaction.Rollback();
+
+                            System.Diagnostics.Debug.WriteLine(e.Message + " @OwnerSelectedDeleteCommand_Execute()");
+
+                            // エラーイベント発火
+                            MyError er = new MyError();
+                            er.ErrType = "DB";
+                            er.ErrCode = 0;
+                            er.ErrText = "「" + e.Message + "」";
+                            er.ErrDescription = "データベースを更新する処理でエラーが発生し、ロールバックしました。";
+                            er.ErrDatetime = DateTime.Now;
+                            er.ErrPlace = "MainViewModel::OwnerSelectedDeleteCommand_Execute()";
+                            ErrorOccured?.Invoke(er);
+                        }
+                    }
+                }
+            }
+        }
+
+        // オーナー　追加（画面表示）
+        public ICommand OwnerNewCommand { get; }
+        public bool OwnerNewCommand_CanExecute()
+        {
+            return true;
+        }
+        public void OwnerNewCommand_Execute()
+        {
+            // Owner
+            OwnerEdit = new Owner(Guid.NewGuid().ToString())
+            {
+                IsNew = true,
+                IsDirty = false
+            };
+
+            ShowOwnerEdit = true;
+        }
+
+        // オーナー　編集（画面表示）
+        public ICommand OwnerSelectedEditCommand { get; }
+        public bool OwnerSelectedEditCommand_CanExecute()
+        {
+            if (OwnersSelectedItem != null)
+                return true;
+            else
+                return false;
+        }
+        public void OwnerSelectedEditCommand_Execute()
+        {
+            if (OwnersSelectedItem == null) return;
+
+            // Owner
+            OwnerEdit = OwnersSelectedItem;
+
+            ShowOwnerEdit = true;
+        }
+
+        // オーナー　追加・更新のキャンセル
+        public ICommand OwnerNewOrEditCancelCommand { get; }
+        public bool OwnerNewOrEditCancelCommand_CanExecute()
+        {
+            return true;
+        }
+        public void OwnerNewOrEditCancelCommand_Execute()
+        {
+            // 編集を非表示に（閉じる）
+            ShowOwnerEdit = false;
+        }
+
+        // オーナー　追加または更新処理(InsertOrUpdate)
+        public ICommand OwnerInsertOrUpdateCommand { get; }
+        public bool OwnerInsertOrUpdateCommand_CanExecute()
+        {
+            return true;
+        }
+        public void OwnerInsertOrUpdateCommand_Execute()
+        {
+            if (OwnerEdit == null) return;
+
+            // TODO: 入力チェック
+
+            if (OwnerEdit.IsNew)
+            {
+                // 新規追加
+                try
+                {
+                    string sqlInsertInto = String.Format("INSERT INTO Owner (Owner_ID, Name, PostalCode, Address, TelNumber, FaxNumber, Memo) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}')",
+                        OwnerEdit.Owner_ID, OwnerEdit.Name, OwnerEdit.PostalCode, OwnerEdit.Address, OwnerEdit.TelNumber, OwnerEdit.FaxNumber, OwnerEdit.Memo);
+
+                    using (var connection = new SqliteConnection(connectionStringBuilder.ConnectionString))
+                    {
+                        connection.Open();
+
+                        using (var cmd = connection.CreateCommand())
+                        {
+                            cmd.Transaction = connection.BeginTransaction();
+                            try
+                            {
+                                // テーブルへ追加
+                                cmd.CommandText = sqlInsertInto;
+                                var Result = cmd.ExecuteNonQuery();
+                                if (Result != 1)
+                                {
+                                    OwnerEdit.IsNew = false;
+                                    OwnerEdit.IsDirty = false;
+                                }
+
+                                //　コミット
+                                cmd.Transaction.Commit();
+
+                                // 追加画面を非表示に（閉じる）
+                                ShowOwnerEdit = false;
+                            }
+                            catch (Exception e)
+                            {
+                                // ロールバック
+                                cmd.Transaction.Rollback();
+
+                                // エラーイベント発火
+                                MyError er = new MyError();
+                                er.ErrType = "DB";
+                                er.ErrCode = 0;
+                                er.ErrText = "「" + e.Message + "」";
+                                er.ErrDescription = "データベースに登録する処理でエラーが発生し、ロールバックしました。";
+                                er.ErrDatetime = DateTime.Now;
+                                er.ErrPlace = "MainViewModel::OwnerInsertOrUpdateCommand_Execute()";
+                                ErrorOccured?.Invoke(er);
+                            }
+                        }
+                    }
+                }
+                catch (System.Reflection.TargetInvocationException ex)
+                {
+                    System.Diagnostics.Debug.WriteLine("Opps. TargetInvocationException@MainViewModel::OwnerInsertOrUpdateCommand_Execute()");
+                    throw ex.InnerException;
+                }
+                catch (System.InvalidOperationException ex)
+                {
+                    System.Diagnostics.Debug.WriteLine("Opps. InvalidOperationException@MainViewModel::OwnerInsertOrUpdateCommand_Execute()");
+                    throw ex.InnerException;
+                }
+                catch (Exception e)
+                {
+                    if (e.InnerException != null)
+                    {
+                        System.Diagnostics.Debug.WriteLine(e.InnerException.Message + " @MainViewModel::OwnerInsertOrUpdateCommand_Execute()");
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine(e.Message + " @MainViewModel::OwnerInsertOrUpdateCommand_Execute()");
+                    }
+                }
+            }
+            else
+            {
+                // 更新
+
+                if (OwnersSelectedItem == null) return;
+
+                // 編集オブジェクトに格納されている更新された情報をDBへ更新
+
+                string sqlUpdate = String.Format("UPDATE Owner SET Name = '{1}', PostalCode = '{2}', Address = '{3}', TelNumber = '{4}', FaxNumber = '{5}', Memo = '{6}' WHERE Owner_ID = '{0}'",
+                    OwnerEdit.Owner_ID, OwnerEdit.Name, OwnerEdit.PostalCode, OwnerEdit.Address, OwnerEdit.TelNumber, OwnerEdit.FaxNumber, OwnerEdit.Memo);
+
+                using (var connection = new SqliteConnection(connectionStringBuilder.ConnectionString))
+                {
+                    connection.Open();
+
+                    using (var cmd = connection.CreateCommand())
+                    {
+                        cmd.Transaction = connection.BeginTransaction();
+                        try
+                        {
+                            cmd.CommandText = sqlUpdate;
+                            var result = cmd.ExecuteNonQuery();
+                            if (result != 1)
+                            {
+                                //OwnerEdit.IsNew = false;
+                                OwnerEdit.IsDirty = false;
+                            }
+
+                            cmd.Transaction.Commit();
+
+
+                            // 編集画面を非表示に
+                            ShowOwnerEdit = false;
+                        }
+                        catch (Exception e)
+                        {
+                            cmd.Transaction.Rollback();
+
+                            System.Diagnostics.Debug.WriteLine(e.Message + " @MainViewModel::OwnerInsertOrUpdateCommand_Execute()");
+
+                            // エラーイベント発火
+                            MyError er = new MyError();
+                            er.ErrType = "DB";
+                            er.ErrCode = 0;
+                            er.ErrText = "「" + e.Message + "」";
+                            er.ErrDescription = "オーナーの編集更新 (UPDATE)でエラーが発生し、ロールバックしました。";
+                            er.ErrDatetime = DateTime.Now;
+                            er.ErrPlace = "MainViewModel::OwnerInsertOrUpdateCommand_Execute()";
+                            ErrorOccured?.Invoke(er);
+                        }
+                    }
+                }
+            }
+        }
 
         #endregion
 

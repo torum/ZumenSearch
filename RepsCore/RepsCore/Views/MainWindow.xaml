@@ -3,12 +3,14 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
         xmlns:local="clr-namespace:RepsCore"
         xmlns:common="clr-namespace:RepsCore.Common"
         xmlns:vms="clr-namespace:RepsCore.ViewModels"
         mc:Ignorable="d"
-        Height="700" Width="800"
-        MinHeight="470" MinWidth="430" 
+        WindowStartupLocation="CenterScreen"
+        Width="1024" Height="768" 
+        MinWidth="800" MinHeight="600"
         DataContext="{StaticResource MainViewModel}"
         Title="{Binding AppTitle}" >
     <Grid>
@@ -31,8 +33,7 @@
                 <ColumnDefinition Width="50"/>
             </Grid.ColumnDefinitions>
 
-            <TextBox Padding="3" Margin="6" Text="{Binding ErrorText,Mode=OneWay}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" HorizontalScrollBarVisibility="Disabled"
-VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch"></TextBox>
+            <TextBox Padding="3" Margin="6" Text="{Binding ErrorText,Mode=OneWay}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch"></TextBox>
             <Button x:Name="ButtonCloseErrorDialog" FontFamily="Segoe UI Symbol" Content="&#57610;" Command="{Binding CloseErrorCommand}" Grid.Row="0" Grid.Column="1" Width="24" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center">
             </Button>
             <!-- Symbol Enum
@@ -40,7 +41,7 @@ VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch"></TextBox>
             -->
         </Grid>
 
-        <TabControl Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" TabStripPlacement="Left">
+        <TabControl Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" TabStripPlacement="Left" SelectedIndex="1">
             
             <TabItem Header="ホーム" Width="120" Padding="6">
                 <Grid Background="#FFE5E5E5">
@@ -179,7 +180,7 @@ VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch"></TextBox>
 
                     <TabControl HorizontalAlignment="Stretch" VerticalAlignment="Stretch" TabStripPlacement="Top" Margin="6" SelectedIndex="{Binding ShowRentLivingTabActiveIndex, Mode=TwoWay}">
 
-                        <TabItem Header="物件一覧" Width="120" Visibility="{Binding ShowRentLivingSearchList, Converter={StaticResource BoolToVisibilityCollapsedConverter}}">
+                        <TabItem Header="賃貸住居用物件" Width="120" Visibility="{Binding ShowRentLivingSearchList, Converter={StaticResource BoolToVisibilityCollapsedConverter}}">
 
                             <Grid Visibility="{Binding ShowRentLivingSearchList, Converter={StaticResource BoolToVisibilityCollapsedConverter}}">
                                 <Grid.RowDefinitions>
@@ -204,9 +205,9 @@ VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch"></TextBox>
 
                                     <TextBox Text="{Binding RentLivingEditSearchText, UpdateSourceTrigger=PropertyChanged}" Grid.Row="0" Grid.Column="0" Width="212" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"></TextBox>
 
-                                    <Button x:Name="ButtonSearchEditRL" Content="検索" Command="{Binding RentLivingEditSearchCommand}" Grid.Row="0" Grid.Column="1" Width="100" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
+                                    <Button Content="検索" Command="{Binding RentLivingEditSearchCommand}" Grid.Row="0" Grid.Column="1" Width="100" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
 
-                                    <Button x:Name="ButtonListEditRL" Content="一覧" Command="{Binding RentLivingEditListCommand}" Grid.Row="0" Grid.Column="2" Width="100" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
+                                    <Button Content="一覧" Command="{Binding RentLivingEditListCommand}" Grid.Row="0" Grid.Column="2" Width="100" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
 
                                 </Grid>
 
@@ -223,9 +224,7 @@ VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch"></TextBox>
 
                                     <Button x:Name="ButtonAddRL" Content="新規追加" Command="{Binding RentLivingNewCommand}" Grid.Row="0" Grid.Column="0" Width="100" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"/>
 
-                                    <Button x:Name="ButtonEditRL" Content="編集" Command="{Binding RentLivingEditSelectedEditCommand}" Grid.Row="0" Grid.Column="1" Width="100" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
-
-                                    <Button x:Name="ButtonViewRL" Content="表示" Command="{Binding RentLivingEditSelectedViewCommand}" Grid.Row="0" Grid.Column="2" Width="100" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
+                                    <Button x:Name="ButtonEditRL" Content="編集" Command="{Binding RentLivingEditSelectedEditCommand}" Grid.Row="0" Grid.Column="2" Width="100" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
 
                                     <Button x:Name="ButtonDeleteRL" Content="削除" Command="{Binding RentLivingEditSelectedDeleteCommand}" Grid.Row="0" Grid.Column="3" Width="100" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
 
@@ -235,7 +234,7 @@ VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch"></TextBox>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="50"/>
                                         <ColumnDefinition Width="2*"/>
-                                        <ColumnDefinition Width="100" />
+                                        <ColumnDefinition Width="90" />
                                         <ColumnDefinition Width="4*"/>
                                         <ColumnDefinition Width="2*"/>
                                         <ColumnDefinition Width="2*"/>
@@ -363,6 +362,13 @@ VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch"></TextBox>
                                                     </StackPanel>
                                                 </GroupBox>
 
+                                                <GroupBox Header="物件所有権" Margin="10" Padding="10">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <RadioButton Content="一棟所有" Margin="3" GroupName="RentOwnership" IsChecked="{Binding Path=RentLivingNew.Ownership, ConverterParameter={x:Static vms:RentOwnerships.All}, Converter={StaticResource EnumBooleanConverter}}"></RadioButton>
+                                                        <RadioButton Content="区分所有" Margin="3" GroupName="RentOwnership" IsChecked="{Binding Path=RentLivingNew.Ownership, ConverterParameter={x:Static vms:RentOwnerships.Unit}, Converter={StaticResource EnumBooleanConverter}}"></RadioButton>
+                                                    </StackPanel>
+                                                </GroupBox>
+
                                                 <Label Content="階建て："/>
                                                 <TextBox Text="{Binding RentLivingNew.Floors}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
                                                 <Label Content="地下階数："/>
@@ -370,9 +376,10 @@ VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch"></TextBox>
                                                 <Label Content="築年（例 2007）："/>
                                                 <TextBox Text="{Binding RentLivingNew.BuiltYear}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
 
-                                                <!-- 建物写真と募集図面PDFの追加 -->
+                                                <!-- 建物写真の追加 -->
                                                 <GroupBox Header="物件外観写真" Margin="10" Padding="10">
                                                     <StackPanel HorizontalAlignment="Left">
+
                                                         <StackPanel Orientation="Horizontal">
                                                             <Button Width="130" Margin="3" Command="{Binding RentLivingNewPictureAddCommand}">写真の追加</Button>
                                                         </StackPanel>
@@ -428,6 +435,7 @@ VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch"></TextBox>
 
                                             <TabItem Header="部屋一覧" Visibility="{Binding ShowRentLivingNewSectionList, Converter={StaticResource BoolToVisibilityCollapsedConverter}}">
                                                 <StackPanel>
+                                                    
                                                     <StackPanel Orientation="Horizontal">
 
                                                         <Button Width="130" Margin="3" HorizontalAlignment="Left" Command="{Binding RentLivingNewSectionNewCommand}">部屋の追加</Button>
@@ -436,6 +444,7 @@ VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch"></TextBox>
                                                         <Button Width="130" Margin="3" HorizontalAlignment="Left" Command="{Binding RentLivingNewSectionDeleteCommand}">部屋の削除</Button>
 
                                                     </StackPanel>
+                                                    
                                                     <ListView  Margin="3" ItemsSource="{Binding RentLivingNew.RentLivingSections}" SelectedItem="{Binding RentLivingNewSectionSelectedItem}">
                                                         <ListView.View>
                                                             <GridView>
@@ -470,6 +479,7 @@ VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch"></TextBox>
                                                             </GridView>
                                                         </ListView.View>
                                                     </ListView>
+                                                    
                                                 </StackPanel>
                                             </TabItem>
 
@@ -497,6 +507,7 @@ VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch"></TextBox>
                                                             <!-- 部屋写真 -->
                                                             <GroupBox Header="部屋写真" Margin="10" Padding="10">
                                                                 <StackPanel HorizontalAlignment="Left">
+                                                                    
                                                                     <StackPanel Orientation="Horizontal">
                                                                         <Button Width="130" Margin="3" Command="{Binding RentLivingNewSectionNewPictureAddCommand}">写真の追加</Button>
                                                                     </StackPanel>
@@ -576,6 +587,7 @@ VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch"></TextBox>
                                                             <!-- 部屋写真 -->
                                                             <GroupBox Header="部屋写真" Margin="10" Padding="10">
                                                                 <StackPanel HorizontalAlignment="Left">
+                                                                    
                                                                     <StackPanel Orientation="Horizontal">
                                                                         <Button Width="130" Margin="3" Command="{Binding RentLivingNewSectionEditPictureAddCommand}">写真の追加</Button>
                                                                     </StackPanel>
@@ -635,14 +647,6 @@ VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch"></TextBox>
                                         </TabControl>
                                         
                                     </TabItem>
-                                    
-                                    <TabItem Header="管理会社" Width="120">
-                                        <ScrollViewer>
-                                            <StackPanel>
-
-                                            </StackPanel>
-                                        </ScrollViewer>
-                                    </TabItem>
 
                                     <TabItem Header="元付け業者" Width="120">
                                         <ScrollViewer>
@@ -654,6 +658,127 @@ VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch"></TextBox>
                                     
                                     <TabItem Header="オーナー" Width="120">
                                         
+                                    </TabItem>
+                                    
+                                    <TabItem Header="募集図面" Width="120">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="*"/>
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <StackPanel Grid.Row="0" Orientation="Horizontal">
+                                                <Button Width="130" Margin="3" Command="{Binding RentLivingNewZumenPdfAddCommand}">図面の追加</Button>
+                                            </StackPanel>
+                                            
+                                            <!--
+                                            <wv2:WebView2 Grid.Row="1" Name="webView" Source="https://www.microsoft.com"/>
+                                            -->
+
+                                            <ListView Grid.Row="1" ItemsSource="{Binding RentLivingNew.RentLivingZumenPDFs}" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                                <ListView.InputBindings>
+                                                    <!-- エンター!! -->
+                                                    <KeyBinding Key="Enter" Command="{Binding Path=DataContext.RentLivingNewZumenPdfEnterCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" />
+                                                </ListView.InputBindings>
+                                                <ListView.Resources>
+                                                    <ContextMenu x:Key="ATItemContextMenu">
+                                                        <MenuItem Header="表示" Command="{Binding Path=DataContext.RentLivingNewZumenPdfShowCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItems, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"></MenuItem>
+                                                        <Separator/>
+                                                        <MenuItem Header="削除" Command="{Binding Path=DataContext.RentLivingNewZumenPdfDeleteCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItems, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
+                                                            <MenuItem.Resources>
+                                                                <ControlTemplate x:Key="CancelIcon">
+                                                                    <Canvas Background="Transparent" >
+                                                                        <Path Fill="#373737" Width="14.3775" Height="14" Canvas.Left="0.311264" Canvas.Top="0.500005" Stretch="Uniform" Data="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12C4,13.85 4.63,15.55 5.68,16.91L16.91,5.68C15.55,4.63 13.85,4 12,4M12,20A8,8 0 0,0 20,12C20,10.15 19.37,8.45 18.32,7.09L7.09,18.32C8.45,19.37 10.15,20 12,20Z" />
+                                                                    </Canvas>
+                                                                </ControlTemplate>
+                                                            </MenuItem.Resources>
+                                                            <MenuItem.Icon>
+                                                                <ContentControl Template="{StaticResource CancelIcon}" />
+                                                            </MenuItem.Icon>
+                                                        </MenuItem>
+                                                    </ContextMenu>
+                                                </ListView.Resources>
+                                                <ListView.ItemContainerStyle>
+                                                    <Style TargetType="ListViewItem">
+                                                        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                                        <Setter Property="ContextMenu" Value="{StaticResource ATItemContextMenu}" />
+                                                        <Setter Property="Template">
+                                                            <Setter.Value>
+                                                                <ControlTemplate TargetType="{x:Type ListViewItem}">
+                                                                    <Border Name="Border" Margin="{TemplateBinding Margin}" Padding="{TemplateBinding Padding}" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" ClipToBounds="{TemplateBinding ClipToBounds}" CornerRadius="0" SnapsToDevicePixels="true">
+                                                                        <GridViewRowPresenter VerticalAlignment="{TemplateBinding VerticalContentAlignment}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+
+                                                                        <Border.InputBindings>
+                                                                            <!-- ダブルクリック!! -->
+                                                                            <MouseBinding Command="{Binding Path=DataContext.RentLivingNewZumenPdfEnterCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" Gesture="LeftDoubleClick" />
+                                                                        </Border.InputBindings>
+                                                                    </Border>
+                                                                </ControlTemplate>
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                        <Style.Triggers>
+                                                            <Trigger Property="ItemsControl.AlternationIndex" Value="0">
+                                                                <Setter Property="BorderThickness" Value="1" />
+                                                            </Trigger>
+                                                            <Trigger Property="ItemsControl.AlternationIndex" Value="1">
+                                                                <Setter Property="BorderThickness" Value="1" />
+                                                            </Trigger>
+                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                <Setter Property="TextElement.FontWeight" Value="SemiBold"/>
+                                                                <Setter Property="BorderThickness" Value="1" />
+                                                            </Trigger>
+                                                            <Trigger Property="IsSelected" Value="True">
+                                                                <Setter Property="TextElement.FontWeight" Value="Bold"/>
+                                                                <Setter Property="BorderThickness" Value="1" />
+                                                            </Trigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </ListView.ItemContainerStyle>
+                                                <ListView.View>
+                                                    <GridView>
+                                                        <GridViewColumn Header="ID" Width="120">
+                                                            <GridViewColumn.CellTemplate>
+                                                                <DataTemplate>
+                                                                    <TextBlock Text="{Binding RentZumenPDF_ID, Mode=OneWay}" Padding="3"/>
+                                                                </DataTemplate>
+                                                            </GridViewColumn.CellTemplate>
+                                                        </GridViewColumn>
+                                                        <GridViewColumn Header="登録日" Width="150">
+                                                            <GridViewColumn.CellTemplate>
+                                                                <DataTemplate>
+                                                                    <TextBlock Text="{Binding DateTimeAdded, Mode=OneWay, StringFormat=yyyy/MM/dd HH:mm:ss}" Padding="3"/>
+                                                                </DataTemplate>
+                                                            </GridViewColumn.CellTemplate>
+                                                        </GridViewColumn>
+                                                        <GridViewColumn Header="情報公開日" Width="150">
+                                                            <GridViewColumn.CellTemplate>
+                                                                <DataTemplate>
+                                                                    <TextBlock Text="{Binding DateTimePublished, Mode=OneWay, StringFormat=yyyy/MM/dd HH:mm:ss}" Padding="3"/>
+                                                                </DataTemplate>
+                                                            </GridViewColumn.CellTemplate>
+                                                        </GridViewColumn>
+                                                        <GridViewColumn Header="最終確認日" Width="150">
+                                                            <GridViewColumn.CellTemplate>
+                                                                <DataTemplate>
+                                                                    <TextBlock Text="{Binding DateTimeVerified, Mode=OneWay, StringFormat=yyyy/MM/dd HH:mm:ss}" Padding="3"/>
+                                                                </DataTemplate>
+                                                            </GridViewColumn.CellTemplate>
+                                                        </GridViewColumn>
+                                                        <GridViewColumn Header="ファイルサイズ" Width="120">
+                                                            <GridViewColumn.CellTemplate>
+                                                                <DataTemplate>
+                                                                    <TextBlock Text="{Binding FileSizeLabel, Mode=OneWay}" Padding="3"/>
+                                                                </DataTemplate>
+                                                            </GridViewColumn.CellTemplate>
+                                                        </GridViewColumn>
+                                                    </GridView>
+                                                </ListView.View>
+                                            </ListView>
+
+                                        </Grid>
                                     </TabItem>
                                     
                                 </TabControl>
@@ -713,6 +838,7 @@ VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch"></TextBox>
 
                                                 <GroupBox Header="物件外観写真" Margin="10" Padding="10">
                                                     <StackPanel HorizontalAlignment="Left">
+
                                                         <StackPanel Orientation="Horizontal">
                                                             <Button Width="130" Margin="3" Command="{Binding RentLivingEditPictureAddCommand}">写真の追加</Button>
                                                         </StackPanel>
@@ -756,7 +882,6 @@ VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch"></TextBox>
                                                                 </DataTemplate>
                                                             </ListView.ItemTemplate>
                                                         </ListView>
-
 
                                                     </StackPanel>
                                                 </GroupBox>
@@ -839,6 +964,7 @@ VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch"></TextBox>
                                                             <!-- 部屋写真 -->
                                                             <GroupBox Header="部屋写真" Margin="10" Padding="10">
                                                                 <StackPanel HorizontalAlignment="Left">
+                                                                    
                                                                     <StackPanel Orientation="Horizontal">
                                                                         <Button Width="130" Margin="3" Command="{Binding RentLivingEditSectionNewPictureAddCommand}">写真の追加</Button>
                                                                     </StackPanel>
@@ -918,6 +1044,7 @@ VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch"></TextBox>
                                                             <!-- 部屋写真 -->
                                                             <GroupBox Header="部屋写真" Margin="10" Padding="10">
                                                                 <StackPanel HorizontalAlignment="Left">
+
                                                                     <StackPanel Orientation="Horizontal">
                                                                         <Button Width="130" Margin="3" Command="{Binding RentLivingEditSectionEditPictureAddCommand}">写真の追加</Button>
                                                                     </StackPanel>
@@ -978,7 +1105,7 @@ VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch"></TextBox>
                                             
                                         </TabControl>
                                     </TabItem>
-
+<!--
                                     <TabItem Header="管理会社" Width="120">
                                         <ScrollViewer>
                                             <StackPanel>
@@ -986,7 +1113,7 @@ VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch"></TextBox>
                                             </StackPanel>
                                         </ScrollViewer>
                                     </TabItem>
-
+-->
                                     <TabItem Header="元付け業者" Width="120">
                                         <ScrollViewer>
                                             <StackPanel>
@@ -998,7 +1125,128 @@ VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch"></TextBox>
                                     <TabItem Header="オーナー" Width="120">
 
                                     </TabItem>
+                                    
+                                    <TabItem Header="募集図面" Width="120">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="*"/>
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
 
+                                            <StackPanel Grid.Row="0" Orientation="Horizontal">
+                                                <Button Width="130" Margin="3" Command="{Binding RentLivingEditZumenPdfAddCommand}">図面の追加</Button>
+                                            </StackPanel>
+
+                                            <!--
+                                            <wv2:WebView2 Grid.Row="1" Name="webView" Source="https://www.microsoft.com"/>
+                                            -->
+
+                                            <ListView Grid.Row="1" ItemsSource="{Binding RentLivingEdit.RentLivingZumenPDFs}" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                                <ListView.InputBindings>
+                                                    <!-- エンター!! -->
+                                                    <KeyBinding Key="Enter" Command="{Binding Path=DataContext.RentLivingEditZumenPdfEnterCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" />
+                                                </ListView.InputBindings>
+                                                <ListView.Resources>
+                                                    <ContextMenu x:Key="ATItemContextMenu">
+                                                        <MenuItem Header="表示" Command="{Binding Path=DataContext.RentLivingEditZumenPdfShowCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItems, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"></MenuItem>
+                                                        <Separator/>
+                                                        <MenuItem Header="削除" Command="{Binding Path=DataContext.RentLivingEditZumenPdfDeleteCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItems, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
+                                                            <MenuItem.Resources>
+                                                                <ControlTemplate x:Key="CancelIcon">
+                                                                    <Canvas Background="Transparent" >
+                                                                        <Path Fill="#373737" Width="14.3775" Height="14" Canvas.Left="0.311264" Canvas.Top="0.500005" Stretch="Uniform" Data="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12C4,13.85 4.63,15.55 5.68,16.91L16.91,5.68C15.55,4.63 13.85,4 12,4M12,20A8,8 0 0,0 20,12C20,10.15 19.37,8.45 18.32,7.09L7.09,18.32C8.45,19.37 10.15,20 12,20Z" />
+                                                                    </Canvas>
+                                                                </ControlTemplate>
+                                                            </MenuItem.Resources>
+                                                            <MenuItem.Icon>
+                                                                <ContentControl Template="{StaticResource CancelIcon}" />
+                                                            </MenuItem.Icon>
+                                                        </MenuItem>
+                                                    </ContextMenu>
+                                                </ListView.Resources>
+                                                <ListView.ItemContainerStyle>
+                                                    <Style TargetType="ListViewItem">
+                                                        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                                        <Setter Property="ContextMenu" Value="{StaticResource ATItemContextMenu}" />
+                                                        <Setter Property="Template">
+                                                            <Setter.Value>
+                                                                <ControlTemplate TargetType="{x:Type ListViewItem}">
+                                                                    <Border Name="Border" Margin="{TemplateBinding Margin}" Padding="{TemplateBinding Padding}" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" ClipToBounds="{TemplateBinding ClipToBounds}" CornerRadius="0" SnapsToDevicePixels="true">
+                                                                        <GridViewRowPresenter VerticalAlignment="{TemplateBinding VerticalContentAlignment}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                                                                        
+                                                                        <Border.InputBindings>
+                                                                            <!-- ダブルクリック!! -->
+                                                                            <MouseBinding Command="{Binding Path=DataContext.RentLivingEditZumenPdfEnterCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" Gesture="LeftDoubleClick" />
+                                                                        </Border.InputBindings>
+                                                                    </Border>
+                                                                </ControlTemplate>
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                        <Style.Triggers>
+                                                            <Trigger Property="ItemsControl.AlternationIndex" Value="0">
+                                                                <Setter Property="BorderThickness" Value="1" />
+                                                            </Trigger>
+                                                            <Trigger Property="ItemsControl.AlternationIndex" Value="1">
+                                                                <Setter Property="BorderThickness" Value="1" />
+                                                            </Trigger>
+                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                <Setter Property="TextElement.FontWeight" Value="SemiBold"/>
+                                                                <Setter Property="BorderThickness" Value="1" />
+                                                            </Trigger>
+                                                            <Trigger Property="IsSelected" Value="True">
+                                                                <Setter Property="TextElement.FontWeight" Value="Bold"/>
+                                                                <Setter Property="BorderThickness" Value="1" />
+                                                            </Trigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </ListView.ItemContainerStyle>
+                                                <ListView.View>
+                                                    <GridView>
+                                                        <GridViewColumn Header="ID" Width="120">
+                                                            <GridViewColumn.CellTemplate>
+                                                                <DataTemplate>
+                                                                    <TextBlock Text="{Binding RentZumenPDF_ID, Mode=OneWay}" Padding="3"/>
+                                                                </DataTemplate>
+                                                            </GridViewColumn.CellTemplate>
+                                                        </GridViewColumn>
+                                                        <GridViewColumn Header="登録日" Width="150">
+                                                            <GridViewColumn.CellTemplate>
+                                                                <DataTemplate>
+                                                                    <TextBlock Text="{Binding DateTimeAdded, Mode=OneWay, StringFormat=yyyy/MM/dd HH:mm:ss}" Padding="3"/>
+                                                                </DataTemplate>
+                                                            </GridViewColumn.CellTemplate>
+                                                        </GridViewColumn>
+                                                        <GridViewColumn Header="情報公開日" Width="150">
+                                                            <GridViewColumn.CellTemplate>
+                                                                <DataTemplate>
+                                                                    <TextBlock Text="{Binding DateTimePublished, Mode=OneWay, StringFormat=yyyy/MM/dd HH:mm:ss}" Padding="3"/>
+                                                                </DataTemplate>
+                                                            </GridViewColumn.CellTemplate>
+                                                        </GridViewColumn>
+                                                        <GridViewColumn Header="最終確認日" Width="150">
+                                                            <GridViewColumn.CellTemplate>
+                                                                <DataTemplate>
+                                                                    <TextBlock Text="{Binding DateTimeVerified, Mode=OneWay, StringFormat=yyyy/MM/dd HH:mm:ss}" Padding="3"/>
+                                                                </DataTemplate>
+                                                            </GridViewColumn.CellTemplate>
+                                                        </GridViewColumn>
+                                                        <GridViewColumn Header="ファイルサイズ" Width="120">
+                                                            <GridViewColumn.CellTemplate>
+                                                                <DataTemplate>
+                                                                    <TextBlock Text="{Binding FileSizeLabel, Mode=OneWay}" Padding="3"/>
+                                                                </DataTemplate>
+                                                            </GridViewColumn.CellTemplate>
+                                                        </GridViewColumn>
+                                                    </GridView>
+                                                </ListView.View>
+                                            </ListView>
+
+                                        </Grid>
+                                    </TabItem>
+                                    
                                 </TabControl>
 
                                 <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
@@ -1017,18 +1265,647 @@ VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch"></TextBox>
             <TabItem Header="賃貸事業用物件" Padding="6">
 
             </TabItem>
+
+            <TabItem Header="賃貸駐車場" Padding="6">
+
+            </TabItem>
             
-            <!--
-            <TabItem Header="駐車場" Padding="6">
-
-            </TabItem>
-            -->
-
             <TabItem Header="元付け業者" Padding="6">
+                <Grid Background="#FFE5E5E5">
 
+                    <TabControl HorizontalAlignment="Stretch" VerticalAlignment="Stretch" TabStripPlacement="Top" Margin="6" SelectedIndex="{Binding ShowAgencyTabActiveIndex, Mode=TwoWay}">
+
+                        <TabItem Header="元付け業者" Width="120" Visibility="{Binding ShowAgencySearchList, Converter={StaticResource BoolToVisibilityCollapsedConverter}}">
+
+                            <Grid >
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="50"/>
+                                    <RowDefinition Height="50"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Grid Grid.Row="0">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBox Text="{Binding AgencySearchText}" Grid.Row="0" Grid.Column="0" Width="212" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"></TextBox>
+
+                                    <Button Content="検索" Command="{Binding AgencySearchCommand}" Grid.Row="0" Grid.Column="1" Width="100" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
+
+                                    <Button Content="一覧" Command="{Binding AgencyListCommand}" Grid.Row="0" Grid.Column="2" Width="100" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
+
+                                </Grid>
+
+                                <Grid Grid.Row="1">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <Button Content="新規追加" Command="{Binding AgencyNewCommand}" Grid.Row="0" Grid.Column="0" Width="100" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+
+                                    <Button Content="編集" Command="{Binding AgencySelectedEditCommand}" Grid.Row="0" Grid.Column="2" Width="100" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
+
+                                    <Button Content="削除" Command="{Binding AgencySelectedDeleteCommand}" Grid.Row="0" Grid.Column="3" Width="100" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
+
+                                </Grid>
+
+                                <Grid x:Name="RealestateAgencyListViewDummy" Grid.Row="2" Grid.Column="0" Visibility="Hidden" Margin="0 0 27 0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="50"/>
+                                        <ColumnDefinition Width="4*"/>
+                                        <ColumnDefinition Width="2*" />
+                                        <ColumnDefinition Width="90"/>
+                                        <ColumnDefinition Width="5*"/>
+                                        <ColumnDefinition Width="2*"/>
+                                        <ColumnDefinition Width="2*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <!--  This is the hidden helper Field which is used to bind to, using the "Fill" column of the helper grid  -->
+                                    <Grid x:Name="REAWidth0" Grid.Column="0" />
+                                    <Grid x:Name="REAWidth1" Grid.Column="1" />
+                                    <Grid x:Name="REAWidth2" Grid.Column="2" />
+                                    <Grid x:Name="REAWidth3" Grid.Column="3" />
+                                    <Grid x:Name="REAWidth4" Grid.Column="4" />
+                                    <Grid x:Name="REAWidth5" Grid.Column="5" />
+                                    <Grid x:Name="REAWidth6" Grid.Column="6" />
+                                </Grid>
+
+                                <ListView Grid.Row="2" Grid.Column="0" Background="Transparent" ItemsSource="{Binding Agencies}" SelectedItem="{Binding AgenciesSelectedItem, Mode=TwoWay}" SelectionMode="Extended" common:GridViewSort.AutoSort="True" common:GridViewSort.ShowSortGlyph="True" IsSynchronizedWithCurrentItem="True" AlternationCount="2" MinHeight="80" BorderThickness="0" Padding="0 0 0 0" Margin="0 0 0 0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Visible">
+                                    <ListView.Resources>
+                                        <ContextMenu x:Key="REAEditItemContextMenu">
+                                            <MenuItem Header="選択アイテム">
+
+                                            </MenuItem>
+                                        </ContextMenu>
+                                    </ListView.Resources>
+                                    <ListView.ItemContainerStyle>
+                                        <Style TargetType="ListViewItem">
+                                            <Setter Property="Margin" Value="1 0 0 0"/>
+                                            <Setter Property="Padding" Value="0 1 0 1"/>
+                                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                            <Setter Property="ContextMenu" Value="{StaticResource REAEditItemContextMenu}" />
+                                        </Style>
+                                    </ListView.ItemContainerStyle>
+
+                                    <ListView.View>
+                                        <GridView>
+                                            <GridViewColumn Header="ID" Width="{Binding ElementName=REAWidth0, Path=ActualWidth}">
+                                                <GridViewColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding Agency_ID, Mode=OneWay}" Padding="3"/>
+                                                    </DataTemplate>
+                                                </GridViewColumn.CellTemplate>
+                                            </GridViewColumn>
+
+                                            <GridViewColumn Header="会社名" Width="{Binding ElementName=REAWidth1, Path=ActualWidth}">
+                                                <GridViewColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding Name, Mode=OneWay}" Padding="3"/>
+                                                    </DataTemplate>
+                                                </GridViewColumn.CellTemplate>
+                                            </GridViewColumn>
+                                            
+                                            <GridViewColumn Header="支店" Width="{Binding ElementName=REAWidth2, Path=ActualWidth}">
+                                                <GridViewColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding Branch, Mode=OneWay}" Padding="3"/>
+                                                    </DataTemplate>
+                                                </GridViewColumn.CellTemplate>
+                                            </GridViewColumn>
+                                            
+                                            <GridViewColumn Header="〒" Width="{Binding ElementName=REAWidth3, Path=ActualWidth}">
+                                                <GridViewColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding PostalCode, Mode=OneWay}" Padding="3"/>
+                                                    </DataTemplate>
+                                                </GridViewColumn.CellTemplate>
+                                            </GridViewColumn>
+
+                                            <GridViewColumn Header="所在地" Width="{Binding ElementName=REAWidth4, Path=ActualWidth}">
+                                                <GridViewColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding Address, Mode=OneWay}" Padding="3"/>
+                                                    </DataTemplate>
+                                                </GridViewColumn.CellTemplate>
+                                            </GridViewColumn>
+
+                                            <GridViewColumn Header="電話番号" Width="{Binding ElementName=REAWidth5, Path=ActualWidth}">
+                                                <GridViewColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding TelNumber, Mode=OneWay}" Padding="3"/>
+                                                    </DataTemplate>
+                                                </GridViewColumn.CellTemplate>
+                                            </GridViewColumn>
+
+                                            <GridViewColumn Header="FAX番号" Width="{Binding ElementName=REAWidth6, Path=ActualWidth}">
+                                                <GridViewColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding FaxNumber, Mode=OneWay}" Padding="3"/>
+                                                    </DataTemplate>
+                                                </GridViewColumn.CellTemplate>
+                                            </GridViewColumn>
+                                            
+
+                                        </GridView>
+                                    </ListView.View>
+
+                                </ListView>
+
+                            </Grid>
+
+                        </TabItem>
+
+                        <TabItem Header="業者編集" Width="120" Visibility="{Binding ShowAgencyEdit, Converter={StaticResource BoolToVisibilityCollapsedConverter}}">
+                            
+                            <Grid x:Name="GridEditAgency">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TabControl Grid.Row="0">
+                                    
+                                    <TabItem Header="業者情報" Width="120">
+                                        <ScrollViewer>
+                                            <StackPanel>
+                                                <Label Content="会社名："/>
+                                                <TextBox Text="{Binding AgencyEdit.Name}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                <Label Content="支店："/>
+                                                <TextBox Text="{Binding AgencyEdit.Branch}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                <Label Content="〒："/>
+                                                <TextBox Text="{Binding AgencyEdit.PostalCode}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                <Label Content="所在地："/>
+                                                <TextBox Text="{Binding AgencyEdit.Address}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                <Label Content="電話番号："/>
+                                                <TextBox Text="{Binding AgencyEdit.TelNumber}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                <Label Content="FAX番号："/>
+                                                <TextBox Text="{Binding AgencyEdit.FaxNumber}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                <Label Content="備考："/>
+                                                <TextBox Text="{Binding AgencyEdit.Memo}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+
+                                            </StackPanel>
+                                        </ScrollViewer>
+                                    </TabItem>
+
+                                    <TabItem Header="媒介物件" Width="120">
+
+                                    </TabItem>
+                                    
+                                </TabControl>
+
+                                <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <Button Command="{Binding AgencyInsertOrUpdateCommand}" Width="200" Margin="6" Padding="6" VerticalAlignment="Center" HorizontalAlignment="Center">業者の登録または更新</Button>
+                                    <Button Command="{Binding AgencyNewOrEditCancelCommand}" Width="200" Margin="6" Padding="6" VerticalAlignment="Center" HorizontalAlignment="Center">キャンセル</Button>
+                                </StackPanel>
+                            </Grid>
+                            
+                        </TabItem>
+                        
+                    </TabControl>
+                    
+                </Grid>
             </TabItem>
 
+            <TabItem Header="管理会社" Padding="6">
+                <Grid Background="#FFE5E5E5">
+
+                    <TabControl HorizontalAlignment="Stretch" VerticalAlignment="Stretch" TabStripPlacement="Top" Margin="6" SelectedIndex="{Binding ShowMaintenanceCompanyTabActiveIndex, Mode=TwoWay}">
+
+                        <TabItem Header="管理会社" Width="120" Visibility="{Binding ShowMaintenanceCompanySearchList, Converter={StaticResource BoolToVisibilityCollapsedConverter}}">
+
+                            <Grid >
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="50"/>
+                                    <RowDefinition Height="50"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Grid Grid.Row="0">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBox Text="{Binding MaintenanceCompanySearchText}" Grid.Row="0" Grid.Column="0" Width="212" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"></TextBox>
+
+                                    <Button Content="検索" Command="{Binding MaintenanceCompanySearchCommand}" Grid.Row="0" Grid.Column="1" Width="100" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
+
+                                    <Button Content="一覧" Command="{Binding MaintenanceCompanyListCommand}" Grid.Row="0" Grid.Column="2" Width="100" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
+
+                                </Grid>
+
+                                <Grid Grid.Row="1">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <Button Content="新規追加" Command="{Binding MaintenanceCompanyNewCommand}" Grid.Row="0" Grid.Column="0" Width="100" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+
+                                    <Button Content="編集" Command="{Binding MaintenanceCompanySelectedEditCommand}" Grid.Row="0" Grid.Column="2" Width="100" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
+
+                                    <Button Content="削除" Command="{Binding MaintenanceCompanySelectedDeleteCommand}" Grid.Row="0" Grid.Column="3" Width="100" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
+
+                                </Grid>
+
+                                <Grid x:Name="MaintenanceCompanyListViewDummy" Grid.Row="2" Grid.Column="0" Visibility="Hidden" Margin="0 0 27 0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="50"/>
+                                        <ColumnDefinition Width="4*"/>
+                                        <ColumnDefinition Width="2*" />
+                                        <ColumnDefinition Width="90"/>
+                                        <ColumnDefinition Width="5*"/>
+                                        <ColumnDefinition Width="2*"/>
+                                        <ColumnDefinition Width="2*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <!--  This is the hidden helper Field which is used to bind to, using the "Fill" column of the helper grid  -->
+                                    <Grid x:Name="MCWidth0" Grid.Column="0" />
+                                    <Grid x:Name="MCWidth1" Grid.Column="1" />
+                                    <Grid x:Name="MCWidth2" Grid.Column="2" />
+                                    <Grid x:Name="MCWidth3" Grid.Column="3" />
+                                    <Grid x:Name="MCWidth4" Grid.Column="4" />
+                                    <Grid x:Name="MCWidth5" Grid.Column="5" />
+                                    <Grid x:Name="MCWidth6" Grid.Column="6" />
+                                </Grid>
+
+                                <ListView Grid.Row="2" Grid.Column="0" Background="Transparent" ItemsSource="{Binding MaintenanceCompanies}" SelectedItem="{Binding MaintenanceCompaniesSelectedItem, Mode=TwoWay}" SelectionMode="Extended" common:GridViewSort.AutoSort="True" common:GridViewSort.ShowSortGlyph="True" IsSynchronizedWithCurrentItem="True" AlternationCount="2" MinHeight="80" BorderThickness="0" Padding="0 0 0 0" Margin="0 0 0 0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Visible">
+                                    <ListView.Resources>
+                                        <ContextMenu x:Key="MCEditItemContextMenu">
+                                            <MenuItem Header="選択アイテム">
+
+                                            </MenuItem>
+                                        </ContextMenu>
+                                    </ListView.Resources>
+                                    <ListView.ItemContainerStyle>
+                                        <Style TargetType="ListViewItem">
+                                            <Setter Property="Margin" Value="1 0 0 0"/>
+                                            <Setter Property="Padding" Value="0 1 0 1"/>
+                                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                            <Setter Property="ContextMenu" Value="{StaticResource MCEditItemContextMenu}" />
+                                        </Style>
+                                    </ListView.ItemContainerStyle>
+
+                                    <ListView.View>
+                                        <GridView>
+                                            <GridViewColumn Header="ID" Width="{Binding ElementName=MCWidth0, Path=ActualWidth}">
+                                                <GridViewColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding MaintenanceCompany_ID, Mode=OneWay}" Padding="3"/>
+                                                    </DataTemplate>
+                                                </GridViewColumn.CellTemplate>
+                                            </GridViewColumn>
+
+                                            <GridViewColumn Header="会社名" Width="{Binding ElementName=MCWidth1, Path=ActualWidth}">
+                                                <GridViewColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding Name, Mode=OneWay}" Padding="3"/>
+                                                    </DataTemplate>
+                                                </GridViewColumn.CellTemplate>
+                                            </GridViewColumn>
+
+                                            <GridViewColumn Header="支店" Width="{Binding ElementName=MCWidth2, Path=ActualWidth}">
+                                                <GridViewColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding Branch, Mode=OneWay}" Padding="3"/>
+                                                    </DataTemplate>
+                                                </GridViewColumn.CellTemplate>
+                                            </GridViewColumn>
+
+                                            <GridViewColumn Header="〒" Width="{Binding ElementName=MCWidth3, Path=ActualWidth}">
+                                                <GridViewColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding PostalCode, Mode=OneWay}" Padding="3"/>
+                                                    </DataTemplate>
+                                                </GridViewColumn.CellTemplate>
+                                            </GridViewColumn>
+
+                                            <GridViewColumn Header="所在地" Width="{Binding ElementName=MCWidth4, Path=ActualWidth}">
+                                                <GridViewColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding Address, Mode=OneWay}" Padding="3"/>
+                                                    </DataTemplate>
+                                                </GridViewColumn.CellTemplate>
+                                            </GridViewColumn>
+
+                                            <GridViewColumn Header="電話番号" Width="{Binding ElementName=MCWidth5, Path=ActualWidth}">
+                                                <GridViewColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding TelNumber, Mode=OneWay}" Padding="3"/>
+                                                    </DataTemplate>
+                                                </GridViewColumn.CellTemplate>
+                                            </GridViewColumn>
+
+                                            <GridViewColumn Header="FAX番号" Width="{Binding ElementName=MCWidth6, Path=ActualWidth}">
+                                                <GridViewColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding FaxNumber, Mode=OneWay}" Padding="3"/>
+                                                    </DataTemplate>
+                                                </GridViewColumn.CellTemplate>
+                                            </GridViewColumn>
+
+
+                                        </GridView>
+                                    </ListView.View>
+
+                                </ListView>
+
+                            </Grid>
+
+                        </TabItem>
+
+                        <TabItem Header="管理会社編集" Width="120" Visibility="{Binding ShowMaintenanceCompanyEdit, Converter={StaticResource BoolToVisibilityCollapsedConverter}}">
+
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TabControl Grid.Row="0">
+
+                                    <TabItem Header="管理会社情報" Width="120">
+                                        <ScrollViewer>
+                                            <StackPanel>
+                                                <Label Content="会社名："/>
+                                                <TextBox Text="{Binding MaintenanceCompanyEdit.Name}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                <Label Content="支店："/>
+                                                <TextBox Text="{Binding MaintenanceCompanyEdit.Branch}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                <Label Content="〒："/>
+                                                <TextBox Text="{Binding MaintenanceCompanyEdit.PostalCode}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                <Label Content="所在地："/>
+                                                <TextBox Text="{Binding MaintenanceCompanyEdit.Address}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                <Label Content="電話番号："/>
+                                                <TextBox Text="{Binding MaintenanceCompanyEdit.TelNumber}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                <Label Content="FAX番号："/>
+                                                <TextBox Text="{Binding MaintenanceCompanyEdit.FaxNumber}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                <Label Content="備考："/>
+                                                <TextBox Text="{Binding MaintenanceCompanyEdit.Memo}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+
+                                            </StackPanel>
+                                        </ScrollViewer>
+                                    </TabItem>
+
+                                    <TabItem Header="管理物件" Width="120">
+
+                                    </TabItem>
+
+                                </TabControl>
+
+                                <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <Button Command="{Binding MaintenanceCompanyInsertOrUpdateCommand}" Width="200" Margin="6" Padding="6" VerticalAlignment="Center" HorizontalAlignment="Center">管理会社の登録または更新</Button>
+                                    <Button Command="{Binding MaintenanceCompanyNewOrEditCancelCommand}" Width="200" Margin="6" Padding="6" VerticalAlignment="Center" HorizontalAlignment="Center">キャンセル</Button>
+                                </StackPanel>
+                            </Grid>
+
+                        </TabItem>
+
+                    </TabControl>
+
+                </Grid>
+            </TabItem>
+            
             <TabItem Header="オーナー" Padding="6">
+                <Grid Background="#FFE5E5E5">
+
+                    <TabControl HorizontalAlignment="Stretch" VerticalAlignment="Stretch" TabStripPlacement="Top" Margin="6" SelectedIndex="{Binding ShowOwnerTabActiveIndex, Mode=TwoWay}">
+
+                        <TabItem Header="オーナー" Width="120" Visibility="{Binding ShowOwnerSearchList, Converter={StaticResource BoolToVisibilityCollapsedConverter}}">
+
+                            <Grid >
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="50"/>
+                                    <RowDefinition Height="50"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Grid Grid.Row="0">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBox Text="{Binding OwnerSearchText}" Grid.Row="0" Grid.Column="0" Width="212" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"></TextBox>
+
+                                    <Button Content="検索" Command="{Binding OwnerSearchCommand}" Grid.Row="0" Grid.Column="1" Width="100" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
+
+                                    <Button Content="一覧" Command="{Binding OwnerListCommand}" Grid.Row="0" Grid.Column="2" Width="100" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
+
+                                </Grid>
+
+                                <Grid Grid.Row="1">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <Button Content="新規追加" Command="{Binding OwnerNewCommand}" Grid.Row="0" Grid.Column="0" Width="100" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+
+                                    <Button Content="編集" Command="{Binding OwnerSelectedEditCommand}" Grid.Row="0" Grid.Column="2" Width="100" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
+
+                                    <Button Content="削除" Command="{Binding OwnerSelectedDeleteCommand}" Grid.Row="0" Grid.Column="3" Width="100" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
+
+                                </Grid>
+
+                                <Grid x:Name="OwnerListViewDummy" Grid.Row="2" Grid.Column="0" Visibility="Hidden" Margin="0 0 27 0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="50"/>
+                                        <ColumnDefinition Width="4*"/>
+                                        <ColumnDefinition Width="2*" />
+                                        <ColumnDefinition Width="90"/>
+                                        <ColumnDefinition Width="5*"/>
+                                        <ColumnDefinition Width="2*"/>
+                                        <ColumnDefinition Width="2*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <!--  This is the hidden helper Field which is used to bind to, using the "Fill" column of the helper grid  -->
+                                    <Grid x:Name="OWidth0" Grid.Column="0" />
+                                    <Grid x:Name="OWidth1" Grid.Column="1" />
+                                    <Grid x:Name="OWidth2" Grid.Column="2" />
+                                    <Grid x:Name="OWidth3" Grid.Column="3" />
+                                    <Grid x:Name="OWidth4" Grid.Column="4" />
+                                    <Grid x:Name="OWidth5" Grid.Column="5" />
+                                    <Grid x:Name="OWidth6" Grid.Column="6" />
+                                </Grid>
+
+                                <ListView Grid.Row="2" Grid.Column="0" Background="Transparent" ItemsSource="{Binding Owners}" SelectedItem="{Binding OwnersSelectedItem, Mode=TwoWay}" SelectionMode="Extended" common:GridViewSort.AutoSort="True" common:GridViewSort.ShowSortGlyph="True" IsSynchronizedWithCurrentItem="True" AlternationCount="2" MinHeight="80" BorderThickness="0" Padding="0 0 0 0" Margin="0 0 0 0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Visible">
+                                    <ListView.Resources>
+                                        <ContextMenu x:Key="OEditItemContextMenu">
+                                            <MenuItem Header="選択アイテム">
+
+                                            </MenuItem>
+                                        </ContextMenu>
+                                    </ListView.Resources>
+                                    <ListView.ItemContainerStyle>
+                                        <Style TargetType="ListViewItem">
+                                            <Setter Property="Margin" Value="1 0 0 0"/>
+                                            <Setter Property="Padding" Value="0 1 0 1"/>
+                                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                            <Setter Property="ContextMenu" Value="{StaticResource OEditItemContextMenu}" />
+                                        </Style>
+                                    </ListView.ItemContainerStyle>
+
+                                    <ListView.View>
+                                        <GridView>
+                                            <GridViewColumn Header="ID" Width="{Binding ElementName=OWidth0, Path=ActualWidth}">
+                                                <GridViewColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding Owner_ID, Mode=OneWay}" Padding="3"/>
+                                                    </DataTemplate>
+                                                </GridViewColumn.CellTemplate>
+                                            </GridViewColumn>
+
+                                            <GridViewColumn Header="氏名" Width="{Binding ElementName=OWidth1, Path=ActualWidth}">
+                                                <GridViewColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding Name, Mode=OneWay}" Padding="3"/>
+                                                    </DataTemplate>
+                                                </GridViewColumn.CellTemplate>
+                                            </GridViewColumn>
+
+                                            <GridViewColumn Header="〒" Width="{Binding ElementName=OWidth2, Path=ActualWidth}">
+                                                <GridViewColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding PostalCode, Mode=OneWay}" Padding="3"/>
+                                                    </DataTemplate>
+                                                </GridViewColumn.CellTemplate>
+                                            </GridViewColumn>
+
+                                            <GridViewColumn Header="住所" Width="{Binding ElementName=OWidth3, Path=ActualWidth}">
+                                                <GridViewColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding Address, Mode=OneWay}" Padding="3"/>
+                                                    </DataTemplate>
+                                                </GridViewColumn.CellTemplate>
+                                            </GridViewColumn>
+
+                                            <GridViewColumn Header="電話番号" Width="{Binding ElementName=OWidth4, Path=ActualWidth}">
+                                                <GridViewColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding TelNumber, Mode=OneWay}" Padding="3"/>
+                                                    </DataTemplate>
+                                                </GridViewColumn.CellTemplate>
+                                            </GridViewColumn>
+
+                                            <GridViewColumn Header="FAX番号" Width="{Binding ElementName=OWidth5, Path=ActualWidth}">
+                                                <GridViewColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding FaxNumber, Mode=OneWay}" Padding="3"/>
+                                                    </DataTemplate>
+                                                </GridViewColumn.CellTemplate>
+                                            </GridViewColumn>
+
+
+                                        </GridView>
+                                    </ListView.View>
+
+                                </ListView>
+
+                            </Grid>
+
+                        </TabItem>
+
+                        <TabItem Header="オーナー編集" Width="120" Visibility="{Binding ShowOwnerEdit, Converter={StaticResource BoolToVisibilityCollapsedConverter}}">
+
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TabControl Grid.Row="0">
+
+                                    <TabItem Header="オーナー情報" Width="120">
+                                        <ScrollViewer>
+                                            <StackPanel>
+                                                <Label Content="氏名："/>
+                                                <TextBox Text="{Binding OwnerEdit.Name}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                <Label Content="〒："/>
+                                                <TextBox Text="{Binding OwnerEdit.PostalCode}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                <Label Content="住所："/>
+                                                <TextBox Text="{Binding OwnerEdit.Address}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                <Label Content="電話番号："/>
+                                                <TextBox Text="{Binding OwnerEdit.TelNumber}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                <Label Content="FAX番号："/>
+                                                <TextBox Text="{Binding OwnerEdit.FaxNumber}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                <Label Content="備考："/>
+                                                <TextBox Text="{Binding OwnerEdit.Memo}" Width="212" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+
+                                            </StackPanel>
+                                        </ScrollViewer>
+                                    </TabItem>
+
+                                    <TabItem Header="所有物件" Width="120">
+
+                                    </TabItem>
+
+                                </TabControl>
+
+                                <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <Button Command="{Binding OwnerInsertOrUpdateCommand}" Width="200" Margin="6" Padding="6" VerticalAlignment="Center" HorizontalAlignment="Center">オーナーの登録または更新</Button>
+                                    <Button Command="{Binding OwnerNewOrEditCancelCommand}" Width="200" Margin="6" Padding="6" VerticalAlignment="Center" HorizontalAlignment="Center">キャンセル</Button>
+                                </StackPanel>
+                            </Grid>
+
+                        </TabItem>
+
+                    </TabControl>
+
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="設定" Padding="6">
 
             </TabItem>
 
