@@ -46,20 +46,20 @@
             <TabItem Header="ホーム" Width="120" Padding="6">
                 <Grid Background="#FFE5E5E5">
 
-                    <TabControl Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" TabStripPlacement="Top" Margin="6">
+                    <TabControl HorizontalAlignment="Stretch" VerticalAlignment="Stretch" TabStripPlacement="Top" Margin="6">
 
                         <TabItem Header="物件検索" Width="120">
 
                             <Grid>
                                 <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="50"/>
                                     <RowDefinition Height="*"/>
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
 
-                                <Grid Grid.Row="0" VerticalAlignment="Top">
+                                <Grid Grid.Row="0">
                                     <Grid.RowDefinitions>
                                         <RowDefinition/>
                                     </Grid.RowDefinitions>
@@ -205,7 +205,7 @@
 
                                     <TextBox Text="{Binding RentLivingEditSearchText, UpdateSourceTrigger=PropertyChanged}" Grid.Row="0" Grid.Column="0" Width="212" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"></TextBox>
 
-                                    <Button Content="検索" Command="{Binding RentLivingEditSearchCommand}" Grid.Row="0" Grid.Column="1" Width="100" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
+                                    <Button Content="検索" Command="{Binding RentLivingEditSearchCommand}" Grid.Row="0" Grid.Column="1" IsDefault="True" Width="100" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
 
                                     <Button Content="一覧" Command="{Binding RentLivingEditListCommand}" Grid.Row="0" Grid.Column="2" Width="100" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
 
@@ -655,7 +655,11 @@
                                             </StackPanel>
                                         </ScrollViewer>
                                     </TabItem>
-                                    
+
+                                    <TabItem Header="管理会社" Width="120">
+
+                                    </TabItem>
+
                                     <TabItem Header="オーナー" Width="120">
                                         
                                     </TabItem>
@@ -1105,16 +1109,16 @@
                                             
                                         </TabControl>
                                     </TabItem>
-<!--
-                                    <TabItem Header="管理会社" Width="120">
+
+                                    <TabItem Header="元付け業者" Width="120">
                                         <ScrollViewer>
                                             <StackPanel>
 
                                             </StackPanel>
                                         </ScrollViewer>
                                     </TabItem>
--->
-                                    <TabItem Header="元付け業者" Width="120">
+
+                                    <TabItem Header="管理会社" Width="120">
                                         <ScrollViewer>
                                             <StackPanel>
 
@@ -1298,9 +1302,9 @@
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
 
-                                    <TextBox Text="{Binding AgencySearchText}" Grid.Row="0" Grid.Column="0" Width="212" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"></TextBox>
+                                    <TextBox Text="{Binding AgencySearchText, UpdateSourceTrigger=PropertyChanged}" Grid.Row="0" Grid.Column="0" Width="212" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"></TextBox>
 
-                                    <Button Content="検索" Command="{Binding AgencySearchCommand}" Grid.Row="0" Grid.Column="1" Width="100" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
+                                    <Button Content="検索" Command="{Binding AgencySearchCommand}" Grid.Row="0" Grid.Column="1" IsDefault="True" Width="100" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
 
                                     <Button Content="一覧" Command="{Binding AgencyListCommand}" Grid.Row="0" Grid.Column="2" Width="100" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
 
@@ -1513,9 +1517,9 @@
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
 
-                                    <TextBox Text="{Binding MaintenanceCompanySearchText}" Grid.Row="0" Grid.Column="0" Width="212" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"></TextBox>
+                                    <TextBox Text="{Binding MaintenanceCompanySearchText, UpdateSourceTrigger=PropertyChanged}" Grid.Row="0" Grid.Column="0" Width="212" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"></TextBox>
 
-                                    <Button Content="検索" Command="{Binding MaintenanceCompanySearchCommand}" Grid.Row="0" Grid.Column="1" Width="100" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
+                                    <Button Content="検索" Command="{Binding MaintenanceCompanySearchCommand}" Grid.Row="0" Grid.Column="1" IsDefault="True" Width="100" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
 
                                     <Button Content="一覧" Command="{Binding MaintenanceCompanyListCommand}" Grid.Row="0" Grid.Column="2" Width="100" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
 
@@ -1728,9 +1732,9 @@
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
 
-                                    <TextBox Text="{Binding OwnerSearchText}" Grid.Row="0" Grid.Column="0" Width="212" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"></TextBox>
+                                    <TextBox Text="{Binding OwnerSearchText, UpdateSourceTrigger=PropertyChanged}" Grid.Row="0" Grid.Column="0" Width="212" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"></TextBox>
 
-                                    <Button Content="検索" Command="{Binding OwnerSearchCommand}" Grid.Row="0" Grid.Column="1" Width="100" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
+                                    <Button Content="検索" Command="{Binding OwnerSearchCommand}" Grid.Row="0" Grid.Column="1" IsDefault="True" Width="100" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
 
                                     <Button Content="一覧" Command="{Binding OwnerListCommand}" Grid.Row="0" Grid.Column="2" Width="100" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
 
