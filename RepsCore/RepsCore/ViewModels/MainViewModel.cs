@@ -1,6 +1,4 @@
 ﻿using Microsoft.Data.Sqlite;
-using Microsoft.Win32;
-using RepsCore.Common;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -13,10 +11,13 @@ using System.Linq;
 using System.Text;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Xml;
 using System.Xml.Linq;
+using RepsCore.Models;
+using RepsCore.ViewModels.Classes;
+using RepsCore.Models.Classes;
+using RepsCore.Common;
 
 /// ////////////////////////////////////////////////////////////
 /// //////////////まずは小さく造って大きく育てる////////////////
@@ -28,7 +29,9 @@ using System.Xml.Linq;
 /// 
 /// 区分所有かどうかで、図面の追加画面を変える。（利便性のため、表示用の一覧はして、追加削除はしない読み取り専用にする）
 /// 
-/// 物件に、元付け・管理会社・オーナーの関連付け（元付けとオーナーは区分所有を考慮して、部屋で追加するが、建物として一覧はする）
+/// 物件に、元付け・管理会社・オーナーの関連付け（元付けとオーナーは区分所有を考慮して、部屋で追加するが、建物として一覧はする）(元付けは媒介で複数いる可能性)
+/// (管理会社は画像と一緒に建物にまとめるかな。建物管理　 〇 元付け業者と同じ　〇 指定管理会社　〇 オーナーの自主管理　● 不明)
+/// 建物に、登記情報のPDFを登録できるようにする。
 /// 
 /// 住所・〒・Geo関連のデータ
 /// 
@@ -70,1343 +73,7 @@ using System.Xml.Linq;
 
 namespace RepsCore.ViewModels
 {
-    /// <summary>
-    /// 物件の種別などの Enum （ViewのXAMLで参照するのでここで定義）
-    /// </summary>
-    #region == グローバル定数 ==
 
-    // 賃貸物件のタイプ（住居用・事業用・駐車場）
-    public enum RentTypes
-    {
-        RentLiving, RentBussiness, RentParking
-    }
-
-    // 賃貸住居用物件種別（アパート・マンション・一戸建て・他）
-    public enum RentLivingKinds
-    {
-        Apartment, Mansion, House, Other
-    }
-    
-    // 一括所有の建物か、区分所有か
-    public enum RentOwnerships
-    {
-        All, Unit
-    }
-
-    #endregion
-
-    /// <summary>
-    /// 賃貸物件のRent・Section等、及び派生クラス
-    /// </summary>
-    #region == Rent・Section等、及びその派生クラス ==
-
-    /// <summary>
-    /// 物件（建物等）の基底クラス
-    /// </summary>
-    public class Rent : ViewModelBase
-    {
-        // GUID and Primary Key
-        protected string _rent_id;
-        public string Rent_ID
-        {
-            get
-            {
-                return _rent_id;
-            }
-        }
-
-        private string _name;
-        public string Name
-        {
-            get
-            {
-                return _name;
-            }
-            set
-            {
-                if (_name == value) return;
-
-                _name = value;
-                this.NotifyPropertyChanged("Name");
-            }
-        }
-
-        public Dictionary<RentTypes, string> RentTypeToLabel { get; } = new Dictionary<RentTypes, string>()
-        {
-            {RentTypes.RentLiving, "賃貸住居用"},
-            {RentTypes.RentBussiness, "賃貸事業用"},
-            {RentTypes.RentParking, "賃貸駐車場"},
-        };
-
-        public Dictionary<string, RentTypes> StringToRentType { get; } = new Dictionary<string, RentTypes>()
-        {
-            {"RentLiving", RentTypes.RentLiving},
-            {"RentBussiness", RentTypes.RentBussiness},
-            {"RentParking", RentTypes.RentParking},
-        };
-
-        protected RentTypes _type;
-        public RentTypes Type
-        {
-            get
-            {
-                return _type;
-            }
-        }
-
-        public string TypeLabel
-        {
-            get
-            {
-                return this.RentTypeToLabel[this.Type];
-            }
-        }
-
-        private string _postalCode;
-        public string PostalCode
-        {
-            get
-            {
-                return _postalCode;
-            }
-            set
-            {
-                if (_postalCode == value) return;
-
-                _postalCode = value;
-                this.NotifyPropertyChanged("PostalCode");
-            }
-        }
-
-        private string _location;
-        public string Location
-        {
-            get
-            {
-                return _location;
-            }
-            set
-            {
-                if (_location == value) return;
-
-                _location = value;
-                this.NotifyPropertyChanged("Location");
-            }
-        }
-
-        private string _trainStation1;
-        public string TrainStation1
-        {
-            get
-            {
-                return _trainStation1;
-            }
-            set
-            {
-                if (_trainStation1 == value) return;
-
-                _trainStation1 = value;
-                this.NotifyPropertyChanged("TrainStation1");
-            }
-        }
-
-        private string _trainStation2;
-        public string TrainStation2
-        {
-            get
-            {
-                return _trainStation2;
-            }
-            set
-            {
-                if (_trainStation2 == value) return;
-
-                _trainStation2 = value;
-                this.NotifyPropertyChanged("TrainStation2");
-            }
-        }
-
-        public Rent()
-        {
-
-        }
-    }
-
-    /// <summary>
-    /// 賃貸住居用の物件クラス（建物）
-    /// </summary>
-    public class RentLiving : Rent
-    {
-        protected string _rentLiving_id;
-        public string RentLiving_ID
-        {
-            get
-            {
-                return _rentLiving_id;
-            }
-        }
-
-        // 新規か編集（保存済み）かどうかのフラグ。
-        public bool IsNew { get; set; }
-
-        // 変更があったかどうかのフラグ。
-        public bool IsDirty { get; set; }
-
-        public Dictionary<RentLivingKinds, string> RentLivingKindToLabel { get; } = new Dictionary<RentLivingKinds, string>()
-        {
-            {RentLivingKinds.Apartment, "アパート"},
-            {RentLivingKinds.Mansion, "マンション"},
-            {RentLivingKinds.House, "一戸建て"},
-            {RentLivingKinds.Other, "その他"},
-        };
-
-        public Dictionary<string, RentLivingKinds> StringToRentLivingKind { get; } = new Dictionary<string, RentLivingKinds>()
-        {
-            {"Apartment", RentLivingKinds.Apartment},
-            {"Mansion", RentLivingKinds.Mansion},
-            {"House", RentLivingKinds.House},
-            {"Other", RentLivingKinds.Other},
-        };
-
-        // 賃貸住居用物件種別　アパート・マンション・戸建て・他
-        private RentLivingKinds _kind;
-        public RentLivingKinds Kind
-        {
-            get
-            {
-                return _kind;
-            }
-            set
-            {
-                if (_kind == value) return;
-
-                _kind = value;
-                this.NotifyPropertyChanged("Kind");
-            }
-        }
-
-        // 所有権（一棟所有・区分所有）
-        private RentOwnerships _ownership;
-        public RentOwnerships Ownership
-        {
-            get
-            {
-                return _ownership;
-            }
-            set
-            {
-                if (_ownership == value) return;
-
-                _ownership = value;
-                this.NotifyPropertyChanged("Ownership");
-            }
-        }
-
-        public Dictionary<string, RentOwnerships> StringToRentOwnership { get; } = new Dictionary<string, RentOwnerships>()
-        {
-            {"Unit", RentOwnerships.Unit},
-            {"All", RentOwnerships.All},
-        };
-
-        // 地上n階建て
-        private int _floors;
-        public int Floors
-        {
-            get
-            {
-                return _floors;
-            }
-            set
-            {
-                if (_floors == value) return;
-
-                _floors = value;
-                this.NotifyPropertyChanged("Floors");
-            }
-        }
-
-        // 地下n階建て
-        private int _floorsBasement;
-        public int FloorsBasement
-        {
-            get
-            {
-                return _floorsBasement;
-            }
-            set
-            {
-                if (_floorsBasement == value) return;
-
-                _floorsBasement = value;
-                this.NotifyPropertyChanged("FloorsBasement");
-            }
-        }
-
-        // 築年
-        private int _builtYear;
-        public int BuiltYear
-        {
-            get
-            {
-                return _builtYear;
-            }
-            set
-            {
-                if (_builtYear == value) return;
-
-                _builtYear = value;
-                this.NotifyPropertyChanged("BuiltYear");
-            }
-        }
-
-        // 物件写真一覧
-        public ObservableCollection<RentLivingPicture> RentLivingPictures { get; set; } = new ObservableCollection<RentLivingPicture>();
-
-        // 物件写真のDBへの更新時にDBから削除されるべき物件写真のIDリスト
-        public List<string> RentLivingPicturesToBeDeletedIDs = new List<string>();
-
-        // 図面一覧
-        public ObservableCollection<RentLivingZumenPDF> RentLivingZumenPDFs { get; set; } = new ObservableCollection<RentLivingZumenPDF>();
-
-        // 図面のDBへの更新時にDBから削除されるべき図面のIDリスト
-        public List<string> RentLivingZumenPdfToBeDeletedIDs = new List<string>();
-
-        // 部屋一覧
-        public ObservableCollection<RentLivingSection> RentLivingSections { get; set; } = new ObservableCollection<RentLivingSection>();
-
-        // DBへの更新時にDBから削除されるべき部屋のIDリスト
-        public List<string> RentLivingSectionToBeDeletedIDs = new List<string>();
-
-        // コンストラクタ
-        public RentLiving (string rentid, string rentlivingid)
-        {
-            this._rent_id = rentid;
-            this._rentLiving_id = rentlivingid;
-
-            this._type = RentTypes.RentLiving;
-        }
-
-    }
-
-    /// <summary>
-    /// 物件の写真の基底クラス
-    /// </summary>
-    public class RentPicture : ViewModelBase
-    {
-        protected string _rentPicture_id;
-        public string RentPicture_ID
-        {
-            get
-            {
-                return _rentPicture_id;
-            }
-        }
-
-        protected string _rent_id;
-        public string Rent_ID
-        {
-            get
-            {
-                return _rent_id;
-            }
-        }
-
-        // For display.
-        private ImageSource _picture;
-        public ImageSource Picture
-        {
-            get
-            {
-                return _picture;
-            }
-            set
-            {
-                if (_picture == value) return;
-
-                _picture = value;
-                this.NotifyPropertyChanged("Picture");
-            }
-        }
-
-        private byte[] _pictureThumbW200xData;
-        public byte[] PictureThumbW200xData
-        {
-            get
-            {
-                return _pictureThumbW200xData;
-            }
-            set
-            {
-                if (_pictureThumbW200xData == value) return;
-
-                _pictureThumbW200xData = value;
-                this.NotifyPropertyChanged("PictureThumbW200xData");
-            }
-        }
-
-        private byte[] _pictureData;
-        public byte[] PictureData
-        {
-            get
-            {
-                return _pictureData;
-            }
-            set
-            {
-                if (_pictureData == value) return;
-
-                _pictureData = value;
-                this.NotifyPropertyChanged("PictureData");
-            }
-        }
-
-        private string _pictureFileExt;
-        public string PictureFileExt
-        {
-            get
-            {
-                return _pictureFileExt;
-            }
-            set
-            {
-                if (_pictureFileExt == value) return;
-
-                _pictureFileExt = value;
-                this.NotifyPropertyChanged("PictureFileExt");
-            }
-        }
-
-        // 新規追加された画像（要保存）
-        public bool IsNew { get; set; }
-
-        // 画像が差し替えなど、変更された（要保存）
-        public bool IsModified { get; set; }
-
-    }
-
-    /// <summary>
-    /// 賃貸住居用物件の写真クラス（外観等）
-    /// </summary>
-    public class RentLivingPicture : RentPicture
-    {
-        protected string _rentLiving_id;
-        public string RentLiving_ID
-        {
-            get
-            {
-                return _rentLiving_id;
-            }
-        }
-
-        public RentLivingPicture(string rentid, string rentlivingid, string rentlivingpictureid)
-        {
-            this._rent_id = rentid;
-            this._rentLiving_id = rentlivingid;
-
-            this._rentPicture_id = rentlivingpictureid;
-        }
-    }
-
-
-    /// <summary>
-    /// 図面の基底クラス
-    /// </summary>
-    public class RentZumenPDF : ViewModelBase
-    {
-        protected string _rentZumenPDF_id;
-        public string RentZumenPDF_ID
-        {
-            get
-            {
-                return _rentZumenPDF_id;
-            }
-        }
-
-        protected string _rent_id;
-        public string Rent_ID
-        {
-            get
-            {
-                return _rent_id;
-            }
-        }
-
-        private byte[] _pdfData;
-        public byte[] PDFData
-        {
-            get
-            {
-                return _pdfData;
-            }
-            set
-            {
-                if (_pdfData == value) return;
-
-                _pdfData = value;
-                this.NotifyPropertyChanged("PDFData");
-            }
-        }
-
-        // 登録日
-        protected DateTime _dateTimeAdded;
-        public DateTime DateTimeAdded
-        {
-            get
-            {
-                return _dateTimeAdded;
-            }
-            set
-            {
-                if (_dateTimeAdded == value) return;
-
-                _dateTimeAdded = value;
-                this.NotifyPropertyChanged("DateTimeAdded");
-            }
-        }
-
-        // 情報公開日
-        private DateTime _dateTimePublished;
-        public DateTime DateTimePublished
-        {
-            get
-            {
-                return _dateTimePublished;
-            }
-            set
-            {
-                if (_dateTimePublished == value) return;
-
-                _dateTimePublished = value;
-                this.NotifyPropertyChanged("DateTimePublished");
-
-                this.IsDirty = true;
-            }
-        }
-
-        // 最終確認日
-        private DateTime _dateTimeVerified;
-        public DateTime DateTimeVerified
-        {
-            get
-            {
-                return _dateTimeVerified;
-            }
-            set
-            {
-                if (_dateTimeVerified == value) return;
-
-                _dateTimeVerified = value;
-                this.NotifyPropertyChanged("DateTimeVerified");
-
-                this.IsDirty = true;
-            }
-        }
-
-        // ファイルサイズ
-        public long _fileSize;
-        public long FileSize
-        {
-            get
-            {
-                return _fileSize;
-            }
-            set
-            {
-                if (_fileSize == value) return;
-
-                _fileSize = value;
-                this.NotifyPropertyChanged("FileSize");
-                this.NotifyPropertyChanged("FileSizeLabel");
-            }
-        }
-
-        public string FileSizeLabel
-        {
-            get
-            {
-                if (FileSize > 0)
-                {
-                    string[] sizes = { "B", "KB", "MB", "GB", "TB" };
-                    double len = FileSize;
-                    int order = 0;
-                    while (len >= 1024 && order < sizes.Length - 1)
-                    {
-                        order++;
-                        len = len / 1024;
-                    }
-
-                    // Adjust the format string to your preferences. For example "{0:0.#}{1}" would
-                    // show a single decimal place, and no space.
-                    return String.Format("{0:0.##} {1}", len, sizes[order]);
-                }
-                else
-                {
-                    return "";
-                }
-
-
-            }
-        }
-
-        // 新規追加なので、DBにINSERTが必要
-        public bool IsNew { get; set; }
-
-        // 日付などが変更された（DBのUPDATEが必要）
-        public bool IsDirty { get; set; }
-    }
-
-    /// <summary>
-    /// 賃貸住居用物件の図面クラス
-    /// </summary>
-    public class RentLivingZumenPDF : RentZumenPDF
-    {
-        protected string _rentLiving_id;
-        public string RentLiving_ID
-        {
-            get
-            {
-                return _rentLiving_id;
-            }
-        }
-
-        public RentLivingZumenPDF(string rentid, string rentlivingid, string rentlivingzumenid)
-        {
-            this._rent_id = rentid;
-            this._rentLiving_id = rentlivingid;
-
-            this._rentZumenPDF_id = rentlivingzumenid;
-
-            // 一応
-            this._dateTimeAdded = DateTime.Now;
-        }
-    }
-
-
-    /// <summary>
-    /// 部屋・区画等の基底クラス
-    /// </summary>
-    public class Section : ViewModelBase
-    {
-        protected string _rent_ID;
-        public string Rent_ID
-        {
-            get
-            {
-                return _rent_ID;
-            }
-        }
-
-        private bool _isVacant;
-        public bool IsVacant
-        {
-            get
-            {
-                return _isVacant;
-            }
-            set
-            {
-                if (_isVacant == value) return;
-
-                _isVacant = value;
-                this.NotifyPropertyChanged("IsVacant");
-            }
-        }
-
-
-        // 新規に追加（Insert）
-        public bool IsNew { get; set; }
-
-        // 変更があった
-        public bool IsDirty { get; set; }
-
-    }
-
-    /// <summary>
-    /// 賃貸住居用の部屋クラス
-    /// </summary>
-    public class RentLivingSection : Section
-    {
-        protected string _rentLiving_ID;
-        public string RentLiving_ID
-        {
-            get
-            {
-                return _rentLiving_ID;
-            }
-        }
-
-        protected string _rentLivingSection_ID;
-        public string RentLivingSection_ID
-        {
-            get
-            {
-                return _rentLivingSection_ID;
-            }
-        }
-
-        // 部屋番号
-        private string _rentLivingSectionRoomNumber;
-        public string RentLivingSectionRoomNumber
-        {
-            get
-            {
-                return _rentLivingSectionRoomNumber;
-            }
-            set
-            {
-                if (_rentLivingSectionRoomNumber == value) return;
-
-                _rentLivingSectionRoomNumber = value;
-                this.NotifyPropertyChanged("RentLivingSectionRoomNumber");
-            }
-        }
-
-        // 賃料
-        private int _rentLivingSectionPrice;
-        public int RentLivingSectionPrice
-        {
-            get
-            {
-                return _rentLivingSectionPrice;
-            }
-            set
-            {
-                if (_rentLivingSectionPrice == value) return;
-
-                _rentLivingSectionPrice = value;
-                this.NotifyPropertyChanged("RentLivingSectionPrice");
-            }
-        }
-
-        // 間取り
-        private string _rentLivingSectionMadori; // TODO 1K, 2K...
-        public string RentLivingSectionMadori
-        {
-            get
-            {
-                return _rentLivingSectionMadori;
-            }
-            set
-            {
-                if (_rentLivingSectionMadori == value) return;
-
-                _rentLivingSectionMadori = value;
-                this.NotifyPropertyChanged("RentLivingSectionMadori");
-            }
-        }
-
-        // 部屋写真コレクション
-        public ObservableCollection<RentLivingSectionPicture> RentLivingSectionPictures { get; set; } = new ObservableCollection<RentLivingSectionPicture>();
-
-        // DBへの更新時にDBから削除されるべき部屋写真のIDリスト
-        public List<string> RentLivingSectionPicturesToBeDeletedIDs = new List<string>();
-
-        public RentLivingSection(string rentid, string rentlivingid, string sectionid)
-        {
-            this._rent_ID = rentid;
-            this._rentLiving_ID = rentlivingid;
-            this._rentLivingSection_ID = sectionid;
-        }
-    }
-
-    /// <summary>
-    /// 部屋・区画の写真基底クラス
-    /// </summary>
-    public class RentSectionPicture : ViewModelBase
-    {
-        protected string _rentSectionPicture_id;
-        public string RentSectionPicture_ID
-        {
-            get
-            {
-                return _rentSectionPicture_id;
-            }
-        }
-
-        protected string _rent_id;
-        public string Rent_ID
-        {
-            get
-            {
-                return _rent_id;
-            }
-        }
-
-        // For display.
-        private ImageSource _picture;
-        public ImageSource Picture
-        {
-            get
-            {
-                return _picture;
-            }
-            set
-            {
-                if (_picture == value) return;
-
-                _picture = value;
-                this.NotifyPropertyChanged("Picture");
-            }
-        }
-
-        private byte[] _pictureThumbW200xData;
-        public byte[] PictureThumbW200xData
-        {
-            get
-            {
-                return _pictureThumbW200xData;
-            }
-            set
-            {
-                if (_pictureThumbW200xData == value) return;
-
-                _pictureThumbW200xData = value;
-                this.NotifyPropertyChanged("PictureThumbW200xData");
-            }
-        }
-
-        private byte[] _pictureData;
-        public byte[] PictureData
-        {
-            get
-            {
-                return _pictureData;
-            }
-            set
-            {
-                if (_pictureData == value) return;
-
-                _pictureData = value;
-                this.NotifyPropertyChanged("PictureData");
-            }
-        }
-
-        private string _pictureFileExt;
-        public string PictureFileExt
-        {
-            get
-            {
-                return _pictureFileExt;
-            }
-            set
-            {
-                if (_pictureFileExt == value) return;
-
-                _pictureFileExt = value;
-                this.NotifyPropertyChanged("PictureFileExt");
-            }
-        }
-
-        // 新規に追加されたので、まだDBに保存されていない。
-        public bool IsNew { get; set; }
-
-        // 保存されていてIDは固定だが、内容が変更されているのでUPDATEが必要。
-        public bool IsModified { get; set; }
-
-    }
-
-    /// <summary>
-    /// 賃貸住居用物件の写真クラス（室内・設備写真等）
-    /// </summary>
-    public class RentLivingSectionPicture : RentSectionPicture
-    {
-        protected string _rentLivingSection_id;
-        public string RentLivingSection_ID
-        {
-            get
-            {
-                return _rentLivingSection_id;
-            }
-        }
-
-        protected string _rentLiving_id;
-        public string RentLiving_ID
-        {
-            get
-            {
-                return _rentLiving_id;
-            }
-        }
-
-        public RentLivingSectionPicture(string rentid, string rentlivingid, string rentlivingsectionid, string rentlivingsectionpictureid)
-        {
-            this._rent_id = rentid;
-            this._rentLiving_id = rentlivingid;
-            this._rentLivingSection_id = rentlivingsectionid;
-
-            this._rentSectionPicture_id = rentlivingsectionpictureid;
-        }
-    }
-
-
-    /// <summary>
-    /// 元付け業者クラス
-    /// </summary>
-    public class Agency : ViewModelBase
-    {
-        // GUID and Primary Key
-        protected string _agency_id;
-        public string Agency_ID
-        {
-            get
-            {
-                return _agency_id;
-            }
-        }
-
-        private string _name;
-        public string Name
-        {
-            get
-            {
-                return _name;
-            }
-            set
-            {
-                if (_name == value) return;
-
-                _name = value;
-                this.NotifyPropertyChanged("Name");
-            }
-        }
-
-        private string _branch;
-        public string Branch
-        {
-            get
-            {
-                return _branch;
-            }
-            set
-            {
-                if (_branch == value) return;
-
-                _branch = value;
-                this.NotifyPropertyChanged("Branch");
-            }
-        }
-
-        private string _telNumber;
-        public string TelNumber
-        {
-            get
-            {
-                return _telNumber;
-            }
-            set
-            {
-                if (_telNumber == value) return;
-
-                _telNumber = value;
-                this.NotifyPropertyChanged("TelNumber");
-            }
-        }
-
-        private string _faxNumber;
-        public string FaxNumber
-        {
-            get
-            {
-                return _faxNumber;
-            }
-            set
-            {
-                if (_faxNumber == value) return;
-
-                _faxNumber = value;
-                this.NotifyPropertyChanged("FaxNumber");
-            }
-        }
-
-        private string _postalCode;
-        public string PostalCode
-        {
-            get
-            {
-                return _postalCode;
-            }
-            set
-            {
-                if (_postalCode == value) return;
-
-                _postalCode = value;
-                this.NotifyPropertyChanged("PostalCode");
-            }
-        }
-
-        private string _address;
-        public string Address
-        {
-            get
-            {
-                return _address;
-            }
-            set
-            {
-                if (_address == value) return;
-
-                _address = value;
-                this.NotifyPropertyChanged("Address");
-            }
-        }
-
-        private string _memo;
-        public string Memo
-        {
-            get
-            {
-                return _memo;
-            }
-            set
-            {
-                if (_memo == value) return;
-
-                _memo = value;
-                this.NotifyPropertyChanged("Memo");
-            }
-        }
-
-        public bool IsNew { get; set; }
-
-        public bool IsDirty { get; set; }
-
-        public Agency(string agencyid)
-        {
-            this._agency_id = agencyid;
-        }
-    }
-
-    /// <summary>
-    /// 管理会社クラス
-    /// </summary>
-    public class MaintenanceCompany : ViewModelBase
-    {
-        // GUID and Primary Key
-        protected string _maintenanceCompany_id;
-        public string MaintenanceCompany_ID
-        {
-            get
-            {
-                return _maintenanceCompany_id;
-            }
-        }
-
-        private string _name;
-        public string Name
-        {
-            get
-            {
-                return _name;
-            }
-            set
-            {
-                if (_name == value) return;
-
-                _name = value;
-                this.NotifyPropertyChanged("Name");
-            }
-        }
-
-        private string _branch;
-        public string Branch
-        {
-            get
-            {
-                return _branch;
-            }
-            set
-            {
-                if (_branch == value) return;
-
-                _branch = value;
-                this.NotifyPropertyChanged("Branch");
-            }
-        }
-
-        private string _telNumber;
-        public string TelNumber
-        {
-            get
-            {
-                return _telNumber;
-            }
-            set
-            {
-                if (_telNumber == value) return;
-
-                _telNumber = value;
-                this.NotifyPropertyChanged("TelNumber");
-            }
-        }
-
-        private string _faxNumber;
-        public string FaxNumber
-        {
-            get
-            {
-                return _faxNumber;
-            }
-            set
-            {
-                if (_faxNumber == value) return;
-
-                _faxNumber = value;
-                this.NotifyPropertyChanged("FaxNumber");
-            }
-        }
-
-        private string _postalCode;
-        public string PostalCode
-        {
-            get
-            {
-                return _postalCode;
-            }
-            set
-            {
-                if (_postalCode == value) return;
-
-                _postalCode = value;
-                this.NotifyPropertyChanged("PostalCode");
-            }
-        }
-
-        private string _address;
-        public string Address
-        {
-            get
-            {
-                return _address;
-            }
-            set
-            {
-                if (_address == value) return;
-
-                _address = value;
-                this.NotifyPropertyChanged("Address");
-            }
-        }
-
-        private string _memo;
-        public string Memo
-        {
-            get
-            {
-                return _memo;
-            }
-            set
-            {
-                if (_memo == value) return;
-
-                _memo = value;
-                this.NotifyPropertyChanged("Memo");
-            }
-        }
-
-        public bool IsNew { get; set; }
-
-        public bool IsDirty { get; set; }
-
-        public MaintenanceCompany(string maintenanceCompanyid)
-        {
-            this._maintenanceCompany_id = maintenanceCompanyid;
-        }
-    }
-
-    /// <summary>
-    /// オーナークラス
-    /// </summary>
-    public class Owner : ViewModelBase
-    {
-        // GUID and Primary Key
-        protected string _owner_id;
-        public string Owner_ID
-        {
-            get
-            {
-                return _owner_id;
-            }
-        }
-
-        private string _name;
-        public string Name
-        {
-            get
-            {
-                return _name;
-            }
-            set
-            {
-                if (_name == value) return;
-
-                _name = value;
-                this.NotifyPropertyChanged("Name");
-            }
-        }
-
-        private string _telNumber;
-        public string TelNumber
-        {
-            get
-            {
-                return _telNumber;
-            }
-            set
-            {
-                if (_telNumber == value) return;
-
-                _telNumber = value;
-                this.NotifyPropertyChanged("TelNumber");
-            }
-        }
-
-        private string _faxNumber;
-        public string FaxNumber
-        {
-            get
-            {
-                return _faxNumber;
-            }
-            set
-            {
-                if (_faxNumber == value) return;
-
-                _faxNumber = value;
-                this.NotifyPropertyChanged("FaxNumber");
-            }
-        }
-
-        private string _postalCode;
-        public string PostalCode
-        {
-            get
-            {
-                return _postalCode;
-            }
-            set
-            {
-                if (_postalCode == value) return;
-
-                _postalCode = value;
-                this.NotifyPropertyChanged("PostalCode");
-            }
-        }
-
-        private string _address;
-        public string Address
-        {
-            get
-            {
-                return _address;
-            }
-            set
-            {
-                if (_address == value) return;
-
-                _address = value;
-                this.NotifyPropertyChanged("Address");
-            }
-        }
-
-        private string _memo;
-        public string Memo
-        {
-            get
-            {
-                return _memo;
-            }
-            set
-            {
-                if (_memo == value) return;
-
-                _memo = value;
-                this.NotifyPropertyChanged("Memo");
-            }
-        }
-        public bool IsNew { get; set; }
-
-        public bool IsDirty { get; set; }
-
-        public Owner(string ownerid)
-        {
-
-            this._owner_id = ownerid;
-        }
-    }
-
-    #endregion
-
-    /// <summary>
-    /// 情報保持・表示用のMyErrorクラス
-    /// </summary>
-    #region == エラー情報保持・表示用クラス ==
-
-    public class MyError
-    {
-        public string ErrType { get; set; } // eg "API, DB, other"
-        public int ErrCode { get; set; } // HTTP ERROR CODE?
-        public string ErrText { get; set; } // API error code translated via dictionaly.
-        public string ErrPlace { get; set; } // eg RESTのPATH。
-        public string ErrPlaceParent { get; set; } // ?
-        public DateTime ErrDatetime { get; set; }
-        public string ErrDescription { get; set; } // 自前の補足説明。
-    }
-
-    #endregion
-
-    /// <summary>
-    /// IO Dialog Service
-    /// </summary>
-    #region == IO Dialog Serviceダイアログ表示用クラス ==
-    
-    /// TODO: サービスのインジェクションは・・・とりあえずしない。
-    /// https://stackoverflow.com/questions/28707039/trying-to-understand-using-a-service-to-open-a-dialog?noredirect=1&lq=1
-    /*
-    public interface IOpenDialogService
-    {
-        string[] GetOpenPictureFileDialog(string title, bool multi = true);
-    }
-    */
-
-    public class OpenDialogService// : IOpenDialogService
-    {
-
-        public string[] GetOpenPictureFileDialog(string title, bool multi = true)
-        {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Multiselect = multi;
-            openFileDialog.Filter = "イメージファイル (*.jpg;*.png;*.gif;*.jpeg)|*.png;*.jpg;*.gif;*.jpeg|写真ファイル (*.jpg;*.png;*.jpeg)|*.jpg;*.png;*.jpeg|画像ファイル(*.gif;*.png)|*.gif;*.png"; // 外観ならJPGかPNGのみ。間取りならGIFかPNG。
-            openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures); // or MyDocuments
-            openFileDialog.Title = title;
-
-            if (openFileDialog.ShowDialog() == true)
-            {
-                return openFileDialog.FileNames;
-            }
-            return null;
-        }
-
-        public string GetOpenZumenPdfFileDialog(string title)
-        {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Multiselect = false;
-            openFileDialog.Filter = "PDFファイル (*.pdf)|*.pdf"; 
-            openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            openFileDialog.Title = title;
-
-            if (openFileDialog.ShowDialog() == true)
-            {
-                return openFileDialog.FileName;
-            }
-            return null;
-        }
-    }
-
-    #endregion
-
-    /// <summary>
-    /// メインのビューモデル
-    /// </summary>
     public class MainViewModel : ViewModelBase
     {
 
@@ -1520,7 +187,7 @@ namespace RepsCore.ViewModels
                 this.NotifyPropertyChanged("RentLivingNew");
             }
         }
-        
+
         // 賃貸物件住居用　編集更新用のクラスオブジェクト
         private RentLiving _rentLivingEdit = new RentLiving(Guid.NewGuid().ToString(), Guid.NewGuid().ToString());
         public RentLiving RentLivingEdit
@@ -1767,7 +434,7 @@ namespace RepsCore.ViewModels
 
             }
         }
-        
+
         // RL新規追加画面の表示フラグ
         private bool _showRentLivingNew = false;
         public bool ShowRentLivingNew
@@ -2077,7 +744,7 @@ namespace RepsCore.ViewModels
             }
 
         }
-        
+
         // 元付け業者Agency新規追加画面の表示フラグ
         private bool _showAgencyEdit = false;
         public bool ShowAgencyEdit
@@ -2363,12 +1030,28 @@ namespace RepsCore.ViewModels
         // サービスのインジェクションは・・・とりあえずしない。
         //private IOpenDialogService openDialogService;
         private OpenDialogService _openDialogService = new OpenDialogService();
-        
+
         #endregion
 
-        /// <summary>
-        /// メインのビューモデルのコンストラクタ
-        /// </summary>
+        private SearchTags _selectedSearchTags = SearchTags.Title;
+        public SearchTags SelectedSearchTags
+        {
+            get
+            {
+                return _selectedSearchTags;
+            }
+            set
+            {
+                if (_selectedSearchTags == value)
+                    return;
+
+                _selectedSearchTags = value;
+                NotifyPropertyChanged("SelectedSearchTags");
+            }
+        }
+
+        public event EventHandler<BlogEntryEventArgs> OpenEditorView;
+
         public MainViewModel()// (IOpenDialogService openDialogService)
         {
             //this._openDialogService = openDialogService;
@@ -2466,7 +1149,7 @@ namespace RepsCore.ViewModels
             RentLivingEditZumenPdfEnterCommand = new GenericRelayCommand<RentZumenPDF>(
                 param => RentLivingEditZumenPdfEnterCommand_Execute(param),
                 param => RentLivingEditZumenPdfEnterCommand_CanExecute());
-            
+
 
             // RL 管理編集 新規部屋
             RentLivingEditSectionNewCommand = new RelayCommand(RentLivingEditSectionNewCommand_Execute, RentLivingEditSectionNewCommand_CanExecute);
@@ -2522,7 +1205,7 @@ namespace RepsCore.ViewModels
 
             // エラー通知画面を閉じる
             CloseErrorCommand = new RelayCommand(CloseErrorCommand_Execute, CloseErrorCommand_CanExecute);
-            
+
             #endregion
 
             #region == SQLite DB のイニシャライズ ==
@@ -2712,6 +1395,9 @@ namespace RepsCore.ViewModels
 
             #endregion
 
+
+
+            OpenBuildingWindowCommand = new RelayCommand(OpenBuildingWindowCommand_Execute, OpenBuildingWindowCommand_CanExecute);
         }
 
         #region == イベント ==
@@ -3365,7 +2051,7 @@ namespace RepsCore.ViewModels
                                     {
                                         string sqlInsertIntoRentLivingPicture = String.Format("INSERT INTO RentLivingPicture (RentLivingPicture_ID, RentLiving_ID, Rent_ID, PictureData, PictureThumbW200xData, PictureFileExt) VALUES ('{0}', '{1}', '{2}', @0, @1, '{5}')",
                                             pic.RentPicture_ID, RentLivingNew.RentLiving_ID, RentLivingNew.Rent_ID, pic.PictureData, pic.PictureThumbW200xData, pic.PictureFileExt);
-                                        
+
                                         // 物件画像の追加
                                         cmd.CommandText = sqlInsertIntoRentLivingPicture;
                                         // ループなので、前のパラメーターをクリアする。
@@ -3472,7 +2158,7 @@ namespace RepsCore.ViewModels
                         {
                             // ロールバック
                             cmd.Transaction.Rollback();
-                          
+
                             // エラーイベント発火
                             MyError er = new MyError();
                             er.ErrType = "DB";
@@ -3630,7 +2316,7 @@ namespace RepsCore.ViewModels
 
             if (!ShowRentLivingNewSectionNew) ShowRentLivingNewSectionNew = true;
         }
-        
+
         // RL新規　部屋追加キャンセル
         public ICommand RentLivingNewSectionNewCancelCommand { get; }
         public bool RentLivingNewSectionNewCancelCommand_CanExecute()
@@ -3661,14 +2347,14 @@ namespace RepsCore.ViewModels
             // 追加画面を閉じる
             ShowRentLivingNewSectionNew = false;
         }
-        
+
         // RL新規　部屋編集（画面表示）
         public ICommand RentLivingNewSectionEditCommand { get; }
         public bool RentLivingNewSectionEditCommand_CanExecute()
         {
             if (RentLivingNewSectionSelectedItem != null)
                 return true;
-            else 
+            else
                 return false;
         }
         public void RentLivingNewSectionEditCommand_Execute()
@@ -4110,7 +2796,7 @@ namespace RepsCore.ViewModels
         {
             if (obj == null) return;
             if (RentLivingNew == null) return;
-            
+
             // System.Windows.Controls.SelectedItemCollection をキャストして、ループ
             System.Collections.IList items = (System.Collections.IList)obj;
             var collection = items.Cast<RentLivingZumenPDF>();
@@ -4125,7 +2811,7 @@ namespace RepsCore.ViewModels
 
                 break;
             }
-            
+
         }
 
         // RL編集　物件の図面PDF表示（ダブルクリックやエンター押下で）
@@ -4213,7 +2899,7 @@ namespace RepsCore.ViewModels
                                 rlpic.PictureData = imageBytes;
 
                                 byte[] imageThumbBytes = (byte[])reader["PictureThumbW200xData"];
-                                rlpic.PictureThumbW200xData =  imageThumbBytes;
+                                rlpic.PictureThumbW200xData = imageThumbBytes;
                                 /*
                                 byte[] imageBytes = new byte[0];
                                 if (reader["PictureData"] != null && !Convert.IsDBNull(reader["PictureData"]))
@@ -4574,7 +3260,7 @@ namespace RepsCore.ViewModels
                                     // 更新
                                     string sqlUpdateRentLivingSection = String.Format("UPDATE RentLivingSection SET RoomNumber = '{1}', Price = '{2}', Madori = '{3}' WHERE RentLivingSection_ID = '{0}'",
                                             room.RentLivingSection_ID, room.RentLivingSectionRoomNumber, room.RentLivingSectionPrice, room.RentLivingSectionMadori);
-                                    
+
                                     cmd.CommandText = sqlUpdateRentLivingSection;
                                     var UpdateoRentLivingSectionResult = cmd.ExecuteNonQuery();
                                     if (UpdateoRentLivingSectionResult > 0)
@@ -4844,7 +3530,7 @@ namespace RepsCore.ViewModels
             if (RentLivingEdit == null) return;
 
             System.Collections.IList items = (System.Collections.IList)obj;
-            
+
             if (items.Count > 0)
             {
                 RentLivingPicture rlpic = items.Cast<RentLivingPicture>().First();
@@ -4924,13 +3610,13 @@ namespace RepsCore.ViewModels
 
             // RentLivingEditSectionNew オブジェクトを用意
             RentLivingEditSectionNew = new RentLivingSection(RentLivingNew.Rent_ID, RentLivingNew.RentLiving_ID, Guid.NewGuid().ToString());
-            
+
             RentLivingEditSectionNew.IsNew = true;
             RentLivingEditSectionNew.IsDirty = false;
 
             if (!ShowRentLivingEditSectionNew) ShowRentLivingEditSectionNew = true;
         }
-        
+
         // RL編集　部屋追加キャンセル
         public ICommand RentLivingEditSectionNewCancelCommand { get; }
         public bool RentLivingEditSectionNewCancelCommand_CanExecute()
@@ -5330,7 +4016,7 @@ namespace RepsCore.ViewModels
                 RentLivingEditSectionEdit.RentLivingSectionPictures.Remove(item);
             }
 
-            
+
         }
 
 
@@ -5563,7 +4249,7 @@ namespace RepsCore.ViewModels
                             ag.TelNumber = Convert.ToString(reader["TelNumber"]);
                             ag.FaxNumber = Convert.ToString(reader["FaxNumber"]);
                             ag.Memo = Convert.ToString(reader["Memo"]);
-                            
+
                             ag.IsNew = false;
                             ag.IsDirty = false;
 
@@ -6040,7 +4726,7 @@ namespace RepsCore.ViewModels
             {
                 // 選択アイテムのデータを削除
 
-                string sqlDelete = String.Format("DELETE FROM MaintenanceCompany WHERE MaintenanceCompany_ID = '{0}'", 
+                string sqlDelete = String.Format("DELETE FROM MaintenanceCompany WHERE MaintenanceCompany_ID = '{0}'",
                     MaintenanceCompaniesSelectedItem.MaintenanceCompany_ID);
 
                 using (var connection = new SqliteConnection(connectionStringBuilder.ConnectionString))
@@ -6666,7 +5352,26 @@ namespace RepsCore.ViewModels
 
         #endregion
 
-        #endregion
+        public ICommand OpenBuildingWindowCommand { get; }
+        public bool OpenBuildingWindowCommand_CanExecute()
+        {
+            return true;
+        }
+        public void OpenBuildingWindowCommand_Execute()
+        {
+            BlogEntryEventArgs ag = new BlogEntryEventArgs();
+            ag.Id = "hoge";
 
+            OpenEditorView?.Invoke(this, ag);
+        }
     }
+
+    public enum SearchTags
+    {
+        Title, Artist, Album
+    }
+
+
+    #endregion
+
 }
