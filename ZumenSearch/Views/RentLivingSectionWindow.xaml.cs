@@ -72,11 +72,15 @@ namespace ZumenSearch.Views
             {
                 RestoreButton.Visibility = Visibility.Collapsed;
                 MaxButton.Visibility = Visibility.Visible;
+
+                BackgroundGrid.Margin = new Thickness(0, 0, 0, 0);
             }
             else if (this.WindowState == WindowState.Maximized)
             {
                 RestoreButton.Visibility = Visibility.Visible;
                 MaxButton.Visibility = Visibility.Collapsed;
+
+                BackgroundGrid.Margin = new Thickness(3, 3, 3, 3);
             }
         }
 

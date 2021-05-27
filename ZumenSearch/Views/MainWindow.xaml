@@ -11,8 +11,8 @@
         WindowStyle="None"
         WindowStartupLocation="CenterScreen"
         Background="{DynamicResource WindowBackgroundColorBrush}"
-        Width="1224" Height="720"
-        MinWidth="1224" MinHeight="720"
+        Width="1024" Height="680"
+        MinWidth="1024" MinHeight="680"
         DataContext="{StaticResource MainViewModel}"
         Title="{Binding AppTitle}" 
         StateChanged="Window_StateChanged"
@@ -23,7 +23,7 @@
         <WindowChrome CaptionHeight="32" ResizeBorderThickness="{x:Static SystemParameters.WindowResizeBorderThickness}"/>
     </WindowChrome.WindowChrome>
     <Border Style="{StaticResource WindowMainPanelStyle}">
-        <Grid Background="{DynamicResource WindowBackgroundColorBrush}">
+        <Grid x:Name="BackgroundGrid" Background="{DynamicResource WindowBackgroundColorBrush}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="32"/>
                 <RowDefinition Height="Auto"/>
