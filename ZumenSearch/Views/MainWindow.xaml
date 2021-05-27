@@ -11,7 +11,7 @@
         WindowStyle="None"
         WindowStartupLocation="CenterScreen"
         Background="{DynamicResource WindowBackgroundColorBrush}"
-        Width="1280" Height="827"
+        Width="1280" Height="720"
         MinWidth="1280" MinHeight="720"
         DataContext="{StaticResource MainViewModel}"
         Title="{Binding AppTitle}" 

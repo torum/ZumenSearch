@@ -11,8 +11,8 @@
         WindowStyle="None"
         WindowStartupLocation="CenterScreen"
         Background="{DynamicResource WindowBackgroundColorBrush}"
-        Width="1124" Height="700" 
-        MinWidth="1124" MinHeight="700"
+        Width="1224" Height="720" 
+        MinWidth="1224" MinHeight="720"
         StateChanged="Window_StateChanged"
         Closing="Window_Closing">
     <WindowChrome.WindowChrome>
@@ -27,10 +27,12 @@
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="1221"/>
+                <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
             <!-- アプリタイトルバー -->
-            <Grid x:Name="AppTitleBar">
+            <Grid x:Name="AppTitleBar" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="32"/>
                 </Grid.RowDefinitions>
@@ -75,7 +77,7 @@
             </Grid>
 
             <!-- エラー通知エリア -->
-            <Grid Grid.Row="1" Visibility="{Binding ShowErrorDialog, Converter={StaticResource BoolToVisibilityCollapsedConverter}}" Background="#FFDFD991">
+            <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Visibility="{Binding ShowErrorDialog, Converter={StaticResource BoolToVisibilityCollapsedConverter}}" Background="#FFDFD991">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="50"/>
                     <RowDefinition Height="*"/>
@@ -94,13 +96,13 @@
             </Grid>
 
             <!-- 賃貸物件住居用の編集 -->
-            <Grid Grid.Row="2">
+            <Grid Grid.Row="2" Grid.Column="1">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="375"/>
-                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="846"/>
                 </Grid.ColumnDefinitions>
 
                 <!-- 写真 -->
@@ -212,171 +214,218 @@
                                     <RowDefinition Height="*"/>
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="525"/>
-                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="445"/>
+                                    <ColumnDefinition Width="190"/>
+                                    <ColumnDefinition Width="190"/>
                                 </Grid.ColumnDefinitions>
 
+                                <!-- 部屋番号・条件・設備 -->
                                 <StackPanel Grid.Row="0" Grid.Column="0" Margin="0 0 6 0">
-
+                                    
+                                    <!-- 部屋番号 -->
                                     <StackPanel Orientation="Horizontal">
 
-                                        <GroupBox Header="部屋番号" Padding="6">
+                                        <GroupBox Header="部屋番号" Padding="6" Margin="0 0 6 0">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBox Text="{Binding RentLivingEdit.Name}" Width="84" Margin="6 6 0 6" HorizontalAlignment="Left"></TextBox>
+                                                <Label VerticalAlignment="Bottom" Content="号室" />
+                                            </StackPanel>
+                                        </GroupBox>
+
+                                        <GroupBox Header="間取り" Padding="6" Margin="0 0 6 0">
+                                            <StackPanel Orientation="Horizontal">
+                                                <ComboBox Width="68" Margin="6" SelectedIndex="-1">
+                                                    <ComboBoxItem>1</ComboBoxItem>
+                                                    <ComboBoxItem>2</ComboBoxItem>
+                                                    <ComboBoxItem>3</ComboBoxItem>
+                                                    <ComboBoxItem>4</ComboBoxItem>
+                                                    <ComboBoxItem>5</ComboBoxItem>
+                                                    <ComboBoxItem>6</ComboBoxItem>
+                                                    <ComboBoxItem>7</ComboBoxItem>
+                                                    <ComboBoxItem>8</ComboBoxItem>
+                                                    <ComboBoxItem>9</ComboBoxItem>
+                                                </ComboBox>
+                                                <ComboBox Width="68" Margin="6" SelectedIndex="-1">
+                                                    <ComboBoxItem>R</ComboBoxItem>
+                                                    <ComboBoxItem>K</ComboBoxItem>
+                                                    <ComboBoxItem>SK</ComboBoxItem>
+                                                    <ComboBoxItem>DK</ComboBoxItem>
+                                                    <ComboBoxItem>SDK</ComboBoxItem>
+                                                    <ComboBoxItem>LK</ComboBoxItem>
+                                                    <ComboBoxItem>SLK</ComboBoxItem>
+                                                    <ComboBoxItem>LDK</ComboBoxItem>
+                                                    <ComboBoxItem>SLDK</ComboBoxItem>
+                                                </ComboBox>
+                                            </StackPanel>
+                                        </GroupBox>
+
+                                        <GroupBox Header="専有面積" Padding="6" Margin="0 0 6 0">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBox Width="42" Margin="6 6 0 6" HorizontalAlignment="Left" />
+                                                <Label VerticalAlignment="Bottom" Content="㎡" />
+                                            </StackPanel>
+                                        </GroupBox>
+
+                                    </StackPanel>
+
+                                    <!-- 条件・設備 -->
+                                    <GroupBox Header="条件・設備" Padding="6" Height="554">
+                                        <ScrollViewer VerticalScrollBarVisibility="Auto">
                                             <StackPanel>
-                                                <TextBox Text="{Binding RentLivingEdit.Name}" Width="84" Margin="6" HorizontalAlignment="Left"></TextBox>
+                                                <Expander Header="部屋設備" Margin="6" Padding="6" IsExpanded="True">
+                                                    <WrapPanel Orientation="Horizontal">
+                                                        <CheckBox Margin="6" Content="バストイレ別" />
+                                                        <CheckBox Margin="6" Content="室内洗濯機置き場" />
+                                                        <CheckBox Margin="6" Content="エアコン" />
+                                                        <CheckBox Margin="6" Content="フローリング" />
+                                                        <CheckBox Margin="6" Content="ロフト" />
+                                                        <CheckBox Margin="6" Content="追い焚き" />
+                                                        <CheckBox Margin="6" Content="ガスコンロ" />
+                                                        <CheckBox Margin="6" Content="IH" />
+                                                        <CheckBox Margin="6" Content="コンロ２口以上" />
+                                                    </WrapPanel>
+                                                </Expander>
+                                                <Expander Header="方位・位置" Margin="6" Padding="6" IsExpanded="False">
+                                                    <StackPanel>
+                                                        <WrapPanel Orientation="Horizontal">
+                                                            <GroupBox Header="所在階" Padding="6" Margin="6">
+                                                                <StackPanel Orientation="Horizontal">
+                                                                    <ComboBox Width="68" Margin="6 6 0 6" SelectedIndex="0" HorizontalAlignment="Left">
+                                                                        <ComboBoxItem>地上</ComboBoxItem>
+                                                                        <ComboBoxItem>地下</ComboBoxItem>
+                                                                    </ComboBox>
+                                                                    <TextBox Width="42" Margin="3 0 0 6" HorizontalAlignment="Left" VerticalAlignment="Bottom" />
+                                                                    <Label VerticalAlignment="Bottom" Content="階" />
+                                                                </StackPanel>
+                                                            </GroupBox>
+
+                                                            <GroupBox Header="主要採光面" Padding="6" Margin="6">
+                                                                <ComboBox Width="68" Margin="6 6 0 6" HorizontalAlignment="Left" SelectedIndex="-1">
+                                                                    <ComboBoxItem>北</ComboBoxItem>
+                                                                    <ComboBoxItem>北東</ComboBoxItem>
+                                                                    <ComboBoxItem>東</ComboBoxItem>
+                                                                    <ComboBoxItem>南東</ComboBoxItem>
+                                                                    <ComboBoxItem>南</ComboBoxItem>
+                                                                    <ComboBoxItem>南西</ComboBoxItem>
+                                                                    <ComboBoxItem>西</ComboBoxItem>
+                                                                    <ComboBoxItem>北西</ComboBoxItem>
+                                                                </ComboBox>
+                                                            </GroupBox>
+                                                        </WrapPanel>
+                                                        <WrapPanel Orientation="Horizontal">
+                                                            <CheckBox Margin="6" Content="角部屋" />
+                                                        </WrapPanel>
+                                                    </StackPanel>
+                                                </Expander>
+                                                <Expander Header="条件" Margin="6" Padding="6" IsExpanded="False">
+                                                    <WrapPanel Orientation="Horizontal">
+                                                        <CheckBox Margin="6" Content="ペット相談" />
+                                                        <CheckBox Margin="6" Content="2人入居可" />
+                                                        <CheckBox Margin="6" Content="保証人不要" />
+                                                        <CheckBox Margin="6" Content="事務所使用相談" />
+                                                    </WrapPanel>
+                                                </Expander>
                                             </StackPanel>
-                                        </GroupBox>
-                                        
-                                        <GroupBox Header="賃料" Padding="6">
+                                        </ScrollViewer>
+                                    </GroupBox>
+                                    
+                                </StackPanel>
+
+                                <!-- 賃料系 -->
+                                <StackPanel Grid.Row="0" Grid.Column="1" Margin="0 0 6 0">
+
+                                    <GroupBox Header="賃料" Padding="6">
+                                        <StackPanel Orientation="Horizontal">
                                             <StackPanel Orientation="Horizontal">
-                                                <StackPanel Orientation="Horizontal">
-                                                    <TextBox Width="68" Margin="6 6 0 6" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                                                    <Label VerticalAlignment="Bottom" Content="円" />
-                                                </StackPanel>
+                                                <TextBox Width="68" Margin="6 6 0 6" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                                <Label VerticalAlignment="Bottom" Content="円" />
                                             </StackPanel>
-                                        </GroupBox>
+                                        </StackPanel>
+                                    </GroupBox>
 
-                                        <GroupBox Header="管理費・共益費" Padding="6">
+                                    <GroupBox Header="管理費・共益費" Padding="6">
+                                        <StackPanel Orientation="Horizontal">
                                             <StackPanel Orientation="Horizontal">
-                                                <StackPanel Orientation="Horizontal">
-                                                    <TextBox Width="68" Margin="6 6 0 6" HorizontalAlignment="Left" VerticalAlignment="Center" />
-                                                    <Label VerticalAlignment="Bottom" Content="円" />
-                                                </StackPanel>
+                                                <TextBox Width="68" Margin="6 6 0 6" HorizontalAlignment="Left" VerticalAlignment="Center" />
+                                                <Label VerticalAlignment="Bottom" Content="円" />
                                             </StackPanel>
-                                        </GroupBox>
-                                        
-                                    </StackPanel>
+                                        </StackPanel>
+                                    </GroupBox>
 
-
-                                    <StackPanel Orientation="Horizontal">
-
-                                        <GroupBox Header="敷金" Padding="6">
+                                    <GroupBox Header="敷金" Padding="6">
+                                        <StackPanel Orientation="Horizontal">
                                             <StackPanel Orientation="Horizontal">
-                                                <StackPanel Orientation="Horizontal">
-                                                    <TextBox Width="68" Margin="6 6 0 6" HorizontalAlignment="Left" VerticalAlignment="Bottom" />
-                                                    <ComboBox Width="58" SelectedIndex="0" Margin="6 6 0 6"  VerticalAlignment="Bottom">
-                                                        <ComboBoxItem>ヵ月</ComboBoxItem>
-                                                        <ComboBoxItem>円</ComboBoxItem>
-                                                    </ComboBox>
-                                                </StackPanel>
+                                                <TextBox Width="68" Margin="6 6 0 6" HorizontalAlignment="Left" VerticalAlignment="Bottom" />
+                                                <ComboBox Width="58" SelectedIndex="0" Margin="6 6 0 6"  VerticalAlignment="Bottom">
+                                                    <ComboBoxItem>ヵ月</ComboBoxItem>
+                                                    <ComboBoxItem>円</ComboBoxItem>
+                                                </ComboBox>
                                             </StackPanel>
-                                        </GroupBox>
+                                        </StackPanel>
+                                    </GroupBox>
 
-
-                                        <GroupBox Header="礼金" Padding="6">
+                                    <GroupBox Header="礼金" Padding="6">
+                                        <StackPanel Orientation="Horizontal">
                                             <StackPanel Orientation="Horizontal">
-                                                <StackPanel Orientation="Horizontal">
-                                                    <TextBox Width="68" Margin="6 6 0 6" HorizontalAlignment="Left" VerticalAlignment="Bottom" />
-                                                    <ComboBox Width="58" SelectedIndex="0" Margin="6 6 0 6"  VerticalAlignment="Bottom">
-                                                        <ComboBoxItem>ヵ月</ComboBoxItem>
-                                                        <ComboBoxItem>円</ComboBoxItem>
-                                                    </ComboBox>
-                                                </StackPanel>
+                                                <TextBox Width="68" Margin="6 6 0 6" HorizontalAlignment="Left" VerticalAlignment="Bottom" />
+                                                <ComboBox Width="58" SelectedIndex="0" Margin="6 6 0 6"  VerticalAlignment="Bottom">
+                                                    <ComboBoxItem>ヵ月</ComboBoxItem>
+                                                    <ComboBoxItem>円</ComboBoxItem>
+                                                </ComboBox>
                                             </StackPanel>
-                                        </GroupBox>
+                                        </StackPanel>
+                                    </GroupBox>
 
-                                    </StackPanel>
-
-
-                                    <StackPanel Orientation="Horizontal">
-
-                                        <GroupBox Header="仲介手数料" Padding="6">
+                                    <GroupBox Header="仲介手数料" Padding="6">
+                                        <StackPanel Orientation="Horizontal">
                                             <StackPanel Orientation="Horizontal">
-                                                <StackPanel Orientation="Horizontal">
-                                                    <TextBox Width="68" Margin="6 6 0 6" HorizontalAlignment="Left" VerticalAlignment="Bottom" />
-                                                    <ComboBox Width="58" SelectedIndex="0" Margin="6 6 0 6"  VerticalAlignment="Bottom">
-                                                        <ComboBoxItem>ヵ月</ComboBoxItem>
-                                                        <ComboBoxItem>円</ComboBoxItem>
-                                                    </ComboBox>
-                                                </StackPanel>
+                                                <TextBox Width="68" Margin="6 6 0 6" HorizontalAlignment="Left" VerticalAlignment="Bottom" />
+                                                <ComboBox Width="58" SelectedIndex="0" Margin="6 6 0 6"  VerticalAlignment="Bottom">
+                                                    <ComboBoxItem>ヵ月</ComboBoxItem>
+                                                    <ComboBoxItem>円</ComboBoxItem>
+                                                </ComboBox>
                                             </StackPanel>
-                                        </GroupBox>
+                                        </StackPanel>
+                                    </GroupBox>
 
+                                    <GroupBox Header="借家契約" Padding="6">
+                                        <StackPanel>
+                                            <RadioButton Content="普通借家" Margin="6"/>
+                                            <RadioButton Content="定期借家" Margin="6"/>
+                                        </StackPanel>
+                                    </GroupBox>
 
-                                        <GroupBox Header="更新料" Padding="6">
+                                    <GroupBox Header="契約期間" Padding="6">
+                                        <StackPanel Orientation="Horizontal">
                                             <StackPanel Orientation="Horizontal">
-                                                <StackPanel Orientation="Horizontal">
-                                                    <TextBox Width="68" Margin="6 6 0 6" HorizontalAlignment="Left" VerticalAlignment="Bottom" />
-                                                    <ComboBox Width="58" SelectedIndex="0" Margin="6 6 0 6"  VerticalAlignment="Bottom">
-                                                        <ComboBoxItem>ヵ月</ComboBoxItem>
-                                                        <ComboBoxItem>円</ComboBoxItem>
-                                                    </ComboBox>
-                                                </StackPanel>
+                                                <TextBox Width="34" Margin="6 6 0 6" HorizontalAlignment="Left" VerticalAlignment="Center" />
+                                                <Label VerticalAlignment="Bottom" Content="年" />
                                             </StackPanel>
-                                        </GroupBox>
+                                        </StackPanel>
+                                    </GroupBox>
 
-                                    </StackPanel>
-
-
-
+                                    <GroupBox Header="更新料" Padding="6">
+                                        <StackPanel Orientation="Horizontal">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBox Width="68" Margin="6 6 0 6" HorizontalAlignment="Left" VerticalAlignment="Bottom" />
+                                                <ComboBox Width="58" SelectedIndex="0" Margin="6 6 0 6"  VerticalAlignment="Bottom">
+                                                    <ComboBoxItem>ヵ月</ComboBoxItem>
+                                                    <ComboBoxItem>円</ComboBoxItem>
+                                                </ComboBox>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </GroupBox>
 
                                 </StackPanel>
 
-                                <StackPanel Grid.Row="0" Grid.Column="1" Margin="0 0 6 0">
-
-                                    <GroupBox Header="間取り" Padding="6">
-                                        <StackPanel Orientation="Horizontal">
-                                            <ComboBox Width="68" Margin="6" SelectedIndex="-1">
-                                                <ComboBoxItem>1</ComboBoxItem>
-                                                <ComboBoxItem>2</ComboBoxItem>
-                                                <ComboBoxItem>3</ComboBoxItem>
-                                                <ComboBoxItem>4</ComboBoxItem>
-                                                <ComboBoxItem>5</ComboBoxItem>
-                                                <ComboBoxItem>6</ComboBoxItem>
-                                                <ComboBoxItem>7</ComboBoxItem>
-                                                <ComboBoxItem>8</ComboBoxItem>
-                                                <ComboBoxItem>9</ComboBoxItem>
-                                            </ComboBox>
-                                            <ComboBox Width="68" Margin="6" SelectedIndex="-1">
-                                                <ComboBoxItem>R</ComboBoxItem>
-                                                <ComboBoxItem>K</ComboBoxItem>
-                                                <ComboBoxItem>SK</ComboBoxItem>
-                                                <ComboBoxItem>DK</ComboBoxItem>
-                                                <ComboBoxItem>SDK</ComboBoxItem>
-                                                <ComboBoxItem>LK</ComboBoxItem>
-                                                <ComboBoxItem>SLK</ComboBoxItem>
-                                                <ComboBoxItem>LDK</ComboBoxItem>
-                                                <ComboBoxItem>SLDK</ComboBoxItem>
-                                            </ComboBox>
-                                        </StackPanel>
-                                    </GroupBox>
-
-                                    <GroupBox Header="専有面積" Padding="6">
-                                        <StackPanel Orientation="Horizontal">
-                                            <TextBox Width="42" Margin="6 6 0 6" HorizontalAlignment="Left" />
-                                            <Label VerticalAlignment="Bottom" Content="㎡" />
-                                        </StackPanel>
-                                    </GroupBox>
-
-                                    <GroupBox Header="所在階" Padding="6">
-                                        <StackPanel Orientation="Horizontal">
-                                            <ComboBox Width="68" Margin="6 6 0 6" SelectedIndex="0" HorizontalAlignment="Left">
-                                                <ComboBoxItem>地上</ComboBoxItem>
-                                                <ComboBoxItem>地下</ComboBoxItem>
-                                            </ComboBox>
-
-                                            <TextBox Width="42" Margin="3 0 0 6" HorizontalAlignment="Left" VerticalAlignment="Bottom" />
-                                            <Label VerticalAlignment="Bottom" Content="階" />
-                                        </StackPanel>
-                                    </GroupBox>
-
-                                    <GroupBox Header="主要採光面" Padding="6">
-                                        <ComboBox Width="68" Margin="6 6 0 6" HorizontalAlignment="Left" SelectedIndex="-1">
-                                            <ComboBoxItem>北</ComboBoxItem>
-                                            <ComboBoxItem>北東</ComboBoxItem>
-                                            <ComboBoxItem>東</ComboBoxItem>
-                                            <ComboBoxItem>南東</ComboBoxItem>
-                                            <ComboBoxItem>南</ComboBoxItem>
-                                            <ComboBoxItem>南西</ComboBoxItem>
-                                            <ComboBoxItem>西</ComboBoxItem>
-                                            <ComboBoxItem>北西</ComboBoxItem>
-                                        </ComboBox>
-                                    </GroupBox>
+                                <!-- 仲介条件系 -->
+                                <StackPanel Grid.Row="0" Grid.Column="2" Margin="0 0 6 0">
 
                                     <GroupBox Header="取引態様" Padding="6">
 
                                         <TabControl>
                                             <TabItem Header="自社元付" Padding="6">
-                                                <StackPanel>
+                                                <StackPanel Margin="6">
                                                     <RadioButton Content="一般媒介" Margin="6"/>
                                                     <RadioButton Content="専任媒介" Margin="6"/>
                                                     <RadioButton Content="専属専任媒介" Margin="6"/>
@@ -385,7 +434,7 @@
                                                 </StackPanel>
                                             </TabItem>
                                             <TabItem Header="仲介先物" Padding="6">
-                                                <StackPanel>
+                                                <StackPanel Margin="6">
                                                     <RadioButton Content="一般媒介" Margin="6"/>
                                                     <RadioButton Content="専任媒介" Margin="6"/>
                                                     <RadioButton Content="専属専任媒介" Margin="6"/>
@@ -394,6 +443,25 @@
                                                 </StackPanel>
                                             </TabItem>
                                         </TabControl>
+                                    </GroupBox>
+
+                                    <GroupBox Header="手数料" Padding="6">
+                                        <StackPanel Orientation="Horizontal">
+                                            <StackPanel>
+                                                <Label Content="元付け"/>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBox Text="" Width="42" Margin="6 0 0 6" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                    <Label Content="％" VerticalAlignment="Bottom"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                            <StackPanel>
+                                                <Label Content="客付け"/>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBox Text="" Width="42" Margin="6 0 0 6" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                    <Label Content="％" VerticalAlignment="Bottom"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </StackPanel>
                                     </GroupBox>
 
                                     <GroupBox Header="現況" Padding="6">
@@ -408,17 +476,35 @@
                                         </StackPanel>
                                     </GroupBox>
 
+                                    <GroupBox Header="空室確認" Padding="6">
+                                        <StackPanel>
+                                            <StackPanel>
+                                                <Label Content="確認日"/>
+                                                <DatePicker Width="115" Margin="6 0 12 6" HorizontalAlignment="Left" VerticalAlignment="Center" IsEnabled="True"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </GroupBox>
+
                                 </StackPanel>
 
                             </Grid>
 
                         </TabItem>
 
-                        <!-- 設備 -->
+                        <!-- 元付け -->
                         <TabItem Width="120">
                             <TabItem.Header>
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="3">
-                                    <Label Content="設備" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    <Label Content="元付け" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </TabItem.Header>
+                        </TabItem>
+                        
+                        <!-- オーナー -->
+                        <TabItem Width="120">
+                            <TabItem.Header>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="3">
+                                    <Label Content="オーナー " HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </TabItem.Header>
                         </TabItem>
