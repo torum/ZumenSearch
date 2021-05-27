@@ -108,7 +108,7 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- 写真・図面 -->
-                <Grid Grid.Row="0" Grid.Column="0" Margin="3">
+                <Grid Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" Margin="3">
 
                     <TabControl>
                         
@@ -123,7 +123,7 @@
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="244"/>
-                                    <RowDefinition Height="144"/>
+                                    <RowDefinition Height="*"/>
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="366"/>
@@ -150,7 +150,7 @@
                                             <Button Width="130" Margin="2" Command="{Binding RentLivingEditPictureAddCommand}">写真の追加</Button>
                                         </StackPanel>
 
-                                        <ListView Grid.Row="2" Margin="2" ItemsSource="{Binding RentLivingEdit.RentLivingPictures}" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                        <ListView Grid.Row="2" Margin="3" ItemsSource="{Binding RentLivingEdit.RentLivingPictures}" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                                             <ListView.Resources>
                                                 <ContextMenu x:Key="ATItemContextMenu">
                                                     <MenuItem Header="削除" Command="{Binding Path=DataContext.RentLivingEditPictureDeleteCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItems, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
@@ -443,11 +443,7 @@
 
                                     <GroupBox Header="築年月" Padding="6">
                                         <StackPanel Orientation="Horizontal">
-                                            <StackPanel>
-                                                <Label Content="築年月（西暦）"/>
-                                                <DatePicker Width="96" Margin="6 0 12 6" HorizontalAlignment="Left" VerticalAlignment="Center" common:DatePickerCalendar.IsMonthYear="True" common:DatePickerDateFormat.DateFormat="yyyy/MMM"/>
-                                            </StackPanel>
-                                            <StackPanel>
+                                            <StackPanel Margin="0 0 12 0">
                                                 <Label Content="築年月（和暦）"/>
                                                 <StackPanel Orientation="Horizontal">
                                                     <ComboBox Width="60" Margin="6 0 0 6" SelectedIndex="-1">
@@ -464,6 +460,10 @@
                                                     <TextBox Width="33" Margin="3 0 0 6" VerticalAlignment="Bottom" />
                                                     <Label VerticalAlignment="Bottom" Content="月" />
                                                 </StackPanel>
+                                            </StackPanel>
+                                            <StackPanel>
+                                                <Label Content="築年月（西暦）"/>
+                                                <DatePicker Width="96" Margin="6 0 12 6" HorizontalAlignment="Left" VerticalAlignment="Center" common:DatePickerCalendar.IsMonthYear="True" common:DatePickerDateFormat.DateFormat="yyyy/MMM"/>
                                             </StackPanel>
                                         </StackPanel>
                                     </GroupBox>
@@ -1224,7 +1224,7 @@
                 </Grid>
 
                 <!-- 部屋一覧 -->
-                <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="3">
+                <Grid Grid.Row="1" Grid.Column="1" Margin="3">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
@@ -1244,7 +1244,7 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Grid.Row="1">
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                 <Button Width="130" Margin="3" HorizontalAlignment="Left" Command="{Binding RentLivingEditSectionNewCommand}">部屋の追加</Button>
                                 <Button Width="130" Margin="3" HorizontalAlignment="Left" Command="{Binding RentLivingEditSectionEditCommand}">部屋の編集</Button>
                                 <Button Width="130" Margin="3" HorizontalAlignment="Left" Command="{Binding RentLivingEditSectionDuplicateCommand}">部屋の複製</Button>
@@ -1252,7 +1252,7 @@
                             </StackPanel>
                         </StackPanel>
 
-                        <ListView Grid.Row="2" Margin="3" ItemsSource="{Binding RentLivingEdit.RentLivingSections}" SelectedItem="{Binding RentLivingEditSectionSelectedItem}">
+                        <ListView Grid.Row="2" ItemsSource="{Binding RentLivingEdit.RentLivingSections}" SelectedItem="{Binding RentLivingEditSectionSelectedItem}">
                             <ListView.View>
                                 <GridView>
                                     <GridViewColumn Header="ID" Width="0">

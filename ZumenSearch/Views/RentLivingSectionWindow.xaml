@@ -120,7 +120,7 @@
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="244"/>
-                                    <RowDefinition Height="144"/>
+                                    <RowDefinition Height="*"/>
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="366"/>

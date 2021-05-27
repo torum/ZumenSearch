@@ -57,6 +57,7 @@ using ZumenSearch.Common;
 /// （技術的に対応できるならば、P2Pで会社間共有）
 
 /// ● 履歴：
+/// v0.0.0.11 サイズ変更
 /// 2020/10/30 金曜日: 元付け業者・管理会社・オーナーの追加、一覧、削除、編集。
 /// 2020/10/29 木曜日: 図面PDFの追加、一覧、削除、表示。編集画面でのDBから削除洩れ修正。
 /// 2020/10/28 水曜日: 部屋の写真の追加・削除。
@@ -85,7 +86,7 @@ namespace ZumenSearch.ViewModels
         #region == 基本 ==
 
         // Application version.
-        private const string _appVer = "0.0.0.1";
+        private const string _appVer = "0.0.0.11";
 
         // Application name.
         private const string _appName = "ZumenSearch";
@@ -351,6 +352,23 @@ namespace ZumenSearch.ViewModels
         #endregion
 
         #region == 表示切替のフラグ ==
+
+        // 賃貸住居用　検索結果のTabControlインデックス切り替え
+        private int _rentLivingSearchTabSelectedIndex = 0;
+        public int RentLivingSearchTabSelectedIndex
+        {
+            get
+            {
+                return _rentLivingSearchTabSelectedIndex;
+            }
+            set
+            {
+                if (_rentLivingSearchTabSelectedIndex == value) return;
+
+                _rentLivingSearchTabSelectedIndex = value;
+                this.NotifyPropertyChanged("RentLivingSearchTabSelectedIndex");
+            }
+        }
 
         // 削除予定 RL検索一覧・追加タブインデックス
         private int _showRentLivingTabActiveIndex = 0;
@@ -1045,6 +1063,9 @@ namespace ZumenSearch.ViewModels
             RentLivingEditSearchCommand = new RelayCommand(RentLivingEditSearchCommand_Execute, RentLivingEditSearchCommand_CanExecute);
             // RL 管理一覧
             RentLivingEditListCommand = new RelayCommand(RentLivingEditListCommand_Execute, RentLivingEditListCommand_CanExecute);
+            // RL 検索条件画面に戻る
+            RentLivingSearchBackCommand = new RelayCommand(RentLivingSearchBackCommand_Execute, RentLivingSearchBackCommand_CanExecute);
+
             // RL 管理一覧選択表示
             RentLivingEditSelectedViewCommand = new RelayCommand(RentLivingEditSelectedViewCommand_Execute, RentLivingEditSelectedViewCommand_CanExecute);
             // RL 管理一覧選択削除
@@ -1103,7 +1124,9 @@ namespace ZumenSearch.ViewModels
 
             // RL 管理一覧選択編集
             RentLivingEditSelectedEditCommand = new RelayCommand(RentLivingEditSelectedEditCommand_Execute, RentLivingEditSelectedEditCommand_CanExecute);
-            RentLivingEditSelectedEditUpdateCommand = new RelayCommand(RentLivingEditSelectedEditUpdateCommand_Execute, RentLivingEditSelectedEditUpdateCommand_CanExecute);
+            
+            //
+            //RentLivingEditSelectedEditUpdateCommand = new RelayCommand(RentLivingEditSelectedEditUpdateCommand_Execute, RentLivingEditSelectedEditUpdateCommand_CanExecute);
 
 
 
@@ -1157,8 +1180,8 @@ namespace ZumenSearch.ViewModels
 
             ErrorOccured += new MyErrorEvent(OnError);
 
-            // デフォで一覧表示する。
-            RentLivingEditListCommand_Execute();
+            //
+            RentLivingSearchTabSelectedIndex = 0;
 
         }
 
@@ -1473,17 +1496,20 @@ namespace ZumenSearch.ViewModels
         {
             if (String.IsNullOrEmpty(RentLivingEditSearchText))
             {
-                return false;
+                //return false;
             }
             else
             {
-                return true;
+                //return true;
             }
+            return true;
         }
         public void RentLivingEditSearchCommand_Execute()
         {
             // Firest, clear it.
             Rents.Clear();
+
+            RentLivingSearchTabSelectedIndex = 1;
 
             using (var connection = new SqliteConnection(connectionStringBuilder.ConnectionString))
             {
@@ -1525,6 +1551,8 @@ namespace ZumenSearch.ViewModels
         {
             // Firest, clear it.
             Rents.Clear();
+
+            RentLivingSearchTabSelectedIndex = 1;
 
             try
             {
@@ -1583,6 +1611,19 @@ namespace ZumenSearch.ViewModels
             }
 
 
+        }
+
+        // 検索へ戻る
+        public ICommand RentLivingSearchBackCommand { get; }
+        public bool RentLivingSearchBackCommand_CanExecute()
+        {
+            return true;
+        }
+        public void RentLivingSearchBackCommand_Execute()
+        {
+            RentLivingEditSelectedItem = null;
+
+            RentLivingSearchTabSelectedIndex = 0;
         }
 
         // RL　物件管理、一覧選択アイテム表示(PDFとか)
@@ -4239,7 +4280,6 @@ namespace ZumenSearch.ViewModels
         }
 
         #endregion
-
 
 
     }
