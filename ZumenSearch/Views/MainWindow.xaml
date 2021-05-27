@@ -1,0 +1,670 @@
+﻿<Window x:Class="ZumenSearch.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ZumenSearch"
+        xmlns:common="clr-namespace:ZumenSearch.Common"
+        xmlns:helper="clr-namespace:ZumenSearch.Helper"
+        xmlns:vms="clr-namespace:ZumenSearch.ViewModels"
+        mc:Ignorable="d"
+        WindowStyle="None"
+        WindowStartupLocation="CenterScreen"
+        Background="{DynamicResource WindowBackgroundColorBrush}"
+        Width="1280" Height="827"
+        MinWidth="1280" MinHeight="720"
+        DataContext="{StaticResource MainViewModel}"
+        Title="{Binding AppTitle}" 
+        StateChanged="Window_StateChanged"
+        Loaded="Window_Loaded"
+        Closing="Window_Closing" SnapsToDevicePixels="True">
+
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="32" ResizeBorderThickness="{x:Static SystemParameters.WindowResizeBorderThickness}"/>
+    </WindowChrome.WindowChrome>
+    <Border Style="{StaticResource WindowMainPanelStyle}">
+        <Grid Background="{DynamicResource WindowBackgroundColorBrush}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="32"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- アプリタイトルバー -->
+            <Grid x:Name="AppTitleBar" Grid.Row="0" Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="32"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Row="0" Grid.Column="0" Background="{DynamicResource BoardBackgroundColorBrush}" Orientation="Horizontal" HorizontalAlignment="Stretch">
+  
+                    <Button ToolTip="{Binding AppTitleVer}" IsHitTestVisible="True" WindowChrome.IsHitTestVisibleInChrome="True" IsTabStop="False" Visibility="Collapsed">
+                        <Button.Style>
+                            <Style TargetType="{x:Type Button}">
+                                <Setter Property="OverridesDefaultStyle" Value="true" />
+                                <Setter Property="Background" Value="Transparent" />
+                                <Setter Property="Foreground" Value="{DynamicResource ControlForegroundColorBrush}"/>
+                                <Setter Property="BorderThickness" Value="0" />
+                                <Setter Property="Margin" Value="0" />
+                                <Setter Property="Padding" Value="0" />
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="Border" CornerRadius="0" BorderThickness="0" Background="{TemplateBinding Background}">
+                                                <Viewbox Width="22" Height="22" Margin="5">
+                                                    <Canvas Width="24" Height="24">
+                                                        <Canvas.RenderTransform>
+                                                            <TranslateTransform X="0" Y="0"/>
+                                                        </Canvas.RenderTransform>
+                                                        <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Name="path4519"  Fill="{DynamicResource TitleTextColorBrush}" StrokeThickness="0" Data="M 3.9543374 3.1555264 C 2.5507725 3.0998097 1.4976792 4.5676481 1.7498657 5.8735045 c 0.024875 4.5518935 -0.05464 9.1077785 0.041682 13.6571425 0.2358003 1.220232 1.6120947 1.929967 2.7967315 1.720168 5.302673 -0.02444 10.6092348 0.05248 15.9094488 -0.04002 1.200174 -0.220264 1.955814 -1.529207 1.752263 -2.675677 -0.02615 -4.55308 0.05509 -9.1102167 -0.04231 -13.6607303 -0.242884 -1.2580895 -1.673494 -1.9361805 -2.878603 -1.7188671 -5.124912 1.1e-6 -10.2498266 -2.4e-6 -15.3747378 1.8e-6 z"/>
+                                                        <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Name="path4513" Fill="{DynamicResource BoardBackgroundColorBrush}" StrokeThickness="1" Data="m 3.4667969 4.9314423 c 5.688802 0 11.3776041 0 17.0664061 0 0 3.5907826 0 7.1815647 0 10.7723477 -5.688802 0 -11.3776041 0 -17.0664061 0 0 -3.590783 0 -7.1815651 0 -10.7723477 z"/>
+                                                        <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Name="rect4530"  Fill="{DynamicResource TitleTextColorBrush}" StrokeThickness="0" Data="m 4.5464377 6.1260772 c 1.7826012 0 3.5652024 0 5.3478036 0 0 2.5939146 0 5.1878288 0 7.7817438 -1.7826012 0 -3.5652024 0 -5.3478036 0 0 -2.593915 0 -5.1878292 0 -7.7817438 z"/>
+                                                        <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Name="rect45349"  Fill="{DynamicResource TitleTextColorBrush}" StrokeThickness="0" Data="m 10.983051 12.610171 c 2.915254 0 5.830509 0 8.745763 0 0 0.440677 0 0.881355 0 1.322033 -2.915254 0 -5.830509 0 -8.745763 0 0 -0.440678 0 -0.881356 0 -1.322033 z"/>
+                                                        <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Name="rect453491" Fill="{DynamicResource BoardBackgroundColorBrush}" StrokeThickness="0" Data="m 3.3651018 17.127518 c 5.6764691 0 11.3529382 0 17.0294072 0 0 0.819873 0 1.639745 0 2.459618 -5.676469 0 -11.3529381 0 -17.0294072 0 0 -0.819873 0 -1.639745 0 -2.459618 z"/>
+                                                        <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Name="rect453495"  Fill="{DynamicResource TitleTextColorBrush}" StrokeThickness="0" Data="m 10.983051 9.4067808 c 2.915254 0 5.830509 0 8.745763 0 0 0.440677 0 0.8813552 0 1.3220332 -2.915254 0 -5.830509 0 -8.745763 0 0 -0.440678 0 -0.8813562 0 -1.3220332 z"/>
+                                                        <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Name="rect4534915"  Fill="{DynamicResource TitleTextColorBrush}" StrokeThickness="0"  Data="m 10.983051 6.1525428 c 2.915254 0 5.830509 0 8.745763 0 0 0.4406772 0 0.8813552 0 1.3220332 -2.915254 0 -5.830509 0 -8.745763 0 0 -0.440678 0 -0.881356 0 -1.3220332 z"/>
+                                                    </Canvas>
+                                                </Viewbox>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+
+                    <TextBlock Text="{Binding AppTitleVer}" VerticalAlignment="Center" Margin="6 0 0 0" Visibility="Collapsed"/>
+                    
+                </StackPanel>
+
+                <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Stretch">
+
+                    <Button Style="{DynamicResource PathButton}" IsHitTestVisible="True" WindowChrome.IsHitTestVisibleInChrome="True" Opacity="0.7" Visibility="Collapsed">
+                        M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z
+                    </Button>
+
+                </StackPanel>
+
+                <!-- System icons -->
+                <StackPanel Orientation="Horizontal" Grid.Column="2" HorizontalAlignment="Right" Margin="0">
+
+                    <Button x:Name="SettingsButton" Style="{DynamicResource PathSysButton}" ToolTip="設定"
+                                Content="M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,
+8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,
+11.67 19.47,11.34 19.43,11L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,
+4.96 19.05,5.05L16.56,6.05C16.04,5.66 15.5,5.32 14.87,5.07L14.5,2.42C14.46,2.18 14.25,2 14,2H10C9.75,
+2 9.54,2.18 9.5,2.42L9.13,5.07C8.5,5.32 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.96 4.46,5.05 4.34,
+5.27L2.34,8.73C2.21,8.95 2.27,9.22 2.46,9.37L4.57,11C4.53,11.34 4.5,11.67 4.5,12C4.5,12.33 4.53,
+12.65 4.57,12.97L2.46,14.63C2.27,14.78 2.21,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.03 4.95,
+18.95L7.44,17.94C7.96,18.34 8.5,18.68 9.13,18.93L9.5,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,
+21.82 14.5,21.58L14.87,18.93C15.5,18.67 16.04,18.34 16.56,17.94L19.05,18.95C19.27,19.03 19.54,
+18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.97Z">
+                    </Button>
+
+                    <Button x:Name="MinimizeButton" Style="{StaticResource PathSysButton}" Click="MinimizeButton_Click">
+                        M20,14H4V10H20
+                    </Button>
+
+                    <Button x:Name="RestoreButton" Style="{StaticResource PathSysButton}" Click="RestoreButton_Click">
+                        M4,8H8V4H20V16H16V20H4V8M16,8V14H18V6H10V8H16M6,12V18H14V12H6Z
+                    </Button>
+
+                    <Button x:Name="MaxButton" Style="{StaticResource PathSysButton}" Click="MaxButton_Click">
+                        M4,4H20V20H4V4M6,8V18H18V8H6Z
+                    </Button>
+
+                    <Button x:Name="CloseButton" Style="{StaticResource PathSysButtonClose}" Click="CloseButton_Click">
+                        M13.46,12L19,17.54V19H17.54L12,13.46L6.46,19H5V17.54L10.54,12L5,6.46V5H6.46L12,10.54L17.54,5H19V6.46L13.46,12Z
+                    </Button>
+
+                </StackPanel>
+
+            </Grid>
+
+            <!-- エラー通知エリア -->
+            <Grid Grid.Row="1" Grid.Column="0" Visibility="{Binding ShowErrorDialog, Converter={StaticResource BoolToVisibilityCollapsedConverter}}" Background="#FFDFD991">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="50"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBox Padding="3" Margin="6" Text="{Binding ErrorText,Mode=OneWay}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch"></TextBox>
+                <Button x:Name="ButtonCloseErrorDialog" FontFamily="Segoe UI Symbol" Content="&#57610;" Command="{Binding CloseErrorCommand}" Grid.Row="0" Grid.Column="1" Width="24" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center">
+                </Button>
+                <!-- Symbol Enum
+                    https://docs.microsoft.com/en-us/uwp/api/windows.ui.xaml.controls.symbol?view=winrt-19041
+                -->
+            </Grid>
+
+            <!-- メインペイン -->
+            <TabControl Grid.Row="2" Style="{DynamicResource LeftMenuTabControlStyle}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" TabStripPlacement="Left" SelectedIndex="1">
+
+                <!-- ホーム -->
+                <TabItem Style="{DynamicResource LeftMenuTabItemStyle}">
+                    <TabItem.Header>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal">
+                                <Viewbox HorizontalAlignment="Left" VerticalAlignment="Center" Stretch="Uniform" Width="18" Height="18">
+                                    <Canvas  Width="20" Height="20" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <Path Fill="{DynamicResource NormalTextColorBrush}" Stretch="Uniform" Data="M12 5.69L17 10.19V18H15V12H9V18H7V10.19L12 5.69M12 3L2 12H5V20H11V14H13V20H19V12H22L12 3Z"/>
+                                    </Canvas>
+                                </Viewbox>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="12 0 0 0">
+                                <Label FontSize="15" Content="ホーム" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </StackPanel>
+
+                        </Grid>
+                    </TabItem.Header>
+
+                    <Grid Margin="12">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- 検索ボックス -->
+                        <TextBox x:Name="SearchTextBox" Grid.Row="0" Grid.Column="0" Text="{Binding HomeSearchText, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Margin="12" KeyboardNavigation.TabNavigation="Local" IsVisibleChanged="TextBox_IsVisibleChanged">
+                            <TextBox.Style>
+                                <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource SearchTextBoxStyle}">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="{x:Type TextBox}">
+                                                <Border x:Name="border" Background="{TemplateBinding Background}" BorderThickness="{TemplateBinding BorderThickness}" BorderBrush="{TemplateBinding BorderBrush}">
+                                                    <Grid>
+                                                        <Grid.RowDefinitions>
+                                                            <RowDefinition Height="*"/>
+                                                        </Grid.RowDefinitions>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <ScrollViewer x:Name="PART_ContentHost" Focusable="false" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden"/>
+
+                                                        <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0" VerticalAlignment="Center">
+                                                            <RadioButton x:Name="SearchTitleRadioButton" GroupName="RentSearchTags" Margin="1 0 1 0" Padding="5" Content="物件名" Width="80" IsChecked="{Binding Path=SelectedRentSearchTags, ConverterParameter={x:Static vms:RentSearchTags.RentName}, Converter={StaticResource EnumBooleanConverter}}" Style="{DynamicResource SelectionRadioButtonStyle}"/>
+                                                            <RadioButton x:Name="SearchArtistRadioButton" GroupName="RentSearchTags" Margin="1 0 1 0" Padding="5" Content="所在地" Width="80" IsChecked="{Binding Path=SelectedRentSearchTags, ConverterParameter={x:Static vms:RentSearchTags.RentLocation}, Converter={StaticResource EnumBooleanConverter}}" Style="{DynamicResource SelectionRadioButtonStyle}"/>
+                                                            <RadioButton x:Name="SearchAlbumRadioButton" GroupName="RentSearchTags" Margin="1 0 1 0" Padding="5" Content="最寄り駅" Width="80" IsChecked="{Binding Path=SelectedRentSearchTags, ConverterParameter={x:Static vms:RentSearchTags.RentStation}, Converter={StaticResource EnumBooleanConverter}}" Style="{DynamicResource SelectionRadioButtonStyle}"/>
+                                                        </StackPanel>
+
+                                                        <Button Grid.Column="2" Height="22" Width="22" Margin="2 1 2 1" ToolTip="検索" Command="{Binding HomeSearchExecCommand}" IsDefault="True" Content="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z">
+                                                            <Button.Resources>
+                                                                <Style x:Key="ButtonIntextboxFocusVisual">
+                                                                    <Setter Property="Control.Template">
+                                                                        <Setter.Value>
+                                                                            <ControlTemplate>
+                                                                                <Border>
+                                                                                    <Rectangle Margin="2" StrokeThickness="1" Stroke="{DynamicResource ControlMediumColorBrush}" StrokeDashArray="1 2" />
+                                                                                </Border>
+                                                                            </ControlTemplate>
+                                                                        </Setter.Value>
+                                                                    </Setter>
+                                                                </Style>
+                                                            </Button.Resources>
+                                                            <Button.Style>
+                                                                <Style TargetType="Button">
+                                                                    <Setter Property="SnapsToDevicePixels" Value="true" />
+                                                                    <Setter Property="OverridesDefaultStyle" Value="True" />
+                                                                    <Setter Property="FocusVisualStyle" Value="{DynamicResource ButtonIntextboxFocusVisual}" />
+                                                                    <Setter Property="Background" Value="{DynamicResource BoardBackgroundColorBrush}" />
+                                                                    <Setter Property="Foreground" Value="{DynamicResource ControlForegroundColorBrush}"/>
+                                                                    <Setter Property="Margin" Value="0" />
+                                                                    <Setter Property="Padding" Value="0" />
+                                                                    <Setter Property="Template">
+                                                                        <Setter.Value>
+                                                                            <ControlTemplate TargetType="Button">
+                                                                                <Border x:Name="Border" BorderThickness="1" Background="{TemplateBinding Background}" BorderBrush="{DynamicResource BorderDarkColorBrush}" CornerRadius="2">
+                                                                                    <Path x:Name="PathIcon" Data="{Binding Content, RelativeSource={RelativeSource TemplatedParent}}" Stretch="Uniform" Stroke="Transparent" StrokeThickness="0" Margin="4" RenderTransformOrigin="0.5,0.5">
+                                                                                        <Path.RenderTransform>
+                                                                                            <TransformGroup>
+                                                                                                <TransformGroup.Children>
+                                                                                                    <RotateTransform Angle="0" />
+                                                                                                    <ScaleTransform ScaleX="1" ScaleY="1" />
+                                                                                                </TransformGroup.Children>
+                                                                                            </TransformGroup>
+                                                                                        </Path.RenderTransform>
+                                                                                        <Path.Fill>
+                                                                                            <SolidColorBrush x:Name="PathIconColor" Color="{DynamicResource ControlForegroundColor}"/>
+                                                                                        </Path.Fill>
+                                                                                    </Path>
+                                                                                </Border>
+                                                                                <ControlTemplate.Triggers>
+
+                                                                                    <Trigger Property="IsEnabled" Value="False">
+                                                                                        <Setter TargetName="PathIcon" Property="Fill" Value="{DynamicResource DisabledForegroundColorBrush}"/>
+                                                                                    </Trigger>
+
+                                                                                    <Trigger Property="IsMouseOver" Value="true">
+                                                                                        <Setter TargetName="PathIcon" Property="Fill" Value="{DynamicResource ControlMouseOverColorBrush}"/>
+                                                                                    </Trigger>
+
+                                                                                </ControlTemplate.Triggers>
+
+                                                                            </ControlTemplate>
+                                                                        </Setter.Value>
+                                                                    </Setter>
+                                                                </Style>
+                                                            </Button.Style>
+
+                                                        </Button>
+
+                                                    </Grid>
+                                                </Border>
+                                                <!--
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsEnabled" Value="false">
+                                                        <Setter Property="Opacity" TargetName="border" Value="0.56"/>
+                                                    </Trigger>
+                                                    <Trigger Property="IsMouseOver" Value="true">
+                                                        <Setter Property="BorderBrush" TargetName="border" Value="{StaticResource ControlMouseOverColorBrush}"/>
+                                                    </Trigger>
+                                                    <Trigger Property="IsKeyboardFocused" Value="true">
+                                                        <Setter Property="BorderBrush" TargetName="border" Value="{StaticResource ControlPressedColorBrush}"/>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                                -->
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <!--
+                                    <Style.Triggers>
+                                        <MultiTrigger>
+                                            <MultiTrigger.Conditions>
+                                                <Condition Property="IsInactiveSelectionHighlightEnabled" Value="true"/>
+                                                <Condition Property="IsSelectionActive" Value="false"/>
+                                            </MultiTrigger.Conditions>
+                                            <Setter Property="SelectionBrush" Value="{DynamicResource {x:Static SystemColors.InactiveSelectionHighlightBrushKey}}"/>
+                                        </MultiTrigger>
+                                    </Style.Triggers>
+                                    -->
+                                </Style>
+                            </TextBox.Style>
+                        </TextBox>
+
+                        <Grid Grid.Row="1" Grid.Column="0" x:Name="RentLivingSearchListViewDummy" Visibility="Hidden" Margin="0 0 27 0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="0"/>
+                                <ColumnDefinition Width="3*"/>
+                                <ColumnDefinition Width="100" />
+                                <ColumnDefinition Width="2*"/>
+                                <ColumnDefinition Width="2*"/>
+                                <ColumnDefinition Width="2*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!--  This is the hidden helper Field which is used to bind to, using the "Fill" column of the helper grid  -->
+                            <Grid x:Name="RLSWidth0" Grid.Column="0" />
+                            <Grid x:Name="RLSWidth1" Grid.Column="1" />
+                            <Grid x:Name="RLSWidth2" Grid.Column="2" />
+                            <Grid x:Name="RLSWidth3" Grid.Column="3" />
+                            <Grid x:Name="RLSWidth4" Grid.Column="4" />
+                            <Grid x:Name="RLSWidth5" Grid.Column="5" />
+                        </Grid>
+
+                        <ListView Grid.Row="1" Grid.Column="0" x:Name="RentLivingSearchListView" Background="{DynamicResource ListviewAlt0ColorBrush}" helper:GridViewSort.AutoSort="True" helper:GridViewSort.ShowSortGlyph="True" IsSynchronizedWithCurrentItem="True" AlternationCount="2" MinHeight="80" BorderThickness="0" Padding="0 0 0 0" Margin="0 0 0 0" SelectionMode="Extended" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Visible">
+                            <ListView.Resources>
+                                <ContextMenu x:Key="RLSearchItemContextMenu">
+                                    <MenuItem Header="選択アイテム">
+
+                                    </MenuItem>
+                                </ContextMenu>
+                                <Style TargetType="{x:Type ScrollBar}">
+                                    <Setter Property="Margin" Value="0,0,0,0" />
+                                    <Setter Property="BorderThickness" Value="0" />
+                                    <Style.Triggers>
+                                        <Trigger Property="Orientation" Value="Vertical">
+                                            <Setter Property="Width" Value="18"/>
+                                            <Setter Property="Height" Value="Auto" />
+                                            <Setter Property="Template" Value="{StaticResource VerticalScrollBar}" />
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ListView.Resources>
+                            <ListView.ItemContainerStyle>
+                                <Style TargetType="ListViewItem" BasedOn="{StaticResource ListViewItemStyle}">
+                                    <Setter Property="Margin" Value="1 0 0 0"/>
+                                    <Setter Property="Padding" Value="0 1 0 1"/>
+                                    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                    <Setter Property="ContextMenu" Value="{StaticResource RLSearchItemContextMenu}" />
+                                </Style>
+                            </ListView.ItemContainerStyle>
+
+                            <ListView.View>
+                                <GridView>
+                                    <GridView.ColumnHeaderContainerStyle>
+                                        <Style TargetType="GridViewColumnHeader" BasedOn="{StaticResource GridViewColumnHeaderStyle}">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </Style>
+                                    </GridView.ColumnHeaderContainerStyle>
+
+                                    <GridViewColumn Header="ID" Width="{Binding ElementName=RLSWidth0, Path=ActualWidth}">
+
+                                    </GridViewColumn>
+
+                                    <GridViewColumn Width="{Binding ElementName=RLSWidth1, Path=ActualWidth}">
+                                        <GridViewColumnHeader Content="物件名" Padding="3"/>
+
+                                    </GridViewColumn>
+
+                                    <GridViewColumn Header="所在地" Width="{Binding ElementName=RLSWidth2, Path=ActualWidth}">
+
+                                    </GridViewColumn>
+
+                                    <GridViewColumn Header="最寄り駅1" Width="{Binding ElementName=RLSWidth3, Path=ActualWidth}">
+
+                                    </GridViewColumn>
+
+                                    <GridViewColumn Header="最寄り駅2" Width="{Binding ElementName=RLSWidth4, Path=ActualWidth}">
+
+                                    </GridViewColumn>
+
+                                    <GridViewColumn Header="最終更新日" Width="{Binding ElementName=RLSWidth5, Path=ActualWidth}">
+
+                                    </GridViewColumn>
+                                </GridView>
+                            </ListView.View>
+
+                        </ListView>
+
+                    </Grid>
+
+                </TabItem>
+
+                <!-- 賃貸住居用 -->
+                <TabItem Style="{DynamicResource LeftMenuTabItemStyle}">
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="12 0 0 0">
+                            <Label Content="賃貸住居用" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </TabItem.Header>
+                    
+                    <Grid Margin="12">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <!-- ページタイトル -->
+                        <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal">
+                            <Label Content="賃貸住居用：条件検索" FontSize="24"/>
+                        </StackPanel>
+
+                        <!-- ページコンテンツ -->
+                        <Grid Grid.Row="1" Grid.Column="0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="1*"/>
+                                <ColumnDefinition Width="1*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- 検索ペイン -->
+                            <Grid Grid.Row="0" Grid.Column="0" Margin="0 0 12 0">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- 検索ボタン -->
+                                <Grid Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <Button Content="検索" Command="{Binding RentLivingEditSearchCommand}" Grid.Row="0" Grid.Column="1" IsDefault="True" Width="100" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
+
+                                    <Button Content="一覧" Command="{Binding RentLivingEditListCommand}" Grid.Row="0" Grid.Column="2" Width="100" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
+
+                                </Grid>
+
+                                <!-- 検索条件　項目入力 -->
+                                <Grid Grid.Row="1" Grid.Column="0">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                        <StackPanel>
+
+                                            <Label Content="物件名："/>
+                                            <TextBox Text="{Binding RentLivingEditSearchText, UpdateSourceTrigger=PropertyChanged}" Grid.Row="0" Grid.Column="0" Margin="6 0 6 6" HorizontalAlignment="Stretch"></TextBox>
+
+                                        </StackPanel>
+                                    </ScrollViewer>
+                                </Grid>
+         
+                            </Grid>
+
+                            <!-- 検索結果 物件一覧 -->
+                            <Grid Grid.Row="0" Grid.Column="1">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Grid Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <Button x:Name="ButtonAddRL" Content="新規追加" Command="{Binding RentLivingNewCommand}" Grid.Row="0" Grid.Column="0" Width="100" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+
+                                    <Button x:Name="ButtonEditRL" Content="編集" Command="{Binding RentLivingEditSelectedEditCommand}" Grid.Row="0" Grid.Column="1" Width="100" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
+
+                                    <Button x:Name="ButtonDeleteRL" Content="削除" Command="{Binding RentLivingEditSelectedDeleteCommand}" Grid.Row="0" Grid.Column="2" Width="100" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
+
+                                </Grid>
+
+                                <Grid Grid.Row="1" Grid.Column="0" HorizontalAlignment="Stretch">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <Grid x:Name="RentLivingEditListViewDummy" Grid.Row="2" Grid.Column="0" Visibility="Hidden" Margin="0 0 27 0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="0"/>
+                                            <ColumnDefinition Width="2*"/>
+                                            <ColumnDefinition Width="0"/>
+                                            <ColumnDefinition Width="0"/>
+                                            <ColumnDefinition Width="0"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <!--  This is the hidden helper Field which is used to bind to, using the "Fill" column of the helper grid  -->
+                                        <Grid x:Name="RLEWidth0" Grid.Column="0" />
+                                        <Grid x:Name="RLEWidth1" Grid.Column="1" />
+                                        <Grid x:Name="RLEWidth2" Grid.Column="2" />
+                                        <Grid x:Name="RLEWidth3" Grid.Column="3" />
+                                        <Grid x:Name="RLEWidth4" Grid.Column="4" />
+                                    </Grid>
+
+                                    <ListView x:Name="RentLivingEditListView" Grid.Row="2" Grid.Column="0" Background="{DynamicResource ListviewAlt0ColorBrush}" ItemsSource="{Binding Rents}" SelectedItem="{Binding RentLivingEditSelectedItem, Mode=TwoWay}" SelectionMode="Extended" helper:GridViewSort.AutoSort="True" helper:GridViewSort.ShowSortGlyph="True" IsSynchronizedWithCurrentItem="True" AlternationCount="2" MinHeight="80" BorderThickness="0" Padding="0 0 0 0" Margin="0 0 0 0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Visible">
+                                        <ListView.Resources>
+                                            <ContextMenu x:Key="RLEditItemContextMenu">
+                                                <MenuItem Header="選択アイテム">
+
+                                                </MenuItem>
+                                            </ContextMenu>
+                                            <Style TargetType="{x:Type ScrollBar}">
+                                                <Setter Property="Margin" Value="0,0,0,0" />
+                                                <Setter Property="BorderThickness" Value="0" />
+                                                <Style.Triggers>
+                                                    <Trigger Property="Orientation" Value="Vertical">
+                                                        <Setter Property="Width" Value="18"/>
+                                                        <Setter Property="Height" Value="Auto" />
+                                                        <Setter Property="Template" Value="{StaticResource VerticalScrollBar}" />
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </ListView.Resources>
+                                        <ListView.ItemContainerStyle>
+                                            <Style TargetType="ListViewItem" BasedOn="{StaticResource ListViewItemStyle}">
+                                                <Setter Property="Margin" Value="1 0 0 0"/>
+                                                <Setter Property="Padding" Value="0 1 0 1"/>
+                                                <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                                                <Setter Property="ContextMenu" Value="{StaticResource RLEditItemContextMenu}" />
+                                            </Style>
+                                        </ListView.ItemContainerStyle>
+
+                                        <ListView.View>
+                                            <GridView>
+                                                <GridView.ColumnHeaderContainerStyle>
+                                                    <Style TargetType="GridViewColumnHeader" BasedOn="{StaticResource GridViewColumnHeaderStyle}">
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                    </Style>
+                                                </GridView.ColumnHeaderContainerStyle>
+                                                <GridViewColumn Header="ID" Width="{Binding ElementName=RLEWidth0, Path=ActualWidth}">
+                                                    <GridViewColumn.CellTemplate>
+                                                        <DataTemplate>
+                                                            <TextBlock x:Name="RLID" Text="{Binding Rent_ID, Mode=OneWay}" Padding="3"/>
+                                                        </DataTemplate>
+                                                    </GridViewColumn.CellTemplate>
+                                                </GridViewColumn>
+
+                                                <GridViewColumn Header="物件名" Width="{Binding ElementName=RLEWidth1, Path=ActualWidth}">
+                                                    <GridViewColumn.CellTemplate>
+                                                        <DataTemplate>
+                                                            <TextBlock x:Name="RLName" Text="{Binding Name, Mode=OneWay}" Padding="3"/>
+                                                        </DataTemplate>
+                                                    </GridViewColumn.CellTemplate>
+                                                </GridViewColumn>
+
+                                                <GridViewColumn Header="所在地" Width="{Binding ElementName=RLEWidth2, Path=ActualWidth}">
+                                                    <GridViewColumn.CellTemplate>
+                                                        <DataTemplate>
+                                                            <TextBlock x:Name="RLLocation" Text="{Binding Location, Mode=OneWay}" Padding="3"/>
+                                                        </DataTemplate>
+                                                    </GridViewColumn.CellTemplate>
+                                                </GridViewColumn>
+
+                                                <GridViewColumn Header="最寄り駅1" Width="{Binding ElementName=RLEWidth3, Path=ActualWidth}">
+                                                    <GridViewColumn.CellTemplate>
+                                                        <DataTemplate>
+                                                            <TextBlock x:Name="RLStation1" Text="{Binding TrainStation1, Mode=OneWay}" Padding="3"/>
+                                                        </DataTemplate>
+                                                    </GridViewColumn.CellTemplate>
+                                                </GridViewColumn>
+
+                                                <GridViewColumn Header="最寄り駅2" Width="{Binding ElementName=RLEWidth4, Path=ActualWidth}">
+                                                    <GridViewColumn.CellTemplate>
+                                                        <DataTemplate>
+                                                            <TextBlock x:Name="RLStation2" Text="{Binding TrainStation2, Mode=OneWay}" Padding="3"/>
+                                                        </DataTemplate>
+                                                    </GridViewColumn.CellTemplate>
+                                                </GridViewColumn>
+                                            </GridView>
+                                        </ListView.View>
+
+                                    </ListView>
+
+                                </Grid>
+
+                            </Grid>
+                            
+                        </Grid>
+                        
+                    </Grid>
+
+                </TabItem>
+
+                <!-- 賃貸事業用 -->
+                <TabItem Style="{DynamicResource LeftMenuTabItemStyle}">
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="12 0 0 0">
+                            <Label Content="賃貸事業用" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </TabItem.Header>
+                </TabItem>
+
+                <!-- 賃貸駐車場 -->
+                <!--
+                <TabItem Style="{DynamicResource LeftMenuTabItemStyle}">
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="12 0 0 0">
+                            <Label Content="賃貸駐車場" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </TabItem.Header>
+                </TabItem>
+                -->
+
+                <!-- 元付け業者 -->
+                <TabItem Style="{DynamicResource LeftMenuTabItemStyle}">
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="12 0 0 0">
+                            <Label Content="元付け業者" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </TabItem.Header>
+                </TabItem>
+
+                <!-- 管理会社 -->
+                <TabItem Style="{DynamicResource LeftMenuTabItemStyle}" Visibility="Collapsed">
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="12 0 0 0">
+                            <Label Content="管理会社" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </TabItem.Header>
+                </TabItem>
+
+                <!-- オーナー" -->
+                <TabItem Style="{DynamicResource LeftMenuTabItemStyle}">
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="12 0 0 0">
+                            <Label Content="オーナー" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </TabItem.Header>
+                </TabItem>
+
+            </TabControl>
+
+        </Grid>
+    </Border>
+</Window>

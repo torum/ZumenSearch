@@ -1,0 +1,434 @@
+﻿<Window x:Class="ZumenSearch.Views.RentLivingSectionWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ZumenSearch.Views"
+        xmlns:common="clr-namespace:ZumenSearch.Common"
+        xmlns:helper="clr-namespace:ZumenSearch.Helper"
+        xmlns:vms="clr-namespace:ZumenSearch.ViewModels"
+        mc:Ignorable="d"
+        WindowStyle="None"
+        WindowStartupLocation="CenterScreen"
+        Background="{DynamicResource WindowBackgroundColorBrush}"
+        Width="1124" Height="700" 
+        MinWidth="1124" MinHeight="700"
+        StateChanged="Window_StateChanged"
+        Closing="Window_Closing">
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="32" ResizeBorderThickness="{x:Static SystemParameters.WindowResizeBorderThickness}"/>
+    </WindowChrome.WindowChrome>
+    <Border Style="{StaticResource WindowMainPanelStyle}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- アプリタイトルバー -->
+            <Grid x:Name="AppTitleBar">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="32"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Menu icon -->
+                <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Stretch" VerticalAlignment="Center">
+                    <Label Content="賃貸住居用物件：部屋情報編集" />
+                </StackPanel>
+
+                <!-- System icons -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0">
+
+                    <Button x:Name="SaveButton" Style="{DynamicResource PathSysButton}" Command="{Binding RentLivingEditSectionUpdateCommand}" ToolTip="登録" Content="M15,9H5V5H15M12,19A3,3 0 0,1 9,16A3,3 0 0,1 12,13A3,3 0 0,1 15,16A3,3 0 0,1 12,19M17,3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V7L17,3Z">
+                    </Button>
+
+                    <Button x:Name="HelpButton" Style="{DynamicResource PathSysButton}" ToolTip="ヘルプ" Visibility="Collapsed"
+                                Content="M10,19H13V22H10V19M12,2C17.35,2.22 19.68,7.62 16.5,11.67C15.67,12.67 14.33,13.33 13.67,14.17C13,15 13,16 13,17H10C10,15.33 10,13.92 10.67,12.92C11.33,11.92 12.67,11.33 13.5,10.67C15.92,8.43 15.32,5.26 12,5A3,3 0 0,0 9,8H6A6,6 0 0,1 12,2Z">
+                    </Button>
+
+                    <Button x:Name="MinimizeButton" Style="{StaticResource PathSysButton}" Click="MinimizeButton_Click">
+                        M20,14H4V10H20
+                    </Button>
+
+                    <Button x:Name="RestoreButton" Style="{StaticResource PathSysButton}" Click="RestoreButton_Click">
+                        M4,8H8V4H20V16H16V20H4V8M16,8V14H18V6H10V8H16M6,12V18H14V12H6Z
+                    </Button>
+
+                    <Button x:Name="MaxButton" Style="{StaticResource PathSysButton}" Click="MaxButton_Click">
+                        M4,4H20V20H4V4M6,8V18H18V8H6Z
+                    </Button>
+
+                    <Button x:Name="CloseButton" Style="{StaticResource PathSysButton}" Click="CloseButton_Click">
+                        M13.46,12L19,17.54V19H17.54L12,13.46L6.46,19H5V17.54L10.54,12L5,6.46V5H6.46L12,10.54L17.54,5H19V6.46L13.46,12Z
+                    </Button>
+
+                </StackPanel>
+
+            </Grid>
+
+            <!-- エラー通知エリア -->
+            <Grid Grid.Row="1" Visibility="{Binding ShowErrorDialog, Converter={StaticResource BoolToVisibilityCollapsedConverter}}" Background="#FFDFD991">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="50"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBox Padding="3" Margin="6" Text="{Binding ErrorText,Mode=OneWay}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch"></TextBox>
+                <Button x:Name="ButtonCloseErrorDialog" FontFamily="Segoe UI Symbol" Content="&#57610;" Command="{Binding CloseErrorCommand}" Grid.Row="0" Grid.Column="1" Width="24" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center">
+                </Button>
+                <!-- Symbol Enum
+             https://docs.microsoft.com/en-us/uwp/api/windows.ui.xaml.controls.symbol?view=winrt-19041
+            -->
+            </Grid>
+
+            <!-- 賃貸物件住居用の編集 -->
+            <Grid Grid.Row="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="375"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- 写真 -->
+                <Grid Grid.Row="0" Grid.Column="0" Margin="3">
+                    <TabControl>
+
+                        <!-- 写真 -->
+                        <TabItem Width="120">
+                            <TabItem.Header>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="3">
+                                    <Label Content="写真" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </TabItem.Header>
+
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="244"/>
+                                    <RowDefinition Height="144"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="366"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- メイン写真 -->
+                                <Grid Grid.Row="0" Grid.Column="0" Background="#eee">
+                                    <Image Width="360" Height="240" Margin="2"></Image>
+                                </Grid>
+
+                                <!-- 写真一覧 -->
+                                <Grid Grid.Row="1" Grid.Column="0">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <StackPanel Grid.Row="1" Orientation="Horizontal">
+                                        <Button Width="130" Margin="3" Command="{Binding RentLivingEditSectionNewPictureAddCommand}">写真の追加</Button>
+                                    </StackPanel>
+
+                                    <ListView Grid.Row="2" Margin="3" ItemsSource="{Binding RentLivingEditSectionNew.RentLivingSectionPictures}" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                        <ListView.Resources>
+                                            <ContextMenu x:Key="ATItemContextMenu">
+                                                <MenuItem Header="削除" Command="{Binding Path=DataContext.RentLivingEditSectionNewPictureDeleteCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItems, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
+                                                    <MenuItem.Resources>
+                                                        <ControlTemplate x:Key="CancelIcon">
+                                                            <Canvas Background="Transparent" >
+                                                                <Path Fill="#373737" Width="14.3775" Height="14" Canvas.Left="0.311264" Canvas.Top="0.500005" Stretch="Uniform" Data="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12C4,13.85 4.63,15.55 5.68,16.91L16.91,5.68C15.55,4.63 13.85,4 12,4M12,20A8,8 0 0,0 20,12C20,10.15 19.37,8.45 18.32,7.09L7.09,18.32C8.45,19.37 10.15,20 12,20Z" />
+                                                            </Canvas>
+                                                        </ControlTemplate>
+                                                    </MenuItem.Resources>
+                                                    <MenuItem.Icon>
+                                                        <ContentControl Template="{StaticResource CancelIcon}" />
+                                                    </MenuItem.Icon>
+                                                </MenuItem>
+                                            </ContextMenu>
+                                        </ListView.Resources>
+                                        <ListView.ItemContainerStyle>
+                                            <Style TargetType="ListViewItem">
+                                                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                                <Setter Property="ContextMenu" Value="{StaticResource ATItemContextMenu}" />
+                                            </Style>
+                                        </ListView.ItemContainerStyle>
+                                        <ListView.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <WrapPanel/>
+                                            </ItemsPanelTemplate>
+                                        </ListView.ItemsPanel>
+                                        <ListView.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid Width="200" Height="150">
+                                                    <Image Source="{Binding Picture}" Stretch="Uniform"></Image>
+                                                    <TextBlock Text="hoge"></TextBlock>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ListView.ItemTemplate>
+                                    </ListView>
+
+                                </Grid>
+
+                            </Grid>
+
+
+                        </TabItem>
+
+                    </TabControl>
+
+                </Grid>
+
+                <!-- 部屋情報 -->
+                <Grid Grid.Row="0" Grid.Column="1" Margin="3">
+
+                    <TabControl>
+
+                        <!-- 部屋概要 -->
+                        <TabItem Width="120">
+                            <TabItem.Header>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="3">
+                                    <Label Content="部屋概要" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </TabItem.Header>
+
+                            <Grid Margin="6">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="525"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Row="0" Grid.Column="0" Margin="0 0 6 0">
+
+                                    <StackPanel Orientation="Horizontal">
+
+                                        <GroupBox Header="部屋番号" Padding="6">
+                                            <StackPanel>
+                                                <TextBox Text="{Binding RentLivingEdit.Name}" Width="84" Margin="6" HorizontalAlignment="Left"></TextBox>
+                                            </StackPanel>
+                                        </GroupBox>
+                                        
+                                        <GroupBox Header="賃料" Padding="6">
+                                            <StackPanel Orientation="Horizontal">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBox Width="68" Margin="6 6 0 6" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                                    <Label VerticalAlignment="Bottom" Content="円" />
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </GroupBox>
+
+                                        <GroupBox Header="管理費・共益費" Padding="6">
+                                            <StackPanel Orientation="Horizontal">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBox Width="68" Margin="6 6 0 6" HorizontalAlignment="Left" VerticalAlignment="Center" />
+                                                    <Label VerticalAlignment="Bottom" Content="円" />
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </GroupBox>
+                                        
+                                    </StackPanel>
+
+
+                                    <StackPanel Orientation="Horizontal">
+
+                                        <GroupBox Header="敷金" Padding="6">
+                                            <StackPanel Orientation="Horizontal">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBox Width="68" Margin="6 6 0 6" HorizontalAlignment="Left" VerticalAlignment="Bottom" />
+                                                    <ComboBox Width="58" SelectedIndex="0" Margin="6 6 0 6"  VerticalAlignment="Bottom">
+                                                        <ComboBoxItem>ヵ月</ComboBoxItem>
+                                                        <ComboBoxItem>円</ComboBoxItem>
+                                                    </ComboBox>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </GroupBox>
+
+
+                                        <GroupBox Header="礼金" Padding="6">
+                                            <StackPanel Orientation="Horizontal">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBox Width="68" Margin="6 6 0 6" HorizontalAlignment="Left" VerticalAlignment="Bottom" />
+                                                    <ComboBox Width="58" SelectedIndex="0" Margin="6 6 0 6"  VerticalAlignment="Bottom">
+                                                        <ComboBoxItem>ヵ月</ComboBoxItem>
+                                                        <ComboBoxItem>円</ComboBoxItem>
+                                                    </ComboBox>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </GroupBox>
+
+                                    </StackPanel>
+
+
+                                    <StackPanel Orientation="Horizontal">
+
+                                        <GroupBox Header="仲介手数料" Padding="6">
+                                            <StackPanel Orientation="Horizontal">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBox Width="68" Margin="6 6 0 6" HorizontalAlignment="Left" VerticalAlignment="Bottom" />
+                                                    <ComboBox Width="58" SelectedIndex="0" Margin="6 6 0 6"  VerticalAlignment="Bottom">
+                                                        <ComboBoxItem>ヵ月</ComboBoxItem>
+                                                        <ComboBoxItem>円</ComboBoxItem>
+                                                    </ComboBox>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </GroupBox>
+
+
+                                        <GroupBox Header="更新料" Padding="6">
+                                            <StackPanel Orientation="Horizontal">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBox Width="68" Margin="6 6 0 6" HorizontalAlignment="Left" VerticalAlignment="Bottom" />
+                                                    <ComboBox Width="58" SelectedIndex="0" Margin="6 6 0 6"  VerticalAlignment="Bottom">
+                                                        <ComboBoxItem>ヵ月</ComboBoxItem>
+                                                        <ComboBoxItem>円</ComboBoxItem>
+                                                    </ComboBox>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </GroupBox>
+
+                                    </StackPanel>
+
+
+
+
+                                </StackPanel>
+
+                                <StackPanel Grid.Row="0" Grid.Column="1" Margin="0 0 6 0">
+
+                                    <GroupBox Header="間取り" Padding="6">
+                                        <StackPanel Orientation="Horizontal">
+                                            <ComboBox Width="68" Margin="6" SelectedIndex="-1">
+                                                <ComboBoxItem>1</ComboBoxItem>
+                                                <ComboBoxItem>2</ComboBoxItem>
+                                                <ComboBoxItem>3</ComboBoxItem>
+                                                <ComboBoxItem>4</ComboBoxItem>
+                                                <ComboBoxItem>5</ComboBoxItem>
+                                                <ComboBoxItem>6</ComboBoxItem>
+                                                <ComboBoxItem>7</ComboBoxItem>
+                                                <ComboBoxItem>8</ComboBoxItem>
+                                                <ComboBoxItem>9</ComboBoxItem>
+                                            </ComboBox>
+                                            <ComboBox Width="68" Margin="6" SelectedIndex="-1">
+                                                <ComboBoxItem>R</ComboBoxItem>
+                                                <ComboBoxItem>K</ComboBoxItem>
+                                                <ComboBoxItem>SK</ComboBoxItem>
+                                                <ComboBoxItem>DK</ComboBoxItem>
+                                                <ComboBoxItem>SDK</ComboBoxItem>
+                                                <ComboBoxItem>LK</ComboBoxItem>
+                                                <ComboBoxItem>SLK</ComboBoxItem>
+                                                <ComboBoxItem>LDK</ComboBoxItem>
+                                                <ComboBoxItem>SLDK</ComboBoxItem>
+                                            </ComboBox>
+                                        </StackPanel>
+                                    </GroupBox>
+
+                                    <GroupBox Header="専有面積" Padding="6">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBox Width="42" Margin="6 6 0 6" HorizontalAlignment="Left" />
+                                            <Label VerticalAlignment="Bottom" Content="㎡" />
+                                        </StackPanel>
+                                    </GroupBox>
+
+                                    <GroupBox Header="所在階" Padding="6">
+                                        <StackPanel Orientation="Horizontal">
+                                            <ComboBox Width="68" Margin="6 6 0 6" SelectedIndex="0" HorizontalAlignment="Left">
+                                                <ComboBoxItem>地上</ComboBoxItem>
+                                                <ComboBoxItem>地下</ComboBoxItem>
+                                            </ComboBox>
+
+                                            <TextBox Width="42" Margin="3 0 0 6" HorizontalAlignment="Left" VerticalAlignment="Bottom" />
+                                            <Label VerticalAlignment="Bottom" Content="階" />
+                                        </StackPanel>
+                                    </GroupBox>
+
+                                    <GroupBox Header="主要採光面" Padding="6">
+                                        <ComboBox Width="68" Margin="6 6 0 6" HorizontalAlignment="Left" SelectedIndex="-1">
+                                            <ComboBoxItem>北</ComboBoxItem>
+                                            <ComboBoxItem>北東</ComboBoxItem>
+                                            <ComboBoxItem>東</ComboBoxItem>
+                                            <ComboBoxItem>南東</ComboBoxItem>
+                                            <ComboBoxItem>南</ComboBoxItem>
+                                            <ComboBoxItem>南西</ComboBoxItem>
+                                            <ComboBoxItem>西</ComboBoxItem>
+                                            <ComboBoxItem>北西</ComboBoxItem>
+                                        </ComboBox>
+                                    </GroupBox>
+
+                                    <GroupBox Header="取引態様" Padding="6">
+
+                                        <TabControl>
+                                            <TabItem Header="自社元付" Padding="6">
+                                                <StackPanel>
+                                                    <RadioButton Content="一般媒介" Margin="6"/>
+                                                    <RadioButton Content="専任媒介" Margin="6"/>
+                                                    <RadioButton Content="専属専任媒介" Margin="6"/>
+                                                    <RadioButton Content="代理" Margin="6"/>
+                                                    <RadioButton Content="貸主" Margin="6"/>
+                                                </StackPanel>
+                                            </TabItem>
+                                            <TabItem Header="仲介先物" Padding="6">
+                                                <StackPanel>
+                                                    <RadioButton Content="一般媒介" Margin="6"/>
+                                                    <RadioButton Content="専任媒介" Margin="6"/>
+                                                    <RadioButton Content="専属専任媒介" Margin="6"/>
+                                                    <RadioButton Content="代理" Margin="6"/>
+                                                    <RadioButton Content="貸主" Margin="6"/>
+                                                </StackPanel>
+                                            </TabItem>
+                                        </TabControl>
+                                    </GroupBox>
+
+                                    <GroupBox Header="現況" Padding="6">
+                                        <StackPanel Orientation="Horizontal">
+                                            <ComboBox Width="150" Margin="6" SelectedIndex="0">
+                                                <ComboBoxItem>空室・募集中</ComboBoxItem>
+                                                <ComboBoxItem>申込済み</ComboBoxItem>
+                                                <ComboBoxItem>契約済・入居中</ComboBoxItem>
+                                                <ComboBoxItem>解約・退去予定</ComboBoxItem>
+                                                <ComboBoxItem>募集停止</ComboBoxItem>
+                                            </ComboBox>
+                                        </StackPanel>
+                                    </GroupBox>
+
+                                </StackPanel>
+
+                            </Grid>
+
+                        </TabItem>
+
+                        <!-- 設備 -->
+                        <TabItem Width="120">
+                            <TabItem.Header>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="3">
+                                    <Label Content="設備" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </TabItem.Header>
+                        </TabItem>
+
+                    </TabControl>
+
+                </Grid>
+
+            </Grid>
+
+        </Grid>
+    </Border>
+</Window>
