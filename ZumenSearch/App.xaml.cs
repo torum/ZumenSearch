@@ -6,6 +6,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Threading;
+using System.Text;
+using System.IO;
 using ZumenSearch.Models;
 using ZumenSearch.ViewModels;
 using ZumenSearch.ViewModels.Classes;
@@ -68,7 +70,109 @@ namespace ZumenSearch
             #endregion
         }
 
+        public App()
+        {
+            // 未処理例外の処理
+            // UI スレッドで実行されているコードで処理されなかったら発生する（.NET 3.0 より）
+            DispatcherUnhandledException += App_DispatcherUnhandledException;
+            // バックグラウンドタスク内で処理されなかったら発生する（.NET 4.0 より）
+            TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
+            // 例外が処理されなかったら発生する（.NET 1.0 より）
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+        }
+
+        #region == エラーログ関連 ==
+
+        /// <summary>
+        /// UI スレッドで発生した未処理例外を処理します。
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void App_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
+        {
+            var exception = e.Exception as Exception;
+            if (ConfirmUnhandledException(exception, "UI スレッド"))
+            {
+                e.Handled = true;
+            }
+            else
+            {
+                Environment.Exit(1);
+            }
+        }
+
+        /// <summary>
+        /// バックグラウンドタスクで発生した未処理例外を処理します。
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void TaskScheduler_UnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
+        {
+            var exception = e.Exception.InnerException as Exception;
+            if (ConfirmUnhandledException(exception, "バックグラウンドタスク"))
+            {
+                e.SetObserved();
+            }
+            else
+            {
+                Environment.Exit(1);
+            }
+        }
+
+        /// <summary>
+        /// 実行を継続するかどうかを選択できる場合の未処理例外を処理します。
+        /// </summary>
+        /// <param name="e">例外オブジェクト</param>
+        /// <param name="sourceName">発生したスレッドの種別を示す文字列</param>
+        /// <returns>継続することが選択された場合は true, それ以外は false</returns>
+        bool ConfirmUnhandledException(Exception e, string sourceName)
+        {
+            var message = $"予期せぬエラーが発生しました。続けて発生する場合は開発者に報告してください。\nプログラムの実行を継続しますか？";
+            if (e != null) message += $"\n({e.Message} @ {e.TargetSite.Name})";
+
+            // Logger.Fatal($"未処理例外 ({sourceName})", e); // 適当なログ記録
+            SaveErrorLogs(message);
+
+            var result = MessageBox.Show(message, $"未処理例外 ({sourceName})", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            return result == MessageBoxResult.Yes;
+        }
+
+        /// <summary>
+        /// 最終的に処理されなかった未処理例外を処理します。
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            var exception = e.ExceptionObject as Exception;
+            var message = $"予期せぬエラーが発生しました。";
+            if (exception != null) message += $"\n({exception.Message} @ {exception.TargetSite.Name})";
+
+            // Logger.Fatal("未処理例外", exception); // 適当なログ記録
+            SaveErrorLogs(message);
+
+            MessageBox.Show(message, "未処理例外", MessageBoxButton.OK, MessageBoxImage.Stop);
+            Environment.Exit(1);
+        }
+
+        private void SaveErrorLogs(string eText)
+        {
+            var logFilePath = System.Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + System.IO.Path.DirectorySeparatorChar + "ZumenSearch_Errors.txt";
+            var txt = new StringBuilder();
+            txt.AppendLine(eText);
+
+            DateTime dt = DateTime.Now;
+            string nowString = dt.ToString("yyyy/MM/dd HH:mm:ss");
+            txt.AppendLine(nowString);
+
+            File.WriteAllText(logFilePath, txt.ToString());
+
+        }
+
+        #endregion
+
         #region == 二重起動防止 ==
+
         /// <summary> Check and bring to front if already exists.</summary>
         /// 
         // 二重起動防止 on/off
@@ -111,161 +215,16 @@ namespace ZumenSearch
 
         #endregion
 
-        #region == ウィンドウ関連 ==
+        #region == チャイルドウィンドウ管理 ==
 
-        /// <summary> Hold a list of windows here.</summary>
+        // Windowの一覧を保持 
         public List<Window> WindowList = new List<Window>();
 
-        /// <summary> Create or BringToFront an Editor Window.</summary>
-        public void OpenRentLivingWindow(OpenRentLivingWindowEventArgs arg)
-        {
-            if (arg == null)
-                return;
-
-            if (String.IsNullOrEmpty(arg.Id))
-                return;
-
-            if (arg.EditObject == null)
-                return;
-
-            string id = arg.Id;
-
-            App app = App.Current as App;
-
-            foreach (var w in app.WindowList)
-            {
-                if (!(w is RentLivingWindow))
-                    continue;
-
-                if ((w as RentLivingWindow).DataContext == null)
-                    continue;
-
-                if (!((w as RentLivingWindow).DataContext is RentLivingViewModel))
-                    continue;
-
-                if (id == ((w as RentLivingWindow).DataContext as RentLivingViewModel).Id)
-                {
-                    //w.Activate();
-
-                    if ((w as RentLivingWindow).WindowState == WindowState.Minimized || (w as Window).Visibility == Visibility.Hidden)
-                    {
-                        //w.Show();
-                        (w as RentLivingWindow).Visibility = Visibility.Visible;
-                        (w as RentLivingWindow).WindowState = WindowState.Normal;
-                    }
-
-                    (w as RentLivingWindow).Activate();
-                    //(w as EditorWindow).Topmost = true;
-                    //(w as EditorWindow).Topmost = false;
-                    (w as RentLivingWindow).Focus();
-
-                    return;
-                }
-            }
-
-            // Create new window.
-
-            if (arg.EditObject is RentLiving)
-            {
-                var win = new RentLivingWindow();
-
-                win.DataContext = new RentLivingViewModel(id);
-                (win.DataContext as RentLivingViewModel).RentLivingEdit = (arg.EditObject as RentLiving);
-                (win.DataContext as RentLivingViewModel).OpenRentLivingSectionWindow += (sender, arg) => { app.OpenRentLivingSectionWindow(arg); };
-
-                app.WindowList.Add(win);
-
-                // We can't use Show() or set win.Owner = this. 
-                // Try minimized and resotre a child window then close it. An owner window minimizes itself.
-                //win.Owner = this;
-                //win.Show();
-                win.ShowInTaskbar = true;
-                win.ShowActivated = true;
-                win.Visibility = Visibility.Visible;
-                win.Activate();
-            }
-
-
-            
-        }
-
-        public void OpenRentLivingSectionWindow(OpenRentLivingSectionWindowEventArgs arg)
-        {
-
-            if (arg == null)
-                return;
-
-            if (String.IsNullOrEmpty(arg.Id))
-                return;
-
-            if (arg.EditObject == null)
-                return;
-
-            string id = arg.Id;
-
-            App app = App.Current as App;
-
-            foreach (var w in app.WindowList)
-            {
-                if (!(w is RentLivingSectionWindow))
-                    continue;
-
-                if ((w as RentLivingSectionWindow).DataContext == null)
-                    continue;
-
-                if (!((w as RentLivingSectionWindow).DataContext is RentLivingSectionViewModel))
-                    continue;
-
-                if (id == ((w as RentLivingSectionWindow).DataContext as RentLivingSectionViewModel).Id)
-                {
-                    //w.Activate();
-
-                    if ((w as RentLivingSectionWindow).WindowState == WindowState.Minimized || (w as Window).Visibility == Visibility.Hidden)
-                    {
-                        //w.Show();
-                        (w as RentLivingSectionWindow).Visibility = Visibility.Visible;
-                        (w as RentLivingSectionWindow).WindowState = WindowState.Normal;
-                    }
-
-                    (w as RentLivingSectionWindow).Activate();
-                    //(w as EditorWindow).Topmost = true;
-                    //(w as EditorWindow).Topmost = false;
-                    (w as RentLivingSectionWindow).Focus();
-
-                    return;
-                }
-            }
-
-            // Create new window.
-
-            if (arg.EditObject is RentLivingSection)
-            {
-                var win = new RentLivingSectionWindow();
-
-                win.DataContext = new RentLivingSectionViewModel(id);
-                (win.DataContext as RentLivingSectionViewModel).RentLivingRoomEdit = (arg.EditObject as RentLivingSection);
-
-                app.WindowList.Add(win);
-
-                // We can't use Show() or set win.Owner = this. 
-                // Try minimized and resotre a child window then close it. An owner window minimizes itself.
-                //win.Owner = this;
-                //win.Show();
-                win.ShowInTaskbar = true;
-                win.ShowActivated = true;
-                win.Visibility = Visibility.Visible;
-                win.Activate();
-            }
-
-
-
-        }
-
+        // Windowを閉じた時にWindowListからWindowを削除する
         public void RemoveEditWindow(Window editor)
         {
             WindowList.Remove(editor);
         }
-
 
         #endregion
 

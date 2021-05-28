@@ -8,32 +8,31 @@ using ZumenSearch.Common;
 namespace ZumenSearch.Models.Classes
 {
 
-    public class Zumen
+    public class PDF : ViewModelBase
     {
-
         // TODO:
     }
 
     /// <summary>
     /// 図面の基底クラス
     /// </summary>
-    public class RentZumenPDF : ViewModelBase
+    public class RentZumenPDF : PDF
     {
-        protected string _rentZumenPDF_id;
-        public string RentZumenPDF_ID
+        protected string _rentZumenPdfId;
+        public string RentZumenPdfId
         {
             get
             {
-                return _rentZumenPDF_id;
+                return _rentZumenPdfId;
             }
         }
 
-        protected string _rent_id;
-        public string Rent_ID
+        protected string _rentId;
+        public string RentId
         {
             get
             {
-                return _rent_id;
+                return _rentId;
             }
         }
 
@@ -166,24 +165,24 @@ namespace ZumenSearch.Models.Classes
     /// </summary>
     public class RentLivingZumenPDF : RentZumenPDF
     {
-        protected string _rentLiving_id;
-        public string RentLiving_ID
+        protected string _rentLivingId;
+        public string RentLivingId
         {
             get
             {
-                return _rentLiving_id;
+                return _rentLivingId;
             }
         }
 
         public RentLivingZumenPDF(string rentid, string rentlivingid, string rentlivingzumenid)
         {
-            this._rent_id = rentid;
-            this._rentLiving_id = rentlivingid;
+            _rentId = rentid;
+            _rentLivingId = rentlivingid;
 
-            this._rentZumenPDF_id = rentlivingzumenid;
+            _rentZumenPdfId = rentlivingzumenid;
 
             // 一応
-            this._dateTimeAdded = DateTime.Now;
+            _dateTimeAdded = DateTime.Now;
         }
     }
 

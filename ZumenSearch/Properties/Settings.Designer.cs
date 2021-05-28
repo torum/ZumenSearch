@@ -166,5 +166,41 @@ namespace ZumenSearch.Properties {
                 this["RentLivingSectionWindow_Width"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool MainWindow_Maximized {
+            get {
+                return ((bool)(this["MainWindow_Maximized"]));
+            }
+            set {
+                this["MainWindow_Maximized"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool RentLivingSectionWindow_Maximized {
+            get {
+                return ((bool)(this["RentLivingSectionWindow_Maximized"]));
+            }
+            set {
+                this["RentLivingSectionWindow_Maximized"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool RentLivingWindow_Maximized {
+            get {
+                return ((bool)(this["RentLivingWindow_Maximized"]));
+            }
+            set {
+                this["RentLivingWindow_Maximized"] = value;
+            }
+        }
     }
 }

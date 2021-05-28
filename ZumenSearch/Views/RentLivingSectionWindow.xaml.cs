@@ -34,16 +34,26 @@ namespace ZumenSearch.Views
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             // Load window possition.
-            if ((Properties.Settings.Default.RentLivingSectionWindow_Left != 0)
-                && (Properties.Settings.Default.RentLivingSectionWindow_Top != 0)
-                && (Properties.Settings.Default.RentLivingSectionWindow_Width != 0)
-                && (Properties.Settings.Default.RentLivingSectionWindow_Height != 0)
-                )
+            if ((Properties.Settings.Default.RentLivingSectionWindow_Width >= 0) && (Properties.Settings.Default.RentLivingSectionWindow_Height >= 0) )
+            {
+                this.Width = Properties.Settings.Default.RentLivingSectionWindow_Width;
+                this.Height = Properties.Settings.Default.RentLivingSectionWindow_Height;
+            }
+
+            if ((Properties.Settings.Default.RentLivingSectionWindow_Left >= 0) && (Properties.Settings.Default.RentLivingSectionWindow_Top >= 0))
             {
                 this.Left = Properties.Settings.Default.RentLivingSectionWindow_Left;
                 this.Top = Properties.Settings.Default.RentLivingSectionWindow_Top;
-                this.Width = Properties.Settings.Default.RentLivingSectionWindow_Width;
-                this.Height = Properties.Settings.Default.RentLivingSectionWindow_Height;
+            }
+            else
+            {
+                this.Left = 0;
+                this.Top = 0;
+            }
+
+            if (Properties.Settings.Default.RentLivingSectionWindow_Maximized)
+            {
+                this.WindowState = WindowState.Maximized;
             }
         }
 
@@ -61,8 +71,14 @@ namespace ZumenSearch.Views
                 Properties.Settings.Default.RentLivingSectionWindow_Height = this.Height;
                 Properties.Settings.Default.RentLivingSectionWindow_Width = this.Width;
 
-                Properties.Settings.Default.Save();
+                Properties.Settings.Default.RentLivingSectionWindow_Maximized = false;
             }
+            else if (this.WindowState == WindowState.Maximized)
+            {
+                Properties.Settings.Default.RentLivingSectionWindow_Maximized = true;
+            }
+
+            Properties.Settings.Default.Save();
 
         }
 

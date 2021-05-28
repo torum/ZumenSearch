@@ -15,15 +15,84 @@ namespace ZumenSearch.Models.Classes
     /// </summary>
     public class Section : ViewModelBase
     {
-        protected string _rent_ID;
-        public string Rent_ID
+        // 賃貸IDの保持
+        protected string _rentId;
+        public string RentId
         {
             get
             {
-                return _rent_ID;
+                return _rentId;
             }
         }
 
+        // 新規か編集（保存済み）かどうかのフラグ。
+        private bool _isNew;
+        public bool IsNew
+        {
+            get
+            {
+                return _isNew;
+            }
+            set
+            {
+                if (_isNew == value) return;
+
+                _isNew = value;
+                NotifyPropertyChanged("IsNew");
+                NotifyPropertyChanged("IsEdit");
+                NotifyPropertyChanged("Status");
+            }
+        }
+
+        // 新規か編集（保存済み）かどうかのフラグ。
+        public bool IsEdit
+        {
+            get
+            {
+                if (IsNew)
+                    return false;
+                else
+                    return true;
+            }
+        }
+
+        // 変更（データ入力）があったかどうかのフラグ。
+        private bool _isDirty = false;
+        public bool IsDirty
+        {
+            get
+            {
+                return _isDirty;
+            }
+            set
+            {
+                if (_isDirty == value) return;
+
+                _isDirty = value;
+                NotifyPropertyChanged("IsDirty");
+                NotifyPropertyChanged("Status");
+            }
+        }
+
+        // 編集ステータスの情報表示。
+        public string Status
+        {
+            get
+            {
+                if (IsNew && IsDirty)
+                    return "[新規] [変更あり]";
+                else if (IsNew)
+                    return "[新規]";
+                else if (IsEdit && IsDirty)
+                    return "[更新] [変更あり]";
+                else if (IsEdit)
+                    return "[更新]";
+                else
+                    return "";
+            }
+        }
+
+        // 空きフラグ
         private bool _isVacant;
         public bool IsVacant
         {
@@ -37,16 +106,10 @@ namespace ZumenSearch.Models.Classes
 
                 _isVacant = value;
                 this.NotifyPropertyChanged("IsVacant");
+
+                IsDirty = true;
             }
         }
-
-
-        // 新規に追加（Insert）
-        public bool IsNew { get; set; }
-
-        // 変更があった
-        public bool IsDirty { get; set; }
-
     }
 
     /// <summary>
@@ -54,21 +117,23 @@ namespace ZumenSearch.Models.Classes
     /// </summary>
     public class RentLivingSection : Section
     {
-        protected string _rentLiving_ID;
-        public string RentLiving_ID
+        // 建物IDの保持
+        protected string _rentLivingId;
+        public string RentLivingId
         {
             get
             {
-                return _rentLiving_ID;
+                return _rentLivingId;
             }
         }
 
-        protected string _rentLivingSection_ID;
-        public string RentLivingSection_ID
+        // 部屋ID
+        protected string _rentLivingSectionId;
+        public string RentLivingSectionId
         {
             get
             {
-                return _rentLivingSection_ID;
+                return _rentLivingSectionId;
             }
         }
 
@@ -86,6 +151,9 @@ namespace ZumenSearch.Models.Classes
 
                 _rentLivingSectionRoomNumber = value;
                 this.NotifyPropertyChanged("RentLivingSectionRoomNumber");
+
+                // 変更フラグ
+                IsDirty = true;
             }
         }
 
@@ -103,6 +171,9 @@ namespace ZumenSearch.Models.Classes
 
                 _rentLivingSectionPrice = value;
                 this.NotifyPropertyChanged("RentLivingSectionPrice");
+
+                // 変更フラグ
+                IsDirty = true;
             }
         }
 
@@ -120,6 +191,9 @@ namespace ZumenSearch.Models.Classes
 
                 _rentLivingSectionMadori = value;
                 this.NotifyPropertyChanged("RentLivingSectionMadori");
+
+                // 変更フラグ
+                IsDirty = true;
             }
         }
 
@@ -131,9 +205,9 @@ namespace ZumenSearch.Models.Classes
 
         public RentLivingSection(string rentid, string rentlivingid, string sectionid)
         {
-            this._rent_ID = rentid;
-            this._rentLiving_ID = rentlivingid;
-            this._rentLivingSection_ID = sectionid;
+            _rentId = rentid;
+            _rentLivingId = rentlivingid;
+            _rentLivingSectionId = sectionid;
         }
     }
 

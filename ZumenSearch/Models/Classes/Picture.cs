@@ -18,21 +18,21 @@ namespace ZumenSearch.Models.Classes
     /// </summary>
     public class RentPicture : ViewModelBase
     {
-        protected string _rentPicture_id;
-        public string RentPicture_ID
+        protected string _rentPictureId;
+        public string RentPictureId
         {
             get
             {
-                return _rentPicture_id;
+                return _rentPictureId;
             }
         }
 
-        protected string _rent_id;
-        public string Rent_ID
+        protected string _rentId;
+        public string RentId
         {
             get
             {
-                return _rent_id;
+                return _rentId;
             }
         }
 
@@ -114,21 +114,21 @@ namespace ZumenSearch.Models.Classes
     /// </summary>
     public class RentLivingPicture : RentPicture
     {
-        protected string _rentLiving_id;
-        public string RentLiving_ID
+        protected string _rentLivingId;
+        public string RentLivingId
         {
             get
             {
-                return _rentLiving_id;
+                return _rentLivingId;
             }
         }
 
         public RentLivingPicture(string rentid, string rentlivingid, string rentlivingpictureid)
         {
-            this._rent_id = rentid;
-            this._rentLiving_id = rentlivingid;
+            this._rentId = rentid;
+            this._rentLivingId = rentlivingid;
 
-            this._rentPicture_id = rentlivingpictureid;
+            this._rentPictureId = rentlivingpictureid;
         }
     }
 
@@ -139,21 +139,21 @@ namespace ZumenSearch.Models.Classes
     /// </summary>
     public class RentSectionPicture : ViewModelBase
     {
-        protected string _rentSectionPicture_id;
-        public string RentSectionPicture_ID
+        protected string _rentSectionPictureId;
+        public string RentSectionPictureId
         {
             get
             {
-                return _rentSectionPicture_id;
+                return _rentSectionPictureId;
             }
         }
 
-        protected string _rent_id;
-        public string Rent_ID
+        protected string _rentId;
+        public string RentId
         {
             get
             {
-                return _rent_id;
+                return _rentId;
             }
         }
 
@@ -235,31 +235,31 @@ namespace ZumenSearch.Models.Classes
     /// </summary>
     public class RentLivingSectionPicture : RentSectionPicture
     {
-        protected string _rentLivingSection_id;
-        public string RentLivingSection_ID
+        protected string _rentLivingSectionId;
+        public string RentLivingSectionId
         {
             get
             {
-                return _rentLivingSection_id;
+                return _rentLivingSectionId;
             }
         }
 
-        protected string _rentLiving_id;
-        public string RentLiving_ID
+        protected string _rentLivingId;
+        public string RentLivingId
         {
             get
             {
-                return _rentLiving_id;
+                return _rentLivingId;
             }
         }
 
         public RentLivingSectionPicture(string rentid, string rentlivingid, string rentlivingsectionid, string rentlivingsectionpictureid)
         {
-            this._rent_id = rentid;
-            this._rentLiving_id = rentlivingid;
-            this._rentLivingSection_id = rentlivingsectionid;
+            this._rentId = rentid;
+            this._rentLivingId = rentlivingid;
+            this._rentLivingSectionId = rentlivingsectionid;
 
-            this._rentSectionPicture_id = rentlivingsectionpictureid;
+            this._rentSectionPictureId = rentlivingsectionpictureid;
         }
     }
 

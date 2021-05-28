@@ -43,7 +43,7 @@
 
                 <!-- Menu icon -->
                 <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Stretch" VerticalAlignment="Center">
-                    <Label Content="賃貸住居用物件：部屋情報編集" />
+                    <Label Content="賃貸住居用物件：部屋情報編集" Margin="6 0 0 0" />
                 </StackPanel>
 
                 <!-- System icons -->
@@ -105,7 +105,7 @@
                     <ColumnDefinition Width="646"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- 写真 -->
+                <!-- 写真・図面 -->
                 <Grid Grid.Row="0" Grid.Column="0" Margin="3">
                     <TabControl>
 
@@ -142,7 +142,7 @@
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
 
-                                    <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Left">
                                         <Button Width="130" Margin="6" Command="{Binding RentLivingEditSectionNewPictureAddCommand}">写真の追加</Button>
                                     </StackPanel>
 
@@ -188,6 +188,33 @@
 
                             </Grid>
 
+
+                        </TabItem>
+
+                        <!-- 図面 （区分所有の場合） -->
+                        <TabItem Width="120">
+                            <TabItem.Header>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="3">
+                                    <Label Content="図面" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </TabItem.Header>
+
+                            <Grid Margin="2">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Row="1" Orientation="Horizontal">
+                                    <Button Width="130" Margin="3">図面の追加</Button>
+                                </StackPanel>
+
+
+                            </Grid>
 
                         </TabItem>
 
@@ -353,19 +380,19 @@
                                             </StackPanel>
                                         </GroupBox>
 
-                                        <GroupBox Header="保証会社" Padding="6" Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Margin="0 0 6 0">
+                                        <GroupBox Header="保証会社" Padding="6" Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Margin="0 0 6 0" Visibility="Collapsed">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBox Width="372" Margin="6 6 0 6" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
+                                            </StackPanel>
+                                        </GroupBox>
+
+                                        <GroupBox Header="住宅保険" Padding="6" Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2" Margin="0 0 6 0" Visibility="Collapsed">
                                             <StackPanel Orientation="Horizontal">
                                                 <TextBox Width="372" Margin="6 6 0 6" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
                                             </StackPanel>
                                         </GroupBox>
                                         
-                                        <GroupBox Header="住宅保険" Padding="6" Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2" Margin="0 0 6 0">
-                                            <StackPanel Orientation="Horizontal">
-                                                <TextBox Width="372" Margin="6 6 0 6" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
-                                            </StackPanel>
-                                        </GroupBox>
-                                        
-                                        <GroupBox Header="鍵交換費用" Padding="6" Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2" Margin="0 0 6 0">
+                                        <GroupBox Header="鍵交換費用" Padding="6" Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2" Margin="0 0 6 0" Visibility="Collapsed">
                                             <StackPanel Orientation="Horizontal">
                                                 <TextBox Width="372" Margin="6 6 0 6" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
                                             </StackPanel>

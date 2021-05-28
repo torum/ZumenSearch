@@ -45,43 +45,8 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Row="0" Grid.Column="0" Background="{DynamicResource BoardBackgroundColorBrush}" Orientation="Horizontal" HorizontalAlignment="Stretch">
-  
-                    <Button ToolTip="{Binding AppTitleVer}" IsHitTestVisible="True" WindowChrome.IsHitTestVisibleInChrome="True" IsTabStop="False" Visibility="Collapsed">
-                        <Button.Style>
-                            <Style TargetType="{x:Type Button}">
-                                <Setter Property="OverridesDefaultStyle" Value="true" />
-                                <Setter Property="Background" Value="Transparent" />
-                                <Setter Property="Foreground" Value="{DynamicResource ControlForegroundColorBrush}"/>
-                                <Setter Property="BorderThickness" Value="0" />
-                                <Setter Property="Margin" Value="0" />
-                                <Setter Property="Padding" Value="0" />
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="Button">
-                                            <Border x:Name="Border" CornerRadius="0" BorderThickness="0" Background="{TemplateBinding Background}">
-                                                <Viewbox Width="22" Height="22" Margin="5">
-                                                    <Canvas Width="24" Height="24">
-                                                        <Canvas.RenderTransform>
-                                                            <TranslateTransform X="0" Y="0"/>
-                                                        </Canvas.RenderTransform>
-                                                        <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Name="path4519"  Fill="{DynamicResource TitleTextColorBrush}" StrokeThickness="0" Data="M 3.9543374 3.1555264 C 2.5507725 3.0998097 1.4976792 4.5676481 1.7498657 5.8735045 c 0.024875 4.5518935 -0.05464 9.1077785 0.041682 13.6571425 0.2358003 1.220232 1.6120947 1.929967 2.7967315 1.720168 5.302673 -0.02444 10.6092348 0.05248 15.9094488 -0.04002 1.200174 -0.220264 1.955814 -1.529207 1.752263 -2.675677 -0.02615 -4.55308 0.05509 -9.1102167 -0.04231 -13.6607303 -0.242884 -1.2580895 -1.673494 -1.9361805 -2.878603 -1.7188671 -5.124912 1.1e-6 -10.2498266 -2.4e-6 -15.3747378 1.8e-6 z"/>
-                                                        <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Name="path4513" Fill="{DynamicResource BoardBackgroundColorBrush}" StrokeThickness="1" Data="m 3.4667969 4.9314423 c 5.688802 0 11.3776041 0 17.0664061 0 0 3.5907826 0 7.1815647 0 10.7723477 -5.688802 0 -11.3776041 0 -17.0664061 0 0 -3.590783 0 -7.1815651 0 -10.7723477 z"/>
-                                                        <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Name="rect4530"  Fill="{DynamicResource TitleTextColorBrush}" StrokeThickness="0" Data="m 4.5464377 6.1260772 c 1.7826012 0 3.5652024 0 5.3478036 0 0 2.5939146 0 5.1878288 0 7.7817438 -1.7826012 0 -3.5652024 0 -5.3478036 0 0 -2.593915 0 -5.1878292 0 -7.7817438 z"/>
-                                                        <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Name="rect45349"  Fill="{DynamicResource TitleTextColorBrush}" StrokeThickness="0" Data="m 10.983051 12.610171 c 2.915254 0 5.830509 0 8.745763 0 0 0.440677 0 0.881355 0 1.322033 -2.915254 0 -5.830509 0 -8.745763 0 0 -0.440678 0 -0.881356 0 -1.322033 z"/>
-                                                        <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Name="rect453491" Fill="{DynamicResource BoardBackgroundColorBrush}" StrokeThickness="0" Data="m 3.3651018 17.127518 c 5.6764691 0 11.3529382 0 17.0294072 0 0 0.819873 0 1.639745 0 2.459618 -5.676469 0 -11.3529381 0 -17.0294072 0 0 -0.819873 0 -1.639745 0 -2.459618 z"/>
-                                                        <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Name="rect453495"  Fill="{DynamicResource TitleTextColorBrush}" StrokeThickness="0" Data="m 10.983051 9.4067808 c 2.915254 0 5.830509 0 8.745763 0 0 0.440677 0 0.8813552 0 1.3220332 -2.915254 0 -5.830509 0 -8.745763 0 0 -0.440678 0 -0.8813562 0 -1.3220332 z"/>
-                                                        <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Name="rect4534915"  Fill="{DynamicResource TitleTextColorBrush}" StrokeThickness="0"  Data="m 10.983051 6.1525428 c 2.915254 0 5.830509 0 8.745763 0 0 0.4406772 0 0.8813552 0 1.3220332 -2.915254 0 -5.830509 0 -8.745763 0 0 -0.440678 0 -0.881356 0 -1.3220332 z"/>
-                                                    </Canvas>
-                                                </Viewbox>
-                                            </Border>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                            </Style>
-                        </Button.Style>
-                    </Button>
 
-                    <TextBlock Text="{Binding AppTitleVer}" VerticalAlignment="Center" Margin="6 0 0 0"/>
+                    <Label Content="{Binding AppTitleVer}" VerticalAlignment="Center" Margin="6 0 0 0"/>
                     
                 </StackPanel>
 
@@ -577,7 +542,7 @@
                                                     <GridViewColumn Header="ID" Width="{Binding ElementName=RLEWidth0, Path=ActualWidth}">
                                                         <GridViewColumn.CellTemplate>
                                                             <DataTemplate>
-                                                                <TextBlock x:Name="RLID" Text="{Binding Rent_ID, Mode=OneWay}" Padding="3"/>
+                                                                <TextBlock x:Name="RLID" Text="{Binding RentId, Mode=OneWay}" Padding="3"/>
                                                             </DataTemplate>
                                                         </GridViewColumn.CellTemplate>
                                                     </GridViewColumn>

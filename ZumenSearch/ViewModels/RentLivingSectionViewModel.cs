@@ -23,7 +23,7 @@ using ZumenSearch.Common;
 
 namespace ZumenSearch.ViewModels
 {
-    class RentLivingSectionViewModel : ViewModelBase
+    public class RentLivingSectionViewModel : ViewModelBase
     {
         private string _id;
         public string Id
@@ -110,6 +110,13 @@ namespace ZumenSearch.ViewModels
                 this.NotifyPropertyChanged("ErrorText");
             }
         }
+
+
+
+
+
+
+
 
         // エラー通知画面のクローズコマンド
         public ICommand CloseErrorCommand { get; }
