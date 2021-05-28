@@ -34,14 +34,12 @@ namespace ZumenSearch.Views
             InitializeComponent();
 
             Loaded += (this.DataContext as MainViewModel).OnWindowLoaded;
-
             Closing += (this.DataContext as MainViewModel).OnWindowClosing;
-
 
             RestoreButton.Visibility = Visibility.Collapsed;
             MaxButton.Visibility = Visibility.Visible;
 
-
+            //
             if (this.DataContext is MainViewModel vm)
             {
                 if (vm != null)
@@ -169,17 +167,16 @@ namespace ZumenSearch.Views
                 RestoreButton.Visibility = Visibility.Collapsed;
                 MaxButton.Visibility = Visibility.Visible;
 
-                BackgroundGrid.Margin = new Thickness(0, 0, 0, 0);
+                //BackgroundGrid.Margin = new Thickness(0, 0, 0, 0);
             }
             else if (this.WindowState == WindowState.Maximized)
             {
                 RestoreButton.Visibility = Visibility.Visible;
                 MaxButton.Visibility = Visibility.Collapsed;
 
-                BackgroundGrid.Margin = new Thickness(3, 3, 3, 3);
+                //BackgroundGrid.Margin = new Thickness(3, 3, 3, 3);
             }
         }
-
 
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
@@ -204,6 +201,7 @@ namespace ZumenSearch.Views
         #endregion
 
         #region == MAXIMIZE時のタスクバー被りのFix ==
+
         // https://engy.us/blog/2020/01/01/implementing-a-custom-window-title-bar-in-wpf/
 
         protected override void OnSourceInitialized(EventArgs e)
@@ -305,7 +303,6 @@ namespace ZumenSearch.Views
 
 
         #endregion
-
 
         private void TextBox_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {

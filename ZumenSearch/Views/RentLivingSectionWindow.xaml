@@ -114,15 +114,15 @@
                     <ColumnDefinition Width="701"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- 写真・図面 -->
+                <!-- 画像・PDF -->
                 <Grid Grid.Row="0" Grid.Column="0" Margin="3">
                     <TabControl>
 
-                        <!-- 写真 -->
+                        <!-- 画像（内観写真、間取り図） -->
                         <TabItem Width="120">
                             <TabItem.Header>
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="3">
-                                    <Label Content="写真" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    <Label Content="画像" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </TabItem.Header>
 
@@ -135,12 +135,12 @@
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
 
-                                <!-- メイン写真 -->
+                                <!-- 画像プレビュー -->
                                 <Grid Grid.Row="0" Grid.Column="0" Background="#eee">
                                     <Image Width="320" Height="213" Margin="2"></Image>
                                 </Grid>
 
-                                <!-- 写真一覧 -->
+                                <!-- 画像一覧 -->
                                 <Grid Grid.Row="1" Grid.Column="0">
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto"/>
@@ -152,7 +152,7 @@
                                     </Grid.ColumnDefinitions>
 
                                     <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Left">
-                                        <Button Width="130" Margin="6" Command="{Binding RentLivingEditSectionNewPictureAddCommand}">写真の追加</Button>
+                                        <Button Width="130" Margin="6" Command="{Binding RentLivingEditSectionNewPictureAddCommand}">画像の追加</Button>
                                     </StackPanel>
 
                                     <ListView Grid.Row="2" Margin="3" ItemsSource="{Binding RentLivingEditSectionNew.RentLivingSectionPictures}" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
@@ -200,11 +200,11 @@
 
                         </TabItem>
 
-                        <!-- 図面 （区分所有の場合） -->
+                        <!-- PDF （募集図面、登記簿謄本、公図、建築図面）（区分所有の場合） -->
                         <TabItem Width="120">
                             <TabItem.Header>
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="3">
-                                    <Label Content="図面" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    <Label Content="PDF" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </TabItem.Header>
 
@@ -219,7 +219,7 @@
                                 </Grid.ColumnDefinitions>
 
                                 <StackPanel Grid.Row="1" Orientation="Horizontal">
-                                    <Button Width="130" Margin="3">図面の追加</Button>
+                                    <Button Width="130" Margin="3">PDFの追加</Button>
                                 </StackPanel>
 
 

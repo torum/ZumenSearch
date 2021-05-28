@@ -10,6 +10,7 @@
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=vms:RentLivingViewModel}"
         SnapsToDevicePixels="true"
+        WindowStyle="None"
         BorderThickness="0"
         WindowStartupLocation="CenterScreen"
         Background="{DynamicResource WindowBackgroundColorBrush}"
@@ -31,7 +32,6 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="1024"/>
-                <!-- 1183 -->
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
@@ -109,16 +109,16 @@
                     <ColumnDefinition Width="701"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- 写真・図面 -->
+                <!-- 画像・PDF -->
                 <Grid Grid.Row="0" Grid.Column="0" Margin="3">
 
                     <TabControl>
 
-                        <!-- 写真 -->
+                        <!-- 画像（外観写真、地図） -->
                         <TabItem Width="120">
                             <TabItem.Header>
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="3">
-                                    <Label Content="写真" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    <Label Content="画像" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </TabItem.Header>
 
@@ -131,12 +131,12 @@
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
 
-                                <!-- メイン写真 -->
+                                <!-- 画像プレビュー表示 -->
                                 <Grid Grid.Row="0" Grid.Column="0" Background="#eee" HorizontalAlignment="Center" VerticalAlignment="Center">
                                     <Image Width="320" Height="213" Margin="0"></Image>
                                 </Grid>
 
-                                <!-- 写真一覧 -->
+                                <!-- 画像一覧 -->
                                 <Grid Grid.Row="1" Grid.Column="0">
                                     <Grid>
                                         <Grid.RowDefinitions>
@@ -149,7 +149,7 @@
                                         </Grid.ColumnDefinitions>
 
                                         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <Button Width="130" Margin="6" Command="{Binding RentLivingEditPictureAddCommand}">写真の追加</Button>
+                                            <Button Width="130" Margin="6" Command="{Binding RentLivingEditPictureAddCommand}">画像の追加</Button>
                                         </StackPanel>
 
                                         <ListView Grid.Row="2" Margin="3" ItemsSource="{Binding RentLivingEdit.RentLivingPictures}" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
@@ -199,11 +199,11 @@
 
                         </TabItem>
 
-                        <!-- 図面 -->
+                        <!-- PDF（募集図面、登記簿謄本、公図、建築図面） -->
                         <TabItem Width="120">
                             <TabItem.Header>
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="3">
-                                    <Label Content="図面" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    <Label Content="PDF" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </TabItem.Header>
                             <TabItem.Style>
@@ -227,7 +227,7 @@
                                 </Grid.ColumnDefinitions>
 
                                 <StackPanel Grid.Row="1" Orientation="Horizontal">
-                                    <Button Width="130" Margin="3" Command="{Binding RentLivingEditZumenPdfAddCommand}">図面の追加</Button>
+                                    <Button Width="130" Margin="3" Command="{Binding RentLivingEditZumenPdfAddCommand}">PDFの追加</Button>
                                 </StackPanel>
 
                                 <ListView Grid.Row="2" Margin="3" ItemsSource="{Binding RentLivingEdit.RentLivingZumenPDFs}" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
@@ -1156,7 +1156,6 @@
                 </StatusBarItem>
 
             </StatusBar>
-
 
         </Grid>
     </Border>

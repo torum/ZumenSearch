@@ -20,7 +20,6 @@
         StateChanged="Window_StateChanged"
         Loaded="Window_Loaded"
         Closing="Window_Closing">
-
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="32" ResizeBorderThickness="{x:Static SystemParameters.WindowResizeBorderThickness}"/>
     </WindowChrome.WindowChrome>
