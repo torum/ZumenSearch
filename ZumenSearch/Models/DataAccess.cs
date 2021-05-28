@@ -76,7 +76,6 @@ namespace ZumenSearch
                                 "Floors INTEGER NOT NULL," +
                                 "FloorsBasement INTEGER," +
                                 "BuiltYear INTEGER NOT NULL," +
-                                "UnitOwnership TEXT NOT NULL," +
                                 "FOREIGN KEY (Rent_ID) REFERENCES Rent(Rent_ID)" +
                                 " )";
                             tableCmd.ExecuteNonQuery();
@@ -461,7 +460,7 @@ namespace ZumenSearch
         // 賃貸住居用物件を追加（INSERT）
         public bool AddRentLiving(RentLiving rl)
         {
-            //Debug.WriteLine("DataAccess:AddRentLiving: " + rl.Name);
+            Debug.WriteLine("DataAccess:AddRentLiving: " + rl.Name);
 
             bool result = false;
 
@@ -627,6 +626,8 @@ namespace ZumenSearch
                             er.ErrDatetime = DateTime.Now;
                             er.ErrPlace = "MainViewModel::RentLivingAddNewCommand_Execute()";
                             //ErrorOccured?.Invoke(er);
+
+                            Debug.WriteLine(e.Message + " @DataAccess:AddRentLiving:Transaction.Commit");
                         }
                     }
                 }
@@ -662,6 +663,7 @@ namespace ZumenSearch
         // 賃貸住居用物件を更新（UPDATE）
         public void UpdateRentLiving(RentLiving rl)
         {
+            Debug.WriteLine("DataAccess:UpdateRentLiving: " + rl.Name);
 
             string sqlUpdateRent = String.Format("UPDATE Rent SET Name = '{1}', Type = '{2}', PostalCode = '{3}', Location = '{4}', TrainStation1 = '{5}', TrainStation2 = '{6}' WHERE Rent_ID = '{0}'",
                 rl.RentId, rl.Name, rl.Type.ToString(), rl.PostalCode, rl.Location, rl.TrainStation1, rl.TrainStation2);

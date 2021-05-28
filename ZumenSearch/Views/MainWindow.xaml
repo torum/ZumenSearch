@@ -9,6 +9,8 @@
         xmlns:vms="clr-namespace:ZumenSearch.ViewModels"
         mc:Ignorable="d"
         WindowStyle="None"
+        SnapsToDevicePixels="true"
+        BorderThickness="0"
         WindowStartupLocation="CenterScreen"
         Background="{DynamicResource WindowBackgroundColorBrush}"
         Width="1024" Height="680"
@@ -17,7 +19,7 @@
         Title="{Binding AppTitle}" 
         StateChanged="Window_StateChanged"
         Loaded="Window_Loaded"
-        Closing="Window_Closing" SnapsToDevicePixels="True">
+        Closing="Window_Closing">
 
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="32" ResizeBorderThickness="{x:Static SystemParameters.WindowResizeBorderThickness}"/>
@@ -393,15 +395,18 @@
                                     <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
 
                                 <Button Content="一覧" Command="{Binding RentLivingEditListCommand}" Grid.Row="0" Grid.Column="0" Width="100" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
 
                                 <Button x:Name="ButtonAddRL" Content="新規追加" Command="{Binding RentLivingNewCommand}" Grid.Row="0" Grid.Column="1" Width="100" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                
+                                <Button x:Name="ButtonViewRL" Content="表示" Command="{Binding RentLivingEditSelectedViewCommand}" Grid.Row="0" Grid.Column="2" Width="100" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
 
-                                <Button x:Name="ButtonEditRL" Content="編集" Command="{Binding RentLivingEditSelectedEditCommand}" Grid.Row="0" Grid.Column="2" Width="100" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
+                                <Button x:Name="ButtonEditRL" Content="編集" Command="{Binding RentLivingEditSelectedEditCommand}" Grid.Row="0" Grid.Column="3" Width="100" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
 
-                                <Button x:Name="ButtonDeleteRL" Content="削除" Command="{Binding RentLivingEditSelectedDeleteCommand}" Grid.Row="0" Grid.Column="3" Width="100" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
+                                <Button x:Name="ButtonDeleteRL" Content="削除" Command="{Binding RentLivingEditSelectedDeleteCommand}" Grid.Row="0" Grid.Column="4" Width="100" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
 
                             </Grid>
                         </Border>
@@ -466,7 +471,7 @@
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
 
-                                    <Grid Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right">
+                                    <Grid Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left">
                                         <Grid.RowDefinitions>
                                             <RowDefinition Height="Auto"/>
                                         </Grid.RowDefinitions>
@@ -474,7 +479,7 @@
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
 
-                                        <Button Content="戻る" Command="{Binding RentLivingSearchBackCommand}" Grid.Row="0" Grid.Column="1" IsDefault="True" Width="100" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
+                                        <Button Content="戻る" Command="{Binding RentLivingSearchBackCommand}" Grid.Row="0" Grid.Column="1" Width="100" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
 
                                     </Grid>
 

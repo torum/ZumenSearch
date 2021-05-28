@@ -38,6 +38,7 @@ using ZumenSearch.Common;
 /// Modelsに基底クラス定義やデータ操作をリストラクチャー。
 
 /// ● 履歴：
+/// v0.0.0.14 ステータスバー追加等、もろもろ
 /// v0.0.0.13 もろもろ
 /// v0.0.0.11 サイズ・レイアウト
 /// 
@@ -61,7 +62,7 @@ namespace ZumenSearch.ViewModels
         #region == 基本 ==
 
         // Application version.
-        private const string _appVer = "0.0.0.13";
+        private const string _appVer = "0.0.0.14";
 
         // Application name.
         private const string _appName = "ZumenSearch";

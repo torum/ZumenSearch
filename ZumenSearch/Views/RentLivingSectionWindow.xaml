@@ -6,13 +6,15 @@
         xmlns:local="clr-namespace:ZumenSearch.Views"
         xmlns:common="clr-namespace:ZumenSearch.Common"
         xmlns:helper="clr-namespace:ZumenSearch.Helper"
-        xmlns:vms="clr-namespace:ZumenSearch.ViewModels"
+        xmlns:vms="clr-namespace:ZumenSearch.ViewModels" d:DataContext="{d:DesignInstance Type=vms:RentLivingSectionViewModel}"
         mc:Ignorable="d"
         WindowStyle="None"
+        BorderThickness="0"
         WindowStartupLocation="CenterScreen"
+        SnapsToDevicePixels="true"
         Background="{DynamicResource WindowBackgroundColorBrush}"
         Width="1024" Height="680" 
-        MinWidth="1024" MinHeight="680"
+        MinWidth="1024"
         StateChanged="Window_StateChanged"
         Closing="Window_Closing">
     <WindowChrome.WindowChrome>
@@ -24,6 +26,7 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
@@ -37,17 +40,23 @@
                     <RowDefinition Height="32"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Menu icon -->
+                <!-- Window icon/title -->
                 <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Stretch" VerticalAlignment="Center">
                     <Label Content="賃貸住居用物件：部屋情報編集" Margin="6 0 0 0" />
                 </StackPanel>
 
+                <!-- Info space -->
+                <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    
+                </StackPanel>
+
                 <!-- System icons -->
-                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0">
+                <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0">
 
                     <Button x:Name="SaveButton" Style="{DynamicResource PathSysButton}" Command="{Binding RentLivingEditSectionUpdateCommand}" ToolTip="登録" Content="M15,9H5V5H15M12,19A3,3 0 0,1 9,16A3,3 0 0,1 12,13A3,3 0 0,1 15,16A3,3 0 0,1 12,19M17,3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V7L17,3Z">
                     </Button>
@@ -68,7 +77,7 @@
                         M4,4H20V20H4V4M6,8V18H18V8H6Z
                     </Button>
 
-                    <Button x:Name="CloseButton" Style="{StaticResource PathSysButton}" Click="CloseButton_Click">
+                    <Button x:Name="CloseButton" Style="{StaticResource PathSysButtonClose}" Click="CloseButton_Click">
                         M13.46,12L19,17.54V19H17.54L12,13.46L6.46,19H5V17.54L10.54,12L5,6.46V5H6.46L12,10.54L17.54,5H19V6.46L13.46,12Z
                     </Button>
 
@@ -101,8 +110,8 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="375"/>
-                    <ColumnDefinition Width="646"/>
+                    <ColumnDefinition Width="320"/>
+                    <ColumnDefinition Width="701"/>
                 </Grid.ColumnDefinitions>
 
                 <!-- 写真・図面 -->
@@ -119,7 +128,7 @@
 
                             <Grid>
                                 <Grid.RowDefinitions>
-                                    <RowDefinition Height="244"/>
+                                    <RowDefinition Height="213"/>
                                     <RowDefinition Height="*"/>
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
@@ -128,7 +137,7 @@
 
                                 <!-- メイン写真 -->
                                 <Grid Grid.Row="0" Grid.Column="0" Background="#eee">
-                                    <Image Width="360" Height="240" Margin="2"></Image>
+                                    <Image Width="320" Height="213" Margin="2"></Image>
                                 </Grid>
 
                                 <!-- 写真一覧 -->
@@ -243,7 +252,7 @@
                                         <RowDefinition Height="*"/>
                                     </Grid.RowDefinitions>
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="415"/>
+                                        <ColumnDefinition Width="469"/>
                                         <ColumnDefinition Width="196"/>
                                     </Grid.ColumnDefinitions>
 
@@ -270,7 +279,7 @@
                                             <StackPanel Orientation="Horizontal">
                                                 <GroupBox Header="部屋番号" Padding="6" Margin="0 0 6 0">
                                                     <StackPanel Orientation="Horizontal">
-                                                        <TextBox Text="{Binding RentLivingEdit.Name}" Width="68" Margin="6 6 0 6" HorizontalAlignment="Left"></TextBox>
+                                                        <TextBox Text="{Binding RentLivingEdit.Name}" Width="122" Margin="6 6 0 6" HorizontalAlignment="Left"></TextBox>
                                                         <Label VerticalAlignment="Bottom" Content="号室" />
                                                     </StackPanel>
                                                 </GroupBox>
@@ -558,6 +567,52 @@
                 </Grid>
 
             </Grid>
+
+            <!-- ステータスバー -->
+            <StatusBar Grid.Row="3" Grid.Column="1" Padding="0" Height="24" BorderBrush="#aaa" BorderThickness="0 1 0 0" Background="{DynamicResource WindowBackgroundColorBrush}">
+                <StatusBar.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="53" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="53" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                        </Grid>
+                    </ItemsPanelTemplate>
+                </StatusBar.ItemsPanel>
+
+                <!-- 保存ステータス -->
+                <StatusBarItem Grid.Column="0" HorizontalAlignment="Center">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <TextBlock Text="{Binding RentLivingRoomEdit.StatusIsNew}" VerticalAlignment="Center" HorizontalAlignment="Center" Opacity="0.6"/>
+                    </StackPanel>
+                </StatusBarItem>
+
+                <!-- セパレーター -->
+                <Separator Grid.Column="1" Opacity="0.4"/>
+
+                <!-- 変更ステータス -->
+                <StatusBarItem Grid.Column="2" HorizontalAlignment="Center">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <TextBlock Text="{Binding RentLivingRoomEdit.StatusIsDirty}" VerticalAlignment="Center" HorizontalAlignment="Center" Opacity="0.6"/>
+                    </StackPanel>
+                </StatusBarItem>
+
+                <!-- セパレーター -->
+                <Separator Grid.Column="3" Opacity="0.4"/>
+
+                <!-- エラー -->
+                <StatusBarItem Grid.Column="4" HorizontalContentAlignment="Left">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="" VerticalAlignment="Center" HorizontalAlignment="Left" Padding="0" TextWrapping="NoWrap"></TextBlock>
+                    </StackPanel>
+
+                </StatusBarItem>
+
+            </StatusBar>
 
         </Grid>
     </Border>

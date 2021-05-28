@@ -9,7 +9,8 @@
         xmlns:vms="clr-namespace:ZumenSearch.ViewModels" 
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=vms:RentLivingViewModel}"
-        WindowStyle="None"
+        SnapsToDevicePixels="true"
+        BorderThickness="0"
         WindowStartupLocation="CenterScreen"
         Background="{DynamicResource WindowBackgroundColorBrush}"
         Width="1024" Height="680"
@@ -25,6 +26,7 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
@@ -44,9 +46,14 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Menu icon -->
+                <!-- Window icon/title -->
                 <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Stretch" VerticalAlignment="Center">
                     <Label Content="賃貸住居用物件：建物情報編集" Margin="6 0 0 0" />
+                </StackPanel>
+
+                <!-- Info space -->
+                <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    
                 </StackPanel>
 
                 <!-- System icons -->
@@ -66,7 +73,7 @@
                         M4,4H20V20H4V4M6,8V18H18V8H6Z
                     </Button>
 
-                    <Button x:Name="CloseButton" Style="{StaticResource PathSysButton}" Click="CloseButton_Click">
+                    <Button x:Name="CloseButton" Style="{StaticResource PathSysButtonClose}" Click="CloseButton_Click">
                         M13.46,12L19,17.54V19H17.54L12,13.46L6.46,19H5V17.54L10.54,12L5,6.46V5H6.46L12,10.54L17.54,5H19V6.46L13.46,12Z
                     </Button>
 
@@ -86,8 +93,7 @@
                 </Grid.ColumnDefinitions>
 
                 <TextBox Padding="3" Margin="6" Text="{Binding ErrorText,Mode=OneWay}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch"></TextBox>
-                <Button x:Name="ButtonCloseErrorDialog" FontFamily="Segoe UI Symbol" Content="&#57610;" Command="{Binding CloseErrorCommand}" Grid.Row="0" Grid.Column="1" Width="24" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center">
-                </Button>
+                <Button x:Name="ButtonCloseErrorDialog" FontFamily="Segoe UI Symbol" Content="&#57610;" Command="{Binding CloseErrorCommand}" Grid.Row="0" Grid.Column="1" Width="24" Padding="3" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
                 <!-- Symbol Enum
              https://docs.microsoft.com/en-us/uwp/api/windows.ui.xaml.controls.symbol?view=winrt-19041
             -->
@@ -99,8 +105,8 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="375"/>
-                    <ColumnDefinition Width="646"/>
+                    <ColumnDefinition Width="320"/>
+                    <ColumnDefinition Width="701"/>
                 </Grid.ColumnDefinitions>
 
                 <!-- 写真・図面 -->
@@ -118,7 +124,7 @@
 
                             <Grid>
                                 <Grid.RowDefinitions>
-                                    <RowDefinition Height="244"/>
+                                    <RowDefinition Height="213"/>
                                     <RowDefinition Height="*"/>
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
@@ -126,8 +132,8 @@
                                 </Grid.ColumnDefinitions>
 
                                 <!-- メイン写真 -->
-                                <Grid Grid.Row="0" Grid.Column="0" Background="#eee">
-                                    <Image Width="360" Height="240" Margin="2"></Image>
+                                <Grid Grid.Row="0" Grid.Column="0" Background="#eee" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <Image Width="320" Height="213" Margin="0"></Image>
                                 </Grid>
 
                                 <!-- 写真一覧 -->
@@ -178,8 +184,8 @@
                                             </ListView.ItemsPanel>
                                             <ListView.ItemTemplate>
                                                 <DataTemplate>
-                                                    <Grid Width="200" Height="150">
-                                                        <Image Source="{Binding Picture}" Stretch="Uniform"></Image>
+                                                    <Grid Width="200" Height="133">
+                                                        <Image Source="{Binding Picture}" Stretch="Uniform" Width="200" Height="133"></Image>
                                                         <TextBlock Text="hoge"></TextBlock>
                                                     </Grid>
                                                 </DataTemplate>
@@ -200,7 +206,16 @@
                                     <Label Content="図面" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </TabItem.Header>
-
+                            <TabItem.Style>
+                                <Style>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ElementName=RadioButtonBuildingTypeKubunshoyuu, Path=IsChecked}" Value="True">
+                                            <Setter Property="TabItem.Visibility" Value="Hidden"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TabItem.Style>
+                            
                             <Grid Margin="2">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
@@ -353,8 +368,8 @@
                                             <RowDefinition Height="*"/>
                                         </Grid.RowDefinitions>
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="244"/>
-                                            <ColumnDefinition Width="244"/>
+                                            <ColumnDefinition Width="297"/>
+                                            <ColumnDefinition Width="245"/>
                                             <ColumnDefinition Width="120"/>
                                         </Grid.ColumnDefinitions>
 
@@ -973,7 +988,7 @@
                             </TabItem>
 
                             <!-- 元付け業者 （区分所有なら非表示にする） -->
-                            <TabItem Width="120" Visibility="Collapsed">
+                            <TabItem Width="120">
                                 <TabItem.Header>
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="3">
                                         <Label Content="元付け" HorizontalAlignment="Center" VerticalAlignment="Center"/>
@@ -996,7 +1011,7 @@
                             </TabItem>
 
                             <!-- オーナー （区分所有なら非表示にする） -->
-                            <TabItem Width="120" Visibility="Collapsed">
+                            <TabItem Width="120">
                                 <TabItem.Header>
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="3">
                                         <Label Content="オーナー" HorizontalAlignment="Center" VerticalAlignment="Center"/>
@@ -1095,6 +1110,53 @@
                 </Grid>
 
             </Grid>
+
+            <!-- ステータスバー -->
+            <StatusBar Grid.Row="3" Grid.Column="1" Padding="0" Height="24" BorderBrush="#aaa" BorderThickness="0 1 0 0" Background="{DynamicResource WindowBackgroundColorBrush}">
+                <StatusBar.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="53" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="53" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                        </Grid>
+                    </ItemsPanelTemplate>
+                </StatusBar.ItemsPanel>
+
+                <!-- 保存ステータス -->
+                <StatusBarItem Grid.Column="0" HorizontalAlignment="Center">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <TextBlock Text="{Binding RentLivingEdit.StatusIsNew}" VerticalAlignment="Center" HorizontalAlignment="Center" Opacity="0.6"/>
+                    </StackPanel>
+                </StatusBarItem>
+
+                <!-- セパレーター -->
+                <Separator Grid.Column="1" Opacity="0.4"/>
+                
+                <!-- 変更ステータス -->
+                <StatusBarItem Grid.Column="2" HorizontalAlignment="Center">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <TextBlock Text="{Binding RentLivingEdit.StatusIsDirty}" VerticalAlignment="Center" HorizontalAlignment="Center" Opacity="0.6"/>
+                    </StackPanel>
+                </StatusBarItem>
+
+                <!-- セパレーター -->
+                <Separator Grid.Column="3" Opacity="0.4"/>
+
+                <!-- エラー -->
+                <StatusBarItem Grid.Column="4" HorizontalContentAlignment="Left">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="" VerticalAlignment="Center" HorizontalAlignment="Left" Padding="0" TextWrapping="NoWrap"></TextBlock>
+                    </StackPanel>
+
+                </StatusBarItem>
+
+            </StatusBar>
+
 
         </Grid>
     </Border>

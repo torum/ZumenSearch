@@ -40,7 +40,9 @@ namespace ZumenSearch.Models.Classes
                 _isNew = value;
                 NotifyPropertyChanged("IsNew");
                 NotifyPropertyChanged("IsEdit");
-                NotifyPropertyChanged("Status");
+                //NotifyPropertyChanged("Status");
+                NotifyPropertyChanged("StatusIsNew");
+                NotifyPropertyChanged("StatusIsDirty");
             }
         }
 
@@ -70,10 +72,13 @@ namespace ZumenSearch.Models.Classes
 
                 _isDirty = value;
                 NotifyPropertyChanged("IsDirty");
-                NotifyPropertyChanged("Status");
+                //NotifyPropertyChanged("Status");
+                NotifyPropertyChanged("StatusIsNew");
+                NotifyPropertyChanged("StatusIsDirty");
             }
         }
 
+        /*
         // 編集ステータスの情報表示。
         public string Status
         {
@@ -87,6 +92,41 @@ namespace ZumenSearch.Models.Classes
                     return "[更新] [変更あり]";
                 else if (IsEdit)
                     return "[更新]";
+                else
+                    return "";
+            }
+        }
+        */
+
+        public string StatusIsNew
+        {
+            get
+            {
+                if (IsNew && IsDirty)
+                    return "新規";
+                else if (IsNew)
+                    return "新規";
+                else if (IsEdit && IsDirty)
+                    return "更新";
+                else if (IsEdit)
+                    return "更新";
+                else
+                    return "";
+            }
+        }
+
+        public string StatusIsDirty
+        {
+            get
+            {
+                if (IsNew && IsDirty)
+                    return "変更";
+                else if (IsNew)
+                    return "";
+                else if (IsEdit && IsDirty)
+                    return "変更";
+                else if (IsEdit)
+                    return "";
                 else
                     return "";
             }
