@@ -6,8 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Data.Sqlite;
-using ZumenSearch.Models.Classes;
+using ZumenSearch.Models;
 using ZumenSearch.Common;
+using System.Data;
 
 namespace ZumenSearch
 {
@@ -32,8 +33,10 @@ namespace ZumenSearch
         }
 
         // Sqlite DB のイニシャライズメソッド
-        public void InitializeDatabase(string dataBaseFilePath)
+        public ResultWrapper InitializeDatabase(string dataBaseFilePath)
         {
+            ResultWrapper res = new ResultWrapper();
+
             _dataBaseFilePath = dataBaseFilePath;
 
             // Create a table if not exists.
@@ -86,8 +89,11 @@ namespace ZumenSearch
                                 "RentLiving_ID TEXT NOT NULL," +
                                 "Rent_ID TEXT NOT NULL," +
                                 "PictureData BLOB NOT NULL," +
-                                "PictureThumbW200xData BLOB NOT NULL," +
+                                "PictureThumbData BLOB NOT NULL," +
                                 "PictureFileExt TEXT NOT NULL," +
+                                "PictureType TEXT NOT NULL," +
+                                "PictureDescription TEXT NOT NULL," +
+                                "PictureIsMain INTERGER  NOT NULL," +
                                 "FOREIGN KEY (Rent_ID) REFERENCES Rent(Rent_ID)," +
                                 "FOREIGN KEY (RentLiving_ID) REFERENCES RentLiving(RentLiving_ID)" +
                                 " )";
@@ -128,7 +134,7 @@ namespace ZumenSearch
                                 "RentLiving_ID TEXT NOT NULL," +
                                 "Rent_ID TEXT NOT NULL," +
                                 "PictureData BLOB NOT NULL," +
-                                "PictureThumbW200xData BLOB NOT NULL," +
+                                "PictureThumbData BLOB NOT NULL," +
                                 "PictureFileExt TEXT NOT NULL," +
                                 "FOREIGN KEY (Rent_ID) REFERENCES Rent(Rent_ID)," +
                                 "FOREIGN KEY (RentLiving_ID) REFERENCES RentLiving(RentLiving_ID)," +
@@ -182,35 +188,71 @@ namespace ZumenSearch
                             // トランザクションのロールバック
                             tableCmd.Transaction.Rollback();
 
-                            System.Diagnostics.Debug.WriteLine(e.Message + " @MainViewModel()");
+                            // エラー
+                            res.IsError = true;
+                            res.Error.ErrType = ErrorObject.ErrTypes.DB;
+                            res.Error.ErrCode = 0;
+                            res.Error.ErrText = "「" + e.Message + "」";
+                            res.Error.ErrDescription = "データベースを初期化する処理でエラーが発生し、ロールバックしました。";
+                            res.Error.ErrDatetime = DateTime.Now;
+                            res.Error.ErrPlace = "@DataAccess::InitializeDatabase::Transaction.Commit";
 
                         }
                     }
                 }
                 catch (System.Reflection.TargetInvocationException ex)
                 {
+                    res.IsError = true;
+                    res.Error.ErrType = ErrorObject.ErrTypes.DB;
+                    res.Error.ErrCode = 0;
+                    res.Error.ErrText = "「" + ex.Message + "」";
+                    res.Error.ErrDescription = "データベースを初期化する処理でエラーが発生しました。";
+                    res.Error.ErrDatetime = DateTime.Now;
+                    res.Error.ErrPlace = "TargetInvocationException@DataAccess::InitializeDatabase::connection.Open";
+
                     throw ex.InnerException;
                 }
                 catch (System.InvalidOperationException ex)
                 {
+                    res.IsError = true;
+                    res.Error.ErrType = ErrorObject.ErrTypes.DB;
+                    res.Error.ErrCode = 0;
+                    res.Error.ErrText = "「" + ex.Message + "」";
+                    res.Error.ErrDescription = "データベースを初期化する処理でエラーが発生しました。";
+                    res.Error.ErrDatetime = DateTime.Now;
+                    res.Error.ErrPlace = "InvalidOperationException@DataAccess::InitializeDatabase::connection.Open";
+
                     throw ex.InnerException;
                 }
                 catch (Exception e)
                 {
+                    res.IsError = true;
+                    res.Error.ErrType = ErrorObject.ErrTypes.DB;
+                    res.Error.ErrCode = 0;
+
                     if (e.InnerException != null)
                     {
-                        string err = e.InnerException.Message;
-                        System.Diagnostics.Debug.WriteLine(err);
+                        res.Error.ErrText = "「" + e.InnerException.Message + "」";
                     }
+                    else
+                    {
+                        res.Error.ErrText = "「" + e.Message + "」";
+                    }
+                    res.Error.ErrDescription = "データベースを初期化する処理でエラーが発生しました。";
+                    res.Error.ErrDatetime = DateTime.Now;
+                    res.Error.ErrPlace = "Exception@DataAccess::InitializeDatabase::connection.Open";
                 }
 
             }
 
+            return res;
         }
 
         // 賃貸住居用一覧
-        public void GetListOfRentLiving(ObservableCollection<RentLiving> rents)
+        public ResultWrapper RentLivingList(ObservableCollection<RentLiving> rents)
         {
+            ResultWrapper res = new ResultWrapper();
+
             rents.Clear();
 
             try
@@ -246,72 +288,127 @@ namespace ZumenSearch
             }
             catch (Exception e)
             {
-                string errmessage;
+                res.IsError = true;
+                res.Error.ErrType = ErrorObject.ErrTypes.DB;
+                res.Error.ErrCode = 0;
+
                 if (e.InnerException != null)
                 {
-                    errmessage = e.InnerException.Message;
-                    Debug.WriteLine(e.InnerException.Message + " @MainViewModel::RentLivingListCommand_Execute()");
+                    Debug.WriteLine(e.InnerException.Message + " @DataAccess::GetListOfRentLiving");
+                    res.Error.ErrText = "「" + e.InnerException.Message + "」";
                 }
                 else
                 {
-                    errmessage = e.Message;
-                    Debug.WriteLine("Exception:'" + e.Message + "' @MainViewModel::RentLivingListCommand_Execute()");
+                    Debug.WriteLine(e.Message + " @DataAccess::GetListOfRentLiving");
+                    res.Error.ErrText = "「" + e.Message + "」";
                 }
+                res.Error.ErrDescription = "賃貸住居用物件の一覧取得処理でエラーが発生しました。";
+                res.Error.ErrDatetime = DateTime.Now;
+                res.Error.ErrPlace = "Exception@DataAccess::GetListOfRentLiving";
 
-                // TODO: 
-                // エラーイベント発火
-                MyError er = new MyError();
-                er.ErrType = "DB";
-                er.ErrCode = 0;
-                er.ErrText = "「" + errmessage + "」";
-                er.ErrDescription = "賃貸住居用　物件管理、一覧（SELECT）する処理でエラーが発生しました。";
-                er.ErrDatetime = DateTime.Now;
-                er.ErrPlace = "In " + e.Source + " from MainViewModel::RentLivingListCommand_Execute()";
-                //ErrorOccured?.Invoke(er);
             }
 
+            return res;
         }
 
         // 賃貸住居用検索
-        public void GetSearchResultOfRentLiving(ObservableCollection<RentLiving> rents, string searchText)
+        public ResultWrapper RentLivingSearch(ObservableCollection<RentLiving> rents, string searchText)
         {
+            ResultWrapper res = new ResultWrapper();
+
             rents.Clear();
 
-            using (var connection = new SqliteConnection(connectionStringBuilder.ConnectionString))
+            try
             {
-                connection.Open();
-
-                using (var cmd = connection.CreateCommand())
+                using (var connection = new SqliteConnection(connectionStringBuilder.ConnectionString))
                 {
-                    cmd.CommandText = "SELECT * FROM Rent INNER JOIN RentLiving ON Rent.Rent_ID = RentLiving.Rent_ID WHERE Name Like '%" + searchText + "%'";
+                    connection.Open();
 
-                    using (var reader = cmd.ExecuteReader())
+                    using (var cmd = connection.CreateCommand())
                     {
-                        while (reader.Read())
+                        cmd.CommandText = "SELECT * FROM Rent INNER JOIN RentLiving ON Rent.Rent_ID = RentLiving.Rent_ID WHERE Name Like '%" + searchText + "%'";
+
+                        using (var reader = cmd.ExecuteReader())
                         {
+                            while (reader.Read())
+                            {
 
-                            RentLiving rl = new RentLiving(Convert.ToString(reader["Rent_ID"]), Convert.ToString(reader["RentLiving_ID"]));
-                            //rl.Rent_ID = Convert.ToString(reader["Rent_ID"]);
-                            rl.Name = Convert.ToString(reader["Name"]);
-                            //rl.Type = rl.StringToRentType[Convert.ToString(reader["Type"])];
-                            rl.PostalCode = Convert.ToString(reader["PostalCode"]);
-                            rl.Location = Convert.ToString(reader["Location"]);
-                            rl.TrainStation1 = Convert.ToString(reader["TrainStation1"]);
-                            rl.TrainStation2 = Convert.ToString(reader["TrainStation2"]);
+                                RentLiving rl = new RentLiving(Convert.ToString(reader["Rent_ID"]), Convert.ToString(reader["RentLiving_ID"]));
+                                //rl.Rent_ID = Convert.ToString(reader["Rent_ID"]);
+                                rl.Name = Convert.ToString(reader["Name"]);
+                                //rl.Type = rl.StringToRentType[Convert.ToString(reader["Type"])];
+                                rl.PostalCode = Convert.ToString(reader["PostalCode"]);
+                                rl.Location = Convert.ToString(reader["Location"]);
+                                rl.TrainStation1 = Convert.ToString(reader["TrainStation1"]);
+                                rl.TrainStation2 = Convert.ToString(reader["TrainStation2"]);
 
-                            rents.Add(rl);
+                                rents.Add(rl);
 
+                            }
                         }
                     }
                 }
             }
+            catch (System.Reflection.TargetInvocationException ex)
+            {
+                Debug.WriteLine("Opps. TargetInvocationException@DataAccess::GetSearchResultOfRentLiving");
+
+                res.IsError = true;
+                res.Error.ErrType = ErrorObject.ErrTypes.DB;
+                res.Error.ErrCode = 0;
+                res.Error.ErrText = "「" + ex.Message + "」";
+                res.Error.ErrDescription = "賃貸住居用物件の検索結果取得処理でエラーが発生しました。";
+                res.Error.ErrDatetime = DateTime.Now;
+                res.Error.ErrPlace = "TargetInvocationException@DataAccess::GetSearchResultOfRentLiving::connection.Open";
+
+                throw ex.InnerException;
+            }
+            catch (System.InvalidOperationException ex)
+            {
+                Debug.WriteLine("Opps. InvalidOperationException@DataAccess::GetSearchResultOfRentLiving");
+
+                res.IsError = true;
+                res.Error.ErrType = ErrorObject.ErrTypes.DB;
+                res.Error.ErrCode = 0;
+                res.Error.ErrText = "「" + ex.Message + "」";
+                res.Error.ErrDescription = "賃貸住居用物件の検索結果取得処理でエラーが発生しました。";
+                res.Error.ErrDatetime = DateTime.Now;
+                res.Error.ErrPlace = "InvalidOperationException@DataAccess::GetSearchResultOfRentLiving";
+
+                throw ex.InnerException;
+            }
+            catch (Exception e)
+            {
+                res.IsError = true;
+                res.Error.ErrType = ErrorObject.ErrTypes.DB;
+                res.Error.ErrCode = 0;
+
+                if (e.InnerException != null)
+                {
+                    Debug.WriteLine(e.InnerException.Message + " @DataAccess::GetSearchResultOfRentLiving");
+                    res.Error.ErrText = "「" + e.InnerException.Message + "」";
+                }
+                else
+                {
+                    Debug.WriteLine(e.Message + " @DataAccess::GetSearchResultOfRentLiving");
+                    res.Error.ErrText = "「" + e.Message + "」";
+                }
+                res.Error.ErrDescription = "賃貸住居用物件の検索結果取得処理でエラーが発生しました。";
+                res.Error.ErrDatetime = DateTime.Now;
+                res.Error.ErrPlace = "Exception@DataAccess::GetSearchResultOfRentLiving";
+
+            }
+
+
+            return res;
         }
 
-        // 賃貸住居用物件オブジェクトをIDから取得
-        public RentLiving GetRentLivingById(string rentId, string rentLivingId)
+        // 賃貸住居用物件オブジェクトをIDで取得
+        public ResultWrapper RentLivingSelectById(string rentId, string rentLivingId)
         {
+            ResultWrapper res = new ResultWrapper();
+
             RentLiving rl = new RentLiving(rentId, rentLivingId);
-            rl.IsNew = false;
 
             using (var connection = new SqliteConnection(connectionStringBuilder.ConnectionString))
             {
@@ -350,21 +447,38 @@ namespace ZumenSearch
                     {
                         while (reader.Read())
                         {
-
                             RentLivingPicture rlpic = new RentLivingPicture(rentId, rentLivingId, Convert.ToString(reader["RentLivingPicture_ID"]));
 
                             byte[] imageBytes = (byte[])reader["PictureData"];
                             rlpic.PictureData = imageBytes;
 
-                            byte[] imageThumbBytes = (byte[])reader["PictureThumbW200xData"];
-                            rlpic.PictureThumbW200xData = imageThumbBytes;
+                            rlpic.Picture = Methods.BitmapImageFromBytes(imageBytes);
 
+                            byte[] imageThumbBytes = (byte[])reader["PictureThumbData"];
+                            rlpic.PictureThumbData = imageThumbBytes;
+
+                            rlpic.PictureThumb = Methods.BitmapImageFromBytes(imageThumbBytes);
 
                             rlpic.PictureFileExt = Convert.ToString(reader["PictureFileExt"]);
 
-                            rlpic.Picture = Methods.BitmapImageFromBytes(imageThumbBytes);
+                            rlpic.PictureType = Convert.ToString(reader["PictureType"]);
+
+                            rlpic.PictureDescription = Convert.ToString(reader["PictureDescription"]);
+
+                            // test
+                            if (ColumnExists(reader, "PictureIsMain"))
+                            {
+                                var bln = Convert.ToInt32(reader["PictureIsMain"]);
+                                if (bln > 0)
+                                    rlpic.PictureIsMain = true;
+                                else
+                                    rlpic.PictureIsMain = false;
+                            }
 
                             rl.RentLivingPictures.Add(rlpic);
+
+                            rlpic.IsNew = false;
+                            rlpic.IsModified = false;
                         }
                     }
 
@@ -409,7 +523,7 @@ namespace ZumenSearch
                             room.RentLivingSectionPrice = Convert.ToInt32(reader["Price"]);
 
                             room.IsNew = false;
-                            room.IsDirty = false;
+                            room.IsModified = false;
 
                             rl.RentLivingSections.Add(room);
                         }
@@ -428,8 +542,8 @@ namespace ZumenSearch
                                 byte[] imageBytes = (byte[])reader["PictureData"];
                                 rlsecpic.PictureData = imageBytes;
 
-                                byte[] imageThumbBytes = (byte[])reader["PictureThumbW200xData"];
-                                rlsecpic.PictureThumbW200xData = imageThumbBytes;
+                                byte[] imageThumbBytes = (byte[])reader["PictureThumbData"];
+                                rlsecpic.PictureThumbData = imageThumbBytes;
 
 
                                 rlsecpic.PictureFileExt = Convert.ToString(reader["PictureFileExt"]);
@@ -451,24 +565,41 @@ namespace ZumenSearch
             }
 
             // 大事
+            rl.IsNew = false;
             rl.IsDirty = false;
 
-            return rl;
+            res.Data = rl;
 
+            return res;
         }
 
         // 賃貸住居用物件を追加（INSERT）
-        public bool AddRentLiving(RentLiving rl)
+        public ResultWrapper RentLivingInsert(RentLiving rl)
         {
-            Debug.WriteLine("DataAccess:AddRentLiving: " + rl.Name);
+            ResultWrapper res = new ResultWrapper();
 
-            bool result = false;
+            string sqlInsertIntoRent = String.Format(
+                "INSERT INTO Rent " +
+                "(Rent_ID, Name, Type, PostalCode, Location, TrainStation1, TrainStation2) " +
+                "VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}')",
+                rl.RentId, 
+                rl.Name, 
+                rl.Type.ToString(), 
+                rl.PostalCode, 
+                rl.Location, 
+                rl.TrainStation1, 
+                rl.TrainStation2);
 
-            string sqlInsertIntoRent = String.Format("INSERT INTO Rent (Rent_ID, Name, Type, PostalCode, Location, TrainStation1, TrainStation2) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}')",
-                rl.RentId, rl.Name, rl.Type.ToString(), rl.PostalCode, rl.Location, rl.TrainStation1, rl.TrainStation2);
-
-            string sqlInsertIntoRentLiving = String.Format("INSERT INTO RentLiving (RentLiving_ID, Rent_ID, Kind, Floors, FloorsBasement, BuiltYear) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}')",
-                rl.RentLivingId, rl.RentId, rl.Kind.ToString(), rl.Floors, rl.FloorsBasement, rl.BuiltYear);
+            string sqlInsertIntoRentLiving = String.Format(
+                "INSERT INTO RentLiving " +
+                "(RentLiving_ID, Rent_ID, Kind, Floors, FloorsBasement, BuiltYear) " +
+                "VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}')",
+                rl.RentLivingId, 
+                rl.RentId, 
+                rl.Kind.ToString(), 
+                rl.Floors, 
+                rl.FloorsBasement, 
+                rl.BuiltYear);
 
             try
             {
@@ -505,8 +636,8 @@ namespace ZumenSearch
                                     // 新規なので全てIsNewのはずだけど・・・
                                     if (pic.IsNew)
                                     {
-                                        string sqlInsertIntoRentLivingPicture = String.Format("INSERT INTO RentLivingPicture (RentLivingPicture_ID, RentLiving_ID, Rent_ID, PictureData, PictureThumbW200xData, PictureFileExt) VALUES ('{0}', '{1}', '{2}', @0, @1, '{5}')",
-                                            pic.RentPictureId, rl.RentLivingId, rl.RentId, pic.PictureData, pic.PictureThumbW200xData, pic.PictureFileExt);
+                                        string sqlInsertIntoRentLivingPicture = String.Format("INSERT INTO RentLivingPicture (RentLivingPicture_ID, RentLiving_ID, Rent_ID, PictureData, PictureThumbData, PictureFileExt, PictureType, PictureDescription) VALUES ('{0}', '{1}', '{2}', @0, @1, '{5}','{6}','{7}')",
+                                            pic.RentPictureId, rl.RentLivingId, rl.RentId, pic.PictureData, pic.PictureThumbData, pic.PictureFileExt, pic.PictureType, pic.PictureDescription);
 
                                         // 物件画像の追加
                                         cmd.CommandText = sqlInsertIntoRentLivingPicture;
@@ -518,7 +649,7 @@ namespace ZumenSearch
                                         cmd.Parameters.Add(parameter1);
 
                                         SqliteParameter parameter2 = new SqliteParameter("@1", System.Data.DbType.Binary);
-                                        parameter2.Value = pic.PictureThumbW200xData;
+                                        parameter2.Value = pic.PictureThumbData;
                                         cmd.Parameters.Add(parameter2);
 
                                         var r = cmd.ExecuteNonQuery();
@@ -570,7 +701,7 @@ namespace ZumenSearch
                                     if (InsertIntoRentLivingSectionResult > 0)
                                     {
                                         room.IsNew = false;
-                                        room.IsDirty = false;
+                                        room.IsModified = false;
                                     }
 
                                     // 部屋の写真
@@ -578,8 +709,8 @@ namespace ZumenSearch
                                     {
                                         foreach (var roompic in room.RentLivingSectionPictures)
                                         {
-                                            string sqlInsertIntoRentLivingSectionPic = String.Format("INSERT INTO RentLivingSectionPicture (RentLivingSectionPicture_ID, RentLivingSection_ID, RentLiving_ID, Rent_ID, PictureData, PictureThumbW200xData, PictureFileExt) VALUES ('{0}', '{1}', '{2}', '{3}', @0, @1, '{6}')",
-                                                roompic.RentSectionPictureId, roompic.RentLivingSectionId, rl.RentLivingId, rl.RentId, roompic.PictureData, roompic.PictureThumbW200xData, roompic.PictureFileExt);
+                                            string sqlInsertIntoRentLivingSectionPic = String.Format("INSERT INTO RentLivingSectionPicture (RentLivingSectionPicture_ID, RentLivingSection_ID, RentLiving_ID, Rent_ID, PictureData, PictureThumbData, PictureFileExt) VALUES ('{0}', '{1}', '{2}', '{3}', @0, @1, '{6}')",
+                                                roompic.RentSectionPictureId, roompic.RentLivingSectionId, rl.RentLivingId, rl.RentId, roompic.PictureData, roompic.PictureThumbData, roompic.PictureFileExt);
 
                                             cmd.CommandText = sqlInsertIntoRentLivingSectionPic;
                                             // ループなので、前のパラメーターをクリアする。
@@ -590,7 +721,7 @@ namespace ZumenSearch
                                             cmd.Parameters.Add(parameter1);
 
                                             SqliteParameter parameter2 = new SqliteParameter("@1", System.Data.DbType.Binary);
-                                            parameter2.Value = roompic.PictureThumbW200xData;
+                                            parameter2.Value = roompic.PictureThumbData;
                                             cmd.Parameters.Add(parameter2);
 
                                             var InsertIntoRentLivingSectionPicResult = cmd.ExecuteNonQuery();
@@ -608,68 +739,114 @@ namespace ZumenSearch
                             //　コミット
                             cmd.Transaction.Commit();
 
-                            result = true;
+                            res.IsError = false;
                         }
                         catch (Exception e)
                         {
-                            result = false;
+                            res.IsError = true;
 
                             // ロールバック
                             cmd.Transaction.Rollback();
 
-                            // エラーイベント発火
-                            MyError er = new MyError();
-                            er.ErrType = "DB";
-                            er.ErrCode = 0;
-                            er.ErrText = "「" + e.Message + "」";
-                            er.ErrDescription = "賃貸住居用物件の新規追加 (INSERT)で、データベースに追加する処理でエラーが発生し、ロールバックしました。";
-                            er.ErrDatetime = DateTime.Now;
-                            er.ErrPlace = "MainViewModel::RentLivingAddNewCommand_Execute()";
-                            //ErrorOccured?.Invoke(er);
+                            // エラー
+                            res.Error.ErrType = ErrorObject.ErrTypes.DB;
+                            res.Error.ErrCode = 0;
+                            res.Error.ErrText = "「" + e.Message + "」";
+                            res.Error.ErrDescription = "賃貸住居用物件の新規追加 (INSERT)で、データベースに追加する処理でエラーが発生し、ロールバックしました。";
+                            res.Error.ErrDatetime = DateTime.Now;
+                            res.Error.ErrPlace = "@DataAccess::AddRentLiving::Transaction.Commit";
 
-                            Debug.WriteLine(e.Message + " @DataAccess:AddRentLiving:Transaction.Commit");
+                            Debug.WriteLine(e.Message + " @DataAccess::AddRentLiving::Transaction.Commit");
                         }
                     }
                 }
             }
             catch (System.Reflection.TargetInvocationException ex)
             {
-                Debug.WriteLine("Opps. TargetInvocationException@DataAccess:AddRentLiving");
-                result = false;
+                Debug.WriteLine("Opps. TargetInvocationException@DataAccess::AddRentLiving");
+
+                res.IsError = true;
+                res.Error.ErrType = ErrorObject.ErrTypes.DB;
+                res.Error.ErrCode = 0;
+                res.Error.ErrText = "「" + ex.Message + "」";
+                res.Error.ErrDescription = "賃貸住居用物件の新規追加 (INSERT)で、データベースに追加する処理でエラーが発生しました。";
+                res.Error.ErrDatetime = DateTime.Now;
+                res.Error.ErrPlace = "TargetInvocationException@DataAccess::AddRentLiving::connection.Open";
+
                 throw ex.InnerException;
             }
             catch (System.InvalidOperationException ex)
             {
-                Debug.WriteLine("Opps. InvalidOperationException@DataAccess:AddRentLiving");
-                result = false;
+                Debug.WriteLine("Opps. InvalidOperationException@DataAccess::AddRentLiving");
+
+                res.IsError = true;
+                res.Error.ErrType = ErrorObject.ErrTypes.DB;
+                res.Error.ErrCode = 0;
+                res.Error.ErrText = "「" + ex.Message + "」";
+                res.Error.ErrDescription = "賃貸住居用物件の新規追加 (INSERT)で、データベースに追加する処理でエラーが発生しました。";
+                res.Error.ErrDatetime = DateTime.Now;
+                res.Error.ErrPlace = "InvalidOperationException@DataAccess::AddRentLiving::connection.Open";
+
                 throw ex.InnerException;
             }
             catch (Exception e)
             {
+                res.IsError = true;
+                res.Error.ErrType = ErrorObject.ErrTypes.DB;
+                res.Error.ErrCode = 0;
+                
                 if (e.InnerException != null)
                 {
-                    Debug.WriteLine(e.InnerException.Message + " @DataAccess:AddRentLiving");
+                    Debug.WriteLine(e.InnerException.Message + " @DataAccess::AddRentLiving");
+                    res.Error.ErrText = "「" + e.InnerException.Message + "」";
                 }
                 else
                 {
-                    Debug.WriteLine(e.Message + " @DataAccess:AddRentLiving");
+                    Debug.WriteLine(e.Message + " @DataAccess::AddRentLiving");
+                    res.Error.ErrText = "「" + e.Message + "」";
                 }
-                result = false;
+                res.Error.ErrDescription = "賃貸住居用物件の新規追加 (INSERT)で、データベースに追加する処理でエラーが発生しました。";
+                res.Error.ErrDatetime = DateTime.Now;
+                res.Error.ErrPlace = "Exception@DataAccess::AddRentLiving::connection.Open";
             }
 
-            return result;
+            return res;
         }
 
         // 賃貸住居用物件を更新（UPDATE）
-        public void UpdateRentLiving(RentLiving rl)
+        public ResultWrapper RentLivingUpdate(RentLiving rl)
         {
-            Debug.WriteLine("DataAccess:UpdateRentLiving: " + rl.Name);
+            ResultWrapper res = new ResultWrapper();
 
-            string sqlUpdateRent = String.Format("UPDATE Rent SET Name = '{1}', Type = '{2}', PostalCode = '{3}', Location = '{4}', TrainStation1 = '{5}', TrainStation2 = '{6}' WHERE Rent_ID = '{0}'",
-                rl.RentId, rl.Name, rl.Type.ToString(), rl.PostalCode, rl.Location, rl.TrainStation1, rl.TrainStation2);
+            string sqlUpdateRent = String.Format(
+                "UPDATE Rent SET " +
+                    "Name = '{1}', " +
+                    "Type = '{2}', " +
+                    "PostalCode = '{3}', " +
+                    "Location = '{4}', " +
+                    "TrainStation1 = '{5}', " +
+                    "TrainStation2 = '{6}' " +
+                        "WHERE Rent_ID = '{0}'",
+                rl.RentId, 
+                rl.Name, 
+                rl.Type.ToString(), 
+                rl.PostalCode, 
+                rl.Location, 
+                rl.TrainStation1, 
+                rl.TrainStation2);
 
-            string sqlUpdateRentLiving = String.Format("UPDATE RentLiving SET Kind = '{1}', Floors = '{2}', FloorsBasement = '{3}', BuiltYear = '{4}' WHERE RentLiving_ID = '{0}'",
-                rl.RentLivingId, rl.Kind.ToString(), rl.Floors, rl.FloorsBasement, rl.BuiltYear);
+            string sqlUpdateRentLiving = String.Format(
+                "UPDATE RentLiving SET " +
+                    "Kind = '{1}', " +
+                    "Floors = '{2}', " +
+                    "FloorsBasement = '{3}', " +
+                    "BuiltYear = '{4}' " +
+                        "WHERE RentLiving_ID = '{0}'",
+                rl.RentLivingId, 
+                rl.Kind.ToString(), 
+                rl.Floors, 
+                rl.FloorsBasement, 
+                rl.BuiltYear);
 
             // TODO more to come
 
@@ -703,8 +880,8 @@ namespace ZumenSearch
                             {
                                 if (pic.IsNew)
                                 {
-                                    string sqlInsertIntoRentLivingPicture = String.Format("INSERT INTO RentLivingPicture (RentLivingPicture_ID, RentLiving_ID, Rent_ID, PictureData, PictureThumbW200xData, PictureFileExt) VALUES ('{0}', '{1}', '{2}', @0, @1, '{5}')",
-                                        pic.RentPictureId, rl.RentLivingId, rl.RentId, pic.PictureData, pic.PictureThumbW200xData, pic.PictureFileExt);
+                                    string sqlInsertIntoRentLivingPicture = String.Format("INSERT INTO RentLivingPicture (RentLivingPicture_ID, RentLiving_ID, Rent_ID, PictureData, PictureThumbData, PictureFileExt, PictureType, PictureDescription) VALUES ('{0}', '{1}', '{2}', @0, @1, '{5}', '{6}', '{7}')",
+                                        pic.RentPictureId, rl.RentLivingId, rl.RentId, pic.PictureData, pic.PictureThumbData, pic.PictureFileExt, pic.PictureType, pic.PictureDescription);
 
                                     // 物件画像の追加
                                     cmd.CommandText = sqlInsertIntoRentLivingPicture;
@@ -716,7 +893,7 @@ namespace ZumenSearch
                                     cmd.Parameters.Add(parameter1);
 
                                     SqliteParameter parameter2 = new SqliteParameter("@1", System.Data.DbType.Binary);
-                                    parameter2.Value = pic.PictureThumbW200xData;
+                                    parameter2.Value = pic.PictureThumbData;
                                     cmd.Parameters.Add(parameter2);
 
                                     result = cmd.ExecuteNonQuery();
@@ -728,8 +905,8 @@ namespace ZumenSearch
                                 }
                                 else if (pic.IsModified)
                                 {
-                                    string sqlUpdateRentLivingPicture = String.Format("UPDATE RentLivingPicture SET PictureData = @0, PictureThumbW200xData = @1, PictureFileExt = '{5}' WHERE RentLivingPicture_ID = '{0}'",
-                                        pic.RentPictureId, rl.RentLivingId, rl.RentId, pic.PictureData, pic.PictureThumbW200xData, pic.PictureFileExt);
+                                    string sqlUpdateRentLivingPicture = String.Format("UPDATE RentLivingPicture SET PictureData = @0, PictureThumbData = @1, PictureFileExt = '{5}', PictureType = '{6}', PictureDescription = '{7}' WHERE RentLivingPicture_ID = '{0}'",
+                                        pic.RentPictureId, rl.RentLivingId, rl.RentId, pic.PictureData, pic.PictureThumbData, pic.PictureFileExt, pic.PictureType, pic.PictureDescription);
 
                                     // 物件画像の更新
                                     cmd.CommandText = sqlUpdateRentLivingPicture;
@@ -741,7 +918,7 @@ namespace ZumenSearch
                                     cmd.Parameters.Add(parameter1);
 
                                     SqliteParameter parameter2 = new SqliteParameter("@1", System.Data.DbType.Binary);
-                                    parameter2.Value = pic.PictureThumbW200xData;
+                                    parameter2.Value = pic.PictureThumbData;
                                     cmd.Parameters.Add(parameter2);
 
                                     result = cmd.ExecuteNonQuery();
@@ -853,7 +1030,7 @@ namespace ZumenSearch
                                     if (InsertIntoRentLivingSectionResult > 0)
                                     {
                                         room.IsNew = false;
-                                        room.IsDirty = false;
+                                        room.IsModified = false;
                                     }
                                 }
                                 // TODO:
@@ -869,7 +1046,7 @@ namespace ZumenSearch
                                     if (UpdateoRentLivingSectionResult > 0)
                                     {
                                         //room.IsNew = false;
-                                        room.IsDirty = false;
+                                        room.IsModified = false;
                                     }
                                 }
 
@@ -880,8 +1057,8 @@ namespace ZumenSearch
                                     {
                                         if (roompic.IsNew)
                                         {
-                                            string sqlInsertIntoRentLivingSectionPic = String.Format("INSERT INTO RentLivingSectionPicture (RentLivingSectionPicture_ID, RentLivingSection_ID, RentLiving_ID, Rent_ID, PictureData, PictureThumbW200xData, PictureFileExt) VALUES ('{0}', '{1}', '{2}', '{3}', @0, @1, '{6}')",
-                                                roompic.RentSectionPictureId, roompic.RentLivingSectionId, roompic.RentLivingId, roompic.RentId, roompic.PictureData, roompic.PictureThumbW200xData, roompic.PictureFileExt);
+                                            string sqlInsertIntoRentLivingSectionPic = String.Format("INSERT INTO RentLivingSectionPicture (RentLivingSectionPicture_ID, RentLivingSection_ID, RentLiving_ID, Rent_ID, PictureData, PictureThumbData, PictureFileExt) VALUES ('{0}', '{1}', '{2}', '{3}', @0, @1, '{6}')",
+                                                roompic.RentSectionPictureId, roompic.RentLivingSectionId, roompic.RentLivingId, roompic.RentId, roompic.PictureData, roompic.PictureThumbData, roompic.PictureFileExt);
 
                                             cmd.CommandText = sqlInsertIntoRentLivingSectionPic;
                                             // ループなので、前のパラメーターをクリアする。
@@ -892,7 +1069,7 @@ namespace ZumenSearch
                                             cmd.Parameters.Add(parameter1);
 
                                             SqliteParameter parameter2 = new SqliteParameter("@1", System.Data.DbType.Binary);
-                                            parameter2.Value = roompic.PictureThumbW200xData;
+                                            parameter2.Value = roompic.PictureThumbData;
                                             cmd.Parameters.Add(parameter2);
 
                                             var InsertIntoRentLivingSectionPicResult = cmd.ExecuteNonQuery();
@@ -904,8 +1081,8 @@ namespace ZumenSearch
                                         }
                                         else if (roompic.IsModified)
                                         {
-                                            string sqlUpdateRentLivingSectionPic = String.Format("UPDATE RentLivingSectionPicture SET PictureData = @0, PictureThumbW200xData = @1, PictureFileExt = '{6}' WHERE RentLivingSectionPicture_ID = '{0}'",
-                                                roompic.RentSectionPictureId, roompic.RentLivingSectionId, roompic.RentLivingId, roompic.RentId, roompic.PictureData, roompic.PictureThumbW200xData, roompic.PictureFileExt);
+                                            string sqlUpdateRentLivingSectionPic = String.Format("UPDATE RentLivingSectionPicture SET PictureData = @0, PictureThumbData = @1, PictureFileExt = '{6}' WHERE RentLivingSectionPicture_ID = '{0}'",
+                                                roompic.RentSectionPictureId, roompic.RentLivingSectionId, roompic.RentLivingId, roompic.RentId, roompic.PictureData, roompic.PictureThumbData, roompic.PictureFileExt);
 
                                             cmd.CommandText = sqlUpdateRentLivingSectionPic;
                                             // ループなので、前のパラメーターをクリアする。
@@ -916,7 +1093,7 @@ namespace ZumenSearch
                                             cmd.Parameters.Add(parameter1);
 
                                             SqliteParameter parameter2 = new SqliteParameter("@1", System.Data.DbType.Binary);
-                                            parameter2.Value = roompic.PictureThumbW200xData;
+                                            parameter2.Value = roompic.PictureThumbData;
                                             cmd.Parameters.Add(parameter2);
 
                                             var UpdateRentLivingSectionPicResult = cmd.ExecuteNonQuery();
@@ -983,28 +1160,29 @@ namespace ZumenSearch
                     }
                     catch (Exception e)
                     {
+                        // ロールバック
                         cmd.Transaction.Rollback();
 
-                        System.Diagnostics.Debug.WriteLine(e.Message + " @MainViewModel::RentLivingUpdateCommand_Execute()");
+                        // エラー
+                        res.IsError = true;
+                        res.Error.ErrType = ErrorObject.ErrTypes.DB;
+                        res.Error.ErrCode = 0;
+                        res.Error.ErrText = "「" + e.Message + "」";
+                        res.Error.ErrDescription = "賃貸住居用物件の編集更新 (UPDATE)で、データベースを更新する処理でエラーが発生し、ロールバックしました。";
+                        res.Error.ErrDatetime = DateTime.Now;
+                        res.Error.ErrPlace = "@DataAccess::UpdateRentLiving::Transaction.Commit";
 
-                        // エラーイベント発火
-                        MyError er = new MyError();
-                        er.ErrType = "DB";
-                        er.ErrCode = 0;
-                        er.ErrText = "「" + e.Message + "」";
-                        er.ErrDescription = "賃貸住居用物件の選択アイテム編集更新 (UPDATE)で、データベースを更新する処理でエラーが発生し、ロールバックしました。";
-                        er.ErrDatetime = DateTime.Now;
-                        er.ErrPlace = "MainViewModel::RentLivingUpdateCommand_Execute()";
-                        //ErrorOccured?.Invoke(er);
                     }
                 }
             }
+
+            return res;
         }
 
         // 賃貸住居用物件を削除（DELETE）
-        public void DeleteRentLiving(string rentId)
+        public ResultWrapper RentLivingDelete(string rentId)
         {
-            // 選択アイテムのデータを削除
+            ResultWrapper res = new ResultWrapper();
 
             string sqlRentTable = String.Format("DELETE FROM Rent WHERE Rent_ID = '{0}'", rentId);
 
@@ -1031,27 +1209,36 @@ namespace ZumenSearch
 
                         cmd.Transaction.Commit();
 
-
-
                     }
                     catch (Exception e)
                     {
                         cmd.Transaction.Rollback();
 
-                        Debug.WriteLine(e.Message + " @RentLivingDeleteCommand_Execute()");
+                        // エラー
+                        res.IsError = true;
+                        res.Error.ErrType = ErrorObject.ErrTypes.DB;
+                        res.Error.ErrCode = 0;
+                        res.Error.ErrText = "「" + e.Message + "」";
+                        res.Error.ErrDescription = "賃貸住居用物件の選択アイテム削除（DELETE）で、データベースを更新する処理でエラーが発生し、ロールバックしました。";
+                        res.Error.ErrDatetime = DateTime.Now;
+                        res.Error.ErrPlace = "@DataAccess::DeleteRentLiving::Transaction.Commit";
 
-                        // エラーイベント発火
-                        MyError er = new MyError();
-                        er.ErrType = "DB";
-                        er.ErrCode = 0;
-                        er.ErrText = "「" + e.Message + "」";
-                        er.ErrDescription = "賃貸住居用物件の選択アイテム削除（DELETE）で、データベースを更新する処理でエラーが発生し、ロールバックしました。";
-                        er.ErrDatetime = DateTime.Now;
-                        er.ErrPlace = "MainViewModel::RentLivingDeleteCommand_Execute()";
-                        //ErrorOccured?.Invoke(er);
                     }
                 }
             }
+
+            return res;
+        }
+
+        // Column存在チェック
+        public bool ColumnExists(IDataRecord dr, string columnName)
+        {
+            for (int i = 0; i < dr.FieldCount; i++)
+            {
+                if (dr.GetName(i).Equals(columnName, StringComparison.InvariantCultureIgnoreCase))
+                    return true;
+            }
+            return false; ;
         }
 
     }

@@ -11,7 +11,6 @@ using System.IO;
 using ZumenSearch.Models;
 using ZumenSearch.ViewModels;
 using ZumenSearch.ViewModels.Classes;
-using ZumenSearch.Models.Classes;
 using ZumenSearch.Views;
 using ZumenSearch.Common;
 

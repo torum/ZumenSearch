@@ -20,7 +20,7 @@ using System.Diagnostics;
 using ZumenSearch.ViewModels;
 using ZumenSearch.Views;
 using ZumenSearch.ViewModels.Classes;
-using ZumenSearch.Models.Classes;
+using ZumenSearch.Models;
 
 namespace ZumenSearch.Views
 {
@@ -47,14 +47,87 @@ namespace ZumenSearch.Views
                     App app = App.Current as App;
                     if (app != null)
                     {
-                        vm.OpenRentLivingWindow += (sender, arg) => { this.OpenRentLivingWindow(arg); };
+                        vm.OpenRentLivingBuildingWindow += (sender, arg) => { this.OpenRentLivingBuildingWindow(arg); };
 
                     }
                 }
             }
         }
 
-        public void OpenRentLivingWindow(OpenRentLivingWindowEventArgs arg)
+        // 二重起動防止処理からの復帰
+        public void BringToForeground()
+        {
+            if (this.WindowState == WindowState.Minimized || this.Visibility == Visibility.Hidden)
+            {
+                this.Show();
+                this.WindowState = WindowState.Normal;
+            }
+
+            this.Activate();
+            this.Topmost = true;
+            this.Topmost = false;
+            this.Focus();
+        }
+
+        // Windowロード時の処理
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            if ((Properties.Settings.Default.MainWindow_Width != 0))
+            {
+                this.Width = Properties.Settings.Default.MainWindow_Width;
+            }
+
+            if ((Properties.Settings.Default.MainWindow_Height != 0))
+            {
+                this.Height = Properties.Settings.Default.MainWindow_Height;
+            }
+
+            if ((Properties.Settings.Default.MainWindow_Left >= 0))
+            {
+                this.Left = Properties.Settings.Default.MainWindow_Left;
+            }
+            else
+            {
+                this.Left = 0;
+            }
+
+            if ((Properties.Settings.Default.MainWindow_Top >= 0))
+            {
+                this.Top = Properties.Settings.Default.MainWindow_Top;
+            }
+            else
+            {
+                this.Top = 0;
+            }
+
+            if (Properties.Settings.Default.MainWindow_Maximized)
+            {
+                this.WindowState = WindowState.Maximized;
+            }
+        }
+
+        // Windowクローズ時の処理
+        private void Window_Closing(object sender, CancelEventArgs e)
+        {
+            if (this.WindowState == WindowState.Normal)
+            {
+                Properties.Settings.Default.MainWindow_Left = this.Left;
+                Properties.Settings.Default.MainWindow_Top = this.Top;
+                Properties.Settings.Default.MainWindow_Height = this.Height;
+                Properties.Settings.Default.MainWindow_Width = this.Width;
+
+                Properties.Settings.Default.MainWindow_Maximized = false;
+            }
+            else if (this.WindowState == WindowState.Maximized)
+            {
+                Properties.Settings.Default.MainWindow_Maximized = true;
+            }
+
+            Properties.Settings.Default.Save();
+        }
+
+        // 建物 Windowの表示
+        public void OpenRentLivingBuildingWindow(OpenRentLivingBuildingWindowEventArgs arg)
         {
             if (arg == null)
                 return;
@@ -62,7 +135,7 @@ namespace ZumenSearch.Views
             if (String.IsNullOrEmpty(arg.Id))
                 return;
 
-            if (arg.EditObject == null)
+            if (arg.RentLivingObject == null)
                 return;
 
             string id = arg.Id;
@@ -71,55 +144,57 @@ namespace ZumenSearch.Views
 
             foreach (var w in app.WindowList)
             {
-                if (!(w is RentLivingWindow))
+                if (!(w is RentLivingBuildingWindow))
                     continue;
 
-                if ((w as RentLivingWindow).DataContext == null)
+                if ((w as RentLivingBuildingWindow).DataContext == null)
                     continue;
 
-                if (!((w as RentLivingWindow).DataContext is RentLivingViewModel))
+                if (!((w as RentLivingBuildingWindow).DataContext is RentLivingBuildingViewModel))
                     continue;
 
-                if (id == ((w as RentLivingWindow).DataContext as RentLivingViewModel).Id)
+                if (id == ((w as RentLivingBuildingWindow).DataContext as RentLivingBuildingViewModel).Id)
                 {
                     //w.Activate();
 
-                    if ((w as RentLivingWindow).WindowState == WindowState.Minimized || (w as Window).Visibility == Visibility.Hidden)
+                    if ((w as RentLivingBuildingWindow).WindowState == WindowState.Minimized || (w as Window).Visibility == Visibility.Hidden)
                     {
                         //w.Show();
-                        (w as RentLivingWindow).Visibility = Visibility.Visible;
-                        (w as RentLivingWindow).WindowState = WindowState.Normal;
+                        (w as RentLivingBuildingWindow).Visibility = Visibility.Visible;
+                        (w as RentLivingBuildingWindow).WindowState = WindowState.Normal;
                     }
 
-                    (w as RentLivingWindow).Activate();
+                    (w as RentLivingBuildingWindow).Activate();
                     //(w as EditorWindow).Topmost = true;
                     //(w as EditorWindow).Topmost = false;
-                    (w as RentLivingWindow).Focus();
+                    (w as RentLivingBuildingWindow).Focus();
 
                     return;
                 }
             }
 
             // Create a new window.
-            if (arg.EditObject is RentLiving)
+            if (arg.RentLivingObject is RentLiving)
             {
                 // Windowを生成
-                var win = new RentLivingWindow();
+                var win = new RentLivingBuildingWindow();
 
                 // ViewModelを設定
-                win.DataContext = new RentLivingViewModel(id);
+                win.DataContext = new RentLivingBuildingViewModel(id);
 
                 // 設定したViewModelを変数に代入
-                var vm = win.DataContext as RentLivingViewModel;
+                var vm = win.DataContext as RentLivingBuildingViewModel;
 
                 // 編集用の賃貸住居用物件を設定
-                vm.RentLivingEdit = (arg.EditObject as RentLiving);
+                vm.RentLivingEdit = (arg.RentLivingObject as RentLiving);
 
                 // データアクセスのモジュールを編集画面に渡す。
                 vm.DataAccessModule = arg.DataAccessModule;
 
                 // 部屋編集用のWindowを表示させるイベントをサブスクライブする設定
                 vm.OpenRentLivingSectionWindow += (sender, arg) => { win.OpenRentLivingSectionWindow(arg); };
+                // 画像編集用のWindowを表示させるイベントをサブスクライブする設定
+                vm.OpenRentLivingImagesWindow += (sender, arg) => { win.OpenRentLivingImagesWindow(arg); };
 
                 // 編集画面終了時の保存確認後の閉じるアクションを設定
                 //vm.CloseAction = new Action(win.Close);
@@ -139,24 +214,6 @@ namespace ZumenSearch.Views
                 //win.Activate();
             }
         }
-
-        #region == 二重起動防止処理からの復帰 ==
-
-        public void BringToForeground()
-        {
-            if (this.WindowState == WindowState.Minimized || this.Visibility == Visibility.Hidden)
-            {
-                this.Show();
-                this.WindowState = WindowState.Normal;
-            }
-
-            this.Activate();
-            this.Topmost = true;
-            this.Topmost = false;
-            this.Focus();
-        }
-
-        #endregion
 
         #region == デフォのウィンドウ関連 ==
 
@@ -319,48 +376,5 @@ namespace ZumenSearch.Views
             }
         }
 
-        private void Window_Loaded(object sender, RoutedEventArgs e)
-        {
-            if ((Properties.Settings.Default.MainWindow_Width != 0) && (Properties.Settings.Default.MainWindow_Height != 0))
-            {
-                this.Width = Properties.Settings.Default.MainWindow_Width;
-                this.Height = Properties.Settings.Default.MainWindow_Height;
-            }
-
-            if ((Properties.Settings.Default.MainWindow_Left >= 0) && (Properties.Settings.Default.MainWindow_Top >= 0))
-            {
-                this.Left = Properties.Settings.Default.MainWindow_Left;
-                this.Top = Properties.Settings.Default.MainWindow_Top;
-            }
-            else
-            {
-                this.Left = 0;
-                this.Top = 0;
-            }
-
-            if (Properties.Settings.Default.MainWindow_Maximized)
-            {
-                this.WindowState = WindowState.Maximized;
-            }
-        }
-
-        private void Window_Closing(object sender, CancelEventArgs e)
-        {
-            if (this.WindowState == WindowState.Normal)
-            {
-                Properties.Settings.Default.MainWindow_Left = this.Left;
-                Properties.Settings.Default.MainWindow_Top = this.Top;
-                Properties.Settings.Default.MainWindow_Height = this.Height;
-                Properties.Settings.Default.MainWindow_Width = this.Width;
-
-                Properties.Settings.Default.MainWindow_Maximized = false;
-            }
-            else if (this.WindowState == WindowState.Maximized)
-            {
-                Properties.Settings.Default.MainWindow_Maximized = true;
-            }
-
-            Properties.Settings.Default.Save();
-        }
     }
 }

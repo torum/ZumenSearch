@@ -20,7 +20,6 @@ using Microsoft.Data.Sqlite;
 using ZumenSearch.Models;
 using ZumenSearch.ViewModels;
 using ZumenSearch.ViewModels.Classes;
-using ZumenSearch.Models.Classes;
 using ZumenSearch.Views;
 using ZumenSearch.Common;
 
@@ -38,6 +37,7 @@ using ZumenSearch.Common;
 /// Modelsに基底クラス定義やデータ操作をリストラクチャー。
 
 /// ● 履歴：
+/// v0.0.0.16 画像編集Windowを追加し、画像の追加、一覧、編集、削除のサイクルは一旦完了。PDF画面途中。部屋編集画面と保存の流れを変更。他。
 /// v0.0.0.15 MAXIMIZE時のタスクバー被りのFix
 /// v0.0.0.14 ステータスバー追加等、もろもろ
 /// v0.0.0.13 もろもろ
@@ -63,7 +63,7 @@ namespace ZumenSearch.ViewModels
         #region == 基本 ==
 
         // Application version.
-        private const string _appVer = "0.0.0.15";
+        private const string _appVer = "0.0.0.16";
 
         // Application name.
         private const string _appName = "ZumenSearch";
@@ -949,7 +949,7 @@ namespace ZumenSearch.ViewModels
 
         #endregion
 
-        #region == エラー通知やログ関連 ==
+        #region == エラー関連のプロパティ ==
 
         private StringBuilder _errorText = new StringBuilder();
         public string ErrorText
@@ -966,15 +966,15 @@ namespace ZumenSearch.ViewModels
         }
 
         // エラーのリスト TODO: ログ保存
-        private ObservableCollection<MyError> _errors = new ObservableCollection<MyError>();
-        public ObservableCollection<MyError> Errors
+        private ObservableCollection<ErrorObject> _errors = new ObservableCollection<ErrorObject>();
+        public ObservableCollection<ErrorObject> Errors
         {
             get { return this._errors; }
         }
 
         #endregion
 
-        #region == ダイアログ（サービス） ==
+        #region == ダイアログ ==
 
         // サービスのインジェクションは・・・とりあえずしない。
         //private IOpenDialogService openDialogService;
@@ -1019,85 +1019,45 @@ namespace ZumenSearch.ViewModels
 
         #endregion
 
-        //
-        public event EventHandler<OpenRentLivingWindowEventArgs> OpenRentLivingWindow;
+        #region == イベント ==
+
+        // エラー通知イベント
+        public delegate void MyErrorEvent(ErrorObject err);
+        public event MyErrorEvent ErrorOccured;
+
+        // 物件編集画面表示イベント
+        public event EventHandler<OpenRentLivingBuildingWindowEventArgs> OpenRentLivingBuildingWindow;
+
+        #endregion
 
         public MainViewModel()
         {
+            #region == イベントへのサブスクライブ ==
+
+            ErrorOccured += new MyErrorEvent(OnError);
+
+            #endregion
+
             #region == コマンドのイニシャライズ ==
 
+            // ホーム検索
             HomeSearchExecCommand = new RelayCommand(HomeSearchExecCommand_Execute, HomeSearchExecCommand_CanExecute);
 
-            // RL 管理検索
+            // RL検索
             RentLivingEditSearchCommand = new RelayCommand(RentLivingEditSearchCommand_Execute, RentLivingEditSearchCommand_CanExecute);
-            // RL 管理一覧
+            // RL一覧
             RentLivingEditListCommand = new RelayCommand(RentLivingEditListCommand_Execute, RentLivingEditListCommand_CanExecute);
             // RL 検索条件画面に戻る
             RentLivingSearchBackCommand = new RelayCommand(RentLivingSearchBackCommand_Execute, RentLivingSearchBackCommand_CanExecute);
 
-            // RL 管理一覧選択表示
-            RentLivingEditSelectedViewCommand = new RelayCommand(RentLivingEditSelectedViewCommand_Execute, RentLivingEditSelectedViewCommand_CanExecute);
-            // RL 管理一覧選択削除
-            RentLivingEditSelectedDeleteCommand = new RelayCommand(RentLivingEditSelectedDeleteCommand_Execute, RentLivingEditSelectedDeleteCommand_CanExecute);
-
-
-            // RL 管理新規物件
-            RentLivingNewCommand = new RelayCommand(RentLivingNewCommand_Execute, RentLivingNewCommand_CanExecute);
-            RentLivingNewAddCommand = new RelayCommand(RentLivingNewAddCommand_Execute, RentLivingNewAddCommand_CanExecute);
-
-            // RL 管理新規画像追加と削除
-            RentLivingNewPictureAddCommand = new RelayCommand(RentLivingNewPictureAddCommand_Execute, RentLivingNewPictureAddCommand_CanExecute);
-            RentLivingNewPictureDeleteCommand = new GenericRelayCommand<object>(
-                param => RentLivingNewPictureDeleteCommand_Execute(param),
-                param => RentLivingNewPictureDeleteCommand_CanExecute());
-
-            // RL 管理新規　PDF追加と削除
-            RentLivingNewZumenPdfAddCommand = new RelayCommand(RentLivingNewZumenPdfAddCommand_Execute, RentLivingNewZumenPdfAddCommand_CanExecute);
-            RentLivingNewZumenPdfDeleteCommand = new GenericRelayCommand<object>(
-                param => RentLivingNewZumenPdfDeleteCommand_Execute(param),
-                param => RentLivingNewZumenPdfDeleteCommand_CanExecute());
-            // 表示
-            RentLivingNewZumenPdfShowCommand = new GenericRelayCommand<object>(
-                param => RentLivingNewZumenPdfShowCommand_Execute(param),
-                param => RentLivingNewZumenPdfShowCommand_CanExecute());
-            // 
-            RentLivingNewZumenPdfEnterCommand = new GenericRelayCommand<RentZumenPDF>(
-                param => RentLivingNewZumenPdfEnterCommand_Execute(param),
-                param => RentLivingNewZumenPdfEnterCommand_CanExecute());
-
-            // RL 管理新規 部屋新規
-            RentLivingNewSectionNewCommand = new RelayCommand(RentLivingNewSectionNewCommand_Execute, RentLivingNewSectionNewCommand_CanExecute);
-            RentLivingNewSectionNewCancelCommand = new RelayCommand(RentLivingNewSectionNewCancelCommand_Execute, RentLivingNewSectionNewCancelCommand_CanExecute);
-            RentLivingNewSectionAddCommand = new RelayCommand(RentLivingNewSectionAddCommand_Execute, RentLivingNewSectionAddCommand_CanExecute);
-            // RL 管理新規 部屋編集
-            RentLivingNewSectionEditCommand = new RelayCommand(RentLivingNewSectionEditCommand_Execute, RentLivingNewSectionEditCommand_CanExecute);
-            RentLivingNewSectionEditCancelCommand = new RelayCommand(RentLivingNewSectionEditCancelCommand_Execute, RentLivingNewSectionEditCancelCommand_CanExecute);
-            RentLivingNewSectionUpdateCommand = new RelayCommand(RentLivingNewSectionUpdateCommand_Execute, RentLivingNewSectionUpdateCommand_CanExecute);
-
-            // RL 管理新規 部屋複製と削除
-            RentLivingNewSectionDuplicateCommand = new RelayCommand(RentLivingNewSectionDuplicateCommand_Execute, RentLivingNewSectionDuplicateCommand_CanExecute);
-            RentLivingNewSectionDeleteCommand = new RelayCommand(RentLivingNewSectionDeleteCommand_Execute, RentLivingNewSectionDeleteCommand_CanExecute);
-
-            // RL 管理新規　新規部屋の画像追加と削除
-            RentLivingNewSectionNewPictureAddCommand = new RelayCommand(RentLivingNewSectionNewPictureAddCommand_Execute, RentLivingNewSectionNewPictureAddCommand_CanExecute);
-            RentLivingNewSectionNewPictureDeleteCommand = new GenericRelayCommand<object>(
-                param => RentLivingNewSectionNewPictureDeleteCommand_Execute(param),
-                param => RentLivingNewSectionNewPictureDeleteCommand_CanExecute());
-            // RL 管理新規　編集部屋の画像追加と削除
-            RentLivingNewSectionEditPictureAddCommand = new RelayCommand(RentLivingNewSectionEditPictureAddCommand_Execute, RentLivingNewSectionEditPictureAddCommand_CanExecute);
-            RentLivingNewSectionEditPictureDeleteCommand = new GenericRelayCommand<object>(
-                param => RentLivingNewSectionEditPictureDeleteCommand_Execute(param),
-                param => RentLivingNewSectionEditPictureDeleteCommand_CanExecute());
-
-
-
-            // RL 管理一覧選択編集
+            // RL新規
+            RentLivingEditNewCommand = new RelayCommand(RentLivingEditNewCommand_Execute, RentLivingEditNewCommand_CanExecute);
+            // RL編集
             RentLivingEditSelectedEditCommand = new RelayCommand(RentLivingEditSelectedEditCommand_Execute, RentLivingEditSelectedEditCommand_CanExecute);
-            
-            //
-            //RentLivingEditSelectedEditUpdateCommand = new RelayCommand(RentLivingEditSelectedEditUpdateCommand_Execute, RentLivingEditSelectedEditUpdateCommand_CanExecute);
-
-
+            // RL表示
+            RentLivingEditSelectedViewCommand = new RelayCommand(RentLivingEditSelectedViewCommand_Execute, RentLivingEditSelectedViewCommand_CanExecute);
+            // RL削除
+            RentLivingEditSelectedDeleteCommand = new RelayCommand(RentLivingEditSelectedDeleteCommand_Execute, RentLivingEditSelectedDeleteCommand_CanExecute);
 
 
             // 元付け業者
@@ -1134,21 +1094,24 @@ namespace ZumenSearch.ViewModels
 
             #region == SQLite DB のイニシャライズ ==
 
+            // DBのファイルパスを設定（TODO）
             var dataBaseFilePath = System.Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + System.IO.Path.DirectorySeparatorChar + _appName + ".db";
             
-            dataAccessModule.InitializeDatabase(dataBaseFilePath);
+            // SQLite DB のイニシャライズ
+            ResultWrapper res = dataAccessModule.InitializeDatabase(dataBaseFilePath);
+            if (res.IsError)
+            {
+                // エラーの通知
+                ErrorOccured?.Invoke(res.Error);
 
-            #endregion
-
-            #region == イベントへのサブスクライブ ==
-
-            ErrorOccured += new MyErrorEvent(OnError);
+                return;
+            }
 
             #endregion
 
         }
 
-        #region == イベント ==
+        #region == イベントの実装 ==
 
         // 起動時の処理
         public void OnWindowLoaded(object sender, RoutedEventArgs e)
@@ -1358,29 +1321,29 @@ namespace ZumenSearch.ViewModels
             // Now, use "app.Windows" this time.
             foreach (var w in app.Windows)
             {
-                if (w is RentLivingSectionWindow)
+                if (w is RentLivingRoomWindow)
                 {
-                    if ((w as RentLivingSectionWindow).DataContext == null)
+                    if ((w as RentLivingRoomWindow).DataContext == null)
                         continue;
 
-                    if (!((w as RentLivingSectionWindow).DataContext is RentLivingSectionViewModel))
+                    if (!((w as RentLivingRoomWindow).DataContext is RentLivingRoomViewModel))
                         continue;
 
-                    (w as RentLivingSectionWindow).Close();
+                    (w as RentLivingRoomWindow).Close();
                 }
             }
 
             foreach (var w in app.Windows)
             {
-                if (w is RentLivingWindow)
+                if (w is RentLivingBuildingWindow)
                 {
-                    if ((w as RentLivingWindow).DataContext == null)
+                    if ((w as RentLivingBuildingWindow).DataContext == null)
                         continue;
 
-                    if (!((w as RentLivingWindow).DataContext is RentLivingViewModel))
+                    if (!((w as RentLivingBuildingWindow).DataContext is RentLivingBuildingViewModel))
                         continue;
 
-                    (w as RentLivingWindow).Close();
+                    (w as RentLivingBuildingWindow).Close();
                 }
 
             }
@@ -1407,13 +1370,8 @@ namespace ZumenSearch.ViewModels
 
         }
 
-        #region == エラーイベント ==
-
-        public delegate void MyErrorEvent(MyError err);
-        public event MyErrorEvent ErrorOccured;
-
         // エラーイベントの実装
-        private void OnError(MyError err)
+        private void OnError(ErrorObject err)
         {
             if (err == null) { return; }
 
@@ -1423,15 +1381,13 @@ namespace ZumenSearch.ViewModels
                 // リストに追加。TODO：あとあとログ保存等
                 _errors.Insert(0, err);
 
-                ErrorText = String.Format("エラー：{3}、エラー内容 {4}、 タイプ {1}、発生箇所 {2}、発生時刻 {0}", err.ErrDatetime.ToString(), err.ErrType, err.ErrPlace, err.ErrText, err.ErrDescription);
+                ErrorText = String.Format("エラー：{3}、エラー内容 {4}、 タイプ {1}、発生箇所 {2}、発生時刻 {0}", err.ErrDatetime.ToString(), err.ErrType.ToString(), err.ErrPlace, err.ErrText, err.ErrDescription);
 
             });
 
             // エラーの表示
             ShowErrorDialog = true;
         }
-
-        #endregion
 
         #endregion
 
@@ -1451,7 +1407,7 @@ namespace ZumenSearch.ViewModels
 
         #endregion
 
-        #region == 賃貸住居用 物件管理 ==
+        #region == 賃貸住居用 物件検索・編集 ==
 
         // 検索
         public ICommand RentLivingEditSearchCommand { get; }
@@ -1477,8 +1433,15 @@ namespace ZumenSearch.ViewModels
             RentLivingSearchTabSelectedIndex = 1;
 
             // 検索結果一覧を取得
-            dataAccessModule.GetSearchResultOfRentLiving(Rents, RentLivingEditSearchText);
+            ResultWrapper res = dataAccessModule.RentLivingSearch(Rents, RentLivingEditSearchText);
 
+            if (res.IsError)
+            {
+                // エラーの通知
+                ErrorOccured?.Invoke(res.Error);
+
+                return;
+            }
         }
 
         // 一覧
@@ -1496,9 +1459,15 @@ namespace ZumenSearch.ViewModels
             RentLivingSearchTabSelectedIndex = 1;
 
             // 一覧を取得
-            dataAccessModule.GetListOfRentLiving(Rents);
+            ResultWrapper res = dataAccessModule.RentLivingList(Rents);
+            
+            if (res.IsError)
+            {
+                // エラーの通知
+                ErrorOccured?.Invoke(res.Error);
 
-            //TODO: エラー取得して、エラーを通知。
+                return;
+            }
         }
 
         // 検索へ戻る
@@ -1517,12 +1486,12 @@ namespace ZumenSearch.ViewModels
         }
 
         // 新規追加（編集画面表示）
-        public ICommand RentLivingNewCommand { get; }
-        public bool RentLivingNewCommand_CanExecute()
+        public ICommand RentLivingEditNewCommand { get; }
+        public bool RentLivingEditNewCommand_CanExecute()
         {
             return true;
         }
-        public void RentLivingNewCommand_Execute()
+        public void RentLivingEditNewCommand_Execute()
         {
             // 編集用の賃貸住居用物件オブジェクトを用意
             RentLiving rl = new RentLiving(Guid.NewGuid().ToString(), Guid.NewGuid().ToString())
@@ -1531,15 +1500,15 @@ namespace ZumenSearch.ViewModels
             };
 
             // 編集画面に渡すEventArgsを用意
-            OpenRentLivingWindowEventArgs ag = new OpenRentLivingWindowEventArgs
+            OpenRentLivingBuildingWindowEventArgs ag = new OpenRentLivingBuildingWindowEventArgs
             {
                 Id = rl.RentLivingId,
-                EditObject = rl,
+                RentLivingObject = rl,
                 DataAccessModule = this.dataAccessModule
             };
 
             // 画面表示イベント発火
-            OpenRentLivingWindow?.Invoke(this, ag);
+            OpenRentLivingBuildingWindow?.Invoke(this, ag);
         }
 
         // 編集（編集画面表示）
@@ -1561,23 +1530,35 @@ namespace ZumenSearch.ViewModels
                 return;
 
             // 編集用の賃貸住居用物件オブジェクトを取得
-            RentLiving rl = dataAccessModule.GetRentLivingById(RentLivingEditSelectedItem.RentId, RentLivingEditSelectedItem.RentLivingId);
+            ResultWrapper res = dataAccessModule.RentLivingSelectById(RentLivingEditSelectedItem.RentId, RentLivingEditSelectedItem.RentLivingId);
+            if (res.IsError)
+            {
+                // エラーの通知
+                ErrorOccured?.Invoke(res.Error);
 
-            //TODO:エラーの通知
+                return;
+            }
+
+            if (res.Data == null)
+                return;
+            if (res.Data is not RentLiving)
+                return;
+
+            RentLiving rl = res.Data as RentLiving;
 
             // 編集画面に渡すEventArgsを用意
-            OpenRentLivingWindowEventArgs ag = new OpenRentLivingWindowEventArgs
+            OpenRentLivingBuildingWindowEventArgs ag = new OpenRentLivingBuildingWindowEventArgs
             {
                 Id = rl.RentLivingId,
-                EditObject = rl,
+                RentLivingObject = rl,
                 DataAccessModule = dataAccessModule
             };
 
             // 画面表示イベント発火
-            OpenRentLivingWindow?.Invoke(this, ag);
+            OpenRentLivingBuildingWindow?.Invoke(this, ag);
         }
 
-        // 表示(PDFとか)
+        // 表示 (PDFとか)
         public ICommand RentLivingEditSelectedViewCommand { get; }
         public bool RentLivingEditSelectedViewCommand_CanExecute()
         {
@@ -1616,1215 +1597,20 @@ namespace ZumenSearch.ViewModels
             if (RentLivingEditSelectedItem != null)
             {
                 // DBから削除
-                dataAccessModule.DeleteRentLiving(RentLivingEditSelectedItem.RentId);
+                ResultWrapper res = dataAccessModule.RentLivingDelete(RentLivingEditSelectedItem.RentId);
 
-                //TODO: エラーのトラップと通知。
+                if (res.IsError)
+                {
+                    // エラー通知
+                    ErrorOccured?.Invoke(res.Error);
+
+                    return;
+                }
 
                 // 一覧からも削除
                 if (Rents.Remove(RentLivingEditSelectedItem))
                 {
                     RentLivingEditSelectedItem = null;
-                }
-            }
-        }
-
-        #endregion
-
-        #region == RL 新規物件 削除予定 ==
-
-        // RL新規　物件追加処理(INSERT)
-        public ICommand RentLivingNewAddCommand { get; }
-        public bool RentLivingNewAddCommand_CanExecute()
-        {
-            return true;
-        }
-        public void RentLivingNewAddCommand_Execute()
-        {
-            if (RentLivingNew == null) return;
-
-            // TODO: 入力チェック
-
-            try
-            {
-                string sqlInsertIntoRent = String.Format("INSERT INTO Rent (Rent_ID, Name, Type, PostalCode, Location, TrainStation1, TrainStation2) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}')",
-                    RentLivingNew.RentId, RentLivingNew.Name, RentLivingNew.Type.ToString(), RentLivingNew.PostalCode, RentLivingNew.Location, RentLivingNew.TrainStation1, RentLivingNew.TrainStation2);
-
-                string sqlInsertIntoRentLiving = String.Format("INSERT INTO RentLiving (RentLiving_ID, Rent_ID, Kind, Floors, FloorsBasement, BuiltYear) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}')",
-                    RentLivingNew.RentLivingId, RentLivingNew.RentId, RentLivingNew.Kind.ToString(), RentLivingNew.Floors, RentLivingNew.FloorsBasement, RentLivingNew.BuiltYear);
-
-                using (var connection = new SqliteConnection(connectionStringBuilder.ConnectionString))
-                {
-                    connection.Open();
-
-                    using (var cmd = connection.CreateCommand())
-                    {
-                        cmd.Transaction = connection.BeginTransaction();
-                        try
-                        {
-                            // Rentテーブルへ追加
-                            cmd.CommandText = sqlInsertIntoRent;
-                            var InsertIntoRentResult = cmd.ExecuteNonQuery();
-                            if (InsertIntoRentResult != 1)
-                            {
-                                // これいる?
-                            }
-
-                            // RentLivingテーブルへ追加
-                            cmd.CommandText = sqlInsertIntoRentLiving;
-                            var InsertIntoRentLivingResult = cmd.ExecuteNonQuery();
-                            if (InsertIntoRentLivingResult != 1)
-                            {
-                                // これいる?
-                            }
-
-                            // 写真追加
-                            if (RentLivingNew.RentLivingPictures.Count > 0)
-                            {
-                                foreach (var pic in RentLivingNew.RentLivingPictures)
-                                {
-                                    // 新規なので全てIsNewのはずだけど・・・
-                                    if (pic.IsNew)
-                                    {
-                                        string sqlInsertIntoRentLivingPicture = String.Format("INSERT INTO RentLivingPicture (RentLivingPicture_ID, RentLiving_ID, Rent_ID, PictureData, PictureThumbW200xData, PictureFileExt) VALUES ('{0}', '{1}', '{2}', @0, @1, '{5}')",
-                                            pic.RentPictureId, RentLivingNew.RentLivingId, RentLivingNew.RentId, pic.PictureData, pic.PictureThumbW200xData, pic.PictureFileExt);
-
-                                        // 物件画像の追加
-                                        cmd.CommandText = sqlInsertIntoRentLivingPicture;
-                                        // ループなので、前のパラメーターをクリアする。
-                                        cmd.Parameters.Clear();
-
-                                        SqliteParameter parameter1 = new SqliteParameter("@0", System.Data.DbType.Binary);
-                                        parameter1.Value = pic.PictureData;
-                                        cmd.Parameters.Add(parameter1);
-
-                                        SqliteParameter parameter2 = new SqliteParameter("@1", System.Data.DbType.Binary);
-                                        parameter2.Value = pic.PictureThumbW200xData;
-                                        cmd.Parameters.Add(parameter2);
-
-                                        var result = cmd.ExecuteNonQuery();
-                                        if (result > 0)
-                                        {
-                                            pic.IsNew = false;
-                                            pic.IsModified = false;
-                                        }
-                                    }
-                                }
-                            }
-
-                            if (RentLivingNew.RentLivingZumenPDFs.Count > 0)
-                            {
-                                foreach (var pdf in RentLivingNew.RentLivingZumenPDFs)
-                                {
-                                    string sqlInsertIntoRentLivingZumenPdf = String.Format("INSERT INTO RentLivingZumenPdf (RentLivingZumenPdf_ID, RentLiving_ID, Rent_ID, PdfData, DateTimeAdded, DateTimePublished, DateTimeVerified, FileSize) VALUES ('{0}', '{1}', '{2}', @0, '{4}', '{5}', '{6}', '{7}')",
-                                        pdf.RentZumenPdfId, RentLivingNew.RentLivingId, RentLivingNew.RentId, pdf.PDFData, pdf.DateTimeAdded.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"), pdf.DateTimePublished.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"), pdf.DateTimeVerified.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"), pdf.FileSize);
-
-                                    // 図面の追加
-                                    cmd.CommandText = sqlInsertIntoRentLivingZumenPdf;
-                                    // ループなので、前のパラメーターをクリアする。
-                                    cmd.Parameters.Clear();
-
-                                    SqliteParameter parameter1 = new SqliteParameter("@0", System.Data.DbType.Binary);
-                                    parameter1.Value = pdf.PDFData;
-                                    cmd.Parameters.Add(parameter1);
-
-                                    var result = cmd.ExecuteNonQuery();
-                                    if (result > 0)
-                                    {
-                                        pdf.IsNew = false;
-                                        //pic.IsModified = false;
-                                    }
-                                }
-                            }
-
-                            // 部屋追加
-                            if (RentLivingNew.RentLivingSections.Count > 0)
-                            {
-                                foreach (var room in RentLivingNew.RentLivingSections)
-                                {
-                                    string sqlInsertIntoRentLivingSection = String.Format("INSERT INTO RentLivingSection (RentLivingSection_ID, RentLiving_ID, Rent_ID, RoomNumber, Price, Madori) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}')",
-                                            room.RentLivingSectionId, RentLivingNew.RentLivingId, RentLivingNew.RentId, room.RentLivingSectionRoomNumber, room.RentLivingSectionPrice, room.RentLivingSectionMadori);
-
-                                    cmd.CommandText = sqlInsertIntoRentLivingSection;
-                                    var InsertIntoRentLivingSectionResult = cmd.ExecuteNonQuery();
-                                    if (InsertIntoRentLivingSectionResult > 0)
-                                    {
-                                        room.IsNew = false;
-                                        room.IsDirty = false;
-                                    }
-
-                                    // 部屋の写真
-                                    if (room.RentLivingSectionPictures.Count > 0)
-                                    {
-                                        foreach (var roompic in room.RentLivingSectionPictures)
-                                        {
-                                            string sqlInsertIntoRentLivingSectionPic = String.Format("INSERT INTO RentLivingSectionPicture (RentLivingSectionPicture_ID, RentLivingSection_ID, RentLiving_ID, Rent_ID, PictureData, PictureThumbW200xData, PictureFileExt) VALUES ('{0}', '{1}', '{2}', '{3}', @0, @1, '{6}')",
-                                                roompic.RentSectionPictureId, roompic.RentLivingSectionId, RentLivingNew.RentLivingId, RentLivingNew.RentId, roompic.PictureData, roompic.PictureThumbW200xData, roompic.PictureFileExt);
-
-                                            cmd.CommandText = sqlInsertIntoRentLivingSectionPic;
-                                            // ループなので、前のパラメーターをクリアする。
-                                            cmd.Parameters.Clear();
-
-                                            SqliteParameter parameter1 = new SqliteParameter("@0", System.Data.DbType.Binary);
-                                            parameter1.Value = roompic.PictureData;
-                                            cmd.Parameters.Add(parameter1);
-
-                                            SqliteParameter parameter2 = new SqliteParameter("@1", System.Data.DbType.Binary);
-                                            parameter2.Value = roompic.PictureThumbW200xData;
-                                            cmd.Parameters.Add(parameter2);
-
-                                            var InsertIntoRentLivingSectionPicResult = cmd.ExecuteNonQuery();
-                                            if (InsertIntoRentLivingSectionPicResult > 0)
-                                            {
-                                                roompic.IsNew = false;
-                                                roompic.IsModified = false;
-                                            }
-                                        }
-                                    }
-
-                                }
-                            }
-
-                            //　コミット
-                            cmd.Transaction.Commit();
-
-                            // 追加画面を非表示に（閉じる）
-                            if (ShowRentLivingNew) ShowRentLivingNew = false;
-                        }
-                        catch (Exception e)
-                        {
-                            // ロールバック
-                            cmd.Transaction.Rollback();
-
-                            // エラーイベント発火
-                            MyError er = new MyError();
-                            er.ErrType = "DB";
-                            er.ErrCode = 0;
-                            er.ErrText = "「" + e.Message + "」";
-                            er.ErrDescription = "賃貸住居用物件の新規追加 (INSERT)で、データベースに追加する処理でエラーが発生し、ロールバックしました。";
-                            er.ErrDatetime = DateTime.Now;
-                            er.ErrPlace = "MainViewModel::RentLivingNewAddCommand_Execute()";
-                            ErrorOccured?.Invoke(er);
-                        }
-                    }
-                }
-            }
-            catch (System.Reflection.TargetInvocationException ex)
-            {
-                System.Diagnostics.Debug.WriteLine("Opps. TargetInvocationException@MainViewModel::RentLivingNewAddCommand_Execute()");
-                throw ex.InnerException;
-            }
-            catch (System.InvalidOperationException ex)
-            {
-                System.Diagnostics.Debug.WriteLine("Opps. InvalidOperationException@MainViewModel::RentLivingNewAddCommand_Execute()");
-                throw ex.InnerException;
-            }
-            catch (Exception e)
-            {
-                if (e.InnerException != null)
-                {
-                    System.Diagnostics.Debug.WriteLine(e.InnerException.Message + " @MainViewModel::RentLivingNewAddCommand_Execute()");
-                }
-                else
-                {
-                    System.Diagnostics.Debug.WriteLine(e.Message + " @MainViewModel::RentLivingNewAddCommand_Execute()");
-                }
-            }
-        }
-
-
-        // RL新規　物件の画像追加
-        public ICommand RentLivingNewPictureAddCommand { get; }
-        public bool RentLivingNewPictureAddCommand_CanExecute()
-        {
-            return true;
-        }
-        public void RentLivingNewPictureAddCommand_Execute()
-        {
-            if (RentLivingNew == null) return;
-
-            var files = _openDialogService.GetOpenPictureFileDialog("物件写真の追加");
-
-            if (files != null)
-            {
-                foreach (String filePath in files)
-                {
-                    string fileName = filePath.Trim();
-
-                    if (!string.IsNullOrEmpty(fileName))
-                    {
-                        FileInfo fi = new FileInfo(fileName);
-                        if (fi.Exists)
-                        {
-                            // 画像データの読み込み
-                            byte[] ImageData;
-                            FileStream fs = new FileStream(fileName, FileMode.Open, FileAccess.Read);
-                            //BinaryReader br = new BinaryReader(fs);
-                            //ImageData = br.ReadBytes((int)fs.Length);
-                            //br.Close();
-                            System.Drawing.Image img = System.Drawing.Image.FromStream(fs, false, false); // 検証なしが早い。https://www.atmarkit.co.jp/ait/articles/0706/07/news139.html
-
-                            ImageData = Methods.ImageToByteArray(img);
-
-                            // サムネイル画像の作成
-                            System.Drawing.Image thumbImg = Methods.FixedSize(img, 200, 150);
-                            byte[] ImageThumbData = Methods.ImageToByteArray(thumbImg);
-
-
-                            RentLivingPicture rlpic = new RentLivingPicture(RentLivingNew.RentId, RentLivingNew.RentLivingId, Guid.NewGuid().ToString());
-                            rlpic.PictureData = ImageData;
-                            rlpic.PictureThumbW200xData = ImageThumbData;
-                            rlpic.PictureFileExt = fi.Extension;
-                            rlpic.IsModified = false;
-                            rlpic.IsNew = true;
-
-                            rlpic.Picture = Methods.BitmapImageFromImage(thumbImg, Methods.FileExtToImageFormat(rlpic.PictureFileExt));
-
-                            RentLivingNew.RentLivingPictures.Add(rlpic);
-
-
-                            fs.Close();
-                        }
-                        else
-                        {
-                            // エラーイベント発火
-                            MyError er = new MyError();
-                            er.ErrType = "File";
-                            er.ErrCode = 0;
-                            er.ErrText = "「" + "File Does Not Exist" + "」";
-                            er.ErrDescription = fileName + " ファイルが存在しません。";
-                            er.ErrDatetime = DateTime.Now;
-                            er.ErrPlace = "MainViewModel::RentLivingNewAddCommand_Execute()";
-                            ErrorOccured?.Invoke(er);
-                        }
-                    }
-                }
-            }
-        }
-
-        // RL新規　物件の画像削除
-        public ICommand RentLivingNewPictureDeleteCommand { get; }
-        public bool RentLivingNewPictureDeleteCommand_CanExecute()
-        {
-            return true;
-        }
-        public void RentLivingNewPictureDeleteCommand_Execute(object obj)
-        {
-            if (obj == null) return;
-
-            if (RentLivingNew == null) return;
-
-            // 選択アイテム保持用
-            List<RentLivingPicture> selectedList = new List<RentLivingPicture>();
-
-            // System.Windows.Controls.SelectedItemCollection をキャストして、ループ
-            System.Collections.IList items = (System.Collections.IList)obj;
-            var collection = items.Cast<RentLivingPicture>();
-
-            foreach (var item in collection)
-            {
-                // 削除リストに追加
-                selectedList.Add(item as RentLivingPicture);
-            }
-
-            // 選択注文アイテムをループして、アイテムを削除する
-            foreach (var item in selectedList)
-            {
-                RentLivingNew.RentLivingPictures.Remove(item);
-            }
-
-        }
-
-
-        // RL新規　部屋追加（画面表示）
-        public ICommand RentLivingNewSectionNewCommand { get; }
-        public bool RentLivingNewSectionNewCommand_CanExecute()
-        {
-            return true;
-        }
-        public void RentLivingNewSectionNewCommand_Execute()
-        {
-            if (RentLivingNew == null) return;
-
-            // RentLivingNewSectionNew オブジェクトを用意
-            RentLivingNewSectionNew = new RentLivingSection(RentLivingNew.RentId, RentLivingNew.RentLivingId, Guid.NewGuid().ToString());
-            RentLivingNewSectionNew.IsNew = true;
-            RentLivingNewSectionNew.IsDirty = false;
-
-            if (!ShowRentLivingNewSectionNew) ShowRentLivingNewSectionNew = true;
-        }
-
-        // RL新規　部屋追加キャンセル
-        public ICommand RentLivingNewSectionNewCancelCommand { get; }
-        public bool RentLivingNewSectionNewCancelCommand_CanExecute()
-        {
-            return true;
-        }
-        public void RentLivingNewSectionNewCancelCommand_Execute()
-        {
-            if (ShowRentLivingNewSectionNew) ShowRentLivingNewSectionNew = false;
-        }
-
-        // RL新規　部屋追加処理 (ADD to Collection)
-        public ICommand RentLivingNewSectionAddCommand { get; }
-        public bool RentLivingNewSectionAddCommand_CanExecute()
-        {
-            return true;
-        }
-        public void RentLivingNewSectionAddCommand_Execute()
-        {
-            if (RentLivingNew == null) return;
-            if (RentLivingNewSectionNew == null) return;
-
-            // TODO: 入力チェック
-
-            // 物件オブジェクトの部屋コレクションに追加
-            RentLivingNew.RentLivingSections.Add(RentLivingNewSectionNew);
-
-            // 追加画面を閉じる
-            ShowRentLivingNewSectionNew = false;
-        }
-
-        // RL新規　部屋編集（画面表示）
-        public ICommand RentLivingNewSectionEditCommand { get; }
-        public bool RentLivingNewSectionEditCommand_CanExecute()
-        {
-            if (RentLivingNewSectionSelectedItem != null)
-                return true;
-            else
-                return false;
-        }
-        public void RentLivingNewSectionEditCommand_Execute()
-        {
-            if (RentLivingNew == null) return;
-            if (RentLivingNewSectionSelectedItem == null) return;
-
-            // 
-            RentLivingNewSectionEdit = RentLivingNewSectionSelectedItem;
-            /*
-            RentLivingNewSectionEdit = new RentLivingSection(RentLivingNewSectionSelectedItem.Rent_ID, RentLivingNewSectionSelectedItem.RentLiving_ID, RentLivingNewSectionSelectedItem.RentLivingSection_ID);
-
-            RentLivingNewSectionEdit.IsNew = false;
-            RentLivingNewSectionEdit.IsDirty = false;
-
-            RentLivingNewSectionEdit.RentLivingSectionRoomNumber = RentLivingNewSectionSelectedItem.RentLivingSectionRoomNumber;
-            RentLivingNewSectionEdit.RentLivingSectionMadori = RentLivingNewSectionSelectedItem.RentLivingSectionMadori;
-            RentLivingNewSectionEdit.RentLivingSectionPrice = RentLivingNewSectionSelectedItem.RentLivingSectionPrice;
-            // TODO: more to come
-
-            // TODO: これは・・・
-            foreach (var hoge in RentLivingNewSectionSelectedItem.RentLivingSectionPictures)
-            {
-                RentLivingNewSectionEdit.RentLivingSectionPictures.Add(hoge);
-            }
-            */
-
-            if (!ShowRentLivingNewSectionEdit) ShowRentLivingNewSectionEdit = true;
-        }
-
-        // RL新規　部屋編集キャンセル
-        public ICommand RentLivingNewSectionEditCancelCommand { get; }
-        public bool RentLivingNewSectionEditCancelCommand_CanExecute()
-        {
-            return true;
-        }
-        public void RentLivingNewSectionEditCancelCommand_Execute()
-        {
-            if (ShowRentLivingNewSectionEdit) ShowRentLivingNewSectionEdit = false;
-        }
-
-        // RL新規　部屋更新 (Update collection)
-        public ICommand RentLivingNewSectionUpdateCommand { get; }
-        public bool RentLivingNewSectionUpdateCommand_CanExecute()
-        {
-            return true;
-        }
-        public void RentLivingNewSectionUpdateCommand_Execute()
-        {
-            if (RentLivingNew == null) return;
-            if (RentLivingNewSectionSelectedItem == null) return;
-
-            // TODO: 入力チェック
-
-            /*
-            var found = RentLivingNew.RentLivingSections.FirstOrDefault(x => x.RentLivingSection_ID == RentLivingNewSectionEdit.RentLivingSection_ID);
-            if (found != null)
-            {
-                found.RentLivingSectionRoomNumber = RentLivingNewSectionEdit.RentLivingSectionRoomNumber;
-                found.RentLivingSectionMadori = RentLivingNewSectionEdit.RentLivingSectionMadori;
-                found.RentLivingSectionPrice = RentLivingNewSectionEdit.RentLivingSectionPrice;
-                // TODO: more to come
-
-                // 一旦クリアして追加しなおさないと、変更が通知（更新）されない
-                found.RentLivingSectionPictures.Clear();
-                foreach (var hoge in RentLivingNewSectionEdit.RentLivingSectionPictures)
-                {
-                    found.RentLivingSectionPictures.Add(hoge);
-                }
-            }
-            else
-            {
-                System.Diagnostics.Debug.WriteLine("THIS SHOULD NOT BE HAPPENING @RentLivingNewSectionUpdateCommand_Execute");
-            }
-            */
-
-            // 部屋編集画面を閉じる
-            ShowRentLivingNewSectionEdit = false;
-        }
-
-        // RL新規　部屋一覧の選択を複製
-        public ICommand RentLivingNewSectionDuplicateCommand { get; }
-        public bool RentLivingNewSectionDuplicateCommand_CanExecute()
-        {
-            if (RentLivingNewSectionSelectedItem != null)
-                return true;
-            else
-                return false;
-        }
-        public void RentLivingNewSectionDuplicateCommand_Execute()
-        {
-            if (RentLivingNew == null) return;
-            if (RentLivingNewSectionSelectedItem == null) return;
-
-            //
-            RentLivingNewSectionNew = new RentLivingSection(RentLivingNew.RentId, RentLivingNew.RentLivingId, Guid.NewGuid().ToString());
-            RentLivingNewSectionNew.IsNew = true;
-            RentLivingNewSectionNew.IsDirty = false;
-
-            RentLivingNewSectionNew.RentLivingSectionRoomNumber = RentLivingNewSectionSelectedItem.RentLivingSectionRoomNumber + "の複製";
-            RentLivingNewSectionNew.RentLivingSectionMadori = RentLivingNewSectionSelectedItem.RentLivingSectionMadori;
-            RentLivingNewSectionNew.RentLivingSectionPrice = RentLivingNewSectionSelectedItem.RentLivingSectionPrice;
-            // TODO: more to come
-
-            // 追加
-            RentLivingNew.RentLivingSections.Add(RentLivingNewSectionNew);
-        }
-
-        // RL新規　部屋一覧の選択を削除
-        public ICommand RentLivingNewSectionDeleteCommand { get; }
-        public bool RentLivingNewSectionDeleteCommand_CanExecute()
-        {
-            if (RentLivingNewSectionSelectedItem != null)
-                return true;
-            else
-                return false;
-        }
-        public void RentLivingNewSectionDeleteCommand_Execute()
-        {
-            if (RentLivingNew == null) return;
-            if (RentLivingNewSectionSelectedItem == null) return;
-
-            // 削除
-            RentLivingNew.RentLivingSections.Remove(RentLivingNewSectionSelectedItem);
-        }
-
-
-        // RL新規　新規部屋の画像追加
-        public ICommand RentLivingNewSectionNewPictureAddCommand { get; }
-        public bool RentLivingNewSectionNewPictureAddCommand_CanExecute()
-        {
-            return true;
-        }
-        public void RentLivingNewSectionNewPictureAddCommand_Execute()
-        {
-            if (RentLivingNew == null) return;
-            if (RentLivingNewSectionNew == null) return;
-
-            var files = _openDialogService.GetOpenPictureFileDialog("部屋の写真追加");
-
-            if (files != null)
-            {
-                foreach (String filePath in files)
-                {
-                    string fileName = filePath.Trim();
-
-                    if (!string.IsNullOrEmpty(fileName))
-                    {
-                        FileInfo fi = new FileInfo(fileName);
-                        if (fi.Exists)
-                        {
-                            // 画像データの読み込み
-                            byte[] ImageData;
-                            FileStream fs = new FileStream(fileName, FileMode.Open, FileAccess.Read);
-                            //BinaryReader br = new BinaryReader(fs);
-                            //ImageData = br.ReadBytes((int)fs.Length);
-                            //br.Close();
-                            System.Drawing.Image img = System.Drawing.Image.FromStream(fs, false, false); // 検証なしが早い。https://www.atmarkit.co.jp/ait/articles/0706/07/news139.html
-
-                            ImageData = Methods.ImageToByteArray(img);
-
-                            // サムネイル画像の作成
-                            System.Drawing.Image thumbImg = Methods.FixedSize(img, 200, 150);
-                            byte[] ImageThumbData = Methods.ImageToByteArray(thumbImg);
-
-
-                            RentLivingSectionPicture rlpic = new RentLivingSectionPicture(RentLivingNewSectionNew.RentId, RentLivingNewSectionNew.RentLivingId, RentLivingNewSectionNew.RentLivingSectionId, Guid.NewGuid().ToString());
-                            rlpic.PictureData = ImageData;
-                            rlpic.PictureThumbW200xData = ImageThumbData;
-                            rlpic.PictureFileExt = fi.Extension;
-
-                            rlpic.IsNew = true;
-                            rlpic.IsModified = false;
-
-                            rlpic.Picture = Methods.BitmapImageFromImage(thumbImg, Methods.FileExtToImageFormat(rlpic.PictureFileExt));
-
-                            RentLivingNewSectionNew.RentLivingSectionPictures.Add(rlpic);
-
-
-                            fs.Close();
-                        }
-                        else
-                        {
-                            // エラーイベント発火
-                            MyError er = new MyError();
-                            er.ErrType = "File";
-                            er.ErrCode = 0;
-                            er.ErrText = "「" + "File Does Not Exist" + "」";
-                            er.ErrDescription = fileName + " ファイルが存在しません。";
-                            er.ErrDatetime = DateTime.Now;
-                            er.ErrPlace = "MainViewModel::RentLivingNewSectionNewPictureAddCommand_Execute()";
-                            ErrorOccured?.Invoke(er);
-                        }
-                    }
-                }
-            }
-        }
-
-        // RL新規　新規部屋の画像削除
-        public ICommand RentLivingNewSectionNewPictureDeleteCommand { get; }
-        public bool RentLivingNewSectionNewPictureDeleteCommand_CanExecute()
-        {
-            return true;
-        }
-        public void RentLivingNewSectionNewPictureDeleteCommand_Execute(object obj)
-        {
-            if (obj == null) return;
-
-            if (RentLivingNew == null) return;
-            if (RentLivingNewSectionNew == null) return;
-
-            // 選択アイテム保持用
-            List<RentLivingSectionPicture> selectedList = new List<RentLivingSectionPicture>();
-
-            // System.Windows.Controls.SelectedItemCollection をキャストして、ループ
-            System.Collections.IList items = (System.Collections.IList)obj;
-            var collection = items.Cast<RentLivingSectionPicture>();
-
-            foreach (var item in collection)
-            {
-                // 削除リストに追加
-                selectedList.Add(item as RentLivingSectionPicture);
-            }
-
-            // 選択注文アイテムをループして、アイテムを削除する
-            foreach (var item in selectedList)
-            {
-                RentLivingNewSectionNew.RentLivingSectionPictures.Remove(item);
-
-                // 新規部屋なので、DBにはまだ保存されていないはずなので、DBから削除する処理は不要。
-            }
-
-        }
-
-        // RL新規　編集部屋の画像追加
-        public ICommand RentLivingNewSectionEditPictureAddCommand { get; }
-        public bool RentLivingNewSectionEditPictureAddCommand_CanExecute()
-        {
-            return true;
-        }
-        public void RentLivingNewSectionEditPictureAddCommand_Execute()
-        {
-            if (RentLivingNew == null) return;
-            if (RentLivingNewSectionEdit == null) return;
-
-            var files = _openDialogService.GetOpenPictureFileDialog("部屋の写真追加");
-
-            if (files != null)
-            {
-                foreach (String filePath in files)
-                {
-                    string fileName = filePath.Trim();
-
-                    if (!string.IsNullOrEmpty(fileName))
-                    {
-                        FileInfo fi = new FileInfo(fileName);
-                        if (fi.Exists)
-                        {
-                            // 画像データの読み込み
-                            byte[] ImageData;
-                            FileStream fs = new FileStream(fileName, FileMode.Open, FileAccess.Read);
-                            //BinaryReader br = new BinaryReader(fs);
-                            //ImageData = br.ReadBytes((int)fs.Length);
-                            //br.Close();
-                            System.Drawing.Image img = System.Drawing.Image.FromStream(fs, false, false); // 検証なしが早い。https://www.atmarkit.co.jp/ait/articles/0706/07/news139.html
-
-                            ImageData = Methods.ImageToByteArray(img);
-
-                            // サムネイル画像の作成
-                            System.Drawing.Image thumbImg = Methods.FixedSize(img, 200, 150);
-                            byte[] ImageThumbData = Methods.ImageToByteArray(thumbImg);
-
-
-                            RentLivingSectionPicture rlpic = new RentLivingSectionPicture(RentLivingNewSectionEdit.RentId, RentLivingNewSectionEdit.RentLivingId, RentLivingNewSectionEdit.RentLivingSectionId, Guid.NewGuid().ToString());
-                            rlpic.PictureData = ImageData;
-                            rlpic.PictureThumbW200xData = ImageThumbData;
-                            rlpic.PictureFileExt = fi.Extension;
-
-                            rlpic.IsNew = true;
-                            rlpic.IsModified = false;
-
-                            rlpic.Picture = Methods.BitmapImageFromImage(thumbImg, Methods.FileExtToImageFormat(rlpic.PictureFileExt));
-
-                            RentLivingNewSectionEdit.RentLivingSectionPictures.Add(rlpic);
-
-
-                            fs.Close();
-                        }
-                        else
-                        {
-                            // エラーイベント発火
-                            MyError er = new MyError();
-                            er.ErrType = "File";
-                            er.ErrCode = 0;
-                            er.ErrText = "「" + "File Does Not Exist" + "」";
-                            er.ErrDescription = fileName + " ファイルが存在しません。";
-                            er.ErrDatetime = DateTime.Now;
-                            er.ErrPlace = "MainViewModel::RentLivingNewSectionNewPictureAddCommand_Execute()";
-                            ErrorOccured?.Invoke(er);
-                        }
-                    }
-                }
-            }
-        }
-
-        // RL新規　編集部屋の画像削除
-        public ICommand RentLivingNewSectionEditPictureDeleteCommand { get; }
-        public bool RentLivingNewSectionEditPictureDeleteCommand_CanExecute()
-        {
-            return true;
-        }
-        public void RentLivingNewSectionEditPictureDeleteCommand_Execute(object obj)
-        {
-            if (obj == null) return;
-
-            if (RentLivingNew == null) return;
-            if (RentLivingNewSectionEdit == null) return;
-
-            // 選択アイテム保持用
-            List<RentLivingSectionPicture> selectedList = new List<RentLivingSectionPicture>();
-
-            // System.Windows.Controls.SelectedItemCollection をキャストして、ループ
-            System.Collections.IList items = (System.Collections.IList)obj;
-            var collection = items.Cast<RentLivingSectionPicture>();
-
-            foreach (var item in collection)
-            {
-                // 削除リストに追加
-                selectedList.Add(item as RentLivingSectionPicture);
-            }
-
-            // 選択注文アイテムをループして、アイテムを削除する
-            foreach (var item in selectedList)
-            {
-                RentLivingNewSectionEdit.RentLivingSectionPictures.Remove(item);
-
-                // 新規部屋なので、DBにはまだ保存されていないはずなので、DBから削除する処理は不要。
-            }
-        }
-
-
-        // RL新規　物件の図面PDF追加
-        public ICommand RentLivingNewZumenPdfAddCommand { get; }
-        public bool RentLivingNewZumenPdfAddCommand_CanExecute()
-        {
-            return true;
-        }
-        public void RentLivingNewZumenPdfAddCommand_Execute()
-        {
-            if (RentLivingNew == null) return;
-
-            string fileName = _openDialogService.GetOpenZumenPdfFileDialog("図面の追加");
-
-            if (!string.IsNullOrEmpty(fileName))
-            {
-                FileInfo fi = new FileInfo(fileName.Trim());
-                if (fi.Exists)
-                {
-                    // 図面ファイルのPDFデータの読み込み
-                    byte[] PdfData;
-                    FileStream fs = new FileStream(fileName, FileMode.Open, FileAccess.Read);
-                    long len = fs.Length;
-
-                    BinaryReader br = new BinaryReader(fs);
-                    PdfData = br.ReadBytes((int)fs.Length);
-                    br.Close();
-
-                    RentLivingZumenPDF rlZumen = new RentLivingZumenPDF(RentLivingNew.RentId, RentLivingNew.RentLivingId, Guid.NewGuid().ToString());
-                    rlZumen.PDFData = PdfData;
-                    rlZumen.FileSize = len;
-
-                    // TODO:
-                    //rlZumen.DateTimeAdded = DateTime.Now;
-                    rlZumen.DateTimePublished = DateTime.Now;
-                    rlZumen.DateTimeVerified = DateTime.Now;
-
-                    //rlZumen.IsModified = false;
-                    rlZumen.IsNew = true;
-
-                    RentLivingNew.RentLivingZumenPDFs.Add(rlZumen);
-
-                    fs.Close();
-                }
-                else
-                {
-                    // エラーイベント発火
-                    MyError er = new MyError();
-                    er.ErrType = "File";
-                    er.ErrCode = 0;
-                    er.ErrText = "「" + "File Does Not Exist" + "」";
-                    er.ErrDescription = fileName + " ファイルが存在しません。";
-                    er.ErrDatetime = DateTime.Now;
-                    er.ErrPlace = "MainViewModel::RentLivingNewZumenPdfAddCommand_Execute()";
-                    ErrorOccured?.Invoke(er);
-                }
-            }
-        }
-
-        // RL新規　物件の図面PDF削除
-        public ICommand RentLivingNewZumenPdfDeleteCommand { get; }
-        public bool RentLivingNewZumenPdfDeleteCommand_CanExecute()
-        {
-            return true;
-        }
-        public void RentLivingNewZumenPdfDeleteCommand_Execute(object obj)
-        {
-            if (obj == null) return;
-
-            if (RentLivingNew == null) return;
-
-            // 選択アイテム保持用
-            List<RentLivingZumenPDF> selectedList = new List<RentLivingZumenPDF>();
-
-            // System.Windows.Controls.SelectedItemCollection をキャストして、ループ
-            System.Collections.IList items = (System.Collections.IList)obj;
-            var collection = items.Cast<RentLivingZumenPDF>();
-
-            foreach (var item in collection)
-            {
-                // 削除リストに追加
-                selectedList.Add(item as RentLivingZumenPDF);
-            }
-
-            // 選択注文アイテムをループして、アイテムを削除する
-            foreach (var item in selectedList)
-            {
-                RentLivingNew.RentLivingZumenPDFs.Remove(item);
-            }
-
-        }
-
-        // RL編集　物件の図面PDF表示
-        public ICommand RentLivingNewZumenPdfShowCommand { get; }
-        public bool RentLivingNewZumenPdfShowCommand_CanExecute()
-        {
-            return true;
-        }
-        public void RentLivingNewZumenPdfShowCommand_Execute(object obj)
-        {
-            if (obj == null) return;
-            if (RentLivingNew == null) return;
-
-            // System.Windows.Controls.SelectedItemCollection をキャストして、ループ
-            System.Collections.IList items = (System.Collections.IList)obj;
-            var collection = items.Cast<RentLivingZumenPDF>();
-
-            foreach (var item in collection)
-            {
-                byte[] pdfBytes = (item as RentLivingZumenPDF).PDFData;
-
-                File.WriteAllBytes(Path.GetTempPath() + Path.DirectorySeparatorChar + "temp.pdf", pdfBytes);
-
-                Process.Start(new ProcessStartInfo(Path.GetTempPath() + Path.DirectorySeparatorChar + "temp.pdf") { UseShellExecute = true });
-
-                break;
-            }
-
-        }
-
-        // RL編集　物件の図面PDF表示（ダブルクリックやエンター押下で）
-        public ICommand RentLivingNewZumenPdfEnterCommand { get; }
-        public bool RentLivingNewZumenPdfEnterCommand_CanExecute()
-        {
-            return true;
-        }
-        public void RentLivingNewZumenPdfEnterCommand_Execute(RentZumenPDF obj)
-        {
-            if (obj == null) return;
-            if (RentLivingNew == null) return;
-
-            byte[] pdfBytes = (obj as RentZumenPDF).PDFData;
-
-            File.WriteAllBytes(Path.GetTempPath() + Path.DirectorySeparatorChar + "temp.pdf", pdfBytes);
-
-            Process.Start(new ProcessStartInfo(Path.GetTempPath() + Path.DirectorySeparatorChar + "temp.pdf") { UseShellExecute = true });
-        }
-
-
-        // RL編集　物件管理、選択編集、更新（UPDATE）
-        public ICommand RentLivingEditSelectedEditUpdateCommand { get; }
-        public bool RentLivingEditSelectedEditUpdateCommand_CanExecute()
-        {
-            if (RentLivingEditSelectedItem == null)
-            {
-                return false;
-            }
-            else
-            {
-                return true;
-            }
-        }
-        public void RentLivingEditSelectedEditUpdateCommand_Execute()
-        {
-
-            if (RentLivingEdit == null) return;
-            if (RentLivingEditSelectedItem == null) return;
-
-            // TODO: 入力チェック
-
-            // 編集オブジェクトに格納されている更新された情報をDBへ更新
-
-            string sqlUpdateRent = String.Format("UPDATE Rent SET Name = '{1}', Type = '{2}', PostalCode = '{3}', Location = '{4}', TrainStation1 = '{5}', TrainStation2 = '{6}' WHERE Rent_ID = '{0}'",
-                RentLivingEdit.RentId, RentLivingEdit.Name, RentLivingEdit.Type.ToString(), RentLivingEdit.PostalCode, RentLivingEdit.Location, RentLivingEdit.TrainStation1, RentLivingEdit.TrainStation2);
-
-            string sqlUpdateRentLiving = String.Format("UPDATE RentLiving SET Kind = '{1}', Floors = '{2}', FloorsBasement = '{3}', BuiltYear = '{4}' WHERE RentLiving_ID = '{0}'",
-                RentLivingEdit.RentLivingId, RentLivingEdit.Kind.ToString(), RentLivingEdit.Floors, RentLivingEdit.FloorsBasement, RentLivingEdit.BuiltYear);
-
-            // TODO more to come
-
-            using (var connection = new SqliteConnection(connectionStringBuilder.ConnectionString))
-            {
-                connection.Open();
-
-                using (var cmd = connection.CreateCommand())
-                {
-                    cmd.Transaction = connection.BeginTransaction();
-                    try
-                    {
-                        cmd.CommandText = sqlUpdateRent;
-                        var result = cmd.ExecuteNonQuery();
-                        if (result != 1)
-                        {
-                            // 
-                        }
-
-                        cmd.CommandText = sqlUpdateRentLiving;
-                        result = cmd.ExecuteNonQuery();
-                        if (result != 1)
-                        {
-                            // 
-                        }
-
-                        // 物件写真の追加または更新
-                        if (RentLivingEdit.RentLivingPictures.Count > 0)
-                        {
-                            foreach (var pic in RentLivingEdit.RentLivingPictures)
-                            {
-                                if (pic.IsNew)
-                                {
-                                    string sqlInsertIntoRentLivingPicture = String.Format("INSERT INTO RentLivingPicture (RentLivingPicture_ID, RentLiving_ID, Rent_ID, PictureData, PictureThumbW200xData, PictureFileExt) VALUES ('{0}', '{1}', '{2}', @0, @1, '{5}')",
-                                        pic.RentPictureId, RentLivingEdit.RentLivingId, RentLivingEdit.RentId, pic.PictureData, pic.PictureThumbW200xData, pic.PictureFileExt);
-
-                                    // 物件画像の追加
-                                    cmd.CommandText = sqlInsertIntoRentLivingPicture;
-                                    // ループなので、前のパラメーターをクリアする。
-                                    cmd.Parameters.Clear();
-
-                                    SqliteParameter parameter1 = new SqliteParameter("@0", System.Data.DbType.Binary);
-                                    parameter1.Value = pic.PictureData;
-                                    cmd.Parameters.Add(parameter1);
-
-                                    SqliteParameter parameter2 = new SqliteParameter("@1", System.Data.DbType.Binary);
-                                    parameter2.Value = pic.PictureThumbW200xData;
-                                    cmd.Parameters.Add(parameter2);
-
-                                    result = cmd.ExecuteNonQuery();
-                                    if (result > 0)
-                                    {
-                                        pic.IsNew = false;
-                                        pic.IsModified = false;
-                                    }
-                                }
-                                else if (pic.IsModified)
-                                {
-                                    string sqlUpdateRentLivingPicture = String.Format("UPDATE RentLivingPicture SET PictureData = @0, PictureThumbW200xData = @1, PictureFileExt = '{5}' WHERE RentLivingPicture_ID = '{0}'",
-                                        pic.RentPictureId, RentLivingEdit.RentLivingId, RentLivingEdit.RentId, pic.PictureData, pic.PictureThumbW200xData, pic.PictureFileExt);
-
-                                    // 物件画像の更新
-                                    cmd.CommandText = sqlUpdateRentLivingPicture;
-                                    // ループなので、前のパラメーターをクリアする。
-                                    cmd.Parameters.Clear();
-
-                                    SqliteParameter parameter1 = new SqliteParameter("@0", System.Data.DbType.Binary);
-                                    parameter1.Value = pic.PictureData;
-                                    cmd.Parameters.Add(parameter1);
-
-                                    SqliteParameter parameter2 = new SqliteParameter("@1", System.Data.DbType.Binary);
-                                    parameter2.Value = pic.PictureThumbW200xData;
-                                    cmd.Parameters.Add(parameter2);
-
-                                    result = cmd.ExecuteNonQuery();
-                                    if (result > 0)
-                                    {
-                                        pic.IsNew = false;
-                                        pic.IsModified = false;
-                                    }
-                                }
-
-                            }
-                        }
-
-                        // 物件写真の削除リストを処理
-                        if (RentLivingEdit.RentLivingPicturesToBeDeletedIDs.Count > 0)
-                        {
-                            foreach (var id in RentLivingEdit.RentLivingPicturesToBeDeletedIDs)
-                            {
-                                // 削除
-                                string sqlDeleteRentLivingPicture = String.Format("DELETE FROM RentLivingPicture WHERE RentLivingPicture_ID = '{0}'",
-                                        id);
-
-                                cmd.CommandText = sqlDeleteRentLivingPicture;
-                                var DelRentLivingPicResult = cmd.ExecuteNonQuery();
-                                if (DelRentLivingPicResult > 0)
-                                {
-                                    //
-                                }
-                            }
-                            RentLivingEdit.RentLivingPicturesToBeDeletedIDs.Clear();
-                        }
-
-                        // 図面の更新
-                        if (RentLivingEdit.RentLivingZumenPDFs.Count > 0)
-                        {
-                            foreach (var pdf in RentLivingEdit.RentLivingZumenPDFs)
-                            {
-                                if (pdf.IsNew)
-                                {
-                                    string sqlInsertIntoRentLivingZumen = String.Format("INSERT INTO RentLivingZumenPdf (RentLivingZumenPdf_ID, RentLiving_ID, Rent_ID, PdfData, DateTimeAdded, DateTimePublished, DateTimeVerified, FileSize) VALUES ('{0}', '{1}', '{2}', @0, '{4}', '{5}', '{6}', '{7}')",
-                                        pdf.RentZumenPdfId, RentLivingEdit.RentLivingId, RentLivingEdit.RentId, pdf.PDFData, pdf.DateTimeAdded.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"), pdf.DateTimePublished.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"), pdf.DateTimeVerified.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"), pdf.FileSize);
-
-                                    // 図面の追加
-                                    cmd.CommandText = sqlInsertIntoRentLivingZumen;
-                                    // ループなので、前のパラメーターをクリアする。
-                                    cmd.Parameters.Clear();
-
-                                    SqliteParameter parameter1 = new SqliteParameter("@0", System.Data.DbType.Binary);
-                                    parameter1.Value = pdf.PDFData;
-                                    cmd.Parameters.Add(parameter1);
-
-                                    result = cmd.ExecuteNonQuery();
-                                    if (result > 0)
-                                    {
-                                        pdf.IsNew = false;
-                                        pdf.IsDirty = false;
-                                    }
-                                }
-                                else if (pdf.IsDirty)
-                                {
-                                    string sqlUpdateRentLivingZumen = String.Format("UPDATE RentLivingZumenPdf SET DateTimePublished = '{1}', DateTimeVerified = '{2}' WHERE RentLivingZumenPdf_ID = '{0}'",
-                                        pdf.RentZumenPdfId, pdf.DateTimePublished.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"), pdf.DateTimeVerified.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"), pdf.FileSize);
-
-                                    // 図面アトリビュート情報の更新
-                                    cmd.CommandText = sqlUpdateRentLivingZumen;
-
-                                    result = cmd.ExecuteNonQuery();
-                                    if (result > 0)
-                                    {
-                                        pdf.IsNew = false;
-                                        pdf.IsDirty = false;
-                                    }
-                                }
-                            }
-                        }
-
-                        // 図面の削除リストを処理
-                        if (RentLivingEdit.RentLivingZumenPdfToBeDeletedIDs.Count > 0)
-                        {
-                            foreach (var id in RentLivingEdit.RentLivingZumenPdfToBeDeletedIDs)
-                            {
-                                // 削除
-                                string sqlDeleteRentLivingPDF = String.Format("DELETE FROM RentLivingZumenPdf WHERE RentLivingZumenPdf_ID = '{0}'",
-                                        id);
-
-                                cmd.CommandText = sqlDeleteRentLivingPDF;
-                                var DelRentLivingPdfResult = cmd.ExecuteNonQuery();
-                                if (DelRentLivingPdfResult > 0)
-                                {
-                                    //
-                                }
-                            }
-                            RentLivingEdit.RentLivingZumenPdfToBeDeletedIDs.Clear();
-                        }
-
-                        // 部屋更新
-                        if (RentLivingEdit.RentLivingSections.Count > 0)
-                        {
-                            foreach (var room in RentLivingEdit.RentLivingSections)
-                            {
-                                if (room.IsNew)
-                                {
-                                    // 新規追加
-                                    string sqlInsertIntoRentLivingSection = String.Format("INSERT INTO RentLivingSection (RentLivingSection_ID, RentLiving_ID, Rent_ID, RoomNumber, Price, Madori) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}')",
-                                            room.RentLivingSectionId, RentLivingEdit.RentLivingId, RentLivingEdit.RentId, room.RentLivingSectionRoomNumber, room.RentLivingSectionPrice, room.RentLivingSectionMadori);
-
-                                    cmd.CommandText = sqlInsertIntoRentLivingSection;
-                                    var InsertIntoRentLivingSectionResult = cmd.ExecuteNonQuery();
-                                    if (InsertIntoRentLivingSectionResult > 0)
-                                    {
-                                        room.IsNew = false;
-                                        room.IsDirty = false;
-                                    }
-                                }
-                                // TODO:
-                                //else if (room.IsDirty)
-                                else
-                                {
-                                    // 更新
-                                    string sqlUpdateRentLivingSection = String.Format("UPDATE RentLivingSection SET RoomNumber = '{1}', Price = '{2}', Madori = '{3}' WHERE RentLivingSection_ID = '{0}'",
-                                            room.RentLivingSectionId, room.RentLivingSectionRoomNumber, room.RentLivingSectionPrice, room.RentLivingSectionMadori);
-
-                                    cmd.CommandText = sqlUpdateRentLivingSection;
-                                    var UpdateoRentLivingSectionResult = cmd.ExecuteNonQuery();
-                                    if (UpdateoRentLivingSectionResult > 0)
-                                    {
-                                        //room.IsNew = false;
-                                        room.IsDirty = false;
-                                    }
-                                }
-
-                                // 部屋の写真
-                                if (room.RentLivingSectionPictures.Count > 0)
-                                {
-                                    foreach (var roompic in room.RentLivingSectionPictures)
-                                    {
-                                        if (roompic.IsNew)
-                                        {
-                                            string sqlInsertIntoRentLivingSectionPic = String.Format("INSERT INTO RentLivingSectionPicture (RentLivingSectionPicture_ID, RentLivingSection_ID, RentLiving_ID, Rent_ID, PictureData, PictureThumbW200xData, PictureFileExt) VALUES ('{0}', '{1}', '{2}', '{3}', @0, @1, '{6}')",
-                                                roompic.RentSectionPictureId, roompic.RentLivingSectionId, roompic.RentLivingId, roompic.RentId, roompic.PictureData, roompic.PictureThumbW200xData, roompic.PictureFileExt);
-
-                                            cmd.CommandText = sqlInsertIntoRentLivingSectionPic;
-                                            // ループなので、前のパラメーターをクリアする。
-                                            cmd.Parameters.Clear();
-
-                                            SqliteParameter parameter1 = new SqliteParameter("@0", System.Data.DbType.Binary);
-                                            parameter1.Value = roompic.PictureData;
-                                            cmd.Parameters.Add(parameter1);
-
-                                            SqliteParameter parameter2 = new SqliteParameter("@1", System.Data.DbType.Binary);
-                                            parameter2.Value = roompic.PictureThumbW200xData;
-                                            cmd.Parameters.Add(parameter2);
-
-                                            var InsertIntoRentLivingSectionPicResult = cmd.ExecuteNonQuery();
-                                            if (InsertIntoRentLivingSectionPicResult > 0)
-                                            {
-                                                roompic.IsNew = false;
-                                                roompic.IsModified = false;
-                                            }
-                                        }
-                                        else if (roompic.IsModified)
-                                        {
-                                            string sqlUpdateRentLivingSectionPic = String.Format("UPDATE RentLivingSectionPicture SET PictureData = @0, PictureThumbW200xData = @1, PictureFileExt = '{6}' WHERE RentLivingSectionPicture_ID = '{0}'",
-                                                roompic.RentSectionPictureId, roompic.RentLivingSectionId, roompic.RentLivingId, roompic.RentId, roompic.PictureData, roompic.PictureThumbW200xData, roompic.PictureFileExt);
-
-                                            cmd.CommandText = sqlUpdateRentLivingSectionPic;
-                                            // ループなので、前のパラメーターをクリアする。
-                                            cmd.Parameters.Clear();
-
-                                            SqliteParameter parameter1 = new SqliteParameter("@0", System.Data.DbType.Binary);
-                                            parameter1.Value = roompic.PictureData;
-                                            cmd.Parameters.Add(parameter1);
-
-                                            SqliteParameter parameter2 = new SqliteParameter("@1", System.Data.DbType.Binary);
-                                            parameter2.Value = roompic.PictureThumbW200xData;
-                                            cmd.Parameters.Add(parameter2);
-
-                                            var UpdateRentLivingSectionPicResult = cmd.ExecuteNonQuery();
-                                            if (UpdateRentLivingSectionPicResult > 0)
-                                            {
-                                                roompic.IsNew = false;
-                                                roompic.IsModified = false;
-                                            }
-                                        }
-                                    }
-                                }
-
-                                // 部屋画像の削除リストを処理
-                                if (room.RentLivingSectionPicturesToBeDeletedIDs.Count > 0)
-                                {
-                                    foreach (var id in room.RentLivingSectionPicturesToBeDeletedIDs)
-                                    {
-                                        // 削除
-                                        string sqlDeleteRentLivingSectionPicture = String.Format("DELETE FROM RentLivingSectionPicture WHERE RentLivingSectionPicture_ID = '{0}'",
-                                                id);
-
-                                        cmd.CommandText = sqlDeleteRentLivingSectionPicture;
-                                        var UpdateoRentLivingSectionResult = cmd.ExecuteNonQuery();
-                                        if (UpdateoRentLivingSectionResult > 0)
-                                        {
-                                            //
-                                        }
-                                    }
-                                }
-
-                            }
-                        }
-
-                        // 部屋の削除リストを処理
-                        if (RentLivingEdit.RentLivingSectionToBeDeletedIDs.Count > 0)
-                        {
-                            foreach (var id in RentLivingEdit.RentLivingSectionToBeDeletedIDs)
-                            {
-                                // 削除
-                                string sqlDeleteRentLivingSection = String.Format("DELETE FROM RentLivingSection WHERE RentLivingSection_ID = '{0}'",
-                                        id);
-
-                                cmd.CommandText = sqlDeleteRentLivingSection;
-                                var DelRentLivingPdfResult = cmd.ExecuteNonQuery();
-                                if (DelRentLivingPdfResult > 0)
-                                {
-                                    //
-                                }
-                            }
-                            RentLivingEdit.RentLivingSectionToBeDeletedIDs.Clear();
-                        }
-
-                        cmd.Transaction.Commit();
-
-                        // 編集オブジェクトに格納された情報を、選択アイテムに更新（Listviewの情報が更新されるー＞DBからSelectして一覧を読み込みし直さなくて良くなる）
-                        RentLivingEditSelectedItem.Name = RentLivingEdit.Name;
-                        RentLivingEditSelectedItem.PostalCode = RentLivingEdit.PostalCode;
-                        RentLivingEditSelectedItem.Location = RentLivingEdit.Location;
-                        RentLivingEditSelectedItem.TrainStation1 = RentLivingEdit.TrainStation1;
-                        RentLivingEditSelectedItem.TrainStation2 = RentLivingEdit.TrainStation2;
-                        // TODO
-
-                        // 編集画面を非表示に
-                        if (ShowRentLivingEdit) ShowRentLivingEdit = false;
-                    }
-                    catch (Exception e)
-                    {
-                        cmd.Transaction.Rollback();
-
-                        System.Diagnostics.Debug.WriteLine(e.Message + " @MainViewModel::RentLivingEditSelectedEditUpdateCommand_Execute()");
-
-                        // エラーイベント発火
-                        MyError er = new MyError();
-                        er.ErrType = "DB";
-                        er.ErrCode = 0;
-                        er.ErrText = "「" + e.Message + "」";
-                        er.ErrDescription = "賃貸住居用物件の選択アイテム編集更新 (UPDATE)で、データベースを更新する処理でエラーが発生し、ロールバックしました。";
-                        er.ErrDatetime = DateTime.Now;
-                        er.ErrPlace = "MainViewModel::RentLivingEditSelectedEditUpdateCommand_Execute()";
-                        ErrorOccured?.Invoke(er);
-                    }
                 }
             }
         }
@@ -2942,7 +1728,7 @@ namespace ZumenSearch.ViewModels
                     errmessage = e.Message;
                     System.Diagnostics.Debug.WriteLine("Exception:'" + e.Message + "' @MainViewModel::AgencyListCommand_Execute()");
                 }
-
+                /*
                 // エラーイベント発火
                 MyError er = new MyError();
                 er.ErrType = "DB";
@@ -2952,6 +1738,7 @@ namespace ZumenSearch.ViewModels
                 er.ErrDatetime = DateTime.Now;
                 er.ErrPlace = "In " + e.Source + " from MainViewModel::AgencyListCommand_Execute()";
                 ErrorOccured?.Invoke(er);
+                */
             }
 
 
@@ -3001,7 +1788,7 @@ namespace ZumenSearch.ViewModels
                             cmd.Transaction.Rollback();
 
                             System.Diagnostics.Debug.WriteLine(e.Message + " @AgencySelectedDeleteCommand_Execute()");
-
+                            /*
                             // エラーイベント発火
                             MyError er = new MyError();
                             er.ErrType = "DB";
@@ -3011,6 +1798,7 @@ namespace ZumenSearch.ViewModels
                             er.ErrDatetime = DateTime.Now;
                             er.ErrPlace = "MainViewModel::AgencySelectedDeleteCommand_Execute()";
                             ErrorOccured?.Invoke(er);
+                            */
                         }
                     }
                 }
@@ -3115,6 +1903,8 @@ namespace ZumenSearch.ViewModels
                                 // ロールバック
                                 cmd.Transaction.Rollback();
 
+                                Debug.WriteLine("Opps. " + "「" + e.Message + "」");
+                                /*
                                 // エラーイベント発火
                                 MyError er = new MyError();
                                 er.ErrType = "DB";
@@ -3124,6 +1914,7 @@ namespace ZumenSearch.ViewModels
                                 er.ErrDatetime = DateTime.Now;
                                 er.ErrPlace = "MainViewModel::AgencyInsertOrUpdateCommand()";
                                 ErrorOccured?.Invoke(er);
+                                */
                             }
                         }
                     }
@@ -3189,7 +1980,7 @@ namespace ZumenSearch.ViewModels
                             cmd.Transaction.Rollback();
 
                             System.Diagnostics.Debug.WriteLine(e.Message + " @MainViewModel::AgencyInsertOrUpdateCommand_Execute()");
-
+                            /*
                             // エラーイベント発火
                             MyError er = new MyError();
                             er.ErrType = "DB";
@@ -3199,6 +1990,7 @@ namespace ZumenSearch.ViewModels
                             er.ErrDatetime = DateTime.Now;
                             er.ErrPlace = "MainViewModel::AgencyInsertOrUpdateCommand_Execute()";
                             ErrorOccured?.Invoke(er);
+                            */
                         }
                     }
                 }
@@ -3319,7 +2111,7 @@ namespace ZumenSearch.ViewModels
                     errmessage = e.Message;
                     System.Diagnostics.Debug.WriteLine("Exception:'" + e.Message + "' @MainViewModel::MaintenanceCompanyListCommand_Execute()");
                 }
-
+                /*
                 // エラーイベント発火
                 MyError er = new MyError();
                 er.ErrType = "DB";
@@ -3329,6 +2121,7 @@ namespace ZumenSearch.ViewModels
                 er.ErrDatetime = DateTime.Now;
                 er.ErrPlace = "In " + e.Source + " from MainViewModel::MaintenanceCompanyListCommand_Execute()";
                 ErrorOccured?.Invoke(er);
+                */
             }
 
 
@@ -3379,7 +2172,7 @@ namespace ZumenSearch.ViewModels
                             cmd.Transaction.Rollback();
 
                             System.Diagnostics.Debug.WriteLine(e.Message + " @MaintenanceCompanySelectedDeleteCommand_Execute()");
-
+                            /*
                             // エラーイベント発火
                             MyError er = new MyError();
                             er.ErrType = "DB";
@@ -3389,6 +2182,7 @@ namespace ZumenSearch.ViewModels
                             er.ErrDatetime = DateTime.Now;
                             er.ErrPlace = "MainViewModel::MaintenanceCompanySelectedDeleteCommand_Execute()";
                             ErrorOccured?.Invoke(er);
+                            */
                         }
                     }
                 }
@@ -3493,6 +2287,9 @@ namespace ZumenSearch.ViewModels
                                 // ロールバック
                                 cmd.Transaction.Rollback();
 
+
+                                Debug.WriteLine("Opps. " + "「" + e.Message + "」");
+                                /*
                                 // エラーイベント発火
                                 MyError er = new MyError();
                                 er.ErrType = "DB";
@@ -3502,6 +2299,7 @@ namespace ZumenSearch.ViewModels
                                 er.ErrDatetime = DateTime.Now;
                                 er.ErrPlace = "MainViewModel::MaintenanceCompanyInsertOrUpdateCommand_Execute()";
                                 ErrorOccured?.Invoke(er);
+                                */
                             }
                         }
                     }
@@ -3567,7 +2365,7 @@ namespace ZumenSearch.ViewModels
                             cmd.Transaction.Rollback();
 
                             System.Diagnostics.Debug.WriteLine(e.Message + " @MainViewModel::MaintenanceCompanyInsertOrUpdateCommand_Execute()");
-
+                            /*
                             // エラーイベント発火
                             MyError er = new MyError();
                             er.ErrType = "DB";
@@ -3577,6 +2375,7 @@ namespace ZumenSearch.ViewModels
                             er.ErrDatetime = DateTime.Now;
                             er.ErrPlace = "MainViewModel::MaintenanceCompanyInsertOrUpdateCommand_Execute()";
                             ErrorOccured?.Invoke(er);
+                            */
                         }
                     }
                 }
@@ -3694,7 +2493,7 @@ namespace ZumenSearch.ViewModels
                     errmessage = e.Message;
                     System.Diagnostics.Debug.WriteLine("Exception:'" + e.Message + "' @MainViewModel::OwnerListCommand_Execute()");
                 }
-
+                /*
                 // エラーイベント発火
                 MyError er = new MyError();
                 er.ErrType = "DB";
@@ -3704,6 +2503,7 @@ namespace ZumenSearch.ViewModels
                 er.ErrDatetime = DateTime.Now;
                 er.ErrPlace = "In " + e.Source + " from MainViewModel::OwnerListCommand_Execute()";
                 ErrorOccured?.Invoke(er);
+                */
             }
 
 
@@ -3754,7 +2554,7 @@ namespace ZumenSearch.ViewModels
                             cmd.Transaction.Rollback();
 
                             System.Diagnostics.Debug.WriteLine(e.Message + " @OwnerSelectedDeleteCommand_Execute()");
-
+                            /*
                             // エラーイベント発火
                             MyError er = new MyError();
                             er.ErrType = "DB";
@@ -3764,6 +2564,7 @@ namespace ZumenSearch.ViewModels
                             er.ErrDatetime = DateTime.Now;
                             er.ErrPlace = "MainViewModel::OwnerSelectedDeleteCommand_Execute()";
                             ErrorOccured?.Invoke(er);
+                            */
                         }
                     }
                 }
@@ -3868,6 +2669,8 @@ namespace ZumenSearch.ViewModels
                                 // ロールバック
                                 cmd.Transaction.Rollback();
 
+                                Debug.WriteLine("Opps. " + "「" + e.Message + "」");
+                                /*
                                 // エラーイベント発火
                                 MyError er = new MyError();
                                 er.ErrType = "DB";
@@ -3877,6 +2680,7 @@ namespace ZumenSearch.ViewModels
                                 er.ErrDatetime = DateTime.Now;
                                 er.ErrPlace = "MainViewModel::OwnerInsertOrUpdateCommand_Execute()";
                                 ErrorOccured?.Invoke(er);
+                                */
                             }
                         }
                     }
@@ -3942,7 +2746,7 @@ namespace ZumenSearch.ViewModels
                             cmd.Transaction.Rollback();
 
                             System.Diagnostics.Debug.WriteLine(e.Message + " @MainViewModel::OwnerInsertOrUpdateCommand_Execute()");
-
+                            /*
                             // エラーイベント発火
                             MyError er = new MyError();
                             er.ErrType = "DB";
@@ -3952,6 +2756,7 @@ namespace ZumenSearch.ViewModels
                             er.ErrDatetime = DateTime.Now;
                             er.ErrPlace = "MainViewModel::OwnerInsertOrUpdateCommand_Execute()";
                             ErrorOccured?.Invoke(er);
+                            */
                         }
                     }
                 }
@@ -3975,9 +2780,7 @@ namespace ZumenSearch.ViewModels
 
         #endregion
 
-
     }
-
 
     #endregion
 

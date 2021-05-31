@@ -240,6 +240,10 @@
 
                                         </MultiTrigger>
 
+                                        <Trigger Property="IsEnabled" Value="False">
+                                            <Setter Property="Opacity" Value="0.4"/>
+                                        </Trigger>
+
                                     </ControlTemplate.Triggers>
 
                                 </ControlTemplate>
@@ -301,7 +305,7 @@
                                             <!-- ここの色を変えただけ -->
                                             <Setter TargetName="Border" Property="Background" Value="#E81123"></Setter>
 
-                                            <Setter TargetName="PathIcon" Property="Fill" Value="{DynamicResource ControlMouseOverColorBrush}"/>
+                                            <Setter TargetName="PathIcon" Property="Fill" Value="{DynamicResource ControlMouseOverBackgroundColorBrush}"/>
                                         </Trigger>
 
                                         <MultiTrigger>
@@ -309,24 +313,11 @@
                                                 <Condition Property="IsPressed" Value="False" />
                                                 <Condition Property="IsMouseOver" Value="True" />
                                             </MultiTrigger.Conditions>
-                                            <Setter TargetName="PathIcon" Property="Fill" Value="{DynamicResource ControlMouseOverColorBrush}">
-                                                <!--
-                                                <Setter.Value>
-                                                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                                        <GradientBrush.GradientStops>
-                                                            <GradientStopCollection>
-                                                                <GradientStop Color="{DynamicResource ControlMouseOverColor}" Offset="0.0" />
-                                                                <GradientStop Color="{DynamicResource ControlDarkColor}" Offset="1.0" />
-                                                            </GradientStopCollection>
-                                                        </GradientBrush.GradientStops>
-                                                    </LinearGradientBrush>
-                                                </Setter.Value>
-                                                -->
-                                            </Setter>
+                                            <Setter TargetName="PathIcon" Property="Fill" Value="{DynamicResource ControlMouseOverBackgroundColorBrush}"/>
                                         </MultiTrigger>
 
                                         <MultiTrigger>
-                                            <Setter TargetName="PathIcon" Property="Fill" Value="{DynamicResource ControlPressedColorBrush}"/>
+                                            <Setter TargetName="PathIcon" Property="Fill" Value="{DynamicResource ControlMouseOverBackgroundColorBrush}"/>
                                             <MultiTrigger.Conditions>
                                                 <Condition Property="IsPressed" Value="true" />
                                                 <Condition Property="IsMouseOver" Value="True" />

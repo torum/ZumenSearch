@@ -202,5 +202,65 @@ namespace ZumenSearch.Properties {
                 this["RentLivingWindow_Maximized"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public double RentLivingImagesWindow_Left {
+            get {
+                return ((double)(this["RentLivingImagesWindow_Left"]));
+            }
+            set {
+                this["RentLivingImagesWindow_Left"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public double RentLivingImagesWindow_Top {
+            get {
+                return ((double)(this["RentLivingImagesWindow_Top"]));
+            }
+            set {
+                this["RentLivingImagesWindow_Top"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public double RentLivingImagesWindow_Height {
+            get {
+                return ((double)(this["RentLivingImagesWindow_Height"]));
+            }
+            set {
+                this["RentLivingImagesWindow_Height"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public double RentLivingImagesWindow_Width {
+            get {
+                return ((double)(this["RentLivingImagesWindow_Width"]));
+            }
+            set {
+                this["RentLivingImagesWindow_Width"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool RentLivingImagesWindow_Maximized {
+            get {
+                return ((bool)(this["RentLivingImagesWindow_Maximized"]));
+            }
+            set {
+                this["RentLivingImagesWindow_Maximized"] = value;
+            }
+        }
     }
 }

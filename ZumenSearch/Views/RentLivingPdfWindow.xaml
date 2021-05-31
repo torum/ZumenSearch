@@ -1,0 +1,14 @@
+﻿<Window x:Class="ZumenSearch.Views.RentLivingPdfWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ZumenSearch.Views" 
+        xmlns:viewmodels="clr-namespace:ZumenSearch.ViewModels" 
+        d:DataContext="{d:DesignInstance Type=viewmodels:RentLivingPdfViewModel}"
+        mc:Ignorable="d"
+        Title="RentLivingPdfWindow" Height="450" Width="800">
+    <Grid>
+        <Image Width="360" Height="240" Margin="0" Source="{Binding Picture}"></Image>
+    </Grid>
+</Window>
