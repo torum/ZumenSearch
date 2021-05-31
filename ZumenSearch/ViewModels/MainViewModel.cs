@@ -37,6 +37,9 @@ using ZumenSearch.Common;
 /// Modelsに基底クラス定義やデータ操作をリストラクチャー。
 
 /// ● 履歴：
+/// v0.0.0.18 Renamingの置換もろもろ。画像編集画面でのIsDirty修正（IsEdit追加）
+/// v0.0.0.17 クリーンアップ。
+/// v0.0.0.16 Windowの表示位置保存を修正。
 /// v0.0.0.16 画像編集Windowを追加し、画像の追加、一覧、編集、削除のサイクルは一旦完了。PDF画面途中。部屋編集画面と保存の流れを変更。他。
 /// v0.0.0.15 MAXIMIZE時のタスクバー被りのFix
 /// v0.0.0.14 ステータスバー追加等、もろもろ
@@ -63,7 +66,7 @@ namespace ZumenSearch.ViewModels
         #region == 基本 ==
 
         // Application version.
-        private const string _appVer = "0.0.0.16";
+        private const string _appVer = "0.0.0.18";
 
         // Application name.
         private const string _appName = "ZumenSearch";
@@ -121,8 +124,8 @@ namespace ZumenSearch.ViewModels
             }
         }
 
-        private RentLivingSection _rentLivingNewSectionSelectedItem;
-        public RentLivingSection RentLivingNewSectionSelectedItem
+        private RentLivingRoom _rentLivingNewSectionSelectedItem;
+        public RentLivingRoom RentLivingNewSectionSelectedItem
         {
             get
             {
@@ -169,8 +172,8 @@ namespace ZumenSearch.ViewModels
             }
         }
 
-        private RentLivingSection _rentLivingNewSectionNew = new RentLivingSection(Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString());
-        public RentLivingSection RentLivingNewSectionNew
+        private RentLivingRoom _rentLivingNewSectionNew = new RentLivingRoom(Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString());
+        public RentLivingRoom RentLivingNewSectionNew
         {
             get
             {
@@ -185,8 +188,8 @@ namespace ZumenSearch.ViewModels
             }
         }
 
-        private RentLivingSection _rentLivingNewSectionEdit = new RentLivingSection(Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString());
-        public RentLivingSection RentLivingNewSectionEdit
+        private RentLivingRoom _rentLivingNewSectionEdit = new RentLivingRoom(Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString());
+        public RentLivingRoom RentLivingNewSectionEdit
         {
             get
             {

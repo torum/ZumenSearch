@@ -38,35 +38,31 @@ namespace ZumenSearch.Views
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             // Load window possition.
-            if ((Properties.Settings.Default.RentLivingSectionWindow_Width >= 0))
+            if ((Properties.Settings.Default.RentLivingRoomWindow_Width >= 1024))
             {
-                this.Width = Properties.Settings.Default.RentLivingSectionWindow_Width;
+                this.Width = Properties.Settings.Default.RentLivingRoomWindow_Width;
             }
 
-            if ((Properties.Settings.Default.RentLivingSectionWindow_Height >= 0))
+            if ((Properties.Settings.Default.RentLivingRoomWindow_Height >= 680))
             {
-                this.Height = Properties.Settings.Default.RentLivingSectionWindow_Height;
+                this.Height = Properties.Settings.Default.RentLivingRoomWindow_Height;
             }
 
-            if ((Properties.Settings.Default.RentLivingSectionWindow_Left >= 0) )
+            if ((Properties.Settings.Default.RentLivingRoomWindow_Left > 0) )
             {
-                this.Left = Properties.Settings.Default.RentLivingSectionWindow_Left;
+                this.Left = Properties.Settings.Default.RentLivingRoomWindow_Left;
             }
-            else
-            {
+            if (this.Left < 0)
                 this.Left = 0;
-            }
 
-            if ((Properties.Settings.Default.RentLivingSectionWindow_Top >= 0))
+            if ((Properties.Settings.Default.RentLivingRoomWindow_Top > 0))
             {
-                this.Top = Properties.Settings.Default.RentLivingSectionWindow_Top;
+                this.Top = Properties.Settings.Default.RentLivingRoomWindow_Top;
             }
-            else
-            {
+            if (this.Top < 0)
                 this.Top = 0;
-            }
 
-            if (Properties.Settings.Default.RentLivingSectionWindow_Maximized)
+            if (Properties.Settings.Default.RentLivingRoomWindow_Maximized)
             {
                 this.WindowState = WindowState.Maximized;
             }
@@ -81,16 +77,16 @@ namespace ZumenSearch.Views
             // Save window pos.
             if (WindowState == WindowState.Normal && Visibility == Visibility.Visible)
             {
-                Properties.Settings.Default.RentLivingSectionWindow_Left = this.Left;
-                Properties.Settings.Default.RentLivingSectionWindow_Top = this.Top;
-                Properties.Settings.Default.RentLivingSectionWindow_Height = this.Height;
-                Properties.Settings.Default.RentLivingSectionWindow_Width = this.Width;
+                Properties.Settings.Default.RentLivingRoomWindow_Left = this.Left;
+                Properties.Settings.Default.RentLivingRoomWindow_Top = this.Top;
+                Properties.Settings.Default.RentLivingRoomWindow_Height = this.Height;
+                Properties.Settings.Default.RentLivingRoomWindow_Width = this.Width;
 
-                Properties.Settings.Default.RentLivingSectionWindow_Maximized = false;
+                Properties.Settings.Default.RentLivingRoomWindow_Maximized = false;
             }
             else if (this.WindowState == WindowState.Maximized)
             {
-                Properties.Settings.Default.RentLivingSectionWindow_Maximized = true;
+                Properties.Settings.Default.RentLivingRoomWindow_Maximized = true;
             }
 
             Properties.Settings.Default.Save();

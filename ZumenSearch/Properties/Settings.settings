@@ -14,52 +14,52 @@
     <Setting Name="MainWindow_Width" Type="System.Double" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
-    <Setting Name="RentLivingWindow_Left" Type="System.Double" Scope="User">
+    <Setting Name="RentLivingBuildingWindow_Left" Type="System.Double" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
-    <Setting Name="RentLivingWindow_Top" Type="System.Double" Scope="User">
+    <Setting Name="RentLivingBuildingWindow_Top" Type="System.Double" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
-    <Setting Name="RentLivingWindow_Height" Type="System.Double" Scope="User">
+    <Setting Name="RentLivingBuildingWindow_Height" Type="System.Double" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
-    <Setting Name="RentLivingWindow_Width" Type="System.Double" Scope="User">
+    <Setting Name="RentLivingBuildingWindow_Width" Type="System.Double" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
-    <Setting Name="RentLivingSectionWindow_Left" Type="System.Double" Scope="User">
+    <Setting Name="RentLivingRoomWindow_Left" Type="System.Double" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
-    <Setting Name="RentLivingSectionWindow_Top" Type="System.Double" Scope="User">
+    <Setting Name="RentLivingRoomWindow_Top" Type="System.Double" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
-    <Setting Name="RentLivingSectionWindow_Height" Type="System.Double" Scope="User">
+    <Setting Name="RentLivingRoomWindow_Height" Type="System.Double" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
-    <Setting Name="RentLivingSectionWindow_Width" Type="System.Double" Scope="User">
+    <Setting Name="RentLivingRoomWindow_Width" Type="System.Double" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
     <Setting Name="MainWindow_Maximized" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
-    <Setting Name="RentLivingSectionWindow_Maximized" Type="System.Boolean" Scope="User">
+    <Setting Name="RentLivingRoomWindow_Maximized" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
-    <Setting Name="RentLivingWindow_Maximized" Type="System.Boolean" Scope="User">
+    <Setting Name="RentLivingBuildingWindow_Maximized" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
-    <Setting Name="RentLivingImagesWindow_Left" Type="System.Double" Scope="User">
+    <Setting Name="RentLivingImageWindow_Left" Type="System.Double" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
-    <Setting Name="RentLivingImagesWindow_Top" Type="System.Double" Scope="User">
+    <Setting Name="RentLivingImageWindow_Top" Type="System.Double" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
-    <Setting Name="RentLivingImagesWindow_Height" Type="System.Double" Scope="User">
+    <Setting Name="RentLivingImageWindow_Height" Type="System.Double" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
-    <Setting Name="RentLivingImagesWindow_Width" Type="System.Double" Scope="User">
+    <Setting Name="RentLivingImageWindow_Width" Type="System.Double" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
-    <Setting Name="RentLivingImagesWindow_Maximized" Type="System.Boolean" Scope="User">
+    <Setting Name="RentLivingImageWindow_Maximized" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
   </Settings>

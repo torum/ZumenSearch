@@ -16,7 +16,7 @@ namespace ZumenSearch.Models
     /// <summary>
     /// 図面の基底クラス
     /// </summary>
-    public class RentZumenPDF : PDF
+    public class RentPdf : PDF
     {
         protected string _rentZumenPdfId;
         public string RentZumenPdfId
@@ -37,7 +37,7 @@ namespace ZumenSearch.Models
         }
 
         private byte[] _pdfData;
-        public byte[] PDFData
+        public byte[] PdfData
         {
             get
             {
@@ -48,7 +48,7 @@ namespace ZumenSearch.Models
                 if (_pdfData == value) return;
 
                 _pdfData = value;
-                this.NotifyPropertyChanged("PDFData");
+                this.NotifyPropertyChanged("PdfData");
             }
         }
 
@@ -163,7 +163,7 @@ namespace ZumenSearch.Models
     /// <summary>
     /// 賃貸住居用物件の図面クラス
     /// </summary>
-    public class RentLivingZumenPDF : RentZumenPDF
+    public class RentLivingPdf : RentPdf
     {
         protected string _rentLivingId;
         public string RentLivingId
@@ -174,12 +174,12 @@ namespace ZumenSearch.Models
             }
         }
 
-        public RentLivingZumenPDF(string rentid, string rentlivingid, string rentlivingzumenid)
+        public RentLivingPdf(string rentid, string rentlivingid, string rentlivingpdfid)
         {
             _rentId = rentid;
             _rentLivingId = rentlivingid;
 
-            _rentZumenPdfId = rentlivingzumenid;
+            _rentZumenPdfId = rentlivingpdfid;
 
             // 一応
             _dateTimeAdded = DateTime.Now;

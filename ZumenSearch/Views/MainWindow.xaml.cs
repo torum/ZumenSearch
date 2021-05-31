@@ -72,33 +72,29 @@ namespace ZumenSearch.Views
         // Windowロード時の処理
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            if ((Properties.Settings.Default.MainWindow_Width != 0))
+            if ((Properties.Settings.Default.MainWindow_Width >= 1024))
             {
                 this.Width = Properties.Settings.Default.MainWindow_Width;
             }
 
-            if ((Properties.Settings.Default.MainWindow_Height != 0))
+            if ((Properties.Settings.Default.MainWindow_Height >= 680))
             {
                 this.Height = Properties.Settings.Default.MainWindow_Height;
             }
 
-            if ((Properties.Settings.Default.MainWindow_Left >= 0))
+            if ((Properties.Settings.Default.MainWindow_Left > 0))
             {
                 this.Left = Properties.Settings.Default.MainWindow_Left;
             }
-            else
-            {
+            if (this.Left < 0)
                 this.Left = 0;
-            }
 
-            if ((Properties.Settings.Default.MainWindow_Top >= 0))
+            if ((Properties.Settings.Default.MainWindow_Top > 0))
             {
                 this.Top = Properties.Settings.Default.MainWindow_Top;
             }
-            else
-            {
+            if (this.Top < 0)
                 this.Top = 0;
-            }
 
             if (Properties.Settings.Default.MainWindow_Maximized)
             {
@@ -192,9 +188,9 @@ namespace ZumenSearch.Views
                 vm.DataAccessModule = arg.DataAccessModule;
 
                 // 部屋編集用のWindowを表示させるイベントをサブスクライブする設定
-                vm.OpenRentLivingSectionWindow += (sender, arg) => { win.OpenRentLivingSectionWindow(arg); };
+                vm.OpenRentLivingRoomWindow += (sender, arg) => { win.OpenRentLivingRoomWindow(arg); };
                 // 画像編集用のWindowを表示させるイベントをサブスクライブする設定
-                vm.OpenRentLivingImagesWindow += (sender, arg) => { win.OpenRentLivingImagesWindow(arg); };
+                vm.OpenRentLivingImageWindow += (sender, arg) => { win.OpenRentLivingImageWindow(arg); };
 
                 // 編集画面終了時の保存確認後の閉じるアクションを設定
                 //vm.CloseAction = new Action(win.Close);

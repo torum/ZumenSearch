@@ -247,7 +247,7 @@
                                     <Button Width="130" Margin="3" Command="{Binding RentLivingEditZumenPdfAddCommand}">PDFの追加</Button>
                                 </StackPanel>
 
-                                <ListView Grid.Row="2" Margin="3" ItemsSource="{Binding RentLivingEdit.RentLivingZumenPDFs}" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                <ListView Grid.Row="2" Margin="3" ItemsSource="{Binding RentLivingEdit.RentLivingPdfs}" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                                     <ListView.InputBindings>
                                         <!-- エンター!! -->
                                         <KeyBinding Key="Enter" Command="{Binding Path=DataContext.RentLivingEditZumenPdfEnterCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" />
@@ -1085,34 +1085,34 @@
                                 </StackPanel>
                             </StackPanel>
 
-                            <ListView Grid.Row="2" ItemsSource="{Binding RentLivingEdit.RentLivingSections}" SelectedItem="{Binding SectionsSelectedItem}">
+                            <ListView Grid.Row="2" ItemsSource="{Binding RentLivingEdit.RentLivingRooms}" SelectedItem="{Binding SectionsSelectedItem}">
                                 <ListView.View>
                                     <GridView>
                                         <GridViewColumn Header="ID" Width="0">
                                             <GridViewColumn.CellTemplate>
                                                 <DataTemplate>
-                                                    <TextBlock Text="{Binding RentLivingSectionId, Mode=OneWay}" Padding="3"/>
+                                                    <TextBlock Text="{Binding RentLivingRoomId, Mode=OneWay}" Padding="3"/>
                                                 </DataTemplate>
                                             </GridViewColumn.CellTemplate>
                                         </GridViewColumn>
                                         <GridViewColumn Header="部屋番号" Width="120">
                                             <GridViewColumn.CellTemplate>
                                                 <DataTemplate>
-                                                    <TextBlock Text="{Binding RentLivingSectionRoomNumber, Mode=OneWay}" Padding="3"/>
+                                                    <TextBlock Text="{Binding RentLivingRoomRoomNumber, Mode=OneWay}" Padding="3"/>
                                                 </DataTemplate>
                                             </GridViewColumn.CellTemplate>
                                         </GridViewColumn>
                                         <GridViewColumn Header="賃料" Width="120">
                                             <GridViewColumn.CellTemplate>
                                                 <DataTemplate>
-                                                    <TextBlock Text="{Binding RentLivingSectionPrice, Mode=OneWay}" Padding="3"/>
+                                                    <TextBlock Text="{Binding RentLivingRoomPrice, Mode=OneWay}" Padding="3"/>
                                                 </DataTemplate>
                                             </GridViewColumn.CellTemplate>
                                         </GridViewColumn>
                                         <GridViewColumn Header="間取り" Width="120">
                                             <GridViewColumn.CellTemplate>
                                                 <DataTemplate>
-                                                    <TextBlock Text="{Binding RentLivingSectionMadori, Mode=OneWay}" Padding="3"/>
+                                                    <TextBlock Text="{Binding RentLivingRoomMadori, Mode=OneWay}" Padding="3"/>
                                                 </DataTemplate>
                                             </GridViewColumn.CellTemplate>
                                         </GridViewColumn>

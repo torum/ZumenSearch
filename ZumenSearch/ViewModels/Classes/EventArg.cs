@@ -24,23 +24,23 @@ namespace ZumenSearch.ViewModels.Classes
         public DataAccess DataAccessModule { get; set; }
     }
 
-    public class OpenRentLivingSectionWindowEventArgs : EventArgs
+    public class OpenRentLivingRoomWindowEventArgs : EventArgs
     {
         // Window識別用ID
         public string Id { get; set; }
 
         // 賃貸住居用物件に属する部屋リスト
-        public ObservableCollection<RentLivingSection> RentLivingSections { get; set; }
+        public ObservableCollection<RentLivingRoom> RentLivingRooms { get; set; }
 
         // 部屋オブジェクト
-        public RentLivingSection RentLivingSectionObject { get; set; }
+        public RentLivingRoom RentLivingRoomObject { get; set; }
 
         // データ編集用DBアクセスモジュール
         //public DataAccess DataAccessModule { get; set; }
 
     }
 
-    public class OpenRentLivingImagesWindowEventArgs : EventArgs
+    public class OpenRentLivingImageWindowEventArgs : EventArgs
     {
         // Window識別用ID
         public string Id { get; set; }
@@ -50,6 +50,9 @@ namespace ZumenSearch.ViewModels.Classes
 
         // 画像オブジェクト
         public RentLivingPicture RentLivingPictureObject { get; set; }
+
+        // 編集モードか新規モードかのフラグ（編集画面でIsDirtyのセットに使う）
+        public bool IsEdit { get; set; }
 
         // データ編集用DBアクセスモジュール
         //public DataAccess DataAccessModule { get; set; }

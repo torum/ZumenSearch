@@ -91,8 +91,8 @@ namespace ZumenSearch.ViewModels
         }
 
         // 部屋リストの選択項目を保持
-        private RentLivingSection _sectionsSelectedItem;
-        public RentLivingSection SectionsSelectedItem
+        private RentLivingRoom _sectionsSelectedItem;
+        public RentLivingRoom SectionsSelectedItem
         {
             get
             {
@@ -203,10 +203,10 @@ namespace ZumenSearch.ViewModels
         #region == イベント ==
 
         // 部屋編集画面を開く
-        public event EventHandler<OpenRentLivingSectionWindowEventArgs> OpenRentLivingSectionWindow;
+        public event EventHandler<OpenRentLivingRoomWindowEventArgs> OpenRentLivingRoomWindow;
 
         // 画像編集画面を開く
-        public event EventHandler<OpenRentLivingImagesWindowEventArgs> OpenRentLivingImagesWindow;
+        public event EventHandler<OpenRentLivingImageWindowEventArgs> OpenRentLivingImageWindow;
         
         // エラー通知イベント
         public delegate void MyErrorEvent(ErrorObject err);
@@ -264,7 +264,7 @@ namespace ZumenSearch.ViewModels
                 param => RentLivingEditZumenPdfShowCommand_Execute(param),
                 param => RentLivingEditZumenPdfShowCommand_CanExecute());
             // PDFの
-            RentLivingEditZumenPdfEnterCommand = new GenericRelayCommand<RentZumenPDF>(
+            RentLivingEditZumenPdfEnterCommand = new GenericRelayCommand<RentPdf>(
                 param => RentLivingEditZumenPdfEnterCommand_Execute(param),
                 param => RentLivingEditZumenPdfEnterCommand_CanExecute());
 
@@ -444,7 +444,7 @@ namespace ZumenSearch.ViewModels
                             rlpic.PictureThumbData = ImageThumbData;
                             rlpic.PictureFileExt = fi.Extension;
 
-                            // DBに保存する為のフラグ。
+                            // 画面閉じる際の確認用のフラグ。
                             rlpic.IsNew = true;
                             // DBに保存する為のフラグ。
                             rlpic.IsModified = true;
@@ -459,13 +459,14 @@ namespace ZumenSearch.ViewModels
                             fs.Close();
 
                             // 画像編集Windowへ渡す為のArgをセット
-                            OpenRentLivingImagesWindowEventArgs ag = new OpenRentLivingImagesWindowEventArgs();
+                            OpenRentLivingImageWindowEventArgs ag = new OpenRentLivingImageWindowEventArgs();
                             ag.Id = rlpic.RentPictureId;
                             ag.RentLivingPictureObject = rlpic;
                             ag.RentLivingPictures = RentLivingEdit.RentLivingPictures;
+                            ag.IsEdit = false;
 
                             // 画像編集Windowを開く
-                            OpenRentLivingImagesWindow?.Invoke(this, ag);
+                            OpenRentLivingImageWindow?.Invoke(this, ag);
 
                         }
                     }
@@ -522,13 +523,14 @@ namespace ZumenSearch.ViewModels
         private void PictureEdit(RentLivingPicture rlpic)
         {
             // 画像編集Windowへ渡す為のArgをセット
-            OpenRentLivingImagesWindowEventArgs ag = new OpenRentLivingImagesWindowEventArgs();
+            OpenRentLivingImageWindowEventArgs ag = new OpenRentLivingImageWindowEventArgs();
             ag.Id = rlpic.RentPictureId;
             ag.RentLivingPictureObject = rlpic;
             ag.RentLivingPictures = RentLivingEdit.RentLivingPictures;
+            ag.IsEdit = true;
 
             // 画像編集Windowを開く
-            OpenRentLivingImagesWindow?.Invoke(this, ag);
+            OpenRentLivingImageWindow?.Invoke(this, ag);
         }
 
         // 物件画像削除
@@ -702,16 +704,16 @@ namespace ZumenSearch.ViewModels
             if (RentLivingEdit == null) 
                 return;
 
-            // RentLivingSection Newオブジェクトを用意
-            RentLivingSection rlsection = new RentLivingSection(RentLivingEdit.RentId, _id, Guid.NewGuid().ToString());
+            // RentLivingRoom Newオブジェクトを用意
+            RentLivingRoom rlsection = new RentLivingRoom(RentLivingEdit.RentId, _id, Guid.NewGuid().ToString());
             rlsection.IsNew = true;
 
-            OpenRentLivingSectionWindowEventArgs ag = new OpenRentLivingSectionWindowEventArgs();
-            ag.Id = rlsection.RentLivingSectionId;
-            ag.RentLivingSectionObject = rlsection;
-            ag.RentLivingSections = RentLivingEdit.RentLivingSections;
+            OpenRentLivingRoomWindowEventArgs ag = new OpenRentLivingRoomWindowEventArgs();
+            ag.Id = rlsection.RentLivingRoomId;
+            ag.RentLivingRoomObject = rlsection;
+            ag.RentLivingRooms = RentLivingEdit.RentLivingRooms;
 
-            OpenRentLivingSectionWindow?.Invoke(this, ag);
+            OpenRentLivingRoomWindow?.Invoke(this, ag);
         }
 
         // 部屋の編集（画面表示）
@@ -730,12 +732,12 @@ namespace ZumenSearch.ViewModels
             if (SectionsSelectedItem == null) 
                 return;
 
-            OpenRentLivingSectionWindowEventArgs ag = new OpenRentLivingSectionWindowEventArgs();
-            ag.Id = SectionsSelectedItem.RentLivingSectionId;
-            ag.RentLivingSectionObject = SectionsSelectedItem;
-            ag.RentLivingSections = RentLivingEdit.RentLivingSections;
+            OpenRentLivingRoomWindowEventArgs ag = new OpenRentLivingRoomWindowEventArgs();
+            ag.Id = SectionsSelectedItem.RentLivingRoomId;
+            ag.RentLivingRoomObject = SectionsSelectedItem;
+            ag.RentLivingRooms = RentLivingEdit.RentLivingRooms;
 
-            OpenRentLivingSectionWindow?.Invoke(this, ag);
+            OpenRentLivingRoomWindow?.Invoke(this, ag);
         }
 
         // 部屋を複製 TODO
@@ -754,17 +756,17 @@ namespace ZumenSearch.ViewModels
             /*
             
             //
-            RentLivingEditSectionNew = new RentLivingSection(RentLivingEdit.Rent_ID, RentLivingEdit.RentLiving_ID, Guid.NewGuid().ToString());
+            RentLivingEditSectionNew = new RentLivingRoom(RentLivingEdit.Rent_ID, RentLivingEdit.RentLiving_ID, Guid.NewGuid().ToString());
             RentLivingEditSectionNew.IsNew = true;
             RentLivingEditSectionNew.IsDirty = false;
 
-            RentLivingEditSectionNew.RentLivingSectionRoomNumber = SectionsSelectedItem.RentLivingSectionRoomNumber + "の複製";
-            RentLivingEditSectionNew.RentLivingSectionMadori = SectionsSelectedItem.RentLivingSectionMadori;
-            RentLivingEditSectionNew.RentLivingSectionPrice = SectionsSelectedItem.RentLivingSectionPrice;
+            RentLivingEditSectionNew.RentLivingRoomRoomNumber = SectionsSelectedItem.RentLivingRoomRoomNumber + "の複製";
+            RentLivingEditSectionNew.RentLivingRoomMadori = SectionsSelectedItem.RentLivingRoomMadori;
+            RentLivingEditSectionNew.RentLivingRoomPrice = SectionsSelectedItem.RentLivingRoomPrice;
             // TODO: more to come
 
             // 追加
-            RentLivingEdit.RentLivingSections.Add(RentLivingEditSectionNew);
+            RentLivingEdit.RentLivingRooms.Add(RentLivingEditSectionNew);
 */
         }
 
@@ -782,7 +784,7 @@ namespace ZumenSearch.ViewModels
             if (RentLivingEdit == null) return;
             if (SectionsSelectedItem == null) return;
 
-            //RentLivingSectionToBeDeletedIDs
+            //RentLivingRoomToBeDeletedIDs
             if (SectionsSelectedItem.IsNew)
             {
                 // 新規なので、DBにはまだ保存されていないはずなので、DBから削除する処理は不要。
@@ -790,11 +792,11 @@ namespace ZumenSearch.ViewModels
             else
             {
                 // DBからも削除するために、削除リストに追加（後で削除）
-                RentLivingEdit.RentLivingSectionToBeDeletedIDs.Add(SectionsSelectedItem.RentLivingSectionId);
+                RentLivingEdit.RentLivingRoomToBeDeletedIDs.Add(SectionsSelectedItem.RentLivingRoomId);
             }
 
             // 部屋リストから削除
-            RentLivingEdit.RentLivingSections.Remove(SectionsSelectedItem);
+            RentLivingEdit.RentLivingRooms.Remove(SectionsSelectedItem);
         }
 
         #endregion
@@ -827,8 +829,8 @@ namespace ZumenSearch.ViewModels
                     PdfData = br.ReadBytes((int)fs.Length);
                     br.Close();
 
-                    RentLivingZumenPDF rlZumen = new RentLivingZumenPDF(RentLivingEdit.RentId, RentLivingEdit.RentLivingId, Guid.NewGuid().ToString());
-                    rlZumen.PDFData = PdfData;
+                    RentLivingPdf rlZumen = new RentLivingPdf(RentLivingEdit.RentId, RentLivingEdit.RentLivingId, Guid.NewGuid().ToString());
+                    rlZumen.PdfData = PdfData;
                     rlZumen.FileSize = len;
 
                     // TODO:
@@ -839,7 +841,7 @@ namespace ZumenSearch.ViewModels
                     rlZumen.IsDirty = false;
                     rlZumen.IsNew = true;
 
-                    RentLivingEdit.RentLivingZumenPDFs.Add(rlZumen);
+                    RentLivingEdit.RentLivingPdfs.Add(rlZumen);
 
                     fs.Close();
                 }
@@ -873,16 +875,16 @@ namespace ZumenSearch.ViewModels
             if (RentLivingEdit == null) return;
 
             // 選択アイテム保持用
-            List<RentLivingZumenPDF> selectedList = new List<RentLivingZumenPDF>();
+            List<RentLivingPdf> selectedList = new List<RentLivingPdf>();
 
             // System.Windows.Controls.SelectedItemCollection をキャストして、ループ
             System.Collections.IList items = (System.Collections.IList)obj;
-            var collection = items.Cast<RentLivingZumenPDF>();
+            var collection = items.Cast<RentLivingPdf>();
 
             foreach (var item in collection)
             {
                 // 削除リストに追加
-                selectedList.Add(item as RentLivingZumenPDF);
+                selectedList.Add(item as RentLivingPdf);
             }
 
             // 選択注文アイテムをループして、アイテムを削除する
@@ -899,7 +901,7 @@ namespace ZumenSearch.ViewModels
                 }
 
                 // 一覧から削除
-                RentLivingEdit.RentLivingZumenPDFs.Remove(item);
+                RentLivingEdit.RentLivingPdfs.Remove(item);
             }
 
         }
@@ -918,7 +920,7 @@ namespace ZumenSearch.ViewModels
             /*
             // System.Windows.Controls.SelectedItemCollection をキャストして、ループ
             System.Collections.IList items = (System.Collections.IList)obj;
-            var collection = items.Cast<RentLivingZumenPDF>();
+            var collection = items.Cast<RentLivingPdf>();
 
             foreach (var item in collection)
             {
@@ -929,7 +931,7 @@ namespace ZumenSearch.ViewModels
 
                     using (var cmd = connection.CreateCommand())
                     {
-                        cmd.CommandText = String.Format("SELECT PdfData FROM RentLivingZumenPdf WHERE RentLivingZumenPdf_ID = '{0}'", (item as RentLivingZumenPDF).RentZumenPdfId);
+                        cmd.CommandText = String.Format("SELECT PdfData FROM RentLivingZumenPdf WHERE RentLivingZumenPdf_ID = '{0}'", (item as RentLivingPdf).RentZumenPdfId);
                         using (var reader = cmd.ExecuteReader())
                         {
                             while (reader.Read())
@@ -960,7 +962,7 @@ namespace ZumenSearch.ViewModels
         {
             return true;
         }
-        public void RentLivingEditZumenPdfEnterCommand_Execute(RentZumenPDF obj)
+        public void RentLivingEditZumenPdfEnterCommand_Execute(RentPdf obj)
         {
             if (obj == null) return;
             if (RentLivingEdit == null) return;
@@ -972,7 +974,7 @@ namespace ZumenSearch.ViewModels
 
                 using (var cmd = connection.CreateCommand())
                 {
-                    cmd.CommandText = String.Format("SELECT PdfData FROM RentLivingZumenPdf WHERE RentLivingZumenPdf_ID = '{0}'", (obj as RentZumenPDF).RentZumenPdfId);
+                    cmd.CommandText = String.Format("SELECT PdfData FROM RentLivingZumenPdf WHERE RentLivingZumenPdf_ID = '{0}'", (obj as RentPdf).RentZumenPdfId);
                     using (var reader = cmd.ExecuteReader())
                     {
                         while (reader.Read())

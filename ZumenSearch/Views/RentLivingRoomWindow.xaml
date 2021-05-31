@@ -15,7 +15,7 @@
         SnapsToDevicePixels="true"
         Background="{DynamicResource WindowBackgroundColorBrush}"
         Width="1024" Height="680" 
-        MinWidth="1024" MinHeight="32"
+        MinWidth="1024" MinHeight="680"
         StateChanged="Window_StateChanged"
         Closing="Window_Closing">
     <WindowChrome.WindowChrome>
@@ -156,7 +156,7 @@
                                         <Button Width="130" Margin="6">画像の追加</Button>
                                     </StackPanel>
 
-                                    <ListView Grid.Row="2" Margin="3" ItemsSource="{Binding RentLivingRoomEdit.RentLivingSectionPictures}" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                    <ListView Grid.Row="2" Margin="3" ItemsSource="{Binding RentLivingRoomEdit.RentLivingRoomPictures}" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                                         <ListView.Resources>
                                             <ContextMenu x:Key="ATItemContextMenu">
                                                 <MenuItem Header="削除" Command="{Binding Path=DataContext.RentLivingEditSectionNewPictureDeleteCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItems, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">

@@ -74,96 +74,96 @@ namespace ZumenSearch.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public double RentLivingWindow_Left {
+        public double RentLivingBuildingWindow_Left {
             get {
-                return ((double)(this["RentLivingWindow_Left"]));
+                return ((double)(this["RentLivingBuildingWindow_Left"]));
             }
             set {
-                this["RentLivingWindow_Left"] = value;
+                this["RentLivingBuildingWindow_Left"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public double RentLivingWindow_Top {
+        public double RentLivingBuildingWindow_Top {
             get {
-                return ((double)(this["RentLivingWindow_Top"]));
+                return ((double)(this["RentLivingBuildingWindow_Top"]));
             }
             set {
-                this["RentLivingWindow_Top"] = value;
+                this["RentLivingBuildingWindow_Top"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public double RentLivingWindow_Height {
+        public double RentLivingBuildingWindow_Height {
             get {
-                return ((double)(this["RentLivingWindow_Height"]));
+                return ((double)(this["RentLivingBuildingWindow_Height"]));
             }
             set {
-                this["RentLivingWindow_Height"] = value;
+                this["RentLivingBuildingWindow_Height"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public double RentLivingWindow_Width {
+        public double RentLivingBuildingWindow_Width {
             get {
-                return ((double)(this["RentLivingWindow_Width"]));
+                return ((double)(this["RentLivingBuildingWindow_Width"]));
             }
             set {
-                this["RentLivingWindow_Width"] = value;
+                this["RentLivingBuildingWindow_Width"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public double RentLivingSectionWindow_Left {
+        public double RentLivingRoomWindow_Left {
             get {
-                return ((double)(this["RentLivingSectionWindow_Left"]));
+                return ((double)(this["RentLivingRoomWindow_Left"]));
             }
             set {
-                this["RentLivingSectionWindow_Left"] = value;
+                this["RentLivingRoomWindow_Left"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public double RentLivingSectionWindow_Top {
+        public double RentLivingRoomWindow_Top {
             get {
-                return ((double)(this["RentLivingSectionWindow_Top"]));
+                return ((double)(this["RentLivingRoomWindow_Top"]));
             }
             set {
-                this["RentLivingSectionWindow_Top"] = value;
+                this["RentLivingRoomWindow_Top"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public double RentLivingSectionWindow_Height {
+        public double RentLivingRoomWindow_Height {
             get {
-                return ((double)(this["RentLivingSectionWindow_Height"]));
+                return ((double)(this["RentLivingRoomWindow_Height"]));
             }
             set {
-                this["RentLivingSectionWindow_Height"] = value;
+                this["RentLivingRoomWindow_Height"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public double RentLivingSectionWindow_Width {
+        public double RentLivingRoomWindow_Width {
             get {
-                return ((double)(this["RentLivingSectionWindow_Width"]));
+                return ((double)(this["RentLivingRoomWindow_Width"]));
             }
             set {
-                this["RentLivingSectionWindow_Width"] = value;
+                this["RentLivingRoomWindow_Width"] = value;
             }
         }
         
@@ -182,84 +182,84 @@ namespace ZumenSearch.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool RentLivingSectionWindow_Maximized {
+        public bool RentLivingRoomWindow_Maximized {
             get {
-                return ((bool)(this["RentLivingSectionWindow_Maximized"]));
+                return ((bool)(this["RentLivingRoomWindow_Maximized"]));
             }
             set {
-                this["RentLivingSectionWindow_Maximized"] = value;
+                this["RentLivingRoomWindow_Maximized"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool RentLivingWindow_Maximized {
+        public bool RentLivingBuildingWindow_Maximized {
             get {
-                return ((bool)(this["RentLivingWindow_Maximized"]));
+                return ((bool)(this["RentLivingBuildingWindow_Maximized"]));
             }
             set {
-                this["RentLivingWindow_Maximized"] = value;
+                this["RentLivingBuildingWindow_Maximized"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public double RentLivingImagesWindow_Left {
+        public double RentLivingImageWindow_Left {
             get {
-                return ((double)(this["RentLivingImagesWindow_Left"]));
+                return ((double)(this["RentLivingImageWindow_Left"]));
             }
             set {
-                this["RentLivingImagesWindow_Left"] = value;
+                this["RentLivingImageWindow_Left"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public double RentLivingImagesWindow_Top {
+        public double RentLivingImageWindow_Top {
             get {
-                return ((double)(this["RentLivingImagesWindow_Top"]));
+                return ((double)(this["RentLivingImageWindow_Top"]));
             }
             set {
-                this["RentLivingImagesWindow_Top"] = value;
+                this["RentLivingImageWindow_Top"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public double RentLivingImagesWindow_Height {
+        public double RentLivingImageWindow_Height {
             get {
-                return ((double)(this["RentLivingImagesWindow_Height"]));
+                return ((double)(this["RentLivingImageWindow_Height"]));
             }
             set {
-                this["RentLivingImagesWindow_Height"] = value;
+                this["RentLivingImageWindow_Height"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public double RentLivingImagesWindow_Width {
+        public double RentLivingImageWindow_Width {
             get {
-                return ((double)(this["RentLivingImagesWindow_Width"]));
+                return ((double)(this["RentLivingImageWindow_Width"]));
             }
             set {
-                this["RentLivingImagesWindow_Width"] = value;
+                this["RentLivingImageWindow_Width"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool RentLivingImagesWindow_Maximized {
+        public bool RentLivingImageWindow_Maximized {
             get {
-                return ((bool)(this["RentLivingImagesWindow_Maximized"]));
+                return ((bool)(this["RentLivingImageWindow_Maximized"]));
             }
             set {
-                this["RentLivingImagesWindow_Maximized"] = value;
+                this["RentLivingImageWindow_Maximized"] = value;
             }
         }
     }

@@ -38,7 +38,7 @@ namespace ZumenSearch.Views
         }
 
         // 部屋編集画面の表示
-        public void OpenRentLivingSectionWindow(OpenRentLivingSectionWindowEventArgs arg)
+        public void OpenRentLivingRoomWindow(OpenRentLivingRoomWindowEventArgs arg)
         {
             if (arg == null)
                 return;
@@ -46,7 +46,7 @@ namespace ZumenSearch.Views
             if (String.IsNullOrEmpty(arg.Id))
                 return;
 
-            if (arg.RentLivingSectionObject == null)
+            if (arg.RentLivingRoomObject == null)
                 return;
 
             string id = arg.Id;
@@ -86,7 +86,7 @@ namespace ZumenSearch.Views
 
             // Create new window.
 
-            if (arg.RentLivingSectionObject is RentLivingSection)
+            if (arg.RentLivingRoomObject is RentLivingRoom)
             {
                 // Windowを生成
                 var win = new RentLivingRoomWindow();
@@ -95,8 +95,8 @@ namespace ZumenSearch.Views
                 
                 var vm = (win.DataContext as RentLivingRoomViewModel);
                 // VMにデータを渡す
-                vm.RentLivingRoomEdit = arg.RentLivingSectionObject;
-                vm.RentLivingSections = arg.RentLivingSections;
+                vm.RentLivingRoomEdit = arg.RentLivingRoomObject;
+                vm.RentLivingRooms = arg.RentLivingRooms;
 
                 // 画像編集画面からの変更通知を受け取る
                 vm.RentLivingIsDirty += () => OnRentLivingIsDirty();
@@ -117,7 +117,7 @@ namespace ZumenSearch.Views
         }
 
         // 画像編集画面の表示
-        public void OpenRentLivingImagesWindow(OpenRentLivingImagesWindowEventArgs arg)
+        public void OpenRentLivingImageWindow(OpenRentLivingImageWindowEventArgs arg)
         {
             if (arg == null)
                 return;
@@ -172,6 +172,7 @@ namespace ZumenSearch.Views
             // VMにデータを渡す
             vm.RentLivingPictureEdit = arg.RentLivingPictureObject;
             vm.RentLivingPictures = arg.RentLivingPictures;
+            vm.IsDirty = !arg.IsEdit;
 
             // 画像編集画面からの変更通知を受け取る
             vm.RentLivingIsDirty += () => OnRentLivingIsDirty();
@@ -199,35 +200,31 @@ namespace ZumenSearch.Views
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             // Load window possition.
-            if ((Properties.Settings.Default.RentLivingWindow_Width >= 0))
+            if ((Properties.Settings.Default.RentLivingBuildingWindow_Width >= 1024))
             {
-                this.Width = Properties.Settings.Default.RentLivingWindow_Width;
+                this.Width = Properties.Settings.Default.RentLivingBuildingWindow_Width;
             }
 
-            if ( (Properties.Settings.Default.RentLivingWindow_Height >= 0))
+            if ( (Properties.Settings.Default.RentLivingBuildingWindow_Height >= 680))
             {
-                this.Height = Properties.Settings.Default.RentLivingWindow_Height;
+                this.Height = Properties.Settings.Default.RentLivingBuildingWindow_Height;
             }
 
-            if ((Properties.Settings.Default.RentLivingWindow_Left >= 0) )
+            if ((Properties.Settings.Default.RentLivingBuildingWindow_Left > 0) )
             {
-                this.Left = Properties.Settings.Default.RentLivingWindow_Left;
+                this.Left = Properties.Settings.Default.RentLivingBuildingWindow_Left;
             }
-            else
-            {
+            if (this.Left < 0)
                 this.Left = 0;
-            }
 
-            if ((Properties.Settings.Default.RentLivingWindow_Top >= 0))
+            if ((Properties.Settings.Default.RentLivingBuildingWindow_Top > 0))
             {
-                this.Top = Properties.Settings.Default.RentLivingWindow_Top;
+                this.Top = Properties.Settings.Default.RentLivingBuildingWindow_Top;
             }
-            else
-            {
+            if (this.Top < 0)
                 this.Top = 0;
-            }
 
-            if (Properties.Settings.Default.RentLivingWindow_Maximized)
+            if (Properties.Settings.Default.RentLivingBuildingWindow_Maximized)
             {
                 this.WindowState = WindowState.Maximized;
             }
@@ -285,16 +282,16 @@ namespace ZumenSearch.Views
             // Windowの位置を保存
             if (this.WindowState == WindowState.Normal)
             {
-                Properties.Settings.Default.RentLivingWindow_Left = this.Left;
-                Properties.Settings.Default.RentLivingWindow_Top = this.Top;
-                Properties.Settings.Default.RentLivingWindow_Height = this.Height;
-                Properties.Settings.Default.RentLivingWindow_Width = this.Width;
+                Properties.Settings.Default.RentLivingBuildingWindow_Left = this.Left;
+                Properties.Settings.Default.RentLivingBuildingWindow_Top = this.Top;
+                Properties.Settings.Default.RentLivingBuildingWindow_Height = this.Height;
+                Properties.Settings.Default.RentLivingBuildingWindow_Width = this.Width;
 
-                Properties.Settings.Default.RentLivingWindow_Maximized = false;
+                Properties.Settings.Default.RentLivingBuildingWindow_Maximized = false;
             }
             else if (this.WindowState == WindowState.Maximized)
             {
-                Properties.Settings.Default.RentLivingWindow_Maximized = true;
+                Properties.Settings.Default.RentLivingBuildingWindow_Maximized = true;
             }
 
             Properties.Settings.Default.Save();

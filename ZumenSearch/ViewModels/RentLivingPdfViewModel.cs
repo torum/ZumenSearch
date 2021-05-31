@@ -13,7 +13,7 @@ using System.IO;
 
 namespace ZumenSearch.ViewModels
 {
-    // TODO: RentLivingZumenPDF> RentLivingPDF
+    // TODO: RentLivingPdf> RentLivingPDF
 
 
     /// <summary>
@@ -32,8 +32,8 @@ namespace ZumenSearch.ViewModels
         }
 
         // 元の賃貸住居用物件のPDFオブジェクトを保持。（Winodow生成時に設定される）
-        private RentLivingZumenPDF _rentLivingPdfEdit;
-        public RentLivingZumenPDF RentLivingPdfEdit
+        private RentLivingPdf _rentLivingPdfEdit;
+        public RentLivingPdf RentLivingPdfEdit
         {
             get
             {
@@ -59,7 +59,7 @@ namespace ZumenSearch.ViewModels
         }
 
         // 元の賃貸住居用物件のPDFリストを保持。（Winodow生成時に設定される）
-        public ObservableCollection<RentLivingZumenPDF> RentLivingZumenPDFs { get; set; }
+        public ObservableCollection<RentLivingPdf> RentLivingPdfs { get; set; }
 
         // PDFの画像プレビュー
         private ImageSource _picture;

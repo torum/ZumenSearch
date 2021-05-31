@@ -39,8 +39,8 @@ namespace ZumenSearch.ViewModels
         }
 
         // 元の賃貸住居用物件の部屋オブジェクトを保持。（Winodow生成時に設定される）
-        private RentLivingSection _rentLivingRoomEdit;
-        public RentLivingSection RentLivingRoomEdit 
+        private RentLivingRoom _rentLivingRoomEdit;
+        public RentLivingRoom RentLivingRoomEdit 
         {
             get
             {
@@ -55,7 +55,7 @@ namespace ZumenSearch.ViewModels
                 NotifyPropertyChanged("RentLivingRoomEdit");
 
                 // 値の設定時に、編集画面用のプロパティにそれぞれの値をポピュレイトする
-                RoomNumber = _rentLivingRoomEdit.RentLivingSectionRoomNumber;
+                RoomNumber = _rentLivingRoomEdit.RentLivingRoomRoomNumber;
 
                 // 変更フラグをクリアする（ユーザーの入力で変更・編集された訳ではないので）
                 IsDirty = false;
@@ -63,7 +63,7 @@ namespace ZumenSearch.ViewModels
         }
 
         // 元の賃貸住居用物件の部屋リストを保持。（Winodow生成時に設定される）
-        public ObservableCollection<RentLivingSection> RentLivingSections { get; set; }
+        public ObservableCollection<RentLivingRoom> RentLivingRooms { get; set; }
 
         #region == 編集用のプロパティ ==
 
@@ -256,7 +256,7 @@ namespace ZumenSearch.ViewModels
             //if (DataAccessModule == null)
             //    return false;
 
-            if (RentLivingSections == null)
+            if (RentLivingRooms == null)
                 return false;
 
             if (IsDirty == false)
@@ -267,14 +267,14 @@ namespace ZumenSearch.ViewModels
             //Debug.WriteLine(RoomNumber);
 
             // 各値の更新
-            RentLivingRoomEdit.RentLivingSectionRoomNumber = RoomNumber;
+            RentLivingRoomEdit.RentLivingRoomRoomNumber = RoomNumber;
 
             // 画像リストから該当オブジェクトを見つける
-            var found = RentLivingSections.FirstOrDefault(x => x.RentLivingSectionId == RentLivingRoomEdit.RentLivingSectionId);
+            var found = RentLivingRooms.FirstOrDefault(x => x.RentLivingRoomId == RentLivingRoomEdit.RentLivingRoomId);
             if (found == null)
             {
                 // 追加
-                RentLivingSections.Add(RentLivingRoomEdit);
+                RentLivingRooms.Add(RentLivingRoomEdit);
             }
             else
             {
@@ -365,7 +365,7 @@ namespace ZumenSearch.ViewModels
                             byte[] ImageThumbData = Methods.ImageToByteArray(thumbImg);
 
 
-                            RentLivingSectionPicture rlpic = new RentLivingSectionPicture(RentLivingEditSectionNew.Rent_ID, RentLivingEditSectionNew.RentLiving_ID, RentLivingEditSectionNew.RentLivingSection_ID, Guid.NewGuid().ToString());
+                            RentLivingRoomPicture rlpic = new RentLivingRoomPicture(RentLivingEditSectionNew.Rent_ID, RentLivingEditSectionNew.RentLiving_ID, RentLivingEditSectionNew.RentLivingRoom_ID, Guid.NewGuid().ToString());
                             rlpic.PictureData = ImageData;
                             rlpic.PictureThumbData = ImageThumbData;
                             rlpic.PictureFileExt = fi.Extension;
@@ -375,7 +375,7 @@ namespace ZumenSearch.ViewModels
 
                             rlpic.Picture = Methods.BitmapImageFromImage(thumbImg, Methods.FileExtToImageFormat(rlpic.PictureFileExt));
 
-                            RentLivingEditSectionNew.RentLivingSectionPictures.Add(rlpic);
+                            RentLivingEditSectionNew.RentLivingRoomPictures.Add(rlpic);
 
 
                             fs.Close();
@@ -413,22 +413,22 @@ namespace ZumenSearch.ViewModels
                         if (RentLivingEditSectionNew == null) return;
 
             // 選択アイテム保持用
-            List<RentLivingSectionPicture> selectedList = new List<RentLivingSectionPicture>();
+            List<RentLivingRoomPicture> selectedList = new List<RentLivingRoomPicture>();
 
             // System.Windows.Controls.SelectedItemCollection をキャストして、ループ
             System.Collections.IList items = (System.Collections.IList)obj;
-            var collection = items.Cast<RentLivingSectionPicture>();
+            var collection = items.Cast<RentLivingRoomPicture>();
 
             foreach (var item in collection)
             {
                 // 削除リストに追加
-                selectedList.Add(item as RentLivingSectionPicture);
+                selectedList.Add(item as RentLivingRoomPicture);
             }
 
             // 選択注文アイテムをループして、アイテムを削除する
             foreach (var item in selectedList)
             {
-                RentLivingEditSectionNew.RentLivingSectionPictures.Remove(item);
+                RentLivingEditSectionNew.RentLivingRoomPictures.Remove(item);
 
                 // 新規部屋なので、DBにはまだ保存されていないはずなので、DBから削除する処理は不要。
             }
@@ -474,7 +474,7 @@ namespace ZumenSearch.ViewModels
                             byte[] ImageThumbData = Methods.ImageToByteArray(thumbImg);
 
 
-                            RentLivingSectionPicture rlpic = new RentLivingSectionPicture(RentLivingEditSectionEdit.RentId, RentLivingEditSectionEdit.RentLivingId, RentLivingEditSectionEdit.RentLivingSectionId, Guid.NewGuid().ToString());
+                            RentLivingRoomPicture rlpic = new RentLivingRoomPicture(RentLivingEditSectionEdit.RentId, RentLivingEditSectionEdit.RentLivingId, RentLivingEditSectionEdit.RentLivingRoomId, Guid.NewGuid().ToString());
                             rlpic.PictureData = ImageData;
                             rlpic.PictureThumbData = ImageThumbData;
                             rlpic.PictureFileExt = fi.Extension;
@@ -484,7 +484,7 @@ namespace ZumenSearch.ViewModels
 
                             rlpic.Picture = Methods.BitmapImageFromImage(thumbImg, Methods.FileExtToImageFormat(rlpic.PictureFileExt));
 
-                            RentLivingEditSectionEdit.RentLivingSectionPictures.Add(rlpic);
+                            RentLivingEditSectionEdit.RentLivingRoomPictures.Add(rlpic);
 
 
                             fs.Close();
@@ -512,16 +512,16 @@ namespace ZumenSearch.ViewModels
             if (RentLivingEditSectionEdit == null) return;
 
             // 選択アイテム保持用
-            List<RentLivingSectionPicture> selectedList = new List<RentLivingSectionPicture>();
+            List<RentLivingRoomPicture> selectedList = new List<RentLivingRoomPicture>();
 
             // System.Windows.Controls.SelectedItemCollection をキャストして、ループ
             System.Collections.IList items = (System.Collections.IList)obj;
-            var collection = items.Cast<RentLivingSectionPicture>();
+            var collection = items.Cast<RentLivingRoomPicture>();
 
             foreach (var item in collection)
             {
                 // 削除リストに追加
-                selectedList.Add(item as RentLivingSectionPicture);
+                selectedList.Add(item as RentLivingRoomPicture);
             }
 
             // 選択注文アイテムをループして、アイテムを削除する
@@ -534,11 +534,11 @@ namespace ZumenSearch.ViewModels
                 else
                 {
                     // DBからも削除するために、削除リストに追加（後で削除）
-                    RentLivingEditSectionEdit.RentLivingSectionPicturesToBeDeletedIDs.Add(item.RentSectionPictureId);
+                    RentLivingEditSectionEdit.RentLivingRoomPicturesToBeDeletedIDs.Add(item.RentSectionPictureId);
                 }
 
                 // 一覧から削除
-                RentLivingEditSectionEdit.RentLivingSectionPictures.Remove(item);
+                RentLivingEditSectionEdit.RentLivingRoomPictures.Remove(item);
             }
 
 

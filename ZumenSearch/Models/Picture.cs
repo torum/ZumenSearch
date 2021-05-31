@@ -361,10 +361,10 @@ namespace ZumenSearch.Models
     }
 
     // 賃貸住居用物件の写真クラス（室内内観写真・設備写真・間取り図等）
-    public class RentLivingSectionPicture : RentSectionPicture
+    public class RentLivingRoomPicture : RentSectionPicture
     {
         protected string _rentLivingSectionId;
-        public string RentLivingSectionId
+        public string RentLivingRoomId
         {
             get
             {
@@ -381,7 +381,7 @@ namespace ZumenSearch.Models
             }
         }
 
-        public RentLivingSectionPicture(string rentid, string rentlivingid, string rentlivingsectionid, string rentlivingsectionpictureid)
+        public RentLivingRoomPicture(string rentid, string rentlivingid, string rentlivingsectionid, string rentlivingsectionpictureid)
         {
             this._rentId = rentid;
             this._rentLivingId = rentlivingid;

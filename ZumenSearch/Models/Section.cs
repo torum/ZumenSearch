@@ -95,7 +95,7 @@ namespace ZumenSearch.Models
     /// <summary>
     /// 賃貸住居用の部屋クラス
     /// </summary>
-    public class RentLivingSection : Section
+    public class RentLivingRoom : Section
     {
         // 建物IDの保持
         protected string _rentLivingId;
@@ -109,7 +109,7 @@ namespace ZumenSearch.Models
 
         // 部屋ID
         protected string _rentLivingSectionId;
-        public string RentLivingSectionId
+        public string RentLivingRoomId
         {
             get
             {
@@ -117,9 +117,9 @@ namespace ZumenSearch.Models
             }
         }
 
-        // 部屋番号
+        // 部屋番号・号室
         private string _rentLivingSectionRoomNumber;
-        public string RentLivingSectionRoomNumber
+        public string RentLivingRoomRoomNumber
         {
             get
             {
@@ -130,7 +130,7 @@ namespace ZumenSearch.Models
                 if (_rentLivingSectionRoomNumber == value) return;
 
                 _rentLivingSectionRoomNumber = value;
-                this.NotifyPropertyChanged("RentLivingSectionRoomNumber");
+                this.NotifyPropertyChanged("RentLivingRoomRoomNumber");
 
                 // 変更フラグ
                 IsModified = true;
@@ -139,7 +139,7 @@ namespace ZumenSearch.Models
 
         // 賃料
         private int _rentLivingSectionPrice;
-        public int RentLivingSectionPrice
+        public int RentLivingRoomPrice
         {
             get
             {
@@ -150,7 +150,7 @@ namespace ZumenSearch.Models
                 if (_rentLivingSectionPrice == value) return;
 
                 _rentLivingSectionPrice = value;
-                this.NotifyPropertyChanged("RentLivingSectionPrice");
+                this.NotifyPropertyChanged("RentLivingRoomPrice");
 
                 // 変更フラグ
                 IsModified = true;
@@ -159,7 +159,7 @@ namespace ZumenSearch.Models
 
         // 間取り
         private string _rentLivingSectionMadori; // TODO 1K, 2K...
-        public string RentLivingSectionMadori
+        public string RentLivingRoomMadori
         {
             get
             {
@@ -170,7 +170,7 @@ namespace ZumenSearch.Models
                 if (_rentLivingSectionMadori == value) return;
 
                 _rentLivingSectionMadori = value;
-                this.NotifyPropertyChanged("RentLivingSectionMadori");
+                this.NotifyPropertyChanged("RentLivingRoomMadori");
 
                 // 変更フラグ
                 IsModified = true;
@@ -178,12 +178,12 @@ namespace ZumenSearch.Models
         }
 
         // 部屋写真コレクション
-        public ObservableCollection<RentLivingSectionPicture> RentLivingSectionPictures { get; set; } = new ObservableCollection<RentLivingSectionPicture>();
+        public ObservableCollection<RentLivingRoomPicture> RentLivingRoomPictures { get; set; } = new ObservableCollection<RentLivingRoomPicture>();
 
         // DBへの更新時にDBから削除されるべき部屋写真のIDリスト
-        public List<string> RentLivingSectionPicturesToBeDeletedIDs = new List<string>();
+        public List<string> RentLivingRoomPicturesToBeDeletedIDs = new List<string>();
 
-        public RentLivingSection(string rentid, string rentlivingid, string sectionid)
+        public RentLivingRoom(string rentid, string rentlivingid, string sectionid)
         {
             _rentId = rentid;
             _rentLivingId = rentlivingid;
@@ -191,4 +191,11 @@ namespace ZumenSearch.Models
         }
     }
 
+    /// <summary>
+    /// 賃貸事業用の区画クラス
+    /// </summary>
+    public class RentBusinessSuite : Section
+    {
+
+    }
 }

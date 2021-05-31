@@ -395,16 +395,16 @@ namespace ZumenSearch.Models
         public List<string> RentLivingPicturesToBeDeletedIDs = new List<string>();
 
         // 図面一覧
-        public ObservableCollection<RentLivingZumenPDF> RentLivingZumenPDFs { get; set; } = new ObservableCollection<RentLivingZumenPDF>();
+        public ObservableCollection<RentLivingPdf> RentLivingPdfs { get; set; } = new ObservableCollection<RentLivingPdf>();
 
         // 図面のDBへの更新時にDBから削除されるべき図面のIDリスト
         public List<string> RentLivingZumenPdfToBeDeletedIDs = new List<string>();
 
         // 部屋一覧
-        public ObservableCollection<RentLivingSection> RentLivingSections { get; set; } = new ObservableCollection<RentLivingSection>();
+        public ObservableCollection<RentLivingRoom> RentLivingRooms { get; set; } = new ObservableCollection<RentLivingRoom>();
 
         // DBへの更新時にDBから削除されるべき部屋のIDリスト
-        public List<string> RentLivingSectionToBeDeletedIDs = new List<string>();
+        public List<string> RentLivingRoomToBeDeletedIDs = new List<string>();
 
         // コンストラクタ
         public RentLiving(string rentid, string rentlivingid)

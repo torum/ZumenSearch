@@ -66,7 +66,19 @@ namespace ZumenSearch.ViewModels
                 PictureIsMain = _rentLivingPictureEdit.PictureIsMain;
 
                 // 変更フラグをクリアする（ユーザーの入力で変更・編集された訳ではないので）
-                IsDirty = false;
+
+                // TODO: リストに存在しなければ新規＞IsDirty, else IsDirty = false;
+                /*
+                if (_rentLivingPictureEdit.IsNew)
+                {
+                    IsDirty = true;
+                }
+                else
+                {
+                    IsDirty = false;
+                }
+                   */
+
             }
         }
 
@@ -292,6 +304,9 @@ namespace ZumenSearch.ViewModels
                 // 更新
                 found = RentLivingPictureEdit;
             }
+
+            // 新規フラグをクリア
+            //RentLivingPictureEdit.IsNew = false;
 
             // 変更フラグをクリア
             IsDirty = false;

@@ -22,7 +22,7 @@ using ZumenSearch.ViewModels.Classes;
 namespace ZumenSearch.Views
 {
     /// <summary>
-    /// RentLivingImagesWindow.xaml の相互作用ロジック
+    /// RentLivingImageWindow.xaml の相互作用ロジック
     /// </summary>
     public partial class RentLivingImageWindow : Window
     {
@@ -36,33 +36,34 @@ namespace ZumenSearch.Views
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             // Load window possition.
-            if ((Properties.Settings.Default.RentLivingImagesWindow_Width >= 0) && (Properties.Settings.Default.RentLivingImagesWindow_Height >= 0))
+
+            if ((Properties.Settings.Default.RentLivingImageWindow_Width >= 384))
             {
-                this.Width = Properties.Settings.Default.RentLivingImagesWindow_Width;
-                this.Height = Properties.Settings.Default.RentLivingImagesWindow_Height;
+                this.Width = Properties.Settings.Default.RentLivingImageWindow_Width;
             }
 
-            if ((Properties.Settings.Default.RentLivingImagesWindow_Left >= 0))
+            if ((Properties.Settings.Default.RentLivingImageWindow_Height >= 495))
             {
-                this.Left = Properties.Settings.Default.RentLivingImagesWindow_Left;
+                this.Height = Properties.Settings.Default.RentLivingImageWindow_Height;
             }
-            else
+
+            if ((Properties.Settings.Default.RentLivingImageWindow_Left > 0))
             {
+                this.Left = Properties.Settings.Default.RentLivingImageWindow_Left;
+            }
+            if (this.Left < 0)
                 this.Left = 0;
-            }
 
-            if ( (Properties.Settings.Default.RentLivingImagesWindow_Top >= 0))
+            if ( (Properties.Settings.Default.RentLivingImageWindow_Top > 0))
             {
-                this.Top = Properties.Settings.Default.RentLivingImagesWindow_Top;
+                this.Top = Properties.Settings.Default.RentLivingImageWindow_Top;
             }
-            else
-            {
+            if (this.Top < 0)
                 this.Top = 0;
-            }
 
-            if (Properties.Settings.Default.RentLivingImagesWindow_Maximized)
+            if (Properties.Settings.Default.RentLivingImageWindow_Maximized)
             {
-                this.WindowState = WindowState.Maximized;
+                //this.WindowState = WindowState.Maximized;
             }
         }
 
@@ -104,11 +105,11 @@ namespace ZumenSearch.Views
                         {
                             if (ex.InnerException != null)
                             {
-                                Debug.WriteLine("InnerException:'" + ex.InnerException.Message + " @RentLivingImagesWindow:Window_Closing");
+                                Debug.WriteLine("InnerException:'" + ex.InnerException.Message + " @RentLivingImageWindow:Window_Closing");
                             }
                             else
                             {
-                                Debug.WriteLine("Exception:'" + ex.Message + "' @RentLivingImagesWindow:Window_Closing");
+                                Debug.WriteLine("Exception:'" + ex.Message + "' @RentLivingImageWindow:Window_Closing");
                             }
                         }
 
@@ -119,16 +120,16 @@ namespace ZumenSearch.Views
             // Save window pos.
             if (WindowState == WindowState.Normal)
             {
-                Properties.Settings.Default.RentLivingImagesWindow_Left = this.Left;
-                Properties.Settings.Default.RentLivingImagesWindow_Top = this.Top;
-                Properties.Settings.Default.RentLivingImagesWindow_Height = this.Height;
-                Properties.Settings.Default.RentLivingImagesWindow_Width = this.Width;
+                Properties.Settings.Default.RentLivingImageWindow_Left = this.Left;
+                Properties.Settings.Default.RentLivingImageWindow_Top = this.Top;
+                Properties.Settings.Default.RentLivingImageWindow_Height = this.Height;
+                Properties.Settings.Default.RentLivingImageWindow_Width = this.Width;
 
-                Properties.Settings.Default.RentLivingImagesWindow_Maximized = false;
+                Properties.Settings.Default.RentLivingImageWindow_Maximized = false;
             }
             else if (this.WindowState == WindowState.Maximized)
             {
-                Properties.Settings.Default.RentLivingImagesWindow_Maximized = true;
+                Properties.Settings.Default.RentLivingImageWindow_Maximized = true;
             }
 
             Properties.Settings.Default.Save();

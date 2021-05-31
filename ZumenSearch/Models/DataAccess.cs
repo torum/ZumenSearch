@@ -115,8 +115,8 @@ namespace ZumenSearch
                             tableCmd.ExecuteNonQuery();
 
                             // 賃貸住居用物件の「部屋」テーブル
-                            tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS RentLivingSection(" +
-                                "RentLivingSection_ID TEXT NOT NULL PRIMARY KEY," +
+                            tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS RentLivingRoom(" +
+                                "RentLivingRoom_ID TEXT NOT NULL PRIMARY KEY," +
                                 "RentLiving_ID TEXT NOT NULL," +
                                 "Rent_ID TEXT NOT NULL," +
                                 "RoomNumber TEXT," +
@@ -128,9 +128,9 @@ namespace ZumenSearch
                             tableCmd.ExecuteNonQuery();
 
                             // 賃貸住居用物件の「部屋の写真」テーブル
-                            tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS RentLivingSectionPicture (" +
-                                "RentLivingSectionPicture_ID TEXT NOT NULL PRIMARY KEY," +
-                                "RentLivingSection_ID TEXT NOT NULL," +
+                            tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS RentLivingRoomPicture (" +
+                                "RentLivingRoomPicture_ID TEXT NOT NULL PRIMARY KEY," +
+                                "RentLivingRoom_ID TEXT NOT NULL," +
                                 "RentLiving_ID TEXT NOT NULL," +
                                 "Rent_ID TEXT NOT NULL," +
                                 "PictureData BLOB NOT NULL," +
@@ -138,7 +138,7 @@ namespace ZumenSearch
                                 "PictureFileExt TEXT NOT NULL," +
                                 "FOREIGN KEY (Rent_ID) REFERENCES Rent(Rent_ID)," +
                                 "FOREIGN KEY (RentLiving_ID) REFERENCES RentLiving(RentLiving_ID)," +
-                                "FOREIGN KEY (RentLivingSection_ID) REFERENCES RentLivingSection(RentLivingSection_ID)" +
+                                "FOREIGN KEY (RentLivingRoom_ID) REFERENCES RentLivingRoom(RentLivingRoom_ID)" +
                                 " )";
                             tableCmd.ExecuteNonQuery();
 
@@ -475,10 +475,11 @@ namespace ZumenSearch
                                     rlpic.PictureIsMain = false;
                             }
 
-                            rl.RentLivingPictures.Add(rlpic);
-
                             rlpic.IsNew = false;
                             rlpic.IsModified = false;
+
+                            rl.RentLivingPictures.Add(rlpic);
+
                         }
                     }
 
@@ -488,10 +489,10 @@ namespace ZumenSearch
                     {
                         while (reader.Read())
                         {
-                            RentLivingZumenPDF rlpdf = new RentLivingZumenPDF(rentId, rentLivingId, Convert.ToString(reader["RentLivingZumenPdf_ID"]));
+                            RentLivingPdf rlpdf = new RentLivingPdf(rentId, rentLivingId, Convert.ToString(reader["RentLivingZumenPdf_ID"]));
 
                             byte[] pdfBytes = (byte[])reader["PdfData"];
-                            rlpdf.PDFData = pdfBytes;
+                            rlpdf.PdfData = pdfBytes;
 
 
                             DateTime dt = new DateTime();
@@ -507,37 +508,37 @@ namespace ZumenSearch
 
                             rlpdf.IsNew = false;
 
-                            rl.RentLivingZumenPDFs.Add(rlpdf);
+                            rl.RentLivingPdfs.Add(rlpdf);
                         }
                     }
 
                     // 部屋
-                    cmd.CommandText = String.Format("SELECT * FROM RentLivingSection WHERE Rent_ID = '{0}'", rentId);
+                    cmd.CommandText = String.Format("SELECT * FROM RentLivingRoom WHERE Rent_ID = '{0}'", rentId);
                     using (var reader = cmd.ExecuteReader())
                     {
                         while (reader.Read())
                         {
-                            RentLivingSection room = new RentLivingSection(rentId, rentLivingId, Convert.ToString(reader["RentLivingSection_ID"]));
-                            room.RentLivingSectionRoomNumber = Convert.ToString(reader["RoomNumber"]);
-                            room.RentLivingSectionMadori = Convert.ToString(reader["Madori"]);
-                            room.RentLivingSectionPrice = Convert.ToInt32(reader["Price"]);
+                            RentLivingRoom room = new RentLivingRoom(rentId, rentLivingId, Convert.ToString(reader["RentLivingRoom_ID"]));
+                            room.RentLivingRoomRoomNumber = Convert.ToString(reader["RoomNumber"]);
+                            room.RentLivingRoomMadori = Convert.ToString(reader["Madori"]);
+                            room.RentLivingRoomPrice = Convert.ToInt32(reader["Price"]);
 
                             room.IsNew = false;
                             room.IsModified = false;
 
-                            rl.RentLivingSections.Add(room);
+                            rl.RentLivingRooms.Add(room);
                         }
                     }
 
                     // 部屋写真
-                    foreach (var hoge in rl.RentLivingSections)
+                    foreach (var hoge in rl.RentLivingRooms)
                     {
-                        cmd.CommandText = String.Format("SELECT * FROM RentLivingSectionPicture WHERE RentLivingSection_ID = '{0}'", hoge.RentLivingSectionId);
+                        cmd.CommandText = String.Format("SELECT * FROM RentLivingRoomPicture WHERE RentLivingRoom_ID = '{0}'", hoge.RentLivingRoomId);
                         using (var reader = cmd.ExecuteReader())
                         {
                             while (reader.Read())
                             {
-                                RentLivingSectionPicture rlsecpic = new RentLivingSectionPicture(rentId, rentLivingId, hoge.RentLivingSectionId, Convert.ToString(reader["RentLivingSectionPicture_ID"]));
+                                RentLivingRoomPicture rlsecpic = new RentLivingRoomPicture(rentId, rentLivingId, hoge.RentLivingRoomId, Convert.ToString(reader["RentLivingRoomPicture_ID"]));
 
                                 byte[] imageBytes = (byte[])reader["PictureData"];
                                 rlsecpic.PictureData = imageBytes;
@@ -553,7 +554,7 @@ namespace ZumenSearch
                                 rlsecpic.IsNew = false;
                                 rlsecpic.IsModified = false;
 
-                                hoge.RentLivingSectionPictures.Add(rlsecpic);
+                                hoge.RentLivingRoomPictures.Add(rlsecpic);
 
                             }
                         }
@@ -663,12 +664,12 @@ namespace ZumenSearch
                             }
 
                             // 図面追加
-                            if (rl.RentLivingZumenPDFs.Count > 0)
+                            if (rl.RentLivingPdfs.Count > 0)
                             {
-                                foreach (var pdf in rl.RentLivingZumenPDFs)
+                                foreach (var pdf in rl.RentLivingPdfs)
                                 {
                                     string sqlInsertIntoRentLivingZumenPdf = String.Format("INSERT INTO RentLivingZumenPdf (RentLivingZumenPdf_ID, RentLiving_ID, Rent_ID, PdfData, DateTimeAdded, DateTimePublished, DateTimeVerified, FileSize) VALUES ('{0}', '{1}', '{2}', @0, '{4}', '{5}', '{6}', '{7}')",
-                                        pdf.RentZumenPdfId, rl.RentLivingId, rl.RentId, pdf.PDFData, pdf.DateTimeAdded.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"), pdf.DateTimePublished.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"), pdf.DateTimeVerified.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"), pdf.FileSize);
+                                        pdf.RentZumenPdfId, rl.RentLivingId, rl.RentId, pdf.PdfData, pdf.DateTimeAdded.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"), pdf.DateTimePublished.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"), pdf.DateTimeVerified.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"), pdf.FileSize);
 
                                     // 図面の追加
                                     cmd.CommandText = sqlInsertIntoRentLivingZumenPdf;
@@ -676,7 +677,7 @@ namespace ZumenSearch
                                     cmd.Parameters.Clear();
 
                                     SqliteParameter parameter1 = new SqliteParameter("@0", System.Data.DbType.Binary);
-                                    parameter1.Value = pdf.PDFData;
+                                    parameter1.Value = pdf.PdfData;
                                     cmd.Parameters.Add(parameter1);
 
                                     var r = cmd.ExecuteNonQuery();
@@ -689,30 +690,30 @@ namespace ZumenSearch
                             }
 
                             // 部屋追加
-                            if (rl.RentLivingSections.Count > 0)
+                            if (rl.RentLivingRooms.Count > 0)
                             {
-                                foreach (var room in rl.RentLivingSections)
+                                foreach (var room in rl.RentLivingRooms)
                                 {
-                                    string sqlInsertIntoRentLivingSection = String.Format("INSERT INTO RentLivingSection (RentLivingSection_ID, RentLiving_ID, Rent_ID, RoomNumber, Price, Madori) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}')",
-                                            room.RentLivingSectionId, rl.RentLivingId, rl.RentId, room.RentLivingSectionRoomNumber, room.RentLivingSectionPrice, room.RentLivingSectionMadori);
+                                    string sqlInsertIntoRentLivingRoom = String.Format("INSERT INTO RentLivingRoom (RentLivingRoom_ID, RentLiving_ID, Rent_ID, RoomNumber, Price, Madori) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}')",
+                                            room.RentLivingRoomId, rl.RentLivingId, rl.RentId, room.RentLivingRoomRoomNumber, room.RentLivingRoomPrice, room.RentLivingRoomMadori);
 
-                                    cmd.CommandText = sqlInsertIntoRentLivingSection;
-                                    var InsertIntoRentLivingSectionResult = cmd.ExecuteNonQuery();
-                                    if (InsertIntoRentLivingSectionResult > 0)
+                                    cmd.CommandText = sqlInsertIntoRentLivingRoom;
+                                    var InsertIntoRentLivingRoomResult = cmd.ExecuteNonQuery();
+                                    if (InsertIntoRentLivingRoomResult > 0)
                                     {
                                         room.IsNew = false;
                                         room.IsModified = false;
                                     }
 
                                     // 部屋の写真
-                                    if (room.RentLivingSectionPictures.Count > 0)
+                                    if (room.RentLivingRoomPictures.Count > 0)
                                     {
-                                        foreach (var roompic in room.RentLivingSectionPictures)
+                                        foreach (var roompic in room.RentLivingRoomPictures)
                                         {
-                                            string sqlInsertIntoRentLivingSectionPic = String.Format("INSERT INTO RentLivingSectionPicture (RentLivingSectionPicture_ID, RentLivingSection_ID, RentLiving_ID, Rent_ID, PictureData, PictureThumbData, PictureFileExt) VALUES ('{0}', '{1}', '{2}', '{3}', @0, @1, '{6}')",
-                                                roompic.RentSectionPictureId, roompic.RentLivingSectionId, rl.RentLivingId, rl.RentId, roompic.PictureData, roompic.PictureThumbData, roompic.PictureFileExt);
+                                            string sqlInsertIntoRentLivingRoomPic = String.Format("INSERT INTO RentLivingRoomPicture (RentLivingRoomPicture_ID, RentLivingRoom_ID, RentLiving_ID, Rent_ID, PictureData, PictureThumbData, PictureFileExt) VALUES ('{0}', '{1}', '{2}', '{3}', @0, @1, '{6}')",
+                                                roompic.RentSectionPictureId, roompic.RentLivingRoomId, rl.RentLivingId, rl.RentId, roompic.PictureData, roompic.PictureThumbData, roompic.PictureFileExt);
 
-                                            cmd.CommandText = sqlInsertIntoRentLivingSectionPic;
+                                            cmd.CommandText = sqlInsertIntoRentLivingRoomPic;
                                             // ループなので、前のパラメーターをクリアする。
                                             cmd.Parameters.Clear();
 
@@ -724,8 +725,8 @@ namespace ZumenSearch
                                             parameter2.Value = roompic.PictureThumbData;
                                             cmd.Parameters.Add(parameter2);
 
-                                            var InsertIntoRentLivingSectionPicResult = cmd.ExecuteNonQuery();
-                                            if (InsertIntoRentLivingSectionPicResult > 0)
+                                            var InsertIntoRentLivingRoomPicResult = cmd.ExecuteNonQuery();
+                                            if (InsertIntoRentLivingRoomPicResult > 0)
                                             {
                                                 roompic.IsNew = false;
                                                 roompic.IsModified = false;
@@ -952,14 +953,14 @@ namespace ZumenSearch
                         }
 
                         // 図面の更新
-                        if (rl.RentLivingZumenPDFs.Count > 0)
+                        if (rl.RentLivingPdfs.Count > 0)
                         {
-                            foreach (var pdf in rl.RentLivingZumenPDFs)
+                            foreach (var pdf in rl.RentLivingPdfs)
                             {
                                 if (pdf.IsNew)
                                 {
                                     string sqlInsertIntoRentLivingZumen = String.Format("INSERT INTO RentLivingZumenPdf (RentLivingZumenPdf_ID, RentLiving_ID, Rent_ID, PdfData, DateTimeAdded, DateTimePublished, DateTimeVerified, FileSize) VALUES ('{0}', '{1}', '{2}', @0, '{4}', '{5}', '{6}', '{7}')",
-                                        pdf.RentZumenPdfId, rl.RentLivingId, rl.RentId, pdf.PDFData, pdf.DateTimeAdded.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"), pdf.DateTimePublished.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"), pdf.DateTimeVerified.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"), pdf.FileSize);
+                                        pdf.RentZumenPdfId, rl.RentLivingId, rl.RentId, pdf.PdfData, pdf.DateTimeAdded.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"), pdf.DateTimePublished.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"), pdf.DateTimeVerified.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"), pdf.FileSize);
 
                                     // 図面の追加
                                     cmd.CommandText = sqlInsertIntoRentLivingZumen;
@@ -967,7 +968,7 @@ namespace ZumenSearch
                                     cmd.Parameters.Clear();
 
                                     SqliteParameter parameter1 = new SqliteParameter("@0", System.Data.DbType.Binary);
-                                    parameter1.Value = pdf.PDFData;
+                                    parameter1.Value = pdf.PdfData;
                                     cmd.Parameters.Add(parameter1);
 
                                     result = cmd.ExecuteNonQuery();
@@ -1015,19 +1016,19 @@ namespace ZumenSearch
                         }
 
                         // 部屋更新
-                        if (rl.RentLivingSections.Count > 0)
+                        if (rl.RentLivingRooms.Count > 0)
                         {
-                            foreach (var room in rl.RentLivingSections)
+                            foreach (var room in rl.RentLivingRooms)
                             {
                                 if (room.IsNew)
                                 {
                                     // 新規追加
-                                    string sqlInsertIntoRentLivingSection = String.Format("INSERT INTO RentLivingSection (RentLivingSection_ID, RentLiving_ID, Rent_ID, RoomNumber, Price, Madori) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}')",
-                                            room.RentLivingSectionId, rl.RentLivingId, rl.RentId, room.RentLivingSectionRoomNumber, room.RentLivingSectionPrice, room.RentLivingSectionMadori);
+                                    string sqlInsertIntoRentLivingRoom = String.Format("INSERT INTO RentLivingRoom (RentLivingRoom_ID, RentLiving_ID, Rent_ID, RoomNumber, Price, Madori) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}')",
+                                            room.RentLivingRoomId, rl.RentLivingId, rl.RentId, room.RentLivingRoomRoomNumber, room.RentLivingRoomPrice, room.RentLivingRoomMadori);
 
-                                    cmd.CommandText = sqlInsertIntoRentLivingSection;
-                                    var InsertIntoRentLivingSectionResult = cmd.ExecuteNonQuery();
-                                    if (InsertIntoRentLivingSectionResult > 0)
+                                    cmd.CommandText = sqlInsertIntoRentLivingRoom;
+                                    var InsertIntoRentLivingRoomResult = cmd.ExecuteNonQuery();
+                                    if (InsertIntoRentLivingRoomResult > 0)
                                     {
                                         room.IsNew = false;
                                         room.IsModified = false;
@@ -1038,12 +1039,12 @@ namespace ZumenSearch
                                 else
                                 {
                                     // 更新
-                                    string sqlUpdateRentLivingSection = String.Format("UPDATE RentLivingSection SET RoomNumber = '{1}', Price = '{2}', Madori = '{3}' WHERE RentLivingSection_ID = '{0}'",
-                                            room.RentLivingSectionId, room.RentLivingSectionRoomNumber, room.RentLivingSectionPrice, room.RentLivingSectionMadori);
+                                    string sqlUpdateRentLivingRoom = String.Format("UPDATE RentLivingRoom SET RoomNumber = '{1}', Price = '{2}', Madori = '{3}' WHERE RentLivingRoom_ID = '{0}'",
+                                            room.RentLivingRoomId, room.RentLivingRoomRoomNumber, room.RentLivingRoomPrice, room.RentLivingRoomMadori);
 
-                                    cmd.CommandText = sqlUpdateRentLivingSection;
-                                    var UpdateoRentLivingSectionResult = cmd.ExecuteNonQuery();
-                                    if (UpdateoRentLivingSectionResult > 0)
+                                    cmd.CommandText = sqlUpdateRentLivingRoom;
+                                    var UpdateoRentLivingRoomResult = cmd.ExecuteNonQuery();
+                                    if (UpdateoRentLivingRoomResult > 0)
                                     {
                                         //room.IsNew = false;
                                         room.IsModified = false;
@@ -1051,16 +1052,16 @@ namespace ZumenSearch
                                 }
 
                                 // 部屋の写真
-                                if (room.RentLivingSectionPictures.Count > 0)
+                                if (room.RentLivingRoomPictures.Count > 0)
                                 {
-                                    foreach (var roompic in room.RentLivingSectionPictures)
+                                    foreach (var roompic in room.RentLivingRoomPictures)
                                     {
                                         if (roompic.IsNew)
                                         {
-                                            string sqlInsertIntoRentLivingSectionPic = String.Format("INSERT INTO RentLivingSectionPicture (RentLivingSectionPicture_ID, RentLivingSection_ID, RentLiving_ID, Rent_ID, PictureData, PictureThumbData, PictureFileExt) VALUES ('{0}', '{1}', '{2}', '{3}', @0, @1, '{6}')",
-                                                roompic.RentSectionPictureId, roompic.RentLivingSectionId, roompic.RentLivingId, roompic.RentId, roompic.PictureData, roompic.PictureThumbData, roompic.PictureFileExt);
+                                            string sqlInsertIntoRentLivingRoomPic = String.Format("INSERT INTO RentLivingRoomPicture (RentLivingRoomPicture_ID, RentLivingRoom_ID, RentLiving_ID, Rent_ID, PictureData, PictureThumbData, PictureFileExt) VALUES ('{0}', '{1}', '{2}', '{3}', @0, @1, '{6}')",
+                                                roompic.RentSectionPictureId, roompic.RentLivingRoomId, roompic.RentLivingId, roompic.RentId, roompic.PictureData, roompic.PictureThumbData, roompic.PictureFileExt);
 
-                                            cmd.CommandText = sqlInsertIntoRentLivingSectionPic;
+                                            cmd.CommandText = sqlInsertIntoRentLivingRoomPic;
                                             // ループなので、前のパラメーターをクリアする。
                                             cmd.Parameters.Clear();
 
@@ -1072,8 +1073,8 @@ namespace ZumenSearch
                                             parameter2.Value = roompic.PictureThumbData;
                                             cmd.Parameters.Add(parameter2);
 
-                                            var InsertIntoRentLivingSectionPicResult = cmd.ExecuteNonQuery();
-                                            if (InsertIntoRentLivingSectionPicResult > 0)
+                                            var InsertIntoRentLivingRoomPicResult = cmd.ExecuteNonQuery();
+                                            if (InsertIntoRentLivingRoomPicResult > 0)
                                             {
                                                 roompic.IsNew = false;
                                                 roompic.IsModified = false;
@@ -1081,10 +1082,10 @@ namespace ZumenSearch
                                         }
                                         else if (roompic.IsModified)
                                         {
-                                            string sqlUpdateRentLivingSectionPic = String.Format("UPDATE RentLivingSectionPicture SET PictureData = @0, PictureThumbData = @1, PictureFileExt = '{6}' WHERE RentLivingSectionPicture_ID = '{0}'",
-                                                roompic.RentSectionPictureId, roompic.RentLivingSectionId, roompic.RentLivingId, roompic.RentId, roompic.PictureData, roompic.PictureThumbData, roompic.PictureFileExt);
+                                            string sqlUpdateRentLivingRoomPic = String.Format("UPDATE RentLivingRoomPicture SET PictureData = @0, PictureThumbData = @1, PictureFileExt = '{6}' WHERE RentLivingRoomPicture_ID = '{0}'",
+                                                roompic.RentSectionPictureId, roompic.RentLivingRoomId, roompic.RentLivingId, roompic.RentId, roompic.PictureData, roompic.PictureThumbData, roompic.PictureFileExt);
 
-                                            cmd.CommandText = sqlUpdateRentLivingSectionPic;
+                                            cmd.CommandText = sqlUpdateRentLivingRoomPic;
                                             // ループなので、前のパラメーターをクリアする。
                                             cmd.Parameters.Clear();
 
@@ -1096,8 +1097,8 @@ namespace ZumenSearch
                                             parameter2.Value = roompic.PictureThumbData;
                                             cmd.Parameters.Add(parameter2);
 
-                                            var UpdateRentLivingSectionPicResult = cmd.ExecuteNonQuery();
-                                            if (UpdateRentLivingSectionPicResult > 0)
+                                            var UpdateRentLivingRoomPicResult = cmd.ExecuteNonQuery();
+                                            if (UpdateRentLivingRoomPicResult > 0)
                                             {
                                                 roompic.IsNew = false;
                                                 roompic.IsModified = false;
@@ -1107,17 +1108,17 @@ namespace ZumenSearch
                                 }
 
                                 // 部屋画像の削除リストを処理
-                                if (room.RentLivingSectionPicturesToBeDeletedIDs.Count > 0)
+                                if (room.RentLivingRoomPicturesToBeDeletedIDs.Count > 0)
                                 {
-                                    foreach (var id in room.RentLivingSectionPicturesToBeDeletedIDs)
+                                    foreach (var id in room.RentLivingRoomPicturesToBeDeletedIDs)
                                     {
                                         // 削除
-                                        string sqlDeleteRentLivingSectionPicture = String.Format("DELETE FROM RentLivingSectionPicture WHERE RentLivingSectionPicture_ID = '{0}'",
+                                        string sqlDeleteRentLivingRoomPicture = String.Format("DELETE FROM RentLivingRoomPicture WHERE RentLivingRoomPicture_ID = '{0}'",
                                                 id);
 
-                                        cmd.CommandText = sqlDeleteRentLivingSectionPicture;
-                                        var UpdateoRentLivingSectionResult = cmd.ExecuteNonQuery();
-                                        if (UpdateoRentLivingSectionResult > 0)
+                                        cmd.CommandText = sqlDeleteRentLivingRoomPicture;
+                                        var UpdateoRentLivingRoomResult = cmd.ExecuteNonQuery();
+                                        if (UpdateoRentLivingRoomResult > 0)
                                         {
                                             //
                                         }
@@ -1128,21 +1129,21 @@ namespace ZumenSearch
                         }
 
                         // 部屋の削除リストを処理
-                        if (rl.RentLivingSectionToBeDeletedIDs.Count > 0)
+                        if (rl.RentLivingRoomToBeDeletedIDs.Count > 0)
                         {
-                            foreach (var id in rl.RentLivingSectionToBeDeletedIDs)
+                            foreach (var id in rl.RentLivingRoomToBeDeletedIDs)
                             {
                                 // 削除
-                                string sqlDeleteRentLivingSection = String.Format("DELETE FROM RentLivingSection WHERE RentLivingSection_ID = '{0}'", id);
+                                string sqlDeleteRentLivingRoom = String.Format("DELETE FROM RentLivingRoom WHERE RentLivingRoom_ID = '{0}'", id);
 
-                                cmd.CommandText = sqlDeleteRentLivingSection;
+                                cmd.CommandText = sqlDeleteRentLivingRoom;
                                 var DelRentLivingPdfResult = cmd.ExecuteNonQuery();
                                 if (DelRentLivingPdfResult > 0)
                                 {
                                     //
                                 }
                             }
-                            rl.RentLivingSectionToBeDeletedIDs.Clear();
+                            rl.RentLivingRoomToBeDeletedIDs.Clear();
                         }
 
                         cmd.Transaction.Commit();
