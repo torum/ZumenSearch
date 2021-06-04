@@ -37,6 +37,7 @@ using ZumenSearch.Common;
 /// Modelsに基底クラス定義やデータ操作をリストラクチャー。
 
 /// ● 履歴：
+/// v0.0.0.19 Round corner 化。PDF編集画面途中。
 /// v0.0.0.18 Renamingの置換もろもろ。画像編集画面でのIsDirty修正（IsEdit追加）
 /// v0.0.0.17 クリーンアップ。
 /// v0.0.0.16 Windowの表示位置保存を修正。

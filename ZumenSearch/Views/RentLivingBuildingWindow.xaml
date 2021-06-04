@@ -121,6 +121,11 @@
                                     <Label Content="画像" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </TabItem.Header>
+                            <TabItem.Style>
+                                <Style TargetType="{x:Type TabItem}" BasedOn="{StaticResource DefaultTabItem}">
+                                    <Setter Property="OverridesDefaultStyle" Value="False" />
+                                </Style>
+                            </TabItem.Style>
 
                             <Grid>
                                 <Grid.RowDefinitions>
@@ -224,7 +229,8 @@
                                 </StackPanel>
                             </TabItem.Header>
                             <TabItem.Style>
-                                <Style>
+                                <Style TargetType="{x:Type TabItem}" BasedOn="{StaticResource DefaultTabItem}">
+                                    <Setter Property="OverridesDefaultStyle" Value="False" />
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding ElementName=RadioButtonBuildingTypeKubunshoyuu, Path=IsChecked}" Value="True">
                                             <Setter Property="TabItem.Visibility" Value="Hidden"/>
@@ -377,6 +383,11 @@
                                         <Label Content="建物概要" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </TabItem.Header>
+                                <TabItem.Style>
+                                    <Style TargetType="{x:Type TabItem}" BasedOn="{StaticResource DefaultTabItem}">
+                                        <Setter Property="OverridesDefaultStyle" Value="False" />
+                                    </Style>
+                                </TabItem.Style>
 
                                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                                     <Grid Margin="6">
@@ -635,7 +646,12 @@
                                         <Label Content="交通" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </TabItem.Header>
-
+                                <TabItem.Style>
+                                    <Style TargetType="{x:Type TabItem}" BasedOn="{StaticResource DefaultTabItem}">
+                                        <Setter Property="OverridesDefaultStyle" Value="False" />
+                                    </Style>
+                                </TabItem.Style>
+                                
                                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                                     <Grid Margin="6">
                                         <Grid.RowDefinitions>
@@ -734,7 +750,12 @@
                                         <Label Content="設備" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </TabItem.Header>
-
+                                <TabItem.Style>
+                                    <Style TargetType="{x:Type TabItem}" BasedOn="{StaticResource DefaultTabItem}">
+                                        <Setter Property="OverridesDefaultStyle" Value="False" />
+                                    </Style>
+                                </TabItem.Style>
+                                
                                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                                     <StackPanel Margin="6 12 6 6">
 
@@ -1012,7 +1033,8 @@
                                     </StackPanel>
                                 </TabItem.Header>
                                 <TabItem.Style>
-                                    <Style>
+                                    <Style TargetType="{x:Type TabItem}" BasedOn="{StaticResource DefaultTabItem}">
+                                        <Setter Property="OverridesDefaultStyle" Value="False" />
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding ElementName=RadioButtonBuildingTypeKubunshoyuu, Path=IsChecked}" Value="True">
                                                 <Setter Property="TabItem.Visibility" Value="Hidden"/>
@@ -1035,7 +1057,8 @@
                                     </StackPanel>
                                 </TabItem.Header>
                                 <TabItem.Style>
-                                    <Style>
+                                    <Style TargetType="{x:Type TabItem}" BasedOn="{StaticResource DefaultTabItem}">
+                                        <Setter Property="OverridesDefaultStyle" Value="False" />
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding ElementName=RadioButtonBuildingTypeKubunshoyuu, Path=IsChecked}" Value="True">
                                                 <Setter Property="TabItem.Visibility" Value="Hidden"/>

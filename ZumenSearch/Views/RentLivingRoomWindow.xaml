@@ -17,7 +17,8 @@
         Width="1024" Height="680" 
         MinWidth="1024" MinHeight="680"
         StateChanged="Window_StateChanged"
-        Closing="Window_Closing">
+        Closing="Window_Closing"
+    xmlns:theme="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero2">
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="32" ResizeBorderThickness="{x:Static SystemParameters.WindowResizeBorderThickness}"/>
     </WindowChrome.WindowChrome>
@@ -126,6 +127,11 @@
                                     <Label Content="画像" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </TabItem.Header>
+                            <TabItem.Style>
+                                <Style TargetType="{x:Type TabItem}" BasedOn="{StaticResource DefaultTabItem}">
+                                    <Setter Property="OverridesDefaultStyle" Value="False" />
+                                </Style>
+                            </TabItem.Style>
 
                             <Grid>
                                 <Grid.RowDefinitions>
@@ -208,6 +214,11 @@
                                     <Label Content="PDF" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </TabItem.Header>
+                            <TabItem.Style>
+                                <Style TargetType="{x:Type TabItem}" BasedOn="{StaticResource DefaultTabItem}">
+                                    <Setter Property="OverridesDefaultStyle" Value="False" />
+                                </Style>
+                            </TabItem.Style>
 
                             <Grid Margin="2">
                                 <Grid.RowDefinitions>
@@ -244,6 +255,11 @@
                                     <Label Content="部屋概要" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </TabItem.Header>
+                            <TabItem.Style>
+                                <Style TargetType="{x:Type TabItem}" BasedOn="{StaticResource DefaultTabItem}">
+                                    <Setter Property="OverridesDefaultStyle" Value="False" />
+                                </Style>
+                            </TabItem.Style>
 
                             <ScrollViewer VerticalScrollBarVisibility="Auto">
 
@@ -348,7 +364,7 @@
                                         <GroupBox Header="礼金" Padding="6" Grid.Row="2" Grid.Column="1" Margin="0 0 6 0">
                                             <StackPanel Orientation="Horizontal">
                                                 <TextBox Width="68" Margin="6 6 0 6" HorizontalAlignment="Left" VerticalAlignment="Bottom" />
-                                                <ComboBox Width="58" SelectedIndex="0" Margin="6 6 0 6"  VerticalAlignment="Bottom">
+                                                <ComboBox Style="{DynamicResource ComboBoxStyle1}" Width="58" SelectedIndex="0" Margin="6 6 0 6"  VerticalAlignment="Bottom">
                                                     <ComboBoxItem>ヵ月</ComboBoxItem>
                                                     <ComboBoxItem>円</ComboBoxItem>
                                                 </ComboBox>
@@ -410,7 +426,7 @@
                                         
                                         <GroupBox Header="備考" Padding="6" Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="2" Margin="0 0 6 0">
                                             <StackPanel Orientation="Horizontal">
-                                                <TextBox Height="93" Width="374" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Margin="6 6 0 6" HorizontalAlignment="Stretch" VerticalAlignment="Top" />
+                                                <TextBox Height="68" Width="374" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Margin="6 6 0 6" HorizontalAlignment="Stretch" VerticalAlignment="Top" />
                                             </StackPanel>
                                         </GroupBox>
 
@@ -484,6 +500,11 @@
                                     <Label Content="設備" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </TabItem.Header>
+                            <TabItem.Style>
+                                <Style TargetType="{x:Type TabItem}" BasedOn="{StaticResource DefaultTabItem}">
+                                    <Setter Property="OverridesDefaultStyle" Value="False" />
+                                </Style>
+                            </TabItem.Style>
 
                             <ScrollViewer VerticalScrollBarVisibility="Auto">
                                 <StackPanel Margin="6 12 6 6">
@@ -552,6 +573,12 @@
                                     <Label Content="元付け" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </TabItem.Header>
+                            <TabItem.Style>
+                                <Style TargetType="{x:Type TabItem}" BasedOn="{StaticResource DefaultTabItem}">
+                                    <Setter Property="OverridesDefaultStyle" Value="False" />
+                                </Style>
+                            </TabItem.Style>
+                            
                         </TabItem>
                         
                         <!-- オーナー -->
@@ -561,6 +588,12 @@
                                     <Label Content="オーナー " HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </TabItem.Header>
+                            <TabItem.Style>
+                                <Style TargetType="{x:Type TabItem}" BasedOn="{StaticResource DefaultTabItem}">
+                                    <Setter Property="OverridesDefaultStyle" Value="False" />
+                                </Style>
+                            </TabItem.Style>
+                            
                         </TabItem>
 
                     </TabControl>
