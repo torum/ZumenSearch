@@ -36,7 +36,7 @@ namespace ZumenSearch.Views
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             // Load window possition.
-
+            /*
             if ((Properties.Settings.Default.RentLivingImageWindow_Width >= 384))
             {
                 this.Width = Properties.Settings.Default.RentLivingImageWindow_Width;
@@ -65,6 +65,7 @@ namespace ZumenSearch.Views
             {
                 //this.WindowState = WindowState.Maximized;
             }
+            */
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -118,6 +119,7 @@ namespace ZumenSearch.Views
             }
 
             // Save window pos.
+            /*
             if (WindowState == WindowState.Normal)
             {
                 Properties.Settings.Default.RentLivingImageWindow_Left = this.Left;
@@ -133,6 +135,7 @@ namespace ZumenSearch.Views
             }
 
             Properties.Settings.Default.Save();
+            */
 
             // Windowリストから自らを削除。
             App app = App.Current as App;

@@ -394,15 +394,21 @@
                                     <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
 
-                                <Button x:Name="ButtonAddRL" Content="新規追加" Command="{Binding RentLivingEditNewCommand}" Grid.Row="0" Grid.Column="0" Width="100" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                <Button Content="検索" Command="{Binding RentLivingEditSearchCommand}" Grid.Row="0" Grid.Column="0" IsDefault="True" Width="100" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
+
+                                <Button Content="一覧" Command="{Binding RentLivingEditListCommand}" Grid.Row="0" Grid.Column="1" Width="100" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
+
+                                <Button x:Name="ButtonAddRL" Content="新規追加" Command="{Binding RentLivingEditNewCommand}" Grid.Row="0" Grid.Column="2" Width="100" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                                 
-                                <Button x:Name="ButtonViewRL" Content="表示" Command="{Binding RentLivingEditSelectedViewCommand}" Grid.Row="0" Grid.Column="1" Width="100" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
+                                <Button x:Name="ButtonEditRL" Content="編集" Command="{Binding RentLivingEditSelectedEditCommand}" Grid.Row="0" Grid.Column="3" Width="100" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
 
-                                <Button x:Name="ButtonEditRL" Content="編集" Command="{Binding RentLivingEditSelectedEditCommand}" Grid.Row="0" Grid.Column="2" Width="100" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
+                                <Button x:Name="ButtonViewRL" Content="表示" Command="{Binding RentLivingEditSelectedViewCommand}" Grid.Row="0" Grid.Column="4" Width="100" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
 
-                                <Button x:Name="ButtonDeleteRL" Content="削除" Command="{Binding RentLivingEditSelectedDeleteCommand}" Grid.Row="0" Grid.Column="3" Width="100" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
+                                <Button x:Name="ButtonDeleteRL" Content="削除" Command="{Binding RentLivingEditSelectedDeleteCommand}" Grid.Row="0" Grid.Column="5" Width="100" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
 
                             </Grid>
                         </Border>
@@ -412,51 +418,42 @@
 
                             <!-- 検索条件 -->
                             <TabItem Style="{DynamicResource NoChromeTabHeaderCollapsed}">
-                                <Grid>
+                                <Grid Grid.Row="1" Grid.Column="0">
                                     <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto"/>
                                         <RowDefinition Height="*"/>
                                     </Grid.RowDefinitions>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
+                                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                        <!-- 検索条件　項目入力 -->
+                                        <StackPanel Margin="12">
 
-                                    <!-- 検索ボタン -->
-                                    <Grid Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right">
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                        </Grid.RowDefinitions>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
+                                            <Grid HorizontalAlignment="Stretch">
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto"/>
+                                                </Grid.RowDefinitions>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
 
-                                        <Button Content="一覧" Command="{Binding RentLivingEditListCommand}" Grid.Row="0" Grid.Column="0" Width="100" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
+                                                <StackPanel Grid.Row="0" Grid.Column="0">
 
-                                        <Button Content="検索" Command="{Binding RentLivingEditSearchCommand}" Grid.Row="0" Grid.Column="1" IsDefault="True" Width="100" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
+                                                    <Label Content="物件名"/>
+                                                    <TextBox Text="{Binding RentLivingEditSearchText, UpdateSourceTrigger=PropertyChanged}" Grid.Row="0" Grid.Column="0" Margin="6 0 6 6" HorizontalAlignment="Stretch"></TextBox>
 
-                                    </Grid>
+                                                </StackPanel>
 
-                                    <!-- 検索条件　項目入力 -->
-                                    <Grid Grid.Row="1" Grid.Column="0">
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="*"/>
-                                        </Grid.RowDefinitions>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <ScrollViewer VerticalScrollBarVisibility="Auto">
-                                            <StackPanel>
+                                                <Button Grid.Row="0" Grid.Column="1" Content="検索" Command="{Binding RentLivingEditSearchCommand}" IsDefault="True" Width="100" VerticalAlignment="Bottom" HorizontalAlignment="Center"></Button>
 
-                                                <Label Content="物件名"/>
-                                                <TextBox Text="{Binding RentLivingEditSearchText, UpdateSourceTrigger=PropertyChanged}" Grid.Row="0" Grid.Column="0" Margin="6 0 6 6" HorizontalAlignment="Stretch"></TextBox>
+                                            </Grid>
+                                            
+                                            
+                                        </StackPanel>
 
-                                            </StackPanel>
-                                        </ScrollViewer>
-                                    </Grid>
-
+                                    </ScrollViewer>
                                 </Grid>
-
                             </TabItem>
 
                             <!-- 検索結果一覧 -->
@@ -478,11 +475,11 @@
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
 
-                                        <Button Content="戻る" Command="{Binding RentLivingSearchBackCommand}" Grid.Row="0" Grid.Column="1" Width="100" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
+                                        <Button Visibility="Collapsed" Content="戻る" Command="{Binding RentLivingSearchBackCommand}" Grid.Row="0" Grid.Column="1" Width="100" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
 
                                     </Grid>
 
-                                    <Grid Grid.Row="1" Grid.Column="0">
+                                    <Grid Grid.Row="1" Grid.Column="0" Margin="12">
                                         <Grid.RowDefinitions>
                                             <RowDefinition Height="Auto"/>
                                             <RowDefinition Height="*"/>

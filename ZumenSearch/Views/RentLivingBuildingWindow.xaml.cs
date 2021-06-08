@@ -33,8 +33,8 @@ namespace ZumenSearch.Views
             Loaded += Window_Loaded;
 
             RestoreButton.Visibility = Visibility.Collapsed;
-            MaxButton.Visibility = Visibility.Visible;
-
+            //MaxButton.Visibility = Visibility.Visible;
+            MaxButton.Visibility = Visibility.Collapsed;
         }
 
         // 部屋編集画面の表示

@@ -37,6 +37,7 @@ using ZumenSearch.Common;
 /// Modelsに基底クラス定義やデータ操作をリストラクチャー。
 
 /// ● 履歴：
+/// v0.0.0.20 建物編集画面をリデザイン。
 /// v0.0.0.19 Round corner 化。PDF編集画面途中。
 /// v0.0.0.18 Renamingの置換もろもろ。画像編集画面でのIsDirty修正（IsEdit追加）
 /// v0.0.0.17 クリーンアップ。
@@ -67,7 +68,7 @@ namespace ZumenSearch.ViewModels
         #region == 基本 ==
 
         // Application version.
-        private const string _appVer = "0.0.0.18";
+        private const string _appVer = "0.0.0.20";
 
         // Application name.
         private const string _appName = "ZumenSearch";
@@ -1113,6 +1114,9 @@ namespace ZumenSearch.ViewModels
 
             #endregion
 
+
+            RentLivingEditListCommand_Execute();
+
         }
 
         #region == イベントの実装 ==
@@ -1433,8 +1437,15 @@ namespace ZumenSearch.ViewModels
             // 一覧をクリア
             Rents.Clear();
 
-            // 検索結果一覧タブに移動
+            // 既に一覧を表示していたら、検索画面に戻る。
+            if (RentLivingSearchTabSelectedIndex == 1)
+            {
+                RentLivingSearchBackCommand_Execute();
+                return;
+            }
+
             RentLivingSearchTabSelectedIndex = 1;
+            // 検索結果一覧タブに移動
 
             // 検索結果一覧を取得
             ResultWrapper res = dataAccessModule.RentLivingSearch(Rents, RentLivingEditSearchText);
