@@ -87,37 +87,7 @@ namespace ZumenSearch.ViewModels
 
         #region == 編集用のプロパティ ==
 
-        // 変更（データ入力）があったかどうかのフラグ。（画面終了時の確認）
-        private bool _isDirty = false;
-        public bool IsDirty
-        {
-            get
-            {
-                return _isDirty;
-            }
-            set
-            {
-                if (_isDirty == value) return;
-
-                _isDirty = value;
-                NotifyPropertyChanged("IsDirty");
-                NotifyPropertyChanged("StatusIsDirty");
-            }
-        }
-
-        // 変更フラグの表示用テキスト
-        public string StatusIsDirty
-        {
-            get
-            {
-                if (IsDirty)
-                    return "変更";
-                else
-                    return "";
-            }
-        }
-
-        // 画像
+        // 画像プレビュー
         private ImageSource _picture;
         public ImageSource Picture
         {
@@ -197,6 +167,36 @@ namespace ZumenSearch.ViewModels
 
                 // 変更フラグを立てる
                 IsDirty = true;
+            }
+        }
+
+        // 変更（データ入力）があったかどうかのフラグ。（画面終了時の確認）
+        private bool _isDirty = false;
+        public bool IsDirty
+        {
+            get
+            {
+                return _isDirty;
+            }
+            set
+            {
+                if (_isDirty == value) return;
+
+                _isDirty = value;
+                NotifyPropertyChanged("IsDirty");
+                NotifyPropertyChanged("StatusIsDirty");
+            }
+        }
+
+        // 変更フラグの表示用テキスト
+        public string StatusIsDirty
+        {
+            get
+            {
+                if (IsDirty)
+                    return "変更";
+                else
+                    return "";
             }
         }
 

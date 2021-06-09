@@ -669,7 +669,7 @@ namespace ZumenSearch
                                 foreach (var pdf in rl.RentLivingPdfs)
                                 {
                                     string sqlInsertIntoRentLivingZumenPdf = String.Format("INSERT INTO RentLivingZumenPdf (RentLivingZumenPdf_ID, RentLiving_ID, Rent_ID, PdfData, DateTimeAdded, DateTimePublished, DateTimeVerified, FileSize) VALUES ('{0}', '{1}', '{2}', @0, '{4}', '{5}', '{6}', '{7}')",
-                                        pdf.RentZumenPdfId, rl.RentLivingId, rl.RentId, pdf.PdfData, pdf.DateTimeAdded.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"), pdf.DateTimePublished.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"), pdf.DateTimeVerified.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"), pdf.FileSize);
+                                        pdf.RentPdfId, rl.RentLivingId, rl.RentId, pdf.PdfData, pdf.DateTimeAdded.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"), pdf.DateTimePublished.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"), pdf.DateTimeVerified.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"), pdf.FileSize);
 
                                     // 図面の追加
                                     cmd.CommandText = sqlInsertIntoRentLivingZumenPdf;
@@ -960,7 +960,7 @@ namespace ZumenSearch
                                 if (pdf.IsNew)
                                 {
                                     string sqlInsertIntoRentLivingZumen = String.Format("INSERT INTO RentLivingZumenPdf (RentLivingZumenPdf_ID, RentLiving_ID, Rent_ID, PdfData, DateTimeAdded, DateTimePublished, DateTimeVerified, FileSize) VALUES ('{0}', '{1}', '{2}', @0, '{4}', '{5}', '{6}', '{7}')",
-                                        pdf.RentZumenPdfId, rl.RentLivingId, rl.RentId, pdf.PdfData, pdf.DateTimeAdded.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"), pdf.DateTimePublished.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"), pdf.DateTimeVerified.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"), pdf.FileSize);
+                                        pdf.RentPdfId, rl.RentLivingId, rl.RentId, pdf.PdfData, pdf.DateTimeAdded.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"), pdf.DateTimePublished.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"), pdf.DateTimeVerified.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"), pdf.FileSize);
 
                                     // 図面の追加
                                     cmd.CommandText = sqlInsertIntoRentLivingZumen;
@@ -975,13 +975,13 @@ namespace ZumenSearch
                                     if (result > 0)
                                     {
                                         pdf.IsNew = false;
-                                        pdf.IsDirty = false;
+                                        pdf.IsModified = false;
                                     }
                                 }
-                                else if (pdf.IsDirty)
+                                else if (pdf.IsModified)
                                 {
                                     string sqlUpdateRentLivingZumen = String.Format("UPDATE RentLivingZumenPdf SET DateTimePublished = '{1}', DateTimeVerified = '{2}' WHERE RentLivingZumenPdf_ID = '{0}'",
-                                        pdf.RentZumenPdfId, pdf.DateTimePublished.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"), pdf.DateTimeVerified.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"), pdf.FileSize);
+                                        pdf.RentPdfId, pdf.DateTimePublished.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"), pdf.DateTimeVerified.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"), pdf.FileSize);
 
                                     // 図面アトリビュート情報の更新
                                     cmd.CommandText = sqlUpdateRentLivingZumen;
@@ -990,16 +990,16 @@ namespace ZumenSearch
                                     if (result > 0)
                                     {
                                         pdf.IsNew = false;
-                                        pdf.IsDirty = false;
+                                        pdf.IsModified = false;
                                     }
                                 }
                             }
                         }
 
                         // 図面の削除リストを処理
-                        if (rl.RentLivingZumenPdfToBeDeletedIDs.Count > 0)
+                        if (rl.RentLivingPdfsToBeDeletedIDs.Count > 0)
                         {
-                            foreach (var id in rl.RentLivingZumenPdfToBeDeletedIDs)
+                            foreach (var id in rl.RentLivingPdfsToBeDeletedIDs)
                             {
                                 // 削除
                                 string sqlDeleteRentLivingPDF = String.Format("DELETE FROM RentLivingZumenPdf WHERE RentLivingZumenPdf_ID = '{0}'",
@@ -1012,7 +1012,7 @@ namespace ZumenSearch
                                     //
                                 }
                             }
-                            rl.RentLivingZumenPdfToBeDeletedIDs.Clear();
+                            rl.RentLivingPdfsToBeDeletedIDs.Clear();
                         }
 
                         // 部屋更新

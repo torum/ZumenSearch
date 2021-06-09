@@ -10,12 +10,10 @@ using ZumenSearch.Models;
 using ZumenSearch.Views;
 using ZumenSearch.Common;
 using System.IO;
+using System.Windows.Input;
 
 namespace ZumenSearch.ViewModels
 {
-    // TODO: RentLivingPdf> RentLivingPDF
-
-
     /// <summary>
     /// 賃貸住居用物件のPDF編集用ViewModel
     /// </summary>
@@ -48,18 +46,18 @@ namespace ZumenSearch.ViewModels
                 NotifyPropertyChanged("RentLivingPdfEdit");
 
                 // 値の設定時に、編集画面用のプロパティにそれぞれの値をポピュレイトする
-                //Picture = _rentLivingPictureEdit.Picture;
-                //SelectedPictureType = _rentLivingPictureEdit.PictureType;
-                //PictureDescription = _rentLivingPictureEdit.PictureDescription;
-                //PictureIsMain = _rentLivingPictureEdit.PictureIsMain;
+                Picture = _rentLivingPdfEdit.Picture;
+                SelectedPdfType = _rentLivingPdfEdit.PdfType;
+                PdfDescription = _rentLivingPdfEdit.PdfDescription;
+                PdfIsMain = _rentLivingPdfEdit.PdfIsMain;
 
-                // 変更フラグをクリアする（ユーザーの入力で変更・編集された訳ではないので）
-                IsDirty = false;
             }
         }
 
         // 元の賃貸住居用物件のPDFリストを保持。（Winodow生成時に設定される）
         public ObservableCollection<RentLivingPdf> RentLivingPdfs { get; set; }
+
+        #region == 編集用のプロパティ ==
 
         // PDFの画像プレビュー
         private ImageSource _picture;
@@ -81,7 +79,69 @@ namespace ZumenSearch.ViewModels
             }
         }
 
-        #region == 編集用のプロパティ ==
+        // PDFの種類
+        private string _selectedPdfType;
+        public string SelectedPdfType
+        {
+            get
+            {
+                return _selectedPdfType;
+            }
+            set
+            {
+                if (_selectedPdfType == value)
+                    return;
+
+                _selectedPdfType = value;
+                NotifyPropertyChanged("SelectedPdfType");
+
+                // 変更フラグを立てる
+                IsDirty = true;
+            }
+        }
+
+        // PDFのメインPDFフラグ
+        private bool _pdfIsMain;
+        public bool PdfIsMain
+        {
+            get
+            {
+                return _pdfIsMain;
+            }
+            set
+            {
+                if (_pdfIsMain == value)
+                    return;
+
+                _pdfIsMain = value;
+                NotifyPropertyChanged("PdfIsMain");
+
+                // 変更フラグを立てる
+                IsDirty = true;
+            }
+        }
+
+        // PDF説明・コメント
+        private string _pdfDescription;
+        public string PdfDescription
+        {
+            get
+            {
+                return _pdfDescription;
+            }
+            set
+            {
+                if (_pdfDescription == value)
+                    return;
+
+                _pdfDescription = value;
+                NotifyPropertyChanged("PdfDescription");
+
+                // 変更フラグを立てる
+                IsDirty = true;
+            }
+        }
+
         // 変更（データ入力）があったかどうかのフラグ。（画面終了時の確認）
         private bool _isDirty = false;
         public bool IsDirty
@@ -114,7 +174,13 @@ namespace ZumenSearch.ViewModels
         #endregion
 
 
-        private Windows.Data.Pdf.PdfDocument pdfDocument;
+        #region == イベント ==
+
+        // 親画面（賃貸住居用物件）に、（コードビハインド経由で）変更通知を送るイベント。
+        public delegate void IsDirtyEventHandler();
+        public event IsDirtyEventHandler RentLivingIsDirty;
+
+        #endregion
 
         public RentLivingPdfViewModel(string id)
         {
@@ -122,50 +188,112 @@ namespace ZumenSearch.ViewModels
 
             #region == コマンド初期化 ==
 
-            // 画像を保存
-            //PictureSaveCommand = new RelayCommand(PictureSaveCommand_Execute, PictureSaveCommand_CanExecute);
+            // PDFを保存
+            PdfSaveCommand = new RelayCommand(PdfSaveCommand_Execute, PdfSaveCommand_CanExecute);
 
             #endregion
 
         }
 
-        private async void btnPdf_Click()
+
+        #region == イベントの実装 ==
+
+
+        #endregion
+
+        #region == コマンドの実装 ==
+
+        // 画像の保存（追加または更新）
+        public ICommand PdfSaveCommand { get; }
+        public bool PdfSaveCommand_CanExecute()
         {
+            if (RentLivingPdfEdit == null)
+                return false;
 
-            var file = await Windows.Storage.StorageFile.GetFileFromPathAsync(@"C:\Users\xxxx\Downloads\zumen.pdf");
+            if (RentLivingPdfs == null)
+                return false;
 
-            try
+            if (IsDirty)
             {
-                // PDFファイルを読み込む
-                pdfDocument = await Windows.Data.Pdf.PdfDocument.LoadFromFileAsync(file);
+                return true;
             }
-            catch
+            else
             {
-
+                return false;
             }
+        }
+        public void PdfSaveCommand_Execute()
+        {
+            PdfSave();
+        }
 
-            if (pdfDocument != null)
+        // PDFの保存（追加または更新）メソッド（コードビハインドから保存確認ダイアログでも呼ばれる）
+        public bool PdfSave()
+        {
+            if (RentLivingPdfEdit == null)
+                return false;
+
+            if (RentLivingPdfs == null)
+                return false;
+
+            if (IsDirty == false)
+                return true;
+
+            // TODO: 入力チェック
+
+            // 各値の更新
+            RentLivingPdfEdit.PdfDescription = PdfDescription;
+            RentLivingPdfEdit.PdfType = SelectedPdfType;
+
+            // IsMainフラグだった場合、
+            if (PdfIsMain)
             {
-                // 1ページ目を読み込む
-                using (Windows.Data.Pdf.PdfPage page = pdfDocument.GetPage(0))
+                // 一旦画像リスト内の全てのIsMainフラグをクリアする
+                foreach (var hoge in RentLivingPdfs)
                 {
-                    BitmapImage image = new BitmapImage();
-
-                    using (var stream = new Windows.Storage.Streams.InMemoryRandomAccessStream())
+                    if (hoge.PdfIsMain)
                     {
-                        await page.RenderToStreamAsync(stream);
+                        hoge.PdfIsMain = false;
 
-                        image.BeginInit();
-                        image.CacheOption = BitmapCacheOption.OnLoad;
-                        image.StreamSource = stream.AsStream();
-                        image.EndInit();
+                        // 変更フラグを立ててDBに保存されるように
+                        hoge.IsModified = true;
                     }
-
-                    Picture = image;
                 }
             }
+            RentLivingPdfEdit.PdfIsMain = PdfIsMain;
 
 
+            // 画像リストから該当オブジェクトを見つける
+            var found = RentLivingPdfs.FirstOrDefault(x => x.RentPdfId == RentLivingPdfEdit.RentPdfId);
+            if (found == null)
+            {
+                // 追加
+                RentLivingPdfs.Add(RentLivingPdfEdit);
+            }
+            else
+            {
+                // 更新
+                found = RentLivingPdfEdit;
+            }
+
+            // 新規フラグをクリア
+            //RentLivingPictureEdit.IsNew = false;
+
+            // 変更フラグをクリア
+            IsDirty = false;
+
+            // DB更新用のフラグを立てる
+            RentLivingPdfEdit.IsModified = true;
+            // 触らない >RentLivingPictureEdit.IsNew
+
+            // 親画面（賃貸住居用物件）に、変更通知を送る。
+            RentLivingIsDirty?.Invoke();
+
+            return true;
         }
+
+        #endregion
+
+
     }
 }

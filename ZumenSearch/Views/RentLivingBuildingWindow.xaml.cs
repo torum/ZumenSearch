@@ -185,7 +185,77 @@ namespace ZumenSearch.Views
             win.ShowDialog();
 
         }
-        
+
+        // PDF編集画面の表示
+        public void OpenRentLivingPdfWindow(OpenRentLivingPdfWindowEventArgs arg)
+        {
+            if (arg == null)
+                return;
+
+            if (String.IsNullOrEmpty(arg.Id))
+                return;
+
+            if (arg.RentLivingPdfs == null)
+                return;
+
+            string id = arg.Id;
+
+            App app = App.Current as App;
+
+            foreach (var w in app.WindowList)
+            {
+                if (!(w is RentLivingImageWindow))
+                    continue;
+
+                if ((w as RentLivingImageWindow).DataContext == null)
+                    continue;
+
+                if (!((w as RentLivingImageWindow).DataContext is RentLivingImageViewModel))
+                    continue;
+
+                if (id == ((w as RentLivingImageWindow).DataContext as RentLivingImageViewModel).Id)
+                {
+                    //w.Activate();
+
+                    if ((w as RentLivingImageWindow).WindowState == WindowState.Minimized || (w as Window).Visibility == Visibility.Hidden)
+                    {
+                        //w.Show();
+                        (w as RentLivingImageWindow).Visibility = Visibility.Visible;
+                        (w as RentLivingImageWindow).WindowState = WindowState.Normal;
+                    }
+
+                    (w as RentLivingImageWindow).Activate();
+                    //(w as EditorWindow).Topmost = true;
+                    //(w as EditorWindow).Topmost = false;
+                    (w as RentLivingImageWindow).Focus();
+
+                    return;
+                }
+            }
+
+            // Create a new window.
+            var win = new RentLivingPdfWindow();
+            // VMをセット
+            win.DataContext = new RentLivingPdfViewModel(id);
+
+            var vm = (win.DataContext as RentLivingPdfViewModel);
+            // VMにデータを渡す
+            vm.RentLivingPdfEdit = arg.RentLivingPdfObject;
+            vm.RentLivingPdfs = arg.RentLivingPdfs;
+            vm.IsDirty = !arg.IsEdit;
+
+            // 画像編集画面からの変更通知を受け取る
+            vm.RentLivingIsDirty += () => OnRentLivingIsDirty();
+
+            // Windowリストへ追加。
+            app.WindowList.Add(win);
+
+            // モーダルで編集画面を開く
+            win.Owner = this;
+            win.ShowDialog();
+
+        }
+
         public void OnRentLivingIsDirty()
         {
             if (this.DataContext == null)

@@ -191,6 +191,8 @@ namespace ZumenSearch.Views
                 vm.OpenRentLivingRoomWindow += (sender, arg) => { win.OpenRentLivingRoomWindow(arg); };
                 // 画像編集用のWindowを表示させるイベントをサブスクライブする設定
                 vm.OpenRentLivingImageWindow += (sender, arg) => { win.OpenRentLivingImageWindow(arg); };
+                // PDF編集用のWindowを表示させるイベントをサブスクライブする設定
+                vm.OpenRentLivingPdfWindow += (sender, arg) => { win.OpenRentLivingPdfWindow(arg); };
 
                 // 編集画面終了時の保存確認後の閉じるアクションを設定
                 //vm.CloseAction = new Action(win.Close);

@@ -22,12 +22,14 @@ using ZumenSearch.ViewModels.Classes;
 using ZumenSearch.Views;
 using ZumenSearch.Common;
 using System.Drawing.Drawing2D;
+using Windows.Data.Pdf;
+using System.Threading.Tasks;
 
 namespace ZumenSearch.Common
 {
     class Methods
     {
-        #region == メソッド ==
+        #region == 画像操作メソッド ==
 
         // バイト配列をImageオブジェクトに変換
         public static System.Drawing.Image ByteArrayToImage(byte[] b)
@@ -59,6 +61,20 @@ namespace ZumenSearch.Common
             }
         }
 
+        public static Byte[] BitmapImageToByteArray(BitmapImage bitmapImage)
+        {
+            byte[] data;
+            JpegBitmapEncoder encoder = new JpegBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(bitmapImage));
+            using (MemoryStream ms = new MemoryStream())
+            {
+                encoder.Save(ms);
+                data = ms.ToArray();
+            }
+
+            return data;
+        }
+        
         // System.Drawing.Image をBitmapImageオブジェクトに変換
         public static BitmapImage BitmapImageFromImage(System.Drawing.Image img, ImageFormat imf)
         {
@@ -143,33 +159,51 @@ namespace ZumenSearch.Common
             return bmPhoto;
         }
 
-        public static System.Drawing.Image RoundCorners(System.Drawing.Image StartImage, int CornerRadius, Color BackgroundColor)
+        #endregion
+
+        #region == PDF操作メソッド ==
+
+        public async static Task<BitmapImage> BitmapImageFromPdf(Byte[] bytes)
         {
-            CornerRadius *= 2;
-            Bitmap RoundedImage = new Bitmap(StartImage.Width, StartImage.Height);
+            Windows.Data.Pdf.PdfDocument pdfDocument;
 
-            using (Graphics g = Graphics.FromImage(RoundedImage))
+            using (var stream = new MemoryStream(bytes))
             {
-                g.Clear(BackgroundColor);
-                g.SmoothingMode = SmoothingMode.HighQuality;
-                g.CompositingQuality = CompositingQuality.HighQuality;
-                g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                pdfDocument = await Windows.Data.Pdf.PdfDocument.LoadFromStreamAsync(stream.AsRandomAccessStream());
 
-                using (Brush brush = new TextureBrush(StartImage))
+                if (pdfDocument != null)
                 {
-                    using (GraphicsPath gp = new GraphicsPath())
+                    // 1ページ目を読み込む
+                    using (Windows.Data.Pdf.PdfPage page = pdfDocument.GetPage(0))
                     {
-                        gp.AddArc(-1, -1, CornerRadius, CornerRadius, 180, 90);
-                        gp.AddArc(0 + RoundedImage.Width - CornerRadius, -1, CornerRadius, CornerRadius, 270, 90);
-                        gp.AddArc(0 + RoundedImage.Width - CornerRadius, 0 + RoundedImage.Height - CornerRadius, CornerRadius, CornerRadius, 0, 90);
-                        gp.AddArc(-1, 0 + RoundedImage.Height - CornerRadius, CornerRadius, CornerRadius, 90, 90);
+                        BitmapImage image = new BitmapImage();
 
-                        g.FillPath(brush, gp);
+                        using (var IMRAStream = new Windows.Storage.Streams.InMemoryRandomAccessStream())
+                        {
+                            await page.RenderToStreamAsync(IMRAStream);
+
+                            image.BeginInit();
+                            image.CacheOption = BitmapCacheOption.OnLoad;
+                            image.StreamSource = IMRAStream.AsStream();
+                            image.EndInit();
+                        }
+                        /*
+                        // save to file.
+                        JpegBitmapEncoder encoder = new JpegBitmapEncoder();
+                        encoder.Frames.Add(BitmapFrame.Create(image));
+
+                        //string filePath = @"C:\Users\hoge\Desktop\test.jpg";
+                        using (var fileStream = new System.IO.FileStream(filePath, System.IO.FileMode.Create, FileAccess.Write))
+                        {
+                            encoder.Save(fileStream);
+                        }
+                        */
+                        return image;
                     }
                 }
-
-                return RoundedImage;
             }
+
+            return null;
         }
 
         #endregion

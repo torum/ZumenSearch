@@ -398,7 +398,7 @@ namespace ZumenSearch.Models
         public ObservableCollection<RentLivingPdf> RentLivingPdfs { get; set; } = new ObservableCollection<RentLivingPdf>();
 
         // 図面のDBへの更新時にDBから削除されるべき図面のIDリスト
-        public List<string> RentLivingZumenPdfToBeDeletedIDs = new List<string>();
+        public List<string> RentLivingPdfsToBeDeletedIDs = new List<string>();
 
         // 部屋一覧
         public ObservableCollection<RentLivingRoom> RentLivingRooms { get; set; } = new ObservableCollection<RentLivingRoom>();

@@ -30,6 +30,7 @@ namespace ZumenSearch.ViewModels.Classes
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Multiselect = multi;
             openFileDialog.Filter = "イメージファイル (*.jpg;*.png;*.gif;*.jpeg)|*.png;*.jpg;*.gif;*.jpeg|写真ファイル (*.jpg;*.png;*.jpeg)|*.jpg;*.png;*.jpeg|画像ファイル(*.gif;*.png)|*.gif;*.png"; // 外観ならJPGかPNGのみ。間取りならGIFかPNG。
+            // TODO: remember the last folder user accessed.
             openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures); // or MyDocuments
             openFileDialog.Title = title;
 
@@ -40,17 +41,18 @@ namespace ZumenSearch.ViewModels.Classes
             return null;
         }
 
-        public string GetOpenZumenPdfFileDialog(string title)
+        public string[] GetOpenZumenPdfFileDialog(string title, bool multi = true)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Multiselect = false;
+            openFileDialog.Multiselect = multi;
             openFileDialog.Filter = "PDFファイル (*.pdf)|*.pdf";
+            // TODO: remember the last folder user accessed.
             openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             openFileDialog.Title = title;
 
             if (openFileDialog.ShowDialog() == true)
             {
-                return openFileDialog.FileName;
+                return openFileDialog.FileNames;
             }
             return null;
         }

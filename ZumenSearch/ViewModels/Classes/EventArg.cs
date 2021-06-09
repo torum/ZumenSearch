@@ -59,4 +59,23 @@ namespace ZumenSearch.ViewModels.Classes
 
     }
 
+    public class OpenRentLivingPdfWindowEventArgs : EventArgs
+    {
+        // Window識別用ID
+        public string Id { get; set; }
+
+        // 賃貸住居用物件に属する画像リスト
+        public ObservableCollection<RentLivingPdf> RentLivingPdfs { get; set; }
+
+        // 画像オブジェクト
+        public RentLivingPdf RentLivingPdfObject { get; set; }
+
+        // 編集モードか新規モードかのフラグ（編集画面でIsDirtyのセットに使う）
+        public bool IsEdit { get; set; }
+
+        // データ編集用DBアクセスモジュール
+        //public DataAccess DataAccessModule { get; set; }
+
+    }
+
 }

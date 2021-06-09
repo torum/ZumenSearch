@@ -31,12 +31,13 @@ namespace ZumenSearch.Views
 
             Loaded += Window_Loaded;
 
-            RestoreButton.Visibility = Visibility.Collapsed;
-            MaxButton.Visibility = Visibility.Visible;
+            //RestoreButton.Visibility = Visibility.Collapsed;
+            //MaxButton.Visibility = Visibility.Visible;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            /*
             // Load window possition.
             if ((Properties.Settings.Default.RentLivingRoomWindow_Width >= 1024))
             {
@@ -66,6 +67,7 @@ namespace ZumenSearch.Views
             {
                 this.WindowState = WindowState.Maximized;
             }
+            */
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -73,7 +75,8 @@ namespace ZumenSearch.Views
             App app = App.Current as App;
 
             app.RemoveEditWindow(this);
-
+            
+            /*
             // Save window pos.
             if (WindowState == WindowState.Normal && Visibility == Visibility.Visible)
             {
@@ -90,11 +93,12 @@ namespace ZumenSearch.Views
             }
 
             Properties.Settings.Default.Save();
-
+            */
         }
 
         private void Window_StateChanged(object sender, EventArgs e)
         {
+            /*
             if (this.WindowState == WindowState.Normal)
             {
                 RestoreButton.Visibility = Visibility.Collapsed;
@@ -109,6 +113,7 @@ namespace ZumenSearch.Views
 
                 //BackgroundGrid.Margin = new Thickness(3, 3, 3, 3);
             }
+            */
         }
 
         private void CloseButton_Click(object sender, RoutedEventArgs e)

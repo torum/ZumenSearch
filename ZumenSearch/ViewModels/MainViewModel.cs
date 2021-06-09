@@ -23,20 +23,15 @@ using ZumenSearch.ViewModels.Classes;
 using ZumenSearch.Views;
 using ZumenSearch.Common;
 
-/// ////////////////////////////////////////////////////////////
-/// //////////////まずは小さく造って大きく育てる////////////////
-/// ////////////////////////////////////////////////////////////
-
 /// ■ TODO:
 ///
-/// 区分所有かどうかで、図面の追加画面を変える。（利便性のため、表示用の一覧はして、追加削除はしない読み取り専用にする）
-///
-/// 登記情報のPDFを登録できるようにする。
+/// 写真のサムネイル保存する必要ある？
 /// 
 /// エラー処理、及びログ保存
-/// Modelsに基底クラス定義やデータ操作をリストラクチャー。
+/// 
 
 /// ● 履歴：
+/// v0.0.0.21 PDF追加画面と建物画面での表示（とりあえず）。
 /// v0.0.0.20 建物編集画面をリデザイン。
 /// v0.0.0.19 Round corner 化。PDF編集画面途中。
 /// v0.0.0.18 Renamingの置換もろもろ。画像編集画面でのIsDirty修正（IsEdit追加）
@@ -57,7 +52,7 @@ using ZumenSearch.Common;
 /// 不動産IDが出来たら、Webサーバーを作り、会社内共有
 /// （サーバー機能を追加して、同一ネットワーク内のローカルIPアドレスを指定してお互いに物件をフェッチし合えるようにする・・重複対策は・・・）
 /// 技術的に対応できるならば、P2Pで会社間共有
-
+/// 
 
 namespace ZumenSearch.ViewModels
 {
@@ -68,7 +63,7 @@ namespace ZumenSearch.ViewModels
         #region == 基本 ==
 
         // Application version.
-        private const string _appVer = "0.0.0.20";
+        private const string _appVer = "0.0.0.21";
 
         // Application name.
         private const string _appName = "ZumenSearch";
