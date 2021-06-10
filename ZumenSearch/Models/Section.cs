@@ -117,6 +117,24 @@ namespace ZumenSearch.Models
             }
         }
 
+        // 区分所有かどうか
+        protected bool _isOwnershipTypeUnit;
+        public bool IsOwnershipTypeUnit
+        {
+            get
+            {
+                return _isOwnershipTypeUnit;
+            }
+            set
+            {
+                if (_isOwnershipTypeUnit == value) 
+                    return;
+
+                _isOwnershipTypeUnit = value;
+                this.NotifyPropertyChanged("IsOwnershipTypeUnit");
+            }
+        }
+
         // 部屋番号・号室
         private string _rentLivingSectionRoomNumber;
         public string RentLivingRoomRoomNumber

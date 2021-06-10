@@ -7,6 +7,7 @@
         xmlns:common="clr-namespace:ZumenSearch.Common"
         xmlns:helper="clr-namespace:ZumenSearch.Helper"
         xmlns:vms="clr-namespace:ZumenSearch.ViewModels" 
+        xmlns:models="clr-namespace:ZumenSearch.Models" 
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=vms:RentLivingBuildingViewModel}"
         SnapsToDevicePixels="true"
@@ -393,9 +394,10 @@
                                         </TabControl>
                                     </StackPanel>
 
-                                    <!-- 構造・設備 -->
+                                    <!-- 建物構造・設備 -->
                                     <StackPanel Grid.Row="2" Grid.Column="1" Grid.RowSpan="4" Margin="6 0 6 0">
                                         <TabControl Height="420" Margin="0 12 0 0">
+                                            <!-- 建物構造 -->
                                             <TabItem>
                                                 <TabItem.Header>
                                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="3">
@@ -415,8 +417,8 @@
 
                                                             <GroupBox Header="所有区分" Padding="6">
                                                                 <StackPanel Orientation="Horizontal">
-                                                                    <RadioButton Content="建物一棟" GroupName="BuildingType" IsChecked="True" Margin="6"/>
-                                                                    <RadioButton x:Name="RadioButtonBuildingTypeKubunshoyuu" Content="区分所有" GroupName="BuildingType" Margin="6"/>
+                                                                    <RadioButton Content="建物一棟" GroupName="OwnershipType" IsChecked="{Binding Path=RentLivingEdit.Ownership, ConverterParameter={x:Static models:Ownerships.All}, Converter={StaticResource EnumBooleanConverter}}" Margin="6"/>
+                                                                    <RadioButton x:Name="RadioButtonOwnershipType" Content="区分所有" GroupName="OwnershipType" IsChecked="{Binding Path=RentLivingEdit.Ownership, ConverterParameter={x:Static models:Ownerships.Unit}, Converter={StaticResource EnumBooleanConverter}}" Margin="6"/>
                                                                 </StackPanel>
                                                             </GroupBox>
 
@@ -434,7 +436,7 @@
                                                                 <GroupBox.Style>
                                                                     <Style>
                                                                         <Style.Triggers>
-                                                                            <DataTrigger Binding="{Binding ElementName=RadioButtonBuildingTypeKubunshoyuu, Path=IsChecked}" Value="True">
+                                                                            <DataTrigger Binding="{Binding ElementName=RadioButtonOwnershipType, Path=IsChecked}" Value="True">
                                                                                 <Setter Property="GroupBox.Visibility" Value="Hidden"/>
                                                                             </DataTrigger>
                                                                         </Style.Triggers>
@@ -573,10 +575,10 @@
                                                             </GroupBox>
 
                                                             <StackPanel Orientation="Vertical" VerticalAlignment="Top" Visibility="Collapsed">
-                                                                <RadioButton x:Name="RadioButtonRLKindApartEdit" Content="アパート（木造・鉄骨造）" GroupName="RentLivingKind" IsChecked="{Binding Path=RentLivingEdit.Kind, UpdateSourceTrigger=PropertyChanged, ConverterParameter={x:Static vms:RentLivingKinds.Apartment}, Converter={StaticResource EnumBooleanConverter}}" Margin="6"/>
-                                                                <RadioButton x:Name="RadioButtonRLKindMansionEdit" Content="マンション（鉄筋コンクリート造）" GroupName="RentLivingKind" IsChecked="{Binding Path=RentLivingEdit.Kind, UpdateSourceTrigger=PropertyChanged, ConverterParameter={x:Static vms:RentLivingKinds.Mansion}, Converter={StaticResource EnumBooleanConverter}}" Margin="6"/>
-                                                                <RadioButton x:Name="RadioButtonRLKindHouseEdit" Content="一戸建て" GroupName="RentLivingKind" IsChecked="{Binding Path=RentLivingEdit.Kind, UpdateSourceTrigger=PropertyChanged, ConverterParameter={x:Static vms:RentLivingKinds.House}, Converter={StaticResource EnumBooleanConverter}}" Margin="6"/>
-                                                                <RadioButton x:Name="RadioButtonRLKindOtherEdit" Content="その他（テラスハウス・タウンハウス等）" GroupName="RentLivingKind" IsChecked="{Binding Path=RentLivingEdit.Kind, UpdateSourceTrigger=PropertyChanged, ConverterParameter={x:Static vms:RentLivingKinds.Other}, Converter={StaticResource EnumBooleanConverter}}" Margin="6"/>
+                                                                <RadioButton x:Name="RadioButtonRLKindApartEdit" Content="アパート（木造・鉄骨造）" GroupName="RentLivingKind" IsChecked="{Binding Path=RentLivingEdit.Kind, UpdateSourceTrigger=PropertyChanged, ConverterParameter={x:Static models:RentLivingKinds.Apartment}, Converter={StaticResource EnumBooleanConverter}}" Margin="6"/>
+                                                                <RadioButton x:Name="RadioButtonRLKindMansionEdit" Content="マンション（鉄筋コンクリート造）" GroupName="RentLivingKind" IsChecked="{Binding Path=RentLivingEdit.Kind, UpdateSourceTrigger=PropertyChanged, ConverterParameter={x:Static models:RentLivingKinds.Mansion}, Converter={StaticResource EnumBooleanConverter}}" Margin="6"/>
+                                                                <RadioButton x:Name="RadioButtonRLKindHouseEdit" Content="一戸建て" GroupName="RentLivingKind" IsChecked="{Binding Path=RentLivingEdit.Kind, UpdateSourceTrigger=PropertyChanged, ConverterParameter={x:Static models:RentLivingKinds.House}, Converter={StaticResource EnumBooleanConverter}}" Margin="6"/>
+                                                                <RadioButton x:Name="RadioButtonRLKindOtherEdit" Content="その他（テラスハウス・タウンハウス等）" GroupName="RentLivingKind" IsChecked="{Binding Path=RentLivingEdit.Kind, UpdateSourceTrigger=PropertyChanged, ConverterParameter={x:Static models:RentLivingKinds.Other}, Converter={StaticResource EnumBooleanConverter}}" Margin="6"/>
                                                             </StackPanel>
                                                         </StackPanel>
 
@@ -584,6 +586,7 @@
                                                 </ScrollViewer>
 
                                             </TabItem>
+                                            <!-- 設備 -->
                                             <TabItem>
                                                 <TabItem.Header>
                                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="3">
@@ -864,7 +867,6 @@
                                                 </ScrollViewer>
 
                                             </TabItem>
-
                                         </TabControl>
                                     </StackPanel>
 
@@ -1613,7 +1615,7 @@
                             <Style TargetType="{x:Type TabItem}" BasedOn="{StaticResource DefaultTabItem}">
                                 <Setter Property="OverridesDefaultStyle" Value="False" />
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding ElementName=RadioButtonBuildingTypeKubunshoyuu, Path=IsChecked}" Value="True">
+                                    <DataTrigger Binding="{Binding ElementName=RadioButtonOwnershipType, Path=IsChecked}" Value="True">
                                         <Setter Property="TabItem.Visibility" Value="Hidden"/>
                                     </DataTrigger>
                                 </Style.Triggers>
@@ -1637,7 +1639,7 @@
                             <Style TargetType="{x:Type TabItem}" BasedOn="{StaticResource DefaultTabItem}">
                                 <Setter Property="OverridesDefaultStyle" Value="False" />
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding ElementName=RadioButtonBuildingTypeKubunshoyuu, Path=IsChecked}" Value="True">
+                                    <DataTrigger Binding="{Binding ElementName=RadioButtonOwnershipType, Path=IsChecked}" Value="True">
                                         <Setter Property="TabItem.Visibility" Value="Hidden"/>
                                     </DataTrigger>
                                 </Style.Triggers>

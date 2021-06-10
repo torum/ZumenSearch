@@ -31,6 +31,7 @@ using ZumenSearch.Common;
 /// 
 
 /// ● 履歴：
+/// v0.0.0.22 部屋画面のデザイン途中。区分所有の表示切り替え。
 /// v0.0.0.21 PDF追加画面と建物画面での表示（とりあえず）。
 /// v0.0.0.20 建物編集画面をリデザイン。
 /// v0.0.0.19 Round corner 化。PDF編集画面途中。
@@ -63,7 +64,7 @@ namespace ZumenSearch.ViewModels
         #region == 基本 ==
 
         // Application version.
-        private const string _appVer = "0.0.0.21";
+        private const string _appVer = "0.0.0.22";
 
         // Application name.
         private const string _appName = "ZumenSearch";

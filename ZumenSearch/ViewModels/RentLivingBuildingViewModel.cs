@@ -429,6 +429,10 @@ namespace ZumenSearch.ViewModels
             // RentLivingRoom Newオブジェクトを用意
             RentLivingRoom rlsection = new RentLivingRoom(RentLivingEdit.RentId, _id, Guid.NewGuid().ToString());
             rlsection.IsNew = true;
+            if (RentLivingEdit.Ownership == Ownerships.Unit)
+                rlsection.IsOwnershipTypeUnit = true;
+            else if (RentLivingEdit.Ownership == Ownerships.All)
+                rlsection.IsOwnershipTypeUnit = false;
 
             OpenRentLivingRoomWindowEventArgs ag = new OpenRentLivingRoomWindowEventArgs();
             ag.Id = rlsection.RentLivingRoomId;
@@ -454,10 +458,16 @@ namespace ZumenSearch.ViewModels
             if (SectionsSelectedItem == null)
                 return;
 
+            if (RentLivingEdit.Ownership == Ownerships.Unit)
+                SectionsSelectedItem.IsOwnershipTypeUnit = true;
+            else if (RentLivingEdit.Ownership == Ownerships.All)
+                SectionsSelectedItem.IsOwnershipTypeUnit = false;
+
             OpenRentLivingRoomWindowEventArgs ag = new OpenRentLivingRoomWindowEventArgs();
             ag.Id = SectionsSelectedItem.RentLivingRoomId;
             ag.RentLivingRoomObject = SectionsSelectedItem;
             ag.RentLivingRooms = RentLivingEdit.RentLivingRooms;
+
 
             OpenRentLivingRoomWindow?.Invoke(this, ag);
         }

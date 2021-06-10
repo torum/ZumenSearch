@@ -19,6 +19,26 @@ using ZumenSearch.ViewModels;
 
 namespace ZumenSearch.Models
 {
+
+    // 賃貸物件のタイプ（住居用・事業用・駐車場）
+    public enum RentTypes
+    {
+        RentLiving, RentBussiness, RentParking
+    }
+
+    // 一括所有の建物か、区分所有か
+    public enum Ownerships
+    {
+        All, Unit
+    }
+
+    // 賃貸住居用物件種別（アパート・マンション・一戸建て・他）
+    public enum RentLivingKinds
+    {
+        Apartment, Mansion, House, Other
+    }
+
+
     // 物件（建物等）の基底クラス
     public class Rent : ViewModelBase
     {
@@ -192,6 +212,29 @@ namespace ZumenSearch.Models
             }
         }
 
+        public Dictionary<string, Ownerships> StringToRentOwnership { get; } = new Dictionary<string, Ownerships>()
+        {
+            {"Unit", Ownerships.Unit},
+            {"All", Ownerships.All},
+        };
+
+        // 所有権（一棟所有・区分所有）
+        private Ownerships _ownership;
+        public Ownerships Ownership
+        {
+            get
+            {
+                return _ownership;
+            }
+            set
+            {
+                if (_ownership == value) return;
+
+                _ownership = value;
+                this.NotifyPropertyChanged("Ownership");
+            }
+        }
+
         // 所在地〒
         private string _postalCode;
         public string PostalCode
@@ -313,28 +356,6 @@ namespace ZumenSearch.Models
             }
         }
 
-        // 所有権（一棟所有・区分所有）
-        private RentOwnerships _ownership;
-        public RentOwnerships Ownership
-        {
-            get
-            {
-                return _ownership;
-            }
-            set
-            {
-                if (_ownership == value) return;
-
-                _ownership = value;
-                this.NotifyPropertyChanged("Ownership");
-            }
-        }
-
-        public Dictionary<string, RentOwnerships> StringToRentOwnership { get; } = new Dictionary<string, RentOwnerships>()
-        {
-            {"Unit", RentOwnerships.Unit},
-            {"All", RentOwnerships.All},
-        };
 
         // 地上n階建て
         private int _floors;
