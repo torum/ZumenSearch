@@ -10,7 +10,6 @@
         d:DataContext="{d:DesignInstance Type=vms:RentLivingRoomViewModel}"
         mc:Ignorable="d"
         SnapsToDevicePixels="true"
-        WindowStyle="None"
         ResizeMode="NoResize"
         BorderThickness="0"
         WindowStartupLocation="CenterOwner"
@@ -18,8 +17,7 @@
         Width="1024" Height="670" 
         MinWidth="1024" MinHeight="670"
         StateChanged="Window_StateChanged"
-        Closing="Window_Closing"
-        xmlns:theme="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero2">
+        Closing="Window_Closing">
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="32" ResizeBorderThickness="0"/>
     </WindowChrome.WindowChrome>
@@ -580,7 +578,7 @@
                     </TabItem>
 
                     <!-- 元付け -->
-                    <TabItem Width="120">
+                    <TabItem Width="120" Visibility="Collapsed">
                         <TabItem.Header>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="3">
                                 <Label Content="元付け" HorizontalAlignment="Center" VerticalAlignment="Center"/>
@@ -603,7 +601,7 @@
                     </TabItem>
 
                     <!-- オーナー -->
-                    <TabItem Width="120">
+                    <TabItem Width="120" Visibility="Collapsed">
                         <TabItem.Header>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="3">
                                 <Label Content="オーナー " HorizontalAlignment="Center" VerticalAlignment="Center"/>

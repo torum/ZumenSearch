@@ -303,8 +303,90 @@ namespace ZumenSearch.Models
             }
         }
 
+        // 最寄り駅３
+        private string _trainStation3;
+        public string TrainStation3
+        {
+            get
+            {
+                return _trainStation3;
+            }
+            set
+            {
+                if (_trainStation3 == value) return;
+
+                _trainStation3 = value;
+                this.NotifyPropertyChanged("TrainStation3");
+            }
+        }
+
         public Rent()
         {
+
+        }
+    }
+
+
+    public class RentLivingSummary : Rent
+    {
+
+        // Icon Path
+        private static string _rsNew = "M12 5C15.87 5 19 8.13 19 12C19 15.87 15.87 19 12 19C8.13 19 5 15.87 5 12C5 8.13 8.13 5 12 5M12 2C17.5 2 22 6.5 22 12C22 17.5 17.5 22 12 22C6.5 22 2 17.5 2 12C2 6.5 6.5 2 12 2M12 4C7.58 4 4 7.58 4 12C4 16.42 7.58 20 12 20C16.42 20 20 16.42 20 12C20 7.58 16.42 4 12 4Z";
+        private static string _rsNormal = "M12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z";
+        private static string _rsVisited = "M12 2C6.5 2 2 6.5 2 12S6.5 22 12 22 22 17.5 22 12 17.5 2 12 2M12 20C7.59 20 4 16.41 4 12S7.59 4 12 4 20 7.59 20 12 16.41 20 12 20M16.59 7.58L10 14.17L7.41 11.59L6 13L10 17L18 9L16.59 7.58Z";
+
+
+
+        // 建物ID
+        protected string _rentLivingId;
+        public string RentLivingId
+        {
+            get
+            {
+                return _rentLivingId;
+            }
+        }
+
+        // For display.
+        private ImageSource _pictureThumb;
+        public ImageSource PictureThumb
+        {
+            get
+            {
+                return _pictureThumb;
+            }
+            set
+            {
+                if (_pictureThumb == value) return;
+
+                _pictureThumb = value;
+                this.NotifyPropertyChanged("PictureThumb");
+            }
+        }
+
+        private string _pathIcon = "M12 5C15.87 5 19 8.13 19 12C19 15.87 15.87 19 12 19C8.13 19 5 15.87 5 12C5 8.13 8.13 5 12 5M12 2C17.5 2 22 6.5 22 12C22 17.5 17.5 22 12 22C6.5 22 2 17.5 2 12C2 6.5 6.5 2 12 2M12 4C7.58 4 4 7.58 4 12C4 16.42 7.58 20 12 20C16.42 20 20 16.42 20 12C20 7.58 16.42 4 12 4Z";
+        public string PathIcon
+        {
+            get
+            {
+                return _pathIcon;
+            }
+            set
+            {
+                if (_pathIcon == value)
+                    return;
+
+                _pathIcon = value;
+                NotifyPropertyChanged(nameof(PathIcon));
+            }
+        }
+
+
+        // コンストラクタ
+        public RentLivingSummary(string rentid, string rentlivingid)
+        {
+            _rentId = rentid;
+            _rentLivingId = rentlivingid;
 
         }
     }

@@ -102,12 +102,12 @@ namespace ZumenSearch.ViewModels
 
         #region == 物件関連オブジェクト ==
 
-        public ObservableCollection<RentLiving> Rents { get; } = new ObservableCollection<RentLiving>();
+        public ObservableCollection<RentLivingSummary> RentSearchResult { get; } = new ObservableCollection<RentLivingSummary>();
 
         #region == 賃貸住居用 ==
 
-        private RentLiving _rentLivingEditSelectedItem;
-        public RentLiving RentLivingEditSelectedItem
+        private RentLivingSummary _rentLivingEditSelectedItem;
+        public RentLivingSummary RentLivingEditSelectedItem
         {
             get
             {
@@ -1094,24 +1094,32 @@ namespace ZumenSearch.ViewModels
             #endregion
 
             #region == SQLite DB のイニシャライズ ==
-
-            // DBのファイルパスを設定（TODO）
-            var dataBaseFilePath = System.Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + System.IO.Path.DirectorySeparatorChar + _appName + ".db";
-            
-            // SQLite DB のイニシャライズ
-            ResultWrapper res = dataAccessModule.InitializeDatabase(dataBaseFilePath);
-            if (res.IsError)
+            try
             {
-                // エラーの通知
-                ErrorOccured?.Invoke(res.Error);
+                // DBのファイルパスを設定（TODO）
+                ///var dataBaseFilePath = System.Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + System.IO.Path.DirectorySeparatorChar + _appName + ".db";
+                var databaseFileFolerPath = System.Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + System.IO.Path.DirectorySeparatorChar + _appName;
+                System.IO.Directory.CreateDirectory(databaseFileFolerPath);
+                var dataBaseFilePath = databaseFileFolerPath + System.IO.Path.DirectorySeparatorChar + _appName + ".db";
 
-                return;
+                // SQLite DB のイニシャライズ
+                ResultWrapper res = dataAccessModule.InitializeDatabase(dataBaseFilePath);
+                if (res.IsError)
+                {
+                    // エラーの通知
+                    ErrorOccured?.Invoke(res.Error);
+
+                    return;
+                }
+            }
+            catch
+            {
+                //TODO:
             }
 
             #endregion
 
-
-            RentLivingEditListCommand_Execute();
+            //RentLivingEditListCommand_Execute();
 
         }
 
@@ -1431,7 +1439,7 @@ namespace ZumenSearch.ViewModels
         public void RentLivingEditSearchCommand_Execute()
         {
             // 一覧をクリア
-            Rents.Clear();
+            RentSearchResult.Clear();
 
             // 既に一覧を表示していたら、検索画面に戻る。
             if (RentLivingSearchTabSelectedIndex == 1)
@@ -1444,7 +1452,7 @@ namespace ZumenSearch.ViewModels
             // 検索結果一覧タブに移動
 
             // 検索結果一覧を取得
-            ResultWrapper res = dataAccessModule.RentLivingSearch(Rents, RentLivingEditSearchText);
+            ResultWrapper res = dataAccessModule.RentLivingSearch(RentSearchResult, RentLivingEditSearchText);
 
             if (res.IsError)
             {
@@ -1453,6 +1461,7 @@ namespace ZumenSearch.ViewModels
 
                 return;
             }
+
         }
 
         // 一覧
@@ -1464,14 +1473,14 @@ namespace ZumenSearch.ViewModels
         public void RentLivingEditListCommand_Execute()
         {
             // 一覧をクリア
-            Rents.Clear();
+            RentSearchResult.Clear();
 
             // 検索結果一覧タブに移動
             RentLivingSearchTabSelectedIndex = 1;
 
             // 一覧を取得
-            ResultWrapper res = dataAccessModule.RentLivingList(Rents);
-            
+            ResultWrapper res = dataAccessModule.RentLivingSearch(RentSearchResult, "*");
+
             if (res.IsError)
             {
                 // エラーの通知
@@ -1619,7 +1628,7 @@ namespace ZumenSearch.ViewModels
                 }
 
                 // 一覧からも削除
-                if (Rents.Remove(RentLivingEditSelectedItem))
+                if (RentSearchResult.Remove(RentLivingEditSelectedItem))
                 {
                     RentLivingEditSelectedItem = null;
                 }
