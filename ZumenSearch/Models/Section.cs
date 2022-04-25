@@ -70,7 +70,7 @@ namespace ZumenSearch.Models
                 if (IsNew)
                     return "新規";
                 else
-                    return "更新";
+                    return "編集";
             }
         }
 

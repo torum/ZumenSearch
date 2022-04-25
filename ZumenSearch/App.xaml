@@ -1245,6 +1245,7 @@
                     <Style x:Key="ListViewItemStyle" TargetType="ListViewItem">
                         <Setter Property="FocusVisualStyle" Value="{StaticResource ListviewFocusVisual}"/>
                         <Setter Property="Background" Value="{DynamicResource ItemBackgroundColorBrush}"/>
+                        <Setter Property="TextElement.FontWeight" Value="Normal"/>
                         <!--
                         <Setter Property="Foreground" Value="{Binding Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"/>
                         -->

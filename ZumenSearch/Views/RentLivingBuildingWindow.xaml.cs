@@ -312,7 +312,7 @@ namespace ZumenSearch.Views
                         try
                         {
                             // 変更の保存確認ダイアログを表示。
-                            var result = MessageBox.Show("変更を保存して閉じますか？", "未保存の変更があります", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
+                            var result = MessageBox.Show("変更を保存して閉じますか？", "ZumenSearch: 未保存の変更があります", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
 
                             if (result == MessageBoxResult.Yes)
                             {

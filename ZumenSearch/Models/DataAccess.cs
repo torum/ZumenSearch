@@ -73,6 +73,9 @@ namespace ZumenSearch
                                 "PictureThumbData BLOB)";
                             tableCmd.ExecuteNonQuery();
 
+
+                            // TODO: TrainLine
+
                             // メインの賃貸物件「サムネイル・インデックス」テーブル
                             /*
                             tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS RentThumb (" +
@@ -258,7 +261,125 @@ namespace ZumenSearch
             return res;
         }
 
+        // 総合検索
+        public ResultWrapper MainSearch(ObservableCollection<MainSearchResult> searchResult, string searchText)
+        {
+            ResultWrapper res = new ResultWrapper();
 
+            searchResult.Clear();
+
+            try
+            {
+                using (var connection = new SqliteConnection(connectionStringBuilder.ConnectionString))
+                {
+                    connection.Open();
+
+                    using (var cmd = connection.CreateCommand())
+                    {
+                        if ((searchText == "") || (searchText == "*"))
+                        {
+                            // TODO: limit result (stop using *)
+                            cmd.CommandText = "SELECT * FROM Rent INNER JOIN RentLiving ON Rent.Rent_ID = RentLiving.Rent_ID";
+                        }
+                        else
+                        {
+                            // TODO: limit result (stop using *)
+                            cmd.CommandText = "SELECT * FROM Rent INNER JOIN RentLiving ON Rent.Rent_ID = RentLiving.Rent_ID WHERE Name Like '%" + searchText + "%'"
+                                + " OR Location Like '%" + searchText + "%'"
+                                 //+ " OR TrainLine Like '%" + searchText + "%'"
+                                  + " OR TrainStation1 Like '%" + searchText + "%'"
+                                  + " OR TrainStation2 Like '%" + searchText + "%'"
+                                  + " OR TrainStation3 Like '%" + searchText + "%'";
+                        }
+
+                        using (var reader = cmd.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                MainSearchResult msr = new MainSearchResult(Convert.ToString(reader["Rent_ID"]), Convert.ToString(reader["RentLiving_ID"]), ResultTypes.RentLiving);
+                                //rl.Rent_ID = Convert.ToString(reader["Rent_ID"]);
+                                msr.Name = Convert.ToString(reader["Name"]);
+
+                                //if (reader["PictureThumbData"].GetType() != typeof(DBNull))
+                                //{
+                                //    byte[] imageThumbBytes = (byte[])reader["PictureThumbData"];
+                                //    rl.PictureThumb = Methods.BitmapImageFromBytes(imageThumbBytes);
+                                //}
+
+                                //rl.PostalCode = Convert.ToString(reader["PostalCode"]);
+                                msr.Location = Convert.ToString(reader["Location"]);
+                                msr.TrainStation = Convert.ToString(reader["TrainStation1"]);
+
+                                string ts = Convert.ToString(reader["TrainStation2"]);
+                                if (!string.IsNullOrEmpty(ts))
+                                    msr.TrainStation = msr.TrainStation + "/" + ts;
+
+                                ts = Convert.ToString(reader["TrainStation3"]);
+                                if (!string.IsNullOrEmpty(ts))
+                                    msr.TrainStation = msr.TrainStation + "/" + ts;
+
+                                searchResult.Add(msr);
+                                
+                            }
+                        }
+                    }
+                }
+            }
+            catch (System.Reflection.TargetInvocationException ex)
+            {
+                Debug.WriteLine("Opps. TargetInvocationException@DataAccess::GetSearchResultOfRentLiving");
+
+                res.IsError = true;
+                res.Error.ErrType = ErrorObject.ErrTypes.DB;
+                res.Error.ErrCode = 0;
+                res.Error.ErrText = "「" + ex.Message + "」";
+                res.Error.ErrDescription = "賃貸住居用物件の検索結果取得処理でエラーが発生しました。";
+                res.Error.ErrDatetime = DateTime.Now;
+                res.Error.ErrPlace = "TargetInvocationException@DataAccess::GetSearchResultOfRentLiving::connection.Open";
+
+                throw ex.InnerException;
+            }
+            catch (System.InvalidOperationException ex)
+            {
+                Debug.WriteLine("Opps. InvalidOperationException@DataAccess::GetSearchResultOfRentLiving");
+
+                res.IsError = true;
+                res.Error.ErrType = ErrorObject.ErrTypes.DB;
+                res.Error.ErrCode = 0;
+                res.Error.ErrText = "「" + ex.Message + "」";
+                res.Error.ErrDescription = "賃貸住居用物件の検索結果取得処理でエラーが発生しました。";
+                res.Error.ErrDatetime = DateTime.Now;
+                res.Error.ErrPlace = "InvalidOperationException@DataAccess::GetSearchResultOfRentLiving";
+
+                throw ex.InnerException;
+            }
+            catch (Exception e)
+            {
+                res.IsError = true;
+                res.Error.ErrType = ErrorObject.ErrTypes.DB;
+                res.Error.ErrCode = 0;
+
+                if (e.InnerException != null)
+                {
+                    Debug.WriteLine(e.InnerException.Message + " @DataAccess::GetSearchResultOfRentLiving");
+                    res.Error.ErrText = "「" + e.InnerException.Message + "」";
+                }
+                else
+                {
+                    Debug.WriteLine(e.Message + " @DataAccess::GetSearchResultOfRentLiving");
+                    res.Error.ErrText = "「" + e.Message + "」";
+                }
+                res.Error.ErrDescription = "賃貸住居用物件の検索結果取得処理でエラーが発生しました。";
+                res.Error.ErrDatetime = DateTime.Now;
+                res.Error.ErrPlace = "Exception@DataAccess::GetSearchResultOfRentLiving";
+
+            }
+
+
+            return res;
+        }
+
+        //MainSearch
 
         // 賃貸住居用検索
         public ResultWrapper RentLivingSearch(ObservableCollection<RentLivingSummary> rents, string searchText)

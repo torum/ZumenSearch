@@ -149,7 +149,7 @@
                         </Grid.ColumnDefinitions>
 
                         <!-- 検索ボックス -->
-                        <TextBox x:Name="SearchTextBox" Grid.Row="0" Grid.Column="1" Text="{Binding HomeSearchText, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Margin="32 6 32 32" KeyboardNavigation.TabNavigation="Local" IsVisibleChanged="TextBox_IsVisibleChanged">
+                        <TextBox x:Name="SearchTextBox" Grid.Row="0" Grid.Column="1" Text="{Binding MainSearchText, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Margin="32 6 32 32" KeyboardNavigation.TabNavigation="Local" IsVisibleChanged="TextBox_IsVisibleChanged">
                             <TextBox.Style>
                                 <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource SearchTextBoxStyle}">
                                     <Setter Property="Template">
@@ -270,7 +270,7 @@
 
                         <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" x:Name="RentLivingSearchListViewDummy" Visibility="Hidden" Margin="0 0 27 0">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition Width="120"/>
                                 <ColumnDefinition Width="3*"/>
                                 <ColumnDefinition Width="3*" />
                                 <ColumnDefinition Width="2*"/>
@@ -288,12 +288,112 @@
                         </Grid>
 
                         <!-- 検索結果一覧 -->
-                        <ListView Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" x:Name="RentLivingSearchListView" Background="{DynamicResource ListviewAlt0ColorBrush}" helper:GridViewSort.AutoSort="True" helper:GridViewSort.ShowSortGlyph="True" IsSynchronizedWithCurrentItem="True" AlternationCount="2" MinHeight="80" BorderThickness="0" Padding="0 0 0 0" Margin="0 0 0 0" SelectionMode="Extended" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Visible">
+                        <ListView Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" x:Name="MainSearchListView" ItemsSource="{Binding SearchResult, NotifyOnTargetUpdated=True}" SelectedItem="{Binding SearchResultSelectedItem, Mode=TwoWay}" Background="{DynamicResource ListviewAlt0ColorBrush}" helper:GridViewSort.AutoSort="True" helper:GridViewSort.ShowSortGlyph="True" IsSynchronizedWithCurrentItem="True" AlternationCount="2" MinHeight="80" BorderThickness="0" Padding="0 0 0 0" Margin="0 0 0 0" SelectionMode="Single" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Visible" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling">
+                            <ListView.InputBindings>
+                                <KeyBinding Key="Enter"
+                                Command="{Binding Path=DataContext.ListviewEnterKeyCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"
+                                CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" />
+                            </ListView.InputBindings>
                             <ListView.Resources>
-
-                                <ContextMenu x:Key="RLSearchItemContextMenu">
-                                    <MenuItem Header="選択アイテム">
-
+                                <ContextMenu x:Key="ItemContextMenu">
+                                    <MenuItem Header="Open In App Browser" Command="{Binding Path=DataContext.OpenInAppBrowserCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
+                                        <MenuItem.Resources>
+                                            <ControlTemplate x:Key="OpenInAppBrowser">
+                                                <Canvas Background="Transparent" >
+                                                    <Path Fill="#373737" Width="14.3775" Height="14" Canvas.Left="0.311264" Canvas.Top="0.500005" Stretch="Uniform" Data="M12,10L8,14H11V20H13V14H16M19,4H5C3.89,4 3,4.9 3,6V18A2,2 0 0,0 5,20H9V18H5V8H19V18H15V20H19A2,2 0 0,0 21,18V6A2,2 0 0,0 19,4Z" />
+                                                </Canvas>
+                                            </ControlTemplate>
+                                        </MenuItem.Resources>
+                                        <MenuItem.Icon>
+                                            <ContentControl Template="{StaticResource OpenInAppBrowser}" />
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                    <MenuItem Header="Open In Default Browser" Command="{Binding Path=DataContext.OpenInExternalBrowserCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
+                                        <MenuItem.Resources>
+                                            <ControlTemplate x:Key="OpenInExtBrowser">
+                                                <Canvas Background="Transparent" >
+                                                    <Path Fill="#373737" Width="14.3775" Height="14" Canvas.Left="0.311264" Canvas.Top="0.500005" Stretch="Uniform" Data="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z" />
+                                                </Canvas>
+                                            </ControlTemplate>
+                                        </MenuItem.Resources>
+                                        <MenuItem.Icon>
+                                            <ContentControl Template="{StaticResource OpenInExtBrowser}" />
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                    <Separator/>
+                                    <MenuItem Header="Archive" Command="{Binding Path=DataContext.ArchiveSelectedCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
+                                        <MenuItem.Resources>
+                                            <ControlTemplate x:Key="ArchiveThis">
+                                                <Canvas Background="Transparent" >
+                                                    <Path Fill="#373737" Width="14.3775" Height="14" Canvas.Left="0.311264" Canvas.Top="0.500005" Stretch="Uniform" Data="M5.12,5L5.93,4H17.93L18.87,5M12,17.5L6.5,12H10V10H14V12H17.5L12,17.5M20.54,5.23L19.15,3.55C18.88,3.21 18.47,3 18,3H6C5.53,3 5.12,3.21 4.84,3.55L3.46,5.23C3.17,5.57 3,6 3,6.5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V6.5C21,6 20.83,5.57 20.54,5.23Z" />
+                                                </Canvas>
+                                            </ControlTemplate>
+                                        </MenuItem.Resources>
+                                        <MenuItem.Icon>
+                                            <ContentControl Template="{StaticResource ArchiveThis}" />
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                    <Separator/>
+                                    <MenuItem Header="Edit"
+                                  Command="{Binding Path=DataContext.OpenEditorCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"
+                                  CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
+                                        <MenuItem.Resources>
+                                            <ControlTemplate x:Key="EditIcon">
+                                                <Canvas Background="Transparent" >
+                                                    <Path Fill="#373737"
+                          Width="14.3775"
+                          Height="14"
+                          Canvas.Left="0.311264"
+                          Canvas.Top="0.500005"
+                          Stretch="Uniform"
+                          Data="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z" />
+                                                </Canvas>
+                                            </ControlTemplate>
+                                        </MenuItem.Resources>
+                                        <MenuItem.Icon>
+                                            <ContentControl Template="{StaticResource EditIcon}" />
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                    <MenuItem Header="Reload"
+                                  Command="{Binding Path=DataContext.GetEntryCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"
+                                  CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
+                                        <MenuItem.Resources>
+                                            <ControlTemplate x:Key="GetEntry">
+                                                <Canvas Background="Transparent" >
+                                                    <Path Fill="#373737"
+                          Width="14.3775"
+                          Height="14"
+                          Canvas.Left="0.311264"
+                          Canvas.Top="0.500005"
+                          Stretch="Uniform"
+                          Data="M12,6V9L16,5L12,1V4A8,8 0 0,0 4,12C4,13.57 4.46,15.03 5.24,16.26L6.7,14.8C6.25,13.97 6,13 6,12A6,6 0 0,1 12,6M18.76,7.74L17.3,9.2C17.74,10.04 18,11 18,12A6,6 0 0,1 12,18V15L8,19L12,23V20A8,8 0 0,0 20,12C20,10.43 19.54,8.97 18.76,7.74Z" />
+                                                </Canvas>
+                                            </ControlTemplate>
+                                        </MenuItem.Resources>
+                                        <MenuItem.Icon>
+                                            <ContentControl Template="{StaticResource GetEntry}" />
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                    <Separator/>
+                                    <MenuItem Header="Delete"
+                                  Command="{Binding Path=DataContext.DeleteEntryCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"
+                                  CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
+                                        <MenuItem.Resources>
+                                            <ControlTemplate x:Key="DeleteForeverIcon">
+                                                <Canvas Background="Transparent">
+                                                    <Path Fill="#373737" 
+                          Width="14.3775"
+                          Height="14"
+                          Canvas.Left="0.311264"
+                          Canvas.Top="0.500005"
+                          Stretch="Uniform"
+                          Data="M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19M8.46,11.88L9.87,10.47L12,12.59L14.12,10.47L15.53,11.88L13.41,14L15.53,16.12L14.12,17.53L12,15.41L9.88,17.53L8.47,16.12L10.59,14L8.46,11.88M15.5,4L14.5,3H9.5L8.5,4H5V6H19V4H15.5Z" />
+                                                </Canvas>
+                                            </ControlTemplate>
+                                        </MenuItem.Resources>
+                                        <MenuItem.Icon>
+                                            <ContentControl Template="{StaticResource DeleteForeverIcon}" />
+                                        </MenuItem.Icon>
                                     </MenuItem>
                                 </ContextMenu>
                                 <Style TargetType="{x:Type ScrollBar}">
@@ -305,54 +405,186 @@
                                             <Setter Property="Height" Value="Auto" />
                                             <Setter Property="Template" Value="{StaticResource VerticalScrollBar}" />
                                         </Trigger>
+                                        <Trigger Property="Orientation" Value="Horizontal">
+                                            <Setter Property="Width" Value="Auto"/>
+                                            <Setter Property="Height" Value="18" />
+                                            <Setter Property="Template" Value="{StaticResource HorizontalScrollBar}" />
+                                        </Trigger>
                                     </Style.Triggers>
                                 </Style>
+                                <Style x:Key="ListViewScrollViewerStyle" TargetType="{x:Type ScrollViewer}">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="{x:Type ScrollViewer}">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition/>
+                                                        <RowDefinition Height="Auto"/>
+                                                    </Grid.RowDefinitions>
+
+                                                    <!--
+                                                    <ScrollContentPresenter Grid.Column="0"/>
+                                                    -->
+                                                    <DockPanel Margin="{TemplateBinding Padding}">
+                                                        <ScrollViewer DockPanel.Dock="Top" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden" Focusable="False">
+                                                            <GridViewHeaderRowPresenter Margin="2,0,2,0"
+                                                        Columns="{Binding Path=TemplatedParent.View.Columns, RelativeSource={RelativeSource TemplatedParent}}"
+                                                        ColumnHeaderContainerStyle="{Binding Path=TemplatedParent.View.ColumnHeaderContainerStyle, RelativeSource={RelativeSource TemplatedParent}}"
+                                                        ColumnHeaderTemplate="{Binding Path=TemplatedParent.View.ColumnHeaderTemplate, RelativeSource={RelativeSource TemplatedParent}}"
+                                                        ColumnHeaderTemplateSelector="{Binding Path=TemplatedParent.View.ColumnHeaderTemplateSelector, RelativeSource={RelativeSource TemplatedParent}}"
+                                                        AllowsColumnReorder="{Binding Path=TemplatedParent.View.AllowsColumnReorder, RelativeSource={RelativeSource TemplatedParent}}"
+                                                        ColumnHeaderContextMenu="{Binding Path=TemplatedParent.View.ColumnHeaderContextMenu, RelativeSource={RelativeSource TemplatedParent}}"
+                                                        ColumnHeaderToolTip="{Binding Path=TemplatedParent.View.ColumnHeaderToolTip, RelativeSource={RelativeSource TemplatedParent}}"
+                                                        SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                                                        </ScrollViewer>
+
+                                                        <ScrollContentPresenter Name="PART_ScrollContentPresenter" KeyboardNavigation.DirectionalNavigation="Local"/>
+                                                    </DockPanel>
+
+
+                                                    <ScrollBar Name="PART_VerticalScrollBar" Grid.Row="0" Grid.Column="1" Value="{TemplateBinding VerticalOffset}" Maximum="{TemplateBinding ScrollableHeight}" ViewportSize="{TemplateBinding ViewportHeight}" Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}"/>
+                                                    <ScrollBar Name="PART_HorizontalScrollBar" Orientation="Horizontal" Grid.Row="1" Grid.Column="0" Value="{TemplateBinding HorizontalOffset}" Maximum="{TemplateBinding ScrollableWidth}" ViewportSize="{TemplateBinding ViewportWidth}" Visibility="{TemplateBinding ComputedHorizontalScrollBarVisibility}"/>
+                                                    <Rectangle Grid.Row="1" Grid.Column="1" Fill="Transparent"/>
+                                                </Grid>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
                             </ListView.Resources>
+                            <ListView.Style>
+                                <Style TargetType="ListView">
+                                    <Setter Property="SnapsToDevicePixels" Value="true" />
+                                    <Setter Property="OverridesDefaultStyle" Value="True" />
+                                    <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto" />
+                                    <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto" />
+                                    <Setter Property="ScrollViewer.CanContentScroll" Value="true" />
+                                    <Setter Property="AlternationCount" Value="2"/>
+                                    <Setter Property="Margin" Value="0"/>
+                                    <Setter Property="Padding" Value="0"/>
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="ListView">
+                                                <Border Name="Border" BorderThickness="0" Background="{TemplateBinding Background}">
+                                                    <ScrollViewer Style="{DynamicResource ListViewScrollViewerStyle}" CanContentScroll="True">
+                                                        <ItemsPresenter />
+                                                    </ScrollViewer>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </ListView.Style>
                             <ListView.ItemContainerStyle>
                                 <Style TargetType="ListViewItem" BasedOn="{StaticResource ListViewItemStyle}">
-                                    <Setter Property="Margin" Value="1 0 0 0"/>
-                                    <Setter Property="Padding" Value="0 1 0 1"/>
-                                    <Setter Property="HorizontalContentAlignment" Value="Center"/>
-                                    <Setter Property="ContextMenu" Value="{StaticResource RLSearchItemContextMenu}" />
+                                    <Setter Property="Margin" Value="0 0 0 0"/>
+                                    <Setter Property="Padding" Value="1"/>
+                                    <Setter Property="ContextMenu" Value="{StaticResource ItemContextMenu}" />
+                                    <Setter Property="HorizontalContentAlignment" Value="Left" />
+                                    <Setter Property="VerticalContentAlignment" Value="Top" />
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="{x:Type ListViewItem}">
+                                                <Border Name="Border" Margin="{TemplateBinding Margin}" Padding="{TemplateBinding Padding}" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" ClipToBounds="{TemplateBinding ClipToBounds}" CornerRadius="0" SnapsToDevicePixels="true">
+                                                    <Border.InputBindings>
+                                                        <MouseBinding Command="{Binding Path=DataContext.ListviewLeftDoubleClickCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" Gesture="LeftDoubleClick" />
+                                                    </Border.InputBindings>
+                                                    <GridViewRowPresenter VerticalAlignment="{TemplateBinding VerticalContentAlignment}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
                                 </Style>
                             </ListView.ItemContainerStyle>
-
                             <ListView.View>
-                                
                                 <GridView>
                                     <GridView.ColumnHeaderContainerStyle>
-                                        <Style TargetType="GridViewColumnHeader" BasedOn="{StaticResource GridViewColumnHeaderStyle}">
+                                        <Style TargetType="GridViewColumnHeader" BasedOn="{StaticResource GridViewColumnHeaderClickStyle}">
                                             <Setter Property="Visibility" Value="Visible" />
                                         </Style>
                                     </GridView.ColumnHeaderContainerStyle>
 
-                                    <GridViewColumn Header="種別" Width="{Binding ElementName=RLSWidth0, Path=ActualWidth}">
+                                    <GridViewColumn Header="種別" Width="{Binding ElementName=RLSWidth0, Path=ActualWidth}" helper:GridViewSort.PropertyName="ResultTypeLabel">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0">
 
+                                                    <TextBlock Text="{Binding Path=ResultTypeLabel,Mode=OneWay}" Padding="3" />
+
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
 
-                                    <GridViewColumn Width="{Binding ElementName=RLSWidth1, Path=ActualWidth}">
-                                        <GridViewColumnHeader Content="物件名・名前" Padding="3"/>
+                                    <GridViewColumn Header="物件名・名前" Width="{Binding ElementName=RLSWidth1, Path=ActualWidth}" helper:GridViewSort.PropertyName="Name">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0">
 
+                                                    <TextBlock Text="{Binding Path=Name,Mode=OneWay}" Padding="3" />
+
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
 
-                                    <GridViewColumn Header="所在地・住所" Width="{Binding ElementName=RLSWidth2, Path=ActualWidth}">
+                                    <GridViewColumn Header="所在地・住所" Width="{Binding ElementName=RLSWidth2, Path=ActualWidth}" helper:GridViewSort.PropertyName="Location">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0">
 
+                                                    <TextBlock Text="{Binding Path=Location,Mode=OneWay}" Padding="3" />
+
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
 
                                     <GridViewColumn Header="沿線" Width="{Binding ElementName=RLSWidth3, Path=ActualWidth}">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0">
 
+                                                    <TextBlock Text="{Binding Path=TrainLine,Mode=OneWay}" Padding="3" />
+
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
 
                                     <GridViewColumn Header="最寄り駅" Width="{Binding ElementName=RLSWidth4, Path=ActualWidth}">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0">
 
+                                                    <TextBlock Text="{Binding Path=TrainStation,Mode=OneWay}" Padding="3" />
+
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
 
                                     <GridViewColumn Header="最終更新日" Width="{Binding ElementName=RLSWidth5, Path=ActualWidth}">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0">
 
+                                                    <TextBlock Text="" Padding="3" />
+
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
                                 </GridView>
                             </ListView.View>
-
+                            <ListView.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel Orientation="Vertical" CanVerticallyScroll="True"/>
+                                </ItemsPanelTemplate>
+                            </ListView.ItemsPanel>
                         </ListView>
 
                     </Grid>
@@ -379,7 +611,7 @@
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Stretch">
 
                                 <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
-                                <Button Content="検索" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding RentLivingEditSearchCommand}" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
+                                <Button Content="検索" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding RentLivingShowSearchCommand}" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
 
                                 <Border Visibility="Collapsed" BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
                                 <Button Visibility="Collapsed" Content="一覧" Style="{DynamicResource ListviewMenuButton}" Command="{Binding RentLivingEditListCommand}" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
@@ -586,7 +818,7 @@
 
                                     </Grid>
 
-                                    <ListView x:Name="RentLivingEditListView" Grid.Row="1" Grid.Column="0" Background="{DynamicResource ListviewAlt0ColorBrush}" ItemsSource="{Binding RentSearchResult}" SelectedItem="{Binding RentLivingEditSelectedItem, Mode=TwoWay}" SelectionMode="Single" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling" helper:GridViewSort.AutoSort="True" helper:GridViewSort.ShowSortGlyph="True" IsSynchronizedWithCurrentItem="True" AlternationCount="2" MinHeight="80" BorderThickness="0.5 0 0 0" BorderBrush="#121212" Padding="0 0 0 0" Margin="0 0 0 0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Visible">
+                                    <ListView x:Name="RentLivingEditListView" Grid.Row="1" Grid.Column="0" Background="{DynamicResource ListviewAlt0ColorBrush}" ItemsSource="{Binding RentLivingSearchResult}" SelectedItem="{Binding RentLivingEditSelectedItem, Mode=TwoWay}" SelectionMode="Single" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling" helper:GridViewSort.AutoSort="True" helper:GridViewSort.ShowSortGlyph="True" IsSynchronizedWithCurrentItem="True" AlternationCount="2" MinHeight="80" BorderThickness="0.5 0 0 0" BorderBrush="#121212" Padding="0 0 0 0" Margin="0 0 0 0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Visible">
                                         <ListView.InputBindings>
                                             <KeyBinding Key="Return" Command="{Binding Path=DataContext.ListviewEnterKeyCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" />
                                         </ListView.InputBindings>

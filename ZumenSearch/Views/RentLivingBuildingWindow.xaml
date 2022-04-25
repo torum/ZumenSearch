@@ -119,12 +119,6 @@
                         
                         <Border Background="{DynamicResource WindowBackgroundColorBrush}">
                             <Grid Margin="0 12 0 0">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="*"/>
-                                </Grid.RowDefinitions>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
 
                                 <ScrollViewer Grid.Row="0" Grid.Column="0" VerticalScrollBarVisibility="Auto">
                                     <Grid>
@@ -406,8 +400,8 @@
 
                                                                 <GroupBox Header="所有区分" Padding="6">
                                                                     <StackPanel Orientation="Horizontal">
-                                                                        <RadioButton Content="建物一棟" GroupName="OwnershipType" IsChecked="{Binding Path=RentLivingEdit.Ownership, ConverterParameter={x:Static models:Ownerships.All}, Converter={StaticResource EnumBooleanConverter}}" Margin="6"/>
-                                                                        <RadioButton x:Name="RadioButtonOwnershipType" Content="区分所有" GroupName="OwnershipType" IsChecked="{Binding Path=RentLivingEdit.Ownership, ConverterParameter={x:Static models:Ownerships.Unit}, Converter={StaticResource EnumBooleanConverter}}" Margin="6"/>
+                                                                        <RadioButton Content="建物一棟" GroupName="OwnershipType" IsChecked="{Binding Path=RentLivingEdit.Ownership, ConverterParameter={x:Static models:Ownerships.All}, Converter={StaticResource EnumBooleanConverter}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="6"/>
+                                                                        <RadioButton x:Name="RadioButtonOwnershipType" Content="区分所有" GroupName="OwnershipType" IsChecked="{Binding Path=RentLivingEdit.Ownership, ConverterParameter={x:Static models:Ownerships.Unit}, Converter={StaticResource EnumBooleanConverter}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="6"/>
                                                                     </StackPanel>
                                                                 </GroupBox>
 
@@ -599,8 +593,6 @@
                                     </Grid>
                                 </ScrollViewer>
 
-
-
                             </Grid>
                         </Border>
 
@@ -631,7 +623,7 @@
                                             </Style>
                                         </TabItem.Style>
 
-                                        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                                        <ScrollViewer VerticalScrollBarVisibility="Auto">
 
                                             <StackPanel Margin="6 12 6 6">
 
@@ -918,11 +910,9 @@
                                     </TabItem>
                                 </TabControl>
 
-
                             </Grid>
 
                         </Border>
-                        
 
                     </TabItem>
 

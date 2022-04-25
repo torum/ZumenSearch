@@ -64,7 +64,7 @@ namespace ZumenSearch.ViewModels
         #region == 基本 ==
 
         // Application version.
-        private const string _appVer = "0.0.0.22";
+        private const string _appVer = "0.0.0.23";
 
         // Application name.
         private const string _appName = "ZumenSearch";
@@ -102,7 +102,45 @@ namespace ZumenSearch.ViewModels
 
         #region == 物件関連オブジェクト ==
 
-        public ObservableCollection<RentLivingSummary> RentSearchResult { get; } = new ObservableCollection<RentLivingSummary>();
+        public ObservableCollection<RentLivingSummary> RentLivingSearchResult { get; } = new ObservableCollection<RentLivingSummary>();
+        public ObservableCollection<MainSearchResult> SearchResult { get; } = new ObservableCollection<MainSearchResult>();
+
+        #region == 総合検索 ==
+
+        private MainSearchResult _searchResultSelectedItem;
+        public MainSearchResult SearchResultSelectedItem
+        {
+            get
+            {
+                return _searchResultSelectedItem;
+            }
+            set
+            {
+                if (_searchResultSelectedItem == value) return;
+
+                _searchResultSelectedItem = value;
+                this.NotifyPropertyChanged(nameof(SearchResultSelectedItem));
+            }
+        }
+
+        private string _mainSearchText;
+        public string MainSearchText
+        {
+            get
+            {
+                return _mainSearchText;
+            }
+            set
+            {
+                if (_mainSearchText == value) return;
+
+                _mainSearchText = value;
+                this.NotifyPropertyChanged(nameof(MainSearchText));
+            }
+        }
+
+
+        #endregion
 
         #region == 賃貸住居用 ==
 
@@ -118,7 +156,7 @@ namespace ZumenSearch.ViewModels
                 if (_rentLivingEditSelectedItem == value) return;
 
                 _rentLivingEditSelectedItem = value;
-                this.NotifyPropertyChanged("RentLivingEditSelectedItem");
+                this.NotifyPropertyChanged(nameof(RentLivingEditSelectedItem));
             }
         }
 
@@ -983,42 +1021,6 @@ namespace ZumenSearch.ViewModels
 
         #endregion
 
-        #region == ホーム画面 ==
-
-        private RentSearchTags _selectedRentSearchTags = RentSearchTags.RentName;
-        public RentSearchTags SelectedRentSearchTags
-        {
-            get
-            {
-                return _selectedRentSearchTags;
-            }
-            set
-            {
-                if (_selectedRentSearchTags == value)
-                    return;
-
-                _selectedRentSearchTags = value;
-                NotifyPropertyChanged("SelectedRentSearchTags");
-            }
-        }
-
-        private string _homeSearchText;
-        public string HomeSearchText
-        {
-            get
-            {
-                return _homeSearchText;
-            }
-            set
-            {
-                if (_homeSearchText == value) return;
-
-                _homeSearchText = value;
-                this.NotifyPropertyChanged("HomeSearchText");
-            }
-        }
-
-        #endregion
 
         #region == イベント ==
 
@@ -1044,6 +1046,9 @@ namespace ZumenSearch.ViewModels
             // ホーム検索
             HomeSearchExecCommand = new RelayCommand(HomeSearchExecCommand_Execute, HomeSearchExecCommand_CanExecute);
 
+
+            // RL検索画面表示
+            RentLivingShowSearchCommand = new RelayCommand(RentLivingShowSearchCommand_Execute, RentLivingShowSearchCommand_CanExecute);
             // RL検索
             RentLivingEditSearchCommand = new RelayCommand(RentLivingEditSearchCommand_Execute, RentLivingEditSearchCommand_CanExecute);
             // RL一覧
@@ -1405,7 +1410,7 @@ namespace ZumenSearch.ViewModels
 
         #region == コマンド ==
 
-        #region == ホーム画面 ==
+        #region == 総合検索 ==
 
         public ICommand HomeSearchExecCommand { get; }
         public bool HomeSearchExecCommand_CanExecute()
@@ -1415,11 +1420,42 @@ namespace ZumenSearch.ViewModels
         public void HomeSearchExecCommand_Execute()
         {
             //
+            SearchResult.Clear();
+
+            ResultWrapper res = dataAccessModule.MainSearch(SearchResult, MainSearchText);
+
+            if (res.IsError)
+            {
+                // エラーの通知
+                ErrorOccured?.Invoke(res.Error);
+
+                return;
+            }
+
         }
 
         #endregion
 
         #region == 賃貸住居用 物件検索・編集 ==
+
+        // 検索画面の表示または移動
+        public ICommand RentLivingShowSearchCommand { get; }
+        public bool RentLivingShowSearchCommand_CanExecute()
+        {
+            if (RentLivingSearchTabSelectedIndex != 0)
+                return true;
+            else
+                return false;
+        }
+        public void RentLivingShowSearchCommand_Execute()
+        {
+            // 既に一覧を表示していたら、検索画面に戻る。
+            if (RentLivingSearchTabSelectedIndex == 1)
+            {
+                RentLivingSearchBackCommand_Execute();
+                return;
+            }
+        }
 
         // 検索
         public ICommand RentLivingEditSearchCommand { get; }
@@ -1438,9 +1474,6 @@ namespace ZumenSearch.ViewModels
         }
         public void RentLivingEditSearchCommand_Execute()
         {
-            // 一覧をクリア
-            RentSearchResult.Clear();
-
             // 既に一覧を表示していたら、検索画面に戻る。
             if (RentLivingSearchTabSelectedIndex == 1)
             {
@@ -1448,11 +1481,14 @@ namespace ZumenSearch.ViewModels
                 return;
             }
 
+            // 一覧をクリア
+            RentLivingSearchResult.Clear();
+
             RentLivingSearchTabSelectedIndex = 1;
             // 検索結果一覧タブに移動
 
             // 検索結果一覧を取得
-            ResultWrapper res = dataAccessModule.RentLivingSearch(RentSearchResult, RentLivingEditSearchText);
+            ResultWrapper res = dataAccessModule.RentLivingSearch(RentLivingSearchResult, RentLivingEditSearchText);
 
             if (res.IsError)
             {
@@ -1461,7 +1497,6 @@ namespace ZumenSearch.ViewModels
 
                 return;
             }
-
         }
 
         // 一覧
@@ -1473,13 +1508,13 @@ namespace ZumenSearch.ViewModels
         public void RentLivingEditListCommand_Execute()
         {
             // 一覧をクリア
-            RentSearchResult.Clear();
+            RentLivingSearchResult.Clear();
 
             // 検索結果一覧タブに移動
             RentLivingSearchTabSelectedIndex = 1;
 
             // 一覧を取得
-            ResultWrapper res = dataAccessModule.RentLivingSearch(RentSearchResult, "*");
+            ResultWrapper res = dataAccessModule.RentLivingSearch(RentLivingSearchResult, "*");
 
             if (res.IsError)
             {
@@ -1628,7 +1663,7 @@ namespace ZumenSearch.ViewModels
                 }
 
                 // 一覧からも削除
-                if (RentSearchResult.Remove(RentLivingEditSelectedItem))
+                if (RentLivingSearchResult.Remove(RentLivingEditSelectedItem))
                 {
                     RentLivingEditSelectedItem = null;
                 }

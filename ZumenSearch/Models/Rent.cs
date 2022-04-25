@@ -38,7 +38,6 @@ namespace ZumenSearch.Models
         Apartment, Mansion, House, Other
     }
 
-
     // 物件（建物等）の基底クラス
     public class Rent : ViewModelBase
     {
@@ -134,9 +133,9 @@ namespace ZumenSearch.Models
                 else if (IsNew)
                     return "新規";
                 else if (IsEdit && IsDirty)
-                    return "更新";
+                    return "編集";
                 else if (IsEdit)
-                    return "更新";
+                    return "編集";
                 else
                     return "";
             }
@@ -232,6 +231,9 @@ namespace ZumenSearch.Models
 
                 _ownership = value;
                 this.NotifyPropertyChanged("Ownership");
+
+                // 変更フラグ
+                IsDirty = true;
             }
         }
 
@@ -249,6 +251,9 @@ namespace ZumenSearch.Models
 
                 _postalCode = value;
                 this.NotifyPropertyChanged("PostalCode");
+
+                // 変更フラグ
+                IsDirty = true;
             }
         }
 
@@ -266,6 +271,9 @@ namespace ZumenSearch.Models
 
                 _location = value;
                 this.NotifyPropertyChanged("Location");
+
+                // 変更フラグ
+                IsDirty = true;
             }
         }
 
@@ -283,6 +291,9 @@ namespace ZumenSearch.Models
 
                 _trainStation1 = value;
                 this.NotifyPropertyChanged("TrainStation1");
+
+                // 変更フラグ
+                IsDirty = true;
             }
         }
 
@@ -300,6 +311,9 @@ namespace ZumenSearch.Models
 
                 _trainStation2 = value;
                 this.NotifyPropertyChanged("TrainStation2");
+
+                // 変更フラグ
+                IsDirty = true;
             }
         }
 
@@ -317,6 +331,9 @@ namespace ZumenSearch.Models
 
                 _trainStation3 = value;
                 this.NotifyPropertyChanged("TrainStation3");
+
+                // 変更フラグ
+                IsDirty = true;
             }
         }
 
@@ -325,7 +342,6 @@ namespace ZumenSearch.Models
 
         }
     }
-
 
     public class RentLivingSummary : Rent
     {
@@ -435,6 +451,9 @@ namespace ZumenSearch.Models
 
                 _kind = value;
                 this.NotifyPropertyChanged("Kind");
+
+                // 変更フラグ
+                IsDirty = true;
             }
         }
 
@@ -453,6 +472,9 @@ namespace ZumenSearch.Models
 
                 _floors = value;
                 this.NotifyPropertyChanged("Floors");
+
+                // 変更フラグ
+                IsDirty = true;
             }
         }
 
@@ -470,6 +492,9 @@ namespace ZumenSearch.Models
 
                 _floorsBasement = value;
                 this.NotifyPropertyChanged("FloorsBasement");
+
+                // 変更フラグ
+                IsDirty = true;
             }
         }
 
@@ -487,6 +512,9 @@ namespace ZumenSearch.Models
 
                 _builtYear = value;
                 this.NotifyPropertyChanged("BuiltYear");
+
+                // 変更フラグ
+                IsDirty = true;
             }
         }
 
