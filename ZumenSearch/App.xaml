@@ -132,7 +132,7 @@
                         </Style.Resources>
                         <Setter Property="OverridesDefaultStyle" Value="False" />
                         <Setter Property="Margin" Value="0"/>
-                        <Setter Property="Padding" Value="4"/>
+                        <Setter Property="Padding" Value="6"/>
                         <Setter Property="HorizontalAlignment" Value="Left"/>
                         <Setter Property="VerticalAlignment" Value="Center"/>
 
@@ -615,6 +615,10 @@
                                             <Setter TargetName="Border" Property="Background" Value="{DynamicResource ControlMouseOverBackgroundColorBrush}"></Setter>
 
                                             <Setter TargetName="PathIcon" Property="Fill" Value="{DynamicResource ControlMouseOverColorBrush}"/>
+                                        </Trigger>
+
+                                        <Trigger Property="IsEnabled" Value="False">
+                                            <Setter TargetName="PathIcon" Property="Fill" Value="{DynamicResource DisabledForegroundColorBrush}"/>
                                         </Trigger>
 
                                         <MultiTrigger>
@@ -1377,6 +1381,7 @@
                                             <Setter Property="TextElement.FontWeight" Value="Bold"/>
                                         </Trigger>
                                         <Trigger Property="IsEnabled" Value="false">
+                                            <Setter Property="Foreground" Value="{DynamicResource DisabledForegroundColorBrush}"/>
                                         </Trigger>
                                         <Trigger Property="IsPressed" Value="true">
                                         </Trigger>
@@ -2388,6 +2393,11 @@
                                         <Trigger Property="IsPressed" Value="true">
                                             <Setter TargetName="PathIcon" Property="Fill" Value="{DynamicResource ControlPressedColorBrush}"/>
                                             <Setter TargetName="ButtonText" Property="TextElement.Foreground" Value="{DynamicResource ControlPressedColorBrush}"/>
+                                        </Trigger>
+
+                                        <Trigger Property="IsEnabled" Value="False">
+                                            <Setter TargetName="PathIcon" Property="Fill" Value="{DynamicResource DisabledForegroundColorBrush}"/>
+                                            <Setter TargetName="ButtonText" Property="TextElement.Foreground" Value="{DynamicResource DisabledForegroundColorBrush}"/>
                                         </Trigger>
 
                                     </ControlTemplate.Triggers>

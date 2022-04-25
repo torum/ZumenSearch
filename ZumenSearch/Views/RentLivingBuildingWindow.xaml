@@ -12,14 +12,15 @@
         d:DataContext="{d:DesignInstance Type=vms:RentLivingBuildingViewModel}"
         SnapsToDevicePixels="true"
         BorderThickness="0"
+        Window.ResizeMode ="NoResize"
         WindowStartupLocation="CenterOwner"
         Background="{DynamicResource WindowBackgroundColorBrush}"
-        Width="860" Height="670"
-        MinWidth="860" MinHeight="670"
+        Width="860" Height="640"
+        MinWidth="860" MinHeight="640"
         StateChanged="Window_StateChanged"
         Closing="Window_Closing">
     <WindowChrome.WindowChrome>
-        <WindowChrome CaptionHeight="32" ResizeBorderThickness="3"/>
+        <WindowChrome CaptionHeight="32" ResizeBorderThickness="0"/>
     </WindowChrome.WindowChrome>
     <Border Style="{StaticResource WindowMainPanelStyle}">
         <Grid x:Name="BackgroundGrid" Background="{DynamicResource BoardBackgroundColorBrush}">
@@ -140,7 +141,7 @@
                                         <!-- 物件名 -->
                                         <StackPanel Grid.Row="0" Grid.Column="0" Margin="6 0 6 0">
 
-                                            <GroupBox Header="物件名" Padding="0 0 6 6" Style="{DynamicResource GroupBoxStyle}">
+                                            <GroupBox Header="物件名" Padding="0 0 6 0" Style="{DynamicResource GroupBoxStyle}">
                                                 <StackPanel>
                                                     <TextBox Text="{Binding RentLivingEdit.Name, UpdateSourceTrigger=PropertyChanged}" Margin="6" HorizontalAlignment="Stretch"></TextBox>
                                                 </StackPanel>
@@ -151,7 +152,7 @@
                                         <!-- 物件種目 -->
                                         <StackPanel Grid.Row="0" Grid.Column="1" Margin="6 0 6 0">
 
-                                            <GroupBox Header="物件種目" Padding="0 0 6 6" Style="{DynamicResource GroupBoxStyle}">
+                                            <GroupBox Header="物件種目" Padding="0 0 6 0" Style="{DynamicResource GroupBoxStyle}">
                                                 <ComboBox SelectedIndex="-1" Margin="6">
                                                     <ComboBoxItem>アパート</ComboBoxItem>
                                                     <ComboBoxItem>マンション</ComboBoxItem>
@@ -167,7 +168,7 @@
                                         <!-- 所在地 -->
                                         <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="6 0 6 0">
 
-                                            <GroupBox Header="所在地" Padding="0 0 6 6" Style="{DynamicResource GroupBoxStyle}">
+                                            <GroupBox Header="所在地" Padding="0 0 6 0" Style="{DynamicResource GroupBoxStyle}">
                                                 <Grid>
                                                     <Grid.RowDefinitions>
                                                         <RowDefinition Height="*"/>
@@ -233,8 +234,8 @@
                                         </StackPanel>
 
                                         <!-- 交通１・２・３ -->
-                                        <Grid Grid.Row="2" Grid.Column="0" Grid.RowSpan="4" Margin="6 0 6 0">
-                                            <TabControl Height="420" Margin="0 0 0 0">
+                                        <Grid Grid.Row="2" Grid.Column="0" Margin="6 6 6 0" VerticalAlignment="Top">
+                                            <TabControl Height="420" Margin="0 0 0 0" VerticalAlignment="Top">
                                                 <TabItem>
                                                     <TabItem.Header>
                                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="3">
@@ -383,8 +384,8 @@
                                         </Grid>
 
                                         <!-- 建物 -->
-                                        <Grid Grid.Row="2" Grid.Column="1" Grid.RowSpan="4" Margin="6 0 6 0">
-                                            <TabControl Height="420" Margin="0 0 0 0">
+                                        <Grid Grid.Row="2" Grid.Column="1" Margin="6 6 6 0" VerticalAlignment="Top">
+                                            <TabControl Height="420" Margin="0 0 0 0" VerticalAlignment="Top">
                                                 <!-- 建物構造 -->
                                                 <TabItem>
                                                     <TabItem.Header>
@@ -943,10 +944,10 @@
 
                                 <StackPanel Grid.Row="0" Margin="3" Visibility="Collapsed">
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                        <Button Margin="3" HorizontalAlignment="Left" Command="{Binding SectionNewCommand}">追加</Button>
-                                        <Button Margin="3" HorizontalAlignment="Left" Command="{Binding SectionEditCommand}">編集</Button>
-                                        <Button Margin="3" HorizontalAlignment="Left" Command="{Binding SectionDuplicateCommand}">複製</Button>
-                                        <Button Margin="3" HorizontalAlignment="Left" Command="{Binding SectionDeleteCommand}">削除</Button>
+                                        <Button Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" HorizontalAlignment="Left" Command="{Binding SectionNewCommand}">追加</Button>
+                                        <Button Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" HorizontalAlignment="Left" Command="{Binding SectionEditCommand}">編集</Button>
+                                        <Button Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" HorizontalAlignment="Left" Command="{Binding SectionDuplicateCommand}">複製</Button>
+                                        <Button Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" HorizontalAlignment="Left" Command="{Binding SectionDeleteCommand}">削除</Button>
                                     </StackPanel>
                                 </StackPanel>
 
@@ -955,240 +956,16 @@
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Stretch">
 
                                         <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
-                                        <Button Content="追加" ToolTip="追加" Command="{Binding SectionNewCommand}" VerticalAlignment="Center">
-                                            <Button.Style>
-                                                <Style TargetType="{x:Type Button}">
-                                                    <Setter Property="OverridesDefaultStyle" Value="true" />
-                                                    <Setter Property="Background" Value="{DynamicResource BoardBackgroundColorBrush}" />
-                                                    <Setter Property="Foreground" Value="{DynamicResource ControlMediumColorBrush}"/>
-                                                    <Setter Property="BorderThickness" Value="0" />
-                                                    <Setter Property="BorderBrush" Value="#ccc" />
-                                                    <Setter Property="Margin" Value="12 0 12 0" />
-                                                    <Setter Property="Padding" Value="0" />
-                                                    <Setter Property="Template">
-                                                        <Setter.Value>
-                                                            <ControlTemplate TargetType="Button">
-                                                                <Border x:Name="Border" Background="{TemplateBinding Background}">
-                                                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                                                        <Viewbox Width="12" Height="12" Margin="0">
-                                                                            <Canvas Width="24" Height="24">
-                                                                                <Canvas.RenderTransform>
-                                                                                    <TranslateTransform X="1" Y="3"/>
-                                                                                </Canvas.RenderTransform>
-                                                                                <Path x:Name="PathIcon" Data="M5.12,5L5.93,4H17.93L18.87,5M12,17.5L6.5,12H10V10H14V12H17.5L12,17.5M20.54,5.23L19.15,3.55C18.88,3.21 18.47,3 18,3H6C5.53,3 5.12,3.21 4.84,3.55L3.46,5.23C3.17,5.57 3,6 3,6.5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V6.5C21,6 20.83,5.57 20.54,5.23Z" Stretch="Uniform">
-                                                                                    <Path.Fill>
-                                                                                        <SolidColorBrush x:Name="PathIconColor" Color="{DynamicResource ControlForegroundColor}"/>
-                                                                                    </Path.Fill>
-                                                                                    <Path.RenderTransform>
-                                                                                        <TransformGroup>
-                                                                                            <TransformGroup.Children>
-                                                                                                <RotateTransform Angle="0" />
-                                                                                                <ScaleTransform ScaleX="1.18" ScaleY="1.18" />
-                                                                                            </TransformGroup.Children>
-                                                                                        </TransformGroup>
-                                                                                    </Path.RenderTransform>
-                                                                                </Path>
-                                                                            </Canvas>
-                                                                        </Viewbox>
-                                                                        <TextBlock x:Name="ButtonText" Margin="6 0 0 0" Text="{Binding Content, RelativeSource={RelativeSource TemplatedParent}}"></TextBlock>
-                                                                    </StackPanel>
-                                                                </Border>
-                                                                <ControlTemplate.Triggers>
-
-                                                                    <Trigger Property="IsMouseOver" Value="true">
-                                                                        <Setter TargetName="PathIcon" Property="Fill" Value="{DynamicResource ControlMouseOverColorBrush}"/>
-                                                                        <Setter TargetName="ButtonText" Property="TextElement.Foreground" Value="{DynamicResource ControlMouseOverColorBrush}"/>
-                                                                    </Trigger>
-
-                                                                    <Trigger Property="IsPressed" Value="true">
-                                                                        <Setter TargetName="PathIcon" Property="Fill" Value="{DynamicResource ControlPressedColorBrush}"/>
-                                                                        <Setter TargetName="ButtonText" Property="TextElement.Foreground" Value="{DynamicResource ControlPressedColorBrush}"/>
-                                                                    </Trigger>
-
-                                                                </ControlTemplate.Triggers>
-                                                            </ControlTemplate>
-                                                        </Setter.Value>
-                                                    </Setter>
-                                                </Style>
-                                            </Button.Style>
-                                        </Button>
+                                        <Button Content="追加" ToolTip="追加" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding SectionNewCommand}" VerticalAlignment="Center"></Button>
 
                                         <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
-                                        <Button Content="編集" ToolTip="編集" Command="{Binding SectionEditCommand}" VerticalAlignment="Center">
-                                            <Button.Style>
-                                                <Style TargetType="{x:Type Button}">
-                                                    <Setter Property="OverridesDefaultStyle" Value="true" />
-                                                    <Setter Property="Background" Value="{DynamicResource BoardBackgroundColorBrush}" />
-                                                    <Setter Property="Foreground" Value="{DynamicResource ControlMediumColorBrush}"/>
-                                                    <Setter Property="BorderThickness" Value="0" />
-                                                    <Setter Property="BorderBrush" Value="#ccc" />
-                                                    <Setter Property="Margin" Value="12 0 12 0" />
-                                                    <Setter Property="Padding" Value="0" />
-                                                    <Setter Property="Template">
-                                                        <Setter.Value>
-                                                            <ControlTemplate TargetType="Button">
-                                                                <Border x:Name="Border" Background="{TemplateBinding Background}">
-                                                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                                                        <Viewbox Width="12" Height="12" Margin="0">
-                                                                            <Canvas Width="24" Height="24">
-                                                                                <Canvas.RenderTransform>
-                                                                                    <TranslateTransform X="1" Y="3"/>
-                                                                                </Canvas.RenderTransform>
-                                                                                <Path x:Name="PathIcon" Data="M5.12,5L5.93,4H17.93L18.87,5M12,17.5L6.5,12H10V10H14V12H17.5L12,17.5M20.54,5.23L19.15,3.55C18.88,3.21 18.47,3 18,3H6C5.53,3 5.12,3.21 4.84,3.55L3.46,5.23C3.17,5.57 3,6 3,6.5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V6.5C21,6 20.83,5.57 20.54,5.23Z" Stretch="Uniform">
-                                                                                    <Path.Fill>
-                                                                                        <SolidColorBrush x:Name="PathIconColor" Color="{DynamicResource ControlForegroundColor}"/>
-                                                                                    </Path.Fill>
-                                                                                    <Path.RenderTransform>
-                                                                                        <TransformGroup>
-                                                                                            <TransformGroup.Children>
-                                                                                                <RotateTransform Angle="0" />
-                                                                                                <ScaleTransform ScaleX="1.18" ScaleY="1.18" />
-                                                                                            </TransformGroup.Children>
-                                                                                        </TransformGroup>
-                                                                                    </Path.RenderTransform>
-                                                                                </Path>
-                                                                            </Canvas>
-                                                                        </Viewbox>
-                                                                        <TextBlock x:Name="ButtonText" Margin="6 0 0 0" Text="{Binding Content, RelativeSource={RelativeSource TemplatedParent}}"></TextBlock>
-                                                                    </StackPanel>
-                                                                </Border>
-                                                                <ControlTemplate.Triggers>
-
-                                                                    <Trigger Property="IsMouseOver" Value="true">
-                                                                        <Setter TargetName="PathIcon" Property="Fill" Value="{DynamicResource ControlMouseOverColorBrush}"/>
-                                                                        <Setter TargetName="ButtonText" Property="TextElement.Foreground" Value="{DynamicResource ControlMouseOverColorBrush}"/>
-                                                                    </Trigger>
-
-                                                                    <Trigger Property="IsPressed" Value="true">
-                                                                        <Setter TargetName="PathIcon" Property="Fill" Value="{DynamicResource ControlPressedColorBrush}"/>
-                                                                        <Setter TargetName="ButtonText" Property="TextElement.Foreground" Value="{DynamicResource ControlPressedColorBrush}"/>
-                                                                    </Trigger>
-
-                                                                </ControlTemplate.Triggers>
-                                                            </ControlTemplate>
-                                                        </Setter.Value>
-                                                    </Setter>
-                                                </Style>
-                                            </Button.Style>
-                                        </Button>
+                                        <Button Content="編集" ToolTip="編集" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding SectionEditCommand}" VerticalAlignment="Center"></Button>
 
                                         <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
-                                        <Button Content="複製" ToolTip="複製" Command="{Binding SectionDuplicateCommand}" VerticalAlignment="Center">
-                                            <Button.Style>
-                                                <Style TargetType="{x:Type Button}">
-                                                    <Setter Property="OverridesDefaultStyle" Value="true" />
-                                                    <Setter Property="Background" Value="{DynamicResource BoardBackgroundColorBrush}" />
-                                                    <Setter Property="Foreground" Value="{DynamicResource ControlMediumColorBrush}"/>
-                                                    <Setter Property="BorderThickness" Value="0" />
-                                                    <Setter Property="BorderBrush" Value="#ccc" />
-                                                    <Setter Property="Margin" Value="12 0 12 0" />
-                                                    <Setter Property="Padding" Value="0" />
-                                                    <Setter Property="Template">
-                                                        <Setter.Value>
-                                                            <ControlTemplate TargetType="Button">
-                                                                <Border x:Name="Border" Background="{TemplateBinding Background}">
-                                                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                                                        <Viewbox Width="12" Height="12" Margin="0">
-                                                                            <Canvas Width="24" Height="24">
-                                                                                <Canvas.RenderTransform>
-                                                                                    <TranslateTransform X="1" Y="3"/>
-                                                                                </Canvas.RenderTransform>
-                                                                                <Path x:Name="PathIcon" Data="M5.12,5L5.93,4H17.93L18.87,5M12,17.5L6.5,12H10V10H14V12H17.5L12,17.5M20.54,5.23L19.15,3.55C18.88,3.21 18.47,3 18,3H6C5.53,3 5.12,3.21 4.84,3.55L3.46,5.23C3.17,5.57 3,6 3,6.5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V6.5C21,6 20.83,5.57 20.54,5.23Z" Stretch="Uniform">
-                                                                                    <Path.Fill>
-                                                                                        <SolidColorBrush x:Name="PathIconColor" Color="{DynamicResource ControlForegroundColor}"/>
-                                                                                    </Path.Fill>
-                                                                                    <Path.RenderTransform>
-                                                                                        <TransformGroup>
-                                                                                            <TransformGroup.Children>
-                                                                                                <RotateTransform Angle="0" />
-                                                                                                <ScaleTransform ScaleX="1.18" ScaleY="1.18" />
-                                                                                            </TransformGroup.Children>
-                                                                                        </TransformGroup>
-                                                                                    </Path.RenderTransform>
-                                                                                </Path>
-                                                                            </Canvas>
-                                                                        </Viewbox>
-                                                                        <TextBlock x:Name="ButtonText" Margin="6 0 0 0" Text="{Binding Content, RelativeSource={RelativeSource TemplatedParent}}"></TextBlock>
-                                                                    </StackPanel>
-                                                                </Border>
-                                                                <ControlTemplate.Triggers>
-
-                                                                    <Trigger Property="IsMouseOver" Value="true">
-                                                                        <Setter TargetName="PathIcon" Property="Fill" Value="{DynamicResource ControlMouseOverColorBrush}"/>
-                                                                        <Setter TargetName="ButtonText" Property="TextElement.Foreground" Value="{DynamicResource ControlMouseOverColorBrush}"/>
-                                                                    </Trigger>
-
-                                                                    <Trigger Property="IsPressed" Value="true">
-                                                                        <Setter TargetName="PathIcon" Property="Fill" Value="{DynamicResource ControlPressedColorBrush}"/>
-                                                                        <Setter TargetName="ButtonText" Property="TextElement.Foreground" Value="{DynamicResource ControlPressedColorBrush}"/>
-                                                                    </Trigger>
-
-                                                                </ControlTemplate.Triggers>
-                                                            </ControlTemplate>
-                                                        </Setter.Value>
-                                                    </Setter>
-                                                </Style>
-                                            </Button.Style>
-                                        </Button>
+                                        <Button Content="複製" ToolTip="複製" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" VerticalAlignment="Center"></Button>
 
                                         <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
-                                        <Button Content="削除" ToolTip="削除" Command="{Binding SectionDeleteCommand}" VerticalAlignment="Center">
-                                            <Button.Style>
-                                                <Style TargetType="{x:Type Button}">
-                                                    <Setter Property="OverridesDefaultStyle" Value="true" />
-                                                    <Setter Property="Background" Value="{DynamicResource BoardBackgroundColorBrush}" />
-                                                    <Setter Property="Foreground" Value="{DynamicResource ControlMediumColorBrush}"/>
-                                                    <Setter Property="BorderThickness" Value="0" />
-                                                    <Setter Property="BorderBrush" Value="#ccc" />
-                                                    <Setter Property="Margin" Value="12 0 12 0" />
-                                                    <Setter Property="Padding" Value="0" />
-                                                    <Setter Property="Template">
-                                                        <Setter.Value>
-                                                            <ControlTemplate TargetType="Button">
-                                                                <Border x:Name="Border" Background="{TemplateBinding Background}">
-                                                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                                                        <Viewbox Width="12" Height="12" Margin="0">
-                                                                            <Canvas Width="24" Height="24">
-                                                                                <Canvas.RenderTransform>
-                                                                                    <TranslateTransform X="1" Y="3"/>
-                                                                                </Canvas.RenderTransform>
-                                                                                <Path x:Name="PathIcon" Data="M5.12,5L5.93,4H17.93L18.87,5M12,17.5L6.5,12H10V10H14V12H17.5L12,17.5M20.54,5.23L19.15,3.55C18.88,3.21 18.47,3 18,3H6C5.53,3 5.12,3.21 4.84,3.55L3.46,5.23C3.17,5.57 3,6 3,6.5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V6.5C21,6 20.83,5.57 20.54,5.23Z" Stretch="Uniform">
-                                                                                    <Path.Fill>
-                                                                                        <SolidColorBrush x:Name="PathIconColor" Color="{DynamicResource ControlForegroundColor}"/>
-                                                                                    </Path.Fill>
-                                                                                    <Path.RenderTransform>
-                                                                                        <TransformGroup>
-                                                                                            <TransformGroup.Children>
-                                                                                                <RotateTransform Angle="0" />
-                                                                                                <ScaleTransform ScaleX="1.18" ScaleY="1.18" />
-                                                                                            </TransformGroup.Children>
-                                                                                        </TransformGroup>
-                                                                                    </Path.RenderTransform>
-                                                                                </Path>
-                                                                            </Canvas>
-                                                                        </Viewbox>
-                                                                        <TextBlock x:Name="ButtonText" Margin="6 0 0 0" Text="{Binding Content, RelativeSource={RelativeSource TemplatedParent}}"></TextBlock>
-                                                                    </StackPanel>
-                                                                </Border>
-                                                                <ControlTemplate.Triggers>
-
-                                                                    <Trigger Property="IsMouseOver" Value="true">
-                                                                        <Setter TargetName="PathIcon" Property="Fill" Value="{DynamicResource ControlMouseOverColorBrush}"/>
-                                                                        <Setter TargetName="ButtonText" Property="TextElement.Foreground" Value="{DynamicResource ControlMouseOverColorBrush}"/>
-                                                                    </Trigger>
-
-                                                                    <Trigger Property="IsPressed" Value="true">
-                                                                        <Setter TargetName="PathIcon" Property="Fill" Value="{DynamicResource ControlPressedColorBrush}"/>
-                                                                        <Setter TargetName="ButtonText" Property="TextElement.Foreground" Value="{DynamicResource ControlPressedColorBrush}"/>
-                                                                    </Trigger>
-
-                                                                </ControlTemplate.Triggers>
-                                                            </ControlTemplate>
-                                                        </Setter.Value>
-                                                    </Setter>
-                                                </Style>
-                                            </Button.Style>
-                                        </Button>
+                                        <Button Content="削除" ToolTip="削除" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" VerticalAlignment="Center"></Button>
 
                                         <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
                                     </StackPanel>

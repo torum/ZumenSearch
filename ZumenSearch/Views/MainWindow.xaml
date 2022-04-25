@@ -129,7 +129,7 @@
             <!-- メインペイン -->
             <TabControl Grid.Row="2" Style="{DynamicResource TopMenuTabControlStyle}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" TabStripPlacement="Top" SelectedIndex="0">
 
-                <!-- ホーム -->
+                <!-- 総合 -->
                 <TabItem Style="{DynamicResource TopMenuTabItemStyle}" Background="{DynamicResource BoardBackgroundColorBrush}">
                     <TabItem.Header>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0 0 0 0">
@@ -167,13 +167,7 @@
                                                         </Grid.ColumnDefinitions>
                                                         <ScrollViewer x:Name="PART_ContentHost" Focusable="false" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden"/>
 
-                                                        <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0" VerticalAlignment="Center">
-                                                            <RadioButton x:Name="SearchTitleRadioButton" GroupName="RentSearchTags" Margin="1 0 1 0" Padding="4" Content="物件名" Width="80" IsChecked="{Binding Path=SelectedRentSearchTags, ConverterParameter={x:Static vms:RentSearchTags.RentName}, Converter={StaticResource EnumBooleanConverter}}" Style="{DynamicResource SelectionRadioButtonStyle}"/>
-                                                            <RadioButton x:Name="SearchArtistRadioButton" GroupName="RentSearchTags" Margin="1 0 1 0" Padding="4" Content="所在地" Width="80" IsChecked="{Binding Path=SelectedRentSearchTags, ConverterParameter={x:Static vms:RentSearchTags.RentLocation}, Converter={StaticResource EnumBooleanConverter}}" Style="{DynamicResource SelectionRadioButtonStyle}"/>
-                                                            <RadioButton x:Name="SearchAlbumRadioButton" GroupName="RentSearchTags" Margin="1 0 1 0" Padding="4" Content="最寄り駅" Width="80" IsChecked="{Binding Path=SelectedRentSearchTags, ConverterParameter={x:Static vms:RentSearchTags.RentStation}, Converter={StaticResource EnumBooleanConverter}}" Style="{DynamicResource SelectionRadioButtonStyle}"/>
-                                                        </StackPanel>
-
-                                                        <Button Grid.Column="2" Height="22" Width="22" Margin="2 1 2 1" ToolTip="検索" Command="{Binding HomeSearchExecCommand}" IsDefault="True" Content="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z">
+                                                        <Button Grid.Column="2" Width="100" Margin="2 1 2 1" ToolTip="検索" Command="{Binding HomeSearchExecCommand}" IsDefault="True" Content="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z">
                                                             <Button.Resources>
                                                                 <Style x:Key="ButtonIntextboxFocusVisual">
                                                                     <Setter Property="Control.Template">
@@ -200,28 +194,35 @@
                                                                         <Setter.Value>
                                                                             <ControlTemplate TargetType="Button">
                                                                                 <Border x:Name="Border" BorderThickness="1" Background="{TemplateBinding Background}" BorderBrush="{DynamicResource BorderDarkColorBrush}" CornerRadius="2">
-                                                                                    <Path x:Name="PathIcon" Data="{Binding Content, RelativeSource={RelativeSource TemplatedParent}}" Stretch="Uniform" Stroke="Transparent" StrokeThickness="0" Margin="4" RenderTransformOrigin="0.5,0.5">
-                                                                                        <Path.RenderTransform>
-                                                                                            <TransformGroup>
-                                                                                                <TransformGroup.Children>
-                                                                                                    <RotateTransform Angle="0" />
-                                                                                                    <ScaleTransform ScaleX="1" ScaleY="1" />
-                                                                                                </TransformGroup.Children>
-                                                                                            </TransformGroup>
-                                                                                        </Path.RenderTransform>
-                                                                                        <Path.Fill>
-                                                                                            <SolidColorBrush x:Name="PathIconColor" Color="{DynamicResource ControlForegroundColor}"/>
-                                                                                        </Path.Fill>
-                                                                                    </Path>
+                                                                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+
+                                                                                        <Path x:Name="PathIcon" Data="{Binding Content, RelativeSource={RelativeSource TemplatedParent}}" Stretch="Uniform" Stroke="Transparent" StrokeThickness="0" Margin="4" RenderTransformOrigin="0.5,0.5">
+                                                                                            <Path.RenderTransform>
+                                                                                                <TransformGroup>
+                                                                                                    <TransformGroup.Children>
+                                                                                                        <RotateTransform Angle="0" />
+                                                                                                        <ScaleTransform ScaleX="0.8" ScaleY="0.8" />
+                                                                                                    </TransformGroup.Children>
+                                                                                                </TransformGroup>
+                                                                                            </Path.RenderTransform>
+                                                                                            <Path.Fill>
+                                                                                                <SolidColorBrush x:Name="PathIconColor" Color="{DynamicResource ControlForegroundColor}"/>
+                                                                                            </Path.Fill>
+                                                                                        </Path>
+
+                                                                                        <TextBlock x:Name="SearchBoxButtonText" Text="検索" FontWeight="Bold" Margin="0" Padding="0" HorizontalAlignment="Left" VerticalAlignment="Center"></TextBlock>
+                                                                                    </StackPanel>
                                                                                 </Border>
                                                                                 <ControlTemplate.Triggers>
 
                                                                                     <Trigger Property="IsEnabled" Value="False">
                                                                                         <Setter TargetName="PathIcon" Property="Fill" Value="{DynamicResource DisabledForegroundColorBrush}"/>
+                                                                                        <Setter TargetName="SearchBoxButtonText" Property="TextElement.Foreground" Value="{DynamicResource DisabledForegroundColorBrush}"/>
                                                                                     </Trigger>
 
                                                                                     <Trigger Property="IsMouseOver" Value="true">
                                                                                         <Setter TargetName="PathIcon" Property="Fill" Value="{DynamicResource ControlMouseOverColorBrush}"/>
+                                                                                        <Setter TargetName="SearchBoxButtonText" Property="TextElement.Foreground" Value="{DynamicResource ControlMouseOverColorBrush}"/>
                                                                                     </Trigger>
 
                                                                                 </ControlTemplate.Triggers>
@@ -269,12 +270,12 @@
 
                         <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" x:Name="RentLivingSearchListViewDummy" Visibility="Hidden" Margin="0 0 27 0">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="0"/>
+                                <ColumnDefinition Width="100"/>
                                 <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition Width="100" />
+                                <ColumnDefinition Width="3*" />
                                 <ColumnDefinition Width="2*"/>
                                 <ColumnDefinition Width="2*"/>
-                                <ColumnDefinition Width="2*"/>
+                                <ColumnDefinition Width="120"/>
                             </Grid.ColumnDefinitions>
 
                             <!--  This is the hidden helper Field which is used to bind to, using the "Fill" column of the helper grid  -->
@@ -286,6 +287,7 @@
                             <Grid x:Name="RLSWidth5" Grid.Column="5" />
                         </Grid>
 
+                        <!-- 検索結果一覧 -->
                         <ListView Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" x:Name="RentLivingSearchListView" Background="{DynamicResource ListviewAlt0ColorBrush}" helper:GridViewSort.AutoSort="True" helper:GridViewSort.ShowSortGlyph="True" IsSynchronizedWithCurrentItem="True" AlternationCount="2" MinHeight="80" BorderThickness="0" Padding="0 0 0 0" Margin="0 0 0 0" SelectionMode="Extended" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Visible">
                             <ListView.Resources>
 
@@ -324,24 +326,24 @@
                                         </Style>
                                     </GridView.ColumnHeaderContainerStyle>
 
-                                    <GridViewColumn Header="ID" Width="{Binding ElementName=RLSWidth0, Path=ActualWidth}">
+                                    <GridViewColumn Header="種別" Width="{Binding ElementName=RLSWidth0, Path=ActualWidth}">
 
                                     </GridViewColumn>
 
                                     <GridViewColumn Width="{Binding ElementName=RLSWidth1, Path=ActualWidth}">
-                                        <GridViewColumnHeader Content="物件名" Padding="3"/>
+                                        <GridViewColumnHeader Content="物件名・名前" Padding="3"/>
 
                                     </GridViewColumn>
 
-                                    <GridViewColumn Header="所在地" Width="{Binding ElementName=RLSWidth2, Path=ActualWidth}">
+                                    <GridViewColumn Header="所在地・住所" Width="{Binding ElementName=RLSWidth2, Path=ActualWidth}">
 
                                     </GridViewColumn>
 
-                                    <GridViewColumn Header="最寄り駅1" Width="{Binding ElementName=RLSWidth3, Path=ActualWidth}">
+                                    <GridViewColumn Header="沿線" Width="{Binding ElementName=RLSWidth3, Path=ActualWidth}">
 
                                     </GridViewColumn>
 
-                                    <GridViewColumn Header="最寄り駅2" Width="{Binding ElementName=RLSWidth4, Path=ActualWidth}">
+                                    <GridViewColumn Header="最寄り駅" Width="{Binding ElementName=RLSWidth4, Path=ActualWidth}">
 
                                     </GridViewColumn>
 
@@ -365,7 +367,7 @@
 
                     <Grid Margin="0 24 0 0">
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="28"/>
+                            <RowDefinition Height="Auto"/>
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
@@ -383,13 +385,13 @@
                                 <Button Visibility="Collapsed" Content="一覧" Style="{DynamicResource ListviewMenuButton}" Command="{Binding RentLivingEditListCommand}" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
 
                                 <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
+                                <Button Content="新規" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding RentLivingEditNewCommand}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+
+                                <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
                                 <Button Content="編集" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding RentLivingEditSelectedEditCommand}" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
 
                                 <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
                                 <Button Content="表示" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding RentLivingEditSelectedViewCommand}" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
-
-                                <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
-                                <Button Content="新規" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding RentLivingEditNewCommand}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
 
                                 <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
                                 <Button Content="削除" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding RentLivingEditSelectedDeleteCommand}" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
@@ -403,7 +405,7 @@
                         <TabControl Grid.Row="1" Grid.Column="0" SelectedIndex="{Binding RentLivingSearchTabSelectedIndex}" Style="{DynamicResource HiddlenTabControl}">
 
                             <!-- 検索条件 -->
-                            <TabItem Style="{DynamicResource NoChromeTabHeaderCollapsed}">
+                            <TabItem Style="{DynamicResource NoChromeTabHeader}">
                                 <Grid Grid.Row="1" Grid.Column="0">
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="*"/>
@@ -445,12 +447,12 @@
                                                                             <ScrollViewer x:Name="PART_ContentHost" Focusable="false" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden"/>
 
                                                                             <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0" VerticalAlignment="Center">
-                                                                                <RadioButton x:Name="SearchTitleRadioButton" GroupName="RentSearchTags" Height="24" Margin="1 1 1 1" Padding="4" Content="物件名" Width="80" IsChecked="{Binding Path=SelectedRentSearchTags, ConverterParameter={x:Static vms:RentSearchTags.RentName}, Converter={StaticResource EnumBooleanConverter}}" Style="{DynamicResource SelectionRadioButtonStyle}"/>
-                                                                                <RadioButton x:Name="SearchArtistRadioButton" GroupName="RentSearchTags" Height="24" Margin="1 1 1 1" Padding="4" Content="所在地" Width="80" IsChecked="{Binding Path=SelectedRentSearchTags, ConverterParameter={x:Static vms:RentSearchTags.RentLocation}, Converter={StaticResource EnumBooleanConverter}}" Style="{DynamicResource SelectionRadioButtonStyle}"/>
-                                                                                <RadioButton x:Name="SearchAlbumRadioButton" GroupName="RentSearchTags" Height="24" Margin="1 1 1 1" Padding="4" Content="最寄り駅" Width="80" IsChecked="{Binding Path=SelectedRentSearchTags, ConverterParameter={x:Static vms:RentSearchTags.RentStation}, Converter={StaticResource EnumBooleanConverter}}" Style="{DynamicResource SelectionRadioButtonStyle}"/>
+                                                                                <RadioButton x:Name="SearchTitleRadioButton" GroupName="RentSearchTags" Margin="1 1 1 1" Padding="4" Content="物件名" Width="80" IsChecked="{Binding Path=SelectedRentSearchTags, ConverterParameter={x:Static vms:RentSearchTags.RentName}, Converter={StaticResource EnumBooleanConverter}}" Style="{DynamicResource SelectionRadioButtonStyle}"/>
+                                                                                <RadioButton x:Name="SearchArtistRadioButton" GroupName="RentSearchTags" Margin="1 1 1 1" Padding="4" Content="所在地" Width="80" IsChecked="{Binding Path=SelectedRentSearchTags, ConverterParameter={x:Static vms:RentSearchTags.RentLocation}, Converter={StaticResource EnumBooleanConverter}}" Style="{DynamicResource SelectionRadioButtonStyle}"/>
+                                                                                <RadioButton x:Name="SearchAlbumRadioButton" GroupName="RentSearchTags" Margin="1 1 1 1" Padding="4" Content="最寄り駅" Width="80" IsChecked="{Binding Path=SelectedRentSearchTags, ConverterParameter={x:Static vms:RentSearchTags.RentStation}, Converter={StaticResource EnumBooleanConverter}}" Style="{DynamicResource SelectionRadioButtonStyle}"/>
                                                                             </StackPanel>
 
-                                                                            <Button Grid.Column="2" Height="24" Width="100" Margin="3 1 1 1" ToolTip="検索" Command="{Binding RentLivingEditSearchCommand}" IsDefault="True" Content="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z">
+                                                                            <Button Grid.Column="2" Width="100" Margin="2 1 2 1" ToolTip="検索" Command="{Binding RentLivingEditSearchCommand}" IsDefault="True" Content="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z">
                                                                                 <Button.Resources>
                                                                                     <Style x:Key="ButtonIntextboxFocusVisual">
                                                                                         <Setter Property="Control.Template">
@@ -495,7 +497,7 @@
                                                                                                                 </Path.Fill>
                                                                                                             </Path>
 
-                                                                                                            <TextBlock Text="検索" Margin="1" Padding="4" HorizontalAlignment="Left" VerticalAlignment="Center"></TextBlock>
+                                                                                                            <TextBlock x:Name="RLSearchBoxButtonText" Text="検索" FontWeight="Bold" Margin="0" Padding="0" HorizontalAlignment="Left" VerticalAlignment="Center"></TextBlock>
                                                                                                         </StackPanel>
                                                                                                     </Border>
 
@@ -504,10 +506,12 @@
 
                                                                                                         <Trigger Property="IsEnabled" Value="False">
                                                                                                             <Setter TargetName="PathIcon" Property="Fill" Value="{DynamicResource DisabledForegroundColorBrush}"/>
+                                                                                                            <Setter TargetName="RLSearchBoxButtonText" Property="TextElement.Foreground" Value="{DynamicResource DisabledForegroundColorBrush}"/>
                                                                                                         </Trigger>
 
                                                                                                         <Trigger Property="IsMouseOver" Value="true">
                                                                                                             <Setter TargetName="PathIcon" Property="Fill" Value="{DynamicResource ControlMouseOverColorBrush}"/>
+                                                                                                            <Setter TargetName="RLSearchBoxButtonText" Property="TextElement.Foreground" Value="{DynamicResource ControlMouseOverColorBrush}"/>
                                                                                                         </Trigger>
 
                                                                                                     </ControlTemplate.Triggers>
@@ -560,7 +564,7 @@
                             </TabItem>
 
                             <!-- 検索結果一覧 -->
-                            <TabItem Style="{DynamicResource NoChromeTabHeaderCollapsed}">
+                            <TabItem Style="{DynamicResource NoChromeTabHeader}">
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto"/>
