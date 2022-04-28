@@ -39,178 +39,170 @@ namespace ZumenSearch
 
             _dataBaseFilePath = dataBaseFilePath;
 
-            // Create a table if not exists.
-            connectionStringBuilder = new SqliteConnectionStringBuilder
+            try
             {
-                DataSource = dataBaseFilePath
-            };
+                connectionStringBuilder = new SqliteConnectionStringBuilder("Data Source="+dataBaseFilePath);
 
-            using (var connection = new SqliteConnection(connectionStringBuilder.ConnectionString))
-            {
+                using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
                 try
                 {
                     connection.Open();
 
-                    using (var tableCmd = connection.CreateCommand())
+                    using var tableCmd = connection.CreateCommand();
+                    // トランザクション開始
+                    tableCmd.Transaction = connection.BeginTransaction();
+                    try
                     {
-                        // トランザクション開始
-                        tableCmd.Transaction = connection.BeginTransaction();
-                        try
+                        // メインの賃貸物件「インデックス」テーブル
+                        tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS Rent (" +
+                            "Rent_ID TEXT NOT NULL PRIMARY KEY," +
+                            "Name TEXT NOT NULL," +
+                            "Type TEXT NOT NULL," +
+                            "PostalCode TEXT," +
+                            "Location TEXT," +
+                            "LocationHiddenPart TEXT," +
+                            "GeoLocationLatitude TEXT," +
+                            "GeoLocationLongitude TEXT," +
+                            "TrainStation1 TEXT," +
+                            "TrainStation2 TEXT," +
+                            "TrainStation3 TEXT," +
+                            "PictureThumbData BLOB)";
+                        tableCmd.ExecuteNonQuery();
+
+                        // 賃貸住居用物件のテーブル
+                        tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS RentLiving (" +
+                            "RentLiving_ID TEXT NOT NULL PRIMARY KEY," +
+                            "Rent_ID TEXT NOT NULL," +
+                            "Kind TEXT NOT NULL," +
+                            "Floors INTEGER NOT NULL," +
+                            "FloorsBasement INTEGER," +
+                            "BuiltYear INTEGER NOT NULL," +
+                            "FOREIGN KEY (Rent_ID) REFERENCES Rent(Rent_ID)" +
+                            " )";
+                        tableCmd.ExecuteNonQuery();
+
+                        // 賃貸住居用物件の「写真」テーブル
+                        tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS RentLivingPicture (" +
+                            "RentLivingPicture_ID TEXT NOT NULL PRIMARY KEY," +
+                            "RentLiving_ID TEXT NOT NULL," +
+                            "Rent_ID TEXT NOT NULL," +
+                            "PictureData BLOB NOT NULL," +
+                            "PictureThumbData BLOB NOT NULL," +
+                            "PictureFileExt TEXT NOT NULL," +
+                            "PictureType TEXT NOT NULL," +
+                            "PictureDescription TEXT NOT NULL," +
+                            "PictureIsMain INTEGER  NOT NULL," +
+                            "FOREIGN KEY (Rent_ID) REFERENCES Rent(Rent_ID)," +
+                            "FOREIGN KEY (RentLiving_ID) REFERENCES RentLiving(RentLiving_ID)" +
+                            " )";
+                        tableCmd.ExecuteNonQuery();
+
+                        // 賃貸住居用物件の「図面」テーブル
+                        tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS RentLivingZumenPdf (" +
+                            "RentLivingZumenPdf_ID TEXT NOT NULL PRIMARY KEY," +
+                            "RentLiving_ID TEXT NOT NULL," +
+                            "Rent_ID TEXT NOT NULL," +
+                            "PdfData BLOB NOT NULL," +
+                            "DateTimeAdded TEXT NOT NULL," +
+                            "DateTimePublished TEXT NOT NULL," +
+                            "DateTimeVerified TEXT NOT NULL," +
+                            "FileSize REAL NOT NULL," +
+                            "FOREIGN KEY (Rent_ID) REFERENCES Rent(Rent_ID)," +
+                            "FOREIGN KEY (RentLiving_ID) REFERENCES RentLiving(RentLiving_ID)" +
+                            " )";
+                        tableCmd.ExecuteNonQuery();
+
+                        // 賃貸住居用物件の「部屋」テーブル
+                        tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS RentLivingRoom(" +
+                            "RentLivingRoom_ID TEXT NOT NULL PRIMARY KEY," +
+                            "RentLiving_ID TEXT NOT NULL," +
+                            "Rent_ID TEXT NOT NULL," +
+                            "RoomNumber TEXT," +
+                            "Price INTEGER NOT NULL," +
+                            "Madori TEXT NOT NULL," +
+                            "FOREIGN KEY (Rent_ID) REFERENCES Rent(Rent_ID)," +
+                            "FOREIGN KEY (RentLiving_ID) REFERENCES RentLiving(RentLiving_ID)" +
+                            " )";
+                        tableCmd.ExecuteNonQuery();
+
+                        // 賃貸住居用物件の「部屋の写真」テーブル
+                        tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS RentLivingRoomPicture (" +
+                            "RentLivingRoomPicture_ID TEXT NOT NULL PRIMARY KEY," +
+                            "RentLivingRoom_ID TEXT NOT NULL," +
+                            "RentLiving_ID TEXT NOT NULL," +
+                            "Rent_ID TEXT NOT NULL," +
+                            "PictureData BLOB NOT NULL," +
+                            "PictureThumbData BLOB NOT NULL," +
+                            "PictureFileExt TEXT NOT NULL," +
+                            "FOREIGN KEY (Rent_ID) REFERENCES Rent(Rent_ID)," +
+                            "FOREIGN KEY (RentLiving_ID) REFERENCES RentLiving(RentLiving_ID)," +
+                            "FOREIGN KEY (RentLivingRoom_ID) REFERENCES RentLivingRoom(RentLivingRoom_ID)" +
+                            " )";
+                        tableCmd.ExecuteNonQuery();
+
+                        // 元付け業者テーブル
+                        tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS Agency (" +
+                            "Agency_ID TEXT NOT NULL PRIMARY KEY," +
+                            "Name TEXT NOT NULL," +
+                            "Branch TEXT NOT NULL," +
+                            "TelNumber TEXT NOT NULL," +
+                            "FaxNumber TEXT NOT NULL," +
+                            "PostalCode TEXT NOT NULL," +
+                            "Address TEXT NOT NULL," +
+                            "Memo TEXT NOT NULL" +
+                            " )";
+                        tableCmd.ExecuteNonQuery();
+
+                        // 管理会社テーブル
+                        tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS MaintenanceCompany (" +
+                            "MaintenanceCompany_ID TEXT NOT NULL PRIMARY KEY," +
+                            "Name TEXT NOT NULL," +
+                            "Branch TEXT NOT NULL," +
+                            "TelNumber TEXT NOT NULL," +
+                            "FaxNumber TEXT NOT NULL," +
+                            "PostalCode TEXT NOT NULL," +
+                            "Address TEXT NOT NULL," +
+                            "Memo TEXT NOT NULL" +
+                            " )";
+                        tableCmd.ExecuteNonQuery();
+
+                        // オーナーテーブル
+                        tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS Owner (" +
+                            "Owner_ID TEXT NOT NULL PRIMARY KEY," +
+                            "Name TEXT NOT NULL," +
+                            "TelNumber TEXT NOT NULL," +
+                            "FaxNumber TEXT NOT NULL," +
+                            "PostalCode TEXT NOT NULL," +
+                            "Address TEXT NOT NULL," +
+                            "Memo TEXT NOT NULL" +
+                            " )";
+                        tableCmd.ExecuteNonQuery();
+
+                        // トランザクションコミット
+                        tableCmd.Transaction.Commit();
+                    }
+                    catch (Exception e)
+                    {
+                        // トランザクションのロールバック
+                        tableCmd.Transaction.Rollback();
+
+                        // エラー
+                        res.IsError = true;
+                        res.Error.ErrType = ErrorObject.ErrTypes.DB;
+                        res.Error.ErrCode = 0;
+                        if (e.InnerException != null)
                         {
-                            // メインの賃貸物件「インデックス」テーブル
-                            tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS Rent (" +
-                                "Rent_ID TEXT NOT NULL PRIMARY KEY," +
-                                "Name TEXT NOT NULL," +
-                                "Type TEXT NOT NULL," +
-                                "PostalCode TEXT," +
-                                "Location TEXT," +
-                                "LocationHiddenPart TEXT," +
-                                "GeoLocationLatitude TEXT," +
-                                "GeoLocationLongitude TEXT," +
-                                "TrainStation1 TEXT," +
-                                "TrainStation2 TEXT," +
-                                "TrainStation3 TEXT," +
-                                "PictureThumbData BLOB)";
-                            tableCmd.ExecuteNonQuery();
-
-
-                            // TODO: TrainLine
-
-                            // メインの賃貸物件「サムネイル・インデックス」テーブル
-                            /*
-                            tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS RentThumb (" +
-                                "Rent_ID TEXT NOT NULL PRIMARY KEY," +
-                                "PictureThumbData BLOB NOT NULL)";
-                            tableCmd.ExecuteNonQuery();
-                            */
-
-                            // 賃貸住居用物件のテーブル
-                            tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS RentLiving (" +
-                                "RentLiving_ID TEXT NOT NULL PRIMARY KEY," +
-                                "Rent_ID TEXT NOT NULL," +
-                                "Kind TEXT NOT NULL," +
-                                "Floors INTEGER NOT NULL," +
-                                "FloorsBasement INTEGER," +
-                                "BuiltYear INTEGER NOT NULL," +
-                                "FOREIGN KEY (Rent_ID) REFERENCES Rent(Rent_ID)" +
-                                " )";
-                            tableCmd.ExecuteNonQuery();
-
-                            // 賃貸住居用物件の「写真」テーブル
-                            tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS RentLivingPicture (" +
-                                "RentLivingPicture_ID TEXT NOT NULL PRIMARY KEY," +
-                                "RentLiving_ID TEXT NOT NULL," +
-                                "Rent_ID TEXT NOT NULL," +
-                                "PictureData BLOB NOT NULL," +
-                                "PictureThumbData BLOB NOT NULL," +
-                                "PictureFileExt TEXT NOT NULL," +
-                                "PictureType TEXT NOT NULL," +
-                                "PictureDescription TEXT NOT NULL," +
-                                "PictureIsMain INTEGER  NOT NULL," +
-                                "FOREIGN KEY (Rent_ID) REFERENCES Rent(Rent_ID)," +
-                                "FOREIGN KEY (RentLiving_ID) REFERENCES RentLiving(RentLiving_ID)" +
-                                " )";
-                            tableCmd.ExecuteNonQuery();
-
-                            // 賃貸住居用物件の「図面」テーブル
-                            tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS RentLivingZumenPdf (" +
-                                "RentLivingZumenPdf_ID TEXT NOT NULL PRIMARY KEY," +
-                                "RentLiving_ID TEXT NOT NULL," +
-                                "Rent_ID TEXT NOT NULL," +
-                                "PdfData BLOB NOT NULL," +
-                                "DateTimeAdded TEXT NOT NULL," +
-                                "DateTimePublished TEXT NOT NULL," +
-                                "DateTimeVerified TEXT NOT NULL," +
-                                "FileSize REAL NOT NULL," +
-                                "FOREIGN KEY (Rent_ID) REFERENCES Rent(Rent_ID)," +
-                                "FOREIGN KEY (RentLiving_ID) REFERENCES RentLiving(RentLiving_ID)" +
-                                " )";
-                            tableCmd.ExecuteNonQuery();
-
-                            // 賃貸住居用物件の「部屋」テーブル
-                            tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS RentLivingRoom(" +
-                                "RentLivingRoom_ID TEXT NOT NULL PRIMARY KEY," +
-                                "RentLiving_ID TEXT NOT NULL," +
-                                "Rent_ID TEXT NOT NULL," +
-                                "RoomNumber TEXT," +
-                                "Price INTEGER NOT NULL," +
-                                "Madori TEXT NOT NULL," +
-                                "FOREIGN KEY (Rent_ID) REFERENCES Rent(Rent_ID)," +
-                                "FOREIGN KEY (RentLiving_ID) REFERENCES RentLiving(RentLiving_ID)" +
-                                " )";
-                            tableCmd.ExecuteNonQuery();
-
-                            // 賃貸住居用物件の「部屋の写真」テーブル
-                            tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS RentLivingRoomPicture (" +
-                                "RentLivingRoomPicture_ID TEXT NOT NULL PRIMARY KEY," +
-                                "RentLivingRoom_ID TEXT NOT NULL," +
-                                "RentLiving_ID TEXT NOT NULL," +
-                                "Rent_ID TEXT NOT NULL," +
-                                "PictureData BLOB NOT NULL," +
-                                "PictureThumbData BLOB NOT NULL," +
-                                "PictureFileExt TEXT NOT NULL," +
-                                "FOREIGN KEY (Rent_ID) REFERENCES Rent(Rent_ID)," +
-                                "FOREIGN KEY (RentLiving_ID) REFERENCES RentLiving(RentLiving_ID)," +
-                                "FOREIGN KEY (RentLivingRoom_ID) REFERENCES RentLivingRoom(RentLivingRoom_ID)" +
-                                " )";
-                            tableCmd.ExecuteNonQuery();
-
-                            // 元付け業者テーブル
-                            tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS Agency (" +
-                                "Agency_ID TEXT NOT NULL PRIMARY KEY," +
-                                "Name TEXT NOT NULL," +
-                                "Branch TEXT NOT NULL," +
-                                "TelNumber TEXT NOT NULL," +
-                                "FaxNumber TEXT NOT NULL," +
-                                "PostalCode TEXT NOT NULL," +
-                                "Address TEXT NOT NULL," +
-                                "Memo TEXT NOT NULL" +
-                                " )";
-                            tableCmd.ExecuteNonQuery();
-
-                            // 管理会社テーブル
-                            tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS MaintenanceCompany (" +
-                                "MaintenanceCompany_ID TEXT NOT NULL PRIMARY KEY," +
-                                "Name TEXT NOT NULL," +
-                                "Branch TEXT NOT NULL," +
-                                "TelNumber TEXT NOT NULL," +
-                                "FaxNumber TEXT NOT NULL," +
-                                "PostalCode TEXT NOT NULL," +
-                                "Address TEXT NOT NULL," +
-                                "Memo TEXT NOT NULL" +
-                                " )";
-                            tableCmd.ExecuteNonQuery();
-
-                            // オーナーテーブル
-                            tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS Owner (" +
-                                "Owner_ID TEXT NOT NULL PRIMARY KEY," +
-                                "Name TEXT NOT NULL," +
-                                "TelNumber TEXT NOT NULL," +
-                                "FaxNumber TEXT NOT NULL," +
-                                "PostalCode TEXT NOT NULL," +
-                                "Address TEXT NOT NULL," +
-                                "Memo TEXT NOT NULL" +
-                                " )";
-                            tableCmd.ExecuteNonQuery();
-
-                            // トランザクションコミット
-                            tableCmd.Transaction.Commit();
+                            res.Error.ErrText = "「" + e.InnerException.Message + "」";
                         }
-                        catch (Exception e)
+                        else
                         {
-                            // トランザクションのロールバック
-                            tableCmd.Transaction.Rollback();
-
-                            // エラー
-                            res.IsError = true;
-                            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-                            res.Error.ErrCode = 0;
                             res.Error.ErrText = "「" + e.Message + "」";
-                            res.Error.ErrDescription = "データベースを初期化する処理でエラーが発生し、ロールバックしました。";
-                            res.Error.ErrDatetime = DateTime.Now;
-                            res.Error.ErrPlace = "@DataAccess::InitializeDatabase::Transaction.Commit";
-
                         }
+                        //res.Error.ErrText = "「" + e.Message + "」";
+                        res.Error.ErrDescription = "データベースを初期化する処理でエラーが発生し、ロールバックしました。";
+                        res.Error.ErrDatetime = DateTime.Now;
+                        res.Error.ErrPlace = "@DataAccess::InitializeDatabase::Transaction.Commit";
+
                     }
                 }
                 catch (System.Reflection.TargetInvocationException ex)
@@ -255,7 +247,48 @@ namespace ZumenSearch
                     res.Error.ErrDatetime = DateTime.Now;
                     res.Error.ErrPlace = "Exception@DataAccess::InitializeDatabase::connection.Open";
                 }
+            }
+            catch (System.Reflection.TargetInvocationException ex)
+            {
+                res.IsError = true;
+                res.Error.ErrType = ErrorObject.ErrTypes.DB;
+                res.Error.ErrCode = 0;
+                res.Error.ErrText = "「" + ex.Message + "」";
+                res.Error.ErrDescription = "データベースを初期化する処理でエラーが発生しました。";
+                res.Error.ErrDatetime = DateTime.Now;
+                res.Error.ErrPlace = "TargetInvocationException@DataAccess::InitializeDatabase::connectionStringBuilder";
 
+                throw ex.InnerException;
+            }
+            catch (System.InvalidOperationException ex)
+            {
+                res.IsError = true;
+                res.Error.ErrType = ErrorObject.ErrTypes.DB;
+                res.Error.ErrCode = 0;
+                res.Error.ErrText = "「" + ex.Message + "」";
+                res.Error.ErrDescription = "データベースを初期化する処理でエラーが発生しました。";
+                res.Error.ErrDatetime = DateTime.Now;
+                res.Error.ErrPlace = "InvalidOperationException@DataAccess::InitializeDatabase::connectionStringBuilder";
+
+                throw ex.InnerException;
+            }
+            catch (Exception ex)
+            {
+                res.IsError = true;
+                res.Error.ErrType = ErrorObject.ErrTypes.DB;
+                res.Error.ErrCode = 0;
+
+                if (ex.InnerException != null)
+                {
+                    res.Error.ErrText = "「" + ex.InnerException.Message + "」";
+                }
+                else
+                {
+                    res.Error.ErrText = "「" + ex.Message + "」";
+                }
+                res.Error.ErrDescription = "データベースを初期化する処理でエラーが発生しました。";
+                res.Error.ErrDatetime = DateTime.Now;
+                res.Error.ErrPlace = "Exception@DataAccess::InitializeDatabase::connectionStringBuilder";
             }
 
             return res;
@@ -378,8 +411,6 @@ namespace ZumenSearch
 
             return res;
         }
-
-        //MainSearch
 
         // 賃貸住居用検索
         public ResultWrapper RentLivingSearch(ObservableCollection<RentLivingSummary> rents, string searchText)
@@ -664,14 +695,27 @@ namespace ZumenSearch
 
             string sqlInsertIntoRent = String.Format(
                 "INSERT INTO Rent " +
-                "(Rent_ID, Name, Type, PostalCode, Location, TrainStation1, TrainStation2, TrainStation2, PictureThumbData) " +
-                "VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}', '{7}', @PictureThumbData)",
+                "(Rent_ID, Name, Type, PostalCode, Location, TrainStation1, TrainStation2, TrainStation3) " +
+                "VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}', '{7}')",
                 rl.RentId, 
                 rl.Name, 
                 rl.Type.ToString(), 
                 rl.PostalCode, 
                 rl.Location, 
                 rl.TrainStation1, 
+                rl.TrainStation2,
+                rl.TrainStation3);
+
+            string sqlInsertIntoRentWithThumb = String.Format(
+                "INSERT INTO Rent " +
+                "(Rent_ID, Name, Type, PostalCode, Location, TrainStation1, TrainStation2, TrainStation3, PictureThumbData) " +
+                "VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}', '{7}', @PictureThumbData)",
+                rl.RentId,
+                rl.Name,
+                rl.Type.ToString(),
+                rl.PostalCode,
+                rl.Location,
+                rl.TrainStation1,
                 rl.TrainStation2,
                 rl.TrainStation3);
 
@@ -701,6 +745,8 @@ namespace ZumenSearch
                             cmd.CommandText = sqlInsertIntoRent;
 
                             // 物件写真の追加または更新
+                            SqliteParameter parameterThumb = new SqliteParameter("@PictureThumbData", System.Data.DbType.Binary);
+                            parameterThumb.Value = null;
                             if (rl.RentLivingPictures.Count > 0)
                             {
                                 foreach (var pic in rl.RentLivingPictures)
@@ -709,10 +755,12 @@ namespace ZumenSearch
                                     {
                                         if (pic.IsNew || pic.IsModified)
                                         {
-                                            SqliteParameter parameter1 = new SqliteParameter("@PictureThumbData", System.Data.DbType.Binary);
-                                            parameter1.Value = pic.PictureThumbData;
-                                            cmd.Parameters.Add(parameter1);
+                                            cmd.CommandText = sqlInsertIntoRentWithThumb;
+                                            parameterThumb.Value = pic.PictureThumbData;
+                                            cmd.Parameters.Add(parameterThumb);
                                         }
+
+                                        break;
                                     }
                                 }
                             }
@@ -949,10 +997,32 @@ namespace ZumenSearch
 
             string sqlUpdateRentThumb = String.Format(
                 "UPDATE Rent SET " +
+                    "Name = '{1}', " +
+                    "Type = '{2}', " +
+                    "PostalCode = '{3}', " +
+                    "Location = '{4}', " +
+                    "TrainStation1 = '{5}', " +
+                    "TrainStation2 = '{6}', " +
+                    "TrainStation3 = '{7}', " +
+                    "PictureThumbData = @PictureThumbData " +
+                        "WHERE Rent_ID = '{0}'",
+                rl.RentId,
+                rl.Name,
+                rl.Type.ToString(),
+                rl.PostalCode,
+                rl.Location,
+                rl.TrainStation1,
+                rl.TrainStation2,
+                rl.TrainStation3
+                );
+            /*
+            string sqlUpdateRentThumb = String.Format(
+                "UPDATE Rent SET " +
                     "PictureThumbData = @PictureThumbData " +
                         "WHERE Rent_ID = '{0}'",
                 rl.RentId
                 );
+            */
 
             string sqlUpdateRentLiving = String.Format(
                 "UPDATE RentLiving SET " +
@@ -980,12 +1050,8 @@ namespace ZumenSearch
                     {
                         // Rent Table の更新
                         cmd.CommandText = sqlUpdateRent;
-                        var result = cmd.ExecuteNonQuery();
-                        if (result != 1)
-                        {
-                            // 
-                        }
 
+                        //parameterThumb.Value = null;
                         // 物件写真の追加または更新
                         if (rl.RentLivingPictures.Count > 0)
                         {
@@ -995,17 +1061,19 @@ namespace ZumenSearch
                                 {
                                     if (pic.IsNew || pic.IsModified)
                                     {
+                                        Debug.WriteLine("asdff");
                                         cmd.CommandText = sqlUpdateRentThumb;
 
-                                        SqliteParameter parameter1 = new SqliteParameter("@PictureThumbData", System.Data.DbType.Binary);
-                                        parameter1.Value = pic.PictureThumbData;
-                                        cmd.Parameters.Add(parameter1);
-                                        
-                                        result = cmd.ExecuteNonQuery();
-                                        if (result != 1)
+                                        SqliteParameter parameterThumb = new SqliteParameter("@PictureThumbData", System.Data.DbType.Binary);
+                                        parameterThumb.Value = pic.PictureThumbData;
+                                        cmd.Parameters.Add(parameterThumb);
+                                        /*
+                                        var ret = cmd.ExecuteNonQuery();
+                                        if (ret != 1)
                                         {
                                             // 
                                         }
+                                        */
                                     }
 
                                     break;
@@ -1013,6 +1081,13 @@ namespace ZumenSearch
                             }
                         }
 
+                        var result = cmd.ExecuteNonQuery();
+                        if (result != 1)
+                        {
+                            // 
+                        }
+
+                        cmd.Parameters.Clear();
 
                         // RentLiving Table の更新
                         cmd.CommandText = sqlUpdateRentLiving;
@@ -1022,6 +1097,8 @@ namespace ZumenSearch
                             // 
                         }
 
+                        cmd.Parameters.Clear();
+
                         // 物件写真の追加または更新
                         if (rl.RentLivingPictures.Count > 0)
                         {
@@ -1029,8 +1106,8 @@ namespace ZumenSearch
                             {
                                 if (pic.IsNew)
                                 {
-                                    string sqlInsertIntoRentLivingPicture = String.Format("INSERT INTO RentLivingPicture (RentLivingPicture_ID, RentLiving_ID, Rent_ID, PictureData, PictureThumbData, PictureFileExt, PictureType, PictureDescription) VALUES ('{0}', '{1}', '{2}', @0, @1, '{5}', '{6}', '{7}', @2)",
-                                        pic.RentPictureId, rl.RentLivingId, rl.RentId, pic.PictureData, pic.PictureThumbData, pic.PictureFileExt, pic.PictureType, pic.PictureDescription);
+                                    string sqlInsertIntoRentLivingPicture = String.Format("INSERT INTO RentLivingPicture (RentLivingPicture_ID, RentLiving_ID, Rent_ID, PictureData, PictureThumbData, PictureFileExt, PictureType, PictureDescription, PictureIsMain) VALUES ('{0}', '{1}', '{2}', @0, @1, '{3}', '{4}', '{5}', @2)",
+                                        pic.RentPictureId, rl.RentLivingId, rl.RentId, pic.PictureFileExt, pic.PictureType, pic.PictureDescription);
 
                                     // 物件画像の追加
                                     cmd.CommandText = sqlInsertIntoRentLivingPicture;
@@ -1060,8 +1137,8 @@ namespace ZumenSearch
                                 }
                                 else if (pic.IsModified)
                                 {
-                                    string sqlUpdateRentLivingPicture = String.Format("UPDATE RentLivingPicture SET PictureData = @0, PictureThumbData = @1, PictureFileExt = '{5}', PictureType = '{6}', PictureDescription = '{7}', PictureIsMain = @2 WHERE RentLivingPicture_ID = '{0}'",
-                                        pic.RentPictureId, rl.RentLivingId, rl.RentId, pic.PictureData, pic.PictureThumbData, pic.PictureFileExt, pic.PictureType, pic.PictureDescription);
+                                    string sqlUpdateRentLivingPicture = String.Format("UPDATE RentLivingPicture SET PictureData = @0, PictureThumbData = @1, PictureFileExt = '{1}', PictureType = '{2}', PictureDescription = '{3}', PictureIsMain = @2 WHERE RentLivingPicture_ID = '{0}'",
+                                        pic.RentPictureId, pic.PictureFileExt, pic.PictureType, pic.PictureDescription);
 
                                     // 物件画像の更新
                                     cmd.CommandText = sqlUpdateRentLivingPicture;
@@ -1093,6 +1170,8 @@ namespace ZumenSearch
                             }
                         }
 
+                        cmd.Parameters.Clear();
+
                         // 物件写真の削除リストを処理
                         if (rl.RentLivingPicturesToBeDeletedIDs.Count > 0)
                         {
@@ -1111,6 +1190,8 @@ namespace ZumenSearch
                             }
                             rl.RentLivingPicturesToBeDeletedIDs.Clear();
                         }
+
+                        cmd.Parameters.Clear();
 
                         // 図面の更新
                         if (rl.RentLivingPdfs.Count > 0)
@@ -1305,7 +1386,7 @@ namespace ZumenSearch
                             }
                             rl.RentLivingRoomToBeDeletedIDs.Clear();
                         }
-
+              
                         cmd.Transaction.Commit();
 
                         // 編集オブジェクトに格納された情報を、選択アイテムに更新（Listviewの情報が更新されるー＞DBからSelectして一覧を読み込みし直さなくて良くなる）

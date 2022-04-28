@@ -31,6 +31,7 @@ using ZumenSearch.Common;
 /// 
 
 /// ● 履歴：
+/// v0.0.0.24 色々。
 /// v0.0.0.23 VS2022に更新。ダークテーマ化し、レイアウト含め諸々変更。
 /// v0.0.0.22 部屋画面のデザイン途中。区分所有の表示切り替え。
 /// v0.0.0.21 PDF追加画面と建物画面での表示（とりあえず）。
@@ -64,7 +65,7 @@ namespace ZumenSearch.ViewModels
         #region == 基本 ==
 
         // Application version.
-        private const string _appVer = "0.0.0.23";
+        private const string _appVer = "0.0.0.24";
 
         // Application name.
         private const string _appName = "ZumenSearch";
@@ -1021,7 +1022,6 @@ namespace ZumenSearch.ViewModels
 
         #endregion
 
-
         #region == イベント ==
 
         // エラー通知イベント
@@ -1043,27 +1043,37 @@ namespace ZumenSearch.ViewModels
 
             #region == コマンドのイニシャライズ ==
 
-            // ホーム検索
+            // 総合検索実行
             HomeSearchExecCommand = new RelayCommand(HomeSearchExecCommand_Execute, HomeSearchExecCommand_CanExecute);
 
+            // 検索結果エンターキーまたはダブルクリック
+            HomeSearchEnterKeyCommand = new GenericRelayCommand<MainSearchResult>(
+                param => HomeSearchEnterKeyCommand_Execute(param),
+                param => HomeSearchEnterKeyCommand_CanExecute());
 
-            // RL検索画面表示
+            // 編集
+            HomeSearchEditCommand = new GenericRelayCommand<MainSearchResult>(
+                param => HomeSearchEditCommand_Execute(param),
+                param => HomeSearchEditCommand_CanExecute());
+
+            // RL検索画面
             RentLivingShowSearchCommand = new RelayCommand(RentLivingShowSearchCommand_Execute, RentLivingShowSearchCommand_CanExecute);
-            // RL検索
-            RentLivingEditSearchCommand = new RelayCommand(RentLivingEditSearchCommand_Execute, RentLivingEditSearchCommand_CanExecute);
-            // RL一覧
-            RentLivingEditListCommand = new RelayCommand(RentLivingEditListCommand_Execute, RentLivingEditListCommand_CanExecute);
-            // RL 検索条件画面に戻る
+            RentLivingSearchCommand = new RelayCommand(RentLivingSearchCommand_Execute, RentLivingSearchCommand_CanExecute);
+            RentLivingListCommand = new RelayCommand(RentLivingListCommand_Execute, RentLivingListCommand_CanExecute);
             RentLivingSearchBackCommand = new RelayCommand(RentLivingSearchBackCommand_Execute, RentLivingSearchBackCommand_CanExecute);
 
+            RentLivingSearchEnterKeyCommand = new GenericRelayCommand<RentLivingSummary>(
+                param => RentLivingSearchEnterKeyCommand_Execute(param),
+                param => RentLivingSearchEnterKeyCommand_CanExecute());
+
             // RL新規
-            RentLivingEditNewCommand = new RelayCommand(RentLivingEditNewCommand_Execute, RentLivingEditNewCommand_CanExecute);
+            RentLivingNewCommand = new RelayCommand(RentLivingNewCommand_Execute, RentLivingNewCommand_CanExecute);
             // RL編集
-            RentLivingEditSelectedEditCommand = new RelayCommand(RentLivingEditSelectedEditCommand_Execute, RentLivingEditSelectedEditCommand_CanExecute);
+            RentLivingSelectedEditCommand = new RelayCommand(RentLivingSelectedEditCommand_Execute, RentLivingSelectedEditCommand_CanExecute);
             // RL表示
-            RentLivingEditSelectedViewCommand = new RelayCommand(RentLivingEditSelectedViewCommand_Execute, RentLivingEditSelectedViewCommand_CanExecute);
+            RentLivingSelectedViewCommand = new RelayCommand(RentLivingSelectedViewCommand_Execute, RentLivingSelectedViewCommand_CanExecute);
             // RL削除
-            RentLivingEditSelectedDeleteCommand = new RelayCommand(RentLivingEditSelectedDeleteCommand_Execute, RentLivingEditSelectedDeleteCommand_CanExecute);
+            RentLivingSelectedDeleteCommand = new RelayCommand(RentLivingSelectedDeleteCommand_Execute, RentLivingSelectedDeleteCommand_CanExecute);
 
 
             // 元付け業者
@@ -1101,12 +1111,15 @@ namespace ZumenSearch.ViewModels
             #region == SQLite DB のイニシャライズ ==
             try
             {
-                // DBのファイルパスを設定（TODO）
+                // DBのファイルパスを設定
                 ///var dataBaseFilePath = System.Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + System.IO.Path.DirectorySeparatorChar + _appName + ".db";
-                var databaseFileFolerPath = System.Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + System.IO.Path.DirectorySeparatorChar + _appName;
-                System.IO.Directory.CreateDirectory(databaseFileFolerPath);
-                var dataBaseFilePath = databaseFileFolerPath + System.IO.Path.DirectorySeparatorChar + _appName + ".db";
+                var databaseFileFolderPath = System.Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + System.IO.Path.DirectorySeparatorChar + _appName;
+                
+                System.IO.Directory.CreateDirectory(databaseFileFolderPath);
+                
+                var dataBaseFilePath = databaseFileFolderPath + System.IO.Path.DirectorySeparatorChar + _appName + ".db";
 
+                
                 // SQLite DB のイニシャライズ
                 ResultWrapper res = dataAccessModule.InitializeDatabase(dataBaseFilePath);
                 if (res.IsError)
@@ -1116,15 +1129,33 @@ namespace ZumenSearch.ViewModels
 
                     return;
                 }
+                
             }
-            catch
+            catch (System.Reflection.TargetInvocationException ex)
             {
-                //TODO:
+                Debug.WriteLine("Exception@MainViewModel " + "「" + ex.Message + "」");
+
+                throw ex.InnerException;
+            }
+            catch (System.InvalidOperationException ex)
+            {
+                Debug.WriteLine("Exception@MainViewModel " + "「" + ex.Message + "」");
+
+                throw ex.InnerException;
+            }
+            catch (Exception e)
+            {
+                if (e.InnerException != null)
+                {
+                    Debug.WriteLine("Exception@MainViewModel " + "「" + e.InnerException.Message + "」");
+                }
+                else
+                {
+                    Debug.WriteLine("Exception@MainViewModel " + "「" + e.Message + "」");
+                }
             }
 
             #endregion
-
-            //RentLivingEditListCommand_Execute();
 
         }
 
@@ -1408,6 +1439,42 @@ namespace ZumenSearch.ViewModels
 
         #endregion
 
+        #region == メソッド ==
+
+        // 編集Windowの表示
+        public void OpenRentLivingBuilding(string indexId, string dataId)
+        {
+            // 編集用の賃貸住居用物件オブジェクトを取得
+            ResultWrapper res = dataAccessModule.RentLivingSelectById(indexId, dataId);
+            if (res.IsError)
+            {
+                // エラーの通知
+                ErrorOccured?.Invoke(res.Error);
+
+                return;
+            }
+
+            if (res.Data == null)
+                return;
+            if (res.Data is not RentLiving)
+                return;
+
+            RentLiving rl = res.Data as RentLiving;
+
+            // 編集画面に渡すEventArgsを用意
+            OpenRentLivingBuildingWindowEventArgs ag = new OpenRentLivingBuildingWindowEventArgs
+            {
+                Id = rl.RentLivingId,
+                RentLivingObject = rl,
+                DataAccessModule = dataAccessModule
+            };
+
+            // 画面表示イベント発火
+            OpenRentLivingBuildingWindow?.Invoke(this, ag);
+        }
+
+        #endregion
+
         #region == コマンド ==
 
         #region == 総合検索 ==
@@ -1431,7 +1498,38 @@ namespace ZumenSearch.ViewModels
 
                 return;
             }
+        }
 
+        public ICommand HomeSearchEnterKeyCommand { get; }
+        public bool HomeSearchEnterKeyCommand_CanExecute()
+        {
+            return true;
+        }
+        public void HomeSearchEnterKeyCommand_Execute(MainSearchResult selectedEntry)
+        {
+            if (selectedEntry == null)
+                return;
+
+            if (HomeSearchEditCommand_CanExecute())
+            {
+                HomeSearchEditCommand_Execute(selectedEntry);
+            }
+        }
+
+        public ICommand HomeSearchEditCommand { get; }
+        public bool HomeSearchEditCommand_CanExecute()
+        {
+            return true;
+        }
+        public void HomeSearchEditCommand_Execute(MainSearchResult selectedEntry)
+        {
+            if (selectedEntry == null)
+                return;
+
+            // TODO：型チェックしてそれ次第で振り分ける
+
+            // 編集Windowの表示
+            OpenRentLivingBuilding(selectedEntry.IndexId, selectedEntry.DataId);
         }
 
         #endregion
@@ -1458,8 +1556,8 @@ namespace ZumenSearch.ViewModels
         }
 
         // 検索
-        public ICommand RentLivingEditSearchCommand { get; }
-        public bool RentLivingEditSearchCommand_CanExecute()
+        public ICommand RentLivingSearchCommand { get; }
+        public bool RentLivingSearchCommand_CanExecute()
         {
             // TODO
             if (String.IsNullOrEmpty(RentLivingEditSearchText))
@@ -1472,7 +1570,7 @@ namespace ZumenSearch.ViewModels
             }
             return true;
         }
-        public void RentLivingEditSearchCommand_Execute()
+        public void RentLivingSearchCommand_Execute()
         {
             // 既に一覧を表示していたら、検索画面に戻る。
             if (RentLivingSearchTabSelectedIndex == 1)
@@ -1500,12 +1598,12 @@ namespace ZumenSearch.ViewModels
         }
 
         // 一覧
-        public ICommand RentLivingEditListCommand { get; }
-        public bool RentLivingEditListCommand_CanExecute()
+        public ICommand RentLivingListCommand { get; }
+        public bool RentLivingListCommand_CanExecute()
         {
             return true;
         }
-        public void RentLivingEditListCommand_Execute()
+        public void RentLivingListCommand_Execute()
         {
             // 一覧をクリア
             RentLivingSearchResult.Clear();
@@ -1540,13 +1638,32 @@ namespace ZumenSearch.ViewModels
             RentLivingSearchTabSelectedIndex = 0;
         }
 
-        // 新規追加（編集画面表示）
-        public ICommand RentLivingEditNewCommand { get; }
-        public bool RentLivingEditNewCommand_CanExecute()
+        // 
+        public ICommand RentLivingSearchEnterKeyCommand { get; }
+        public bool RentLivingSearchEnterKeyCommand_CanExecute()
         {
             return true;
         }
-        public void RentLivingEditNewCommand_Execute()
+        public void RentLivingSearchEnterKeyCommand_Execute(RentLivingSummary selectedEntry)
+        {
+            if (selectedEntry == null)
+                return;
+
+            RentLivingEditSelectedItem = selectedEntry;
+
+            if (RentLivingSelectedEditCommand_CanExecute())
+            {
+                RentLivingSelectedEditCommand_Execute();
+            }
+        }
+
+        // 新規追加（編集画面表示）
+        public ICommand RentLivingNewCommand { get; }
+        public bool RentLivingNewCommand_CanExecute()
+        {
+            return true;
+        }
+        public void RentLivingNewCommand_Execute()
         {
             // 編集用の賃貸住居用物件オブジェクトを用意
             RentLiving rl = new RentLiving(Guid.NewGuid().ToString(), Guid.NewGuid().ToString())
@@ -1567,8 +1684,8 @@ namespace ZumenSearch.ViewModels
         }
 
         // 編集（編集画面表示）
-        public ICommand RentLivingEditSelectedEditCommand { get; }
-        public bool RentLivingEditSelectedEditCommand_CanExecute()
+        public ICommand RentLivingSelectedEditCommand { get; }
+        public bool RentLivingSelectedEditCommand_CanExecute()
         {
             if (RentLivingEditSelectedItem == null)
             {
@@ -1579,43 +1696,18 @@ namespace ZumenSearch.ViewModels
                 return true;
             }
         }
-        public void RentLivingEditSelectedEditCommand_Execute()
+        public void RentLivingSelectedEditCommand_Execute()
         {
             if (RentLivingEditSelectedItem == null)
                 return;
 
-            // 編集用の賃貸住居用物件オブジェクトを取得
-            ResultWrapper res = dataAccessModule.RentLivingSelectById(RentLivingEditSelectedItem.RentId, RentLivingEditSelectedItem.RentLivingId);
-            if (res.IsError)
-            {
-                // エラーの通知
-                ErrorOccured?.Invoke(res.Error);
-
-                return;
-            }
-
-            if (res.Data == null)
-                return;
-            if (res.Data is not RentLiving)
-                return;
-
-            RentLiving rl = res.Data as RentLiving;
-
-            // 編集画面に渡すEventArgsを用意
-            OpenRentLivingBuildingWindowEventArgs ag = new OpenRentLivingBuildingWindowEventArgs
-            {
-                Id = rl.RentLivingId,
-                RentLivingObject = rl,
-                DataAccessModule = dataAccessModule
-            };
-
-            // 画面表示イベント発火
-            OpenRentLivingBuildingWindow?.Invoke(this, ag);
+            // 編集Windowの表示へ
+            OpenRentLivingBuilding(RentLivingEditSelectedItem.RentId, RentLivingEditSelectedItem.RentLivingId);
         }
 
         // 表示 (PDFとか)
-        public ICommand RentLivingEditSelectedViewCommand { get; }
-        public bool RentLivingEditSelectedViewCommand_CanExecute()
+        public ICommand RentLivingSelectedViewCommand { get; }
+        public bool RentLivingSelectedViewCommand_CanExecute()
         {
             if (RentLivingEditSelectedItem == null)
             {
@@ -1626,17 +1718,17 @@ namespace ZumenSearch.ViewModels
                 return true;
             }
         }
-        public void RentLivingEditSelectedViewCommand_Execute()
+        public void RentLivingSelectedViewCommand_Execute()
         {
             //RentLivingEditSelectedItem
-            System.Diagnostics.Debug.WriteLine("RentLivingEditSelectedViewCommand_Execute");
+            System.Diagnostics.Debug.WriteLine("RentLivingSelectedViewCommand_Execute");
 
             // TODO view
         }
 
         // 削除（DELETE）
-        public ICommand RentLivingEditSelectedDeleteCommand { get; }
-        public bool RentLivingEditSelectedDeleteCommand_CanExecute()
+        public ICommand RentLivingSelectedDeleteCommand { get; }
+        public bool RentLivingSelectedDeleteCommand_CanExecute()
         {
             if (RentLivingEditSelectedItem == null)
             {
@@ -1647,7 +1739,7 @@ namespace ZumenSearch.ViewModels
                 return true;
             }
         }
-        public void RentLivingEditSelectedDeleteCommand_Execute()
+        public void RentLivingSelectedDeleteCommand_Execute()
         {
             if (RentLivingEditSelectedItem != null)
             {

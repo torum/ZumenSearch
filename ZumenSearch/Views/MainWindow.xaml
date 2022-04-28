@@ -291,12 +291,12 @@
                         <ListView Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" x:Name="MainSearchListView" ItemsSource="{Binding SearchResult, NotifyOnTargetUpdated=True}" SelectedItem="{Binding SearchResultSelectedItem, Mode=TwoWay}" Background="{DynamicResource ListviewAlt0ColorBrush}" helper:GridViewSort.AutoSort="True" helper:GridViewSort.ShowSortGlyph="True" IsSynchronizedWithCurrentItem="True" AlternationCount="2" MinHeight="80" BorderThickness="0" Padding="0 0 0 0" Margin="0 0 0 0" SelectionMode="Single" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Visible" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling">
                             <ListView.InputBindings>
                                 <KeyBinding Key="Enter"
-                                Command="{Binding Path=DataContext.ListviewEnterKeyCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"
+                                Command="{Binding Path=DataContext.HomeSearchEnterKeyCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"
                                 CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" />
                             </ListView.InputBindings>
                             <ListView.Resources>
                                 <ContextMenu x:Key="ItemContextMenu">
-                                    <MenuItem Header="Open In App Browser" Command="{Binding Path=DataContext.OpenInAppBrowserCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
+                                    <MenuItem Header="Open In App Browser" Visibility="Collapsed">
                                         <MenuItem.Resources>
                                             <ControlTemplate x:Key="OpenInAppBrowser">
                                                 <Canvas Background="Transparent" >
@@ -308,7 +308,7 @@
                                             <ContentControl Template="{StaticResource OpenInAppBrowser}" />
                                         </MenuItem.Icon>
                                     </MenuItem>
-                                    <MenuItem Header="Open In Default Browser" Command="{Binding Path=DataContext.OpenInExternalBrowserCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
+                                    <MenuItem Header="表示">
                                         <MenuItem.Resources>
                                             <ControlTemplate x:Key="OpenInExtBrowser">
                                                 <Canvas Background="Transparent" >
@@ -321,21 +321,8 @@
                                         </MenuItem.Icon>
                                     </MenuItem>
                                     <Separator/>
-                                    <MenuItem Header="Archive" Command="{Binding Path=DataContext.ArchiveSelectedCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
-                                        <MenuItem.Resources>
-                                            <ControlTemplate x:Key="ArchiveThis">
-                                                <Canvas Background="Transparent" >
-                                                    <Path Fill="#373737" Width="14.3775" Height="14" Canvas.Left="0.311264" Canvas.Top="0.500005" Stretch="Uniform" Data="M5.12,5L5.93,4H17.93L18.87,5M12,17.5L6.5,12H10V10H14V12H17.5L12,17.5M20.54,5.23L19.15,3.55C18.88,3.21 18.47,3 18,3H6C5.53,3 5.12,3.21 4.84,3.55L3.46,5.23C3.17,5.57 3,6 3,6.5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V6.5C21,6 20.83,5.57 20.54,5.23Z" />
-                                                </Canvas>
-                                            </ControlTemplate>
-                                        </MenuItem.Resources>
-                                        <MenuItem.Icon>
-                                            <ContentControl Template="{StaticResource ArchiveThis}" />
-                                        </MenuItem.Icon>
-                                    </MenuItem>
-                                    <Separator/>
-                                    <MenuItem Header="Edit"
-                                  Command="{Binding Path=DataContext.OpenEditorCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"
+                                    <MenuItem Header="編集"
+                                  Command="{Binding Path=DataContext.HomeSearchEditCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"
                                   CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
                                         <MenuItem.Resources>
                                             <ControlTemplate x:Key="EditIcon">
@@ -352,47 +339,6 @@
                                         </MenuItem.Resources>
                                         <MenuItem.Icon>
                                             <ContentControl Template="{StaticResource EditIcon}" />
-                                        </MenuItem.Icon>
-                                    </MenuItem>
-                                    <MenuItem Header="Reload"
-                                  Command="{Binding Path=DataContext.GetEntryCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"
-                                  CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
-                                        <MenuItem.Resources>
-                                            <ControlTemplate x:Key="GetEntry">
-                                                <Canvas Background="Transparent" >
-                                                    <Path Fill="#373737"
-                          Width="14.3775"
-                          Height="14"
-                          Canvas.Left="0.311264"
-                          Canvas.Top="0.500005"
-                          Stretch="Uniform"
-                          Data="M12,6V9L16,5L12,1V4A8,8 0 0,0 4,12C4,13.57 4.46,15.03 5.24,16.26L6.7,14.8C6.25,13.97 6,13 6,12A6,6 0 0,1 12,6M18.76,7.74L17.3,9.2C17.74,10.04 18,11 18,12A6,6 0 0,1 12,18V15L8,19L12,23V20A8,8 0 0,0 20,12C20,10.43 19.54,8.97 18.76,7.74Z" />
-                                                </Canvas>
-                                            </ControlTemplate>
-                                        </MenuItem.Resources>
-                                        <MenuItem.Icon>
-                                            <ContentControl Template="{StaticResource GetEntry}" />
-                                        </MenuItem.Icon>
-                                    </MenuItem>
-                                    <Separator/>
-                                    <MenuItem Header="Delete"
-                                  Command="{Binding Path=DataContext.DeleteEntryCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"
-                                  CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
-                                        <MenuItem.Resources>
-                                            <ControlTemplate x:Key="DeleteForeverIcon">
-                                                <Canvas Background="Transparent">
-                                                    <Path Fill="#373737" 
-                          Width="14.3775"
-                          Height="14"
-                          Canvas.Left="0.311264"
-                          Canvas.Top="0.500005"
-                          Stretch="Uniform"
-                          Data="M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19M8.46,11.88L9.87,10.47L12,12.59L14.12,10.47L15.53,11.88L13.41,14L15.53,16.12L14.12,17.53L12,15.41L9.88,17.53L8.47,16.12L10.59,14L8.46,11.88M15.5,4L14.5,3H9.5L8.5,4H5V6H19V4H15.5Z" />
-                                                </Canvas>
-                                            </ControlTemplate>
-                                        </MenuItem.Resources>
-                                        <MenuItem.Icon>
-                                            <ContentControl Template="{StaticResource DeleteForeverIcon}" />
                                         </MenuItem.Icon>
                                     </MenuItem>
                                 </ContextMenu>
@@ -490,7 +436,7 @@
                                             <ControlTemplate TargetType="{x:Type ListViewItem}">
                                                 <Border Name="Border" Margin="{TemplateBinding Margin}" Padding="{TemplateBinding Padding}" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" ClipToBounds="{TemplateBinding ClipToBounds}" CornerRadius="0" SnapsToDevicePixels="true">
                                                     <Border.InputBindings>
-                                                        <MouseBinding Command="{Binding Path=DataContext.ListviewLeftDoubleClickCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" Gesture="LeftDoubleClick" />
+                                                        <MouseBinding Command="{Binding Path=DataContext.HomeSearchEnterKeyCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" Gesture="LeftDoubleClick" />
                                                     </Border.InputBindings>
                                                     <GridViewRowPresenter VerticalAlignment="{TemplateBinding VerticalContentAlignment}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
                                                 </Border>
@@ -606,34 +552,7 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
-                        <!-- Menu panel -->
-                        <Border Grid.Row="0" Grid.Column="0" Height="28" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" BorderThickness="0 0.5 0 0.5" BorderBrush="#121212" Margin="1 0 0 0">
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Stretch">
-
-                                <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
-                                <Button Content="検索" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding RentLivingShowSearchCommand}" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
-
-                                <Border Visibility="Collapsed" BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
-                                <Button Visibility="Collapsed" Content="一覧" Style="{DynamicResource ListviewMenuButton}" Command="{Binding RentLivingEditListCommand}" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
-
-                                <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
-                                <Button Content="新規" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding RentLivingEditNewCommand}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-
-                                <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
-                                <Button Content="編集" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding RentLivingEditSelectedEditCommand}" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
-
-                                <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
-                                <Button Content="表示" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding RentLivingEditSelectedViewCommand}" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
-
-                                <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
-                                <Button Content="削除" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding RentLivingEditSelectedDeleteCommand}" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
-
-                                <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
-
-                            </StackPanel>
-                        </Border>
-
-                        <!-- ページコンテンツ -->
+                        <!-- 検索条件と検索結果一覧（フォーカス順位の関係でコード上は上に持ってくる） -->
                         <TabControl Grid.Row="1" Grid.Column="0" SelectedIndex="{Binding RentLivingSearchTabSelectedIndex}" Style="{DynamicResource HiddlenTabControl}">
 
                             <!-- 検索条件 -->
@@ -684,7 +603,7 @@
                                                                                 <RadioButton x:Name="SearchAlbumRadioButton" GroupName="RentSearchTags" Margin="1 1 1 1" Padding="4" Content="最寄り駅" Width="80" IsChecked="{Binding Path=SelectedRentSearchTags, ConverterParameter={x:Static vms:RentSearchTags.RentStation}, Converter={StaticResource EnumBooleanConverter}}" Style="{DynamicResource SelectionRadioButtonStyle}"/>
                                                                             </StackPanel>
 
-                                                                            <Button Grid.Column="2" Width="100" Margin="2 1 2 1" ToolTip="検索" Command="{Binding RentLivingEditSearchCommand}" IsDefault="True" Content="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z">
+                                                                            <Button Grid.Column="2" Width="100" Margin="2 1 2 1" ToolTip="検索" Command="{Binding RentLivingSearchCommand}" IsDefault="True" Content="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z">
                                                                                 <Button.Resources>
                                                                                     <Style x:Key="ButtonIntextboxFocusVisual">
                                                                                         <Setter Property="Control.Template">
@@ -820,7 +739,7 @@
 
                                     <ListView x:Name="RentLivingEditListView" Grid.Row="1" Grid.Column="0" Background="{DynamicResource ListviewAlt0ColorBrush}" ItemsSource="{Binding RentLivingSearchResult}" SelectedItem="{Binding RentLivingEditSelectedItem, Mode=TwoWay}" SelectionMode="Single" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling" helper:GridViewSort.AutoSort="True" helper:GridViewSort.ShowSortGlyph="True" IsSynchronizedWithCurrentItem="True" AlternationCount="2" MinHeight="80" BorderThickness="0.5 0 0 0" BorderBrush="#121212" Padding="0 0 0 0" Margin="0 0 0 0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Visible">
                                         <ListView.InputBindings>
-                                            <KeyBinding Key="Return" Command="{Binding Path=DataContext.ListviewEnterKeyCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" />
+                                            <KeyBinding Key="Return" Command="{Binding Path=DataContext.RentLivingSearchEnterKeyCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" />
                                         </ListView.InputBindings>
                                         <ListView.Resources>
                                             <Style TargetType="{x:Type ScrollBar}">
@@ -846,19 +765,7 @@
                                                 </Setter>
                                             </Style>
                                             <ContextMenu x:Key="ItemContextMenu">
-                                                <MenuItem Header="Open In App Browser" Command="{Binding Path=DataContext.OpenInAppBrowserCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
-                                                    <MenuItem.Resources>
-                                                        <ControlTemplate x:Key="OpenInAppBrowser">
-                                                            <Canvas Background="Transparent" >
-                                                                <Path Fill="#373737" Width="14.3775" Height="14" Canvas.Left="0.311264" Canvas.Top="0.500005" Stretch="Uniform" Data="M12,10L8,14H11V20H13V14H16M19,4H5C3.89,4 3,4.9 3,6V18A2,2 0 0,0 5,20H9V18H5V8H19V18H15V20H19A2,2 0 0,0 21,18V6A2,2 0 0,0 19,4Z" />
-                                                            </Canvas>
-                                                        </ControlTemplate>
-                                                    </MenuItem.Resources>
-                                                    <MenuItem.Icon>
-                                                        <ContentControl Template="{StaticResource OpenInAppBrowser}" />
-                                                    </MenuItem.Icon>
-                                                </MenuItem>
-                                                <MenuItem Header="Open In Default Browser" Command="{Binding Path=DataContext.OpenInExternalBrowserCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
+                                                <MenuItem Header="表示" Command="{Binding Path=DataContext.RentLivingSelectedViewCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
                                                     <MenuItem.Resources>
                                                         <ControlTemplate x:Key="OpenInBrowser">
                                                             <Canvas Background="Transparent" >
@@ -871,21 +778,8 @@
                                                     </MenuItem.Icon>
                                                 </MenuItem>
                                                 <Separator/>
-                                                <MenuItem Header="Archive" Command="{Binding Path=DataContext.ArchiveSelectedCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
-                                                    <MenuItem.Resources>
-                                                        <ControlTemplate x:Key="ArchiveThis">
-                                                            <Canvas Background="Transparent" >
-                                                                <Path Fill="#373737" Width="14.3775" Height="14" Canvas.Left="0.311264" Canvas.Top="0.500005" Stretch="Uniform" Data="M5.12,5L5.93,4H17.93L18.87,5M12,17.5L6.5,12H10V10H14V12H17.5L12,17.5M20.54,5.23L19.15,3.55C18.88,3.21 18.47,3 18,3H6C5.53,3 5.12,3.21 4.84,3.55L3.46,5.23C3.17,5.57 3,6 3,6.5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V6.5C21,6 20.83,5.57 20.54,5.23Z" />
-                                                            </Canvas>
-                                                        </ControlTemplate>
-                                                    </MenuItem.Resources>
-                                                    <MenuItem.Icon>
-                                                        <ContentControl Template="{StaticResource ArchiveThis}" />
-                                                    </MenuItem.Icon>
-                                                </MenuItem>
-                                                <Separator/>
-                                                <MenuItem Header="Edit"
-                                  Command="{Binding Path=DataContext.OpenEditorCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"
+                                                <MenuItem Header="編集"
+                                  Command="{Binding Path=DataContext.RentLivingSelectedEditCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"
                                   CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
                                                     <MenuItem.Resources>
                                                         <ControlTemplate x:Key="EditIcon">
@@ -904,29 +798,9 @@
                                                         <ContentControl Template="{StaticResource EditIcon}" />
                                                     </MenuItem.Icon>
                                                 </MenuItem>
-                                                <MenuItem Header="Reload"
-                                  Command="{Binding Path=DataContext.GetEntryCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"
-                                  CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
-                                                    <MenuItem.Resources>
-                                                        <ControlTemplate x:Key="GetEntry">
-                                                            <Canvas Background="Transparent" >
-                                                                <Path Fill="#373737"
-                          Width="14.3775"
-                          Height="14"
-                          Canvas.Left="0.311264"
-                          Canvas.Top="0.500005"
-                          Stretch="Uniform"
-                          Data="M12,6V9L16,5L12,1V4A8,8 0 0,0 4,12C4,13.57 4.46,15.03 5.24,16.26L6.7,14.8C6.25,13.97 6,13 6,12A6,6 0 0,1 12,6M18.76,7.74L17.3,9.2C17.74,10.04 18,11 18,12A6,6 0 0,1 12,18V15L8,19L12,23V20A8,8 0 0,0 20,12C20,10.43 19.54,8.97 18.76,7.74Z" />
-                                                            </Canvas>
-                                                        </ControlTemplate>
-                                                    </MenuItem.Resources>
-                                                    <MenuItem.Icon>
-                                                        <ContentControl Template="{StaticResource GetEntry}" />
-                                                    </MenuItem.Icon>
-                                                </MenuItem>
                                                 <Separator/>
-                                                <MenuItem Header="Delete"
-                                  Command="{Binding Path=DataContext.DeleteEntryCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"
+                                                <MenuItem Header="削除"
+                                  Command="{Binding Path=DataContext.RentLivingSelectedDeleteCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"
                                   CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
                                                     <MenuItem.Resources>
                                                         <ControlTemplate x:Key="DeleteForeverIcon">
@@ -984,7 +858,7 @@
                                             <DataTemplate>
                                                 <Border x:Name="Border" Width="482" Height="128" Background="#1E1E1E" CornerRadius="3">
                                                     <Border.InputBindings>
-                                                        <MouseBinding Command="{Binding Path=DataContext.OpenInExternalBrowserCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding}" Gesture="LeftDoubleClick" />
+                                                        <MouseBinding Gesture="LeftDoubleClick" Command="{Binding Path=DataContext.RentLivingSearchEnterKeyCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding}" />
                                                     </Border.InputBindings>
 
                                                     <Grid>
@@ -1039,8 +913,8 @@
 
                                                             <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
 
-                                                                <Button Width="24" Height="24" Margin="0 0 0 0" ToolTip="編集" Style="{DynamicResource PathButton}" Content="M12,10L8,14H11V20H13V14H16M19,4H5C3.89,4 3,4.9 3,6V18A2,2 0 0,0 5,20H9V18H5V8H19V18H15V20H19A2,2 0 0,0 21,18V6A2,2 0 0,0 19,4Z" HorizontalAlignment="Right" Command="{Binding Path=DataContext.OpenInAppBrowserCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding}"></Button>
-                                                                <Button Width="24" Height="24" Margin="0 0 3 0" ToolTip="表示" Style="{DynamicResource PathButton}" Content="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z" HorizontalAlignment="Right" Command="{Binding Path=DataContext.OpenInExternalBrowserCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding}"></Button>
+                                                                <Button Width="24" Height="24" Margin="0 0 0 0" ToolTip="編集" Style="{DynamicResource PathButton}" Content="M12,10L8,14H11V20H13V14H16M19,4H5C3.89,4 3,4.9 3,6V18A2,2 0 0,0 5,20H9V18H5V8H19V18H15V20H19A2,2 0 0,0 21,18V6A2,2 0 0,0 19,4Z" HorizontalAlignment="Right" Command="{Binding Path=DataContext.RentLivingSelectedEditCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding}"></Button>
+                                                                <Button Width="24" Height="24" Margin="0 0 3 0" ToolTip="表示" Style="{DynamicResource PathButton}" Content="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z" HorizontalAlignment="Right" Command="{Binding Path=DataContext.RentLivingSelectedViewCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding}"></Button>
 
                                                             </StackPanel>
                                                         </Grid>
@@ -1048,13 +922,13 @@
                                                         <Border Grid.Row="1" Grid.Column="0" Background="#1E1E1E" CornerRadius="3" VerticalAlignment="Top" Margin="3 3 3 3">
                                                             <Grid>
                                                                 <!--  Adding rounded corners here  -->
-                                                                <Border Name="EntryImageMask" Margin="0" Background="#1E1E1E" CornerRadius="3"/>
+                                                                <Border Name="RLThumbImageMask" Margin="0" Background="#1E1E1E" CornerRadius="3"/>
                                                                 <!--  Image  -->
                                                                 <Grid>
                                                                     <Grid.OpacityMask>
-                                                                        <VisualBrush Visual="{Binding ElementName=EntryImageMask}" />
+                                                                        <VisualBrush Visual="{Binding ElementName=RLThumbImageMask}" />
                                                                     </Grid.OpacityMask>
-                                                                    <Image x:Name="EntryImage" Stretch="Uniform" Width="130" Height="87" Margin="0" Source="{Binding PictureThumb}" Opacity="0.8"></Image>
+                                                                    <Image x:Name="RLThumbImage" Stretch="Uniform" Width="130" Height="87" Margin="0" Source="{Binding PictureThumb}" Opacity="0.8"></Image>
                                                                 </Grid>
                                                             </Grid>
                                                         </Border>
@@ -1062,12 +936,12 @@
                                                         <Grid Grid.Row="1" Grid.Column="1">
                                                             <StackPanel>
                                                                 <Border x:Name="EntrySummaryBackground" Background="Transparent" CornerRadius="3" Margin="9 9 9 6">
-                                                                    <TextBlock x:Name="EntrySummary" Text="{Binding SummaryVeryShort}" FontFamily="Bookman Old Style" TextWrapping="Wrap" Foreground="#555"></TextBlock>
+                                                                    <TextBlock x:Name="EntrySummary" Text="" FontFamily="Bookman Old Style" TextWrapping="Wrap" Foreground="#555"></TextBlock>
                                                                 </Border>
 
-                                                                <TextBlock x:Name="EntryAuthor" Margin="3 3 6 1" Text="{Binding Author}" FontFamily="Bookman Old Style" Foreground="#444" HorizontalAlignment="Right" VerticalAlignment="Bottom"></TextBlock>
+                                                                <TextBlock x:Name="EntryAuthor" Margin="3 3 6 1" Text="" FontFamily="Bookman Old Style" Foreground="#444" HorizontalAlignment="Right" VerticalAlignment="Bottom"></TextBlock>
 
-                                                                <TextBlock x:Name="EntryPublished" Margin="3 1 6 3" Text="{Binding PublishedDateTimeFormated}" FontFamily="Bookman Old Style" Foreground="#444" HorizontalAlignment="Right" VerticalAlignment="Bottom"></TextBlock>
+                                                                <TextBlock x:Name="EntryPublished" Margin="3 1 6 3" Text="" FontFamily="Bookman Old Style" Foreground="#444" HorizontalAlignment="Right" VerticalAlignment="Bottom"></TextBlock>
 
                                                             </StackPanel>
                                                         </Grid>
@@ -1090,7 +964,7 @@
                                                         <Setter TargetName="EntrySummary" Property="Foreground" Value="#888"/>
                                                         <Setter TargetName="EntryAuthor" Property="Foreground" Value="#888"/>
                                                         <Setter TargetName="EntryPublished" Property="Foreground" Value="#888"/>
-                                                        <Setter TargetName="EntryImage" Property="Opacity" Value="1"/>
+                                                        <Setter TargetName="RLThumbImage" Property="Opacity" Value="1"/>
                                                         <Setter TargetName="EntryStatusIcon" Property="Fill" Value="#888"/>
 
                                                         <Setter TargetName="EntrySummaryBackground" Property="Background" Value="Transparent"/>
@@ -1105,7 +979,7 @@
                                                         <Setter TargetName="EntrySummary" Property="Foreground" Value="#888"/>
                                                         <Setter TargetName="EntryAuthor" Property="Foreground" Value="#888"/>
                                                         <Setter TargetName="EntryPublished" Property="Foreground" Value="#888"/>
-                                                        <Setter TargetName="EntryImage" Property="Opacity" Value="1"/>
+                                                        <Setter TargetName="RLThumbImage" Property="Opacity" Value="1"/>
                                                         <Setter TargetName="EntryStatusIcon" Property="Fill" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
 
                                                         <Setter TargetName="EntrySummaryBackground" Property="Background" Value="Transparent"/>
@@ -1119,6 +993,33 @@
                             </TabItem>
 
                         </TabControl>
+
+                        <!-- メニューパネル -->
+                        <Border Grid.Row="0" Grid.Column="0" Height="28" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" BorderThickness="0 0.5 0 0.5" BorderBrush="#121212" Margin="1 0 0 0">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Stretch">
+
+                                <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
+                                <Button Content="検索" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding RentLivingShowSearchCommand}" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
+
+                                <Border Visibility="Collapsed" BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
+                                <Button Visibility="Collapsed" Content="一覧" Style="{DynamicResource ListviewMenuButton}" Command="{Binding RentLivingListCommand}" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
+
+                                <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
+                                <Button Content="新規" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding RentLivingNewCommand}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+
+                                <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
+                                <Button Content="編集" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding RentLivingSelectedEditCommand}" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
+
+                                <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
+                                <Button Content="表示" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding RentLivingSelectedViewCommand}" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
+
+                                <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
+                                <Button Content="削除" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding RentLivingSelectedDeleteCommand}" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
+
+                                <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
+
+                            </StackPanel>
+                        </Border>
 
                     </Grid>
 

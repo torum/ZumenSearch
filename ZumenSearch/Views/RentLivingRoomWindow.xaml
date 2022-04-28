@@ -40,19 +40,18 @@
                     <RowDefinition Height="32"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="100"/>
+                    <ColumnDefinition Width="200"/>
                     <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="100"/>
+                    <ColumnDefinition Width="200"/>
                 </Grid.ColumnDefinitions>
 
                 <!-- Window icon/title -->
                 <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Stretch" VerticalAlignment="Center">
-                    
+                    <Label Content="賃貸住居用物件：部屋情報" Margin="6 0 6 0" Style="{DynamicResource DefaultLabelStyle}" />
                 </StackPanel>
 
                 <!-- Info space -->
                 <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <Label Content="賃貸住居用物件：部屋情報" Margin="6 0 6 0" Style="{DynamicResource DefaultLabelStyle}" />
                     <TextBlock Text="{Binding RentLivingRoomEdit.StatusIsNew}" Style="{DynamicResource DefaultTextBlockStyle}" VerticalAlignment="Center" HorizontalAlignment="Left" Opacity="0.6" Margin="6 0 6 0"/>
                     <TextBlock Text="{Binding StatusIsDirty}" Style="{DynamicResource DefaultTextBlockStyle}" VerticalAlignment="Center" HorizontalAlignment="Left" Opacity="0.6" Margin="6 0 6 0"/>
                 </StackPanel>

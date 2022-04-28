@@ -48,17 +48,17 @@
 
                 <!-- Window icon/title -->
                 <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Stretch" VerticalAlignment="Center">
+                    <Label Content="賃貸住居用物件：建物情報" Style="{DynamicResource DefaultLabelStyle}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="6 0 6 0" />
+                    <TextBlock Text="{Binding RentLivingEdit.StatusIsNew}" Style="{DynamicResource DefaultTextBlockStyle}" HorizontalAlignment="Left" VerticalAlignment="Center" Opacity="0.6" Margin="6 0 6 0"/>
                 </StackPanel>
 
                 <!-- Info space -->
                 <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <Label Content="賃貸住居用物件：建物情報" Style="{DynamicResource DefaultLabelStyle}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="6 0 6 0" />
-                    <TextBlock Text="{Binding RentLivingEdit.StatusIsNew}" Style="{DynamicResource DefaultTextBlockStyle}" HorizontalAlignment="Left" VerticalAlignment="Center" Opacity="0.6" Margin="6 0 6 0"/>
-                    <TextBlock Text="{Binding RentLivingEdit.StatusIsDirty}" Style="{DynamicResource DefaultTextBlockStyle}" HorizontalAlignment="Left" VerticalAlignment="Center" Opacity="0.6" Margin="6 0 6 0"/>
                 </StackPanel>
 
                 <!-- System icons -->
                 <StackPanel Orientation="Horizontal" Grid.Column="2" HorizontalAlignment="Right" Margin="0" Background="{DynamicResource BoardBackgroundColorBrush}">
+                    <TextBlock Text="{Binding RentLivingEdit.StatusIsDirty}" Style="{DynamicResource DefaultTextBlockStyle}" HorizontalAlignment="Left" VerticalAlignment="Center" Opacity="0.6" Margin="6 0 6 0"/>
 
                     <Button x:Name="SaveButton" Style="{DynamicResource PathSysButton}" Command="{Binding SaveCommand}" ToolTip="登録" WindowChrome.IsHitTestVisibleInChrome="True" Content="M15,9H5V5H15M12,19A3,3 0 0,1 9,16A3,3 0 0,1 12,13A3,3 0 0,1 15,16A3,3 0 0,1 12,19M17,3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V7L17,3Z"></Button>
 
@@ -983,7 +983,7 @@
                                 <ListView x:Name="ListViewListView" Grid.Row="1" Grid.Column="0" MinHeight="80" BorderThickness="0" Padding="0" Foreground="LightGray" helper:GridViewSort.AutoSort="True" helper:GridViewSort.ShowSortGlyph="True" IsSynchronizedWithCurrentItem="True" Background="{DynamicResource WindowBackgroundBaseColorBrush}" Margin="0" ItemsSource="{Binding RentLivingEdit.RentLivingRooms, NotifyOnTargetUpdated=True}" SelectedItem="{Binding Mode=TwoWay,Path=SectionsSelectedItem}" SelectionMode="Single" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" AlternationCount="2" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling">
                                     <ListView.InputBindings>
                                         <KeyBinding Key="Enter"
-                                Command="{Binding Path=DataContext.ListviewEnterKeyCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"
+                                Command="{Binding Path=DataContext.SectionListViewEnterKeyCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"
                                 CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" />
                                     </ListView.InputBindings>
                                     <ListView.Resources>
@@ -1257,7 +1257,7 @@
                                                     <ControlTemplate TargetType="{x:Type ListViewItem}">
                                                         <Border Name="Border" Margin="{TemplateBinding Margin}" Padding="{TemplateBinding Padding}" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" ClipToBounds="{TemplateBinding ClipToBounds}" CornerRadius="0" SnapsToDevicePixels="true">
                                                             <Border.InputBindings>
-                                                                <MouseBinding Command="{Binding Path=DataContext.ListviewLeftDoubleClickCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" Gesture="LeftDoubleClick" />
+                                                                <MouseBinding Command="{Binding Path=DataContext.SectionListViewEnterKeyCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" Gesture="LeftDoubleClick" />
                                                             </Border.InputBindings>
                                                             <GridViewRowPresenter VerticalAlignment="{TemplateBinding VerticalContentAlignment}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
                                                         </Border>

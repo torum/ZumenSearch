@@ -284,6 +284,11 @@ namespace ZumenSearch.ViewModels
                 param => RentLivingEditZumenPdfEnterCommand_Execute(param),
                 param => RentLivingEditZumenPdfEnterCommand_CanExecute());
 
+            // 
+            SectionListViewEnterKeyCommand = new GenericRelayCommand<RentLivingRoom>(
+                param => SectionListViewEnterKeyCommand_Execute(param),
+                param => SectionListViewEnterKeyCommand_CanExecute());
+
             // 部屋の追加
             SectionNewCommand = new RelayCommand(SectionNewCommand_Execute, SectionNewCommand_CanExecute);
             // 部屋の編集
@@ -414,6 +419,24 @@ namespace ZumenSearch.ViewModels
         #endregion
 
         #region == 部屋編集コマンド ==
+
+        public ICommand SectionListViewEnterKeyCommand { get; }
+        public bool SectionListViewEnterKeyCommand_CanExecute()
+        {
+            return true;
+        }
+        public void SectionListViewEnterKeyCommand_Execute(RentLivingRoom selectedEntry)
+        {
+            if (selectedEntry == null)
+                return;
+
+            SectionsSelectedItem = selectedEntry;
+
+            if (SectionEditCommand_CanExecute())
+            {
+                SectionEditCommand_Execute();
+            }
+        }
 
         // 部屋の追加（画面表示）
         public ICommand SectionNewCommand { get; }

@@ -129,13 +129,13 @@ namespace ZumenSearch.Models
             get
             {
                 if (IsNew && IsDirty)
-                    return "新規";
+                    return "[新規] ";
                 else if (IsNew)
-                    return "新規";
+                    return "[新規] ";
                 else if (IsEdit && IsDirty)
-                    return "編集";
+                    return "[編集] ";
                 else if (IsEdit)
-                    return "編集";
+                    return "[編集]";
                 else
                     return "";
             }
@@ -146,11 +146,11 @@ namespace ZumenSearch.Models
             get
             {
                 if (IsNew && IsDirty)
-                    return "変更";
+                    return "（変更あり）";
                 else if (IsNew)
                     return "";
                 else if (IsEdit && IsDirty)
-                    return "変更";
+                    return "（変更あり）";
                 else if (IsEdit)
                     return "";
                 else
@@ -343,6 +343,7 @@ namespace ZumenSearch.Models
         }
     }
 
+    // 物件（建物等）の検索結果表示用クラス
     public class RentLivingSummary : Rent
     {
 
