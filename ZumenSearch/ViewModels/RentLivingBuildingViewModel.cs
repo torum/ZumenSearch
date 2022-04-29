@@ -280,7 +280,7 @@ namespace ZumenSearch.ViewModels
                 param => RentLivingEditZumenPdfShowCommand_Execute(param),
                 param => RentLivingEditZumenPdfShowCommand_CanExecute());
             // PDFの
-            RentLivingEditZumenPdfEnterCommand = new GenericRelayCommand<RentPdf>(
+            RentLivingEditZumenPdfEnterCommand = new GenericRelayCommand<RentPDF>(
                 param => RentLivingEditZumenPdfEnterCommand_Execute(param),
                 param => RentLivingEditZumenPdfEnterCommand_CanExecute());
 
@@ -345,32 +345,7 @@ namespace ZumenSearch.ViewModels
 
         #endregion
 
-        #region == コマンドの実装 ==
-
-        #region == 編集コマンド ==
-
-        // 物件の保存（追加または更新）
-        public ICommand SaveCommand { get; }
-        public bool SaveCommand_CanExecute()
-        {
-            if (RentLivingEdit == null) 
-                return false;
-            if (DataAccessModule == null) 
-                return false;
-
-            if (RentLivingEdit.IsDirty)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-        public void SaveCommand_Execute()
-        {
-            Save();
-        }
+        #region == メソッド ==
 
         // 物件の保存（追加または更新）メソッド（コードビハインドから保存確認ダイアログでも呼ばれる）
         public bool Save()
@@ -414,6 +389,35 @@ namespace ZumenSearch.ViewModels
             RentLivingEdit.IsDirty = false;
 
             return true;
+        }
+
+        #endregion
+
+        #region == コマンドの実装 ==
+
+        #region == 編集コマンド ==
+
+        // 物件の保存（追加または更新）
+        public ICommand SaveCommand { get; }
+        public bool SaveCommand_CanExecute()
+        {
+            if (RentLivingEdit == null) 
+                return false;
+            if (DataAccessModule == null) 
+                return false;
+
+            if (RentLivingEdit.IsDirty)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        public void SaveCommand_Execute()
+        {
+            Save();
         }
 
         #endregion
@@ -1095,7 +1099,7 @@ namespace ZumenSearch.ViewModels
         {
             return true;
         }
-        public void RentLivingEditZumenPdfEnterCommand_Execute(RentPdf obj)
+        public void RentLivingEditZumenPdfEnterCommand_Execute(RentPDF obj)
         {
             if (obj == null) return;
             if (RentLivingEdit == null) return;

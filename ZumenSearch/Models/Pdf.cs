@@ -11,14 +11,14 @@ namespace ZumenSearch.Models
     /// <summary>
     /// 図面の基底クラス
     /// </summary>
-    public class RentPdf : ViewModelBase
+    public class RentPDF : ViewModelBase
     {
-        protected string _rentPdfId;
+        protected string _RentPdfId;
         public string RentPdfId
         {
             get
             {
-                return _rentPdfId;
+                return _RentPdfId;
             }
         }
 
@@ -225,9 +225,9 @@ namespace ZumenSearch.Models
             get
             {
                 if (IsNew)
-                    return "新規";
+                    return "：新規";
                 else
-                    return "更新";
+                    return "：更新";
             }
         }
 
@@ -252,7 +252,7 @@ namespace ZumenSearch.Models
     /// <summary>
     /// 賃貸住居用物件の図面クラス
     /// </summary>
-    public class RentLivingPdf : RentPdf
+    public class RentLivingPdf : RentPDF
     {
         protected string _rentLivingId;
         public string RentLivingId
@@ -330,7 +330,7 @@ namespace ZumenSearch.Models
             _rentId = rentid;
             _rentLivingId = rentlivingid;
 
-            _rentPdfId = rentlivingpdfid;
+            _RentPdfId = rentlivingpdfid;
 
             // 一応
             _dateTimeAdded = DateTime.Now;

@@ -907,7 +907,7 @@
 
                                                             </StackPanel>
 
-                                                            <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                            <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
                                                                 <TextBlock x:Name="RentTitle" Text="{Binding Name}" TextWrapping="Wrap" Padding="3 0 3 3" Foreground="{DynamicResource NormalTextColorBrush}"></TextBlock>
                                                             </StackPanel>
 

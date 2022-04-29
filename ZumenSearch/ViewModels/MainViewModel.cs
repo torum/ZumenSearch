@@ -31,6 +31,7 @@ using ZumenSearch.Common;
 /// 
 
 /// ● 履歴：
+/// v0.0.0.25 色々。
 /// v0.0.0.24 色々。
 /// v0.0.0.23 VS2022に更新。ダークテーマ化し、レイアウト含め諸々変更。
 /// v0.0.0.22 部屋画面のデザイン途中。区分所有の表示切り替え。
@@ -65,7 +66,7 @@ namespace ZumenSearch.ViewModels
         #region == 基本 ==
 
         // Application version.
-        private const string _appVer = "0.0.0.24";
+        private const string _appVer = "0.0.0.25";
 
         // Application name.
         private const string _appName = "ZumenSearch";
@@ -1109,6 +1110,7 @@ namespace ZumenSearch.ViewModels
             #endregion
 
             #region == SQLite DB のイニシャライズ ==
+
             try
             {
                 // DBのファイルパスを設定

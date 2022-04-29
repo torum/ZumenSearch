@@ -60,6 +60,7 @@
                             </Style>
                         </Style.Resources>
                         <Setter Property="Padding" Value="3"/>
+                        <Setter Property="Foreground" Value="{DynamicResource NormalTextColorBrush}" />
                         <Setter Property="FontWeight" Value="Normal" />
                     </Style>
 
@@ -1715,7 +1716,7 @@
 
                 </ResourceDictionary>
 
-                <!-- Default Round Corner TabControl -->
+                <!-- Round Corner TabControl -->
                 <ResourceDictionary>
 
                     <Style x:Key="DefaultTabItemFocusVisual">
@@ -1928,7 +1929,105 @@
 
                 </ResourceDictionary>
 
-                <!-- Default Round Corner ComboBox -->
+                <!-- Editing TabControl -->
+                <ResourceDictionary>
+
+                    <Style x:Key="EditingTabFocusVisualStyle">
+                        <Setter Property="Control.Template">
+                            <Setter.Value>
+                                <ControlTemplate>
+                                    <Rectangle Margin="1" StrokeThickness="1" StrokeDashArray="1 2" Stroke="{DynamicResource ControlMediumColorBrush}"/>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+
+                    <Style x:Key="EditingTabControlStyle" TargetType="{x:Type TabControl}">
+                        <Setter Property="OverridesDefaultStyle" Value="False" />
+                        <Setter Property="Foreground" Value="{DynamicResource NormalTextColorBrush}" />
+                        <Setter Property="Background" Value="{DynamicResource WindowBackgroundColorBrush}"/>
+                        <Setter Property="BorderThickness" Value="0"/>
+                    </Style>
+                    <Style x:Key="EditingTabItemStyle" TargetType="{x:Type TabItem}">
+                        <Setter Property="OverridesDefaultStyle" Value="False" />
+                        <Setter Property="FocusVisualStyle" Value="{StaticResource EditingTabFocusVisualStyle}"/>
+                        <Setter Property="Foreground" Value="{DynamicResource ControlDarkColorBrush}" />
+                        <Setter Property="Background" Value="{DynamicResource BoardBackgroundColorBrush}"/>
+                        <Setter Property="Padding" Value="12 6 12 6"/>
+                        <Setter Property="BorderThickness" Value="0 0 0 0"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="{x:Type TabItem}">
+
+                                    <Border Name="HeaderBorder" Width="{TemplateBinding Width}" Height="{TemplateBinding Height}" Padding="{TemplateBinding Padding}" BorderThickness="0 0 0 2" HorizontalAlignment="Center" CornerRadius="3 3 0 0">
+                                        <ContentPresenter x:Name="ContentSite" HorizontalAlignment="Center" VerticalAlignment="Center" ContentSource="Header" RecognizesAccessKey="True" />
+                                    </Border>
+
+                                    <ControlTemplate.Triggers>
+
+                                        <MultiTrigger>
+                                            <MultiTrigger.Conditions>
+                                                <Condition Property="IsSelected" Value="False" />
+                                                <Condition Property="IsMouseOver" Value="False" />
+                                            </MultiTrigger.Conditions>
+                                            <Setter TargetName="HeaderBorder" Property="Background" Value="{DynamicResource WindowBackgroundColorBrush}" />
+                                            <Setter TargetName="HeaderBorder" Property="BorderBrush" Value="Transparent" />
+
+                                            <Setter Property="Foreground" Value="{DynamicResource NormalTextColorBrush}" />
+
+                                        </MultiTrigger>
+
+                                        <MultiTrigger>
+                                            <MultiTrigger.Conditions>
+                                                <Condition Property="IsSelected" Value="False" />
+                                                <Condition Property="IsMouseOver" Value="True" />
+                                            </MultiTrigger.Conditions>
+                                            <Setter TargetName="HeaderBorder" Property="Background" Value="{DynamicResource WindowBackgroundColorBrush}" />
+                                            <Setter TargetName="HeaderBorder" Property="BorderBrush" Value="Gray" />
+
+                                            <Setter Property="Foreground" Value="{DynamicResource NormalTextColorBrush}" />
+                                        </MultiTrigger>
+
+                                        <MultiTrigger>
+                                            <MultiTrigger.Conditions>
+                                                <Condition Property="IsSelected" Value="True" />
+                                                <Condition Property="IsMouseOver" Value="True" />
+                                            </MultiTrigger.Conditions>
+                                            <Setter TargetName="HeaderBorder" Property="Background" Value="{DynamicResource WindowBackgroundColorBrush}" />
+                                            <Setter TargetName="HeaderBorder" Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" />
+
+                                            <Setter Property="Foreground" Value="{DynamicResource NormalTextColorBrush}" />
+                                        </MultiTrigger>
+
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter Property="Foreground" Value="{DynamicResource TitleTextColorBrush}" />
+                                            <Setter TargetName="HeaderBorder" Property="Background" Value="{DynamicResource WindowBackgroundColorBrush}" />
+                                            <Setter TargetName="HeaderBorder" Property="BorderBrush" Value="{DynamicResource ControlLightColorBrush}" />
+                                            <Setter TargetName="HeaderBorder" Property="BorderThickness" Value="0 0 0 2"/>
+                                        </Trigger>
+<!--
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Foreground" Value="{DynamicResource TitleTextColorBrush}" />
+                                            <Setter TargetName="HeaderBorder" Property="BorderBrush" Value="{DynamicResource ControlDarkColorBrush}" />
+                                            <Setter TargetName="HeaderBorder" Property="BorderThickness" Value="0 0 0 2"/>
+                                        </Trigger>
+                                        -->
+
+                                        <Trigger Property="IsEnabled" Value="False">
+                                            <Setter Property="Background" Value="gray" />
+                                            <Setter Property="BorderBrush" Value="#FFC9C7BA" />
+                                            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" />
+                                        </Trigger>
+                                        
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+
+                </ResourceDictionary>
+
+                <!-- Round Corner ComboBox -->
                 <ResourceDictionary>
                     <Style x:Key="ComboBoxFocusVisual">
                         <Setter Property="Control.Template">
@@ -2481,6 +2580,7 @@
                         <Setter Property="BorderBrush" Value="#D5DFE5"/>
                         <Setter Property="BorderThickness" Value="0"/>
                         <Setter Property="FontWeight" Value="Normal"/>
+                        <Setter Property="Foreground" Value="{DynamicResource NormalTextColorBrush}" />
                         <Setter Property="Template">
                             <Setter.Value>
                                 <ControlTemplate TargetType="{x:Type GroupBox}">

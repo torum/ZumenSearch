@@ -29,7 +29,7 @@ namespace ZumenSearch.Models
     // 一括所有の建物か、区分所有か
     public enum Ownerships
     {
-        All, Unit
+        Unknown, All, Unit
     }
 
     // 賃貸住居用物件種別（アパート・マンション・一戸建て・他）
@@ -129,13 +129,13 @@ namespace ZumenSearch.Models
             get
             {
                 if (IsNew && IsDirty)
-                    return "[新規] ";
+                    return "：新規";
                 else if (IsNew)
-                    return "[新規] ";
+                    return "：新規";
                 else if (IsEdit && IsDirty)
-                    return "[編集] ";
+                    return "：編集";
                 else if (IsEdit)
-                    return "[編集]";
+                    return "：編集";
                 else
                     return "";
             }
@@ -146,11 +146,11 @@ namespace ZumenSearch.Models
             get
             {
                 if (IsNew && IsDirty)
-                    return "（変更あり）";
+                    return "変更";
                 else if (IsNew)
                     return "";
                 else if (IsEdit && IsDirty)
-                    return "（変更あり）";
+                    return "変更";
                 else if (IsEdit)
                     return "";
                 else
@@ -213,8 +213,9 @@ namespace ZumenSearch.Models
 
         public Dictionary<string, Ownerships> StringToRentOwnership { get; } = new Dictionary<string, Ownerships>()
         {
-            {"Unit", Ownerships.Unit},
+            {"Unknown", Ownerships.Unit},
             {"All", Ownerships.All},
+            {"Unit", Ownerships.Unit},
         };
 
         // 所有権（一棟所有・区分所有）

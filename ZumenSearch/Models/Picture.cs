@@ -157,9 +157,9 @@ namespace ZumenSearch.Models
             get
             {
                 if (IsNew)
-                    return "新規";
+                    return "：新規";
                 else
-                    return "更新";
+                    return "：更新";
             }
         }
 

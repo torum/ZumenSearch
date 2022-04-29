@@ -20,7 +20,7 @@
         <WindowChrome CaptionHeight="32" ResizeBorderThickness="0"/>
     </WindowChrome.WindowChrome>
     <Border Style="{StaticResource WindowMainPanelStyle}">
-        <Grid x:Name="BackgroundGrid" Background="{DynamicResource WindowBackgroundColorBrush}">
+        <Grid x:Name="BackgroundGrid" Background="{DynamicResource BoardBackgroundColorBrush}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
@@ -45,7 +45,8 @@
 
                 <!-- Window icon/title -->
                 <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Stretch" VerticalAlignment="Center">
-                    <Label Content="賃貸住居用物件：PDF編集" Margin="6 0 0 0" />
+                    <Label Content="賃貸住居用：PDF" Margin="6 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Left" Style="{DynamicResource DefaultLabelStyle}" />
+                    <Label Content="{Binding RentLivingPdfEdit.StatusIsNew}" VerticalAlignment="Center" HorizontalAlignment="Left" Opacity="1" Style="{DynamicResource DefaultLabelStyle}"/>
                 </StackPanel>
 
                 <!-- Info space -->
@@ -56,6 +57,8 @@
                 <!-- System icons -->
                 <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0">
 
+                    <Label Content="{Binding StatusIsDirty}" Style="{DynamicResource DefaultLabelStyle}" HorizontalAlignment="Left" VerticalAlignment="Center" Opacity="1" Margin="6 0 12 1"/>
+                    
                     <Button x:Name="SaveButton" Style="{DynamicResource PathSysButton}" Command="{Binding PdfSaveCommand}" ToolTip="登録" Content="M15,9H5V5H15M12,19A3,3 0 0,1 9,16A3,3 0 0,1 12,13A3,3 0 0,1 15,16A3,3 0 0,1 12,19M17,3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V7L17,3Z">
                     </Button>
 
@@ -82,7 +85,7 @@
                     <Image Width="360" Height="256" Margin="0" Source="{Binding Picture}"></Image>
                 </Grid>
 
-                <GroupBox Grid.Row="1" Grid.Column="0" Header="PDFのプロパティ" Padding="6" Margin="12 0 12 6">
+                <GroupBox Grid.Row="1" Grid.Column="0" Header="PDFのプロパティ" Padding="6" Margin="12 6 12 6" Style="{DynamicResource GroupBoxStyle}">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="1*"/>
@@ -93,9 +96,9 @@
                             <ColumnDefinition Width="1*"/>
                         </Grid.ColumnDefinitions>
 
-                        <StackPanel Grid.Row="0" Grid.Column="0" VerticalAlignment="Bottom">
-                            <Label Content="種類"/>
-                            <ComboBox Margin="6 0 6 6" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" ItemsSource="{Binding RentLivingPdfEdit.PdfTypes, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="Value" SelectedValue="{Binding SelectedPdfType}" SelectedValuePath="Key">
+                        <StackPanel Grid.Row="0" Grid.Column="0" VerticalAlignment="Bottom" Margin="0 6 0 0">
+                            <Label Content="種類" Style="{DynamicResource DefaultLabelStyle}"/>
+                            <ComboBox Margin="6 6 6 6" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" ItemsSource="{Binding RentLivingPdfEdit.PdfTypes, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="Value" SelectedValue="{Binding SelectedPdfType}" SelectedValuePath="Key">
                             </ComboBox>
                         </StackPanel>
 
@@ -105,8 +108,8 @@
 
                         <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Bottom">
                             <StackPanel>
-                                <Label Content="説明"/>
-                                <TextBox Text="{Binding PdfDescription, UpdateSourceTrigger=PropertyChanged}" Margin="6 0 6 6" HorizontalAlignment="Stretch"></TextBox>
+                                <Label Content="説明" Style="{DynamicResource DefaultLabelStyle}"/>
+                                <TextBox Text="{Binding PdfDescription, UpdateSourceTrigger=PropertyChanged}" Margin="6 6 6 6" HorizontalAlignment="Stretch"></TextBox>
                             </StackPanel>
                         </StackPanel>
 
@@ -134,7 +137,6 @@
                 <!-- 保存ステータス -->
                 <StatusBarItem Grid.Column="0" HorizontalAlignment="Center">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
-                        <TextBlock Text="{Binding RentLivingPdfEdit.StatusIsNew}" VerticalAlignment="Center" HorizontalAlignment="Center" Opacity="0.6"/>
                     </StackPanel>
                 </StatusBarItem>
 
@@ -144,7 +146,6 @@
                 <!-- 変更ステータス -->
                 <StatusBarItem Grid.Column="2" HorizontalAlignment="Center">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
-                        <TextBlock Text="{Binding StatusIsDirty}" VerticalAlignment="Center" HorizontalAlignment="Center" Opacity="0.6"/>
                     </StackPanel>
                 </StatusBarItem>
 

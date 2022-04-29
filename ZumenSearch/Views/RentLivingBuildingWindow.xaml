@@ -15,8 +15,8 @@
         Window.ResizeMode ="NoResize"
         WindowStartupLocation="CenterOwner"
         Background="{DynamicResource WindowBackgroundColorBrush}"
-        Width="860" Height="640"
-        MinWidth="860" MinHeight="640"
+        Width="860" Height="610"
+        MinWidth="860" MinHeight="610"
         StateChanged="Window_StateChanged"
         Closing="Window_Closing">
     <WindowChrome.WindowChrome>
@@ -48,8 +48,8 @@
 
                 <!-- Window icon/title -->
                 <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Stretch" VerticalAlignment="Center">
-                    <Label Content="賃貸住居用物件：建物情報" Style="{DynamicResource DefaultLabelStyle}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="6 0 6 0" />
-                    <TextBlock Text="{Binding RentLivingEdit.StatusIsNew}" Style="{DynamicResource DefaultTextBlockStyle}" HorizontalAlignment="Left" VerticalAlignment="Center" Opacity="0.6" Margin="6 0 6 0"/>
+                    <Label Content="賃貸住居用：建物" Style="{DynamicResource DefaultLabelStyle}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="6 0 0 0" />
+                    <Label Content="{Binding RentLivingEdit.StatusIsNew}" Style="{DynamicResource DefaultLabelStyle}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0 0 6 0"/>
                 </StackPanel>
 
                 <!-- Info space -->
@@ -58,7 +58,8 @@
 
                 <!-- System icons -->
                 <StackPanel Orientation="Horizontal" Grid.Column="2" HorizontalAlignment="Right" Margin="0" Background="{DynamicResource BoardBackgroundColorBrush}">
-                    <TextBlock Text="{Binding RentLivingEdit.StatusIsDirty}" Style="{DynamicResource DefaultTextBlockStyle}" HorizontalAlignment="Left" VerticalAlignment="Center" Opacity="0.6" Margin="6 0 6 0"/>
+
+                    <Label Content="{Binding RentLivingEdit.StatusIsDirty}" Style="{DynamicResource DefaultLabelStyle}" HorizontalAlignment="Left" VerticalAlignment="Center" Opacity="0.6" Margin="6 0 12 1"/>
 
                     <Button x:Name="SaveButton" Style="{DynamicResource PathSysButton}" Command="{Binding SaveCommand}" ToolTip="登録" WindowChrome.IsHitTestVisibleInChrome="True" Content="M15,9H5V5H15M12,19A3,3 0 0,1 9,16A3,3 0 0,1 12,13A3,3 0 0,1 15,16A3,3 0 0,1 12,19M17,3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V7L17,3Z"></Button>
 
@@ -132,143 +133,200 @@
                                             <ColumnDefinition Width="1*"/>
                                         </Grid.ColumnDefinitions>
 
-                                        <!-- 物件名 -->
-                                        <StackPanel Grid.Row="0" Grid.Column="0" Margin="6 0 6 0">
+                                        <Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="auto"/>
+                                                <RowDefinition Height="auto"/>
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="auto"/>
+                                            </Grid.ColumnDefinitions>
 
-                                            <GroupBox Header="物件名" Padding="0 0 6 0" Style="{DynamicResource GroupBoxStyle}">
-                                                <StackPanel>
-                                                    <TextBox Text="{Binding RentLivingEdit.Name, UpdateSourceTrigger=PropertyChanged}" Margin="6" HorizontalAlignment="Stretch"></TextBox>
+                                            <!-- 物件名 -->
+                                            <StackPanel Grid.Row="0" Grid.Column="0" Margin="6 0 6 0">
+
+                                                <GroupBox Header="物件名" Padding="0 0 6 0" Style="{DynamicResource GroupBoxStyle}">
+                                                    <StackPanel>
+                                                        <TextBox Text="{Binding RentLivingEdit.Name, UpdateSourceTrigger=PropertyChanged}" Margin="6" HorizontalAlignment="Stretch"></TextBox>
+                                                    </StackPanel>
+                                                </GroupBox>
+
+                                            </StackPanel>
+
+                                            <!-- 物件種目・建物管理 -->
+                                            <StackPanel Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" Margin="6 0 6 0" Orientation="Horizontal">
+
+                                                <GroupBox Header="物件種目" Padding="0 0 6 0" Style="{DynamicResource GroupBoxStyle}">
+                                                    <ComboBox SelectedIndex="-1" Margin="6" Width="140" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                                        <ComboBoxItem>アパート</ComboBoxItem>
+                                                        <ComboBoxItem>マンション</ComboBoxItem>
+                                                        <ComboBoxItem>一戸建て</ComboBoxItem>
+                                                        <ComboBoxItem>テラスハウス</ComboBoxItem>
+                                                        <ComboBoxItem>タウンハウス</ComboBoxItem>
+                                                        <ComboBoxItem>シェアハウス</ComboBoxItem>
+                                                        <ComboBoxItem>寮・下宿</ComboBoxItem>
+                                                    </ComboBox>
+                                                </GroupBox>
+
+                                                <GroupBox Header="所有権" Padding="0 0 6 0" Style="{DynamicResource GroupBoxStyle}">
+                                                    <!--
+                                                                        <StackPanel Orientation="Horizontal">
+                                                                            <RadioButton Content="建物一棟" GroupName="OwnershipType" IsChecked="{Binding Path=RentLivingEdit.Ownership, ConverterParameter={x:Static models:Ownerships.All}, Converter={StaticResource EnumBooleanConverter}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="6"/>
+                                                                            <RadioButton x:Name="RadioButtonOwnershipType" Content="区分所有" GroupName="OwnershipType" IsChecked="{Binding Path=RentLivingEdit.Ownership, ConverterParameter={x:Static models:Ownerships.Unit}, Converter={StaticResource EnumBooleanConverter}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="6"/>
+                                                                        </StackPanel>
+                                                                        -->
+                                                    <ComboBox SelectedIndex="-1" Margin="6" Width="110" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                                        <ComboBoxItem IsSelected="{Binding Path=RentLivingEdit.Ownership, ConverterParameter={x:Static models:Ownerships.All}, Converter={StaticResource EnumBooleanConverter}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">建物一棟</ComboBoxItem>
+                                                        <ComboBoxItem x:Name="ButtonOwnershipType" IsSelected="{Binding Path=RentLivingEdit.Ownership, ConverterParameter={x:Static models:Ownerships.Unit}, Converter={StaticResource EnumBooleanConverter}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">区分所有</ComboBoxItem>
+                                                    </ComboBox>
+                                                </GroupBox>
+                                                
+                                                <GroupBox Header="建物管理" Padding="0 0 6 0" Style="{DynamicResource GroupBoxStyle}">
+                                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                                        <ComboBox SelectedIndex="-1" Margin="6" Width="110" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                                            <ComboBoxItem>自社管理</ComboBoxItem>
+                                                            <ComboBoxItem>貸主管理</ComboBoxItem>
+                                                            <ComboBoxItem>他社管理</ComboBoxItem>
+                                                            <ComboBoxItem>その他/不明</ComboBoxItem>
+                                                        </ComboBox>
+                                                    </StackPanel>
+                                                </GroupBox>
+
+                                            </StackPanel>
+
+                                            <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="auto"/>
+                                                    <RowDefinition Height="auto"/>
+                                                </Grid.RowDefinitions>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="auto"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <!-- 所在地 -->
+                                                <StackPanel Grid.Row="1" Grid.Column="0" Margin="6 0 6 0">
+
+                                                    <GroupBox Header="所在地" Padding="0 0 6 0" Style="{DynamicResource GroupBoxStyle}">
+                                                        <Grid>
+                                                            <Grid.RowDefinitions>
+                                                                <RowDefinition Height="*"/>
+                                                            </Grid.RowDefinitions>
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="*"/>
+                                                                <ColumnDefinition Width="Auto"/>
+                                                            </Grid.ColumnDefinitions>
+
+                                                            <StackPanel Grid.Row="0" Grid.Column="0">
+                                                                <TextBox Text="{Binding RentLivingEdit.Location, UpdateSourceTrigger=PropertyChanged}" Margin="6" HorizontalAlignment="Stretch" VerticalAlignment="Bottom"></TextBox>
+                                                            </StackPanel>
+                                                            <StackPanel Grid.Row="0" Grid.Column="1" Visibility="Collapsed">
+                                                                <Button VerticalAlignment="Bottom" Content="+" Width="24" Height="24" Margin="6" />
+                                                            </StackPanel>
+                                                        </Grid>
+                                                    </GroupBox>
+
+                                                    <GroupBox Header="所在地" Padding="6" Visibility="Collapsed">
+                                                        <StackPanel>
+
+                                                            <StackPanel Orientation="Horizontal">
+                                                                <StackPanel>
+                                                                    <Label Content="〒"/>
+                                                                    <TextBox Text="{Binding RentLivingEdit.PostalCode, UpdateSourceTrigger=PropertyChanged}" Margin="6 0 6 6" Width="66" HorizontalAlignment="Left"></TextBox>
+                                                                </StackPanel>
+
+                                                                <StackPanel>
+                                                                    <Label Content="都道府県"/>
+                                                                    <TextBox Text="" Margin="6 0 6 6" Width="90" HorizontalAlignment="Left" Visibility="Collapsed"></TextBox>
+                                                                    <ComboBox Margin="6 0 6 6" Width="90" HorizontalAlignment="Left">
+
+                                                                    </ComboBox>
+                                                                </StackPanel>
+
+                                                            </StackPanel>
+
+                                                            <StackPanel>
+                                                                <Label Content="市区町村"/>
+                                                                <TextBox Text="" Margin="6 0 6 6" Width="169" HorizontalAlignment="Left"></TextBox>
+                                                            </StackPanel>
+
+                                                            <StackPanel>
+                                                                <Label Content="町域"/>
+                                                                <TextBox Text="" Margin="6 0 6 6" Width="200" HorizontalAlignment="Left"></TextBox>
+                                                            </StackPanel>
+
+                                                            <StackPanel Orientation="Horizontal">
+                                                                <StackPanel>
+                                                                    <Label Content="字・丁目"/>
+                                                                    <TextBox Text="" Margin="6 0 6 6" Width="169" HorizontalAlignment="Left"></TextBox>
+                                                                </StackPanel>
+
+                                                            </StackPanel>
+
+                                                            <StackPanel>
+                                                                <Label Content="番地・号"/>
+                                                                <TextBox Text="" Margin="6 0 6 6" Width="110" HorizontalAlignment="Left"></TextBox>
+                                                            </StackPanel>
+                                                        </StackPanel>
+                                                    </GroupBox>
+
                                                 </StackPanel>
-                                            </GroupBox>
 
-                                        </StackPanel>
-
-                                        <!-- 物件種目 -->
-                                        <StackPanel Grid.Row="0" Grid.Column="1" Margin="6 0 6 0">
-
-                                            <GroupBox Header="物件種目" Padding="0 0 6 0" Style="{DynamicResource GroupBoxStyle}">
-                                                <ComboBox SelectedIndex="-1" Margin="6">
-                                                    <ComboBoxItem>アパート</ComboBoxItem>
-                                                    <ComboBoxItem>マンション</ComboBoxItem>
-                                                    <ComboBoxItem>一戸建て</ComboBoxItem>
-                                                    <ComboBoxItem>テラスハウス</ComboBoxItem>
-                                                    <ComboBoxItem>タウンハウス</ComboBoxItem>
-                                                    <ComboBoxItem>シェアハウス</ComboBoxItem>
-                                                    <ComboBoxItem>寮・下宿</ComboBoxItem>
-                                                </ComboBox>
-                                            </GroupBox>
-                                        </StackPanel>
-
-                                        <!-- 所在地 -->
-                                        <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="6 0 6 0">
-
-                                            <GroupBox Header="所在地" Padding="0 0 6 0" Style="{DynamicResource GroupBoxStyle}">
-                                                <Grid>
-                                                    <Grid.RowDefinitions>
-                                                        <RowDefinition Height="*"/>
-                                                    </Grid.RowDefinitions>
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="*"/>
-                                                        <ColumnDefinition Width="Auto"/>
-                                                    </Grid.ColumnDefinitions>
-
-                                                    <StackPanel Grid.Row="0" Grid.Column="0">
-                                                        <TextBox Text="" Margin="6" HorizontalAlignment="Stretch" VerticalAlignment="Bottom"></TextBox>
-                                                    </StackPanel>
-                                                    <StackPanel Grid.Row="0" Grid.Column="1">
-                                                        <Button VerticalAlignment="Bottom" Content="+" Width="24" Height="24" Margin="6" />
-                                                    </StackPanel>
-                                                </Grid>
-                                            </GroupBox>
-
-                                            <GroupBox Header="所在地" Padding="6" Visibility="Collapsed">
-                                                <StackPanel>
-
+                                                <!-- 所在地詳細 -->
+                                                <StackPanel Grid.Row="1" Grid.Column="2" Margin="6 0 6 0" HorizontalAlignment="Right">
                                                     <StackPanel Orientation="Horizontal">
-                                                        <StackPanel>
-                                                            <Label Content="〒"/>
-                                                            <TextBox Text="{Binding RentLivingEdit.PostalCode, UpdateSourceTrigger=PropertyChanged}" Margin="6 0 6 6" Width="66" HorizontalAlignment="Left"></TextBox>
-                                                        </StackPanel>
 
-                                                        <StackPanel>
-                                                            <Label Content="都道府県"/>
-                                                            <TextBox Text="{Binding RentLivingEdit.Location, UpdateSourceTrigger=PropertyChanged}" Margin="6 0 6 6" Width="90" HorizontalAlignment="Left" Visibility="Collapsed"></TextBox>
-                                                            <ComboBox Margin="6 0 6 6" Width="90" HorizontalAlignment="Left">
+                                                        <GroupBox Header="所在地詳細" Padding="0 0 6 0" Style="{DynamicResource GroupBoxStyle}">
 
-                                                            </ComboBox>
-                                                        </StackPanel>
+                                                            <Button VerticalAlignment="Center" Content="所在地設定" Margin="6" Padding="3" Width="100" />
 
-                                                    </StackPanel>
+                                                        </GroupBox>
 
-                                                    <StackPanel>
-                                                        <Label Content="市区町村"/>
-                                                        <TextBox Text="" Margin="6 0 6 6" Width="169" HorizontalAlignment="Left"></TextBox>
-                                                    </StackPanel>
+                                                        <GroupBox Header="地図表示" Padding="0 0 6 0" Style="{DynamicResource GroupBoxStyle}">
 
-                                                    <StackPanel>
-                                                        <Label Content="町域"/>
-                                                        <TextBox Text="" Margin="6 0 6 6" Width="200" HorizontalAlignment="Left"></TextBox>
-                                                    </StackPanel>
+                                                            <Button VerticalAlignment="Center" Content="マップで表示" Margin="6" Padding="3" Width="100" />
 
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <StackPanel>
-                                                            <Label Content="字・丁目"/>
-                                                            <TextBox Text="" Margin="6 0 6 6" Width="169" HorizontalAlignment="Left"></TextBox>
-                                                        </StackPanel>
+                                                        </GroupBox>
 
-                                                    </StackPanel>
-
-                                                    <StackPanel>
-                                                        <Label Content="番地・号"/>
-                                                        <TextBox Text="" Margin="6 0 6 6" Width="110" HorizontalAlignment="Left"></TextBox>
                                                     </StackPanel>
                                                 </StackPanel>
-                                            </GroupBox>
-
-                                        </StackPanel>
+                                            </Grid>
+                                        </Grid>
 
                                         <!-- 交通１・２・３ -->
                                         <Grid Grid.Row="2" Grid.Column="0" Margin="6 6 6 0" VerticalAlignment="Top">
-                                            <TabControl Height="420" Margin="0 0 0 0" VerticalAlignment="Top">
-                                                <TabItem>
-                                                    <TabItem.Header>
-                                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="3">
-                                                            <Label Content="交通１" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                        </StackPanel>
-                                                    </TabItem.Header>
-                                                    <TabItem.Style>
-                                                        <Style TargetType="{x:Type TabItem}" BasedOn="{StaticResource DefaultTabItem}">
-                                                            <Setter Property="OverridesDefaultStyle" Value="False" />
-                                                        </Style>
-                                                    </TabItem.Style>
+                                            <TabControl Height="395" Margin="0 0 0 0" VerticalAlignment="Top" Style="{DynamicResource EditingTabControlStyle}">
 
+                                                <TabItem Header="交通１" Style="{DynamicResource EditingTabItemStyle}">
+                                                    
                                                     <ScrollViewer VerticalScrollBarVisibility="Auto">
-                                                        <StackPanel>
-                                                            <GroupBox Grid.Row="0" Grid.Column="0" Header="電車" Padding="6" Margin="6 0 6 0">
+                                                        <StackPanel Margin="6 12 6 0">
+                                                            <GroupBox Header="電車" Padding="6 12 6 6" Style="{DynamicResource GroupBoxStyle}">
                                                                 <StackPanel>
-                                                                    <Label Content="沿線"/>
-                                                                    <TextBox Text="" Margin="6 0 12 6" HorizontalAlignment="Stretch"></TextBox>
+                                                                    <Label Content="沿線" Style="{DynamicResource DefaultLabelStyle}"/>
+                                                                    <TextBox Text="" Margin="6 6 12 6" HorizontalAlignment="Stretch"></TextBox>
 
-                                                                    <Label Content="最寄り駅"/>
-                                                                    <TextBox Text="{Binding RentLivingEdit.TrainStation1}" Margin="6 0 12 6" HorizontalAlignment="Stretch"></TextBox>
+                                                                    <Label Content="最寄り駅" Style="{DynamicResource DefaultLabelStyle}"/>
+                                                                    <TextBox Text="{Binding RentLivingEdit.TrainStation1}" Margin="6 6 12 6" HorizontalAlignment="Stretch"></TextBox>
 
-                                                                    <Label Content="最寄り駅から徒歩"/>
-                                                                    <StackPanel Orientation="Horizontal">
-                                                                        <TextBox Text="" Width="60" Margin="6 0 3 6" HorizontalAlignment="Left"></TextBox>
-                                                                        <Label Content="分" VerticalAlignment="Bottom"/>
+                                                                    <Label Content="最寄り駅から徒歩" Style="{DynamicResource DefaultLabelStyle}"/>
+                                                                    <StackPanel Orientation="Horizontal" Margin="6 6 12 0">
+                                                                        <TextBox Text="" Width="60" Margin="0 0 3 6" HorizontalAlignment="Left"></TextBox>
+                                                                        <Label Content="分" VerticalAlignment="Bottom" Margin="0 0 3 6" Style="{DynamicResource DefaultLabelStyle}"/>
                                                                     </StackPanel>
 
                                                                 </StackPanel>
                                                             </GroupBox>
-                                                            <GroupBox Grid.Row="0" Grid.Column="0" Header="バス" Padding="6" Margin="6 0 6 0">
+                                                            <GroupBox Header="バス" Padding="6 12 6 0" Style="{DynamicResource GroupBoxStyle}">
                                                                 <StackPanel>
-                                                                    <Label Content="バス停名"/>
-                                                                    <TextBox Text="" Margin="6 0 12 6" HorizontalAlignment="Stretch"></TextBox>
+                                                                    <Label Content="バス停名" Style="{DynamicResource DefaultLabelStyle}"/>
+                                                                    <TextBox Text="" Margin="6 6 12 6" HorizontalAlignment="Stretch"></TextBox>
 
-                                                                    <Label Content="バス停から徒歩"/>
-                                                                    <StackPanel Orientation="Horizontal">
-                                                                        <TextBox Text="" Width="60" Margin="6 0 3 6" HorizontalAlignment="Left"></TextBox>
-                                                                        <Label Content="分" VerticalAlignment="Bottom"/>
+                                                                    <Label Content="バス停から徒歩" Style="{DynamicResource DefaultLabelStyle}"/>
+                                                                    <StackPanel Orientation="Horizontal" Margin="6 6 12 6">
+                                                                        <TextBox Text="" Width="60" Margin="0 0 3 6" HorizontalAlignment="Left"></TextBox>
+                                                                        <Label Content="分" VerticalAlignment="Bottom" Margin="0 0 3 6" Style="{DynamicResource DefaultLabelStyle}"/>
                                                                     </StackPanel>
                                                                 </StackPanel>
                                                             </GroupBox>
@@ -277,46 +335,36 @@
                                                     </ScrollViewer>
 
                                                 </TabItem>
-                                                <TabItem>
-                                                    <TabItem.Header>
-                                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="3">
-                                                            <Label Content="交通２" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                        </StackPanel>
-                                                    </TabItem.Header>
-                                                    <TabItem.Style>
-                                                        <Style TargetType="{x:Type TabItem}" BasedOn="{StaticResource DefaultTabItem}">
-                                                            <Setter Property="OverridesDefaultStyle" Value="False" />
-                                                        </Style>
-                                                    </TabItem.Style>
+                                                
+                                                <TabItem Header="交通２" Style="{DynamicResource EditingTabItemStyle}">
 
                                                     <ScrollViewer VerticalScrollBarVisibility="Auto">
-
-                                                        <StackPanel>
-                                                            <GroupBox Grid.Row="0" Grid.Column="1" Header="電車" Padding="6" Margin="6 0 6 0">
+                                                        <StackPanel Margin="6 12 6 0">
+                                                            <GroupBox Header="電車" Padding="6 12 6 6" Style="{DynamicResource GroupBoxStyle}">
                                                                 <StackPanel>
-                                                                    <Label Content="沿線"/>
-                                                                    <TextBox Text="" Margin="6 0 12 6" HorizontalAlignment="Stretch"></TextBox>
+                                                                    <Label Content="沿線" Style="{DynamicResource DefaultLabelStyle}"/>
+                                                                    <TextBox Text="" Margin="6 6 12 6" HorizontalAlignment="Stretch"></TextBox>
 
-                                                                    <Label Content="最寄り駅"/>
-                                                                    <TextBox Text="{Binding RentLivingEdit.TrainStation2}" Margin="6 0 12 6" HorizontalAlignment="Stretch"></TextBox>
+                                                                    <Label Content="最寄り駅" Style="{DynamicResource DefaultLabelStyle}"/>
+                                                                    <TextBox Text="{Binding RentLivingEdit.TrainStation2}" Margin="6 6 12 6" HorizontalAlignment="Stretch"></TextBox>
 
-                                                                    <Label Content="最寄り駅から徒歩"/>
-                                                                    <StackPanel Orientation="Horizontal">
-                                                                        <TextBox Text="" Width="60" Margin="6 0 3 6" HorizontalAlignment="Left"></TextBox>
-                                                                        <Label Content="分" VerticalAlignment="Bottom"/>
+                                                                    <Label Content="最寄り駅から徒歩" Style="{DynamicResource DefaultLabelStyle}"/>
+                                                                    <StackPanel Orientation="Horizontal" Margin="6 6 12 0">
+                                                                        <TextBox Text="" Width="60" Margin="0 0 3 6" HorizontalAlignment="Left"></TextBox>
+                                                                        <Label Content="分" VerticalAlignment="Bottom" Margin="0 0 3 6" Style="{DynamicResource DefaultLabelStyle}"/>
                                                                     </StackPanel>
 
                                                                 </StackPanel>
                                                             </GroupBox>
-                                                            <GroupBox Grid.Row="0" Grid.Column="1" Header="バス" Padding="6" Margin="6 0 6 0">
+                                                            <GroupBox Header="バス" Padding="6 12 6 0" Style="{DynamicResource GroupBoxStyle}">
                                                                 <StackPanel>
-                                                                    <Label Content="バス停名"/>
-                                                                    <TextBox Text="" Margin="6 0 12 6" HorizontalAlignment="Stretch"></TextBox>
+                                                                    <Label Content="バス停名" Style="{DynamicResource DefaultLabelStyle}"/>
+                                                                    <TextBox Text="" Margin="6 6 12 6" HorizontalAlignment="Stretch"></TextBox>
 
-                                                                    <Label Content="バス停から徒歩"/>
-                                                                    <StackPanel Orientation="Horizontal">
-                                                                        <TextBox Text="" Width="60" Margin="6 0 3 6" HorizontalAlignment="Left"></TextBox>
-                                                                        <Label Content="分" VerticalAlignment="Bottom"/>
+                                                                    <Label Content="バス停から徒歩" Style="{DynamicResource DefaultLabelStyle}"/>
+                                                                    <StackPanel Orientation="Horizontal" Margin="6 6 12 6">
+                                                                        <TextBox Text="" Width="60" Margin="0 0 3 6" HorizontalAlignment="Left"></TextBox>
+                                                                        <Label Content="分" VerticalAlignment="Bottom" Margin="0 0 3 6" Style="{DynamicResource DefaultLabelStyle}"/>
                                                                     </StackPanel>
                                                                 </StackPanel>
                                                             </GroupBox>
@@ -325,53 +373,43 @@
                                                     </ScrollViewer>
 
                                                 </TabItem>
-                                                <TabItem>
-                                                    <TabItem.Header>
-                                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="3">
-                                                            <Label Content="交通３" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                        </StackPanel>
-                                                    </TabItem.Header>
-                                                    <TabItem.Style>
-                                                        <Style TargetType="{x:Type TabItem}" BasedOn="{StaticResource DefaultTabItem}">
-                                                            <Setter Property="OverridesDefaultStyle" Value="False" />
-                                                        </Style>
-                                                    </TabItem.Style>
+                                                
+                                                <TabItem Header="交通３" Style="{DynamicResource EditingTabItemStyle}">
 
                                                     <ScrollViewer VerticalScrollBarVisibility="Auto">
-
-                                                        <StackPanel>
-                                                            <GroupBox Grid.Row="0" Grid.Column="2" Header="電車" Padding="6" Margin="6 0 6 0">
+                                                        <StackPanel Margin="6 12 6 0">
+                                                            <GroupBox Header="電車" Padding="6 12 6 6" Style="{DynamicResource GroupBoxStyle}">
                                                                 <StackPanel>
-                                                                    <Label Content="沿線"/>
-                                                                    <TextBox Text="" Margin="6 0 12 6" HorizontalAlignment="Stretch"></TextBox>
+                                                                    <Label Content="沿線" Style="{DynamicResource DefaultLabelStyle}"/>
+                                                                    <TextBox Text="" Margin="6 6 12 6" HorizontalAlignment="Stretch"></TextBox>
 
-                                                                    <Label Content="最寄り駅"/>
-                                                                    <TextBox Text="" Margin="6 0 12 6" HorizontalAlignment="Stretch"></TextBox>
+                                                                    <Label Content="最寄り駅" Style="{DynamicResource DefaultLabelStyle}"/>
+                                                                    <TextBox Text="{Binding RentLivingEdit.TrainStation3}" Margin="6 6 12 6" HorizontalAlignment="Stretch"></TextBox>
 
-                                                                    <Label Content="最寄り駅から徒歩"/>
-                                                                    <StackPanel Orientation="Horizontal">
-                                                                        <TextBox Text="" Width="60" Margin="6 0 3 6" HorizontalAlignment="Left"></TextBox>
-                                                                        <Label Content="分" VerticalAlignment="Bottom"/>
+                                                                    <Label Content="最寄り駅から徒歩" Style="{DynamicResource DefaultLabelStyle}"/>
+                                                                    <StackPanel Orientation="Horizontal" Margin="6 6 12 0">
+                                                                        <TextBox Text="" Width="60" Margin="0 0 3 6" HorizontalAlignment="Left"></TextBox>
+                                                                        <Label Content="分" VerticalAlignment="Bottom" Margin="0 0 3 6" Style="{DynamicResource DefaultLabelStyle}"/>
                                                                     </StackPanel>
 
                                                                 </StackPanel>
                                                             </GroupBox>
-                                                            <GroupBox Grid.Row="0" Grid.Column="2" Header="バス" Padding="6" Margin="6 0 6 0">
+                                                            <GroupBox Header="バス" Padding="6 12 6 0" Style="{DynamicResource GroupBoxStyle}">
                                                                 <StackPanel>
-                                                                    <Label Content="バス停名"/>
-                                                                    <TextBox Text="" Margin="6 0 12 6" HorizontalAlignment="Stretch"></TextBox>
+                                                                    <Label Content="バス停名" Style="{DynamicResource DefaultLabelStyle}"/>
+                                                                    <TextBox Text="" Margin="6 6 12 6" HorizontalAlignment="Stretch"></TextBox>
 
-                                                                    <Label Content="バス停から徒歩"/>
-                                                                    <StackPanel Orientation="Horizontal">
-                                                                        <TextBox Text="" Width="60" Margin="6 0 3 6" HorizontalAlignment="Left"></TextBox>
-                                                                        <Label Content="分" VerticalAlignment="Bottom"/>
+                                                                    <Label Content="バス停から徒歩" Style="{DynamicResource DefaultLabelStyle}"/>
+                                                                    <StackPanel Orientation="Horizontal" Margin="6 6 12 6">
+                                                                        <TextBox Text="" Width="60" Margin="0 0 3 6" HorizontalAlignment="Left"></TextBox>
+                                                                        <Label Content="分" VerticalAlignment="Bottom" Margin="0 0 3 6" Style="{DynamicResource DefaultLabelStyle}"/>
                                                                     </StackPanel>
                                                                 </StackPanel>
                                                             </GroupBox>
                                                         </StackPanel>
 
                                                     </ScrollViewer>
-
+                                                    
                                                 </TabItem>
 
                                             </TabControl>
@@ -379,163 +417,50 @@
 
                                         <!-- 建物 -->
                                         <Grid Grid.Row="2" Grid.Column="1" Margin="6 6 6 0" VerticalAlignment="Top">
-                                            <TabControl Height="420" Margin="0 0 0 0" VerticalAlignment="Top">
-                                                <!-- 建物構造 -->
-                                                <TabItem>
-                                                    <TabItem.Header>
-                                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="3">
-                                                            <Label Content="建物" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                        </StackPanel>
-                                                    </TabItem.Header>
-                                                    <TabItem.Style>
-                                                        <Style TargetType="{x:Type TabItem}" BasedOn="{StaticResource DefaultTabItem}">
-                                                            <Setter Property="OverridesDefaultStyle" Value="False" />
-                                                        </Style>
-                                                    </TabItem.Style>
+                                            
+                                            <TabControl Height="395" Margin="0 0 0 0" VerticalAlignment="Top" Style="{DynamicResource EditingTabControlStyle}">
+                                                
+                                                <!-- 建物概要 -->
+                                                <TabItem Header="建物概要" Style="{DynamicResource EditingTabItemStyle}">
 
                                                     <ScrollViewer VerticalScrollBarVisibility="Auto">
-                                                        <StackPanel>
+                                                        <StackPanel Margin="6 12 6 0">
 
-                                                            <StackPanel Grid.Row="0" Grid.Column="0" Margin="6 0 6 0">
+                                                            <StackPanel Margin="6 0 6 0">
 
-                                                                <GroupBox Header="所有区分" Padding="6">
+                                                                <StackPanel Orientation="Horizontal" Margin="0">
+                                                                    
+                                                                    <GroupBox Header="建物構造" Padding="6" Style="{DynamicResource GroupBoxStyle}">
+                                                                        <ComboBox SelectedIndex="-1" Margin="6 6 6 6" Width="290" HorizontalAlignment="Stretch" VerticalAlignment="Center">
+                                                                            <ComboBoxItem>木造</ComboBoxItem>
+                                                                            <ComboBoxItem>ブロック造</ComboBoxItem>
+                                                                            <ComboBoxItem>軽量鉄骨造</ComboBoxItem>
+                                                                            <ComboBoxItem>鉄骨造</ComboBoxItem>
+                                                                            <ComboBoxItem>鉄筋コンクリート(RC)造</ComboBoxItem>
+                                                                            <ComboBoxItem>鉄骨鉄筋コンクリート(SRC)造</ComboBoxItem>
+                                                                            <ComboBoxItem>ALC造</ComboBoxItem>
+                                                                            <ComboBoxItem>プレキャストコンクリート(PC)造</ComboBoxItem>
+                                                                            <ComboBoxItem>鉄骨プレキャストコンクリート(HPC)造</ComboBoxItem>
+                                                                            <ComboBoxItem>鉄筋ブロック造</ComboBoxItem>
+                                                                            <ComboBoxItem>コンクリート充填鋼管(CFT)造</ComboBoxItem>
+                                                                            <ComboBoxItem>その他</ComboBoxItem>
+                                                                        </ComboBox>
+                                                                    </GroupBox>
+
+                                                                </StackPanel>
+
+                                                            </StackPanel>
+
+                                                            <StackPanel Margin="6 0 6 0">
+
+                                                                <GroupBox Header="築年月" Padding="6" Style="{DynamicResource GroupBoxStyle}">
+
                                                                     <StackPanel Orientation="Horizontal">
-                                                                        <RadioButton Content="建物一棟" GroupName="OwnershipType" IsChecked="{Binding Path=RentLivingEdit.Ownership, ConverterParameter={x:Static models:Ownerships.All}, Converter={StaticResource EnumBooleanConverter}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="6"/>
-                                                                        <RadioButton x:Name="RadioButtonOwnershipType" Content="区分所有" GroupName="OwnershipType" IsChecked="{Binding Path=RentLivingEdit.Ownership, ConverterParameter={x:Static models:Ownerships.Unit}, Converter={StaticResource EnumBooleanConverter}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="6"/>
-                                                                    </StackPanel>
-                                                                </GroupBox>
 
-                                                                <GroupBox Header="建物管理" Padding="6" Visibility="Collapsed">
-                                                                    <StackPanel>
-                                                                        <RadioButton Content="自社管理" Margin="6"/>
-                                                                        <RadioButton Content="貸主管理" Margin="6"/>
-                                                                        <RadioButton Content="他社管理" Margin="6"/>
-                                                                        <RadioButton Content="他" Margin="6"/>
-                                                                    </StackPanel>
-                                                                </GroupBox>
-
-                                                                <!-- 区分所有なら非表示にする -->
-                                                                <GroupBox Header="元付け" Padding="6" Visibility="Collapsed">
-                                                                    <GroupBox.Style>
-                                                                        <Style>
-                                                                            <Style.Triggers>
-                                                                                <DataTrigger Binding="{Binding ElementName=RadioButtonOwnershipType, Path=IsChecked}" Value="True">
-                                                                                    <Setter Property="GroupBox.Visibility" Value="Hidden"/>
-                                                                                </DataTrigger>
-                                                                            </Style.Triggers>
-                                                                        </Style>
-                                                                    </GroupBox.Style>
-                                                                    <StackPanel>
-                                                                        <RadioButton Content="自社元付" Margin="6"/>
-                                                                        <RadioButton Content="仲介先物" Margin="6"/>
-                                                                    </StackPanel>
-                                                                </GroupBox>
-
-                                                                <GroupBox Header="取引態様" Padding="6" Visibility="Collapsed">
-
-                                                                    <TabControl>
-                                                                        <TabItem Header="自社元付" Padding="6">
-                                                                            <StackPanel>
-                                                                                <RadioButton Content="一般媒介" Margin="6"/>
-                                                                                <RadioButton Content="専任媒介" Margin="6"/>
-                                                                                <RadioButton Content="専属専任媒介" Margin="6"/>
-                                                                                <RadioButton Content="代理" Margin="6"/>
-                                                                                <RadioButton Content="貸主" Margin="6"/>
-                                                                            </StackPanel>
-                                                                        </TabItem>
-                                                                        <TabItem Header="先物仲介" Padding="6">
-                                                                            <StackPanel>
-                                                                                <RadioButton Content="一般媒介" Margin="6"/>
-                                                                                <RadioButton Content="専任媒介" Margin="6"/>
-                                                                                <RadioButton Content="専属専任媒介" Margin="6"/>
-                                                                                <RadioButton Content="代理" Margin="6"/>
-                                                                                <RadioButton Content="貸主" Margin="6"/>
-                                                                            </StackPanel>
-                                                                        </TabItem>
-                                                                    </TabControl>
-                                                                </GroupBox>
-
-                                                                <GroupBox Header="登録情報" Padding="6" Visibility="Collapsed">
-                                                                    <StackPanel>
-                                                                        <StackPanel>
-                                                                            <Label Content="更新日"/>
-                                                                            <DatePicker Width="115" Margin="6 0 12 6" HorizontalAlignment="Left" VerticalAlignment="Center" IsEnabled="True"/>
-                                                                        </StackPanel>
-                                                                        <StackPanel Visibility="Collapsed">
-                                                                            <Label Content="登録日"/>
-                                                                            <DatePicker Width="115" Margin="6 0 12 6" HorizontalAlignment="Left" VerticalAlignment="Center" IsEnabled="True"/>
-                                                                        </StackPanel>
-                                                                    </StackPanel>
-                                                                </GroupBox>
-
-                                                            </StackPanel>
-
-                                                            <StackPanel Grid.Row="2" Grid.Column="1" Margin="6 0 6 0">
-                                                                <GroupBox Header="建物構造" Padding="6">
-                                                                    <ComboBox SelectedIndex="-1" Margin="6">
-                                                                        <ComboBoxItem>木造</ComboBoxItem>
-                                                                        <ComboBoxItem>ブロック造</ComboBoxItem>
-                                                                        <ComboBoxItem>軽量鉄骨造</ComboBoxItem>
-                                                                        <ComboBoxItem>鉄骨造</ComboBoxItem>
-                                                                        <ComboBoxItem>鉄筋コンクリート(RC)造</ComboBoxItem>
-                                                                        <ComboBoxItem>鉄骨鉄筋コンクリート(SRC)造</ComboBoxItem>
-                                                                        <ComboBoxItem>ALC造</ComboBoxItem>
-                                                                        <ComboBoxItem>プレキャストコンクリート(PC)造</ComboBoxItem>
-                                                                        <ComboBoxItem>鉄骨プレキャストコンクリート(HPC)造</ComboBoxItem>
-                                                                        <ComboBoxItem>鉄筋ブロック造</ComboBoxItem>
-                                                                        <ComboBoxItem>コンクリート充填鋼管(CFT)造</ComboBoxItem>
-                                                                        <ComboBoxItem>その他</ComboBoxItem>
-                                                                    </ComboBox>
-                                                                </GroupBox>
-                                                            </StackPanel>
-
-                                                            <StackPanel Grid.Row="3" Grid.Column="1" Margin="6 0 6 0">
-                                                                <GroupBox Header="規模" Padding="6">
-                                                                    <Grid>
-                                                                        <Grid.RowDefinitions>
-                                                                            <RowDefinition Height="*"/>
-                                                                        </Grid.RowDefinitions>
-                                                                        <Grid.ColumnDefinitions>
-                                                                            <ColumnDefinition Width="2*"/>
-                                                                            <ColumnDefinition Width="1*"/>
-                                                                        </Grid.ColumnDefinitions>
-
-                                                                        <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal">
-                                                                            <StackPanel>
-                                                                                <Label Content="地上"/>
-                                                                                <StackPanel Orientation="Horizontal">
-                                                                                    <TextBox Text="{Binding RentLivingEdit.Floors, UpdateSourceTrigger=PropertyChanged}" Width="42" Margin="6 0 0 6" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
-                                                                                    <Label Content="階" VerticalAlignment="Bottom"/>
-                                                                                </StackPanel>
-                                                                            </StackPanel>
-                                                                            <StackPanel>
-                                                                                <Label Content="地下"/>
-                                                                                <StackPanel Orientation="Horizontal">
-                                                                                    <TextBox Text="{Binding RentLivingEdit.FloorsBasement, UpdateSourceTrigger=PropertyChanged}" Width="42" Margin="6 0 0 6" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
-                                                                                    <Label Content="階" VerticalAlignment="Bottom"/>
-                                                                                </StackPanel>
-                                                                            </StackPanel>
-                                                                        </StackPanel>
-
-                                                                        <StackPanel Grid.Row="0" Grid.Column="1">
-                                                                            <Label Content="総戸数"/>
-                                                                            <StackPanel Orientation="Horizontal">
-                                                                                <TextBox Text="" Width="42" Margin="6 0 0 6" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
-                                                                                <Label Content="戸" VerticalAlignment="Bottom"/>
-                                                                            </StackPanel>
-                                                                        </StackPanel>
-                                                                    </Grid>
-                                                                </GroupBox>
-
-                                                            </StackPanel>
-
-                                                            <StackPanel Grid.Row="4" Grid.Column="1" Margin="6 0 6 0">
-                                                                <GroupBox Header="築年月" Padding="6">
-                                                                    <StackPanel>
                                                                         <StackPanel Margin="0 0 12 0">
-                                                                            <Label Content="築年月（和暦）"/>
+                                                                            <Label Content="和暦" Style="{DynamicResource DefaultLabelStyle}"/>
                                                                             <StackPanel Orientation="Horizontal">
-                                                                                <ComboBox Width="60" Margin="6 0 0 6" SelectedIndex="-1">
+                                                                                <ComboBox Width="60" Margin="6" SelectedIndex="-1" HorizontalAlignment="Left" VerticalAlignment="Center">
                                                                                     <ComboBoxItem>令和</ComboBoxItem>
                                                                                     <ComboBoxItem>平成</ComboBoxItem>
                                                                                     <ComboBoxItem>昭和</ComboBoxItem>
@@ -543,51 +468,143 @@
                                                                                     <ComboBoxItem>明治</ComboBoxItem>
                                                                                 </ComboBox>
 
-                                                                                <TextBox Width="33" Margin="9 0 0 6" VerticalAlignment="Bottom" />
-                                                                                <Label VerticalAlignment="Bottom" Content="年" />
+                                                                                <TextBox Width="33" Margin="3 0 3 6" VerticalAlignment="Bottom" />
+                                                                                <Label VerticalAlignment="Bottom" Margin="0 0 3 6" Content="年" Style="{DynamicResource DefaultLabelStyle}" />
 
-                                                                                <TextBox Width="33" Margin="3 0 0 6" VerticalAlignment="Bottom" />
-                                                                                <Label VerticalAlignment="Bottom" Content="月" />
+                                                                                <TextBox Width="33" Margin="3 0 3 6" VerticalAlignment="Bottom" />
+                                                                                <Label VerticalAlignment="Bottom" Margin="0 0 3 6" Content="月" Style="{DynamicResource DefaultLabelStyle}" />
                                                                             </StackPanel>
                                                                         </StackPanel>
+
                                                                         <StackPanel>
-                                                                            <Label Content="築年月（西暦）"/>
-                                                                            <DatePicker Width="96" Margin="6 0 12 6" HorizontalAlignment="Left" VerticalAlignment="Center" common:DatePickerCalendar.IsMonthYear="True" common:DatePickerDateFormat.DateFormat="yyyy/MMM"/>
+                                                                            <Label Content="西暦" Style="{DynamicResource DefaultLabelStyle}"/>
+                                                                            <DatePicker Width="96" Margin="3" HorizontalAlignment="Left" VerticalAlignment="Center" common:DatePickerCalendar.IsMonthYear="True" common:DatePickerDateFormat.DateFormat="yyyy/MMM"/>
                                                                         </StackPanel>
+
+                                                                    </StackPanel>
+
+                                                                </GroupBox>
+
+                                                            </StackPanel>
+                                                            
+                                                            <StackPanel Margin="6 0 6 0">
+                                                                
+                                                                <GroupBox Header="規模" Padding="6" Style="{DynamicResource GroupBoxStyle}">
+                                                                    <StackPanel Orientation="Horizontal">
+                                                                        
+                                                                        <StackPanel Orientation="Horizontal">
+                                                                            <StackPanel>
+                                                                                <Label Content="地上" Style="{DynamicResource DefaultLabelStyle}"/>
+                                                                                <StackPanel Orientation="Horizontal" Margin="6 6 12 0">
+                                                                                    <TextBox Text="{Binding RentLivingEdit.Floors, UpdateSourceTrigger=PropertyChanged}" Width="42" Margin="0 0 3 6" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                                                    <Label Content="階" VerticalAlignment="Bottom" Margin="0 0 3 6" Style="{DynamicResource DefaultLabelStyle}"/>
+                                                                                </StackPanel>
+                                                                            </StackPanel>
+                                                                            <StackPanel>
+                                                                                <Label Content="地下" Style="{DynamicResource DefaultLabelStyle}"/>
+                                                                                <StackPanel Orientation="Horizontal" Margin="6 6 12 0">
+                                                                                    <TextBox Text="{Binding RentLivingEdit.FloorsBasement, UpdateSourceTrigger=PropertyChanged}" Width="42" Margin="0 0 3 6" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                                                    <Label Content="階" VerticalAlignment="Bottom" Margin="0 0 3 6" Style="{DynamicResource DefaultLabelStyle}"/>
+                                                                                </StackPanel>
+                                                                            </StackPanel>
+                                                                        </StackPanel>
+
+                                                                        <StackPanel Margin="12 0 0 0">
+                                                                            <Label Content="総戸数" Style="{DynamicResource DefaultLabelStyle}"/>
+                                                                            <StackPanel Orientation="Horizontal" Margin="6 6 12 0">
+                                                                                <TextBox Text="" Width="42" Margin="0 0 3 6" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                                                <Label Content="戸" VerticalAlignment="Bottom" Margin="0 0 3 6" Style="{DynamicResource DefaultLabelStyle}"/>
+                                                                            </StackPanel>
+                                                                        </StackPanel>
+                                                                        
                                                                     </StackPanel>
                                                                 </GroupBox>
 
-                                                                <StackPanel Orientation="Vertical" VerticalAlignment="Top" Visibility="Collapsed">
-                                                                    <RadioButton x:Name="RadioButtonRLKindApartEdit" Content="アパート（木造・鉄骨造）" GroupName="RentLivingKind" IsChecked="{Binding Path=RentLivingEdit.Kind, UpdateSourceTrigger=PropertyChanged, ConverterParameter={x:Static models:RentLivingKinds.Apartment}, Converter={StaticResource EnumBooleanConverter}}" Margin="6"/>
-                                                                    <RadioButton x:Name="RadioButtonRLKindMansionEdit" Content="マンション（鉄筋コンクリート造）" GroupName="RentLivingKind" IsChecked="{Binding Path=RentLivingEdit.Kind, UpdateSourceTrigger=PropertyChanged, ConverterParameter={x:Static models:RentLivingKinds.Mansion}, Converter={StaticResource EnumBooleanConverter}}" Margin="6"/>
-                                                                    <RadioButton x:Name="RadioButtonRLKindHouseEdit" Content="一戸建て" GroupName="RentLivingKind" IsChecked="{Binding Path=RentLivingEdit.Kind, UpdateSourceTrigger=PropertyChanged, ConverterParameter={x:Static models:RentLivingKinds.House}, Converter={StaticResource EnumBooleanConverter}}" Margin="6"/>
-                                                                    <RadioButton x:Name="RadioButtonRLKindOtherEdit" Content="その他（テラスハウス・タウンハウス等）" GroupName="RentLivingKind" IsChecked="{Binding Path=RentLivingEdit.Kind, UpdateSourceTrigger=PropertyChanged, ConverterParameter={x:Static models:RentLivingKinds.Other}, Converter={StaticResource EnumBooleanConverter}}" Margin="6"/>
-                                                                </StackPanel>
                                                             </StackPanel>
+
+                                                            <StackPanel Margin="6 0 6 0" Orientation="Horizontal">
+
+                                                                <!-- 区分所有なら非表示にする -->
+                                                                <GroupBox Header="取引態様" Padding="6">
+                                                                    <GroupBox.Style>
+                                                                        <Style TargetType="{x:Type GroupBox}" BasedOn="{StaticResource GroupBoxStyle}">
+                                                                            <Style.Triggers>
+                                                                                <DataTrigger Binding="{Binding ElementName=ButtonOwnershipType, Path=IsSelected}" Value="True">
+                                                                                    <Setter Property="GroupBox.Visibility" Value="Collapsed"/>
+                                                                                </DataTrigger>
+                                                                            </Style.Triggers>
+                                                                        </Style>
+                                                                    </GroupBox.Style>
+
+                                                                    <StackPanel>
+
+                                                                        <StackPanel Orientation="Horizontal">
+                                                                            <RadioButton Content="自社元付" Margin="6" Style="{DynamicResource DefaultRadioButtonStyle}"/>
+                                                                            <RadioButton Content="仲介先物" Margin="6" Style="{DynamicResource DefaultRadioButtonStyle}"/>
+                                                                        </StackPanel>
+
+                                                                        <StackPanel Orientation="Horizontal">
+                                                                            <ComboBox SelectedIndex="-1" Margin="6" Width="130" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                                                                <ComboBoxItem>一般媒介</ComboBoxItem>
+                                                                                <ComboBoxItem>専任媒介</ComboBoxItem>
+                                                                                <ComboBoxItem>専属専任媒介</ComboBoxItem>
+                                                                                <ComboBoxItem>代理</ComboBoxItem>
+                                                                                <ComboBoxItem>貸主</ComboBoxItem>
+                                                                            </ComboBox>
+                                                                        </StackPanel>
+
+                                                                    </StackPanel>
+                                                                </GroupBox>
+                                                                
+                                                            </StackPanel>
+                                                            
+                                                            <GroupBox Header="登録情報" Padding="6" Style="{DynamicResource GroupBoxStyle}" Visibility="Collapsed">
+                                                                
+                                                                <StackPanel Orientation="Horizontal">
+                                                                    <StackPanel Margin="6 0 0 12">
+                                                                        <Label Content="登録日" Style="{DynamicResource DefaultLabelStyle}"/>
+                                                                        <DatePicker Width="115" Margin="3" HorizontalAlignment="Left" VerticalAlignment="Center" IsEnabled="True"/>
+                                                                    </StackPanel>
+                                                                    <StackPanel Margin="12 0 0 0">
+                                                                        <Label Content="更新日" Style="{DynamicResource DefaultLabelStyle}"/>
+                                                                        <DatePicker Width="115" Margin="3" HorizontalAlignment="Left" VerticalAlignment="Center" IsEnabled="True"/>
+                                                                    </StackPanel>
+                                                                </StackPanel>
+                                                                
+                                                            </GroupBox>
 
                                                         </StackPanel>
                                                     </ScrollViewer>
 
                                                 </TabItem>
+                                                
+                                                <!-- 建物詳細 -->
+                                                <TabItem Header="建物詳細" Style="{DynamicResource EditingTabItemStyle}" Visibility="Collapsed">
 
-                                                <!-- 建物備考 -->
-                                                <TabItem>
-                                                    <TabItem.Header>
-                                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="3">
-                                                            <Label Content="備考" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                                        <StackPanel Margin="6 12 6 0">
+
+
                                                         </StackPanel>
-                                                    </TabItem.Header>
-                                                    <TabItem.Style>
-                                                        <Style TargetType="{x:Type TabItem}" BasedOn="{StaticResource DefaultTabItem}">
-                                                            <Setter Property="OverridesDefaultStyle" Value="False" />
-                                                        </Style>
-                                                    </TabItem.Style>
+                                                    </ScrollViewer>
 
-                                                    <Expander Header="建物備考" Margin="6" Padding="6" IsExpanded="True">
-                                                        <TextBox MinHeight="280" Margin="12" HorizontalAlignment="Stretch" VerticalAlignment="Top" AcceptsReturn="True" ScrollViewer.VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" />
-                                                    </Expander>
                                                 </TabItem>
+                                                
+                                                <!-- 建物備考 -->
+                                                <TabItem Header="備考" Style="{DynamicResource EditingTabItemStyle}">
+
+                                                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                                        <StackPanel Margin="6 12 6 0">
+                                                            <GroupBox Header="建物備考" Margin="6 0 6 0" Style="{DynamicResource GroupBoxStyle}">
+                                                                <TextBox MinHeight="280" Margin="12" HorizontalAlignment="Stretch" VerticalAlignment="Top" AcceptsReturn="True" ScrollViewer.VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" />
+                                                            </GroupBox>
+                                                        </StackPanel>
+                                                    </ScrollViewer>
+                                                    
+                                                </TabItem>
+                                                
                                             </TabControl>
+                                            
                                         </Grid>
 
                                     </Grid>
@@ -608,20 +625,10 @@
 
                             <Grid Margin="0 12 0 0">
 
-                                <TabControl Margin="6 0 6 6">
+                                <TabControl Margin="6 0 6 6" VerticalAlignment="Top" Style="{DynamicResource EditingTabControlStyle}">
 
                                     <!-- 設備 -->
-                                    <TabItem>
-                                        <TabItem.Header>
-                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="3">
-                                                <Label Content="設備" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                            </StackPanel>
-                                        </TabItem.Header>
-                                        <TabItem.Style>
-                                            <Style TargetType="{x:Type TabItem}" BasedOn="{StaticResource DefaultTabItem}">
-                                                <Setter Property="OverridesDefaultStyle" Value="False" />
-                                            </Style>
-                                        </TabItem.Style>
+                                    <TabItem Header="建物設備" Style="{DynamicResource EditingTabItemStyle}">
 
                                         <ScrollViewer VerticalScrollBarVisibility="Auto">
 
@@ -887,27 +894,19 @@
                                             </StackPanel>
                                         </ScrollViewer>
 
-
-
                                     </TabItem>
 
-                                    <!-- 設備備考 -->
-                                    <TabItem>
-                                        <TabItem.Header>
-                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="3">
-                                                <Label Content="備考" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    <!-- 備考 -->
+                                    <TabItem Header="備考" Style="{DynamicResource EditingTabItemStyle}">
+                                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                            <StackPanel Margin="6 12 6 0">
+                                                <GroupBox Header="建物設備備考" Margin="6 0 6 0" Style="{DynamicResource GroupBoxStyle}">
+                                                    <TextBox MinHeight="280" Margin="12" HorizontalAlignment="Stretch" VerticalAlignment="Top" AcceptsReturn="True" ScrollViewer.VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" />
+                                                </GroupBox>
                                             </StackPanel>
-                                        </TabItem.Header>
-                                        <TabItem.Style>
-                                            <Style TargetType="{x:Type TabItem}" BasedOn="{StaticResource DefaultTabItem}">
-                                                <Setter Property="OverridesDefaultStyle" Value="False" />
-                                            </Style>
-                                        </TabItem.Style>
-
-                                        <Expander Header="設備備考" Margin="6" Padding="6" IsExpanded="True">
-                                            <TextBox MinHeight="280" Margin="12" HorizontalAlignment="Stretch" VerticalAlignment="Top" AcceptsReturn="True" ScrollViewer.VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" />
-                                        </Expander>
+                                        </ScrollViewer>
                                     </TabItem>
+                                    
                                 </TabControl>
 
                             </Grid>
@@ -1354,7 +1353,7 @@
 
                             </Grid>
 
-                            <ListView Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Padding="6" Margin="6 12 6 6" BorderThickness="1" ItemsSource="{Binding RentLivingEdit.RentLivingPictures}" SelectedItem="{Binding PicturesSelectedItem}" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                            <ListView Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Padding="6" Margin="6 12 6 6" BorderThickness="1" Background="Transparent" ItemsSource="{Binding RentLivingEdit.RentLivingPictures}" SelectedItem="{Binding PicturesSelectedItem}" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                                 <ListView.Resources>
                                     <ContextMenu x:Key="ATItemContextMenu">
                                         <MenuItem Header="編集" Command="{Binding Path=DataContext.PictureEditListviewCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItems, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
@@ -1390,6 +1389,7 @@
                                     <Style TargetType="ListViewItem">
                                         <Setter Property="Padding" Value="0"/>
                                         <Setter Property="Margin" Value="3"/>
+                                        <Setter Property="Background" Value="Transparent"/>
                                         <Setter Property="HorizontalContentAlignment" Value="Center"/>
                                         <Setter Property="ContextMenu" Value="{StaticResource ATItemContextMenu}" />
                                     </Style>
@@ -1486,7 +1486,7 @@
 
                             </Grid>
 
-                            <ListView Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Padding="6" Margin="6 12 6 6" BorderThickness="1" ItemsSource="{Binding RentLivingEdit.RentLivingPdfs}" SelectedItem="{Binding PdfsSelectedItem}" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                            <ListView Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Padding="6" Margin="6 12 6 6" BorderThickness="1" Background="Transparent" ItemsSource="{Binding RentLivingEdit.RentLivingPdfs}" SelectedItem="{Binding PdfsSelectedItem}" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                                 <ListView.InputBindings>
                                     <KeyBinding Key="Enter" Command="{Binding Path=DataContext.RentLivingEditZumenPdfEnterCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" />
                                 </ListView.InputBindings>
@@ -1513,6 +1513,7 @@
                                     <Style TargetType="ListViewItem">
                                         <Setter Property="Padding" Value="0"/>
                                         <Setter Property="Margin" Value="3"/>
+                                        <Setter Property="Background" Value="Transparent"/>
                                         <Setter Property="HorizontalContentAlignment" Value="Center"/>
                                         <Setter Property="ContextMenu" Value="{StaticResource ATItemContextMenu}" />
                                     </Style>
@@ -1622,7 +1623,7 @@
                             <Style TargetType="{x:Type TabItem}" BasedOn="{StaticResource DefaultTabItem}">
                                 <Setter Property="OverridesDefaultStyle" Value="False" />
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding ElementName=RadioButtonOwnershipType, Path=IsChecked}" Value="True">
+                                    <DataTrigger Binding="{Binding ElementName=ButtonOwnershipType, Path=IsSelected}" Value="True">
                                         <Setter Property="TabItem.Visibility" Value="Hidden"/>
                                     </DataTrigger>
                                 </Style.Triggers>
@@ -1636,18 +1637,16 @@
                     </TabItem>
 
                     <!-- オーナー （区分所有なら非表示にする） -->
-                    <TabItem Width="120" Visibility="Collapsed">
+                    <TabItem Width="120">
                         <TabItem.Header>
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="3">
-                                <Label Content="オーナー" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </StackPanel>
+                            <Label Content="オーナー" Style="{DynamicResource TabMenuLabelStyle}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </TabItem.Header>
                         <TabItem.Style>
-                            <Style TargetType="{x:Type TabItem}" BasedOn="{StaticResource DefaultTabItem}">
+                            <Style TargetType="{x:Type TabItem}" BasedOn="{StaticResource TopMenuTabItemStyle}">
                                 <Setter Property="OverridesDefaultStyle" Value="False" />
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding ElementName=RadioButtonOwnershipType, Path=IsChecked}" Value="True">
-                                        <Setter Property="TabItem.Visibility" Value="Hidden"/>
+                                    <DataTrigger Binding="{Binding ElementName=ButtonOwnershipType, Path=IsSelected}" Value="True">
+                                        <Setter Property="TabItem.Visibility" Value="Collapsed"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
