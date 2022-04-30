@@ -484,7 +484,6 @@
                         </Border>
                     </TabItem>
 
-
                     <!-- 画像（内観写真、間取り図） -->
                     <TabItem Width="120" Style="{DynamicResource TopMenuTabItemStyle}">
                         <TabItem.Header>
@@ -567,9 +566,7 @@
                     <!-- PDF （募集図面、登記簿謄本、公図、建築図面）（区分所有の場合） -->
                     <TabItem Width="120">
                         <TabItem.Header>
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="3">
-                                <Label Content="図面" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </StackPanel>
+                            <Label Content="図面" HorizontalAlignment="Center" VerticalAlignment="Center" Style="{DynamicResource TabMenuLabelStyle}"/>
                         </TabItem.Header>
                         <TabItem.Style>
                             <Style TargetType="{x:Type TabItem}" BasedOn="{StaticResource TopMenuTabItemStyle}">
@@ -625,7 +622,7 @@
                     </TabItem>
 
                     <!-- オーナー -->
-                    <TabItem Width="120" Visibility="Collapsed">
+                    <TabItem Width="120">
                         <TabItem.Header>
                             <Label Content="オーナー " HorizontalAlignment="Center" VerticalAlignment="Center" Style="{DynamicResource TabMenuLabelStyle}"/>
                         </TabItem.Header>

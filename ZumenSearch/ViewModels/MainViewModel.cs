@@ -31,6 +31,7 @@ using ZumenSearch.Common;
 /// 
 
 /// ● 履歴：
+/// v0.0.0.26 色々。
 /// v0.0.0.25 色々。
 /// v0.0.0.24 色々。
 /// v0.0.0.23 VS2022に更新。ダークテーマ化し、レイアウト含め諸々変更。
@@ -66,7 +67,7 @@ namespace ZumenSearch.ViewModels
         #region == 基本 ==
 
         // Application version.
-        private const string _appVer = "0.0.0.25";
+        private const string _appVer = "0.0.0.26";
 
         // Application name.
         private const string _appName = "ZumenSearch";
@@ -104,7 +105,7 @@ namespace ZumenSearch.ViewModels
 
         #region == 物件関連オブジェクト ==
 
-        public ObservableCollection<RentLivingSummary> RentLivingSearchResult { get; } = new ObservableCollection<RentLivingSummary>();
+        public ObservableCollection<RentLivingSearchResult> RentLivingSearchResult { get; } = new ObservableCollection<RentLivingSearchResult>();
         public ObservableCollection<MainSearchResult> SearchResult { get; } = new ObservableCollection<MainSearchResult>();
 
         #region == 総合検索 ==
@@ -146,8 +147,8 @@ namespace ZumenSearch.ViewModels
 
         #region == 賃貸住居用 ==
 
-        private RentLivingSummary _rentLivingEditSelectedItem;
-        public RentLivingSummary RentLivingEditSelectedItem
+        private RentLivingSearchResult _rentLivingEditSelectedItem;
+        public RentLivingSearchResult RentLivingEditSelectedItem
         {
             get
             {
@@ -1063,7 +1064,7 @@ namespace ZumenSearch.ViewModels
             RentLivingListCommand = new RelayCommand(RentLivingListCommand_Execute, RentLivingListCommand_CanExecute);
             RentLivingSearchBackCommand = new RelayCommand(RentLivingSearchBackCommand_Execute, RentLivingSearchBackCommand_CanExecute);
 
-            RentLivingSearchEnterKeyCommand = new GenericRelayCommand<RentLivingSummary>(
+            RentLivingSearchEnterKeyCommand = new GenericRelayCommand<RentLivingSearchResult>(
                 param => RentLivingSearchEnterKeyCommand_Execute(param),
                 param => RentLivingSearchEnterKeyCommand_CanExecute());
 
@@ -1536,7 +1537,7 @@ namespace ZumenSearch.ViewModels
 
         #endregion
 
-        #region == 賃貸住居用 物件検索・編集 ==
+        #region == 賃貸住居用 ==
 
         // 検索画面の表示または移動
         public ICommand RentLivingShowSearchCommand { get; }
@@ -1646,7 +1647,7 @@ namespace ZumenSearch.ViewModels
         {
             return true;
         }
-        public void RentLivingSearchEnterKeyCommand_Execute(RentLivingSummary selectedEntry)
+        public void RentLivingSearchEnterKeyCommand_Execute(RentLivingSearchResult selectedEntry)
         {
             if (selectedEntry == null)
                 return;

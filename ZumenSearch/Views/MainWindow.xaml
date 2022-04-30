@@ -342,6 +342,17 @@
                                         </MenuItem.Icon>
                                     </MenuItem>
                                 </ContextMenu>
+                                <Style x:Key="ListviewItemFocusVisual">
+                                    <Setter Property="Control.Template">
+                                        <Setter.Value>
+                                            <ControlTemplate>
+                                                <Border CornerRadius="3">
+                                                    <Rectangle Margin="2" StrokeThickness="1" Stroke="#121212" StrokeDashArray="1 2" />
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
                                 <Style TargetType="{x:Type ScrollBar}">
                                     <Setter Property="Margin" Value="0,0,0,0" />
                                     <Setter Property="BorderThickness" Value="0" />
@@ -428,6 +439,7 @@
                                 <Style TargetType="ListViewItem" BasedOn="{StaticResource ListViewItemStyle}">
                                     <Setter Property="Margin" Value="0 0 0 0"/>
                                     <Setter Property="Padding" Value="1"/>
+                                    <Setter Property="FocusVisualStyle" Value="{StaticResource ListviewItemFocusVisual}"/>
                                     <Setter Property="ContextMenu" Value="{StaticResource ItemContextMenu}" />
                                     <Setter Property="HorizontalContentAlignment" Value="Left" />
                                     <Setter Property="VerticalContentAlignment" Value="Top" />

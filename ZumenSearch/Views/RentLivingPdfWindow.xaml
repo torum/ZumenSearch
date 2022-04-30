@@ -12,9 +12,9 @@
         WindowStartupLocation="CenterOwner"
         SnapsToDevicePixels="true"
         Background="{DynamicResource WindowBackgroundColorBrush}"
-        Width="384" Height="509" 
-        MinWidth="384" MinHeight="509"
-        MaxWidth="384" MaxHeight="509"
+        Width="384" Height="470" 
+        MinWidth="384" MinHeight="470"
+        MaxWidth="384" MaxHeight="470"
         Closing="Window_Closing">
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="32" ResizeBorderThickness="0"/>
@@ -118,49 +118,6 @@
 
             </Grid>
 
-            <!-- ステータスバー -->
-            <StatusBar Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Padding="0" Margin="0" Height="24" BorderBrush="#ccc" BorderThickness="0 1 0 0" Background="{DynamicResource WindowBackgroundColorBrush}">
-                <StatusBar.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="53" />
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="53" />
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                        </Grid>
-                    </ItemsPanelTemplate>
-                </StatusBar.ItemsPanel>
-
-                <!-- 保存ステータス -->
-                <StatusBarItem Grid.Column="0" HorizontalAlignment="Center">
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
-                    </StackPanel>
-                </StatusBarItem>
-
-                <!-- セパレーター -->
-                <Separator Grid.Column="1" Background="#ccc"/>
-
-                <!-- 変更ステータス -->
-                <StatusBarItem Grid.Column="2" HorizontalAlignment="Center">
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
-                    </StackPanel>
-                </StatusBarItem>
-
-                <!-- セパレーター -->
-                <Separator Grid.Column="3" Background="#ccc"/>
-
-                <!-- エラー -->
-                <StatusBarItem Grid.Column="4" HorizontalContentAlignment="Left">
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <TextBlock Text="" VerticalAlignment="Center" HorizontalAlignment="Left" Padding="0" TextWrapping="NoWrap"></TextBlock>
-                    </StackPanel>
-
-                </StatusBarItem>
-
-            </StatusBar>
 
         </Grid>
     </Border>

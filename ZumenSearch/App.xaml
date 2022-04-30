@@ -64,6 +64,13 @@
                         <Setter Property="FontWeight" Value="Normal" />
                     </Style>
 
+                    <Style TargetType="{x:Type Expander}">
+                        <Setter Property="Padding" Value="3"/>
+                        <Setter Property="Foreground" Value="{DynamicResource TitleTextColorBrush}" />
+                        <Setter Property="FontWeight" Value="Normal" />
+                    </Style>
+                    
+
                     <Style x:Key="DefaultTextBlockStyle" TargetType="{x:Type TextBlock}">
                         <Setter Property="Foreground" Value="{DynamicResource NormalTextColorBrush}" />
                         <Setter Property="FontWeight" Value="Normal" />
@@ -118,7 +125,7 @@
                         </Style.Triggers>
                     </Style>
 
-                    <Style x:Key="DefaultRadioButtonStyle" TargetType="{x:Type RadioButton}">
+                    <Style TargetType="{x:Type RadioButton}">
                         <Setter Property="Foreground" Value="{DynamicResource NormalTextColorBrush}" />
                         <Setter Property="Padding" Value="0" />
                         <Setter Property="Margin" Value="3 0 0 0" />

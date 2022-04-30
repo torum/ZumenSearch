@@ -64,19 +64,19 @@ namespace ZumenSearch.Models
             }
         }
 
-        private byte[] _pictureData;
-        public byte[] PictureData
+        private byte[] _thumbData;
+        public byte[] ThumbData
         {
             get
             {
-                return _pictureData;
+                return _thumbData;
             }
             set
             {
-                if (_pictureData == value) return;
+                if (_thumbData == value) return;
 
-                _pictureData = value;
-                this.NotifyPropertyChanged("PictureData");
+                _thumbData = value;
+                this.NotifyPropertyChanged("ThumbData");
             }
         }
 
@@ -266,8 +266,8 @@ namespace ZumenSearch.Models
         public Dictionary<string, string> PdfTypes { get; set; } = new Dictionary<string, string>()
         {
             {"BoshuuZumen", "募集図面"},
-            {"Touhon", "登記簿謄本"},
             {"KenchikuZumen", "建築図面"},
+            {"Touhon", "登記簿謄本"},
             {"Other", "その他"},
         };
 

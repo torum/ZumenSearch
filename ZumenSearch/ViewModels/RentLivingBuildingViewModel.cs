@@ -245,14 +245,17 @@ namespace ZumenSearch.ViewModels
             PictureAddCommand = new RelayCommand(PictureAddCommand_Execute, PictureAddCommand_CanExecute);
             // 画像の編集
             PictureEditCommand = new RelayCommand(PictureEditCommand_Execute, PictureEditCommand_CanExecute);
+            // 画像の表示
+            PictureShowCommand = new RelayCommand(PictureShowCommand_Execute, PictureShowCommand_CanExecute);
             // 画像の削除
             PictureDeleteCommand = new RelayCommand(PictureDeleteCommand_Execute, PictureDeleteCommand_CanExecute);
+            // 画像ListViewのエンター・ダブルクリック
+            PictureEnterKeyCommand = new RelayCommand(PictureEnterKeyCommand_Execute, PictureEnterKeyCommand_CanExecute);
 
             // 画像の編集（Listview）
             PictureEditListviewCommand = new GenericRelayCommand<object>(
                 param => PictureEditListviewCommand_Execute(param),
                 param => PictureEditListviewCommand_CanExecute());
-
 
             // 画像の削除（Listview）
             PictureDeleteListviewCommand = new GenericRelayCommand<object>(
@@ -270,6 +273,10 @@ namespace ZumenSearch.ViewModels
             PdfEditCommand = new RelayCommand(PdfEditCommand_Execute, PdfEditCommand_CanExecute);
             // PDFの削除
             PdfDeleteCommand = new RelayCommand(PdfDeleteCommand_Execute, PdfDeleteCommand_CanExecute);
+            // PDFの表示
+            PdfShowCommand = new RelayCommand(PdfShowCommand_Execute, PdfShowCommand_CanExecute);
+            // PDFListViewのエンター・ダブルクリック
+            PdfEnterKeyCommand = new RelayCommand(PdfEnterKeyCommand_Execute, PdfEnterKeyCommand_CanExecute);
 
             // PDFの削除
             RentLivingEditZumenPdfDeleteCommand = new GenericRelayCommand<object>(
@@ -297,20 +304,6 @@ namespace ZumenSearch.ViewModels
             SectionDuplicateCommand = new RelayCommand(SectionDuplicateCommand_Execute, SectionDuplicateCommand_CanExecute);
             // 部屋の削除
             SectionDeleteCommand = new RelayCommand(SectionDeleteCommand_Execute, SectionDeleteCommand_CanExecute);
-
-            // 
-            /*
-            // RL 管理新規　新規部屋の画像追加と削除
-            RentLivingNewSectionNewPictureAddCommand = new RelayCommand(RentLivingNewSectionNewPictureAddCommand_Execute, RentLivingNewSectionNewPictureAddCommand_CanExecute);
-            RentLivingNewSectionNewPictureDeleteCommand = new GenericRelayCommand<object>(
-                param => RentLivingNewSectionNewPictureDeleteCommand_Execute(param),
-                param => RentLivingNewSectionNewPictureDeleteCommand_CanExecute());
-            // RL 管理新規　編集部屋の画像追加と削除
-            RentLivingNewSectionEditPictureAddCommand = new RelayCommand(RentLivingNewSectionEditPictureAddCommand_Execute, RentLivingNewSectionEditPictureAddCommand_CanExecute);
-            RentLivingNewSectionEditPictureDeleteCommand = new GenericRelayCommand<object>(
-                param => RentLivingNewSectionEditPictureDeleteCommand_Execute(param),
-                param => RentLivingNewSectionEditPictureDeleteCommand_CanExecute());
-            */
 
             #endregion
 
@@ -389,6 +382,34 @@ namespace ZumenSearch.ViewModels
             RentLivingEdit.IsDirty = false;
 
             return true;
+        }
+
+        // 物件画像編集メソッド（Listview内外のコマンドから呼ばれる）
+        private void PictureEdit(RentLivingPicture rlpic)
+        {
+            // 画像編集Windowへ渡す為のArgをセット
+            OpenRentLivingImageWindowEventArgs ag = new OpenRentLivingImageWindowEventArgs();
+            ag.Id = rlpic.RentPictureId;
+            ag.RentLivingPictureObject = rlpic;
+            ag.RentLivingPictures = RentLivingEdit.RentLivingPictures;
+            ag.IsEdit = true;
+
+            // 画像編集Windowを開く
+            OpenRentLivingImageWindow?.Invoke(this, ag);
+        }
+
+        // 物件PDF編集メソッド（Listview内外のコマンドから呼ばれる）
+        private void PdfEdit(RentLivingPdf rlpdf)
+        {
+            // PDF編集Windowへ渡す為のArgをセット
+            OpenRentLivingPdfWindowEventArgs ag = new OpenRentLivingPdfWindowEventArgs();
+            ag.Id = rlpdf.RentPdfId;
+            ag.RentLivingPdfObject = rlpdf;
+            ag.RentLivingPdfs = RentLivingEdit.RentLivingPdfs;
+            ag.IsEdit = true;
+
+            // PDF編集Windowを開く
+            OpenRentLivingPdfWindow?.Invoke(this, ag);
         }
 
         #endregion
@@ -681,18 +702,38 @@ namespace ZumenSearch.ViewModels
             }
         }
 
-        // 物件画像編集メソッド（Listview内外のコマンドから呼ばれる）
-        private void PictureEdit(RentLivingPicture rlpic)
+        // 物件画像表示
+        public ICommand PictureShowCommand { get; }
+        public bool PictureShowCommand_CanExecute()
         {
-            // 画像編集Windowへ渡す為のArgをセット
-            OpenRentLivingImageWindowEventArgs ag = new OpenRentLivingImageWindowEventArgs();
-            ag.Id = rlpic.RentPictureId;
-            ag.RentLivingPictureObject = rlpic;
-            ag.RentLivingPictures = RentLivingEdit.RentLivingPictures;
-            ag.IsEdit = true;
+            if (PicturesSelectedItem != null)
+                return true;
+            else
+                return false;
+        }
+        public void PictureShowCommand_Execute()
+        {
+            if (PicturesSelectedItem == null)
+                return;
 
-            // 画像編集Windowを開く
-            OpenRentLivingImageWindow?.Invoke(this, ag);
+            // TODO:
+        }
+
+        // 物件PDFエンターキー・ダブルクリック
+        public ICommand PictureEnterKeyCommand { get; }
+        public bool PictureEnterKeyCommand_CanExecute()
+        {
+            if (PicturesSelectedItem != null)
+                return true;
+            else
+                return false;
+        }
+        public void PictureEnterKeyCommand_Execute()
+        {
+            if (PicturesSelectedItem == null)
+                return;
+
+            PictureEdit(PicturesSelectedItem);
         }
 
         // 物件画像削除
@@ -857,7 +898,7 @@ namespace ZumenSearch.ViewModels
 
         #region == 図面編集コマンド ==
 
-        // RL編集　物件の図面PDF追加
+        // 物件PDF追加
         public ICommand PdfAddCommand { get; }
         public bool PdfAddCommand_CanExecute()
         {
@@ -901,7 +942,7 @@ namespace ZumenSearch.ViewModels
 
                             // ByteArrayに変換
                             byte[] ImageData = Methods.BitmapImageToByteArray(bitimg);
-                            rlZumen.PictureData = ImageData;
+                            rlZumen.ThumbData = ImageData;
 
                             // TODO:
                             //rlZumen.DateTimeAdded = DateTime.Now;
@@ -934,7 +975,7 @@ namespace ZumenSearch.ViewModels
             }
         }
 
-        // 物件画像編集
+        // 物件PDF編集
         public ICommand PdfEditCommand { get; }
         public bool PdfEditCommand_CanExecute()
         {
@@ -949,20 +990,6 @@ namespace ZumenSearch.ViewModels
                 return;
 
             PdfEdit(PdfsSelectedItem);
-        }
-
-        // 物件PDF編集メソッド（Listview内外のコマンドから呼ばれる）
-        private void PdfEdit(RentLivingPdf rlpdf)
-        {
-            // PDF編集Windowへ渡す為のArgをセット
-            OpenRentLivingPdfWindowEventArgs ag = new OpenRentLivingPdfWindowEventArgs();
-            ag.Id = rlpdf.RentPdfId;
-            ag.RentLivingPdfObject = rlpdf;
-            ag.RentLivingPdfs = RentLivingEdit.RentLivingPdfs;
-            ag.IsEdit = true;
-
-            // PDF編集Windowを開く
-            OpenRentLivingPdfWindow?.Invoke(this, ag);
         }
 
         // 物件PDF削除
@@ -999,7 +1026,43 @@ namespace ZumenSearch.ViewModels
             SetIsDirty = true;
         }
 
-        // RL編集　物件の図面PDF削除
+        // 物件PDF表示
+        public ICommand PdfShowCommand { get; }
+        public bool PdfShowCommand_CanExecute()
+        {
+            if (PdfsSelectedItem != null)
+                return true;
+            else
+                return false;
+        }
+        public void PdfShowCommand_Execute()
+        {
+            if (PdfsSelectedItem == null)
+                return;
+
+            // TODO:
+        }
+
+        // 物件PDFエンターキー・ダブルクリック
+        public ICommand PdfEnterKeyCommand { get; }
+        public bool PdfEnterKeyCommand_CanExecute()
+        {
+            if (PdfsSelectedItem != null)
+                return true;
+            else
+                return false;
+        }
+        public void PdfEnterKeyCommand_Execute()
+        {
+            if (PdfsSelectedItem == null)
+                return;
+
+            PdfEdit(PdfsSelectedItem);
+        }
+
+        // TODO: 以下、使わなくてもよさそうなので、削除検討
+
+        // 物件PDF削除
         public ICommand RentLivingEditZumenPdfDeleteCommand { get; }
         public bool RentLivingEditZumenPdfDeleteCommand_CanExecute()
         {
@@ -1043,7 +1106,7 @@ namespace ZumenSearch.ViewModels
 
         }
 
-        // RL編集　物件の図面PDF表示
+        // 物件PDF表示
         public ICommand RentLivingEditZumenPdfShowCommand { get; }
         public bool RentLivingEditZumenPdfShowCommand_CanExecute()
         {
@@ -1093,7 +1156,7 @@ namespace ZumenSearch.ViewModels
 
         }
 
-        // RL編集　物件の図面PDF表示（ダブルクリックやエンター押下で）
+        // 物件PDF　（ダブルクリックやエンター押下で）
         public ICommand RentLivingEditZumenPdfEnterCommand { get; }
         public bool RentLivingEditZumenPdfEnterCommand_CanExecute()
         {

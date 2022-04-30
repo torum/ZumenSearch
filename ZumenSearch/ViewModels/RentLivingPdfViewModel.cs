@@ -173,7 +173,6 @@ namespace ZumenSearch.ViewModels
         }
         #endregion
 
-
         #region == イベント ==
 
         // 親画面（賃貸住居用物件）に、（コードビハインド経由で）変更通知を送るイベント。
@@ -195,37 +194,12 @@ namespace ZumenSearch.ViewModels
 
         }
 
-
         #region == イベントの実装 ==
 
 
         #endregion
 
-        #region == コマンドの実装 ==
-
-        // 画像の保存（追加または更新）
-        public ICommand PdfSaveCommand { get; }
-        public bool PdfSaveCommand_CanExecute()
-        {
-            if (RentLivingPdfEdit == null)
-                return false;
-
-            if (RentLivingPdfs == null)
-                return false;
-
-            if (IsDirty)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-        public void PdfSaveCommand_Execute()
-        {
-            PdfSave();
-        }
+        #region == メソッド ==
 
         // PDFの保存（追加または更新）メソッド（コードビハインドから保存確認ダイアログでも呼ばれる）
         public bool PdfSave()
@@ -294,6 +268,33 @@ namespace ZumenSearch.ViewModels
 
         #endregion
 
+        #region == コマンドの実装 ==
+
+        // 画像の保存（追加または更新）
+        public ICommand PdfSaveCommand { get; }
+        public bool PdfSaveCommand_CanExecute()
+        {
+            if (RentLivingPdfEdit == null)
+                return false;
+
+            if (RentLivingPdfs == null)
+                return false;
+
+            if (IsDirty)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        public void PdfSaveCommand_Execute()
+        {
+            PdfSave();
+        }
+
+        #endregion
 
     }
 }

@@ -12,7 +12,6 @@
         d:DataContext="{d:DesignInstance Type=vms:RentLivingBuildingViewModel}"
         SnapsToDevicePixels="true"
         BorderThickness="0"
-        Window.ResizeMode ="NoResize"
         WindowStartupLocation="CenterOwner"
         Background="{DynamicResource WindowBackgroundColorBrush}"
         Width="860" Height="610"
@@ -20,7 +19,7 @@
         StateChanged="Window_StateChanged"
         Closing="Window_Closing">
     <WindowChrome.WindowChrome>
-        <WindowChrome CaptionHeight="32" ResizeBorderThickness="0"/>
+        <WindowChrome CaptionHeight="32" ResizeBorderThickness="3"/>
     </WindowChrome.WindowChrome>
     <Border Style="{StaticResource WindowMainPanelStyle}">
         <Grid x:Name="BackgroundGrid" Background="{DynamicResource BoardBackgroundColorBrush}">
@@ -295,8 +294,9 @@
                                         </Grid>
 
                                         <!-- 交通１・２・３ -->
-                                        <Grid Grid.Row="2" Grid.Column="0" Margin="6 6 6 0" VerticalAlignment="Top">
-                                            <TabControl Height="395" Margin="0 0 0 0" VerticalAlignment="Top" Style="{DynamicResource EditingTabControlStyle}">
+                                        <Border Grid.Row="2" Grid.Column="0" VerticalAlignment="Stretch" Margin="0" BorderThickness="0 6 3 0" BorderBrush="{DynamicResource BoardBackgroundColorBrush}">
+                                            
+                                            <TabControl Height="395" Margin="6 0 0 0" VerticalAlignment="Top" Style="{DynamicResource EditingTabControlStyle}">
 
                                                 <TabItem Header="交通１" Style="{DynamicResource EditingTabItemStyle}">
                                                     
@@ -413,12 +413,13 @@
                                                 </TabItem>
 
                                             </TabControl>
-                                        </Grid>
+                                            
+                                        </Border>
 
                                         <!-- 建物 -->
-                                        <Grid Grid.Row="2" Grid.Column="1" Margin="6 6 6 0" VerticalAlignment="Top">
+                                        <Border Grid.Row="2" Grid.Column="1" VerticalAlignment="Stretch" Margin="0" BorderThickness="3 6 0 0" BorderBrush="{DynamicResource BoardBackgroundColorBrush}">
                                             
-                                            <TabControl Height="395" Margin="0 0 0 0" VerticalAlignment="Top" Style="{DynamicResource EditingTabControlStyle}">
+                                            <TabControl Height="395" Margin="6 0 0 0" VerticalAlignment="Top" Style="{DynamicResource EditingTabControlStyle}">
                                                 
                                                 <!-- 建物概要 -->
                                                 <TabItem Header="建物概要" Style="{DynamicResource EditingTabItemStyle}">
@@ -522,7 +523,73 @@
 
                                                             </StackPanel>
 
-                                                            <StackPanel Margin="6 0 6 0" Orientation="Horizontal">
+                                                            <StackPanel Margin="6 0 6 0">
+
+                                                                <GroupBox Header="登録情報" Padding="6" Style="{DynamicResource GroupBoxStyle}">
+                                                                    <StackPanel Orientation="Horizontal">
+                                                                        <StackPanel Margin="6 0 0 12">
+                                                                            <Label Content="登録日" Style="{DynamicResource DefaultLabelStyle}"/>
+                                                                            <DatePicker Width="115" Margin="3" HorizontalAlignment="Left" VerticalAlignment="Center" IsEnabled="True"/>
+                                                                        </StackPanel>
+                                                                        <StackPanel Margin="12 0 0 0">
+                                                                            <Label Content="更新日" Style="{DynamicResource DefaultLabelStyle}"/>
+                                                                            <DatePicker Width="115" Margin="3" HorizontalAlignment="Left" VerticalAlignment="Center" IsEnabled="True"/>
+                                                                        </StackPanel>
+                                                                    </StackPanel>
+
+                                                                </GroupBox>
+                                                            </StackPanel>
+
+
+                                                        </StackPanel>
+                                                    </ScrollViewer>
+
+                                                </TabItem>
+
+                                                <!-- 取引条件 -->
+                                                <!-- 区分所有なら非表示にする -->
+                                                <TabItem Header="取引条件" Visibility="Collapsed">
+                                                    <TabItem.Style>
+                                                        <Style TargetType="{x:Type TabItem}" BasedOn="{StaticResource EditingTabItemStyle}">
+                                                            <Setter Property="OverridesDefaultStyle" Value="False" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding ElementName=ButtonOwnershipType, Path=IsSelected}" Value="True">
+                                                                    <Setter Property="TabItem.Visibility" Value="Collapsed"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TabItem.Style>
+                                                    
+                                                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                                        <StackPanel Margin="6 12 6 0">
+                                                            
+                                                            <StackPanel Margin="6 0 6 0">
+
+                                                                <!-- 区分所有なら非表示にする -->
+                                                                <GroupBox Header="媒介" Padding="6">
+                                                                    <GroupBox.Style>
+                                                                        <Style TargetType="{x:Type GroupBox}" BasedOn="{StaticResource GroupBoxStyle}">
+                                                                            <Style.Triggers>
+                                                                                <DataTrigger Binding="{Binding ElementName=ButtonOwnershipType, Path=IsSelected}" Value="True">
+                                                                                    <Setter Property="GroupBox.Visibility" Value="Collapsed"/>
+                                                                                </DataTrigger>
+                                                                            </Style.Triggers>
+                                                                        </Style>
+                                                                    </GroupBox.Style>
+
+                                                                    <StackPanel>
+
+                                                                        <StackPanel Orientation="Horizontal">
+                                                                            <RadioButton Content="元付" Margin="6"/>
+                                                                            <RadioButton Content="先物" Margin="6"/>
+                                                                        </StackPanel>
+
+                                                                    </StackPanel>
+                                                                </GroupBox>
+                                                                
+                                                            </StackPanel>
+
+                                                            <StackPanel Margin="6 0 6 0">
 
                                                                 <!-- 区分所有なら非表示にする -->
                                                                 <GroupBox Header="取引態様" Padding="6">
@@ -538,52 +605,89 @@
 
                                                                     <StackPanel>
 
-                                                                        <StackPanel Orientation="Horizontal">
-                                                                            <RadioButton Content="自社元付" Margin="6" Style="{DynamicResource DefaultRadioButtonStyle}"/>
-                                                                            <RadioButton Content="仲介先物" Margin="6" Style="{DynamicResource DefaultRadioButtonStyle}"/>
-                                                                        </StackPanel>
-
-                                                                        <StackPanel Orientation="Horizontal">
-                                                                            <ComboBox SelectedIndex="-1" Margin="6" Width="130" HorizontalAlignment="Left" VerticalAlignment="Center">
-                                                                                <ComboBoxItem>一般媒介</ComboBoxItem>
-                                                                                <ComboBoxItem>専任媒介</ComboBoxItem>
-                                                                                <ComboBoxItem>専属専任媒介</ComboBoxItem>
-                                                                                <ComboBoxItem>代理</ComboBoxItem>
-                                                                                <ComboBoxItem>貸主</ComboBoxItem>
-                                                                            </ComboBox>
-                                                                        </StackPanel>
-
+                                                                        <ComboBox SelectedIndex="-1" Margin="6" Width="130" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                                                            <ComboBoxItem>一般媒介</ComboBoxItem>
+                                                                            <ComboBoxItem>専任媒介</ComboBoxItem>
+                                                                            <ComboBoxItem>専属専任媒介</ComboBoxItem>
+                                                                            <ComboBoxItem>代理</ComboBoxItem>
+                                                                            <ComboBoxItem>貸主</ComboBoxItem>
+                                                                        </ComboBox>
                                                                     </StackPanel>
                                                                 </GroupBox>
-                                                                
+
                                                             </StackPanel>
-                                                            
-                                                            <GroupBox Header="登録情報" Padding="6" Style="{DynamicResource GroupBoxStyle}" Visibility="Collapsed">
-                                                                
-                                                                <StackPanel Orientation="Horizontal">
-                                                                    <StackPanel Margin="6 0 0 12">
-                                                                        <Label Content="登録日" Style="{DynamicResource DefaultLabelStyle}"/>
-                                                                        <DatePicker Width="115" Margin="3" HorizontalAlignment="Left" VerticalAlignment="Center" IsEnabled="True"/>
+
+                                                            <StackPanel Margin="6 0 6 0">
+
+                                                                <!-- 区分所有なら非表示にする -->
+                                                                <GroupBox Header="手数料" Padding="6">
+                                                                    <GroupBox.Style>
+                                                                        <Style TargetType="{x:Type GroupBox}" BasedOn="{StaticResource GroupBoxStyle}">
+                                                                            <Style.Triggers>
+                                                                                <DataTrigger Binding="{Binding ElementName=ButtonOwnershipType, Path=IsSelected}" Value="True">
+                                                                                    <Setter Property="GroupBox.Visibility" Value="Collapsed"/>
+                                                                                </DataTrigger>
+                                                                            </Style.Triggers>
+                                                                        </Style>
+                                                                    </GroupBox.Style>
+
+                                                                    <StackPanel>
+                                                                        <Grid>
+                                                                            <Grid.RowDefinitions>
+                                                                                <RowDefinition Height="auto"/>
+                                                                                <RowDefinition Height="auto"/>
+                                                                            </Grid.RowDefinitions>
+                                                                            <Grid.ColumnDefinitions>
+                                                                                <ColumnDefinition Width="1*"/>
+                                                                                <ColumnDefinition Width="1*"/>
+                                                                            </Grid.ColumnDefinitions>
+
+                                                                            <StackPanel Grid.Row="0" Grid.Column="0">
+                                                                                <Label Content="貸主" Style="{DynamicResource DefaultLabelStyle}"/>
+                                                                                <StackPanel Orientation="Horizontal" Margin="6 6 12 0">
+                                                                                    <TextBox Text="{Binding RentLivingEdit.Floors, UpdateSourceTrigger=PropertyChanged}" Width="42" Margin="0 0 3 6" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                                                    <ComboBox SelectedIndex="0" Margin="0 0 3 6" VerticalAlignment="Bottom">
+                                                                                        <ComboBoxItem>％</ComboBoxItem>
+                                                                                        <ComboBoxItem>円</ComboBoxItem>
+                                                                                    </ComboBox>
+                                                                                </StackPanel>
+                                                                            </StackPanel>
+
+                                                                            <StackPanel Grid.Row="0" Grid.Column="1">
+                                                                                <Label Content="借主" Style="{DynamicResource DefaultLabelStyle}"/>
+                                                                                <StackPanel Orientation="Horizontal" Margin="6 6 12 0">
+                                                                                    <TextBox Text="{Binding RentLivingEdit.Floors, UpdateSourceTrigger=PropertyChanged}" Width="42" Margin="0 0 3 6" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                                                    <ComboBox SelectedIndex="0" Margin="0 0 3 6" VerticalAlignment="Bottom">
+                                                                                        <ComboBoxItem>％</ComboBoxItem>
+                                                                                        <ComboBoxItem>円</ComboBoxItem>
+                                                                                    </ComboBox>                                                                                </StackPanel>
+                                                                            </StackPanel>
+
+                                                                            <StackPanel Grid.Row="1" Grid.Column="0">
+                                                                                <Label Content="元付" Style="{DynamicResource DefaultLabelStyle}"/>
+                                                                                <StackPanel Orientation="Horizontal" Margin="6 6 12 0">
+                                                                                    <TextBox Text="{Binding RentLivingEdit.Floors, UpdateSourceTrigger=PropertyChanged}" Width="42" Margin="0 0 3 6" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                                                    <ComboBox SelectedIndex="0" Margin="0 0 3 6" VerticalAlignment="Bottom">
+                                                                                        <ComboBoxItem>％</ComboBoxItem>
+                                                                                        <ComboBoxItem>円</ComboBoxItem>
+                                                                                    </ComboBox>                                                                                </StackPanel>
+                                                                            </StackPanel>
+
+                                                                            <StackPanel Grid.Row="1" Grid.Column="1">
+                                                                                <Label Content="客付け" Style="{DynamicResource DefaultLabelStyle}"/>
+                                                                                <StackPanel Orientation="Horizontal" Margin="6 6 12 0">
+                                                                                    <TextBox Text="{Binding RentLivingEdit.Floors, UpdateSourceTrigger=PropertyChanged}" Width="42" Margin="0 0 3 6" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                                                                    <ComboBox SelectedIndex="0" Margin="0 0 3 6" VerticalAlignment="Bottom">
+                                                                                        <ComboBoxItem>％</ComboBoxItem>
+                                                                                        <ComboBoxItem>円</ComboBoxItem>
+                                                                                    </ComboBox>                                                                                </StackPanel>
+                                                                            </StackPanel>
+
+                                                                        </Grid>
                                                                     </StackPanel>
-                                                                    <StackPanel Margin="12 0 0 0">
-                                                                        <Label Content="更新日" Style="{DynamicResource DefaultLabelStyle}"/>
-                                                                        <DatePicker Width="115" Margin="3" HorizontalAlignment="Left" VerticalAlignment="Center" IsEnabled="True"/>
-                                                                    </StackPanel>
-                                                                </StackPanel>
-                                                                
-                                                            </GroupBox>
+                                                                </GroupBox>
 
-                                                        </StackPanel>
-                                                    </ScrollViewer>
-
-                                                </TabItem>
-                                                
-                                                <!-- 建物詳細 -->
-                                                <TabItem Header="建物詳細" Style="{DynamicResource EditingTabItemStyle}" Visibility="Collapsed">
-
-                                                    <ScrollViewer VerticalScrollBarVisibility="Auto">
-                                                        <StackPanel Margin="6 12 6 0">
-
+                                                            </StackPanel>
 
                                                         </StackPanel>
                                                     </ScrollViewer>
@@ -605,7 +709,7 @@
                                                 
                                             </TabControl>
                                             
-                                        </Grid>
+                                        </Border>
 
                                     </Grid>
                                 </ScrollViewer>
@@ -915,6 +1019,533 @@
 
                     </TabItem>
 
+                    <!-- 画像 -->
+                    <TabItem Width="120" Style="{DynamicResource TopMenuTabItemStyle}">
+                        <TabItem.Header>
+                            <Label Content="画像" Style="{DynamicResource TabMenuLabelStyle}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </TabItem.Header>
+
+                        <Grid Margin="0 12 0 0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- プレビュー画像 -->
+                            <Border Grid.Row="0" Grid.Column="0" Background="#eee" CornerRadius="3" VerticalAlignment="Top" Margin="12" Visibility="Collapsed">
+                                <Grid>
+                                    <!--  Add rounded corners here  -->
+                                    <Border Name="PicPrevMask" Margin="-5" Background="#eee" CornerRadius="3" />
+
+                                    <!--  Image  -->
+                                    <Grid>
+                                        <Grid.OpacityMask>
+                                            <VisualBrush Visual="{Binding ElementName=PicPrevMask}" />
+                                        </Grid.OpacityMask>
+
+                                        <Image Width="250" Height="167" Source="{Binding PicturesSelectedItem.Picture}"></Image>
+                                    </Grid>
+                                </Grid>
+                            </Border>
+
+                            <Grid Grid.Row="0" Grid.Column="1" Visibility="Collapsed">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Left" Margin="12">
+                                    <TextBlock Text="{Binding PicturesSelectedItem.PictureTypeLabel}"></TextBlock>
+                                    <TextBlock Text="（メイン画像）" Visibility="Hidden">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding PicturesSelectedItem.PictureIsMain}" Value="true">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding PicturesSelectedItem.PictureIsMain}" Value="false">
+                                                        <Setter Property="Visibility" Value="Hidden"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </StackPanel>
+
+                                <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Left" Margin="12">
+                                    <TextBlock Text="{Binding PicturesSelectedItem.PictureDescription}"></TextBlock>
+                                </StackPanel>
+
+                                <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="12 12 12 0">
+                                    <Button Margin="6" Command="{Binding PictureAddCommand}">追加</Button>
+                                    <Button Margin="6" Command="{Binding PictureEditCommand}">編集</Button>
+                                    <Button Margin="6" Command="{Binding PictureDeleteCommand}">削除</Button>
+                                </StackPanel>
+
+                            </Grid>
+
+                            <!-- Menu panel -->
+                            <Border Grid.Row="0" Grid.Column="0" Height="28" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" BorderThickness="0 0.5 0.5 0.5" BorderBrush="#121212">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Stretch">
+
+                                    <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
+                                    <Button Content="追加" ToolTip="追加" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding PictureAddCommand}" VerticalAlignment="Center"></Button>
+
+                                    <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
+                                    <Button Content="編集" ToolTip="編集" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding PictureEditCommand}" VerticalAlignment="Center"></Button>
+
+                                    <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
+                                    <Button Content="表示" ToolTip="表示" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" VerticalAlignment="Center"></Button>
+                                    
+                                    <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
+                                    <Button Content="削除" ToolTip="削除" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding PictureDeleteCommand}" VerticalAlignment="Center"></Button>
+
+                                    <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
+                                </StackPanel>
+                            </Border>
+
+                            <ListView Grid.Row="1" Grid.Column="0" Padding="6" Margin="0" BorderThickness="0" Background="{DynamicResource WindowBackgroundColorBrush}" ItemsSource="{Binding RentLivingEdit.RentLivingPictures}" SelectedItem="{Binding PicturesSelectedItem}" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                <ListView.InputBindings>
+                                    <KeyBinding Key="Enter" Command="{Binding Path=DataContext.PictureEnterKeyCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" />
+                                </ListView.InputBindings>
+                                <ListView.Resources>
+                                    <Style x:Key="ListviewItemFocusVisual">
+                                        <Setter Property="Control.Template">
+                                            <Setter.Value>
+                                                <ControlTemplate>
+                                                    <Border CornerRadius="3">
+                                                        <Rectangle Margin="2" StrokeThickness="1" Stroke="#121212" StrokeDashArray="1 2" />
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                    <ContextMenu x:Key="ATItemContextMenu">
+                                        <MenuItem Header="表示" Command="{Binding Path=DataContext.PictureShowCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItems, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
+                                            <MenuItem.Resources>
+                                                <ControlTemplate x:Key="OpenInBrowser">
+                                                    <Canvas Background="Transparent" >
+                                                        <Path Fill="#373737" Width="14.3775" Height="14" Canvas.Left="0.311264" Canvas.Top="0.500005" Stretch="Uniform" Data="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z" />
+                                                    </Canvas>
+                                                </ControlTemplate>
+                                            </MenuItem.Resources>
+                                            <MenuItem.Icon>
+                                                <ContentControl Template="{StaticResource OpenInBrowser}" />
+                                            </MenuItem.Icon>
+                                        </MenuItem>
+                                        <Separator/>
+                                        <MenuItem Header="編集" Command="{Binding Path=DataContext.PictureEditCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItems, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
+                                            <MenuItem.Resources>
+                                                <ControlTemplate x:Key="EditIcon">
+                                                    <Canvas Background="Transparent" >
+                                                        <Path Fill="#373737" Width="14.3775" Height="14" Canvas.Left="0.311264" Canvas.Top="0.500005" Stretch="Uniform" Data="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z" />
+                                                    </Canvas>
+                                                </ControlTemplate>
+                                            </MenuItem.Resources>
+                                            <MenuItem.Icon>
+                                                <ContentControl Template="{StaticResource EditIcon}" />
+                                            </MenuItem.Icon>
+                                        </MenuItem>
+                                        <Separator/>
+                                        <MenuItem Header="削除" Command="{Binding Path=DataContext.PictureDeleteCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItems, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
+                                            <MenuItem.Resources>
+                                                <ControlTemplate x:Key="DeleteForeverIcon">
+                                                    <Canvas Background="Transparent">
+                                                        <Path Fill="#373737" Width="14.3775" Height="14" Canvas.Left="0.311264" Canvas.Top="0.500005" Stretch="Uniform" Data="M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19M8.46,11.88L9.87,10.47L12,12.59L14.12,10.47L15.53,11.88L13.41,14L15.53,16.12L14.12,17.53L12,15.41L9.88,17.53L8.47,16.12L10.59,14L8.46,11.88M15.5,4L14.5,3H9.5L8.5,4H5V6H19V4H15.5Z" />
+                                                    </Canvas>
+                                                </ControlTemplate>
+                                            </MenuItem.Resources>
+                                            <MenuItem.Icon>
+                                                <ContentControl Template="{StaticResource DeleteForeverIcon}" />
+                                            </MenuItem.Icon>
+                                        </MenuItem>
+
+                                    </ContextMenu>
+                                </ListView.Resources>
+                                <ListView.ItemContainerStyle>
+                                    <Style TargetType="ListViewItem">
+                                        <Setter Property="Padding" Value="0"/>
+                                        <Setter Property="Margin" Value="3"/>
+                                        <Setter Property="BorderThickness" Value="1"/>
+                                        <Setter Property="Background" Value="Transparent"/>
+                                        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                        <Setter Property="FocusVisualStyle" Value="{StaticResource ListviewItemFocusVisual}"/>
+                                        <Setter Property="ContextMenu" Value="{StaticResource ATItemContextMenu}" />
+
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="BorderBrush" Value="#666"/>
+                                            </Trigger>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter Property="BorderBrush" Value="#888" />
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ListView.ItemContainerStyle>
+                                <ListView.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel/>
+                                    </ItemsPanelTemplate>
+                                </ListView.ItemsPanel>
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel>
+                                            <Grid Width="110" Height="73" Margin="6">
+                                                <Grid.InputBindings>
+                                                    <MouseBinding Command="{Binding Path=DataContext.PictureEnterKeyCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" Gesture="LeftDoubleClick" />
+                                                </Grid.InputBindings>
+                                                
+                                                <!--  Add rounded corners here  -->
+                                                <Border Name="PicPrevMask" Margin="-5" Background="#eee" CornerRadius="3" BorderThickness="2" />
+                                                <Grid>
+                                                    <Grid.OpacityMask>
+                                                        <VisualBrush Visual="{Binding ElementName=PicPrevMask}" />
+                                                    </Grid.OpacityMask>
+
+                                                    <Image Source="{Binding PictureThumb}" Stretch="Uniform" Width="110" Height="73" Margin="0"></Image>
+                                                </Grid>
+
+                                            </Grid>
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding PictureTypeLabel}" Style="{DynamicResource DefaultTextBlockStyle}" Margin="3"></TextBlock>
+                                                <TextBlock Text="メイン画像" x:Name="PictureIsMain" Style="{DynamicResource DefaultTextBlockStyle}"></TextBlock>
+                                            </StackPanel>
+                                        </StackPanel>
+
+                                        <DataTemplate.Triggers>
+
+                                            <DataTrigger Binding="{Binding PictureIsMain}" Value="True">
+                                                <Setter TargetName="PicPrevMask" Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                                                <Setter TargetName="PictureIsMain" Property="Visibility" Value="Collapsed"/>
+                                            </DataTrigger>
+
+                                            <DataTrigger Binding="{Binding PictureIsMain}" Value="False">
+                                                <Setter TargetName="PicPrevMask" Property="BorderBrush" Value="Transparent"/>
+                                                <Setter TargetName="PictureIsMain" Property="Visibility" Value="Collapsed"/>
+                                            </DataTrigger>
+                                            
+                                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListViewItem}}, Path=IsSelected}" Value="True">
+                                                <Setter TargetName="PicPrevMask" Property="Background" Value="White"/>
+                                            </DataTrigger>
+                                            
+                                        </DataTemplate.Triggers>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+
+                        </Grid>
+
+                    </TabItem>
+
+                    <!-- 図面（募集図面、登記簿謄本、公図、建築図面）（区分所有なら非表示にする）  -->
+                    <TabItem Width="120">
+                        <TabItem.Header>
+                            <Label Content="図面" Style="{DynamicResource TabMenuLabelStyle}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </TabItem.Header>
+                        <TabItem.Style>
+                            <Style TargetType="{x:Type TabItem}" BasedOn="{StaticResource TopMenuTabItemStyle}">
+                                <Setter Property="OverridesDefaultStyle" Value="False" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ElementName=ButtonOwnershipType, Path=IsSelected}" Value="True">
+                                        <Setter Property="TabItem.Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TabItem.Style>
+                        <Grid Margin="0 12 0 0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- プレビュー画像 -->
+                            <Border Grid.Row="0" Grid.Column="0" Background="#eee" CornerRadius="3" VerticalAlignment="Top" Margin="12" Visibility="Collapsed">
+                                <Grid>
+                                    <!--  Add rounded corners here  -->
+                                    <Border Name="PdfPrevMask" Margin="-5" Background="#eee" CornerRadius="3" />
+
+                                    <!--  Image  -->
+                                    <Grid>
+                                        <Grid.OpacityMask>
+                                            <VisualBrush Visual="{Binding ElementName=PdfPrevMask}" />
+                                        </Grid.OpacityMask>
+
+                                        <Image Width="250" Height="178" Source="{Binding PdfsSelectedItem.Picture}"></Image>
+                                    </Grid>
+                                </Grid>
+                            </Border>
+
+                            <Grid Grid.Row="0" Grid.Column="1" Visibility="Collapsed">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Left" Margin="12">
+                                    <TextBlock Text="{Binding PdfsSelectedItem.PdfTypeLabel}"></TextBlock>
+                                    <TextBlock Text="（メイン図面）" Visibility="Hidden">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding PdfsSelectedItem.PdfIsMain}" Value="true">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding PdfsSelectedItem.PdfIsMain}" Value="false">
+                                                        <Setter Property="Visibility" Value="Hidden"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </StackPanel>
+
+                                <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Left" Margin="12">
+                                    <TextBlock Text="{Binding PdfsSelectedItem.PdfDescription}"></TextBlock>
+                                </StackPanel>
+
+                                <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="12 12 12 0">
+                                    <Button Margin="6" Command="{Binding PdfAddCommand}">追加</Button>
+                                    <Button Margin="6" Command="{Binding PdfEditCommand}">編集</Button>
+                                    <Button Margin="6" Command="{Binding PdfDeleteCommand}">削除</Button>
+                                </StackPanel>
+
+                            </Grid>
+
+                            <!-- Menu panel -->
+                            <Border Grid.Row="0" Grid.Column="0" Height="28" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" BorderThickness="0 0.5 0.5 0.5" BorderBrush="#121212">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Stretch">
+
+                                    <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
+                                    <Button Content="追加" ToolTip="追加" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding PdfAddCommand}" VerticalAlignment="Center"></Button>
+
+                                    <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
+                                    <Button Content="編集" ToolTip="編集" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding PdfEditCommand}" VerticalAlignment="Center"></Button>
+
+                                    <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
+                                    <Button Content="表示" ToolTip="表示" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding PdfShowCommand}" VerticalAlignment="Center"></Button>
+                                    
+                                    <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
+                                    <Button Content="削除" ToolTip="削除" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding PdfDeleteCommand}" VerticalAlignment="Center"></Button>
+
+                                    <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
+                                </StackPanel>
+                            </Border>
+
+                            <ListView Grid.Row="1" Grid.Column="0" Padding="6" Margin="0" BorderThickness="0" Background="{DynamicResource WindowBackgroundColorBrush}" ItemsSource="{Binding RentLivingEdit.RentLivingPdfs}" SelectedItem="{Binding PdfsSelectedItem}" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                <ListView.InputBindings>
+                                    <KeyBinding Key="Enter" Command="{Binding Path=DataContext.PdfEnterKeyCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" />
+                                </ListView.InputBindings>
+                                <ListView.Resources>
+                                    <Style x:Key="ListviewItemFocusVisual">
+                                        <Setter Property="Control.Template">
+                                            <Setter.Value>
+                                                <ControlTemplate>
+                                                    <Border CornerRadius="3">
+                                                        <Rectangle Margin="2" StrokeThickness="1" Stroke="#121212" StrokeDashArray="1 2" />
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                    <ContextMenu x:Key="ATItemContextMenu">
+                                        <MenuItem Header="表示" Command="{Binding Path=DataContext.PdfShowCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItems, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
+                                            <MenuItem.Resources>
+                                                <ControlTemplate x:Key="OpenInBrowser">
+                                                    <Canvas Background="Transparent" >
+                                                        <Path Fill="#373737" Width="14.3775" Height="14" Canvas.Left="0.311264" Canvas.Top="0.500005" Stretch="Uniform" Data="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z" />
+                                                    </Canvas>
+                                                </ControlTemplate>
+                                            </MenuItem.Resources>
+                                            <MenuItem.Icon>
+                                                <ContentControl Template="{StaticResource OpenInBrowser}" />
+                                            </MenuItem.Icon>
+                                        </MenuItem>
+                                        <Separator/>
+                                        <MenuItem Header="編集" Command="{Binding Path=DataContext.PdfEditCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItems, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
+                                            <MenuItem.Resources>
+                                                <ControlTemplate x:Key="EditIcon">
+                                                    <Canvas Background="Transparent" >
+                                                        <Path Fill="#373737" Width="14.3775" Height="14" Canvas.Left="0.311264" Canvas.Top="0.500005" Stretch="Uniform" Data="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z" />
+                                                    </Canvas>
+                                                </ControlTemplate>
+                                            </MenuItem.Resources>
+                                            <MenuItem.Icon>
+                                                <ContentControl Template="{StaticResource EditIcon}" />
+                                            </MenuItem.Icon>
+                                        </MenuItem>
+                                        <Separator/>
+                                        <MenuItem Header="削除" Command="{Binding Path=DataContext.PdfDeleteCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItems, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
+                                            <MenuItem.Resources>
+                                                <ControlTemplate x:Key="DeleteForeverIcon">
+                                                    <Canvas Background="Transparent">
+                                                        <Path Fill="#373737" Width="14.3775" Height="14" Canvas.Left="0.311264" Canvas.Top="0.500005" Stretch="Uniform" Data="M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19M8.46,11.88L9.87,10.47L12,12.59L14.12,10.47L15.53,11.88L13.41,14L15.53,16.12L14.12,17.53L12,15.41L9.88,17.53L8.47,16.12L10.59,14L8.46,11.88M15.5,4L14.5,3H9.5L8.5,4H5V6H19V4H15.5Z" />
+                                                    </Canvas>
+                                                </ControlTemplate>
+                                            </MenuItem.Resources>
+                                            <MenuItem.Icon>
+                                                <ContentControl Template="{StaticResource DeleteForeverIcon}" />
+                                            </MenuItem.Icon>
+                                        </MenuItem>
+                                    </ContextMenu>
+                                </ListView.Resources>
+                                <ListView.ItemContainerStyle>
+                                    <Style TargetType="ListViewItem">
+                                        <Setter Property="Padding" Value="0"/>
+                                        <Setter Property="Margin" Value="3"/>
+                                        <Setter Property="Background" Value="Transparent"/>
+                                        <Setter Property="BorderThickness" Value="1"/>
+                                        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                        <Setter Property="FocusVisualStyle" Value="{StaticResource ListviewItemFocusVisual}"/>
+                                        <Setter Property="ContextMenu" Value="{StaticResource ATItemContextMenu}" />
+                                    </Style>
+                                    <!--
+                                    <Style TargetType="ListViewItem">
+                                        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                        <Setter Property="ContextMenu" Value="{StaticResource ATItemContextMenu}" />
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="{x:Type ListViewItem}">
+                                                    <Border Name="Border" Margin="{TemplateBinding Margin}" Padding="{TemplateBinding Padding}" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" ClipToBounds="{TemplateBinding ClipToBounds}" CornerRadius="0" SnapsToDevicePixels="true">
+                                                        <GridViewRowPresenter VerticalAlignment="{TemplateBinding VerticalContentAlignment}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+
+                                                        <Border.InputBindings>
+                                                            <MouseBinding Command="{Binding Path=DataContext.RentLivingEditZumenPdfEnterCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" Gesture="LeftDoubleClick" />
+                                                        </Border.InputBindings>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Style.Triggers>
+                                            <Trigger Property="ItemsControl.AlternationIndex" Value="0">
+                                                <Setter Property="BorderThickness" Value="1" />
+                                            </Trigger>
+                                            <Trigger Property="ItemsControl.AlternationIndex" Value="1">
+                                                <Setter Property="BorderThickness" Value="1" />
+                                            </Trigger>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="TextElement.FontWeight" Value="SemiBold"/>
+                                                <Setter Property="BorderThickness" Value="1" />
+                                            </Trigger>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter Property="TextElement.FontWeight" Value="Bold"/>
+                                                <Setter Property="BorderThickness" Value="1" />
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                    -->
+                                </ListView.ItemContainerStyle>
+                                <ListView.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel/>
+                                    </ItemsPanelTemplate>
+                                </ListView.ItemsPanel>
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel>
+
+                                            <Grid Width="110" Height="78" Margin="6">
+                                                <Grid.InputBindings>
+                                                    <MouseBinding Command="{Binding Path=DataContext.PdfEnterKeyCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" Gesture="LeftDoubleClick" />
+                                                </Grid.InputBindings>
+                                                
+                                                <!--  Add rounded corners here  -->
+                                                <Border Name="PdfPrevMask" Margin="-5" Background="#eee" CornerRadius="3" BorderThickness="2" />
+
+                                                <!--  Image  -->
+                                                <Grid>
+                                                    <Grid.OpacityMask>
+                                                        <VisualBrush Visual="{Binding ElementName=PdfPrevMask}" />
+                                                    </Grid.OpacityMask>
+
+                                                    <Image Source="{Binding Picture}" Stretch="Uniform" Width="110" Height="78" Margin="0"></Image>
+                                                </Grid>
+
+                                            </Grid>
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding PdfTypeLabel}" Style="{DynamicResource DefaultTextBlockStyle}" Margin="3"></TextBlock>
+                                                <TextBlock Text="メイン図面" x:Name="PdfIsMain" Style="{DynamicResource DefaultTextBlockStyle}"></TextBlock>
+                                            </StackPanel>
+                                        </StackPanel>
+
+                                        <DataTemplate.Triggers>
+
+                                            <DataTrigger Binding="{Binding PdfIsMain}" Value="True">
+                                                <Setter TargetName="PdfPrevMask" Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                                                <Setter TargetName="PdfIsMain" Property="Visibility" Value="Collapsed"/>
+                                            </DataTrigger>
+
+                                            <DataTrigger Binding="{Binding PdfIsMain}" Value="False">
+                                                <Setter TargetName="PdfPrevMask" Property="BorderBrush" Value="Transparent"/>
+                                                <Setter TargetName="PdfIsMain" Property="Visibility" Value="Collapsed"/>
+                                            </DataTrigger>
+
+                                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListViewItem}}, Path=IsSelected}" Value="True">
+                                                <Setter TargetName="PdfPrevMask" Property="Background" Value="White"/>
+                                            </DataTrigger>
+
+                                        </DataTemplate.Triggers>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                                <!--
+                                <ListView.View>
+                                    <GridView>
+                                        <GridViewColumn Header="ID" Width="120">
+                                            <GridViewColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding RentZumenPdfId, Mode=OneWay}" Padding="3"/>
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+                                        </GridViewColumn>
+                                        <GridViewColumn Header="登録日" Width="150">
+                                            <GridViewColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding DateTimeAdded, Mode=OneWay, StringFormat=yyyy/MM/dd HH:mm:ss}" Padding="3"/>
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+                                        </GridViewColumn>
+                                        <GridViewColumn Header="情報公開日" Width="150">
+                                            <GridViewColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding DateTimePublished, Mode=OneWay, StringFormat=yyyy/MM/dd HH:mm:ss}" Padding="3"/>
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+                                        </GridViewColumn>
+                                        <GridViewColumn Header="最終確認日" Width="150">
+                                            <GridViewColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding DateTimeVerified, Mode=OneWay, StringFormat=yyyy/MM/dd HH:mm:ss}" Padding="3"/>
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+                                        </GridViewColumn>
+                                        <GridViewColumn Header="ファイルサイズ" Width="120">
+                                            <GridViewColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding FileSizeLabel, Mode=OneWay}" Padding="3"/>
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+                                        </GridViewColumn>
+                                    </GridView>
+                                </ListView.View>
+                                -->
+                            </ListView>
+                        </Grid>
+
+                    </TabItem>
+
                     <!-- 部屋 -->
                     <TabItem Width="120" Style="{DynamicResource TopMenuTabItemStyle}">
                         <TabItem.Header>
@@ -941,7 +1572,7 @@
                                 </StackPanel>
 
                                 <!-- Menu panel -->
-                                <Border Grid.Row="0" Grid.Column="0" Height="28" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" BorderThickness="0 0.5 0 0.5" BorderBrush="#121212">
+                                <Border Grid.Row="0" Grid.Column="0" Height="28" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" BorderThickness="0 0.5 0.5 0.5" BorderBrush="#121212">
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Stretch">
 
                                         <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
@@ -1275,339 +1906,6 @@
 
                             </Grid>
 
-                        </Grid>
-
-                    </TabItem>
-
-                    <!-- 画像 -->
-                    <TabItem Width="120" Style="{DynamicResource TopMenuTabItemStyle}">
-                        <TabItem.Header>
-                            <Label Content="画像" Style="{DynamicResource TabMenuLabelStyle}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </TabItem.Header>
-
-                        <Grid Margin="0 12 0 0">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="*"/>
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-
-                            <!-- プレビュー画像 -->
-                            <Border Grid.Row="0" Grid.Column="0" Background="#eee" CornerRadius="3" VerticalAlignment="Top" Margin="12">
-                                <Grid>
-                                    <!--  Add rounded corners here  -->
-                                    <Border Name="PicPrevMask" Margin="-5" Background="#eee" CornerRadius="3" />
-
-                                    <!--  Image  -->
-                                    <Grid>
-                                        <Grid.OpacityMask>
-                                            <VisualBrush Visual="{Binding ElementName=PicPrevMask}" />
-                                        </Grid.OpacityMask>
-
-                                        <Image Width="250" Height="167" Source="{Binding PicturesSelectedItem.Picture}"></Image>
-                                    </Grid>
-                                </Grid>
-                            </Border>
-
-                            <Grid Grid.Row="0" Grid.Column="1">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="*"/>
-                                </Grid.RowDefinitions>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-
-                                <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Left" Margin="12">
-                                    <TextBlock Text="{Binding PicturesSelectedItem.PictureTypeLabel}"></TextBlock>
-                                    <TextBlock Text="（メイン画像）" Visibility="Hidden">
-                                        <TextBlock.Style>
-                                            <Style TargetType="TextBlock">
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding PicturesSelectedItem.PictureIsMain}" Value="true">
-                                                        <Setter Property="Visibility" Value="Visible"/>
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding PicturesSelectedItem.PictureIsMain}" Value="false">
-                                                        <Setter Property="Visibility" Value="Hidden"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </TextBlock.Style>
-                                    </TextBlock>
-                                </StackPanel>
-
-                                <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Left" Margin="12">
-                                    <TextBlock Text="{Binding PicturesSelectedItem.PictureDescription}"></TextBlock>
-                                </StackPanel>
-
-                                <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="12 12 12 0">
-                                    <Button Margin="6" Command="{Binding PictureAddCommand}">追加</Button>
-                                    <Button Margin="6" Command="{Binding PictureEditCommand}">編集</Button>
-                                    <Button Margin="6" Command="{Binding PictureDeleteCommand}">削除</Button>
-                                </StackPanel>
-
-
-                            </Grid>
-
-                            <ListView Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Padding="6" Margin="6 12 6 6" BorderThickness="1" Background="Transparent" ItemsSource="{Binding RentLivingEdit.RentLivingPictures}" SelectedItem="{Binding PicturesSelectedItem}" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                                <ListView.Resources>
-                                    <ContextMenu x:Key="ATItemContextMenu">
-                                        <MenuItem Header="編集" Command="{Binding Path=DataContext.PictureEditListviewCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItems, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
-                                            <MenuItem.Resources>
-                                                <ControlTemplate x:Key="CancelIcon">
-                                                    <Canvas Background="Transparent" >
-                                                        <Path Fill="#373737" Width="14.3775" Height="14" Canvas.Left="0.311264" Canvas.Top="0.500005" Stretch="Uniform" Data="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12C4,13.85 4.63,15.55 5.68,16.91L16.91,5.68C15.55,4.63 13.85,4 12,4M12,20A8,8 0 0,0 20,12C20,10.15 19.37,8.45 18.32,7.09L7.09,18.32C8.45,19.37 10.15,20 12,20Z" />
-                                                    </Canvas>
-                                                </ControlTemplate>
-                                            </MenuItem.Resources>
-                                            <MenuItem.Icon>
-                                                <ContentControl Template="{StaticResource CancelIcon}" />
-                                            </MenuItem.Icon>
-                                        </MenuItem>
-                                        <MenuItem Header="削除" Command="{Binding Path=DataContext.PictureDeleteListviewCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItems, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
-                                            <MenuItem.Resources>
-                                                <ControlTemplate x:Key="CancelIcon">
-                                                    <Canvas Background="Transparent" >
-                                                        <Path Fill="#373737" Width="14.3775" Height="14" Canvas.Left="0.311264" Canvas.Top="0.500005" Stretch="Uniform" Data="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12C4,13.85 4.63,15.55 5.68,16.91L16.91,5.68C15.55,4.63 13.85,4 12,4M12,20A8,8 0 0,0 20,12C20,10.15 19.37,8.45 18.32,7.09L7.09,18.32C8.45,19.37 10.15,20 12,20Z" />
-                                                    </Canvas>
-                                                </ControlTemplate>
-                                            </MenuItem.Resources>
-                                            <MenuItem.Icon>
-                                                <ContentControl Template="{StaticResource CancelIcon}" />
-                                            </MenuItem.Icon>
-                                        </MenuItem>
-                                        <MenuItem Header="変更" Command="{Binding Path=DataContext.PictureChangeListviewCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItems, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
-
-                                        </MenuItem>
-                                    </ContextMenu>
-                                </ListView.Resources>
-                                <ListView.ItemContainerStyle>
-                                    <Style TargetType="ListViewItem">
-                                        <Setter Property="Padding" Value="0"/>
-                                        <Setter Property="Margin" Value="3"/>
-                                        <Setter Property="Background" Value="Transparent"/>
-                                        <Setter Property="HorizontalContentAlignment" Value="Center"/>
-                                        <Setter Property="ContextMenu" Value="{StaticResource ATItemContextMenu}" />
-                                    </Style>
-                                </ListView.ItemContainerStyle>
-                                <ListView.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <WrapPanel/>
-                                    </ItemsPanelTemplate>
-                                </ListView.ItemsPanel>
-                                <ListView.ItemTemplate>
-                                    <DataTemplate>
-                                        <Grid Width="110" Height="73">
-                                            <Image Source="{Binding PictureThumb}" Stretch="Uniform" Width="110" Height="73" Margin="0"></Image>
-                                            <TextBlock Text="{Binding PictureTypeLabel}"></TextBlock>
-                                        </Grid>
-                                    </DataTemplate>
-                                </ListView.ItemTemplate>
-                            </ListView>
-
-                        </Grid>
-
-                    </TabItem>
-
-                    <!-- 図面（募集図面、登記簿謄本、公図、建築図面） -->
-                    <TabItem Width="120" Style="{DynamicResource TopMenuTabItemStyle}">
-                        <TabItem.Header>
-                            <Label Content="図面" Style="{DynamicResource TabMenuLabelStyle}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </TabItem.Header>
-
-                        <Grid Margin="0 12 0 0">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="*"/>
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-
-                            <!-- プレビュー画像 -->
-                            <Border Grid.Row="0" Grid.Column="0" Background="#eee" CornerRadius="3" VerticalAlignment="Top" Margin="12">
-                                <Grid>
-                                    <!--  Add rounded corners here  -->
-                                    <Border Name="PdfPrevMask" Margin="-5" Background="#eee" CornerRadius="3" />
-
-                                    <!--  Image  -->
-                                    <Grid>
-                                        <Grid.OpacityMask>
-                                            <VisualBrush Visual="{Binding ElementName=PdfPrevMask}" />
-                                        </Grid.OpacityMask>
-
-                                        <Image Width="250" Height="178" Source="{Binding PdfsSelectedItem.Picture}"></Image>
-                                    </Grid>
-                                </Grid>
-                            </Border>
-
-                            <Grid Grid.Row="0" Grid.Column="1">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="*"/>
-                                </Grid.RowDefinitions>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-
-                                <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Left" Margin="12">
-                                    <TextBlock Text="{Binding PdfsSelectedItem.PdfTypeLabel}"></TextBlock>
-                                    <TextBlock Text="（メイン図面）" Visibility="Hidden">
-                                        <TextBlock.Style>
-                                            <Style TargetType="TextBlock">
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding PdfsSelectedItem.PdfIsMain}" Value="true">
-                                                        <Setter Property="Visibility" Value="Visible"/>
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding PdfsSelectedItem.PdfIsMain}" Value="false">
-                                                        <Setter Property="Visibility" Value="Hidden"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </TextBlock.Style>
-                                    </TextBlock>
-                                </StackPanel>
-
-                                <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Left" Margin="12">
-                                    <TextBlock Text="{Binding PdfsSelectedItem.PdfDescription}"></TextBlock>
-                                </StackPanel>
-
-                                <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="12 12 12 0">
-                                    <Button Margin="6" Command="{Binding PdfAddCommand}">追加</Button>
-                                    <Button Margin="6" Command="{Binding PdfEditCommand}">編集</Button>
-                                    <Button Margin="6" Command="{Binding PdfDeleteCommand}">削除</Button>
-                                </StackPanel>
-
-                            </Grid>
-
-                            <ListView Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Padding="6" Margin="6 12 6 6" BorderThickness="1" Background="Transparent" ItemsSource="{Binding RentLivingEdit.RentLivingPdfs}" SelectedItem="{Binding PdfsSelectedItem}" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                                <ListView.InputBindings>
-                                    <KeyBinding Key="Enter" Command="{Binding Path=DataContext.RentLivingEditZumenPdfEnterCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" />
-                                </ListView.InputBindings>
-                                <ListView.Resources>
-                                    <ContextMenu x:Key="ATItemContextMenu">
-                                        <MenuItem Header="表示" Command="{Binding Path=DataContext.RentLivingEditZumenPdfShowCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItems, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"></MenuItem>
-                                        <Separator/>
-                                        <MenuItem Header="削除" Command="{Binding Path=DataContext.RentLivingEditZumenPdfDeleteCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItems, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
-                                            <MenuItem.Resources>
-                                                <ControlTemplate x:Key="CancelIcon">
-                                                    <Canvas Background="Transparent" >
-                                                        <Path Fill="#373737" Width="14.3775" Height="14" Canvas.Left="0.311264" Canvas.Top="0.500005" Stretch="Uniform" Data="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12C4,13.85 4.63,15.55 5.68,16.91L16.91,5.68C15.55,4.63 13.85,4 12,4M12,20A8,8 0 0,0 20,12C20,10.15 19.37,8.45 18.32,7.09L7.09,18.32C8.45,19.37 10.15,20 12,20Z" />
-                                                    </Canvas>
-                                                </ControlTemplate>
-                                            </MenuItem.Resources>
-                                            <MenuItem.Icon>
-                                                <ContentControl Template="{StaticResource CancelIcon}" />
-                                            </MenuItem.Icon>
-                                        </MenuItem>
-                                    </ContextMenu>
-                                </ListView.Resources>
-                                <ListView.ItemContainerStyle>
-
-                                    <Style TargetType="ListViewItem">
-                                        <Setter Property="Padding" Value="0"/>
-                                        <Setter Property="Margin" Value="3"/>
-                                        <Setter Property="Background" Value="Transparent"/>
-                                        <Setter Property="HorizontalContentAlignment" Value="Center"/>
-                                        <Setter Property="ContextMenu" Value="{StaticResource ATItemContextMenu}" />
-                                    </Style>
-                                    <!--
-                                    <Style TargetType="ListViewItem">
-                                        <Setter Property="HorizontalContentAlignment" Value="Center"/>
-                                        <Setter Property="ContextMenu" Value="{StaticResource ATItemContextMenu}" />
-                                        <Setter Property="Template">
-                                            <Setter.Value>
-                                                <ControlTemplate TargetType="{x:Type ListViewItem}">
-                                                    <Border Name="Border" Margin="{TemplateBinding Margin}" Padding="{TemplateBinding Padding}" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" ClipToBounds="{TemplateBinding ClipToBounds}" CornerRadius="0" SnapsToDevicePixels="true">
-                                                        <GridViewRowPresenter VerticalAlignment="{TemplateBinding VerticalContentAlignment}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
-
-                                                        <Border.InputBindings>
-                                                            <MouseBinding Command="{Binding Path=DataContext.RentLivingEditZumenPdfEnterCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" Gesture="LeftDoubleClick" />
-                                                        </Border.InputBindings>
-                                                    </Border>
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                        <Style.Triggers>
-                                            <Trigger Property="ItemsControl.AlternationIndex" Value="0">
-                                                <Setter Property="BorderThickness" Value="1" />
-                                            </Trigger>
-                                            <Trigger Property="ItemsControl.AlternationIndex" Value="1">
-                                                <Setter Property="BorderThickness" Value="1" />
-                                            </Trigger>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter Property="TextElement.FontWeight" Value="SemiBold"/>
-                                                <Setter Property="BorderThickness" Value="1" />
-                                            </Trigger>
-                                            <Trigger Property="IsSelected" Value="True">
-                                                <Setter Property="TextElement.FontWeight" Value="Bold"/>
-                                                <Setter Property="BorderThickness" Value="1" />
-                                            </Trigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                    -->
-                                </ListView.ItemContainerStyle>
-                                <ListView.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <WrapPanel/>
-                                    </ItemsPanelTemplate>
-                                </ListView.ItemsPanel>
-                                <ListView.ItemTemplate>
-                                    <DataTemplate>
-                                        <Grid Width="110" Height="78">
-                                            <Image Source="{Binding Picture}" Stretch="Uniform" Width="110" Height="78" Margin="0"></Image>
-                                            <TextBlock Text="{Binding PdfTypeLabel}"></TextBlock>
-                                        </Grid>
-                                    </DataTemplate>
-                                </ListView.ItemTemplate>
-                                <!--
-                                <ListView.View>
-                                    <GridView>
-                                        <GridViewColumn Header="ID" Width="120">
-                                            <GridViewColumn.CellTemplate>
-                                                <DataTemplate>
-                                                    <TextBlock Text="{Binding RentZumenPdfId, Mode=OneWay}" Padding="3"/>
-                                                </DataTemplate>
-                                            </GridViewColumn.CellTemplate>
-                                        </GridViewColumn>
-                                        <GridViewColumn Header="登録日" Width="150">
-                                            <GridViewColumn.CellTemplate>
-                                                <DataTemplate>
-                                                    <TextBlock Text="{Binding DateTimeAdded, Mode=OneWay, StringFormat=yyyy/MM/dd HH:mm:ss}" Padding="3"/>
-                                                </DataTemplate>
-                                            </GridViewColumn.CellTemplate>
-                                        </GridViewColumn>
-                                        <GridViewColumn Header="情報公開日" Width="150">
-                                            <GridViewColumn.CellTemplate>
-                                                <DataTemplate>
-                                                    <TextBlock Text="{Binding DateTimePublished, Mode=OneWay, StringFormat=yyyy/MM/dd HH:mm:ss}" Padding="3"/>
-                                                </DataTemplate>
-                                            </GridViewColumn.CellTemplate>
-                                        </GridViewColumn>
-                                        <GridViewColumn Header="最終確認日" Width="150">
-                                            <GridViewColumn.CellTemplate>
-                                                <DataTemplate>
-                                                    <TextBlock Text="{Binding DateTimeVerified, Mode=OneWay, StringFormat=yyyy/MM/dd HH:mm:ss}" Padding="3"/>
-                                                </DataTemplate>
-                                            </GridViewColumn.CellTemplate>
-                                        </GridViewColumn>
-                                        <GridViewColumn Header="ファイルサイズ" Width="120">
-                                            <GridViewColumn.CellTemplate>
-                                                <DataTemplate>
-                                                    <TextBlock Text="{Binding FileSizeLabel, Mode=OneWay}" Padding="3"/>
-                                                </DataTemplate>
-                                            </GridViewColumn.CellTemplate>
-                                        </GridViewColumn>
-                                    </GridView>
-                                </ListView.View>
-                                -->
-                            </ListView>
                         </Grid>
 
                     </TabItem>

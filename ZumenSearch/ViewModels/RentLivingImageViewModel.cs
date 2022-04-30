@@ -228,31 +228,7 @@ namespace ZumenSearch.ViewModels
 
         #endregion
 
-        #region == コマンドの実装 ==
-
-        // 画像の保存（追加または更新）
-        public ICommand PictureSaveCommand { get; }
-        public bool PictureSaveCommand_CanExecute()
-        {
-            if (RentLivingPictureEdit == null)
-                return false;
-
-            if (RentLivingPictures == null)
-                return false;
-
-            if (IsDirty)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-        public void PictureSaveCommand_Execute()
-        {
-            PictureSave();
-        }
+        #region == メソッド ==
 
         // 画像の保存（追加または更新）メソッド（コードビハインドから保存確認ダイアログでも呼ばれる）
         public bool PictureSave()
@@ -283,7 +259,7 @@ namespace ZumenSearch.ViewModels
                     if (hoge.PictureIsMain)
                     {
                         hoge.PictureIsMain = false;
-                        
+
                         // 変更フラグを立ててDBに保存されるように
                         hoge.IsModified = true;
                     }
@@ -303,6 +279,7 @@ namespace ZumenSearch.ViewModels
             {
                 // 更新
                 found = RentLivingPictureEdit;
+                //found.PictureIsMain = RentLivingPictureEdit.PictureIsMain;
             }
 
             // 新規フラグをクリア
@@ -319,6 +296,34 @@ namespace ZumenSearch.ViewModels
             RentLivingIsDirty?.Invoke();
 
             return true;
+        }
+
+        #endregion
+
+        #region == コマンドの実装 ==
+
+        // 画像の保存（追加または更新）
+        public ICommand PictureSaveCommand { get; }
+        public bool PictureSaveCommand_CanExecute()
+        {
+            if (RentLivingPictureEdit == null)
+                return false;
+
+            if (RentLivingPictures == null)
+                return false;
+
+            if (IsDirty)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        public void PictureSaveCommand_Execute()
+        {
+            PictureSave();
         }
 
         #endregion
