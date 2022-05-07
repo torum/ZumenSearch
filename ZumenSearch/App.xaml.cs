@@ -21,6 +21,27 @@ namespace ZumenSearch
     /// </summary>
     public partial class App : Application
     {
+        #region == 二重起動防止 ==
+
+        /// <summary> Check and bring to front if already exists.</summary>
+        /// 
+        // 二重起動防止 on/off
+        private bool _mutexOn = true;
+
+        /// <summary>The event mutex name.</summary>
+        private const string UniqueEventName = "{e9bf8024-c2a4-4513-87b8-d7537bffd6a5}";
+
+        /// <summary>The unique mutex name.</summary>
+        private const string UniqueMutexName = "{dc7b6684-5244-49df-8ca5-8c903579a3b8}";
+
+        /// <summary>The event wait handle.</summary>
+        private EventWaitHandle eventWaitHandle;
+
+        /// <summary>The mutex.</summary>
+        private Mutex mutex;
+
+        #endregion
+
         private void AppOnStartup(object sender, StartupEventArgs e)
         {
             // テスト用
@@ -73,11 +94,13 @@ namespace ZumenSearch
         {
             // 未処理例外の処理
             // UI スレッドで実行されているコードで処理されなかったら発生する（.NET 3.0 より）
-            DispatcherUnhandledException += App_DispatcherUnhandledException;
+            //DispatcherUnhandledException += App_DispatcherUnhandledException;
             // バックグラウンドタスク内で処理されなかったら発生する（.NET 4.0 より）
-            TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
+            //TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
             // 例外が処理されなかったら発生する（.NET 1.0 より）
-            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+            //AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+
+            ShutdownMode = ShutdownMode.OnMainWindowClose;
         }
 
         #region == エラーログ関連 ==
@@ -170,26 +193,7 @@ namespace ZumenSearch
 
         #endregion
 
-        #region == 二重起動防止 ==
 
-        /// <summary> Check and bring to front if already exists.</summary>
-        /// 
-        // 二重起動防止 on/off
-        private bool _mutexOn = true;
-
-        /// <summary>The event mutex name.</summary>
-        private const string UniqueEventName = "{e9bf8024-c2a4-4513-87b8-d7537bffd6a5}";
-
-        /// <summary>The unique mutex name.</summary>
-        private const string UniqueMutexName = "{dc7b6684-5244-49df-8ca5-8c903579a3b8}";
-
-        /// <summary>The event wait handle.</summary>
-        private EventWaitHandle eventWaitHandle;
-
-        /// <summary>The mutex.</summary>
-        private Mutex mutex;
-
-        #endregion
 
         #region == テーマ切り替え ==
 

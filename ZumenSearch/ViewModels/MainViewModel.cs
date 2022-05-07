@@ -27,10 +27,13 @@ using ZumenSearch.Common;
 ///
 /// 不動産IDの入力欄
 /// DataAccessのAsync化
+/// 〒・住所・Geo関連のデータを入力補完
 /// エラー処理、及びログ保存
 /// 
 
 /// ● 履歴：
+/// v0.0.0.28 PDF関係。
+/// v0.0.0.27 アイコンとか部屋色々。
 /// v0.0.0.26 色々。
 /// v0.0.0.25 色々。
 /// v0.0.0.24 色々。
@@ -50,7 +53,6 @@ using ZumenSearch.Common;
 /// 
 
 /// ◆ 後で・検討中： 
-/// 〒・住所・Geo関連のデータを入力補完
 /// XMLでインポート・エクスポート
 /// RESTful API, Server, P2P and beyond...
 /// Webサーバーを作り、会社内共有
@@ -67,7 +69,7 @@ namespace ZumenSearch.ViewModels
         #region == 基本 ==
 
         // Application version.
-        private const string _appVer = "0.0.0.26";
+        private const string _appVer = "0.0.0.28";
 
         // Application name.
         private const string _appName = "ZumenSearch";
@@ -1374,6 +1376,8 @@ namespace ZumenSearch.ViewModels
             {
                 if (w is RentLivingRoomWindow)
                 {
+                    Debug.WriteLine("Closing RentLivingRoomWindow...");
+
                     if ((w as RentLivingRoomWindow).DataContext == null)
                         continue;
 
@@ -1382,12 +1386,11 @@ namespace ZumenSearch.ViewModels
 
                     (w as RentLivingRoomWindow).Close();
                 }
-            }
 
-            foreach (var w in app.Windows)
-            {
                 if (w is RentLivingBuildingWindow)
                 {
+                    Debug.WriteLine("Closing RentLivingBuildingWindow...");
+
                     if ((w as RentLivingBuildingWindow).DataContext == null)
                         continue;
 
@@ -1397,28 +1400,23 @@ namespace ZumenSearch.ViewModels
                     (w as RentLivingBuildingWindow).Close();
                 }
 
-            }
-
-            #endregion
-
-            #region == ウィンドウ関連 ==
-            /*
-            if (sender is Window)
-            {
-                if ((sender as Window).WindowState == WindowState.Normal)
+                if (w is RentLivingPdfWindow)
                 {
-                    Properties.Settings.Default.MainWindow_Left = (sender as Window).Left;
-                    Properties.Settings.Default.MainWindow_Top = (sender as Window).Top;
-                    Properties.Settings.Default.MainWindow_Height = (sender as Window).Height;
-                    Properties.Settings.Default.MainWindow_Width = (sender as Window).Width;
-                }
+                    Debug.WriteLine("Closing RentLivingPdfWindow...");
 
-                Properties.Settings.Default.Save();
+                    if ((w as RentLivingPdfWindow).DataContext == null)
+                        continue;
+
+                    if (!((w as RentLivingPdfWindow).DataContext is RentLivingPdfViewModel))
+                        continue;
+
+                    (w as RentLivingPdfWindow).Close();
+                }
             }
-            */
 
             #endregion
 
+            //Debug.WriteLine("MainViewModel OnWindowClosing...");
         }
 
         // エラーイベントの実装

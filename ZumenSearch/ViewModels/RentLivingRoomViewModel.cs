@@ -20,11 +20,13 @@ using System.Runtime.InteropServices;
 using ZumenSearch.Models;
 using ZumenSearch.Views;
 using ZumenSearch.Common;
+using ZumenSearch.ViewModels.Classes;
 
 namespace ZumenSearch.ViewModels
 {
     /// <summary>
     /// 賃貸住居用 部屋 のViewModel
+    /// RentLivingRoomEditは直接弄らないで、Window生成時に値を展開し、保存時に各値をセットする。
     /// </summary>
     public class RentLivingRoomViewModel : ViewModelBase
     {
@@ -52,20 +54,29 @@ namespace ZumenSearch.ViewModels
                     return;
 
                 _rentLivingRoomEdit = value;
-                NotifyPropertyChanged("RentLivingRoomEdit");
+                NotifyPropertyChanged(nameof(RentLivingRoomEdit));
 
-                // 値の設定時に、編集画面用のプロパティにそれぞれの値をポピュレイトする
+                // 編集画面用のプロパティにそれぞれの値をポピュレイトする
+
+                // Tmp画像の編集用リストを設定。(保存時に差し替える)
+                RentLivingRoomPicturesTmp = new ObservableCollection<RentLivingRoomPicture>(RentLivingRoomEdit.RentLivingRoomPictures);
+
+                // Tmp図面の編集用リストを設定。(保存時に差し替える)
+                RentLivingRoomPdfsTmp = new ObservableCollection<RentLivingRoomPdf>(RentLivingRoomEdit.RentLivingRoomPdfs);
+
                 RoomNumber = _rentLivingRoomEdit.RentLivingRoomRoomNumber;
 
-                // 変更フラグをクリアする（ユーザーの入力で変更・編集された訳ではないので）
+                // TODO: ..
+
+
+                // 編集画面用の変更フラグをリセット。
                 IsDirty = false;
+
             }
         }
 
         // 元の賃貸住居用物件の部屋リストを保持。（Winodow生成時に設定される）
         public ObservableCollection<RentLivingRoom> RentLivingRooms { get; set; }
-
-        #region == 編集用のプロパティ ==
 
         // 変更（データ入力）があったかどうかのフラグ。（画面終了時の確認）
         private bool _isDirty = false;
@@ -80,8 +91,8 @@ namespace ZumenSearch.ViewModels
                 if (_isDirty == value) return;
 
                 _isDirty = value;
-                NotifyPropertyChanged("IsDirty");
-                NotifyPropertyChanged("StatusIsDirty");
+                NotifyPropertyChanged(nameof(IsDirty));
+                NotifyPropertyChanged(nameof(StatusIsDirty));
             }
         }
 
@@ -97,6 +108,20 @@ namespace ZumenSearch.ViewModels
             }
         }
 
+        // 変更通知受け取り。（画像リストなど、変更があった場合にイベント経由でコードビハインドから呼ばれる
+        public bool SetIsDirty
+        {
+            set
+            {
+                if (value)
+                {
+                    IsDirty = value;
+                }
+            }
+        }
+
+        #region == 編集用のプロパティ ==
+
         // 部屋番号
         private string _roomNumber;
         public string RoomNumber
@@ -111,7 +136,7 @@ namespace ZumenSearch.ViewModels
                     return;
 
                 _roomNumber = value;
-                NotifyPropertyChanged("RoomNumber");
+                NotifyPropertyChanged(nameof(RoomNumber));
 
                 // 変更フラグを立てる
                 IsDirty = true;
@@ -119,6 +144,57 @@ namespace ZumenSearch.ViewModels
         }
 
         #endregion
+
+        #region == 画像 ==
+
+        // Tmp画像の編集用リスト。(保存時に差し替える)
+        public ObservableCollection<RentLivingRoomPicture> RentLivingRoomPicturesTmp { get; set; }
+
+        // 画像リストの選択項目を保持
+        private RentLivingRoomPicture _picturesSelectedItem;
+        public RentLivingRoomPicture PicturesSelectedItem
+        {
+            get
+            {
+                return _picturesSelectedItem;
+            }
+            set
+            {
+                if (_picturesSelectedItem == value)
+                    return;
+
+                _picturesSelectedItem = value;
+                this.NotifyPropertyChanged(nameof(PicturesSelectedItem));
+            }
+        }
+
+        #endregion
+
+        #region == PDF ==
+
+        // TmpPDFの編集用リスト。(保存時に差し替える)
+        public ObservableCollection<RentLivingRoomPdf> RentLivingRoomPdfsTmp { get; set; }
+
+        // PDFリストの選択項目を保持
+        private RentLivingRoomPdf _pdfsSelectedItem;
+        public RentLivingRoomPdf PdfsSelectedItem
+        {
+            get
+            {
+                return _pdfsSelectedItem;
+            }
+            set
+            {
+                if (_pdfsSelectedItem == value)
+                    return;
+
+                _pdfsSelectedItem = value;
+                this.NotifyPropertyChanged(nameof(PdfsSelectedItem));
+            }
+        }
+
+        #endregion
+
 
         #region == エラー通知関連のプロパティ ==
 
@@ -135,7 +211,7 @@ namespace ZumenSearch.ViewModels
                 if (_showErrorDialog == value) return;
 
                 _showErrorDialog = value;
-                this.NotifyPropertyChanged("ShowErrorDialog");
+                this.NotifyPropertyChanged(nameof(ShowErrorDialog));
             }
         }
 
@@ -150,21 +226,34 @@ namespace ZumenSearch.ViewModels
             set
             {
                 _errorText.Insert(0, value + Environment.NewLine);
-                this.NotifyPropertyChanged("ErrorText");
+                this.NotifyPropertyChanged(nameof(ErrorText));
             }
         }
 
 
         #endregion
 
+        #region == ダイアログ（サービス） ==
+
+        // サービスのインジェクションは・・・とりあえずしない。
+        //private IOpenDialogService openDialogService;
+        private OpenDialogService _openDialogService = new OpenDialogService();
+
+        #endregion
+
         #region == イベント ==
 
-        public delegate void MyErrorEvent(ErrorObject err);
-        public event MyErrorEvent ErrorOccured;
-        
+        //public delegate void MyErrorEvent(ErrorObject err);
+        //public event MyErrorEvent ErrorOccured;
+
         // 親画面（賃貸住居用物件）に、（コードビハインド経由で）変更通知を送るイベント。
         public delegate void IsDirtyEventHandler();
         public event IsDirtyEventHandler RentLivingIsDirty;
+
+        // 画像編集画面を開く
+        public event EventHandler<OpenRentLivingRoomImageWindowEventArgs> OpenRentLivingRoomImageWindow;
+        // 図面編集画面を開く
+        public event EventHandler<OpenRentLivingRoomPdfWindowEventArgs> OpenRentLivingRoomPdfWindow;
 
         #endregion
 
@@ -172,28 +261,39 @@ namespace ZumenSearch.ViewModels
         {
             _id = id;
 
-            #region == コマンド ==
+            #region == コマンド初期化 ==
 
             // 部屋情報の保存・更新
             SectionSaveCommand = new RelayCommand(SectionSaveCommand_Execute, SectionSaveCommand_CanExecute);
 
-            // RL 管理編集　新規部屋の画像追加と削除
-            //RentLivingEditSectionNewPictureAddCommand = new RelayCommand(RentLivingEditSectionNewPictureAddCommand_Execute, RentLivingEditSectionNewPictureAddCommand_CanExecute);
-            //RentLivingEditSectionNewPictureDeleteCommand = new GenericRelayCommand<object>(
-            //    param => RentLivingEditSectionNewPictureDeleteCommand_Execute(param),
-            //    param => RentLivingEditSectionNewPictureDeleteCommand_CanExecute());
-            // RL 管理編集　編集部屋の画像追加と削除
-            //RentLivingEditSectionEditPictureAddCommand = new RelayCommand(RentLivingEditSectionEditPictureAddCommand_Execute, RentLivingEditSectionEditPictureAddCommand_CanExecute);
-            //RentLivingEditSectionEditPictureDeleteCommand = new GenericRelayCommand<object>(
-            //    param => RentLivingEditSectionEditPictureDeleteCommand_Execute(param),
-            //    param => RentLivingEditSectionEditPictureDeleteCommand_CanExecute());
+            // 画像の追加
+            PictureAddCommand = new RelayCommand(PictureAddCommand_Execute, PictureAddCommand_CanExecute);
+            // 画像の編集
+            PictureEditCommand = new RelayCommand(PictureEditCommand_Execute, PictureEditCommand_CanExecute);
+            // 画像の表示
+            PictureShowCommand = new RelayCommand(PictureShowCommand_Execute, PictureShowCommand_CanExecute);
+            // 画像の削除
+            PictureDeleteCommand = new RelayCommand(PictureDeleteCommand_Execute, PictureDeleteCommand_CanExecute);
+            // 画像ListViewのエンター・ダブルクリック
+            PictureEnterKeyCommand = new RelayCommand(PictureEnterKeyCommand_Execute, PictureEnterKeyCommand_CanExecute);
+
+            // PDFの追加
+            PdfAddCommand = new RelayCommand(PdfAddCommand_Execute, PdfAddCommand_CanExecute);
+            // PDFの編集
+            PdfEditCommand = new RelayCommand(PdfEditCommand_Execute, PdfEditCommand_CanExecute);
+            // PDFの削除
+            PdfDeleteCommand = new RelayCommand(PdfDeleteCommand_Execute, PdfDeleteCommand_CanExecute);
+            // PDFの表示
+            PdfShowCommand = new RelayCommand(PdfShowCommand_Execute, PdfShowCommand_CanExecute);
+            // PDFListViewのエンター・ダブルクリック
+            PdfEnterKeyCommand = new RelayCommand(PdfEnterKeyCommand_Execute, PdfEnterKeyCommand_CanExecute);
 
             // エラー通知画面を閉じる
             CloseErrorCommand = new RelayCommand(CloseErrorCommand_Execute, CloseErrorCommand_CanExecute);
 
             #endregion
 
-            ErrorOccured += new MyErrorEvent(OnError);
+            //ErrorOccured += new MyErrorEvent(OnError);
 
         }
 
@@ -220,6 +320,85 @@ namespace ZumenSearch.ViewModels
 
         #endregion
 
+        #region == メソッド ==
+
+        // 部屋の保存（追加または更新）メソッド（コードビハインドから保存確認ダイアログでも呼ばれる）
+        public bool SectionSave()
+        {
+            if (RentLivingRoomEdit == null)
+                return false;
+
+            if (RentLivingRooms == null)
+                return false;
+
+            // TODO: 入力チェック
+
+            //
+            RentLivingRoomEdit.RentLivingRoomPictures = RentLivingRoomPicturesTmp;
+            //
+            RentLivingRoomEdit.RentLivingRoomPdfs = RentLivingRoomPdfsTmp;
+
+            // 各値の更新
+            RentLivingRoomEdit.RentLivingRoomRoomNumber = RoomNumber;
+            // ...
+
+            // 部屋リストから該当オブジェクトを見つける
+            var found = RentLivingRooms.FirstOrDefault(x => x.RentLivingRoomId == RentLivingRoomEdit.RentLivingRoomId);
+            if (found == null)
+            {
+                // 追加
+                RentLivingRooms.Add(RentLivingRoomEdit);
+            }
+            else
+            {
+                // 更新
+                found = RentLivingRoomEdit;
+            }
+
+            // DB更新用のフラグを立てる
+            RentLivingRoomEdit.IsDirty = true;
+
+            // 変更フラグをクリア
+            IsDirty = false;
+
+            // 親画面（賃貸住居用物件）に、変更通知を送る。
+            RentLivingIsDirty?.Invoke();
+
+            return true;
+
+        }
+
+        // 画像編集メソッド（Listview内外のコマンドから呼ばれる）
+        private void PictureEdit(RentLivingRoomPicture rlRoomPic)
+        {
+            OpenRentLivingRoomImageWindowEventArgs ag = new OpenRentLivingRoomImageWindowEventArgs
+            {
+                Id = rlRoomPic.RentSectionPictureId,
+                RentLivingRoomPictureObject = rlRoomPic,
+                RentLivingRoomPictures = RentLivingRoomPicturesTmp,
+                IsEdit = true
+            };
+
+            // 画像編集Windowを開く
+            OpenRentLivingRoomImageWindow?.Invoke(this, ag);
+        }
+
+        // 物件PDF編集メソッド（Listview内外のコマンドから呼ばれる）
+        private void PdfEdit(RentLivingRoomPdf rlRoompdf)
+        {
+            // PDF編集Windowへ渡す為のArgをセット
+            OpenRentLivingRoomPdfWindowEventArgs ag = new OpenRentLivingRoomPdfWindowEventArgs();
+            ag.Id = rlRoompdf.RentSectionPdfId;
+            ag.RentLivingRoomPdfObject = rlRoompdf;
+            ag.RentLivingRoomPdfs = RentLivingRoomPdfsTmp;
+            ag.IsEdit = true;
+
+            // PDF編集Windowを開く
+            OpenRentLivingRoomPdfWindow?.Invoke(this, ag);
+        }
+
+        #endregion
+
         #region == コマンドの実装 == 
 
         #region == 編集コマンド ==
@@ -230,8 +409,6 @@ namespace ZumenSearch.ViewModels
         {
             if (RentLivingRoomEdit == null)
                 return false;
-            //if (DataAccessModule == null)
-            //    return false;
 
             if (IsDirty)
             {
@@ -247,81 +424,344 @@ namespace ZumenSearch.ViewModels
             SectionSave();
         }
 
-        // 部屋の保存（追加または更新）メソッド（コードビハインドから保存確認ダイアログでも呼ばれる）
-        public bool SectionSave()
+        #endregion
+
+        #region == 画像編集コマンド ==
+
+        // 物件画像追加
+        public ICommand PictureAddCommand { get; }
+        public bool PictureAddCommand_CanExecute()
+        {
+            return true;
+        }
+        public void PictureAddCommand_Execute()
         {
             if (RentLivingRoomEdit == null)
-                return false;
+                return;
 
-            //if (DataAccessModule == null)
-            //    return false;
+            var files = _openDialogService.GetOpenPictureFileDialog("部屋の写真追加");
 
-            if (RentLivingRooms == null)
-                return false;
+            if (files != null)
+            {
+                foreach (String filePath in files)
+                {
+                    string fileName = filePath.Trim();
 
-            if (IsDirty == false)
+                    if (!string.IsNullOrEmpty(fileName))
+                    {
+                        FileInfo fi = new FileInfo(fileName);
+                        if (fi.Exists)
+                        {
+                            // 画像データの読み込み
+                            FileStream fs = new FileStream(fileName, FileMode.Open, FileAccess.Read);
+
+                            // Imageオブジェクトに読み込み。
+                            System.Drawing.Image img = System.Drawing.Image.FromStream(fs, false, false); 
+
+                            // ByteArrayに変換
+                            byte[] ImageData = Methods.ImageToByteArray(img);
+
+                            // サムネイル画像の作成
+                            System.Drawing.Image thumbImg = Methods.FixedSize(img, 130, 87);
+                            // ByteArrayに変換
+                            byte[] ImageThumbData = Methods.ImageToByteArray(thumbImg);
+
+                            // RentLivingPictureオブジェクトを用意
+                            RentLivingRoomPicture rlRoomPic = new RentLivingRoomPicture(RentLivingRoomEdit.RentId, RentLivingRoomEdit.RentLivingId, RentLivingRoomEdit.RentLivingRoomId, Guid.NewGuid().ToString());
+                            rlRoomPic.PictureData = ImageData;
+                            rlRoomPic.PictureThumbData = ImageThumbData;
+                            rlRoomPic.PictureFileExt = fi.Extension;
+
+                            // 画面閉じる際の確認用のフラグ。
+                            rlRoomPic.IsNew = true;
+                            // DBに保存する為のフラグ。
+                            rlRoomPic.IsModified = true;
+
+                            // ビットマップImageに変換（表示用）
+                            rlRoomPic.Picture = Methods.BitmapImageFromImage(img, Methods.FileExtToImageFormat(rlRoomPic.PictureFileExt));
+                            rlRoomPic.PictureThumb = Methods.BitmapImageFromImage(thumbImg, Methods.FileExtToImageFormat(rlRoomPic.PictureFileExt));
+
+                            // 物件の画像リストに追加。
+                            //RentLivingEdit.RentLivingPictures.Add(rlpic);
+
+                            fs.Close();
+
+                            // 画像編集Windowへ渡す為のArgをセット
+                            OpenRentLivingRoomImageWindowEventArgs ag = new OpenRentLivingRoomImageWindowEventArgs();
+                            ag.Id = rlRoomPic.RentSectionPictureId;
+                            ag.RentLivingRoomPictureObject = rlRoomPic;
+                            ag.RentLivingRoomPictures = RentLivingRoomPicturesTmp;// 仮リストを編集//RentLivingRoomEdit.RentLivingRoomPictures;
+                            ag.IsEdit = false;
+
+                            // 画像編集Windowを開く
+                            OpenRentLivingRoomImageWindow?.Invoke(this, ag);
+
+                        }
+                    }
+                }
+            }
+
+        }
+
+        // 物件画像編集
+        public ICommand PictureEditCommand { get; }
+        public bool PictureEditCommand_CanExecute()
+        {
+            if (PicturesSelectedItem != null)
                 return true;
+            else
+                return false;
+        }
+        public void PictureEditCommand_Execute()
+        {
+            if (PicturesSelectedItem == null)
+                return;
 
-            // TODO: 入力チェック
+            PictureEdit(PicturesSelectedItem);
+        }
 
-            //Debug.WriteLine(RoomNumber);
+        // 物件画像表示
+        public ICommand PictureShowCommand { get; }
+        public bool PictureShowCommand_CanExecute()
+        {
+            if (PicturesSelectedItem != null)
+                return true;
+            else
+                return false;
+        }
+        public void PictureShowCommand_Execute()
+        {
+            if (PicturesSelectedItem == null)
+                return;
 
-            // 各値の更新
-            RentLivingRoomEdit.RentLivingRoomRoomNumber = RoomNumber;
+            // TODO:
+        }
 
-            // 画像リストから該当オブジェクトを見つける
-            var found = RentLivingRooms.FirstOrDefault(x => x.RentLivingRoomId == RentLivingRoomEdit.RentLivingRoomId);
-            if (found == null)
+        // 物件PDFエンターキー・ダブルクリック
+        public ICommand PictureEnterKeyCommand { get; }
+        public bool PictureEnterKeyCommand_CanExecute()
+        {
+            if (PicturesSelectedItem != null)
+                return true;
+            else
+                return false;
+        }
+        public void PictureEnterKeyCommand_Execute()
+        {
+            if (PicturesSelectedItem == null)
+                return;
+
+            PictureEdit(PicturesSelectedItem);
+        }
+
+        // 物件画像削除
+        public ICommand PictureDeleteCommand { get; }
+        public bool PictureDeleteCommand_CanExecute()
+        {
+            if (PicturesSelectedItem != null)
+                return true;
+            else
+                return false;
+        }
+        public void PictureDeleteCommand_Execute()
+        {
+            if (PicturesSelectedItem == null)
+                return;
+
+            // TODO: "削除しますか？"確認
+
+
+            // DBから削除するかどうか。
+            if (PicturesSelectedItem.IsNew)
             {
-                // 追加
-                RentLivingRooms.Add(RentLivingRoomEdit);
+                // 新規画像なので、DBにはまだ保存されていないはずなので、DBから削除は不要。
             }
             else
             {
-                // 更新
-                found = RentLivingRoomEdit;
+                // DBからも削除するために、削除リストに追加（後で建物情報を保存する際に削除）
+                RentLivingRoomEdit.RentLivingRoomPicturesToBeDeletedIDs.Add(PicturesSelectedItem.RentSectionPictureId);
             }
-            /*
-            if (RentLivingRoomEdit.IsNew)
-            {
-                //物件追加（INSERT）
-                ResultWrapper res = DataAccessModule.RentLivingInsert(RentLivingEdit);
-                if (res.IsError)
-                {
-                    // エラー通知
-                    ErrorOccured?.Invoke(res.Error);
 
-                    return false;
-                }
-            }
-            else
-            {
-                // 物件更新（UPDATE）
-                ResultWrapper res = DataAccessModule.RentLivingUpdate(RentLivingEdit);
-                if (res.IsError)
-                {
-                    // エラー通知
-                    ErrorOccured?.Invoke(res.Error);
+            // Tmp一覧から削除
+            RentLivingRoomPicturesTmp.Remove(PicturesSelectedItem);
+            // 一覧から削除 <don't
+            //RentLivingRoomEdit.RentLivingRoomPictures.Remove(PicturesSelectedItem);
 
-                    return false;
-                }
-            }
-            */
-
-            // 変更フラグをクリア
-            IsDirty = false;
-
-            // DB更新用のフラグを立てる
-            RentLivingRoomEdit.IsModified = true;
-
-            // 親画面（賃貸住居用物件）に、変更通知を送る。
-            RentLivingIsDirty?.Invoke();
-
-            return true;
+            // 変更フラグを立てる。
+            SetIsDirty = true;
 
         }
 
         #endregion
+
+        #region == PDF編集コマンド ==
+
+        // 物件PDF追加
+        public ICommand PdfAddCommand { get; }
+        public bool PdfAddCommand_CanExecute()
+        {
+            return true;
+        }
+        public async void PdfAddCommand_Execute()
+        {
+            if (RentLivingRoomEdit == null) return;
+
+            var files = _openDialogService.GetOpenZumenPdfFileDialog("図面の追加");
+            
+            if (files != null)
+            {
+                foreach (String filePath in files)
+                {
+                    string fileName = filePath.Trim();
+
+                    if (!string.IsNullOrEmpty(fileName))
+                    {
+                        FileInfo fi = new FileInfo(fileName);
+                        if (fi.Exists)
+                        {
+                            // 図面ファイルのPDFデータの読み込み
+                            byte[] PdfData;
+                            FileStream fs = new FileStream(fileName, FileMode.Open, FileAccess.Read);
+                            long len = fs.Length;
+
+                            // ByteArrayに変換
+                            BinaryReader br = new BinaryReader(fs);
+                            PdfData = br.ReadBytes((int)fs.Length);
+                            br.Close();
+
+                            fs.Close();
+
+                            // RentLivingPdfオブジェクトの作成
+                            RentLivingRoomPdf rlZumen = new RentLivingRoomPdf(RentLivingRoomEdit.RentId, RentLivingRoomEdit.RentLivingId, RentLivingRoomEdit.RentLivingRoomId, Guid.NewGuid().ToString());
+
+                            rlZumen.PdfData = PdfData;
+                            //rlZumen.FileSize = len;
+
+                            // 画像を作成。
+                            BitmapImage bitimg = await Methods.BitmapImageFromPdf(PdfData);
+                            rlZumen.Picture = bitimg;
+
+                            // ByteArrayに変換
+                            byte[] ImageData = Methods.BitmapImageToByteArray(bitimg);
+                            rlZumen.PdfThumbData = ImageData;
+
+                            // TODO:
+                            //rlZumen.DateTimeAdded = DateTime.Now;
+                            rlZumen.DateTimePublished = DateTime.Now;
+                            rlZumen.DateTimeVerified = DateTime.Now;
+
+                            // 画面閉じる際の確認用のフラグ。
+                            rlZumen.IsNew = true;
+                            // DBに保存する為のフラグ。
+                            rlZumen.IsModified = true;
+
+                            // 物件のPDFリストに追加。
+                            //RentLivingEdit.RentLivingPdfs.Add(rlZumen);
+
+
+                            // PDF編集Windowへ渡す為のArgをセット
+                            OpenRentLivingRoomPdfWindowEventArgs ag = new OpenRentLivingRoomPdfWindowEventArgs();
+                            ag.Id = rlZumen.RentSectionPdfId;
+                            ag.RentLivingRoomPdfObject = rlZumen;
+                            ag.RentLivingRoomPdfs = RentLivingRoomPdfsTmp;//RentLivingRoomEdit.RentLivingRoomPdfs;
+                            ag.IsEdit = false;
+
+                            // PDF編集Windowを開く
+                            OpenRentLivingRoomPdfWindow?.Invoke(this, ag);
+
+                        }
+                    }
+                }
+            }
+        }
+
+        // 物件PDF編集
+        public ICommand PdfEditCommand { get; }
+        public bool PdfEditCommand_CanExecute()
+        {
+            if (PdfsSelectedItem != null)
+                return true;
+            else
+                return false;
+        }
+        public void PdfEditCommand_Execute()
+        {
+            if (PdfsSelectedItem == null)
+                return;
+
+            PdfEdit(PdfsSelectedItem);
+        }
+
+        // 物件PDF削除
+        public ICommand PdfDeleteCommand { get; }
+        public bool PdfDeleteCommand_CanExecute()
+        {
+            if (PdfsSelectedItem != null)
+                return true;
+            else
+                return false;
+        }
+        public void PdfDeleteCommand_Execute()
+        {
+            if (PdfsSelectedItem == null)
+                return;
+
+            // TODO: "削除しますか？"確認
+            /*
+            // DBから削除するかどうか。
+            if (PdfsSelectedItem.IsNew)
+            {
+                // 新規画像なので、DBにはまだ保存されていないはずなので、DBから削除は不要。
+            }
+            else
+            {
+                // DBからも削除するために、削除リストに追加（後で建物情報を保存する際に削除）
+                RentLivingEdit.RentLivingPdfsToBeDeletedIDs.Add(PdfsSelectedItem.RentPdfId);
+            }
+
+            // 一覧から削除
+            RentLivingEdit.RentLivingPdfs.Remove(PdfsSelectedItem);
+            */
+            // 変更フラグを立てる。
+            SetIsDirty = true;
+        }
+
+        // 物件PDF表示
+        public ICommand PdfShowCommand { get; }
+        public bool PdfShowCommand_CanExecute()
+        {
+            if (PdfsSelectedItem != null)
+                return true;
+            else
+                return false;
+        }
+        public void PdfShowCommand_Execute()
+        {
+            if (PdfsSelectedItem == null)
+                return;
+
+            // TODO:
+        }
+
+        // 物件PDFエンターキー・ダブルクリック
+        public ICommand PdfEnterKeyCommand { get; }
+        public bool PdfEnterKeyCommand_CanExecute()
+        {
+            if (PdfsSelectedItem != null)
+                return true;
+            else
+                return false;
+        }
+        public void PdfEnterKeyCommand_Execute()
+        {
+            if (PdfsSelectedItem == null)
+                return;
+
+            PdfEdit(PdfsSelectedItem);
+        }
+
+        #endregion
+
 
         #region == 編集TODO ==
         /*

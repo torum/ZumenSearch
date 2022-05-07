@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,6 +18,7 @@ using System.Runtime.InteropServices;
 using System.ComponentModel;
 using ZumenSearch.ViewModels;
 using ZumenSearch.Views;
+using ZumenSearch.ViewModels.Classes;
 
 namespace ZumenSearch.Views
 {
@@ -31,8 +33,159 @@ namespace ZumenSearch.Views
 
             Loaded += Window_Loaded;
 
-            //RestoreButton.Visibility = Visibility.Collapsed;
-            //MaxButton.Visibility = Visibility.Visible;
+            RestoreButton.Visibility = Visibility.Collapsed;
+            MaxButton.Visibility = Visibility.Collapsed;
+        }
+
+        // 画像編集画面の表示
+        public void OpenRentLivingRoomImageWindow(OpenRentLivingRoomImageWindowEventArgs arg)
+        {
+            if (arg == null)
+                return;
+
+            if (String.IsNullOrEmpty(arg.Id))
+                return;
+
+            if (arg.RentLivingRoomPictures == null)
+                return;
+
+            string id = arg.Id;
+
+            App app = App.Current as App;
+            
+            foreach (var w in app.WindowList)
+            {
+                if (!(w is RentLivingRoomImageWindow))
+                    continue;
+
+                if ((w as RentLivingRoomImageWindow).DataContext == null)
+                    continue;
+
+                if (!((w as RentLivingRoomImageWindow).DataContext is RentLivingRoomImageViewModel))
+                    continue;
+
+                if (id == ((w as RentLivingRoomImageWindow).DataContext as RentLivingRoomImageViewModel).Id)
+                {
+                    //w.Activate();
+
+                    if ((w as RentLivingRoomImageWindow).WindowState == WindowState.Minimized || (w as Window).Visibility == Visibility.Hidden)
+                    {
+                        //w.Show();
+                        (w as RentLivingRoomImageWindow).Visibility = Visibility.Visible;
+                        (w as RentLivingRoomImageWindow).WindowState = WindowState.Normal;
+                    }
+
+                    (w as RentLivingRoomImageWindow).Activate();
+                    //(w as EditorWindow).Topmost = true;
+                    //(w as EditorWindow).Topmost = false;
+                    (w as RentLivingRoomImageWindow).Focus();
+
+                    return;
+                }
+            }
+
+            // Create a new window.
+            var win = new RentLivingRoomImageWindow();
+            // VMをセット
+            win.DataContext = new RentLivingRoomImageViewModel(id);
+
+            var vm = (win.DataContext as RentLivingRoomImageViewModel);
+            // VMにデータを渡す
+            vm.RentLivingRoomPictureEdit = arg.RentLivingRoomPictureObject;
+            vm.RentLivingRoomPictures = arg.RentLivingRoomPictures;
+            vm.IsDirty = !arg.IsEdit;
+
+            // 画像編集画面からの変更通知を受け取る
+            vm.RentLivingRoomIsDirty += () => OnRentLivingRoomIsDirty();
+
+            // Windowリストへ追加。
+            app.WindowList.Add(win);
+
+            // モーダルで編集画面を開く
+            win.Owner = this;
+            win.ShowDialog();
+            
+        }
+
+        // PDF編集画面の表示
+        public void OpenRentLivingRoomPdfWindow(OpenRentLivingRoomPdfWindowEventArgs arg)
+        {
+            if (arg == null)
+                return;
+
+            if (String.IsNullOrEmpty(arg.Id))
+                return;
+            
+            if (arg.RentLivingRoomPdfs == null)
+                return;
+
+            string id = arg.Id;
+
+            App app = App.Current as App;
+
+            foreach (var w in app.WindowList)
+            {
+                if (!(w is RentLivingRoomPdfWindow))
+                    continue;
+
+                if ((w as RentLivingRoomPdfWindow).DataContext == null)
+                    continue;
+
+                if (!((w as RentLivingRoomPdfWindow).DataContext is RentLivingRoomPdfViewModel))
+                    continue;
+
+                if (id == ((w as RentLivingRoomPdfWindow).DataContext as RentLivingRoomPdfViewModel).Id)
+                {
+                    //w.Activate();
+
+                    if ((w as RentLivingRoomPdfWindow).WindowState == WindowState.Minimized || (w as Window).Visibility == Visibility.Hidden)
+                    {
+                        //w.Show();
+                        (w as RentLivingRoomPdfWindow).Visibility = Visibility.Visible;
+                        (w as RentLivingRoomPdfWindow).WindowState = WindowState.Normal;
+                    }
+
+                    (w as RentLivingRoomPdfWindow).Activate();
+                    //(w as EditorWindow).Topmost = true;
+                    //(w as EditorWindow).Topmost = false;
+                    (w as RentLivingRoomPdfWindow).Focus();
+
+                    return;
+                }
+            }
+
+            // Create a new window.
+            var win = new RentLivingRoomPdfWindow();
+            // VMをセット
+            win.DataContext = new RentLivingRoomPdfViewModel(id);
+
+            var vm = (win.DataContext as RentLivingRoomPdfViewModel);
+            // VMにデータを渡す
+            vm.RentLivingRoomPdfEdit = arg.RentLivingRoomPdfObject;
+            vm.RentLivingRoomPdfs = arg.RentLivingRoomPdfs;
+            vm.IsDirty = !arg.IsEdit;
+
+            // 図面編集画面からの変更通知を受け取る
+            vm.RentLivingRoomIsDirty += () => OnRentLivingRoomIsDirty();
+
+            // Windowリストへ追加。
+            app.WindowList.Add(win);
+
+            // モーダルで編集画面を開く
+            win.Owner = this;
+            win.ShowDialog();
+            
+        }
+
+        public void OnRentLivingRoomIsDirty()
+        {
+            if (this.DataContext == null)
+                return;
+
+            if (this.DataContext is not RentLivingRoomViewModel)
+                return;
+
+            (this.DataContext as RentLivingRoomViewModel).SetIsDirty = true;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -72,13 +225,76 @@ namespace ZumenSearch.Views
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            App app = App.Current as App;
 
-            app.RemoveEditWindow(this);
-            
-            /*
-            // Save window pos.
-            if (WindowState == WindowState.Normal && Visibility == Visibility.Visible)
+            // 変更フラグが立っている時に、保存するか確認し、キャンセル可能にする。
+            if (this.DataContext != null)
+            {
+                if (this.DataContext is RentLivingRoomViewModel)
+                {
+                    if ((this.DataContext as RentLivingRoomViewModel).IsDirty)
+                    {
+                        try
+                        {
+                            // 変更の保存確認ダイアログを表示。
+                            var result = MessageBox.Show("変更を保存して閉じますか？", "ZumenSearch: 未保存の変更があります", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
+
+                            if (result == MessageBoxResult.Yes)
+                            {
+                                // 「はい」ボタンを押した場合の処理
+                                var vm = (this.DataContext as RentLivingRoomViewModel);
+                                if (vm.SectionSave() == false)
+                                {
+                                    e.Cancel = true;
+
+                                    return;
+                                }
+                            }
+                            else if (result == MessageBoxResult.No)
+                            {
+                                // 「No」ボタンを押した場合の処理
+                                e.Cancel = false;
+
+                                // For the bug> https://stackoverflow.com/questions/50930684/wpf-app-not-exiting-because-of-uwp-pdfdocument
+                                var vm = (this.DataContext as RentLivingRoomViewModel);
+                                foreach (var tmp in vm.RentLivingRoomPdfsTmp)
+                                {
+                                    tmp.Picture = null;
+                                    tmp.PdfData = null;
+                                    tmp.PdfThumbData = null;
+                                }
+
+                                foreach (var tmp in vm.RentLivingRoomEdit.RentLivingRoomPdfs)
+                                {
+                                    tmp.Picture = null;
+                                    tmp.PdfData = null;
+                                    tmp.PdfThumbData = null;
+                                }
+                            }
+                            else if (result == MessageBoxResult.Cancel)
+                            {
+                                // 「キャンセル」ボタンを押した場合の処理
+                                e.Cancel = true;
+
+                                return;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            if (ex.InnerException != null)
+                            {
+                                Debug.WriteLine("InnerException:'" + ex.InnerException.Message + " @RentLivingRoomWindow:Window_Closing");
+                            }
+                            else
+                            {
+                                Debug.WriteLine("Exception:'" + ex.Message + "' @RentLivingRoomWindow:Window_Closing");
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Windowの位置を保存
+            if (this.WindowState == WindowState.Normal)
             {
                 Properties.Settings.Default.RentLivingRoomWindow_Left = this.Left;
                 Properties.Settings.Default.RentLivingRoomWindow_Top = this.Top;
@@ -93,7 +309,11 @@ namespace ZumenSearch.Views
             }
 
             Properties.Settings.Default.Save();
-            */
+
+            // Windowの一覧から自らを削除
+            App app = App.Current as App;
+            app.RemoveEditWindow(this);
+            
         }
 
         private void Window_StateChanged(object sender, EventArgs e)

@@ -24,7 +24,7 @@
         <WindowChrome CaptionHeight="32" ResizeBorderThickness="{x:Static SystemParameters.WindowResizeBorderThickness}"/>
     </WindowChrome.WindowChrome>
     <Border Style="{StaticResource WindowMainPanelStyle}">
-        <Grid x:Name="BackgroundGrid" Background="{DynamicResource BoardBackgroundColorBrush}">
+        <Grid x:Name="BackgroundGrid" Background="{DynamicResource BoardBackgroundColorBrush}" UseLayoutRounding="True">
             <Grid.RowDefinitions>
                 <RowDefinition Height="32"/>
                 <RowDefinition Height="Auto"/>
@@ -48,6 +48,18 @@
                 <Menu Style="{DynamicResource MainMenuStyle}" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Stretch" Margin="0 0 0 0" IsHitTestVisible="True" WindowChrome.IsHitTestVisibleInChrome="True">
                     <MenuItem x:Name="MainMenuMainItem" Header="{Binding AppTitleVer}" Style="{DynamicResource MainMenuItemStyle}">
                         <MenuItem.Resources>
+                            <!-- FocusVisual -->
+                            <Style x:Key="MainMenuFocusVisual">
+                                <Setter Property="Control.Template">
+                                    <Setter.Value>
+                                        <ControlTemplate>
+                                            <Border>
+                                                <Rectangle Margin="3 0 -3 0" StrokeThickness="1" Stroke="{DynamicResource ControlMediumColorBrush}" StrokeDashArray="1 2" />
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
                             <ControlTemplate x:Key="hamburger-menu">
                                 <Canvas Background="Transparent">
                                     <Canvas.RenderTransform>
@@ -58,7 +70,7 @@
                             </ControlTemplate>
                         </MenuItem.Resources>
                         <MenuItem.Icon>
-                            <ContentControl Template="{StaticResource hamburger-menu}"/>
+                            <ContentControl Template="{StaticResource hamburger-menu}" FocusVisualStyle="{StaticResource MainMenuFocusVisual}" />
                         </MenuItem.Icon>
 
                         <MenuItem Header="E_xit" Click="CloseButton_Click"/>
@@ -347,7 +359,7 @@
                                         <Setter.Value>
                                             <ControlTemplate>
                                                 <Border CornerRadius="3">
-                                                    <Rectangle Margin="2" StrokeThickness="1" Stroke="#121212" StrokeDashArray="1 2" />
+                                                    <Rectangle Margin="2" StrokeThickness="1" Stroke="#CCCCCC" StrokeDashArray="1 2" />
                                                 </Border>
                                             </ControlTemplate>
                                         </Setter.Value>
@@ -564,8 +576,32 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
-                        <!-- 検索条件と検索結果一覧（フォーカス順位の関係でコード上は上に持ってくる） -->
-                        <TabControl Grid.Row="1" Grid.Column="0" SelectedIndex="{Binding RentLivingSearchTabSelectedIndex}" Style="{DynamicResource HiddlenTabControl}">
+                        <!-- メニューパネル -->
+                        <Border Grid.Row="0" Grid.Column="0" Height="28" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" BorderThickness="0 0.5 0 0.5" BorderBrush="#121212">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Stretch">
+
+                                <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
+                                <Button Content="検索" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding RentLivingShowSearchCommand}" VerticalAlignment="Center" HorizontalAlignment="Center" Tag="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z"></Button>
+
+                                <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
+                                <Button Content="新規" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding RentLivingNewCommand}" VerticalAlignment="Center" HorizontalAlignment="Center" Tag="M19,5H22V7H19V10H17V7H14V5H17V2H19V5M17,19V13H19V21H3V5H11V7H5V19H17Z"></Button>
+
+                                <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
+                                <Button Content="編集" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding RentLivingSelectedEditCommand}" VerticalAlignment="Center" HorizontalAlignment="Center" Tag="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"></Button>
+
+                                <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
+                                <Button Content="表示" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding RentLivingSelectedViewCommand}" VerticalAlignment="Center" HorizontalAlignment="Center" Tag="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z"></Button>
+
+                                <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
+                                <Button Content="削除" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding RentLivingSelectedDeleteCommand}" VerticalAlignment="Center" HorizontalAlignment="Center" Tag="M9,3V4H4V6H5V19A2,2 0 0,0 7,21H17A2,2 0 0,0 19,19V6H20V4H15V3H9M7,6H17V19H7V6M9,8V17H11V8H9M13,8V17H15V8H13Z"></Button>
+
+                                <Border BorderThickness="1 0 0 0" BorderBrush="#121212"></Border>
+
+                            </StackPanel>
+                        </Border>
+
+                        <!-- 検索条件と検索結果一覧 -->
+                        <TabControl Grid.Row="12" Grid.Column="0" SelectedIndex="{Binding RentLivingSearchTabSelectedIndex}" Style="{DynamicResource HiddlenTabControl}">
 
                             <!-- 検索条件 -->
                             <TabItem Style="{DynamicResource NoChromeTabHeader}">
@@ -608,13 +644,13 @@
                                                                                 <ColumnDefinition Width="Auto"/>
                                                                             </Grid.ColumnDefinitions>
                                                                             <ScrollViewer x:Name="PART_ContentHost" Focusable="false" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden"/>
-
+<!--
                                                                             <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0" VerticalAlignment="Center">
                                                                                 <RadioButton x:Name="SearchTitleRadioButton" GroupName="RentSearchTags" Margin="1 1 1 1" Padding="4" Content="物件名" Width="80" IsChecked="{Binding Path=SelectedRentSearchTags, ConverterParameter={x:Static vms:RentSearchTags.RentName}, Converter={StaticResource EnumBooleanConverter}}" Style="{DynamicResource SelectionRadioButtonStyle}"/>
                                                                                 <RadioButton x:Name="SearchArtistRadioButton" GroupName="RentSearchTags" Margin="1 1 1 1" Padding="4" Content="所在地" Width="80" IsChecked="{Binding Path=SelectedRentSearchTags, ConverterParameter={x:Static vms:RentSearchTags.RentLocation}, Converter={StaticResource EnumBooleanConverter}}" Style="{DynamicResource SelectionRadioButtonStyle}"/>
                                                                                 <RadioButton x:Name="SearchAlbumRadioButton" GroupName="RentSearchTags" Margin="1 1 1 1" Padding="4" Content="最寄り駅" Width="80" IsChecked="{Binding Path=SelectedRentSearchTags, ConverterParameter={x:Static vms:RentSearchTags.RentStation}, Converter={StaticResource EnumBooleanConverter}}" Style="{DynamicResource SelectionRadioButtonStyle}"/>
                                                                             </StackPanel>
-
+-->
                                                                             <Button Grid.Column="2" Width="100" Margin="2 1 2 1" ToolTip="検索" Command="{Binding RentLivingSearchCommand}" IsDefault="True" Content="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z">
                                                                                 <Button.Resources>
                                                                                     <Style x:Key="ButtonIntextboxFocusVisual">
@@ -790,19 +826,11 @@
                                                     </MenuItem.Icon>
                                                 </MenuItem>
                                                 <Separator/>
-                                                <MenuItem Header="編集"
-                                  Command="{Binding Path=DataContext.RentLivingSelectedEditCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"
-                                  CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
+                                                <MenuItem Header="編集" Command="{Binding Path=DataContext.RentLivingSelectedEditCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
                                                     <MenuItem.Resources>
                                                         <ControlTemplate x:Key="EditIcon">
                                                             <Canvas Background="Transparent" >
-                                                                <Path Fill="#373737"
-                          Width="14.3775"
-                          Height="14"
-                          Canvas.Left="0.311264"
-                          Canvas.Top="0.500005"
-                          Stretch="Uniform"
-                          Data="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z" />
+                                                                <Path Fill="#373737" Width="14.3775" Height="14" Canvas.Left="0.311264" Canvas.Top="0.500005" Stretch="Uniform" Data="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z" />
                                                             </Canvas>
                                                         </ControlTemplate>
                                                     </MenuItem.Resources>
@@ -811,19 +839,11 @@
                                                     </MenuItem.Icon>
                                                 </MenuItem>
                                                 <Separator/>
-                                                <MenuItem Header="削除"
-                                  Command="{Binding Path=DataContext.RentLivingSelectedDeleteCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"
-                                  CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
+                                                <MenuItem Header="削除" Command="{Binding Path=DataContext.RentLivingSelectedDeleteCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
                                                     <MenuItem.Resources>
                                                         <ControlTemplate x:Key="DeleteForeverIcon">
                                                             <Canvas Background="Transparent">
-                                                                <Path Fill="#373737" 
-                          Width="14.3775"
-                          Height="14"
-                          Canvas.Left="0.311264"
-                          Canvas.Top="0.500005"
-                          Stretch="Uniform"
-                          Data="M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19M8.46,11.88L9.87,10.47L12,12.59L14.12,10.47L15.53,11.88L13.41,14L15.53,16.12L14.12,17.53L12,15.41L9.88,17.53L8.47,16.12L10.59,14L8.46,11.88M15.5,4L14.5,3H9.5L8.5,4H5V6H19V4H15.5Z" />
+                                                                <Path Fill="#373737" Width="14.3775" Height="14" Canvas.Left="0.311264" Canvas.Top="0.500005" Stretch="Uniform" Data="M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19M8.46,11.88L9.87,10.47L12,12.59L14.12,10.47L15.53,11.88L13.41,14L15.53,16.12L14.12,17.53L12,15.41L9.88,17.53L8.47,16.12L10.59,14L8.46,11.88M15.5,4L14.5,3H9.5L8.5,4H5V6H19V4H15.5Z" />
                                                             </Canvas>
                                                         </ControlTemplate>
                                                     </MenuItem.Resources>
@@ -1005,33 +1025,6 @@
                             </TabItem>
 
                         </TabControl>
-
-                        <!-- メニューパネル -->
-                        <Border Grid.Row="0" Grid.Column="0" Height="28" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" BorderThickness="0 0.5 0 0.5" BorderBrush="#121212" Margin="1 0 0 0">
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Stretch">
-
-                                <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
-                                <Button Content="検索" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding RentLivingShowSearchCommand}" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
-
-                                <Border Visibility="Collapsed" BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
-                                <Button Visibility="Collapsed" Content="一覧" Style="{DynamicResource ListviewMenuButton}" Command="{Binding RentLivingListCommand}" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
-
-                                <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
-                                <Button Content="新規" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding RentLivingNewCommand}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-
-                                <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
-                                <Button Content="編集" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding RentLivingSelectedEditCommand}" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
-
-                                <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
-                                <Button Content="表示" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding RentLivingSelectedViewCommand}" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
-
-                                <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
-                                <Button Content="削除" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding RentLivingSelectedDeleteCommand}" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
-
-                                <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
-
-                            </StackPanel>
-                        </Border>
 
                     </Grid>
 

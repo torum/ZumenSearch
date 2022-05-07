@@ -54,6 +54,15 @@ namespace ZumenSearch.Views
             }
         }
 
+        protected override void OnClosed(EventArgs e)
+        {
+            base.OnClosed(e);
+
+            Debug.WriteLine("MainWindow OnClosed.");
+
+            App.Current.Shutdown();
+        }
+
         // 二重起動防止処理からの復帰
         public void BringToForeground()
         {
@@ -120,6 +129,16 @@ namespace ZumenSearch.Views
             }
 
             Properties.Settings.Default.Save();
+
+            // TODO:
+            Debug.WriteLine("MainWindow Closing...");
+
+            App app = App.Current as App;
+            foreach (var w in app.WindowList)
+            {
+                Debug.WriteLine("Unclosed window: " + w.Name);
+            }
+
         }
 
         // 建物 Windowの表示

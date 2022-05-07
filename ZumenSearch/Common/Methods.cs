@@ -63,13 +63,35 @@ namespace ZumenSearch.Common
 
         public static Byte[] BitmapImageToByteArray(BitmapImage bitmapImage)
         {
-            byte[] data;
-            JpegBitmapEncoder encoder = new JpegBitmapEncoder();
-            encoder.Frames.Add(BitmapFrame.Create(bitmapImage));
-            using (MemoryStream ms = new MemoryStream())
+            byte[] data = null;
+
+            try
             {
-                encoder.Save(ms);
-                data = ms.ToArray();
+                PngBitmapEncoder encoder = new PngBitmapEncoder();
+                //encoder.Frames.Add(BitmapFrame.Create(bitmapImage));
+                encoder.Frames.Add(BitmapFrame.Create(bitmapImage, null, null, null));// https://stackoverflow.com/questions/16941520/exception-on-bitmapframe-create-bug-in-wpf-framework
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    encoder.Save(ms);
+                    data = ms.ToArray();
+                }
+                /*
+                JpegBitmapEncoder encoder = new JpegBitmapEncoder();
+                encoder.Frames.Add(BitmapFrame.Create(bitmapImage));
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    encoder.Save(ms);
+                    data = ms.ToArray();
+                }
+                */
+            }
+            catch (System.NotSupportedException ex)
+            {
+                Debug.WriteLine("NotSupportedException: Methods@BitmapImageToByteArray(), " + ex.Message);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Exception: Methods@BitmapImageToByteArray(), " + ex.Message);
             }
 
             return data;
@@ -166,7 +188,7 @@ namespace ZumenSearch.Common
         public async static Task<BitmapImage> BitmapImageFromPdf(Byte[] bytes)
         {
             Windows.Data.Pdf.PdfDocument pdfDocument;
-
+            
             using (var stream = new MemoryStream(bytes))
             {
                 pdfDocument = await Windows.Data.Pdf.PdfDocument.LoadFromStreamAsync(stream.AsRandomAccessStream());
@@ -187,6 +209,9 @@ namespace ZumenSearch.Common
                             image.StreamSource = IMRAStream.AsStream();
                             image.EndInit();
                         }
+
+                        return image;
+
                         /*
                         // save to file.
                         JpegBitmapEncoder encoder = new JpegBitmapEncoder();
@@ -198,7 +223,6 @@ namespace ZumenSearch.Common
                             encoder.Save(fileStream);
                         }
                         */
-                        return image;
                     }
                 }
             }

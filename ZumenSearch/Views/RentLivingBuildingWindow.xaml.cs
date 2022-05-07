@@ -98,16 +98,23 @@ namespace ZumenSearch.Views
                 vm.RentLivingRoomEdit = arg.RentLivingRoomObject;
                 vm.RentLivingRooms = arg.RentLivingRooms;
 
-                // 画像編集画面からの変更通知を受け取る
+                // 画像編集画面からの変更通知を受け取るイベントにサブスクライブ
                 vm.RentLivingIsDirty += () => OnRentLivingIsDirty();
+
+                // 画像編集用のWindowを表示させるイベントをサブスクライブする設定
+                vm.OpenRentLivingRoomImageWindow += (sender, arg) => { win.OpenRentLivingRoomImageWindow(arg); };
+                // 図面編集用のWindowを表示させるイベントをサブスクライブする設定
+                vm.OpenRentLivingRoomPdfWindow += (sender, arg) => { win.OpenRentLivingRoomPdfWindow(arg); };
 
                 // Windowリストへ追加。
                 app.WindowList.Add(win);
 
-                // モーダルで編集画面を開く
+                // Winオーナーを設定。
                 win.Owner = this;
-                //win.Show();
+                // モーダルで編集画面を開く
                 win.ShowDialog();
+                // または非モーダルで編集画面を開く
+                //win.Show();
 
                 //win.ShowInTaskbar = true;
                 //win.ShowActivated = true;
@@ -204,30 +211,30 @@ namespace ZumenSearch.Views
 
             foreach (var w in app.WindowList)
             {
-                if (!(w is RentLivingImageWindow))
+                if (!(w is RentLivingPdfWindow))
                     continue;
 
-                if ((w as RentLivingImageWindow).DataContext == null)
+                if ((w as RentLivingPdfWindow).DataContext == null)
                     continue;
 
-                if (!((w as RentLivingImageWindow).DataContext is RentLivingImageViewModel))
+                if (!((w as RentLivingPdfWindow).DataContext is RentLivingPdfViewModel))
                     continue;
 
-                if (id == ((w as RentLivingImageWindow).DataContext as RentLivingImageViewModel).Id)
+                if (id == ((w as RentLivingPdfWindow).DataContext as RentLivingPdfViewModel).Id)
                 {
                     //w.Activate();
 
-                    if ((w as RentLivingImageWindow).WindowState == WindowState.Minimized || (w as Window).Visibility == Visibility.Hidden)
+                    if ((w as RentLivingPdfWindow).WindowState == WindowState.Minimized || (w as Window).Visibility == Visibility.Hidden)
                     {
                         //w.Show();
-                        (w as RentLivingImageWindow).Visibility = Visibility.Visible;
-                        (w as RentLivingImageWindow).WindowState = WindowState.Normal;
+                        (w as RentLivingPdfWindow).Visibility = Visibility.Visible;
+                        (w as RentLivingPdfWindow).WindowState = WindowState.Normal;
                     }
 
-                    (w as RentLivingImageWindow).Activate();
+                    (w as RentLivingPdfWindow).Activate();
                     //(w as EditorWindow).Topmost = true;
                     //(w as EditorWindow).Topmost = false;
-                    (w as RentLivingImageWindow).Focus();
+                    (w as RentLivingPdfWindow).Focus();
 
                     return;
                 }
@@ -325,6 +332,23 @@ namespace ZumenSearch.Views
                                     return;
                                 }
                             }
+                            else if (result == MessageBoxResult.No)
+                            {
+                                // 「No」ボタンを押した場合の処理
+                                e.Cancel = false;
+
+                                // For the bug> https://stackoverflow.com/questions/50930684/wpf-app-not-exiting-because-of-uwp-pdfdocument
+                                var vm = (this.DataContext as RentLivingBuildingViewModel);
+                                foreach (var tmp in vm.RentLivingEdit.RentLivingRooms)
+                                {
+                                    foreach (var hoge in tmp.RentLivingRoomPdfs)
+                                    {
+                                        hoge.Picture = null;
+                                        hoge.PdfData = null;
+                                        hoge.PdfThumbData = null;
+                                    }
+                                }
+                            }
                             else if (result == MessageBoxResult.Cancel)
                             {
                                 // 「キャンセル」ボタンを押した場合の処理
@@ -365,6 +389,9 @@ namespace ZumenSearch.Views
             }
 
             Properties.Settings.Default.Save();
+
+
+            Debug.WriteLine("RentLivingBuildingWindow Closing...");
 
             // Windowの一覧から自らを削除
             App app = App.Current as App;

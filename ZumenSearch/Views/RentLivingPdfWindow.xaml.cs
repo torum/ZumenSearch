@@ -54,6 +54,18 @@ namespace ZumenSearch.Views
                                     return;
                                 }
                             }
+                            else if (result == MessageBoxResult.No)
+                            {
+                                // 「No」ボタンを押した場合の処理
+                                e.Cancel = false;
+
+                                // For the bug> https://stackoverflow.com/questions/50930684/wpf-app-not-exiting-because-of-uwp-pdfdocument
+                                var vm = (this.DataContext as RentLivingPdfViewModel);
+                                vm.RentLivingPdfEdit.Picture = null;
+                                vm.RentLivingPdfEdit.PdfData = null;
+                                vm.RentLivingPdfEdit.PdfThumbData = null;
+                                vm.Picture = null;
+                            }
                             else if (result == MessageBoxResult.Cancel)
                             {
                                 // 「キャンセル」ボタンを押した場合の処理
@@ -97,12 +109,14 @@ namespace ZumenSearch.Views
             Properties.Settings.Default.Save();
             */
 
+
+            Debug.WriteLine("RentLivingPdfWindow Closing...");
+
             // Windowリストから自らを削除。
             App app = App.Current as App;
             app.RemoveEditWindow(this);
 
         }
-
 
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {

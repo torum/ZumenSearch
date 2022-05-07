@@ -5,7 +5,8 @@
              xmlns:vms="clr-namespace:ZumenSearch.ViewModels"
              xmlns:common="clr-namespace:ZumenSearch.Common" xmlns:theme="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Royale"
              StartupUri="Views\MainWindow.xaml"
-             Startup="AppOnStartup">
+             Startup="AppOnStartup"
+             ShutdownMode="OnMainWindowClose">
     <Application.Resources>
 
 
@@ -190,13 +191,11 @@
                         </Setter>
                     </Style>
 
-
-
-
                 </ResourceDictionary>
 
                 <!-- Main menu -->
                 <ResourceDictionary>
+
                     <SolidColorBrush x:Key="Menu.Static.Background" Color="#FFF0F0F0"/>
                     <Style x:Key="MainMenuStyle" TargetType="{x:Type Menu}">
                         <Setter Property="Padding" Value="0"/>
@@ -2410,7 +2409,20 @@
 
                 <!-- ListviewMenuButton -->
                 <ResourceDictionary>
-
+                    
+                    <!-- FocusVisual -->
+                    <Style x:Key="ListviewMenuButtonFocusVisual">
+                        <Setter Property="Control.Template">
+                            <Setter.Value>
+                                <ControlTemplate>
+                                    <Border>
+                                        <Rectangle Margin="0" StrokeThickness="1" Stroke="{DynamicResource ControlMediumColorBrush}" StrokeDashArray="1 2" />
+                                    </Border>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                    
                     <Style x:Key="ListviewMenuButton" TargetType="{x:Type Button}">
                         <Setter Property="OverridesDefaultStyle" Value="true" />
                         <Setter Property="Background" Value="{DynamicResource BoardBackgroundColorBrush}" />
@@ -2419,6 +2431,7 @@
                         <Setter Property="BorderBrush" Value="#ccc" />
                         <Setter Property="Margin" Value="12 3 6 3" />
                         <Setter Property="Padding" Value="3" />
+                        <Setter Property="FocusVisualStyle" Value="{DynamicResource ListviewMenuButtonFocusVisual}" />
                         <Setter Property="Template">
                             <Setter.Value>
                                 <ControlTemplate TargetType="Button">
@@ -2427,9 +2440,9 @@
                                             <Viewbox Width="12" Height="12" Margin="0">
                                                 <Canvas Width="24" Height="24">
                                                     <Canvas.RenderTransform>
-                                                        <TranslateTransform X="1" Y="3"/>
+                                                        <TranslateTransform X="1" Y="1"/>
                                                     </Canvas.RenderTransform>
-                                                    <Path x:Name="PathIcon" Data="M5.12,5L5.93,4H17.93L18.87,5M12,17.5L6.5,12H10V10H14V12H17.5L12,17.5M20.54,5.23L19.15,3.55C18.88,3.21 18.47,3 18,3H6C5.53,3 5.12,3.21 4.84,3.55L3.46,5.23C3.17,5.57 3,6 3,6.5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V6.5C21,6 20.83,5.57 20.54,5.23Z" Stretch="Uniform">
+                                                    <Path x:Name="PathIcon" Data="{Binding Tag, RelativeSource={RelativeSource TemplatedParent}}" Stretch="Uniform">
                                                         <Path.Fill>
                                                             <SolidColorBrush x:Name="PathIconColor" Color="{DynamicResource ControlForegroundColor}"/>
                                                         </Path.Fill>
@@ -2469,6 +2482,7 @@
                             </Setter.Value>
                         </Setter>
                     </Style>
+                    
                 </ResourceDictionary>
 
                 <!-- Flat ComboBox -->

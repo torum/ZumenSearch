@@ -69,7 +69,7 @@ namespace ZumenSearch
                             "TrainStation1 TEXT," +
                             "TrainStation2 TEXT," +
                             "TrainStation3 TEXT," +
-                            "PictureThumbData BLOB,"+
+                            "PictureThumbData BLOB,"+ // TODO
                             "DateTimeUpdated TEXT" +
                             ")";
                         tableCmd.ExecuteNonQuery();
@@ -144,6 +144,29 @@ namespace ZumenSearch
                             "PictureData BLOB NOT NULL," +
                             "PictureThumbData BLOB NOT NULL," +
                             "PictureFileExt TEXT NOT NULL," +
+                            "PictureType TEXT NOT NULL," +
+                            "PictureDescription TEXT NOT NULL," +
+                            "PictureIsMain INTEGER  NOT NULL," +
+                            "FOREIGN KEY (Rent_ID) REFERENCES Rent(Rent_ID)," +
+                            "FOREIGN KEY (RentLiving_ID) REFERENCES RentLiving(RentLiving_ID)," +
+                            "FOREIGN KEY (RentLivingRoom_ID) REFERENCES RentLivingRoom(RentLivingRoom_ID)" +
+                            " )";
+                        tableCmd.ExecuteNonQuery();
+
+                        // 賃貸住居用物件の「部屋の図面」テーブル
+                        tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS RentLivingRoomPdf (" +
+                            "RentLivingRoomPdf_ID TEXT NOT NULL PRIMARY KEY," +
+                            "RentLivingRoom_ID TEXT NOT NULL," +
+                            "RentLiving_ID TEXT NOT NULL," +
+                            "Rent_ID TEXT NOT NULL," +
+                            "PdfData BLOB NOT NULL," +
+                            "PdfThumbData BLOB NOT NULL," +
+                            "DateTimeAdded TEXT NOT NULL," +
+                            "DateTimePublished TEXT NOT NULL," +
+                            "DateTimeVerified TEXT NOT NULL," +
+                            "PdfType TEXT NOT NULL," +
+                            "PdfDescription TEXT NOT NULL," +
+                            "PdfIsMain INTEGER  NOT NULL," +
                             "FOREIGN KEY (Rent_ID) REFERENCES Rent(Rent_ID)," +
                             "FOREIGN KEY (RentLiving_ID) REFERENCES RentLiving(RentLiving_ID)," +
                             "FOREIGN KEY (RentLivingRoom_ID) REFERENCES RentLivingRoom(RentLivingRoom_ID)" +
@@ -598,7 +621,7 @@ namespace ZumenSearch
                                 rlpdf.PdfData = pdfBytes;
 
                                 byte[] thumbBytes = (byte[])reader["PdfThumbData"];
-                                rlpdf.ThumbData = thumbBytes;
+                                rlpdf.PdfThumbData = thumbBytes;
                                 rlpdf.Picture = Methods.BitmapImageFromBytes(thumbBytes);
 
                                 DateTime dt = new DateTime();
@@ -645,7 +668,7 @@ namespace ZumenSearch
                                 room.RentLivingRoomPrice = Convert.ToInt32(reader["Price"]);
 
                                 room.IsNew = false;
-                                room.IsModified = false;
+                                room.IsDirty = false;
 
                                 rl.RentLivingRooms.Add(room);
                             }
@@ -664,18 +687,76 @@ namespace ZumenSearch
                                     byte[] imageBytes = (byte[])reader["PictureData"];
                                     rlsecpic.PictureData = imageBytes;
 
+                                    rlsecpic.Picture = Methods.BitmapImageFromBytes(imageBytes);
+
                                     byte[] imageThumbBytes = (byte[])reader["PictureThumbData"];
                                     rlsecpic.PictureThumbData = imageThumbBytes;
 
-
                                     rlsecpic.PictureFileExt = Convert.ToString(reader["PictureFileExt"]);
 
-                                    rlsecpic.Picture = Methods.BitmapImageFromBytes(imageThumbBytes);
+                                    rlsecpic.PictureThumb = Methods.BitmapImageFromBytes(imageThumbBytes);
+
+                                    rlsecpic.PictureType = Convert.ToString(reader["PictureType"]);
+
+                                    rlsecpic.PictureDescription = Convert.ToString(reader["PictureDescription"]);
+
+                                    var bln = Convert.ToInt32(reader["PictureIsMain"]);
+                                    if (bln > 0)
+                                        rlsecpic.PictureIsMain = true;
+                                    else
+                                        rlsecpic.PictureIsMain = false;
 
                                     rlsecpic.IsNew = false;
                                     rlsecpic.IsModified = false;
 
                                     hoge.RentLivingRoomPictures.Add(rlsecpic);
+
+                                }
+                            }
+
+                        }
+
+                        // 部屋図面
+                        foreach (var hoge in rl.RentLivingRooms)
+                        {
+                            cmd.CommandText = String.Format("SELECT * FROM RentLivingRoomPdf WHERE RentLivingRoom_ID = '{0}'", hoge.RentLivingRoomId);
+                            using (var reader = cmd.ExecuteReader())
+                            {
+                                while (reader.Read())
+                                {
+                                    RentLivingRoomPdf rlsecpdf = new RentLivingRoomPdf(rentId, rentLivingId, hoge.RentLivingRoomId, Convert.ToString(reader["RentLivingRoomPdf_ID"]));
+
+
+                                    byte[] pdfBytes = (byte[])reader["PdfData"];
+                                    rlsecpdf.PdfData = pdfBytes;
+
+                                    byte[] thumbBytes = (byte[])reader["PdfThumbData"];
+                                    rlsecpdf.PdfThumbData = thumbBytes;
+                                    rlsecpdf.Picture = Methods.BitmapImageFromBytes(thumbBytes);
+
+                                    DateTime dt = new DateTime();
+
+                                    dt = DateTime.Parse(Convert.ToString(reader["DateTimeAdded"]));
+                                    rlsecpdf.DateTimeAdded = dt.ToLocalTime();
+                                    dt = DateTime.Parse(Convert.ToString(reader["DateTimePublished"]));
+                                    rlsecpdf.DateTimePublished = dt.ToLocalTime();
+                                    dt = DateTime.Parse(Convert.ToString(reader["DateTimeVerified"]));
+                                    rlsecpdf.DateTimeVerified = dt.ToLocalTime();
+
+                                    rlsecpdf.PdfType = Convert.ToString(reader["PdfType"]);
+
+                                    rlsecpdf.PdfDescription = Convert.ToString(reader["PdfDescription"]);
+
+                                    var bln = Convert.ToInt32(reader["PdfIsMain"]);
+                                    if (bln > 0)
+                                        rlsecpdf.PdfIsMain = true;
+                                    else
+                                        rlsecpdf.PdfIsMain = false;
+
+                                    rlsecpdf.IsNew = false;
+                                    rlsecpdf.IsModified = false;
+
+                                    hoge.RentLivingRoomPdfs.Add(rlsecpdf);
 
                                 }
                             }
@@ -869,7 +950,7 @@ namespace ZumenSearch
                                     cmd.Parameters.Add(parameter1);
 
                                     SqliteParameter parameter2 = new SqliteParameter("@1", System.Data.DbType.Binary);
-                                    parameter2.Value = pdf.ThumbData;
+                                    parameter2.Value = pdf.PdfThumbData;
                                     cmd.Parameters.Add(parameter2);
 
                                     SqliteParameter parameter3 = new SqliteParameter("@2", System.Data.DbType.Int32);
@@ -902,7 +983,7 @@ namespace ZumenSearch
                                     if (InsertIntoRentLivingRoomResult > 0)
                                     {
                                         room.IsNew = false;
-                                        room.IsModified = false;
+                                        room.IsDirty = false;
                                     }
 
                                     // 部屋の写真
@@ -910,8 +991,10 @@ namespace ZumenSearch
                                     {
                                         foreach (var roompic in room.RentLivingRoomPictures)
                                         {
-                                            string sqlInsertIntoRentLivingRoomPic = String.Format("INSERT INTO RentLivingRoomPicture (RentLivingRoomPicture_ID, RentLivingRoom_ID, RentLiving_ID, Rent_ID, PictureData, PictureThumbData, PictureFileExt) VALUES ('{0}', '{1}', '{2}', '{3}', @0, @1, '{6}')",
-                                                roompic.RentSectionPictureId, roompic.RentLivingRoomId, rl.RentLivingId, rl.RentId, roompic.PictureData, roompic.PictureThumbData, roompic.PictureFileExt);
+                                            string sqlInsertIntoRentLivingRoomPic = String.Format(
+                                                "INSERT INTO RentLivingRoomPicture (RentLivingRoomPicture_ID, RentLivingRoom_ID, RentLiving_ID, Rent_ID, PictureData, PictureThumbData, PictureFileExt, PictureType, PictureDescription, PictureIsMain) " +
+                                                "VALUES ('{0}', '{1}', '{2}', '{3}', @0, @1, '{4}', '{5}', '{6}', @2)",
+                                                roompic.RentSectionPictureId, roompic.RentLivingRoomId, rl.RentLivingId, rl.RentId, roompic.PictureFileExt, roompic.PictureTypes, roompic.PictureDescription);
 
                                             cmd.CommandText = sqlInsertIntoRentLivingRoomPic;
                                             // ループなので、前のパラメーターをクリアする。
@@ -925,11 +1008,54 @@ namespace ZumenSearch
                                             parameter2.Value = roompic.PictureThumbData;
                                             cmd.Parameters.Add(parameter2);
 
+                                            SqliteParameter parameter3 = new SqliteParameter("@2", System.Data.DbType.Int32);
+                                            parameter3.Value = 0;
+                                            if (roompic.PictureIsMain)
+                                                parameter3.Value = 1;
+                                            cmd.Parameters.Add(parameter3);
+
                                             var InsertIntoRentLivingRoomPicResult = cmd.ExecuteNonQuery();
                                             if (InsertIntoRentLivingRoomPicResult > 0)
                                             {
                                                 roompic.IsNew = false;
                                                 roompic.IsModified = false;
+                                            }
+                                        }
+                                    }
+
+                                    // 部屋の図面
+                                    if (room.RentLivingRoomPdfs.Count > 0)
+                                    {
+                                        foreach (var roompdf in room.RentLivingRoomPdfs)
+                                        {
+                                            string sqlInsertIntoRentLivingRoomPdf = String.Format(
+                                                "INSERT INTO RentLivingRoomPdf (RentLivingRoomPdf_ID, RentLivingRoom_ID, RentLiving_ID, Rent_ID, PdfData, PdfThumbData, DateTimeAdded, DateTimePublished, DateTimeVerified, PdfType, PdfDescription, PdfIsMain) " +
+                                                "VALUES ('{0}', '{1}', '{2}', '{3}', @0, @1, '{4}', '{5}', '{6}', '{7}', '{8}', @2)",
+                                                roompdf.RentSectionPdfId, roompdf.RentLivingRoomId, rl.RentLivingId, rl.RentId, roompdf.DateTimeAdded.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"), roompdf.DateTimePublished.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"), roompdf.DateTimeVerified.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"), roompdf.PdfTypes, roompdf.PdfDescription);
+
+                                            cmd.CommandText = sqlInsertIntoRentLivingRoomPdf;
+                                            // ループなので、前のパラメーターをクリアする。
+                                            cmd.Parameters.Clear();
+
+                                            SqliteParameter parameter1 = new SqliteParameter("@0", System.Data.DbType.Binary);
+                                            parameter1.Value = roompdf.PdfData;
+                                            cmd.Parameters.Add(parameter1);
+
+                                            SqliteParameter parameter2 = new SqliteParameter("@1", System.Data.DbType.Binary);
+                                            parameter2.Value = roompdf.PdfThumbData;
+                                            cmd.Parameters.Add(parameter2);
+
+                                            SqliteParameter parameter3 = new SqliteParameter("@2", System.Data.DbType.Int32);
+                                            parameter3.Value = 0;
+                                            if (roompdf.PdfIsMain)
+                                                parameter3.Value = 1;
+                                            cmd.Parameters.Add(parameter3);
+
+                                            var InsertIntoRentLivingRoomPdfResult = cmd.ExecuteNonQuery();
+                                            if (InsertIntoRentLivingRoomPdfResult > 0)
+                                            {
+                                                roompdf.IsNew = false;
+                                                roompdf.IsModified = false;
                                             }
                                         }
                                     }
@@ -1059,15 +1185,7 @@ namespace ZumenSearch
                 rl.TrainStation2,
                 rl.TrainStation3
                 );
-            /*
-            string sqlUpdateRentThumb = String.Format(
-                "UPDATE Rent SET " +
-                    "PictureThumbData = @PictureThumbData " +
-                        "WHERE Rent_ID = '{0}'",
-                rl.RentId
-                );
-            */
-
+           
             string sqlUpdateRentLiving = String.Format(
                 "UPDATE RentLiving SET " +
                     "Kind = '{1}', " +
@@ -1182,7 +1300,8 @@ namespace ZumenSearch
                                 else if (pic.IsModified)
                                 {
                                     string sqlUpdateRentLivingPicture = String.Format(
-                                        "UPDATE RentLivingPicture SET PictureData = @0, PictureThumbData = @1, PictureFileExt = '{1}', PictureType = '{2}', PictureDescription = '{3}', PictureIsMain = @2 WHERE RentLivingPicture_ID = '{0}'",
+                                        "UPDATE RentLivingPicture SET PictureData = @0, PictureThumbData = @1, PictureFileExt = '{1}', PictureType = '{2}', PictureDescription = '{3}', PictureIsMain = @2 "+
+                                        "WHERE RentLivingPicture_ID = '{0}'",
                                         pic.RentPictureId, pic.PictureFileExt, pic.PictureType, pic.PictureDescription);
 
                                     // 物件画像の更新
@@ -1260,7 +1379,7 @@ namespace ZumenSearch
                                     cmd.Parameters.Add(parameter1);
 
                                     SqliteParameter parameter2 = new SqliteParameter("@1", System.Data.DbType.Binary);
-                                    parameter2.Value = pdf.ThumbData;
+                                    parameter2.Value = pdf.PdfThumbData;
                                     cmd.Parameters.Add(parameter2);
 
                                     SqliteParameter parameter3 = new SqliteParameter("@2", System.Data.DbType.Int32);
@@ -1279,7 +1398,8 @@ namespace ZumenSearch
                                 else if (pdf.IsModified)
                                 {
                                     string sqlUpdateRentLivingZumen = String.Format(
-                                        "UPDATE RentLivingPdf SET DateTimePublished = '{1}', DateTimeVerified = '{2}' WHERE RentLivingPdf_ID = '{0}'",
+                                        "UPDATE RentLivingPdf SET DateTimePublished = '{1}', DateTimeVerified = '{2}' "+
+                                        "WHERE RentLivingPdf_ID = '{0}'",
                                         pdf.RentPdfId, pdf.DateTimePublished.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"), pdf.DateTimeVerified.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"), pdf.FileSize);
 
                                     // 図面アトリビュート情報の更新
@@ -1330,7 +1450,7 @@ namespace ZumenSearch
                                     if (InsertIntoRentLivingRoomResult > 0)
                                     {
                                         room.IsNew = false;
-                                        room.IsModified = false;
+                                        room.IsDirty = false;
                                     }
                                 }
                                 // TODO:
@@ -1346,7 +1466,7 @@ namespace ZumenSearch
                                     if (UpdateoRentLivingRoomResult > 0)
                                     {
                                         //room.IsNew = false;
-                                        room.IsModified = false;
+                                        room.IsDirty = false;
                                     }
                                 }
 
@@ -1357,8 +1477,10 @@ namespace ZumenSearch
                                     {
                                         if (roompic.IsNew)
                                         {
-                                            string sqlInsertIntoRentLivingRoomPic = String.Format("INSERT INTO RentLivingRoomPicture (RentLivingRoomPicture_ID, RentLivingRoom_ID, RentLiving_ID, Rent_ID, PictureData, PictureThumbData, PictureFileExt) VALUES ('{0}', '{1}', '{2}', '{3}', @0, @1, '{6}')",
-                                                roompic.RentSectionPictureId, roompic.RentLivingRoomId, roompic.RentLivingId, roompic.RentId, roompic.PictureData, roompic.PictureThumbData, roompic.PictureFileExt);
+                                            string sqlInsertIntoRentLivingRoomPic = String.Format(
+                                                "INSERT INTO RentLivingRoomPicture (RentLivingRoomPicture_ID, RentLivingRoom_ID, RentLiving_ID, Rent_ID, PictureData, PictureThumbData, PictureFileExt, PictureType, PictureDescription, PictureIsMain) " +
+                                                "VALUES ('{0}', '{1}', '{2}', '{3}', @0, @1, '{4}', '{5}', '{6}', @2)",
+                                                roompic.RentSectionPictureId, roompic.RentLivingRoomId, roompic.RentLivingId, roompic.RentId, roompic.PictureFileExt, roompic.PictureType, roompic.PictureDescription);
 
                                             cmd.CommandText = sqlInsertIntoRentLivingRoomPic;
                                             // ループなので、前のパラメーターをクリアする。
@@ -1372,6 +1494,12 @@ namespace ZumenSearch
                                             parameter2.Value = roompic.PictureThumbData;
                                             cmd.Parameters.Add(parameter2);
 
+                                            SqliteParameter parameter3 = new SqliteParameter("@2", System.Data.DbType.Int32);
+                                            parameter3.Value = 0;
+                                            if (roompic.PictureIsMain)
+                                                parameter3.Value = 1;
+                                            cmd.Parameters.Add(parameter3);
+
                                             var InsertIntoRentLivingRoomPicResult = cmd.ExecuteNonQuery();
                                             if (InsertIntoRentLivingRoomPicResult > 0)
                                             {
@@ -1381,8 +1509,10 @@ namespace ZumenSearch
                                         }
                                         else if (roompic.IsModified)
                                         {
-                                            string sqlUpdateRentLivingRoomPic = String.Format("UPDATE RentLivingRoomPicture SET PictureData = @0, PictureThumbData = @1, PictureFileExt = '{6}' WHERE RentLivingRoomPicture_ID = '{0}'",
-                                                roompic.RentSectionPictureId, roompic.RentLivingRoomId, roompic.RentLivingId, roompic.RentId, roompic.PictureData, roompic.PictureThumbData, roompic.PictureFileExt);
+                                            string sqlUpdateRentLivingRoomPic = String.Format(
+                                                "UPDATE RentLivingRoomPicture SET PictureData = @0, PictureThumbData = @1, PictureFileExt = '{4}', PictureType = '{5}', PictureDescription = '{6}', PictureIsMain = @2 " +
+                                                "WHERE RentLivingRoomPicture_ID = '{0}'",
+                                                roompic.RentSectionPictureId, roompic.RentLivingRoomId, roompic.RentLivingId, roompic.RentId, roompic.PictureFileExt, roompic.PictureType, roompic.PictureDescription);
 
                                             cmd.CommandText = sqlUpdateRentLivingRoomPic;
                                             // ループなので、前のパラメーターをクリアする。
@@ -1395,6 +1525,12 @@ namespace ZumenSearch
                                             SqliteParameter parameter2 = new SqliteParameter("@1", System.Data.DbType.Binary);
                                             parameter2.Value = roompic.PictureThumbData;
                                             cmd.Parameters.Add(parameter2);
+
+                                            SqliteParameter parameter3 = new SqliteParameter("@2", System.Data.DbType.Int32);
+                                            parameter3.Value = 0;
+                                            if (roompic.PictureIsMain)
+                                                parameter3.Value = 1;
+                                            cmd.Parameters.Add(parameter3);
 
                                             var UpdateRentLivingRoomPicResult = cmd.ExecuteNonQuery();
                                             if (UpdateRentLivingRoomPicResult > 0)
@@ -1424,6 +1560,97 @@ namespace ZumenSearch
                                     }
                                 }
 
+                                // 部屋の図面
+                                if (room.RentLivingRoomPdfs.Count > 0)
+                                {
+                                    foreach (var roompdf in room.RentLivingRoomPdfs)
+                                    {
+                                        if (roompdf.IsNew)
+                                        {
+                                            string sqlInsertIntoRentLivingRoomPdf = String.Format(
+                                                "INSERT INTO RentLivingRoomPdf (RentLivingRoomPdf_ID, RentLivingRoom_ID, RentLiving_ID, Rent_ID, PdfData, PdfThumbData, DateTimeAdded, DateTimePublished, DateTimeVerified, PdfType, PdfDescription, PdfIsMain) " +
+                                                "VALUES ('{0}', '{1}', '{2}', '{3}', @0, @1, '{4}', '{5}', '{6}', '{7}', '{8}', @2)",
+                                                roompdf.RentSectionPdfId, roompdf.RentLivingRoomId, roompdf.RentLivingId, roompdf.RentId, roompdf.DateTimeAdded.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"), roompdf.DateTimePublished.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"), roompdf.DateTimeVerified.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"), roompdf.PdfType, roompdf.PdfDescription);
+
+                                            cmd.CommandText = sqlInsertIntoRentLivingRoomPdf;
+                                            // ループなので、前のパラメーターをクリアする。
+                                            cmd.Parameters.Clear();
+
+                                            SqliteParameter parameter1 = new SqliteParameter("@0", System.Data.DbType.Binary);
+                                            parameter1.Value = roompdf.PdfData;
+                                            cmd.Parameters.Add(parameter1);
+
+                                            SqliteParameter parameter2 = new SqliteParameter("@1", System.Data.DbType.Binary);
+                                            parameter2.Value = roompdf.PdfThumbData;
+                                            cmd.Parameters.Add(parameter2);
+
+                                            SqliteParameter parameter3 = new SqliteParameter("@2", System.Data.DbType.Int32);
+                                            parameter3.Value = 0;
+                                            if (roompdf.PdfIsMain)
+                                                parameter3.Value = 1;
+                                            cmd.Parameters.Add(parameter3);
+
+                                            var InsertIntoRentLivingRoomPdfResult = cmd.ExecuteNonQuery();
+                                            if (InsertIntoRentLivingRoomPdfResult > 0)
+                                            {
+                                                roompdf.IsNew = false;
+                                                roompdf.IsModified = false;
+                                            }
+                                        }
+                                        else if (roompdf.IsModified)
+                                        {
+                                            string sqlUpdateRentLivingRoomPdf = String.Format(
+                                                "UPDATE RentLivingRoomPdf SET PdfData = @0, PdfThumbData = @1, DateTimeAdded = '{4}', DateTimePublished = '{5}', DateTimeVerified = '{6}', PdfType = '{7}', PdfDescription = '{8}', PdfIsMain = @2 " +
+                                                "WHERE RentLivingRoomPdf_ID = '{0}'",
+                                                roompdf.RentSectionPdfId, roompdf.RentLivingRoomId, roompdf.RentLivingId, roompdf.RentId, roompdf.DateTimeAdded.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"), roompdf.DateTimePublished.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"), roompdf.DateTimeVerified.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"), roompdf.PdfType, roompdf.PdfDescription);
+
+                                            cmd.CommandText = sqlUpdateRentLivingRoomPdf;
+                                            // ループなので、前のパラメーターをクリアする。
+                                            cmd.Parameters.Clear();
+
+                                            SqliteParameter parameter1 = new SqliteParameter("@0", System.Data.DbType.Binary);
+                                            parameter1.Value = roompdf.PdfData;
+                                            cmd.Parameters.Add(parameter1);
+
+                                            SqliteParameter parameter2 = new SqliteParameter("@1", System.Data.DbType.Binary);
+                                            parameter2.Value = roompdf.PdfThumbData;
+                                            cmd.Parameters.Add(parameter2);
+
+                                            SqliteParameter parameter3 = new SqliteParameter("@2", System.Data.DbType.Int32);
+                                            parameter3.Value = 0;
+                                            if (roompdf.PdfIsMain)
+                                                parameter3.Value = 1;
+                                            cmd.Parameters.Add(parameter3);
+
+                                            var UpdateRentLivingRoomPdfResult = cmd.ExecuteNonQuery();
+                                            if (UpdateRentLivingRoomPdfResult > 0)
+                                            {
+                                                roompdf.IsNew = false;
+                                                roompdf.IsModified = false;
+                                            }
+                                        }
+                                    }
+                                }
+
+                                // 部屋図面の削除リストを処理
+                                if (room.RentLivingRoomPdfsToBeDeletedIDs.Count > 0)
+                                {
+                                    foreach (var id in room.RentLivingRoomPdfsToBeDeletedIDs)
+                                    {
+                                        // 削除
+                                        string sqlDeleteRentLivingRoomPdf = String.Format("DELETE FROM RentLivingRoomPdf WHERE RentLivingRoomPdf_ID = '{0}'",
+                                                id);
+
+                                        cmd.CommandText = sqlDeleteRentLivingRoomPdf;
+                                        var UpdateoRentLivingRoomResult = cmd.ExecuteNonQuery();
+                                        if (UpdateoRentLivingRoomResult > 0)
+                                        {
+                                            //
+                                        }
+                                    }
+                                }
+
+
                             }
                         }
 
@@ -1446,17 +1673,6 @@ namespace ZumenSearch
                         }
               
                         cmd.Transaction.Commit();
-
-                        // 編集オブジェクトに格納された情報を、選択アイテムに更新（Listviewの情報が更新されるー＞DBからSelectして一覧を読み込みし直さなくて良くなる）
-                        //RentLivingEditSelectedItem.Name = RentLivingEdit.Name;
-                        //RentLivingEditSelectedItem.PostalCode = RentLivingEdit.PostalCode;
-                        //RentLivingEditSelectedItem.Location = RentLivingEdit.Location;
-                        //RentLivingEditSelectedItem.TrainStation1 = RentLivingEdit.TrainStation1;
-                        //RentLivingEditSelectedItem.TrainStation2 = RentLivingEdit.TrainStation2;
-                        // TODO
-
-                        // 編集画面を非表示に
-                        //if (ShowRentLivingEdit) ShowRentLivingEdit = false;
                     }
                     catch (Exception e)
                     {
@@ -1493,6 +1709,7 @@ namespace ZumenSearch
             string sqlRentLivingPdfTable = String.Format("DELETE FROM RentLivingPdf WHERE Rent_ID = '{0}'", rentId);
             string sqlRentLivingRoomTable = String.Format("DELETE FROM RentLivingRoom WHERE Rent_ID = '{0}'", rentId);
             string sqlRentLivingRoomPictureTable = String.Format("DELETE FROM RentLivingRoomPicture WHERE Rent_ID = '{0}'", rentId);
+            string sqlRentLivingRoomPdfTable = String.Format("DELETE FROM RentLivingRoomPdf WHERE Rent_ID = '{0}'", rentId);
 
             using (var connection = new SqliteConnection(connectionStringBuilder.ConnectionString))
             {
@@ -1505,6 +1722,9 @@ namespace ZumenSearch
                     {
                         cmd.CommandText = sqlRentLivingRoomPictureTable;
                         var result = cmd.ExecuteNonQuery();
+
+                        cmd.CommandText = sqlRentLivingRoomPdfTable;
+                        result = cmd.ExecuteNonQuery();
 
                         cmd.CommandText = sqlRentLivingRoomTable;
                         result = cmd.ExecuteNonQuery();

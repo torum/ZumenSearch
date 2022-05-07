@@ -12,6 +12,7 @@ using System.Collections.ObjectModel;
 
 namespace ZumenSearch.ViewModels.Classes
 {
+    // 賃貸住居用　建物 Window
     public class OpenRentLivingBuildingWindowEventArgs : EventArgs
     {
         // Window識別用ID
@@ -24,6 +25,7 @@ namespace ZumenSearch.ViewModels.Classes
         public DataAccess DataAccessModule { get; set; }
     }
 
+    // 賃貸住居用　部屋 Window
     public class OpenRentLivingRoomWindowEventArgs : EventArgs
     {
         // Window識別用ID
@@ -40,6 +42,7 @@ namespace ZumenSearch.ViewModels.Classes
 
     }
 
+    // 賃貸住居用　建物画像 Window
     public class OpenRentLivingImageWindowEventArgs : EventArgs
     {
         // Window識別用ID
@@ -59,6 +62,7 @@ namespace ZumenSearch.ViewModels.Classes
 
     }
 
+    // 賃貸住居用　建物PDF Window
     public class OpenRentLivingPdfWindowEventArgs : EventArgs
     {
         // Window識別用ID
@@ -77,5 +81,40 @@ namespace ZumenSearch.ViewModels.Classes
         //public DataAccess DataAccessModule { get; set; }
 
     }
+
+    // 賃貸住居用　部屋画像 Window
+    public class OpenRentLivingRoomImageWindowEventArgs : EventArgs
+    {
+        // Window識別用ID
+        public string Id { get; set; }
+
+        // 賃貸住居用物件に属する画像リスト
+        public ObservableCollection<RentLivingRoomPicture> RentLivingRoomPictures { get; set; }
+
+        // 画像オブジェクト
+        public RentLivingRoomPicture RentLivingRoomPictureObject { get; set; }
+
+        // 編集モードか新規モードかのフラグ（編集画面でIsDirtyのセットに使う）
+        public bool IsEdit { get; set; }
+
+    }
+
+    // 賃貸住居用　部屋図面 Window
+    public class OpenRentLivingRoomPdfWindowEventArgs : EventArgs
+    {
+        // Window識別用ID
+        public string Id { get; set; }
+
+        // 賃貸住居用物件に属する図面リスト
+        public ObservableCollection<RentLivingRoomPdf> RentLivingRoomPdfs { get; set; }
+
+        // 図面オブジェクト
+        public RentLivingRoomPdf RentLivingRoomPdfObject { get; set; }
+
+        // 編集モードか新規モードかのフラグ（編集画面でIsDirtyのセットに使う）
+        public bool IsEdit { get; set; }
+
+    }
+
 
 }

@@ -31,9 +31,9 @@ namespace ZumenSearch.ViewModels
     /// <summary>
     /// 賃貸住居用物件の画像編集用ViewModel
     /// </summary>
-    public class RentLivingImageViewModel : ViewModelBase
+    public class RentLivingRoomImageViewModel : ViewModelBase
     {
-        // 賃貸住居用物件の画像ID（Window識別用）（Winodow生成時に設定される）
+        // 賃貸住居用部屋の画像ID（Window識別用）（Winodow生成時に設定される）
         private string _id;
         public string Id
         {
@@ -44,26 +44,26 @@ namespace ZumenSearch.ViewModels
         }
 
         // 元の賃貸住居用物件の画像オブジェクトを保持。（Winodow生成時に設定される）
-        private RentLivingPicture _rentLivingPictureEdit;
-        public RentLivingPicture RentLivingPictureEdit
+        private RentLivingRoomPicture _rentLivingRoomPictureEdit;
+        public RentLivingRoomPicture RentLivingRoomPictureEdit
         {
             get
             {
-                return _rentLivingPictureEdit;
+                return _rentLivingRoomPictureEdit;
             }
             set
             {
-                if (_rentLivingPictureEdit == value)
+                if (_rentLivingRoomPictureEdit == value)
                     return;
 
-                _rentLivingPictureEdit = value;
-                NotifyPropertyChanged("RentLivingPictureEdit");
+                _rentLivingRoomPictureEdit = value;
+                NotifyPropertyChanged(nameof(RentLivingRoomPictureEdit));
 
                 // 値の設定時に、編集画面用のプロパティにそれぞれの値をポピュレイトする
-                Picture = _rentLivingPictureEdit.Picture;
-                SelectedPictureType = _rentLivingPictureEdit.PictureType;
-                PictureDescription = _rentLivingPictureEdit.PictureDescription;
-                PictureIsMain = _rentLivingPictureEdit.PictureIsMain;
+                Picture = _rentLivingRoomPictureEdit.Picture;
+                SelectedPictureType = _rentLivingRoomPictureEdit.PictureType;
+                PictureDescription = _rentLivingRoomPictureEdit.PictureDescription;
+                PictureIsMain = _rentLivingRoomPictureEdit.PictureIsMain;
 
                 // 変更フラグをクリアする（ユーザーの入力で変更・編集された訳ではないので）
 
@@ -83,7 +83,7 @@ namespace ZumenSearch.ViewModels
         }
 
         // 元の賃貸住居用物件の画像リストを保持。（Winodow生成時に設定される）
-        public ObservableCollection<RentLivingPicture> RentLivingPictures { get; set; }
+        public ObservableCollection<RentLivingRoomPicture> RentLivingRoomPictures { get; set; }
 
         #region == 編集用のプロパティ ==
         
@@ -100,7 +100,7 @@ namespace ZumenSearch.ViewModels
                 if (_picture == value) return;
 
                 _picture = value;
-                this.NotifyPropertyChanged("Picture");
+                this.NotifyPropertyChanged(nameof(Picture));
 
                 // 変更フラグを立てる
                 IsDirty = true;
@@ -121,7 +121,7 @@ namespace ZumenSearch.ViewModels
                     return;
 
                 _selectedPictureType = value;
-                NotifyPropertyChanged("SelectedPictureType");
+                NotifyPropertyChanged(nameof(SelectedPictureType));
 
                 // 変更フラグを立てる
                 IsDirty = true;
@@ -142,7 +142,7 @@ namespace ZumenSearch.ViewModels
                     return;
 
                 _pictureIsMain = value;
-                NotifyPropertyChanged("PictureIsMain");
+                NotifyPropertyChanged(nameof(PictureIsMain));
 
                 // 変更フラグを立てる
                 IsDirty = true;
@@ -163,7 +163,7 @@ namespace ZumenSearch.ViewModels
                     return;
 
                 _pictureDescription = value;
-                NotifyPropertyChanged("PictureDescription");
+                NotifyPropertyChanged(nameof(PictureDescription));
 
                 // 変更フラグを立てる
                 IsDirty = true;
@@ -183,8 +183,8 @@ namespace ZumenSearch.ViewModels
                 if (_isDirty == value) return;
 
                 _isDirty = value;
-                NotifyPropertyChanged("IsDirty");
-                NotifyPropertyChanged("StatusIsDirty");
+                NotifyPropertyChanged(nameof(IsDirty));
+                NotifyPropertyChanged(nameof(StatusIsDirty));
             }
         }
 
@@ -206,11 +206,11 @@ namespace ZumenSearch.ViewModels
 
         // 親画面（賃貸住居用物件）に、（コードビハインド経由で）変更通知を送るイベント。
         public delegate void IsDirtyEventHandler();
-        public event IsDirtyEventHandler RentLivingIsDirty;
+        public event IsDirtyEventHandler RentLivingRoomIsDirty;
 
         #endregion
 
-        public RentLivingImageViewModel(string id)
+        public RentLivingRoomImageViewModel(string id)
         {
             _id = id;
 
@@ -223,20 +223,15 @@ namespace ZumenSearch.ViewModels
 
         }
 
-        #region == イベントの実装 ==
-
-
-        #endregion
-
         #region == メソッド ==
 
         // 画像の保存（追加または更新）メソッド（コードビハインドから保存確認ダイアログでも呼ばれる）
         public bool PictureSave()
         {
-            if (RentLivingPictureEdit == null)
+            if (RentLivingRoomPictureEdit == null)
                 return false;
 
-            if (RentLivingPictures == null)
+            if (RentLivingRoomPictures == null)
                 return false;
 
             if (IsDirty == false)
@@ -247,14 +242,14 @@ namespace ZumenSearch.ViewModels
             //Debug.WriteLine("SelectedPictureType = " + SelectedPictureType);
 
             // 各値の更新
-            RentLivingPictureEdit.PictureDescription = PictureDescription;
-            RentLivingPictureEdit.PictureType = SelectedPictureType;
+            RentLivingRoomPictureEdit.PictureDescription = PictureDescription;
+            RentLivingRoomPictureEdit.PictureType = SelectedPictureType;
 
             // IsMainフラグだった場合、
             if (PictureIsMain)
             {
                 // 一旦画像リスト内の全てのIsMainフラグをクリアする
-                foreach (var hoge in RentLivingPictures)
+                foreach (var hoge in RentLivingRoomPictures)
                 {
                     if (hoge.PictureIsMain)
                     {
@@ -265,20 +260,20 @@ namespace ZumenSearch.ViewModels
                     }
                 }
             }
-            RentLivingPictureEdit.PictureIsMain = PictureIsMain;
+            RentLivingRoomPictureEdit.PictureIsMain = PictureIsMain;
 
 
             // 画像リストから該当オブジェクトを見つける
-            var found = RentLivingPictures.FirstOrDefault(x => x.RentPictureId == RentLivingPictureEdit.RentPictureId);
+            var found = RentLivingRoomPictures.FirstOrDefault(x => x.RentSectionPictureId == RentLivingRoomPictureEdit.RentSectionPictureId);
             if (found == null)
             {
                 // 追加
-                RentLivingPictures.Add(RentLivingPictureEdit);
+                RentLivingRoomPictures.Add(RentLivingRoomPictureEdit);
             }
             else
             {
                 // 更新
-                found = RentLivingPictureEdit;
+                found = RentLivingRoomPictureEdit;
                 //found.PictureIsMain = RentLivingPictureEdit.PictureIsMain;
             }
 
@@ -289,11 +284,11 @@ namespace ZumenSearch.ViewModels
             IsDirty = false;
 
             // DB更新用のフラグを立てる
-            RentLivingPictureEdit.IsModified = true;
+            RentLivingRoomPictureEdit.IsModified = true;
             // 触らない >RentLivingPictureEdit.IsNew
 
             // 親画面（賃貸住居用物件）に、変更通知を送る。
-            RentLivingIsDirty?.Invoke();
+            RentLivingRoomIsDirty?.Invoke();
 
             return true;
         }
@@ -306,10 +301,10 @@ namespace ZumenSearch.ViewModels
         public ICommand PictureSaveCommand { get; }
         public bool PictureSaveCommand_CanExecute()
         {
-            if (RentLivingPictureEdit == null)
+            if (RentLivingRoomPictureEdit == null)
                 return false;
 
-            if (RentLivingPictures == null)
+            if (RentLivingRoomPictures == null)
                 return false;
 
             if (IsDirty)

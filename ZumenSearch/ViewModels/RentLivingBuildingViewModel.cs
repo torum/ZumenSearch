@@ -23,18 +23,18 @@ using ZumenSearch.ViewModels.Classes;
 using ZumenSearch.Views;
 using ZumenSearch.Common;
 using System.Windows.Media;
+using System.Threading.Tasks;
 
 namespace ZumenSearch.ViewModels
 {
     /// <summary>
     /// 賃貸住居用 建物 のViewModel
+    /// 建物ではRentLivingEditの値を直接利用する。
     /// </summary>
     public class RentLivingBuildingViewModel : ViewModelBase
     {
-        #region == On window creation ==
-
         // 賃貸住居用建物のID（Window識別用）（Winodow生成時に設定される）
-        private string _id;
+        private readonly string _id;
         public string Id
         {
             get
@@ -57,7 +57,7 @@ namespace ZumenSearch.ViewModels
                     return;
 
                 _rentLivingEdit = value;
-                NotifyPropertyChanged("RentLivingEdit");
+                NotifyPropertyChanged(nameof(RentLivingEdit));
 
                 // 値の設定時に、編集画面用のプロパティにそれぞれの値をポピュレイトする
 
@@ -78,10 +78,6 @@ namespace ZumenSearch.ViewModels
         // データ編集用DBアクセスモジュール（Winodow生成時に設定される）
         public DataAccess DataAccessModule;
         
-        #endregion
-
-        #region == From code behind ==
-
         // 変更通知受け取り。（画像リストなど、変更があった場合にイベント経由でコードビハインドから呼ばれる
         public bool SetIsDirty
         {
@@ -90,14 +86,8 @@ namespace ZumenSearch.ViewModels
                 if (value)
                     if (RentLivingEdit != null)
                         RentLivingEdit.IsDirty = value;
-
-                // メイン画像の更新
-                // TODO:もっと効率の良い場所はないか・・・メイン画像が変更されたイベント等。
-                //UpdateMainPicture();
             }
         }
-
-        #endregion
 
         #region == 部屋 ==
 
@@ -114,7 +104,7 @@ namespace ZumenSearch.ViewModels
                 if (_sectionsSelectedItem == value) return;
 
                 _sectionsSelectedItem = value;
-                this.NotifyPropertyChanged("SectionsSelectedItem");
+                this.NotifyPropertyChanged(nameof(SectionsSelectedItem));
             }
         }
 
@@ -136,7 +126,7 @@ namespace ZumenSearch.ViewModels
                     return;
 
                 _picturesSelectedItem = value;
-                this.NotifyPropertyChanged("PicturesSelectedItem");
+                this.NotifyPropertyChanged(nameof(PicturesSelectedItem));
             }
         }
 
@@ -158,7 +148,7 @@ namespace ZumenSearch.ViewModels
                     return;
 
                 _pdfsSelectedItem = value;
-                this.NotifyPropertyChanged("PdfsSelectedItem");
+                this.NotifyPropertyChanged(nameof(PdfsSelectedItem));
             }
         }
 
@@ -179,7 +169,7 @@ namespace ZumenSearch.ViewModels
                 if (_showErrorDialog == value) return;
 
                 _showErrorDialog = value;
-                this.NotifyPropertyChanged("ShowErrorDialog");
+                this.NotifyPropertyChanged(nameof(ShowErrorDialog));
             }
         }
 
@@ -194,7 +184,7 @@ namespace ZumenSearch.ViewModels
             set
             {
                 _errorText.Insert(0, value + Environment.NewLine);
-                this.NotifyPropertyChanged("ErrorText");
+                this.NotifyPropertyChanged(nameof(ErrorText));
             }
         }
 
@@ -388,11 +378,13 @@ namespace ZumenSearch.ViewModels
         private void PictureEdit(RentLivingPicture rlpic)
         {
             // 画像編集Windowへ渡す為のArgをセット
-            OpenRentLivingImageWindowEventArgs ag = new OpenRentLivingImageWindowEventArgs();
-            ag.Id = rlpic.RentPictureId;
-            ag.RentLivingPictureObject = rlpic;
-            ag.RentLivingPictures = RentLivingEdit.RentLivingPictures;
-            ag.IsEdit = true;
+            OpenRentLivingImageWindowEventArgs ag = new OpenRentLivingImageWindowEventArgs
+            {
+                Id = rlpic.RentPictureId,
+                RentLivingPictureObject = rlpic,
+                RentLivingPictures = RentLivingEdit.RentLivingPictures,
+                IsEdit = true
+            };
 
             // 画像編集Windowを開く
             OpenRentLivingImageWindow?.Invoke(this, ag);
@@ -506,6 +498,8 @@ namespace ZumenSearch.ViewModels
             if (SectionsSelectedItem == null)
                 return;
 
+            SectionsSelectedItem.IsNew = false;
+
             if (RentLivingEdit.Ownership == Ownerships.Unit)
                 SectionsSelectedItem.IsOwnershipTypeUnit = true;
             else if (RentLivingEdit.Ownership == Ownerships.All)
@@ -515,7 +509,6 @@ namespace ZumenSearch.ViewModels
             ag.Id = SectionsSelectedItem.RentLivingRoomId;
             ag.RentLivingRoomObject = SectionsSelectedItem;
             ag.RentLivingRooms = RentLivingEdit.RentLivingRooms;
-
 
             OpenRentLivingRoomWindow?.Invoke(this, ag);
         }
@@ -834,7 +827,7 @@ namespace ZumenSearch.ViewModels
 
             if (RentLivingEdit == null) return;
 
-            System.Collections.IList items = (System.Collections.IList)obj;
+            //System.Collections.IList items = (System.Collections.IList)obj;
             /*
             if (items.Count > 0)
             {
@@ -908,71 +901,84 @@ namespace ZumenSearch.ViewModels
         {
             if (RentLivingEdit == null) return;
 
-            var files = _openDialogService.GetOpenZumenPdfFileDialog("図面の追加");
+            string fileName = "";
 
-            if (files != null)
+            try
             {
-                foreach (String filePath in files)
+                var files = _openDialogService.GetOpenZumenPdfFileDialog("図面の追加");
+
+                if (files != null)
                 {
-                    string fileName = filePath.Trim();
-
-                    if (!string.IsNullOrEmpty(fileName))
+                    foreach (String filePath in files)
                     {
-                        FileInfo fi = new FileInfo(fileName);
-                        if (fi.Exists)
-                        {
-                            // 図面ファイルのPDFデータの読み込み
-                            byte[] PdfData;
-                            FileStream fs = new FileStream(fileName, FileMode.Open, FileAccess.Read);
-                            long len = fs.Length;
+                        fileName = filePath.Trim();
 
-                            // ByteArrayに変換
-                            BinaryReader br = new BinaryReader(fs);
-                            PdfData = br.ReadBytes((int)fs.Length);
-                            br.Close();
+                        break;
+                    }
+                }
 
-                            // RentLivingPdfオブジェクトの作成
-                            RentLivingPdf rlZumen = new RentLivingPdf(RentLivingEdit.RentId, RentLivingEdit.RentLivingId, Guid.NewGuid().ToString());
-                            rlZumen.PdfData = PdfData;
-                            rlZumen.FileSize = len;
+                if (!string.IsNullOrEmpty(fileName))
+                {
+                    FileInfo fi = new FileInfo(fileName);
+                    if (fi.Exists)
+                    {
+                        // 図面ファイルのPDFデータの読み込み
+                        byte[] PdfData;
+                        FileStream fs = new FileStream(fileName, FileMode.Open, FileAccess.Read);
+                        long len = fs.Length;
 
-                            // 画像を作成。
-                            BitmapImage  bitimg = await Methods.BitmapImageFromPdf(PdfData);
-                            rlZumen.Picture = bitimg;
+                        // ByteArrayに変換
+                        BinaryReader br = new BinaryReader(fs);
+                        PdfData = br.ReadBytes((int)fs.Length);
+                        br.Close();
 
-                            // ByteArrayに変換
-                            byte[] ImageData = Methods.BitmapImageToByteArray(bitimg);
-                            rlZumen.ThumbData = ImageData;
+                        fs.Close();
 
-                            // TODO:
-                            //rlZumen.DateTimeAdded = DateTime.Now;
-                            rlZumen.DateTimePublished = DateTime.Now;
-                            rlZumen.DateTimeVerified = DateTime.Now;
+                        // RentLivingPdfオブジェクトの作成
+                        RentLivingPdf rlZumen = new RentLivingPdf(RentLivingEdit.RentId, RentLivingEdit.RentLivingId, Guid.NewGuid().ToString());
+                        rlZumen.PdfData = PdfData;
+                        rlZumen.FileSize = len;
 
-                            // 画面閉じる際の確認用のフラグ。
-                            rlZumen.IsNew = true;
-                            // DBに保存する為のフラグ。
-                            rlZumen.IsModified = true;
+                        // 画像を作成。
+                        BitmapImage bitimg = await Methods.BitmapImageFromPdf(PdfData);
+                        rlZumen.Picture = bitimg;
 
-                            // 物件のPDFリストに追加。
-                            //RentLivingEdit.RentLivingPdfs.Add(rlZumen);
+                        // ByteArrayに変換
+                        byte[] ImageData = Methods.BitmapImageToByteArray(bitimg);
+                        rlZumen.PdfThumbData = ImageData;
 
-                            fs.Close();
+                        // TODO:
+                        //rlZumen.DateTimeAdded = DateTime.Now;
+                        rlZumen.DateTimePublished = DateTime.Now;
+                        rlZumen.DateTimeVerified = DateTime.Now;
 
-                            // PDF編集Windowへ渡す為のArgをセット
-                            OpenRentLivingPdfWindowEventArgs ag = new OpenRentLivingPdfWindowEventArgs();
-                            ag.Id = rlZumen.RentPdfId;
-                            ag.RentLivingPdfObject = rlZumen;
-                            ag.RentLivingPdfs = RentLivingEdit.RentLivingPdfs;
-                            ag.IsEdit = false;
+                        // 画面閉じる際の確認用のフラグ。
+                        rlZumen.IsNew = true;
+                        // DBに保存する為のフラグ。
+                        rlZumen.IsModified = true;
 
-                            // PDF編集Windowを開く
-                            OpenRentLivingPdfWindow?.Invoke(this, ag);
+                        // PDF編集Windowへ渡す為のArgをセット
+                        OpenRentLivingPdfWindowEventArgs ag = new OpenRentLivingPdfWindowEventArgs();
+                        ag.Id = rlZumen.RentPdfId;
+                        ag.RentLivingPdfObject = rlZumen;
+                        ag.RentLivingPdfs = RentLivingEdit.RentLivingPdfs;
+                        ag.IsEdit = false;
 
-                        }
+                        // PDF編集Windowを開く
+                        OpenRentLivingPdfWindow?.Invoke(this, ag);
+                        
                     }
                 }
             }
+            catch (NotSupportedException ex)
+            {
+                Debug.WriteLine("NotSupportedException: RentLivingBuildingViewModel@PdfAddCommand_Execute(), " + ex.Message);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Exception: RentLivingBuildingViewModel@PdfAddCommand_Execute(), " + ex.Message);
+            }
+
         }
 
         // 物件PDF編集
@@ -986,7 +992,7 @@ namespace ZumenSearch.ViewModels
         }
         public void PdfEditCommand_Execute()
         {
-            if (PicturesSelectedItem == null)
+            if (PdfsSelectedItem == null)
                 return;
 
             PdfEdit(PdfsSelectedItem);

@@ -24,16 +24,12 @@ using System.Windows.Media;
 
 namespace ZumenSearch.ViewModels
 {
-    ///
-    /// TODO: 画像ファイルのサイズと拡張子の種類を表示し、画像ファイルのサイズが大きすぎる場合は警告を出す。
-    /// 
-
     /// <summary>
-    /// 賃貸住居用物件の画像編集用ViewModel
+    /// 賃貸住居用物件の図面編集用ViewModel
     /// </summary>
-    public class RentLivingImageViewModel : ViewModelBase
+    public class RentLivingRoomPdfViewModel : ViewModelBase
     {
-        // 賃貸住居用物件の画像ID（Window識別用）（Winodow生成時に設定される）
+        // 賃貸住居用部屋の図面ID（Window識別用）（Winodow生成時に設定される）
         private string _id;
         public string Id
         {
@@ -43,27 +39,28 @@ namespace ZumenSearch.ViewModels
             }
         }
 
-        // 元の賃貸住居用物件の画像オブジェクトを保持。（Winodow生成時に設定される）
-        private RentLivingPicture _rentLivingPictureEdit;
-        public RentLivingPicture RentLivingPictureEdit
+        // 元の賃貸住居用物件の図面オブジェクトを保持。（Winodow生成時に設定される）
+        private RentLivingRoomPdf _rentLivingRoomPdfEdit;
+        public RentLivingRoomPdf RentLivingRoomPdfEdit
         {
             get
             {
-                return _rentLivingPictureEdit;
+                return _rentLivingRoomPdfEdit;
             }
             set
             {
-                if (_rentLivingPictureEdit == value)
+                if (_rentLivingRoomPdfEdit == value)
                     return;
 
-                _rentLivingPictureEdit = value;
-                NotifyPropertyChanged("RentLivingPictureEdit");
+                _rentLivingRoomPdfEdit = value;
+                NotifyPropertyChanged(nameof(RentLivingRoomPdfEdit));
 
                 // 値の設定時に、編集画面用のプロパティにそれぞれの値をポピュレイトする
-                Picture = _rentLivingPictureEdit.Picture;
-                SelectedPictureType = _rentLivingPictureEdit.PictureType;
-                PictureDescription = _rentLivingPictureEdit.PictureDescription;
-                PictureIsMain = _rentLivingPictureEdit.PictureIsMain;
+                Picture = _rentLivingRoomPdfEdit.Picture;
+                SelectedPdfType = _rentLivingRoomPdfEdit.PdfType;
+                PdfDescription = _rentLivingRoomPdfEdit.PdfDescription;
+                PdfIsMain = _rentLivingRoomPdfEdit.PdfIsMain;
+                PdfTypes = _rentLivingRoomPdfEdit.PdfTypes;
 
                 // 変更フラグをクリアする（ユーザーの入力で変更・編集された訳ではないので）
 
@@ -83,10 +80,12 @@ namespace ZumenSearch.ViewModels
         }
 
         // 元の賃貸住居用物件の画像リストを保持。（Winodow生成時に設定される）
-        public ObservableCollection<RentLivingPicture> RentLivingPictures { get; set; }
+        public ObservableCollection<RentLivingRoomPdf> RentLivingRoomPdfs { get; set; }
 
         #region == 編集用のプロパティ ==
-        
+
+        public Dictionary<string, string> PdfTypes { get; set; }
+
         // 画像プレビュー
         private ImageSource _picture;
         public ImageSource Picture
@@ -100,7 +99,7 @@ namespace ZumenSearch.ViewModels
                 if (_picture == value) return;
 
                 _picture = value;
-                this.NotifyPropertyChanged("Picture");
+                this.NotifyPropertyChanged(nameof(Picture));
 
                 // 変更フラグを立てる
                 IsDirty = true;
@@ -108,20 +107,20 @@ namespace ZumenSearch.ViewModels
         }
 
         // 画像の種類
-        private string _selectedPictureType;
-        public string SelectedPictureType
+        private string _selectedPdfType;
+        public string SelectedPdfType
         {
             get
             {
-                return _selectedPictureType;
+                return _selectedPdfType;
             }
             set
             {
-                if (_selectedPictureType == value)
+                if (_selectedPdfType == value)
                     return;
 
-                _selectedPictureType = value;
-                NotifyPropertyChanged("SelectedPictureType");
+                _selectedPdfType = value;
+                NotifyPropertyChanged(nameof(SelectedPdfType));
 
                 // 変更フラグを立てる
                 IsDirty = true;
@@ -129,20 +128,20 @@ namespace ZumenSearch.ViewModels
         }
 
         // 画像のメイン画像フラグ
-        private bool _pictureIsMain;
-        public bool PictureIsMain
+        private bool _pdfIsMain;
+        public bool PdfIsMain
         {
             get
             {
-                return _pictureIsMain;
+                return _pdfIsMain;
             }
             set
             {
-                if (_pictureIsMain == value)
+                if (_pdfIsMain == value)
                     return;
 
-                _pictureIsMain = value;
-                NotifyPropertyChanged("PictureIsMain");
+                _pdfIsMain = value;
+                NotifyPropertyChanged(nameof(PdfIsMain));
 
                 // 変更フラグを立てる
                 IsDirty = true;
@@ -150,20 +149,20 @@ namespace ZumenSearch.ViewModels
         }
 
         // 画像説明・コメント
-        private string _pictureDescription;
-        public string PictureDescription
+        private string _pdfDescription;
+        public string PdfDescription
         {
             get
             {
-                return _pictureDescription;
+                return _pdfDescription;
             }
             set
             {
-                if (_pictureDescription == value)
+                if (_pdfDescription == value)
                     return;
 
-                _pictureDescription = value;
-                NotifyPropertyChanged("PictureDescription");
+                _pdfDescription = value;
+                NotifyPropertyChanged(nameof(PdfDescription));
 
                 // 変更フラグを立てる
                 IsDirty = true;
@@ -183,8 +182,8 @@ namespace ZumenSearch.ViewModels
                 if (_isDirty == value) return;
 
                 _isDirty = value;
-                NotifyPropertyChanged("IsDirty");
-                NotifyPropertyChanged("StatusIsDirty");
+                NotifyPropertyChanged(nameof(IsDirty));
+                NotifyPropertyChanged(nameof(StatusIsDirty));
             }
         }
 
@@ -206,37 +205,32 @@ namespace ZumenSearch.ViewModels
 
         // 親画面（賃貸住居用物件）に、（コードビハインド経由で）変更通知を送るイベント。
         public delegate void IsDirtyEventHandler();
-        public event IsDirtyEventHandler RentLivingIsDirty;
+        public event IsDirtyEventHandler RentLivingRoomIsDirty;
 
         #endregion
 
-        public RentLivingImageViewModel(string id)
+        public RentLivingRoomPdfViewModel(string id)
         {
             _id = id;
 
             #region == コマンド初期化 ==
 
             // 画像を保存
-            PictureSaveCommand = new RelayCommand(PictureSaveCommand_Execute, PictureSaveCommand_CanExecute);
+            PdfSaveCommand = new RelayCommand(PdfSaveCommand_Execute, PdfSaveCommand_CanExecute);
 
             #endregion
 
         }
 
-        #region == イベントの実装 ==
-
-
-        #endregion
-
         #region == メソッド ==
 
         // 画像の保存（追加または更新）メソッド（コードビハインドから保存確認ダイアログでも呼ばれる）
-        public bool PictureSave()
+        public bool PdfSave()
         {
-            if (RentLivingPictureEdit == null)
+            if (RentLivingRoomPdfEdit == null)
                 return false;
 
-            if (RentLivingPictures == null)
+            if (RentLivingRoomPdfs == null)
                 return false;
 
             if (IsDirty == false)
@@ -247,38 +241,37 @@ namespace ZumenSearch.ViewModels
             //Debug.WriteLine("SelectedPictureType = " + SelectedPictureType);
 
             // 各値の更新
-            RentLivingPictureEdit.PictureDescription = PictureDescription;
-            RentLivingPictureEdit.PictureType = SelectedPictureType;
+            RentLivingRoomPdfEdit.PdfDescription = PdfDescription;
+            RentLivingRoomPdfEdit.PdfType = SelectedPdfType;
 
             // IsMainフラグだった場合、
-            if (PictureIsMain)
+            if (PdfIsMain)
             {
                 // 一旦画像リスト内の全てのIsMainフラグをクリアする
-                foreach (var hoge in RentLivingPictures)
+                foreach (var hoge in RentLivingRoomPdfs)
                 {
-                    if (hoge.PictureIsMain)
+                    if (hoge.PdfIsMain)
                     {
-                        hoge.PictureIsMain = false;
+                        hoge.PdfIsMain = false;
 
                         // 変更フラグを立ててDBに保存されるように
                         hoge.IsModified = true;
                     }
                 }
             }
-            RentLivingPictureEdit.PictureIsMain = PictureIsMain;
-
+            RentLivingRoomPdfEdit.PdfIsMain = PdfIsMain;
 
             // 画像リストから該当オブジェクトを見つける
-            var found = RentLivingPictures.FirstOrDefault(x => x.RentPictureId == RentLivingPictureEdit.RentPictureId);
+            var found = RentLivingRoomPdfs.FirstOrDefault(x => x.RentSectionPdfId == RentLivingRoomPdfEdit.RentSectionPdfId);
             if (found == null)
             {
                 // 追加
-                RentLivingPictures.Add(RentLivingPictureEdit);
+                RentLivingRoomPdfs.Add(RentLivingRoomPdfEdit);
             }
             else
             {
                 // 更新
-                found = RentLivingPictureEdit;
+                found = RentLivingRoomPdfEdit;
                 //found.PictureIsMain = RentLivingPictureEdit.PictureIsMain;
             }
 
@@ -289,11 +282,11 @@ namespace ZumenSearch.ViewModels
             IsDirty = false;
 
             // DB更新用のフラグを立てる
-            RentLivingPictureEdit.IsModified = true;
+            RentLivingRoomPdfEdit.IsModified = true;
             // 触らない >RentLivingPictureEdit.IsNew
 
             // 親画面（賃貸住居用物件）に、変更通知を送る。
-            RentLivingIsDirty?.Invoke();
+            RentLivingRoomIsDirty?.Invoke();
 
             return true;
         }
@@ -303,13 +296,13 @@ namespace ZumenSearch.ViewModels
         #region == コマンドの実装 ==
 
         // 画像の保存（追加または更新）
-        public ICommand PictureSaveCommand { get; }
-        public bool PictureSaveCommand_CanExecute()
+        public ICommand PdfSaveCommand { get; }
+        public bool PdfSaveCommand_CanExecute()
         {
-            if (RentLivingPictureEdit == null)
+            if (RentLivingRoomPdfEdit == null)
                 return false;
 
-            if (RentLivingPictures == null)
+            if (RentLivingRoomPdfs == null)
                 return false;
 
             if (IsDirty)
@@ -321,9 +314,9 @@ namespace ZumenSearch.ViewModels
                 return false;
             }
         }
-        public void PictureSaveCommand_Execute()
+        public void PdfSaveCommand_Execute()
         {
-            PictureSave();
+            PdfSave();
         }
 
         #endregion

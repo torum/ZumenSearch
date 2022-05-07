@@ -9,7 +9,6 @@ using ZumenSearch.ViewModels;
 
 namespace ZumenSearch.Models
 {
-
     /// <summary>
     /// 部屋・区画等の基底クラス
     /// </summary>
@@ -25,24 +24,24 @@ namespace ZumenSearch.Models
             }
         }
 
-        // 空きフラグ
-        private bool _isVacant;
-        public bool IsVacant
+        private string _pathIcon = "M12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z";
+        public string PathIcon
         {
             get
             {
-                return _isVacant;
+                return _pathIcon;
             }
             set
             {
-                if (_isVacant == value) return;
+                if (_pathIcon == value)
+                    return;
 
-                _isVacant = value;
-                this.NotifyPropertyChanged("IsVacant");
-
-                IsModified = true;
+                _pathIcon = value;
+                NotifyPropertyChanged(nameof(PathIcon));
             }
         }
+
+        #region == ステータスフラグ == 
 
         // 新規か編集（保存済み）かどうかのフラグ。
         private bool _isNew;
@@ -58,38 +57,78 @@ namespace ZumenSearch.Models
 
                 _isNew = value;
                 NotifyPropertyChanged("IsNew");
+                NotifyPropertyChanged("IsEdit");
                 NotifyPropertyChanged("StatusIsNew");
+                NotifyPropertyChanged("StatusIsDirty");
             }
         }
 
-        // 表示用のステータス
-        public string StatusIsNew
+        // 新規か編集（保存済み）かどうかのフラグ。
+        public bool IsEdit
         {
             get
             {
                 if (IsNew)
-                    return "新規";
+                    return false;
                 else
-                    return "編集";
+                    return true;
             }
         }
 
-        // 変更があったかどうかの（DB更新用）フラグ。
-        private bool _isModified = false;
-        public bool IsModified
+        // 変更（データ入力）があったかどうかのフラグ。
+        private bool _isDirty = false;
+        public bool IsDirty
         {
             get
             {
-                return _isModified;
+                return _isDirty;
             }
             set
             {
-                if (_isModified == value) return;
+                if (_isDirty == value) return;
 
-                _isModified = value;
-                NotifyPropertyChanged("IsModified");
+                _isDirty = value;
+                NotifyPropertyChanged("IsDirty");
+                NotifyPropertyChanged("StatusIsNew");
+                NotifyPropertyChanged("StatusIsDirty");
             }
         }
+
+        public string StatusIsNew
+        {
+            get
+            {
+                if (IsNew && IsDirty)
+                    return "：新規";
+                else if (IsNew)
+                    return "：新規";
+                else if (IsEdit && IsDirty)
+                    return "：編集";
+                else if (IsEdit)
+                    return "：編集";
+                else
+                    return "";
+            }
+        }
+
+        public string StatusIsDirty
+        {
+            get
+            {
+                if (IsNew && IsDirty)
+                    return "変更";
+                else if (IsNew)
+                    return "";
+                else if (IsEdit && IsDirty)
+                    return "変更";
+                else if (IsEdit)
+                    return "";
+                else
+                    return "";
+            }
+        }
+
+        #endregion
     }
 
     /// <summary>
@@ -131,7 +170,7 @@ namespace ZumenSearch.Models
                     return;
 
                 _isOwnershipTypeUnit = value;
-                this.NotifyPropertyChanged("IsOwnershipTypeUnit");
+                this.NotifyPropertyChanged(nameof(IsOwnershipTypeUnit));
             }
         }
 
@@ -148,10 +187,10 @@ namespace ZumenSearch.Models
                 if (_rentLivingSectionRoomNumber == value) return;
 
                 _rentLivingSectionRoomNumber = value;
-                this.NotifyPropertyChanged("RentLivingRoomRoomNumber");
+                this.NotifyPropertyChanged(nameof(RentLivingRoomRoomNumber));
 
                 // 変更フラグ
-                IsModified = true;
+                IsDirty = true;
             }
         }
 
@@ -168,10 +207,10 @@ namespace ZumenSearch.Models
                 if (_rentLivingSectionPrice == value) return;
 
                 _rentLivingSectionPrice = value;
-                this.NotifyPropertyChanged("RentLivingRoomPrice");
+                this.NotifyPropertyChanged(nameof(RentLivingRoomPrice));
 
                 // 変更フラグ
-                IsModified = true;
+                IsDirty = true;
             }
         }
 
@@ -188,10 +227,10 @@ namespace ZumenSearch.Models
                 if (_rentLivingSectionMadori == value) return;
 
                 _rentLivingSectionMadori = value;
-                this.NotifyPropertyChanged("RentLivingRoomMadori");
+                this.NotifyPropertyChanged(nameof(RentLivingRoomMadori));
 
                 // 変更フラグ
-                IsModified = true;
+                IsDirty = true;
             }
         }
 
@@ -200,6 +239,12 @@ namespace ZumenSearch.Models
 
         // DBへの更新時にDBから削除されるべき部屋写真のIDリスト
         public List<string> RentLivingRoomPicturesToBeDeletedIDs = new List<string>();
+
+        // 部屋図面コレクション
+        public ObservableCollection<RentLivingRoomPdf> RentLivingRoomPdfs { get; set; } = new ObservableCollection<RentLivingRoomPdf>();
+
+        // DBへの更新時にDBから削除されるべき部屋図面のIDリスト
+        public List<string> RentLivingRoomPdfsToBeDeletedIDs = new List<string>();
 
         public RentLivingRoom(string rentid, string rentlivingid, string sectionid)
         {

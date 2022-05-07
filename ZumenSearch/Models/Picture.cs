@@ -44,7 +44,7 @@ namespace ZumenSearch.Models
                 if (_picture == value) return;
 
                 _picture = value;
-                this.NotifyPropertyChanged("Picture");
+                this.NotifyPropertyChanged(nameof(Picture));
             }
         }
 
@@ -61,7 +61,7 @@ namespace ZumenSearch.Models
                 if (_pictureThumb == value) return;
 
                 _pictureThumb = value;
-                this.NotifyPropertyChanged("PictureThumb");
+                this.NotifyPropertyChanged(nameof(PictureThumb));
             }
         }
 
@@ -77,7 +77,7 @@ namespace ZumenSearch.Models
                 if (_PictureThumbData == value) return;
 
                 _PictureThumbData = value;
-                this.NotifyPropertyChanged("PictureThumbData");
+                this.NotifyPropertyChanged(nameof(PictureThumbData));
             }
         }
 
@@ -93,7 +93,7 @@ namespace ZumenSearch.Models
                 if (_pictureData == value) return;
 
                 _pictureData = value;
-                this.NotifyPropertyChanged("PictureData");
+                this.NotifyPropertyChanged(nameof(PictureData));
             }
         }
 
@@ -109,7 +109,7 @@ namespace ZumenSearch.Models
                 if (_pictureFileExt == value) return;
 
                 _pictureFileExt = value;
-                this.NotifyPropertyChanged("PictureFileExt");
+                this.NotifyPropertyChanged(nameof(PictureFileExt));
             }
         }
 
@@ -127,7 +127,7 @@ namespace ZumenSearch.Models
                     return;
 
                 _pictureIsMain = value;
-                NotifyPropertyChanged("PictureIsMain");
+                NotifyPropertyChanged(nameof(PictureIsMain));
             }
         }
 
@@ -144,9 +144,9 @@ namespace ZumenSearch.Models
                 if (_isNew == value) return;
 
                 _isNew = value;
-                NotifyPropertyChanged("IsNew");
+                NotifyPropertyChanged(nameof(IsNew));
                 //NotifyPropertyChanged("IsEdit");
-                NotifyPropertyChanged("StatusIsNew");
+                NotifyPropertyChanged(nameof(StatusIsNew));
                 //NotifyPropertyChanged("StatusIsDirty");
             }
         }
@@ -176,12 +176,12 @@ namespace ZumenSearch.Models
                 if (_isModified == value) return;
 
                 _isModified = value;
-                NotifyPropertyChanged("IsModified");
+                NotifyPropertyChanged(nameof(IsModified));
             }
         }
     }
 
-    // 賃貸住居用物件の写真クラス（建物外観写真・地図等）
+    // 賃貸住居用の写真クラス（建物外観写真・地図等）
     public class RentLivingPicture : RentPicture
     {
         protected string _rentLivingId;
@@ -262,11 +262,10 @@ namespace ZumenSearch.Models
         }
     }
 
-    // 賃貸事業用物件の写真クラス
+    // TODO: 賃貸事業用の写真クラス
 
-    // ・・・
 
-    // 部屋・区画の写真基底クラス
+    // 賃貸住居用の部屋・区画の写真基底クラス
     public class RentSectionPicture : ViewModelBase
     {
         protected string _rentSectionPictureId;
@@ -304,6 +303,23 @@ namespace ZumenSearch.Models
             }
         }
 
+        // For display.
+        private ImageSource _picturehumb;
+        public ImageSource PictureThumb
+        {
+            get
+            {
+                return _picturehumb;
+            }
+            set
+            {
+                if (_picturehumb == value) return;
+
+                _picturehumb = value;
+                this.NotifyPropertyChanged(nameof(PictureThumb));
+            }
+        }
+
         private byte[] _PictureThumbData;
         public byte[] PictureThumbData
         {
@@ -316,7 +332,7 @@ namespace ZumenSearch.Models
                 if (_PictureThumbData == value) return;
 
                 _PictureThumbData = value;
-                this.NotifyPropertyChanged("PictureThumbData");
+                this.NotifyPropertyChanged(nameof(PictureThumbData));
             }
         }
 
@@ -332,7 +348,7 @@ namespace ZumenSearch.Models
                 if (_pictureData == value) return;
 
                 _pictureData = value;
-                this.NotifyPropertyChanged("PictureData");
+                this.NotifyPropertyChanged(nameof(PictureData));
             }
         }
 
@@ -348,19 +364,80 @@ namespace ZumenSearch.Models
                 if (_pictureFileExt == value) return;
 
                 _pictureFileExt = value;
-                this.NotifyPropertyChanged("PictureFileExt");
+                this.NotifyPropertyChanged(nameof(PictureFileExt));
             }
         }
 
-        // 新規に追加されたので、まだDBに保存されていない。
-        public bool IsNew { get; set; }
+        // メイン画像フラグ。
+        private bool _pictureIsMain;
+        public bool PictureIsMain
+        {
+            get
+            {
+                return _pictureIsMain;
+            }
+            set
+            {
+                if (_pictureIsMain == value)
+                    return;
 
-        // 保存されていてIDは固定だが、内容が変更されているのでUPDATEが必要。
-        public bool IsModified { get; set; }
+                _pictureIsMain = value;
+                NotifyPropertyChanged("PictureIsMain");
+            }
+        }
+
+        // 新規か編集（保存済み）かどうかのフラグ。
+        private bool _isNew;
+        public bool IsNew
+        {
+            get
+            {
+                return _isNew;
+            }
+            set
+            {
+                if (_isNew == value) return;
+
+                _isNew = value;
+                NotifyPropertyChanged(nameof(IsNew));
+                //NotifyPropertyChanged("IsEdit");
+                NotifyPropertyChanged(nameof(StatusIsNew));
+                //NotifyPropertyChanged("StatusIsDirty");
+            }
+        }
+
+        // 表示用のステータス
+        public string StatusIsNew
+        {
+            get
+            {
+                if (IsNew)
+                    return "：新規";
+                else
+                    return "：更新";
+            }
+        }
+
+        // 変更があったかどうかの（DB更新用）フラグ。
+        private bool _isModified = false;
+        public bool IsModified
+        {
+            get
+            {
+                return _isModified;
+            }
+            set
+            {
+                if (_isModified == value) return;
+
+                _isModified = value;
+                NotifyPropertyChanged(nameof(IsModified));
+            }
+        }
 
     }
 
-    // 賃貸住居用物件の写真クラス（室内内観写真・設備写真・間取り図等）
+    // 賃貸住居用の部屋の写真クラス（室内内観写真・設備写真・間取り図等）
     public class RentLivingRoomPicture : RentSectionPicture
     {
         protected string _rentLivingSectionId;
@@ -381,6 +458,71 @@ namespace ZumenSearch.Models
             }
         }
 
+        public Dictionary<string, string> PictureTypes { get; set; } = new Dictionary<string, string>()
+        {
+            {"Naikan", "内観"},
+            {"Kitchen", "キッチン"},
+            {"Bathroom", "バスルーム"},
+            {"Toilet", "トイレ"},
+            {"Entrance", "玄関"},
+            {"Other", "その他"},
+        };
+
+        private string _pictureType;
+        public string PictureType
+        {
+            get
+            {
+                return _pictureType;
+            }
+            set
+            {
+                if (_pictureType == value)
+                    return;
+
+                _pictureType = value;
+                NotifyPropertyChanged("PictureType");
+                NotifyPropertyChanged("PictureTypeLabel");
+
+                IsModified = true;
+            }
+        }
+
+        public string PictureTypeLabel
+        {
+            get
+            {
+                if (PictureType == null)
+                    return "";
+
+                if (PictureTypes.ContainsKey(PictureType))
+                    return
+                        PictureTypes[PictureType];
+                else
+                    return "";
+            }
+        }
+
+        private string _pictureDescription;
+        public string PictureDescription
+        {
+            get
+            {
+                return _pictureDescription;
+            }
+            set
+            {
+                if (_pictureDescription == value)
+                    return;
+
+                _pictureDescription = value;
+                NotifyPropertyChanged("PictureDescription");
+
+                IsModified = true;
+            }
+        }
+
+
         public RentLivingRoomPicture(string rentid, string rentlivingid, string rentlivingsectionid, string rentlivingsectionpictureid)
         {
             this._rentId = rentid;
@@ -391,5 +533,5 @@ namespace ZumenSearch.Models
         }
     }
 
-
+    // TODO: 賃貸事業用の区画の写真クラス
 }

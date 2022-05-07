@@ -12,17 +12,18 @@
         d:DataContext="{d:DesignInstance Type=vms:RentLivingBuildingViewModel}"
         SnapsToDevicePixels="true"
         BorderThickness="0"
+        WindowStyle="None"
         WindowStartupLocation="CenterOwner"
         Background="{DynamicResource WindowBackgroundColorBrush}"
-        Width="860" Height="610"
-        MinWidth="860" MinHeight="610"
+        Width="860" Height="650"
+        MinWidth="860" MinHeight="240"
         StateChanged="Window_StateChanged"
         Closing="Window_Closing">
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="32" ResizeBorderThickness="3"/>
     </WindowChrome.WindowChrome>
     <Border Style="{StaticResource WindowMainPanelStyle}">
-        <Grid x:Name="BackgroundGrid" Background="{DynamicResource BoardBackgroundColorBrush}">
+        <Grid x:Name="BackgroundGrid" Background="{DynamicResource BoardBackgroundColorBrush}" UseLayoutRounding="True">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -147,7 +148,7 @@
 
                                                 <GroupBox Header="物件名" Padding="0 0 6 0" Style="{DynamicResource GroupBoxStyle}">
                                                     <StackPanel>
-                                                        <TextBox Text="{Binding RentLivingEdit.Name, UpdateSourceTrigger=PropertyChanged}" Margin="6" HorizontalAlignment="Stretch"></TextBox>
+                                                        <TextBox Text="{Binding RentLivingEdit.Name, UpdateSourceTrigger=PropertyChanged}" Margin="6" HorizontalAlignment="Stretch" VerticalAlignment="Center"></TextBox>
                                                     </StackPanel>
                                                 </GroupBox>
 
@@ -194,36 +195,23 @@
 
                                             </StackPanel>
 
+                                            <!-- 所在地 -->
                                             <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
                                                 <Grid.RowDefinitions>
                                                     <RowDefinition Height="auto"/>
-                                                    <RowDefinition Height="auto"/>
                                                 </Grid.RowDefinitions>
                                                 <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="auto"/>
                                                     <ColumnDefinition Width="auto"/>
                                                 </Grid.ColumnDefinitions>
 
                                                 <!-- 所在地 -->
-                                                <StackPanel Grid.Row="1" Grid.Column="0" Margin="6 0 6 0">
+                                                <StackPanel Grid.Row="0" Grid.Column="0" Margin="6 0 0 0">
 
-                                                    <GroupBox Header="所在地" Padding="0 0 6 0" Style="{DynamicResource GroupBoxStyle}">
-                                                        <Grid>
-                                                            <Grid.RowDefinitions>
-                                                                <RowDefinition Height="*"/>
-                                                            </Grid.RowDefinitions>
-                                                            <Grid.ColumnDefinitions>
-                                                                <ColumnDefinition Width="*"/>
-                                                                <ColumnDefinition Width="Auto"/>
-                                                            </Grid.ColumnDefinitions>
-
-                                                            <StackPanel Grid.Row="0" Grid.Column="0">
-                                                                <TextBox Text="{Binding RentLivingEdit.Location, UpdateSourceTrigger=PropertyChanged}" Margin="6" HorizontalAlignment="Stretch" VerticalAlignment="Bottom"></TextBox>
-                                                            </StackPanel>
-                                                            <StackPanel Grid.Row="0" Grid.Column="1" Visibility="Collapsed">
-                                                                <Button VerticalAlignment="Bottom" Content="+" Width="24" Height="24" Margin="6" />
-                                                            </StackPanel>
-                                                        </Grid>
+                                                    <GroupBox Header="所在地" Padding="0 0 0 0" Style="{DynamicResource GroupBoxStyle}">
+                                                        <StackPanel Grid.Row="0" Grid.Column="0">
+                                                            <TextBox Text="{Binding RentLivingEdit.Location, UpdateSourceTrigger=PropertyChanged}" Width="514" Margin="6" HorizontalAlignment="Left" VerticalAlignment="Bottom"></TextBox>
+                                                        </StackPanel>
                                                     </GroupBox>
 
                                                     <GroupBox Header="所在地" Padding="6" Visibility="Collapsed">
@@ -273,24 +261,26 @@
                                                 </StackPanel>
 
                                                 <!-- 所在地詳細 -->
-                                                <StackPanel Grid.Row="1" Grid.Column="2" Margin="6 0 6 0" HorizontalAlignment="Right">
-                                                    <StackPanel Orientation="Horizontal">
+                                                <StackPanel Grid.Row="0" Grid.Column="1" Margin="6 0 6 0" HorizontalAlignment="Left">
+                                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
 
                                                         <GroupBox Header="所在地詳細" Padding="0 0 6 0" Style="{DynamicResource GroupBoxStyle}">
 
-                                                            <Button VerticalAlignment="Center" Content="所在地設定" Margin="6" Padding="3" Width="100" />
+                                                            <Button VerticalAlignment="Center" Content="所在地設定" Margin="6" Padding="3" Width="110" HorizontalAlignment="Left" />
 
                                                         </GroupBox>
 
                                                         <GroupBox Header="地図表示" Padding="0 0 6 0" Style="{DynamicResource GroupBoxStyle}">
 
-                                                            <Button VerticalAlignment="Center" Content="マップで表示" Margin="6" Padding="3" Width="100" />
+                                                            <Button VerticalAlignment="Center" Content="マップで表示" Margin="6" Padding="3" Width="110" HorizontalAlignment="Left" />
 
                                                         </GroupBox>
 
                                                     </StackPanel>
                                                 </StackPanel>
+                                                
                                             </Grid>
+                                            
                                         </Grid>
 
                                         <!-- 交通１・２・３ -->
@@ -432,7 +422,7 @@
                                                                 <StackPanel Orientation="Horizontal" Margin="0">
                                                                     
                                                                     <GroupBox Header="建物構造" Padding="6" Style="{DynamicResource GroupBoxStyle}">
-                                                                        <ComboBox SelectedIndex="-1" Margin="6 6 6 6" Width="290" HorizontalAlignment="Stretch" VerticalAlignment="Center">
+                                                                        <ComboBox SelectedIndex="-1" Margin="6 6 6 6" Width="250" HorizontalAlignment="Stretch" VerticalAlignment="Center">
                                                                             <ComboBoxItem>木造</ComboBoxItem>
                                                                             <ComboBoxItem>ブロック造</ComboBoxItem>
                                                                             <ComboBoxItem>軽量鉄骨造</ComboBoxItem>
@@ -538,6 +528,7 @@
                                                                     </StackPanel>
 
                                                                 </GroupBox>
+                                                                
                                                             </StackPanel>
 
 
@@ -738,7 +729,7 @@
 
                                             <StackPanel Margin="6 12 6 6">
 
-                                                <Expander Header="一般共用設備" Margin="6" Padding="6" IsExpanded="False">
+                                                <Expander Header="一般共用設備" Margin="6" Padding="6" IsExpanded="True">
                                                     <WrapPanel Orientation="Horizontal">
                                                         <CheckBox Margin="6" Content="エレベータ" />
                                                         <CheckBox Margin="6" Content="オートロック" />
@@ -1034,78 +1025,21 @@
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
-                            <!-- プレビュー画像 -->
-                            <Border Grid.Row="0" Grid.Column="0" Background="#eee" CornerRadius="3" VerticalAlignment="Top" Margin="12" Visibility="Collapsed">
-                                <Grid>
-                                    <!--  Add rounded corners here  -->
-                                    <Border Name="PicPrevMask" Margin="-5" Background="#eee" CornerRadius="3" />
-
-                                    <!--  Image  -->
-                                    <Grid>
-                                        <Grid.OpacityMask>
-                                            <VisualBrush Visual="{Binding ElementName=PicPrevMask}" />
-                                        </Grid.OpacityMask>
-
-                                        <Image Width="250" Height="167" Source="{Binding PicturesSelectedItem.Picture}"></Image>
-                                    </Grid>
-                                </Grid>
-                            </Border>
-
-                            <Grid Grid.Row="0" Grid.Column="1" Visibility="Collapsed">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="*"/>
-                                </Grid.RowDefinitions>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-
-                                <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Left" Margin="12">
-                                    <TextBlock Text="{Binding PicturesSelectedItem.PictureTypeLabel}"></TextBlock>
-                                    <TextBlock Text="（メイン画像）" Visibility="Hidden">
-                                        <TextBlock.Style>
-                                            <Style TargetType="TextBlock">
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding PicturesSelectedItem.PictureIsMain}" Value="true">
-                                                        <Setter Property="Visibility" Value="Visible"/>
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding PicturesSelectedItem.PictureIsMain}" Value="false">
-                                                        <Setter Property="Visibility" Value="Hidden"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </TextBlock.Style>
-                                    </TextBlock>
-                                </StackPanel>
-
-                                <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Left" Margin="12">
-                                    <TextBlock Text="{Binding PicturesSelectedItem.PictureDescription}"></TextBlock>
-                                </StackPanel>
-
-                                <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="12 12 12 0">
-                                    <Button Margin="6" Command="{Binding PictureAddCommand}">追加</Button>
-                                    <Button Margin="6" Command="{Binding PictureEditCommand}">編集</Button>
-                                    <Button Margin="6" Command="{Binding PictureDeleteCommand}">削除</Button>
-                                </StackPanel>
-
-                            </Grid>
-
                             <!-- Menu panel -->
                             <Border Grid.Row="0" Grid.Column="0" Height="28" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" BorderThickness="0 0.5 0.5 0.5" BorderBrush="#121212">
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Stretch">
 
                                     <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
-                                    <Button Content="追加" ToolTip="追加" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding PictureAddCommand}" VerticalAlignment="Center"></Button>
+                                    <Button Content="追加" ToolTip="追加" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding PictureAddCommand}" VerticalAlignment="Center" HorizontalAlignment="Center" Tag="M19,5H22V7H19V10H17V7H14V5H17V2H19V5M17,19V13H19V21H3V5H11V7H5V19H17Z"></Button>
 
                                     <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
-                                    <Button Content="編集" ToolTip="編集" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding PictureEditCommand}" VerticalAlignment="Center"></Button>
+                                    <Button Content="編集" ToolTip="編集" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding PictureEditCommand}" VerticalAlignment="Center" HorizontalAlignment="Center" Tag="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"></Button>
 
                                     <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
-                                    <Button Content="表示" ToolTip="表示" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" VerticalAlignment="Center"></Button>
+                                    <Button Content="表示" ToolTip="表示" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding PictureShowCommand}" VerticalAlignment="Center" HorizontalAlignment="Center" Tag="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z"></Button>
                                     
                                     <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
-                                    <Button Content="削除" ToolTip="削除" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding PictureDeleteCommand}" VerticalAlignment="Center"></Button>
+                                    <Button Content="削除" ToolTip="削除" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding PictureDeleteCommand}" VerticalAlignment="Center" HorizontalAlignment="Center" Tag="M9,3V4H4V6H5V19A2,2 0 0,0 7,21H17A2,2 0 0,0 19,19V6H20V4H15V3H9M7,6H17V19H7V6M9,8V17H11V8H9M13,8V17H15V8H13Z"></Button>
 
                                     <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
                                 </StackPanel>
@@ -1239,311 +1173,7 @@
                                     </DataTemplate>
                                 </ListView.ItemTemplate>
                             </ListView>
-
                         </Grid>
-
-                    </TabItem>
-
-                    <!-- 図面（募集図面、登記簿謄本、公図、建築図面）（区分所有なら非表示にする）  -->
-                    <TabItem Width="120">
-                        <TabItem.Header>
-                            <Label Content="図面" Style="{DynamicResource TabMenuLabelStyle}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </TabItem.Header>
-                        <TabItem.Style>
-                            <Style TargetType="{x:Type TabItem}" BasedOn="{StaticResource TopMenuTabItemStyle}">
-                                <Setter Property="OverridesDefaultStyle" Value="False" />
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding ElementName=ButtonOwnershipType, Path=IsSelected}" Value="True">
-                                        <Setter Property="TabItem.Visibility" Value="Collapsed"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TabItem.Style>
-                        <Grid Margin="0 12 0 0">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="*"/>
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-
-                            <!-- プレビュー画像 -->
-                            <Border Grid.Row="0" Grid.Column="0" Background="#eee" CornerRadius="3" VerticalAlignment="Top" Margin="12" Visibility="Collapsed">
-                                <Grid>
-                                    <!--  Add rounded corners here  -->
-                                    <Border Name="PdfPrevMask" Margin="-5" Background="#eee" CornerRadius="3" />
-
-                                    <!--  Image  -->
-                                    <Grid>
-                                        <Grid.OpacityMask>
-                                            <VisualBrush Visual="{Binding ElementName=PdfPrevMask}" />
-                                        </Grid.OpacityMask>
-
-                                        <Image Width="250" Height="178" Source="{Binding PdfsSelectedItem.Picture}"></Image>
-                                    </Grid>
-                                </Grid>
-                            </Border>
-
-                            <Grid Grid.Row="0" Grid.Column="1" Visibility="Collapsed">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="*"/>
-                                </Grid.RowDefinitions>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-
-                                <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Left" Margin="12">
-                                    <TextBlock Text="{Binding PdfsSelectedItem.PdfTypeLabel}"></TextBlock>
-                                    <TextBlock Text="（メイン図面）" Visibility="Hidden">
-                                        <TextBlock.Style>
-                                            <Style TargetType="TextBlock">
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding PdfsSelectedItem.PdfIsMain}" Value="true">
-                                                        <Setter Property="Visibility" Value="Visible"/>
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding PdfsSelectedItem.PdfIsMain}" Value="false">
-                                                        <Setter Property="Visibility" Value="Hidden"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </TextBlock.Style>
-                                    </TextBlock>
-                                </StackPanel>
-
-                                <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Left" Margin="12">
-                                    <TextBlock Text="{Binding PdfsSelectedItem.PdfDescription}"></TextBlock>
-                                </StackPanel>
-
-                                <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="12 12 12 0">
-                                    <Button Margin="6" Command="{Binding PdfAddCommand}">追加</Button>
-                                    <Button Margin="6" Command="{Binding PdfEditCommand}">編集</Button>
-                                    <Button Margin="6" Command="{Binding PdfDeleteCommand}">削除</Button>
-                                </StackPanel>
-
-                            </Grid>
-
-                            <!-- Menu panel -->
-                            <Border Grid.Row="0" Grid.Column="0" Height="28" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" BorderThickness="0 0.5 0.5 0.5" BorderBrush="#121212">
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Stretch">
-
-                                    <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
-                                    <Button Content="追加" ToolTip="追加" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding PdfAddCommand}" VerticalAlignment="Center"></Button>
-
-                                    <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
-                                    <Button Content="編集" ToolTip="編集" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding PdfEditCommand}" VerticalAlignment="Center"></Button>
-
-                                    <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
-                                    <Button Content="表示" ToolTip="表示" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding PdfShowCommand}" VerticalAlignment="Center"></Button>
-                                    
-                                    <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
-                                    <Button Content="削除" ToolTip="削除" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding PdfDeleteCommand}" VerticalAlignment="Center"></Button>
-
-                                    <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
-                                </StackPanel>
-                            </Border>
-
-                            <ListView Grid.Row="1" Grid.Column="0" Padding="6" Margin="0" BorderThickness="0" Background="{DynamicResource WindowBackgroundColorBrush}" ItemsSource="{Binding RentLivingEdit.RentLivingPdfs}" SelectedItem="{Binding PdfsSelectedItem}" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                                <ListView.InputBindings>
-                                    <KeyBinding Key="Enter" Command="{Binding Path=DataContext.PdfEnterKeyCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" />
-                                </ListView.InputBindings>
-                                <ListView.Resources>
-                                    <Style x:Key="ListviewItemFocusVisual">
-                                        <Setter Property="Control.Template">
-                                            <Setter.Value>
-                                                <ControlTemplate>
-                                                    <Border CornerRadius="3">
-                                                        <Rectangle Margin="2" StrokeThickness="1" Stroke="#121212" StrokeDashArray="1 2" />
-                                                    </Border>
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style>
-                                    <ContextMenu x:Key="ATItemContextMenu">
-                                        <MenuItem Header="表示" Command="{Binding Path=DataContext.PdfShowCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItems, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
-                                            <MenuItem.Resources>
-                                                <ControlTemplate x:Key="OpenInBrowser">
-                                                    <Canvas Background="Transparent" >
-                                                        <Path Fill="#373737" Width="14.3775" Height="14" Canvas.Left="0.311264" Canvas.Top="0.500005" Stretch="Uniform" Data="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z" />
-                                                    </Canvas>
-                                                </ControlTemplate>
-                                            </MenuItem.Resources>
-                                            <MenuItem.Icon>
-                                                <ContentControl Template="{StaticResource OpenInBrowser}" />
-                                            </MenuItem.Icon>
-                                        </MenuItem>
-                                        <Separator/>
-                                        <MenuItem Header="編集" Command="{Binding Path=DataContext.PdfEditCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItems, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
-                                            <MenuItem.Resources>
-                                                <ControlTemplate x:Key="EditIcon">
-                                                    <Canvas Background="Transparent" >
-                                                        <Path Fill="#373737" Width="14.3775" Height="14" Canvas.Left="0.311264" Canvas.Top="0.500005" Stretch="Uniform" Data="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z" />
-                                                    </Canvas>
-                                                </ControlTemplate>
-                                            </MenuItem.Resources>
-                                            <MenuItem.Icon>
-                                                <ContentControl Template="{StaticResource EditIcon}" />
-                                            </MenuItem.Icon>
-                                        </MenuItem>
-                                        <Separator/>
-                                        <MenuItem Header="削除" Command="{Binding Path=DataContext.PdfDeleteCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItems, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
-                                            <MenuItem.Resources>
-                                                <ControlTemplate x:Key="DeleteForeverIcon">
-                                                    <Canvas Background="Transparent">
-                                                        <Path Fill="#373737" Width="14.3775" Height="14" Canvas.Left="0.311264" Canvas.Top="0.500005" Stretch="Uniform" Data="M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19M8.46,11.88L9.87,10.47L12,12.59L14.12,10.47L15.53,11.88L13.41,14L15.53,16.12L14.12,17.53L12,15.41L9.88,17.53L8.47,16.12L10.59,14L8.46,11.88M15.5,4L14.5,3H9.5L8.5,4H5V6H19V4H15.5Z" />
-                                                    </Canvas>
-                                                </ControlTemplate>
-                                            </MenuItem.Resources>
-                                            <MenuItem.Icon>
-                                                <ContentControl Template="{StaticResource DeleteForeverIcon}" />
-                                            </MenuItem.Icon>
-                                        </MenuItem>
-                                    </ContextMenu>
-                                </ListView.Resources>
-                                <ListView.ItemContainerStyle>
-                                    <Style TargetType="ListViewItem">
-                                        <Setter Property="Padding" Value="0"/>
-                                        <Setter Property="Margin" Value="3"/>
-                                        <Setter Property="Background" Value="Transparent"/>
-                                        <Setter Property="BorderThickness" Value="1"/>
-                                        <Setter Property="HorizontalContentAlignment" Value="Center"/>
-                                        <Setter Property="FocusVisualStyle" Value="{StaticResource ListviewItemFocusVisual}"/>
-                                        <Setter Property="ContextMenu" Value="{StaticResource ATItemContextMenu}" />
-                                    </Style>
-                                    <!--
-                                    <Style TargetType="ListViewItem">
-                                        <Setter Property="HorizontalContentAlignment" Value="Center"/>
-                                        <Setter Property="ContextMenu" Value="{StaticResource ATItemContextMenu}" />
-                                        <Setter Property="Template">
-                                            <Setter.Value>
-                                                <ControlTemplate TargetType="{x:Type ListViewItem}">
-                                                    <Border Name="Border" Margin="{TemplateBinding Margin}" Padding="{TemplateBinding Padding}" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" ClipToBounds="{TemplateBinding ClipToBounds}" CornerRadius="0" SnapsToDevicePixels="true">
-                                                        <GridViewRowPresenter VerticalAlignment="{TemplateBinding VerticalContentAlignment}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
-
-                                                        <Border.InputBindings>
-                                                            <MouseBinding Command="{Binding Path=DataContext.RentLivingEditZumenPdfEnterCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" Gesture="LeftDoubleClick" />
-                                                        </Border.InputBindings>
-                                                    </Border>
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                        <Style.Triggers>
-                                            <Trigger Property="ItemsControl.AlternationIndex" Value="0">
-                                                <Setter Property="BorderThickness" Value="1" />
-                                            </Trigger>
-                                            <Trigger Property="ItemsControl.AlternationIndex" Value="1">
-                                                <Setter Property="BorderThickness" Value="1" />
-                                            </Trigger>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter Property="TextElement.FontWeight" Value="SemiBold"/>
-                                                <Setter Property="BorderThickness" Value="1" />
-                                            </Trigger>
-                                            <Trigger Property="IsSelected" Value="True">
-                                                <Setter Property="TextElement.FontWeight" Value="Bold"/>
-                                                <Setter Property="BorderThickness" Value="1" />
-                                            </Trigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                    -->
-                                </ListView.ItemContainerStyle>
-                                <ListView.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <WrapPanel/>
-                                    </ItemsPanelTemplate>
-                                </ListView.ItemsPanel>
-                                <ListView.ItemTemplate>
-                                    <DataTemplate>
-                                        <StackPanel>
-
-                                            <Grid Width="110" Height="78" Margin="6">
-                                                <Grid.InputBindings>
-                                                    <MouseBinding Command="{Binding Path=DataContext.PdfEnterKeyCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" Gesture="LeftDoubleClick" />
-                                                </Grid.InputBindings>
-                                                
-                                                <!--  Add rounded corners here  -->
-                                                <Border Name="PdfPrevMask" Margin="-5" Background="#eee" CornerRadius="3" BorderThickness="2" />
-
-                                                <!--  Image  -->
-                                                <Grid>
-                                                    <Grid.OpacityMask>
-                                                        <VisualBrush Visual="{Binding ElementName=PdfPrevMask}" />
-                                                    </Grid.OpacityMask>
-
-                                                    <Image Source="{Binding Picture}" Stretch="Uniform" Width="110" Height="78" Margin="0"></Image>
-                                                </Grid>
-
-                                            </Grid>
-                                            <StackPanel>
-                                                <TextBlock Text="{Binding PdfTypeLabel}" Style="{DynamicResource DefaultTextBlockStyle}" Margin="3"></TextBlock>
-                                                <TextBlock Text="メイン図面" x:Name="PdfIsMain" Style="{DynamicResource DefaultTextBlockStyle}"></TextBlock>
-                                            </StackPanel>
-                                        </StackPanel>
-
-                                        <DataTemplate.Triggers>
-
-                                            <DataTrigger Binding="{Binding PdfIsMain}" Value="True">
-                                                <Setter TargetName="PdfPrevMask" Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
-                                                <Setter TargetName="PdfIsMain" Property="Visibility" Value="Collapsed"/>
-                                            </DataTrigger>
-
-                                            <DataTrigger Binding="{Binding PdfIsMain}" Value="False">
-                                                <Setter TargetName="PdfPrevMask" Property="BorderBrush" Value="Transparent"/>
-                                                <Setter TargetName="PdfIsMain" Property="Visibility" Value="Collapsed"/>
-                                            </DataTrigger>
-
-                                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListViewItem}}, Path=IsSelected}" Value="True">
-                                                <Setter TargetName="PdfPrevMask" Property="Background" Value="White"/>
-                                            </DataTrigger>
-
-                                        </DataTemplate.Triggers>
-                                    </DataTemplate>
-                                </ListView.ItemTemplate>
-                                <!--
-                                <ListView.View>
-                                    <GridView>
-                                        <GridViewColumn Header="ID" Width="120">
-                                            <GridViewColumn.CellTemplate>
-                                                <DataTemplate>
-                                                    <TextBlock Text="{Binding RentZumenPdfId, Mode=OneWay}" Padding="3"/>
-                                                </DataTemplate>
-                                            </GridViewColumn.CellTemplate>
-                                        </GridViewColumn>
-                                        <GridViewColumn Header="登録日" Width="150">
-                                            <GridViewColumn.CellTemplate>
-                                                <DataTemplate>
-                                                    <TextBlock Text="{Binding DateTimeAdded, Mode=OneWay, StringFormat=yyyy/MM/dd HH:mm:ss}" Padding="3"/>
-                                                </DataTemplate>
-                                            </GridViewColumn.CellTemplate>
-                                        </GridViewColumn>
-                                        <GridViewColumn Header="情報公開日" Width="150">
-                                            <GridViewColumn.CellTemplate>
-                                                <DataTemplate>
-                                                    <TextBlock Text="{Binding DateTimePublished, Mode=OneWay, StringFormat=yyyy/MM/dd HH:mm:ss}" Padding="3"/>
-                                                </DataTemplate>
-                                            </GridViewColumn.CellTemplate>
-                                        </GridViewColumn>
-                                        <GridViewColumn Header="最終確認日" Width="150">
-                                            <GridViewColumn.CellTemplate>
-                                                <DataTemplate>
-                                                    <TextBlock Text="{Binding DateTimeVerified, Mode=OneWay, StringFormat=yyyy/MM/dd HH:mm:ss}" Padding="3"/>
-                                                </DataTemplate>
-                                            </GridViewColumn.CellTemplate>
-                                        </GridViewColumn>
-                                        <GridViewColumn Header="ファイルサイズ" Width="120">
-                                            <GridViewColumn.CellTemplate>
-                                                <DataTemplate>
-                                                    <TextBlock Text="{Binding FileSizeLabel, Mode=OneWay}" Padding="3"/>
-                                                </DataTemplate>
-                                            </GridViewColumn.CellTemplate>
-                                        </GridViewColumn>
-                                    </GridView>
-                                </ListView.View>
-                                -->
-                            </ListView>
-                        </Grid>
-
                     </TabItem>
 
                     <!-- 部屋 -->
@@ -1555,42 +1185,32 @@
                         <Grid Margin="0 12 0 0">
                             <Grid>
                                 <Grid.RowDefinitions>
-                                    <RowDefinition Height="28"/>
+                                    <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="*"/>
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
 
-                                <StackPanel Grid.Row="0" Margin="3" Visibility="Collapsed">
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                        <Button Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" HorizontalAlignment="Left" Command="{Binding SectionNewCommand}">追加</Button>
-                                        <Button Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" HorizontalAlignment="Left" Command="{Binding SectionEditCommand}">編集</Button>
-                                        <Button Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" HorizontalAlignment="Left" Command="{Binding SectionDuplicateCommand}">複製</Button>
-                                        <Button Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" HorizontalAlignment="Left" Command="{Binding SectionDeleteCommand}">削除</Button>
-                                    </StackPanel>
-                                </StackPanel>
-
                                 <!-- Menu panel -->
                                 <Border Grid.Row="0" Grid.Column="0" Height="28" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" BorderThickness="0 0.5 0.5 0.5" BorderBrush="#121212">
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Stretch">
 
                                         <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
-                                        <Button Content="追加" ToolTip="追加" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding SectionNewCommand}" VerticalAlignment="Center"></Button>
+                                        <Button Content="新規" ToolTip="新規" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding SectionNewCommand}" VerticalAlignment="Center" HorizontalAlignment="Center" Tag="M19,5H22V7H19V10H17V7H14V5H17V2H19V5M17,19V13H19V21H3V5H11V7H5V19H17Z"></Button>
 
                                         <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
-                                        <Button Content="編集" ToolTip="編集" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding SectionEditCommand}" VerticalAlignment="Center"></Button>
+                                        <Button Content="編集" ToolTip="編集" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding SectionEditCommand}" VerticalAlignment="Center" HorizontalAlignment="Center" Tag="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"></Button>
 
                                         <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
-                                        <Button Content="複製" ToolTip="複製" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" VerticalAlignment="Center"></Button>
+                                        <Button Content="複製" ToolTip="複製" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding SectionDuplicateCommand}" VerticalAlignment="Center" HorizontalAlignment="Center" Tag="M11,17H4A2,2 0 0,1 2,15V3A2,2 0 0,1 4,1H16V3H4V15H11V13L15,16L11,19V17M19,21V7H8V13H6V7A2,2 0 0,1 8,5H19A2,2 0 0,1 21,7V21A2,2 0 0,1 19,23H8A2,2 0 0,1 6,21V19H8V21H19Z"></Button>
 
                                         <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
-                                        <Button Content="削除" ToolTip="削除" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" VerticalAlignment="Center"></Button>
+                                        <Button Content="削除" ToolTip="削除" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding SectionDeleteCommand}" VerticalAlignment="Center" HorizontalAlignment="Center" Tag="M9,3V4H4V6H5V19A2,2 0 0,0 7,21H17A2,2 0 0,0 19,19V6H20V4H15V3H9M7,6H17V19H7V6M9,8V17H11V8H9M13,8V17H15V8H13Z"></Button>
 
-                                        <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
+                                        <Border BorderThickness="1 0 0 0" BorderBrush="#121212"></Border>
                                     </StackPanel>
                                 </Border>
-
 
                                 <Grid Grid.Row="1" Grid.Column="0" Margin="0 0 23 0" HorizontalAlignment="Stretch" Visibility="Hidden">
                                     <Grid.ColumnDefinitions>
@@ -1618,57 +1238,11 @@
                                     </ListView.InputBindings>
                                     <ListView.Resources>
                                         <ContextMenu x:Key="ItemContextMenu">
-                                            <MenuItem Header="Open In App Browser" Command="{Binding Path=DataContext.OpenInAppBrowserCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
-                                                <MenuItem.Resources>
-                                                    <ControlTemplate x:Key="OpenInAppBrowser">
-                                                        <Canvas Background="Transparent" >
-                                                            <Path Fill="#373737" Width="14.3775" Height="14" Canvas.Left="0.311264" Canvas.Top="0.500005" Stretch="Uniform" Data="M12,10L8,14H11V20H13V14H16M19,4H5C3.89,4 3,4.9 3,6V18A2,2 0 0,0 5,20H9V18H5V8H19V18H15V20H19A2,2 0 0,0 21,18V6A2,2 0 0,0 19,4Z" />
-                                                        </Canvas>
-                                                    </ControlTemplate>
-                                                </MenuItem.Resources>
-                                                <MenuItem.Icon>
-                                                    <ContentControl Template="{StaticResource OpenInAppBrowser}" />
-                                                </MenuItem.Icon>
-                                            </MenuItem>
-                                            <MenuItem Header="Open In Default Browser" Command="{Binding Path=DataContext.OpenInExternalBrowserCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
-                                                <MenuItem.Resources>
-                                                    <ControlTemplate x:Key="OpenInExtBrowser">
-                                                        <Canvas Background="Transparent" >
-                                                            <Path Fill="#373737" Width="14.3775" Height="14" Canvas.Left="0.311264" Canvas.Top="0.500005" Stretch="Uniform" Data="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z" />
-                                                        </Canvas>
-                                                    </ControlTemplate>
-                                                </MenuItem.Resources>
-                                                <MenuItem.Icon>
-                                                    <ContentControl Template="{StaticResource OpenInExtBrowser}" />
-                                                </MenuItem.Icon>
-                                            </MenuItem>
-                                            <Separator/>
-                                            <MenuItem Header="Archive" Command="{Binding Path=DataContext.ArchiveSelectedCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
-                                                <MenuItem.Resources>
-                                                    <ControlTemplate x:Key="ArchiveThis">
-                                                        <Canvas Background="Transparent" >
-                                                            <Path Fill="#373737" Width="14.3775" Height="14" Canvas.Left="0.311264" Canvas.Top="0.500005" Stretch="Uniform" Data="M5.12,5L5.93,4H17.93L18.87,5M12,17.5L6.5,12H10V10H14V12H17.5L12,17.5M20.54,5.23L19.15,3.55C18.88,3.21 18.47,3 18,3H6C5.53,3 5.12,3.21 4.84,3.55L3.46,5.23C3.17,5.57 3,6 3,6.5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V6.5C21,6 20.83,5.57 20.54,5.23Z" />
-                                                        </Canvas>
-                                                    </ControlTemplate>
-                                                </MenuItem.Resources>
-                                                <MenuItem.Icon>
-                                                    <ContentControl Template="{StaticResource ArchiveThis}" />
-                                                </MenuItem.Icon>
-                                            </MenuItem>
-                                            <Separator/>
-                                            <MenuItem Header="Edit"
-                                  Command="{Binding Path=DataContext.OpenEditorCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"
-                                  CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
+                                            <MenuItem Header="編集" Command="{Binding Path=DataContext.SectionEditCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
                                                 <MenuItem.Resources>
                                                     <ControlTemplate x:Key="EditIcon">
                                                         <Canvas Background="Transparent" >
-                                                            <Path Fill="#373737"
-                          Width="14.3775"
-                          Height="14"
-                          Canvas.Left="0.311264"
-                          Canvas.Top="0.500005"
-                          Stretch="Uniform"
-                          Data="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z" />
+                                                            <Path Fill="#373737" Width="14.3775" Height="14" Canvas.Left="0.311264" Canvas.Top="0.500005" Stretch="Uniform" Data="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z" />
                                                         </Canvas>
                                                     </ControlTemplate>
                                                 </MenuItem.Resources>
@@ -1676,40 +1250,25 @@
                                                     <ContentControl Template="{StaticResource EditIcon}" />
                                                 </MenuItem.Icon>
                                             </MenuItem>
-                                            <MenuItem Header="Reload"
-                                  Command="{Binding Path=DataContext.GetEntryCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"
-                                  CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
+                                            <Separator/>
+                                            <MenuItem Header="複製" Command="{Binding Path=DataContext.SectionDuplicateCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
                                                 <MenuItem.Resources>
-                                                    <ControlTemplate x:Key="GetEntry">
+                                                    <ControlTemplate x:Key="DuplicateIcon">
                                                         <Canvas Background="Transparent" >
-                                                            <Path Fill="#373737"
-                          Width="14.3775"
-                          Height="14"
-                          Canvas.Left="0.311264"
-                          Canvas.Top="0.500005"
-                          Stretch="Uniform"
-                          Data="M12,6V9L16,5L12,1V4A8,8 0 0,0 4,12C4,13.57 4.46,15.03 5.24,16.26L6.7,14.8C6.25,13.97 6,13 6,12A6,6 0 0,1 12,6M18.76,7.74L17.3,9.2C17.74,10.04 18,11 18,12A6,6 0 0,1 12,18V15L8,19L12,23V20A8,8 0 0,0 20,12C20,10.43 19.54,8.97 18.76,7.74Z" />
+                                                            <Path Fill="#373737" Width="14.3775" Height="14" Canvas.Left="0.311264" Canvas.Top="0.500005" Stretch="Uniform" Data="M11,17H4A2,2 0 0,1 2,15V3A2,2 0 0,1 4,1H16V3H4V15H11V13L15,16L11,19V17M19,21V7H8V13H6V7A2,2 0 0,1 8,5H19A2,2 0 0,1 21,7V21A2,2 0 0,1 19,23H8A2,2 0 0,1 6,21V19H8V21H19Z" />
                                                         </Canvas>
                                                     </ControlTemplate>
                                                 </MenuItem.Resources>
                                                 <MenuItem.Icon>
-                                                    <ContentControl Template="{StaticResource GetEntry}" />
+                                                    <ContentControl Template="{StaticResource DuplicateIcon}" />
                                                 </MenuItem.Icon>
                                             </MenuItem>
                                             <Separator/>
-                                            <MenuItem Header="Delete"
-                                  Command="{Binding Path=DataContext.DeleteEntryCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"
-                                  CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
+                                            <MenuItem Header="削除" Command="{Binding Path=DataContext.SectionDeleteCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
                                                 <MenuItem.Resources>
                                                     <ControlTemplate x:Key="DeleteForeverIcon">
                                                         <Canvas Background="Transparent">
-                                                            <Path Fill="#373737" 
-                          Width="14.3775"
-                          Height="14"
-                          Canvas.Left="0.311264"
-                          Canvas.Top="0.500005"
-                          Stretch="Uniform"
-                          Data="M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19M8.46,11.88L9.87,10.47L12,12.59L14.12,10.47L15.53,11.88L13.41,14L15.53,16.12L14.12,17.53L12,15.41L9.88,17.53L8.47,16.12L10.59,14L8.46,11.88M15.5,4L14.5,3H9.5L8.5,4H5V6H19V4H15.5Z" />
+                                                            <Path Fill="#373737" Width="14.3775" Height="14" Canvas.Left="0.311264" Canvas.Top="0.500005" Stretch="Uniform" Data="M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19M8.46,11.88L9.87,10.47L12,12.59L14.12,10.47L15.53,11.88L13.41,14L15.53,16.12L14.12,17.53L12,15.41L9.88,17.53L8.47,16.12L10.59,14L8.46,11.88M15.5,4L14.5,3H9.5L8.5,4H5V6H19V4H15.5Z" />
                                                         </Canvas>
                                                     </ControlTemplate>
                                                 </MenuItem.Resources>
@@ -1910,19 +1469,262 @@
 
                     </TabItem>
 
-                    <!-- 元付け業者 （区分所有なら非表示にする） -->
-                    <TabItem Width="120" Visibility="Collapsed">
+                    <!-- 図面（募集図面、登記簿謄本、公図、建築図面）（区分所有なら非表示にする）  -->
+                    <TabItem Width="120">
                         <TabItem.Header>
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="3">
-                                <Label Content="元付け" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </StackPanel>
+                            <Label Content="図面" Style="{DynamicResource TabMenuLabelStyle}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </TabItem.Header>
                         <TabItem.Style>
-                            <Style TargetType="{x:Type TabItem}" BasedOn="{StaticResource DefaultTabItem}">
+                            <Style TargetType="{x:Type TabItem}" BasedOn="{StaticResource TopMenuTabItemStyle}">
                                 <Setter Property="OverridesDefaultStyle" Value="False" />
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding ElementName=ButtonOwnershipType, Path=IsSelected}" Value="True">
-                                        <Setter Property="TabItem.Visibility" Value="Hidden"/>
+                                        <Setter Property="TabItem.Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TabItem.Style>
+
+                        <Grid Margin="0 12 0 0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Menu panel -->
+                            <Border Grid.Row="0" Grid.Column="0" Height="28" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" BorderThickness="0 0.5 0.5 0.5" BorderBrush="#121212">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Stretch">
+
+                                    <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
+                                    <Button Content="追加" ToolTip="追加" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding PdfAddCommand}" VerticalAlignment="Center" HorizontalAlignment="Center" Tag="M19,5H22V7H19V10H17V7H14V5H17V2H19V5M17,19V13H19V21H3V5H11V7H5V19H17Z"></Button>
+
+                                    <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
+                                    <Button Content="編集" ToolTip="編集" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding PdfEditCommand}" VerticalAlignment="Center" HorizontalAlignment="Center" Tag="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"></Button>
+
+                                    <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
+                                    <Button Content="表示" ToolTip="表示" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding PdfShowCommand}" VerticalAlignment="Center" HorizontalAlignment="Center" Tag="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z"></Button>
+
+                                    <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
+                                    <Button Content="削除" ToolTip="削除" Margin="12 0 12 0" Style="{DynamicResource ListviewMenuButton}" Command="{Binding PdfDeleteCommand}" VerticalAlignment="Center" HorizontalAlignment="Center" Tag="M9,3V4H4V6H5V19A2,2 0 0,0 7,21H17A2,2 0 0,0 19,19V6H20V4H15V3H9M7,6H17V19H7V6M9,8V17H11V8H9M13,8V17H15V8H13Z"></Button>
+
+                                    <Border BorderThickness="0.5 0 0 0" BorderBrush="#121212"></Border>
+                                </StackPanel>
+                            </Border>
+
+                            <ListView Grid.Row="1" Grid.Column="0" Padding="6" Margin="0" BorderThickness="0" Background="{DynamicResource WindowBackgroundColorBrush}" ItemsSource="{Binding RentLivingEdit.RentLivingPdfs}" SelectedItem="{Binding PdfsSelectedItem}" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                <ListView.InputBindings>
+                                    <KeyBinding Key="Enter" Command="{Binding Path=DataContext.PdfEnterKeyCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" />
+                                </ListView.InputBindings>
+                                <ListView.Resources>
+                                    <Style x:Key="ListviewItemFocusVisual">
+                                        <Setter Property="Control.Template">
+                                            <Setter.Value>
+                                                <ControlTemplate>
+                                                    <Border CornerRadius="3">
+                                                        <Rectangle Margin="2" StrokeThickness="1" Stroke="#121212" StrokeDashArray="1 2" />
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                    <ContextMenu x:Key="ATItemContextMenu">
+                                        <MenuItem Header="表示" Command="{Binding Path=DataContext.PdfShowCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItems, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
+                                            <MenuItem.Resources>
+                                                <ControlTemplate x:Key="OpenInBrowser">
+                                                    <Canvas Background="Transparent" >
+                                                        <Path Fill="#373737" Width="14.3775" Height="14" Canvas.Left="0.311264" Canvas.Top="0.500005" Stretch="Uniform" Data="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z" />
+                                                    </Canvas>
+                                                </ControlTemplate>
+                                            </MenuItem.Resources>
+                                            <MenuItem.Icon>
+                                                <ContentControl Template="{StaticResource OpenInBrowser}" />
+                                            </MenuItem.Icon>
+                                        </MenuItem>
+                                        <Separator/>
+                                        <MenuItem Header="編集" Command="{Binding Path=DataContext.PdfEditCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItems, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
+                                            <MenuItem.Resources>
+                                                <ControlTemplate x:Key="EditIcon">
+                                                    <Canvas Background="Transparent" >
+                                                        <Path Fill="#373737" Width="14.3775" Height="14" Canvas.Left="0.311264" Canvas.Top="0.500005" Stretch="Uniform" Data="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z" />
+                                                    </Canvas>
+                                                </ControlTemplate>
+                                            </MenuItem.Resources>
+                                            <MenuItem.Icon>
+                                                <ContentControl Template="{StaticResource EditIcon}" />
+                                            </MenuItem.Icon>
+                                        </MenuItem>
+                                        <Separator/>
+                                        <MenuItem Header="削除" Command="{Binding Path=DataContext.PdfDeleteCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItems, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
+                                            <MenuItem.Resources>
+                                                <ControlTemplate x:Key="DeleteForeverIcon">
+                                                    <Canvas Background="Transparent">
+                                                        <Path Fill="#373737" Width="14.3775" Height="14" Canvas.Left="0.311264" Canvas.Top="0.500005" Stretch="Uniform" Data="M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19M8.46,11.88L9.87,10.47L12,12.59L14.12,10.47L15.53,11.88L13.41,14L15.53,16.12L14.12,17.53L12,15.41L9.88,17.53L8.47,16.12L10.59,14L8.46,11.88M15.5,4L14.5,3H9.5L8.5,4H5V6H19V4H15.5Z" />
+                                                    </Canvas>
+                                                </ControlTemplate>
+                                            </MenuItem.Resources>
+                                            <MenuItem.Icon>
+                                                <ContentControl Template="{StaticResource DeleteForeverIcon}" />
+                                            </MenuItem.Icon>
+                                        </MenuItem>
+                                    </ContextMenu>
+                                </ListView.Resources>
+                                <ListView.ItemContainerStyle>
+                                    <Style TargetType="ListViewItem">
+                                        <Setter Property="Padding" Value="0"/>
+                                        <Setter Property="Margin" Value="3"/>
+                                        <Setter Property="Background" Value="Transparent"/>
+                                        <Setter Property="BorderThickness" Value="1"/>
+                                        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                        <Setter Property="FocusVisualStyle" Value="{StaticResource ListviewItemFocusVisual}"/>
+                                        <Setter Property="ContextMenu" Value="{StaticResource ATItemContextMenu}" />
+                                    </Style>
+                                    <!--
+                                    <Style TargetType="ListViewItem">
+                                        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                        <Setter Property="ContextMenu" Value="{StaticResource ATItemContextMenu}" />
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="{x:Type ListViewItem}">
+                                                    <Border Name="Border" Margin="{TemplateBinding Margin}" Padding="{TemplateBinding Padding}" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" ClipToBounds="{TemplateBinding ClipToBounds}" CornerRadius="0" SnapsToDevicePixels="true">
+                                                        <GridViewRowPresenter VerticalAlignment="{TemplateBinding VerticalContentAlignment}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+
+                                                        <Border.InputBindings>
+                                                            <MouseBinding Command="{Binding Path=DataContext.RentLivingEditZumenPdfEnterCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" Gesture="LeftDoubleClick" />
+                                                        </Border.InputBindings>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Style.Triggers>
+                                            <Trigger Property="ItemsControl.AlternationIndex" Value="0">
+                                                <Setter Property="BorderThickness" Value="1" />
+                                            </Trigger>
+                                            <Trigger Property="ItemsControl.AlternationIndex" Value="1">
+                                                <Setter Property="BorderThickness" Value="1" />
+                                            </Trigger>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="TextElement.FontWeight" Value="SemiBold"/>
+                                                <Setter Property="BorderThickness" Value="1" />
+                                            </Trigger>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter Property="TextElement.FontWeight" Value="Bold"/>
+                                                <Setter Property="BorderThickness" Value="1" />
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                    -->
+                                </ListView.ItemContainerStyle>
+                                <ListView.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel/>
+                                    </ItemsPanelTemplate>
+                                </ListView.ItemsPanel>
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel>
+
+                                            <Grid Width="110" Height="78" Margin="6">
+                                                <Grid.InputBindings>
+                                                    <MouseBinding Command="{Binding Path=DataContext.PdfEnterKeyCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}" Gesture="LeftDoubleClick" />
+                                                </Grid.InputBindings>
+
+                                                <!--  Add rounded corners here  -->
+                                                <Border Name="PdfPrevMask" Margin="-5" Background="#eee" CornerRadius="3" BorderThickness="2" />
+
+                                                <!--  Image  -->
+                                                <Grid>
+                                                    <Grid.OpacityMask>
+                                                        <VisualBrush Visual="{Binding ElementName=PdfPrevMask}" />
+                                                    </Grid.OpacityMask>
+
+                                                    <Image Source="{Binding Picture}" Stretch="Uniform" Width="110" Height="78" Margin="0"></Image>
+                                                </Grid>
+
+                                            </Grid>
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding PdfTypeLabel}" Style="{DynamicResource DefaultTextBlockStyle}" Margin="3"></TextBlock>
+                                                <TextBlock Text="メイン図面" x:Name="PdfIsMain" Style="{DynamicResource DefaultTextBlockStyle}"></TextBlock>
+                                            </StackPanel>
+                                        </StackPanel>
+
+                                        <DataTemplate.Triggers>
+
+                                            <DataTrigger Binding="{Binding PdfIsMain}" Value="True">
+                                                <Setter TargetName="PdfPrevMask" Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                                                <Setter TargetName="PdfIsMain" Property="Visibility" Value="Collapsed"/>
+                                            </DataTrigger>
+
+                                            <DataTrigger Binding="{Binding PdfIsMain}" Value="False">
+                                                <Setter TargetName="PdfPrevMask" Property="BorderBrush" Value="Transparent"/>
+                                                <Setter TargetName="PdfIsMain" Property="Visibility" Value="Collapsed"/>
+                                            </DataTrigger>
+
+                                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListViewItem}}, Path=IsSelected}" Value="True">
+                                                <Setter TargetName="PdfPrevMask" Property="Background" Value="White"/>
+                                            </DataTrigger>
+
+                                        </DataTemplate.Triggers>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                                <!--
+                                <ListView.View>
+                                    <GridView>
+                                        <GridViewColumn Header="ID" Width="120">
+                                            <GridViewColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding RentZumenPdfId, Mode=OneWay}" Padding="3"/>
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+                                        </GridViewColumn>
+                                        <GridViewColumn Header="登録日" Width="150">
+                                            <GridViewColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding DateTimeAdded, Mode=OneWay, StringFormat=yyyy/MM/dd HH:mm:ss}" Padding="3"/>
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+                                        </GridViewColumn>
+                                        <GridViewColumn Header="情報公開日" Width="150">
+                                            <GridViewColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding DateTimePublished, Mode=OneWay, StringFormat=yyyy/MM/dd HH:mm:ss}" Padding="3"/>
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+                                        </GridViewColumn>
+                                        <GridViewColumn Header="最終確認日" Width="150">
+                                            <GridViewColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding DateTimeVerified, Mode=OneWay, StringFormat=yyyy/MM/dd HH:mm:ss}" Padding="3"/>
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+                                        </GridViewColumn>
+                                        <GridViewColumn Header="ファイルサイズ" Width="120">
+                                            <GridViewColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding FileSizeLabel, Mode=OneWay}" Padding="3"/>
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+                                        </GridViewColumn>
+                                    </GridView>
+                                </ListView.View>
+                                -->
+                            </ListView>
+                        </Grid>
+                    </TabItem>
+
+                    <!-- 元付け業者 （区分所有なら非表示にする） -->
+                    <TabItem Width="120" Visibility="Collapsed">
+                        <TabItem.Header>
+                            <Label Content="元付け" Style="{DynamicResource TabMenuLabelStyle}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </TabItem.Header>
+                        <TabItem.Style>
+                            <Style TargetType="{x:Type TabItem}" BasedOn="{StaticResource TopMenuTabItemStyle}">
+                                <Setter Property="OverridesDefaultStyle" Value="False" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ElementName=ButtonOwnershipType, Path=IsSelected}" Value="True">
+                                        <Setter Property="TabItem.Visibility" Value="Collapsed"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
@@ -1935,7 +1737,7 @@
                     </TabItem>
 
                     <!-- オーナー （区分所有なら非表示にする） -->
-                    <TabItem Width="120">
+                    <TabItem Width="120" Visibility="Collapsed">
                         <TabItem.Header>
                             <Label Content="オーナー" Style="{DynamicResource TabMenuLabelStyle}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </TabItem.Header>
@@ -1949,6 +1751,7 @@
                                 </Style.Triggers>
                             </Style>
                         </TabItem.Style>
+                        
                         <ScrollViewer VerticalScrollBarVisibility="Auto">
 
                         </ScrollViewer>
