@@ -9,7 +9,7 @@ using ZumenSearch.Services;
 
 namespace ZumenSearch.ViewModels;
 
-public class MainViewModel : ObservableRecipient, INavigationAware
+public class MainViewModel : ObservableObject, INavigationAware
 {
     public INavigationService NavigationService
     {
