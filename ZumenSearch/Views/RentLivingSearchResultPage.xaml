@@ -1,0 +1,94 @@
+﻿<Page
+    x:Class="ZumenSearch.Views.RentLivingSearchResultPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:v="using:ZumenSearch.Views"
+    mc:Ignorable="d">
+
+    <Grid x:Name="ContentArea">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <BreadcrumbBar x:Name="BreadcrumbBar1">
+            <BreadcrumbBar.ItemTemplate>
+                <DataTemplate x:DataType="v:Folder">
+                    <BreadcrumbBarItem Content="{Binding}" AutomationProperties.Name="{Binding Name}">
+                        <BreadcrumbBarItem.ContentTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Name}" />
+                            </DataTemplate>
+                        </BreadcrumbBarItem.ContentTemplate>
+                    </BreadcrumbBarItem>
+                </DataTemplate>
+            </BreadcrumbBar.ItemTemplate>
+        </BreadcrumbBar>
+
+
+        <Grid MaxWidth="1000" Grid.Row="1">
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <StackPanel Grid.Row="0">
+
+                <CommandBar DefaultLabelPosition="Right">
+
+                    <AppBarButton Icon="Back" Label="戻る"  Command="{x:Bind ViewModel.BackCommand}"/>
+
+                    <AppBarButton Icon="Edit" Label="編集" Visibility="Collapsed"/>
+
+                    <AppBarButton Icon="Add" Label="新規" Command="{x:Bind ViewModel.AddNewCommand}"/>
+
+
+                    <AppBarToggleButton Icon="Shuffle" Label="Shuffle" Visibility="Collapsed"/>
+                    <AppBarToggleButton Icon="RepeatAll" Label="Repeat" Visibility="Collapsed"/>
+                    
+                    <AppBarButton Icon="Forward" Label="Forward" Visibility="Collapsed"/>
+
+                    <AppBarSeparator Visibility="Collapsed"/>
+
+
+                    <CommandBar.Content>
+                        <TextBlock Text="Now playing..." Margin="12,14" Visibility="Collapsed"/>
+                    </CommandBar.Content>
+                </CommandBar>
+
+                <Border BorderThickness="0,1,0,0" BorderBrush="{ThemeResource NavigationViewItemSeparatorForeground}"></Border>
+
+            </StackPanel>
+
+            <ScrollViewer Grid.Row="1" Margin="0 24 0 0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+
+
+
+            </ScrollViewer>
+
+            <StackPanel Grid.Row="2">
+                <Border BorderThickness="0,1,0,0" BorderBrush="{ThemeResource NavigationViewItemSeparatorForeground}"></Border>
+
+                <CommandBar Grid.Row="0" DefaultLabelPosition="Right">
+
+
+                    <CommandBar.SecondaryCommands>
+                        <AppBarButton Label="エクスポート"/>
+                        <AppBarButton Label="Dislike"/>
+                    </CommandBar.SecondaryCommands>
+                    
+                    <AppBarButton Icon="Clear" Label="リセット" Visibility="Collapsed"/>
+
+                    <CommandBar.Content>
+                        <TextBlock Text="Now playing..." Margin="12,14" Visibility="Collapsed"/>
+                    </CommandBar.Content>
+                </CommandBar>
+            </StackPanel>
+
+        </Grid>
+    </Grid>
+</Page>
