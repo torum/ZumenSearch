@@ -11,6 +11,11 @@ using ZumenSearch.Services;
 using ZumenSearch.ViewModels;
 using ZumenSearch.Views;
 
+using ZumenSearch.Models;
+using ZumenSearch.Notifications;
+using WinUI3App1.Core.Contracts.Services;
+using WinUI3App1.Core.Services;
+
 namespace ZumenSearch;
 
 // To learn more about WinUI 3, see https://docs.microsoft.com/windows/apps/winui/winui3/.
@@ -52,8 +57,12 @@ public partial class App : Application
             services.AddTransient<ActivationHandler<LaunchActivatedEventArgs>, DefaultActivationHandler>();
 
             // Other Activation Handlers
+            services.AddTransient<IActivationHandler, AppNotificationActivationHandler>();
 
             // Services
+            services.AddSingleton<IAppNotificationService, AppNotificationService>();
+            services.AddSingleton<ILocalSettingsService, LocalSettingsService>();
+            services.AddSingleton<IThemeSelectorService, ThemeSelectorService>();
             services.AddTransient<INavigationViewService, NavigationViewService>();
 
             services.AddSingleton<IActivationService, ActivationService>();
@@ -61,6 +70,7 @@ public partial class App : Application
             services.AddSingleton<INavigationService, NavigationService>();
 
             // Core Services
+            services.AddSingleton<ISampleDataService, SampleDataService>();
             services.AddSingleton<IFileService, FileService>();
 
             // Views and ViewModels
@@ -74,21 +84,48 @@ public partial class App : Application
             services.AddTransient<RentLivingSearchResultViewModel>();
             services.AddTransient<RentLivingSearchResultPage>();
 
-            services.AddTransient<RentLivingEditViewModel>();
-            services.AddTransient<RentLivingEditPage>(); 
+            services.AddTransient<RentLivingEditShellViewModel>();
+            services.AddTransient<RentLivingEditShellPage>(); 
 
             services.AddTransient<RentLivingEditBuildingViewModel>();
-            services.AddTransient<RentLivingEditBuildingPage>(); 
+            services.AddTransient<RentLivingEditBuildingPage>();
+            services.AddTransient<RentLivingEditLocationViewModel>();
+            services.AddTransient<RentLivingEditLocationPage>();
+            services.AddTransient<RentLivingEditTransportationViewModel>();
+            services.AddTransient<RentLivingEditTransportationPage>();
+            services.AddTransient<RentLivingEditApplianceViewModel>();
+            services.AddTransient<RentLivingEditAppliancePage>();
+            services.AddTransient<RentLivingEditPictureShellViewModel>();
+            services.AddTransient<RentLivingEditPictureShellPage>();
+            services.AddTransient<RentLivingEditUnitShellViewModel>();
+            services.AddTransient<RentLivingEditUnitShellPage>();
+            services.AddTransient<RentLivingEditZumenViewModel>();
+            services.AddTransient<RentLivingEditZumenPage>();
+
+            services.AddTransient<RentBussinessViewModel>();
+            services.AddTransient<RentBussinessPage>();
+
+            services.AddTransient<RentParkingViewModel>();
+            services.AddTransient<RentParkingPage>();
 
             services.AddTransient<RentOwnerViewModel>();
             services.AddTransient<RentOwnerPage>();
+
+            services.AddTransient<RealEstateBrokerViewModel>();
+            services.AddTransient<RealEstateBrokerPage>();
+
+            services.AddTransient<SettingsViewModel>();
+            services.AddTransient<SettingsPage>();
 
             services.AddTransient<ShellPage>();
             services.AddTransient<ShellViewModel>();
 
             // Configuration
+            services.Configure<LocalSettingsOptions>(context.Configuration.GetSection(nameof(LocalSettingsOptions)));
         }).
         Build();
+
+        App.GetService<IAppNotificationService>().Initialize();
 
         UnhandledException += App_UnhandledException;
     }
@@ -102,6 +139,8 @@ public partial class App : Application
     protected async override void OnLaunched(LaunchActivatedEventArgs args)
     {
         base.OnLaunched(args);
+
+        App.GetService<IAppNotificationService>().Show(string.Format("AppNotificationSamplePayload".GetLocalized(), AppContext.BaseDirectory));
 
         await App.GetService<IActivationService>().ActivateAsync(args);
 

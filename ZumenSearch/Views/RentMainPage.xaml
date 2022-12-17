@@ -27,12 +27,14 @@
         </VisualStateManager.VisualStateGroups>
 
         <Grid.RowDefinitions>
-            <RowDefinition Height="24"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="12"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
+        <BreadcrumbBar x:Name="BreadcrumbBarMain" Grid.Row="0"/>
 
-        <Grid MaxWidth="1000" Grid.Row="1">
+        <Grid MaxWidth="1000" Grid.Row="2">
 
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>

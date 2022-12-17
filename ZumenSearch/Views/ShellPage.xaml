@@ -74,30 +74,27 @@
                             </NavigationViewItem.Icon>
                         </NavigationViewItem>
 
-                        <NavigationViewItem x:Uid="Shell_RentBussiness">
+                        <NavigationViewItem x:Uid="Shell_RentBussiness" helpers:NavigationHelper.NavigateTo="ZumenSearch.ViewModels.RentBussinessViewModel">
                             <NavigationViewItem.Icon>
                                 <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xe7c3;"/>
                             </NavigationViewItem.Icon>
                         </NavigationViewItem>
 
-                        <NavigationViewItem x:Uid="Shell_RentParking">
+                        <NavigationViewItem x:Uid="Shell_RentParking" helpers:NavigationHelper.NavigateTo="ZumenSearch.ViewModels.RentParkingViewModel">
                             <NavigationViewItem.Icon>
                                 <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xe7c3;"/>
                             </NavigationViewItem.Icon>
                         </NavigationViewItem>
 
+                        <NavigationViewItem x:Uid="Shell_RentOwner" Icon="ContactInfo" helpers:NavigationHelper.NavigateTo="ZumenSearch.ViewModels.RentOwnerViewModel"/>
 
-                        <NavigationViewItem x:Uid="Shell_RentOwner" Icon="ContactInfo" helpers:NavigationHelper.NavigateTo="ZumenSearch.ViewModels.RentOwnerViewModel">
-                        </NavigationViewItem>
-                        
                     </NavigationViewItem.MenuItems>
-
+                    
                 </NavigationViewItem>
-                
 
                 <NavigationViewItemSeparator/>
 
-                <NavigationViewItem x:Uid="Shell_Broker">
+                <NavigationViewItem x:Uid="Shell_Broker" helpers:NavigationHelper.NavigateTo="ZumenSearch.ViewModels.RealEstateBrokerViewModel">
                     <NavigationViewItem.Icon>
                         <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xe939;"/>
                     </NavigationViewItem.Icon>

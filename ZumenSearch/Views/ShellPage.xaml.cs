@@ -44,7 +44,12 @@ public sealed partial class ShellPage : Page
         KeyboardAccelerators.Add(BuildKeyboardAccelerator(VirtualKey.GoBack));
 
 
-        // needed to be here.
+        // Any other way?
+        var settings = (Microsoft.UI.Xaml.Controls.NavigationViewItem)NavigationViewControl.SettingsItem;
+        settings.Content = "設定";
+
+
+        // Needed to be here.
         ViewModel.NavigationService.NavigateTo(typeof(RentMainViewModel).FullName!);
     }
 

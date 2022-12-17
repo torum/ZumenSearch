@@ -18,14 +18,17 @@ public class PageService : IPageService
 
         Configure<RentLivingSearchViewModel, RentLivingSearchPage>(); 
         Configure<RentLivingSearchResultViewModel, RentLivingSearchResultPage>();
-        Configure<RentLivingEditViewModel, RentLivingEditPage>();
+        Configure<RentLivingEditShellViewModel, RentLivingEditShellPage>();
 
-        Configure<RentLivingEditBuildingViewModel, RentLivingEditBuildingPage>();
+        Configure<RentBussinessViewModel, RentBussinessPage>();
 
-        
+        Configure<RentParkingViewModel, RentParkingPage>();
+
         Configure<RentOwnerViewModel, RentOwnerPage>();
 
+        Configure<RealEstateBrokerViewModel, RealEstateBrokerPage>();
 
+        Configure<SettingsViewModel, SettingsPage>();
     }
 
     public Type GetPageType(string key)

@@ -15,11 +15,20 @@
     <EnableMsixTooling>true</EnableMsixTooling>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="Views\RealEstateBrokerPage.xaml" />
+    <None Remove="Views\RentBussinessPage.xaml" />
     <None Remove="Views\RentLivingEditBuildingPage.xaml" />
-    <None Remove="Views\RentLivingEditPage.xaml" />
+    <None Remove="Views\RentLivingEditLocationPage.xaml" />
+    <None Remove="Views\RentLivingEditPictureShellPage.xaml" />
+    <None Remove="Views\RentLivingEditShellPage.xaml" />
+    <None Remove="Views\RentLivingEditTransportationPage.xaml" />
+    <None Remove="Views\RentLivingEditUnitShellPage.xaml" />
+    <None Remove="Views\RentLivingEditZumenPage.xaml" />
     <None Remove="Views\RentLivingSearchResultPage.xaml" />
     <None Remove="Views\RentMainPage.xaml" />
     <None Remove="Views\RentOwnerPage.xaml" />
+    <None Remove="Views\RentParkingPage.xaml" />
+    <None Remove="Views\SettingsPage.xaml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -43,7 +52,43 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Page Update="Views\RentLivingEditPage.xaml">
+    <Page Update="Views\RealEstateBrokerPage.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\RentLivingEditTransportationPage.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\RentLivingEditPictureShellPage.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\RentLivingEditUnitShellPage.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\RentLivingEditLocationPage.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\RentLivingEditZumenPage.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\SettingsPage.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\SettingsPage.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\RentParkingPage.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\RentLivingEditShellPage.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
@@ -56,6 +101,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Views\RentLivingEditBuildingPage.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\RentBussinessPage.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>

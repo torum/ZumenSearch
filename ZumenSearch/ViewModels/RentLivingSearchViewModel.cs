@@ -53,6 +53,6 @@ public class RentLivingSearchViewModel : ObservableObject, INavigationAware
     {
         Debug.WriteLine("AddNew command executed!");
 
-        NavigationService.NavigateTo(typeof(RentLivingEditViewModel).FullName!, "test");
+        NavigationService.NavigateTo(typeof(RentLivingEditShellViewModel).FullName!, "test");
     }
 }

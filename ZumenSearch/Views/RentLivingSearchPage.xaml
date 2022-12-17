@@ -14,7 +14,6 @@
                     <VisualState.StateTriggers>
                         <AdaptiveTrigger MinWindowWidth="1007" />
                     </VisualState.StateTriggers>
-                    
                     <VisualState.Setters>
                         <Setter Target="ComboBoxesChinryou.MaximumRowsOrColumns" Value="3"/>
                         <Setter Target="RadioButtonsEkiToho.MaximumRowsOrColumns" Value="3"/>
@@ -33,7 +32,6 @@
         <BreadcrumbBar x:Name="BreadcrumbBar1" Grid.Row="0"/>
 
         <Grid MaxWidth="1000" Grid.Row="1">
-
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
@@ -77,7 +75,7 @@
 
                     <VariableSizedWrapGrid Orientation="Horizontal" Margin="0">
                         <TextBox MaxWidth="500" MinWidth="350" Header="物件名" PlaceholderText="Type your text here" Margin="24,24,24,0"/>
-                        <TextBox MaxWidth="600" MinWidth="350" Header="所在地" PlaceholderText="Type your text here" Margin="24,24,24,0"/>
+                        <TextBox MaxWidth="500" MinWidth="350" Header="所在地" PlaceholderText="Type your text here" Margin="24,24,24,0"/>
                     </VariableSizedWrapGrid>
 
                     <VariableSizedWrapGrid Orientation="Horizontal" Margin="0">
@@ -92,7 +90,7 @@
 
                     <TextBlock Text="詳細条件" Margin="24,36,24,0"></TextBlock>
                     
-                    <Grid BorderBrush="{ThemeResource NavigationViewItemSeparatorForeground}" BorderThickness="1" CornerRadius="8" Margin="24,8,24,24">
+                    <Grid BorderBrush="{ThemeResource NavigationViewItemSeparatorForeground}" BorderThickness="1" CornerRadius="4" Margin="24,8,24,24">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
@@ -115,7 +113,7 @@
                             <ColumnDefinition Width="4*"/>
                         </Grid.ColumnDefinitions>
 
-                        <Border Grid.Row="0" Grid.RowSpan="15" Grid.Column="0" CornerRadius="8,0,0,8" Background="LightGray" Opacity="0.1"></Border>
+                        <Border Grid.Row="0" Grid.RowSpan="15" Grid.Column="0" CornerRadius="4,0,0,4" Background="LightGray" Opacity="0.1"></Border>
                         <Border Grid.Row="0" Grid.RowSpan="15" Grid.Column="1"  CornerRadius="0,4,4,0"></Border>
 
                         <StackPanel Grid.Row="0" Grid.Column="0">

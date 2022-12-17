@@ -51,6 +51,8 @@ public sealed partial class RentMainPage : Page
         ViewModel = App.GetService<RentMainViewModel>();
         InitializeComponent();
 
+        BreadcrumbBarMain.ItemsSource = new string[] { "総合検索" };
+
         ObservableCollection<CustomDataObject> Items = new ObservableCollection<CustomDataObject>();
 
         var temp = new CustomDataObject();
