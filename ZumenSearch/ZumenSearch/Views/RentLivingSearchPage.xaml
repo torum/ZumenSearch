@@ -1,0 +1,253 @@
+﻿<Page
+    x:Class="ZumenSearch.Views.RentLivingSearchPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    mc:Ignorable="d"
+    NavigationCacheMode="Required"
+    >
+    <Grid x:Name="ContentArea">
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup>
+                <VisualState>
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="1007" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="ComboBoxesChinryou.MaximumRowsOrColumns" Value="3"/>
+                        <Setter Target="RadioButtonsEkiToho.MaximumRowsOrColumns" Value="3"/>
+                        <Setter Target="CheckBoxsMadori.MaximumRowsOrColumns" Value="3"/>
+                        <Setter Target="CheckBoxsTatemonoShubetu.MaximumRowsOrColumns" Value="3"/>
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+        
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <BreadcrumbBar x:Name="BreadcrumbBar1" Grid.Row="0"/>
+
+        <Grid MaxWidth="1000" Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <StackPanel Grid.Row="0">
+
+                <CommandBar DefaultLabelPosition="Right">
+
+                    <AppBarButton Icon="Find" Label="検索" Command="{x:Bind ViewModel.SearchCommand}"/>
+
+                    <AppBarButton Icon="Add" Label="新規" Command="{x:Bind ViewModel.AddNewCommand}"/>
+
+                    <AppBarToggleButton Icon="Shuffle" Label="Shuffle" Visibility="Collapsed"/>
+                    <AppBarToggleButton Icon="RepeatAll" Label="Repeat" Visibility="Collapsed"/>
+                    <AppBarButton Icon="Back" Label="Back" Visibility="Collapsed"/>
+                    <AppBarButton Icon="Forward" Label="Forward" Visibility="Collapsed"/>
+
+                    <AppBarSeparator Visibility="Collapsed"/>
+
+                    <!--
+            <CommandBar.SecondaryCommands>
+                <AppBarButton Label="Like"/>
+                <AppBarButton Label="Dislike"/>
+            </CommandBar.SecondaryCommands>
+            -->
+
+                    <CommandBar.Content>
+                        <TextBlock Text="Now playing..." Margin="12,14" Visibility="Collapsed"/>
+                    </CommandBar.Content>
+                </CommandBar>
+
+                <Border BorderThickness="0,1,0,0" BorderBrush="{ThemeResource NavigationViewItemSeparatorForeground}"></Border>
+
+            </StackPanel>
+
+            <ScrollViewer Grid.Row="1" Margin="0 24 0 0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+
+                <StackPanel HorizontalAlignment="Center">
+
+                    <VariableSizedWrapGrid Orientation="Horizontal" Margin="0">
+                        <TextBox MaxWidth="500" MinWidth="350" Header="物件名" PlaceholderText="Type your text here" Margin="24,24,24,0"/>
+                        <TextBox MaxWidth="500" MinWidth="350" Header="所在地" PlaceholderText="Type your text here" Margin="24,24,24,0"/>
+                    </VariableSizedWrapGrid>
+
+                    <VariableSizedWrapGrid Orientation="Horizontal" Margin="0">
+                        <TextBox MaxWidth="500" MinWidth="350" Header="沿線名" PlaceholderText="Type your text here" Margin="24,24,24,0"/>
+                        <TextBox MaxWidth="500" MinWidth="350" Header="最寄り駅" PlaceholderText="Type your text here" Margin="24,24,24,0"/>
+                    </VariableSizedWrapGrid>
+
+                    <VariableSizedWrapGrid Orientation="Horizontal" Margin="0">
+                        <TextBox MaxWidth="500" MinWidth="350" Header="貸主名" PlaceholderText="Type your text here" Margin="24,24,24,0"/>
+                        <TextBox MaxWidth="500" MinWidth="350" Header="不動産ID" PlaceholderText="Type your text here" Margin="24,24,24,0"/>
+                    </VariableSizedWrapGrid>
+
+                    <TextBlock Text="詳細条件" Margin="24,36,24,0"></TextBlock>
+                    
+                    <Grid BorderBrush="{ThemeResource NavigationViewItemSeparatorForeground}" BorderThickness="1" CornerRadius="4" Margin="24,8,24,24">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*"/> 
+                            <ColumnDefinition Width="4*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Row="0" Grid.RowSpan="15" Grid.Column="0" CornerRadius="4,0,0,4" Background="LightGray" Opacity="0.1"></Border>
+                        <Border Grid.Row="0" Grid.RowSpan="15" Grid.Column="1"  CornerRadius="0,4,4,0"></Border>
+
+                        <StackPanel Grid.Row="0" Grid.Column="0">
+                            <TextBlock Text="賃料" Margin="12"></TextBlock>
+                        </StackPanel>
+                        <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
+                            <VariableSizedWrapGrid x:Name="ComboBoxesChinryou" Orientation="Horizontal" MaximumRowsOrColumns="1" Margin="0,12,0,12">
+                                <ComboBox PlaceholderText="Pick a color" MinWidth="200" Margin="24,6,0,6">
+                                    <x:String>Blue</x:String>
+                                    <x:String>Green</x:String>
+                                    <x:String>Red</x:String>
+                                    <x:String>Yellow</x:String>
+                                </ComboBox>
+                                <ComboBox PlaceholderText="Pick a color" MinWidth="200" Margin="24,6,0,6">
+                                    <x:String>Blue</x:String>
+                                    <x:String>Green</x:String>
+                                    <x:String>Red</x:String>
+                                    <x:String>Yellow</x:String>
+                                </ComboBox>
+                            </VariableSizedWrapGrid>
+                        </StackPanel>
+
+                        <Border Grid.Row="1" Grid.Column="0" BorderThickness="0.5" Height="1" BorderBrush="LightGray" Opacity="0.1"></Border>
+                        <Border Grid.Row="1" Grid.Column="1" BorderThickness="1" Height="1" BorderBrush="LightGray" Opacity="0.1"></Border>
+
+                        <StackPanel Grid.Row="2" Grid.Column="0">
+                            <TextBlock Text="駅徒歩" Margin="12"></TextBlock>
+                        </StackPanel>
+                        <StackPanel Grid.Row="2" Grid.Column="1" VerticalAlignment="Center">
+                            <VariableSizedWrapGrid x:Name="RadioButtonsEkiToho" Orientation="Horizontal" MaximumRowsOrColumns="1" Margin="0,6,0,6">
+                                <RadioButton Content="Option 1" GroupName="test" Margin="24,0,0,0"/>
+                                <RadioButton Content="Option 2" GroupName="test" Margin="24,0,0,0"/>
+                                <RadioButton Content="Option 3" GroupName="test" Margin="24,0,0,0"/>
+                                <RadioButton Content="Option 4" GroupName="test" Margin="24,0,0,0"/>
+                                <RadioButton Content="Option 5" GroupName="test" Margin="24,0,0,0"/>
+                                <RadioButton Content="Option 6" GroupName="test" Margin="24,0,0,0"/>
+                            </VariableSizedWrapGrid>
+                        </StackPanel>
+
+                        <Border Grid.Row="3" Grid.Column="0" BorderThickness="0.5" Height="1" BorderBrush="LightGray" Opacity="0.1"></Border>
+                        <Border Grid.Row="3" Grid.Column="1" BorderThickness="1" Height="1" BorderBrush="LightGray" Opacity="0.1"></Border>
+
+                        <StackPanel Grid.Row="4" Grid.Column="0">
+                            <TextBlock Text="間取り" Margin="12"></TextBlock>
+                        </StackPanel>
+                        <StackPanel Grid.Row="4" Grid.Column="1" VerticalAlignment="Center">
+                            <VariableSizedWrapGrid x:Name="CheckBoxsMadori" Orientation="Horizontal" Margin="0,6,0,6" MaximumRowsOrColumns="1">
+                                <CheckBox Content="Two-state CheckBox" Margin="24,6,0,0"/>
+                                <CheckBox Content="Two-state CheckBox" Margin="24,6,0,0"/>
+                                <CheckBox Content="Two-state CheckBox" Margin="24,6,0,0"/>
+                                <CheckBox Content="Two-state CheckBox" Margin="24,6,0,0"/>
+                                <CheckBox Content="Two-state CheckBox" Margin="24,6,0,0"/>
+                                <CheckBox Content="Two-state CheckBox" Margin="24,6,0,0"/>
+                            </VariableSizedWrapGrid>
+                        </StackPanel>
+
+                        <Border Grid.Row="5" Grid.Column="0" BorderThickness="0.5" Height="1" BorderBrush="LightGray" Opacity="0.1"></Border>
+                        <Border Grid.Row="5" Grid.Column="1" BorderThickness="1" Height="1" BorderBrush="LightGray" Opacity="0.1"></Border>
+
+                        <StackPanel Grid.Row="6" Grid.Column="0">
+                            <TextBlock Text="建物種別" Margin="12"></TextBlock>
+                        </StackPanel>
+                        <StackPanel Grid.Row="6" Grid.Column="1" VerticalAlignment="Center">
+                            <VariableSizedWrapGrid x:Name="CheckBoxsTatemonoShubetu" Orientation="Horizontal" Margin="0,6,0,6" MaximumRowsOrColumns="1">
+                                <CheckBox Content="Two-state CheckBox" Margin="24,6,0,0"/>
+                                <CheckBox Content="Two-state CheckBox" Margin="24,6,0,0"/>
+                                <CheckBox Content="Two-state CheckBox" Margin="24,6,0,0"/>
+                                <CheckBox Content="Two-state CheckBox" Margin="24,6,0,0"/>
+                                <CheckBox Content="Two-state CheckBox" Margin="24,6,0,0"/>
+                                <CheckBox Content="Two-state CheckBox" Margin="24,6,0,0"/>
+                            </VariableSizedWrapGrid>
+                        </StackPanel>
+
+                        <Border Grid.Row="7" Grid.Column="0" BorderThickness="0.5" Height="1" BorderBrush="LightGray" Opacity="0.1"></Border>
+                        <Border Grid.Row="7" Grid.Column="1" BorderThickness="1" Height="1" BorderBrush="LightGray" Opacity="0.1"></Border>
+
+                        <StackPanel Grid.Row="8" Grid.Column="0">
+                            <TextBlock Text="建物構造" Margin="12"></TextBlock>
+                        </StackPanel>
+                        <StackPanel Grid.Row="8" Grid.Column="1" Orientation="Horizontal">
+
+                        </StackPanel>
+
+                        <Border Grid.Row="9" Grid.Column="0" BorderThickness="0.5" Height="1" BorderBrush="LightGray" Opacity="0.1"></Border>
+                        <Border Grid.Row="9" Grid.Column="1" BorderThickness="1" Height="1" BorderBrush="LightGray" Opacity="0.1"></Border>
+
+                        <StackPanel Grid.Row="10" Grid.Column="0">
+                            <TextBlock Text="築後年数" Margin="12"></TextBlock>
+                        </StackPanel>
+                        <StackPanel Grid.Row="10" Grid.Column="1" Orientation="Horizontal">
+
+                        </StackPanel>
+
+                        <Border Grid.Row="11" Grid.Column="0" BorderThickness="0.5" Height="1" BorderBrush="LightGray" Opacity="0.1"></Border>
+                        <Border Grid.Row="11" Grid.Column="1" BorderThickness="1" Height="1" BorderBrush="LightGray" Opacity="0.1"></Border>
+
+                        <StackPanel Grid.Row="12" Grid.Column="0">
+                            <TextBlock Text="専有面積" Margin="12"></TextBlock>
+                        </StackPanel>
+                        <StackPanel Grid.Row="12" Grid.Column="1" Orientation="Horizontal">
+
+                        </StackPanel>
+
+                        <Border Grid.Row="13" Grid.Column="0" BorderThickness="0.5" Height="1" BorderBrush="LightGray" Opacity="0.1"></Border>
+                        <Border Grid.Row="13" Grid.Column="1" BorderThickness="1" Height="1" BorderBrush="LightGray" Opacity="0.1"></Border>
+
+                        <StackPanel Grid.Row="14" Grid.Column="0">
+                            <TextBlock Text="専有面積" Margin="12"></TextBlock>
+                        </StackPanel>
+                        <StackPanel Grid.Row="14" Grid.Column="1" Orientation="Horizontal">
+
+                        </StackPanel>
+
+                    </Grid>
+
+                </StackPanel>
+
+            </ScrollViewer>
+
+            <StackPanel Grid.Row="2">
+                <Border BorderThickness="0,1,0,0" BorderBrush="{ThemeResource NavigationViewItemSeparatorForeground}"></Border>
+
+                <CommandBar Grid.Row="0" DefaultLabelPosition="Right">
+
+
+                    <AppBarButton Icon="Clear" Label="リセット"/>
+
+                    <CommandBar.Content>
+                        <TextBlock Text="Now playing..." Margin="12,14" Visibility="Collapsed"/>
+                    </CommandBar.Content>
+                </CommandBar>
+            </StackPanel>
+
+        </Grid>
+        
+    </Grid>
+</Page>

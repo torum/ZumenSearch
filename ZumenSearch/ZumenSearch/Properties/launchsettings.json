@@ -1,0 +1,10 @@
+﻿{
+    "profiles": {
+      "ZumenSearch (Package)": {
+        "commandName": "MsixPackage"
+      },
+      "ZumenSearch (Unpackaged)": {
+        "commandName": "Project"
+      }
+    }
+}
