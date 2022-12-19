@@ -22,8 +22,6 @@ public class Folder
 
 public sealed partial class RentLivingSearchResultPage : Page
 {
-
-
     public RentLivingSearchResultViewModel ViewModel
     {
         get;
@@ -34,7 +32,6 @@ public sealed partial class RentLivingSearchResultPage : Page
         ViewModel = App.GetService<RentLivingSearchResultViewModel>();
         InitializeComponent();
 
-        // [BreadcrumbBar]
         // BreadcrumbBar1.ItemsSource = new string[] { "条件検索", "検索結果一覧" };
         BreadcrumbBar1.ItemsSource = new ObservableCollection<Folder>{
             new Folder { Name = "条件検索", Page = typeof(RentLivingSearchViewModel).FullName!},
@@ -42,7 +39,6 @@ public sealed partial class RentLivingSearchResultPage : Page
         };
 
         BreadcrumbBar1.ItemClicked += BreadcrumbBar_ItemClicked;
-
     }
 
     private void BreadcrumbBar_ItemClicked(BreadcrumbBar sender, BreadcrumbBarItemClickedEventArgs args)
@@ -54,7 +50,6 @@ public sealed partial class RentLivingSearchResultPage : Page
             ViewModel.NavigationService.NavigateTo(items[args.Index].Page);
             Debug.WriteLine(items[args.Index].Page);
         }
-
     }
 
 

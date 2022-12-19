@@ -1,0 +1,33 @@
+﻿<Page
+    x:Class="AddressManagement.Views.PrefectureDataGridPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:controls="using:CommunityToolkit.WinUI.UI.Controls"
+    mc:Ignorable="d">
+
+    <Grid x:Name="ContentArea">
+        <controls:DataGrid
+            x:Name="dg"
+            IsReadOnly="True"
+            SelectionMode="Single"
+            CanUserSortColumns="True"
+            AutoGenerateColumns="False"
+            GridLinesVisibility="Horizontal"
+            ItemsSource="{x:Bind ViewModel.Source, Mode=OneWay}">
+            <controls:DataGrid.Resources>
+                <SolidColorBrush x:Key="DataGridColumnHeaderBackgroundColor" Color="Transparent" />
+                <SolidColorBrush x:Key="DataGridCellFocusVisualPrimaryBrush" Color="Transparent"/>
+                <SolidColorBrush x:Key="DataGridCellFocusVisualSecondaryBrush" Color="Transparent"/>
+            </controls:DataGrid.Resources>
+            <controls:DataGrid.Columns>
+                <controls:DataGridTextColumn Binding="{Binding PrefectureCodeID}" Header="都道府県コード" Tag="PrefectureCodeID"/>
+                <controls:DataGridTextColumn Binding="{Binding AdministrativeDivisionCodeID}" Header="全国地方公共団体コード" />
+                <controls:DataGridTextColumn Binding="{Binding PrefectureName}" Header="都道府県名" Tag="PrefectureName" />
+                <controls:DataGridTextColumn Binding="{Binding PrefectureNameKana}" Header="都道府県名_カナ" />
+                <controls:DataGridTextColumn Binding="{Binding PrefectureNameEnglish}" Header="都道府県名_英字" />
+            </controls:DataGrid.Columns>
+        </controls:DataGrid>
+    </Grid>
+</Page>

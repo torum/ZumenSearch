@@ -1,0 +1,10 @@
+﻿{
+    "profiles": {
+      "AddressManagement (Package)": {
+        "commandName": "MsixPackage"
+      },
+      "AddressManagement (Unpackaged)": {
+        "commandName": "Project"
+      }
+    }
+}

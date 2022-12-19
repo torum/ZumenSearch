@@ -87,21 +87,6 @@ public partial class App : Application
             services.AddTransient<RentLivingEditShellViewModel>();
             services.AddTransient<RentLivingEditShellPage>(); 
 
-            services.AddTransient<RentLivingEditBuildingViewModel>();
-            services.AddTransient<RentLivingEditBuildingPage>();
-            services.AddTransient<RentLivingEditLocationViewModel>();
-            services.AddTransient<RentLivingEditLocationPage>();
-            services.AddTransient<RentLivingEditTransportationViewModel>();
-            services.AddTransient<RentLivingEditTransportationPage>();
-            services.AddTransient<RentLivingEditApplianceViewModel>();
-            services.AddTransient<RentLivingEditAppliancePage>();
-            services.AddTransient<RentLivingEditPictureShellViewModel>();
-            services.AddTransient<RentLivingEditPictureShellPage>();
-            services.AddTransient<RentLivingEditUnitShellViewModel>();
-            services.AddTransient<RentLivingEditUnitShellPage>();
-            services.AddTransient<RentLivingEditZumenViewModel>();
-            services.AddTransient<RentLivingEditZumenPage>();
-
             services.AddTransient<RentBussinessViewModel>();
             services.AddTransient<RentBussinessPage>();
 

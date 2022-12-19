@@ -20,11 +20,18 @@
     <None Remove="Views\RentLivingEditBuildingPage.xaml" />
     <None Remove="Views\RentLivingEditLocationPage.xaml" />
     <None Remove="Views\RentLivingEditPictureShellPage.xaml" />
-    <None Remove="Views\RentLivingEditShellPage.xaml" />
     <None Remove="Views\RentLivingEditTransportationPage.xaml" />
     <None Remove="Views\RentLivingEditUnitShellPage.xaml" />
     <None Remove="Views\RentLivingEditZumenPage.xaml" />
-    <None Remove="Views\RentLivingSearchResultPage.xaml" />
+    <None Remove="Views\RentLivingEdit\RentLivingEditGyousyaPage.xaml" />
+    <None Remove="Views\RentLivingEdit\RentLivingEditKasinusiPage.xaml" />
+    <None Remove="Views\RentLivingEdit\RentLivingEditUnitEditShellPage.xaml" />
+    <None Remove="Views\RentLivingEdit\Units\RentLivingEditUnitEditAppliancePage.xaml" />
+    <None Remove="Views\RentLivingEdit\Units\RentLivingEditUnitEditBasicPage.xaml" />
+    <None Remove="Views\RentLivingEdit\Units\RentLivingEditUnitEditPicturePage.xaml" />
+    <None Remove="Views\RentLivingEdit\Units\RentLivingEditUnitEditStatusPage.xaml" />
+    <None Remove="Views\RentLivingEdit\Units\RentLivingEditUnitEditTransactionPage.xaml" />
+    <None Remove="Views\RentLivingEdit\Units\RentLivingEditUnitEditZumenPage.xaml" />
     <None Remove="Views\RentMainPage.xaml" />
     <None Remove="Views\RentOwnerPage.xaml" />
     <None Remove="Views\RentParkingPage.xaml" />
@@ -76,6 +83,36 @@
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
+    <Page Update="Views\RentLivingEdit\RentLivingEditGyousyaPage.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\RentLivingEdit\RentLivingEditUnitEditShellPage.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+    </Page>
+    <Page Update="Views\RentLivingEdit\RentLivingEditKasinusiPage.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+    </Page>
+    <Page Update="Views\RentLivingEdit\Units\RentLivingEditUnitEditStatusPage.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\RentLivingEdit\Units\RentLivingEditUnitEditZumenPage.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\RentLivingEdit\Units\RentLivingEditUnitEditPicturePage.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\RentLivingEdit\Units\RentLivingEditUnitEditAppliancePage.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\RentLivingEdit\Units\RentLivingEditUnitEditTransactionPage.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="Views\SettingsPage.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
@@ -110,6 +147,12 @@
     </Page>
     <Page Update="Views\RentOwnerPage.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+    </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Views\RentLivingEdit\Units\RentLivingEditUnitEditBasicPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   

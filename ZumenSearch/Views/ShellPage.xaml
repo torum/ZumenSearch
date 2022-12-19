@@ -10,55 +10,23 @@
     Loaded="OnLoaded">
 
     <Grid>
-
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         
-        <Grid x:Name="AppTitleBar"
-              Grid.Row="0"
-              Margin="12,0,0,0"
-              Canvas.ZIndex="1"
-              Height="{Binding ElementName=NavigationViewControl, Path=CompactPaneLength}"
-              IsHitTestVisible="True"
-              VerticalAlignment="Top"
-              HorizontalAlignment="Left">
-            <Image Source="/Assets/WindowIcon.ico"
-                   HorizontalAlignment="Left"
-                   Width="16"
-                   Height="16" />
-            <TextBlock x:Name="AppTitleBarText"
-                       VerticalAlignment="Center"
-                       TextWrapping="NoWrap"
-                       Style="{StaticResource CaptionTextBlockStyle}"
-                       Margin="28,0,0,0"/>
+        <Grid x:Name="AppTitleBar" Grid.Row="0" Margin="12,0,0,0" Canvas.ZIndex="1" Height="{Binding ElementName=NavigationViewControl, Path=CompactPaneLength}" IsHitTestVisible="True" VerticalAlignment="Top" HorizontalAlignment="Left">
+            <Image Source="/Assets/WindowIcon.ico" HorizontalAlignment="Left" Width="16" Height="16" />
+            <TextBlock x:Name="AppTitleBarText" VerticalAlignment="Center" TextWrapping="NoWrap" Style="{StaticResource CaptionTextBlockStyle}" Margin="28,0,0,0"/>
         </Grid>
-        <NavigationView
-            x:Name="NavigationViewControl"
-            Grid.Row="1"
-            Canvas.ZIndex="0"
-            Margin="2,0,0,0"
-            PaneDisplayMode="Auto"
-            IsBackButtonVisible="Collapsed"
-            IsPaneToggleButtonVisible="True"
-            IsBackEnabled="{x:Bind ViewModel.IsBackEnabled, Mode=OneWay}"
-            SelectedItem="{x:Bind ViewModel.Selected, Mode=OneWay}"
-            IsSettingsVisible="True"
-            ExpandedModeThresholdWidth="1280"
-            OpenPaneLength ="200"
-            DisplayModeChanged="NavigationViewControl_DisplayModeChanged"
-            Header="{x:Bind ((ContentControl)ViewModel.Selected).Content, Mode=OneWay}">
+        
+        <NavigationView x:Name="NavigationViewControl" Grid.Row="1" Canvas.ZIndex="0" Margin="2,0,0,0" PaneDisplayMode="Auto" IsBackButtonVisible="Collapsed" IsPaneToggleButtonVisible="True" IsBackEnabled="{x:Bind ViewModel.IsBackEnabled, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.Selected, Mode=OneWay}" IsSettingsVisible="True" ExpandedModeThresholdWidth="1280" OpenPaneLength ="200" DisplayModeChanged="NavigationViewControl_DisplayModeChanged" Header="{x:Bind ((ContentControl)ViewModel.Selected).Content, Mode=OneWay}">
             <NavigationView.Resources>
                 <SolidColorBrush x:Key="NavigationViewContentBackground" Color="Transparent" />
                 <SolidColorBrush x:Key="NavigationViewContentGridBorderBrush" Color="Transparent" />
             </NavigationView.Resources>
             <NavigationView.MenuItems>
                 <!--
-                TODO: Update item titles by updating <x:Uid>.Content entries in Strings/en-us/Resources.resw.
-                https://docs.microsoft.com/windows/uwp/app-resources/localize-strings-ui-manifest#refer-to-a-string-resource-identifier-from-xaml
-            
-                TODO: Update item icons by updating FontIcon.Glyph properties.
                 https://docs.microsoft.com/windows/apps/design/style/segoe-fluent-icons-font#icon-list
                 -->
 
@@ -86,22 +54,16 @@
                             </NavigationViewItem.Icon>
                         </NavigationViewItem>
 
-                        <NavigationViewItem x:Uid="Shell_RentOwner" Icon="ContactInfo" helpers:NavigationHelper.NavigateTo="ZumenSearch.ViewModels.RentOwnerViewModel"/>
-
                     </NavigationViewItem.MenuItems>
                     
                 </NavigationViewItem>
 
-                <NavigationViewItemSeparator/>
+                <NavigationViewItemSeparator />
 
-                <NavigationViewItem x:Uid="Shell_Broker" helpers:NavigationHelper.NavigateTo="ZumenSearch.ViewModels.RealEstateBrokerViewModel">
-                    <NavigationViewItem.Icon>
-                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xe939;"/>
-                    </NavigationViewItem.Icon>
+                <NavigationViewItem x:Uid="Shell_Broker" Icon="OtherUser" helpers:NavigationHelper.NavigateTo="ZumenSearch.ViewModels.RealEstateBrokerViewModel">
                 </NavigationViewItem>
 
-
-
+                <NavigationViewItem x:Uid="Shell_RentOwner" Icon="OtherUser" helpers:NavigationHelper.NavigateTo="ZumenSearch.ViewModels.RentOwnerViewModel"/>
 
             </NavigationView.MenuItems>
             <NavigationView.HeaderTemplate>
@@ -136,5 +98,6 @@
             </Grid>
             
         </NavigationView>
+        
     </Grid>
 </Page>

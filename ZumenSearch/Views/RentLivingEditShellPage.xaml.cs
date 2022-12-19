@@ -23,88 +23,45 @@ public sealed partial class RentLivingEditShellPage : Page
         get;
     }
 
-    // List of ValueTuple holding the Navigation Tag and the relative Navigation Page
-    private readonly List<(string Tag, Type Page)> _pages = new List<(string Tag, Type Page)>
-{
-        ("building", typeof(RentLivingEditBuildingPage)),
-        ("location", typeof(RentLivingEditLocationPage)),
-        ("transportation", typeof(RentLivingEditTransportationPage)),
-        ("appliance", typeof(RentLivingEditAppliancePage)),
-        ("pictures", typeof(RentLivingEditPictureShellPage)),
-        ("units", typeof(RentLivingEditUnitShellPage)),
-        ("zumen", typeof(RentLivingEditZumenPage)),
-    };
-
     public RentLivingEditShellPage()
     {
         ViewModel = App.GetService<RentLivingEditShellViewModel>();
         InitializeComponent();
 
-        // [BreadcrumbBar]
-        // BreadcrumbBar1.ItemsSource = new string[] { "条件検索", "検索結果一覧" };
         BreadcrumbBar1.ItemsSource = new ObservableCollection<Folder>{
-            new Folder { Name = "物件情報の入力", Page = typeof(RentLivingSearchResultViewModel).FullName! },
+            new Folder { Name = "物件情報の編集", Page = typeof(RentLivingSearchResultViewModel).FullName! },
         };
 
-        //BreadcrumbBar1.ItemClicked += BreadcrumbBar_ItemClicked;
     }
 
-    private void BreadcrumbBar_ItemClicked(BreadcrumbBar sender, BreadcrumbBarItemClickedEventArgs args)
+    // List of ValueTuple holding the Navigation Tag and the relative Navigation Page
+    private readonly List<(string Tag, Type Page)> _pages = new()
     {
-        /*
-        if (BreadcrumbBar1.ItemsSource is not ObservableCollection<Folder> items) return;
-
-        if (args.Index == 0)
-        {
-            ViewModel.NavigationService.NavigateTo(items[args.Index].Page);
-            Debug.WriteLine(items[args.Index].Page);
-        }
-        */
-    }
-
-    // Add "using" for WinUI controls.
-    // using muxc = Microsoft.UI.Xaml.Controls;
-
-    private double NavViewCompactModeThresholdWidth
-    {
-        get
-        {
-            return NavView.CompactModeThresholdWidth;
-        }
-    }
+        ("building", typeof(RentLivingEdit.RentLivingEditBuildingPage)),
+        ("location", typeof(RentLivingEdit.RentLivingEditLocationPage)),
+        ("transportation", typeof(RentLivingEdit.RentLivingEditTransportationPage)),
+        ("appliance", typeof(RentLivingEdit.RentLivingEditAppliancePage)),
+        ("pictures", typeof(RentLivingEdit.RentLivingEditPictureListPage)),
+        ("units", typeof(RentLivingEdit.RentLivingEditUnitListPage)),
+        ("zumen", typeof(RentLivingEdit.RentLivingEditZumenListPage)),
+        ("kasinusi", typeof(RentLivingEdit.RentLivingEditKasinusiPage)),
+        ("gyousya", typeof(RentLivingEdit.RentLivingEditGyousyaPage)),
+    };
 
     private void ContentFrame_NavigationFailed(object sender, NavigationFailedEventArgs e)
     {
         throw new Exception("Failed to load Page " + e.SourcePageType.FullName);
     }
 
-
     private void NavView_Loaded(object sender, RoutedEventArgs e)
     {
-        // You can also add items in code.
-        /*
-        NavView.MenuItems.Add(new NavigationViewItemSeparator());
-        NavView.MenuItems.Add(new NavigationViewItem
-        {
-            Content = "My content",
-            Icon = new SymbolIcon((Symbol)0xF1AD),
-            Tag = "content"
-        });
-        _pages.Add(("content", typeof(MyContentPage)));
-        */
+        // Since we use ItemInvoked, we set selecteditem manually
+        NavView.SelectedItem = NavView.MenuItems.OfType<NavigationViewItem>().First();
 
-        // Add handler for ContentFrame navigation.
-        ContentFrame.Navigated += On_Navigated;
+        // Pass Frame when navigate.
+        ContentFrame.Navigate(typeof(RentLivingEdit.RentLivingEditBuildingPage), ContentFrame, new Microsoft.UI.Xaml.Media.Animation.EntranceNavigationTransitionInfo());
 
-        // NavView doesn't load any page by default, so load home page.
-        NavView.SelectedItem = NavView.MenuItems[0];
-        // If navigation occurs on SelectionChanged, this isn't needed.
-        // Because we use ItemInvoked to navigate, we need to call Navigate
-        // here to load the home page.
-        NavView_Navigate("building", new EntranceNavigationTransitionInfo());
-
-        // Listen to the window directly so the app responds
-        // to accelerator keys regardless of which element has focus.
+        // Listen to the window directly so the app responds to accelerator keys regardless of which element has focus.
         //Window.Current.CoreWindow.Dispatcher.AcceleratorKeyActivated +=  CoreDispatcher_AcceleratorKeyActivated;
 
         //Window.Current.CoreWindow.PointerPressed += CoreWindow_PointerPressed;
@@ -116,20 +73,73 @@ public sealed partial class RentLivingEditShellPage : Page
     {
         if (args.IsSettingsInvoked == true)
         {
-            NavView_Navigate("settings", args.RecommendedNavigationTransitionInfo);
+            //NavView_Navigate("settings", args.RecommendedNavigationTransitionInfo);
         }
-        else if (args.InvokedItemContainer != null)
+        else if (args.InvokedItemContainer != null && (args.InvokedItemContainer.Tag != null))
         {
+            /*
             var navItemTag = args.InvokedItemContainer.Tag.ToString();
-            NavView_Navigate(navItemTag, args.RecommendedNavigationTransitionInfo);
+
+            if (navItemTag is not null)
+            {
+                NavView_Navigate(navItemTag, args.RecommendedNavigationTransitionInfo);
+
+            }
+            */
+            if (_pages is null)
+                return;
+
+            var item = _pages.First(p => p.Tag.Equals(args.InvokedItemContainer.Tag.ToString()));
+
+            var _page = item.Page;
+
+            if (_page is null)
+                return;
+
+            // Pass Frame when navigate.
+            ContentFrame.Navigate(_page, ContentFrame, args.RecommendedNavigationTransitionInfo);
         }
     }
 
-    private void NavView_Navigate(
-        string navItemTag,
-        NavigationTransitionInfo transitionInfo)
+    private void NavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
-        Type _page = null;
+        /*
+        if (args.IsSettingsSelected == true)
+        {
+            //NavView_Navigate("settings", args.RecommendedNavigationTransitionInfo);
+        }
+        else if (args.SelectedItemContainer != null && args.SelectedItemContainer.Tag != null)
+        {
+            var navItemTag = args.SelectedItemContainer.Tag.ToString();
+
+            if (navItemTag != null)
+            {
+                //NavView_Navigate(navItemTag, args.RecommendedNavigationTransitionInfo);
+
+                Debug.WriteLine("■■■SelectionChanged: "+ args.SelectedItemContainer.Tag.ToString());
+
+                var item = _pages.First(p => p.Tag.Equals(args.SelectedItemContainer.Tag.ToString()));
+
+                var _page = item.Page;
+                if (_page is null)
+                    return;
+
+                var preNavPageType = ContentFrame.CurrentSourcePageType;
+                if (preNavPageType is null)
+                    return;
+                if (Type.Equals(preNavPageType, _page))
+                    return;
+
+                ContentFrame.Navigate(_page, null, args.RecommendedNavigationTransitionInfo);
+            }
+        }
+        */
+    }
+
+    private void NavView_Navigate(string navItemTag, NavigationTransitionInfo transitionInfo)
+    {
+        /*
+        Type? _page = null;
         if (navItemTag == "settings")
         {
             //_page = typeof(SettingsPage);
@@ -139,6 +149,7 @@ public sealed partial class RentLivingEditShellPage : Page
             var item = _pages.FirstOrDefault(p => p.Tag.Equals(navItemTag));
             _page = item.Page;
         }
+
         // Get the page type before navigation so you can prevent duplicate
         // entries in the backstack.
         var preNavPageType = ContentFrame.CurrentSourcePageType;
@@ -147,11 +158,12 @@ public sealed partial class RentLivingEditShellPage : Page
         if (!(_page is null) && !Type.Equals(preNavPageType, _page))
         {
             ContentFrame.Navigate(_page, null, transitionInfo);
+            Debug.WriteLine("NavView_Navigate: " + _page.FullName);
         }
+        */
     }
 
-    private void NavView_BackRequested(NavigationView sender,
-                                       NavigationViewBackRequestedEventArgs args)
+    private void NavView_BackRequested(NavigationView sender, NavigationViewBackRequestedEventArgs args)
     {
         TryGoBack();
     }
@@ -200,39 +212,21 @@ public sealed partial class RentLivingEditShellPage : Page
         return true;
     }
 
-    private void On_Navigated(object sender, NavigationEventArgs e)
+    private void ContentFrame_Navigated(object sender, NavigationEventArgs e)
     {
         //NavView.IsBackEnabled = ContentFrame.CanGoBack;
-        /*
-        if (ContentFrame.SourcePageType == typeof(SettingsPage))
-        {
-            // SettingsItem is not part of NavView.MenuItems, and doesn't have a Tag.
-            NavView.SelectedItem = (NavigationViewItem)NavView.SettingsItem;
-            NavView.Header = "Settings";
-        }
-        else if (ContentFrame.SourcePageType != null)
-        {
-            var item = _pages.FirstOrDefault(p => p.Page == e.SourcePageType);
 
-            NavView.SelectedItem = NavView.MenuItems
-                .OfType<NavigationViewItem>()
-                .First(n => n.Tag.Equals(item.Tag));
-
-            NavView.Header =
-                ((NavigationViewItem)NavView.SelectedItem)?.Content?.ToString();
-        }
-        */
         if (ContentFrame.SourcePageType != null)
         {
+            /*
             var item = _pages.FirstOrDefault(p => p.Page == e.SourcePageType);
-
             // This only works for flat NavigationView
             NavView.SelectedItem = NavView.MenuItems
                 .OfType<NavigationViewItem>()
                 .First(n => n.Tag.Equals(item.Tag));
+            */
+            NavView.Header = ((NavigationViewItem)NavView.SelectedItem)?.Content?.ToString();
 
-            NavView.Header =
-                ((NavigationViewItem)NavView.SelectedItem)?.Content?.ToString();
         }
     }
 }

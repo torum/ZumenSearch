@@ -1,0 +1,82 @@
+﻿<Page
+    x:Class="ZumenSearch.Views.RentLivingEdit.RentLivingEditLocationPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    NavigationCacheMode="Required">
+
+    <Grid x:Name="ContentArea">
+        <ScrollViewer>
+
+            <Grid Margin="0,24,0,24">
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <StackPanel>
+
+                    <StackPanel Margin="0,24,24,0">
+                        <TextBlock Text=""></TextBlock>
+                    </StackPanel>
+
+                    <StackPanel Margin="0,24,24,0">
+                        <TextBlock Text="〒"/>
+                        <TextBox Text="" Margin="0 6 6 6" Width="120" HorizontalAlignment="Left"></TextBox>
+                    </StackPanel>
+
+                    <StackPanel Margin="0,24,24,0">
+                        <TextBlock Text="都道府県"/>
+                        <ComboBox Margin="0 6 6 6" Width="200" HorizontalAlignment="Left">
+
+                        </ComboBox>
+                    </StackPanel>
+
+                    <StackPanel Margin="0,24,24,0">
+                        <TextBlock Text="市区町村"/>
+                        <TextBox Text="" Margin="0 6 6 6" Width="300" HorizontalAlignment="Left"></TextBox>
+                    </StackPanel>
+
+                    <StackPanel Margin="0,24,24,0">
+                        <TextBlock Text="町名"/>
+                        <TextBox Text="" Margin="0 6 6 6" Width="250" HorizontalAlignment="Left"></TextBox>
+                    </StackPanel>
+
+                    <StackPanel Margin="0,24,24,0">
+                        <StackPanel>
+                            <TextBlock Text="丁目"/>
+                            <TextBox Text="" Margin="0 6 6 6" Width="200" HorizontalAlignment="Left"></TextBox>
+                        </StackPanel>
+
+                    </StackPanel>
+
+                    <StackPanel Margin="0,24,24,0">
+                        <TextBlock Text="番地以下"/>
+                        <TextBox Text="" Margin="0 6 6 6" Width="200" HorizontalAlignment="Left"></TextBox>
+                    </StackPanel>
+
+
+                    <!-- 
+                    <GroupBox Header="所在地詳細" Padding="0" Style="{DynamicResource GroupBoxStyle}">
+
+                        <Button VerticalAlignment="Center" Content="所在地設定" Margin="6" Padding="3" Width="120" HorizontalAlignment="Left" />
+
+                    </GroupBox>
+
+                    <GroupBox Header="地図表示" Padding="0" Style="{DynamicResource GroupBoxStyle}">
+
+                        <Button Content="マップ座標取得" Command="{Binding ShowInMapCommand}" VerticalAlignment="Center" Margin="6" Padding="3" Width="120" HorizontalAlignment="Left" />
+
+                    </GroupBox>
+                    
+                    -->
+                </StackPanel>
+                
+            </Grid>
+
+        </ScrollViewer>
+
+    </Grid>
+</Page>

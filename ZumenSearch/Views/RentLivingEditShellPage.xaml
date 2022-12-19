@@ -57,7 +57,7 @@
 
                 <CommandBar DefaultLabelPosition="Right">
 
-                    <AppBarButton Icon="Back" Label="戻る"  Command="{x:Bind ViewModel.BackCommand}"/>
+                    <AppBarButton Icon="Back" Label="戻る" Command="{x:Bind ViewModel.BackCommand}"/>
 
                     <AppBarButton Icon="Edit" Label="編集" Visibility="Collapsed"/>
                     
@@ -71,7 +71,6 @@
 
                     <AppBarSeparator Visibility="Collapsed"/>
 
-
                     <CommandBar.Content>
                         <TextBlock Text="Now playing..." Margin="12,14" Visibility="Collapsed"/>
                     </CommandBar.Content>
@@ -81,25 +80,19 @@
 
             </StackPanel>
 
-            <NavigationView Grid.Row="1" x:Name="NavView" Header="{x:Bind ((ContentControl)ViewModel.Selected).Content, Mode=OneWay}" PaneDisplayMode="LeftCompact" OpenPaneLength ="160" ExpandedModeThresholdWidth="1280" Margin="0,8,0,0" SelectionFollowsFocus="Enabled" IsPaneToggleButtonVisible="True" IsSettingsVisible="False" IsBackButtonVisible="Collapsed" Loaded="NavView_Loaded" ItemInvoked="NavView_ItemInvoked">
+            <NavigationView Grid.Row="1" x:Name="NavView" Header="{x:Bind ((ContentControl)ViewModel.Selected).Content, Mode=OneWay}" PaneDisplayMode="LeftCompact" OpenPaneLength ="160" ExpandedModeThresholdWidth="1280" Margin="0,8,0,0" SelectionFollowsFocus="Disabled" IsPaneToggleButtonVisible="True" IsSettingsVisible="False" IsBackButtonVisible="Collapsed" Loaded="NavView_Loaded" ItemInvoked="NavView_ItemInvoked">
                 <!--   BackRequested="NavView_BackRequested" -->
                 <NavigationView.MenuItems>
-                    <NavigationViewItem Icon="Home" Content="基本" Tag="building" IsExpanded="True"/>
+                    <NavigationViewItem Icon="Page2" Content="建物" Tag="building"/>
                     <NavigationViewItem Icon="Page2" Content="所在地" Tag="location" />
                     <NavigationViewItem Icon="Page2" Content="交通" Tag="transportation" />
                     <NavigationViewItem Icon="Page2" Content="設備" Tag="appliance" />
-                    <NavigationViewItem Icon="Folder" Content="写真" Tag="pictures" />
                     <NavigationViewItem Icon="Folder" Content="部屋" Tag="units"/>
-
-                    <!--
-                        <NavigationViewItem.MenuItems>
-                            <NavigationViewItem Icon="Bookmarks" Content="契約条件" Tag="room_address" />
-                            <NavigationViewItem Icon="Bookmarks" Content="取引条件" Tag="room_traffic" />
-                            <NavigationViewItem Icon="Bookmarks" Content="室内設備" Tag="room_options" />
-                            <NavigationViewItem Icon="Bookmarks" Content="室内写真" Tag="room_pictures" />
-                        </NavigationViewItem.MenuItems>
-                        -->
-                    <NavigationViewItem Icon="Attach" Content="図面" Tag="zumen"/>
+                    <NavigationViewItem Icon="Folder" Content="写真" Tag="pictures" />
+                    <NavigationViewItem Icon="Folder" Content="図面" Tag="zumen"/>
+                    <NavigationViewItemSeparator />
+                    <NavigationViewItem Icon="OtherUser" Content="元付" Tag="kasinusi"/>
+                    <NavigationViewItem Icon="OtherUser" Content="貸主" Tag="kasinusi"/>
                 </NavigationView.MenuItems>
                 <NavigationView.HeaderTemplate>
                     <DataTemplate>
@@ -110,9 +103,9 @@
                         </Grid>
                     </DataTemplate>
                 </NavigationView.HeaderTemplate>
-                <ScrollViewer Margin="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-                    <Frame x:Name="ContentFrame"/>
-                </ScrollViewer >
+                <Grid Margin="{StaticResource NavigationViewSubPageContentMargin}">
+                    <Frame x:Name="ContentFrame" Navigated="ContentFrame_Navigated" NavigationFailed="ContentFrame_NavigationFailed"/>
+                </Grid>
             </NavigationView>
 
             
