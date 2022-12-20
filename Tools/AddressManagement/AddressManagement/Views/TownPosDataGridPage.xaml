@@ -1,13 +1,12 @@
 ﻿<Page
-    x:Class="AddressManagement.Views.TownCodeDataGridPage"
+    x:Class="AddressManagement.Views.TownPosDataGridPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:controls="using:CommunityToolkit.WinUI.UI.Controls"
     mc:Ignorable="d"
-    NavigationCacheMode="Required"
-    >
+    NavigationCacheMode="Required">
 
     <Grid x:Name="ContentArea">
         <Grid.RowDefinitions>
@@ -22,8 +21,9 @@
                 <AppBarButton Icon="SaveLocal" Label="Save as SQLiteDB" Click="Save"></AppBarButton>
 
                 <AppBarButton Icon="Upload" Label="Load from SQLiteDB" Click="Load" Visibility="Collapsed"></AppBarButton>
+
                 <CommandBar.Content>
-                    <TextBlock Text="mt_pref_all.csv" Margin="12,14"/>
+                    <TextBlock Text="mt_town_pos_all.csv" Margin="12,14"/>
                 </CommandBar.Content>
             </CommandBar>
 
@@ -41,15 +41,10 @@
             <controls:DataGrid.Columns>
                 <controls:DataGridTextColumn Binding="{Binding AdministrativeDivisionCode}" Header="全国地方公共団体コード" />
                 <controls:DataGridTextColumn Binding="{Binding TownID}" Header="町字ID" />
-                <controls:DataGridTextColumn Binding="{Binding ChouAzaCodeKind}" Header="町字区分コード" />
-                <controls:DataGridTextColumn Binding="{Binding PrefectureName}" Header="都道府県名"/>
-                <controls:DataGridTextColumn Binding="{Binding CountyName}" Header="郡名" />
-                <controls:DataGridTextColumn Binding="{Binding CityName}" Header="市区町村名" />
-                <controls:DataGridTextColumn Binding="{Binding WardName}" Header="政令市区名" />
-                <controls:DataGridTextColumn Binding="{Binding ChouName}" Header="大字・町名" />
-                <controls:DataGridTextColumn Binding="{Binding Choume}" Header="丁目名" />
-                <controls:DataGridTextColumn Binding="{Binding KoazaName}" Header="子字" />
-                <controls:DataGridTextColumn Binding="{Binding PostalCode}" Header="郵便番号" />
+                <controls:DataGridTextColumn Binding="{Binding Longitude}" Header="経度"/>
+                <controls:DataGridTextColumn Binding="{Binding Latitude}" Header="緯度" />
+                <controls:DataGridTextColumn Binding="{Binding CRS}" Header="座標参照系"/>
+                <controls:DataGridTextColumn Binding="{Binding MapInfoLovel}" Header="地図情報レベル" />
             </controls:DataGrid.Columns>
         </controls:DataGrid>
     </Grid>

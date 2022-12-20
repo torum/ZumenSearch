@@ -23,14 +23,7 @@ public sealed partial class PostalCodeDataGridPage : Page
 {
     private readonly SqliteConnectionStringBuilder connectionStringBuilder;
 
-    //private string _dataBaseFilePath;
-    public string DataBaseFilePath
-    {
-        get
-        {
-            return "C:\\Users\\torum\\Desktop\\test.db";
-        }
-    }
+    private string DataBaseFilePath => System.Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory) + Path.DirectorySeparatorChar + "test.db";
 
     public ObservableCollection<PostalCode> PostalCodeDataSource { get; } = new ObservableCollection<PostalCode>();
 
@@ -50,7 +43,7 @@ public sealed partial class PostalCodeDataGridPage : Page
         connectionStringBuilder = new SqliteConnectionStringBuilder("Data Source=" + DataBaseFilePath);
     }
 
-    public async void Save(object sender, RoutedEventArgs e)
+    public void Save(object sender, RoutedEventArgs e)
     {
         if (PostalCodeDataSource.Count < 1)
             return;
@@ -68,7 +61,7 @@ public sealed partial class PostalCodeDataGridPage : Page
                 tableCmd.Transaction = connection.BeginTransaction();
                 try
                 {
-                    tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS PostalCode (" +
+                    tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS PostalCode (" + // postalcodes
                         "AdministrativeDivisionCode TEXT NOT NULL," +
                         "PostalCode TEXT NOT NULL," + // PRIMARY KEY
                         "PrefectureName TEXT NOT NULL," +
@@ -91,12 +84,14 @@ public sealed partial class PostalCodeDataGridPage : Page
             catch (System.Reflection.TargetInvocationException ex)
             {
                 Debug.WriteLine("DB Create Error: " + ex.Message);
-                throw ex.InnerException;
+                if (ex.InnerException != null)
+                    throw ex.InnerException;
             }
             catch (System.InvalidOperationException ex)
             {
                 Debug.WriteLine("DB Create Error: " + ex.Message);
-                throw ex.InnerException;
+                if (ex.InnerException != null)
+                    throw ex.InnerException;
             }
             catch (Exception ex)
             {
@@ -124,7 +119,7 @@ public sealed partial class PostalCodeDataGridPage : Page
     "INSERT INTO PostalCode " +
     "(AdministrativeDivisionCode, PostalCode, PrefectureName, CityName, ChouName) " +
     "VALUES ('{0}', '{1}', '{2}', '{3}', '{4}')",
-    hoge.AdministrativeDivisionCodeID,
+    hoge.AdministrativeDivisionCode,
     hoge.Code,
     hoge.PrefectureName,
     hoge.CityName,
@@ -154,7 +149,7 @@ public sealed partial class PostalCodeDataGridPage : Page
         Debug.WriteLine("Done");
     }
 
-    public async void Load(object sender, RoutedEventArgs e)
+    public void Load(object sender, RoutedEventArgs e)
     {
         PostalCodeDataSource.Clear();
         try
@@ -174,7 +169,7 @@ public sealed partial class PostalCodeDataGridPage : Page
                         {
 
                             PostalCode hoge = new PostalCode();
-                            hoge.AdministrativeDivisionCodeID = Convert.ToString(reader["AdministrativeDivisionCode"]);
+                            hoge.AdministrativeDivisionCode = Convert.ToString(reader["AdministrativeDivisionCode"]);
                             hoge.PrefectureName = Convert.ToString(reader["PrefectureName"]);
                             hoge.Code = Convert.ToString(reader["PostalCode"]);
                             hoge.CityName = Convert.ToString(reader["CityName"]);
@@ -191,13 +186,15 @@ public sealed partial class PostalCodeDataGridPage : Page
         {
             Debug.WriteLine("Opps. TargetInvocationException@DataAccess::GetSearchResultOfRentLiving");
 
-            throw ex.InnerException;
+            if (ex.InnerException != null)
+                throw ex.InnerException;
         }
         catch (System.InvalidOperationException ex)
         {
             Debug.WriteLine("Opps. InvalidOperationException@DataAccess::GetSearchResultOfRentLiving");
 
-            throw ex.InnerException;
+            if (ex.InnerException != null)
+                throw ex.InnerException;
         }
         catch (Exception ex)
         {
@@ -271,8 +268,7 @@ public sealed partial class PostalCodeDataGridPage : Page
                 obj.PrefectureName = record.PrefectureName;
                 obj.ChouName = record.ChouName;
                 obj.CityName = record.CityName;
-                obj.AdministrativeDivisionCodeID = record.AdministrativeDivisionCodeID;
-                obj.CityName = record.CityName;
+                obj.AdministrativeDivisionCode = record.AdministrativeDivisionCode;
                 obj.Code = record.Code;
 
                 PostalCodeDataSource.Add(obj);
@@ -295,7 +291,7 @@ public sealed partial class PostalCodeDataGridPage : Page
     {
         public PostalCodeClassMapper()
         {
-            Map(x => x.AdministrativeDivisionCodeID).Index(0);
+            Map(x => x.AdministrativeDivisionCode).Index(0);
             Map(x => x.Code).Index(2);
             Map(x => x.PrefectureName).Index(6);
             Map(x => x.CityName).Index(7);

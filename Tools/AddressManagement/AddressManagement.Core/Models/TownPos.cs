@@ -5,14 +5,7 @@ using CsvHelper.Configuration.Attributes;
 
 namespace AddressManagement.Core.Models;
 
-// 大元の郵便番号データ
-// https://www.post.japanpost.jp/zipcode/dl/kogaki-zip.html
-
-// 加工済み x-ken-all
-// http://zipcloud.ibsnet.co.jp/
-
-
-public class PostalCode
+public class TownPos
 {
     //全国地方公共団体コード
     [Index(0)]
@@ -21,30 +14,37 @@ public class PostalCode
         get; set;
     }
 
-    //郵便番号
-    [Index(2)]
-    public string Code
+    //町字ID
+    [Index(1)]
+    public string TownID
     {
         get; set;
     }
 
-    //都道府県名
+    //代表点_経度
     [Index(3)]
-    public string PrefectureName
+    public string Longitude
     {
         get; set;
     }
 
-    //市区町村名（郡名含む）
+    //代表点_緯度
     [Index(4)]
-    public string CityName
+    public string Latitude
     {
         get; set;
     }
 
-    // 大字・町名
+    // 代表点_座標参照系 eg.EPSG:6668
     [Index(5)]
-    public string ChouName
+    public string CRS
+    {
+        get; set;
+    }
+
+    //代表点_地図情報レベル
+    [Index(6)]
+    public string MapInfoLovel
     {
         get; set;
     }

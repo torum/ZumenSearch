@@ -11,14 +11,15 @@ using CsvHelper;
 using System.Globalization;
 using System.Text;
 using CsvHelper.Configuration.Attributes;
+
 using Microsoft.Data.Sqlite;
-using System.Data.Common;
+
 
 namespace AddressManagement.Views;
 
 // TODO: Change the grid as appropriate for your app. Adjust the column definitions on DataGridPage.xaml.
 // For more details, see the documentation at https://docs.microsoft.com/windows/communitytoolkit/controls/datagrid.
-public sealed partial class TownCodeDataGridPage : Page
+public sealed partial class TownPosDataGridPage : Page
 {
     private readonly SqliteConnectionStringBuilder connectionStringBuilder;
 
@@ -26,51 +27,49 @@ public sealed partial class TownCodeDataGridPage : Page
 
     Microsoft.UI.Dispatching.DispatcherQueue _dispatcherQueue = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
 
-    public ObservableCollection<Town> TownCodeDataSource { get; } = new ObservableCollection<Town>();
+    public ObservableCollection<TownPos> TownPosDataSource { get; } = new ObservableCollection<TownPos>();
 
-    public TownCodeDataGridViewModel ViewModel
+    public TownPosDataGridViewModel ViewModel
     {
         get;
     }
 
-    public TownCodeDataGridPage()
+    public TownPosDataGridPage()
     {
-        ViewModel = App.GetService<TownCodeDataGridViewModel>();
+        ViewModel = App.GetService<TownPosDataGridViewModel>();
         InitializeComponent();
 
         //
-        dg.ItemsSource = TownCodeDataSource;
-
+        dg.ItemsSource = TownPosDataSource;
 
         connectionStringBuilder = new SqliteConnectionStringBuilder("Data Source=" + DataBaseFilePath);
     }
 
-    private void SaveDo()
+    public void Save(object sender, RoutedEventArgs e)
     {
+        if (TownPosDataSource.Count < 1)
+            return;
+
         try
         {
+
             using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
             try
             {
                 connection.Open();
 
                 using var tableCmd = connection.CreateCommand();
-
+                
                 tableCmd.Transaction = connection.BeginTransaction();
                 try
                 {
-                    tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS TownCode (" + // towns
+                    tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS TownPos (" + // towns_coordinates
                         "AdministrativeDivisionCode TEXT NOT NULL," +
                         "TownCode TEXT NOT NULL," + // PRIMARY KEY
-                        "ChouAzaCodeKind TEXT," +
-                        "PrefectureName TEXT," +
-                        "CountyName TEXT," +
-                        "CityName TEXT," +
-                        "WardName TEXT," +
-                        "ChouName TEXT," +
-                        "Choume TEXT," +
-                        "KoazaName TEXT," +
-                        "PostalCode TEXT" +
+                        "Longitude TEXT NOT NULL," +
+                        "Latitude TEXT NOT NULL," +
+                        "CRS TEXT," +
+                        "MapInfoLovel TEXT" +
                         ")";
                     tableCmd.ExecuteNonQuery();
 
@@ -117,24 +116,18 @@ public sealed partial class TownCodeDataGridPage : Page
                 cmd.Transaction = connection.BeginTransaction();
                 try
                 {
-                    foreach (var hoge in TownCodeDataSource)
+                    foreach (var hoge in TownPosDataSource)
                     {
                         var sqlInsertIntoRent = String.Format(
-    "INSERT INTO TownCode " +
-    "(AdministrativeDivisionCode, TownCode, ChouAzaCodeKind, PrefectureName, CountyName, CityName, WardName, ChouName, Choume, KoazaName, PostalCode) " +
-    "VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}', '{7}', '{8}', '{9}', '{10}')",
+    "INSERT INTO TownPos " +
+    "(AdministrativeDivisionCode, TownCode, Longitude, Latitude, CRS, MapInfoLovel) " +
+    "VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}')",
     hoge.AdministrativeDivisionCode,
     hoge.TownID,
-    hoge.ChouAzaCodeKind,
-    hoge.PrefectureName,
-    hoge.CountyName,
-    hoge.CityName,
-    hoge.WardName,
-    hoge.ChouName,
-    hoge.Choume,
-    hoge.KoazaName,
-    hoge.PostalCode
-    );
+    hoge.Longitude,
+    hoge.Latitude,
+    hoge.CRS,
+    hoge.MapInfoLovel);
 
                         cmd.CommandText = sqlInsertIntoRent;
 
@@ -157,22 +150,71 @@ public sealed partial class TownCodeDataGridPage : Page
             }
         }
 
-    }
-
-    public async void Save(object sender, RoutedEventArgs e)
-    {
-        if (TownCodeDataSource.Count < 1)
-            return;
-
-        await Task.Run(() => SaveDo());
-
-        Debug.WriteLine("Save Done");
-
+        Debug.WriteLine("Done");
     }
 
     public void Load(object sender, RoutedEventArgs e)
     {
-    
+        /*
+                TownPosDataSource.Clear();
+                try
+                {
+                    using (var connection = new SqliteConnection(connectionStringBuilder.ConnectionString))
+                    {
+                        connection.Open();
+
+                        using (var cmd = connection.CreateCommand())
+                        {
+
+                            cmd.CommandText = "SELECT * FROM PostalCode";
+
+                            using (var reader = cmd.ExecuteReader())
+                            {
+                                while (reader.Read())
+                                {
+
+                                    TownPos hoge = new TownPos();
+                                    hoge.AdministrativeDivisionCode = Convert.ToString(reader["AdministrativeDivisionCode"]);
+                                    hoge.PrefectureName = Convert.ToString(reader["PrefectureName"]);
+                                    hoge.Code = Convert.ToString(reader["PostalCode"]);
+                                    hoge.CityName = Convert.ToString(reader["CityName"]);
+                                    hoge.ChouName = Convert.ToString(reader["ChouName"]);
+
+                                    TownPosDataSource.Add(hoge);
+
+                                }
+                            }
+                        }
+                    }
+                }
+                catch (System.Reflection.TargetInvocationException ex)
+                {
+                    Debug.WriteLine("Opps. TargetInvocationException@DataAccess::GetSearchResultOfRentLiving");
+
+                    if (ex.InnerException != null)
+                        throw ex.InnerException;
+                }
+                catch (System.InvalidOperationException ex)
+                {
+                    Debug.WriteLine("Opps. InvalidOperationException@DataAccess::GetSearchResultOfRentLiving");
+
+                    if (ex.InnerException != null)
+                        throw ex.InnerException;
+                }
+                catch (Exception ex)
+                {
+                    if (ex.InnerException != null)
+                    {
+                        Debug.WriteLine(ex.InnerException.Message + " @DataAccess::GetSearchResultOfRentLiving");
+                    }
+                    else
+                    {
+                        Debug.WriteLine(ex.Message + " @DataAccess::GetSearchResultOfRentLiving");
+
+                    }
+                }
+
+        */
     }
 
     private async void OpenDo(string filePath)
@@ -188,58 +230,36 @@ public sealed partial class TownCodeDataGridPage : Page
         using var reader = new StreamReader(filePath, Encoding.UTF8);
         using (var csv = new CsvReader(reader, config))
         {
-            csv.Context.RegisterClassMap<TownCodeClassMapper>();
-            /*
-             
-            //一行毎の読み込み
-            csv.Read();
-            //ヘッダを読み込み
-            csv.ReadHeader();
-            //行毎に読み込みと処理
-            while (csv.Read())
-            {
-                var record = csv.GetRecord<Foo>();
-                Console.WriteLine(record.Id);
-            }
-            */
+            csv.Context.RegisterClassMap<TownPosClassMapper>();
 
-
-            var records = csv.GetRecords<Town>();
+            var records = csv.GetRecords<TownPos>();
 
             foreach (var record in records)
             {
-                Town obj = new Town();
-                obj.PrefectureName = record.PrefectureName;
-                obj.ChouName = record.ChouName;
-                obj.CountyName = record.CountyName;
-                obj.Choume = record.Choume;
-                obj.CityName = record.CityName;
-                obj.PostalCode = record.PostalCode;
+                TownPos obj = new TownPos();
                 obj.AdministrativeDivisionCode = record.AdministrativeDivisionCode;
                 obj.TownID = record.TownID;
-                obj.ChouAzaCodeKind = record.ChouAzaCodeKind;
-                //obj.CityName = record.CityName;
-                obj.WardName = record.WardName;
-                obj.KoazaName = record.KoazaName;
+                obj.Longitude = record.Longitude;
+                obj.Latitude = record.Latitude;
+                obj.CRS = record.CRS;
+                obj.MapInfoLovel = record.MapInfoLovel;
 
                 _dispatcherQueue.TryEnqueue(() =>
                 {
-                    TownCodeDataSource.Add(obj);
+                    TownPosDataSource.Add(obj);
                 });
 
                 await Task.Delay(1);
             }
-        }
 
-        //dg.ItemsSource = TownCodeDataSource;
+        }
 
         Debug.WriteLine("Open Done");
     }
 
     public async void Open(object sender, RoutedEventArgs e)
     {
-
-        TownCodeDataSource.Clear();
+        TownPosDataSource.Clear();
 
         var filePicker = new FileOpenPicker();
 
@@ -257,34 +277,31 @@ public sealed partial class TownCodeDataGridPage : Page
 
         var file = await filePicker.PickSingleFileAsync();
 
-        await Task.Run(() => OpenDo(file.Path));
+        if (file == null)
+            return;
 
+        await Task.Run(() => OpenDo(file.Path));
 
     }
 
-    class TownCodeMapper : CsvHelper.Configuration.ClassMap<Town>
+    class TownPosMapper : CsvHelper.Configuration.ClassMap<TownPos>
     {
-        public TownCodeMapper()
+        public TownPosMapper()
         {
             AutoMap(CultureInfo.InvariantCulture);
         }
     }
 
-    class TownCodeClassMapper : CsvHelper.Configuration.ClassMap<Town>
+    class TownPosClassMapper : CsvHelper.Configuration.ClassMap<TownPos>
     {
-        public TownCodeClassMapper()
+        public TownPosClassMapper()
         {
             Map(x => x.AdministrativeDivisionCode).Index(0);
             Map(x => x.TownID).Index(1);
-            Map(x => x.ChouAzaCodeKind).Index(2);
-            Map(x => x.PrefectureName).Index(3);
-            Map(x => x.CountyName).Index(6);
-            Map(x => x.CityName).Index(9);
-            Map(x => x.WardName).Index(12);
-            Map(x => x.ChouName).Index(15);
-            Map(x => x.Choume).Index(18);
-            Map(x => x.KoazaName).Index(21);
-            Map(x => x.PostalCode).Index(35);
+            Map(x => x.Longitude).Index(3);
+            Map(x => x.Latitude).Index(4);
+            Map(x => x.CRS).Index(5);
+            Map(x => x.MapInfoLovel).Index(6);
         }
     }
 }

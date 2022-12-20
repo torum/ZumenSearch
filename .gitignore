@@ -348,3 +348,7 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
+Data/mt_pref_all.csv
+Data/mt_town_all.csv
+Data/mt_town_all_test.csv
+Data/x-ken-all.csv

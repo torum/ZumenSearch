@@ -7,20 +7,18 @@
     mc:Ignorable="d"
     NavigationCacheMode="Required">
 
-    <Grid x:Name="ContentArea">
+    <Grid x:Name="ContentArea" Background="{ThemeResource SolidBackgroundFillColorTertiaryBrush}" CornerRadius="4">
         <ScrollViewer>
 
-            <Grid Margin="0,24,0,24">
+            <Grid Margin="24">
 
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
+                <StackPanel Margin="0">
 
-
-                <StackPanel Margin="6 12 6 6">
-
-                    <Expander Header="一般共用設備" Margin="6" Padding="6" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" IsExpanded="True">
+                    <Expander Header="一般共用設備" Margin="0,0,0,12" Padding="6" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" IsExpanded="True">
                         <StackPanel Margin="24,12,24,12">
                             <CheckBox Margin="6" Content="エレベータ" />
                             <CheckBox Margin="6" Content="オートロック" />
@@ -31,7 +29,7 @@
                         </StackPanel>
                     </Expander>
 
-                    <Expander Header="電気・水道・ガス" Margin="6" Padding="6" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" IsExpanded="False">
+                    <Expander Header="電気・水道・ガス" Margin="0,0,0,12" Padding="6" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" IsExpanded="False">
                         <StackPanel Margin="6">
                             <StackPanel Margin="0,0,0,24" VerticalAlignment="Bottom">
                                 <TextBlock><Run FontWeight="Bold" Text="電気" /><Run Text="（事業者、住所、電話連絡先、容量[  ]アンペア、メーター[専用・子・割当・他]）" /></TextBlock>
@@ -108,7 +106,7 @@
                         </StackPanel>
                     </Expander>
 
-                    <Expander Header="共聴設備" Margin="6" Padding="6" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" IsExpanded="False">
+                    <Expander Header="共聴設備" Margin="0,0,0,12" Padding="6" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" IsExpanded="False">
                         <StackPanel Margin="6">
                             <StackPanel Margin="0,0,0,12" VerticalAlignment="Bottom">
                                 <TextBlock><Run FontWeight="Bold" Text="TVアンテナ " /><Run Text="[有り（[UHF・VHF・BS・CS]）・無し・その他]" /></TextBlock>
@@ -157,7 +155,7 @@
 
                     </Expander>
 
-                    <Expander Header="駐車場" Margin="6" Padding="6" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" IsExpanded="False">
+                    <Expander Header="駐車場" Margin="0,0,0,12" Padding="6" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" IsExpanded="False">
                         <StackPanel>
                             <StackPanel Margin="0,0,0,0" Orientation="Horizontal">
                                 <StackPanel Width="100" Margin="6" HorizontalAlignment="Left">
@@ -212,7 +210,7 @@
 
                     </Expander>
 
-                    <Expander Header="バイク置き場" Margin="6" Padding="6" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" IsExpanded="False">
+                    <Expander Header="バイク置き場" Margin="0,0,0,12" Padding="6" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" IsExpanded="False">
                         <StackPanel Margin="0,0,0,0" Orientation="Horizontal">
                             <StackPanel Width="100" Margin="6" HorizontalAlignment="Left">
                                 <TextBlock Text="区分" />
@@ -242,7 +240,7 @@
                         </StackPanel>
                     </Expander>
 
-                    <Expander Header="駐輪場" Margin="6" Padding="6" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" IsExpanded="False">
+                    <Expander Header="駐輪場" Margin="0,0,0,12" Padding="6" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" IsExpanded="False">
                         <StackPanel Margin="0,0,0,0" Orientation="Horizontal">
                             <StackPanel Width="100" Margin="6" HorizontalAlignment="Left">
                                 <TextBlock Text="区分" />

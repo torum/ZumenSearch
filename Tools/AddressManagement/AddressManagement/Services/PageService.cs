@@ -19,7 +19,9 @@ public class PageService : IPageService
         Configure<PrefectureCodeDataGridViewModel, PrefectureDataGridPage>();
         Configure<DataGrid1ViewModel, DataGrid1Page>();
         Configure<TownCodeDataGridViewModel, TownCodeDataGridPage>();
+        Configure<TownPosDataGridViewModel, TownPosDataGridPage>();
         Configure<PostalCodeDataGridViewModel, PostalCodeDataGridPage>();
+
     }
 
     public Type GetPageType(string key)

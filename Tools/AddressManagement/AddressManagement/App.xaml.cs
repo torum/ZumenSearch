@@ -79,6 +79,8 @@ public partial class App : Application
             services.AddTransient<PrefectureDataGridPage>();
             services.AddTransient<TownCodeDataGridViewModel>();
             services.AddTransient<TownCodeDataGridPage>();
+            services.AddTransient<TownPosDataGridViewModel>();
+            services.AddTransient<TownPosDataGridPage>();
             services.AddTransient<PostalCodeDataGridViewModel>();
             services.AddTransient<PostalCodeDataGridPage>();
             services.AddTransient<ListDetailsViewModel>();

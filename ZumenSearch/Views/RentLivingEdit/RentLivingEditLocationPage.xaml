@@ -7,19 +7,18 @@
     mc:Ignorable="d"
     NavigationCacheMode="Required">
 
-    <Grid x:Name="ContentArea">
+    <Grid x:Name="ContentArea" Background="{ThemeResource SolidBackgroundFillColorTertiaryBrush}" CornerRadius="4">
         <ScrollViewer>
 
-            <Grid Margin="0,24,0,24">
+            <Grid Margin="24">
 
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
                 <StackPanel>
-
                     <StackPanel Margin="0,24,24,0">
-                        <TextBlock Text=""></TextBlock>
+                        <TextBlock Text="sdf"></TextBlock>
                     </StackPanel>
 
                     <StackPanel Margin="0,24,24,0">
@@ -73,10 +72,7 @@
                     
                     -->
                 </StackPanel>
-                
             </Grid>
-
         </ScrollViewer>
-
     </Grid>
 </Page>

@@ -6,17 +6,17 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     NavigationCacheMode="Required">
-    <Grid x:Name="ContentArea">
+    <Grid x:Name="ContentArea" Background="{ThemeResource SolidBackgroundFillColorTertiaryBrush}" CornerRadius="4">
         <ScrollViewer>
 
-            <Grid Margin="0,24,0,24">
+            <Grid Margin="24">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <StackPanel HorizontalAlignment="Stretch" Margin="0,0,24,0" Padding="6">
+                <StackPanel HorizontalAlignment="Stretch">
 
-                    <TextBox MinWidth="200" Width="250" Header="部屋番号" PlaceholderText="Type your text here" Margin="0,0,0,0" HorizontalAlignment="Left"/>
+                    <TextBox MinWidth="200" Width="250" Header="部屋番号" PlaceholderText="Type your text here" HorizontalAlignment="Left"/>
                     
                     <StackPanel Orientation="Horizontal" Margin="0,24,0,0">
                         <TextBlock Text="間取り" Margin="0 0 3 6" HorizontalAlignment="Left" VerticalAlignment="Bottom"/>

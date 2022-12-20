@@ -71,7 +71,7 @@
 
             <ScrollViewer Grid.Row="1" Margin="0 24 0 0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
 
-                <StackPanel HorizontalAlignment="Center">
+                <StackPanel HorizontalAlignment="Center" Background="{ThemeResource SolidBackgroundFillColorTertiaryBrush}" CornerRadius="4">
 
                     <VariableSizedWrapGrid Orientation="Horizontal" Margin="0">
                         <TextBox MaxWidth="500" MinWidth="350" Header="物件名" PlaceholderText="Type your text here" Margin="24,24,24,0"/>

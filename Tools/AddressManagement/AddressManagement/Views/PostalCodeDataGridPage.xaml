@@ -20,7 +20,7 @@
 
                 <AppBarButton Icon="SaveLocal" Label="Save as SQLiteDB" Click="Save"></AppBarButton>
 
-                <AppBarButton Icon="Upload" Label="Load from SQLiteDB" Click="Load"></AppBarButton>
+                <AppBarButton Icon="Upload" Label="Load from SQLiteDB" Click="Load" Visibility="Collapsed"></AppBarButton>
 
                 <CommandBar.Content>
                     <TextBlock Text="x-ken-all.csv" Margin="12,14"/>
@@ -39,7 +39,7 @@
                 <SolidColorBrush x:Key="DataGridCellFocusVisualSecondaryBrush" Color="Transparent"/>
             </controls:DataGrid.Resources>
             <controls:DataGrid.Columns>
-                <controls:DataGridTextColumn Binding="{Binding AdministrativeDivisionCodeID}" Header="全国地方公共団体コード" />
+                <controls:DataGridTextColumn Binding="{Binding AdministrativeDivisionCode}" Header="全国地方公共団体コード" />
                 <controls:DataGridTextColumn Binding="{Binding Code}" Header="郵便番号" />
                 <controls:DataGridTextColumn Binding="{Binding PrefectureName}" Header="都道府県名"/>
                 <controls:DataGridTextColumn Binding="{Binding CityName}" Header="市区町村名" />

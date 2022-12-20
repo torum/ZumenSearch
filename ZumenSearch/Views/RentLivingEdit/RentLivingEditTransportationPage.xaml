@@ -8,27 +8,27 @@
     NavigationCacheMode="Required">
 
     <Grid x:Name="ContentArea">
-        <ScrollViewer>
+        <Grid>
 
-            <Grid Margin="0,24,0,24">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
 
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-
-                <TabView CanReorderTabs="False" IsAddTabButtonVisible="False" TabWidthMode="Equal">
-                    <TabView.TabItems>
-                        <TabViewItem Header="交通１" IsClosable="False">
-                            <TabViewItem.IconSource>
-                                <SymbolIconSource Symbol="Placeholder" />
-                            </TabViewItem.IconSource>
-
+            <TabView CanReorderTabs="False" IsAddTabButtonVisible="False" TabWidthMode="Equal">
+                <TabView.TabItems>
+                    <TabViewItem Header="交通１" IsClosable="False">
+                        <TabViewItem.IconSource>
+                            <SymbolIconSource Symbol="Placeholder" />
+                        </TabViewItem.IconSource>
+                        <ScrollViewer>
                             <StackPanel Margin="24 12 24 24">
+
                                 <TextBlock Text="電車" Margin="0,24,0,24"></TextBlock>
                                 <StackPanel>
                                     <TextBlock Text="沿線"/>
                                     <AutoSuggestBox Text="" Margin="0 6 12 6" Width="500" HorizontalAlignment="Left"></AutoSuggestBox>
-                                    
+
+
                                     <TextBlock Text="駅名" Margin="0,12,0,0"/>
                                     <AutoSuggestBox Text="" Margin="0 6 12 6" Width="500" HorizontalAlignment="Left"></AutoSuggestBox>
 
@@ -58,31 +58,42 @@
                                     </StackPanel>
                                 </StackPanel>
                             </StackPanel>
+                        </ScrollViewer>
 
-                        </TabViewItem>
-                        <TabViewItem Header="交通２" IsClosable="False">
-                            <TabViewItem.IconSource>
-                                <SymbolIconSource Symbol="Placeholder" />
-                            </TabViewItem.IconSource>
+                    </TabViewItem>
+                    <TabViewItem Header="交通２" IsClosable="False">
+                        <TabViewItem.IconSource>
+                            <SymbolIconSource Symbol="Placeholder" />
+                        </TabViewItem.IconSource>
+
+                        <ScrollViewer>
                             
-                        </TabViewItem>
-                        <TabViewItem Header="交通３" IsClosable="False">
-                            <TabViewItem.IconSource>
-                                <SymbolIconSource Symbol="Placeholder" />
-                            </TabViewItem.IconSource>
+                        </ScrollViewer>
 
-                        </TabViewItem>
-                        <TabViewItem Header="交通４" IsClosable="False">
-                            <TabViewItem.IconSource>
-                                <SymbolIconSource Symbol="Placeholder" />
-                            </TabViewItem.IconSource>
+                    </TabViewItem>
+                    <TabViewItem Header="交通３" IsClosable="False">
+                        <TabViewItem.IconSource>
+                            <SymbolIconSource Symbol="Placeholder" />
+                        </TabViewItem.IconSource>
 
-                        </TabViewItem>
-                    </TabView.TabItems>
-                </TabView>
+                        <ScrollViewer>
 
-            </Grid>
-            
-        </ScrollViewer>
+                        </ScrollViewer>
+
+                    </TabViewItem>
+                    <TabViewItem Header="交通４" IsClosable="False">
+                        <TabViewItem.IconSource>
+                            <SymbolIconSource Symbol="Placeholder" />
+                        </TabViewItem.IconSource>
+
+                        <ScrollViewer>
+
+                        </ScrollViewer>
+
+                    </TabViewItem>
+                </TabView.TabItems>
+            </TabView>
+
+        </Grid>
     </Grid>
 </Page>

@@ -29,21 +29,13 @@
             </StackPanel>
 
             <StackPanel Margin="0,24,24,0">
-                <TextBlock Text="大字・町名"/>
+                <TextBlock Text="町名・大字"/>
                 <TextBox Text="" Margin="0 6 6 6" Width="250" HorizontalAlignment="Left"></TextBox>
             </StackPanel>
-
+            
             <StackPanel Margin="0,24,24,0">
-                <StackPanel>
-                    <TextBlock Text="丁目"/>
-                    <TextBox Text="" Margin="0 6 6 6" Width="200" HorizontalAlignment="Left"></TextBox>
-                </StackPanel>
-            </StackPanel>
-            <StackPanel Margin="0,24,24,0">
-                <StackPanel>
-                    <TextBlock Text="子字"/>
-                    <TextBox Text="" Margin="0 6 6 6" Width="200" HorizontalAlignment="Left"></TextBox>
-                </StackPanel>
+                <TextBlock Text="丁目・子字"/>
+                <TextBox Text="" Margin="0 6 6 6" Width="250" HorizontalAlignment="Left"></TextBox>
             </StackPanel>
 
             <StackPanel Margin="0,24,24,0">

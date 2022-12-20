@@ -2,12 +2,12 @@
 
 public class PrefectureCode
 {
-    public int AdministrativeDivisionCodeID
+    public string AdministrativeDivisionCode
     {
         get; set;
     }
 
-    public int PrefectureCodeID
+    public string Code
     {
         get; set;
     }

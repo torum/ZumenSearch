@@ -22,8 +22,8 @@
                 <SolidColorBrush x:Key="DataGridCellFocusVisualSecondaryBrush" Color="Transparent"/>
             </controls:DataGrid.Resources>
             <controls:DataGrid.Columns>
-                <controls:DataGridTextColumn Binding="{Binding PrefectureCodeID}" Header="都道府県コード" Tag="PrefectureCodeID"/>
-                <controls:DataGridTextColumn Binding="{Binding AdministrativeDivisionCodeID}" Header="全国地方公共団体コード" />
+                <controls:DataGridTextColumn Binding="{Binding Code}" Header="都道府県コード" Tag="PrefectureCodeID"/>
+                <controls:DataGridTextColumn Binding="{Binding AdministrativeDivisionCode}" Header="全国地方公共団体コード" />
                 <controls:DataGridTextColumn Binding="{Binding PrefectureName}" Header="都道府県名" Tag="PrefectureName" />
                 <controls:DataGridTextColumn Binding="{Binding PrefectureNameKana}" Header="都道府県名_カナ" />
                 <controls:DataGridTextColumn Binding="{Binding PrefectureNameEnglish}" Header="都道府県名_英字" />

@@ -7,17 +7,17 @@
     mc:Ignorable="d"
     NavigationCacheMode="Required">
 
-    <Grid x:Name="ContentArea">
+    <Grid x:Name="ContentArea" Background="{ThemeResource SolidBackgroundFillColorTertiaryBrush}" CornerRadius="4">
         <ScrollViewer>
 
-            <Grid Margin="0,24,0,24">
+            <Grid Margin="24">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <StackPanel HorizontalAlignment="Stretch" Margin="0,0,24,0" Padding="6">
+                <StackPanel HorizontalAlignment="Stretch">
                     
-                    <StackPanel HorizontalAlignment="Left" Margin="24,0,24,12">
+                    <StackPanel HorizontalAlignment="Left" Margin="0,0,24,12">
                         <CheckBox Margin="6" Content="バストイレ別" />
                         <CheckBox Margin="6" Content="室内洗濯機置き場" />
                         <CheckBox Margin="6" Content="エアコン" />

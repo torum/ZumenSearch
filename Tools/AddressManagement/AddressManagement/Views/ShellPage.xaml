@@ -53,6 +53,11 @@
                         <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xea37;"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
+                <NavigationViewItem Content="郵便番号マスター" helpers:NavigationHelper.NavigateTo="AddressManagement.ViewModels.PostalCodeDataGridViewModel">
+                    <NavigationViewItem.Icon>
+                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xe80a;"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
                 <NavigationViewItem Content="都道府県マスター" helpers:NavigationHelper.NavigateTo="AddressManagement.ViewModels.PrefectureCodeDataGridViewModel">
                     <NavigationViewItem.Icon>
                         <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xe80a;"/>
@@ -63,7 +68,7 @@
                         <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xe80a;"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem Content="郵便番号マスター" helpers:NavigationHelper.NavigateTo="AddressManagement.ViewModels.PostalCodeDataGridViewModel">
+                <NavigationViewItem Content="町字位置情報マスター" helpers:NavigationHelper.NavigateTo="AddressManagement.ViewModels.TownPosDataGridViewModel">
                     <NavigationViewItem.Icon>
                         <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xe80a;"/>
                     </NavigationViewItem.Icon>
