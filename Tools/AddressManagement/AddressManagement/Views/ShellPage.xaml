@@ -53,22 +53,22 @@
                         <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xea37;"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem Content="郵便番号マスター" helpers:NavigationHelper.NavigateTo="AddressManagement.ViewModels.PostalCodeDataGridViewModel">
+                <NavigationViewItem Content="都道府県" helpers:NavigationHelper.NavigateTo="AddressManagement.ViewModels.PrefectureCodeDataGridViewModel">
                     <NavigationViewItem.Icon>
                         <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xe80a;"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem Content="都道府県マスター" helpers:NavigationHelper.NavigateTo="AddressManagement.ViewModels.PrefectureCodeDataGridViewModel">
+                <NavigationViewItem Content="郵便番号" helpers:NavigationHelper.NavigateTo="AddressManagement.ViewModels.PostalCodeDataGridViewModel">
                     <NavigationViewItem.Icon>
                         <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xe80a;"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem Content="町字マスター" helpers:NavigationHelper.NavigateTo="AddressManagement.ViewModels.TownCodeDataGridViewModel">
+                <NavigationViewItem Content="町字" helpers:NavigationHelper.NavigateTo="AddressManagement.ViewModels.TownDataGridViewModel">
                     <NavigationViewItem.Icon>
                         <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xe80a;"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem Content="町字位置情報マスター" helpers:NavigationHelper.NavigateTo="AddressManagement.ViewModels.TownPosDataGridViewModel">
+                <NavigationViewItem Content="町字位置情報" helpers:NavigationHelper.NavigateTo="AddressManagement.ViewModels.TownCoordinatesDataGridViewModel">
                     <NavigationViewItem.Icon>
                         <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xe80a;"/>
                     </NavigationViewItem.Icon>

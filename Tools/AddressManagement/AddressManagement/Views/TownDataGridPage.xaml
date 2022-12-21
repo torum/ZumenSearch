@@ -1,12 +1,13 @@
 ﻿<Page
-    x:Class="AddressManagement.Views.PostalCodeDataGridPage"
+    x:Class="AddressManagement.Views.TownDataGridPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:controls="using:CommunityToolkit.WinUI.UI.Controls"
     mc:Ignorable="d"
-    NavigationCacheMode="Required">
+    NavigationCacheMode="Required"
+    >
 
     <Grid x:Name="ContentArea">
         <Grid.RowDefinitions>
@@ -21,15 +22,14 @@
                 <AppBarButton Icon="SaveLocal" Label="Import to SQLiteDB" Click="Save"></AppBarButton>
 
                 <AppBarButton Icon="Upload" Label="Load from SQLiteDB" Click="Load" Visibility="Collapsed"></AppBarButton>
-
                 <CommandBar.Content>
-                    <TextBlock Text="x-ken-all.csv" Margin="12,14"/>
+                    <TextBlock Text="mt_pref_all.csv" Margin="12,14"/>
                 </CommandBar.Content>
             </CommandBar>
 
         </StackPanel>
 
-        <controls:DataGrid ItemsSource="{x:Bind ViewModel.PostalCodeDataSource, Mode=OneWay}" Grid.Row="1" Margin="0,24,0,24" AutoGenerateColumns="False" GridLinesVisibility="Horizontal">
+        <controls:DataGrid ItemsSource="{x:Bind ViewModel.TownDataSource, Mode=OneWay}" Grid.Row="1" Margin="0,24,0,24" AutoGenerateColumns="False" GridLinesVisibility="Horizontal">
             <controls:DataGrid.Resources>
                 <SolidColorBrush x:Key="DataGridColumnHeaderBackgroundColor" Color="Transparent" />
                 <SolidColorBrush x:Key="DataGridCellFocusVisualPrimaryBrush" Color="Transparent"/>
@@ -37,10 +37,16 @@
             </controls:DataGrid.Resources>
             <controls:DataGrid.Columns>
                 <controls:DataGridTextColumn Binding="{Binding MunicipalityCode}" Header="全国地方公共団体コード" />
-                <controls:DataGridTextColumn Binding="{Binding Code}" Header="郵便番号" />
+                <controls:DataGridTextColumn Binding="{Binding TownID}" Header="町字ID" />
+                <controls:DataGridTextColumn Binding="{Binding ChouAzaType}" Header="町字区分コード" />
                 <controls:DataGridTextColumn Binding="{Binding PrefectureName}" Header="都道府県名"/>
+                <controls:DataGridTextColumn Binding="{Binding CountyName}" Header="郡名" />
                 <controls:DataGridTextColumn Binding="{Binding SikuchousonName}" Header="市区町村名" />
-                <controls:DataGridTextColumn Binding="{Binding ChouikiName}" Header="町域名" />
+                <controls:DataGridTextColumn Binding="{Binding WardName}" Header="政令市区名" />
+                <controls:DataGridTextColumn Binding="{Binding TownName}" Header="大字・町名" />
+                <controls:DataGridTextColumn Binding="{Binding Choume}" Header="丁目名" />
+                <controls:DataGridTextColumn Binding="{Binding KoazaName}" Header="子字" />
+                <controls:DataGridTextColumn Binding="{Binding PostalCode}" Header="郵便番号" />
             </controls:DataGrid.Columns>
         </controls:DataGrid>
     </Grid>

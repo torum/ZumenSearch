@@ -17,8 +17,7 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Views\PostalCodeDataGridPage.xaml" />
-    <None Remove="Views\TownCodeDataGridPage.xaml" />
-    <None Remove="Views\TownPosDataGridPage.xaml" />
+    <None Remove="Views\TownDataGridPage.xaml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -51,7 +50,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Page Update="Views\TownPosDataGridPage.xaml">
+    <Page Update="Views\TownCoordinatesDataGridPage.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
@@ -59,7 +58,7 @@
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="Views\TownCodeDataGridPage.xaml">
+    <Page Update="Views\TownDataGridPage.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
     </Page>
   </ItemGroup>

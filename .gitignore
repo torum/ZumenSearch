@@ -350,5 +350,5 @@ MigrationBackup/
 .ionide/
 Data/mt_pref_all.csv
 Data/mt_town_all.csv
-Data/mt_town_all_test.csv
+Data/mt_town_pos_all.csv
 Data/x-ken-all.csv

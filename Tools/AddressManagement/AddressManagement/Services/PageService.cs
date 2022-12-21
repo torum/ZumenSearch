@@ -18,8 +18,8 @@ public class PageService : IPageService
         Configure<ListDetailsViewModel, ListDetailsPage>();
         Configure<PrefectureCodeDataGridViewModel, PrefectureDataGridPage>();
         Configure<DataGrid1ViewModel, DataGrid1Page>();
-        Configure<TownCodeDataGridViewModel, TownCodeDataGridPage>();
-        Configure<TownPosDataGridViewModel, TownPosDataGridPage>();
+        Configure<TownDataGridViewModel, TownDataGridPage>();
+        Configure<TownCoordinatesDataGridViewModel, TownCoordinatesDataGridPage>();
         Configure<PostalCodeDataGridViewModel, PostalCodeDataGridPage>();
 
     }

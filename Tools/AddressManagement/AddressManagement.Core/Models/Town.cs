@@ -9,11 +9,13 @@ namespace AddressManagement.Core.Models;
 // https://registry-catalog.registries.digital.go.jp/dataset/o1-000000_g2-000003
 
 
+
+
 public class Town
 {
     //全国地方公共団体コード
     [Index(0)]
-    public string AdministrativeDivisionCode
+    public string MunicipalityCode
     {
         get; set;
     }
@@ -27,7 +29,7 @@ public class Town
 
     //町字区分コード
     [Index(2)]
-    public string ChouAzaCodeKind
+    public string ChouAzaType
     {
         get; set;
     }
@@ -48,7 +50,7 @@ public class Town
 
     //市区町村名（eg.札幌市）
     [Index(9)]
-    public string CityName
+    public string SikuchousonName
     {
         get; set;
     }
@@ -62,7 +64,7 @@ public class Town
 
     // 大字・町名（eg.旭ヶ丘）
     [Index(15)]
-    public string ChouName
+    public string TownName
     {
         get; set;
     }

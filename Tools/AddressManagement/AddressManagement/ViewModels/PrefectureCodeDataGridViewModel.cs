@@ -10,18 +10,38 @@ namespace AddressManagement.ViewModels;
 
 public class PrefectureCodeDataGridViewModel : ObservableRecipient, INavigationAware
 {
+    readonly Microsoft.UI.Dispatching.DispatcherQueue _dispatcherQueue = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
+
     private readonly IPrefectureDataService _sampleDataService;
 
-    public ObservableCollection<PrefectureCode> Source { get; } = new ObservableCollection<PrefectureCode>();
+    public ObservableCollection<Prefecture> Source { get; } = new ObservableCollection<Prefecture>();
 
     public PrefectureCodeDataGridViewModel(IPrefectureDataService sampleDataService)
     {
         _sampleDataService = sampleDataService;
+
+        Task.Run(() => Load());
+        
     }
 
-    public async void OnNavigatedTo(object parameter)
+    private async void Load()
     {
-        Source.Clear();
+        var data = await _sampleDataService.GetPrefectureDataAsync();
+
+        foreach (var item in data)
+        {
+
+            _dispatcherQueue.TryEnqueue(() =>
+            {
+                Source.Add(item);
+            });
+        }
+    }
+
+    public void OnNavigatedTo(object parameter)
+    {
+        /*
+         Source.Clear();
 
         var data = await _sampleDataService.GetPrefectureDataAsync();
 
@@ -29,6 +49,8 @@ public class PrefectureCodeDataGridViewModel : ObservableRecipient, INavigationA
         {
             Source.Add(item);
         }
+
+        */
     }
 
     public void OnNavigatedFrom()

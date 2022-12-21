@@ -10,13 +10,13 @@ using CsvHelper.Configuration;
 using CsvHelper;
 using System.Globalization;
 using System.Text;
-
+using CsvHelper.Configuration.Attributes;
 using Microsoft.Data.Sqlite;
-
+using System.Data.Common;
 
 namespace AddressManagement.Views;
 
-public sealed partial class PostalCodeDataGridPage : Page
+public sealed partial class TownDataGridPage : Page
 {
     private readonly SqliteConnectionStringBuilder connectionStringBuilder;
 
@@ -24,24 +24,21 @@ public sealed partial class PostalCodeDataGridPage : Page
 
     readonly Microsoft.UI.Dispatching.DispatcherQueue _dispatcherQueue = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
 
-    public PostalCodeDataGridViewModel ViewModel
+    public TownDataGridViewModel ViewModel
     {
         get;
     }
 
-    public PostalCodeDataGridPage()
+    public TownDataGridPage()
     {
-        ViewModel = App.GetService<PostalCodeDataGridViewModel>();
+        ViewModel = App.GetService<TownDataGridViewModel>();
         InitializeComponent();
 
         connectionStringBuilder = new SqliteConnectionStringBuilder("Data Source=" + DataBaseFilePath);
     }
 
-    public void Save(object sender, RoutedEventArgs e)
+    private void SaveDo()
     {
-        if (ViewModel.PostalCodeDataSource.Count < 1)
-            return;
-
         try
         {
             using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
@@ -50,39 +47,50 @@ public sealed partial class PostalCodeDataGridPage : Page
                 connection.Open();
 
                 using var tableCmd = connection.CreateCommand();
-                
+
                 tableCmd.Transaction = connection.BeginTransaction();
                 try
                 {
-                    // Create table if not exists.
-                    tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS postal_codes (" +
+                    tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS towns (" +
                         "municipality_code TEXT NOT NULL," +
-                        "postal_code TEXT NOT NULL," + // PRIMARY KEY
-                        "prefecture_name TEXT NOT NULL," +
+                        "town_id TEXT NOT NULL," + // PRIMARY KEY
+                        "chouaza_type TEXT," +
+                        "prefecture_name TEXT," +
+                        "county_name TEXT," +
                         "sikuchouson_name TEXT," +
-                        "chouiki_name TEXT" +
+                        "ward_name TEXT," +
+                        "town_name TEXT," +
+                        "choume TEXT," +
+                        "koaza_name TEXT," +
+                        "postal_code TEXT" +
                         ")";
 
                     tableCmd.ExecuteNonQuery();
 
-                    // Insert data
-                    foreach (var hoge in ViewModel.PostalCodeDataSource)
+                    foreach (var hoge in ViewModel.TownDataSource)
                     {
                         var sqlInsertIntoRent = String.Format(
-    "INSERT INTO postal_codes " +
-    "(municipality_code, postal_code, prefecture_name, sikuchouson_name, chouiki_name) " +
-    "VALUES ('{0}', '{1}', '{2}', '{3}', '{4}')",
+    "INSERT INTO towns " +
+    "(municipality_code, town_id, chouaza_type, prefecture_name, county_name, sikuchouson_name, ward_name, town_name, choume, koaza_name, postal_code) " +
+    "VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}', '{7}', '{8}', '{9}', '{10}')",
     hoge.MunicipalityCode,
-    hoge.Code,
+    hoge.TownID,
+    hoge.ChouAzaType,
     hoge.PrefectureName,
+    hoge.CountyName,
     hoge.SikuchousonName,
-    hoge.ChouikiName);
+    hoge.WardName,
+    hoge.TownName,
+    hoge.Choume,
+    hoge.KoazaName,
+    hoge.PostalCode
+    );
+                    
+                    tableCmd.CommandText = sqlInsertIntoRent;
 
-                        tableCmd.CommandText = sqlInsertIntoRent;
-
-                        var InsertIntoRentResult = tableCmd.ExecuteNonQuery();
+                    var InsertIntoRentResult = tableCmd.ExecuteNonQuery();
                     }
-
+                    
                     tableCmd.Transaction.Commit();
                 }
                 catch (Exception ex)
@@ -113,15 +121,21 @@ public sealed partial class PostalCodeDataGridPage : Page
         {
             Debug.WriteLine("DB Error: " + ex.Message);
         }
+    }
 
+    public async void Save(object sender, RoutedEventArgs e)
+    {
+        if (ViewModel.TownDataSource.Count < 1)
+            return;
+
+        await Task.Run(() => SaveDo());
 
         Debug.WriteLine("Insert Done");
     }
 
     public void Load(object sender, RoutedEventArgs e)
     {
-
-
+    
     }
 
     private async void OpenDo(string filePath)
@@ -131,28 +145,34 @@ public sealed partial class PostalCodeDataGridPage : Page
 
         var config = new CsvConfiguration(CultureInfo.InvariantCulture)
         {
-            HasHeaderRecord = false,
+            HasHeaderRecord = true,
             Encoding = Encoding.UTF8,
         };
         using var reader = new StreamReader(filePath, Encoding.UTF8);
         using (var csv = new CsvReader(reader, config))
         {
-            csv.Context.RegisterClassMap<PostalCodeClassMapper>();
+            csv.Context.RegisterClassMap<TownCodeClassMapper>();
 
-            var records = csv.GetRecords<PostalCode>();
+            var records = csv.GetRecords<Town>();
 
             foreach (var record in records)
             {
-                PostalCode obj = new PostalCode();
+                Town obj = new Town();
                 obj.PrefectureName = record.PrefectureName;
-                obj.ChouikiName = record.ChouikiName;
+                obj.TownName = record.TownName;
+                obj.CountyName = record.CountyName;
+                obj.Choume = record.Choume;
                 obj.SikuchousonName = record.SikuchousonName;
+                obj.PostalCode = record.PostalCode;
                 obj.MunicipalityCode = record.MunicipalityCode;
-                obj.Code = record.Code;
+                obj.TownID = record.TownID;
+                obj.ChouAzaType = record.ChouAzaType;
+                obj.WardName = record.WardName;
+                obj.KoazaName = record.KoazaName;
 
                 _dispatcherQueue.TryEnqueue(() =>
                 {
-                    ViewModel.PostalCodeDataSource.Add(obj);
+                    ViewModel.TownDataSource.Add(obj);
                 });
 
                 await Task.Delay(1);
@@ -164,7 +184,7 @@ public sealed partial class PostalCodeDataGridPage : Page
 
     public async void FileOpen(object sender, RoutedEventArgs e)
     {
-        ViewModel.PostalCodeDataSource.Clear();
+        ViewModel.TownDataSource.Clear();
 
         var filePicker = new FileOpenPicker();
 
@@ -188,23 +208,29 @@ public sealed partial class PostalCodeDataGridPage : Page
         await Task.Run(() => OpenDo(file.Path));
     }
 
-    class PostalCodeMapper : CsvHelper.Configuration.ClassMap<PostalCode>
+    class TownCodeMapper : CsvHelper.Configuration.ClassMap<Town>
     {
-        public PostalCodeMapper()
+        public TownCodeMapper()
         {
             AutoMap(CultureInfo.InvariantCulture);
         }
     }
 
-    class PostalCodeClassMapper : CsvHelper.Configuration.ClassMap<PostalCode>
+    class TownCodeClassMapper : CsvHelper.Configuration.ClassMap<Town>
     {
-        public PostalCodeClassMapper()
+        public TownCodeClassMapper()
         {
             Map(x => x.MunicipalityCode).Index(0);
-            Map(x => x.Code).Index(2);
-            Map(x => x.PrefectureName).Index(6);
-            Map(x => x.SikuchousonName).Index(7);
-            Map(x => x.ChouikiName).Index(8);
+            Map(x => x.TownID).Index(1);
+            Map(x => x.ChouAzaType).Index(2);
+            Map(x => x.PrefectureName).Index(3);
+            Map(x => x.CountyName).Index(6);
+            Map(x => x.SikuchousonName).Index(9);
+            Map(x => x.WardName).Index(12);
+            Map(x => x.TownName).Index(15);
+            Map(x => x.Choume).Index(18);
+            Map(x => x.KoazaName).Index(21);
+            Map(x => x.PostalCode).Index(35);
         }
     }
 }

@@ -69,18 +69,20 @@ public partial class App : Application
 
             // Core Services
             services.AddSingleton<ISampleDataService, SampleDataService>();
-            services.AddSingleton<IPrefectureDataService, PrefectureDataService>();
             services.AddSingleton<IFileService, FileService>();
+
+            services.AddSingleton<IPrefectureDataService, PrefectureDataService>();
+            services.AddSingleton<IPostalCodeDataService, PostalCodeDataService>();
 
             // Views and ViewModels
             services.AddTransient<DataGrid1ViewModel>();
             services.AddTransient<DataGrid1Page>();
             services.AddTransient<PrefectureCodeDataGridViewModel>();
             services.AddTransient<PrefectureDataGridPage>();
-            services.AddTransient<TownCodeDataGridViewModel>();
-            services.AddTransient<TownCodeDataGridPage>();
-            services.AddTransient<TownPosDataGridViewModel>();
-            services.AddTransient<TownPosDataGridPage>();
+            services.AddTransient<TownDataGridViewModel>();
+            services.AddTransient<TownDataGridPage>();
+            services.AddTransient<TownCoordinatesDataGridViewModel>();
+            services.AddTransient<TownCoordinatesDataGridPage>();
             services.AddTransient<PostalCodeDataGridViewModel>();
             services.AddTransient<PostalCodeDataGridPage>();
             services.AddTransient<ListDetailsViewModel>();

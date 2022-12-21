@@ -8,12 +8,12 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace AddressManagement.ViewModels;
 
-public class PostalCodeDataGridViewModel : ObservableRecipient, INavigationAware
+public class TownDataGridViewModel : ObservableRecipient, INavigationAware
 {
+    public ObservableCollection<Town> TownDataSource { get; } = new ObservableCollection<Town>();
 
-    public ObservableCollection<PostalCode> PostalCodeDataSource { get; } = new ObservableCollection<PostalCode>();
 
-    public PostalCodeDataGridViewModel()
+    public TownDataGridViewModel()
     {
     }
 

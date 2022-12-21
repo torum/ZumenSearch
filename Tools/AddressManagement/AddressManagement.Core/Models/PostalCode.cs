@@ -12,39 +12,43 @@ namespace AddressManagement.Core.Models;
 // http://zipcloud.ibsnet.co.jp/
 
 
+
+
+
+// 郵便番号（データベーステーブル名：postal_codes）
 public class PostalCode
 {
-    //全国地方公共団体コード
+    //全国地方公共団体コード（カラム名:municipality_code）
     [Index(0)]
-    public string AdministrativeDivisionCode
+    public string MunicipalityCode
     {
         get; set;
     }
 
-    //郵便番号
+    //郵便番号（カラム名:postal_code）
     [Index(2)]
     public string Code
     {
         get; set;
     }
 
-    //都道府県名
+    //都道府県名（カラム名:prefecture_name）
     [Index(3)]
     public string PrefectureName
     {
         get; set;
     }
 
-    //市区町村名（郡名含む）
+    //市区町村名（郡名・政令都市名含む）（カラム名:sikuchouson_name）
     [Index(4)]
-    public string CityName
+    public string SikuchousonName
     {
         get; set;
     }
 
-    // 大字・町名
+    // 町域名（カラム名:chouiki_name）
     [Index(5)]
-    public string ChouName
+    public string ChouikiName
     {
         get; set;
     }
