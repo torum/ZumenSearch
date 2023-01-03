@@ -7,7 +7,7 @@
     mc:Ignorable="d"
     NavigationCacheMode="Required">
 
-    <Grid x:Name="ContentArea" Background="{ThemeResource SolidBackgroundFillColorTertiaryBrush}" CornerRadius="4">
+    <Grid x:Name="ContentArea" CornerRadius="4">
         <ScrollViewer>
 
             <Grid Margin="24">

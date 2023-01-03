@@ -139,7 +139,7 @@
     <value>貸主</value>
   </data>
   <data name="Shell_RentMain.Content" xml:space="preserve">
-    <value>賃貸物件</value>
+    <value>賃貸総合</value>
   </data>
   <data name="AppNotificationSamplePayload" xml:space="preserve">
     <value>&lt;toast launch="action=ToastClick"&gt;

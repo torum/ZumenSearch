@@ -13,14 +13,16 @@ using ZumenSearch.Views;
 
 using ZumenSearch.Models;
 using ZumenSearch.Notifications;
-using WinUI3App1.Core.Contracts.Services;
-using WinUI3App1.Core.Services;
 
 namespace ZumenSearch;
 
 // To learn more about WinUI 3, see https://docs.microsoft.com/windows/apps/winui/winui3/.
 public partial class App : Application
 {
+
+    private readonly Microsoft.UI.Dispatching.DispatcherQueue _currentDispatcherQueue = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
+    public Microsoft.UI.Dispatching.DispatcherQueue CurrentDispatcherQueue => _currentDispatcherQueue;
+
     // The .NET Generic Host provides dependency injection, configuration, logging, and other services.
     // https://docs.microsoft.com/dotnet/core/extensions/generic-host
     // https://docs.microsoft.com/dotnet/core/extensions/dependency-injection
@@ -76,7 +78,7 @@ public partial class App : Application
             // Views and ViewModels
 
             services.AddTransient<RentMainViewModel>();
-            services.AddTransient<RentMainPage>();
+            services.AddTransient<MainPage>();
 
             services.AddTransient<RentLivingSearchViewModel>();
             services.AddTransient<RentLivingSearchPage>();
@@ -125,7 +127,7 @@ public partial class App : Application
     {
         base.OnLaunched(args);
 
-        App.GetService<IAppNotificationService>().Show(string.Format("AppNotificationSamplePayload".GetLocalized(), AppContext.BaseDirectory));
+        //App.GetService<IAppNotificationService>().Show(string.Format("AppNotificationSamplePayload".GetLocalized(), AppContext.BaseDirectory));
 
         await App.GetService<IActivationService>().ActivateAsync(args);
 

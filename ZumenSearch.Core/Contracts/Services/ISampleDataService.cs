@@ -1,6 +1,6 @@
-﻿using WinUI3App1.Core.Models;
+﻿using ZumenSearch.Core.Models;
 
-namespace WinUI3App1.Core.Contracts.Services;
+namespace ZumenSearch.Core.Contracts.Services;
 
 // Remove this class once your pages/features are using your data.
 public interface ISampleDataService

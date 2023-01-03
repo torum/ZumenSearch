@@ -1,7 +1,7 @@
-﻿using WinUI3App1.Core.Contracts.Services;
-using WinUI3App1.Core.Models;
+﻿using ZumenSearch.Core.Contracts.Services;
+using ZumenSearch.Core.Models;
 
-namespace WinUI3App1.Core.Services;
+namespace ZumenSearch.Core.Services;
 
 // This class holds sample data used by some generated pages to show how they can be used.
 // TODO: The following classes have been created to display sample data. Delete these files once your app is using real data.

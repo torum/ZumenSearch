@@ -40,6 +40,17 @@ public sealed partial class ShellPage : Page
     {
         TitleBarHelper.UpdateTitleBar(RequestedTheme);
 
+
+
+        var manager = WinUIEx.WindowManager.Get(App.MainWindow);
+        // https://stackoverflow.com/questions/74879865/invalidoperationexception-when-closing-a-windowex-window-in-winui-3
+        //manager.PersistenceId = "MainWindowPersistanceId";
+        manager.MinWidth = 640;
+        manager.MinHeight = 480;
+        //manager.Backdrop = new WinUIEx.AcrylicSystemBackdrop();
+        manager.Backdrop = new WinUIEx.MicaSystemBackdrop();
+
+
         KeyboardAccelerators.Add(BuildKeyboardAccelerator(VirtualKey.Left, VirtualKeyModifiers.Menu));
         KeyboardAccelerators.Add(BuildKeyboardAccelerator(VirtualKey.GoBack));
 

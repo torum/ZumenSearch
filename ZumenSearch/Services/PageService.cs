@@ -14,7 +14,7 @@ public class PageService : IPageService
 
     public PageService()
     {
-        Configure<RentMainViewModel, RentMainPage>();
+        Configure<RentMainViewModel, MainPage>();
 
         Configure<RentLivingSearchViewModel, RentLivingSearchPage>(); 
         Configure<RentLivingSearchResultViewModel, RentLivingSearchResultPage>();

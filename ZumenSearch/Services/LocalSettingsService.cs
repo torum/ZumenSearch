@@ -13,7 +13,7 @@ namespace ZumenSearch.Services;
 
 public class LocalSettingsService : ILocalSettingsService
 {
-    private const string _defaultApplicationDataFolder = "WinUI3App1/ApplicationData";
+    private const string _defaultApplicationDataFolder = "ZumenSearch/ApplicationData";
     private const string _defaultLocalSettingsFile = "LocalSettings.json";
 
     private readonly IFileService _fileService;
