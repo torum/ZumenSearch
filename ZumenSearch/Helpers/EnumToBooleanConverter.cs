@@ -1,9 +1,10 @@
 ﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Data;
+using System;
 
 namespace ZumenSearch.Helpers;
 
-public class EnumToBooleanConverter : IValueConverter
+public partial class EnumToBooleanConverter : IValueConverter
 {
     public EnumToBooleanConverter()
     {

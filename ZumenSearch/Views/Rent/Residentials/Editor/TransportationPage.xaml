@@ -1,0 +1,99 @@
+﻿<Page
+    x:Class="ZumenSearch.Views.Rent.Residentials.Editor.TransportationPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    NavigationCacheMode="Required">
+
+    <Grid x:Name="ContentArea">
+        <Grid>
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <TabView CanReorderTabs="False" IsAddTabButtonVisible="False" TabWidthMode="Equal">
+                <TabView.TabItems>
+                    <TabViewItem Header="交通１" IsClosable="False">
+                        <TabViewItem.IconSource>
+                            <SymbolIconSource Symbol="Placeholder" />
+                        </TabViewItem.IconSource>
+                        <ScrollViewer>
+                            <StackPanel Margin="24 12 24 24">
+
+                                <TextBlock Text="電車" Margin="0,24,0,24"></TextBlock>
+                                <StackPanel>
+                                    <TextBlock Text="沿線"/>
+                                    <AutoSuggestBox Text="" Margin="0 6 12 6" Width="500" HorizontalAlignment="Left"></AutoSuggestBox>
+
+
+                                    <TextBlock Text="駅名" Margin="0,12,0,0"/>
+                                    <AutoSuggestBox Text="" Margin="0 6 12 6" Width="500" HorizontalAlignment="Left"></AutoSuggestBox>
+
+                                    <TextBlock Text="駅から徒歩" Margin="0,12,0,0"/>
+                                    <StackPanel Orientation="Horizontal" Margin="0 6 12 0">
+                                        <TextBox Text="" Width="60" Margin="0 0 3 6" HorizontalAlignment="Left"></TextBox>
+                                        <TextBlock Text="分" VerticalAlignment="Bottom" Margin="0 0 3 6"/>
+                                    </StackPanel>
+
+                                </StackPanel>
+
+                                <TextBlock Text="バス" Margin="0,24,0,24"></TextBlock>
+                                <StackPanel>
+                                    <TextBlock Text="バス停名"/>
+                                    <TextBox Text="" Margin="0 6 12 6" Width="250" HorizontalAlignment="Left"></TextBox>
+
+                                    <TextBlock Text="バス乗車時間" Margin="0,12,0,0"/>
+                                    <StackPanel Orientation="Horizontal" Margin="0 6 12 6">
+                                        <TextBox Text="" Width="60" Margin="0 0 3 6" HorizontalAlignment="Left"></TextBox>
+                                        <TextBlock Text="分" VerticalAlignment="Bottom" Margin="0 0 3 6"/>
+                                    </StackPanel>
+
+                                    <TextBlock Text="バス停から徒歩" Margin="0,12,0,0"/>
+                                    <StackPanel Orientation="Horizontal" Margin="0 6 12 6">
+                                        <TextBox Text="" Width="60" Margin="0 0 3 6" HorizontalAlignment="Left"></TextBox>
+                                        <TextBlock Text="分" VerticalAlignment="Bottom" Margin="0 0 3 6"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </StackPanel>
+                        </ScrollViewer>
+
+                    </TabViewItem>
+                    <TabViewItem Header="交通２" IsClosable="False">
+                        <TabViewItem.IconSource>
+                            <SymbolIconSource Symbol="Placeholder" />
+                        </TabViewItem.IconSource>
+
+                        <ScrollViewer>
+                            
+                        </ScrollViewer>
+
+                    </TabViewItem>
+                    <TabViewItem Header="交通３" IsClosable="False">
+                        <TabViewItem.IconSource>
+                            <SymbolIconSource Symbol="Placeholder" />
+                        </TabViewItem.IconSource>
+
+                        <ScrollViewer>
+
+                        </ScrollViewer>
+
+                    </TabViewItem>
+                    <TabViewItem Header="交通４" IsClosable="False">
+                        <TabViewItem.IconSource>
+                            <SymbolIconSource Symbol="Placeholder" />
+                        </TabViewItem.IconSource>
+
+                        <ScrollViewer>
+
+                        </ScrollViewer>
+
+                    </TabViewItem>
+                </TabView.TabItems>
+            </TabView>
+
+        </Grid>
+    </Grid>
+</Page>

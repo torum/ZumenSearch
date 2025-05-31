@@ -1,0 +1,92 @@
+﻿<Page
+    x:Class="ZumenSearch.Views.Rent.Residentials.Editor.Modal.StatusPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    NavigationCacheMode="Required">
+    <Grid x:Name="ContentArea">
+        <ScrollViewer>
+
+            <Grid Margin="24">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <StackPanel HorizontalAlignment="Stretch">
+
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,0">
+                        <TextBlock Text="現況" Margin="0 0 3 6" HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
+                    </StackPanel>
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
+                            <ComboBox Width="224" Margin="0 0 3 6" SelectedIndex="0">
+                                <ComboBoxItem>未指定</ComboBoxItem>
+                                <ComboBoxItem>解約・退去予定</ComboBoxItem>
+                                <ComboBoxItem>空室</ComboBoxItem>
+                                <ComboBoxItem>申し込み済み</ComboBoxItem>
+                                <ComboBoxItem>契約済・入居中</ComboBoxItem>
+                                <ComboBoxItem>その他・不明</ComboBoxItem>
+                            </ComboBox>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,24,0,0">
+                            <TextBlock Text="募集" Margin="0 0 3 6" HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <CheckBox Content="募集中" Margin="0 0 3 6" VerticalAlignment="Bottom"></CheckBox>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,24,0,0">
+                            <TextBlock Text="入居" Margin="0 0 3 6" HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <CheckBox Content="即可" Margin="0 0 3 6" VerticalAlignment="Bottom"></CheckBox>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,24,0,0">
+                            <TextBlock Text="入居可能日" Margin="0 0 3 6" HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <ComboBox Width="120" SelectedIndex="-1" Margin="0 0 3 6"  VerticalAlignment="Bottom">
+                                <ComboBoxItem>１月</ComboBoxItem>
+                                <ComboBoxItem>２月</ComboBoxItem>
+                                <ComboBoxItem>３月</ComboBoxItem>
+                                <ComboBoxItem>４月</ComboBoxItem>
+                                <ComboBoxItem>５月</ComboBoxItem>
+                                <ComboBoxItem>６月</ComboBoxItem>
+                                <ComboBoxItem>７月</ComboBoxItem>
+                                <ComboBoxItem>８月</ComboBoxItem>
+                                <ComboBoxItem>９月</ComboBoxItem>
+                                <ComboBoxItem>１０月</ComboBoxItem>
+                                <ComboBoxItem>１１月</ComboBoxItem>
+                                <ComboBoxItem>１２月</ComboBoxItem>
+                            </ComboBox>
+                            <ComboBox Width="90" SelectedIndex="-1" Margin="0 0 3 6" VerticalAlignment="Bottom">
+                                <ComboBoxItem>上旬</ComboBoxItem>
+                                <ComboBoxItem>中旬</ComboBoxItem>
+                                <ComboBoxItem>下旬</ComboBoxItem>
+                            </ComboBox>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,24,0,0">
+                            <TextBlock Text="現況確認日" Margin="0 0 3 6"/>
+                        </StackPanel>
+                        <StackPanel>
+                            <DatePicker Margin="0 0 6 6" HorizontalAlignment="Left" IsEnabled="True"/>
+                            <Button Content="本日確認" Margin="0 12 0 0" Padding="6" />
+                        </StackPanel>
+
+                    </StackPanel>
+
+
+
+                </StackPanel>
+
+            </Grid>
+
+        </ScrollViewer>
+    </Grid>
+</Page>
+

@@ -1,38 +1,46 @@
-﻿using System.Diagnostics;
+﻿using System;
 using System.Reflection;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI.Xaml;
 using Windows.ApplicationModel;
-using ZumenSearch.Contracts.Services;
 using ZumenSearch.Helpers;
+using Microsoft.Windows.ApplicationModel.Resources;
 
 namespace ZumenSearch.ViewModels;
 
-public class SettingsViewModel : ObservableRecipient
+public partial class SettingsViewModel : ObservableRecipient
 {
-    private readonly IThemeSelectorService _themeSelectorService;
-    private ElementTheme _elementTheme;
-    private string _versionDescription;
+    private static readonly ResourceLoader _resourceLoader = new();
 
-    public ElementTheme ElementTheme
-    {
-        get => _elementTheme;
-        set => SetProperty(ref _elementTheme, value);
-    }
+    private string _versionDescription;
 
     public string VersionDescription
     {
         get => _versionDescription;
-        set => SetProperty(ref _versionDescription, value);
+        private set => SetProperty(ref _versionDescription, value);
     }
+
+    /*
+    private readonly IThemeSelectorService _themeSelectorService;
+
+    [ObservableProperty]
+    private ElementTheme _elementTheme;
 
     public ICommand SwitchThemeCommand
     {
         get;
     }
+    */
 
+    public SettingsViewModel()
+    {
+        _versionDescription = GetVersionDescription();
+    }
+
+    /*
     public SettingsViewModel(IThemeSelectorService themeSelectorService)
     {
         _themeSelectorService = themeSelectorService;
@@ -46,9 +54,15 @@ public class SettingsViewModel : ObservableRecipient
                 {
                     ElementTheme = param;
                     await _themeSelectorService.SetThemeAsync(param);
+
+                    // WeakReferenceMessenger
+                    var thm = ElementTheme.ToString().ToLower();
+                    // send message to other windows (Editor windows)
+                    WeakReferenceMessenger.Default.Send(new ThemeChangedMessage(thm));
                 }
             });
     }
+    */
 
     private static string GetVersionDescription()
     {
@@ -65,6 +79,8 @@ public class SettingsViewModel : ObservableRecipient
             version = Assembly.GetExecutingAssembly().GetName().Version!;
         }
 
-        return $"{"AppDisplayName".GetLocalized()} - {version.Major}.{version.Minor}.{version.Build}.{version.Revision}";
+        var verName =_resourceLoader.GetString("AppDisplayName");
+
+        return $"{verName} - {version.Major}.{version.Minor}.{version.Build}.{version.Revision}";
     }
 }
