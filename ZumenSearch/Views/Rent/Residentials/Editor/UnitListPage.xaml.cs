@@ -31,7 +31,6 @@ public sealed partial class UnitListPage : Page
         InitializeComponent();
 
         BreadcrumbBar1.ItemsSource = new ObservableCollection<Breadcrumbs>{
-            new() { Name = "建物", Page = typeof(ZumenSearch.Views.Rent.Residentials.Editor.BuildingPage).FullName!},
             new() { Name = "部屋", Page = typeof(ZumenSearch.Views.Rent.Residentials.Editor.UnitListPage).FullName! },
         };
         BreadcrumbBar1.ItemClicked += BreadcrumbBar_ItemClicked;
@@ -42,7 +41,7 @@ public sealed partial class UnitListPage : Page
     {
         if (args.Index == 0)
         {
-            _editorShell?.NavFrame.Navigate(typeof(Views.Rent.Residentials.Editor.BuildingPage), _editorShell, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });
+            //_editorShell?.NavFrame.Navigate(typeof(Views.Rent.Residentials.Editor.SummaryPage), _editorShell, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });
         }
     }
 

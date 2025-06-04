@@ -97,7 +97,7 @@ namespace ZumenSearch
                 
                 services.AddTransient<Views.Rent.Residentials.Editor.EditorWindow>();
                 //services.AddTransient<Views.Rent.Residentials.Editor.ResidentialsEditorShell>();
-                services.AddTransient<ViewModels.Rent.Residentials.Editor.ModalViewModel>();
+                services.AddTransient<ViewModels.Rent.Residentials.Editor.EditorViewModel>();
                 services.AddEditorFactory<Views.Rent.Residentials.Editor.EditorShell>();
 
                 services.AddSingleton<ViewModels.Rent.Commercials.CommercialsViewModel>();

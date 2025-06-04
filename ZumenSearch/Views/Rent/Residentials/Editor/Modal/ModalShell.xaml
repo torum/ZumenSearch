@@ -387,12 +387,13 @@
                     <!--  Header="{x:Bind ((ContentControl)ViewModel.Selected).Content, Mode=OneWay}" -->
                     <!--  ExpandedModeThresholdWidth="1280" -->
                     <NavigationView.MenuItems>
-                        <NavigationViewItem Icon="page2" Content="部屋" Tag="room_basic" IsExpanded="True">
+                        <NavigationViewItem Icon="Folder" Content="部屋" Tag="room" IsExpanded="True">
                             <NavigationViewItem.MenuItems>
-                                <NavigationViewItem Icon="page2" Content="現況" Tag="room_status"/>
+                                <NavigationViewItem Icon="page2" Content="概要"  Tag="room_summary"/>
+                                <!--<NavigationViewItem Icon="page2" Content="現況" Tag="room_status"/>
                                 <NavigationViewItem Icon="page2" Content="契約条件" Tag="room_contract"/>
                                 <NavigationViewItem Icon="page2" Content="取引条件" Tag="room_transaction"/>
-                                <NavigationViewItem Icon="page2" Content="設備" Tag="room_appliance" />
+                                <NavigationViewItem Icon="page2" Content="設備" Tag="room_appliance" />-->
                                 <NavigationViewItem Icon="Folder" Content="写真" Tag="room_pictures" />
                             </NavigationViewItem.MenuItems>
                         </NavigationViewItem>

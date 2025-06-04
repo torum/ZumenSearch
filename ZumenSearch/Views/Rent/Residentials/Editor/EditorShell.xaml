@@ -330,40 +330,26 @@
         </VisualStateManager.VisualStateGroups>
         -->
 
-<!--
-            <BreadcrumbBar x:Name="BreadcrumbBar1">
-                <BreadcrumbBar.ItemTemplate>
-                    <DataTemplate x:DataType="mod:Breadcrumbs">
-                        <BreadcrumbBarItem Content="{Binding}" AutomationProperties.Name="{Binding Name}">
-                            <BreadcrumbBarItem.ContentTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding Name}" />
-                                </DataTemplate>
-                            </BreadcrumbBarItem.ContentTemplate>
-                        </BreadcrumbBarItem>
-                    </DataTemplate>
-                </BreadcrumbBar.ItemTemplate>
-            </BreadcrumbBar>
--->
 
 
-
-            <NavigationView Grid.Row="1" x:Name="NavView" OpenPaneLength ="180" PaneDisplayMode="Left" Margin="0,0,0,0" SelectionFollowsFocus="Disabled" IsPaneToggleButtonVisible="False" IsSettingsVisible="False" IsBackButtonVisible="Collapsed" Loaded="NavView_Loaded" ItemInvoked="NavView_ItemInvoked">
+            <NavigationView Grid.Row="0" x:Name="NavView" OpenPaneLength ="180" PaneDisplayMode="Left" Margin="0,0,0,0" SelectionFollowsFocus="Disabled" IsPaneToggleButtonVisible="False" IsSettingsVisible="False" IsBackButtonVisible="Collapsed" Loaded="NavView_Loaded" ItemInvoked="NavView_ItemInvoked">
                 <!--   BackRequested="NavView_BackRequested" -->
                     <NavigationView.MenuItems>
 
                         <!--<NavigationViewItemHeader Content="賃貸物件::住居用"/>-->
 
-                    <NavigationViewItem Icon="Page2" Content="建物" Tag="building" IsExpanded="True">
+                    <NavigationViewItem Icon="Folder" Content="建物" Tag="building" IsExpanded="True">
                             <NavigationViewItem.MenuItems>
-                                <NavigationViewItem Icon="Page2" Content="所在地" Tag="location" />
+                            <NavigationViewItem Icon="Page2" Content="概要" Tag="summary" />
+                            <!--<NavigationViewItem Icon="Page2" Content="所在地" Tag="location" />
                                 <NavigationViewItem Icon="Page2" Content="交通" Tag="transportation" />
                                 <NavigationViewItem Icon="Page2" Content="設備" Tag="appliance" />
+                                -->
                             <NavigationViewItem Icon="Folder" Content="写真" Tag="pictures" />
                             <NavigationViewItem Icon="Folder" Content="部屋" Tag="units" IsExpanded="True">
-                                <NavigationViewItem.MenuItems>
+                                <!--<NavigationViewItem.MenuItems>
                                     <NavigationViewItem Icon="Folder" Content="写真" Tag="unitpictures" />
-                                </NavigationViewItem.MenuItems>
+                                </NavigationViewItem.MenuItems>-->
                             </NavigationViewItem>
                         </NavigationViewItem.MenuItems>
                         </NavigationViewItem>

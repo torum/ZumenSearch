@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using System;
 using ZumenSearch.Views;
 using System.Linq;
+using CommunityToolkit.WinUI;
 
 namespace ZumenSearch.Views.Rent.Residentials.Editor;
 
@@ -27,7 +28,7 @@ public sealed partial class EditorShell : Page
     public Views.Rent.Residentials.Editor.EditorWindow? EditorWin { get; private set; }
 
 
-    public ViewModels.Rent.Residentials.Editor.ModalViewModel? ViewModel
+    public ViewModels.Rent.Residentials.Editor.EditorViewModel? ViewModel
     {
         get;
     }
@@ -38,12 +39,34 @@ public sealed partial class EditorShell : Page
         get => ContentFrame;
     }
 
+    private NavigationViewItem? navigationViewSelectedItem;
+
+    private bool _isConnected;
+    public bool IsConnected
+    {
+        get
+        {
+            return _isConnected;
+        }
+        set
+        {
+            if (_isConnected == value)
+                return;
+
+            _isConnected = value;
+            //NotifyPropertyChanged(nameof(IsConnected));
+        }
+    }
+
+
     //private readonly UISettings settings = new();
 
     // List of ValueTuple holding the Navigation Tag and the relative Navigation Page
-    private readonly List<(string Tag, Type Page)> _pages = new()
+    private readonly List<(string Tag, Type? Page)> _pages = new()
     {
-        ("building", typeof(Views.Rent.Residentials.Editor.BuildingPage)),
+        ("building", null),
+        ("summary", typeof(Views.Rent.Residentials.Editor.SummaryPage)),
+        ("structure", typeof(Views.Rent.Residentials.Editor.StructurePage)),
         ("location", typeof(Views.Rent.Residentials.Editor.LocationPage)),
         ("transportation", typeof(Views.Rent.Residentials.Editor.TransportationPage)),
         ("appliance", typeof(Views.Rent.Residentials.Editor.AppliancePage)),
@@ -55,7 +78,7 @@ public sealed partial class EditorShell : Page
         ("gyousya", typeof(Views.Rent.Residentials.Editor.GyousyaPage)),
     };
 
-    public EditorShell(Views.Rent.Residentials.Editor.EditorWindow win, ViewModels.Rent.Residentials.Editor.ModalViewModel vm)
+    public EditorShell(Views.Rent.Residentials.Editor.EditorWindow win, ViewModels.Rent.Residentials.Editor.EditorViewModel vm)
     {
         EditorWin = win ?? throw new ArgumentNullException(nameof(win));
         ViewModel = vm ?? throw new ArgumentNullException(nameof(vm));
@@ -192,6 +215,8 @@ public sealed partial class EditorShell : Page
         //WeakReferenceMessenger.Default.UnregisterAll(this);
     }
 
+
+
     private void ContentFrame_NavigationFailed(object sender, NavigationFailedEventArgs e)
     {
         throw new Exception("Failed to load Page " + e.SourcePageType.FullName);
@@ -202,10 +227,26 @@ public sealed partial class EditorShell : Page
         // Since we use ItemInvoked, we set selecteditem manually
         //NavView.SelectedItem = NavView.MenuItems.OfType<NavigationViewItem>().First();
 
-        NavView.SelectedItem = NavView.MenuItems.OfType<NavigationViewItem>().First();
+        //NavView.SelectedItem = NavView.MenuItems.OfType<NavigationViewItem>().First().FindChildren().Where(n => n.Tag.Equals("summary"));
+        var firstMenuItem = NavView.MenuItems.OfType<NavigationViewItem>().First();
+        if (firstMenuItem != null)
+        {
+            var childItem = firstMenuItem.MenuItems.OfType<NavigationViewItem>().Where(n => n.Tag.Equals("summary"));
+            if (childItem != null)
+            {
+                childItem.First().IsSelected = true;
+                navigationViewSelectedItem = childItem.First();
+            }
+            else { Debug.WriteLine("No child menu item with tag 'summary' found in NavView."); }
+        }
+        else
+        {
+            Debug.WriteLine("No first menu item found in NavView.");
+        }
 
         // Pass Frame when navigate.  //, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft } //, new SuppressNavigationTransitionInfo() //new EntranceNavigationTransitionInfo()
-        ContentFrame.Navigate(typeof(ZumenSearch.Views.Rent.Residentials.Editor.BuildingPage), this, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });
+        ContentFrame.Navigate(typeof(ZumenSearch.Views.Rent.Residentials.Editor.SummaryPage), this, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });
+
 
         // Listen to the window directly so the app responds to accelerator keys regardless of which element has focus.
         //Window.Current.CoreWindow.Dispatcher.AcceleratorKeyActivated +=  CoreDispatcher_AcceleratorKeyActivated;
@@ -218,6 +259,8 @@ public sealed partial class EditorShell : Page
 
     private void NavView_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
     {
+        if (_pages is null)
+            return;
 
         if (args.IsSettingsInvoked == true)
         {
@@ -225,21 +268,28 @@ public sealed partial class EditorShell : Page
         }
         else if (args.InvokedItemContainer != null && (args.InvokedItemContainer.Tag != null))
         {
-
-            if (_pages is null)
+            if (args.InvokedItemContainer.Tag is not string tag || string.IsNullOrWhiteSpace(tag))
+            {
+                Debug.WriteLine("NavView_ItemInvoked: Invalid tag or null.");
+                sender.SelectedItem = navigationViewSelectedItem; 
                 return;
+            }
 
-            var item = _pages.First(p => p.Tag.Equals(args.InvokedItemContainer.Tag.ToString()));
+            var item = _pages.FirstOrDefault(p => p.Tag.Equals(args.InvokedItemContainer.Tag.ToString()));
 
-            var _page = item.Page;
+            if (item.Page is null)
+            {
+                //Debug.WriteLine("NavView_ItemInvoked: Page is null for tag " + tag);
+                sender.SelectedItem = navigationViewSelectedItem;
 
-            if (_page is null)
                 return;
+            }
+
+            navigationViewSelectedItem = sender.SelectedItem as NavigationViewItem;
 
             // Pass Frame when navigate.
-            ContentFrame.Navigate(_page, this, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });//, args.RecommendedNavigationTransitionInfo
+            ContentFrame.Navigate(item.Page, this, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });//, args.RecommendedNavigationTransitionInfo
         }
- 
     }
 
     private void NavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)

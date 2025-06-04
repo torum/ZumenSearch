@@ -7,22 +7,22 @@ using ZumenSearch.ViewModels;
 
 namespace ZumenSearch.Views.Rent.Residentials.Editor.Modal;
 
-public sealed partial class BasicPage : Page
+public sealed partial class SummaryPage : Page
 {
-    public ViewModels.Rent.Residentials.Editor.Modal.BasicViewModel ViewModel
+    public ViewModels.Rent.Residentials.Editor.Modal.SummaryViewModel ViewModel
     {
         get;
     }
 
     private Views.Rent.Residentials.Editor.Modal.ModalShell? _dialogShell;
 
-    public BasicPage()
+    public SummaryPage()
     {
-        ViewModel = new ViewModels.Rent.Residentials.Editor.Modal.BasicViewModel();
+        ViewModel = new ViewModels.Rent.Residentials.Editor.Modal.SummaryViewModel();
         InitializeComponent();
 
         BreadcrumbBar1.ItemsSource = new ObservableCollection<Breadcrumbs>{
-            new() { Name = "ïîâÆ", Page = typeof(BasicPage).FullName!},
+            new() { Name = "äTóv", Page = typeof(SummaryPage).FullName!},
             //new() { Name = "èZãèóp", Page = typeof(ResidentialsPage).FullName! },
         };
         BreadcrumbBar1.ItemClicked += BreadcrumbBar_ItemClicked;
@@ -32,7 +32,7 @@ public sealed partial class BasicPage : Page
     {
         if (args.Index == 0)
         {
-            _dialogShell?.NavFrame.Navigate(typeof(BasicPage), _dialogShell, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });
+            //_dialogShell?.NavFrame.Navigate(typeof(SummaryPage), _dialogShell, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });
         }
     }
 

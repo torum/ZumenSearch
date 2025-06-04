@@ -6,7 +6,7 @@ using ZumenSearch.Views.Rent.Residentials.Editor;
 
 namespace ZumenSearch.ViewModels.Rent.Residentials.Editor;
 
-public partial class ModalViewModel : ObservableRecipient
+public partial class EditorViewModel : ObservableRecipient
 {
     public Views.Rent.Residentials.Editor.EditorWindow? EditorWin
     {
@@ -14,14 +14,7 @@ public partial class ModalViewModel : ObservableRecipient
     }
 
 
-    private object? _selected;
-    public object? Selected
-    {
-        get => _selected;
-        set => SetProperty(ref _selected, value);
-    }
-
-    public ModalViewModel()
+    public EditorViewModel()
     {
 
     }

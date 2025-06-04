@@ -5,7 +5,6 @@ using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
 using System;
 using System.Collections.Generic;
-//using ZumenSearch.ViewModels.Rent.Residentials.Editor.Units;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
@@ -28,10 +27,13 @@ public sealed partial class ModalShell : Page
         get => ContentFrame;
     }
 
+    private NavigationViewItem? navigationViewSelectedItem;
+
     // List of ValueTuple holding the Navigation Tag and the relative Navigation Page
-    private readonly List<(string Tag, Type Page)> _pages =
+    private readonly List<(string Tag, Type? Page)> _pages =
     [
-        ("room_basic", typeof(Views.Rent.Residentials.Editor.Modal.BasicPage)),
+        ("room", null),
+        ("room_summary", typeof(Views.Rent.Residentials.Editor.Modal.SummaryPage)),
         ("room_status", typeof(Views.Rent.Residentials.Editor.Modal.StatusPage)),
         ("room_contract", typeof(Views.Rent.Residentials.Editor.Modal.ContractPage)),
         ("room_transaction", typeof(Views.Rent.Residentials.Editor.Modal.TransactionPage)),
@@ -103,9 +105,8 @@ public sealed partial class ModalShell : Page
 
     private void NavView_Loaded(object sender, RoutedEventArgs e)
     {
-        /*
         // Since we use ItemInvoked, we set selecteditem manually
-
+        /*
         // Pass Frame when navigate.
         ContentFrame.Navigate(typeof(RentLivingEdit.Units.RentLivingEditUnitEditBasicPage), ContentFrame, new Microsoft.UI.Xaml.Media.Animation.EntranceNavigationTransitionInfo());
 
@@ -117,9 +118,24 @@ public sealed partial class ModalShell : Page
         //SystemNavigationManager.GetForCurrentView().BackRequested += System_BackRequested;
         */
 
-        NavView.SelectedItem = NavView.MenuItems.OfType<NavigationViewItem>().First();
+        //NavView.SelectedItem = NavView.MenuItems.OfType<NavigationViewItem>().First();
+        var firstMenuItem = NavView.MenuItems.OfType<NavigationViewItem>().First();
+        if (firstMenuItem != null)
+        {
+            var childItem = firstMenuItem.MenuItems.OfType<NavigationViewItem>().Where(n => n.Tag.Equals("room_summary"));
+            if (childItem != null)
+            {
+                childItem.First().IsSelected = true;
+                navigationViewSelectedItem = childItem.First();
+            }
+            else { Debug.WriteLine("No child menu item with tag 'room_summary' found in NavView."); }
+        }
+        else
+        {
+            Debug.WriteLine("No first menu item found in NavView.");
+        }
 
-        ContentFrame.Navigate(typeof(ZumenSearch.Views.Rent.Residentials.Editor.Modal.BasicPage), this, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });
+        ContentFrame.Navigate(typeof(ZumenSearch.Views.Rent.Residentials.Editor.Modal.SummaryPage), this, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });
     }
 
     private void ContentFrame_NavigationFailed(object sender, NavigationFailedEventArgs e)
@@ -129,28 +145,35 @@ public sealed partial class ModalShell : Page
 
     private void NavView_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
     {
+        if (_pages is null)
+            return;
+
         if (args.IsSettingsInvoked == true)
         {
             //NavView_Navigate("settings", args.RecommendedNavigationTransitionInfo);
         }
         else if (args.InvokedItemContainer != null && (args.InvokedItemContainer.Tag != null))
         {
-
-            if (_pages is null)
+            if (args.InvokedItemContainer.Tag is not string tag || string.IsNullOrWhiteSpace(tag))
             {
+                Debug.WriteLine("NavView_ItemInvoked: Invalid tag or null.");
+                sender.SelectedItem = navigationViewSelectedItem;
                 return;
             }
 
-            var item = _pages.First(p => p.Tag.Equals(args.InvokedItemContainer.Tag.ToString()));
+            var item = _pages.FirstOrDefault(p => p.Tag.Equals(args.InvokedItemContainer.Tag.ToString()));
 
-            var _page = item.Page;
-
-            if (_page is null)
+            if (item.Page is null)
             {
+                //Debug.WriteLine("NavView_ItemInvoked: Page is null for tag " + tag);
+                sender.SelectedItem = navigationViewSelectedItem;
+
                 return;
             }
 
-            ContentFrame.Navigate(_page, this, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });
+            navigationViewSelectedItem = sender.SelectedItem as NavigationViewItem;
+
+            ContentFrame.Navigate(item.Page, this, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });
         }
     }
 

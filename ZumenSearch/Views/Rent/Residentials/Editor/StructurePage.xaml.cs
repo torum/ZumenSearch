@@ -4,37 +4,47 @@ using Microsoft.UI.Xaml.Navigation;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using ZumenSearch.Models;
-using ZumenSearch.ViewModels.Rent.Residentials.Editor;
+using ZumenSearch.ViewModels;
 
 namespace ZumenSearch.Views.Rent.Residentials.Editor;
 
-public sealed partial class BuildingPage : Page
+public sealed partial class StructurePage : Page
 {
-    public BuildingViewModel ViewModel
+    public ViewModels.Rent.Residentials.Editor.StructureViewModel ViewModel
     {
         get;
     }
 
     private Views.Rent.Residentials.Editor.EditorShell? _editorShell;
 
-    public BuildingPage()
+    public StructurePage()
     {
-        ViewModel = new BuildingViewModel();//App.GetService<RentLivingEditBuildingViewModel>();
+        ViewModel = new ViewModels.Rent.Residentials.Editor.StructureViewModel();//App.GetService<RentLivingEditBuildingViewModel>();
         InitializeComponent();
 
         BreadcrumbBar1.ItemsSource = new ObservableCollection<Breadcrumbs>{
-            new() { Name = "建物", Page = typeof(BuildingPage).FullName!},
-            //new() { Name = "住居用", Page = typeof(ResidentialsPage).FullName! },
+            new() { Name = "概要", Page = typeof(Views.Rent.Residentials.Editor.SummaryPage).FullName!},
+            new() { Name = "構造", Page = typeof(Views.Rent.Residentials.Editor.StructurePage).FullName! },
         };
         BreadcrumbBar1.ItemClicked += BreadcrumbBar_ItemClicked;
+
+
+        ViewModel.EventGoBack += (sender, arg) => OnEventGoBack(arg);
     }
 
     private void BreadcrumbBar_ItemClicked(BreadcrumbBar sender, BreadcrumbBarItemClickedEventArgs args)
     {
         if (args.Index == 0)
         {
-            _editorShell?.NavFrame.Navigate(typeof(BuildingPage), _editorShell, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });
+            //_editorShell?.NavFrame.Navigate(typeof(BuildingPage), _editorShell, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });
+            _editorShell?.NavFrame.GoBack();
         }
+    }
+
+    public void OnEventGoBack(string arg)
+    {
+        //_editorShell?.NavFrame.Navigate(typeof(Views.Rent.Residentials.Editor.BuildingPage), _editorShell, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });
+        _editorShell?.NavFrame.GoBack();
     }
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
