@@ -37,9 +37,9 @@
 
             <StackPanel Grid.Row="0">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <AppBarButton Icon="Find" Label="検索" Command="{x:Bind ViewModel.SearchCommand}"/>
+                    <AppBarButton Icon="Find" Label="検索" Command="{x:Bind ViewModel.SearchRentResidentialCommand}"/>
                     <AppBarButton Icon="Clear" Label="リセット"/>
-                    <AppBarButton Icon="Add" Label="新規" Command="{x:Bind ViewModel.AddNewCommand}"/>
+                    <AppBarButton Icon="Add" Label="新規" Command="{x:Bind ViewModel.AddNewRentResidentialCommand}"/>
                 </StackPanel>
                 <!--
                     <CommandBar DefaultLabelPosition="Right">

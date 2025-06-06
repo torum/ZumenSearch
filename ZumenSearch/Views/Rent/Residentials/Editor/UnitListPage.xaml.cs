@@ -17,17 +17,37 @@ namespace ZumenSearch.Views.Rent.Residentials.Editor;
 
 public sealed partial class UnitListPage : Page
 {
-    public ViewModels.Rent.Residentials.Editor.UnitListViewModel ViewModel
-    {
-        get;
-    }
-
-    //private Frame? ContentFrame;
     private Views.Rent.Residentials.Editor.EditorShell? _editorShell;
+
+    private ViewModels.Rent.Residentials.Editor.EditorViewModel? _viewModel;
+    public ViewModels.Rent.Residentials.Editor.EditorViewModel? ViewModel
+    {
+        get => _viewModel;
+        private set
+        {
+            if (_editorShell != null)
+            {
+                _viewModel = value;
+                if (_viewModel != null)
+                {
+                    _viewModel.EventAddNew += (sender, arg) => OnEventAddNew(arg);
+                }
+                else
+                {
+                    Debug.WriteLine("Views.Rent.Residentials.Editor.UnitListPage ViewModel is null!");
+                }
+            }
+            else
+            {
+                Debug.WriteLine("Views.Rent.Residentials.Editor.UnitListPage _editorShell is null!");
+            }
+        }
+    }
 
     public UnitListPage()
     {
-        ViewModel = new ViewModels.Rent.Residentials.Editor.UnitListViewModel();//App.GetService<RentLivingEditUnitShellViewModel>();
+        //ViewModel = new ViewModels.Rent.Residentials.Editor.UnitListViewModel();//App.GetService<RentLivingEditUnitShellViewModel>();
+
         InitializeComponent();
 
         BreadcrumbBar1.ItemsSource = new ObservableCollection<Breadcrumbs>{
@@ -35,7 +55,6 @@ public sealed partial class UnitListPage : Page
         };
         BreadcrumbBar1.ItemClicked += BreadcrumbBar_ItemClicked;
 
-        ViewModel.EventAddNew += (sender, arg) => OnEventAddNew(arg);
     }
     private void BreadcrumbBar_ItemClicked(BreadcrumbBar sender, BreadcrumbBarItemClickedEventArgs args)
     {
@@ -126,6 +145,7 @@ public sealed partial class UnitListPage : Page
         if ((e.Parameter is Views.Rent.Residentials.Editor.EditorShell) && (e.Parameter != null))
         {
             _editorShell = e.Parameter as Views.Rent.Residentials.Editor.EditorShell;
+            ViewModel = _editorShell?.ViewModel as ViewModels.Rent.Residentials.Editor.EditorViewModel;
         }
 
         base.OnNavigatedTo(e);

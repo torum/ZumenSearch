@@ -40,7 +40,7 @@
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <AppBarButton Icon="Back" Label="戻る" Visibility="Collapsed"/>
                     <!--  Command="{x:Bind ViewModel.SearchCommand}" -->
-                    <AppBarButton Icon="Save" Label="保存"/>
+                    <AppBarButton Icon="Save" Label="保存" Command="{x:Bind ViewModel.SaveCommand}"/>
                 </StackPanel>
 
                 <Border BorderThickness="0,1,0,0" BorderBrush="{ThemeResource NavigationViewItemSeparatorForeground}"></Border>
@@ -66,14 +66,14 @@
 
                 <StackPanel HorizontalAlignment="Stretch" Spacing="12" Margin="0,24,12,24">
 
-                    <TextBox MinWidth="300" Header="物件名" PlaceholderText="" HorizontalAlignment="Stretch"/>
+                    <TextBox MinWidth="300" Header="物件名" PlaceholderText="" HorizontalAlignment="Stretch" Text="{x:Bind ViewModel.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
                     <StackPanel Orientation="Horizontal">
                         <ComboBox Header="物件種目" PlaceholderText="選択" MinWidth="300" Margin="0,0,0,0">
-                            <x:String>Blue</x:String>
-                            <x:String>Green</x:String>
-                            <x:String>Red</x:String>
-                            <x:String>Yellow</x:String>
+                            <x:String>アパート</x:String>
+                            <x:String>マンション</x:String>
+                            <x:String>テラスハウス</x:String>
+                            <x:String>戸建て</x:String>
                         </ComboBox>
 
                         <StackPanel Orientation="Horizontal" Margin="24,0,0,0">

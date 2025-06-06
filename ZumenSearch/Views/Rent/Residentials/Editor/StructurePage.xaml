@@ -36,7 +36,7 @@
 
             <StackPanel Grid.Row="0">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <AppBarButton Icon="Back" Label="戻る" Command="{x:Bind ViewModel.BackCommand}"/>
+                    <AppBarButton Icon="Back" Label="戻る" Command="{x:Bind ViewModel.BackToSummaryCommand}"/>
                     <AppBarButton Icon="Save" Label="保存"/>
                 </StackPanel>
 

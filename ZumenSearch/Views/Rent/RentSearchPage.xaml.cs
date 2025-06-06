@@ -54,17 +54,17 @@ namespace ZumenSearch.Views.Rent
 
     public sealed partial class RentSearchPage : Page
     {
-        private RentSearchViewModel? ViewModel { get; set; }
+        private MainViewModel? ViewModel { get; set; }
 
         public RentSearchPage()
         {
-            ViewModel = App.GetService<RentSearchViewModel>();
+            ViewModel = App.GetService<MainViewModel>();
 
             InitializeComponent();
 
             //BreadcrumbBarMain.ItemsSource = new string[] { "ëççáåüçı" };
             BreadcrumbBarMain.ItemsSource = new ObservableCollection<Breadcrumbs>{
-            new() { Name = "í¿ë›", Page = typeof(RentSearchViewModel).FullName!},
+            new() { Name = "í¿ë›", Page = typeof(RentSearchPage).FullName!},
         };
 
             var Items = new ObservableCollection<CustomDataObject>();

@@ -21,6 +21,7 @@ using Windows.ApplicationModel.Activation;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using ZumenSearch.ServiceExtensions;
+using ZumenSearch.Services;
 using ZumenSearch.ViewModels;
 using ZumenSearch.Views;
 
@@ -33,7 +34,7 @@ namespace ZumenSearch
         private static readonly string _appDeveloper = "torum";
 
         // Data folder path
-        private static readonly string _envDataFolder = System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        private static readonly string _envDataFolder = System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);//Windows.Storage.ApplicationData.Current.LocalFolder.Path;
         public static string AppDataFolder { get; } = _envDataFolder + System.IO.Path.DirectorySeparatorChar + _appDeveloper + System.IO.Path.DirectorySeparatorChar + _appName;
 
         // Config file path
@@ -79,43 +80,35 @@ namespace ZumenSearch
                 // Services
                 // TODO:
                 //services.AddSingleton<IThemeSelectorService, ThemeSelectorService>();
-
+                services.AddSingleton<IDataAccessService, DataAccessService>();
 
                 // Views and ViewModels
-                services.AddSingleton<MainViewModel>();
                 services.AddSingleton<MainShell>();
-                services.AddSingleton<SettingsViewModel>();
-                services.AddSingleton<SettingsPage>();
+                services.AddSingleton<MainViewModel>();
 
-                services.AddSingleton<ViewModels.Rent.RentSearchViewModel>();
                 services.AddSingleton<Views.Rent.RentSearchPage>();
 
-                services.AddSingleton<ViewModels.Rent.Residentials.SearchViewModel>();
                 services.AddSingleton<Views.Rent.Residentials.SearchPage>();
-                services.AddSingleton<ViewModels.Rent.Residentials.SearchResultViewModel>();
                 services.AddSingleton<Views.Rent.Residentials.SearchResultPage>();
                 
                 services.AddTransient<Views.Rent.Residentials.Editor.EditorWindow>();
-                //services.AddTransient<Views.Rent.Residentials.Editor.ResidentialsEditorShell>();
                 services.AddTransient<ViewModels.Rent.Residentials.Editor.EditorViewModel>();
                 services.AddEditorFactory<Views.Rent.Residentials.Editor.EditorShell>();
 
-                services.AddSingleton<ViewModels.Rent.Commercials.CommercialsViewModel>();
                 services.AddSingleton<Views.Rent.Commercials.CommercialsPage>();
+                services.AddSingleton<ViewModels.Rent.Commercials.CommercialsViewModel>();
 
-                services.AddSingleton<ViewModels.Rent.Parkings.ParkingsViewModel>();
                 services.AddSingleton<Views.Rent.Parkings.ParkingsPage>();
+                services.AddSingleton<ViewModels.Rent.Parkings.ParkingsViewModel>();
 
-                services.AddSingleton<ViewModels.Rent.Owners.OwnersViewModel>();
                 services.AddSingleton<Views.Rent.Owners.OwnersPage>();
+                services.AddSingleton<ViewModels.Rent.Owners.OwnersViewModel>();
 
-                services.AddSingleton<ViewModels.Brokers.BrokersViewModel>();
                 services.AddSingleton<Views.Brokers.BrokersPage>();
+                services.AddSingleton<ViewModels.Brokers.BrokersViewModel>();
 
-                //services.AddTransient<EditorViewModel>();
-                //services.AddTransient<EditorWindow>();
-                //services.AddEditorFactory<EditorShell>();
-                //services.AddEditorFactory<EditorWindow>();
+                services.AddSingleton<SettingsPage>();
+                services.AddSingleton<SettingsViewModel>();
             }).
             Build();
 

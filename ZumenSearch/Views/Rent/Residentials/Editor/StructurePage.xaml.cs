@@ -10,16 +10,37 @@ namespace ZumenSearch.Views.Rent.Residentials.Editor;
 
 public sealed partial class StructurePage : Page
 {
-    public ViewModels.Rent.Residentials.Editor.StructureViewModel ViewModel
-    {
-        get;
-    }
-
     private Views.Rent.Residentials.Editor.EditorShell? _editorShell;
+
+    private ViewModels.Rent.Residentials.Editor.EditorViewModel? _viewModel;
+    public ViewModels.Rent.Residentials.Editor.EditorViewModel? ViewModel
+    {
+        get => _viewModel;
+        private set
+        {
+            if (_editorShell != null)
+            {
+                _viewModel = value;
+                if (_viewModel != null)
+                {
+                    _viewModel.EventBackToSummary += (sender, arg) => OnEventBackToSummary(arg);
+                }
+                else
+                {
+                    Debug.WriteLine("Views.Rent.Residentials.Editor.StructurePage ViewModel is null!");
+                }
+            }
+            else
+            {
+                Debug.WriteLine("Views.Rent.Residentials.Editor.StructurePage _editorShell is null!");
+            }
+        }
+    }
 
     public StructurePage()
     {
-        ViewModel = new ViewModels.Rent.Residentials.Editor.StructureViewModel();//App.GetService<RentLivingEditBuildingViewModel>();
+       // ViewModel = new ViewModels.Rent.Residentials.Editor.StructureViewModel();//App.GetService<RentLivingEditBuildingViewModel>();
+
         InitializeComponent();
 
         BreadcrumbBar1.ItemsSource = new ObservableCollection<Breadcrumbs>{
@@ -28,45 +49,38 @@ public sealed partial class StructurePage : Page
         };
         BreadcrumbBar1.ItemClicked += BreadcrumbBar_ItemClicked;
 
-
-        ViewModel.EventGoBack += (sender, arg) => OnEventGoBack(arg);
     }
 
     private void BreadcrumbBar_ItemClicked(BreadcrumbBar sender, BreadcrumbBarItemClickedEventArgs args)
     {
         if (args.Index == 0)
         {
-            //_editorShell?.NavFrame.Navigate(typeof(BuildingPage), _editorShell, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });
-            _editorShell?.NavFrame.GoBack();
+            _editorShell?.NavFrame.Navigate(typeof(Views.Rent.Residentials.Editor.SummaryPage), _editorShell, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });
         }
     }
 
-    public void OnEventGoBack(string arg)
+    public void OnEventBackToSummary(string arg)
     {
-        //_editorShell?.NavFrame.Navigate(typeof(Views.Rent.Residentials.Editor.BuildingPage), _editorShell, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });
-        _editorShell?.NavFrame.GoBack();
+        App.CurrentDispatcherQueue?.TryEnqueue(() =>
+        {
+            _editorShell?.NavFrame.Navigate(typeof(Views.Rent.Residentials.Editor.SummaryPage), _editorShell, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });
+            /*
+            if (_editorShell?.NavFrame.CanGoBack == true)
+            {
+                _editorShell?.NavFrame.GoBack();
+            }
+            */
+        });
     }
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
-        /*
-        if (e.Parameter is string && !string.IsNullOrWhiteSpace((string)e.Parameter))
-        {
-            Debug.WriteLine("------------------------" + e.Parameter.ToString());
-        }
-        else if (e.Parameter is Frame)
-        {
-            Debug.WriteLine("========================");
-        }
-        else
-        {
-
-            Debug.WriteLine("------------------------"+e.Content);
-        }
-        */
         if ((e.Parameter is Views.Rent.Residentials.Editor.EditorShell) && (e.Parameter != null))
         {
             _editorShell = e.Parameter as Views.Rent.Residentials.Editor.EditorShell;
+            ViewModel = _editorShell?.ViewModel as ViewModels.Rent.Residentials.Editor.EditorViewModel;
+
+            //this.IsEnabled = true;
         }
 
         base.OnNavigatedTo(e);

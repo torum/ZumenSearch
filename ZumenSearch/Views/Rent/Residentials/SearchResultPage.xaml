@@ -5,6 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:mod="using:ZumenSearch.Models"
+    xmlns:rent="using:ZumenSearch.Models.Rent"
     mc:Ignorable="d">
 
     <Grid x:Name="ContentArea" Margin="{StaticResource NavigationViewPageContentAreaMargin}">
@@ -37,9 +38,9 @@
 
             <StackPanel Grid.Row="0">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <AppBarButton Icon="Back" Label="戻る"  Command="{x:Bind ViewModel.BackCommand}"/>
-                    <AppBarButton Icon="Edit" Label="編集"/>
-                    <AppBarButton Icon="Add" Label="新規" Command="{x:Bind ViewModel.AddNewCommand}"/>
+                    <AppBarButton Icon="Back" Label="戻る" Command="{x:Bind ViewModel.BackToRentResidentialCommand}"/>
+                    <AppBarButton Icon="Edit" Label="編集" Command="{x:Bind ViewModel.EditRentResidentialCommand}" CommandParameter="{x:Bind SearchResult.SelectedItem, Mode=OneWay}"/> 
+                    <AppBarButton Icon="Add" Label="新規" Command="{x:Bind ViewModel.AddNewRentResidentialCommand}"/>
                 </StackPanel>
                 <!--
                     <CommandBar DefaultLabelPosition="Right">
@@ -60,12 +61,71 @@
                     -->
 
                 <Border BorderThickness="0,1,0,0" BorderBrush="{ThemeResource NavigationViewItemSeparatorForeground}"></Border>
-
+                
+                <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Margin="0,0,24,0" HorizontalAlignment="Left">
+                    <AppBarButton Icon="Delete" Label="削除" Command="{x:Bind ViewModel.DeleteRentResidentialCommand}" CommandParameter="{x:Bind SearchResult.SelectedItem, Mode=OneWay}"/>
+                    <AppBarButton Icon="Copy" Label="複製"/>
+                    <AppBarButton Icon="Sort" IsCompact="True" ToolTipService.ToolTip="Sort" Label="並べ替え" AutomationProperties.Name="Sort">
+                        <AppBarButton.Flyout>
+                            <MenuFlyout>
+                                <MenuFlyoutItem Text="名前順" Tag="name"/>
+                                <MenuFlyoutItem Text="By match" Tag="match"/>
+                                <MenuFlyoutItem Text="By distance" Tag="distance"/>
+                            </MenuFlyout>
+                        </AppBarButton.Flyout>
+                    </AppBarButton>
+                    <!--<CommandBar.SecondaryCommands>
+                            <AppBarButton Icon="Setting" Label="Settings">
+                                <AppBarButton.KeyboardAccelerators>
+                                    <KeyboardAccelerator Modifiers="Control" Key="I" />
+                                </AppBarButton.KeyboardAccelerators>
+                            </AppBarButton>
+                        </CommandBar.SecondaryCommands>-->
+                </CommandBar>
             </StackPanel>
 
-            <ScrollViewer Grid.Row="1" Margin="0 24 0 0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <ScrollViewer Grid.Row="1" Margin="0 0 0 0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
 
+                <StackPanel>
 
+                    <ListView x:Name="SearchResult" SelectionMode="Single" ItemsSource="{x:Bind ViewModel.RentResidentialSearchResult, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" SingleSelectionFollowsFocus="True">
+                        <!--  SelectedItem="{x:Bind ViewModel.SelectedRentResidentialItem, Mode=TwoWay}" -->
+                        <ListView.ItemTemplate>
+                            <DataTemplate x:DataType="rent:RentResidential">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Ellipse x:Name="Ellipse"
+                    Grid.RowSpan="2"
+                    Width ="32"
+                    Height="32"
+                    Margin="6"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center"
+                    Fill="{ThemeResource SystemControlBackgroundBaseMediumBrush}"/>
+                                    <TextBlock Grid.Column="1"
+                    Text="{x:Bind Name, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                    x:Phase="1"
+                    Style="{ThemeResource BaseTextBlockStyle}"
+                    Margin="12,6,0,0"/>
+                                    <TextBlock  Grid.Column="1"
+                    Grid.Row="1"
+                    Text="{x:Bind Id, Mode=OneTime}"
+                    x:Phase="2"
+                    Style="{ThemeResource BodyTextBlockStyle}"
+                    Margin="12,0,0,6"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+
+                </StackPanel>
 
             </ScrollViewer>
 

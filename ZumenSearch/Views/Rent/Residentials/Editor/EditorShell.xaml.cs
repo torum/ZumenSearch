@@ -24,14 +24,12 @@ namespace ZumenSearch.Views.Rent.Residentials.Editor;
 
 public sealed partial class EditorShell : Page
 {
-
-    public Views.Rent.Residentials.Editor.EditorWindow? EditorWin { get; private set; }
-
-
     public ViewModels.Rent.Residentials.Editor.EditorViewModel? ViewModel
     {
         get;
     }
+
+    public Views.Rent.Residentials.Editor.EditorWindow? EditorWin { get; private set; }
 
     // For uses of Navigation in other pages.
     public Frame NavFrame
@@ -40,26 +38,6 @@ public sealed partial class EditorShell : Page
     }
 
     private NavigationViewItem? navigationViewSelectedItem;
-
-    private bool _isConnected;
-    public bool IsConnected
-    {
-        get
-        {
-            return _isConnected;
-        }
-        set
-        {
-            if (_isConnected == value)
-                return;
-
-            _isConnected = value;
-            //NotifyPropertyChanged(nameof(IsConnected));
-        }
-    }
-
-
-    //private readonly UISettings settings = new();
 
     // List of ValueTuple holding the Navigation Tag and the relative Navigation Page
     private readonly List<(string Tag, Type? Page)> _pages = new()
@@ -78,25 +56,26 @@ public sealed partial class EditorShell : Page
         ("gyousya", typeof(Views.Rent.Residentials.Editor.GyousyaPage)),
     };
 
+    //private readonly UISettings settings = new();
+
     public EditorShell(Views.Rent.Residentials.Editor.EditorWindow win, ViewModels.Rent.Residentials.Editor.EditorViewModel vm)
     {
         EditorWin = win ?? throw new ArgumentNullException(nameof(win));
         ViewModel = vm ?? throw new ArgumentNullException(nameof(vm));
-        ViewModel.EditorWin = EditorWin;
 
         this.InitializeComponent();
 
-        if (EditorWin != null)
-        {
-            EditorWin.Content = this;
+        EditorWin.Content = this;
+        EditorWin.ExtendsContentIntoTitleBar = true;
+        EditorWin.SetTitleBar(AppTitleBar);
+        EditorWin.Activated += EditorWindow_Activated;
+        EditorWin.Closed += EditorWindow_Closed;
+        EditorWin.AppWindow.Closing += AppWindow_Closing;
 
-            EditorWin.ExtendsContentIntoTitleBar = true;
-            EditorWin.SetTitleBar(AppTitleBar);
-            EditorWin.Activated += EditorWindow_Activated;
-            EditorWin.Closed += EditorWindow_Closed;
+        ViewModel.EditorWin = EditorWin;
 
-        }
 
+        //_entry = new Models.Rent.RentResidential(Guid.NewGuid().ToString());
 
         /*
         Window = new ResidentialsEditorWindow();
@@ -181,6 +160,22 @@ public sealed partial class EditorShell : Page
             }
         });
         */
+    }
+
+    private void AppWindow_Closing(Microsoft.UI.Windowing.AppWindow sender, Microsoft.UI.Windowing.AppWindowClosingEventArgs args)
+    {
+        if (ViewModel == null)
+            return;
+
+        if (ViewModel.IsEntryDirty)
+        {
+            // TODO: Prompt user to save changes before closing.
+            Debug.WriteLine("AppWindow_Closing: Entry is dirty, prompting save dialog(TODO).");
+            args.Cancel = true; // Cancel the closing operation
+
+            // TEMP: For now, just reset the dirty state.
+            ViewModel.IsEntryDirty = false; 
+        }
     }
 
     public void EditorWindow_Activated(object sender, Microsoft.UI.Xaml.WindowActivatedEventArgs args)
@@ -447,6 +442,13 @@ public sealed partial class EditorShell : Page
         });
     }
 
-
+    public void SetEntry(Models.Rent.RentResidential entry)
+    {
+        if (ViewModel is null)
+        {
+            throw new InvalidOperationException("ViewModel is not initialized.");
+        }
+        ViewModel.Entry = entry ?? throw new ArgumentNullException(nameof(entry));
+    }
 
 }

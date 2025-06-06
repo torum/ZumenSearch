@@ -50,57 +50,22 @@ public sealed partial class ModalShell : Page
         ViewModel = new ViewModels.Rent.Residentials.Editor.Modal.ModalViewModel();//App.GetService<RentLivingEditUnitShellViewModel>();
         InitializeComponent();
 
-
         dialogWindow.ExtendsContentIntoTitleBar = true;
         dialogWindow.SetTitleBar(AppTitleBar);
 
         dialogWindow.Activated += UnitsWindow_Activated;
         dialogWindow.Closed += UnitsWindow_Closed;
-
-
-
-
-        /*
-        BreadcrumbBarRoom.ItemsSource = new ObservableCollection<Folder>{
-            new() { Name = "一覧", Page = typeof(RentLivingEditUnitListViewModel).FullName!},
-            new() { Name = "編集", Page = typeof(RentLivingEditUnitEditShellViewModel).FullName! },
-        };
-        BreadcrumbBarRoom.ItemClicked += BreadcrumbBarRoom_ItemClicked;
-
-        ViewModel.EventGoBack += (sender, arg) => OnEventGoBack(arg);
-        */
     }
 
     public void UnitsWindow_Activated(object sender, Microsoft.UI.Xaml.WindowActivatedEventArgs args)
     {
         var resource = args.WindowActivationState == WindowActivationState.Deactivated ? "WindowCaptionForegroundDisabled" : "WindowCaptionForeground";
         AppTitleBarText.Foreground = (SolidColorBrush)App.Current.Resources[resource];
-
     }
 
     public void UnitsWindow_Closed(object sender, WindowEventArgs args)
     {
         //
-    }
-
-    private void BreadcrumbBarRoom_ItemClicked(BreadcrumbBar sender, BreadcrumbBarItemClickedEventArgs args)
-    {
-        /*
-        if (BreadcrumbBarRoom.ItemsSource is not ObservableCollection<Folder>)
-        {
-            return;
-        }
-
-        if (args.Index == 0)
-        {
-            if (ParentContentFrame == null)
-            {
-                return;
-            }
-
-            ParentContentFrame.Navigate(typeof(RentLivingEdit.RentLivingEditUnitListPage), ParentContentFrame, new EntranceNavigationTransitionInfo());
-        }
-        */
     }
 
     private void NavView_Loaded(object sender, RoutedEventArgs e)

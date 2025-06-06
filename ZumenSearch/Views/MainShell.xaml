@@ -29,21 +29,27 @@
         </Grid>
 
 
-        <NavigationView x:Name="NavigationViewControl" Loaded="NavigationViewControl_Loaded" ItemInvoked="NavigationViewControl_ItemInvoked" Grid.Row="1" Canvas.ZIndex="0" Margin="0,-46,0,0" PaneDisplayMode="Left" IsBackButtonVisible="Collapsed" IsPaneToggleButtonVisible="True" IsBackEnabled="{x:Bind ViewModel.IsBackEnabled, Mode=OneWay}" IsSettingsVisible="True" ExpandedModeThresholdWidth="1280" OpenPaneLength ="200" DisplayModeChanged="NavigationViewControl_DisplayModeChanged" Header="{x:Bind ((ContentControl)ViewModel.Selected).Content, Mode=OneWay}">
+        <NavigationView x:Name="NavigationViewControl" Loaded="NavigationViewControl_Loaded" ItemInvoked="NavigationViewControl_ItemInvoked" Grid.Row="1" Canvas.ZIndex="0" Margin="0,-46,0,0" PaneDisplayMode="Left" IsBackButtonVisible="Collapsed" IsPaneToggleButtonVisible="True" IsBackEnabled="{x:Bind ViewModel.IsBackEnabled, Mode=OneWay}" IsSettingsVisible="True" ExpandedModeThresholdWidth="1280" OpenPaneLength ="200" DisplayModeChanged="NavigationViewControl_DisplayModeChanged" Header="{x:Bind ((ContentControl)ViewModel.SelectedNavigationViewItem).Content, Mode=OneWay}">
             <NavigationView.Resources>
             </NavigationView.Resources>
+            <!--
+            <NavigationView.AutoSuggestBox>
+                <AutoSuggestBox QueryIcon="Find" AutomationProperties.Name="Search" PlaceholderText="Type a name">
+                </AutoSuggestBox>
+            </NavigationView.AutoSuggestBox>
+            -->
             <NavigationView.MenuItems>
-                <!--
-                <NavigationViewItemHeader Content="賃貸"/>
-                -->
+                
 
-                <NavigationViewItem Tag="Rent" Content="賃貸" ToolTipService.ToolTip="賃貸総合検索" IsExpanded="True">
+                <NavigationViewItem Tag="Rent" Content="賃貸" ToolTipService.ToolTip="賃貸" IsExpanded="True">
                     <NavigationViewItem.Icon>
                         <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xe80f;"/>
                     </NavigationViewItem.Icon>
 
                     <NavigationViewItem.MenuItems>
 
+                        <!-- <NavigationViewItemHeader Content="物件"/> -->
+                        
                         <!--  -->
                         <NavigationViewItem Tag="RentResidentials" Content="住居用" ToolTipService.ToolTip="賃貸住居用">
                             <NavigationViewItem.Icon>
