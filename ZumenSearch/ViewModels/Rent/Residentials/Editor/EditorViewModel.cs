@@ -1,29 +1,154 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using ZumenSearch.Models;
+using ZumenSearch.Models.Rent.Residentials;
 using ZumenSearch.Services;
 using ZumenSearch.Views;
+using static ZumenSearch.Models.Rent.Residentials.Enums;
 
 namespace ZumenSearch.ViewModels.Rent.Residentials.Editor;
 
+// 賃貸住居用物件の「種別」クラス
+public class Kind(string key, string label)
+{
+    public string Label { get; set; } = label;
+    public string Key { get; set; } = key;
+};
+
+public class Structure(string key, string label)
+{
+    public string Label { get; set; } = label;
+    public string Key { get; set; } = key;
+};
+
+// 賃貸住居用物件の編集用ViewModel本体クラス
 public partial class EditorViewModel : ObservableObject, INotifyPropertyChanged
 {
-    public Views.Rent.Residentials.Editor.EditorWindow? EditorWin
+    // Flag that indicates if the entry is dirty (i.e., has unsaved changes).
+    private bool _isEntryDirty;
+    public bool IsEntryDirty
     {
-        get; set;
+        get => _isEntryDirty;
+        set
+        {
+            if (SetProperty(ref _isEntryDirty, value))
+            {
+                //
+            }
+        }
     }
 
-    private Models.Rent.RentResidential _entry;
-    public Models.Rent.RentResidential Entry
+    // The Name property holds the name of the entry being edited.
+    private string? _name;
+    public string Name
     {
-        get => _entry; 
+        get => _name ?? string.Empty; // Ensure a non-null value is returned
+        set
+        {
+            if (SetProperty(ref _name, value))
+            {
+                IsEntryDirty = true;
+            }
+        }
+    }
+
+    // For the use of the ComboBox in the UI, we define a collection of kinds.
+    public ObservableCollection<Kind> Kinds =
+    [
+        //new Kind(EnumKinds.Unspecified.ToString(), "未指定"),
+        new Kind(EnumKinds.Apartment.ToString(), "アパート"),
+        new Kind(EnumKinds.Mansion.ToString(), "マンション"),
+        new Kind(EnumKinds.House.ToString(), "一戸建て"),
+        new Kind(EnumKinds.TerraceHouse.ToString(), "テラスハウス"),
+        new Kind(EnumKinds.TownHouse.ToString(), "タウンハウス"),
+        new Kind(EnumKinds.ShareHouse.ToString(), "シェアハウス"),
+        new Kind(EnumKinds.Dormitory.ToString(), "寮・下宿")
+    ];
+
+    // The SelectedKind property holds the currently selected kind from the ComboBox in the UI.
+    private Kind _selectedKind = new(EnumKinds.Unspecified.ToString(), "未指定");
+    public Kind SelectedKind
+    {
+        get => _selectedKind;
+        set
+        {
+            if (SetProperty(ref _selectedKind, value))
+            {
+                IsEntryDirty = true;
+            }
+        }
+    }
+
+    // The IsUnitOwnership property distinguish the building ownership type.
+    private bool _isUnitOwnership;
+    public bool IsUnitOwnership
+    {
+        get => _isUnitOwnership;
+        set
+        {
+            if (SetProperty(ref _isUnitOwnership, value))
+            {
+                IsEntryDirty = true;
+            }
+        }
+    }
+
+    private Structure _selectedStructure = new(EnumStructure.Unspecified.ToString(), "未指定");
+    public Structure SelectedStructure
+    {
+        get => _selectedStructure;
+        set
+        {
+            if (SetProperty(ref _selectedStructure, value))
+            {
+                IsEntryDirty = true;
+            }
+        }
+    }
+
+    public ObservableCollection<Structure> Structures =
+    [
+        //new Structure(EnumStructure.Unspecified.ToString(), "未指定"),
+        new Structure(EnumStructure.Wood.ToString(), "木造"),
+        new Structure(EnumStructure.Block.ToString(), "ブロック造"),
+        new Structure(EnumStructure.LightSteel.ToString(), "軽量鉄骨造"),
+        new Structure(EnumStructure.Steel.ToString(), "鉄骨造"),
+        new Structure(EnumStructure.RC.ToString(), "鉄筋コンクリート(RC)造"),
+        new Structure(EnumStructure.SRC.ToString(), "鉄骨鉄筋コンクリート(SRC)造"),
+        new Structure(EnumStructure.ALC.ToString(), "軽量気泡コンクリート(ALC)造"),
+        new Structure(EnumStructure.PC.ToString(), "プレキャストコンクリート(PC)造"),
+        new Structure(EnumStructure.HPC.ToString(), "鉄骨プレキャストコンクリート(HPC)造"),
+        new Structure(EnumStructure.RB.ToString(), "鉄筋ブロック造"),
+        new Structure(EnumStructure.CFT.ToString(), "コンクリート充填鋼管(CFT)造"),
+        new Structure(EnumStructure.Other.ToString(), "その他")
+    ];
+
+
+
+
+
+
+
+
+
+
+
+
+    // The Entry property holds the COPY of current RentResidential entry being edited. Do not use it directly in the UI.
+    private Models.Rent.Residentials.RentResidential _entry = new();
+    public Models.Rent.Residentials.RentResidential Entry
+    {
+        get => _entry;
         set
         {
             if (value != null)
@@ -40,7 +165,7 @@ public partial class EditorViewModel : ObservableObject, INotifyPropertyChanged
                     // TODO: If EditorWin is null, log an error or handle it accordingly.
                     Debug.WriteLine("EditorWin is null. Cannot set Id.");
                 }
-            
+
                 Name = _entry.Name;
                 //TODO: Set other properties
 
@@ -49,34 +174,13 @@ public partial class EditorViewModel : ObservableObject, INotifyPropertyChanged
         }
     }
 
-    private bool _isEntryDirty;
-    public bool IsEntryDirty
+    // The EditorWin property holds the reference to the EditorWindow instance that is currently being used for editing.
+    public Views.Rent.Residentials.Editor.EditorWindow? EditorWin
     {
-        get => _isEntryDirty;
-        set
-        {
-            if (SetProperty(ref _isEntryDirty, value))
-            {
-
-            }
-        }
+        get; set;
     }
 
-    private string? _name;
-    public string Name
-    {
-        get => _name ?? string.Empty; // Ensure a non-null value is returned
-        set
-        {
-            if (SetProperty(ref _name, value))
-            {
-                IsEntryDirty = true;
-            }
-        }
-    }
-
-    //private readonly MainViewModel _viewModel = App.GetService<MainViewModel>();
-
+    // The event handlers below are used to notify the UI about various actions that can be performed in the editor.
     //
     public event EventHandler<string>? EventAddNew;
     //
@@ -88,15 +192,13 @@ public partial class EditorViewModel : ObservableObject, INotifyPropertyChanged
     public event EventHandler<string>? EventEditTransportation;
     public event EventHandler<string>? EventEditAppliance;
 
-
+    // The IDataAccessService is used to access the data layer for saving and updating entries.
     private readonly IDataAccessService _dataAccessService;
 
+    // Constructor for the EditorViewModel class, initializes the data access service and the entry.
     public EditorViewModel(IDataAccessService dataAccessService)
     {
         _dataAccessService = dataAccessService;
-
-        //
-        _entry = new Models.Rent.RentResidential();
 
     }
 
@@ -108,17 +210,23 @@ public partial class EditorViewModel : ObservableObject, INotifyPropertyChanged
     {
         if (IsEntryDirty)
         {
+            if (string.IsNullOrEmpty(Name))
+            {
+                Debug.WriteLine("TODO: Name is null or empty. This field is required. Show alart and abort.");
+            }
+
             Entry.Name = Name;
-            //TODO: Set other properties
+            //TODO: Set other properties for Entry.
 
             if (string.IsNullOrEmpty(Entry.Id))
             {
-                // If the Entry.Id is empty, generate a new ID.
+                // If the Entry.Id is empty, generate a new ID and save as new.
                 Entry.SetId = Guid.NewGuid().ToString();
                 await SaveAsNewAsync();
             }
             else
             {
+                // If the Entry.Id is not empty, update the existing entry.
                 await SaveAsUpdate();
             }
         }

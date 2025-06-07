@@ -27,7 +27,7 @@ namespace ZumenSearch.Models
             {
                 if (SetProperty(ref _isDirty, value))
                 {
-                    // NotifyPropertyChanged(nameof(IsDirty));
+                    //
                 }
             }
         }
@@ -52,63 +52,13 @@ namespace ZumenSearch.Models
 
                 if (SetProperty(ref _id, value))
                 {
-                    // NotifyPropertyChanged(nameof(Id));
+                    // 
                 }
             }
         }
 
-        private string? _name;
-        public string Name
-        {
-            get => _name ?? string.Empty; // Ensure a non-null value is returned
-            set
-            {
-                if (SetProperty(ref _name, value))
-                {
-                    //NotifyPropertyChanged(nameof(Name));
-                    IsDirty = true;
-                }
-            }
-        }
 
-        /*
-        #region == タイプ ==
 
-        // 賃貸のタイプ（住居用・事業用・駐車場）
-        protected RentTypes _rentType;
-        public RentTypes RentType
-        {
-            get
-            {
-                return _rentType;
-            }
-        }
-
-        public string TypeLabel
-        {
-            get
-            {
-                return this.RentTypeToLabel[this.RentType];
-            }
-        }
-
-        // 賃貸のタイプラベル変換
-        public Dictionary<RentTypes, string> RentTypeToLabel { get; } = new Dictionary<RentTypes, string>()
-        {
-            {RentTypes.RentLiving, "賃貸住居用"},
-            {RentTypes.RentBussiness, "賃貸事業用"},
-            {RentTypes.RentParking, "賃貸駐車場"},
-        };
-
-        public Dictionary<string, RentTypes> StringToRentType { get; } = new Dictionary<string, RentTypes>()
-        {
-            {"RentLiving", RentTypes.RentLiving},
-            {"RentBussiness", RentTypes.RentBussiness},
-            {"RentParking", RentTypes.RentParking},
-        };
-
-        #endregion
-        */
         /*
         #region == 所在地 ==
 
@@ -573,6 +523,7 @@ namespace ZumenSearch.Models
 
         protected Entry()
         {
+            // Instead of using a GUID, we initialize _id to an empty string to indicate that the entry is NEW.
             _id = string.Empty;//Guid.NewGuid().ToString();
         }
 

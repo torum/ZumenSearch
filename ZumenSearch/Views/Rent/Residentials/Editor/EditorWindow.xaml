@@ -6,6 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d" Closed="Window_Closed">
     <Window.SystemBackdrop>
-        <MicaBackdrop Kind="Base"/>
+        <DesktopAcrylicBackdrop/>
+        <!--<MicaBackdrop Kind="Base"/>-->
     </Window.SystemBackdrop>
 </Window>

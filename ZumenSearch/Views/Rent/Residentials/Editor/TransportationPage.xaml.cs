@@ -1,6 +1,9 @@
 ﻿using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
+using ZumenSearch.Models;
 using ZumenSearch.ViewModels.Rent.Residentials.Editor;
 
 namespace ZumenSearch.Views.Rent.Residentials.Editor;
@@ -15,21 +18,11 @@ public sealed partial class TransportationPage : Page
         get => _viewModel;
         private set
         {
-            if (_editorShell != null)
+            if (value != null)
             {
                 _viewModel = value;
-                if (_viewModel != null)
-                {
-                    //
-                }
-                else
-                {
-                    Debug.WriteLine("Views.Rent.Residentials.Editor.TransportationPage ViewModel is null!");
-                }
-            }
-            else
-            {
-                Debug.WriteLine("Views.Rent.Residentials.Editor.TransportationPage _editorShell is null!");
+
+                _viewModel.EventBackToSummary += (sender, arg) => OnEventBackToSummary(arg);
             }
         }
     }
@@ -38,6 +31,34 @@ public sealed partial class TransportationPage : Page
     {
         //ViewModel = new TransportationViewModel();//App.GetService<RentLivingEditTransportationViewModel>();
         InitializeComponent();
+
+        BreadcrumbBar1.ItemsSource = new ObservableCollection<Breadcrumb>{
+            new() { Name = "概要", Page = typeof(Views.Rent.Residentials.Editor.SummaryPage).FullName!},
+            new() { Name = "交通", Page = typeof(Views.Rent.Residentials.Editor.LocationPage).FullName! },
+        };
+        BreadcrumbBar1.ItemClicked += BreadcrumbBar_ItemClicked;
+    }
+
+    private void BreadcrumbBar_ItemClicked(BreadcrumbBar sender, BreadcrumbBarItemClickedEventArgs args)
+    {
+        if (args.Index == 0)
+        {
+            _editorShell?.NavFrame.Navigate(typeof(Views.Rent.Residentials.Editor.SummaryPage), _editorShell, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });
+        }
+    }
+
+    public void OnEventBackToSummary(string arg)
+    {
+        App.CurrentDispatcherQueue?.TryEnqueue(() =>
+        {
+            _editorShell?.NavFrame.Navigate(typeof(Views.Rent.Residentials.Editor.SummaryPage), _editorShell, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });
+            /*
+            if (_editorShell?.NavFrame.CanGoBack == true)
+            {
+                _editorShell?.NavFrame.GoBack();
+            }
+            */
+        });
     }
 
     protected override void OnNavigatedTo(NavigationEventArgs e)

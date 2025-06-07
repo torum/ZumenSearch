@@ -18,7 +18,7 @@
 
         <BreadcrumbBar x:Name="BreadcrumbBar1">
             <BreadcrumbBar.ItemTemplate>
-                <DataTemplate x:DataType="mod:Breadcrumbs">
+                <DataTemplate x:DataType="mod:Breadcrumb">
                     <BreadcrumbBarItem Content="{Binding}" AutomationProperties.Name="{Binding Name}">
                         <BreadcrumbBarItem.ContentTemplate>
                             <DataTemplate>
@@ -64,38 +64,21 @@
                     </VisualStateGroup>
                 </VisualStateManager.VisualStateGroups>
 
-                <StackPanel HorizontalAlignment="Stretch" Spacing="12" Margin="0,24,12,24">
+                <StackPanel HorizontalAlignment="Stretch" Spacing="12" Margin="0,12,12,24">
 
                     <TextBox MinWidth="300" Header="物件名" PlaceholderText="" HorizontalAlignment="Stretch" Text="{x:Bind ViewModel.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
-                    <StackPanel Orientation="Horizontal">
-                        <ComboBox Header="物件種目" PlaceholderText="選択" MinWidth="300" Margin="0,0,0,0">
-                            <x:String>アパート</x:String>
-                            <x:String>マンション</x:String>
-                            <x:String>テラスハウス</x:String>
-                            <x:String>戸建て</x:String>
-                        </ComboBox>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                        <ComboBox Header="物件種目" x:Name="ComboBoxKind" PlaceholderText="選択" MinWidth="300" Margin="0,0,0,0" SelectedIndex="-1" ItemsSource="{x:Bind ViewModel.Kinds, Mode=OneWay}" DisplayMemberPath="Label" SelectedItem="{x:Bind ViewModel.SelectedKind, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></ComboBox>
 
                         <StackPanel Orientation="Horizontal" Margin="24,0,0,0">
                             <StackPanel>
                                 <TextBlock Text="所有権" Margin="12,0,0,0"></TextBlock>
-                                <CheckBox Content="区分所有" Margin="12,8,0,0"/>
+                                <CheckBox Content="区分所有" Margin="12,8,0,0" IsChecked="{x:Bind ViewModel.IsUnitOwnership, Mode=TwoWay}"/>
                             </StackPanel>
                         </StackPanel>
                     </StackPanel>
-                    
-                    <controls:SettingsCard x:Name="settingsCardStructure" Margin="0,6,0,0"
-                                            Command="{x:Bind ViewModel.EditStructureCommand}"
-                               Description="鉄筋コンクリート造、2階建て"
-                               Header="建物構造"
-                               HeaderIcon="{ui:FontIcon Glyph=&#xE799;}"
-                               IsClickEnabled="True"
-                               IsEnabled="True">
-                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="編集"/>
-                        <!--<CommandBar IsOpen="False" DefaultLabelPosition="Right" HorizontalAlignment="Right" Margin="0">
-                            <AppBarButton Icon="Edit" Label="編集"/>
-                        </CommandBar>-->
-                    </controls:SettingsCard>
+
 
                     <controls:SettingsCard x:Name="settingsCardLocation" Margin="0,0,0,0"
                                             Command="{x:Bind ViewModel.EditLocationCommand}"
@@ -123,6 +106,19 @@
                         </CommandBar>-->
                     </controls:SettingsCard>
 
+                    <controls:SettingsCard x:Name="settingsCardStructure" Margin="0,0,0,0"
+                                            Command="{x:Bind ViewModel.EditStructureCommand}"
+                               Description="鉄筋コンクリート造、2階建て"
+                               Header="構造"
+                               HeaderIcon="{ui:FontIcon Glyph=&#xE799;}"
+                               IsClickEnabled="True"
+                               IsEnabled="True">
+                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="編集"/>
+                        <!--<CommandBar IsOpen="False" DefaultLabelPosition="Right" HorizontalAlignment="Right" Margin="0">
+                            <AppBarButton Icon="Edit" Label="編集"/>
+                        </CommandBar>-->
+                    </controls:SettingsCard>
+
                     <controls:SettingsCard x:Name="settingsCardAppliance" Margin="0,0,0,0"
                                             Command="{x:Bind ViewModel.EditApplianceCommand}"
                                Description=""
@@ -135,6 +131,58 @@
                             <AppBarButton Icon="Edit" Label="編集"/>
                         </CommandBar>-->
                     </controls:SettingsCard>
+
+                    <TextBlock Text="その他" Margin="0,24,24,0"></TextBlock>
+                    <Grid BorderThickness="0.5" BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}" CornerRadius="4" Margin="0,0,0,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*"/>
+                            <ColumnDefinition Width="4*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Row="0" Grid.RowSpan="15" Grid.Column="0" CornerRadius="4,0,0,4" Background="{ThemeResource SystemControlForegroundBaseMediumBrush}" Opacity="0.1"></Border>
+                        <Border Grid.Row="0" Grid.RowSpan="15" Grid.Column="1"  CornerRadius="0,4,4,0"></Border>
+
+                        <StackPanel Grid.Row="0" Grid.Column="0">
+                            <TextBlock Text="建物管理" Margin="12"></TextBlock>
+                        </StackPanel>
+                        <StackPanel Grid.Row="0" Grid.Column="1" Padding="24,12,12,12">
+                            <RadioButton Content="未指定" GroupName="tatemonokanri" IsChecked="True"/>
+                            <RadioButton Content="貸主" GroupName="tatemonokanri"/>
+                            <RadioButton Content="自社" GroupName="tatemonokanri"/>
+                            <RadioButton Content="他社" GroupName="tatemonokanri"/>
+                        </StackPanel>
+
+                        <Border Grid.Row="1" Grid.Column="0" BorderThickness="0.5" Height="1" BorderBrush="{ThemeResource SystemControlForegroundBaseMediumBrush}" Opacity="0.1"></Border>
+                        <Border Grid.Row="1" Grid.Column="1" BorderThickness="1" Height="1" BorderBrush="{ThemeResource SystemControlForegroundBaseMediumBrush}" Opacity="0.1"></Border>
+
+                        <StackPanel Grid.Row="2" Grid.Column="0">
+                            <TextBlock Text="建物管理会社" Margin="12"></TextBlock>
+                        </StackPanel>
+                        <StackPanel Grid.Row="2" Grid.Column="1" Padding="24">
+                            <TextBox Text="" Margin="0 0 3 6" VerticalAlignment="Center" HorizontalAlignment="Stretch"></TextBox>
+                        </StackPanel>
+                    </Grid>
+
+                    <TextBox Header="備考" Margin="0,24,0,0"
+    TextWrapping="Wrap" AcceptsReturn="True" IsSpellCheckEnabled="False"
+     MinWidth="400" MinHeight="160" MaxHeight="160" ScrollViewer.VerticalScrollBarVisibility="Auto"/>
 
                 </StackPanel>
             </ScrollViewer>

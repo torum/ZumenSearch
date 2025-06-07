@@ -20,8 +20,8 @@ using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
-using ZumenSearch.ServiceExtensions;
 using ZumenSearch.Services;
+using ZumenSearch.Services.Extensions;
 using ZumenSearch.ViewModels;
 using ZumenSearch.Views;
 

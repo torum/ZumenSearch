@@ -9,6 +9,7 @@
     mc:Ignorable="d"
     Title="" Closed="Window_Closed">
     <Window.SystemBackdrop>
-        <MicaBackdrop Kind="Base"/>
+        <DesktopAcrylicBackdrop/>
+        <!--<MicaBackdrop Kind="Base"/>-->
     </Window.SystemBackdrop>
 </Window>

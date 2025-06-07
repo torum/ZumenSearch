@@ -5,6 +5,15 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using ZumenSearch.Models;
 using ZumenSearch.ViewModels;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Threading.Tasks;
+using System.Xml.Linq;
+using ZumenSearch.Services;
+using ZumenSearch.Views;
 
 namespace ZumenSearch.Views.Rent.Residentials.Editor;
 
@@ -17,29 +26,24 @@ public sealed partial class SummaryPage : Page
     {
         get => _viewModel; 
         private set 
-        { 
-            if (_editorShell != null)
+        {
+            if (value != null)
             {
                 _viewModel = value;
-                if (_viewModel != null)
-                {
-                    _viewModel.EventEditStructure += (sender, arg) => OnEventEditStructure(arg);
-                    _viewModel.EventEditLocation += (sender, arg) => OnEventEditLocation(arg);
-                    _viewModel.EventEditTransportation += (sender, arg) => OnEventEditTransportation(arg);
-                    _viewModel.EventEditAppliance += (sender, arg) => OnEventEditAppliance(arg);
-                }
-                else
-                {
-                    Debug.WriteLine("Views.Rent.Residentials.Editor.SummaryPage ViewModel is null!");
-                }
-            }
-            else
-            {
-                Debug.WriteLine("Views.Rent.Residentials.Editor.SummaryPage _editorShell is null!");
+
+                _viewModel.EventEditStructure += (sender, arg) => OnEventEditStructure(arg);
+                _viewModel.EventEditLocation += (sender, arg) => OnEventEditLocation(arg);
+                _viewModel.EventEditTransportation += (sender, arg) => OnEventEditTransportation(arg);
+                _viewModel.EventEditAppliance += (sender, arg) => OnEventEditAppliance(arg);
             }
         }
     }
 
+    public enum RentLivingKinds
+    {
+
+        Unspecified, Apartment, Mansion, House, TerraceHouse, TownHouse, ShareHouse, Dormitory
+    }
 
     public SummaryPage()
     {
@@ -49,7 +53,7 @@ public sealed partial class SummaryPage : Page
 
         InitializeComponent();
 
-        BreadcrumbBar1.ItemsSource = new ObservableCollection<Breadcrumbs>{
+        BreadcrumbBar1.ItemsSource = new ObservableCollection<Breadcrumb>{
             new() { Name = "概要", Page = typeof(Views.Rent.Residentials.Editor.SummaryPage).FullName! },
         };
 
@@ -60,6 +64,8 @@ public sealed partial class SummaryPage : Page
         ViewModel.EventEditTransportation += (sender, arg) => OnEventEditTransportation(arg);
         ViewModel.EventEditAppliance += (sender, arg) => OnEventEditAppliance(arg);
         */
+
+
     }
 
     private void BreadcrumbBar_ItemClicked(BreadcrumbBar sender, BreadcrumbBarItemClickedEventArgs args)

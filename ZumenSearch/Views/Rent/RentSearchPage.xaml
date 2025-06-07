@@ -24,7 +24,7 @@
         <!--<BreadcrumbBar x:Name="BreadcrumbBarMain" Grid.Row="0"/>-->
         <BreadcrumbBar x:Name="BreadcrumbBarMain">
             <BreadcrumbBar.ItemTemplate>
-                <DataTemplate x:DataType="mod:Breadcrumbs">
+                <DataTemplate x:DataType="mod:Breadcrumb">
                     <BreadcrumbBarItem Content="{Binding}" AutomationProperties.Name="{Binding Name}">
                         <BreadcrumbBarItem.ContentTemplate>
                             <DataTemplate>

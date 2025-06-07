@@ -15,11 +15,11 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Windows.UI.ApplicationSettings;
-using ZumenSearch.Extensions.AbstractFactory;
 using ZumenSearch.Helpers;
 using ZumenSearch.Models;
 using ZumenSearch.Models.Rent;
 using ZumenSearch.Services;
+using ZumenSearch.Services.Extensions.AbstractFactory;
 using ZumenSearch.Views;
 
 namespace ZumenSearch.ViewModels
@@ -84,7 +84,7 @@ namespace ZumenSearch.ViewModels
         }
         */
 
-        public ObservableCollection<Models.Rent.RentResidential> RentResidentialSearchResult = [];
+        public ObservableCollection<Models.Rent.Residentials.RentResidential> RentResidentialSearchResult = [];
 
         private static MainShell Shell => App.GetService<MainShell>();
 
@@ -229,9 +229,9 @@ namespace ZumenSearch.ViewModels
             Shell.NavFrame.Navigate(typeof(Views.Rent.Residentials.SearchResultPage), Shell.NavFrame, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });
         }
 
-        private RelayCommand<RentResidential>? editRentResidentialCommand;
-        public IRelayCommand<RentResidential> EditRentResidentialCommand => editRentResidentialCommand ??= new RelayCommand<RentResidential>(EditRentResidential);
-        private void EditRentResidential(RentResidential? selected)
+        private RelayCommand<Models.Rent.Residentials.RentResidential>? editRentResidentialCommand;
+        public IRelayCommand<Models.Rent.Residentials.RentResidential> EditRentResidentialCommand => editRentResidentialCommand ??= new RelayCommand<Models.Rent.Residentials.RentResidential>(EditRentResidential);
+        private void EditRentResidential(Models.Rent.Residentials.RentResidential? selected)
         {
             bool isFound = false;
 
@@ -297,10 +297,10 @@ namespace ZumenSearch.ViewModels
             }
         }
 
-        private RelayCommand<RentResidential>? deleteRentResidentialCommand;
-        public IRelayCommand<RentResidential> DeleteRentResidentialCommand => deleteRentResidentialCommand ??= new RelayCommand<RentResidential>(DeleteRentResidential);
+        private RelayCommand<Models.Rent.Residentials.RentResidential>? deleteRentResidentialCommand;
+        public IRelayCommand<Models.Rent.Residentials.RentResidential> DeleteRentResidentialCommand => deleteRentResidentialCommand ??= new RelayCommand<Models.Rent.Residentials.RentResidential>(DeleteRentResidential);
 
-        private async void DeleteRentResidential(RentResidential? selected)
+        private async void DeleteRentResidential(Models.Rent.Residentials.RentResidential? selected)
         {
             if (selected != null)
             {

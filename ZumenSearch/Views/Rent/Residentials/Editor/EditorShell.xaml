@@ -26,7 +26,7 @@
             <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal">
 
                 <Image x:Name="AppTitleBarIcon" Source="/Assets/App.ico" HorizontalAlignment="Left" Width="16" Height="16" Margin="8,0,0,0"/>
-                <TextBlock x:Name="AppTitleBarText" Text="ZumenSearch" VerticalAlignment="Center" TextWrapping="NoWrap" Style="{StaticResource CaptionTextBlockStyle}" Margin="6, 0, 0, 0"/>
+                <TextBlock x:Name="AppTitleBarText" Text="" VerticalAlignment="Center" TextWrapping="NoWrap" Style="{StaticResource CaptionTextBlockStyle}" Margin="6, 0, 0, 0"/>
 
             </StackPanel>
 
@@ -35,9 +35,6 @@
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-
-
-                <!--
                 <MenuBar x:Name="AppMenuBar" Grid.Column="0">
                     <MenuBar.Items>
 
@@ -48,61 +45,19 @@
 
                             <MenuBarItem.Items>
 
-                                <MenuFlyoutSubItem x:Uid="ShellMenuBarItem_File_New">
-
-                                    <MenuFlyoutItem x:Uid="ShellMenuBarItem_File_New_Feed" Command="{x:Bind MainViewModel.FeedAddCommand}">
-                                        <MenuFlyoutItem.Icon>
-                                            <PathIcon Margin="0,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                <PathIcon.Data>
-                                                    M6.18,15.64A2.18,2.18 0 0,1 8.36,17.82C8.36,19 7.38,20 6.18,20C5,20 4,19 4,17.82A2.18,2.18 0 0,1 6.18,15.64M4,4.44A15.56,15.56 0 0,1 19.56,20H16.73A12.73,12.73 0 0,0 4,7.27V4.44M4,10.1A9.9,9.9 0 0,1 13.9,20H11.07A7.07,7.07 0 0,0 4,12.93V10.1Z
-                                                </PathIcon.Data>
-                                            </PathIcon>
-                                        </MenuFlyoutItem.Icon>
-                                        <MenuFlyoutItem.KeyboardAccelerators>
-                                            <KeyboardAccelerator Modifiers="Control" Key="N"/>
-                                        </MenuFlyoutItem.KeyboardAccelerators>
-                                    </MenuFlyoutItem>
-
-                                    <MenuFlyoutItem x:Uid="ShellMenuBarItem_File_New_Folder" Command="{x:Bind MainViewModel.FolderAddCommand}">
-                                        <MenuFlyoutItem.Icon>
-                                            <PathIcon Margin="0,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                <PathIcon.Data>
-                                                    M13 19C13 19.34 13.04 19.67 13.09 20H4C2.9 20 2 19.11 2 18V6C2 4.89 2.89 4 4 4H10L12 6H20C21.1 6 22 6.89 22 8V13.81C21.39 13.46 20.72 13.22 20 13.09V8H4V18H13.09C13.04 18.33 13 18.66 13 19M20 18V15H18V18H15V20H18V23H20V20H23V18H20Z
-                                                </PathIcon.Data>
-                                            </PathIcon>
-                                        </MenuFlyoutItem.Icon>
-                                        <MenuFlyoutItem.KeyboardAccelerators>
-                                            <KeyboardAccelerator Modifiers="Control" Key="L"/>
-                                        </MenuFlyoutItem.KeyboardAccelerators>
-                                    </MenuFlyoutItem>
-
-                                </MenuFlyoutSubItem>
-
-                                <MenuFlyoutSubItem x:Uid="ShellMenuBarItem_File_OPML">
-
-                                    <MenuFlyoutItem x:Uid="ShellMenuBarItem_File_OPML_Import" Command="{x:Bind MainViewModel.OpmlImportCommand}">
-                                        <MenuFlyoutItem.Icon>
-                                            <PathIcon Margin="0,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                <PathIcon.Data>
-                                                    M14 2H6C4.89 2 4 2.9 4 4V20C4 21.11 4.89 22 6 22H18C19.11 22 20 21.11 20 20V8L14 2M18 20H6V4H13V9H18V20M15 11.93V19H7.93L10.05 16.88L7.22 14.05L10.05 11.22L12.88 14.05L15 11.93Z</PathIcon.Data>
-                                            </PathIcon>
-                                        </MenuFlyoutItem.Icon>
-                                    </MenuFlyoutItem>
-
-                                    <MenuFlyoutItem x:Uid="ShellMenuBarItem_File_OPML_Export" Command="{x:Bind MainViewModel.OpmlExportCommand}">
-                                        <MenuFlyoutItem.Icon>
-                                            <PathIcon Margin="0,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                <PathIcon.Data>
-                                                    M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2M18 20H6V4H13V9H18V20M16 11V18.1L13.9 16L11.1 18.8L8.3 16L11.1 13.2L8.9 11H16Z</PathIcon.Data>
-                                            </PathIcon>
-                                        </MenuFlyoutItem.Icon>
-                                    </MenuFlyoutItem>
-
-                                </MenuFlyoutSubItem>
-
-                                <MenuFlyoutSeparator/>
-
-                                <MenuFlyoutItem x:Uid="ShellMenuBarItem_File_Exit" Command="{x:Bind ViewModel.MenuFileExitCommand}">
+                                <MenuFlyoutItem x:Uid="ShellMenuBarItem_File_New">
+                                    <MenuFlyoutItem.Icon>
+                                        <PathIcon Margin="0,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <PathIcon.Data>
+                                                M23 18H20V15H18V18H15V20H18V23H20V20H23M6 2C4.89 2 4 2.9 4 4V20C4 21.11 4.89 22 6 22H13.81C13.45 21.38 13.2 20.7 13.08 20H6V4H13V9H18V13.08C18.33 13.03 18.67 13 19 13C19.34 13 19.67 13.03 20 13.08V8L14 2M8 12V14H16V12M8 16V18H13V16Z</PathIcon.Data>
+                                        </PathIcon>
+                                    </MenuFlyoutItem.Icon>
+                                    <MenuFlyoutItem.KeyboardAccelerators>
+                                        <KeyboardAccelerator Modifiers="Menu" Key="N"/>
+                                    </MenuFlyoutItem.KeyboardAccelerators>
+                                </MenuFlyoutItem>
+                                
+                                <MenuFlyoutItem x:Uid="ShellMenuBarItem_File_Exit">
                                     <MenuFlyoutItem.Icon>
                                         <PathIcon Margin="0,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center">
                                             <PathIcon.Data>
@@ -118,6 +73,15 @@
 
                         </MenuBarItem>
 
+                        <MenuBarItem x:Uid="ShellMenuBarItem_View">
+                            <MenuBarItem.KeyboardAccelerators>
+                                <KeyboardAccelerator Modifiers="Menu" Key="V"/>
+                            </MenuBarItem.KeyboardAccelerators>
+
+
+
+                        </MenuBarItem>
+                        <!--
                         <MenuBarItem x:Uid="ShellMenuBarItem_Feed">
                             <MenuBarItem.KeyboardAccelerators>
                                 <KeyboardAccelerator Modifiers="Menu" Key="D"/>
@@ -303,10 +267,9 @@
                             </MenuFlyoutItem>
 
                         </MenuBarItem>
-
+-->
                     </MenuBar.Items>
                 </MenuBar>
--->
             </Grid>
 
             <!--  Background="{ThemeResource MenuBarBackground}" -->

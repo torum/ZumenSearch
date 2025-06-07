@@ -183,9 +183,11 @@ public sealed partial class EditorShell : Page
         var resource = args.WindowActivationState == WindowActivationState.Deactivated ? "WindowCaptionForegroundDisabled" : "WindowCaptionForeground";
         AppTitleBarText.Foreground = (SolidColorBrush)App.Current.Resources[resource];
 
-        //AppTitleBarText.Foreground = (SolidColorBrush)App.Current.Resources[resource];
         //AppTitleBarIcon.Opacity = args.WindowActivationState == WindowActivationState.Deactivated ? 0.4 : 0.7;
         //AppMenuBar.Opacity = args.WindowActivationState == WindowActivationState.Deactivated ? 0.4 : 0.7;
+
+        AppTitleBarIcon.Opacity = args.WindowActivationState == WindowActivationState.Deactivated ? 0.4 : 0.8;
+        AppMenuBar.Opacity = args.WindowActivationState == WindowActivationState.Deactivated ? 0.4 : 0.8;
     }
 
     public void EditorWindow_Closed(object sender, WindowEventArgs args)
@@ -442,7 +444,7 @@ public sealed partial class EditorShell : Page
         });
     }
 
-    public void SetEntry(Models.Rent.RentResidential entry)
+    public void SetEntry(Models.Rent.Residentials.RentResidential entry)
     {
         if (ViewModel is null)
         {

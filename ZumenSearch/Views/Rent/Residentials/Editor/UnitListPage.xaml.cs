@@ -25,21 +25,10 @@ public sealed partial class UnitListPage : Page
         get => _viewModel;
         private set
         {
-            if (_editorShell != null)
+            if (value != null)
             {
                 _viewModel = value;
-                if (_viewModel != null)
-                {
-                    _viewModel.EventAddNew += (sender, arg) => OnEventAddNew(arg);
-                }
-                else
-                {
-                    Debug.WriteLine("Views.Rent.Residentials.Editor.UnitListPage ViewModel is null!");
-                }
-            }
-            else
-            {
-                Debug.WriteLine("Views.Rent.Residentials.Editor.UnitListPage _editorShell is null!");
+                _viewModel.EventAddNew += (sender, arg) => OnEventAddNew(arg);
             }
         }
     }
@@ -50,7 +39,7 @@ public sealed partial class UnitListPage : Page
 
         InitializeComponent();
 
-        BreadcrumbBar1.ItemsSource = new ObservableCollection<Breadcrumbs>{
+        BreadcrumbBar1.ItemsSource = new ObservableCollection<Breadcrumb>{
             new() { Name = "部屋", Page = typeof(ZumenSearch.Views.Rent.Residentials.Editor.UnitListPage).FullName! },
         };
         BreadcrumbBar1.ItemClicked += BreadcrumbBar_ItemClicked;

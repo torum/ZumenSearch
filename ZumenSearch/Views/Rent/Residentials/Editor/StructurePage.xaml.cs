@@ -18,21 +18,11 @@ public sealed partial class StructurePage : Page
         get => _viewModel;
         private set
         {
-            if (_editorShell != null)
+            if (value != null)
             {
                 _viewModel = value;
-                if (_viewModel != null)
-                {
-                    _viewModel.EventBackToSummary += (sender, arg) => OnEventBackToSummary(arg);
-                }
-                else
-                {
-                    Debug.WriteLine("Views.Rent.Residentials.Editor.StructurePage ViewModel is null!");
-                }
-            }
-            else
-            {
-                Debug.WriteLine("Views.Rent.Residentials.Editor.StructurePage _editorShell is null!");
+
+                _viewModel.EventBackToSummary += (sender, arg) => OnEventBackToSummary(arg);
             }
         }
     }
@@ -43,7 +33,7 @@ public sealed partial class StructurePage : Page
 
         InitializeComponent();
 
-        BreadcrumbBar1.ItemsSource = new ObservableCollection<Breadcrumbs>{
+        BreadcrumbBar1.ItemsSource = new ObservableCollection<Breadcrumb>{
             new() { Name = "概要", Page = typeof(Views.Rent.Residentials.Editor.SummaryPage).FullName!},
             new() { Name = "構造", Page = typeof(Views.Rent.Residentials.Editor.StructurePage).FullName! },
         };

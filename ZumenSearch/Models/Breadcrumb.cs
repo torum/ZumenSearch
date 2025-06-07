@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ZumenSearch.Models
 {
-    public  class Breadcrumbs
+    public  class Breadcrumb
     {
         public string? Name
         {

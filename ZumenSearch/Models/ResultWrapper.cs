@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ZumenSearch.Models.Rent;
+using ZumenSearch.Models;
 
 namespace ZumenSearch.Models;
 
@@ -70,7 +70,7 @@ public class SqliteDataAccessSelectRentResidentialResultWrapper : SqliteDataAcce
 {
     //public int UnreadCount = 0;
 
-    public ObservableCollection<RentResidential> SelectedEntries = new();
+    public ObservableCollection<Models.Rent.Residentials.RentResidential> SelectedEntries = [];
 }
 
 

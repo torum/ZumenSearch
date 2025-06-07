@@ -16,7 +16,7 @@
 
         <BreadcrumbBar x:Name="BreadcrumbBar1">
             <BreadcrumbBar.ItemTemplate>
-                <DataTemplate x:DataType="mod:Breadcrumbs">
+                <DataTemplate x:DataType="mod:Breadcrumb">
                     <BreadcrumbBarItem Content="{Binding}" AutomationProperties.Name="{Binding Name}">
                         <BreadcrumbBarItem.ContentTemplate>
                             <DataTemplate>

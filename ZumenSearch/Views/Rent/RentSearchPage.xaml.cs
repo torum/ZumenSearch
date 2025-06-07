@@ -63,7 +63,7 @@ namespace ZumenSearch.Views.Rent
             InitializeComponent();
 
             //BreadcrumbBarMain.ItemsSource = new string[] { "ëççáåüçı" };
-            BreadcrumbBarMain.ItemsSource = new ObservableCollection<Breadcrumbs>{
+            BreadcrumbBarMain.ItemsSource = new ObservableCollection<Breadcrumb>{
             new() { Name = "í¿ë›", Page = typeof(RentSearchPage).FullName!},
         };
 

@@ -9,9 +9,9 @@
     mc:Ignorable="d"
     Title="ZumenSearch"
     Activated="Window_Activated" Closed="Window_Closed" SizeChanged="Window_SizeChanged">
-
     <Window.SystemBackdrop>
-        <MicaBackdrop />
+        <DesktopAcrylicBackdrop/>
+        <!--<MicaBackdrop Kind="Base"/>-->
     </Window.SystemBackdrop>
 
     <Grid>

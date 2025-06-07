@@ -23,7 +23,7 @@ public sealed partial class SearchPage : Page
         InitializeComponent();
 
         //BreadcrumbBar1.ItemsSource = new string[] { "条件検索","asdf"};
-        BreadcrumbBar1.ItemsSource = new ObservableCollection<Breadcrumbs>{
+        BreadcrumbBar1.ItemsSource = new ObservableCollection<Breadcrumb>{
             //new() { Name = "賃貸", Page = typeof(RentSearchViewModel).FullName!},
             new() { Name = "住居用", Page = typeof(Views.Rent.Residentials.SearchPage).FullName! },
         };

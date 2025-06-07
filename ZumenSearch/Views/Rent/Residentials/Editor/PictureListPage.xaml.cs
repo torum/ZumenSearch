@@ -15,21 +15,9 @@ public sealed partial class PictureListPage : Page
         get => _viewModel;
         private set
         {
-            if (_editorShell != null)
+            if (value != null)
             {
                 _viewModel = value;
-                if (_viewModel != null)
-                {
-                    //
-                }
-                else
-                {
-                    Debug.WriteLine("Views.Rent.Residentials.Editor.PictureListPage ViewModel is null!");
-                }
-            }
-            else
-            {
-                Debug.WriteLine("Views.Rent.Residentials.Editor.PictureListPage _editorShell is null!");
             }
         }
     }

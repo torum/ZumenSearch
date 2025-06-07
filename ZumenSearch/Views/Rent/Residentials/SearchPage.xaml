@@ -17,7 +17,7 @@
         <!--<BreadcrumbBar Grid.Row="0" x:Name="BreadcrumbBar1"/>-->
         <BreadcrumbBar x:Name="BreadcrumbBar1">
             <BreadcrumbBar.ItemTemplate>
-                <DataTemplate x:DataType="mod:Breadcrumbs">
+                <DataTemplate x:DataType="mod:Breadcrumb">
                     <BreadcrumbBarItem Content="{Binding}" AutomationProperties.Name="{Binding Name}">
                         <BreadcrumbBarItem.ContentTemplate>
                             <DataTemplate>
@@ -100,7 +100,7 @@
 
                     <TextBlock Text="詳細条件" Margin="24,36,24,0"></TextBlock>
 
-                    <Grid BorderBrush="{ThemeResource NavigationViewItemSeparatorForeground}" BorderThickness="1" CornerRadius="4" Margin="24,8,24,24">
+                    <Grid BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}" BorderThickness="0.5" CornerRadius="4" Margin="24,8,24,24">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
@@ -123,7 +123,7 @@
                             <ColumnDefinition Width="4*"/>
                         </Grid.ColumnDefinitions>
 
-                        <Border Grid.Row="0" Grid.RowSpan="15" Grid.Column="0" CornerRadius="4,0,0,4" Background="LightGray" Opacity="0.1"></Border>
+                        <Border Grid.Row="0" Grid.RowSpan="15" Grid.Column="0" CornerRadius="4,0,0,4" Background="{ThemeResource SystemControlForegroundBaseMediumBrush}" Opacity="0.1"></Border>
                         <Border Grid.Row="0" Grid.RowSpan="15" Grid.Column="1"  CornerRadius="0,4,4,0"></Border>
 
                         <StackPanel Grid.Row="0" Grid.Column="0">
@@ -146,8 +146,8 @@
                             </VariableSizedWrapGrid>
                         </StackPanel>
 
-                        <Border Grid.Row="1" Grid.Column="0" BorderThickness="0.5" Height="1" BorderBrush="LightGray" Opacity="0.1"></Border>
-                        <Border Grid.Row="1" Grid.Column="1" BorderThickness="1" Height="1" BorderBrush="LightGray" Opacity="0.1"></Border>
+                        <Border Grid.Row="1" Grid.Column="0" BorderThickness="0.5" Height="1" BorderBrush="{ThemeResource SystemControlForegroundBaseMediumBrush}" Opacity="0.1"></Border>
+                        <Border Grid.Row="1" Grid.Column="1" BorderThickness="1" Height="1" BorderBrush="{ThemeResource SystemControlForegroundBaseMediumBrush}" Opacity="0.1"></Border>
 
                         <StackPanel Grid.Row="2" Grid.Column="0">
                             <TextBlock Text="駅徒歩" Margin="12"></TextBlock>
@@ -163,8 +163,8 @@
                             </VariableSizedWrapGrid>
                         </StackPanel>
 
-                        <Border Grid.Row="3" Grid.Column="0" BorderThickness="0.5" Height="1" BorderBrush="LightGray" Opacity="0.1"></Border>
-                        <Border Grid.Row="3" Grid.Column="1" BorderThickness="1" Height="1" BorderBrush="LightGray" Opacity="0.1"></Border>
+                        <Border Grid.Row="3" Grid.Column="0" BorderThickness="0.5" Height="1" BorderBrush="{ThemeResource SystemControlForegroundBaseMediumBrush}" Opacity="0.1"></Border>
+                        <Border Grid.Row="3" Grid.Column="1" BorderThickness="1" Height="1" BorderBrush="{ThemeResource SystemControlForegroundBaseMediumBrush}" Opacity="0.1"></Border>
 
                         <StackPanel Grid.Row="4" Grid.Column="0">
                             <TextBlock Text="間取り" Margin="12"></TextBlock>
@@ -180,8 +180,8 @@
                             </VariableSizedWrapGrid>
                         </StackPanel>
 
-                        <Border Grid.Row="5" Grid.Column="0" BorderThickness="0.5" Height="1" BorderBrush="LightGray" Opacity="0.1"></Border>
-                        <Border Grid.Row="5" Grid.Column="1" BorderThickness="1" Height="1" BorderBrush="LightGray" Opacity="0.1"></Border>
+                        <Border Grid.Row="5" Grid.Column="0" BorderThickness="0.5" Height="1" BorderBrush="{ThemeResource SystemControlForegroundBaseMediumBrush}" Opacity="0.1"></Border>
+                        <Border Grid.Row="5" Grid.Column="1" BorderThickness="1" Height="1" BorderBrush="{ThemeResource SystemControlForegroundBaseMediumBrush}" Opacity="0.1"></Border>
 
                         <StackPanel Grid.Row="6" Grid.Column="0">
                             <TextBlock Text="建物種別" Margin="12"></TextBlock>
@@ -197,8 +197,8 @@
                             </VariableSizedWrapGrid>
                         </StackPanel>
 
-                        <Border Grid.Row="7" Grid.Column="0" BorderThickness="0.5" Height="1" BorderBrush="LightGray" Opacity="0.1"></Border>
-                        <Border Grid.Row="7" Grid.Column="1" BorderThickness="1" Height="1" BorderBrush="LightGray" Opacity="0.1"></Border>
+                        <Border Grid.Row="7" Grid.Column="0" BorderThickness="0.5" Height="1" BorderBrush="{ThemeResource SystemControlForegroundBaseMediumBrush}" Opacity="0.1"></Border>
+                        <Border Grid.Row="7" Grid.Column="1" BorderThickness="1" Height="1" BorderBrush="{ThemeResource SystemControlForegroundBaseMediumBrush}" Opacity="0.1"></Border>
 
                         <StackPanel Grid.Row="8" Grid.Column="0">
                             <TextBlock Text="建物構造" Margin="12"></TextBlock>
@@ -207,8 +207,8 @@
 
                         </StackPanel>
 
-                        <Border Grid.Row="9" Grid.Column="0" BorderThickness="0.5" Height="1" BorderBrush="LightGray" Opacity="0.1"></Border>
-                        <Border Grid.Row="9" Grid.Column="1" BorderThickness="1" Height="1" BorderBrush="LightGray" Opacity="0.1"></Border>
+                        <Border Grid.Row="9" Grid.Column="0" BorderThickness="0.5" Height="1" BorderBrush="{ThemeResource SystemControlForegroundBaseMediumBrush}" Opacity="0.1"></Border>
+                        <Border Grid.Row="9" Grid.Column="1" BorderThickness="1" Height="1" BorderBrush="{ThemeResource SystemControlForegroundBaseMediumBrush}" Opacity="0.1"></Border>
 
                         <StackPanel Grid.Row="10" Grid.Column="0">
                             <TextBlock Text="築後年数" Margin="12"></TextBlock>
@@ -217,8 +217,8 @@
 
                         </StackPanel>
 
-                        <Border Grid.Row="11" Grid.Column="0" BorderThickness="0.5" Height="1" BorderBrush="LightGray" Opacity="0.1"></Border>
-                        <Border Grid.Row="11" Grid.Column="1" BorderThickness="1" Height="1" BorderBrush="LightGray" Opacity="0.1"></Border>
+                        <Border Grid.Row="11" Grid.Column="0" BorderThickness="0.5" Height="1" BorderBrush="{ThemeResource SystemControlForegroundBaseMediumBrush}" Opacity="0.1"></Border>
+                        <Border Grid.Row="11" Grid.Column="1" BorderThickness="1" Height="1" BorderBrush="{ThemeResource SystemControlForegroundBaseMediumBrush}" Opacity="0.1"></Border>
 
                         <StackPanel Grid.Row="12" Grid.Column="0">
                             <TextBlock Text="専有面積" Margin="12"></TextBlock>
@@ -227,8 +227,8 @@
 
                         </StackPanel>
 
-                        <Border Grid.Row="13" Grid.Column="0" BorderThickness="0.5" Height="1" BorderBrush="LightGray" Opacity="0.1"></Border>
-                        <Border Grid.Row="13" Grid.Column="1" BorderThickness="1" Height="1" BorderBrush="LightGray" Opacity="0.1"></Border>
+                        <Border Grid.Row="13" Grid.Column="0" BorderThickness="0.5" Height="1" BorderBrush="{ThemeResource SystemControlForegroundBaseMediumBrush}" Opacity="0.1"></Border>
+                        <Border Grid.Row="13" Grid.Column="1" BorderThickness="1" Height="1" BorderBrush="{ThemeResource SystemControlForegroundBaseMediumBrush}" Opacity="0.1"></Border>
 
                         <StackPanel Grid.Row="14" Grid.Column="0">
                             <TextBlock Text="専有面積" Margin="12"></TextBlock>

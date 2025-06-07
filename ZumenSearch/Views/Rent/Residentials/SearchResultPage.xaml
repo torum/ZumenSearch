@@ -5,7 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:mod="using:ZumenSearch.Models"
-    xmlns:rent="using:ZumenSearch.Models.Rent"
+    xmlns:rent="using:ZumenSearch.Models.Rent.Residentials"
     mc:Ignorable="d">
 
     <Grid x:Name="ContentArea" Margin="{StaticResource NavigationViewPageContentAreaMargin}">
@@ -16,7 +16,7 @@
 
         <BreadcrumbBar x:Name="BreadcrumbBar1">
             <BreadcrumbBar.ItemTemplate>
-                <DataTemplate x:DataType="mod:Breadcrumbs">
+                <DataTemplate x:DataType="mod:Breadcrumb">
                     <BreadcrumbBarItem Content="{Binding}" AutomationProperties.Name="{Binding Name}">
                         <BreadcrumbBarItem.ContentTemplate>
                             <DataTemplate>

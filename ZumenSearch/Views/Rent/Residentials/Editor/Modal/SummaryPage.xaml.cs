@@ -21,7 +21,7 @@ public sealed partial class SummaryPage : Page
         ViewModel = new ViewModels.Rent.Residentials.Editor.Modal.SummaryViewModel();
         InitializeComponent();
 
-        BreadcrumbBar1.ItemsSource = new ObservableCollection<Breadcrumbs>{
+        BreadcrumbBar1.ItemsSource = new ObservableCollection<Breadcrumb>{
             new() { Name = "äTóv", Page = typeof(SummaryPage).FullName!},
             //new() { Name = "èZãèóp", Page = typeof(ResidentialsPage).FullName! },
         };

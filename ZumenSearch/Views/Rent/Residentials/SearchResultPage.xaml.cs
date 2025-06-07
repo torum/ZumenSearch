@@ -27,7 +27,7 @@ public sealed partial class SearchResultPage : Page
 
         InitializeComponent();
 
-        BreadcrumbBar1.ItemsSource = new ObservableCollection<Breadcrumbs>{
+        BreadcrumbBar1.ItemsSource = new ObservableCollection<Breadcrumb>{
             //new() { Name = "賃貸", Page = typeof(Views.Rent.RentSearchPage).FullName!},
             new() { Name = "住居用", Page = typeof(Views.Rent.Residentials.SearchPage).FullName! },
             new() { Name = "検索結果", Page = typeof(Views.Rent.Residentials.SearchResultPage).FullName! },

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ZumenSearch.Extensions.AbstractFactory;
+namespace ZumenSearch.Services.Extensions.AbstractFactory;
 
 public interface IAbstractFactory<T>
 {
