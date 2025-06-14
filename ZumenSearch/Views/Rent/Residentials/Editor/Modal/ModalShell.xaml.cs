@@ -21,12 +21,6 @@ public sealed partial class ModalShell : Page
         get;
     }
 
-    // For uses of Navigation in other pages.
-    public Frame NavFrame
-    {
-        get => ContentFrame;
-    }
-
     private NavigationViewItem? navigationViewSelectedItem;
 
     // List of ValueTuple holding the Navigation Tag and the relative Navigation Page
@@ -48,6 +42,9 @@ public sealed partial class ModalShell : Page
     public ModalShell(ModalWindow dialogWindow)
     {
         ViewModel = new ViewModels.Rent.Residentials.Editor.Modal.ModalViewModel();//App.GetService<RentLivingEditUnitShellViewModel>();
+        // Subscribe to ViewModel's events
+        ViewModel.EventBackToSummary += (sender, arg) => OnEventBackToSummary(arg);
+
         InitializeComponent();
 
         dialogWindow.ExtendsContentIntoTitleBar = true;
@@ -100,7 +97,7 @@ public sealed partial class ModalShell : Page
             Debug.WriteLine("No first menu item found in NavView.");
         }
 
-        ContentFrame.Navigate(typeof(ZumenSearch.Views.Rent.Residentials.Editor.Modal.SummaryPage), this, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });
+        ContentFrame.Navigate(typeof(ZumenSearch.Views.Rent.Residentials.Editor.Modal.SummaryPage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });
     }
 
     private void ContentFrame_NavigationFailed(object sender, NavigationFailedEventArgs e)
@@ -138,7 +135,7 @@ public sealed partial class ModalShell : Page
 
             navigationViewSelectedItem = sender.SelectedItem as NavigationViewItem;
 
-            ContentFrame.Navigate(item.Page, this, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });
+            ContentFrame.Navigate(item.Page, ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });
         }
     }
 
@@ -154,6 +151,15 @@ public sealed partial class ModalShell : Page
         }
         */
     }
+
+    public void OnEventBackToSummary(string arg)
+    {
+        App.CurrentDispatcherQueue?.TryEnqueue(() =>
+        {
+            ContentFrame.Navigate(typeof(Views.Rent.Residentials.Editor.Modal.SummaryPage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });
+        });
+    }
+
 
     public void OnEventGoBack(string arg)
     {

@@ -19,7 +19,7 @@ namespace ZumenSearch.Views.Rent.Residentials.Editor;
 
 public sealed partial class SummaryPage : Page
 {
-    private Views.Rent.Residentials.Editor.EditorShell? _editorShell;
+    //private Views.Rent.Residentials.Editor.EditorShell? _editorShell;
 
     private ViewModels.Rent.Residentials.Editor.EditorViewModel? _viewModel;
     public ViewModels.Rent.Residentials.Editor.EditorViewModel? ViewModel
@@ -31,10 +31,6 @@ public sealed partial class SummaryPage : Page
             {
                 _viewModel = value;
 
-                _viewModel.EventEditStructure += (sender, arg) => OnEventEditStructure(arg);
-                _viewModel.EventEditLocation += (sender, arg) => OnEventEditLocation(arg);
-                _viewModel.EventEditTransportation += (sender, arg) => OnEventEditTransportation(arg);
-                _viewModel.EventEditAppliance += (sender, arg) => OnEventEditAppliance(arg);
             }
         }
     }
@@ -76,32 +72,12 @@ public sealed partial class SummaryPage : Page
         }
     }
 
-    public void OnEventEditStructure(string arg)
-    {
-        _editorShell?.NavFrame.Navigate(typeof(Views.Rent.Residentials.Editor.StructurePage), _editorShell, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });
-    }
-
-    public void OnEventEditLocation(string arg)
-    {
-        _editorShell?.NavFrame.Navigate(typeof(Views.Rent.Residentials.Editor.LocationPage), _editorShell, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });
-    }
-
-    public void OnEventEditTransportation(string arg)
-    {
-        _editorShell?.NavFrame.Navigate(typeof(Views.Rent.Residentials.Editor.TransportationPage), _editorShell, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });
-    }
-
-    public void OnEventEditAppliance(string arg)
-    {
-        _editorShell?.NavFrame.Navigate(typeof(Views.Rent.Residentials.Editor.AppliancePage), _editorShell, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });
-    }
-
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
-        if ((e.Parameter is Views.Rent.Residentials.Editor.EditorShell) && (e.Parameter != null))
+        if ((e.Parameter is ViewModels.Rent.Residentials.Editor.EditorViewModel) && (e.Parameter != null))
         {
-            _editorShell = e.Parameter as Views.Rent.Residentials.Editor.EditorShell;
-            ViewModel = _editorShell?.ViewModel as ViewModels.Rent.Residentials.Editor.EditorViewModel;
+            //_editorShell = e.Parameter as Views.Rent.Residentials.Editor.EditorShell;
+            ViewModel = e.Parameter as ViewModels.Rent.Residentials.Editor.EditorViewModel;
         }
 
         base.OnNavigatedTo(e);

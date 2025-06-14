@@ -340,7 +340,7 @@ public class DataAccessService : IDataAccessService
                     continue;
                 }
 
-                var entry = new Models.Rent.Residentials.RentResidential(s);
+                var entry = new Models.Rent.Residentials.EntryResidential(s);
 
                 s = Convert.ToString(reader["feedName"]) ?? "";
                 entry.Name = s;

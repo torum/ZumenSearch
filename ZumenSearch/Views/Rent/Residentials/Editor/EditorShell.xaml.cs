@@ -1,24 +1,26 @@
 ﻿
-using ZumenSearch.ViewModels;
-using ZumenSearch.Helpers;
+using CommunityToolkit.Mvvm.Messaging;
+using CommunityToolkit.WinUI;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Markup;
 using Microsoft.UI.Xaml.Media;
-using System.Diagnostics;
-using Windows.UI.ViewManagement;
-using CommunityToolkit.Mvvm.Messaging;
-using ZumenSearch.Models;
-using System.Collections.ObjectModel;
-using Microsoft.UI.Xaml.Navigation;
 using Microsoft.UI.Xaml.Media.Animation;
+using Microsoft.UI.Xaml.Navigation;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Linq;
+using System.Runtime.InteropServices;
 using Windows.System;
 using Windows.UI.Core;
-using System.Collections.Generic;
-using System;
+using Windows.UI.ViewManagement;
+using ZumenSearch.Helpers;
+using ZumenSearch.Models;
+using ZumenSearch.ViewModels;
 using ZumenSearch.Views;
-using System.Linq;
-using CommunityToolkit.WinUI;
 
 namespace ZumenSearch.Views.Rent.Residentials.Editor;
 
@@ -31,11 +33,13 @@ public sealed partial class EditorShell : Page
 
     public Views.Rent.Residentials.Editor.EditorWindow? EditorWin { get; private set; }
 
+    /*
     // For uses of Navigation in other pages.
     public Frame NavFrame
     {
         get => ContentFrame;
     }
+    */
 
     private NavigationViewItem? navigationViewSelectedItem;
 
@@ -63,6 +67,13 @@ public sealed partial class EditorShell : Page
         EditorWin = win ?? throw new ArgumentNullException(nameof(win));
         ViewModel = vm ?? throw new ArgumentNullException(nameof(vm));
 
+        ViewModel.EventBackToSummary += (sender, arg) => OnEventBackToSummary(arg);
+        ViewModel.EventEditStructure += (sender, arg) => OnEventEditStructure(arg);
+        ViewModel.EventEditLocation += (sender, arg) => OnEventEditLocation(arg);
+        ViewModel.EventEditTransportation += (sender, arg) => OnEventEditTransportation(arg);
+        ViewModel.EventEditAppliance += (sender, arg) => OnEventEditAppliance(arg);
+        ViewModel.EventAddNewUnit += (sender, arg) => OnEventAddNewUnit(arg);
+
         this.InitializeComponent();
 
         EditorWin.Content = this;
@@ -75,7 +86,7 @@ public sealed partial class EditorShell : Page
         ViewModel.EditorWin = EditorWin;
 
 
-        //_entry = new Models.Rent.RentResidential(Guid.NewGuid().ToString());
+        //_entry = new Models.Rent.RentResidential(Guid.CreateVersion7().ToString());
 
         /*
         Window = new ResidentialsEditorWindow();
@@ -242,7 +253,7 @@ public sealed partial class EditorShell : Page
         }
 
         // Pass Frame when navigate.  //, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft } //, new SuppressNavigationTransitionInfo() //new EntranceNavigationTransitionInfo()
-        ContentFrame.Navigate(typeof(ZumenSearch.Views.Rent.Residentials.Editor.SummaryPage), this, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });
+        ContentFrame.Navigate(typeof(ZumenSearch.Views.Rent.Residentials.Editor.SummaryPage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });
 
 
         // Listen to the window directly so the app responds to accelerator keys regardless of which element has focus.
@@ -285,7 +296,7 @@ public sealed partial class EditorShell : Page
             navigationViewSelectedItem = sender.SelectedItem as NavigationViewItem;
 
             // Pass Frame when navigate.
-            ContentFrame.Navigate(item.Page, this, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });//, args.RecommendedNavigationTransitionInfo
+            ContentFrame.Navigate(item.Page, ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });//, args.RecommendedNavigationTransitionInfo
         }
     }
 
@@ -444,7 +455,7 @@ public sealed partial class EditorShell : Page
         });
     }
 
-    public void SetEntry(Models.Rent.Residentials.RentResidential entry)
+    public void SetEntry(Models.Rent.Residentials.EntryResidential entry)
     {
         if (ViewModel is null)
         {
@@ -453,4 +464,116 @@ public sealed partial class EditorShell : Page
         ViewModel.Entry = entry ?? throw new ArgumentNullException(nameof(entry));
     }
 
+    public void OnEventBackToSummary(string arg)
+    {
+        /*
+        App.CurrentDispatcherQueue?.TryEnqueue(() =>
+        {
+
+        });
+        */
+        ContentFrame.Navigate(typeof(Views.Rent.Residentials.Editor.SummaryPage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });
+    }
+
+    public void OnEventEditStructure(string arg)
+    {
+        ContentFrame.Navigate(typeof(Views.Rent.Residentials.Editor.StructurePage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });
+    }
+
+    public void OnEventEditLocation(string arg)
+    {
+        ContentFrame.Navigate(typeof(Views.Rent.Residentials.Editor.LocationPage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });
+    }
+
+    public void OnEventEditTransportation(string arg)
+    {
+        ContentFrame.Navigate(typeof(Views.Rent.Residentials.Editor.TransportationPage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });
+    }
+
+    public void OnEventEditAppliance(string arg)
+    {
+        ContentFrame.Navigate(typeof(Views.Rent.Residentials.Editor.AppliancePage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });
+    }
+
+    public void OnEventAddNewUnit(string arg)
+    {
+        // TODO: arg is temp.
+        
+        if (this.EditorWin == null)
+        {
+            // EditorWin should be initialized in the EditorShell constructor.
+            Debug.WriteLine("EditorWin should be initialized in the EditorShell constructor.");
+            return;
+        }
+
+        Views.Rent.Residentials.Editor.Modal.ModalWindow dialogWin = new();
+        dialogWin.Content = new Views.Rent.Residentials.Editor.Modal.ModalShell(dialogWin);
+
+        //TODO: stupid WinUI3... 
+        // https://github.com/microsoft/microsoft-ui-xaml/issues/10396
+        // https://github.com/microsoft/WindowsAppSDK/discussions/3680
+
+        IntPtr hWndDialog = WinRT.Interop.WindowNative.GetWindowHandle(dialogWin);
+        //Microsoft.UI.WindowId windowId1 = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hWnd1);
+        //Microsoft.UI.Windowing.AppWindow appWindow = Microsoft.UI.Windowing.AppWindow.GetFromWindowId(windowId1);
+        //Microsoft.UI.Windowing.OverlappedPresenter presenter = appWindow.Presenter as Microsoft.UI.Windowing.OverlappedPresenter;
+        IntPtr hWndEditor = WinRT.Interop.WindowNative.GetWindowHandle(this.EditorWin);
+        SetWindowLong(hWndDialog, GWL_HWNDPARENT, hWndEditor);
+
+        Microsoft.UI.Windowing.AppWindow? appWindow = dialogWin.AppWindow;
+        if (appWindow != null)
+        {
+            if (appWindow.Presenter is OverlappedPresenter presenter)
+            {
+                presenter.IsModal = true;
+
+                EnableWindow(hWndEditor, false);
+
+                dialogWin.Closed += (sender, e) =>
+                {
+                    // When the dialog is closed, re-enable the editor window.
+                    EnableWindow(hWndEditor, true);
+
+                    // Activate the editor window again.
+                    this.EditorWin.Activate();
+                };
+
+                // Close the dialog when the editor window is closed.
+                this.EditorWin.Closed += (sender, e) =>
+                {
+                    dialogWin.Close();
+                };
+
+                //appWindow.Show();// TODO: not working. This Show() does not re-enable the editor window.
+                dialogWin.Activate();
+            }
+        }
+
+    }
+
+    #region == TEMP code for modal window(for setting an owner) ==
+
+    [DllImport("User32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+    public static extern bool EnableWindow(IntPtr hWnd, bool bEnable);
+
+    public const int GWL_HWNDPARENT = (-8);
+
+    public static IntPtr SetWindowLong(IntPtr hWnd, int nIndex, IntPtr dwNewLong)
+    {
+        if (IntPtr.Size == 4)
+        {
+            return SetWindowLongPtr32(hWnd, nIndex, dwNewLong);
+        }
+        return SetWindowLongPtr64(hWnd, nIndex, dwNewLong);
+    }
+
+    // Import the Windows API function SetWindowLong for modifying window properties on 32-bit systems.
+    [DllImport("User32.dll", CharSet = CharSet.Auto, EntryPoint = "SetWindowLong")]
+    public static extern IntPtr SetWindowLongPtr32(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
+
+    // Import the Windows API function SetWindowLongPtr for modifying window properties on 64-bit systems.
+    [DllImport("User32.dll", CharSet = CharSet.Auto, EntryPoint = "SetWindowLongPtr")]
+    public static extern IntPtr SetWindowLongPtr64(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
+
+    #endregion
 }

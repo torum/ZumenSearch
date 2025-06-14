@@ -10,7 +10,7 @@ namespace ZumenSearch.Views.Rent.Residentials.Editor;
 
 public sealed partial class StructurePage : Page
 {
-    private Views.Rent.Residentials.Editor.EditorShell? _editorShell;
+    //private Views.Rent.Residentials.Editor.EditorShell? _editorShell;
 
     private ViewModels.Rent.Residentials.Editor.EditorViewModel? _viewModel;
     public ViewModels.Rent.Residentials.Editor.EditorViewModel? ViewModel
@@ -22,7 +22,7 @@ public sealed partial class StructurePage : Page
             {
                 _viewModel = value;
 
-                _viewModel.EventBackToSummary += (sender, arg) => OnEventBackToSummary(arg);
+                //_viewModel.EventBackToSummary += (sender, arg) => OnEventBackToSummary(arg);
             }
         }
     }
@@ -45,32 +45,17 @@ public sealed partial class StructurePage : Page
     {
         if (args.Index == 0)
         {
-            _editorShell?.NavFrame.Navigate(typeof(Views.Rent.Residentials.Editor.SummaryPage), _editorShell, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });
+            //_editorShell?.NavFrame.Navigate(typeof(Views.Rent.Residentials.Editor.SummaryPage), _editorShell, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });
+            ViewModel?.GoBackToSummary();
         }
-    }
-
-    public void OnEventBackToSummary(string arg)
-    {
-        App.CurrentDispatcherQueue?.TryEnqueue(() =>
-        {
-            _editorShell?.NavFrame.Navigate(typeof(Views.Rent.Residentials.Editor.SummaryPage), _editorShell, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });
-            /*
-            if (_editorShell?.NavFrame.CanGoBack == true)
-            {
-                _editorShell?.NavFrame.GoBack();
-            }
-            */
-        });
     }
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
-        if ((e.Parameter is Views.Rent.Residentials.Editor.EditorShell) && (e.Parameter != null))
+        if ((e.Parameter is ViewModels.Rent.Residentials.Editor.EditorViewModel) && (e.Parameter != null))
         {
-            _editorShell = e.Parameter as Views.Rent.Residentials.Editor.EditorShell;
-            ViewModel = _editorShell?.ViewModel as ViewModels.Rent.Residentials.Editor.EditorViewModel;
-
-            //this.IsEnabled = true;
+            //_editorShell = e.Parameter as Views.Rent.Residentials.Editor.EditorShell;
+            ViewModel = e.Parameter as ViewModels.Rent.Residentials.Editor.EditorViewModel;
         }
 
         base.OnNavigatedTo(e);

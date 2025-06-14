@@ -84,7 +84,7 @@ namespace ZumenSearch.ViewModels
         }
         */
 
-        public ObservableCollection<Models.Rent.Residentials.RentResidential> RentResidentialSearchResult = [];
+        public ObservableCollection<Models.Rent.Residentials.EntryResidential> RentResidentialSearchResult = [];
 
         private static MainShell Shell => App.GetService<MainShell>();
 
@@ -93,14 +93,14 @@ namespace ZumenSearch.ViewModels
             _editorFactory = editorFactory;
             _dataAccessService = dataAccessService;
 
-            InitializeDatabase();
+            InitializeDatabaseAsync();
         }
 
-        private async void InitializeDatabase()
+        private async void InitializeDatabaseAsync()
         {
             var filePath = Path.Combine(App.AppDataFolder, "ZumenSearch.db");
 
-            var res = await Task.FromResult(_dataAccessService.InitializeDatabase(filePath));
+            var res = await Task.FromResult(_dataAccessService.InitializeDatabase(filePath)).ConfigureAwait(false);
             if (res.IsError)
             {
                 //ErrorMain = res.Error;
@@ -207,13 +207,13 @@ namespace ZumenSearch.ViewModels
         }
 
         private RelayCommand? searchRentResidentialCommand;
-        public IRelayCommand SearchRentResidentialCommand => searchRentResidentialCommand ??= new RelayCommand(SearchRentResidential);
-        private async void SearchRentResidential()
+        public IRelayCommand SearchRentResidentialCommand => searchRentResidentialCommand ??= new RelayCommand(SearchRentResidentialAsync);
+        private async void SearchRentResidentialAsync()
         {
             //SelectedRentResidentialItem = null;
-            RentResidentialSearchResult.Clear(); 
+            RentResidentialSearchResult.Clear();
 
-            var res = await Task.FromResult(_dataAccessService.SelectRentResidentialsByNameKeyword("*"));
+            var res = await Task.FromResult(_dataAccessService.SelectRentResidentialsByNameKeyword("*")).ConfigureAwait(ConfigureAwaitOptions.ContinueOnCapturedContext);// Go back to UI thred. Let's not do > .ConfigureAwait(false);
             if (res.IsError)
             {
                 //ErrorMain = res.Error;
@@ -229,9 +229,9 @@ namespace ZumenSearch.ViewModels
             Shell.NavFrame.Navigate(typeof(Views.Rent.Residentials.SearchResultPage), Shell.NavFrame, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });
         }
 
-        private RelayCommand<Models.Rent.Residentials.RentResidential>? editRentResidentialCommand;
-        public IRelayCommand<Models.Rent.Residentials.RentResidential> EditRentResidentialCommand => editRentResidentialCommand ??= new RelayCommand<Models.Rent.Residentials.RentResidential>(EditRentResidential);
-        private void EditRentResidential(Models.Rent.Residentials.RentResidential? selected)
+        private RelayCommand<Models.Rent.Residentials.EntryResidential>? editRentResidentialCommand;
+        public IRelayCommand<Models.Rent.Residentials.EntryResidential> EditRentResidentialCommand => editRentResidentialCommand ??= new RelayCommand<Models.Rent.Residentials.EntryResidential>(EditRentResidential);
+        private void EditRentResidential(Models.Rent.Residentials.EntryResidential? selected)
         {
             bool isFound = false;
 
@@ -297,16 +297,16 @@ namespace ZumenSearch.ViewModels
             }
         }
 
-        private RelayCommand<Models.Rent.Residentials.RentResidential>? deleteRentResidentialCommand;
-        public IRelayCommand<Models.Rent.Residentials.RentResidential> DeleteRentResidentialCommand => deleteRentResidentialCommand ??= new RelayCommand<Models.Rent.Residentials.RentResidential>(DeleteRentResidential);
+        private RelayCommand<Models.Rent.Residentials.EntryResidential>? deleteRentResidentialCommand;
+        public IRelayCommand<Models.Rent.Residentials.EntryResidential> DeleteRentResidentialCommand => deleteRentResidentialCommand ??= new RelayCommand<Models.Rent.Residentials.EntryResidential>(DeleteRentResidentialAsync);
 
-        private async void DeleteRentResidential(Models.Rent.Residentials.RentResidential? selected)
+        private async void DeleteRentResidentialAsync(Models.Rent.Residentials.EntryResidential? selected)
         {
             if (selected != null)
             {
                 Debug.WriteLine($"DeleteRentResidentialCommand executed for {selected.Id}");
 
-                var res = await Task.FromResult(_dataAccessService.DeleteRentResidential(selected.Id));
+                var res = await Task.FromResult(_dataAccessService.DeleteRentResidential(selected.Id)).ConfigureAwait(false);
                 if (res.IsError)
                 {
                     //ErrorMain = res.Error;

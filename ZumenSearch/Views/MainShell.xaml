@@ -7,7 +7,8 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:i="using:Microsoft.Xaml.Interactivity"
-    mc:Ignorable="d">
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="46"/>
@@ -28,8 +29,7 @@
                        Text="ZumenSearch"/>
         </Grid>
 
-
-        <NavigationView x:Name="NavigationViewControl" Loaded="NavigationViewControl_Loaded" ItemInvoked="NavigationViewControl_ItemInvoked" Grid.Row="1" Canvas.ZIndex="0" Margin="0,-46,0,0" PaneDisplayMode="Left" IsBackButtonVisible="Collapsed" IsPaneToggleButtonVisible="True" IsBackEnabled="{x:Bind ViewModel.IsBackEnabled, Mode=OneWay}" IsSettingsVisible="True" ExpandedModeThresholdWidth="1280" OpenPaneLength ="200" DisplayModeChanged="NavigationViewControl_DisplayModeChanged" Header="{x:Bind ((ContentControl)ViewModel.SelectedNavigationViewItem).Content, Mode=OneWay}">
+        <NavigationView x:Name="NavigationViewControl" Loaded="NavigationViewControl_Loaded" ItemInvoked="NavigationViewControl_ItemInvoked" Grid.Row="1" Canvas.ZIndex="0" Background="Transparent" Margin="0,-46,0,0" PaneDisplayMode="Left" IsBackButtonVisible="Collapsed" IsPaneToggleButtonVisible="True" IsBackEnabled="{x:Bind ViewModel.IsBackEnabled, Mode=OneWay}" IsSettingsVisible="True" ExpandedModeThresholdWidth="1280" OpenPaneLength ="200" DisplayModeChanged="NavigationViewControl_DisplayModeChanged" Header="{x:Bind ((ContentControl)ViewModel.SelectedNavigationViewItem).Content, Mode=OneWay}">
             <NavigationView.Resources>
             </NavigationView.Resources>
             <!--
@@ -136,13 +136,9 @@
             -->
 
             <Grid >
-                <Frame x:Name="NavigationFrame" Margin="{StaticResource NavigationViewPageContentMargin}" NavigationFailed="NavigationFrame_NavigationFailed"/>
+                <Frame x:Name="NavigationFrame" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Margin="{StaticResource NavigationViewPageContentMargin}" NavigationFailed="NavigationFrame_NavigationFailed"/>
             </Grid>
 
         </NavigationView>
-
-
-
-
     </Grid>
 </Page>

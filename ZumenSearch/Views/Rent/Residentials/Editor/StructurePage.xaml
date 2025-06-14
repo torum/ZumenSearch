@@ -114,9 +114,9 @@
                                     <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <NumberBox Grid.Row="0" Grid.Column="0" MinWidth="100" Header="地上（階建て）" Margin="12,12,0,0" HorizontalAlignment="Left"/>
-                                <NumberBox Grid.Row="0" Grid.Column="1" MinWidth="100" Header="地下（階建て）" Margin="12,12,0,0" HorizontalAlignment="Left"/>
-                                <NumberBox Grid.Row="1" Grid.Column="0" MinWidth="100" Header="総戸数（戸）" Margin="12,12,0,12" HorizontalAlignment="Left"/>
+                                <NumberBox Grid.Row="0" Grid.Column="0" MinWidth="100" Header="地上（階建て）" Value="{x:Bind ViewModel.AboveGroundFloorCount, Mode=TwoWay}" Margin="12,12,0,0" HorizontalAlignment="Left"/>
+                                <NumberBox Grid.Row="0" Grid.Column="1" MinWidth="100" Header="地下（階建て）" Value="{x:Bind ViewModel.BasementFloorCount, Mode=TwoWay}" Margin="12,12,0,0" HorizontalAlignment="Left"/>
+                                <NumberBox Grid.Row="1" Grid.Column="0" MinWidth="100" Header="総戸数（戸）" Value="{x:Bind ViewModel.TotalUnitCount,Mode=TwoWay}" Margin="12,12,0,12" HorizontalAlignment="Left"/>
                             </Grid>
                         </StackPanel>
 
@@ -127,7 +127,7 @@
                             <TextBlock Text="築年月" Margin="12"></TextBlock>
                         </StackPanel>
                         <StackPanel Grid.Row="4" Grid.Column="1" VerticalAlignment="Center">
-                            <DatePicker Header="築年月（西暦）" DayVisible="False" Margin="12,12,0,12"/>
+                            <DatePicker Header="築年月（西暦）" DayVisible="False" SelectedDate="{x:Bind ViewModel.SelectedBuildingBuiltMonthYear, Mode=TwoWay}" Margin="12,12,0,12"/>
                         </StackPanel>
 
                     </Grid>

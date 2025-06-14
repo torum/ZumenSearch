@@ -1,7 +1,10 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Xaml.Navigation;
+using System;
 using System.Diagnostics;
+using System.Xml.Linq;
+using ZumenSearch.Models;
 using ZumenSearch.Views;
 
 namespace ZumenSearch.ViewModels.Rent.Residentials.Editor.Modal;
@@ -21,20 +24,30 @@ public partial class ModalViewModel : ObservableRecipient
         set => SetProperty(ref _selected, value);
     }
 
+    public event EventHandler<string>? EventBackToSummary;
+
     public ModalViewModel()
     {
 
     }
 
-    private RelayCommand? backCommand;
+    private RelayCommand? saveCommand;
 
-    public IRelayCommand BackCommand => backCommand ??= new RelayCommand(Back);
+    public IRelayCommand SaveCommand => saveCommand ??= new RelayCommand(SaveAsync);
 
-    private void Back()
+    public void SaveAsync()
     {
-        //NavigationService.NavigateTo(typeof(RentLivingSearchViewModel).FullName!);
-        //NavigationService.GoBack();
+        // TODO: (make async)
+        Debug.WriteLine("SaveAsync() called in ModalViewModel");
+    }
 
+    private RelayCommand? backToSummaryCommand;
+
+    public IRelayCommand BackToSummaryCommand => backToSummaryCommand ??= new RelayCommand(GoBackToSummary);
+
+    public void GoBackToSummary()
+    {
+        EventBackToSummary?.Invoke(this, "asdf");
     }
 
     private void OnNavigated(object sender, NavigationEventArgs e)

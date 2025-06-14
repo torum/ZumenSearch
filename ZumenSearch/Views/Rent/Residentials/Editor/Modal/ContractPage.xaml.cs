@@ -18,14 +18,35 @@ namespace ZumenSearch.Views.Rent.Residentials.Editor.Modal;
 
 public sealed partial class ContractPage : Page
 {
-    public ViewModels.Rent.Residentials.Editor.Modal.ContractViewModel ViewModel
+    private ViewModels.Rent.Residentials.Editor.Modal.ModalViewModel? _viewModel;
+    public ViewModels.Rent.Residentials.Editor.Modal.ModalViewModel? ViewModel
     {
-        get;
+        get => _viewModel;
+        private set
+        {
+            if (value != null)
+            {
+                _viewModel = value;
+
+                //_viewModel.EventBackToSummary += (sender, arg) => OnEventBackToSummary(arg);
+            }
+        }
     }
 
     public ContractPage()
     {
-        ViewModel = new ViewModels.Rent.Residentials.Editor.Modal.ContractViewModel();
+        //ViewModel = new ViewModels.Rent.Residentials.Editor.Modal.ContractViewModel();
         InitializeComponent();
+    }
+
+    protected override void OnNavigatedTo(NavigationEventArgs e)
+    {
+        if ((e.Parameter is ViewModels.Rent.Residentials.Editor.Modal.ModalViewModel) && (e.Parameter != null))
+        {
+            //_editorShell = e.Parameter as Views.Rent.Residentials.Editor.EditorShell;
+            ViewModel = e.Parameter as ViewModels.Rent.Residentials.Editor.Modal.ModalViewModel;
+        }
+
+        base.OnNavigatedTo(e);
     }
 }

@@ -37,7 +37,7 @@
             <StackPanel Grid.Row="0">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <AppBarButton Icon="Edit" Label="編集"/>
-                    <AppBarButton Icon="Add" Label="新規" Command="{x:Bind ViewModel.AddNewCommand}"/>
+                    <AppBarButton Icon="Add" Label="新規" Command="{x:Bind ViewModel.AddNewUnitCommand}"/>
                 </StackPanel>
 
                 <Border BorderThickness="0,1,0,0" BorderBrush="{ThemeResource NavigationViewItemSeparatorForeground}"></Border>

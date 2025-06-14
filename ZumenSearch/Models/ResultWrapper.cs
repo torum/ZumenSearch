@@ -70,7 +70,7 @@ public class SqliteDataAccessSelectRentResidentialResultWrapper : SqliteDataAcce
 {
     //public int UnreadCount = 0;
 
-    public ObservableCollection<Models.Rent.Residentials.RentResidential> SelectedEntries = [];
+    public ObservableCollection<Models.Rent.Residentials.EntryResidential> SelectedEntries = [];
 }
 
 

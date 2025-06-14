@@ -9,16 +9,24 @@ namespace ZumenSearch.Views.Rent.Residentials.Editor.Modal;
 
 public sealed partial class SummaryPage : Page
 {
-    public ViewModels.Rent.Residentials.Editor.Modal.SummaryViewModel ViewModel
+    private ViewModels.Rent.Residentials.Editor.Modal.ModalViewModel? _viewModel;
+    public ViewModels.Rent.Residentials.Editor.Modal.ModalViewModel? ViewModel
     {
-        get;
-    }
+        get => _viewModel;
+        private set
+        {
+            if (value != null)
+            {
+                _viewModel = value;
 
-    private Views.Rent.Residentials.Editor.Modal.ModalShell? _dialogShell;
+                //_viewModel.EventBackToSummary += (sender, arg) => OnEventBackToSummary(arg);
+            }
+        }
+    }
 
     public SummaryPage()
     {
-        ViewModel = new ViewModels.Rent.Residentials.Editor.Modal.SummaryViewModel();
+        //ViewModel = new ViewModels.Rent.Residentials.Editor.Modal.SummaryViewModel();
         InitializeComponent();
 
         BreadcrumbBar1.ItemsSource = new ObservableCollection<Breadcrumb>{
@@ -32,16 +40,17 @@ public sealed partial class SummaryPage : Page
     {
         if (args.Index == 0)
         {
+            _viewModel?.GoBackToSummary();
             //_dialogShell?.NavFrame.Navigate(typeof(SummaryPage), _dialogShell, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });
         }
     }
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
-
-        if ((e.Parameter is Views.Rent.Residentials.Editor.Modal.ModalShell) && (e.Parameter != null))
+        if ((e.Parameter is ViewModels.Rent.Residentials.Editor.Modal.ModalViewModel) && (e.Parameter != null))
         {
-            _dialogShell = e.Parameter as Views.Rent.Residentials.Editor.Modal.ModalShell;
+            //_editorShell = e.Parameter as Views.Rent.Residentials.Editor.EditorShell;
+            ViewModel = e.Parameter as ViewModels.Rent.Residentials.Editor.Modal.ModalViewModel;
         }
 
         base.OnNavigatedTo(e);

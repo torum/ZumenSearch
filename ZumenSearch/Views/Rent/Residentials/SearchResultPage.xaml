@@ -6,7 +6,8 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:mod="using:ZumenSearch.Models"
     xmlns:rent="using:ZumenSearch.Models.Rent.Residentials"
-    mc:Ignorable="d">
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid x:Name="ContentArea" Margin="{StaticResource NavigationViewPageContentAreaMargin}">
         <Grid.RowDefinitions>
@@ -91,7 +92,7 @@
                     <ListView x:Name="SearchResult" SelectionMode="Single" ItemsSource="{x:Bind ViewModel.RentResidentialSearchResult, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" SingleSelectionFollowsFocus="True">
                         <!--  SelectedItem="{x:Bind ViewModel.SelectedRentResidentialItem, Mode=TwoWay}" -->
                         <ListView.ItemTemplate>
-                            <DataTemplate x:DataType="rent:RentResidential">
+                            <DataTemplate x:DataType="rent:EntryResidential">
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="*"/>

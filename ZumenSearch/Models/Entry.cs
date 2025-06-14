@@ -17,7 +17,7 @@ using ZumenSearch.ViewModels;
 
 namespace ZumenSearch.Models
 {
-    public abstract class Entry : ObservableObject, INotifyPropertyChanged
+    public abstract class Entry : ObservableObject
     {
         private bool _isDirty;
         public bool IsDirty
@@ -524,7 +524,7 @@ namespace ZumenSearch.Models
         protected Entry()
         {
             // Instead of using a GUID, we initialize _id to an empty string to indicate that the entry is NEW.
-            _id = string.Empty;//Guid.NewGuid().ToString();
+            _id = string.Empty;//Guid.CreateVersion7() //Guid.NewGuid().ToString();
         }
 
         protected Entry(string id)
