@@ -6,12 +6,10 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static ZumenSearch.Models.Rent.Residentials.Enums;
 
 namespace ZumenSearch.Models.Rent.Residentials;
 
-// 賃貸住居用の物件クラス（建物）
-public partial class EntryResidential : Entry
+public partial class EntryResidentialSearchResult : Entry
 {
     private string? _name;
     public string Name
@@ -26,12 +24,34 @@ public partial class EntryResidential : Entry
         }
     }
 
-    public EntryResidential()
+    public EntryResidentialSearchResult(string id) : base(id)
+    {
+        //
+    }
+}
+
+// 賃貸住居用の物件クラス（建物）
+public partial class EntryResidentialFull : Entry
+{
+    private string? _name;
+    public string Name
+    {
+        get => _name ?? string.Empty; // Ensure a non-null value is returned
+        set
+        {
+            if (SetProperty(ref _name, value))
+            {
+                IsDirty = true;
+            }
+        }
+    }
+
+    public EntryResidentialFull()
     {
         //
     }
 
-    public EntryResidential(string id) : base(id)
+    public EntryResidentialFull(string id) : base(id)
     {
         //
     }

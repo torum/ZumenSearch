@@ -4,10 +4,47 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="using:CommunityToolkit.WinUI"
+    xmlns:controls="using:CommunityToolkit.WinUI.Controls"
+    xmlns:animations="using:CommunityToolkit.WinUI.Animations"
     mc:Ignorable="d"
     xmlns:mod="using:ZumenSearch.Models"
     NavigationCacheMode="Required"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <Page.Resources>
+        <animations:ImplicitAnimationSet x:Name="ShowTransitions">
+            <animations:OffsetAnimation EasingMode="EaseOut"
+                                        From="0,24,0"
+                                        To="0"
+                                        Duration="0:0:0.4" />
+            <animations:OpacityAnimation EasingMode="EaseOut"
+                                         From="0"
+                                         To="1"
+                                         Duration="0:0:0.2" />
+        </animations:ImplicitAnimationSet>
+        <animations:ImplicitAnimationSet x:Name="HideTransitions">
+            <animations:OffsetAnimation EasingMode="EaseOut"
+                                        From="0"
+                                        To="0,24,0"
+                                        Duration="0:0:0.2" />
+            <animations:OpacityAnimation EasingMode="EaseOut"
+                                         From="1"
+                                         To="0"
+                                         Duration="0:0:0.1" />
+        </animations:ImplicitAnimationSet>
+        <Style x:Key="PanelStyle"
+               TargetType="StackPanel">
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Padding" Value="16" />
+            <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+            <Setter Property="Orientation" Value="Horizontal" />
+            <Setter Property="Spacing" Value="8" />
+            <Setter Property="animations:Implicit.HideAnimations" Value="{StaticResource ShowTransitions}" />
+        </Style>
+    </Page.Resources>
+
 
     <Grid x:Name="ContentArea" Margin="{StaticResource NavigationViewPageContentAreaMargin}">
         <Grid.RowDefinitions>
@@ -48,60 +85,76 @@
             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
 
                 <StackPanel HorizontalAlignment="Stretch" Spacing="12" Margin="0,12,12,24">
-                    
-                    <Grid>
 
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-                        
-                        <Grid Grid.Row="0">
-                            <TextBlock Text="{x:Bind ViewModel.AddressPreview, Mode=OneWay}" Opacity="0.7"  Margin="0 0 0 6" HorizontalAlignment="Right"/>
-                        </Grid>
-                        
-                        <Grid Grid.Row="1">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="1*"/>
-                                <ColumnDefinition Width="1*"/>
-                            </Grid.ColumnDefinitions>
-                            <ComboBox Grid.Column="0" Header="都道府県" ItemsSource="{x:Bind ViewModel.Prefs, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.SelectedPef, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="Name"  PlaceholderText="選択" SelectedIndex="-1" Margin="0 6 6 6" Width="300" HorizontalAlignment="Left">
-                            </ComboBox>
-                        </Grid>
+                    <controls:Segmented x:Name="segmentedControl"
+                            HorizontalAlignment="Stretch"
+                            SelectedIndex="0">
+                        <controls:SegmentedItem Content="住所" HorizontalAlignment="Stretch"
+                                    Tag="one" />
+                        <controls:SegmentedItem Content="緯度・経度" HorizontalAlignment="Stretch"
+                                    Tag="two" />
+                    </controls:Segmented>
+                    <controls:SwitchPresenter Value="{Binding SelectedItem.Tag, ElementName=segmentedControl}">
+                        <controls:Case Value="one">
+                            <StackPanel animations:Implicit.HideAnimations="{StaticResource HideTransitions}"
+                            animations:Implicit.ShowAnimations="{StaticResource ShowTransitions}"
+                            Style="{StaticResource PanelStyle}">
 
-                        <Grid Grid.Row="2">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="1*"/>
-                                <ColumnDefinition Width="1*"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBox Grid.Column="0" Header="市区町村" Text="{x:Bind ViewModel.CityName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0 6 6 6" Width="300" HorizontalAlignment="Left"></TextBox>
-                            <TextBox Grid.Column="1" Header="町名" Text="{x:Bind ViewModel.TownName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0 6 6 6" Width="300" HorizontalAlignment="Left"></TextBox>
-                        </Grid>
-                        
-                        <Grid Grid.Row="3">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="1*"/>
-                                <ColumnDefinition Width="1*"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBox Grid.Column="0" Header="丁目" Text="{x:Bind ViewModel.Choume, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0 6 6 6" Width="300" HorizontalAlignment="Left"></TextBox>
-                            <TextBox Grid.Column="1" Header="番地以下" Text="{x:Bind ViewModel.Banchi, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0 6 6 6" Width="300" HorizontalAlignment="Left"></TextBox>
-                        </Grid>
+                                <StackPanel Margin="12 12 24 12">
 
-                        <Grid Grid.Row="4" Visibility="Collapsed">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="1*"/>
-                                <ColumnDefinition Width="1*"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBox Grid.Column="0" Header="〒" Text="" Margin="0 6 6 6" Width="140" HorizontalAlignment="Left"></TextBox>
-                        </Grid>
+                                    <Grid>
 
-                        <StackPanel Grid.Row="5">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
 
-                            <!-- 
+                                        <Grid Grid.Row="0">
+                                            <TextBlock Text="{x:Bind ViewModel.AddressPreview, Mode=OneWay}" Opacity="0.7"  Margin="0 0 0 6" HorizontalAlignment="Right"/>
+                                        </Grid>
+
+                                        <Grid Grid.Row="1">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="1*"/>
+                                                <ColumnDefinition Width="1*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <ComboBox Grid.Column="0" Header="都道府県" ItemsSource="{x:Bind ViewModel.Prefs, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.SelectedPef, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="Name"  PlaceholderText="選択" SelectedIndex="-1" Margin="0 6 6 6" Width="300" HorizontalAlignment="Left">
+                                            </ComboBox>
+                                        </Grid>
+
+                                        <Grid Grid.Row="2">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="1*"/>
+                                                <ColumnDefinition Width="1*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBox Grid.Column="0" Header="市区町村" Text="{x:Bind ViewModel.CityName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0 6 6 6" MinWidth="300" HorizontalAlignment="Stretch"></TextBox>
+                                            <TextBox Grid.Column="1" Header="町名" Text="{x:Bind ViewModel.TownName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="6 6 6 6" MinWidth="300" HorizontalAlignment="Stretch"></TextBox>
+                                        </Grid>
+
+                                        <Grid Grid.Row="3">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="1*"/>
+                                                <ColumnDefinition Width="1*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBox Grid.Column="0" Header="丁目" Text="{x:Bind ViewModel.Choume, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0 6 6 6" MinWidth="300" HorizontalAlignment="Stretch"></TextBox>
+                                            <TextBox Grid.Column="1" Header="番地以下" Text="{x:Bind ViewModel.Banchi, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="6 6 6 6" MinWidth="300" HorizontalAlignment="Stretch"></TextBox>
+                                        </Grid>
+
+                                        <Grid Grid.Row="4" Visibility="Collapsed">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="1*"/>
+                                                <ColumnDefinition Width="1*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBox Grid.Column="0" Header="〒" Text="" Margin="0 6 6 6" Width="140" HorizontalAlignment="Left"></TextBox>
+                                        </Grid>
+
+                                        <StackPanel Grid.Row="5">
+
+                                            <!-- 
         <GroupBox Header="所在地詳細" Padding="0" Style="{DynamicResource GroupBoxStyle}">
 
             <Button VerticalAlignment="Center" Content="所在地設定" Margin="6" Padding="3" Width="120" HorizontalAlignment="Left" />
@@ -115,8 +168,28 @@
         </GroupBox>
         
         -->
-                        </StackPanel>
-                    </Grid>
+                                        </StackPanel>
+                                    </Grid>
+
+                                </StackPanel>
+
+                            </StackPanel>
+                        </controls:Case>
+                        <controls:Case Value="two">
+                            <StackPanel animations:Implicit.HideAnimations="{StaticResource HideTransitions}"
+                            animations:Implicit.ShowAnimations="{StaticResource ShowTransitions}"
+                            Style="{StaticResource PanelStyle}">
+                                <Ellipse Width="24"
+                             Height="24"
+                             Fill="{ThemeResource AccentFillColorDefaultBrush}" />
+                                <TextBlock VerticalAlignment="Center"
+                               Text="This is the two panel" />
+                            </StackPanel>
+                        </controls:Case>
+                    </controls:SwitchPresenter>
+
+
+
 
                 </StackPanel>
 

@@ -320,18 +320,15 @@
                         </NavigationViewItem.MenuItems>
                         </NavigationViewItem>
 
-                    <NavigationViewItem Icon="Folder" Content="図面" Tag="zumen"/>
-
-                        <!--<NavigationViewItemSeparator />-->
-
-                    <NavigationViewItem Icon="OtherUser" Content="貸主" Tag="kasinusi"/>
-                    <NavigationViewItem Icon="OtherUser" Content="宅建業者" Tag="gyousya"/>
+                    <NavigationViewItem x:Name="NavigationViewItemZumen" Icon="Folder" Content="図面" Tag="zumen"/>
+                    <NavigationViewItem x:Name="NavigationViewItemKasinusi" Icon="OtherUser" Content="貸主" Tag="kasinusi"/>
+                    <NavigationViewItem x:Name="NavigationViewItemGyousya" Icon="OtherUser" Content="宅建業者" Tag="gyousya"/>
                 </NavigationView.MenuItems>
 
 
                     <Grid>
                     <!-- {StaticResource NavigationViewSubPageContentMargin} -->
-                        <Frame x:Name="ContentFrame" Navigated="ContentFrame_Navigated" NavigationFailed="ContentFrame_NavigationFailed"/>
+                        <Frame x:Name="ContentFrame" NavigationFailed="ContentFrame_NavigationFailed"/>
                     </Grid>
                 </NavigationView>
 

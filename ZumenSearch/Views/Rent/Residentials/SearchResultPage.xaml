@@ -92,7 +92,7 @@
                     <ListView x:Name="SearchResult" SelectionMode="Single" ItemsSource="{x:Bind ViewModel.RentResidentialSearchResult, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" SingleSelectionFollowsFocus="True">
                         <!--  SelectedItem="{x:Bind ViewModel.SelectedRentResidentialItem, Mode=TwoWay}" -->
                         <ListView.ItemTemplate>
-                            <DataTemplate x:DataType="rent:EntryResidential">
+                            <DataTemplate x:DataType="rent:EntryResidentialSearchResult">
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="*"/>

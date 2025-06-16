@@ -15,42 +15,19 @@ using ZumenSearch.Models.Location;
 using ZumenSearch.Models.Rent.Residentials;
 using ZumenSearch.Services;
 using ZumenSearch.Views;
-using static ZumenSearch.Models.Rent.Residentials.Enums;
+using ZumenSearch.Views.Rent.Residentials.Editor;
 
 namespace ZumenSearch.ViewModels.Rent.Residentials.Editor;
 
-// 賃貸住居用物件の「種別」クラス
-public class Kind(string key, string label)
-{
-    public string Label { get; set; } = label;
-    public string Key { get; set; } = key;
-};
-
-// 賃貸住居用物件の「構造」クラス
-public class Structure(string key, string label)
-{
-    public string Label { get; set; } = label;
-    public string Key { get; set; } = key;
-};
-
-// 賃貸住居用物件の「都道府県」クラス
-public class Pref
-{
-    public Pref(int iD, string name)
-    {
-        this.ID = iD;
-        this.Name = name;
-    }
-
-    public int ID { get; private set; } // jis_code の初めの二桁
-
-    public string Name { get; private set; }
-};
-
-// 賃貸住居用物件の編集用本体ViewModelクラス
 public partial class EditorViewModel : ObservableObject
 {
-    // Flag that indicates if the entry is dirty (i.e., has unsaved changes).
+    #region == Properties ==
+
+    // The Entry property holds the COPY of current RentResidential entry being edited. Do not use it directly in the UI. Apply changes to this object in SaveAsync() to save the changes.
+    // MainViewModel creates a new instance of this class and call EditorShell.SetEntry(EntryResidentialFull) and sets this property.
+    private Models.Rent.Residentials.EntryResidentialFull _entry = new();
+
+    // This flag indicates if the entry is dirty (i.e., has unsaved changes).
     private bool _isEntryDirty;
     public bool IsEntryDirty
     {
@@ -88,17 +65,17 @@ public partial class EditorViewModel : ObservableObject
     public ObservableCollection<Kind> Kinds =
     [
         //new Kind(EnumKinds.Unspecified.ToString(), "未指定"),
-        new Kind(EnumKinds.Apartment.ToString(), "アパート"),
-        new Kind(EnumKinds.Mansion.ToString(), "マンション"),
-        new Kind(EnumKinds.House.ToString(), "一戸建て"),
-        new Kind(EnumKinds.TerraceHouse.ToString(), "テラスハウス"),
-        new Kind(EnumKinds.TownHouse.ToString(), "タウンハウス"),
-        new Kind(EnumKinds.ShareHouse.ToString(), "シェアハウス"),
-        new Kind(EnumKinds.Dormitory.ToString(), "寮・下宿")
+        new Kind(Models.Rent.Residentials.EnumKinds.Apartment.ToString(), "アパート"),
+        new Kind(Models.Rent.Residentials.EnumKinds.Mansion.ToString(), "マンション"),
+        new Kind(Models.Rent.Residentials.EnumKinds.House.ToString(), "一戸建て"),
+        new Kind(Models.Rent.Residentials.EnumKinds.TerraceHouse.ToString(), "テラスハウス"),
+        new Kind(Models.Rent.Residentials.EnumKinds.TownHouse.ToString(), "タウンハウス"),
+        new Kind(Models.Rent.Residentials.EnumKinds.ShareHouse.ToString(), "シェアハウス"),
+        new Kind(Models.Rent.Residentials.EnumKinds.Dormitory.ToString(), "寮・下宿")
     ];
 
     // The SelectedKind property holds the currently selected kind from the ComboBox in the UI.
-    private Kind _selectedKind = new(EnumKinds.Unspecified.ToString(), "");
+    private Kind _selectedKind = new(Models.Rent.Residentials.EnumKinds.Unspecified.ToString(), "");
     public Kind SelectedKind
     {
         get => _selectedKind;
@@ -125,6 +102,9 @@ public partial class EditorViewModel : ObservableObject
             {
                 IsEntryDirty = true;
                 OnPropertyChanged(nameof(BasicsPreview));
+
+                // If this is set, then show/hide the owner and zumen from shell menu.
+                EventIsUnitOwnership?.Invoke(this, _isUnitOwnership);
             }
         }
     }
@@ -133,26 +113,29 @@ public partial class EditorViewModel : ObservableObject
     {
         get
         {
-            // If the SelectedPef is not set, return an empty string.
-            if (SelectedPef == null)
-            {
-                return string.Empty;
-            }
-
             string s = string.Empty;
-            if (_name != string.Empty)
+
+            if (_name != null)
             {
-                s = _name ?? string.Empty;
+                s = _name;
             }
 
             if (_selectedKind.Label != string.Empty)
             {
-                s += ", " + _selectedKind.Label;
+                if (s != string.Empty)
+                {
+                    s += ", ";
+                }
+                s += _selectedKind.Label;
             }
 
             if (_isUnitOwnership)
             {
-                s += ", " + "区分所有";
+                if (s != string.Empty)
+                {
+                    s += ", ";
+                }
+                s += "区分所有";
             }
 
             return s;
@@ -227,61 +210,6 @@ public partial class EditorViewModel : ObservableObject
             new Pref(46, "鹿児島県"),
             new Pref(47, "沖縄県"),
     ];
-
-    // TODO:
-    public Dictionary<string, int> PrefsDictionary
-    {
-        get; set;
-    } = new Dictionary<string, int>()
-        {
-            {"北海道", 1},
-            {"青森県", 2},
-            {"岩手県", 3},
-            {"宮城県", 4},
-            {"秋田県", 5},
-            {"山形県", 6},
-            {"福島県", 7},
-            {"茨城県", 8},
-            {"栃木県", 9},
-            {"群馬県", 10},
-            {"埼玉県", 11},
-            {"千葉県", 12},
-            {"東京都", 13},
-            {"神奈川県",14},
-            {"新潟県", 15},
-            {"富山県", 16},
-            {"石川県", 17},
-            {"福井県", 18},
-            {"山梨県", 19},
-            {"長野県", 20},
-            {"岐阜県", 21},
-            {"静岡県", 22},
-            {"愛知県", 23},
-            {"三重県", 24},
-            {"滋賀県", 25},
-            {"京都府", 26},
-            {"大阪府", 27},
-            {"兵庫県", 28},
-            {"奈良県", 29},
-            {"和歌山県",30},
-            {"鳥取県", 31},
-            {"島根県", 32},
-            {"岡山県", 33},
-            {"広島県", 34},
-            {"山口県", 35},
-            {"徳島県", 36},
-            {"香川県", 37},
-            {"愛媛県", 38},
-            {"高知県", 39},
-            {"福岡県", 40},
-            {"佐賀県", 41},
-            {"長崎県", 42},
-            {"熊本県", 43},
-            {"大分県", 44},
-            {"宮崎県", 45},
-            {"鹿児島県", 16},
-            {"沖縄県", 47},
-        };
 
     private string _cityName = string.Empty;
     public string CityName
@@ -382,9 +310,9 @@ public partial class EditorViewModel : ObservableObject
 
     #endregion
 
-    #region == 建物構造 ==
+    #region == 構造 ==
 
-    private Structure _selectedStructure = new(EnumStructure.Unspecified.ToString(), "");
+    private Structure _selectedStructure = new(Models.Rent.Residentials.EnumStructure.Unspecified.ToString(), "");
     public Structure SelectedStructure
     {
         get => _selectedStructure;
@@ -401,18 +329,18 @@ public partial class EditorViewModel : ObservableObject
     public ObservableCollection<Structure> Structures =
     [
         //new Structure(EnumStructure.Unspecified.ToString(), "未指定"),
-        new Structure(EnumStructure.Wood.ToString(), "木造"),
-        new Structure(EnumStructure.Block.ToString(), "ブロック造"),
-        new Structure(EnumStructure.LightSteel.ToString(), "軽量鉄骨造"),
-        new Structure(EnumStructure.Steel.ToString(), "鉄骨造"),
-        new Structure(EnumStructure.RC.ToString(), "鉄筋コンクリート(RC)造"),
-        new Structure(EnumStructure.SRC.ToString(), "鉄骨鉄筋コンクリート(SRC)造"),
-        new Structure(EnumStructure.ALC.ToString(), "軽量気泡コンクリート(ALC)造"),
-        new Structure(EnumStructure.PC.ToString(), "プレキャストコンクリート(PC)造"),
-        new Structure(EnumStructure.HPC.ToString(), "鉄骨プレキャストコンクリート(HPC)造"),
-        new Structure(EnumStructure.RB.ToString(), "鉄筋ブロック造"),
-        new Structure(EnumStructure.CFT.ToString(), "コンクリート充填鋼管(CFT)造"),
-        new Structure(EnumStructure.Other.ToString(), "その他")
+        new Structure(Models.Rent.Residentials.EnumStructure.Wood.ToString(), "木造"),
+        new Structure(Models.Rent.Residentials.EnumStructure.Block.ToString(), "ブロック造"),
+        new Structure(Models.Rent.Residentials.EnumStructure.LightSteel.ToString(), "軽量鉄骨造"),
+        new Structure(Models.Rent.Residentials.EnumStructure.Steel.ToString(), "鉄骨造"),
+        new Structure(Models.Rent.Residentials.EnumStructure.RC.ToString(), "鉄筋コンクリート(RC)造"),
+        new Structure(Models.Rent.Residentials.EnumStructure.SRC.ToString(), "鉄骨鉄筋コンクリート(SRC)造"),
+        new Structure(Models.Rent.Residentials.EnumStructure.ALC.ToString(), "軽量気泡コンクリート(ALC)造"),
+        new Structure(Models.Rent.Residentials.EnumStructure.PC.ToString(), "プレキャストコンクリート(PC)造"),
+        new Structure(Models.Rent.Residentials.EnumStructure.HPC.ToString(), "鉄骨プレキャストコンクリート(HPC)造"),
+        new Structure(Models.Rent.Residentials.EnumStructure.RB.ToString(), "鉄筋ブロック造"),
+        new Structure(Models.Rent.Residentials.EnumStructure.CFT.ToString(), "コンクリート充填鋼管(CFT)造"),
+        new Structure(Models.Rent.Residentials.EnumStructure.Other.ToString(), "その他")
     ];
 
     private int _basementFloorCount = 0;
@@ -475,16 +403,14 @@ public partial class EditorViewModel : ObservableObject
     {
         get
         {
-            // If the SelectedPef is not set, return an empty string.
-            if (_selectedStructure == null)
-            {
-                return string.Empty;
-            }
-
             string s = string.Empty;
-            if (_selectedStructure.Label != string.Empty)
+
+            if (_selectedStructure != null)
             {
-                s = _selectedStructure.Label;
+                if (_selectedStructure.Label != string.Empty)
+                {
+                    s = _selectedStructure.Label;
+                }
             }
             if (AboveGroundFloorCount > 0)
             {
@@ -493,7 +419,7 @@ public partial class EditorViewModel : ObservableObject
                     s += ", ";
                 }
 
-                s= $"地上{AboveGroundFloorCount}階";
+                s += $"地上{AboveGroundFloorCount}階";
             }
             if (BasementFloorCount > 0)
             {
@@ -527,7 +453,6 @@ public partial class EditorViewModel : ObservableObject
 
     #endregion
 
-
     #region == 設備 ==
 
 
@@ -543,68 +468,85 @@ public partial class EditorViewModel : ObservableObject
 
     #endregion
 
-
-    // The Entry property holds the COPY of current RentResidential entry being edited. Do not use it directly in the UI. Apply changes to this object in SaveAsync() to save the changes.
-    private Models.Rent.Residentials.EntryResidential _entry = new();
-    public Models.Rent.Residentials.EntryResidential Entry
-    {
-        get => _entry;
-        set
-        {
-            if (value != null)
-            {
-                _entry = value;
-
-                if (EditorWin != null)
-                {
-                    // If the EditorWin is not null, set the Id property of the window to the Entry.Id.
-                    EditorWin.Id = _entry.Id;
-                }
-                else
-                {
-                    // TODO: If EditorWin is null, log an error or handle it accordingly.
-                    Debug.WriteLine("EditorWin is null. Cannot set Id.");
-                }
-
-                Name = _entry.Name;
-                //TODO: Set other properties
-
-                IsEntryDirty = false;
-            }
-        }
-    }
-
-    // The EditorWin property holds the reference to the EditorWindow instance that is currently being used for editing.
-    public Views.Rent.Residentials.Editor.EditorWindow? EditorWin
-    {
-        get; set;
-    }
+    #endregion
 
     #region == Events
 
     // The event handlers below are used to notify the UI about various actions that can be performed in the editor.
-    //
-    public event EventHandler<string>? EventAddNewUnit;
-    //
-    public event EventHandler<string>? EventGoBack;
-    public event EventHandler<string>? EventBackToSummary;
-    //
-    public event EventHandler<string>? EventEditStructure;
-    public event EventHandler<string>? EventEditLocation;
-    public event EventHandler<string>? EventEditTransportation;
-    public event EventHandler<string>? EventEditAppliance;
+    // EditorShell subscribes to these events to handle the actions accordingly.
+    public event EventHandler? EventAddNewUnit;
+    // Who subscribes to this event?
+    public event EventHandler? EventGoBack;
+    // EditorShell subscribes to this event to handle the back navigation.
+    public event EventHandler? EventBackToSummary;
+    public event EventHandler? EventEditLocation;
+    public event EventHandler? EventEditTransportation;
+    public event EventHandler? EventEditAppliance;
+    // EditorShell subscribes to this event to handle the actions accordingly.
+    public event EventHandler<bool>? EventIsUnitOwnership;
 
     #endregion
 
+    #region == Services ==
+    
     // The IDataAccessService is used to access the data layer for saving and updating entries.
     private readonly IDataAccessService _dataAccessService;
 
+    #endregion
+
+    #region == Constructor ==
+
     // Constructor for the EditorViewModel class, initializes the data access service and the entry.
+    #pragma warning disable IDE0290 
     public EditorViewModel(IDataAccessService dataAccessService)
+    
     {
         _dataAccessService = dataAccessService;
 
     }
+    #pragma warning restore IDE0290
+
+    #endregion
+
+    #region == Methods ==
+
+    public void SetEntry(Models.Rent.Residentials.EntryResidentialFull entry)
+    {
+        if (entry != null)
+        {
+            _entry = entry;
+            /*
+            if (_editorWindow == null)
+            {
+                // TODO: Log an error or handle it accordingly.
+                return;
+            }
+
+            // Set the Id property of the window to the Entry.Id.
+            _editorWindow.Id = _entry.Id;
+            */
+
+            Name = _entry.Name;
+            //TODO: Set other properties
+
+            IsEntryDirty = false;
+        }
+    }
+
+    /*
+    public void SetEditorWindow(Views.Rent.Residentials.Editor.EditorWindow editorWin)
+    {
+        _editorWindow = editorWin;
+
+        // Set the Id property of the window to the Entry.Id if _entry is not null (most likely is for now).
+        if (_entry != null)
+        {
+            _editorWindow.Id = _entry.Id;
+        }
+    }
+    */
+
+    #endregion
 
     #region == Commands ==
 
@@ -621,13 +563,13 @@ public partial class EditorViewModel : ObservableObject
                 Debug.WriteLine("TODO: Name is null or empty. This field is required. Show alart and abort.");
             }
 
-            Entry.Name = Name;
+            _entry.Name = Name;
             //TODO: Set other properties for Entry.
 
-            if (string.IsNullOrEmpty(Entry.Id))
+            if (string.IsNullOrEmpty(_entry.Id))
             {
                 // If the Entry.Id is empty, generate a new ID and save as new.
-                Entry.SetId = Guid.CreateVersion7().ToString();
+                _entry.SetId = Guid.CreateVersion7().ToString();
                 await SaveAsNew().ConfigureAwait(false);
             }
             else
@@ -640,7 +582,7 @@ public partial class EditorViewModel : ObservableObject
 
     private Task SaveAsNew()
     {
-        var resInsert = _dataAccessService.InsertRentResidential(Entry.Id, Entry.Name, "some comment");
+        var resInsert = _dataAccessService.InsertRentResidential(_entry.Id, _entry.Name, "some comment");
         if (resInsert.IsError)
         {
             Debug.WriteLine(resInsert.Error.ErrText + Environment.NewLine + resInsert.Error.ErrDescription + Environment.NewLine + resInsert.Error.ErrPlace + Environment.NewLine + resInsert.Error.ErrPlaceParent);
@@ -654,7 +596,7 @@ public partial class EditorViewModel : ObservableObject
         {
             // Clear these dirty flags.
             IsEntryDirty = false;
-            Entry.IsDirty = false;
+            _entry.IsDirty = false;
 
             Debug.WriteLine("No errors on insert.");
         }
@@ -665,7 +607,7 @@ public partial class EditorViewModel : ObservableObject
 
     private Task SaveAsUpdate()
     {
-        var resInsert = _dataAccessService.UpdateRentResidential(Entry.Id, Entry.Name, "some update comment");
+        var resInsert = _dataAccessService.UpdateRentResidential(_entry.Id, _entry.Name, "some update comment");
         if (resInsert.IsError)
         {
             Debug.WriteLine(resInsert.Error.ErrText + Environment.NewLine + resInsert.Error.ErrDescription + Environment.NewLine + resInsert.Error.ErrPlace + Environment.NewLine + resInsert.Error.ErrPlaceParent);
@@ -679,7 +621,7 @@ public partial class EditorViewModel : ObservableObject
         {
             // Clear these dirty flags.
             IsEntryDirty = false;
-            Entry.IsDirty = false;
+            _entry.IsDirty = false;
 
             Debug.WriteLine("No errors on update.");
 
@@ -709,7 +651,7 @@ public partial class EditorViewModel : ObservableObject
     private void AddNewUnit()
     {
         //NavigationService.NavigateTo(typeof(RentLivingEditShellViewModel).FullName!, "test");
-        EventAddNewUnit?.Invoke(this, "asdf");
+        EventAddNewUnit?.Invoke(this, EventArgs.Empty);
     }
 
     // Go Back command (don't use this?)
@@ -719,7 +661,7 @@ public partial class EditorViewModel : ObservableObject
 
     private void GoBack()
     {
-        EventGoBack?.Invoke(this, "asdf");
+        EventGoBack?.Invoke(this, EventArgs.Empty);
     }
 
     private RelayCommand? backToSummaryCommand;
@@ -728,15 +670,7 @@ public partial class EditorViewModel : ObservableObject
 
     public void GoBackToSummary()
     {
-        EventBackToSummary?.Invoke(this, "asdf");
-    }
-
-    private RelayCommand? editStructureCommand;
-    public IRelayCommand EditStructureCommand => editStructureCommand ??= new RelayCommand(EditStructure);
-
-    public void EditStructure()
-    {
-        EventEditStructure?.Invoke(this, "asdf");
+        EventBackToSummary?.Invoke(this, EventArgs.Empty);
     }
 
     private RelayCommand? editLocationCommand;
@@ -744,7 +678,7 @@ public partial class EditorViewModel : ObservableObject
 
     public void EditLocation()
     {
-        EventEditLocation?.Invoke(this, "asdf");
+        EventEditLocation?.Invoke(this, EventArgs.Empty);
     }
 
     private RelayCommand? editTransportationCommand;
@@ -752,7 +686,7 @@ public partial class EditorViewModel : ObservableObject
 
     private void EditTransportation()
     {
-        EventEditTransportation?.Invoke(this, "asdf");
+        EventEditTransportation?.Invoke(this, EventArgs.Empty);
     }
 
     private RelayCommand? editApplianceCommand;
@@ -760,7 +694,7 @@ public partial class EditorViewModel : ObservableObject
 
     public void EditAppliance()
     {
-        EventEditAppliance?.Invoke(this, "asdf");
+        EventEditAppliance?.Invoke(this, EventArgs.Empty);
     }
 
     #endregion

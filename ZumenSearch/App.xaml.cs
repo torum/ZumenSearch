@@ -81,6 +81,7 @@ namespace ZumenSearch
                 // TODO:
                 //services.AddSingleton<IThemeSelectorService, ThemeSelectorService>();
                 services.AddSingleton<IDataAccessService, DataAccessService>();
+                services.AddSingleton<IModalDialogService, ModalDialogService>();
 
                 // Views and ViewModels
                 services.AddSingleton<MainShell>();
