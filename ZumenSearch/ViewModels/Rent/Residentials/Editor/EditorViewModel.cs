@@ -115,14 +115,14 @@ public partial class EditorViewModel : ObservableObject
         {
             string s = string.Empty;
 
-            if (_name != null)
+            if (!string.IsNullOrEmpty(_name))
             {
                 s = _name;
             }
 
-            if (_selectedKind.Label != string.Empty)
+            if (!string.IsNullOrEmpty(_selectedKind.Label))
             {
-                if (s != string.Empty)
+                if (!string.IsNullOrEmpty(s))
                 {
                     s += ", ";
                 }
@@ -131,7 +131,7 @@ public partial class EditorViewModel : ObservableObject
 
             if (_isUnitOwnership)
             {
-                if (s != string.Empty)
+                if (!string.IsNullOrEmpty(s))
                 {
                     s += ", ";
                 }
@@ -293,7 +293,7 @@ public partial class EditorViewModel : ObservableObject
             }
 
             string s = string.Empty;
-            if (_banchi != string.Empty)
+            if (!string.IsNullOrEmpty(_banchi))
             {
                 s = "-" + _banchi;
             }
@@ -306,7 +306,122 @@ public partial class EditorViewModel : ObservableObject
 
     #region = 交通 ==
 
+    private string _ensen = string.Empty;
+    public string Ensen
+    {
+        get => _ensen;
+        set
+        {
+            if (SetProperty(ref _ensen, value))
+            {
+                IsEntryDirty = true;
+                OnPropertyChanged(nameof(TransportationPreview));
+            }
+        }
+    }
 
+    private string _eki = string.Empty;
+    public string Eki
+    {
+        get => _eki;
+        set
+        {
+            if (SetProperty(ref _eki, value))
+            {
+                IsEntryDirty = true;
+                OnPropertyChanged(nameof(TransportationPreview));
+            }
+        }
+    }
+
+    private int _ekiToho = 0;
+    public int EkiToho
+    {
+        get => _ekiToho;
+        set
+        {
+            if (SetProperty(ref _ekiToho, value))
+            {
+                IsEntryDirty = true;
+                OnPropertyChanged(nameof(TransportationPreview));
+            }
+        }
+    }
+
+    private string _busStop = string.Empty;
+    public string BusStop
+    {
+        get => _busStop;
+        set
+        {
+            if (SetProperty(ref _busStop, value))
+            {
+                IsEntryDirty = true;
+                OnPropertyChanged(nameof(TransportationPreview));
+            }
+        }
+    }
+
+    private int __busJyousya = 0;
+    public int BusJyousya
+    {
+        get => __busJyousya;
+        set
+        {
+            if (SetProperty(ref __busJyousya, value))
+            {
+                IsEntryDirty = true;
+                OnPropertyChanged(nameof(TransportationPreview));
+            }
+        }
+    }
+
+    private int _busStopToho = 0;
+    public int BusStopToho
+    {
+        get => _busStopToho;
+        set
+        {
+            if (SetProperty(ref _busStopToho, value))
+            {
+                IsEntryDirty = true;
+                OnPropertyChanged(nameof(TransportationPreview));
+            }
+        }
+    }
+
+    public string TransportationPreview
+    {
+        get
+        {
+            string s = string.Empty;
+
+            if (!string.IsNullOrEmpty(_ensen))
+            {
+                s = _ensen;
+            }
+
+            if (!string.IsNullOrEmpty(_eki))
+            {
+                if (!string.IsNullOrEmpty(s))
+                {
+                    s += ", ";
+                }
+                s += $"{_eki}駅";
+            }
+
+            if (_ekiToho > 0)
+            {
+                if (!string.IsNullOrEmpty(s))
+                {
+                    s += ", ";
+                }
+                s += $"徒歩{_ekiToho}分";
+            }
+
+            return s;
+        }
+    }
 
     #endregion
 
@@ -407,14 +522,14 @@ public partial class EditorViewModel : ObservableObject
 
             if (_selectedStructure != null)
             {
-                if (_selectedStructure.Label != string.Empty)
+                if (!string.IsNullOrEmpty(_selectedStructure.Label))
                 {
                     s = _selectedStructure.Label;
                 }
             }
             if (AboveGroundFloorCount > 0)
             {
-                if (s != string.Empty)
+                if (!string.IsNullOrEmpty(s))
                 {
                     s += ", ";
                 }
@@ -431,7 +546,7 @@ public partial class EditorViewModel : ObservableObject
             }
             if (TotalUnitCount > 0)
             {
-                if (s != string.Empty)
+                if (!string.IsNullOrEmpty(s))
                 {
                     s += ", ";
                 }
@@ -439,7 +554,7 @@ public partial class EditorViewModel : ObservableObject
             }
             if (SelectedBuildingBuiltMonthYear != null)
             {
-                if (s != string.Empty)
+                if (!string.IsNullOrEmpty(s))
                 {
                     s += ", ";
                 }

@@ -104,16 +104,16 @@
 
                                 <StackPanel Margin="12 12 24 24" Spacing="12">
                                     <StackPanel Orientation="Horizontal">
-                                        <AutoSuggestBox Header="沿線" Text="" Margin="0" MinWidth="300" HorizontalAlignment="Stretch"></AutoSuggestBox>
-                                        <AutoSuggestBox Header="駅名" Text="" Margin="12,0,0,0" MinWidth="300" HorizontalAlignment="Stretch"></AutoSuggestBox>
+                                        <AutoSuggestBox Header="沿線" Text="{x:Bind ViewModel.Ensen, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0" MinWidth="300" HorizontalAlignment="Stretch"></AutoSuggestBox>
+                                        <AutoSuggestBox Header="駅名" Text="{x:Bind ViewModel.Eki, Mode=TwoWay}" Margin="12,0,0,0" MinWidth="300" HorizontalAlignment="Stretch"></AutoSuggestBox>
                                     </StackPanel>
-                                    <TextBox Header="駅から徒歩（分）" Text="" MinWidth="90" Margin="0" HorizontalAlignment="Left"></TextBox>
+                                    <NumberBox Header="駅から徒歩（分）" Value="{x:Bind ViewModel.EkiToho, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MinWidth="90" Margin="0" HorizontalAlignment="Left"></NumberBox>
                                     <StackPanel Orientation="Horizontal">
 
-                                        <TextBox Header="バス停名" Text="" Margin="0" MinWidth="300" HorizontalAlignment="Left"></TextBox>
+                                        <TextBox Header="バス停名" Text="{x:Bind ViewModel.BusStop, Mode=TwoWay}" Margin="0" MinWidth="300" HorizontalAlignment="Left"></TextBox>
                                         <StackPanel Orientation="Horizontal" Margin="12,0,0,0">
-                                            <TextBox Header="バス乗車時間（分）" Text="" MinWidth="90" Margin="0" HorizontalAlignment="Left"></TextBox>
-                                            <TextBox Header="バス停から徒歩（分）" Text="" MinWidth="90" Margin="12,0,0,0" HorizontalAlignment="Left"></TextBox>
+                                            <NumberBox Header="バス乗車時間（分）" Value="{x:Bind ViewModel.BusJyousya, Mode=TwoWay}" MinWidth="90" Margin="0" HorizontalAlignment="Left"></NumberBox>
+                                            <NumberBox Header="バス停から徒歩（分）" Value="{x:Bind ViewModel.BusStopToho, Mode=TwoWay}" MinWidth="90" Margin="12,0,0,0" HorizontalAlignment="Left"></NumberBox>
                                         </StackPanel>
                                     </StackPanel>
                                 </StackPanel>

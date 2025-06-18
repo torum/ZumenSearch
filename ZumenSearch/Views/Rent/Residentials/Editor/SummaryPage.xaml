@@ -121,7 +121,7 @@
 
                     <controls:SettingsCard x:Name="settingsCardTransportation" Margin="0,0,0,0"
                                             Command="{x:Bind ViewModel.EditTransportationCommand}"
-                               Description="JR中央線"
+                               Description="{x:Bind ViewModel.TransportationPreview, Mode=OneWay}"
                                Header="交通"
                                HeaderIcon="{ui:FontIcon Glyph=&#xE799;}"
                                IsClickEnabled="True"
@@ -156,7 +156,7 @@
                             </controls:SettingsCard>
 
                             <controls:SettingsCard Header="築年月" HorizontalContentAlignment="Left" ContentAlignment="Vertical">
-                                <DatePicker Header="築年月（西暦）" DayVisible="False" SelectedDate="{x:Bind ViewModel.SelectedBuildingBuiltMonthYear, Mode=TwoWay}" Margin="0" MinWidth="300"/>
+                                <DatePicker Header="築年月（西暦）" DayVisible="False" SelectedDate="{x:Bind ViewModel.SelectedBuildingBuiltMonthYear, Mode=TwoWay}" MinWidth="300" Margin="0,0,0,8" />
                             </controls:SettingsCard>
 
                         </controls:SettingsExpander.Items>
@@ -189,10 +189,10 @@
 
                             <controls:SettingsCard Header="管理形態" HorizontalContentAlignment="Left" ContentAlignment="Vertical">
                                 <StackPanel Orientation="Horizontal">
-                                    <RadioButton Content="未指定" GroupName="tatemonokanri" IsChecked="True"/>
                                     <RadioButton Content="貸主" GroupName="tatemonokanri"/>
                                     <RadioButton Content="自社" GroupName="tatemonokanri"/>
                                     <RadioButton Content="他社" GroupName="tatemonokanri"/>
+                                    <RadioButton Content="未指定" GroupName="tatemonokanri" IsChecked="True"/>
                                 </StackPanel>
                             </controls:SettingsCard>
 

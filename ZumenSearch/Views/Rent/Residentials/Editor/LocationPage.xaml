@@ -84,7 +84,7 @@
 
             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
 
-                <StackPanel HorizontalAlignment="Stretch" Spacing="12" Margin="0,12,12,24">
+                <StackPanel HorizontalAlignment="Stretch" Spacing="12" Margin="0,12,12,12">
 
                     <controls:Segmented x:Name="segmentedControl"
                             HorizontalAlignment="Stretch"
