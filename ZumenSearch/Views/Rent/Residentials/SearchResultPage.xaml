@@ -6,8 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:mod="using:ZumenSearch.Models"
     xmlns:rent="using:ZumenSearch.Models.Rent.Residentials"
-    mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    mc:Ignorable="d">
 
     <Grid x:Name="ContentArea" Margin="{StaticResource NavigationViewPageContentAreaMargin}">
         <Grid.RowDefinitions>

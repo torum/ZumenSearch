@@ -10,6 +10,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using Windows.System;
 using ZumenSearch.Models;
 using ZumenSearch.Models.Location;
 using ZumenSearch.Models.Rent.Residentials;
@@ -22,6 +23,8 @@ namespace ZumenSearch.ViewModels.Rent.Residentials.Editor;
 public partial class EditorViewModel : ObservableObject
 {
     #region == Properties ==
+
+    #region == EntryResidential related properties ==
 
     // The Entry property holds the COPY of current RentResidential entry being edited. Do not use it directly in the UI. Apply changes to this object in SaveAsync() to save the changes.
     // MainViewModel creates a new instance of this class and call EditorShell.SetEntry(EntryResidentialFull) and sets this property.
@@ -37,6 +40,7 @@ public partial class EditorViewModel : ObservableObject
             if (SetProperty(ref _isEntryDirty, value))
             {
                 //
+                SaveCommand.NotifyCanExecuteChanged();
             }
         }
     }
@@ -304,7 +308,7 @@ public partial class EditorViewModel : ObservableObject
 
     #endregion
 
-    #region = 交通 ==
+    #region == 交通 ==
 
     private string _ensen = string.Empty;
     public string Ensen
@@ -571,15 +575,330 @@ public partial class EditorViewModel : ObservableObject
     #region == 設備 ==
 
 
+    private bool _ap_IsAutolock;
+    public bool Ap_IsAutolock
+    {
+        get => _ap_IsAutolock;
+        set
+        {
+            if (SetProperty(ref _ap_IsAutolock, value))
+            {
+                OnPropertyChanged(nameof(AppliancePreview));
+            }
+        }
+    }
+
+    private bool _ap_IsElevator;
+    public bool Ap_IsElevator
+    {
+        get => _ap_IsElevator;
+        set
+        {
+            if (SetProperty(ref _ap_IsElevator, value))
+            {
+                OnPropertyChanged(nameof(AppliancePreview));
+            }
+        }
+    }
+
+    private bool _ap_IsSecurityCamera;
+    public bool Ap_IsSecurityCamera
+    {
+        get => _ap_IsSecurityCamera;
+        set
+        {
+            if (SetProperty(ref _ap_IsSecurityCamera, value))
+            {
+                OnPropertyChanged(nameof(AppliancePreview));
+            }
+        }
+    }
+
+    private bool _ap_IsParcelLocker;
+    public bool Ap_IsParcelLocker
+    {
+        get => _ap_IsParcelLocker;
+        set
+        {
+            if (SetProperty(ref _ap_IsParcelLocker, value))
+            {
+                OnPropertyChanged(nameof(AppliancePreview));
+            }
+        }
+    }
+
+
+    public string AppliancePreview
+    {
+        get
+        {
+            string s = string.Empty;
+
+            if (Ap_IsAutolock)
+            {
+                s += "オートロック";
+            }
+            if (Ap_IsElevator)
+            {
+                if (!string.IsNullOrEmpty(s))
+                {
+                    s += ",";
+                }
+                s += "エレベーター";
+            }
+            if (Ap_IsSecurityCamera)
+            {
+                if (!string.IsNullOrEmpty(s))
+                {
+                    s += ",";
+                }
+                s += "防犯カメラ";
+            }
+            if (Ap_IsParcelLocker)
+            {
+                if (!string.IsNullOrEmpty(s))
+                {
+                    s += ",";
+                }
+                s += "宅配ボックス";
+            }
+
+            return s;
+        }
+    }
+
     #endregion
 
     #region == 管理 ==
 
+    /*
+    public ObservableCollection<KanriShutai> KanriShutais =
+    [
+        new KanriShutai(Models.Rent.Residentials.EnumKanriShutai.Owner.ToString(), "貸主"),
+        new KanriShutai(Models.Rent.Residentials.EnumKanriShutai.Jisya.ToString(), "自社"),
+        new KanriShutai(Models.Rent.Residentials.EnumKanriShutai.Tasha.ToString(), "他社"),
+        new KanriShutai(EnumKanriShutai.Unspecified.ToString(), "未指定")
+    ];
+    */
+
+    private Models.Rent.Residentials.EnumKanriShutai _selectedKanriShutai = Models.Rent.Residentials.EnumKanriShutai.Unspecified;
+    public Models.Rent.Residentials.EnumKanriShutai SelectedKanriShutai
+    {
+        get => _selectedKanriShutai;
+        set
+        {
+            if (SetProperty(ref _selectedKanriShutai, value))
+            {
+                IsEntryDirty = true;
+                OnPropertyChanged(nameof(KanriPreview));
+            }
+        }
+    }
+
+    private readonly bool _isKanriOwnerOptionSelected = false;
+    public bool IsKanriOwnerOptionSelected
+    {
+        get => _isKanriOwnerOptionSelected;
+        set
+        {
+            if (value)
+            {
+                SelectedKanriShutai = Models.Rent.Residentials.EnumKanriShutai.Owner;
+            }
+        }
+    }
+
+    private readonly bool _isKanriJisyaOptionSelected = false;
+    public bool IsKanriJisyaOptionSelected
+    {
+        get => _isKanriJisyaOptionSelected;
+        set
+        {
+            if (value)
+            {
+                SelectedKanriShutai = Models.Rent.Residentials.EnumKanriShutai.Jisya;
+            }
+        }
+    }
+
+    private readonly bool _isKanriTasyaOptionSelected = false;
+    public bool IsKanriTasyaOptionSelected
+    {
+        get => _isKanriTasyaOptionSelected;
+        set
+        {
+            if (value)
+            {
+                SelectedKanriShutai = Models.Rent.Residentials.EnumKanriShutai.Tasha;
+            }
+        }
+    }
+
+    private readonly bool _isKanriUnspecifiedOptionSelected = true;
+    public bool IsKanriUnspecifiedOptionSelected
+    {
+        get => _isKanriUnspecifiedOptionSelected;
+        set
+        {
+            if (value)
+            {
+                SelectedKanriShutai = Models.Rent.Residentials.EnumKanriShutai.Unspecified;
+            }
+        }
+    }
+
+    private string _kanriTashaName = string.Empty;
+    public string KanriTashaName
+    {
+        get => _kanriTashaName;
+        set
+        {
+            if (SetProperty(ref _kanriTashaName, value))
+            {
+                IsEntryDirty = true;
+                OnPropertyChanged(nameof(KanriPreview));
+            }
+        }
+    }
+
+    private string _kanriTashaContactInfo = string.Empty;
+    public string KanriTashaContactInfo
+    {
+        get => _kanriTashaContactInfo;
+        set
+        {
+            if (SetProperty(ref _kanriTashaContactInfo, value))
+            {
+                IsEntryDirty = true;
+                OnPropertyChanged(nameof(KanriPreview));
+            }
+        }
+    }
+
+    public string KanriPreview
+    {
+        get
+        {
+            string s = string.Empty;
+
+            if (SelectedKanriShutai == EnumKanriShutai.Owner)
+            {
+                s += "貸主管理";
+            }
+            else if (SelectedKanriShutai == EnumKanriShutai.Jisya)
+            {
+                s += "自社管理";
+            }
+            else if (SelectedKanriShutai == EnumKanriShutai.Tasha)
+            {
+                s += "他社管理";
+
+                if ((!string.IsNullOrEmpty(KanriTashaName.Trim())) && (!string.IsNullOrEmpty(KanriTashaContactInfo.Trim())))
+                {
+                    s += $" ({KanriTashaName}, {KanriTashaContactInfo})";
+                }
+                else if (!string.IsNullOrEmpty(KanriTashaName))
+                {
+                    s += $" ({KanriTashaName})";
+                }
+            }
+            else if (SelectedKanriShutai == EnumKanriShutai.Unspecified)
+            {
+                s += "";//管理主体未指定
+            }
+
+            return s;
+        }
+    }
 
     #endregion
 
-    #region ==  その他 ==
+    #region == 備考 ==
 
+    private string _tatemonoMemo = string.Empty;
+    public string TatemonoMemo
+    {
+        get => _tatemonoMemo;
+        set
+        {
+            if (SetProperty(ref _tatemonoMemo, value))
+            {
+                IsEntryDirty = true;
+                OnPropertyChanged(nameof(MemoPreview));
+            }
+        }
+    }
+
+    public string MemoPreview
+    {
+        get
+        {
+            string s;
+            if (_tatemonoMemo.Length > 14)
+            {
+                s = _tatemonoMemo[..14] + "..." ;
+            }
+            else
+            {
+                s = _tatemonoMemo;
+            }
+
+            return s;
+        }
+    }
+
+    #endregion
+
+    #region == 写真（建物） ==
+
+    private ObservableCollection<PictureBuilding> _buildingPictures = [];
+    public ObservableCollection<PictureBuilding> BuildingPictures
+    {
+        get => _buildingPictures;
+        set
+        {
+            if (SetProperty(ref _buildingPictures, value))
+            {
+                IsEntryDirty = true;
+            }
+        }
+    }
+
+    private bool _isBuildingPictureEditPaneVisible = false;
+    public bool IsBuildingPictureEditPaneVisible
+    {
+        get => _isBuildingPictureEditPaneVisible;
+        set
+        {
+            if (SetProperty(ref _isBuildingPictureEditPaneVisible, value))
+            {
+               //
+            }
+        }
+    }
+
+    private PictureBuilding? _selectedBuildingPicture;
+    public PictureBuilding? SelectedBuildingPicture
+    {
+        get => _selectedBuildingPicture;
+        set
+        {
+            if (SetProperty(ref _selectedBuildingPicture, value))
+            {
+                //
+                if (_selectedBuildingPicture != null)
+                {
+                    IsBuildingPictureEditPaneVisible = true;
+                }
+                else
+                {
+                    IsBuildingPictureEditPaneVisible = false;
+                }
+            }
+        }
+    }
+
+    #endregion
 
     #endregion
 
@@ -588,17 +907,20 @@ public partial class EditorViewModel : ObservableObject
     #region == Events
 
     // The event handlers below are used to notify the UI about various actions that can be performed in the editor.
+
     // EditorShell subscribes to these events to handle the actions accordingly.
     public event EventHandler? EventAddNewUnit;
-    // Who subscribes to this event?
-    public event EventHandler? EventGoBack;
-    // EditorShell subscribes to this event to handle the back navigation.
     public event EventHandler? EventBackToSummary;
     public event EventHandler? EventEditLocation;
     public event EventHandler? EventEditTransportation;
-    public event EventHandler? EventEditAppliance;
-    // EditorShell subscribes to this event to handle the actions accordingly.
-    public event EventHandler<bool>? EventIsUnitOwnership;
+    public event EventHandler? EventEditAppliance; 
+    public event EventHandler? EventEditMemo;
+    public event EventHandler? EventAddNewBuildingPictures;
+
+    public event EventHandler<bool>? EventIsUnitOwnership; // show or hides navigationview' menu accordingly.
+
+    // Who subscribes to this event?
+    public event EventHandler? EventGoBack;
 
     #endregion
 
@@ -614,7 +936,6 @@ public partial class EditorViewModel : ObservableObject
     // Constructor for the EditorViewModel class, initializes the data access service and the entry.
     #pragma warning disable IDE0290 
     public EditorViewModel(IDataAccessService dataAccessService)
-    
     {
         _dataAccessService = dataAccessService;
 
@@ -642,9 +963,31 @@ public partial class EditorViewModel : ObservableObject
             */
 
             Name = _entry.Name;
+            BuildingPictures = new ObservableCollection<PictureBuilding>(_entry.BuildingPictures); // create a copy.
             //TODO: Set other properties
 
             IsEntryDirty = false;
+        }
+    }
+
+    public void SetNewBuildingPictures(List<string> filePathList)
+    {
+        foreach (var filePath in filePathList) 
+        {
+            if (string.IsNullOrEmpty(filePath.Trim()))
+            {
+                continue;
+            }
+
+            var pic = new Models.Rent.Residentials.PictureBuilding(filePath)
+            {
+                IsNew = true,
+                Id = Guid.CreateVersion7().ToString()
+            };
+
+            BuildingPictures.Add(pic);
+
+            IsEntryDirty = true;
         }
     }
 
@@ -665,10 +1008,20 @@ public partial class EditorViewModel : ObservableObject
 
     #region == Commands ==
 
+    /*
     private RelayCommand? saveCommand;
 
     public IRelayCommand SaveCommand => saveCommand ??= new RelayCommand(SaveAsync);
-
+    */
+    [RelayCommand(CanExecute = nameof(CanSave))]
+    private void Save()
+    {
+        SaveAsync();
+    }
+    private bool CanSave()
+    {
+        return IsEntryDirty;
+    }
     private async void SaveAsync()
     {
         if (IsEntryDirty)
@@ -680,6 +1033,7 @@ public partial class EditorViewModel : ObservableObject
 
             _entry.Name = Name;
             //TODO: Set other properties for Entry.
+            _entry.BuildingPictures = BuildingPictures;
 
             if (string.IsNullOrEmpty(_entry.Id))
             {
@@ -694,10 +1048,9 @@ public partial class EditorViewModel : ObservableObject
             }
         }
     }
-
     private Task SaveAsNew()
     {
-        var resInsert = _dataAccessService.InsertRentResidential(_entry.Id, _entry.Name, "some comment");
+        var resInsert = _dataAccessService.InsertRentResidential(_entry);
         if (resInsert.IsError)
         {
             Debug.WriteLine(resInsert.Error.ErrText + Environment.NewLine + resInsert.Error.ErrDescription + Environment.NewLine + resInsert.Error.ErrPlace + Environment.NewLine + resInsert.Error.ErrPlaceParent);
@@ -719,10 +1072,9 @@ public partial class EditorViewModel : ObservableObject
         // Return a completed task to satisfy the method's return type
         return Task.CompletedTask;
     }
-
     private Task SaveAsUpdate()
     {
-        var resInsert = _dataAccessService.UpdateRentResidential(_entry.Id, _entry.Name, "some update comment");
+        var resInsert = _dataAccessService.UpdateRentResidential(_entry);
         if (resInsert.IsError)
         {
             Debug.WriteLine(resInsert.Error.ErrText + Environment.NewLine + resInsert.Error.ErrDescription + Environment.NewLine + resInsert.Error.ErrPlace + Environment.NewLine + resInsert.Error.ErrPlaceParent);
@@ -739,19 +1091,6 @@ public partial class EditorViewModel : ObservableObject
             _entry.IsDirty = false;
 
             Debug.WriteLine("No errors on update.");
-
-            /*
-            //UpdateSource()
-            if (_viewModel.RentResidentialSearchResult.Contains(Entry))
-            {
-                // If the Entry is already in the search result, update it in the list.
-                var index = _viewModel.RentResidentialSearchResult.IndexOf(Entry);
-                if (index >= 0)
-                {
-                    _viewModel.RentResidentialSearchResult[index] = Entry;
-                }
-            }
-            */
         }
 
         // Return a completed task to satisfy the method's return type
@@ -760,9 +1099,7 @@ public partial class EditorViewModel : ObservableObject
 
     // Add New Modal window command
     private RelayCommand? addNewUnitCommand;
-
     public IRelayCommand AddNewUnitCommand => addNewUnitCommand ??= new RelayCommand(AddNewUnit);
-
     private void AddNewUnit()
     {
         //NavigationService.NavigateTo(typeof(RentLivingEditShellViewModel).FullName!, "test");
@@ -771,26 +1108,21 @@ public partial class EditorViewModel : ObservableObject
 
     // Go Back command (don't use this?)
     private RelayCommand? goBackCommand;
-
     public IRelayCommand BackCommand => goBackCommand ??= new RelayCommand(GoBack);
-
     private void GoBack()
     {
         EventGoBack?.Invoke(this, EventArgs.Empty);
     }
 
     private RelayCommand? backToSummaryCommand;
-
     public IRelayCommand BackToSummaryCommand => backToSummaryCommand ??= new RelayCommand(GoBackToSummary);
-
     public void GoBackToSummary()
-    {
+    { 
         EventBackToSummary?.Invoke(this, EventArgs.Empty);
     }
 
     private RelayCommand? editLocationCommand;
     public IRelayCommand EditLocationCommand => editLocationCommand ??= new RelayCommand(EditLocation);
-
     public void EditLocation()
     {
         EventEditLocation?.Invoke(this, EventArgs.Empty);
@@ -798,7 +1130,6 @@ public partial class EditorViewModel : ObservableObject
 
     private RelayCommand? editTransportationCommand;
     public IRelayCommand EditTransportationCommand => editTransportationCommand ??= new RelayCommand(EditTransportation);
-
     private void EditTransportation()
     {
         EventEditTransportation?.Invoke(this, EventArgs.Empty);
@@ -806,10 +1137,23 @@ public partial class EditorViewModel : ObservableObject
 
     private RelayCommand? editApplianceCommand;
     public IRelayCommand EditApplianceCommand => editApplianceCommand ??= new RelayCommand(EditAppliance);
-
     public void EditAppliance()
     {
         EventEditAppliance?.Invoke(this, EventArgs.Empty);
+    }
+
+    private RelayCommand? editMemoCommand;
+    public IRelayCommand EditMemoCommand => editMemoCommand ??= new RelayCommand(EditMemo);
+    public void EditMemo()
+    {
+        EventEditMemo?.Invoke(this, EventArgs.Empty);
+    }
+
+    private RelayCommand? addNewBuildingPicturesCommand;
+    public IRelayCommand AddNewBuildingPicturesCommand => addNewBuildingPicturesCommand ??= new RelayCommand(AddNewBuildingPictures);
+    public void AddNewBuildingPictures()
+    {
+        EventAddNewBuildingPictures?.Invoke(this, EventArgs.Empty);
     }
 
     #endregion

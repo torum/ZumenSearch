@@ -34,8 +34,9 @@ namespace ZumenSearch
         private static readonly string _appDeveloper = "torum";
 
         // Data folder path
-        private static readonly string _envDataFolder = System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);//Windows.Storage.ApplicationData.Current.LocalFolder.Path;
+        private static readonly string _envDataFolder = System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);//ApplicationData //Windows.Storage.ApplicationData.Current.LocalFolder.Path;
         public static string AppDataFolder { get; } = _envDataFolder + System.IO.Path.DirectorySeparatorChar + _appDeveloper + System.IO.Path.DirectorySeparatorChar + _appName;
+        public static string AppDataPictureFolder { get; } = System.IO.Path.Combine(AppDataFolder, "Pictures");
 
         // Config file path
         public static string AppConfigFilePath { get; } = System.IO.Path.Combine(AppDataFolder, _appName + ".config");

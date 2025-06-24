@@ -4,7 +4,6 @@ using Microsoft.UI.Xaml.Navigation;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using ZumenSearch.Models;
-using ZumenSearch.ViewModels.Rent.Residentials.Editor;
 
 namespace ZumenSearch.Views.Rent.Residentials.Editor;
 

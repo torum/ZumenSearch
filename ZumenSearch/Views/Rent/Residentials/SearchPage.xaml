@@ -6,8 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     mc:Ignorable="d"
     xmlns:mod="using:ZumenSearch.Models"
-    NavigationCacheMode="Required"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    NavigationCacheMode="Required" Background="Transparent">
 
     <Grid x:Name="ContentArea" Margin="{StaticResource NavigationViewPageContentAreaMargin}">
         <Grid.RowDefinitions>

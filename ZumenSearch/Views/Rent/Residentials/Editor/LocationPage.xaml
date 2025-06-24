@@ -9,8 +9,7 @@
     xmlns:animations="using:CommunityToolkit.WinUI.Animations"
     mc:Ignorable="d"
     xmlns:mod="using:ZumenSearch.Models"
-    NavigationCacheMode="Required"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    NavigationCacheMode="Required">
     <Page.Resources>
         <animations:ImplicitAnimationSet x:Name="ShowTransitions">
             <animations:OffsetAnimation EasingMode="EaseOut"

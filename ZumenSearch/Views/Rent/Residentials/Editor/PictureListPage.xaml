@@ -4,10 +4,91 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:mod="using:ZumenSearch.Models"
+    xmlns:pic="using:ZumenSearch.Models.Rent.Residentials"
     mc:Ignorable="d"
     NavigationCacheMode="Required">
 
-    <Grid x:Name="ContentArea">
-        
+    <Grid x:Name="ContentArea" Margin="{StaticResource NavigationViewPageContentAreaMargin}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <BreadcrumbBar x:Name="BreadcrumbBar1">
+            <BreadcrumbBar.ItemTemplate>
+                <DataTemplate x:DataType="mod:Breadcrumb">
+                    <BreadcrumbBarItem Content="{Binding}" AutomationProperties.Name="{Binding Name}">
+                        <BreadcrumbBarItem.ContentTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Name}" />
+                            </DataTemplate>
+                        </BreadcrumbBarItem.ContentTemplate>
+                    </BreadcrumbBarItem>
+                </DataTemplate>
+            </BreadcrumbBar.ItemTemplate>
+        </BreadcrumbBar>
+
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <StackPanel Grid.Row="0">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <AppBarButton Icon="Save" Label="保存" Command="{x:Bind ViewModel.SaveCommand}"/>
+                </StackPanel>
+
+                <Border BorderThickness="0,1,0,0" BorderBrush="{ThemeResource NavigationViewItemSeparatorForeground}"></Border>
+                
+                <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Margin="0,0,24,0" HorizontalAlignment="Left">
+                    <AppBarButton Name="AppBarButtonAddPicture" Icon="Add" Label="追加" Command="{x:Bind ViewModel.AddNewBuildingPicturesCommand}"/>
+                    <AppBarButton Icon="Delete" Label="削除"/>
+                    <!--  Command="{x:Bind ViewModel.DeleteRentResidentialCommand}" CommandParameter="{x:Bind SearchResult.SelectedItem, Mode=OneWay}" -->
+                </CommandBar>
+            </StackPanel>
+
+            <SplitView x:Name="SplitViewControl" Grid.Row="1" Margin="0,0,0,0" CornerRadius="0,0,0,0" BorderThickness="0,0,0,0" BorderBrush="{ThemeResource NavigationViewContentGridBorderBrush}" PaneBackground="Transparent" IsPaneOpen="{x:Bind Path=ViewModel.IsBuildingPictureEditPaneVisible, Mode=TwoWay}" PanePlacement="Right" OpenPaneLength="250" CompactPaneLength="0" DisplayMode="CompactInline">
+                <SplitView.Pane>
+
+                    <StackPanel>
+                        
+                        
+                    </StackPanel>
+                    
+                </SplitView.Pane>
+                <ItemsView ItemsSource="{x:Bind ViewModel.BuildingPictures, Mode=TwoWay}" SelectionChanged="ItemsView_SelectionChanged" Margin="0,12,12,0" MinWidth="250" MinHeight="300" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" SelectionMode="Single" IsItemInvokedEnabled="False">
+                    <!--     "
+    ItemInvoked="SwappableSelectionModesItemsView_ItemInvoked"
+    SelectionChanged="SwappableSelectionModesItemsView_SelectionChanged"  -->
+                    <ItemsView.ItemTemplate>
+                        <DataTemplate  x:DataType="pic:PictureBuilding">
+                            <ItemContainer AutomationProperties.Name="{x:Bind Title}">
+                                <Grid>
+                                    <Image Source="{x:Bind ImageLocation}" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="200" MaxWidth="200" MaxHeight="150" MinHeight="150"/>
+                                    <StackPanel Orientation="Vertical" Height="40" VerticalAlignment="Bottom" Padding="5,1,5,1" Background="{ThemeResource SystemControlBackgroundBaseMediumBrush}" Opacity=".75">
+                                        <TextBlock Text="{x:Bind Title}" Foreground="{ThemeResource SystemControlForegroundAltHighBrush}"/>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="-" Style="{ThemeResource CaptionTextBlockStyle}" Foreground="{ThemeResource SystemControlForegroundAltHighBrush}"/>
+                                            <TextBlock Text="--" Style="{ThemeResource CaptionTextBlockStyle}" Foreground="{ThemeResource SystemControlForegroundAltHighBrush}"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Grid>
+                            </ItemContainer>
+                        </DataTemplate>
+
+                    </ItemsView.ItemTemplate>
+                    <ItemsView.Layout>
+                        <UniformGridLayout MinRowSpacing="5" MinColumnSpacing="5"/>
+                        <!--  MaximumRowsOrColumns="3" -->
+                        <!--
+                        <LinedFlowLayout ItemsStretch="None"  LineHeight="150" LineSpacing="5" MinItemSpacing="5"/>
+                        -->
+                    </ItemsView.Layout>
+                </ItemsView>
+            </SplitView>
+        </Grid>
+
     </Grid>
 </Page>

@@ -10,8 +10,10 @@
     Title="ZumenSearch"
     Activated="Window_Activated" Closed="Window_Closed" SizeChanged="Window_SizeChanged">
     <Window.SystemBackdrop>
+        <DesktopAcrylicBackdrop/>
+        <!--
         <MicaBackdrop Kind="Base"/>
-        <!--<DesktopAcrylicBackdrop/>-->
+        -->
     </Window.SystemBackdrop>
 
     <Grid>

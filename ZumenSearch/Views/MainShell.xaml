@@ -8,7 +8,9 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:i="using:Microsoft.Xaml.Interactivity"
     mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    Background="Transparent">
+    <!-- 
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" -->
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="46"/>
@@ -16,16 +18,17 @@
         </Grid.RowDefinitions>
         <Grid x:Name="AppTitleBar" Canvas.ZIndex="1" Height="46" IsHitTestVisible="True" VerticalAlignment="Top" Margin="0,0,0,0">
             <Image Source="/Assets/App.ico"
+                    x:Name="AppTitleBarIcon"
                    HorizontalAlignment="Left"
                    VerticalAlignment="Center"
-                   Width="16"
-                   Height="16"
-                   Margin="0,2,0,0" />
+                   Width="18"
+                   Height="18"
+                   Margin="0,0,0,0" />
             <TextBlock x:Name="AppTitleBarText"
                        VerticalAlignment="Center"
                        TextWrapping="NoWrap"
                        Style="{StaticResource CaptionTextBlockStyle}"
-                       Margin="28,0,0,0"
+                       Margin="24,0,0,0"
                        Text="ZumenSearch"/>
         </Grid>
 
@@ -49,7 +52,7 @@
                     <NavigationViewItem.MenuItems>
 
                         <!-- <NavigationViewItemHeader Content="物件"/> -->
-                        
+
                         <!--  -->
                         <NavigationViewItem Tag="RentResidentials" Content="住居用" ToolTipService.ToolTip="賃貸住居用">
                             <NavigationViewItem.Icon>
@@ -136,7 +139,7 @@
             -->
 
             <Grid >
-                <Frame x:Name="NavigationFrame" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Margin="{StaticResource NavigationViewPageContentMargin}" NavigationFailed="NavigationFrame_NavigationFailed"/>
+                <Frame x:Name="NavigationFrame" Background="Transparent" Margin="{StaticResource NavigationViewPageContentMargin}" NavigationFailed="NavigationFrame_NavigationFailed"/>
             </Grid>
 
         </NavigationView>

@@ -7,6 +7,7 @@ using System.Data;
 using System.Diagnostics;
 using System.Threading;
 using ZumenSearch.Models;
+using ZumenSearch.Models.Rent.Residentials;
 
 namespace ZumenSearch.Services;
 
@@ -15,7 +16,7 @@ public class DataAccessService : IDataAccessService
     // System.Data.SQLite
     //private readonly SQLiteConnectionStringBuilder connectionStringBuilder = new();
     // Microsoft.Data.Sqlite
-    private SqliteConnectionStringBuilder connectionStringBuilder = new();
+    private SqliteConnectionStringBuilder connectionStringBuilder = [];
 
     private readonly ReaderWriterLockSlim _readerWriterLock = new();
 
@@ -49,11 +50,30 @@ public class DataAccessService : IDataAccessService
                     tableCmd.ExecuteNonQuery();
 
                     tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS rent_residentials (" +
+                        //"rent_residential_id TEXT NOT NULL PRIMARY KEY," +
                         "rent_id TEXT NOT NULL PRIMARY KEY," +
                         "comment TEXT NOT NULL," +
-                        "CONSTRAINT fk_entries FOREIGN KEY (rent_id) REFERENCES rents(rent_id) ON DELETE CASCADE" +
+                        "FOREIGN KEY (rent_id) REFERENCES rents(rent_id) ON DELETE CASCADE" +
                         ")";
                     tableCmd.ExecuteNonQuery();
+
+                    tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS rent_residentials_pictures (" +
+    "picture_id TEXT NOT NULL PRIMARY KEY," +
+    //"rent_residential_id TEXT NOT NULL," +
+    "rent_id TEXT NOT NULL," +
+    "picture_filepath TEXT NOT NULL," +
+    "picture_data BLOB," +
+    //"PictureThumbData BLOB NOT NULL," +
+    //"PictureFileExt TEXT NOT NULL," +
+    //"PictureType TEXT NOT NULL," +
+    //"PictureDescription TEXT NOT NULL," +
+    //"PictureIsMain INTEGER  NOT NULL," +
+    //"FOREIGN KEY (rent_residential_id) REFERENCES rent_residentials(rent_residential_id) ON DELETE CASCADE," +
+    "FOREIGN KEY (rent_id) REFERENCES rent_residentials(rent_id) ON DELETE CASCADE," +
+    "FOREIGN KEY (rent_id) REFERENCES rents(rent_id) ON DELETE CASCADE" +
+    " )";
+                    tableCmd.ExecuteNonQuery();
+
                     /*
                     tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS images (" +
                         "image_id TEXT NOT NULL PRIMARY KEY," +
@@ -160,12 +180,12 @@ public class DataAccessService : IDataAccessService
         return res;
     }
 
-    public SqliteDataAccessResultWrapper InsertRentResidential(string rentId, string rentName, string comment)
+    public SqliteDataAccessResultWrapper InsertRentResidential(EntryResidentialFull entry)
     {
         var res = new SqliteDataAccessResultWrapper();
         var isBreaked = false;
 
-        if (string.IsNullOrEmpty(rentId))
+        if (string.IsNullOrEmpty(entry.Id))
         {
             res.IsError = true;
             // TODO:
@@ -191,27 +211,78 @@ public class DataAccessService : IDataAccessService
                 cmd.Transaction = connection.BeginTransaction();
                 try
                 {
+                    // Main rent table
                     cmd.CommandType = CommandType.Text;
-                    cmd.CommandText = "INSERT OR IGNORE INTO rents (rent_id, name) VALUES (@RentId, @Name)";
+                    cmd.CommandText = "INSERT INTO rents (rent_id, name) VALUES (@RentId, @Name)";
                     
-                    cmd.Parameters.AddWithValue("@RentId", rentId);
-                    cmd.Parameters.AddWithValue("@Name", rentName);
+                    cmd.Parameters.AddWithValue("@RentId", entry.Id);
+                    cmd.Parameters.AddWithValue("@Name", entry.Name);
                     //cmd.Parameters.AddWithValue("@Updated", updated.ToString("yyyy-MM-dd HH:mm:ss"));
 
                     res.AffectedCount = cmd.ExecuteNonQuery();
 
-                    //
+                    // Residentials table
                     cmd.Parameters.Clear();
 
                     cmd.CommandType = CommandType.Text;
-                    cmd.CommandText = "INSERT OR IGNORE INTO rent_residentials (rent_id, comment) VALUES (@RentId, @Comment)";
-                    
-                    cmd.Parameters.AddWithValue("@RentId", rentId);
-                    cmd.Parameters.AddWithValue("@Comment", comment);
+                    cmd.CommandText = "INSERT INTO rent_residentials (rent_id, comment) VALUES (@RentId, @Comment)"; //@RentResidentialId,  rent_residential_id, 
 
-                    res.AffectedCount += cmd.ExecuteNonQuery();
-                    //
+                    //cmd.Parameters.AddWithValue("@RentResidentialId", entry.Id + "_1");
+                    cmd.Parameters.AddWithValue("@RentId", entry.Id);
+                    cmd.Parameters.AddWithValue("@Comment", "");
 
+                    //res.AffectedCount += cmd.ExecuteNonQuery();
+                    cmd.ExecuteNonQuery();
+
+                    // Picture (building) table
+                    if (entry.BuildingPictures.Count > 0)
+                    {
+                        foreach (var pic in entry.BuildingPictures)
+                        {
+                            // 新規なので全てIsNewのはず・・・
+                            //if (pic.IsNew)
+                            /*
+                            string sqlInsertIntoRentLivingPicture = String.Format(
+                                            "INSERT INTO rent_residentials_pictures (picture_id, rent_id, picture_filepath, picture_data) " +
+                                            "VALUES ('{0}', '{1}', '{2}', @0)",
+                                            pic.Id, entry.Id, pic.ImageLocation);
+                            */
+                            /*
+                            string sqlInsertIntoRentLivingPicture = String.Format(
+                                "INSERT INTO rent_residentials_pictures (picture_id, rent_id, picture_filepath) " +
+                                "VALUES ('{0}', '{1}', '{2}')",
+                                pic.Id, entry.Id, pic.ImageLocation);
+                            */
+                            string sqlInsertIntoRentLivingPicture = "INSERT INTO rent_residentials_pictures (picture_id, rent_id, picture_filepath) VALUES (@PicId, @RentId, @PicLoc)";
+
+                            cmd.CommandText = sqlInsertIntoRentLivingPicture;
+
+                            // ループなので、前のパラメーターをクリアする。
+                            cmd.Parameters.Clear();
+
+                            cmd.Parameters.AddWithValue("@PicId", pic.Id);
+                            //cmd.Parameters.AddWithValue("@RentResidentialId", entry.Id + "_1");
+                            cmd.Parameters.AddWithValue("@RentId", entry.Id);
+                            cmd.Parameters.AddWithValue("@PicLoc", pic.ImageLocation);
+
+                            /*
+                            var parameter1 = new SqliteParameter("@0", System.Data.DbType.Binary)
+                            {
+                                Value = pic.PictureData;
+                            };
+                            cmd.Parameters.Add(parameter1);
+                            */
+
+                            var r = cmd.ExecuteNonQuery();
+                            if (r > 0)
+                            {
+                                pic.IsNew = false;
+                                pic.IsModified = false;
+                            }
+                        }
+                    }
+
+                    // commit
                     cmd.Transaction.Commit();
                 }
                 catch (Exception e)
@@ -294,240 +365,18 @@ public class DataAccessService : IDataAccessService
             Thread.Sleep(10);
             //await Task.Delay(100);
 
-            return InsertRentResidential(rentId, rentName, comment);
+            return InsertRentResidential(entry);
         }
 
         return res;
     }
 
-    public SqliteDataAccessSelectRentResidentialResultWrapper SelectRentResidentialsByNameKeyword(string keyword)
-    {
-        var res = new SqliteDataAccessSelectRentResidentialResultWrapper();
-
-        if (string.IsNullOrEmpty(keyword))
-        {
-            keyword = "*";
-        }
-
-        try
-        {
-            _readerWriterLock.EnterReadLock();
-
-            // System.Data.SQLite
-            //using var connection = new SQLiteConnection(connectionStringBuilder.ConnectionString);
-            // Microsoft.Data.Sqlite
-            using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
-            connection.Open();
-
-            using var cmd = connection.CreateCommand();
-            if (keyword == "*")
-            {
-                //cmd.CommandText = String.Format("SELECT * FROM entries INNER JOIN feeds USING (feed_id) WHERE feed_id = '{0}' AND archived = '{1}' ORDER BY published DESC LIMIT 1000", feedId, bool.FalseString);
-
-                cmd.CommandText = "SELECT rents.name as feedName, rent_residentials.comment as entryTitle, rents.rent_id as entryId FROM rent_residentials INNER JOIN rents USING (rent_id)";
-            }
-            else
-            {
-                cmd.CommandText = String.Format("SELECT rents.name as feedName, rent_residentials.comment as entryTitle, rents.rent_id as entryId FROM rent_residentials INNER JOIN rents USING (rent_id) WHERE rents.name LIKE '{0}'", keyword);
-            }
-
-            using var reader = cmd.ExecuteReader();
-            while (reader.Read())
-            {
-                var s = Convert.ToString(reader["entryId"]);
-                if (string.IsNullOrEmpty(s))
-                {
-                    Debug.WriteLine("DataAccess::SelectRentResidentialsByNameKeyword: entryId is null or empty for a rent residential entry.");
-                    continue;
-                }
-
-                var entry = new Models.Rent.Residentials.EntryResidentialSearchResult(s);
-
-                s = Convert.ToString(reader["feedName"]) ?? "";
-                entry.Name = s;
-
-                s = Convert.ToString(reader["entryTitle"]);
-                if (!string.IsNullOrEmpty(s))
-                {
-                    //
-                }
-
-                // Reset entry Isdirty flag.
-                entry.IsDirty = false;
-
-                res.AffectedCount++;
-
-                res.SelectedEntries.Add(entry);
-            }
-        }
-        catch (System.Reflection.TargetInvocationException ex)
-        {
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-            res.Error.ErrDescription = "TargetInvocationException";
-            res.Error.ErrText = ex.Message;
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
-            res.Error.ErrPlaceParent = "DataAccess::SelectRentResidentialsByNameKeyword";
-        }
-        catch (System.InvalidOperationException ex)
-        {
-            Debug.WriteLine("Opps. InvalidOperationException@DataAccess::SelectRentResidentialsByNameKeyword");
-
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-            res.Error.ErrDescription = "InvalidOperationException";
-            res.Error.ErrText = ex.Message;
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
-            res.Error.ErrPlaceParent = "DataAccess::SelectRentResidentialsByNameKeyword";
-        }
-        catch (Exception e)
-        {
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-            if (e.InnerException != null)
-            {
-                Debug.WriteLine(e.InnerException.Message + " @DataAccess::SelectRentResidentialsByNameKeyword");
-                res.Error.ErrDescription = "InnerException";
-                res.Error.ErrText = e.InnerException.Message;
-            }
-            else
-            {
-                Debug.WriteLine(e.Message + " @DataAccess::SelectRentResidentialsByNameKeyword");
-                res.Error.ErrDescription = "Exception";
-                res.Error.ErrText = e.Message;
-            }
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
-            res.Error.ErrPlaceParent = "DataAccess::SelectRentResidentialsByNameKeyword";
-        }
-        finally
-        {
-            _readerWriterLock.ExitReadLock();
-        }
-
-        return res;
-    }
-
-    public SqliteDataAccessSelectRentResidentialFullResultWrapper SelectRentResidentialById(string id)
-    {
-        var res = new SqliteDataAccessSelectRentResidentialFullResultWrapper();
-
-        if (string.IsNullOrEmpty(id))
-        {
-            res.IsError = true;
-            // TODO:
-            return res;
-        }
-
-        try
-        {
-            _readerWriterLock.EnterReadLock();
-
-            // System.Data.SQLite
-            //using var connection = new SQLiteConnection(connectionStringBuilder.ConnectionString);
-            // Microsoft.Data.Sqlite
-            using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
-            connection.Open();
-
-            using var cmd = connection.CreateCommand();
-            cmd.CommandText = String.Format("SELECT rents.name as feedName, rent_residentials.comment as entryTitle, rents.rent_id as entryId FROM rent_residentials INNER JOIN rents USING (rent_id) WHERE rents.rent_id = '{0}'", id);
-
-            using var reader = cmd.ExecuteReader();
-            while (reader.Read())
-            {
-                var s = Convert.ToString(reader["entryId"]);
-                if (string.IsNullOrEmpty(s))
-                {
-                    Debug.WriteLine("DataAccess::SelectRentResidentialsById: entryId is null or empty for a rent residential entry.");
-                    continue;
-                }
-
-                var entry = new Models.Rent.Residentials.EntryResidentialFull(s);
-
-                s = Convert.ToString(reader["feedName"]) ?? "";
-                entry.Name = s;
-
-                s = Convert.ToString(reader["entryTitle"]);
-                if (!string.IsNullOrEmpty(s))
-                {
-                    //
-                }
-
-                // Reset entry Isdirty flag.
-                entry.IsDirty = false;
-
-                res.AffectedCount++;
-
-                res.EntryFull = entry;
-
-                break; // Assuming we only want the first match
-            }
-        }
-        catch (System.Reflection.TargetInvocationException ex)
-        {
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-            res.Error.ErrDescription = "TargetInvocationException";
-            res.Error.ErrText = ex.Message;
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
-            res.Error.ErrPlaceParent = "DataAccess::SelectRentResidentialsByNameKeyword";
-        }
-        catch (System.InvalidOperationException ex)
-        {
-            Debug.WriteLine("Opps. InvalidOperationException@DataAccess::SelectRentResidentialsByNameKeyword");
-
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-            res.Error.ErrDescription = "InvalidOperationException";
-            res.Error.ErrText = ex.Message;
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
-            res.Error.ErrPlaceParent = "DataAccess::SelectRentResidentialsByNameKeyword";
-        }
-        catch (Exception e)
-        {
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-            if (e.InnerException != null)
-            {
-                Debug.WriteLine(e.InnerException.Message + " @DataAccess::SelectRentResidentialsByNameKeyword");
-                res.Error.ErrDescription = "InnerException";
-                res.Error.ErrText = e.InnerException.Message;
-            }
-            else
-            {
-                Debug.WriteLine(e.Message + " @DataAccess::SelectRentResidentialsByNameKeyword");
-                res.Error.ErrDescription = "Exception";
-                res.Error.ErrText = e.Message;
-            }
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
-            res.Error.ErrPlaceParent = "DataAccess::SelectRentResidentialsByNameKeyword";
-        }
-        finally
-        {
-            _readerWriterLock.ExitReadLock();
-        }
-
-        return res;
-    }
-
-
-    public SqliteDataAccessResultWrapper UpdateRentResidential(string rentId, string rentName, string comment)
+    public SqliteDataAccessResultWrapper UpdateRentResidential(EntryResidentialFull entry)
     {
         var res = new SqliteDataAccessResultWrapper();
         var isBreaked = false;
 
-        if (string.IsNullOrEmpty(rentId))
+        if (string.IsNullOrEmpty(entry.Id))
         {
             res.IsError = true;
             // TODO:
@@ -555,12 +404,12 @@ public class DataAccessService : IDataAccessService
                 {
                     cmd.CommandType = CommandType.Text;
                     var sql = "UPDATE rents SET ";
-                    sql += String.Format("name = '{0}' ", EscapeSingleQuote(rentName));
+                    sql += String.Format("name = '{0}' ", EscapeSingleQuote(entry.Name));
                     //sql += String.Format("title = '{0}', ", EscapeSingleQuote(feedTitle));
                     //sql += String.Format("description = '{0}', ", EscapeSingleQuote(feedDescription));
                     //sql += String.Format("updated = '{0}'", updated.ToString("yyyy-MM-dd HH:mm:ss"));
 
-                    sql += String.Format(" WHERE rent_id = '{0}'; ", rentId);
+                    sql += String.Format(" WHERE rent_id = '{0}'; ", entry.Id);
 
                     cmd.CommandText = sql;
 
@@ -568,12 +417,12 @@ public class DataAccessService : IDataAccessService
 
                     //
                     sql = "UPDATE rent_residentials SET ";
-                    sql += String.Format("comment = '{0}' ", EscapeSingleQuote(comment));
+                    sql += String.Format("comment = '{0}' ", EscapeSingleQuote("some comment"));
                     //sql += String.Format("title = '{0}', ", EscapeSingleQuote(feedTitle));
                     //sql += String.Format("description = '{0}', ", EscapeSingleQuote(feedDescription));
                     //sql += String.Format("updated = '{0}'", updated.ToString("yyyy-MM-dd HH:mm:ss"));
 
-                    sql += String.Format(" WHERE rent_id = '{0}'; ", rentId);
+                    sql += String.Format(" WHERE rent_id = '{0}'; ", entry.Id);
                     //
 
                     res.AffectedCount += cmd.ExecuteNonQuery();
@@ -661,7 +510,7 @@ public class DataAccessService : IDataAccessService
             Thread.Sleep(10);
             //await Task.Delay(100);
 
-            return UpdateRentResidential(rentId, rentName, comment);
+            return UpdateRentResidential(entry);
         }
 
         return res;
@@ -786,6 +635,262 @@ public class DataAccessService : IDataAccessService
 
         return res;
     }
+
+    public SqliteDataAccessSelectRentResidentialResultWrapper SelectRentResidentialsByNameKeyword(string keyword)
+    {
+        var res = new SqliteDataAccessSelectRentResidentialResultWrapper();
+
+        if (string.IsNullOrEmpty(keyword))
+        {
+            keyword = "*";
+            //Debug.WriteLine("using *");
+        }
+        else
+        {
+            //Debug.WriteLine(keyword);
+        }
+
+            try
+            {
+                _readerWriterLock.EnterReadLock();
+
+                // System.Data.SQLite
+                //using var connection = new SQLiteConnection(connectionStringBuilder.ConnectionString);
+                // Microsoft.Data.Sqlite
+                using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
+                connection.Open();
+
+                using var cmd = connection.CreateCommand();
+                if (keyword == "*")
+                {
+                    //cmd.CommandText = String.Format("SELECT * FROM entries INNER JOIN feeds USING (feed_id) WHERE feed_id = '{0}' AND archived = '{1}' ORDER BY published DESC LIMIT 1000", feedId, bool.FalseString);
+
+                    cmd.CommandText = "SELECT rents.name as feedName, rent_residentials.comment as entryTitle, rents.rent_id as entryId FROM rent_residentials INNER JOIN rents USING (rent_id)";
+                }
+                else
+                {
+                    cmd.CommandText = String.Format("SELECT rents.name as feedName, rent_residentials.comment as entryTitle, rents.rent_id as entryId FROM rent_residentials INNER JOIN rents USING (rent_id) WHERE rents.name LIKE '{0}'", keyword);
+                }
+
+                using var reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    var s = Convert.ToString(reader["entryId"]);
+                    if (string.IsNullOrEmpty(s))
+                    {
+                        Debug.WriteLine("DataAccess::SelectRentResidentialsByNameKeyword: entryId is null or empty for a rent residential entry.");
+                        continue;
+                    }
+
+                    var entry = new Models.Rent.Residentials.EntryResidentialSearchResult(s);
+
+                    s = Convert.ToString(reader["feedName"]) ?? "";
+                    entry.Name = s;
+
+                    s = Convert.ToString(reader["entryTitle"]);
+                    if (!string.IsNullOrEmpty(s))
+                    {
+                        //
+                    }
+
+                    // Reset entry Isdirty flag.
+                    entry.IsDirty = false;
+
+                    res.AffectedCount++;
+
+                    res.SelectedEntries.Add(entry);
+                }
+            }
+            catch (System.Reflection.TargetInvocationException ex)
+            {
+                res.IsError = true;
+                res.Error.ErrType = ErrorObject.ErrTypes.DB;
+                res.Error.ErrCode = "";
+                res.Error.ErrDescription = "TargetInvocationException";
+                res.Error.ErrText = ex.Message;
+                res.Error.ErrDatetime = DateTime.Now;
+                res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
+                res.Error.ErrPlaceParent = "DataAccess::SelectRentResidentialsByNameKeyword";
+            }
+            catch (System.InvalidOperationException ex)
+            {
+                Debug.WriteLine("Opps. InvalidOperationException@DataAccess::SelectRentResidentialsByNameKeyword");
+
+                res.IsError = true;
+                res.Error.ErrType = ErrorObject.ErrTypes.DB;
+                res.Error.ErrCode = "";
+                res.Error.ErrDescription = "InvalidOperationException";
+                res.Error.ErrText = ex.Message;
+                res.Error.ErrDatetime = DateTime.Now;
+                res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
+                res.Error.ErrPlaceParent = "DataAccess::SelectRentResidentialsByNameKeyword";
+            }
+            catch (Exception e)
+            {
+                res.IsError = true;
+                res.Error.ErrType = ErrorObject.ErrTypes.DB;
+                res.Error.ErrCode = "";
+                if (e.InnerException != null)
+                {
+                    Debug.WriteLine(e.InnerException.Message + " @DataAccess::SelectRentResidentialsByNameKeyword");
+                    res.Error.ErrDescription = "InnerException";
+                    res.Error.ErrText = e.InnerException.Message;
+                }
+                else
+                {
+                    Debug.WriteLine(e.Message + " @DataAccess::SelectRentResidentialsByNameKeyword");
+                    res.Error.ErrDescription = "Exception";
+                    res.Error.ErrText = e.Message;
+                }
+                res.Error.ErrDatetime = DateTime.Now;
+                res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
+                res.Error.ErrPlaceParent = "DataAccess::SelectRentResidentialsByNameKeyword";
+            }
+            finally
+            {
+                _readerWriterLock.ExitReadLock();
+            }
+
+        return res;
+    }
+
+    public SqliteDataAccessSelectRentResidentialFullResultWrapper SelectRentResidentialById(string id)
+    {
+        var res = new SqliteDataAccessSelectRentResidentialFullResultWrapper();
+
+        var entry = new Models.Rent.Residentials.EntryResidentialFull();
+
+        if (string.IsNullOrEmpty(id))
+        {
+            res.IsError = true;
+            // TODO:
+            return res;
+        }
+
+        try
+        {
+            _readerWriterLock.EnterReadLock();
+
+            // System.Data.SQLite
+            //using var connection = new SQLiteConnection(connectionStringBuilder.ConnectionString);
+            // Microsoft.Data.Sqlite
+            using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
+            connection.Open();
+
+            using var cmd = connection.CreateCommand();
+            cmd.CommandText = String.Format("SELECT rents.name as feedName, rent_residentials.comment as entryTitle, rents.rent_id as entryId FROM rent_residentials INNER JOIN rents USING (rent_id) WHERE rents.rent_id = '{0}'", id);
+
+            using (var reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    var s = Convert.ToString(reader["entryId"]);
+                    if (string.IsNullOrEmpty(s))
+                    {
+                        Debug.WriteLine("DataAccess::SelectRentResidentialsById: entryId is null or empty for a rent residential entry.");
+                        continue;
+                    }
+
+                    s = Convert.ToString(reader["feedName"]) ?? "";
+                    entry.Name = s;
+
+                    s = Convert.ToString(reader["entryTitle"]);
+                    if (!string.IsNullOrEmpty(s))
+                    {
+                        //
+                    }
+
+                    res.AffectedCount++;
+
+                    //break; // Assuming we only want the first match
+                }
+            }
+
+            // 物件写真
+            cmd.CommandText = String.Format("SELECT * FROM rent_residentials_pictures WHERE rent_id = '{0}'", id);
+            using (var reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    var rlpic = new PictureBuilding(Convert.ToString(reader["picture_filepath"]) ?? string.Empty)
+                    {
+                        //Convert.ToString(reader["RentLivingPicture_ID"])
+                        /*
+                        byte[] imageBytes = (byte[])reader["PictureData"];
+                        rlpic.PictureData = imageBytes;
+
+                        rlpic.Picture = Methods.BitmapImageFromBytes(imageBytes);
+                        */
+
+                        Id = Convert.ToString(reader["picture_id"]),
+                        // TODO: 
+
+                        IsNew = false,
+                        IsModified = false
+                    }; 
+
+                    entry.BuildingPictures.Add(rlpic);
+                }
+            }
+
+            // Reset entry Isdirty flag.
+            entry.IsDirty = false;
+
+            res.EntryFull = entry;
+        }
+        catch (System.Reflection.TargetInvocationException ex)
+        {
+            res.IsError = true;
+            res.Error.ErrType = ErrorObject.ErrTypes.DB;
+            res.Error.ErrCode = "";
+            res.Error.ErrDescription = "TargetInvocationException";
+            res.Error.ErrText = ex.Message;
+            res.Error.ErrDatetime = DateTime.Now;
+            res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
+            res.Error.ErrPlaceParent = "DataAccess::SelectRentResidentialsByNameKeyword";
+        }
+        catch (System.InvalidOperationException ex)
+        {
+            Debug.WriteLine("Opps. InvalidOperationException@DataAccess::SelectRentResidentialsByNameKeyword");
+
+            res.IsError = true;
+            res.Error.ErrType = ErrorObject.ErrTypes.DB;
+            res.Error.ErrCode = "";
+            res.Error.ErrDescription = "InvalidOperationException";
+            res.Error.ErrText = ex.Message;
+            res.Error.ErrDatetime = DateTime.Now;
+            res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
+            res.Error.ErrPlaceParent = "DataAccess::SelectRentResidentialsByNameKeyword";
+        }
+        catch (Exception e)
+        {
+            res.IsError = true;
+            res.Error.ErrType = ErrorObject.ErrTypes.DB;
+            res.Error.ErrCode = "";
+            if (e.InnerException != null)
+            {
+                Debug.WriteLine(e.InnerException.Message + " @DataAccess::SelectRentResidentialsByNameKeyword");
+                res.Error.ErrDescription = "InnerException";
+                res.Error.ErrText = e.InnerException.Message;
+            }
+            else
+            {
+                Debug.WriteLine(e.Message + " @DataAccess::SelectRentResidentialsByNameKeyword");
+                res.Error.ErrDescription = "Exception";
+                res.Error.ErrText = e.Message;
+            }
+            res.Error.ErrDatetime = DateTime.Now;
+            res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
+            res.Error.ErrPlaceParent = "DataAccess::SelectRentResidentialsByNameKeyword";
+        }
+        finally
+        {
+            _readerWriterLock.ExitReadLock();
+        }
+
+        return res;
+    }
+
 
     /*
     public SqliteDataAccessResultWrapper InsertFeed(string feedId, Uri feedUri, string feedName, string feedTitle, string feedDescription, DateTime updated, Uri? htmlUri)

@@ -17,7 +17,7 @@ using ZumenSearch.ViewModels;
 
 namespace ZumenSearch.Models
 {
-    public abstract class Entry : ObservableObject
+    public abstract class EntryBase : ObservableObject
     {
         private bool _isDirty;
         public bool IsDirty
@@ -57,7 +57,18 @@ namespace ZumenSearch.Models
             }
         }
 
-
+        private string? _name;
+        public string Name
+        {
+            get => _name ?? string.Empty; // Ensure a non-null value is returned
+            set
+            {
+                if (SetProperty(ref _name, value))
+                {
+                    IsDirty = true;
+                }
+            }
+        }
 
         /*
         #region == 所在地 ==
@@ -521,18 +532,17 @@ namespace ZumenSearch.Models
         #endregion
         */
 
-        protected Entry()
+        protected EntryBase()
         {
             // Instead of using a GUID, we initialize _id to an empty string to indicate that the entry is NEW.
             _id = string.Empty;//Guid.CreateVersion7() //Guid.NewGuid().ToString();
         }
 
-        protected Entry(string id)
+        protected EntryBase(string id)
         {
             _id = id;
         }
     }
-
 
     /*
     // 物件（建物等）の検索結果表示用クラス

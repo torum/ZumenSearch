@@ -12,8 +12,12 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
+using Windows.Storage;
+using Windows.Storage.Pickers;
 using Windows.System;
 using Windows.UI.Core;
 using Windows.UI.ViewManagement;
@@ -50,6 +54,7 @@ public sealed partial class EditorShell : Page
         ("zumen", typeof(Views.Rent.Residentials.Editor.ZumenListPage)),
         ("kasinusi", typeof(Views.Rent.Residentials.Editor.KasinusiPage)),
         ("gyousya", typeof(Views.Rent.Residentials.Editor.GyousyaPage)),
+        ("memo", typeof(Views.Rent.Residentials.Editor.MemoPage)),
     ];
 
     //private readonly UISettings settings = new();
@@ -77,8 +82,12 @@ public sealed partial class EditorShell : Page
         ViewModel.EventEditLocation += (sender, arg) => OnEventEditLocation();
         ViewModel.EventEditTransportation += (sender, arg) => OnEventEditTransportation();
         ViewModel.EventEditAppliance += (sender, arg) => OnEventEditAppliance();
+        ViewModel.EventEditMemo += (sender, arg) => OnEventEditMemo();
         //
         ViewModel.EventAddNewUnit += (sender, arg) => OnEventAddNewUnit();
+        //
+        ViewModel.EventAddNewBuildingPictures += (sender, arg) => OnEventAddNewBuildingPictures();
+        
         //
         ViewModel.EventIsUnitOwnership += (sender, arg) => OnEventIsUnitOwnership(arg);
     }
@@ -209,7 +218,7 @@ public sealed partial class EditorShell : Page
     }
 
     // MainViewModel calls this method to set the entry.
-    public void SetEntry(Models.Rent.Residentials.EntryResidentialFull entry)
+    public void SetEntryToEntryViewModel(Models.Rent.Residentials.EntryResidentialFull entry)
     {
         //ViewModel.Entry = entry ?? throw new ArgumentNullException(nameof(entry));
         ViewModel.SetEntry(entry ?? throw new ArgumentNullException(nameof(entry)));
@@ -253,6 +262,59 @@ public sealed partial class EditorShell : Page
     public void OnEventEditAppliance()
     {
         ContentFrame.Navigate(typeof(Views.Rent.Residentials.Editor.AppliancePage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });
+    }
+
+    public void OnEventEditMemo()
+    {
+        ContentFrame.Navigate(typeof(Views.Rent.Residentials.Editor.MemoPage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });
+    }
+
+    public async void OnEventAddNewBuildingPictures()
+    {
+        string destDirectory = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(App.AppDataPictureFolder, "Rent"),"Residential_Building"), Guid.NewGuid().ToString("N"));
+
+        if (!Directory.Exists(destDirectory))
+        {
+            Directory.CreateDirectory(destDirectory);
+        }
+
+        var openPicker = new Windows.Storage.Pickers.FileOpenPicker();
+
+        var window = EditorWin;//App.MainWindow;
+        var hWnd = WinRT.Interop.WindowNative.GetWindowHandle(window);
+        WinRT.Interop.InitializeWithWindow.Initialize(openPicker, hWnd);
+
+        // Set options for your file picker
+        openPicker.ViewMode = PickerViewMode.List;
+        openPicker.SuggestedStartLocation = PickerLocationId.PicturesLibrary;
+        openPicker.FileTypeFilter.Add(".jpg");
+        openPicker.FileTypeFilter.Add(".jpeg");
+        openPicker.FileTypeFilter.Add(".png");
+        openPicker.FileTypeFilter.Add(".gif");
+
+        // Open the picker for the user to pick a file
+        IReadOnlyList<StorageFile> files = await openPicker.PickMultipleFilesAsync();
+        if (files.Count > 0)
+        {
+            StringBuilder output = new("");
+            List<string> list = [];
+            foreach (StorageFile file in files)
+            {
+                output.Append(file.Path + "\n");
+                list.Add(file.Path);
+
+                using FileStream sourceStream = File.Open(file.Path, FileMode.Open);
+                using FileStream destinationStream = File.Create(Path.Combine(destDirectory, file.Name));
+                await sourceStream.CopyToAsync(destinationStream);
+            }
+
+            Debug.WriteLine(output.ToString());
+            ViewModel.SetNewBuildingPictures(list);
+        }
+        else
+        {
+            Debug.WriteLine("Operation cancelled.");
+        }
     }
 
     public void OnEventAddNewUnit()

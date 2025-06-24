@@ -8,7 +8,9 @@
     Closed="Window_Closed"
     Title="">
     <Window.SystemBackdrop>
+        <DesktopAcrylicBackdrop/>
+        <!--
         <MicaBackdrop Kind="Base"/>
-        <!--<DesktopAcrylicBackdrop/>-->
+        -->
     </Window.SystemBackdrop>
 </Window>

@@ -7,8 +7,7 @@
     NavigationCacheMode="Required"
     xmlns:helpers="using:ZumenSearch.Helpers"
     xmlns:mod="using:ZumenSearch.Models"
-    mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    mc:Ignorable="d">
     <Page.Resources>
         <Thickness x:Key="NavigationViewContentMargin">6,6,0,0</Thickness>
     </Page.Resources>

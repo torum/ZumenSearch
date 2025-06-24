@@ -8,8 +8,7 @@
     xmlns:controls="using:CommunityToolkit.WinUI.Controls"
     xmlns:ui="using:CommunityToolkit.WinUI"
     xmlns:mod="using:ZumenSearch.Models"
-    NavigationCacheMode="Required"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    NavigationCacheMode="Required">
 
     <Grid x:Name="ContentArea" Margin="{StaticResource NavigationViewPageContentAreaMargin}">
         <Grid.RowDefinitions>
@@ -165,7 +164,7 @@
 
                     <controls:SettingsCard x:Name="settingsCardAppliance" Margin="0,0,0,0"
                                             Command="{x:Bind ViewModel.EditApplianceCommand}"
-                               Description=""
+                               Description="{x:Bind ViewModel.AppliancePreview, Mode=OneWay}"
                                Header="設備"
                                HeaderIcon="{ui:FontIcon Glyph=&#xE799;}"
                                IsClickEnabled="True"
@@ -179,85 +178,47 @@
                     <controls:SettingsExpander x:Name="settingsCardManagement"
                             VerticalAlignment="Top"
                             Header="管理"
-                            Description="建物管理"
+                            Description="{x:Bind ViewModel.KanriPreview, Mode=OneWay}"
                             HeaderIcon="{ui:FontIcon Glyph=&#xE91B;}"
                             IsEnabled="True"
                             IsExpanded="False">
-                        <!--  TODO:   -->
 
                         <controls:SettingsExpander.Items>
 
-                            <controls:SettingsCard Header="管理形態" HorizontalContentAlignment="Left" ContentAlignment="Vertical">
+                            <controls:SettingsCard Header="管理主体" HorizontalContentAlignment="Left" ContentAlignment="Vertical">
                                 <StackPanel Orientation="Horizontal">
-                                    <RadioButton Content="貸主" GroupName="tatemonokanri"/>
-                                    <RadioButton Content="自社" GroupName="tatemonokanri"/>
-                                    <RadioButton Content="他社" GroupName="tatemonokanri"/>
-                                    <RadioButton Content="未指定" GroupName="tatemonokanri" IsChecked="True"/>
+                                    <RadioButton Content="貸主" GroupName="Tatemonokanri" IsChecked="{x:Bind ViewModel.IsKanriOwnerOptionSelected, Mode=TwoWay}"/>
+                                    <RadioButton Content="自社" GroupName="Tatemonokanri" IsChecked="{x:Bind ViewModel.IsKanriJisyaOptionSelected, Mode=TwoWay}"/>
+                                    <RadioButton Content="他社" GroupName="Tatemonokanri" IsChecked="{x:Bind ViewModel.IsKanriTasyaOptionSelected, Mode=TwoWay}" Name="RbTatemonoKanriTasha"/>
+                                    <RadioButton Content="未指定" GroupName="Tatemonokanri" IsChecked="{x:Bind ViewModel.IsKanriUnspecifiedOptionSelected, Mode=TwoWay}"/>
                                 </StackPanel>
                             </controls:SettingsCard>
 
-                            <controls:SettingsCard Header="管理会社" HorizontalContentAlignment="Left" ContentAlignment="Vertical">
-                                <TextBox MinWidth="300" Text="" Margin="0 0 3 6" VerticalAlignment="Center" HorizontalAlignment="Stretch"></TextBox>
+                            <controls:SettingsCard Header="管理会社名" HorizontalContentAlignment="Left" ContentAlignment="Vertical" Visibility="{Binding IsChecked, Mode=OneWay, ElementName=RbTatemonoKanriTasha}">
+                                <TextBox MinWidth="300" Width="500" Text="" Margin="0 0 3 6" VerticalAlignment="Center" HorizontalAlignment="Stretch"></TextBox>
                             </controls:SettingsCard>
-                            
+
+                            <controls:SettingsCard Header="管理会社連絡先" HorizontalContentAlignment="Left" ContentAlignment="Vertical" Visibility="{Binding IsChecked, Mode=OneWay, ElementName=RbTatemonoKanriTasha}">
+                                <TextBox MinWidth="300" Width="500" Text="" Margin="0 0 3 6" VerticalAlignment="Center" HorizontalAlignment="Stretch"></TextBox>
+                            </controls:SettingsCard>
+
                         </controls:SettingsExpander.Items>
 
                     </controls:SettingsExpander>
+
+                    <controls:SettingsCard x:Name="settingsCardMemo" Margin="0,0,0,0"
+                                            Command="{x:Bind ViewModel.EditMemoCommand}"
+                               Description="{x:Bind ViewModel.MemoPreview, Mode=OneWay}"
+                               Header="備考"
+                               HeaderIcon="{ui:FontIcon Glyph=&#xE799;}"
+                               IsClickEnabled="True"
+                               IsEnabled="True">
+                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="編集" Visibility="Collapsed"/>
+                        <!--<CommandBar IsOpen="False" DefaultLabelPosition="Right" HorizontalAlignment="Right" Margin="0">
+                            <AppBarButton Icon="Edit" Label="編集"/>
+                        </CommandBar>-->
+                    </controls:SettingsCard>
                     
-                    <!--
-                    <TextBlock Text="その他" Margin="0,24,24,0"></TextBlock>
-                    <Grid BorderThickness="0.5" BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}" CornerRadius="4" Margin="0,0,0,0">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="1*"/>
-                            <ColumnDefinition Width="4*"/>
-                        </Grid.ColumnDefinitions>
-
-                        <Border Grid.Row="0" Grid.RowSpan="15" Grid.Column="0" CornerRadius="4,0,0,4" Background="{ThemeResource SystemControlForegroundBaseMediumBrush}" Opacity="0.1"></Border>
-                        <Border Grid.Row="0" Grid.RowSpan="15" Grid.Column="1"  CornerRadius="0,4,4,0"></Border>
-
-                        <StackPanel Grid.Row="0" Grid.Column="0">
-                            <TextBlock Text="建物管理" Margin="12"></TextBlock>
-                        </StackPanel>
-                        <StackPanel Grid.Row="0" Grid.Column="1" Padding="24,12,12,12">
-                            <RadioButton Content="未指定" GroupName="tatemonokanri" IsChecked="True"/>
-                            <RadioButton Content="貸主" GroupName="tatemonokanri"/>
-                            <RadioButton Content="自社" GroupName="tatemonokanri"/>
-                            <RadioButton Content="他社" GroupName="tatemonokanri"/>
-                        </StackPanel>
-
-                        <Border Grid.Row="1" Grid.Column="0" BorderThickness="0.5" Height="1" BorderBrush="{ThemeResource SystemControlForegroundBaseMediumBrush}" Opacity="0.1"></Border>
-                        <Border Grid.Row="1" Grid.Column="1" BorderThickness="1" Height="1" BorderBrush="{ThemeResource SystemControlForegroundBaseMediumBrush}" Opacity="0.1"></Border>
-
-                        <StackPanel Grid.Row="2" Grid.Column="0">
-                            <TextBlock Text="建物管理会社" Margin="12"></TextBlock>
-                        </StackPanel>
-                        <StackPanel Grid.Row="2" Grid.Column="1" Padding="24">
-                            <TextBox Text="" Margin="0 0 3 6" VerticalAlignment="Center" HorizontalAlignment="Stretch"></TextBox>
-                        </StackPanel>
-                    </Grid>
--->
-                    
-                    <TextBox Header="備考" Margin="0,24,0,0"
-    TextWrapping="Wrap" AcceptsReturn="True" IsSpellCheckEnabled="False"
-     MinWidth="400" MinHeight="160" MaxHeight="160" ScrollViewer.VerticalScrollBarVisibility="Auto"/>
-
                 </StackPanel>
                 
             </ScrollViewer>

@@ -51,11 +51,10 @@
                     
                     <Expander Header="一般" Margin="0" Padding="6" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" IsExpanded="False">
                         <controls:WrapPanel Name="HorizontalWrapPanel" Margin="24,12,24,12">
-
-                            <CheckBox Margin="0,0,0,0" Content="エレベータ" />
-                            <CheckBox Margin="12,0,0,0" Content="オートロック" />
-                            <CheckBox Margin="12,0,0,0" Content="防犯カメラ" />
-                            <CheckBox Margin="12,0,0,0" Content="宅配ボックス" /><!--
+                            <CheckBox Margin="0,0,0,0" Content="エレベータ" IsChecked="{x:Bind ViewModel.Ap_IsElevator,Mode=TwoWay}"/>
+                            <CheckBox Margin="12,0,0,0" Content="オートロック" IsChecked="{x:Bind ViewModel.Ap_IsAutolock,Mode=TwoWay}"/>
+                            <CheckBox Margin="12,0,0,0" Content="防犯カメラ" IsChecked="{x:Bind ViewModel.Ap_IsSecurityCamera,Mode=TwoWay}"/>
+                            <CheckBox Margin="12,0,0,0" Content="宅配ボックス" IsChecked="{x:Bind ViewModel.Ap_IsParcelLocker,Mode=TwoWay}"/><!--
                             <CheckBox Margin="6" Content="キッズルーム" />
                             <CheckBox Margin="6" Content="フロントサービス" />-->
                         </controls:WrapPanel>

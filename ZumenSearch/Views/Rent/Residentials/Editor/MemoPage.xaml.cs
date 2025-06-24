@@ -1,18 +1,13 @@
 ﻿using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Text;
-using Windows.Storage;
-using Windows.Storage.Pickers;
 using ZumenSearch.Models;
-using ZumenSearch.ViewModels.Rent.Residentials.Editor;
+using ZumenSearch.ViewModels;
 
 namespace ZumenSearch.Views.Rent.Residentials.Editor;
 
-public sealed partial class PictureListPage : Page
+public sealed partial class MemoPage : Page
 {
     //private Views.Rent.Residentials.Editor.EditorShell? _editorShell;
 
@@ -29,13 +24,13 @@ public sealed partial class PictureListPage : Page
         }
     }
 
-    public PictureListPage()
+    public MemoPage()
     {
         InitializeComponent();
 
-        //ViewModel = new PictureListViewModel();//App.GetService<RentLivingEditPictureShellViewModel>();
         BreadcrumbBar1.ItemsSource = new ObservableCollection<Breadcrumb>{
-            new() { Name = "写真", Page = typeof(Views.Rent.Residentials.Editor.PictureListPage).FullName! },
+            new() { Name = "概要", Page = typeof(Views.Rent.Residentials.Editor.SummaryPage).FullName!},
+            new() { Name = "備考", Page = typeof(Views.Rent.Residentials.Editor.MemoPage).FullName! },
         };
         BreadcrumbBar1.ItemClicked += BreadcrumbBar_ItemClicked;
     }
@@ -44,7 +39,7 @@ public sealed partial class PictureListPage : Page
     {
         if (args.Index == 0)
         {
-            //_viewModel?.GoBackToSummary();
+            _viewModel?.GoBackToSummary();
         }
     }
 
@@ -53,17 +48,10 @@ public sealed partial class PictureListPage : Page
         if ((e.Parameter is ViewModels.Rent.Residentials.Editor.EditorViewModel) && (e.Parameter != null))
         {
             //_editorShell = e.Parameter as Views.Rent.Residentials.Editor.EditorShell;
+            //ViewModel = _editorShell?.ViewModel as ViewModels.Rent.Residentials.Editor.EditorViewModel;
             ViewModel = e.Parameter as ViewModels.Rent.Residentials.Editor.EditorViewModel;
         }
 
         base.OnNavigatedTo(e);
-    }
-
-    private void ItemsView_SelectionChanged(ItemsView sender, ItemsViewSelectionChangedEventArgs args)
-    {
-        if (ViewModel != null)
-        {
-            ViewModel.SelectedBuildingPicture = sender.SelectedItem as Models.Rent.Residentials.PictureBuilding;
-        }
     }
 }

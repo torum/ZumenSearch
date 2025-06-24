@@ -35,6 +35,7 @@ namespace ZumenSearch.Views
         [
             //("Rent", typeof(Rent.RentSearchPage)),
             ("Rent", null),
+            ("RentSearch", typeof(Rent.RentSearchPage)),
             ("RentResidentials", typeof(Rent.Residentials.SearchPage)),
             ("RentCommercials", typeof(Rent.Commercials.CommercialsPage)),
             ("RentParkings", typeof(Rent.Parkings.ParkingsPage)),
@@ -75,6 +76,14 @@ namespace ZumenSearch.Views
         {
             var resource = args.WindowActivationState == WindowActivationState.Deactivated ? "WindowCaptionForegroundDisabled" : "WindowCaptionForeground";
             AppTitleBarText.Foreground = (SolidColorBrush)App.Current.Resources[resource];
+            if (args.WindowActivationState == WindowActivationState.Deactivated)
+            {
+                AppTitleBarIcon.Opacity = 0.5;
+            }
+            else
+            {
+                AppTitleBarIcon.Opacity = 1;
+            }
         }
 
         private void MainWindow_Closed(object sender, WindowEventArgs args)

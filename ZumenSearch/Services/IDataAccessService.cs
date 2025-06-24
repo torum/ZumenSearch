@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using ZumenSearch.Models;
+using ZumenSearch.Models.Rent.Residentials;
 
 namespace ZumenSearch.Services;
 
@@ -10,15 +11,16 @@ public interface IDataAccessService
 {
     SqliteDataAccessResultWrapper InitializeDatabase(string dataBaseFilePath);
 
-    SqliteDataAccessResultWrapper InsertRentResidential(string rentId, string rentName, string comment);
+    SqliteDataAccessResultWrapper InsertRentResidential(EntryResidentialFull entry);
+
+    SqliteDataAccessResultWrapper UpdateRentResidential(EntryResidentialFull entry);
+
+    SqliteDataAccessResultWrapper DeleteRentResidential(string rentId);
 
     SqliteDataAccessSelectRentResidentialResultWrapper SelectRentResidentialsByNameKeyword(string keyword);
 
     SqliteDataAccessSelectRentResidentialFullResultWrapper SelectRentResidentialById(string id);
 
-    SqliteDataAccessResultWrapper UpdateRentResidential(string rentId, string rentName, string comment);
-
-    SqliteDataAccessResultWrapper DeleteRentResidential(string rentId);
 
     /*
     SqliteDataAccessResultWrapper InsertFeed(string feedId, Uri feedUri, string feedName, string feedTitle, string feedDescription, DateTime updated, Uri? htmlUri);

@@ -104,6 +104,9 @@ public partial class MainViewModel : ObservableObject
         var res = await Task.FromResult(_dataAccessService.InitializeDatabase(filePath)).ConfigureAwait(false);
         if (res.IsError)
         {
+
+            Debug.WriteLine(res.Error.ErrText + Environment.NewLine + res.Error.ErrDescription + Environment.NewLine + res.Error.ErrPlace + Environment.NewLine + res.Error.ErrPlaceParent);
+
             //ErrorMain = res.Error;
             //IsMainErrorInfoBarVisible = true;
 
@@ -119,7 +122,7 @@ public partial class MainViewModel : ObservableObject
     public IRelayCommand AddNewRentResidentialCommand => addNewRentResidentialCommand ??= new RelayCommand(AddNewRentResidential);
     private void AddNewRentResidential()
     {
-        Debug.WriteLine("AddNew command executed!");
+        //Debug.WriteLine("AddNew command executed!");
 
         Views.Rent.Residentials.Editor.EditorShell editorShell = _editorFactory.Create();
 
@@ -221,6 +224,8 @@ public partial class MainViewModel : ObservableObject
         var res = await Task.FromResult(_dataAccessService.SelectRentResidentialsByNameKeyword("*")).ConfigureAwait(ConfigureAwaitOptions.ContinueOnCapturedContext);// Go back to UI thred. Let's not do > .ConfigureAwait(false);
         if (res.IsError)
         {
+            Debug.WriteLine(res.Error.ErrText + Environment.NewLine + res.Error.ErrDescription + Environment.NewLine + res.Error.ErrPlace + Environment.NewLine + res.Error.ErrPlaceParent);
+
             //ErrorMain = res.Error;
             //IsMainErrorInfoBarVisible = true;
 
@@ -246,7 +251,7 @@ public partial class MainViewModel : ObservableObject
             return;
         }
 
-        Debug.WriteLine($"EditRentResidentialCommand executed for {selected.Id}");
+        //Debug.WriteLine($"EditRentResidentialCommand executed for {selected.Id}");
 
         // Check if the selected item is already being edited in another window.
         this.EditorList.ForEach(editorWindow =>
@@ -272,6 +277,8 @@ public partial class MainViewModel : ObservableObject
         var res = await Task.FromResult(_dataAccessService.SelectRentResidentialById(selected.Id)).ConfigureAwait(ConfigureAwaitOptions.ContinueOnCapturedContext);// Go back to UI thred. Let's not do > .ConfigureAwait(false);
         if (res.IsError)
         {
+            Debug.WriteLine(res.Error.ErrText + Environment.NewLine + res.Error.ErrDescription + Environment.NewLine + res.Error.ErrPlace + Environment.NewLine + res.Error.ErrPlaceParent);
+
             //ErrorMain = res.Error;
             //IsMainErrorInfoBarVisible = true;
 
@@ -289,7 +296,7 @@ public partial class MainViewModel : ObservableObject
         Views.Rent.Residentials.Editor.EditorShell editorShell = _editorFactory.Create();
 
         // Sets the instance of selected Entry.
-        editorShell.SetEntry(res.EntryFull);
+        editorShell.SetEntryToEntryViewModel(res.EntryFull);
 
         var editorWindow = editorShell.EditorWin;
 
@@ -356,6 +363,8 @@ public partial class MainViewModel : ObservableObject
         var res = await Task.FromResult(_dataAccessService.DeleteRentResidential(selected.Id)).ConfigureAwait(false);
         if (res.IsError)
         {
+            Debug.WriteLine(res.Error.ErrText + Environment.NewLine + res.Error.ErrDescription + Environment.NewLine + res.Error.ErrPlace + Environment.NewLine + res.Error.ErrPlaceParent);
+
             //ErrorMain = res.Error;
             //IsMainErrorInfoBarVisible = true;
 

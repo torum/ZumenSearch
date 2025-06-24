@@ -34,7 +34,7 @@ public sealed partial class AppliancePage : Page
 
         BreadcrumbBar1.ItemsSource = new ObservableCollection<Breadcrumb>{
             new() { Name = "概要", Page = typeof(Views.Rent.Residentials.Editor.SummaryPage).FullName!},
-            new() { Name = "設備", Page = typeof(Views.Rent.Residentials.Editor.LocationPage).FullName! },
+            new() { Name = "設備", Page = typeof(Views.Rent.Residentials.Editor.AppliancePage).FullName! },
         };
         BreadcrumbBar1.ItemClicked += BreadcrumbBar_ItemClicked;
     }

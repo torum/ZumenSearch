@@ -9,21 +9,9 @@ using System.Threading.Tasks;
 
 namespace ZumenSearch.Models.Rent.Residentials;
 
-public partial class EntryResidentialSearchResult : Entry
+// 賃貸住居用の検索結果表示用物件クラス（建物）
+public partial class EntryResidentialSearchResult : EntryBase
 {
-    private string? _name;
-    public string Name
-    {
-        get => _name ?? string.Empty; // Ensure a non-null value is returned
-        set
-        {
-            if (SetProperty(ref _name, value))
-            {
-                IsDirty = true;
-            }
-        }
-    }
-
     public EntryResidentialSearchResult(string id) : base(id)
     {
         //
@@ -31,21 +19,8 @@ public partial class EntryResidentialSearchResult : Entry
 }
 
 // 賃貸住居用の物件クラス（建物）
-public partial class EntryResidentialFull : Entry
+public partial class EntryResidentialFull : EntryBase
 {
-    private string? _name;
-    public string Name
-    {
-        get => _name ?? string.Empty; // Ensure a non-null value is returned
-        set
-        {
-            if (SetProperty(ref _name, value))
-            {
-                IsDirty = true;
-            }
-        }
-    }
-
     public EntryResidentialFull()
     {
         //
@@ -56,6 +31,22 @@ public partial class EntryResidentialFull : Entry
         //
     }
 
+
+    private ObservableCollection<PictureBuilding> _buildingPictures = [];
+    public ObservableCollection<PictureBuilding> BuildingPictures
+    {
+        get => _buildingPictures;
+        set
+        {
+            if (SetProperty(ref _buildingPictures, value))
+            {
+                IsDirty = true;
+            }
+        }
+    }
+
+    // DBへの更新時にDBから削除されるべき物件写真のIDリスト
+    public ObservableCollection<PictureBuilding> BuildingPicturesToBeDeleted = [];
 
     /*
     // 建物管理
