@@ -883,20 +883,96 @@ public partial class EditorViewModel : ObservableObject
         get => _selectedBuildingPicture;
         set
         {
+            // "quietly" clear values.
+            _buildingPictureIsMain = false;
+            _buildingPictureTitle = string.Empty;
+            _buildingPictureDescription = string.Empty;
+
+            _buildingPicturePropertiesIsDirty = false;
+
             if (SetProperty(ref _selectedBuildingPicture, value))
             {
-                //
                 if (_selectedBuildingPicture != null)
                 {
                     IsBuildingPictureEditPaneVisible = true;
+
+                    // "quietly" update values.
+                    _buildingPictureIsMain = _selectedBuildingPicture.IsMain;
+                    _buildingPictureTitle = _selectedBuildingPicture.Title ?? string.Empty;
+                    _buildingPictureDescription = _selectedBuildingPicture.Description ?? string.Empty;
+
+                    _buildingPicturePropertiesIsDirty = false;
                 }
                 else
                 {
                     IsBuildingPictureEditPaneVisible = false;
                 }
             }
+
+            // notify updates.
+            OnPropertyChanged(nameof(BuildingPictureTitle));
+            OnPropertyChanged(nameof(BuildingPictureDescription));
+            OnPropertyChanged(nameof(BuildingPictureIsMain));
+            OnPropertyChanged(nameof(BuildingPicturePropertiesIsDirty));
+
+            UpdatedBuildingPicturePropertyCommand.NotifyCanExecuteChanged();
+
+            DeleteSelectedBuildingPictureCommand.NotifyCanExecuteChanged();
         }
     }
+
+    private bool _buildingPicturePropertiesIsDirty;
+    public bool BuildingPicturePropertiesIsDirty
+    {
+        get => _buildingPicturePropertiesIsDirty;
+        set
+        {
+            if (SetProperty(ref _buildingPicturePropertiesIsDirty, value))
+            {
+                UpdatedBuildingPicturePropertyCommand.NotifyCanExecuteChanged();
+            }
+        }
+    }
+
+    private string _buildingPictureTitle = string.Empty;
+    public string BuildingPictureTitle
+    {
+        get => _buildingPictureTitle;
+        set 
+        {
+            if (SetProperty(ref _buildingPictureTitle, value))
+            {
+                BuildingPicturePropertiesIsDirty = true;
+            }
+        }
+    }
+
+    private string _buildingPictureDescription = string.Empty;
+    public string BuildingPictureDescription
+    {
+        get => _buildingPictureDescription;
+        set
+        {
+            if (SetProperty(ref _buildingPictureDescription, value))
+            {
+                BuildingPicturePropertiesIsDirty = true;
+            }
+        }
+    }
+
+    private bool _buildingPictureIsMain;
+    public bool BuildingPictureIsMain
+    {
+        get => _buildingPictureIsMain;
+        set
+        {
+            if (SetProperty(ref _buildingPictureIsMain, value))
+            {
+                BuildingPicturePropertiesIsDirty = true;
+            }
+        }
+    }
+
 
     #endregion
 
@@ -1029,6 +1105,7 @@ public partial class EditorViewModel : ObservableObject
             if (string.IsNullOrEmpty(Name))
             {
                 Debug.WriteLine("TODO: Name is null or empty. This field is required. Show alart and abort.");
+                return;
             }
 
             _entry.Name = Name;
@@ -1053,6 +1130,7 @@ public partial class EditorViewModel : ObservableObject
         var resInsert = _dataAccessService.InsertRentResidential(_entry);
         if (resInsert.IsError)
         {
+            Debug.WriteLine("Error on insert.");
             Debug.WriteLine(resInsert.Error.ErrText + Environment.NewLine + resInsert.Error.ErrDescription + Environment.NewLine + resInsert.Error.ErrPlace + Environment.NewLine + resInsert.Error.ErrPlaceParent);
 
             App.CurrentDispatcherQueue?.TryEnqueue(() =>
@@ -1077,6 +1155,7 @@ public partial class EditorViewModel : ObservableObject
         var resInsert = _dataAccessService.UpdateRentResidential(_entry);
         if (resInsert.IsError)
         {
+            Debug.WriteLine("Error on update.");
             Debug.WriteLine(resInsert.Error.ErrText + Environment.NewLine + resInsert.Error.ErrDescription + Environment.NewLine + resInsert.Error.ErrPlace + Environment.NewLine + resInsert.Error.ErrPlaceParent);
 
             App.CurrentDispatcherQueue?.TryEnqueue(() =>
@@ -1154,6 +1233,65 @@ public partial class EditorViewModel : ObservableObject
     public void AddNewBuildingPictures()
     {
         EventAddNewBuildingPictures?.Invoke(this, EventArgs.Empty);
+    }
+
+    [RelayCommand(CanExecute = nameof(CanDeleteSelectedBuildingPicture))]
+    public void DeleteSelectedBuildingPicture()
+    {
+        if (SelectedBuildingPicture != null)
+        {
+            if (_entry.BuildingPictures.Remove(SelectedBuildingPicture))
+            {
+                _entry.BuildingPicturesToBeDeleted.Add(SelectedBuildingPicture);
+
+                IsEntryDirty = true;
+
+                BuildingPictures.Remove(SelectedBuildingPicture);
+
+                SelectedBuildingPicture = null;
+            }
+        }
+    }
+    private bool CanDeleteSelectedBuildingPicture()
+    {
+        return SelectedBuildingPicture != null;
+    }
+
+    [RelayCommand(CanExecute = nameof(CanUpdatedBuildingPictureProperty))]
+    public void UpdatedBuildingPictureProperty()
+    {
+        if (SelectedBuildingPicture != null)
+        {
+            if (BuildingPictureIsMain)
+            {
+                foreach(var asdf in BuildingPictures)
+                {
+                    asdf.IsMain = false;
+                }
+            }
+            SelectedBuildingPicture.IsMain = BuildingPictureIsMain;
+            SelectedBuildingPicture.Title = BuildingPictureTitle;
+            SelectedBuildingPicture.Description = BuildingPictureDescription;
+
+            SelectedBuildingPicture.IsModified = true;
+
+            IsEntryDirty = true;
+
+            BuildingPicturePropertiesIsDirty = false;
+            UpdatedBuildingPicturePropertyCommand.NotifyCanExecuteChanged();
+        }
+    }
+    private bool CanUpdatedBuildingPictureProperty()
+    {
+        if (SelectedBuildingPicture != null)
+        {
+            if (BuildingPicturePropertiesIsDirty)
+            {
+                return true;
+            }
+        }
+        
+        return false;
     }
 
     #endregion

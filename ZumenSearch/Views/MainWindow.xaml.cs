@@ -39,7 +39,7 @@ namespace ZumenSearch.Views
         {
             InitializeComponent();
 
-            this.Title = "ZumenSearch Main";
+            this.Title = "ZumenSearch ";
 
             LoadSetting();
 

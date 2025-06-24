@@ -58,33 +58,21 @@ public class DataAccessService : IDataAccessService
                     tableCmd.ExecuteNonQuery();
 
                     tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS rent_residentials_pictures (" +
-    "picture_id TEXT NOT NULL PRIMARY KEY," +
-    //"rent_residential_id TEXT NOT NULL," +
-    "rent_id TEXT NOT NULL," +
-    "picture_filepath TEXT NOT NULL," +
-    "picture_data BLOB," +
-    //"PictureThumbData BLOB NOT NULL," +
-    //"PictureFileExt TEXT NOT NULL," +
-    //"PictureType TEXT NOT NULL," +
-    //"PictureDescription TEXT NOT NULL," +
-    //"PictureIsMain INTEGER  NOT NULL," +
-    //"FOREIGN KEY (rent_residential_id) REFERENCES rent_residentials(rent_residential_id) ON DELETE CASCADE," +
-    "FOREIGN KEY (rent_id) REFERENCES rent_residentials(rent_id) ON DELETE CASCADE," +
-    "FOREIGN KEY (rent_id) REFERENCES rents(rent_id) ON DELETE CASCADE" +
-    " )";
+                        "picture_id TEXT NOT NULL PRIMARY KEY," +
+                        //"rent_residential_id TEXT NOT NULL," +
+                        "rent_id TEXT NOT NULL," +
+                        "filepath TEXT NOT NULL," +
+                        //"data BLOB," +
+                        "title TEXT NOT NULL," +
+                        "description TEXT NOT NULL," +
+                        "is_main INTEGER  NOT NULL," +
+                        //"FOREIGN KEY (rent_residential_id) REFERENCES rent_residentials(rent_residential_id) ON DELETE CASCADE," +
+                        "FOREIGN KEY (rent_id) REFERENCES rent_residentials(rent_id) ON DELETE CASCADE," +
+                        "FOREIGN KEY (rent_id) REFERENCES rents(rent_id) ON DELETE CASCADE" +
+                        " )";
                     tableCmd.ExecuteNonQuery();
 
-                    /*
-                    tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS images (" +
-                        "image_id TEXT NOT NULL PRIMARY KEY," +
-                        "entry_id TEXT NOT NULL," +
-                        "image_url TEXT," +
-                        //"image_downloaded TEXT," +
-                        "image BLOB," +
-                        "CONSTRAINT fk_entries FOREIGN KEY (entry_id) REFERENCES entries(entry_id) ON DELETE CASCADE" +
-                        ")";
-                    tableCmd.ExecuteNonQuery();
-                    */
+
 
                     //tableCmd.CommandText = "ALTER TABLE entries ADD COLUMN category TEXT;";
                     //tableCmd.ExecuteNonQuery();
@@ -239,7 +227,7 @@ public class DataAccessService : IDataAccessService
                     {
                         foreach (var pic in entry.BuildingPictures)
                         {
-                            // 新規なので全てIsNewのはず・・・
+                            // Insertなので全てIsNewのはず・・・
                             //if (pic.IsNew)
                             /*
                             string sqlInsertIntoRentLivingPicture = String.Format(
@@ -253,7 +241,7 @@ public class DataAccessService : IDataAccessService
                                 "VALUES ('{0}', '{1}', '{2}')",
                                 pic.Id, entry.Id, pic.ImageLocation);
                             */
-                            string sqlInsertIntoRentLivingPicture = "INSERT INTO rent_residentials_pictures (picture_id, rent_id, picture_filepath) VALUES (@PicId, @RentId, @PicLoc)";
+                            string sqlInsertIntoRentLivingPicture = "INSERT INTO rent_residentials_pictures (picture_id, rent_id, filepath, title, description, is_main) VALUES (@PicId, @RentId, @Path, @Tit, @Desc, @Main)";
 
                             cmd.CommandText = sqlInsertIntoRentLivingPicture;
 
@@ -263,7 +251,20 @@ public class DataAccessService : IDataAccessService
                             cmd.Parameters.AddWithValue("@PicId", pic.Id);
                             //cmd.Parameters.AddWithValue("@RentResidentialId", entry.Id + "_1");
                             cmd.Parameters.AddWithValue("@RentId", entry.Id);
-                            cmd.Parameters.AddWithValue("@PicLoc", pic.ImageLocation);
+                            cmd.Parameters.AddWithValue("@Path", pic.ImageLocation);
+                            cmd.Parameters.AddWithValue("@Tit", pic.Title);
+                            cmd.Parameters.AddWithValue("@Desc", pic.Description);
+
+                            var paramIsMain = new SqliteParameter("@Main", System.Data.DbType.Int32);
+                            if (pic.IsMain)
+                            {
+                                paramIsMain.Value = 1;
+                            }
+                            else
+                            {
+                                paramIsMain.Value = 0;
+                            }
+                            cmd.Parameters.Add(paramIsMain);
 
                             /*
                             var parameter1 = new SqliteParameter("@0", System.Data.DbType.Binary)
@@ -403,6 +404,8 @@ public class DataAccessService : IDataAccessService
                 try
                 {
                     cmd.CommandType = CommandType.Text;
+
+                    // Main
                     var sql = "UPDATE rents SET ";
                     sql += String.Format("name = '{0}' ", EscapeSingleQuote(entry.Name));
                     //sql += String.Format("title = '{0}', ", EscapeSingleQuote(feedTitle));
@@ -412,10 +415,9 @@ public class DataAccessService : IDataAccessService
                     sql += String.Format(" WHERE rent_id = '{0}'; ", entry.Id);
 
                     cmd.CommandText = sql;
-
                     res.AffectedCount = cmd.ExecuteNonQuery();
 
-                    //
+                    // Residentials
                     sql = "UPDATE rent_residentials SET ";
                     sql += String.Format("comment = '{0}' ", EscapeSingleQuote("some comment"));
                     //sql += String.Format("title = '{0}', ", EscapeSingleQuote(feedTitle));
@@ -423,9 +425,97 @@ public class DataAccessService : IDataAccessService
                     //sql += String.Format("updated = '{0}'", updated.ToString("yyyy-MM-dd HH:mm:ss"));
 
                     sql += String.Format(" WHERE rent_id = '{0}'; ", entry.Id);
-                    //
 
-                    res.AffectedCount += cmd.ExecuteNonQuery();
+                    cmd.CommandText = sql;
+                    cmd.ExecuteNonQuery();
+
+                    // Pictures (Building)
+                    cmd.Parameters.Clear();
+
+                    // 物件写真の追加または更新
+                    if (entry.BuildingPictures.Count > 0)
+                    {
+                        foreach (var pic in entry.BuildingPictures)
+                        {
+                            bool exec = false;
+
+                            if (pic.IsNew)
+                            {
+                                string sqlInsertIntoRentLivingPicture = "INSERT INTO rent_residentials_pictures (picture_id, rent_id, filepath, title, description, is_main) VALUES (@PicId, @RentId, @Path, @Tit, @Desc, @Main)";
+
+                                // 物件画像の追加
+                                cmd.CommandText = sqlInsertIntoRentLivingPicture;
+
+                                exec = true;
+                            }
+                            else if (pic.IsModified)
+                            {
+                                string sqlUpdateRentLivingPicture = String.Format(
+                                    "UPDATE rent_residentials_pictures SET title = @Tit, description = @Desc, is_main = @Main " +
+                                    "WHERE picture_id = '{0}'", pic.Id);
+
+                                // 物件画像の更新
+                                cmd.CommandText = sqlUpdateRentLivingPicture;
+
+                                exec = true;
+                            }
+
+                            if (exec)
+                            {
+                                // ループなので、前のパラメーターをクリアする。
+                                cmd.Parameters.Clear();
+
+                                cmd.Parameters.AddWithValue("@PicId", pic.Id);
+                                //cmd.Parameters.AddWithValue("@RentResidentialId", entry.Id + "_1");
+                                cmd.Parameters.AddWithValue("@RentId", entry.Id);
+                                cmd.Parameters.AddWithValue("@Path", pic.ImageLocation);
+                                cmd.Parameters.AddWithValue("@Tit", pic.Title);
+                                cmd.Parameters.AddWithValue("@Desc", pic.Description);
+                                var paramIsMain = new SqliteParameter("@Main", System.Data.DbType.Int32);
+                                if (pic.IsMain)
+                                {
+                                    paramIsMain.Value = 1;
+                                }
+                                else
+                                {
+                                    paramIsMain.Value = 0;
+                                }
+                                cmd.Parameters.Add(paramIsMain);
+
+                                var result = cmd.ExecuteNonQuery();
+                                if (result > 0)
+                                {
+                                    pic.IsNew = false;
+                                    pic.IsModified = false;
+                                }
+                            }
+
+                        }
+                    }
+
+                    cmd.Parameters.Clear();
+
+                    // 物件写真の削除リストを処理
+                    if (entry.BuildingPicturesToBeDeleted.Count > 0)
+                    {
+                        foreach (var delp in entry.BuildingPicturesToBeDeleted)
+                        {
+                            // 削除
+                            string sqlDeleteRentLivingPicture = String.Format("DELETE FROM rent_residentials_pictures WHERE picture_id = '{0}'", delp.Id);
+
+                            cmd.CommandText = sqlDeleteRentLivingPicture;
+                            var DelRentLivingPicResult = cmd.ExecuteNonQuery();
+                            if (DelRentLivingPicResult > 0)
+                            {
+                                // TODO:
+                                Debug.WriteLine("Picture deleted");
+                            }
+                        }
+                        entry.BuildingPicturesToBeDeleted.Clear();//RentLivingPicturesToBeDeletedIDs.Clear();
+                    }
+
+                    cmd.Parameters.Clear();
+
                     //
 
                     cmd.Transaction.Commit();
@@ -758,7 +848,7 @@ public class DataAccessService : IDataAccessService
     {
         var res = new SqliteDataAccessSelectRentResidentialFullResultWrapper();
 
-        var entry = new Models.Rent.Residentials.EntryResidentialFull();
+        var entry = new Models.Rent.Residentials.EntryResidentialFull(id);
 
         if (string.IsNullOrEmpty(id))
         {
@@ -812,7 +902,7 @@ public class DataAccessService : IDataAccessService
             {
                 while (reader.Read())
                 {
-                    var rlpic = new PictureBuilding(Convert.ToString(reader["picture_filepath"]) ?? string.Empty)
+                    var rlpic = new PictureBuilding(Convert.ToString(reader["filepath"]) ?? string.Empty)
                     {
                         //Convert.ToString(reader["RentLivingPicture_ID"])
                         /*
@@ -822,12 +912,23 @@ public class DataAccessService : IDataAccessService
                         rlpic.Picture = Methods.BitmapImageFromBytes(imageBytes);
                         */
 
-                        Id = Convert.ToString(reader["picture_id"]),
-                        // TODO: 
+                        Id = Convert.ToString(reader["picture_id"]), 
+                        //ImageLocation = Convert.ToString(reader["filepath"]),
+                        Title = Convert.ToString(reader["title"]) ?? string.Empty,
+                        Description = Convert.ToString(reader["description"]) ?? string.Empty,
 
                         IsNew = false,
                         IsModified = false
-                    }; 
+                    };
+
+                    //if (ColumnExists(reader, "is_main"))
+                    //{
+                    //}
+                    var bln = Convert.ToInt32(reader["is_main"]);
+                    if (bln > 0)
+                        rlpic.IsMain = true;
+                    else
+                        rlpic.IsMain = false;
 
                     entry.BuildingPictures.Add(rlpic);
                 }

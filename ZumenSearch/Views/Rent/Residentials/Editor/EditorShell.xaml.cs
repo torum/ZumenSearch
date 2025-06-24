@@ -50,7 +50,7 @@ public sealed partial class EditorShell : Page
         ("appliance", typeof(Views.Rent.Residentials.Editor.AppliancePage)),
         ("pictures", typeof(Views.Rent.Residentials.Editor.PictureListPage)),
         ("units", typeof(Views.Rent.Residentials.Editor.UnitListPage)),
-        ("unitpictures", typeof(Views.Rent.Residentials.Editor.UnitPictureListPage)),
+        //("unitpictures", typeof(Views.Rent.Residentials.Editor.UnitPictureListPage)),
         ("zumen", typeof(Views.Rent.Residentials.Editor.ZumenListPage)),
         ("kasinusi", typeof(Views.Rent.Residentials.Editor.KasinusiPage)),
         ("gyousya", typeof(Views.Rent.Residentials.Editor.GyousyaPage)),

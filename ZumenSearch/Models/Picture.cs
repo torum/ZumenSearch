@@ -17,10 +17,10 @@ using ZumenSearch.ViewModels;
 
 namespace ZumenSearch.Models
 {
-    public abstract class PictureBase
+    public abstract class PictureBase : ObservableObject
     {
         public string? ImageLocation { get; set; } 
-        public string? Title { get; set; }
+
         public string? Id { get; set; }
 
         public bool IsNew { get; set; }
