@@ -8,6 +8,7 @@
     xmlns:controls="using:CommunityToolkit.WinUI.Controls"
     xmlns:ui="using:CommunityToolkit.WinUI"
     xmlns:mod="using:ZumenSearch.Models"
+    xmlns:modres="using:ZumenSearch.Models.Rent.Residentials"
     NavigationCacheMode="Required">
 
     <Grid x:Name="ContentArea" Margin="{StaticResource NavigationViewPageContentAreaMargin}">
@@ -81,7 +82,15 @@
                             
                             <controls:SettingsCard HorizontalContentAlignment="Left" ContentAlignment="Vertical"
                                  Header="物件種目">
-                                <ComboBox x:Name="ComboBoxKind" PlaceholderText="選択" MinWidth="300" Margin="0,0,0,0" SelectedIndex="-1" ItemsSource="{x:Bind ViewModel.Kinds, Mode=OneWay}" DisplayMemberPath="Label" SelectedItem="{x:Bind ViewModel.SelectedKind, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></ComboBox>
+                                <ComboBox x:Name="ComboBoxKind" PlaceholderText="選択" MinWidth="300" Margin="0,0,0,0" SelectedIndex="-1" ItemsSource="{x:Bind ViewModel.Kinds, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.SelectedKind, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate x:DataType="modres:Kind">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{x:Bind Label, Mode=OneWay}" Margin="0,0,5,0"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
                             </controls:SettingsCard>
 
                             <controls:SettingsCard Header="所有権" HorizontalContentAlignment="Left" ContentAlignment="Vertical">

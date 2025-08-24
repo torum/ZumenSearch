@@ -159,7 +159,7 @@ public partial class EditorViewModel : ObservableObject
             if (SetProperty(ref _selectedPef, value))
             {
                 IsEntryDirty = true;
-                OnPropertyChanged(nameof(AddressPreview)); // Notify that the address preview has changed
+                OnPropertyChanged(nameof(AddressPreview));
             }
         }
     }
@@ -1004,16 +1004,18 @@ public partial class EditorViewModel : ObservableObject
     
     // The IDataAccessService is used to access the data layer for saving and updating entries.
     private readonly IDataAccessService _dataAccessService;
+    private readonly IModalDialogService _dlg;
 
     #endregion
 
     #region == Constructor ==
 
     // Constructor for the EditorViewModel class, initializes the data access service and the entry.
-    #pragma warning disable IDE0290 
-    public EditorViewModel(IDataAccessService dataAccessService)
+#pragma warning disable IDE0290
+    public EditorViewModel(IDataAccessService dataAccessService, IModalDialogService modalDialog )
     {
         _dataAccessService = dataAccessService;
+        _dlg = modalDialog;
 
     }
     #pragma warning restore IDE0290
@@ -1182,6 +1184,7 @@ public partial class EditorViewModel : ObservableObject
     private void AddNewUnit()
     {
         //NavigationService.NavigateTo(typeof(RentLivingEditShellViewModel).FullName!, "test");
+        //_dlg.ShowUnitDialog(this,);
         EventAddNewUnit?.Invoke(this, EventArgs.Empty);
     }
 

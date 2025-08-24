@@ -37,6 +37,7 @@ namespace ZumenSearch.Views
 
         public MainWindow()
         {
+
             InitializeComponent();
 
             this.Title = "ZumenSearch ";
@@ -120,6 +121,7 @@ namespace ZumenSearch.Views
                 };
             }
         }
+
         private void Window_Activated(object sender, WindowActivatedEventArgs args)
         {
             //

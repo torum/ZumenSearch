@@ -16,6 +16,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 using Windows.System;
@@ -23,6 +24,7 @@ using Windows.UI.Core;
 using Windows.UI.ViewManagement;
 using ZumenSearch.Helpers;
 using ZumenSearch.Models;
+using ZumenSearch.Services;
 using ZumenSearch.ViewModels;
 using ZumenSearch.Views;
 
@@ -196,7 +198,7 @@ public sealed partial class EditorShell : Page
             if (args.InvokedItemContainer.Tag is not string tag || string.IsNullOrWhiteSpace(tag))
             {
                 Debug.WriteLine("NavView_ItemInvoked: Invalid tag or null.");
-                sender.SelectedItem = navigationViewSelectedItem; 
+                //sender.SelectedItem = navigationViewSelectedItem; 
                 return;
             }
 
@@ -205,7 +207,7 @@ public sealed partial class EditorShell : Page
             if (item.Page is null)
             {
                 //Debug.WriteLine("NavView_ItemInvoked: Page is null for tag " + tag);
-                sender.SelectedItem = navigationViewSelectedItem;
+                //sender.SelectedItem = navigationViewSelectedItem;
 
                 return;
             }
@@ -326,6 +328,11 @@ public sealed partial class EditorShell : Page
             return;
         }
 
+        var dlgService = App.GetService<IModalDialogService>();
+        dlgService.ShowUnitDialog(ViewModel, EditorWin);
+
+        /*
+
         Views.Rent.Residentials.Editor.Modal.ModalWindow dialogWin = new();
         dialogWin.Content = new Views.Rent.Residentials.Editor.Modal.ModalShell(dialogWin);
 
@@ -347,12 +354,13 @@ public sealed partial class EditorShell : Page
             {
                 presenter.IsModal = true;
 
-                EnableWindow(hWndEditor, false);
+                // Don't use EnableWindow. This causes all sorts of problems. (as of WinAppSDK 1.7.25)
+                //EnableWindow(hWndEditor, false);
 
                 dialogWin.Closed += (sender, e) =>
                 {
-                    // When the dialog is closed, re-enable the editor window.
-                    EnableWindow(hWndEditor, true);
+                    // Don't use EnableWindow. This causes all sorts of problems. (as of WinAppSDK 1.7.25)
+                    //EnableWindow(hWndEditor, true);
 
                     // Activate the editor window again.
                     this.EditorWin.Activate();
@@ -364,10 +372,16 @@ public sealed partial class EditorShell : Page
                     dialogWin.Close();
                 };
 
-                //appWindow.Show();// TODO: not working. This Show() does not re-enable the editor window.
+                //Task.Delay(30).ConfigureAwait(false);
+
+                // Same as EnableWindow. This causes all sorts of problems. (as of WinAppSDK 1.7.25)
+                //appWindow.Show(true);
+
                 dialogWin.Activate();
+                //dialogWin.Show();
             }
         }
+        */
     }
 
     #region == TEMP code for modal window(for setting an owner) ==

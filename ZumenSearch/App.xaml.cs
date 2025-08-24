@@ -50,7 +50,7 @@ namespace ZumenSearch
         public static readonly Microsoft.UI.Dispatching.DispatcherQueue CurrentDispatcherQueue = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
 
         // Main Window
-        public static MainWindow? MainWindow { get; private set; }
+        public static MainWindow? MainWindow { get; private set; } // don't = new();
 
         // Getneric Host
         public IHost Host
@@ -87,8 +87,9 @@ namespace ZumenSearch
                 // Views and ViewModels
                 services.AddSingleton<MainShell>();
                 services.AddSingleton<MainViewModel>();
+                //services.AddSingleton<MainWindow>(); // Use App.MainWindow
 
-                services.AddSingleton<Views.Rent.RentSearchPage>();
+                services.AddSingleton<Views.RentSearchPage>();
 
                 services.AddSingleton<Views.Rent.Residentials.SearchPage>();
                 services.AddSingleton<Views.Rent.Residentials.SearchResultPage>();
@@ -106,8 +107,8 @@ namespace ZumenSearch
                 services.AddSingleton<Views.Rent.Owners.OwnersPage>();
                 services.AddSingleton<ViewModels.Rent.Owners.OwnersViewModel>();
 
-                services.AddSingleton<Views.Brokers.BrokersPage>();
-                services.AddSingleton<ViewModels.Brokers.BrokersViewModel>();
+                services.AddSingleton<Views.BrokersPage>();
+                services.AddSingleton<ViewModels.BrokersViewModel>();
 
                 services.AddSingleton<SettingsPage>();
                 services.AddSingleton<SettingsViewModel>();
@@ -150,13 +151,10 @@ namespace ZumenSearch
             // Create the window and load settings and apply size and position etc.
             MainWindow = new();
             // AFTER creating the main window, initialize main page and window.
-            var shell = App.GetService<MainShell>();//new();
             // Set the the content of the app.
-            MainWindow.Content = shell;
+            MainWindow.Content = App.GetService<MainShell>();//new();
             // Activate the window.
             MainWindow?.Activate();
-
-
         }
 
         // Activated from other instance.

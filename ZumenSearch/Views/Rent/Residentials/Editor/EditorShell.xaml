@@ -297,7 +297,7 @@
 
 
 
-            <NavigationView Grid.Row="0" x:Name="NavView" OpenPaneLength ="180" PaneDisplayMode="Left" Margin="0,0,0,0" SelectionFollowsFocus="Disabled" IsPaneToggleButtonVisible="False" IsSettingsVisible="False" IsBackButtonVisible="Collapsed" Loaded="NavView_Loaded" ItemInvoked="NavView_ItemInvoked">
+            <NavigationView Grid.Row="0" x:Name="NavView" OpenPaneLength ="180" PaneDisplayMode="Left" Margin="0,0,0,0" SelectionFollowsFocus="Disabled" IsPaneToggleButtonVisible="True" IsSettingsVisible="False" IsBackButtonVisible="Collapsed" Loaded="NavView_Loaded" ItemInvoked="NavView_ItemInvoked">
                 <!--   BackRequested="NavView_BackRequested" -->
                     <NavigationView.MenuItems>
 

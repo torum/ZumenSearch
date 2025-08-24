@@ -35,12 +35,12 @@ namespace ZumenSearch.Views
         [
             //("Rent", typeof(Rent.RentSearchPage)),
             ("Rent", null),
-            ("RentSearch", typeof(Rent.RentSearchPage)),
+            ("RentSearch", typeof(RentSearchPage)),
             ("RentResidentials", typeof(Rent.Residentials.SearchPage)),
             ("RentCommercials", typeof(Rent.Commercials.CommercialsPage)),
             ("RentParkings", typeof(Rent.Parkings.ParkingsPage)),
             ("RentOwners", typeof(Rent.Owners.OwnersPage)),
-            ("Brokers", typeof(Brokers.BrokersPage)),
+            ("Brokers", typeof(BrokersPage)),
             //("Settings", typeof(SettingsPage)),
         ];
 
@@ -147,11 +147,11 @@ namespace ZumenSearch.Views
             }
             else if (args.InvokedItemContainer != null && (args.InvokedItemContainer.Tag != null))
             {
-                
+
                 if (args.InvokedItemContainer.Tag is not string tag || string.IsNullOrWhiteSpace(tag))
                 {
                     Debug.WriteLine("NavigationViewControl_ItemInvoked: Invalid tag or null.");
-                    sender.SelectedItem = navigationViewSelectedItem;
+                    //sender.SelectedItem = navigationViewSelectedItem;
                     return;
                 }
 
@@ -171,12 +171,13 @@ namespace ZumenSearch.Views
 
                 if (item.Page is null)
                 {
-                    //Debug.WriteLine("NavView_ItemInvoked: Page is null for tag " + tag);
-                    sender.SelectedItem = navigationViewSelectedItem;
+                    Debug.WriteLine("NavView_ItemInvoked: Page is null for tag " + tag);
+                    // Don't. crash when complact menu.
+                    //sender.SelectedItem = navigationViewSelectedItem;
 
                     return;
                 }
-                
+
                 navigationViewSelectedItem = sender.SelectedItem as NavigationViewItem;
 
                 // Pass Frame when navigate.

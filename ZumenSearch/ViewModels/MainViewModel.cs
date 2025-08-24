@@ -11,6 +11,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -29,6 +30,8 @@ public partial class MainViewModel : ObservableObject
 {
     #region == Properties ==
     private static MainShell Shell => App.GetService<MainShell>();
+
+    private static MainWindow MainWin => App.GetService<MainWindow>();
 
     #region == Window management ==
 
@@ -145,7 +148,15 @@ public partial class MainViewModel : ObservableObject
         if (editorWindow.AppWindow.Presenter is OverlappedPresenter presenter)
         {
             presenter.IsResizable = false;
+            presenter.IsModal = false;
+            presenter.IsAlwaysOnTop = false;
         }
+
+        editorWindow.Closed += (sender, e) =>
+        {
+            // Activate the main window again.
+            App.MainWindow?.Activate();
+        };
 
         //editorWindow.AppWindow.Show();
         editorWindow.Activate();
@@ -319,7 +330,17 @@ public partial class MainViewModel : ObservableObject
         if (editorWindow.AppWindow.Presenter is OverlappedPresenter presenter)
         {
             presenter.IsResizable = false;
+            presenter.IsModal = false;
+            presenter.IsAlwaysOnTop = false;
         }
+
+        editorWindow.Closed += (sender, e) =>
+        {
+            // Activate the main window again.
+            App.MainWindow?.Activate();
+        };
+
+        //await Task.Delay(30).ConfigureAwait(false);
 
         //editorWindow.AppWindow.Show();
         editorWindow.Activate();

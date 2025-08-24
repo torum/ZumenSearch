@@ -180,9 +180,9 @@ public class DataAccessService : IDataAccessService
             return res;
         }
 
+        _readerWriterLock.EnterWriteLock();
         try
         {
-            _readerWriterLock.EnterWriteLock();
             if (_readerWriterLock.WaitingReadCount > 0)
             {
                 isBreaked = true;
@@ -384,9 +384,9 @@ public class DataAccessService : IDataAccessService
             return res;
         }
 
+        _readerWriterLock.EnterWriteLock();
         try
         {
-            _readerWriterLock.EnterWriteLock();
             if (_readerWriterLock.WaitingReadCount > 0)
             {
                 isBreaked = true;
@@ -618,9 +618,9 @@ public class DataAccessService : IDataAccessService
             return res;
         }
 
+        _readerWriterLock.EnterWriteLock();
         try
         {
-            _readerWriterLock.EnterWriteLock();
             if (_readerWriterLock.WaitingReadCount > 0)
             {
                 isBreaked = true;
@@ -1005,10 +1005,10 @@ public class DataAccessService : IDataAccessService
             // TODO:
             return res;
         }
-
+    
+            _readerWriterLock.EnterWriteLock();
         try
         {
-            _readerWriterLock.EnterWriteLock();
             if (_readerWriterLock.WaitingReadCount > 0)
             {
                 isBreaked = true;
@@ -1141,10 +1141,10 @@ public class DataAccessService : IDataAccessService
             // TODO:
             return res;
         }
-
+    
+            _readerWriterLock.EnterWriteLock();
         try
         {
-            _readerWriterLock.EnterWriteLock();
             if (_readerWriterLock.WaitingReadCount > 0)
             {
                 isBreaked = true;
@@ -1259,10 +1259,10 @@ public class DataAccessService : IDataAccessService
             // TODO:
             return res;
         }
-
+    
+            _readerWriterLock.EnterWriteLock();
         try
         {
-            _readerWriterLock.EnterWriteLock();
             if (_readerWriterLock.WaitingReadCount > 0)
             {
                 isBreaked = true;
@@ -1386,10 +1386,10 @@ public class DataAccessService : IDataAccessService
         {
             return res;
         }
-
+    
+            _readerWriterLock.EnterWriteLock();
         try
         {
-            _readerWriterLock.EnterWriteLock();
             if (_readerWriterLock.WaitingReadCount > 0)
             {
                 isBreaked = true;
@@ -2213,10 +2213,10 @@ public class DataAccessService : IDataAccessService
         var after = string.Format(") AND archived = '{0}'", bool.FalseString);
 
         //Debug.WriteLine(before + middle + after);
-
+    
+            _readerWriterLock.EnterWriteLock();
         try
         {
-            _readerWriterLock.EnterWriteLock();
             if (_readerWriterLock.WaitingReadCount > 0)
             {
                 isBreaked = true;
@@ -2323,10 +2323,10 @@ public class DataAccessService : IDataAccessService
         var sql = "UPDATE entries SET ";
         sql += string.Format("status = '{0}'", readStatus.ToString());
         sql += string.Format(" WHERE entry_id = '{0}'; ", entryId);
-
+    
+            _readerWriterLock.EnterWriteLock();
         try
         {
-            _readerWriterLock.EnterWriteLock();
             if (_readerWriterLock.WaitingReadCount > 0)
             {
                 isBreaked = true;
@@ -2455,10 +2455,10 @@ public class DataAccessService : IDataAccessService
         }
 
         //Debug.WriteLine(sqlDelEntries);
-
+    
+            _readerWriterLock.EnterWriteLock();
         try
         {
-            _readerWriterLock.EnterWriteLock();
             if (_readerWriterLock.WaitingReadCount > 0)
             {
                 isBreaked = true;
