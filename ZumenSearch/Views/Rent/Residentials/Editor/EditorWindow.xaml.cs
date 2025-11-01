@@ -55,7 +55,7 @@ public sealed partial class EditorWindow : Window
     private void SaveWindowSizeAndPosition()
     {
         // Save window size and position.
-        Microsoft.UI.Windowing.AppWindow? appWindow = this.AppWindow;
+        var appWindow = this.AppWindow;
         if (appWindow != null)
         {
             if (appWindow.Presenter is OverlappedPresenter)

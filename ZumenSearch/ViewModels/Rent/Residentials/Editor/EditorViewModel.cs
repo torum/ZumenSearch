@@ -117,7 +117,7 @@ public partial class EditorViewModel : ObservableObject
     {
         get
         {
-            string s = string.Empty;
+            var s = string.Empty;
 
             if (!string.IsNullOrEmpty(_name))
             {
@@ -296,7 +296,7 @@ public partial class EditorViewModel : ObservableObject
                 return string.Empty;
             }
 
-            string s = string.Empty;
+            var s = string.Empty;
             if (!string.IsNullOrEmpty(_banchi))
             {
                 s = "-" + _banchi;
@@ -398,7 +398,7 @@ public partial class EditorViewModel : ObservableObject
     {
         get
         {
-            string s = string.Empty;
+            var s = string.Empty;
 
             if (!string.IsNullOrEmpty(_ensen))
             {
@@ -522,7 +522,7 @@ public partial class EditorViewModel : ObservableObject
     {
         get
         {
-            string s = string.Empty;
+            var s = string.Empty;
 
             if (_selectedStructure != null)
             {
@@ -632,7 +632,7 @@ public partial class EditorViewModel : ObservableObject
     {
         get
         {
-            string s = string.Empty;
+            var s = string.Empty;
 
             if (Ap_IsAutolock)
             {
@@ -779,7 +779,7 @@ public partial class EditorViewModel : ObservableObject
     {
         get
         {
-            string s = string.Empty;
+            var s = string.Empty;
 
             if (SelectedKanriShutai == EnumKanriShutai.Owner)
             {

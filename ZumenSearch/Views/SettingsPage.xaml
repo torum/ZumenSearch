@@ -11,7 +11,7 @@
         <helpers:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
     </Page.Resources>
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-        <Grid x:Name="ContentArea" Margin="{StaticResource NavigationViewPageContentAreaMargin}">
+        <Grid x:Name="ContentArea">
 
             <StackPanel>
                 <!--

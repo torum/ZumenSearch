@@ -19,78 +19,77 @@ using ZumenSearch.ViewModels;
 using ZumenSearch.ViewModels.Rent;
 using ZumenSearch.ViewModels.Rent.Residentials;
 
-namespace ZumenSearch.Views
+namespace ZumenSearch.Views;
+
+public class CustomDataObject
 {
-    public class CustomDataObject
+    public string? Title
     {
-        public string? Title
-        {
-            get; set;
-        }
-        public string? ImageLocation
-        {
-            get; set;
-        }
-        public string? Views
-        {
-            get; set;
-        }
-        public string? Likes
-        {
-            get; set;
-        }
-        public string? Description
-        {
-            get; set;
-        }
-
-        public CustomDataObject()
-        {
-        }
-
-
-        // ... Methods ...
+        get; set;
+    }
+    public string? ImageLocation
+    {
+        get; set;
+    }
+    public string? Views
+    {
+        get; set;
+    }
+    public string? Likes
+    {
+        get; set;
+    }
+    public string? Description
+    {
+        get; set;
     }
 
-    public sealed partial class RentSearchPage : Page
+    public CustomDataObject()
     {
-        private MainViewModel? ViewModel { get; set; }
+    }
 
-        public RentSearchPage()
+
+    // ... Methods ...
+}
+
+public sealed partial class RentSearchPage : Page
+{
+    private MainViewModel? ViewModel { get; set; }
+
+    public RentSearchPage()
+    {
+        ViewModel = App.GetService<MainViewModel>();
+
+        InitializeComponent();
+
+        //BreadcrumbBarMain.ItemsSource = new string[] { "ëççáåüçı" };
+        BreadcrumbBarMain.ItemsSource = new ObservableCollection<Breadcrumb>{
+        new() { Name = "í¿ë›", Page = typeof(RentSearchPage).FullName!},
+    };
+
+        var Items = new ObservableCollection<CustomDataObject>();
+
+        var temp = new CustomDataObject
         {
-            ViewModel = App.GetService<MainViewModel>();
-
-            InitializeComponent();
-
-            //BreadcrumbBarMain.ItemsSource = new string[] { "ëççáåüçı" };
-            BreadcrumbBarMain.ItemsSource = new ObservableCollection<Breadcrumb>{
-            new() { Name = "í¿ë›", Page = typeof(RentSearchPage).FullName!},
+            Title = "test"
         };
 
-            var Items = new ObservableCollection<CustomDataObject>();
-
-            var temp = new CustomDataObject
-            {
-                Title = "test"
-            };
-
-            Items.Add(temp);
+        Items.Add(temp);
 
 
 
-            Items.Add(temp);
-            Items.Add(temp);
-            Items.Add(temp);
-            Items.Add(temp);
-            Items.Add(temp);
-            Items.Add(temp);
-            Items.Add(temp);
-            Items.Add(temp);
-            Items.Add(temp);
-            Items.Add(temp);
-            Items.Add(temp);
-            Items.Add(temp);
-            BasicGridView.ItemsSource = Items;
-        }
+        Items.Add(temp);
+        Items.Add(temp);
+        Items.Add(temp);
+        Items.Add(temp);
+        Items.Add(temp);
+        Items.Add(temp);
+        Items.Add(temp);
+        Items.Add(temp);
+        Items.Add(temp);
+        Items.Add(temp);
+        Items.Add(temp);
+        Items.Add(temp);
+        BasicGridView.ItemsSource = Items;
     }
 }

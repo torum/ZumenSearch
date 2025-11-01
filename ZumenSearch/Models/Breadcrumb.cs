@@ -4,18 +4,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ZumenSearch.Models
-{
-    public  class Breadcrumb
-    {
-        public string? Name
-        {
-            get; set;
-        }
+namespace ZumenSearch.Models;
 
-        public string? Page
-        {
-            get; set;
-        }
+public class Breadcrumb
+{
+    public string? Name
+    {
+        get; set;
+    }
+
+    public string? Page
+    {
+        get; set;
     }
 }

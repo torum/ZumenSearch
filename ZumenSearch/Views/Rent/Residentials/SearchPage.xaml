@@ -8,35 +8,38 @@
     xmlns:mod="using:ZumenSearch.Models"
     NavigationCacheMode="Required" Background="Transparent">
 
-    <Grid x:Name="ContentArea" Margin="{StaticResource NavigationViewPageContentAreaMargin}">
+    <Grid x:Name="ContentArea" Margin="46,46,0,0">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!--<BreadcrumbBar Grid.Row="0" x:Name="BreadcrumbBar1"/>-->
-        <BreadcrumbBar x:Name="BreadcrumbBar1">
-            <BreadcrumbBar.ItemTemplate>
-                <DataTemplate x:DataType="mod:Breadcrumb">
-                    <BreadcrumbBarItem Content="{Binding}" AutomationProperties.Name="{Binding Name}">
-                        <BreadcrumbBarItem.ContentTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding Name}" />
-                            </DataTemplate>
-                        </BreadcrumbBarItem.ContentTemplate>
-                    </BreadcrumbBarItem>
-                </DataTemplate>
-            </BreadcrumbBar.ItemTemplate>
-        </BreadcrumbBar>
-
-        <Grid Grid.Row="1">
+        <Grid Grid.Row="0" BorderThickness="0,0,0,1" BorderBrush="{ThemeResource NavigationViewItemSeparatorForeground}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
 
-            <StackPanel Grid.Row="0">
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+            <BreadcrumbBar x:Name="BreadcrumbBar1" Grid.Row="0" Grid.Column="0">
+                <BreadcrumbBar.ItemTemplate>
+                    <DataTemplate x:DataType="mod:Breadcrumb">
+                        <BreadcrumbBarItem Content="{Binding}" AutomationProperties.Name="{Binding Name}">
+                            <BreadcrumbBarItem.ContentTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Name}" FontSize="32"  />
+                                </DataTemplate>
+                            </BreadcrumbBarItem.ContentTemplate>
+                        </BreadcrumbBarItem>
+                    </DataTemplate>
+                </BreadcrumbBar.ItemTemplate>
+            </BreadcrumbBar>
+
+            <StackPanel Grid.Row="0" Grid.Column="1">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,3,0">
                     <AppBarButton Icon="Find" Label="検索" Command="{x:Bind ViewModel.SearchRentResidentialCommand}"/>
                     <AppBarButton Icon="Clear" Label="リセット"/>
                     <AppBarButton Icon="Add" Label="新規" Command="{x:Bind ViewModel.AddNewRentResidentialCommand}"/>
@@ -60,47 +63,33 @@
                     </CommandBar>
                     -->
 
-                <Border BorderThickness="0,1,0,0" BorderBrush="{ThemeResource NavigationViewItemSeparatorForeground}"></Border>
-
             </StackPanel>
 
-            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                <VisualStateManager.VisualStateGroups>
-                    <VisualStateGroup>
-                        <VisualState>
-                            <VisualState.StateTriggers>
-                                <AdaptiveTrigger MinWindowWidth="1024" />
-                            </VisualState.StateTriggers>
-                            <VisualState.Setters>
-                                <Setter Target="ComboBoxesChinryou.MaximumRowsOrColumns" Value="3"/>
-                                <Setter Target="RadioButtonsEkiToho.MaximumRowsOrColumns" Value="3"/>
-                                <Setter Target="CheckBoxsMadori.MaximumRowsOrColumns" Value="3"/>
-                                <Setter Target="CheckBoxsTatemonoShubetu.MaximumRowsOrColumns" Value="3"/>
-                            </VisualState.Setters>
-                        </VisualState>
-                    </VisualStateGroup>
-                </VisualStateManager.VisualStateGroups>
+        </Grid>
 
-                <StackPanel Grid.Row="1" Margin="0 0 0 0" HorizontalAlignment="Stretch">
+        <Grid Grid.Row="1">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+
+                <StackPanel HorizontalAlignment="Stretch">
 
                     <VariableSizedWrapGrid Orientation="Horizontal" Margin="0">
-                        <TextBox MaxWidth="500" MinWidth="350" Header="物件名" PlaceholderText="Type your text here" Margin="24,24,24,0"/>
+                        <TextBox MaxWidth="500" MinWidth="350" Header="物件名" PlaceholderText="Type your text here" Margin="0,24,24,0"/>
                         <TextBox MaxWidth="500" MinWidth="350" Header="所在地" PlaceholderText="Type your text here" Margin="24,24,24,0"/>
                     </VariableSizedWrapGrid>
 
                     <VariableSizedWrapGrid Orientation="Horizontal" Margin="0">
-                        <TextBox MaxWidth="500" MinWidth="350" Header="沿線名" PlaceholderText="Type your text here" Margin="24,24,24,0"/>
+                        <TextBox MaxWidth="500" MinWidth="350" Header="沿線名" PlaceholderText="Type your text here" Margin="0,24,24,0"/>
                         <TextBox MaxWidth="500" MinWidth="350" Header="最寄り駅" PlaceholderText="Type your text here" Margin="24,24,24,0"/>
                     </VariableSizedWrapGrid>
 
                     <VariableSizedWrapGrid Orientation="Horizontal" Margin="0">
-                        <TextBox MaxWidth="500" MinWidth="350" Header="貸主名" PlaceholderText="Type your text here" Margin="24,24,24,0"/>
+                        <TextBox MaxWidth="500" MinWidth="350" Header="貸主名" PlaceholderText="Type your text here" Margin="0,24,24,0"/>
                         <TextBox MaxWidth="500" MinWidth="350" Header="不動産ID" PlaceholderText="Type your text here" Margin="24,24,24,0"/>
                     </VariableSizedWrapGrid>
 
                     <TextBlock Text="詳細条件" Margin="24,36,24,0"></TextBlock>
 
-                    <Grid BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}" BorderThickness="0.5" CornerRadius="4" Margin="24,8,24,24">
+                    <Grid BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}" BorderThickness="0.5" CornerRadius="4" Margin="0,8,24,24">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
@@ -240,10 +229,9 @@
                     </Grid>
 
                 </StackPanel>
+
             </ScrollViewer>
-
         </Grid>
-
     </Grid>
 
 </Page>

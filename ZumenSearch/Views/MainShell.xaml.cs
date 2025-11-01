@@ -21,168 +21,176 @@ using ZumenSearch.ViewModels.Rent;
 using ZumenSearch.Views.Rent;
 using static System.Net.Mime.MediaTypeNames;
 
-namespace ZumenSearch.Views
+namespace ZumenSearch.Views;
+
+public sealed partial class MainShell : Page
 {
-    public sealed partial class MainShell : Page
+    private MainViewModel? ViewModel { get; set; }
+
+
+    private NavigationViewItem? navigationViewSelectedItem;
+
+    // List of ValueTuple holding the Navigation Tag and the relative Navigation Page
+    private readonly List<(string Tag, Type? Page)> _pages =
+    [
+        //("Rent", typeof(Rent.RentSearchPage)),
+        ("Rent", null),
+        ("RentSearch", typeof(RentSearchPage)),
+        ("RentResidentials", typeof(Rent.Residentials.SearchPage)),
+        ("RentCommercials", typeof(Rent.Commercials.CommercialsPage)),
+        ("RentParkings", typeof(Rent.Parkings.ParkingsPage)),
+        ("RentOwners", typeof(Rent.Owners.OwnersPage)),
+        ("Brokers", typeof(BrokersPage)),
+        //("Settings", typeof(SettingsPage)),
+    ];
+
+    // For uses of Navigation in other pages.
+    public Frame NavFrame => NavigationFrame;
+
+    public MainShell(MainViewModel vm)
     {
-        private MainViewModel? ViewModel { get; set; }
+        ViewModel = vm ?? throw new ArgumentNullException(nameof(vm));
 
-
-        private NavigationViewItem? navigationViewSelectedItem;
-
-        // List of ValueTuple holding the Navigation Tag and the relative Navigation Page
-        private readonly List<(string Tag, Type? Page)> _pages =
-        [
-            //("Rent", typeof(Rent.RentSearchPage)),
-            ("Rent", null),
-            ("RentSearch", typeof(RentSearchPage)),
-            ("RentResidentials", typeof(Rent.Residentials.SearchPage)),
-            ("RentCommercials", typeof(Rent.Commercials.CommercialsPage)),
-            ("RentParkings", typeof(Rent.Parkings.ParkingsPage)),
-            ("RentOwners", typeof(Rent.Owners.OwnersPage)),
-            ("Brokers", typeof(BrokersPage)),
-            //("Settings", typeof(SettingsPage)),
-        ];
+        InitializeComponent();
 
         // For uses of Navigation in other pages.
-        public Frame NavFrame
+        //NavFrame = NavigationFrame;
+
+    }
+
+    public void CallMeWhenMainWindowIsReady(MainWindow wnd)
+    {
+        wnd.SetTitleBar(AppTitleBar);
+
+        wnd.Activated += MainWindow_Activated;
+        wnd.Closed += MainWindow_Closed;
+    }
+
+    private void MainWindow_Activated(object sender, WindowActivatedEventArgs args)
+    {
+        var resource = args.WindowActivationState == WindowActivationState.Deactivated ? "WindowCaptionForegroundDisabled" : "WindowCaptionForeground";
+        AppTitleBarText.Foreground = (SolidColorBrush)App.Current.Resources[resource];
+        if (args.WindowActivationState == WindowActivationState.Deactivated)
         {
-            get => NavigationFrame;
+            AppTitleBarIcon.Opacity = 0.5;
         }
-
-        public MainShell(MainViewModel vm)
+        else
         {
-            ViewModel = vm ?? throw new ArgumentNullException(nameof(vm));
+            AppTitleBarIcon.Opacity = 1;
+        }
+    }
 
-            this.InitializeComponent();
+    private void MainWindow_Closed(object sender, WindowEventArgs args)
+    {
+        //
+    }
 
-            // For uses of Navigation in other pages.
-            //NavFrame = NavigationFrame;
+    private void NavigationViewControl_DisplayModeChanged(NavigationView sender, NavigationViewDisplayModeChangedEventArgs args)
+    {
+        AppTitleBar.Margin = new Thickness()
+        {
+            Left = sender.CompactPaneLength * (sender.DisplayMode == NavigationViewDisplayMode.Minimal ? 2 : 1),
+            Top = AppTitleBar.Margin.Top,
+            Right = AppTitleBar.Margin.Right,
+            Bottom = AppTitleBar.Margin.Bottom
+        };
+    }
 
-            if (App.MainWindow != null)
+    private void NavigationFrame_NavigationFailed(object sender, Microsoft.UI.Xaml.Navigation.NavigationFailedEventArgs e)
+    {
+        e.Handled = true;
+    }
+
+    private void NavigationViewControl_Loaded(object sender, RoutedEventArgs e)
+    {
+        // Since we use ItemInvoked, we set selecteditem manually
+        //NavigationViewControl.SelectedItem = NavigationViewControl.MenuItems.OfType<NavigationViewItem>().First();
+
+        var firstMenuItem = NavigationViewControl.MenuItems.OfType<NavigationViewItem>().First();
+        if (firstMenuItem != null)
+        {
+            var childItem = firstMenuItem.MenuItems.OfType<NavigationViewItem>().Where(n => n.Tag.Equals("RentResidentials"));
+            if (childItem != null)
             {
-                App.MainWindow.ExtendsContentIntoTitleBar = true;
-                App.MainWindow.SetTitleBar(AppTitleBar);
-                App.MainWindow.Activated += MainWindow_Activated;
-                App.MainWindow.Closed += MainWindow_Closed;
+                childItem.First().IsSelected = true;
+                navigationViewSelectedItem = childItem.First();
             }
-            else
-            {
-                Debug.WriteLine("MainWindow is null. Make sure to create it before MainShell in App.xaml.cs.");
-            }
+            else { Debug.WriteLine("No child menu item with tag 'RentResidentials' found in NavView."); }
+        }
+        else
+        {
+            Debug.WriteLine("No first menu item found in NavView.");
+        }
+        
+        /*
+        var childItem = NavigationViewControl.MenuItems.OfType<NavigationViewItem>().Where(n => n.Tag.Equals("RentResidentials"));
+        if (childItem != null)
+        {
+            childItem.First().IsSelected = true;
+            navigationViewSelectedItem = childItem.First();
+        }
+        else 
+        { 
+            Debug.WriteLine("No child menu item with tag 'RentResidentials' found in NavView."); 
+        }
+        */
+
+        // Pass Frame when navigate.  //, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft } //, new SuppressNavigationTransitionInfo() //new EntranceNavigationTransitionInfo()
+        //NavigationFrame.Navigate(typeof(Rent.RentSearchPage), NavigationFrame, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom });
+        NavigationFrame.Navigate(typeof(Views.Rent.Residentials.SearchPage), NavigationFrame, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom });//
+    }
+
+    private void NavigationViewControl_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
+    {
+        if (_pages is null)
+        {
+            return;
         }
 
-        private void MainWindow_Activated(object sender, WindowActivatedEventArgs args)
+        if (args.IsSettingsInvoked == true)
         {
-            var resource = args.WindowActivationState == WindowActivationState.Deactivated ? "WindowCaptionForegroundDisabled" : "WindowCaptionForeground";
-            AppTitleBarText.Foreground = (SolidColorBrush)App.Current.Resources[resource];
-            if (args.WindowActivationState == WindowActivationState.Deactivated)
-            {
-                AppTitleBarIcon.Opacity = 0.5;
-            }
-            else
-            {
-                AppTitleBarIcon.Opacity = 1;
-            }
+            navigationViewSelectedItem = sender.SelectedItem as NavigationViewItem;
+
+            //NavView_Navigate("settings", args.RecommendedNavigationTransitionInfo);
+            NavigationFrame.Navigate(typeof(SettingsPage), NavigationFrame, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom });//, args.RecommendedNavigationTransitionInfo
         }
-
-        private void MainWindow_Closed(object sender, WindowEventArgs args)
+        else if (args.InvokedItemContainer != null && (args.InvokedItemContainer.Tag != null))
         {
-            //
-        }
 
-        private void NavigationViewControl_DisplayModeChanged(NavigationView sender, NavigationViewDisplayModeChangedEventArgs args)
-        {
-            AppTitleBar.Margin = new Thickness()
+            if (args.InvokedItemContainer.Tag is not string tag || string.IsNullOrWhiteSpace(tag))
             {
-                Left = sender.CompactPaneLength * (sender.DisplayMode == NavigationViewDisplayMode.Minimal ? 2 : 1),
-                Top = AppTitleBar.Margin.Top,
-                Right = AppTitleBar.Margin.Right,
-                Bottom = AppTitleBar.Margin.Bottom
-            };
-        }
-
-        private void NavigationFrame_NavigationFailed(object sender, Microsoft.UI.Xaml.Navigation.NavigationFailedEventArgs e)
-        {
-            e.Handled = true;
-        }
-
-        private void NavigationViewControl_Loaded(object sender, RoutedEventArgs e)
-        {
-            // Since we use ItemInvoked, we set selecteditem manually
-            //NavigationViewControl.SelectedItem = NavigationViewControl.MenuItems.OfType<NavigationViewItem>().First();
-
-            var firstMenuItem = NavigationViewControl.MenuItems.OfType<NavigationViewItem>().First();
-            if (firstMenuItem != null)
-            {
-                var childItem = firstMenuItem.MenuItems.OfType<NavigationViewItem>().Where(n => n.Tag.Equals("RentResidentials"));
-                if (childItem != null)
-                {
-                    childItem.First().IsSelected = true;
-                    navigationViewSelectedItem = childItem.First();
-                }
-                else { Debug.WriteLine("No child menu item with tag 'RentResidentials' found in NavView."); }
-            }
-            else
-            {
-                Debug.WriteLine("No first menu item found in NavView.");
-            }
-
-            // Pass Frame when navigate.  //, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft } //, new SuppressNavigationTransitionInfo() //new EntranceNavigationTransitionInfo()
-            //NavigationFrame.Navigate(typeof(Rent.RentSearchPage), NavigationFrame, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom });
-            NavigationFrame.Navigate(typeof(Views.Rent.Residentials.SearchPage), NavigationFrame, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom });//
-        }
-
-        private void NavigationViewControl_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
-        {
-            if (_pages is null)
+                Debug.WriteLine("NavigationViewControl_ItemInvoked: Invalid tag or null.");
+                //sender.SelectedItem = navigationViewSelectedItem;
                 return;
-
-            if (args.IsSettingsInvoked == true)
-            {
-                navigationViewSelectedItem = sender.SelectedItem as NavigationViewItem;
-
-                //NavView_Navigate("settings", args.RecommendedNavigationTransitionInfo);
-                NavigationFrame.Navigate(typeof(SettingsPage), NavigationFrame, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom });//, args.RecommendedNavigationTransitionInfo
             }
-            else if (args.InvokedItemContainer != null && (args.InvokedItemContainer.Tag != null))
+
+            /*
+            var MenuItem = sender.SelectedItem as NavigationViewItem;
+            if (MenuItem != null)
             {
-
-                if (args.InvokedItemContainer.Tag is not string tag || string.IsNullOrWhiteSpace(tag))
+                Debug.WriteLine(MenuItem.Tag + ".");
+                if (MenuItem.IsExpanded)
                 {
-                    Debug.WriteLine("NavigationViewControl_ItemInvoked: Invalid tag or null.");
-                    //sender.SelectedItem = navigationViewSelectedItem;
-                    return;
-                }
-
-                /*
-                var MenuItem = sender.SelectedItem as NavigationViewItem;
-                if (MenuItem != null)
-                {
-                    Debug.WriteLine(MenuItem.Tag + ".");
-                    if (MenuItem.IsExpanded)
-                    {
-                        Debug.WriteLine( "IsExpanded.");
-                    } 
-                }
-                */
-
-                var item = _pages.FirstOrDefault(p => p.Tag.Equals(args.InvokedItemContainer.Tag.ToString()));
-
-                if (item.Page is null)
-                {
-                    Debug.WriteLine("NavView_ItemInvoked: Page is null for tag " + tag);
-                    // Don't. crash when complact menu.
-                    //sender.SelectedItem = navigationViewSelectedItem;
-
-                    return;
-                }
-
-                navigationViewSelectedItem = sender.SelectedItem as NavigationViewItem;
-
-                // Pass Frame when navigate.
-                NavigationFrame.Navigate(item.Page, NavigationFrame, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });//, args.RecommendedNavigationTransitionInfo
+                    Debug.WriteLine( "IsExpanded.");
+                } 
             }
+            */
+
+            var item = _pages.FirstOrDefault(p => p.Tag.Equals(args.InvokedItemContainer.Tag.ToString()));
+
+            if (item.Page is null)
+            {
+                Debug.WriteLine("NavView_ItemInvoked: Page is null for tag " + tag);
+                // Don't. crash when complact menu.
+                //sender.SelectedItem = navigationViewSelectedItem;
+
+                return;
+            }
+
+            navigationViewSelectedItem = sender.SelectedItem as NavigationViewItem;
+
+            // Pass Frame when navigate.
+            NavigationFrame.Navigate(item.Page, NavigationFrame, args.RecommendedNavigationTransitionInfo);//, args.RecommendedNavigationTransitionInfo
         }
     }
 }

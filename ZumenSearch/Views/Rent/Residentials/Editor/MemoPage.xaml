@@ -8,7 +8,7 @@
     mc:Ignorable="d"
     NavigationCacheMode="Required">
 
-    <Grid x:Name="ContentArea" Margin="{StaticResource NavigationViewPageContentAreaMargin}">
+    <Grid x:Name="ContentArea">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -17,7 +17,7 @@
         <BreadcrumbBar x:Name="BreadcrumbBar1">
             <BreadcrumbBar.ItemTemplate>
                 <DataTemplate x:DataType="mod:Breadcrumb">
-                    <BreadcrumbBarItem Content="{Binding}" AutomationProperties.Name="{Binding Name}">
+                    <BreadcrumbBarItem Content="{Binding}">
                         <BreadcrumbBarItem.ContentTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding Name}" />

@@ -127,7 +127,7 @@ public partial class MainViewModel : ObservableObject
     {
         //Debug.WriteLine("AddNew command executed!");
 
-        Views.Rent.Residentials.Editor.EditorShell editorShell = _editorFactory.Create();
+        var editorShell = _editorFactory.Create();
 
         var editorWindow = editorShell.EditorWin;
 
@@ -139,15 +139,15 @@ public partial class MainViewModel : ObservableObject
 
         //MainViewModel mainShellViewModel = App.GetService<MainViewModel>();
         // Add to the list of editor windows.
-        this.EditorList.Add(editorWindow);
+        EditorList.Add(editorWindow);
 
         // Window state and position.
         //editorWindow.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(mainShellViewModel.EditorWinLeft, mainShellViewModel.EditorWinTop, mainShellViewModel.EditorWinWidth, mainShellViewModel.EditorWinHeight));
         // TEMP:
-        editorWindow.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(this.EditorWinLeft, this.EditorWinTop, 1366, 768));
+        editorWindow.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(EditorWinLeft, EditorWinTop, EditorWinWidth, EditorWinHeight));
         if (editorWindow.AppWindow.Presenter is OverlappedPresenter presenter)
         {
-            presenter.IsResizable = false;
+            presenter.IsResizable = true;
             presenter.IsModal = false;
             presenter.IsAlwaysOnTop = false;
         }
@@ -155,7 +155,7 @@ public partial class MainViewModel : ObservableObject
         editorWindow.Closed += (sender, e) =>
         {
             // Activate the main window again.
-            App.MainWindow?.Activate();
+            //App.MainWindow?.Activate(); // Not good when multiple editor windows are opened.
         };
 
         //editorWindow.AppWindow.Show();
@@ -254,7 +254,7 @@ public partial class MainViewModel : ObservableObject
     public IRelayCommand<Models.Rent.Residentials.EntryResidentialSearchResult> EditRentResidentialCommand => editRentResidentialCommand ??= new RelayCommand<Models.Rent.Residentials.EntryResidentialSearchResult>(EditRentResidential);
     private async void EditRentResidential(Models.Rent.Residentials.EntryResidentialSearchResult? selected)
     {
-        bool isFound = false;
+        var isFound = false;
         
         if (selected == null)
         {
@@ -265,7 +265,7 @@ public partial class MainViewModel : ObservableObject
         //Debug.WriteLine($"EditRentResidentialCommand executed for {selected.Id}");
 
         // Check if the selected item is already being edited in another window.
-        this.EditorList.ForEach(editorWindow =>
+        EditorList.ForEach(editorWindow =>
         {
             Debug.WriteLine($"Checking editor window with Id: {editorWindow.Id} for selected item with Id: {selected.Id}");
             if (editorWindow.Id == selected.Id)
@@ -304,7 +304,7 @@ public partial class MainViewModel : ObservableObject
             return;
         }
 
-        Views.Rent.Residentials.Editor.EditorShell editorShell = _editorFactory.Create();
+        var editorShell = _editorFactory.Create();
 
         // Sets the instance of selected Entry.
         editorShell.SetEntryToEntryViewModel(res.EntryFull);
@@ -321,15 +321,15 @@ public partial class MainViewModel : ObservableObject
         //MainViewModel mainShellViewModel = App.GetService<MainViewModel>();
         // Add to the list of editor windows.
         editorWindow.Id = selected.Id;
-        this.EditorList.Add(editorWindow);
+        EditorList.Add(editorWindow);
 
         // Window state and position.
         //editorWindow.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(mainShellViewModel.EditorWinLeft, mainShellViewModel.EditorWinTop, mainShellViewModel.EditorWinWidth, mainShellViewModel.EditorWinHeight));
         // TEMP:
-        editorWindow.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(this.EditorWinLeft, this.EditorWinTop, 1366, 768));
+        editorWindow.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(EditorWinLeft, EditorWinTop, EditorWinWidth, EditorWinHeight));
         if (editorWindow.AppWindow.Presenter is OverlappedPresenter presenter)
         {
-            presenter.IsResizable = false;
+            presenter.IsResizable = true;
             presenter.IsModal = false;
             presenter.IsAlwaysOnTop = false;
         }
@@ -337,7 +337,7 @@ public partial class MainViewModel : ObservableObject
         editorWindow.Closed += (sender, e) =>
         {
             // Activate the main window again.
-            App.MainWindow?.Activate();
+            App.MainWnd?.Activate();
         };
 
         //await Task.Delay(30).ConfigureAwait(false);
@@ -356,10 +356,10 @@ public partial class MainViewModel : ObservableObject
             return;
         }
 
-        bool isFound = false;
+        var isFound = false;
 
         // TODO: Check if the selected item is already being edited in another window.
-        this.EditorList.ForEach(editorWindow =>
+        EditorList.ForEach(editorWindow =>
         {
             Debug.WriteLine($"Checking editor window with Id: {editorWindow.Id} for selected item with Id: {selected.Id}");
             if (editorWindow.Id == selected.Id)

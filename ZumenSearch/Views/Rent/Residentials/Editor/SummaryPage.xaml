@@ -11,7 +11,7 @@
     xmlns:modres="using:ZumenSearch.Models.Rent.Residentials"
     NavigationCacheMode="Required">
 
-    <Grid x:Name="ContentArea" Margin="{StaticResource NavigationViewPageContentAreaMargin}">
+    <Grid x:Name="ContentArea">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -86,7 +86,7 @@
                                     <ComboBox.ItemTemplate>
                                         <DataTemplate x:DataType="modres:Kind">
                                             <StackPanel Orientation="Horizontal">
-                                                <TextBlock Text="{x:Bind Label, Mode=OneWay}" Margin="0,0,5,0"/>
+                                                <TextBlock Text="{x:Bind Label}" Margin="0,0,5,0"/>
                                             </StackPanel>
                                         </DataTemplate>
                                     </ComboBox.ItemTemplate>

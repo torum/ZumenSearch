@@ -8,38 +8,40 @@
     xmlns:rent="using:ZumenSearch.Models.Rent.Residentials"
     mc:Ignorable="d">
 
-    <Grid x:Name="ContentArea" Margin="{StaticResource NavigationViewPageContentAreaMargin}">
+    <Grid x:Name="ContentArea" Margin="46,46,0,0">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <BreadcrumbBar x:Name="BreadcrumbBar1">
-            <BreadcrumbBar.ItemTemplate>
-                <DataTemplate x:DataType="mod:Breadcrumb">
-                    <BreadcrumbBarItem Content="{Binding}" AutomationProperties.Name="{Binding Name}">
-                        <BreadcrumbBarItem.ContentTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding Name}" />
-                            </DataTemplate>
-                        </BreadcrumbBarItem.ContentTemplate>
-                    </BreadcrumbBarItem>
-                </DataTemplate>
-            </BreadcrumbBar.ItemTemplate>
-        </BreadcrumbBar>
-
-
-        <Grid Grid.Row="1">
-
+        <Grid Grid.Row="0" BorderThickness="0,0,0,1" BorderBrush="{ThemeResource NavigationViewItemSeparatorForeground}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
 
-            <StackPanel Grid.Row="0">
+            <BreadcrumbBar x:Name="BreadcrumbBar1" Grid.Row="0" Grid.Column="0">
+                <BreadcrumbBar.ItemTemplate>
+                    <DataTemplate x:DataType="mod:Breadcrumb">
+                        <BreadcrumbBarItem Content="{Binding}" AutomationProperties.Name="{Binding Name}">
+                            <BreadcrumbBarItem.ContentTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Name}" FontSize="32"  />
+                                </DataTemplate>
+                            </BreadcrumbBarItem.ContentTemplate>
+                        </BreadcrumbBarItem>
+                    </DataTemplate>
+                </BreadcrumbBar.ItemTemplate>
+            </BreadcrumbBar>
+
+            <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,0,3,0">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <AppBarButton Icon="Back" Label="戻る" Command="{x:Bind ViewModel.BackToRentResidentialCommand}"/>
-                    <AppBarButton Icon="Edit" Label="編集" Command="{x:Bind ViewModel.EditRentResidentialCommand}" CommandParameter="{x:Bind SearchResult.SelectedItem, Mode=OneWay}"/> 
+                    <AppBarButton Icon="Edit" Label="編集" Command="{x:Bind ViewModel.EditRentResidentialCommand}" CommandParameter="{x:Bind SearchResult.SelectedItem, Mode=OneWay}"/>
                     <AppBarButton Icon="Add" Label="新規" Command="{x:Bind ViewModel.AddNewRentResidentialCommand}"/>
                 </StackPanel>
                 <!--
@@ -60,7 +62,17 @@
                     </CommandBar>
                     -->
 
-                <Border BorderThickness="0,1,0,0" BorderBrush="{ThemeResource NavigationViewItemSeparatorForeground}"></Border>
+            </StackPanel>
+
+        </Grid>
+
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <StackPanel Grid.Row="0">
                 
                 <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Margin="0,0,24,0" HorizontalAlignment="Left">
                     <AppBarButton Icon="Delete" Label="削除" Command="{x:Bind ViewModel.DeleteRentResidentialCommand}" CommandParameter="{x:Bind SearchResult.SelectedItem, Mode=OneWay}"/>
@@ -82,26 +94,30 @@
                             </AppBarButton>
                         </CommandBar.SecondaryCommands>-->
                 </CommandBar>
+
+                <Border BorderThickness="0,1,0,0" BorderBrush="{ThemeResource NavigationViewItemSeparatorForeground}"></Border>
+
             </StackPanel>
 
-            <ScrollViewer Grid.Row="1" Margin="0 0 0 0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <Grid Grid.Row="1">
+                <ScrollViewer Margin="0,12,0,0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
 
-                <StackPanel>
+                    <StackPanel>
 
-                    <ListView x:Name="SearchResult" SelectionMode="Single" ItemsSource="{x:Bind ViewModel.RentResidentialSearchResult, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" SingleSelectionFollowsFocus="True">
-                        <!--  SelectedItem="{x:Bind ViewModel.SelectedRentResidentialItem, Mode=TwoWay}" -->
-                        <ListView.ItemTemplate>
-                            <DataTemplate x:DataType="rent:EntryResidentialSearchResult">
-                                <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="*"/>
-                                        <RowDefinition Height="*"/>
-                                    </Grid.RowDefinitions>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Ellipse x:Name="Ellipse"
+                        <ListView x:Name="SearchResult" SelectionMode="Single" ItemsSource="{x:Bind ViewModel.RentResidentialSearchResult, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" SingleSelectionFollowsFocus="True">
+                            <!--  SelectedItem="{x:Bind ViewModel.SelectedRentResidentialItem, Mode=TwoWay}" -->
+                            <ListView.ItemTemplate>
+                                <DataTemplate x:DataType="rent:EntryResidentialSearchResult">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="*"/>
+                                            <RowDefinition Height="*"/>
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Ellipse x:Name="Ellipse"
                     Grid.RowSpan="2"
                     Width ="32"
                     Height="32"
@@ -109,26 +125,26 @@
                     VerticalAlignment="Center"
                     HorizontalAlignment="Center"
                     Fill="{ThemeResource SystemControlBackgroundBaseMediumBrush}"/>
-                                    <TextBlock Grid.Column="1"
+                                        <TextBlock Grid.Column="1"
                     Text="{x:Bind Name, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
                     x:Phase="1"
                     Style="{ThemeResource BaseTextBlockStyle}"
                     Margin="12,6,0,0"/>
-                                    <TextBlock  Grid.Column="1"
+                                        <TextBlock  Grid.Column="1"
                     Grid.Row="1"
                     Text="{x:Bind Id, Mode=OneTime}"
                     x:Phase="2"
                     Style="{ThemeResource BodyTextBlockStyle}"
                     Margin="12,0,0,6"/>
-                                </Grid>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
 
-                </StackPanel>
+                    </StackPanel>
 
-            </ScrollViewer>
-
+                </ScrollViewer>
+            </Grid>
         </Grid>
     </Grid>
 </Page>

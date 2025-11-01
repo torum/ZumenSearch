@@ -14,7 +14,7 @@
         <CollectionViewSource x:Name="cvsProjects" IsSourceGrouped="True" ItemsPath="Activities"/>
     </Page.Resources>
 
-    <Grid x:Name="ContentArea" Margin="{StaticResource NavigationViewPageContentAreaMargin}">
+    <Grid x:Name="ContentArea">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="12"/>
