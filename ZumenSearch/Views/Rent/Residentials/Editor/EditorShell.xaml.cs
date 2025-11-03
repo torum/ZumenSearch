@@ -19,14 +19,9 @@ namespace ZumenSearch.Views.Rent.Residentials.Editor;
 
 public sealed partial class EditorShell : Page
 {
-    public ViewModels.Rent.Residentials.ResidentialsViewModel ViewModel
-    {
-        get;
-    }
+    public ViewModels.Rent.Residentials.ResidentialsViewModel ViewModel;
 
     public Views.Rent.Residentials.Editor.EditorWindow EditorWin { get; private set; }
-
-    //private NavigationViewItem? navigationViewSelectedItem;
 
     // List of ValueTuple holding the Navigation Tag and the relative Navigation Page
     private readonly List<(string Tag, string Label, Type? Page)> _pages =
@@ -80,7 +75,6 @@ public sealed partial class EditorShell : Page
         //
         ViewModel.EventIsUnitOwnership += (sender, arg) => OnEventIsUnitOwnership(arg);
     }
-
 
     private void BreadcrumbBar_ItemClicked(BreadcrumbBar sender, BreadcrumbBarItemClickedEventArgs args)
     {

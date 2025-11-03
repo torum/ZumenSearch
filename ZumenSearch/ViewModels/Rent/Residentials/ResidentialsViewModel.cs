@@ -1,15 +1,17 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Media.Animation;
-using Microsoft.UI.Xaml.Navigation;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Microsoft.Data.Sqlite;
+using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Media.Animation;
+using Microsoft.UI.Xaml.Navigation;
 using Windows.System;
 using ZumenSearch.Models;
 using ZumenSearch.Models.Location;
@@ -150,7 +152,62 @@ public partial class ResidentialsViewModel : ObservableObject
 
     #region == 所在地 ==
 
-    private Pref _selectedPef = new(0, "");
+    private readonly SqliteConnectionStringBuilder connectionStringBuilder = new("Data Source=" + "mt_town_all.db");
+
+    public ObservableCollection<Pref> Prefs =
+    [
+        new Pref("01","010006", "北海道"),
+        new Pref("02","020001", "青森県"),
+            new Pref("03","030007", "岩手県"),
+            new Pref("04","040002", "宮城県"),
+            new Pref("05","050008", "秋田県"),
+            new Pref("06","060003", "山形県"),
+            new Pref("07","070009", "福島県"),
+            new Pref("08","080004", "茨城県"),
+            new Pref("09","090000", "栃木県"),
+            new Pref("10","100005", "群馬県"),
+            new Pref("11","110001", "埼玉県"),
+            new Pref("12","120006", "千葉県"),
+            new Pref("13","130001", "東京都"),
+            new Pref("14","140007", "神奈川県"),
+            new Pref("15","150002", "新潟県"),
+            new Pref("16","160008", "富山県"),
+            new Pref("17","170003", "石川県"),
+            new Pref("18","180009", "福井県"),
+            new Pref("19","190004", "山梨県"),
+            new Pref("20","200000", "長野県"),
+            new Pref("21","210005", "岐阜県"),
+            new Pref("22","220001", "静岡県"),
+            new Pref("23","230006", "愛知県"),
+            new Pref("24","240001", "三重県"),
+            new Pref("25","250007", "滋賀県"),
+            new Pref("26","260002", "京都府"),
+            new Pref("27","270008", "大阪府"),
+            new Pref("28","280003", "兵庫県"),
+            new Pref("29","290009", "奈良県"),
+            new Pref("30","300004", "和歌山県"),
+            new Pref("31","310000", "鳥取県"),
+            new Pref("32","320005", "島根県"),
+            new Pref("33","330001", "岡山県"),
+            new Pref("34","340006", "広島県"),
+            new Pref("35","350001", "山口県"),
+            new Pref("36","360007", "徳島県"),
+            new Pref("37","370002", "香川県"),
+            new Pref("38","380008", "愛媛県"),
+            new Pref("39","390003", "高知県"),
+            new Pref("40","400009", "福岡県"),
+            new Pref("41","410004", "佐賀県"),
+            new Pref("42","420000", "長崎県"),
+            new Pref("43","430005", "熊本県"),
+            new Pref("44","440001", "大分県"),
+            new Pref("45","450006", "宮崎県"),
+            new Pref("46","460001", "鹿児島県"),
+            new Pref("47","470007", "沖縄県"),
+    ];
+
+    private string? MachiazaId;
+
+    private Pref _selectedPef = new("", "", "");
     public Pref SelectedPef
     {
         get => _selectedPef;
@@ -160,98 +217,186 @@ public partial class ResidentialsViewModel : ObservableObject
             {
                 IsEntryDirty = true;
                 OnPropertyChanged(nameof(AddressPreview));
+
+                if (_selectedPef is null)
+                {
+                    Cities = null;
+                    return;
+                }
+
+                var dataset = new List<CountyAndCity>();
+
+                using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
+                connection.Open();
+                using var cmd = connection.CreateCommand();
+                cmd.CommandText = string.Format("SELECT machiaza_id, county, city FROM mt_town_all WHERE pref LIKE '{0}'", _selectedPef.Name);
+                using var reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    var county = Convert.ToString(reader["county"]) ?? "";
+                    var city = Convert.ToString(reader["city"]) ?? "";
+                    var id = Convert.ToString(reader["machiaza_id"]);
+                    if (id is not null)
+                    {
+                        var ccty = new CountyAndCity(id, county, city);
+
+                        dataset.Add(ccty);
+                    }
+                }
+
+                Cities = [.. dataset.DistinctBy(p => p.Combined)];
+
             }
         }
     }
 
-    public ObservableCollection<Pref> Prefs =
-    [
-        new Pref(1, "北海道"),
-        new Pref(2, "青森県"),
-            new Pref(3, "岩手県"),
-            new Pref(4, "宮城県"),
-            new Pref(5, "秋田県"),
-            new Pref(6, "山形県"),
-            new Pref(7, "福島県"),
-            new Pref(8, "茨城県"),
-            new Pref(9, "栃木県"),
-            new Pref(10, "群馬県"),
-            new Pref(11, "埼玉県"),
-            new Pref(12, "千葉県"),
-            new Pref(13, "東京都"),
-            new Pref(14, "神奈川県"),
-            new Pref(15, "新潟県"),
-            new Pref(16, "富山県"),
-            new Pref(17, "石川県"),
-            new Pref(18, "福井県"),
-            new Pref(19, "山梨県"),
-            new Pref(20, "長野県"),
-            new Pref(21, "岐阜県"),
-            new Pref(22, "静岡県"),
-            new Pref(23, "愛知県"),
-            new Pref(24, "三重県"),
-            new Pref(25, "滋賀県"),
-            new Pref(26, "京都府"),
-            new Pref(27, "大阪府"),
-            new Pref(28, "兵庫県"),
-            new Pref(29, "奈良県"),
-            new Pref(30, "和歌山県"),
-            new Pref(31, "鳥取県"),
-            new Pref(32, "島根県"),
-            new Pref(33, "岡山県"),
-            new Pref(34, "広島県"),
-            new Pref(35, "山口県"),
-            new Pref(36, "徳島県"),
-            new Pref(37, "香川県"),
-            new Pref(38, "愛媛県"),
-            new Pref(39, "高知県"),
-            new Pref(40, "福岡県"),
-            new Pref(41, "佐賀県"),
-            new Pref(42, "長崎県"),
-            new Pref(43, "熊本県"),
-            new Pref(44, "大分県"),
-            new Pref(45, "宮崎県"),
-            new Pref(46, "鹿児島県"),
-            new Pref(47, "沖縄県"),
-    ];
-
-    private string _cityName = string.Empty;
-    public string CityName
+    private ObservableCollection<CountyAndCity>? _cities = [];
+    public ObservableCollection<CountyAndCity>? Cities
     {
-        get => _cityName;
+        get => _cities;
         set
         {
-            if (SetProperty(ref _cityName, value))
+            if (SetProperty(ref _cities, value))
+            {
+                //
+            }
+        }
+    }
+
+    private CountyAndCity? _selectedCity;
+    public CountyAndCity? SelectedCity
+    {
+        get => _selectedCity;
+        set
+        {
+            if (SetProperty(ref _selectedCity, value))
             {
                 IsEntryDirty = true;
+                MachiazaId = _selectedCity?.MachiazaId;
+
+                OnPropertyChanged(nameof(AddressPreview));
+
+                if (_selectedPef is null)
+                {
+                    Towns = null;
+                    return;
+                }
+
+                if (_selectedCity is null)
+                {
+                    Towns = null;
+                    return;
+                }
+
+                var dataset = new List<WardAndOaza>();
+
+                using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
+                connection.Open();
+                using var cmd = connection.CreateCommand();
+                cmd.CommandText = string.Format("SELECT machiaza_id, ward, oaza_cho FROM mt_town_all WHERE pref LIKE '{0}' AND county LIKE '{1}' AND city LIKE '{2}'", _selectedPef.Name, _selectedCity.County, _selectedCity.City);
+                using var reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    var ward = Convert.ToString(reader["ward"]) ?? "";
+                    var oaza = Convert.ToString(reader["oaza_cho"]) ?? "";
+                    var id = Convert.ToString(reader["machiaza_id"]);
+                    if (id is not null)
+                    {
+                        var ccty = new WardAndOaza(id, ward, oaza);
+
+                        dataset.Add(ccty);
+                    }
+                }
+
+                Towns = [.. dataset.DistinctBy(p => p.Combined)];
+            }
+        }
+    }
+
+    private ObservableCollection<WardAndOaza>? _towns = [];
+    public ObservableCollection<WardAndOaza>? Towns
+    {
+        get => _towns;
+        set
+        {
+            if (SetProperty(ref _towns, value))
+            {
+                //
+            }
+        }
+    }
+
+    private WardAndOaza? _selectedTown;
+    public WardAndOaza? SelectedTown
+    {
+        get => _selectedTown;
+        set
+        {
+            if (SetProperty(ref _selectedTown, value))
+            {
+                IsEntryDirty = true;
+                MachiazaId = _selectedTown?.MachiazaId;
                 OnPropertyChanged(nameof(AddressPreview));
             }
+
+            if (_selectedCity is null)
+            {
+                Chous = null;
+                return;
+            }
+
+            if (_selectedTown is null)
+            {
+                Chous = null;
+                return;
+            }
+
+            var dataset = new List<Choume>();
+
+            using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
+            connection.Open();
+            using var cmd = connection.CreateCommand();
+            cmd.CommandText = string.Format("SELECT machiaza_id, chome FROM mt_town_all WHERE pref LIKE '{0}' AND county LIKE '{1}' AND city LIKE '{2}' AND ward LIKE '{3}' AND oaza_cho LIKE '{4}'", _selectedPef.Name, _selectedCity.County, _selectedCity.City, _selectedTown.Ward, _selectedTown.Oaza);
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                var cho = Convert.ToString(reader["chome"]) ?? "";
+                var id = Convert.ToString(reader["machiaza_id"]);
+                if (id is not null)
+                {
+                    var ccty = new Choume(id, cho);
+
+                    dataset.Add(ccty);
+                }
+            }
+
+            Chous = [.. dataset.DistinctBy(p => p.Chou)];
         }
     }
 
-    private string _townName = string.Empty;
-    public string TownName
+    private ObservableCollection<Choume>? _chous = [];
+    public ObservableCollection<Choume>? Chous
     {
-        get => _townName;
+        get => _chous;
         set
         {
-            if (SetProperty(ref _townName, value))
+            if (SetProperty(ref _chous, value))
             {
-                IsEntryDirty = true;
-                OnPropertyChanged(nameof(AddressPreview));
+                //
             }
         }
     }
 
-    private string _choume = string.Empty;
-    public string Choume
+    private Choume? _selectedChou;
+    public Choume? SelectedChou
     {
-        get => _choume;
+        get => _selectedChou;
         set
         {
-            if (SetProperty(ref _choume, value))
+            if (SetProperty(ref _selectedChou, value))
             {
                 IsEntryDirty = true;
+                MachiazaId = _selectedChou?.MachiazaId;
                 OnPropertyChanged(nameof(AddressPreview));
             }
         }
@@ -302,7 +447,7 @@ public partial class ResidentialsViewModel : ObservableObject
                 s = "-" + _banchi;
             }
             // TODO:
-            return $"{SelectedPef.Name}{_cityName}{_townName}{_choume}{s}";
+            return $"{SelectedPef.Name}{_selectedCity?.Combined}{_selectedTown?.Combined}{_selectedChou?.Chou}{s}";
         }
     }
 

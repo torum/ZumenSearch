@@ -241,7 +241,7 @@ public class DataAccessService : IDataAccessService
                                 "VALUES ('{0}', '{1}', '{2}')",
                                 pic.Id, entry.Id, pic.ImageLocation);
                             */
-                            string sqlInsertIntoRentLivingPicture = "INSERT INTO rent_residentials_pictures (picture_id, rent_id, filepath, title, description, is_main) VALUES (@PicId, @RentId, @Path, @Tit, @Desc, @Main)";
+                            var sqlInsertIntoRentLivingPicture = "INSERT INTO rent_residentials_pictures (picture_id, rent_id, filepath, title, description, is_main) VALUES (@PicId, @RentId, @Path, @Tit, @Desc, @Main)";
 
                             cmd.CommandText = sqlInsertIntoRentLivingPicture;
 
@@ -407,24 +407,24 @@ public class DataAccessService : IDataAccessService
 
                     // Main
                     var sql = "UPDATE rents SET ";
-                    sql += String.Format("name = '{0}' ", EscapeSingleQuote(entry.Name));
+                    sql += string.Format("name = '{0}' ", EscapeSingleQuote(entry.Name));
                     //sql += String.Format("title = '{0}', ", EscapeSingleQuote(feedTitle));
                     //sql += String.Format("description = '{0}', ", EscapeSingleQuote(feedDescription));
                     //sql += String.Format("updated = '{0}'", updated.ToString("yyyy-MM-dd HH:mm:ss"));
 
-                    sql += String.Format(" WHERE rent_id = '{0}'; ", entry.Id);
+                    sql += string.Format(" WHERE rent_id = '{0}'; ", entry.Id);
 
                     cmd.CommandText = sql;
                     res.AffectedCount = cmd.ExecuteNonQuery();
 
                     // Residentials
                     sql = "UPDATE rent_residentials SET ";
-                    sql += String.Format("comment = '{0}' ", EscapeSingleQuote("some comment"));
+                    sql += string.Format("comment = '{0}' ", EscapeSingleQuote("some comment"));
                     //sql += String.Format("title = '{0}', ", EscapeSingleQuote(feedTitle));
                     //sql += String.Format("description = '{0}', ", EscapeSingleQuote(feedDescription));
                     //sql += String.Format("updated = '{0}'", updated.ToString("yyyy-MM-dd HH:mm:ss"));
 
-                    sql += String.Format(" WHERE rent_id = '{0}'; ", entry.Id);
+                    sql += string.Format(" WHERE rent_id = '{0}'; ", entry.Id);
 
                     cmd.CommandText = sql;
                     cmd.ExecuteNonQuery();
@@ -437,11 +437,11 @@ public class DataAccessService : IDataAccessService
                     {
                         foreach (var pic in entry.BuildingPictures)
                         {
-                            bool exec = false;
+                            var exec = false;
 
                             if (pic.IsNew)
                             {
-                                string sqlInsertIntoRentLivingPicture = "INSERT INTO rent_residentials_pictures (picture_id, rent_id, filepath, title, description, is_main) VALUES (@PicId, @RentId, @Path, @Tit, @Desc, @Main)";
+                                var sqlInsertIntoRentLivingPicture = "INSERT INTO rent_residentials_pictures (picture_id, rent_id, filepath, title, description, is_main) VALUES (@PicId, @RentId, @Path, @Tit, @Desc, @Main)";
 
                                 // 物件画像の追加
                                 cmd.CommandText = sqlInsertIntoRentLivingPicture;
@@ -450,7 +450,7 @@ public class DataAccessService : IDataAccessService
                             }
                             else if (pic.IsModified)
                             {
-                                string sqlUpdateRentLivingPicture = String.Format(
+                                var sqlUpdateRentLivingPicture = string.Format(
                                     "UPDATE rent_residentials_pictures SET title = @Tit, description = @Desc, is_main = @Main " +
                                     "WHERE picture_id = '{0}'", pic.Id);
 
@@ -501,7 +501,7 @@ public class DataAccessService : IDataAccessService
                         foreach (var delp in entry.BuildingPicturesToBeDeleted)
                         {
                             // 削除
-                            string sqlDeleteRentLivingPicture = String.Format("DELETE FROM rent_residentials_pictures WHERE picture_id = '{0}'", delp.Id);
+                            var sqlDeleteRentLivingPicture = string.Format("DELETE FROM rent_residentials_pictures WHERE picture_id = '{0}'", delp.Id);
 
                             cmd.CommandText = sqlDeleteRentLivingPicture;
                             var DelRentLivingPicResult = cmd.ExecuteNonQuery();
@@ -638,7 +638,7 @@ public class DataAccessService : IDataAccessService
                 cmd.Transaction = connection.BeginTransaction();
                 try
                 {
-                    cmd.CommandText = String.Format("DELETE FROM rents WHERE rent_id = '{0}';", rentId);
+                    cmd.CommandText = string.Format("DELETE FROM rents WHERE rent_id = '{0}';", rentId);
                     res.AffectedCount = cmd.ExecuteNonQuery();
 
                     cmd.Transaction.Commit();
@@ -759,7 +759,7 @@ public class DataAccessService : IDataAccessService
                 }
                 else
                 {
-                    cmd.CommandText = String.Format("SELECT rents.name as feedName, rent_residentials.comment as entryTitle, rents.rent_id as entryId FROM rent_residentials INNER JOIN rents USING (rent_id) WHERE rents.name LIKE '{0}'", keyword);
+                    cmd.CommandText = string.Format("SELECT rents.name as feedName, rent_residentials.comment as entryTitle, rents.rent_id as entryId FROM rent_residentials INNER JOIN rents USING (rent_id) WHERE rents.name LIKE '{0}'", keyword);
                 }
 
                 using var reader = cmd.ExecuteReader();
@@ -868,7 +868,7 @@ public class DataAccessService : IDataAccessService
             connection.Open();
 
             using var cmd = connection.CreateCommand();
-            cmd.CommandText = String.Format("SELECT rents.name as feedName, rent_residentials.comment as entryTitle, rents.rent_id as entryId FROM rent_residentials INNER JOIN rents USING (rent_id) WHERE rents.rent_id = '{0}'", id);
+            cmd.CommandText = string.Format("SELECT rents.name as feedName, rent_residentials.comment as entryTitle, rents.rent_id as entryId FROM rent_residentials INNER JOIN rents USING (rent_id) WHERE rents.rent_id = '{0}'", id);
 
             using (var reader = cmd.ExecuteReader())
             {
@@ -897,7 +897,7 @@ public class DataAccessService : IDataAccessService
             }
 
             // 物件写真
-            cmd.CommandText = String.Format("SELECT * FROM rent_residentials_pictures WHERE rent_id = '{0}'", id);
+            cmd.CommandText = string.Format("SELECT * FROM rent_residentials_pictures WHERE rent_id = '{0}'", id);
             using (var reader = cmd.ExecuteReader())
             {
                 while (reader.Read())
@@ -926,9 +926,13 @@ public class DataAccessService : IDataAccessService
                     //}
                     var bln = Convert.ToInt32(reader["is_main"]);
                     if (bln > 0)
+                    {
                         rlpic.IsMain = true;
+                    }
                     else
+                    {
                         rlpic.IsMain = false;
+                    }
 
                     entry.BuildingPictures.Add(rlpic);
                 }

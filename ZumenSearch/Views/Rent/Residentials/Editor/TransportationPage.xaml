@@ -67,7 +67,7 @@
 
                         <StackPanel Margin="12 12 24 24" Spacing="12">
                             <StackPanel Orientation="Horizontal">
-                                <AutoSuggestBox Header="沿線" Text="{x:Bind ViewModel.Ensen, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0" MinWidth="300" HorizontalAlignment="Stretch"></AutoSuggestBox>
+                                <AutoSuggestBox Header="路線" Text="{x:Bind ViewModel.Ensen, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0" MinWidth="300" HorizontalAlignment="Stretch"></AutoSuggestBox>
                                 <AutoSuggestBox Header="駅名" Text="{x:Bind ViewModel.Eki, Mode=TwoWay}" Margin="12,0,0,0" MinWidth="300" HorizontalAlignment="Stretch"></AutoSuggestBox>
                             </StackPanel>
                             <NumberBox Header="駅から徒歩（分）" Value="{x:Bind ViewModel.EkiToho, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MinWidth="90" Margin="0" HorizontalAlignment="Left"></NumberBox>

@@ -15,20 +15,19 @@ using System.Xml;
 using System.Xml.Linq;
 using ZumenSearch.ViewModels;
 
-namespace ZumenSearch.Models
+namespace ZumenSearch.Models;
+
+public abstract class PictureBase : ObservableObject
 {
-    public abstract class PictureBase : ObservableObject
+    public string? ImageLocation { get; set; } 
+
+    public string? Id { get; set; }
+
+    public bool IsNew { get; set; }
+    public bool IsModified { get; set; }
+
+    protected PictureBase()
     {
-        public string? ImageLocation { get; set; } 
 
-        public string? Id { get; set; }
-
-        public bool IsNew { get; set; }
-        public bool IsModified { get; set; }
-
-        protected PictureBase()
-        {
-
-        }
-    };
-}
+    }
+};
