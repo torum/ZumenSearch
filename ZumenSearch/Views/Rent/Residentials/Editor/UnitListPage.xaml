@@ -14,55 +14,17 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <BreadcrumbBar x:Name="BreadcrumbBar1">
-            <BreadcrumbBar.ItemTemplate>
-                <DataTemplate x:DataType="mod:Breadcrumb">
-                    <BreadcrumbBarItem Content="{Binding}" AutomationProperties.Name="{Binding Name}">
-                        <BreadcrumbBarItem.ContentTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding Name}" />
-                            </DataTemplate>
-                        </BreadcrumbBarItem.ContentTemplate>
-                    </BreadcrumbBarItem>
-                </DataTemplate>
-            </BreadcrumbBar.ItemTemplate>
-        </BreadcrumbBar>
-
+        <Grid Grid.Row="0">
+            <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Margin="0,0,24,0" HorizontalAlignment="Right">
+                <AppBarButton Icon="Add" Label="追加" Command="{x:Bind ViewModel.AddNewUnitCommand}"/>
+                <AppBarButton Icon="Edit" Label="編集"/>
+                <AppBarButton Icon="Delete" Label="削除" Command="{x:Bind ViewModel.DeleteSelectedBuildingPictureCommand}"/>
+            </CommandBar>
+        </Grid>
+        
         <Grid Grid.Row="1">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-
-            <StackPanel Grid.Row="0">
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <AppBarButton Icon="Edit" Label="編集"/>
-                    <AppBarButton Icon="Add" Label="新規" Command="{x:Bind ViewModel.AddNewUnitCommand}"/>
-                </StackPanel>
-
-                <Border BorderThickness="0,1,0,0" BorderBrush="{ThemeResource NavigationViewItemSeparatorForeground}"></Border>
-
-            </StackPanel>
-
-            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                <VisualStateManager.VisualStateGroups>
-                    <VisualStateGroup>
-                        <VisualState>
-                            <VisualState.StateTriggers>
-                                <AdaptiveTrigger MinWindowWidth="1024" />
-                            </VisualState.StateTriggers>
-                            <VisualState.Setters>
-
-                            </VisualState.Setters>
-                        </VisualState>
-                    </VisualStateGroup>
-                </VisualStateManager.VisualStateGroups>
-
-
-            </ScrollViewer>
 
         </Grid>
-
     </Grid>
 
 </Page>

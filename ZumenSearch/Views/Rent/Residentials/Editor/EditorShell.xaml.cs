@@ -1,14 +1,4 @@
-﻿
-using CommunityToolkit.Mvvm.Messaging;
-using CommunityToolkit.WinUI;
-using Microsoft.UI.Windowing;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Markup;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Media.Animation;
-using Microsoft.UI.Xaml.Navigation;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -16,57 +6,53 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading.Tasks;
-using Windows.Storage;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Media.Animation;
+using Microsoft.UI.Xaml.Navigation;
 using Windows.Storage.Pickers;
-using Windows.System;
-using Windows.UI.Core;
-using Windows.UI.ViewManagement;
-using ZumenSearch.Helpers;
 using ZumenSearch.Models;
 using ZumenSearch.Services;
-using ZumenSearch.ViewModels;
-using ZumenSearch.Views;
 
 namespace ZumenSearch.Views.Rent.Residentials.Editor;
 
 public sealed partial class EditorShell : Page
 {
-    public ViewModels.Rent.Residentials.Editor.EditorViewModel ViewModel
+    public ViewModels.Rent.Residentials.ResidentialsViewModel ViewModel
     {
         get;
     }
 
     public Views.Rent.Residentials.Editor.EditorWindow EditorWin { get; private set; }
 
-    private NavigationViewItem? navigationViewSelectedItem;
+    //private NavigationViewItem? navigationViewSelectedItem;
 
     // List of ValueTuple holding the Navigation Tag and the relative Navigation Page
-    private readonly List<(string Tag, Type? Page)> _pages =
+    private readonly List<(string Tag, string Label, Type? Page)> _pages =
     [
-        ("building", null),
-        ("summary", typeof(Views.Rent.Residentials.Editor.SummaryPage)),
-        //("structure", typeof(Views.Rent.Residentials.Editor.StructurePage)),
-        ("location", typeof(Views.Rent.Residentials.Editor.LocationPage)),
-        ("transportation", typeof(Views.Rent.Residentials.Editor.TransportationPage)),
-        ("appliance", typeof(Views.Rent.Residentials.Editor.AppliancePage)),
-        ("pictures", typeof(Views.Rent.Residentials.Editor.PictureListPage)),
-        ("units", typeof(Views.Rent.Residentials.Editor.UnitListPage)),
-        //("unitpictures", typeof(Views.Rent.Residentials.Editor.UnitPictureListPage)),
-        ("zumen", typeof(Views.Rent.Residentials.Editor.ZumenListPage)),
-        ("kasinusi", typeof(Views.Rent.Residentials.Editor.KasinusiPage)),
-        ("gyousya", typeof(Views.Rent.Residentials.Editor.GyousyaPage)),
-        ("memo", typeof(Views.Rent.Residentials.Editor.MemoPage)),
+        ("building", "建物", null),
+        ("summary", "基本", typeof(Views.Rent.Residentials.Editor.SummaryPage)),
+        //("structure", "", typeof(Views.Rent.Residentials.Editor.StructurePage)),
+        ("location", "所在地", typeof(Views.Rent.Residentials.Editor.LocationPage)),
+        ("transportation", "交通", typeof(Views.Rent.Residentials.Editor.TransportationPage)),
+        ("appliance", "設備", typeof(Views.Rent.Residentials.Editor.AppliancePage)),
+        ("pictures", "写真", typeof(Views.Rent.Residentials.Editor.PictureListPage)),
+        ("units", "部屋", typeof(Views.Rent.Residentials.Editor.UnitListPage)),
+        ("zumen", "図面", typeof(Views.Rent.Residentials.Editor.ZumenListPage)),
+        ("kasinusi", "貸主", typeof(Views.Rent.Residentials.Editor.KasinusiPage)),
+        ("gyousya", "宅建業者", typeof(Views.Rent.Residentials.Editor.GyousyaPage)),
+        //("memo", "備考", typeof(Views.Rent.Residentials.Editor.MemoPage)),
     ];
 
-    //private readonly UISettings settings = new();
-
-    public EditorShell(Views.Rent.Residentials.Editor.EditorWindow win, ViewModels.Rent.Residentials.Editor.EditorViewModel vm)
+    public EditorShell(Views.Rent.Residentials.Editor.EditorWindow win, ViewModels.Rent.Residentials.ResidentialsViewModel vm)
     {
         EditorWin = win ?? throw new ArgumentNullException(nameof(win));
         ViewModel = vm ?? throw new ArgumentNullException(nameof(vm));
 
-        this.InitializeComponent();
+        InitializeComponent();
+
+        BreadcrumbBar1.ItemClicked += BreadcrumbBar_ItemClicked;
 
         //
         EditorWin.Content = this;
@@ -75,7 +61,7 @@ public sealed partial class EditorShell : Page
         EditorWin.Activated += EditorWindow_Activated;
         EditorWin.Closed += EditorWindow_Closed;
         EditorWin.AppWindow.Closing += AppWindow_Closing;
-        EditorWin.Title = "物件情報の編集（新規）"; 
+        EditorWin.Title = ""; 
         //
         //ViewModel.SetEditorWindow(EditorWin);
 
@@ -84,7 +70,8 @@ public sealed partial class EditorShell : Page
         ViewModel.EventEditLocation += (sender, arg) => OnEventEditLocation();
         ViewModel.EventEditTransportation += (sender, arg) => OnEventEditTransportation();
         ViewModel.EventEditAppliance += (sender, arg) => OnEventEditAppliance();
-        ViewModel.EventEditMemo += (sender, arg) => OnEventEditMemo();
+        ViewModel.EventEditPictures += (sender, arg) => OnEventEditPictures();
+        ViewModel.EventEditUnits += (sender, arg) => OnEventEditUnits();
         //
         ViewModel.EventAddNewUnit += (sender, arg) => OnEventAddNewUnit();
         //
@@ -94,10 +81,29 @@ public sealed partial class EditorShell : Page
         ViewModel.EventIsUnitOwnership += (sender, arg) => OnEventIsUnitOwnership(arg);
     }
 
+
+    private void BreadcrumbBar_ItemClicked(BreadcrumbBar sender, BreadcrumbBarItemClickedEventArgs args)
+    {
+        if (args.Index == 0)
+        {
+            if (ContentFrame.Navigate(typeof(Views.Rent.Residentials.Editor.SummaryPage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom }))
+            {
+                BreadcrumbBar1.ItemsSource = new ObservableCollection<Breadcrumb>{
+                    new() { Name = "建物", Page = typeof(Views.Rent.Residentials.Editor.SummaryPage).FullName!},
+                    new() { Name = "基本", Page = typeof(Views.Rent.Residentials.Editor.SummaryPage).FullName!},
+                };
+
+                NavView.SelectedItem = NavView.MenuItems.OfType<NavigationViewItem>().Where(n => n.Tag.Equals("summary")).First();
+            }
+        }
+    }
+
     private void AppWindow_Closing(Microsoft.UI.Windowing.AppWindow sender, Microsoft.UI.Windowing.AppWindowClosingEventArgs args)
     {
         if (ViewModel == null)
+        {
             return;
+        }
 
         if (ViewModel.IsEntryDirty)
         {
@@ -119,7 +125,7 @@ public sealed partial class EditorShell : Page
         //AppMenuBar.Opacity = args.WindowActivationState == WindowActivationState.Deactivated ? 0.4 : 0.7;
 
         AppTitleBarIcon.Opacity = args.WindowActivationState == WindowActivationState.Deactivated ? 0.4 : 0.8;
-        AppMenuBar.Opacity = args.WindowActivationState == WindowActivationState.Deactivated ? 0.4 : 0.8;
+        //AppMenuBar.Opacity = args.WindowActivationState == WindowActivationState.Deactivated ? 0.4 : 0.8;
     }
 
     public void EditorWindow_Closed(object sender, WindowEventArgs args)
@@ -153,8 +159,11 @@ public sealed partial class EditorShell : Page
     {
         // Since we use ItemInvoked, we set selecteditem manually
         //NavView.SelectedItem = NavView.MenuItems.OfType<NavigationViewItem>().First();
+        // The same with above but more precise.
+        //NavView.SelectedItem = NavView.MenuItems.OfType<NavigationViewItem>().Where(n => n.Tag.Equals("summary")).First();
 
-        //NavView.SelectedItem = NavView.MenuItems.OfType<NavigationViewItem>().First().FindChildren().Where(n => n.Tag.Equals("summary"));
+        /*
+        // This is for hierarchical menu.
         var firstMenuItem = NavView.MenuItems.OfType<NavigationViewItem>().First();
         if (firstMenuItem != null)
         {
@@ -164,41 +173,37 @@ public sealed partial class EditorShell : Page
                 childItem.First().IsSelected = true;
                 navigationViewSelectedItem = childItem.First();
             }
-            else { Debug.WriteLine("No child menu item with tag 'summary' found in NavView."); }
         }
-        else
-        {
-            Debug.WriteLine("No first menu item found in NavView.");
-        }
+        */
 
         // Pass Frame when navigate.  //, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft } //, new SuppressNavigationTransitionInfo() //new EntranceNavigationTransitionInfo()
-        ContentFrame.Navigate(typeof(ZumenSearch.Views.Rent.Residentials.Editor.SummaryPage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });
+        if (ContentFrame.Navigate(typeof(ZumenSearch.Views.Rent.Residentials.Editor.SummaryPage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom }))
+        {
+            BreadcrumbBar1.ItemsSource = new ObservableCollection<Breadcrumb>{
+                new() { Name = "建物", Page = typeof(Views.Rent.Residentials.Editor.SummaryPage).FullName!},
+                new() { Name = "基本", Page = typeof(Views.Rent.Residentials.Editor.SummaryPage).FullName!},
+            };
 
-
-        // Listen to the window directly so the app responds to accelerator keys regardless of which element has focus.
-        //Window.Current.CoreWindow.Dispatcher.AcceleratorKeyActivated +=  CoreDispatcher_AcceleratorKeyActivated;
-
-        //Window.Current.CoreWindow.PointerPressed += CoreWindow_PointerPressed;
-
-        //SystemNavigationManager.GetForCurrentView().BackRequested += System_BackRequested;
-
+            NavView.SelectedItem = NavView.MenuItems.OfType<NavigationViewItem>().Where(n => n.Tag.Equals("summary")).First();
+        }
     }
 
     private void NavView_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
     {
         if (_pages is null)
+        {
             return;
+        }
 
         if (args.IsSettingsInvoked == true)
         {
-            //NavView_Navigate("settings", args.RecommendedNavigationTransitionInfo);
+            // Do nothing. 
         }
         else if (args.InvokedItemContainer != null && (args.InvokedItemContainer.Tag != null))
         {
             if (args.InvokedItemContainer.Tag is not string tag || string.IsNullOrWhiteSpace(tag))
             {
                 Debug.WriteLine("NavView_ItemInvoked: Invalid tag or null.");
-                //sender.SelectedItem = navigationViewSelectedItem; 
                 return;
             }
 
@@ -206,16 +211,18 @@ public sealed partial class EditorShell : Page
 
             if (item.Page is null)
             {
-                //Debug.WriteLine("NavView_ItemInvoked: Page is null for tag " + tag);
-                //sender.SelectedItem = navigationViewSelectedItem;
-
+                Debug.WriteLine("NavView_ItemInvoked: Page is null for tag " + tag);
                 return;
             }
 
-            navigationViewSelectedItem = sender.SelectedItem as NavigationViewItem;
-
-            // Pass Frame when navigate.
-            ContentFrame.Navigate(item.Page, ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });//, args.RecommendedNavigationTransitionInfo
+            if (ContentFrame.Navigate(item.Page, ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom }))
+            {
+                BreadcrumbBar1.ItemsSource = new ObservableCollection<Breadcrumb>{
+                    new() { Name = "建物", Page = typeof(Views.Rent.Residentials.Editor.SummaryPage).FullName!},
+                    new() { Name = item.Label, Page = item.Page.FullName!},
+                };
+            }
+            //, args.RecommendedNavigationTransitionInfo
         }
     }
 
@@ -266,14 +273,19 @@ public sealed partial class EditorShell : Page
         ContentFrame.Navigate(typeof(Views.Rent.Residentials.Editor.AppliancePage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });
     }
 
-    public void OnEventEditMemo()
+    public void OnEventEditPictures()
     {
-        ContentFrame.Navigate(typeof(Views.Rent.Residentials.Editor.MemoPage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });
+        ContentFrame.Navigate(typeof(Views.Rent.Residentials.Editor.PictureListPage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });
+    }
+
+    public void OnEventEditUnits()
+    {
+        ContentFrame.Navigate(typeof(Views.Rent.Residentials.Editor.UnitListPage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });
     }
 
     public async void OnEventAddNewBuildingPictures()
     {
-        string destDirectory = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(App.AppDataPictureFolder, "Rent"),"Residential_Building"), Guid.NewGuid().ToString("N"));
+        var destDirectory = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(App.AppDataPictureFolder, "Rent"),"Residential_Building"), Guid.NewGuid().ToString("N"));
 
         if (!Directory.Exists(destDirectory))
         {
@@ -295,18 +307,18 @@ public sealed partial class EditorShell : Page
         openPicker.FileTypeFilter.Add(".gif");
 
         // Open the picker for the user to pick a file
-        IReadOnlyList<StorageFile> files = await openPicker.PickMultipleFilesAsync();
+        var files = await openPicker.PickMultipleFilesAsync();
         if (files.Count > 0)
         {
             StringBuilder output = new("");
             List<string> list = [];
-            foreach (StorageFile file in files)
+            foreach (var file in files)
             {
                 output.Append(file.Path + "\n");
                 list.Add(file.Path);
 
-                using FileStream sourceStream = File.Open(file.Path, FileMode.Open);
-                using FileStream destinationStream = File.Create(Path.Combine(destDirectory, file.Name));
+                using var sourceStream = File.Open(file.Path, FileMode.Open);
+                using var destinationStream = File.Create(Path.Combine(destDirectory, file.Name));
                 await sourceStream.CopyToAsync(destinationStream);
             }
 
@@ -321,7 +333,7 @@ public sealed partial class EditorShell : Page
 
     public void OnEventAddNewUnit()
     {
-        if (this.EditorWin == null)
+        if (EditorWin == null)
         {
             // EditorWin should be initialized in the EditorShell constructor.
             Debug.WriteLine("EditorWin should be initialized in the EditorShell constructor.");
@@ -416,4 +428,6 @@ public sealed partial class EditorShell : Page
 #pragma warning restore IDE0079
 
     #endregion
+
+
 }

@@ -1,7 +1,7 @@
 ﻿using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using System.Diagnostics;
-using ZumenSearch.ViewModels.Rent.Residentials.Editor;
+using ZumenSearch.ViewModels.Rent.Residentials;
 
 namespace ZumenSearch.Views.Rent.Residentials.Editor;
 
@@ -9,8 +9,8 @@ public sealed partial class ZumenListPage : Page
 {
     //private Views.Rent.Residentials.Editor.EditorShell? _editorShell;
 
-    private ViewModels.Rent.Residentials.Editor.EditorViewModel? _viewModel;
-    public ViewModels.Rent.Residentials.Editor.EditorViewModel? ViewModel
+    private ViewModels.Rent.Residentials.ResidentialsViewModel? _viewModel;
+    public ViewModels.Rent.Residentials.ResidentialsViewModel? ViewModel
     {
         get => _viewModel;
         private set
@@ -31,10 +31,10 @@ public sealed partial class ZumenListPage : Page
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
-        if ((e.Parameter is ViewModels.Rent.Residentials.Editor.EditorViewModel) && (e.Parameter != null))
+        if ((e.Parameter is ViewModels.Rent.Residentials.ResidentialsViewModel) && (e.Parameter != null))
         {
-            //_editorShell = e.Parameter as Views.Rent.Residentials.Editor.EditorShell;
-            ViewModel = e.Parameter as ViewModels.Rent.Residentials.Editor.EditorViewModel;
+            //_editorShell = e.Parameter as Views.Rent.Residentials.EditorShell;
+            ViewModel = e.Parameter as ViewModels.Rent.Residentials.ResidentialsViewModel;
         }
 
         base.OnNavigatedTo(e);

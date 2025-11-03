@@ -19,7 +19,7 @@ using ZumenSearch.ViewModels;
 using ZumenSearch.ViewModels.Rent;
 using ZumenSearch.ViewModels.Rent.Residentials;
 
-namespace ZumenSearch.Views;
+namespace ZumenSearch.Views.Rent;
 
 public class CustomDataObject
 {
@@ -52,11 +52,11 @@ public class CustomDataObject
     // ... Methods ...
 }
 
-public sealed partial class RentSearchPage : Page
+public sealed partial class RentPage : Page
 {
     private MainViewModel? ViewModel { get; set; }
 
-    public RentSearchPage()
+    public RentPage()
     {
         ViewModel = App.GetService<MainViewModel>();
 
@@ -64,7 +64,7 @@ public sealed partial class RentSearchPage : Page
 
         //BreadcrumbBarMain.ItemsSource = new string[] { "ëççáåüçı" };
         BreadcrumbBarMain.ItemsSource = new ObservableCollection<Breadcrumb>{
-        new() { Name = "í¿ë›", Page = typeof(RentSearchPage).FullName!},
+        new() { Name = "í¿ë›", Page = typeof(RentPage).FullName!},
     };
 
         var Items = new ObservableCollection<CustomDataObject>();

@@ -18,9 +18,9 @@ using ZumenSearch.Services;
 using ZumenSearch.Views;
 using ZumenSearch.Views.Rent.Residentials.Editor;
 
-namespace ZumenSearch.ViewModels.Rent.Residentials.Editor;
+namespace ZumenSearch.ViewModels.Rent.Residentials;
 
-public partial class EditorViewModel : ObservableObject
+public partial class ResidentialsViewModel : ObservableObject
 {
     #region == Properties ==
 
@@ -989,8 +989,9 @@ public partial class EditorViewModel : ObservableObject
     public event EventHandler? EventBackToSummary;
     public event EventHandler? EventEditLocation;
     public event EventHandler? EventEditTransportation;
-    public event EventHandler? EventEditAppliance; 
-    public event EventHandler? EventEditMemo;
+    public event EventHandler? EventEditAppliance;
+    public event EventHandler? EventEditPictures;
+    public event EventHandler? EventEditUnits;
     public event EventHandler? EventAddNewBuildingPictures;
 
     public event EventHandler<bool>? EventIsUnitOwnership; // show or hides navigationview' menu accordingly.
@@ -1012,7 +1013,7 @@ public partial class EditorViewModel : ObservableObject
 
     // Constructor for the EditorViewModel class, initializes the data access service and the entry.
 #pragma warning disable IDE0290
-    public EditorViewModel(IDataAccessService dataAccessService, IModalDialogService modalDialog )
+    public ResidentialsViewModel(IDataAccessService dataAccessService, IModalDialogService modalDialog )
     {
         _dataAccessService = dataAccessService;
         _dlg = modalDialog;
@@ -1179,8 +1180,7 @@ public partial class EditorViewModel : ObservableObject
     }
 
     // Add New Modal window command
-    private RelayCommand? addNewUnitCommand;
-    public IRelayCommand AddNewUnitCommand => addNewUnitCommand ??= new RelayCommand(AddNewUnit);
+    [RelayCommand]
     private void AddNewUnit()
     {
         //NavigationService.NavigateTo(typeof(RentLivingEditShellViewModel).FullName!, "test");
@@ -1189,50 +1189,50 @@ public partial class EditorViewModel : ObservableObject
     }
 
     // Go Back command (don't use this?)
-    private RelayCommand? goBackCommand;
-    public IRelayCommand BackCommand => goBackCommand ??= new RelayCommand(GoBack);
+    [RelayCommand]
     private void GoBack()
     {
         EventGoBack?.Invoke(this, EventArgs.Empty);
     }
 
-    private RelayCommand? backToSummaryCommand;
-    public IRelayCommand BackToSummaryCommand => backToSummaryCommand ??= new RelayCommand(GoBackToSummary);
+    [RelayCommand]
     public void GoBackToSummary()
     { 
         EventBackToSummary?.Invoke(this, EventArgs.Empty);
     }
 
-    private RelayCommand? editLocationCommand;
-    public IRelayCommand EditLocationCommand => editLocationCommand ??= new RelayCommand(EditLocation);
+    [RelayCommand]
     public void EditLocation()
     {
         EventEditLocation?.Invoke(this, EventArgs.Empty);
     }
 
-    private RelayCommand? editTransportationCommand;
-    public IRelayCommand EditTransportationCommand => editTransportationCommand ??= new RelayCommand(EditTransportation);
+    [RelayCommand]
     private void EditTransportation()
     {
         EventEditTransportation?.Invoke(this, EventArgs.Empty);
     }
 
-    private RelayCommand? editApplianceCommand;
-    public IRelayCommand EditApplianceCommand => editApplianceCommand ??= new RelayCommand(EditAppliance);
+    [RelayCommand]
     public void EditAppliance()
     {
         EventEditAppliance?.Invoke(this, EventArgs.Empty);
     }
 
-    private RelayCommand? editMemoCommand;
-    public IRelayCommand EditMemoCommand => editMemoCommand ??= new RelayCommand(EditMemo);
-    public void EditMemo()
+    [RelayCommand]
+    public void EditPictures()
     {
-        EventEditMemo?.Invoke(this, EventArgs.Empty);
+        EventEditPictures?.Invoke(this, EventArgs.Empty);
     }
 
-    private RelayCommand? addNewBuildingPicturesCommand;
-    public IRelayCommand AddNewBuildingPicturesCommand => addNewBuildingPicturesCommand ??= new RelayCommand(AddNewBuildingPictures);
+    [RelayCommand]
+    public void EditUnits()
+    {
+        EventEditUnits?.Invoke(this, EventArgs.Empty);
+    }
+
+
+    [RelayCommand]
     public void AddNewBuildingPictures()
     {
         EventAddNewBuildingPictures?.Invoke(this, EventArgs.Empty);

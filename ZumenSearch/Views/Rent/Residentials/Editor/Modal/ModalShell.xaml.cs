@@ -52,6 +52,7 @@ public sealed partial class ModalShell : Page
 
         dialogWindow.Activated += UnitsWindow_Activated;
         dialogWindow.Closed += UnitsWindow_Closed;
+
     }
 
     public void UnitsWindow_Activated(object sender, Microsoft.UI.Xaml.WindowActivatedEventArgs args)

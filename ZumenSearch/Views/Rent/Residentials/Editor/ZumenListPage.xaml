@@ -8,16 +8,19 @@
     NavigationCacheMode="Required">
 
     <Grid x:Name="ContentArea">
-        <ScrollViewer>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
-            <Grid Margin="0,24,0,24">
+        <Grid Grid.Row="0">
+            <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Margin="0,0,24,0" HorizontalAlignment="Right">
+                <AppBarButton Name="AppBarButtonAddZumen" Icon="Add" Label="追加"/>
+                <AppBarButton Icon="Delete" Label="削除"/>
+            </CommandBar>
+        </Grid>
 
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-
-            </Grid>
-
-        </ScrollViewer>
+        <Grid Grid.Row="1">
+        </Grid>
     </Grid>
 </Page>

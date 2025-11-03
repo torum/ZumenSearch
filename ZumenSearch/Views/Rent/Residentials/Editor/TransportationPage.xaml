@@ -45,120 +45,80 @@
     </Page.Resources>
 
     <Grid x:Name="ContentArea">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+        <StackPanel Spacing="12" Margin="0,24,0,0">
 
-        <BreadcrumbBar x:Name="BreadcrumbBar1">
-            <BreadcrumbBar.ItemTemplate>
-                <DataTemplate x:DataType="mod:Breadcrumb">
-                    <BreadcrumbBarItem Content="{Binding}" AutomationProperties.Name="{Binding Name}">
-                        <BreadcrumbBarItem.ContentTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding Name}"/>
-                            </DataTemplate>
-                        </BreadcrumbBarItem.ContentTemplate>
-                    </BreadcrumbBarItem>
-                </DataTemplate>
-            </BreadcrumbBar.ItemTemplate>
-        </BreadcrumbBar>
-
-        <Grid Grid.Row="1">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-
-            <StackPanel Grid.Row="0">
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <AppBarButton Icon="Back" Label="戻る" Command="{x:Bind ViewModel.BackToSummaryCommand}"/>
-                    <AppBarButton Icon="Save" Label="保存"/>
-                </StackPanel>
-
-                <Border BorderThickness="0,1,0,0" BorderBrush="{ThemeResource NavigationViewItemSeparatorForeground}"></Border>
-
-            </StackPanel>
-
-            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-
-                <StackPanel HorizontalAlignment="Stretch" Spacing="12" Margin="0,12,12,24">
-
-                    <controls:Segmented x:Name="segmentedControl"
+            <controls:Segmented x:Name="segmentedControl"
                             HorizontalAlignment="Stretch"
                             SelectedIndex="0">
-                        <controls:SegmentedItem Content="交通１" HorizontalAlignment="Stretch"
+                <controls:SegmentedItem Content="交通１" HorizontalAlignment="Stretch"
                                     Tag="one" />
-                        <controls:SegmentedItem Content="交通２" HorizontalAlignment="Stretch"
+                <controls:SegmentedItem Content="交通２" HorizontalAlignment="Stretch"
                                     Tag="two" />
-                        <controls:SegmentedItem Content="交通３" HorizontalAlignment="Stretch"
+                <controls:SegmentedItem Content="交通３" HorizontalAlignment="Stretch"
                                     Tag="three" />
-                        <controls:SegmentedItem Content="交通４" HorizontalAlignment="Stretch"
+                <controls:SegmentedItem Content="交通４" HorizontalAlignment="Stretch"
                                     Tag="four" />
-                    </controls:Segmented>
-                    <controls:SwitchPresenter Value="{Binding SelectedItem.Tag, ElementName=segmentedControl}">
-                        <controls:Case Value="one">
-                            <StackPanel animations:Implicit.HideAnimations="{StaticResource HideTransitions}"
+            </controls:Segmented>
+            <controls:SwitchPresenter Value="{Binding SelectedItem.Tag, ElementName=segmentedControl}">
+                <controls:Case Value="one">
+                    <StackPanel animations:Implicit.HideAnimations="{StaticResource HideTransitions}"
                             animations:Implicit.ShowAnimations="{StaticResource ShowTransitions}"
                             Style="{StaticResource PanelStyle}">
 
-                                <StackPanel Margin="12 12 24 24" Spacing="12">
-                                    <StackPanel Orientation="Horizontal">
-                                        <AutoSuggestBox Header="沿線" Text="{x:Bind ViewModel.Ensen, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0" MinWidth="300" HorizontalAlignment="Stretch"></AutoSuggestBox>
-                                        <AutoSuggestBox Header="駅名" Text="{x:Bind ViewModel.Eki, Mode=TwoWay}" Margin="12,0,0,0" MinWidth="300" HorizontalAlignment="Stretch"></AutoSuggestBox>
-                                    </StackPanel>
-                                    <NumberBox Header="駅から徒歩（分）" Value="{x:Bind ViewModel.EkiToho, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MinWidth="90" Margin="0" HorizontalAlignment="Left"></NumberBox>
-                                    <StackPanel Orientation="Horizontal">
-
-                                        <TextBox Header="バス停名" Text="{x:Bind ViewModel.BusStop, Mode=TwoWay}" Margin="0" MinWidth="300" HorizontalAlignment="Left"></TextBox>
-                                        <StackPanel Orientation="Horizontal" Margin="12,0,0,0">
-                                            <NumberBox Header="バス乗車時間（分）" Value="{x:Bind ViewModel.BusJyousya, Mode=TwoWay}" MinWidth="90" Margin="0" HorizontalAlignment="Left"></NumberBox>
-                                            <NumberBox Header="バス停から徒歩（分）" Value="{x:Bind ViewModel.BusStopToho, Mode=TwoWay}" MinWidth="90" Margin="12,0,0,0" HorizontalAlignment="Left"></NumberBox>
-                                        </StackPanel>
-                                    </StackPanel>
-                                </StackPanel>
-
+                        <StackPanel Margin="12 12 24 24" Spacing="12">
+                            <StackPanel Orientation="Horizontal">
+                                <AutoSuggestBox Header="沿線" Text="{x:Bind ViewModel.Ensen, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0" MinWidth="300" HorizontalAlignment="Stretch"></AutoSuggestBox>
+                                <AutoSuggestBox Header="駅名" Text="{x:Bind ViewModel.Eki, Mode=TwoWay}" Margin="12,0,0,0" MinWidth="300" HorizontalAlignment="Stretch"></AutoSuggestBox>
                             </StackPanel>
-                        </controls:Case>
-                        <controls:Case Value="two">
-                            <StackPanel animations:Implicit.HideAnimations="{StaticResource HideTransitions}"
+                            <NumberBox Header="駅から徒歩（分）" Value="{x:Bind ViewModel.EkiToho, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MinWidth="90" Margin="0" HorizontalAlignment="Left"></NumberBox>
+                            <StackPanel Orientation="Horizontal">
+
+                                <TextBox Header="バス停名" Text="{x:Bind ViewModel.BusStop, Mode=TwoWay}" Margin="0" MinWidth="300" HorizontalAlignment="Left"></TextBox>
+                                <StackPanel Orientation="Horizontal" Margin="12,0,0,0">
+                                    <NumberBox Header="バス乗車時間（分）" Value="{x:Bind ViewModel.BusJyousya, Mode=TwoWay}" MinWidth="90" Margin="0" HorizontalAlignment="Left"></NumberBox>
+                                    <NumberBox Header="バス停から徒歩（分）" Value="{x:Bind ViewModel.BusStopToho, Mode=TwoWay}" MinWidth="90" Margin="12,0,0,0" HorizontalAlignment="Left"></NumberBox>
+                                </StackPanel>
+                            </StackPanel>
+                        </StackPanel>
+
+                    </StackPanel>
+                </controls:Case>
+                <controls:Case Value="two">
+                    <StackPanel animations:Implicit.HideAnimations="{StaticResource HideTransitions}"
                             animations:Implicit.ShowAnimations="{StaticResource ShowTransitions}"
                             Style="{StaticResource PanelStyle}">
-                                <Ellipse Width="24"
+                        <Ellipse Width="24"
                              Height="24"
                              Fill="{ThemeResource AccentFillColorDefaultBrush}" />
-                                <TextBlock VerticalAlignment="Center"
+                        <TextBlock VerticalAlignment="Center"
                                Text="This is the two panel" />
-                            </StackPanel>
-                        </controls:Case>
-                        <controls:Case Value="three">
-                            <StackPanel animations:Implicit.HideAnimations="{StaticResource HideTransitions}"
+                    </StackPanel>
+                </controls:Case>
+                <controls:Case Value="three">
+                    <StackPanel animations:Implicit.HideAnimations="{StaticResource HideTransitions}"
                             animations:Implicit.ShowAnimations="{StaticResource ShowTransitions}"
                             Style="{StaticResource PanelStyle}">
-                                <Rectangle Width="48"
+                        <Rectangle Width="48"
                                Height="24"
                                Fill="{ThemeResource AccentFillColorDefaultBrush}" />
-                                <TextBlock VerticalAlignment="Center"
+                        <TextBlock VerticalAlignment="Center"
                                Text="This is the three panel" />
-                            </StackPanel>
-                        </controls:Case>
-                        <controls:Case Value="four">
-                            <StackPanel animations:Implicit.HideAnimations="{StaticResource HideTransitions}"
+                    </StackPanel>
+                </controls:Case>
+                <controls:Case Value="four">
+                    <StackPanel animations:Implicit.HideAnimations="{StaticResource HideTransitions}"
                             animations:Implicit.ShowAnimations="{StaticResource ShowTransitions}"
                             Style="{StaticResource PanelStyle}">
-                                <Rectangle Width="48"
+                        <Rectangle Width="48"
                                Height="24"
                                Fill="{ThemeResource AccentFillColorDefaultBrush}" />
-                                <TextBlock VerticalAlignment="Center"
+                        <TextBlock VerticalAlignment="Center"
                                Text="This is the four panel" />
-                            </StackPanel>
-                        </controls:Case>
-                    </controls:SwitchPresenter>
+                    </StackPanel>
+                </controls:Case>
+            </controls:SwitchPresenter>
 
-                </StackPanel>
-
-            </ScrollViewer>
-        </Grid>
+        </StackPanel>
     </Grid>
 </Page>
 

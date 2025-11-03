@@ -33,14 +33,12 @@ public sealed partial class MainShell : Page
     // List of ValueTuple holding the Navigation Tag and the relative Navigation Page
     private readonly List<(string Tag, Type? Page)> _pages =
     [
-        //("Rent", typeof(Rent.RentSearchPage)),
-        ("Rent", null),
-        ("RentSearch", typeof(RentSearchPage)),
+        ("Rent", typeof(RentPage)),
         ("RentResidentials", typeof(Rent.Residentials.SearchPage)),
         ("RentCommercials", typeof(Rent.Commercials.CommercialsPage)),
         ("RentParkings", typeof(Rent.Parkings.ParkingsPage)),
         ("RentOwners", typeof(Rent.Owners.OwnersPage)),
-        ("Brokers", typeof(BrokersPage)),
+        ("Brokers", typeof(Brokers.BrokersPage)),
         //("Settings", typeof(SettingsPage)),
     ];
 

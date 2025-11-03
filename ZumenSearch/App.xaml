@@ -19,6 +19,16 @@
                 <ResourceDictionary Source="/Styles/Thickness.xaml" />
 
                 <ResourceDictionary>
+                    <Style x:Key="RoundCardBorderStyle" TargetType="Border">
+                        <Setter Property="CornerRadius" Value="8" />
+                        <Setter Property="Padding" Value="16" />
+                        <Setter Property="Background" Value="{ThemeResource LayerFillColorDefaultBrush}" />
+                        <Setter Property="BorderThickness" Value="1" />
+                        <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+                    </Style>
+                </ResourceDictionary>
+
+                <ResourceDictionary>
 
                     <x:Double x:Key="MenuBarHeight">30</x:Double>
 

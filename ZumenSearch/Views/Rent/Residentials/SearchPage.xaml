@@ -8,13 +8,13 @@
     xmlns:mod="using:ZumenSearch.Models"
     NavigationCacheMode="Required" Background="Transparent">
 
-    <Grid x:Name="ContentArea" Margin="46,46,0,0">
+    <Grid x:Name="ContentArea" Margin="0,46,0,0">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0" BorderThickness="0,0,0,1" BorderBrush="{ThemeResource NavigationViewItemSeparatorForeground}">
+        <Grid Grid.Row="0" Margin="48,0,48,0" BorderThickness="0,0,0,1" BorderBrush="{ThemeResource NavigationViewItemSeparatorForeground}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
@@ -24,13 +24,13 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <BreadcrumbBar x:Name="BreadcrumbBar1" Grid.Row="0" Grid.Column="0">
+            <BreadcrumbBar x:Name="BreadcrumbBar1" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center">
                 <BreadcrumbBar.ItemTemplate>
                     <DataTemplate x:DataType="mod:Breadcrumb">
-                        <BreadcrumbBarItem Content="{Binding}" AutomationProperties.Name="{Binding Name}">
+                        <BreadcrumbBarItem Content="{Binding}">
                             <BreadcrumbBarItem.ContentTemplate>
                                 <DataTemplate>
-                                    <TextBlock Text="{Binding Name}" FontSize="32"  />
+                                    <TextBlock Text="{Binding Name}" FontSize="32"/>
                                 </DataTemplate>
                             </BreadcrumbBarItem.ContentTemplate>
                         </BreadcrumbBarItem>
@@ -41,50 +41,30 @@
             <StackPanel Grid.Row="0" Grid.Column="1">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,3,0">
                     <AppBarButton Icon="Find" Label="検索" Command="{x:Bind ViewModel.SearchRentResidentialCommand}"/>
-                    <AppBarButton Icon="Clear" Label="リセット"/>
                     <AppBarButton Icon="Add" Label="新規" Command="{x:Bind ViewModel.AddNewRentResidentialCommand}"/>
                 </StackPanel>
-                <!--
-                    <CommandBar DefaultLabelPosition="Right">
-
-                        <AppBarButton Icon="Find" Label="検索" Command="{x:Bind ViewModel.SearchCommand}"/>
-                        <AppBarButton Icon="Add" Label="新規" Command="{x:Bind ViewModel.AddNewCommand}"/>
-                        <AppBarButton Icon="Clear" Label="リセット"/>
-                        
-                        <AppBarSeparator Visibility="Collapsed"/>
-
-                        <CommandBar.SecondaryCommands>
-                            
-                        </CommandBar.SecondaryCommands>
-
-                        <CommandBar.Content>
-                            <TextBlock Text="Now playing..." Margin="12,14" Visibility="Collapsed"/>
-                        </CommandBar.Content>
-                    </CommandBar>
-                    -->
-
             </StackPanel>
 
         </Grid>
 
         <Grid Grid.Row="1">
-            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="48,0,48,0">
 
                 <StackPanel HorizontalAlignment="Stretch">
 
                     <VariableSizedWrapGrid Orientation="Horizontal" Margin="0">
                         <TextBox MaxWidth="500" MinWidth="350" Header="物件名" PlaceholderText="Type your text here" Margin="0,24,24,0"/>
-                        <TextBox MaxWidth="500" MinWidth="350" Header="所在地" PlaceholderText="Type your text here" Margin="24,24,24,0"/>
+                        <TextBox MaxWidth="500" MinWidth="350" Header="所在地" PlaceholderText="Type your text here" Margin="0,24,24,0"/>
                     </VariableSizedWrapGrid>
 
                     <VariableSizedWrapGrid Orientation="Horizontal" Margin="0">
                         <TextBox MaxWidth="500" MinWidth="350" Header="沿線名" PlaceholderText="Type your text here" Margin="0,24,24,0"/>
-                        <TextBox MaxWidth="500" MinWidth="350" Header="最寄り駅" PlaceholderText="Type your text here" Margin="24,24,24,0"/>
+                        <TextBox MaxWidth="500" MinWidth="350" Header="最寄り駅" PlaceholderText="Type your text here" Margin="0,24,24,0"/>
                     </VariableSizedWrapGrid>
 
                     <VariableSizedWrapGrid Orientation="Horizontal" Margin="0">
                         <TextBox MaxWidth="500" MinWidth="350" Header="貸主名" PlaceholderText="Type your text here" Margin="0,24,24,0"/>
-                        <TextBox MaxWidth="500" MinWidth="350" Header="不動産ID" PlaceholderText="Type your text here" Margin="24,24,24,0"/>
+                        <TextBox MaxWidth="500" MinWidth="350" Header="不動産ID" PlaceholderText="Type your text here" Margin="0,24,24,0"/>
                     </VariableSizedWrapGrid>
 
                     <TextBlock Text="詳細条件" Margin="24,36,24,0"></TextBlock>

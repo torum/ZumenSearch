@@ -9,8 +9,8 @@ public sealed partial class KasinusiPage : Page
 {
     //private Views.Rent.Residentials.Editor.EditorShell? _editorShell;
 
-    private ViewModels.Rent.Residentials.Editor.EditorViewModel? _viewModel;
-    public ViewModels.Rent.Residentials.Editor.EditorViewModel? ViewModel
+    private ViewModels.Rent.Residentials.ResidentialsViewModel? _viewModel;
+    public ViewModels.Rent.Residentials.ResidentialsViewModel? ViewModel
     {
         get => _viewModel;
         private set
@@ -30,11 +30,11 @@ public sealed partial class KasinusiPage : Page
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
-        if ((e.Parameter is ViewModels.Rent.Residentials.Editor.EditorViewModel) && (e.Parameter != null))
+        if ((e.Parameter is ViewModels.Rent.Residentials.ResidentialsViewModel) && (e.Parameter != null))
         {
             //_editorShell = e.Parameter as Views.Rent.Residentials.Editor.EditorShell;
             //ViewModel = _editorShell?.ViewModel as ViewModels.Rent.Residentials.Editor.EditorViewModel;
-            ViewModel = e.Parameter as ViewModels.Rent.Residentials.Editor.EditorViewModel;
+            ViewModel = e.Parameter as ViewModels.Rent.Residentials.ResidentialsViewModel;
         }
 
         base.OnNavigatedTo(e);

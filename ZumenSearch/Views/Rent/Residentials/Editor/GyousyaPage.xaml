@@ -8,6 +8,8 @@
     NavigationCacheMode="Required">
 
     <Grid x:Name="ContentArea">
-        
+        <StackPanel Spacing="12" Margin="0,24,0,0">
+            
+        </StackPanel>
     </Grid>
 </Page>

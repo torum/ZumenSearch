@@ -6,8 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     xmlns:mod="using:ZumenSearch.Models"
-    NavigationCacheMode="Required"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    NavigationCacheMode="Required">
     <Page.Resources>
         <Thickness x:Key="NavigationViewContentMargin">6,6,0,0</Thickness>
     </Page.Resources>
@@ -188,7 +187,7 @@
                             </Grid>
                         </DataTemplate>
                     </NavigationView.HeaderTemplate>
-                    <Grid Margin="{StaticResource NavigationViewSubPageContentMargin}">
+                    <Grid>
                         <Frame x:Name="ContentFrame" Navigated="ContentFrame_Navigated" NavigationFailed="ContentFrame_NavigationFailed"/>
                     </Grid>
                 </NavigationView>

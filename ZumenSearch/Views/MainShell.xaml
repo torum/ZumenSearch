@@ -24,18 +24,39 @@
                    VerticalAlignment="Center"
                    Width="18"
                    Height="18"
-                   Margin="12,0,0,0" />
+                   Margin="12,0,0,0" Visibility="Collapsed"/>
             <TextBlock x:Name="AppTitleBarText"
                        VerticalAlignment="Center"
                        TextWrapping="NoWrap"
                        Style="{StaticResource CaptionTextBlockStyle}"
                        Margin="36,0,0,0"
-                       Text="図面検索"/>
+                       Text="ZumenSearch" Visibility="Collapsed"/>
         </Grid>
         
         <Grid Grid.Row="0" Grid.Column="0" Grid.RowSpan="2">
             <!--  BorderBrush="{ThemeResource SmokeFillColorDefaultBrush}" -->
-            <NavigationView x:Name="NavigationViewControl" Loaded="NavigationViewControl_Loaded" ItemInvoked="NavigationViewControl_ItemInvoked" Canvas.ZIndex="0" PaneDisplayMode="Left" IsBackButtonVisible="Collapsed" IsPaneToggleButtonVisible="True" IsBackEnabled="{x:Bind ViewModel.IsBackEnabled, Mode=OneWay}" IsSettingsVisible="True" ExpandedModeThresholdWidth="1280" OpenPaneLength ="200" DisplayModeChanged="NavigationViewControl_DisplayModeChanged">
+            <NavigationView x:Name="NavigationViewControl" Loaded="NavigationViewControl_Loaded" ItemInvoked="NavigationViewControl_ItemInvoked" Canvas.ZIndex="0" PaneDisplayMode="Left" IsBackButtonVisible="Collapsed" IsPaneToggleButtonVisible="True" IsBackEnabled="{x:Bind ViewModel.IsBackEnabled, Mode=OneWay}" IsSettingsVisible="True" ExpandedModeThresholdWidth="1280" OpenPaneLength ="230" DisplayModeChanged="NavigationViewControl_DisplayModeChanged">
+
+                <NavigationView.PaneHeader>
+                    <Grid VerticalAlignment="Center">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"></ColumnDefinition>
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Margin="6,0,0,0" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left">
+                            <Image Source="/Assets/App.ico"
+                   HorizontalAlignment="Left"
+                   VerticalAlignment="Center"
+                   Width="18"
+                   Height="18"
+                   Margin="6,0,0,0" />
+                            <TextBlock x:Name="AppTitleTextBlock" Text="ZumenSearch" FontWeight="SemiBold" Margin="6,0,0,0" VerticalAlignment="Center" Opacity="0.9"/>
+                        </StackPanel>
+
+                    </Grid>
+                </NavigationView.PaneHeader>
+
                 <!--
             <NavigationView.AutoSuggestBox>
                 <AutoSuggestBox QueryIcon="Find" AutomationProperties.Name="Search" PlaceholderText="Type a name">

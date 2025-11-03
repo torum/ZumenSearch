@@ -8,7 +8,7 @@
     xmlns:rent="using:ZumenSearch.Models.Rent.Residentials"
     mc:Ignorable="d">
 
-    <Grid x:Name="ContentArea" Margin="46,46,0,0">
+    <Grid x:Name="ContentArea" Margin="0,46,0,0">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -24,10 +24,10 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <BreadcrumbBar x:Name="BreadcrumbBar1" Grid.Row="0" Grid.Column="0">
+            <BreadcrumbBar x:Name="BreadcrumbBar1" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center">
                 <BreadcrumbBar.ItemTemplate>
                     <DataTemplate x:DataType="mod:Breadcrumb">
-                        <BreadcrumbBarItem Content="{Binding}" AutomationProperties.Name="{Binding Name}">
+                        <BreadcrumbBarItem Content="{Binding}">
                             <BreadcrumbBarItem.ContentTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding Name}" FontSize="32"  />
@@ -41,27 +41,9 @@
             <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,0,3,0">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <AppBarButton Icon="Back" Label="戻る" Command="{x:Bind ViewModel.BackToRentResidentialCommand}"/>
-                    <AppBarButton Icon="Edit" Label="編集" Command="{x:Bind ViewModel.EditRentResidentialCommand}" CommandParameter="{x:Bind SearchResult.SelectedItem, Mode=OneWay}"/>
+                    <AppBarButton Icon="Edit" Label="編集" Command="{x:Bind ViewModel.EditRentResidentialCommand}" CommandParameter="{x:Bind SearchResult.SelectedItem, Mode=OneWay}" Visibility="Collapsed"/>
                     <AppBarButton Icon="Add" Label="新規" Command="{x:Bind ViewModel.AddNewRentResidentialCommand}"/>
                 </StackPanel>
-                <!--
-                    <CommandBar DefaultLabelPosition="Right">
-
-                        <AppBarButton Icon="Back" Label="戻る"  Command="{x:Bind ViewModel.BackCommand}"/>
-                        <AppBarButton Icon="Edit" Label="編集"/>
-                        <AppBarButton Icon="Add" Label="新規" Command="{x:Bind ViewModel.AddNewCommand}"/>
-
-                        <AppBarSeparator Visibility="Collapsed"/>
-                        
-                        <CommandBar.SecondaryCommands>
-                        </CommandBar.SecondaryCommands>
-
-                        <CommandBar.Content>
-                            <TextBlock Text="Now playing..." Margin="12,14" Visibility="Collapsed"/>
-                        </CommandBar.Content>
-                    </CommandBar>
-                    -->
-
             </StackPanel>
 
         </Grid>
@@ -73,9 +55,9 @@
             </Grid.RowDefinitions>
 
             <StackPanel Grid.Row="0">
-                
+
                 <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Margin="0,0,24,0" HorizontalAlignment="Left">
-                    <AppBarButton Icon="Delete" Label="削除" Command="{x:Bind ViewModel.DeleteRentResidentialCommand}" CommandParameter="{x:Bind SearchResult.SelectedItem, Mode=OneWay}"/>
+                    <AppBarButton Icon="Edit" Label="編集" Command="{x:Bind ViewModel.EditRentResidentialCommand}" CommandParameter="{x:Bind SearchResult.SelectedItem, Mode=OneWay}"/>
                     <AppBarButton Icon="Copy" Label="複製"/>
                     <AppBarButton Icon="Sort" IsCompact="True" ToolTipService.ToolTip="Sort" Label="並べ替え" AutomationProperties.Name="Sort">
                         <AppBarButton.Flyout>
@@ -86,6 +68,8 @@
                             </MenuFlyout>
                         </AppBarButton.Flyout>
                     </AppBarButton>
+                    <AppBarButton Icon="Delete" Label="削除" Command="{x:Bind ViewModel.DeleteRentResidentialCommand}" CommandParameter="{x:Bind SearchResult.SelectedItem, Mode=OneWay}"/>
+
                     <!--<CommandBar.SecondaryCommands>
                             <AppBarButton Icon="Setting" Label="Settings">
                                 <AppBarButton.KeyboardAccelerators>

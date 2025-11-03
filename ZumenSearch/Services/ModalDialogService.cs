@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ZumenSearch.Services;
 using Microsoft.UI.Windowing;
-using ZumenSearch.ViewModels.Rent.Residentials.Editor;
+using ZumenSearch.ViewModels.Rent.Residentials;
 using ZumenSearch.Views.Rent.Residentials.Editor;
 
 namespace ZumenSearch.Services;
@@ -19,7 +19,7 @@ public class ModalDialogService : IModalDialogService
        
     }
 
-    public void ShowUnitDialog(EditorViewModel editVM, EditorWindow editWin)
+    public void ShowUnitDialog(ViewModels.Rent.Residentials.ResidentialsViewModel editVM, EditorWindow editWin)
     {
         Debug.WriteLine("ModalDialogService: ShowUnitDialog method called.");
 
@@ -37,11 +37,11 @@ public class ModalDialogService : IModalDialogService
         // https://github.com/microsoft/microsoft-ui-xaml/issues/10396
         // https://github.com/microsoft/WindowsAppSDK/discussions/3680
 
-        IntPtr hWndDialog = WinRT.Interop.WindowNative.GetWindowHandle(dialogWin);
+        var hWndDialog = WinRT.Interop.WindowNative.GetWindowHandle(dialogWin);
         //Microsoft.UI.WindowId windowId1 = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hWnd1);
         //Microsoft.UI.Windowing.AppWindow appWindow = Microsoft.UI.Windowing.AppWindow.GetFromWindowId(windowId1);
         //Microsoft.UI.Windowing.OverlappedPresenter presenter = appWindow.Presenter as Microsoft.UI.Windowing.OverlappedPresenter;
-        IntPtr hWndEditor = WinRT.Interop.WindowNative.GetWindowHandle(editWin);
+        var hWndEditor = WinRT.Interop.WindowNative.GetWindowHandle(editWin);
         SetWindowLong(hWndDialog, GWL_HWNDPARENT, hWndEditor);
 
         Microsoft.UI.Windowing.AppWindow? appWindow = dialogWin.AppWindow;

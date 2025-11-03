@@ -75,13 +75,13 @@ public partial class App : Application
             services.AddSingleton<MainViewModel>();
             services.AddSingleton<MainWindow>();
 
-            services.AddSingleton<Views.RentSearchPage>();
+            services.AddSingleton<Views.Rent.RentPage>();
 
             services.AddSingleton<Views.Rent.Residentials.SearchPage>();
             services.AddSingleton<Views.Rent.Residentials.SearchResultPage>();
             
             services.AddTransient<Views.Rent.Residentials.Editor.EditorWindow>();
-            services.AddTransient<ViewModels.Rent.Residentials.Editor.EditorViewModel>();
+            services.AddTransient<ViewModels.Rent.Residentials.ResidentialsViewModel>();
             services.AddEditorFactory<Views.Rent.Residentials.Editor.EditorShell>();
 
             services.AddSingleton<Views.Rent.Commercials.CommercialsPage>();
@@ -93,11 +93,8 @@ public partial class App : Application
             services.AddSingleton<Views.Rent.Owners.OwnersPage>();
             services.AddSingleton<ViewModels.Rent.Owners.OwnersViewModel>();
 
-            services.AddSingleton<Views.BrokersPage>();
-            services.AddSingleton<ViewModels.BrokersViewModel>();
-
+            services.AddSingleton<Views.Brokers.BrokersPage>();
             services.AddSingleton<SettingsPage>();
-            services.AddSingleton<SettingsViewModel>();
         }).
         Build();
 

@@ -1,20 +1,23 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Input;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
+using Microsoft.Windows.ApplicationModel.Resources;
+using Windows.ApplicationModel;
 using Windows.UI.ApplicationSettings;
 using ZumenSearch.Helpers;
 using ZumenSearch.Models;
@@ -28,7 +31,18 @@ namespace ZumenSearch.ViewModels;
 
 public partial class MainViewModel : ObservableObject
 {
+    private static readonly ResourceLoader _resourceLoader = new();
+
+    private string _versionDescription;
+
+    public string VersionDescription
+    {
+        get => _versionDescription;
+        private set => SetProperty(ref _versionDescription, value);
+    }
+
     #region == Properties ==
+
     private static MainShell Shell => App.GetService<MainShell>();
 
     private static MainWindow MainWin => App.GetService<MainWindow>();
@@ -94,6 +108,9 @@ public partial class MainViewModel : ObservableObject
         _dataAccessService = dataAccessService;
 
         InitializeDatabaseAsync();
+
+        _versionDescription = GetVersionDescription();
+
     }
 
     #endregion
@@ -117,12 +134,30 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
+    private static string GetVersionDescription()
+    {
+        Version version;
+
+        if (RuntimeHelper.IsMSIX)
+        {
+            var packageVersion = Package.Current.Id.Version;
+
+            version = new(packageVersion.Major, packageVersion.Minor, packageVersion.Build, packageVersion.Revision);
+        }
+        else
+        {
+            version = Assembly.GetExecutingAssembly().GetName().Version!;
+        }
+
+        var verName = _resourceLoader.GetString("AppDisplayName");
+
+        return $"{verName} - {version.Major}.{version.Minor}.{version.Build}.{version.Revision}";
+    }
     #endregion
 
     #region == Commands ==
 
-    private RelayCommand? addNewRentResidentialCommand;
-    public IRelayCommand AddNewRentResidentialCommand => addNewRentResidentialCommand ??= new RelayCommand(AddNewRentResidential);
+    [RelayCommand]
     private void AddNewRentResidential()
     {
         //Debug.WriteLine("AddNew command executed!");
@@ -225,9 +260,8 @@ public partial class MainViewModel : ObservableObject
         */
     }
 
-    private RelayCommand? searchRentResidentialCommand;
-    public IRelayCommand SearchRentResidentialCommand => searchRentResidentialCommand ??= new RelayCommand(SearchRentResidentialAsync);
-    private async void SearchRentResidentialAsync()
+    [RelayCommand]
+    private async Task SearchRentResidential()
     {
         //SelectedRentResidentialItem = null;
         RentResidentialSearchResult.Clear();
@@ -250,9 +284,8 @@ public partial class MainViewModel : ObservableObject
         Shell.NavFrame.Navigate(typeof(Views.Rent.Residentials.SearchResultPage), Shell.NavFrame, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });
     }
 
-    private RelayCommand<Models.Rent.Residentials.EntryResidentialSearchResult>? editRentResidentialCommand;
-    public IRelayCommand<Models.Rent.Residentials.EntryResidentialSearchResult> EditRentResidentialCommand => editRentResidentialCommand ??= new RelayCommand<Models.Rent.Residentials.EntryResidentialSearchResult>(EditRentResidential);
-    private async void EditRentResidential(Models.Rent.Residentials.EntryResidentialSearchResult? selected)
+    [RelayCommand]
+    private async Task EditRentResidential(Models.Rent.Residentials.EntryResidentialSearchResult? selected)
     {
         var isFound = false;
         
@@ -346,9 +379,8 @@ public partial class MainViewModel : ObservableObject
         editorWindow.Activate();
     }
 
-    private RelayCommand<Models.Rent.Residentials.EntryResidentialSearchResult>? deleteRentResidentialCommand;
-    public IRelayCommand<Models.Rent.Residentials.EntryResidentialSearchResult> DeleteRentResidentialCommand => deleteRentResidentialCommand ??= new RelayCommand<Models.Rent.Residentials.EntryResidentialSearchResult>(DeleteRentResidentialAsync);
-    private async void DeleteRentResidentialAsync(Models.Rent.Residentials.EntryResidentialSearchResult? selected)
+    [RelayCommand]
+    private async Task DeleteRentResidential(Models.Rent.Residentials.EntryResidentialSearchResult? selected)
     {
         if (selected == null)
         {
@@ -404,9 +436,8 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
-    private RelayCommand? backToRentResidentialCommand;
-    public IRelayCommand BackToRentResidentialCommand => backToRentResidentialCommand ??= new RelayCommand(BackToRentResidential);
-    private void BackToRentResidential()
+    [RelayCommand]
+    private static void BackToRentResidential()
     {
         Shell.NavFrame.Navigate(typeof(Views.Rent.Residentials.SearchPage), Shell.NavFrame, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });
     }
