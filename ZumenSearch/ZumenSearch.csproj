@@ -66,6 +66,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Helpers\" />
+    <Folder Include="Models\Location\" />
     <Folder Include="Styles\" />
     <Folder Include="Strings\" />
   </ItemGroup>

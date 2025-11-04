@@ -30,7 +30,7 @@
             <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
 
                 <Image x:Name="AppTitleBarIcon" Source="/Assets/App.ico" HorizontalAlignment="Left" Width="18" Height="18" Margin="12,0,0,0" VerticalAlignment="Center"/>
-                <TextBlock x:Name="AppTitleBarText" Text="賃貸住居用" TextWrapping="NoWrap"  Margin="12,0,0,0" VerticalAlignment="Center"/>
+                <TextBlock x:Name="AppTitleBarText" Text="{x:Bind ViewModel.WindowTitle, Mode=OneWay}" TextWrapping="NoWrap"  Margin="12,0,0,0" VerticalAlignment="Center"/>
 
             </StackPanel>
 

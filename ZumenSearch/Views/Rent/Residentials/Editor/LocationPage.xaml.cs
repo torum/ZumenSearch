@@ -9,7 +9,6 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
 using ZumenSearch.Models;
-using ZumenSearch.Models.Location;
 using static Microsoft.Extensions.Logging.EventSource.LoggingEventSource;
 
 namespace ZumenSearch.Views.Rent.Residentials.Editor;

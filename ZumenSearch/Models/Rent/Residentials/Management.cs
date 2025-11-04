@@ -4,14 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ZumenSearch.Models.Rent.Residentials
+namespace ZumenSearch.Models.Rent.Residentials;
+
+internal class Management
 {
-    internal class Management
+    // 建物管理形態
+    public enum EnumManagement
     {
-        // 建物管理形態
-        public enum EnumManagement
-        {
-            Unspecified, Kashinushi, Tasha, Jisya, Unknown,
-        }
+        Unspecified, Kashinushi, Tasha, Jisya, Unknown,
     }
 }

@@ -1,5 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -13,11 +12,13 @@ using System.Windows;
 using System.Windows.Input;
 using System.Xml;
 using System.Xml.Linq;
+using CommunityToolkit.Mvvm.ComponentModel;
+using ZumenSearch.Models;
 using ZumenSearch.ViewModels;
 
 namespace ZumenSearch.Models;
 
-public abstract class EntryBase : ObservableObject
+public abstract partial class EntryBase : ObservableObject
 {
     private bool _isDirty;
     public bool IsDirty
@@ -64,8 +65,81 @@ public abstract class EntryBase : ObservableObject
         }
     }
 
-    /*
     #region == 所在地 ==
+
+    private string _prefId = string.Empty;
+    public string LocPrefId
+    {
+        get => _prefId ?? string.Empty;
+        set => SetProperty(ref _prefId, value);
+    }
+
+    private string _prefecture = string.Empty;
+    public string LocPrefecture
+    {
+        get => _prefecture ?? string.Empty;
+        set => SetProperty(ref _prefecture, value);
+    }
+
+    private string _machiazaId = string.Empty;
+    public string LocMachiazaId
+    {
+        get => _machiazaId ?? string.Empty;
+        set => SetProperty(ref _machiazaId, value);
+    }
+
+    private string _county = string.Empty;
+    public string LocCounty
+    {
+        get => _county ?? string.Empty;
+        set => SetProperty(ref _county, value);
+    }
+
+    private string _city = string.Empty;
+    public string LocCity
+    {
+        get => _city ?? string.Empty;
+        set => SetProperty(ref _city, value);
+    }
+
+    private string _ward = string.Empty;
+    public string LocWard
+    {
+        get => _ward ?? string.Empty;
+        set => SetProperty(ref _ward, value);
+    }
+
+    private string _oazaCho = string.Empty;
+    public string LocOazaCho
+    {
+        get => _oazaCho ?? string.Empty;
+        set => SetProperty(ref _oazaCho, value);
+    }
+
+    private string _choume = string.Empty;
+    public string LocChoume
+    {
+        get => _choume ?? string.Empty;
+        set => SetProperty(ref _choume, value);
+    }
+
+    private string _edaban = string.Empty;
+    public string LocEdaban
+    {
+        get => _edaban ?? string.Empty;
+        set => SetProperty(ref _edaban, value);
+    }
+
+    private string _locationFull = string.Empty;
+    public string LocLocationFull
+    {
+        get => _locationFull ?? string.Empty;
+        set => SetProperty(ref _locationFull, value);
+    }
+
+    #endregion
+
+    /*
 
     // 所在地郵便番号
     private string _postalCode;
@@ -150,7 +224,7 @@ public abstract class EntryBase : ObservableObject
         }
     }
 
-    #endregion
+
     */
     /*
     #region == 交通 ==

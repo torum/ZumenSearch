@@ -27,7 +27,7 @@ public sealed partial class ModalShell : Page
     private readonly List<(string Tag, Type? Page)> _pages =
     [
         ("room", null),
-        ("room_summary", typeof(Views.Rent.Residentials.Editor.Modal.SummaryPage)),
+        ("room_summary", typeof(Views.Rent.Residentials.Editor.Modal.BasicPage)),
         ("room_status", typeof(Views.Rent.Residentials.Editor.Modal.StatusPage)),
         ("room_contract", typeof(Views.Rent.Residentials.Editor.Modal.ContractPage)),
         ("room_transaction", typeof(Views.Rent.Residentials.Editor.Modal.TransactionPage)),
@@ -98,7 +98,7 @@ public sealed partial class ModalShell : Page
             Debug.WriteLine("No first menu item found in NavView.");
         }
 
-        ContentFrame.Navigate(typeof(ZumenSearch.Views.Rent.Residentials.Editor.Modal.SummaryPage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });
+        ContentFrame.Navigate(typeof(ZumenSearch.Views.Rent.Residentials.Editor.Modal.BasicPage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });
     }
 
     private void ContentFrame_NavigationFailed(object sender, NavigationFailedEventArgs e)
@@ -157,7 +157,7 @@ public sealed partial class ModalShell : Page
     {
         App.CurrentDispatcherQueue?.TryEnqueue(() =>
         {
-            ContentFrame.Navigate(typeof(Views.Rent.Residentials.Editor.Modal.SummaryPage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });
+            ContentFrame.Navigate(typeof(Views.Rent.Residentials.Editor.Modal.BasicPage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });
         });
     }
 

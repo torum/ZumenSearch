@@ -17,7 +17,7 @@ using ZumenSearch.Views;
 
 namespace ZumenSearch.Views.Rent.Residentials.Editor;
 
-public sealed partial class SummaryPage : Page
+public sealed partial class BasicPage : Page
 {
     //private Views.Rent.Residentials.Editor.EditorShell? _editorShell;
 
@@ -41,9 +41,9 @@ public sealed partial class SummaryPage : Page
         Unspecified, Apartment, Mansion, House, TerraceHouse, TownHouse, ShareHouse, Dormitory
     }
 
-    public SummaryPage()
+    public BasicPage()
     {
-        //Debug.WriteLine("Views.Rent.Residentials.Editor.SummaryPage init!");
+        //Debug.WriteLine("Views.Rent.Residentials.Editor.BasicPage init!");
 
         //ViewModel = new ViewModels.Rent.Residentials.Editor.SummaryViewModel();//App.GetService<RentLivingEditBuildingViewModel>();
 

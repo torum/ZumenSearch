@@ -9,12 +9,12 @@ using System.Xml.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Data.Sqlite;
+using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
 using Windows.System;
 using ZumenSearch.Models;
-using ZumenSearch.Models.Location;
 using ZumenSearch.Models.Rent.Residentials;
 using ZumenSearch.Services;
 using ZumenSearch.Views;
@@ -26,7 +26,23 @@ public partial class ResidentialsViewModel : ObservableObject
 {
     #region == Properties ==
 
-    #region == EntryResidential related properties ==
+    private readonly string _windowTitleBase = "賃貸住居用";
+
+    public string WindowTitle
+    {
+        get
+        {
+            if (string.IsNullOrEmpty(_name))
+            {
+                return _windowTitleBase;
+            }
+            else
+            {
+                return $"{_windowTitleBase} - {_name}";
+            }
+            
+        }
+    }
 
     // The Entry property holds the COPY of current RentResidential entry being edited. Do not use it directly in the UI. Apply changes to this object in SaveAsync() to save the changes.
     // MainViewModel creates a new instance of this class and call EditorShell.SetEntry(EntryResidentialFull) and sets this property.
@@ -61,6 +77,7 @@ public partial class ResidentialsViewModel : ObservableObject
             {
                 IsEntryDirty = true;
                 OnPropertyChanged(nameof(BasicsPreview));
+                OnPropertyChanged(nameof(WindowTitle));
             }
         }
     }
@@ -154,6 +171,8 @@ public partial class ResidentialsViewModel : ObservableObject
 
     private readonly SqliteConnectionStringBuilder connectionStringBuilder = new("Data Source=" + "mt_town_all.db");
 
+    private string? MachiazaId;
+
     public ObservableCollection<Pref> Prefs =
     [
         new Pref("01","010006", "北海道"),
@@ -205,10 +224,8 @@ public partial class ResidentialsViewModel : ObservableObject
             new Pref("47","470007", "沖縄県"),
     ];
 
-    private string? MachiazaId;
-
-    private Pref _selectedPef = new("", "", "");
-    public Pref SelectedPef
+    private Pref? _selectedPef;
+    public Pref? SelectedPef
     {
         get => _selectedPef;
         set
@@ -224,6 +241,7 @@ public partial class ResidentialsViewModel : ObservableObject
                     return;
                 }
 
+                // TODO: move this to service. with async and try catch.
                 var dataset = new List<CountyAndCity>();
 
                 using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
@@ -288,6 +306,8 @@ public partial class ResidentialsViewModel : ObservableObject
                     return;
                 }
 
+                // TODO: move this.
+
                 var dataset = new List<WardAndOaza>();
 
                 using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
@@ -339,6 +359,11 @@ public partial class ResidentialsViewModel : ObservableObject
                 OnPropertyChanged(nameof(AddressPreview));
             }
 
+            if (_selectedPef is null)
+            {
+                Chous = null;
+                return;
+            }
             if (_selectedCity is null)
             {
                 Chous = null;
@@ -350,6 +375,8 @@ public partial class ResidentialsViewModel : ObservableObject
                 Chous = null;
                 return;
             }
+
+            // TODO: move this
 
             var dataset = new List<Choume>();
 
@@ -402,13 +429,14 @@ public partial class ResidentialsViewModel : ObservableObject
         }
     }
 
-    private string _banchi = string.Empty;
-    public string Banchi
+    // db:loc_edaban
+    private string _edaban = string.Empty;
+    public string Edaban
     {
-        get => _banchi;
+        get => _edaban;
         set
         {
-            if (SetProperty(ref _banchi, value))
+            if (SetProperty(ref _edaban, value))
             {
                 IsEntryDirty = true;
                 OnPropertyChanged(nameof(AddressPreview));
@@ -442,9 +470,9 @@ public partial class ResidentialsViewModel : ObservableObject
             }
 
             var s = string.Empty;
-            if (!string.IsNullOrEmpty(_banchi))
+            if (!string.IsNullOrEmpty(_edaban))
             {
-                s = "-" + _banchi;
+                s = "-" + _edaban;
             }
             // TODO:
             return $"{SelectedPef.Name}{_selectedCity?.Combined}{_selectedTown?.Combined}{_selectedChou?.Chou}{s}";
@@ -576,7 +604,7 @@ public partial class ResidentialsViewModel : ObservableObject
 
     #region == 構造 ==
 
-    private Structure _selectedStructure = new(Models.Rent.Residentials.EnumStructure.Unspecified.ToString(), "");
+    private Structure _selectedStructure = new(Models.Rent.Residentials.EnumStructure.Unspecified, "");
     public Structure SelectedStructure
     {
         get => _selectedStructure;
@@ -593,18 +621,18 @@ public partial class ResidentialsViewModel : ObservableObject
     public ObservableCollection<Structure> Structures =
     [
         //new Structure(EnumStructure.Unspecified.ToString(), "未指定"),
-        new Structure(Models.Rent.Residentials.EnumStructure.Wood.ToString(), "木造"),
-        new Structure(Models.Rent.Residentials.EnumStructure.Block.ToString(), "ブロック造"),
-        new Structure(Models.Rent.Residentials.EnumStructure.LightSteel.ToString(), "軽量鉄骨造"),
-        new Structure(Models.Rent.Residentials.EnumStructure.Steel.ToString(), "鉄骨造"),
-        new Structure(Models.Rent.Residentials.EnumStructure.RC.ToString(), "鉄筋コンクリート(RC)造"),
-        new Structure(Models.Rent.Residentials.EnumStructure.SRC.ToString(), "鉄骨鉄筋コンクリート(SRC)造"),
-        new Structure(Models.Rent.Residentials.EnumStructure.ALC.ToString(), "軽量気泡コンクリート(ALC)造"),
-        new Structure(Models.Rent.Residentials.EnumStructure.PC.ToString(), "プレキャストコンクリート(PC)造"),
-        new Structure(Models.Rent.Residentials.EnumStructure.HPC.ToString(), "鉄骨プレキャストコンクリート(HPC)造"),
-        new Structure(Models.Rent.Residentials.EnumStructure.RB.ToString(), "鉄筋ブロック造"),
-        new Structure(Models.Rent.Residentials.EnumStructure.CFT.ToString(), "コンクリート充填鋼管(CFT)造"),
-        new Structure(Models.Rent.Residentials.EnumStructure.Other.ToString(), "その他")
+        new Structure(Models.Rent.Residentials.EnumStructure.Wood, "木造"),
+        new Structure(Models.Rent.Residentials.EnumStructure.Block, "ブロック造"),
+        new Structure(Models.Rent.Residentials.EnumStructure.LightSteel, "軽量鉄骨造"),
+        new Structure(Models.Rent.Residentials.EnumStructure.Steel, "鉄骨造"),
+        new Structure(Models.Rent.Residentials.EnumStructure.RC, "鉄筋コンクリート(RC)造"),
+        new Structure(Models.Rent.Residentials.EnumStructure.SRC, "鉄骨鉄筋コンクリート(SRC)造"),
+        new Structure(Models.Rent.Residentials.EnumStructure.ALC, "軽量気泡コンクリート(ALC)造"),
+        new Structure(Models.Rent.Residentials.EnumStructure.PC, "プレキャストコンクリート(PC)造"),
+        new Structure(Models.Rent.Residentials.EnumStructure.HPC, "鉄骨プレキャストコンクリート(HPC)造"),
+        new Structure(Models.Rent.Residentials.EnumStructure.RB, "鉄筋ブロック造"),
+        new Structure(Models.Rent.Residentials.EnumStructure.CFT, "コンクリート充填鋼管(CFT)造"),
+        new Structure(Models.Rent.Residentials.EnumStructure.Other, "その他")
     ];
 
     private int _basementFloorCount = 0;
@@ -1123,7 +1151,6 @@ public partial class ResidentialsViewModel : ObservableObject
 
     #endregion
 
-    #endregion
 
     #region == Events
 
@@ -1157,7 +1184,7 @@ public partial class ResidentialsViewModel : ObservableObject
     #region == Constructor ==
 
     // Constructor for the EditorViewModel class, initializes the data access service and the entry.
-#pragma warning disable IDE0290
+    #pragma warning disable IDE0290
     public ResidentialsViewModel(IDataAccessService dataAccessService, IModalDialogService modalDialog )
     {
         _dataAccessService = dataAccessService;
@@ -1172,30 +1199,76 @@ public partial class ResidentialsViewModel : ObservableObject
 
     public void SetEntry(Models.Rent.Residentials.EntryResidentialFull entry)
     {
-        if (entry != null)
+        if (entry is null)
         {
-            _entry = entry;
-            /*
-            if (_editorWindow == null)
-            {
-                // TODO: Log an error or handle it accordingly.
-                return;
-            }
-
-            // Set the Id property of the window to the Entry.Id.
-            _editorWindow.Id = _entry.Id;
-            */
-
-            Name = _entry.Name;
-            BuildingPictures = new ObservableCollection<PictureBuilding>(_entry.BuildingPictures); // create a copy.
-            //TODO: Set other properties
-
-            IsEntryDirty = false;
+            return;
         }
+
+        _entry = entry;
+
+        Name = _entry.Name;
+
+        if (!string.IsNullOrEmpty(_entry.LocPrefId))
+        {
+            var hoge = Prefs.FirstOrDefault<Pref>(p => p.MunicipalityCode.Equals(_entry.LocPrefId));
+            if (hoge is not null)
+            {
+                SelectedPef = hoge;
+            }
+        }
+
+        if ((Cities is not null) && ((!string.IsNullOrEmpty(_entry.LocCounty)) || (!string.IsNullOrEmpty(_entry.LocCity))))
+        {
+            foreach (var cty in Cities)
+            {
+                if (cty.County.Equals(_entry.LocCounty) && cty.City.Equals(_entry.LocCity))
+                {
+                    SelectedCity = cty;
+                    break;
+                }
+            }
+        }
+
+        if ((Towns is not null) && ((!string.IsNullOrEmpty(_entry.LocWard)) || (!string.IsNullOrEmpty(_entry.LocOazaCho))))
+        {
+            foreach (var twn in Towns)
+            {
+                if (twn.Ward.Equals(_entry.LocWard) && twn.Oaza.Equals(_entry.LocOazaCho))
+                {
+                    SelectedTown = twn;
+                    break;
+                }
+            }
+        }
+
+        if ((Chous is not null) && (!string.IsNullOrEmpty(_entry.LocChoume)))
+        {
+            var hoge = Chous.FirstOrDefault<Choume>(p => p.Chou.Equals(_entry.LocChoume));
+            if (hoge is not null)
+            {
+                SelectedChou = hoge;
+            }
+        }
+
+        Edaban = _entry.LocEdaban;
+
+        ////////////////
+
+        //TODO: Set other properties
+
+        BuildingPictures = new ObservableCollection<PictureBuilding>(_entry.BuildingPictures); // create a copy.
+        
+
+        IsEntryDirty = false;
     }
 
     public void SetNewBuildingPictures(List<string> filePathList)
     {
+        if (filePathList.Count <= 0)
+        {
+            return;
+        }
+
         foreach (var filePath in filePathList) 
         {
             if (string.IsNullOrEmpty(filePath.Trim()))
@@ -1232,11 +1305,6 @@ public partial class ResidentialsViewModel : ObservableObject
 
     #region == Commands ==
 
-    /*
-    private RelayCommand? saveCommand;
-
-    public IRelayCommand SaveCommand => saveCommand ??= new RelayCommand(SaveAsync);
-    */
     [RelayCommand(CanExecute = nameof(CanSave))]
     private void Save()
     {
@@ -1248,29 +1316,50 @@ public partial class ResidentialsViewModel : ObservableObject
     }
     private async void SaveAsync()
     {
-        if (IsEntryDirty)
+        if (!IsEntryDirty)
         {
-            if (string.IsNullOrEmpty(Name))
-            {
-                Debug.WriteLine("TODO: Name is null or empty. This field is required. Show alart and abort.");
-                return;
-            }
+            return;
+        }
 
-            _entry.Name = Name;
-            //TODO: Set other properties for Entry.
-            _entry.BuildingPictures = BuildingPictures;
+        if (string.IsNullOrEmpty(Name))
+        {
+            Debug.WriteLine("TODO: Name is null or empty. This field is required. Show alart and abort.");
+            return;
+        }
 
-            if (string.IsNullOrEmpty(_entry.Id))
-            {
-                // If the Entry.Id is empty, generate a new ID and save as new.
-                _entry.SetId = Guid.CreateVersion7().ToString();
-                await SaveAsNew().ConfigureAwait(false);
-            }
-            else
-            {
-                // If the Entry.Id is not empty, update the existing entry.
-                await SaveAsUpdate().ConfigureAwait(false);
-            }
+        // 物件名
+        _entry.Name = Name;
+
+        // 所在地
+        _entry.LocPrefId = (_selectedPef is not null) ? _selectedPef.MunicipalityCode : string.Empty;
+        _entry.LocPrefecture = (_selectedPef is not null) ? _selectedPef.Name : string.Empty;
+        _entry.LocMachiazaId = (!string.IsNullOrEmpty(MachiazaId)) ? MachiazaId : string.Empty;
+        _entry.LocCounty = (_selectedCity is not null) ? _selectedCity.County : string.Empty;
+        _entry.LocCity = (_selectedCity is not null) ? _selectedCity.City : string.Empty;
+        _entry.LocWard = (_selectedTown is not null) ? _selectedTown.Ward : string.Empty;
+        _entry.LocOazaCho = (_selectedTown is not null) ? _selectedTown.Oaza : string.Empty;
+        _entry.LocChoume = (_selectedChou is not null) ? _selectedChou.Chou : string.Empty;
+        _entry.LocEdaban = (!string.IsNullOrEmpty(_edaban)) ? _edaban : string.Empty;
+        _entry.LocLocationFull = AddressPreview;
+
+
+        //TODO: Set other properties for Entry.
+        //////////////////
+
+        // 写真
+        _entry.BuildingPictures = BuildingPictures;
+
+
+        if (string.IsNullOrEmpty(_entry.Id))
+        {
+            // If the Entry.Id is empty, generate a new ID and save as new.
+            _entry.SetId = Guid.CreateVersion7().ToString();
+            await SaveAsNew();
+        }
+        else
+        {
+            // If the Entry.Id is not empty, update the existing entry.
+            await SaveAsUpdate();
         }
     }
     private Task SaveAsNew()
@@ -1278,7 +1367,7 @@ public partial class ResidentialsViewModel : ObservableObject
         var resInsert = _dataAccessService.InsertRentResidential(_entry);
         if (resInsert.IsError)
         {
-            Debug.WriteLine("Error on insert.");
+            Debug.WriteLine("Error on insert. @SaveAsNew in ResidentialsViewModel");
             Debug.WriteLine(resInsert.Error.ErrText + Environment.NewLine + resInsert.Error.ErrDescription + Environment.NewLine + resInsert.Error.ErrPlace + Environment.NewLine + resInsert.Error.ErrPlaceParent);
 
             App.CurrentDispatcherQueue?.TryEnqueue(() =>
@@ -1303,7 +1392,7 @@ public partial class ResidentialsViewModel : ObservableObject
         var resInsert = _dataAccessService.UpdateRentResidential(_entry);
         if (resInsert.IsError)
         {
-            Debug.WriteLine("Error on update.");
+            Debug.WriteLine("Error on update. @SaveAsUpdate in ResidentialsViewModel");
             Debug.WriteLine(resInsert.Error.ErrText + Environment.NewLine + resInsert.Error.ErrDescription + Environment.NewLine + resInsert.Error.ErrPlace + Environment.NewLine + resInsert.Error.ErrPlaceParent);
 
             App.CurrentDispatcherQueue?.TryEnqueue(() =>
@@ -1386,18 +1475,20 @@ public partial class ResidentialsViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanDeleteSelectedBuildingPicture))]
     public void DeleteSelectedBuildingPicture()
     {
-        if (SelectedBuildingPicture != null)
+        if (SelectedBuildingPicture == null)
         {
-            if (_entry.BuildingPictures.Remove(SelectedBuildingPicture))
-            {
-                _entry.BuildingPicturesToBeDeleted.Add(SelectedBuildingPicture);
+            return;
+        }
 
-                IsEntryDirty = true;
+        if (_entry.BuildingPictures.Remove(SelectedBuildingPicture))
+        {
+            _entry.BuildingPicturesToBeDeleted.Add(SelectedBuildingPicture);
 
-                BuildingPictures.Remove(SelectedBuildingPicture);
+            IsEntryDirty = true;
 
-                SelectedBuildingPicture = null;
-            }
+            BuildingPictures.Remove(SelectedBuildingPicture);
+
+            SelectedBuildingPicture = null;
         }
     }
     private bool CanDeleteSelectedBuildingPicture()
@@ -1408,26 +1499,28 @@ public partial class ResidentialsViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanUpdatedBuildingPictureProperty))]
     public void UpdatedBuildingPictureProperty()
     {
-        if (SelectedBuildingPicture != null)
+        if (SelectedBuildingPicture == null)
         {
-            if (BuildingPictureIsMain)
-            {
-                foreach(var asdf in BuildingPictures)
-                {
-                    asdf.IsMain = false;
-                }
-            }
-            SelectedBuildingPicture.IsMain = BuildingPictureIsMain;
-            SelectedBuildingPicture.Title = BuildingPictureTitle;
-            SelectedBuildingPicture.Description = BuildingPictureDescription;
-
-            SelectedBuildingPicture.IsModified = true;
-
-            IsEntryDirty = true;
-
-            BuildingPicturePropertiesIsDirty = false;
-            UpdatedBuildingPicturePropertyCommand.NotifyCanExecuteChanged();
+            return;
         }
+
+        if (BuildingPictureIsMain)
+        {
+            foreach (var asdf in BuildingPictures)
+            {
+                asdf.IsMain = false;
+            }
+        }
+        SelectedBuildingPicture.IsMain = BuildingPictureIsMain;
+        SelectedBuildingPicture.Title = BuildingPictureTitle;
+        SelectedBuildingPicture.Description = BuildingPictureDescription;
+
+        SelectedBuildingPicture.IsModified = true;
+
+        IsEntryDirty = true;
+
+        BuildingPicturePropertiesIsDirty = false;
+        UpdatedBuildingPicturePropertyCommand.NotifyCanExecuteChanged();
     }
     private bool CanUpdatedBuildingPictureProperty()
     {

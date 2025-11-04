@@ -121,9 +121,10 @@ public partial class MainViewModel : ObservableObject
     {
         var filePath = Path.Combine(App.AppDataFolder, "ZumenSearch.db");
 
-        var res = await Task.FromResult(_dataAccessService.InitializeDatabase(filePath)).ConfigureAwait(false);
+        var res = await Task.FromResult(_dataAccessService.InitializeDatabase(filePath));
         if (res.IsError)
         {
+            Debug.WriteLine("InitializeDatabase @InitializeDatabaseAsync in MainViewModel");
 
             Debug.WriteLine(res.Error.ErrText + Environment.NewLine + res.Error.ErrDescription + Environment.NewLine + res.Error.ErrPlace + Environment.NewLine + res.Error.ErrPlaceParent);
 

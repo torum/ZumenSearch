@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ZumenSearch.Models.Location;
+namespace ZumenSearch.Models;
 
 
 // 賃貸住居用物件の「都道府県」クラス
@@ -16,24 +16,25 @@ public class Pref(string code, string municipalityCode, string name)
     public string Code { get; private set; } = code;
 
     // 市区町村コード
+    // db:loc_pref_id
     public string MunicipalityCode { get; private set; } = municipalityCode;
 
-    // db:pref
+    // db:loc_prefecture
     public string Name { get; private set; } = name;
 };
 
 public class CountyAndCity
 {
-    //machiaza_id
+    // db:loc_machiaza_id
     public string MachiazaId
     {
         get; init;
     }
 
-    // 郡 db:county
+    // 郡 db:loc_county
     public string County { get; init; }
 
-    // 市区町村 db:city
+    // 市区町村 db:loc_city
     public string City { get; init; }
 
     public string Combined 
@@ -61,17 +62,19 @@ public class CountyAndCity
 
 public class WardAndOaza
 {
-    //machiaza_id
+    // db:loc_machiaza_id
     public string MachiazaId
     {
         get; init;
     }
 
+    // db:loc_ward
     public string Ward
     {
         get; init;
     }
 
+    // db:loc_oaza_cho
     public string Oaza
     {
         get; init;
@@ -102,11 +105,13 @@ public class WardAndOaza
 
 public class Choume
 {
+    // db:loc_machiaza_id
     public string MachiazaId
     {
         get; init;
     }
 
+    // db:loc_choume
     public string Chou
     {
         get; init;

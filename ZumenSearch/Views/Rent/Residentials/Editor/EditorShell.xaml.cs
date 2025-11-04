@@ -27,7 +27,7 @@ public sealed partial class EditorShell : Page
     private readonly List<(string Tag, string Label, Type? Page)> _pages =
     [
         ("building", "建物", null),
-        ("summary", "基本", typeof(Views.Rent.Residentials.Editor.SummaryPage)),
+        ("summary", "基本", typeof(Views.Rent.Residentials.Editor.BasicPage)),
         //("structure", "", typeof(Views.Rent.Residentials.Editor.StructurePage)),
         ("location", "所在地", typeof(Views.Rent.Residentials.Editor.LocationPage)),
         ("transportation", "交通", typeof(Views.Rent.Residentials.Editor.TransportationPage)),
@@ -80,11 +80,11 @@ public sealed partial class EditorShell : Page
     {
         if (args.Index == 0)
         {
-            if (ContentFrame.Navigate(typeof(Views.Rent.Residentials.Editor.SummaryPage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom }))
+            if (ContentFrame.Navigate(typeof(Views.Rent.Residentials.Editor.BasicPage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom }))
             {
                 BreadcrumbBar1.ItemsSource = new ObservableCollection<Breadcrumb>{
-                    new() { Name = "建物", Page = typeof(Views.Rent.Residentials.Editor.SummaryPage).FullName!},
-                    new() { Name = "基本", Page = typeof(Views.Rent.Residentials.Editor.SummaryPage).FullName!},
+                    new() { Name = "建物", Page = typeof(Views.Rent.Residentials.Editor.BasicPage).FullName!},
+                    new() { Name = "基本", Page = typeof(Views.Rent.Residentials.Editor.BasicPage).FullName!},
                 };
 
                 NavView.SelectedItem = NavView.MenuItems.OfType<NavigationViewItem>().Where(n => n.Tag.Equals("summary")).First();
@@ -171,11 +171,11 @@ public sealed partial class EditorShell : Page
         */
 
         // Pass Frame when navigate.  //, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft } //, new SuppressNavigationTransitionInfo() //new EntranceNavigationTransitionInfo()
-        if (ContentFrame.Navigate(typeof(ZumenSearch.Views.Rent.Residentials.Editor.SummaryPage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom }))
+        if (ContentFrame.Navigate(typeof(ZumenSearch.Views.Rent.Residentials.Editor.BasicPage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom }))
         {
             BreadcrumbBar1.ItemsSource = new ObservableCollection<Breadcrumb>{
-                new() { Name = "建物", Page = typeof(Views.Rent.Residentials.Editor.SummaryPage).FullName!},
-                new() { Name = "基本", Page = typeof(Views.Rent.Residentials.Editor.SummaryPage).FullName!},
+                new() { Name = "建物", Page = typeof(Views.Rent.Residentials.Editor.BasicPage).FullName!},
+                new() { Name = "基本", Page = typeof(Views.Rent.Residentials.Editor.BasicPage).FullName!},
             };
 
             NavView.SelectedItem = NavView.MenuItems.OfType<NavigationViewItem>().Where(n => n.Tag.Equals("summary")).First();
@@ -212,7 +212,7 @@ public sealed partial class EditorShell : Page
             if (ContentFrame.Navigate(item.Page, ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom }))
             {
                 BreadcrumbBar1.ItemsSource = new ObservableCollection<Breadcrumb>{
-                    new() { Name = "建物", Page = typeof(Views.Rent.Residentials.Editor.SummaryPage).FullName!},
+                    new() { Name = "建物", Page = typeof(Views.Rent.Residentials.Editor.BasicPage).FullName!},
                     new() { Name = item.Label, Page = item.Page.FullName!},
                 };
             }
@@ -223,9 +223,16 @@ public sealed partial class EditorShell : Page
     // MainViewModel calls this method to set the entry.
     public void SetEntryToEntryViewModel(Models.Rent.Residentials.EntryResidentialFull entry)
     {
+        if (entry is null)
+        {
+            return;
+        }
         //ViewModel.Entry = entry ?? throw new ArgumentNullException(nameof(entry));
-        ViewModel.SetEntry(entry ?? throw new ArgumentNullException(nameof(entry)));
+
+        ViewModel.SetEntry(entry);
         EditorWin.Id = entry.Id; // Set the EditorWin Id to the Entry Id. 
+
+        // TODO: do this from VM.
         EditorWin.Title = $"物件情報の編集（{entry.Name}）";
     }
 
@@ -249,7 +256,7 @@ public sealed partial class EditorShell : Page
 
     public void OnEventBackToSummary()
     {
-        ContentFrame.Navigate(typeof(Views.Rent.Residentials.Editor.SummaryPage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });
+        ContentFrame.Navigate(typeof(Views.Rent.Residentials.Editor.BasicPage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });
     }
 
     public void OnEventEditLocation()
