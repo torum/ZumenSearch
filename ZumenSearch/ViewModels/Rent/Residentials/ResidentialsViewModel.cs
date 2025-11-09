@@ -1278,15 +1278,7 @@ public partial class ResidentialsViewModel : ObservableObject
     #region == Commands ==
 
     [RelayCommand(CanExecute = nameof(CanSave))]
-    private void Save()
-    {
-        SaveAsync();
-    }
-    private bool CanSave()
-    {
-        return IsEntryDirty;
-    }
-    private async void SaveAsync()
+    public async Task Save()
     {
         if (!IsEntryDirty)
         {
@@ -1334,6 +1326,11 @@ public partial class ResidentialsViewModel : ObservableObject
             await SaveAsUpdate();
         }
     }
+    private bool CanSave()
+    {
+        return IsEntryDirty;
+    }
+
     private Task SaveAsNew()
     {
         var resInsert = _dataAccessService.InsertRentResidential(_entry);

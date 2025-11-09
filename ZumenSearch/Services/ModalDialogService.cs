@@ -21,9 +21,50 @@ namespace ZumenSearch.Services;
 
 public class ModalDialogService : IModalDialogService
 {
+    public bool IsDialogOpened {get; private set;}
+
     public ModalDialogService()
     {
-       
+        //
+        IsDialogOpened = false;
+    }
+
+    public async Task<ContentDialogResult> ShowEditorCloseConfirmationDialog(Window win)
+    {
+        if (IsDialogOpened)
+        {
+            // Prevents COM exepction causing by attempt to show multiple dialogs. (Window's close button is enabled even tho dialog is shown)
+            return ContentDialogResult.None;
+        }
+
+        if (win is null)
+        {
+            return ContentDialogResult.None;
+        }
+
+        if (win.Content is null)
+        {
+            return ContentDialogResult.None;
+        }
+
+        var dialog = new ContentDialog
+        {
+            XamlRoot = win.Content.XamlRoot,
+            Title = "保存の確認",
+            IsPrimaryButtonEnabled = true,
+            PrimaryButtonText = "保存して閉じる",
+            DefaultButton = ContentDialogButton.Primary,
+            IsSecondaryButtonEnabled = true,
+            SecondaryButtonText = "変更を破棄して閉じる",
+            CloseButtonText = "キャンセル",
+            Content = "編集画面の変更内容が保存されていません。"
+        };
+
+        Debug.WriteLine("await dialog.ShowAsync()");
+        IsDialogOpened = true;
+        var result = await dialog.ShowAsync();
+        IsDialogOpened = false;
+        return result;
     }
 
     public void ShowUnitDialog(ViewModels.Rent.Residentials.ResidentialsViewModel editVM, EditorWindow editWin)
@@ -133,9 +174,9 @@ public class ModalDialogService : IModalDialogService
             }
         };
         */
-
+        IsDialogOpened = true;
         var result = await dialog.ShowAsync();
-
+        IsDialogOpened = false;
         if (result == ContentDialogResult.Primary)
         {
             //
@@ -144,7 +185,6 @@ public class ModalDialogService : IModalDialogService
 
         return null;
     }
-
 
     public async Task<RailStation?> ShowRailStationSelectDialog(Window win, string railLineCode)
     {
@@ -184,7 +224,9 @@ public class ModalDialogService : IModalDialogService
             }
         };
 
+        IsDialogOpened = true;
         var result = await dialog.ShowAsync();
+        IsDialogOpened = false;
 
         if (result == ContentDialogResult.Primary)
         {

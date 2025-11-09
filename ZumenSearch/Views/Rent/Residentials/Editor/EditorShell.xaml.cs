@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading.Tasks;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
@@ -40,11 +41,14 @@ public sealed partial class EditorShell : Page
         //("memo", "備考", typeof(Views.Rent.Residentials.Editor.MemoPage)),
     ];
 
-    public EditorShell(Views.Rent.Residentials.Editor.EditorWindow win, ViewModels.Rent.Residentials.ResidentialsViewModel vm)
+    private readonly IModalDialogService _dlg;
+
+    public EditorShell(Views.Rent.Residentials.Editor.EditorWindow win, ViewModels.Rent.Residentials.ResidentialsViewModel vm, IModalDialogService modalDialog)
     {
         EditorWin = win ?? throw new ArgumentNullException(nameof(win));
         ViewModel = vm ?? throw new ArgumentNullException(nameof(vm));
         ViewModel.SetEditorWin(win);
+        _dlg = modalDialog;
 
         InitializeComponent();
 
@@ -93,7 +97,7 @@ public sealed partial class EditorShell : Page
         }
     }
 
-    private void AppWindow_Closing(Microsoft.UI.Windowing.AppWindow sender, Microsoft.UI.Windowing.AppWindowClosingEventArgs args)
+    private async void AppWindow_Closing(Microsoft.UI.Windowing.AppWindow sender, Microsoft.UI.Windowing.AppWindowClosingEventArgs args)
     {
         if (ViewModel == null)
         {
@@ -102,12 +106,33 @@ public sealed partial class EditorShell : Page
 
         if (ViewModel.IsEntryDirty)
         {
-            // TODO: Prompt user to save changes before closing.
-            Debug.WriteLine("AppWindow_Closing: Entry is dirty, prompting save dialog(TODO).");
-            args.Cancel = true; // Cancel the closing operation
+            args.Cancel = true; // needs Cancel = true here in order to show dialog.
 
-            // TEMP: For now, just reset the dirty state.
-            ViewModel.IsEntryDirty = false; 
+            // show ConfirmationDialog
+            var result = await _dlg.ShowEditorCloseConfirmationDialog(EditorWin);
+
+            if (result == ContentDialogResult.Primary)
+            {
+                // Save and close.
+
+                await ViewModel.Save();
+                if (ViewModel.IsEntryDirty == false)
+                {
+                    EditorWin.Close();
+                }
+            }
+            else if (result == ContentDialogResult.Secondary)
+            {
+                // Discard change and close.
+
+                ViewModel.IsEntryDirty = false;
+                EditorWin.Close();
+            }
+            else if (result == ContentDialogResult.None)
+            {
+                // Cancel.
+
+            }
         }
     }
 

@@ -4,14 +4,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using ZumenSearch.Models;
 using ZumenSearch.ViewModels.Rent.Residentials;
 using ZumenSearch.Views.Rent.Residentials.Editor;
+using static ZumenSearch.Services.ModalDialogService;
 
 namespace ZumenSearch.Services;
 
 public interface IModalDialogService
 {
+    Task<ContentDialogResult> ShowEditorCloseConfirmationDialog(Window win);
+
     void ShowUnitDialog(ResidentialsViewModel editVM, EditorWindow editWin);
 
     Task<RailLine?> ShowRailLineSelectDialog(Window win);
