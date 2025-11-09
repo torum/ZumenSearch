@@ -3,9 +3,10 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace ZumenSearch.ViewModels.Brokers;
 
-public partial class BrokersViewModel : ObservableRecipient
+public partial class RailLineSelectViewModel : ObservableObject
 {
-    public BrokersViewModel()
+
+    public RailLineSelectViewModel()
     {
 
     }

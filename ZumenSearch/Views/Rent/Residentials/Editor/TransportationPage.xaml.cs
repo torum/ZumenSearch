@@ -10,8 +10,6 @@ namespace ZumenSearch.Views.Rent.Residentials.Editor;
 
 public sealed partial class TransportationPage : Page
 {
-    //private Views.Rent.Residentials.EditorShell? _editorShell;
-
     private ViewModels.Rent.Residentials.ResidentialsViewModel? _viewModel;
     public ViewModels.Rent.Residentials.ResidentialsViewModel? ViewModel
     {
@@ -21,29 +19,46 @@ public sealed partial class TransportationPage : Page
             if (value != null)
             {
                 _viewModel = value;
-
-                //_viewModel.EventBackToSummary += (sender, arg) => OnEventBackToSummary(arg);
             }
         }
     }
 
     public TransportationPage()
     {
-        //ViewModel = new TransportationViewModel();//App.GetService<RentLivingEditTransportationViewModel>();
         InitializeComponent();
-
     }
-
-
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
         if ((e.Parameter is ViewModels.Rent.Residentials.ResidentialsViewModel) && (e.Parameter != null))
         {
-            //_editorShell = e.Parameter as Views.Rent.Residentials.EditorShell;
             ViewModel = e.Parameter as ViewModels.Rent.Residentials.ResidentialsViewModel;
         }
 
         base.OnNavigatedTo(e);
+    }
+
+    private void TextBoxRailLine_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        if (string.IsNullOrEmpty(TextBoxRailLine.Text))
+        {
+            TextBoxRailLine.IsEnabled = false;
+        }
+        else
+        {
+            TextBoxRailLine.IsEnabled = true;
+        }
+    }
+
+    private void TextBoxRailStation_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        if (string.IsNullOrEmpty(TextBoxRailStation.Text))
+        {
+            TextBoxRailStation.IsEnabled = false;
+        }
+        else
+        {
+            TextBoxRailStation.IsEnabled = true;
+        }
     }
 }

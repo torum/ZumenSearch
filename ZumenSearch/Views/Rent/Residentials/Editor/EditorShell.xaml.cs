@@ -44,6 +44,7 @@ public sealed partial class EditorShell : Page
     {
         EditorWin = win ?? throw new ArgumentNullException(nameof(win));
         ViewModel = vm ?? throw new ArgumentNullException(nameof(vm));
+        ViewModel.SetEditorWin(win);
 
         InitializeComponent();
 

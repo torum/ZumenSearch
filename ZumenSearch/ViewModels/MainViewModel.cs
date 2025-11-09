@@ -186,6 +186,8 @@ public partial class MainViewModel : ObservableObject
             presenter.IsResizable = true;
             presenter.IsModal = false;
             presenter.IsAlwaysOnTop = false;
+            presenter.PreferredMinimumWidth = 1274;
+            presenter.PreferredMinimumHeight = 794;
         }
 
         editorWindow.Closed += (sender, e) =>

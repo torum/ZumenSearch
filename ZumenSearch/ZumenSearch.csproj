@@ -15,6 +15,9 @@
 	  <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
   </PropertyGroup>
+  <ItemGroup>
+    <None Remove="Views\Dialogs\RailLineSelectPage.xaml" />
+  </ItemGroup>
 
   <ItemGroup>
     <Content Include="Assets\SplashScreen.scale-200.png" />
@@ -63,10 +66,21 @@
     <None Update="mt_town_all.db">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="rail_lines.db">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="rail_stations.db">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <Page Update="Views\Dialogs\RailStationSelectPage.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\Dialogs\RailLineSelectPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Helpers\" />
-    <Folder Include="Models\Location\" />
     <Folder Include="Styles\" />
     <Folder Include="Strings\" />
   </ItemGroup>

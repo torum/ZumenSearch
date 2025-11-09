@@ -26,6 +26,11 @@ public partial class ResidentialsViewModel : ObservableObject
 {
     #region == Properties ==
 
+    public Views.Rent.Residentials.Editor.EditorWindow? EditorWin
+    {
+        get; private set;
+    }
+
     private readonly string _windowTitleBase = "賃貸住居用";
 
     public string WindowTitle
@@ -241,26 +246,9 @@ public partial class ResidentialsViewModel : ObservableObject
                     return;
                 }
 
-                // TODO: move this to service. with async and try catch.
                 var dataset = new List<CountyAndCity>();
 
-                using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
-                connection.Open();
-                using var cmd = connection.CreateCommand();
-                cmd.CommandText = string.Format("SELECT machiaza_id, county, city FROM mt_town_all WHERE pref LIKE '{0}'", _selectedPef.Name);
-                using var reader = cmd.ExecuteReader();
-                while (reader.Read())
-                {
-                    var county = Convert.ToString(reader["county"]) ?? "";
-                    var city = Convert.ToString(reader["city"]) ?? "";
-                    var id = Convert.ToString(reader["machiaza_id"]);
-                    if (id is not null)
-                    {
-                        var ccty = new CountyAndCity(id, county, city);
-
-                        dataset.Add(ccty);
-                    }
-                }
+                dataset = _dataAccessLocationService.GetCountyAndCityByPref(_selectedPef.Name);
 
                 Cities = [.. dataset.DistinctBy(p => p.Combined)];
 
@@ -306,27 +294,9 @@ public partial class ResidentialsViewModel : ObservableObject
                     return;
                 }
 
-                // TODO: move this.
-
                 var dataset = new List<WardAndOaza>();
 
-                using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
-                connection.Open();
-                using var cmd = connection.CreateCommand();
-                cmd.CommandText = string.Format("SELECT machiaza_id, ward, oaza_cho FROM mt_town_all WHERE pref LIKE '{0}' AND county LIKE '{1}' AND city LIKE '{2}'", _selectedPef.Name, _selectedCity.County, _selectedCity.City);
-                using var reader = cmd.ExecuteReader();
-                while (reader.Read())
-                {
-                    var ward = Convert.ToString(reader["ward"]) ?? "";
-                    var oaza = Convert.ToString(reader["oaza_cho"]) ?? "";
-                    var id = Convert.ToString(reader["machiaza_id"]);
-                    if (id is not null)
-                    {
-                        var ccty = new WardAndOaza(id, ward, oaza);
-
-                        dataset.Add(ccty);
-                    }
-                }
+                dataset = _dataAccessLocationService.GetWardAndOazaByPrefCountyCity(_selectedPef.Name, _selectedCity.County, _selectedCity.City);
 
                 Towns = [.. dataset.DistinctBy(p => p.Combined)];
             }
@@ -380,22 +350,7 @@ public partial class ResidentialsViewModel : ObservableObject
 
             var dataset = new List<Choume>();
 
-            using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
-            connection.Open();
-            using var cmd = connection.CreateCommand();
-            cmd.CommandText = string.Format("SELECT machiaza_id, chome FROM mt_town_all WHERE pref LIKE '{0}' AND county LIKE '{1}' AND city LIKE '{2}' AND ward LIKE '{3}' AND oaza_cho LIKE '{4}'", _selectedPef.Name, _selectedCity.County, _selectedCity.City, _selectedTown.Ward, _selectedTown.Oaza);
-            using var reader = cmd.ExecuteReader();
-            while (reader.Read())
-            {
-                var cho = Convert.ToString(reader["chome"]) ?? "";
-                var id = Convert.ToString(reader["machiaza_id"]);
-                if (id is not null)
-                {
-                    var ccty = new Choume(id, cho);
-
-                    dataset.Add(ccty);
-                }
-            }
+            dataset = _dataAccessLocationService.GetChoumeByPrefCountyCityWardOaza(_selectedPef.Name, _selectedCity.County, _selectedCity.City, _selectedTown.Ward, _selectedTown.Oaza);
 
             Chous = [.. dataset.DistinctBy(p => p.Chou)];
         }
@@ -483,27 +438,38 @@ public partial class ResidentialsViewModel : ObservableObject
 
     #region == 交通 ==
 
-    private string _ensen = string.Empty;
-    public string Ensen
+    private RailLine? _selectedRailLine;
+    public RailLine? SelectedRailLine
     {
-        get => _ensen;
+        get => _selectedRailLine;
         set
         {
-            if (SetProperty(ref _ensen, value))
+            if (SetProperty(ref _selectedRailLine, value))
             {
                 IsEntryDirty = true;
+                // Clear  old value.
+                SelectedRailStation = null;
                 OnPropertyChanged(nameof(TransportationPreview));
             }
+
+            ShowRailStationSelectCommand.NotifyCanExecuteChanged();
         }
     }
 
-    private string _eki = string.Empty;
-    public string Eki
+    private RailStation? _selectecdRailStation;
+    public RailStation? SelectedRailStation
     {
-        get => _eki;
+        get => _selectecdRailStation;
         set
         {
-            if (SetProperty(ref _eki, value))
+            if ((value is null) && (_selectecdRailStation is not null))
+            {
+                // Clear old value.
+                _selectecdRailStation.StationName = string.Empty;
+                OnPropertyChanged(nameof(SelectedRailStation));
+            }
+
+            if (SetProperty(ref _selectecdRailStation, value))
             {
                 IsEntryDirty = true;
                 OnPropertyChanged(nameof(TransportationPreview));
@@ -573,18 +539,18 @@ public partial class ResidentialsViewModel : ObservableObject
         {
             var s = string.Empty;
 
-            if (!string.IsNullOrEmpty(_ensen))
+            if (!string.IsNullOrEmpty(_selectedRailLine?.LineName))
             {
-                s = _ensen;
+                s = _selectedRailLine.LineName;
             }
 
-            if (!string.IsNullOrEmpty(_eki))
+            if (!string.IsNullOrEmpty(_selectecdRailStation?.StationName))
             {
                 if (!string.IsNullOrEmpty(s))
                 {
                     s += ", ";
                 }
-                s += $"{_eki}駅";
+                s += $"{_selectecdRailStation.StationName}駅";
             }
 
             if (_ekiToho > 0)
@@ -1151,7 +1117,6 @@ public partial class ResidentialsViewModel : ObservableObject
 
     #endregion
 
-
     #region == Events
 
     // The event handlers below are used to notify the UI about various actions that can be performed in the editor.
@@ -1177,6 +1142,7 @@ public partial class ResidentialsViewModel : ObservableObject
     
     // The IDataAccessService is used to access the data layer for saving and updating entries.
     private readonly IDataAccessService _dataAccessService;
+    private readonly IDataAccessLocationService _dataAccessLocationService;
     private readonly IModalDialogService _dlg;
 
     #endregion
@@ -1185,9 +1151,10 @@ public partial class ResidentialsViewModel : ObservableObject
 
     // Constructor for the EditorViewModel class, initializes the data access service and the entry.
     #pragma warning disable IDE0290
-    public ResidentialsViewModel(IDataAccessService dataAccessService, IModalDialogService modalDialog )
+    public ResidentialsViewModel(IDataAccessService dataAccessService, IModalDialogService modalDialog, IDataAccessLocationService dataAccessLocationService)
     {
         _dataAccessService = dataAccessService;
+        _dataAccessLocationService = dataAccessLocationService;
         _dlg = modalDialog;
 
     }
@@ -1260,6 +1227,11 @@ public partial class ResidentialsViewModel : ObservableObject
         
 
         IsEntryDirty = false;
+    }
+
+    public void SetEditorWin(Views.Rent.Residentials.Editor.EditorWindow win)
+    {
+        EditorWin = win;
     }
 
     public void SetNewBuildingPictures(List<string> filePathList)
@@ -1465,7 +1437,6 @@ public partial class ResidentialsViewModel : ObservableObject
         EventEditUnits?.Invoke(this, EventArgs.Empty);
     }
 
-
     [RelayCommand]
     public void AddNewBuildingPictures()
     {
@@ -1533,6 +1504,52 @@ public partial class ResidentialsViewModel : ObservableObject
         }
         
         return false;
+    }
+
+    [RelayCommand]
+    public async Task ShowRailLineSelect()
+    {
+        if (EditorWin is null)
+        {
+            return;
+        }
+
+        var railLine = await _dlg.ShowRailLineSelectDialog(EditorWin);
+
+        if (railLine is not null)
+        {
+            SelectedRailLine = railLine;
+        }
+    }
+
+    [RelayCommand(CanExecute = nameof(CanShowRailStationSelect))]
+    public async Task ShowRailStationSelect()
+    {
+        if (EditorWin is null)
+        {
+            return;
+        }
+
+        if (SelectedRailLine is null)
+        {
+            return;
+        }
+
+        var railStation = await _dlg.ShowRailStationSelectDialog(EditorWin, SelectedRailLine.LineCode);
+
+        if (railStation is not null)
+        {
+            SelectedRailStation = railStation;
+        }
+    }
+    private bool CanShowRailStationSelect()
+    {
+        if (SelectedRailLine is null)
+        {
+            return false;
+        }
+
+        return true;
     }
 
     #endregion

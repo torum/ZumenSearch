@@ -62,6 +62,9 @@ public sealed partial class MainWindow : Window
             // Window state
             if (appWindow.Presenter is OverlappedPresenter presenter)
             {
+                presenter.PreferredMinimumWidth = 1274;
+                presenter.PreferredMinimumHeight = 794;
+
                 if (winState == OverlappedPresenterState.Maximized)
                 {
                     // Sets restore size and position.

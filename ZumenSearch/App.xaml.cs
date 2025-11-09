@@ -69,6 +69,9 @@ public partial class App : Application
             //services.AddSingleton<IThemeSelectorService, ThemeSelectorService>();
             services.AddSingleton<IDataAccessService, DataAccessService>();
             services.AddSingleton<IModalDialogService, ModalDialogService>();
+            services.AddSingleton<IDataAccessLocationService, DataAccessLocationService>();
+            services.AddSingleton<IDataAccessTransportationService, DataAccessTransportationService>();
+
 
             // Views and ViewModels
             services.AddSingleton<MainShell>();
