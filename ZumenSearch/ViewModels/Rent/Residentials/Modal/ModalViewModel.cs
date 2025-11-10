@@ -1,9 +1,10 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using Microsoft.UI.Xaml.Navigation;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Xml.Linq;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Navigation;
 using ZumenSearch.Models;
 using ZumenSearch.Views;
 
@@ -16,6 +17,35 @@ public partial class ModalViewModel : ObservableRecipient
         get; set;
     }
 
+    private readonly string _windowTitleBase = "賃貸住居用";
+
+    public string WindowTitle
+    {
+        get
+        {
+            if (string.IsNullOrEmpty(_name))
+            {
+                return $"{_windowTitleBase} - 部屋";
+            }
+            else
+            {
+                return $"{_windowTitleBase} - {_name} - 部屋";
+            }
+        }
+    }
+
+    private string? _name;
+    public string Name
+    {
+        get => _name ?? string.Empty; 
+        set
+        {
+            if (SetProperty(ref _name, value))
+            {
+                OnPropertyChanged(nameof(WindowTitle));
+            }
+        }
+    }
 
     private object? _selected;
     public object? Selected

@@ -7,194 +7,97 @@
     mc:Ignorable="d"
     xmlns:mod="using:ZumenSearch.Models"
     NavigationCacheMode="Required">
-    <Page.Resources>
-        <Thickness x:Key="NavigationViewContentMargin">6,6,0,0</Thickness>
-    </Page.Resources>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="31"/>
+            <RowDefinition Height="46"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <Grid Grid.Row="0" Margin="0,0,0,0" Height="31" VerticalAlignment="Top" HorizontalAlignment="Stretch" Background="{ThemeResource MenuBarBackground}">
+
+        <Grid Grid.Row="0" x:Name="AppTitleBar" Margin="0,0,0,0" Canvas.ZIndex="1" IsHitTestVisible="False" Height="46" VerticalAlignment="Top" HorizontalAlignment="Stretch">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal">
+            <Grid Grid.Row="0" Grid.Column="0" Width="0">
+                <!-- Dummy for toggle button -->
+            </Grid>
 
-                <Image x:Name="AppTitleBarIcon" Source="/Assets/App.ico" HorizontalAlignment="Left" Width="16" Height="16" Margin="8,0,0,0"/>
-                <TextBlock x:Name="AppTitleBarText" Text="" VerticalAlignment="Center" TextWrapping="NoWrap" Style="{StaticResource CaptionTextBlockStyle}" Margin="6, 0, 0, 0"/>
+            <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
+
+                <Image x:Name="AppTitleBarIcon" Source="/Assets/App.ico" HorizontalAlignment="Left" Width="18" Height="18" Margin="12,0,0,0" VerticalAlignment="Center"/>
+                <TextBlock x:Name="AppTitleBarText" Text="{x:Bind ViewModel.WindowTitle, Mode=OneWay}" TextWrapping="NoWrap"  Margin="12,0,0,0" VerticalAlignment="Center"/>
 
             </StackPanel>
 
-            <Grid Grid.Row="0" Grid.Column="1">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <MenuBar x:Name="AppMenuBar" Grid.Column="0">
-                    <MenuBar.Items>
-
-                        <MenuBarItem x:Uid="ShellMenuBarItem_File">
-                            <MenuBarItem.KeyboardAccelerators>
-                                <KeyboardAccelerator Modifiers="Menu" Key="F"/>
-                            </MenuBarItem.KeyboardAccelerators>
-
-                            <MenuBarItem.Items>
-
-                                <MenuFlyoutItem x:Uid="ShellMenuBarItem_File_New">
-                                    <MenuFlyoutItem.Icon>
-                                        <PathIcon Margin="0,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                            <PathIcon.Data>
-                                                M23 18H20V15H18V18H15V20H18V23H20V20H23M6 2C4.89 2 4 2.9 4 4V20C4 21.11 4.89 22 6 22H13.81C13.45 21.38 13.2 20.7 13.08 20H6V4H13V9H18V13.08C18.33 13.03 18.67 13 19 13C19.34 13 19.67 13.03 20 13.08V8L14 2M8 12V14H16V12M8 16V18H13V16Z</PathIcon.Data>
-                                        </PathIcon>
-                                    </MenuFlyoutItem.Icon>
-                                    <MenuFlyoutItem.KeyboardAccelerators>
-                                        <KeyboardAccelerator Modifiers="Menu" Key="N"/>
-                                    </MenuFlyoutItem.KeyboardAccelerators>
-                                </MenuFlyoutItem>
-
-                                <MenuFlyoutItem x:Uid="ShellMenuBarItem_File_Exit">
-                                    <MenuFlyoutItem.Icon>
-                                        <PathIcon Margin="0,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                            <PathIcon.Data>
-                                                M13.46,12L19,17.54V19H17.54L12,13.46L6.46,19H5V17.54L10.54,12L5,6.46V5H6.46L12,10.54L17.54,5H19V6.46L13.46,12Z</PathIcon.Data>
-                                        </PathIcon>
-                                    </MenuFlyoutItem.Icon>
-                                    <MenuFlyoutItem.KeyboardAccelerators>
-                                        <KeyboardAccelerator Modifiers="Menu" Key="F4"/>
-                                    </MenuFlyoutItem.KeyboardAccelerators>
-                                </MenuFlyoutItem>
-
-                            </MenuBarItem.Items>
-
-                        </MenuBarItem>
-
-                        <MenuBarItem x:Uid="ShellMenuBarItem_View">
-                            <MenuBarItem.KeyboardAccelerators>
-                                <KeyboardAccelerator Modifiers="Menu" Key="V"/>
-                            </MenuBarItem.KeyboardAccelerators>
-                        </MenuBarItem>
-                    </MenuBar.Items>
-                </MenuBar>
-            </Grid>
-
-            <!--  Background="{ThemeResource MenuBarBackground}" -->
-            <Grid Grid.Row="0" Grid.Column="2" x:Name="AppTitleBar"></Grid>
+            <Grid Grid.Row="0" Grid.Column="2"></Grid>
 
         </Grid>
-        <Grid x:Name="ContentArea" Grid.Row="1">
-            <!--
-            <VisualStateManager.VisualStateGroups>
-                <VisualStateGroup>
-                    <VisualState>
-                        <VisualState.StateTriggers>
-                            <AdaptiveTrigger MinWindowWidth="1007" />
-                        </VisualState.StateTriggers>
 
-                        <VisualState.Setters>
-                            <Setter Target="NavView.PaneDisplayMode" Value="Left"/>
-                        </VisualState.Setters>
-                    </VisualState>
-                </VisualStateGroup>
-            </VisualStateManager.VisualStateGroups>
-            -->
-
+        <Grid Grid.Row="1" Margin="48,0,48,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <BreadcrumbBar x:Name="BreadcrumbBarRoom" Visibility="Collapsed">
-                <BreadcrumbBar.ItemTemplate>
-                    <DataTemplate x:DataType="mod:Breadcrumb">
-                        <BreadcrumbBarItem Content="{Binding}" AutomationProperties.Name="{Binding Name}">
-                            <BreadcrumbBarItem.ContentTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding Name}" />
-                                </DataTemplate>
-                            </BreadcrumbBarItem.ContentTemplate>
-                        </BreadcrumbBarItem>
-                    </DataTemplate>
-                </BreadcrumbBar.ItemTemplate>
-            </BreadcrumbBar>
+            <Grid  BorderThickness="0,0,0,1" BorderBrush="{ThemeResource NavigationViewItemSeparatorForeground}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
 
-            <Grid MaxWidth="1000" Grid.Row="1">
+                <BreadcrumbBar x:Name="BreadcrumbBar1" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center">
+                    <BreadcrumbBar.ItemTemplate>
+                        <DataTemplate x:DataType="mod:Breadcrumb">
+                            <BreadcrumbBarItem Content="{Binding}">
+                                <BreadcrumbBarItem.ContentTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Name}" FontSize="32" />
+                                    </DataTemplate>
+                                </BreadcrumbBarItem.ContentTemplate>
+                            </BreadcrumbBarItem>
+                        </DataTemplate>
+                    </BreadcrumbBar.ItemTemplate>
+                </BreadcrumbBar>
 
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-
-                <StackPanel Grid.Row="0" Visibility="Collapsed">
-
-                    <CommandBar DefaultLabelPosition="Right">
-
-                        <AppBarButton Icon="Back" Label="戻る"/>
-                        <!--  Command="{x:Bind ViewModel.BackCommand}" -->
-
-                        <AppBarButton Icon="Add" Label="追加" Visibility="Collapsed"/>
-
-                        <AppBarButton Icon="Save" Label="保存"/>
-
-
-                        <AppBarToggleButton Icon="Shuffle" Label="Shuffle" Visibility="Collapsed"/>
-                        <AppBarToggleButton Icon="RepeatAll" Label="Repeat" Visibility="Collapsed"/>
-
-                        <AppBarButton Icon="Forward" Label="Forward" Visibility="Collapsed"/>
-
-                        <AppBarSeparator Visibility="Collapsed"/>
-
-
-                        <CommandBar.Content>
-                            <TextBlock Text="Now playing..." Margin="12,14" Visibility="Collapsed"/>
-                        </CommandBar.Content>
-                    </CommandBar>
-
-                    <Border BorderThickness="0,1,0,0" BorderBrush="{ThemeResource NavigationViewItemSeparatorForeground}"></Border>
-
+                <StackPanel Grid.Row="0" Grid.Column="1">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                        <AppBarButton Icon="Save" Label="保存" Command="{x:Bind ViewModel.SaveCommand}"/>
+                    </StackPanel>
                 </StackPanel>
 
-                <NavigationView Grid.Row="1" x:Name="NavView" PaneDisplayMode="Left" OpenPaneLength ="160" Margin="0,0,0,0" SelectionFollowsFocus="Disabled" IsPaneToggleButtonVisible="False" IsSettingsVisible="False" IsBackButtonVisible="Collapsed" Loaded="NavView_Loaded" ItemInvoked="NavView_ItemInvoked">
-                    <!--   BackRequested="NavView_BackRequested" -->
-                    <!--  Header="{x:Bind ((ContentControl)ViewModel.Selected).Content, Mode=OneWay}" -->
-                    <!--  ExpandedModeThresholdWidth="1280" -->
-                    <NavigationView.MenuItems>
-                        <NavigationViewItem Icon="Folder" Content="部屋" Tag="room" IsExpanded="True">
-                            <NavigationViewItem.MenuItems>
-                                <NavigationViewItem Icon="page2" Content="概要"  Tag="room_summary"/>
-                                <!--<NavigationViewItem Icon="page2" Content="現況" Tag="room_status"/>
-                                <NavigationViewItem Icon="page2" Content="契約条件" Tag="room_contract"/>
-                                <NavigationViewItem Icon="page2" Content="取引条件" Tag="room_transaction"/>
-                                <NavigationViewItem Icon="page2" Content="設備" Tag="room_appliance" />-->
-                                <NavigationViewItem Icon="Folder" Content="写真" Tag="room_pictures" />
-                            </NavigationViewItem.MenuItems>
-                        </NavigationViewItem>
-                        <NavigationViewItem Icon="Folder" Content="図面" Tag="room_zumen"/>
-                        <NavigationViewItem Icon="OtherUser" Content="貸主" Tag="room_kasinusi"/>
-                        <NavigationViewItem Icon="OtherUser" Content="宅建業者" Tag="room_gyousya"/>
-                    </NavigationView.MenuItems>
-                    <NavigationView.HeaderTemplate>
-                        <DataTemplate>
-                            <Grid>
-                                <!--
-                            <TextBlock
-                            Text="{Binding}"
-                            Style="{ThemeResource TitleTextBlockStyle}" />
-                            -->
-                            </Grid>
-                        </DataTemplate>
-                    </NavigationView.HeaderTemplate>
-                    <Grid>
-                        <Frame x:Name="ContentFrame" Navigated="ContentFrame_Navigated" NavigationFailed="ContentFrame_NavigationFailed"/>
-                    </Grid>
-                </NavigationView>
-
-
-
             </Grid>
+
         </Grid>
+
+        <Grid Grid.Row="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <NavigationView x:Name="NavView" Grid.Row="0" Margin="48,6,48,0" PaneDisplayMode="Top" Canvas.ZIndex="0" IsTitleBarAutoPaddingEnabled="True" SelectionFollowsFocus="Disabled" IsPaneToggleButtonVisible="False" IsSettingsVisible="False" IsBackButtonVisible="Collapsed" Loaded="NavView_Loaded" ItemInvoked="NavView_ItemInvoked">
+                <!--   BackRequested="NavView_BackRequested" -->
+                <NavigationView.MenuItems>
+                    <NavigationViewItem Content="基本"  Tag="room_summary"/>
+                    <!--<NavigationViewItem Content="現況" Tag="room_status"/>
+                                <NavigationViewItem Content="契約条件" Tag="room_contract"/>
+                                <NavigationViewItem Content="取引条件" Tag="room_transaction"/>
+                                <NavigationViewItem Content="設備" Tag="room_appliance" />-->
+                    <NavigationViewItem Content="写真" Tag="room_pictures" />
+                    <NavigationViewItem Content="図面" Tag="room_zumen"/>
+                    <NavigationViewItem Content="貸主" Tag="room_kasinusi"/>
+                    <NavigationViewItem Content="宅建業者" Tag="room_gyousya"/>
+                </NavigationView.MenuItems>
+            </NavigationView>
+
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Padding="48,0,48,24">
+                <Frame x:Name="ContentFrame" NavigationFailed="ContentFrame_NavigationFailed"/>
+            </ScrollViewer>
+
+        </Grid>
+
     </Grid>
 </Page>

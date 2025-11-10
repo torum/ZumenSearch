@@ -11,6 +11,7 @@ using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
 using Windows.System;
 using Windows.UI.Core;
+using ZumenSearch.Models;
 using ZumenSearch.ViewModels;
 using ZumenSearch.ViewModels.Rent.Residentials;
 
@@ -110,7 +111,10 @@ public sealed partial class ModalShell : Page
         //SystemNavigationManager.GetForCurrentView().BackRequested += System_BackRequested;
         */
 
-        //NavView.SelectedItem = NavView.MenuItems.OfType<NavigationViewItem>().First();
+        NavView.SelectedItem = NavView.MenuItems.OfType<NavigationViewItem>().First();
+        navigationViewSelectedItem = NavView.SelectedItem as NavigationViewItem;
+
+        /*
         var firstMenuItem = NavView.MenuItems.OfType<NavigationViewItem>().First();
         if (firstMenuItem != null)
         {
@@ -126,8 +130,17 @@ public sealed partial class ModalShell : Page
         {
             Debug.WriteLine("No first menu item found in NavView.");
         }
+        */
 
-        ContentFrame.Navigate(typeof(ZumenSearch.Views.Rent.Residentials.Editor.Modal.BasicPage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });
+        if (ContentFrame.Navigate(typeof(ZumenSearch.Views.Rent.Residentials.Editor.Modal.BasicPage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom }))
+        {
+            BreadcrumbBar1.ItemsSource = new ObservableCollection<Breadcrumb>{
+                new() { Name = "部屋", Page = typeof(Views.Rent.Residentials.Editor.Modal.BasicPage).FullName!},
+                new() { Name = "基本", Page = typeof(Views.Rent.Residentials.Editor.Modal.BasicPage).FullName!},
+            };
+
+            NavView.SelectedItem = NavView.MenuItems.OfType<NavigationViewItem>().Where(n => n.Tag.Equals("room_summary")).First();
+        }
     }
 
     private void ContentFrame_NavigationFailed(object sender, NavigationFailedEventArgs e)
@@ -167,7 +180,7 @@ public sealed partial class ModalShell : Page
 
             navigationViewSelectedItem = sender.SelectedItem as NavigationViewItem;
 
-            ContentFrame.Navigate(item.Page, ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });
+            ContentFrame.Navigate(item.Page, ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom });
         }
     }
 
@@ -188,7 +201,7 @@ public sealed partial class ModalShell : Page
     {
         App.MainWnd?.CurrentDispatcherQueue?.TryEnqueue(() =>
         {
-            ContentFrame.Navigate(typeof(Views.Rent.Residentials.Editor.Modal.BasicPage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });
+            ContentFrame.Navigate(typeof(Views.Rent.Residentials.Editor.Modal.BasicPage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom });
         });
     }
 

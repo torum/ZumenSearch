@@ -29,20 +29,6 @@ public sealed partial class BasicPage : Page
         //ViewModel = new ViewModels.Rent.Residentials.Editor.Modal.SummaryViewModel();
         InitializeComponent();
 
-        BreadcrumbBar1.ItemsSource = new ObservableCollection<Breadcrumb>{
-            new() { Name = "äTóv", Page = typeof(BasicPage).FullName!},
-            //new() { Name = "èZãèóp", Page = typeof(ResidentialsPage).FullName! },
-        };
-        BreadcrumbBar1.ItemClicked += BreadcrumbBar_ItemClicked;
-    }
-
-    private void BreadcrumbBar_ItemClicked(BreadcrumbBar sender, BreadcrumbBarItemClickedEventArgs args)
-    {
-        if (args.Index == 0)
-        {
-            _viewModel?.GoBackToSummary();
-            //_dialogShell?.NavFrame.Navigate(typeof(BasicPage), _dialogShell, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });
-        }
     }
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
