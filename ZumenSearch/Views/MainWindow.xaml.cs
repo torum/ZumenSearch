@@ -314,7 +314,6 @@ public sealed partial class MainWindow : Window
         }
 
         // Editor window
-        // Editor window element
         var editWindow = doc.CreateElement(string.Empty, "EditorWindow", string.Empty);
 
         // Editor window attributes
@@ -336,6 +335,30 @@ public sealed partial class MainWindow : Window
 
         // Set editor window element to root.
         root.AppendChild(editWindow);
+
+
+        // Modal window 
+        var modalWindow = doc.CreateElement(string.Empty, "ModalWindow", string.Empty);
+
+        // Editor window attributes
+        attrs = doc.CreateAttribute("width");
+        attrs.Value = _viewModel.ModalWinWidth.ToString();
+        modalWindow.SetAttributeNode(attrs);
+
+        attrs = doc.CreateAttribute("height");
+        attrs.Value = _viewModel.ModalWinHeight.ToString();
+        modalWindow.SetAttributeNode(attrs);
+
+        attrs = doc.CreateAttribute("top");
+        attrs.Value = _viewModel.ModalWinTop.ToString();
+        modalWindow.SetAttributeNode(attrs);
+
+        attrs = doc.CreateAttribute("left");
+        attrs.Value = _viewModel.ModalWinLeft.ToString();
+        modalWindow.SetAttributeNode(attrs);
+
+        // Set editor window element to root.
+        root.AppendChild(modalWindow);
 
         // Options
         var xOpts = doc.CreateElement(string.Empty, "Opts", string.Empty);
@@ -455,6 +478,35 @@ public sealed partial class MainWindow : Window
                     if (hoge != null)
                     {
                         _viewModel.EditorWinWidth = int.Parse(hoge.Value);
+                    }
+                }
+
+                // Modal window element
+                var modalWindow = xdoc.Root.Element("ModalWindow");
+                if (modalWindow != null)
+                {
+                    var hoge = modalWindow.Attribute("top");
+                    if (hoge != null)
+                    {
+                        _viewModel.ModalWinTop = int.Parse(hoge.Value);
+                    }
+
+                    hoge = modalWindow.Attribute("left");
+                    if (hoge != null)
+                    {
+                        _viewModel.ModalWinLeft = int.Parse(hoge.Value);
+                    }
+
+                    hoge = modalWindow.Attribute("height");
+                    if (hoge != null)
+                    {
+                        _viewModel.ModalWinHeight = int.Parse(hoge.Value);
+                    }
+
+                    hoge = modalWindow.Attribute("width");
+                    if (hoge != null)
+                    {
+                        _viewModel.ModalWinWidth = int.Parse(hoge.Value);
                     }
                 }
 

@@ -4,11 +4,13 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Data.Sqlite;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
@@ -24,12 +26,19 @@ namespace ZumenSearch.ViewModels.Rent.Residentials;
 
 public partial class ResidentialsViewModel : ObservableObject
 {
-    #region == Properties ==
+    #region == プロパティ ==
 
-    public Views.Rent.Residentials.Editor.EditorWindow? EditorWin
-    {
-        get; private set;
-    }
+    public Views.Rent.Residentials.Editor.EditorWindow? EditorWin {get; private set;}
+
+    // Modal Editor window position and size
+    public int ModalWinWidth = 1366;
+    public int ModalWinHeight = 768;
+    public int ModalWinLeft = 130;
+    public int ModalWinTop = 130;
+
+    // The Entry property holds the COPY of current RentResidential entry being edited. Do not use it directly in the UI. Apply changes to this object in SaveAsync() to save the changes.
+    // MainViewModel creates a new instance of this class and call EditorShell.SetEntry(EntryResidentialFull) and sets this property.
+    private Models.Rent.Residentials.EntryResidentialFull _entry = new();
 
     private readonly string _windowTitleBase = "賃貸住居用";
 
@@ -49,10 +58,6 @@ public partial class ResidentialsViewModel : ObservableObject
         }
     }
 
-    // The Entry property holds the COPY of current RentResidential entry being edited. Do not use it directly in the UI. Apply changes to this object in SaveAsync() to save the changes.
-    // MainViewModel creates a new instance of this class and call EditorShell.SetEntry(EntryResidentialFull) and sets this property.
-    private Models.Rent.Residentials.EntryResidentialFull _entry = new();
-
     // This flag indicates if the entry is dirty (i.e., has unsaved changes).
     private bool _isEntryDirty;
     public bool IsEntryDirty
@@ -68,9 +73,10 @@ public partial class ResidentialsViewModel : ObservableObject
         }
     }
 
-    #region == 基本 == 
+    #endregion
 
-    // 物件名
+    #region == 建物基本 == 
+
     // The Name property holds the name of the entry being edited.
     private string? _name;
     public string Name
@@ -86,8 +92,6 @@ public partial class ResidentialsViewModel : ObservableObject
             }
         }
     }
-
-    #region == 種別 ==
 
     // For the use of the ComboBox in the UI, we define a collection of kinds.
     public ObservableCollection<Kind> Kinds =
@@ -116,7 +120,6 @@ public partial class ResidentialsViewModel : ObservableObject
             }
         }
     }
-    #endregion
 
     // 区分所有か一括所有かを示すプロパティ
     // The IsUnitOwnership property distinguish the building ownership type.
@@ -174,7 +177,7 @@ public partial class ResidentialsViewModel : ObservableObject
 
     #region == 所在地 ==
 
-    private readonly SqliteConnectionStringBuilder connectionStringBuilder = new("Data Source=" + "mt_town_all.db");
+    //private readonly SqliteConnectionStringBuilder connectionStringBuilder = new("Data Source=" + "mt_town_all.db");
 
     private string? MachiazaId;
 
@@ -384,7 +387,6 @@ public partial class ResidentialsViewModel : ObservableObject
         }
     }
 
-    // db:loc_edaban
     private string _edaban = string.Empty;
     public string Edaban
     {
@@ -1115,14 +1117,10 @@ public partial class ResidentialsViewModel : ObservableObject
 
     #endregion
 
-    #endregion
-
     #region == Events
 
     // The event handlers below are used to notify the UI about various actions that can be performed in the editor.
-
     // EditorShell subscribes to these events to handle the actions accordingly.
-    public event EventHandler? EventAddNewUnit;
     public event EventHandler? EventBackToSummary;
     public event EventHandler? EventEditLocation;
     public event EventHandler? EventEditTransportation;
@@ -1386,9 +1384,59 @@ public partial class ResidentialsViewModel : ObservableObject
     [RelayCommand]
     private void AddNewUnit()
     {
-        //NavigationService.NavigateTo(typeof(RentLivingEditShellViewModel).FullName!, "test");
-        //_dlg.ShowUnitDialog(this,);
-        EventAddNewUnit?.Invoke(this, EventArgs.Empty);
+        //TODO: 
+        
+        // Stupid WinUI3... 
+        // https://github.com/microsoft/microsoft-ui-xaml/issues/10396
+        // https://github.com/microsoft/WindowsAppSDK/discussions/3680
+
+        Debug.WriteLine("ModalDialogService: ShowUnitDialog method called.");
+
+        if (EditorWin == null)
+        {
+            // EditorWin should be initialized in the EditorShell constructor.
+            Debug.WriteLine("EditorWin should be initialized in the EditorShell constructor.");
+            return;
+        }
+
+        var dialogWin = new Views.Rent.Residentials.Editor.Modal.ModalWindow();
+        dialogWin.Content = new Views.Rent.Residentials.Editor.Modal.ModalShell(dialogWin, new ViewModels.Rent.Residentials.Modal.ModalViewModel(), this);
+
+        var hWndDialog = WinRT.Interop.WindowNative.GetWindowHandle(dialogWin);
+        //Microsoft.UI.WindowId windowId1 = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hWnd1);
+        //Microsoft.UI.Windowing.AppWindow appWindow = Microsoft.UI.Windowing.AppWindow.GetFromWindowId(windowId1);
+        //Microsoft.UI.Windowing.OverlappedPresenter presenter = appWindow.Presenter as Microsoft.UI.Windowing.OverlappedPresenter;
+        var hWndEditor = WinRT.Interop.WindowNative.GetWindowHandle(EditorWin);
+        SetWindowLong(hWndDialog, GWL_HWNDPARENT, hWndEditor);
+
+        Microsoft.UI.Windowing.AppWindow? appWindow = dialogWin.AppWindow;
+
+        OverlappedPresenter presenter = OverlappedPresenter.Create();
+
+        presenter.IsModal = true;
+        presenter.IsResizable = true;
+        presenter.PreferredMinimumWidth = 1274;
+        presenter.PreferredMinimumHeight = 794;
+
+        appWindow.SetPresenter(presenter);
+
+        dialogWin.Closed += (sender, e) =>
+        {
+            //ModalWinWidth = 
+
+            // Activate the editor window again.
+            EditorWin.Activate();
+        };
+
+        // Close the dialog when the editor window is closed.
+        EditorWin.Closed += (sender, e) =>
+        {
+            dialogWin.Close();
+        };
+
+        appWindow.MoveAndResize(new Windows.Graphics.RectInt32(ModalWinLeft, ModalWinTop, ModalWinWidth, ModalWinHeight));
+        appWindow.Show();
+        //dialogWin.Activate();
     }
 
     // Go Back command (don't use this?)
@@ -1548,6 +1596,39 @@ public partial class ResidentialsViewModel : ObservableObject
 
         return true;
     }
+
+    #endregion
+
+    #region == TEMP code for modal window(for setting an owner) ==
+
+#pragma warning disable IDE0079
+#pragma warning disable SYSLIB1054
+
+    [DllImport("User32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+
+    internal static extern bool EnableWindow(IntPtr hWnd, bool bEnable);
+
+    internal const int GWL_HWNDPARENT = (-8);
+
+    internal static IntPtr SetWindowLong(IntPtr hWnd, int nIndex, IntPtr dwNewLong)
+    {
+        if (IntPtr.Size == 4)
+        {
+            return SetWindowLongPtr32(hWnd, nIndex, dwNewLong);
+        }
+        return SetWindowLongPtr64(hWnd, nIndex, dwNewLong);
+    }
+
+    // Import the Windows API function SetWindowLong for modifying window properties on 32-bit systems.
+    [DllImport("User32.dll", CharSet = CharSet.Auto, EntryPoint = "SetWindowLong")]
+    internal static extern IntPtr SetWindowLongPtr32(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
+
+    // Import the Windows API function SetWindowLongPtr for modifying window properties on 64-bit systems.
+    [DllImport("User32.dll", CharSet = CharSet.Auto, EntryPoint = "SetWindowLongPtr")]
+    internal static extern IntPtr SetWindowLongPtr64(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
+
+#pragma warning restore SYSLIB1054
+#pragma warning restore IDE0079
 
     #endregion
 }

@@ -1,24 +1,31 @@
-﻿using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Media.Animation;
-using Microsoft.UI.Xaml.Navigation;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
+using Microsoft.UI.Windowing;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Media.Animation;
+using Microsoft.UI.Xaml.Navigation;
 using Windows.System;
 using Windows.UI.Core;
 using ZumenSearch.ViewModels;
+using ZumenSearch.ViewModels.Rent.Residentials;
 
 namespace ZumenSearch.Views.Rent.Residentials.Editor.Modal;
 
 public sealed partial class ModalShell : Page
 {
-    public ViewModels.Rent.Residentials.Editor.Modal.ModalViewModel ViewModel
+    public ViewModels.Rent.Residentials.Modal.ModalViewModel ViewModel
     {
-        get;
+        get;private set;
+    }
+
+    public ViewModels.Rent.Residentials.ResidentialsViewModel EditorVM
+    {
+        get;private set;
     }
 
     private NavigationViewItem? navigationViewSelectedItem;
@@ -39,9 +46,11 @@ public sealed partial class ModalShell : Page
     ];
 
 
-    public ModalShell(ModalWindow dialogWindow)
+    public ModalShell(ModalWindow dialogWindow, ViewModels.Rent.Residentials.Modal.ModalViewModel vm, ViewModels.Rent.Residentials.ResidentialsViewModel editorVm)
     {
-        ViewModel = new ViewModels.Rent.Residentials.Editor.Modal.ModalViewModel();//App.GetService<RentLivingEditUnitShellViewModel>();
+        ViewModel = vm;//new ViewModels.Rent.Residentials.Editor.Modal.ModalViewModel();//App.GetService<RentLivingEditUnitShellViewModel>();
+        EditorVM = editorVm;
+
         // Subscribe to ViewModel's events
         ViewModel.EventBackToSummary += (sender, arg) => OnEventBackToSummary(arg);
 
@@ -64,6 +73,26 @@ public sealed partial class ModalShell : Page
     public void UnitsWindow_Closed(object sender, WindowEventArgs args)
     {
         //
+        
+        if (sender is ModalWindow mwin)
+        {
+            // Save window size and position.
+            var appWindow = mwin.AppWindow;
+            if (appWindow != null)
+            {
+                if (appWindow.Presenter is OverlappedPresenter)
+                {
+                    EditorVM.ModalWinWidth = (int)appWindow.Size.Width;
+                    EditorVM.ModalWinHeight = (int)appWindow.Size.Height;
+                    EditorVM.ModalWinTop = (int)appWindow.Position.Y;
+                    EditorVM.ModalWinLeft = (int)appWindow.Position.X;
+                }
+            }
+            else
+            {
+                //Debug.WriteLine("appWindow is null");
+            }
+        }
     }
 
     private void NavView_Loaded(object sender, RoutedEventArgs e)
@@ -109,7 +138,9 @@ public sealed partial class ModalShell : Page
     private void NavView_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
     {
         if (_pages is null)
+        {
             return;
+        }
 
         if (args.IsSettingsInvoked == true)
         {

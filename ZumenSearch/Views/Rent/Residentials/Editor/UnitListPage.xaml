@@ -18,6 +18,7 @@
             <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Margin="0,0,24,0" HorizontalAlignment="Right">
                 <AppBarButton Icon="Add" Label="追加" Command="{x:Bind ViewModel.AddNewUnitCommand}"/>
                 <AppBarButton Icon="Edit" Label="編集"/>
+                <AppBarButton Icon="Copy" Label="複製"/>
                 <AppBarButton Icon="Delete" Label="削除" Command="{x:Bind ViewModel.DeleteSelectedBuildingPictureCommand}"/>
             </CommandBar>
         </Grid>

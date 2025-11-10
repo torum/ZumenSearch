@@ -43,8 +43,6 @@ public sealed partial class EditorWindow : Window
 
     private void Window_Closed(object sender, WindowEventArgs args)
     {
-        SaveWindowSizeAndPosition();
-
         // Remove this window from the list of open editor windows if not Main window is closing.
         if (!IsAutoClose)
         {
@@ -53,23 +51,4 @@ public sealed partial class EditorWindow : Window
         }
     }
 
-    private void SaveWindowSizeAndPosition()
-    {
-        // Save window size and position.
-        var appWindow = this.AppWindow;
-        if (appWindow != null)
-        {
-            if (appWindow.Presenter is OverlappedPresenter)
-            {
-                MainVM.EditorWinHeight = (int)appWindow.Size.Height;
-                MainVM.EditorWinWidth = (int)appWindow.Size.Width;
-                MainVM.EditorWinTop = (int)appWindow.Position.Y;
-                MainVM.EditorWinLeft = (int)appWindow.Position.X;
-            }
-        }
-        else
-        {
-            //Debug.WriteLine("appWindow is null");
-        }
-    }
 }

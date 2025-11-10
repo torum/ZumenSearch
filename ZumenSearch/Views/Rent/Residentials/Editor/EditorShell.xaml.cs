@@ -7,6 +7,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
@@ -15,11 +16,15 @@ using Microsoft.UI.Xaml.Navigation;
 using Windows.Storage.Pickers;
 using ZumenSearch.Models;
 using ZumenSearch.Services;
+using ZumenSearch.ViewModels;
+using ZumenSearch.Views.Rent.Residentials.Editor.Modal;
 
 namespace ZumenSearch.Views.Rent.Residentials.Editor;
 
 public sealed partial class EditorShell : Page
 {
+    private readonly MainViewModel MainVM = App.GetService<MainViewModel>();
+
     public ViewModels.Rent.Residentials.ResidentialsViewModel ViewModel;
 
     public Views.Rent.Residentials.Editor.EditorWindow EditorWin { get; private set; }
@@ -61,9 +66,14 @@ public sealed partial class EditorShell : Page
         EditorWin.Activated += EditorWindow_Activated;
         EditorWin.Closed += EditorWindow_Closed;
         EditorWin.AppWindow.Closing += AppWindow_Closing;
-        EditorWin.Title = ""; 
+        EditorWin.Title = "";
         //
         //ViewModel.SetEditorWindow(EditorWin);
+
+        ViewModel.ModalWinWidth = MainVM.ModalWinWidth;
+        ViewModel.ModalWinHeight = MainVM.ModalWinHeight;
+        ViewModel.ModalWinTop = MainVM.ModalWinTop;
+        ViewModel.ModalWinLeft = MainVM.ModalWinLeft;
 
         // subscribe to ViewModel events
         ViewModel.EventBackToSummary += (sender, arg) => OnEventBackToSummary();
@@ -73,10 +83,7 @@ public sealed partial class EditorShell : Page
         ViewModel.EventEditPictures += (sender, arg) => OnEventEditPictures();
         ViewModel.EventEditUnits += (sender, arg) => OnEventEditUnits();
         //
-        ViewModel.EventAddNewUnit += (sender, arg) => OnEventAddNewUnit();
-        //
         ViewModel.EventAddNewBuildingPictures += (sender, arg) => OnEventAddNewBuildingPictures();
-        
         //
         ViewModel.EventIsUnitOwnership += (sender, arg) => OnEventIsUnitOwnership(arg);
     }
@@ -150,24 +157,26 @@ public sealed partial class EditorShell : Page
 
     public void EditorWindow_Closed(object sender, WindowEventArgs args)
     {
-        //Window.BringToFront();
-        /*
-        if (ViewModel.Closing())
+        if (sender is EditorWindow ewin)
         {
-            // https://github.com/microsoft/microsoft-ui-xaml/issues/7336
-            // already done this in viewmodel.
-            //WebViewRichEdit.Close();
-            //WebViewSourceEdit.Close();
-            //WebViewPreviewBrowser.Close();
+            // Save window size and position.
+            var appWindow = ewin.AppWindow;
+            if (appWindow != null)
+            {
+                if (appWindow.Presenter is OverlappedPresenter)
+                {
+                    MainVM.EditorWinHeight = (int)appWindow.Size.Height;
+                    MainVM.EditorWinWidth = (int)appWindow.Size.Width;
+                    MainVM.EditorWinTop = (int)appWindow.Position.Y;
+                    MainVM.EditorWinLeft = (int)appWindow.Position.X;
+
+                    MainVM.ModalWinHeight = ViewModel.ModalWinHeight;
+                    MainVM.ModalWinWidth = ViewModel.ModalWinWidth;
+                    MainVM.ModalWinTop = ViewModel.ModalWinTop;
+                    MainVM.ModalWinLeft = ViewModel.ModalWinLeft;
+                }
+            }
         }
-        else
-        {
-            // Cancel
-            //args.Handled = true;
-        }
-        */
-        //settings.ColorValuesChanged -= Settings_ColorValuesChanged;
-        //WeakReferenceMessenger.Default.UnregisterAll(this);
     }
 
     private void ContentFrame_NavigationFailed(object sender, NavigationFailedEventArgs e)
@@ -367,8 +376,8 @@ public sealed partial class EditorShell : Page
             return;
         }
 
-        var dlgService = App.GetService<IModalDialogService>();
-        dlgService.ShowUnitDialog(ViewModel, EditorWin);
+        //var dlgService = App.GetService<IModalDialogService>();
+        //dlgService.ShowUnitDialog(ViewModel, EditorWin);
 
         /*
 

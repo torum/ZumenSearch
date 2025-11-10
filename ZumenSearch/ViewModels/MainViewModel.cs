@@ -58,6 +58,12 @@ public partial class MainViewModel : ObservableObject
     public int EditorWinLeft = 130;
     public int EditorWinTop = 130;
 
+    // Modal window position and size
+    public int ModalWinWidth = 1366;
+    public int ModalWinHeight = 768;
+    public int ModalWinLeft = 130;
+    public int ModalWinTop = 130;
+
     #endregion
 
     #region == Navigation ==
@@ -177,10 +183,6 @@ public partial class MainViewModel : ObservableObject
         // Add to the list of editor windows.
         EditorList.Add(editorWindow);
 
-        // Window state and position.
-        //editorWindow.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(mainShellViewModel.EditorWinLeft, mainShellViewModel.EditorWinTop, mainShellViewModel.EditorWinWidth, mainShellViewModel.EditorWinHeight));
-        // TEMP:
-        editorWindow.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(EditorWinLeft, EditorWinTop, EditorWinWidth, EditorWinHeight));
         if (editorWindow.AppWindow.Presenter is OverlappedPresenter presenter)
         {
             presenter.IsResizable = true;
@@ -195,6 +197,11 @@ public partial class MainViewModel : ObservableObject
             // Activate the main window again.
             //App.MainWindow?.Activate(); // Not good when multiple editor windows are opened.
         };
+
+        // Window state and position.
+        //editorWindow.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(mainShellViewModel.EditorWinLeft, mainShellViewModel.EditorWinTop, mainShellViewModel.EditorWinWidth, mainShellViewModel.EditorWinHeight));
+        // TEMP:
+        editorWindow.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(EditorWinLeft, EditorWinTop, EditorWinWidth, EditorWinHeight));
 
         //editorWindow.AppWindow.Show();
         editorWindow.Activate();
@@ -264,12 +271,12 @@ public partial class MainViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task SearchRentResidential()
+    private void SearchRentResidential()
     {
         //SelectedRentResidentialItem = null;
         RentResidentialSearchResult.Clear();
 
-        var res = await Task.FromResult(_dataAccessService.SelectRentResidentialsByNameKeyword("*")).ConfigureAwait(ConfigureAwaitOptions.ContinueOnCapturedContext);// Go back to UI thred. Let's not do > .ConfigureAwait(false);
+        var res = _dataAccessService.SelectRentResidentialsByNameKeyword("*");
         if (res.IsError)
         {
             Debug.WriteLine(res.Error.ErrText + Environment.NewLine + res.Error.ErrDescription + Environment.NewLine + res.Error.ErrPlace + Environment.NewLine + res.Error.ErrPlaceParent);
@@ -288,7 +295,7 @@ public partial class MainViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task EditRentResidential(Models.Rent.Residentials.EntryResidentialSearchResult? selected)
+    private void EditRentResidential(Models.Rent.Residentials.EntryResidentialSearchResult? selected)
     {
         var isFound = false;
         
@@ -321,7 +328,7 @@ public partial class MainViewModel : ObservableObject
         }
 
         // Access Database to get the full entry data.
-        var res = await Task.FromResult(_dataAccessService.SelectRentResidentialById(selected.Id)).ConfigureAwait(ConfigureAwaitOptions.ContinueOnCapturedContext);// Go back to UI thred. Let's not do > .ConfigureAwait(false);
+        var res = _dataAccessService.SelectRentResidentialById(selected.Id);// Go back to UI thred. Let's not do > .ConfigureAwait(false);
         if (res.IsError)
         {
             Debug.WriteLine(res.Error.ErrText + Environment.NewLine + res.Error.ErrDescription + Environment.NewLine + res.Error.ErrPlace + Environment.NewLine + res.Error.ErrPlaceParent);
@@ -383,7 +390,7 @@ public partial class MainViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task DeleteRentResidential(Models.Rent.Residentials.EntryResidentialSearchResult? selected)
+    private void DeleteRentResidential(Models.Rent.Residentials.EntryResidentialSearchResult? selected)
     {
         if (selected == null)
         {
@@ -416,8 +423,7 @@ public partial class MainViewModel : ObservableObject
 
         Debug.WriteLine($"DeleteRentResidentialCommand executed for {selected.Id}");
 
-        // TODO: remove FromResult
-        var res = await Task.FromResult(_dataAccessService.DeleteRentResidential(selected.Id)).ConfigureAwait(false);
+        var res = _dataAccessService.DeleteRentResidential(selected.Id);
         if (res.IsError)
         {
             Debug.WriteLine(res.Error.ErrText + Environment.NewLine + res.Error.ErrDescription + Environment.NewLine + res.Error.ErrPlace + Environment.NewLine + res.Error.ErrPlaceParent);

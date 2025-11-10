@@ -7,7 +7,7 @@ using System.Xml.Linq;
 using ZumenSearch.Models;
 using ZumenSearch.Views;
 
-namespace ZumenSearch.ViewModels.Rent.Residentials.Editor.Modal;
+namespace ZumenSearch.ViewModels.Rent.Residentials.Modal;
 
 public partial class ModalViewModel : ObservableRecipient
 {
@@ -33,12 +33,12 @@ public partial class ModalViewModel : ObservableRecipient
 
     private RelayCommand? saveCommand;
 
-    public IRelayCommand SaveCommand => saveCommand ??= new RelayCommand(SaveAsync);
+    public IRelayCommand SaveCommand => saveCommand ??= new RelayCommand(Save);
 
-    public void SaveAsync()
+    public void Save()
     {
         // TODO: (make async)
-        Debug.WriteLine("SaveAsync() called in ModalViewModel");
+        Debug.WriteLine("Save() called in ModalViewModel");
     }
 
     private RelayCommand? backToSummaryCommand;
