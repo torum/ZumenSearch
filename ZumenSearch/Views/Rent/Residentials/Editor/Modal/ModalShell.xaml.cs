@@ -155,12 +155,11 @@ public sealed partial class ModalShell : Page
 
     public void OnEventBackToSummary(string arg)
     {
-        App.CurrentDispatcherQueue?.TryEnqueue(() =>
+        App.MainWnd?.CurrentDispatcherQueue?.TryEnqueue(() =>
         {
             ContentFrame.Navigate(typeof(Views.Rent.Residentials.Editor.Modal.BasicPage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });
         });
     }
-
 
     public void OnEventGoBack(string arg)
     {

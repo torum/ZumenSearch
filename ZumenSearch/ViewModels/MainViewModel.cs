@@ -373,7 +373,7 @@ public partial class MainViewModel : ObservableObject
         editorWindow.Closed += (sender, e) =>
         {
             // Activate the main window again.
-            App.MainWnd?.Activate();
+            //App.MainWnd?.Activate();
         };
 
         //await Task.Delay(30).ConfigureAwait(false);
@@ -416,6 +416,7 @@ public partial class MainViewModel : ObservableObject
 
         Debug.WriteLine($"DeleteRentResidentialCommand executed for {selected.Id}");
 
+        // TODO: remove FromResult
         var res = await Task.FromResult(_dataAccessService.DeleteRentResidential(selected.Id)).ConfigureAwait(false);
         if (res.IsError)
         {

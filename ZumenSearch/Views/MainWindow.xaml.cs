@@ -23,14 +23,16 @@ namespace ZumenSearch.Views;
 #pragma warning disable IDE0003
 public sealed partial class MainWindow : Window
 {
+    private Microsoft.UI.Dispatching.DispatcherQueue? _currentDispatcherQueue;// = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
+    public Microsoft.UI.Dispatching.DispatcherQueue? CurrentDispatcherQueue => _currentDispatcherQueue;
 
     private readonly MainViewModel _viewModel = App.GetService<MainViewModel>();
 
     // Window position and size
     // TODO: Change this lator.1920x1080
-    private int winRestoreWidth = 1920;//1024;
+    private int winRestoreWidth = 1274;//1024;
     // TODO: Change this lator.
-    private int winRestoreHeight = 1080;//768;
+    private int winRestoreHeight = 794;//768;
     private int winRestoreTop = 100;
     private int winRestoreleft = 100;
 
@@ -38,6 +40,8 @@ public sealed partial class MainWindow : Window
 
     public MainWindow()
     {
+        _currentDispatcherQueue = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
+
         InitializeComponent();
 
         this.ExtendsContentIntoTitleBar = true;
@@ -104,7 +108,6 @@ public sealed partial class MainWindow : Window
             // TODO: Check editor window CanClose before closing the main window.
             appWindow.Closing += (s, a) =>
             {
-
                 // TODO: Currently, WinUI3 does not have "App.Current?.Windows". So, we cannot loop through all windows.
 
                 // Temporary workaround for closing all editor windows when the main window is closed.
@@ -148,6 +151,8 @@ public sealed partial class MainWindow : Window
 
         // TODO:
         //_viewModel.CleanUp();
+        
+        _currentDispatcherQueue = null;
 
         // Save error logs.
         var app = App.Current as App;
@@ -182,8 +187,8 @@ public sealed partial class MainWindow : Window
     {
         #region == Save setting ==
 
-        var winHeight = 480;
-        var winWidth = 640;
+        var winHeight = 794;
+        var winWidth = 1274;
         var winTop = 100;
         var winLeft = 100;
         var winState = OverlappedPresenterState.Restored;

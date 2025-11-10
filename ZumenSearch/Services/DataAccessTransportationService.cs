@@ -46,11 +46,11 @@ public class DataAccessTransportationService : IDataAccessTransportationService
         using var cmd = connection.CreateCommand();
         if (string.IsNullOrEmpty(query))
         {
-            cmd.CommandText = "SELECT line_cd, line_name FROM rail_lines";
+            cmd.CommandText = "SELECT line_cd, line_name FROM rail_lines WHERE line_name NOT LIKE '%新幹線%'";
         }
         else
         {
-            cmd.CommandText = string.Format("SELECT line_cd, line_name FROM rail_lines WHERE line_name LIKE '%{0}%'", query);
+            cmd.CommandText = string.Format("SELECT line_cd, line_name FROM rail_lines WHERE line_name LIKE '%{0}%' AND line_name NOT LIKE '%新幹線%'", query);
         }
         using var reader = cmd.ExecuteReader();
         while (reader.Read())

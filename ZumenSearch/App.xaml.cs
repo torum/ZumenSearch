@@ -1,11 +1,12 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.UI.Xaml;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.UI.Xaml;
+using ZumenSearch.Helpers;
 using ZumenSearch.Services;
 using ZumenSearch.Services.Extensions;
 using ZumenSearch.ViewModels;
@@ -20,12 +21,12 @@ public partial class App : Application
     private static readonly string _appDeveloper = "torum";
 
     // Data folder path
-    private static readonly string _envDataFolder = System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);//ApplicationData //Windows.Storage.ApplicationData.Current.LocalFolder.Path;
-    public static string AppDataFolder { get; } = _envDataFolder + System.IO.Path.DirectorySeparatorChar + _appDeveloper + System.IO.Path.DirectorySeparatorChar + _appName;
-    public static string AppDataPictureFolder { get; } = System.IO.Path.Combine(AppDataFolder, "Pictures");
+    private static readonly string _envDataFolder = System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);//ApplicationData 
+    public static string AppDataFolder { get; private set; } = System.IO.Path.Combine(System.IO.Path.Combine(_envDataFolder, _appDeveloper), _appName);
+    public static string AppDataPictureFolder { get; private set; } = System.IO.Path.Combine(AppDataFolder, "Pictures");
 
     // Config file path
-    public static string AppConfigFilePath { get; } = System.IO.Path.Combine(AppDataFolder, _appName + ".config");
+    public static string AppConfigFilePath { get; private set; } = System.IO.Path.Combine(AppDataFolder, _appName + ".config");
 
     // Log file
     public bool IsSaveErrorLog = true;
@@ -33,7 +34,7 @@ public partial class App : Application
     private readonly StringBuilder Errortxt = new();
 
     // DispatcherQueuecherQueue
-    public static readonly Microsoft.UI.Dispatching.DispatcherQueue CurrentDispatcherQueue = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
+    //public static readonly Microsoft.UI.Dispatching.DispatcherQueue CurrentDispatcherQueue = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
 
     // Main Window
     public static MainWindow? MainWnd { get; private set; } // don't = new();
@@ -57,6 +58,19 @@ public partial class App : Application
 
     public App()
     {
+        if (RuntimeHelper.IsMSIX)
+        {
+            Debug.WriteLine("IsMSIX");
+            var envDataFolder = Windows.Storage.ApplicationData.Current.LocalFolder.Path;
+            AppDataFolder = System.IO.Path.Combine(System.IO.Path.Combine(envDataFolder, _appDeveloper), _appName);
+            AppConfigFilePath = System.IO.Path.Combine(AppDataFolder, _appName + ".config");
+            AppDataPictureFolder = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(AppDataFolder, _appDeveloper), _appName), "Pictures");
+        }
+        else
+        {
+            //
+        }
+
         InitializeComponent();
 
         Host = Microsoft.Extensions.Hosting.Host.
@@ -144,7 +158,7 @@ public partial class App : Application
     // Activated from other instance.
     private void App_Activated(object? sender, Microsoft.Windows.AppLifecycle.AppActivationArguments e)
     {
-        CurrentDispatcherQueue?.TryEnqueue(() =>
+        App.MainWnd?.CurrentDispatcherQueue?.TryEnqueue(() =>
         {
             // Due to the bag of the Winui3, the window may not be activated.
             // see https://github.com/microsoft/microsoft-ui-xaml/issues/7595

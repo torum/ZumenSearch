@@ -1339,7 +1339,7 @@ public partial class ResidentialsViewModel : ObservableObject
             Debug.WriteLine("Error on insert. @SaveAsNew in ResidentialsViewModel");
             Debug.WriteLine(resInsert.Error.ErrText + Environment.NewLine + resInsert.Error.ErrDescription + Environment.NewLine + resInsert.Error.ErrPlace + Environment.NewLine + resInsert.Error.ErrPlaceParent);
 
-            App.CurrentDispatcherQueue?.TryEnqueue(() =>
+            App.MainWnd?.CurrentDispatcherQueue?.TryEnqueue(() =>
             {
                 // TODO: Show error message to user
             });
@@ -1364,7 +1364,7 @@ public partial class ResidentialsViewModel : ObservableObject
             Debug.WriteLine("Error on update. @SaveAsUpdate in ResidentialsViewModel");
             Debug.WriteLine(resInsert.Error.ErrText + Environment.NewLine + resInsert.Error.ErrDescription + Environment.NewLine + resInsert.Error.ErrPlace + Environment.NewLine + resInsert.Error.ErrPlaceParent);
 
-            App.CurrentDispatcherQueue?.TryEnqueue(() =>
+            App.MainWnd?.CurrentDispatcherQueue?.TryEnqueue(() =>
             {
                 // TODO: Show error message to user
             });
