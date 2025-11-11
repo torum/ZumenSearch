@@ -52,7 +52,7 @@ public sealed partial class EditorShell : Page
     {
         EditorWin = win ?? throw new ArgumentNullException(nameof(win));
         ViewModel = vm ?? throw new ArgumentNullException(nameof(vm));
-        ViewModel.SetEditorWin(win);
+        ViewModel.SetEditorWin(win);// Must set Editor Winodw to VM.
         _dlg = modalDialog;
 
         InitializeComponent();
@@ -67,8 +67,6 @@ public sealed partial class EditorShell : Page
         EditorWin.Closed += EditorWindow_Closed;
         EditorWin.AppWindow.Closing += AppWindow_Closing;
         EditorWin.Title = "";
-        //
-        //ViewModel.SetEditorWindow(EditorWin);
 
         ViewModel.ModalWinWidth = MainVM.ModalWinWidth;
         ViewModel.ModalWinHeight = MainVM.ModalWinHeight;
@@ -82,8 +80,6 @@ public sealed partial class EditorShell : Page
         ViewModel.EventEditAppliance += (sender, arg) => OnEventEditAppliance();
         ViewModel.EventEditPictures += (sender, arg) => OnEventEditPictures();
         ViewModel.EventEditUnits += (sender, arg) => OnEventEditUnits();
-        //
-        ViewModel.EventAddNewBuildingPictures += (sender, arg) => OnEventAddNewBuildingPictures();
         //
         ViewModel.EventIsUnitOwnership += (sender, arg) => OnEventIsUnitOwnership(arg);
     }
@@ -267,6 +263,9 @@ public sealed partial class EditorShell : Page
         ViewModel.SetEntry(entry);
         EditorWin.Id = entry.Id; // Set the EditorWin Id to the Entry Id. 
 
+        // Just in case.
+        ViewModel.SetEditorWin(EditorWin);
+
         // TODO: do this from VM.
         EditorWin.Title = $"物件情報の編集（{entry.Name}）";
     }
@@ -317,119 +316,6 @@ public sealed partial class EditorShell : Page
     public void OnEventEditUnits()
     {
         ContentFrame.Navigate(typeof(Views.Rent.Residentials.Editor.UnitListPage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });
-    }
-
-    public async void OnEventAddNewBuildingPictures()
-    {
-        var destDirectory = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(App.AppDataPictureFolder, "Rent"),"Residential_Building"), Guid.NewGuid().ToString("N"));
-
-        if (!Directory.Exists(destDirectory))
-        {
-            Directory.CreateDirectory(destDirectory);
-        }
-
-        var openPicker = new Windows.Storage.Pickers.FileOpenPicker();
-
-        var window = EditorWin;//App.MainWindow;
-        var hWnd = WinRT.Interop.WindowNative.GetWindowHandle(window);
-        WinRT.Interop.InitializeWithWindow.Initialize(openPicker, hWnd);
-
-        // Set options for your file picker
-        openPicker.ViewMode = PickerViewMode.List;
-        openPicker.SuggestedStartLocation = PickerLocationId.PicturesLibrary;
-        openPicker.FileTypeFilter.Add(".jpg");
-        openPicker.FileTypeFilter.Add(".jpeg");
-        openPicker.FileTypeFilter.Add(".png");
-        openPicker.FileTypeFilter.Add(".gif");
-
-        // Open the picker for the user to pick a file
-        var files = await openPicker.PickMultipleFilesAsync();
-        if (files.Count > 0)
-        {
-            StringBuilder output = new("");
-            List<string> list = [];
-            foreach (var file in files)
-            {
-                output.Append(file.Path + "\n");
-                list.Add(file.Path);
-
-                using var sourceStream = File.Open(file.Path, FileMode.Open);
-                using var destinationStream = File.Create(Path.Combine(destDirectory, file.Name));
-                await sourceStream.CopyToAsync(destinationStream);
-            }
-
-            Debug.WriteLine(output.ToString());
-            ViewModel.SetNewBuildingPictures(list);
-        }
-        else
-        {
-            Debug.WriteLine("Operation cancelled.");
-        }
-    }
-
-    public void OnEventAddNewUnit()
-    {
-        if (EditorWin == null)
-        {
-            // EditorWin should be initialized in the EditorShell constructor.
-            Debug.WriteLine("EditorWin should be initialized in the EditorShell constructor.");
-            return;
-        }
-
-        //var dlgService = App.GetService<IModalDialogService>();
-        //dlgService.ShowUnitDialog(ViewModel, EditorWin);
-
-        /*
-
-        Views.Rent.Residentials.Editor.Modal.ModalWindow dialogWin = new();
-        dialogWin.Content = new Views.Rent.Residentials.Editor.Modal.ModalShell(dialogWin);
-
-        //TODO: stupid WinUI3... 
-        // https://github.com/microsoft/microsoft-ui-xaml/issues/10396
-        // https://github.com/microsoft/WindowsAppSDK/discussions/3680
-
-        IntPtr hWndDialog = WinRT.Interop.WindowNative.GetWindowHandle(dialogWin);
-        //Microsoft.UI.WindowId windowId1 = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hWnd1);
-        //Microsoft.UI.Windowing.AppWindow appWindow = Microsoft.UI.Windowing.AppWindow.GetFromWindowId(windowId1);
-        //Microsoft.UI.Windowing.OverlappedPresenter presenter = appWindow.Presenter as Microsoft.UI.Windowing.OverlappedPresenter;
-        IntPtr hWndEditor = WinRT.Interop.WindowNative.GetWindowHandle(this.EditorWin);
-        SetWindowLong(hWndDialog, GWL_HWNDPARENT, hWndEditor);
-
-        Microsoft.UI.Windowing.AppWindow? appWindow = dialogWin.AppWindow;
-        if (appWindow != null)
-        {
-            if (appWindow.Presenter is OverlappedPresenter presenter)
-            {
-                presenter.IsModal = true;
-
-                // Don't use EnableWindow. This causes all sorts of problems. (as of WinAppSDK 1.7.25)
-                //EnableWindow(hWndEditor, false);
-
-                dialogWin.Closed += (sender, e) =>
-                {
-                    // Don't use EnableWindow. This causes all sorts of problems. (as of WinAppSDK 1.7.25)
-                    //EnableWindow(hWndEditor, true);
-
-                    // Activate the editor window again.
-                    this.EditorWin.Activate();
-                };
-
-                // Close the dialog when the editor window is closed.
-                this.EditorWin.Closed += (sender, e) =>
-                {
-                    dialogWin.Close();
-                };
-
-                //Task.Delay(30).ConfigureAwait(false);
-
-                // Same as EnableWindow. This causes all sorts of problems. (as of WinAppSDK 1.7.25)
-                //appWindow.Show(true);
-
-                dialogWin.Activate();
-                //dialogWin.Show();
-            }
-        }
-        */
     }
 
     #region == TEMP code for modal window(for setting an owner) ==

@@ -38,27 +38,27 @@ public sealed partial class TransportationPage : Page
         base.OnNavigatedTo(e);
     }
 
-    private void TextBoxRailLine_TextChanged(object sender, TextChangedEventArgs e)
+    private void TextBoxRailLine1_TextChanged(object sender, TextChangedEventArgs e)
     {
-        if (string.IsNullOrEmpty(TextBoxRailLine.Text))
+        if (string.IsNullOrEmpty(TextBoxRailLine1.Text))
         {
-            TextBoxRailLine.IsEnabled = false;
+            TextBoxRailLine1.IsEnabled = false;
         }
         else
         {
-            TextBoxRailLine.IsEnabled = true;
+            TextBoxRailLine1.IsEnabled = true;
         }
     }
 
-    private void TextBoxRailStation_TextChanged(object sender, TextChangedEventArgs e)
+    private void TextBoxRailStation1_TextChanged(object sender, TextChangedEventArgs e)
     {
-        if (string.IsNullOrEmpty(TextBoxRailStation.Text))
+        if (string.IsNullOrEmpty(TextBoxRailStation1.Text))
         {
-            TextBoxRailStation.IsEnabled = false;
+            TextBoxRailStation1.IsEnabled = false;
         }
         else
         {
-            TextBoxRailStation.IsEnabled = true;
+            TextBoxRailStation1.IsEnabled = true;
         }
     }
 }

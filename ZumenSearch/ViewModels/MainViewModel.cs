@@ -113,21 +113,20 @@ public partial class MainViewModel : ObservableObject
         _editorFactory = editorFactory;
         _dataAccessService = dataAccessService;
 
-        InitializeDatabaseAsync();
-
         _versionDescription = GetVersionDescription();
 
+        InitializeDatabaseAsync();
     }
 
     #endregion
 
-    #region == Methods ==
+    #region == Private Methods ==
 
-    private async void InitializeDatabaseAsync()
+    private void InitializeDatabaseAsync()
     {
         var filePath = Path.Combine(App.AppDataFolder, "ZumenSearch.db");
 
-        var res = await Task.FromResult(_dataAccessService.InitializeDatabase(filePath));
+        var res = _dataAccessService.InitializeDatabase(filePath);
         if (res.IsError)
         {
             Debug.WriteLine("InitializeDatabase @InitializeDatabaseAsync in MainViewModel");

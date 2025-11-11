@@ -95,24 +95,6 @@
                                     </Grid>
                                 </Grid>
 
-                                <StackPanel>
-
-                                    <!-- 
-<GroupBox Header="所在地詳細" Padding="0" Style="{DynamicResource GroupBoxStyle}">
-
-    <Button VerticalAlignment="Center" Content="所在地設定" Margin="6" Padding="3" Width="120" HorizontalAlignment="Left" />
-
-</GroupBox>
-
-<GroupBox Header="地図表示" Padding="0" Style="{DynamicResource GroupBoxStyle}">
-
-    <Button Content="マップ座標取得" Command="{Binding ShowInMapCommand}" VerticalAlignment="Center" Margin="6" Padding="3" Width="120" HorizontalAlignment="Left" />
-
-</GroupBox>
-
--->
-                                </StackPanel>
-
                             </StackPanel>
 
                         </Border>
@@ -130,7 +112,21 @@
                 <controls:Case Value="two">
                     <StackPanel Spacing="12" Margin="0,0,0,0">
                         <Border Style="{StaticResource RoundCardBorderStyle}">
-                            
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="1*" MinWidth="320"/>
+                                    <ColumnDefinition Width="1*" MinWidth="320"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid Grid.Column="0">
+                                    <TextBox Header="緯度" Text="{x:Bind ViewModel.LocationLatitude, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></TextBox>
+                                </Grid>
+                                <Grid Grid.Column="1" Margin="12,0,0,0">
+                                    <TextBox Header="緯度" Text="{x:Bind ViewModel.LocationLongitude, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></TextBox>
+                                </Grid>
+                            </Grid>
+                        </Border>
+                        <Border Style="{StaticResource RoundCardBorderStyle}">
+                            <Button Content="GoogleMapで表示" Command="{x:Bind ViewModel.ShowGoogleMapsCommand, Mode=OneWay}"/>
                         </Border>
                     </StackPanel>
                 </controls:Case>

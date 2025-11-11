@@ -36,22 +36,6 @@ public abstract partial class EntryBase : ObservableObject
     protected string _id;
     public string Id => _id;
 
-    public string SetId
-    {
-        set
-        {
-            if (string.IsNullOrEmpty(value))
-            {
-                throw new ArgumentException("Id cannot be null or empty.", nameof(value));
-            }
-
-            if (SetProperty(ref _id, value))
-            {
-                // 
-            }
-        }
-    }
-
     private string? _name;
     public string Name
     {
@@ -608,6 +592,20 @@ public abstract partial class EntryBase : ObservableObject
 
     protected EntryBase(string id)
     {
+        _id = id;
+    }
+
+    public void ClearId()
+    {
+        _id = string.Empty;
+    }
+
+    public void SetId(string id)
+    {
+        if (string.IsNullOrEmpty(id))
+        {
+            throw new ArgumentException("Id cannot be null or empty.", nameof(id));
+        }
         _id = id;
     }
 }
