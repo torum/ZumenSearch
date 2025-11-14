@@ -7,7 +7,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using ZumenSearch.Models;
 using ZumenSearch.ViewModels.Rent.Residentials;
-using ZumenSearch.Views.Rent.Residentials.Editor;
+using ZumenSearch.Views.Rent.Residentials.Bldg;
 using static ZumenSearch.Services.ModalDialogService;
 
 namespace ZumenSearch.Services;

@@ -50,7 +50,7 @@ public partial class MainViewModel : ObservableObject
     #region == Window management ==
 
     // Marking EditorList as readonly to fix IDE0044
-    public readonly List<Views.Rent.Residentials.Editor.EditorWindow> EditorList = [];
+    public readonly List<Views.Rent.Residentials.Bldg.EditorWindow> EditorList = [];
 
     // Editor window position and size
     public int EditorWinWidth = 1366;
@@ -93,7 +93,13 @@ public partial class MainViewModel : ObservableObject
 
     #region == Search ==
 
-    public ObservableCollection<Models.Rent.Residentials.EntryResidentialSearchResult> RentResidentialSearchResult = [];
+    private ObservableCollection<Models.Rent.Residentials.EntryResidentialSearchResult> _entResidentialSearchResult = [];
+
+    public ObservableCollection<Models.Rent.Residentials.EntryResidentialSearchResult> RentResidentialSearchResult
+    {
+        get => _entResidentialSearchResult;
+        set => SetProperty(ref _entResidentialSearchResult, value);
+    }
 
     #endregion
 
@@ -101,14 +107,14 @@ public partial class MainViewModel : ObservableObject
 
     #region == Services ==
 
-    private readonly IAbstractFactory<Views.Rent.Residentials.Editor.EditorShell> _editorFactory;
+    private readonly IAbstractFactory<Views.Rent.Residentials.Bldg.EditorShell> _editorFactory;
     private readonly IDataAccessService _dataAccessService;
 
     #endregion
 
     #region == Constructor ==
 
-    public MainViewModel(IAbstractFactory<Views.Rent.Residentials.Editor.EditorShell> editorFactory, IDataAccessService dataAccessService)
+    public MainViewModel(IAbstractFactory<Views.Rent.Residentials.Bldg.EditorShell> editorFactory, IDataAccessService dataAccessService)
     {
         _editorFactory = editorFactory;
         _dataAccessService = dataAccessService;
@@ -276,6 +282,7 @@ public partial class MainViewModel : ObservableObject
         RentResidentialSearchResult.Clear();
 
         var res = _dataAccessService.SelectRentResidentialsByNameKeyword("*");
+
         if (res.IsError)
         {
             Debug.WriteLine(res.Error.ErrText + Environment.NewLine + res.Error.ErrDescription + Environment.NewLine + res.Error.ErrPlace + Environment.NewLine + res.Error.ErrPlaceParent);
@@ -287,14 +294,14 @@ public partial class MainViewModel : ObservableObject
         }
         else
         {
-            RentResidentialSearchResult = res.SelectedEntries;
-        }
+            RentResidentialSearchResult = new(res.SelectedEntries);
 
-        Shell.NavFrame.Navigate(typeof(Views.Rent.Residentials.SearchResultPage), Shell.NavFrame, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });
+            Shell.NavFrame.Navigate(typeof(Views.Rent.Residentials.SearchResultPage), Shell.NavFrame, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });
+        }
     }
 
     [RelayCommand]
-    private void EditRentResidential(Models.Rent.Residentials.EntryResidentialSearchResult? selected)
+    public async Task EditRentResidential(Models.Rent.Residentials.EntryResidentialSearchResult? selected)
     {
         var isFound = false;
         
@@ -307,7 +314,7 @@ public partial class MainViewModel : ObservableObject
         //Debug.WriteLine($"EditRentResidentialCommand executed for {selected.Id}");
 
         // Check if the selected item is already being edited in another window.
-        EditorList.ForEach(editorWindow =>
+        EditorList.ForEach(async editorWindow =>
         {
             Debug.WriteLine($"Checking editor window with Id: {editorWindow.Id} for selected item with Id: {selected.Id}");
             if (editorWindow.Id == selected.Id)
@@ -315,7 +322,26 @@ public partial class MainViewModel : ObservableObject
                 // If the editor window for this item is already open, activate it.
                 Debug.WriteLine($"Editor window for {selected.Id} is already open. Activating it.");
                 isFound = true;
+
+                // Stupid WinUI3 needs a delay here to properly activate the window.
+                //await Task.Delay(30);
+                //await Task.Yield();
+
                 editorWindow.Activate();
+                App.MainWnd?.AppWindow.MoveInZOrderBelow(editorWindow.AppWindow.Id);
+                editorWindow.AppWindow.MoveInZOrderAtTop();
+                /*
+                App.MainWnd?.CurrentDispatcherQueue?.TryEnqueue(() =>
+                {
+                    editorWindow.AppWindow.Show();
+
+                    editorWindow.AppWindow.MoveInZOrderAtTop();
+                    editorWindow.Activate();
+
+                    App.MainWnd.AppWindow.MoveInZOrderBelow(editorWindow.AppWindow.Id);
+                });
+                */
+
                 return;
             }
         });
@@ -374,6 +400,8 @@ public partial class MainViewModel : ObservableObject
             presenter.IsResizable = true;
             presenter.IsModal = false;
             presenter.IsAlwaysOnTop = false;
+            presenter.PreferredMinimumWidth = 1274;
+            presenter.PreferredMinimumHeight = 794;
         }
 
         editorWindow.Closed += (sender, e) =>
@@ -382,10 +410,25 @@ public partial class MainViewModel : ObservableObject
             //App.MainWnd?.Activate();
         };
 
-        //await Task.Delay(30).ConfigureAwait(false);
+        // Stupid WinUI3 needs a delay here to properly activate the window.
+        //await Task.Delay(30);
+        //await Task.Yield();
+        /*
+        App.MainWnd?.CurrentDispatcherQueue?.TryEnqueue(() =>
+        {
+            editorWindow.AppWindow.Show();
 
-        //editorWindow.AppWindow.Show();
+            editorWindow.AppWindow.MoveInZOrderAtTop();
+            editorWindow.Activate();
+
+            App.MainWnd.AppWindow.MoveInZOrderBelow(editorWindow.AppWindow.Id);
+        });
+        */
+
+        editorWindow.AppWindow.Show();
         editorWindow.Activate();
+        App.MainWnd?.AppWindow.MoveInZOrderBelow(editorWindow.AppWindow.Id);
+        editorWindow.AppWindow.MoveInZOrderAtTop();
     }
 
     [RelayCommand]

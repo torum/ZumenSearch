@@ -30,7 +30,7 @@
                         <BreadcrumbBarItem Content="{Binding}">
                             <BreadcrumbBarItem.ContentTemplate>
                                 <DataTemplate>
-                                    <TextBlock Text="{Binding Name}" FontSize="32"/>
+                                    <TextBlock Text="{Binding Name}" FontSize="32" FontWeight="SemiBold"/>
                                 </DataTemplate>
                             </BreadcrumbBarItem.ContentTemplate>
                         </BreadcrumbBarItem>

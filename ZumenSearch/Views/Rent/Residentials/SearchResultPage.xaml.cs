@@ -1,10 +1,13 @@
-﻿using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media.Animation;
-using Microsoft.UI.Xaml.Navigation;
-using System;
+﻿using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Media.Animation;
+using Microsoft.UI.Xaml.Navigation;
 using ZumenSearch.Models;
+using ZumenSearch.Models.Rent.Residentials;
 using ZumenSearch.ViewModels;
 using ZumenSearch.Views;
 
@@ -62,5 +65,93 @@ public sealed partial class SearchResultPage : Page
         }
 
         base.OnNavigatedTo(e);
+    }
+
+    private void SearchResult_DoubleTapped(object sender, Microsoft.UI.Xaml.Input.DoubleTappedRoutedEventArgs e)
+    {
+        // Stupid WinUI3 can't handle double click properly.
+        // Also, with this, newly created window goes behind main window because WinUI3 is stupid.
+
+        /*
+        if (sender is not ListView listView)
+        {
+            return;
+        }
+
+        // UI element that was double-clicked
+        FrameworkElement element = (FrameworkElement)e.OriginalSource;
+
+        var container = FindParent<ListViewItem>(element);
+
+        if (container is null)
+        {
+            Debug.WriteLine("container is null @SearchResult_DoubleTapped()");
+            return;
+        }
+
+        if (listView.SelectedItem != container.Content)
+        {
+            Debug.WriteLine("(listView.SelectedItem != container.Content) @SearchResult_DoubleTapped()");
+            return;
+        }
+
+        if (ViewModel is null)
+        {
+            return;
+        }
+
+        if (listView.SelectedItem is not EntryResidentialSearchResult searchresult)
+        {
+            return;
+        }
+
+        ViewModel.EditRentResidential(searchresult);
+        */
+    }
+
+    private static T? FindParent<T>(DependencyObject child) where T : DependencyObject
+    {
+        DependencyObject parent = VisualTreeHelper.GetParent(child);
+        while (parent != null && parent is not T)
+        {
+            parent = VisualTreeHelper.GetParent(parent);
+        }
+
+        if (parent is not null)
+        {
+            return parent as T;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    private void SearchResultListView_ItemInvoked(ItemsView sender, ItemsViewItemInvokedEventArgs args)
+    {
+        // Get the invoked item
+        var invokedItem = args.InvokedItem;
+
+        if (ViewModel is null)
+        {
+            return;
+        }
+
+        if (invokedItem is not EntryResidentialSearchResult)
+        {
+            return;
+        }
+
+        // Needs ItemContainer_PointerPressed Handled = true; to avoid stealing child window focus. Strupid WinUI3.
+        ViewModel.EditRentResidentialCommand.Execute(invokedItem);
+
+    }
+
+    private void ItemContainer_PointerPressed(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
+    {
+        // Stupid WinUI3 can't handle double click properly.
+        // This prevents newly created window goes behind the main window.
+        // WinUI3 is so stupid.
+        e.Handled = true;
     }
 }

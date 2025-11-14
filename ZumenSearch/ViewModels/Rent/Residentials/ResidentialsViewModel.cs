@@ -25,7 +25,7 @@ using ZumenSearch.Models;
 using ZumenSearch.Models.Rent.Residentials;
 using ZumenSearch.Services;
 using ZumenSearch.Views;
-using ZumenSearch.Views.Rent.Residentials.Editor;
+using ZumenSearch.Views.Rent.Residentials.Bldg;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace ZumenSearch.ViewModels.Rent.Residentials;
@@ -34,7 +34,7 @@ public partial class ResidentialsViewModel : ObservableObject
 {
     #region == プロパティ ==
 
-    public Views.Rent.Residentials.Editor.EditorWindow? EditorWin {get; private set;}
+    public Views.Rent.Residentials.Bldg.EditorWindow? EditorWin {get; private set;}
 
     // Modal Editor window position and size
     public int ModalWinWidth = 1366;
@@ -45,6 +45,8 @@ public partial class ResidentialsViewModel : ObservableObject
     // The Entry property holds the COPY of current RentResidential entry being edited. Do not use it directly in the UI. Apply changes to this object in SaveAsync() to save the changes.
     // MainViewModel creates a new instance of this class and call EditorShell.SetEntry(EntryResidentialFull) and sets this property.
     private Models.Rent.Residentials.EntryResidentialFull _entry = new();
+
+    private readonly List<string> _unsavedBuildingPictureFileList = [];
 
     private readonly string _windowTitleBase = "賃貸住居用";
 
@@ -978,50 +980,6 @@ public partial class ResidentialsViewModel : ObservableObject
         }
     }
 
-    private PictureBuilding? _selectedBuildingPicture;
-    public PictureBuilding? SelectedBuildingPicture
-    {
-        get => _selectedBuildingPicture;
-        set
-        {
-            // "quietly" clear values.
-            _buildingPictureIsMain = false;
-            _buildingPictureTitle = string.Empty;
-            _buildingPictureDescription = string.Empty;
-
-            _buildingPicturePropertiesIsDirty = false;
-
-            if (SetProperty(ref _selectedBuildingPicture, value))
-            {
-                if (_selectedBuildingPicture != null)
-                {
-                    IsBuildingPictureEditPaneVisible = true;
-
-                    // "quietly" update values.
-                    _buildingPictureIsMain = _selectedBuildingPicture.IsMain;
-                    _buildingPictureTitle = _selectedBuildingPicture.Title ?? string.Empty;
-                    _buildingPictureDescription = _selectedBuildingPicture.Description ?? string.Empty;
-
-                    _buildingPicturePropertiesIsDirty = false;
-                }
-                else
-                {
-                    IsBuildingPictureEditPaneVisible = false;
-                }
-            }
-
-            // notify updates.
-            OnPropertyChanged(nameof(BuildingPictureTitle));
-            OnPropertyChanged(nameof(BuildingPictureDescription));
-            OnPropertyChanged(nameof(BuildingPictureIsMain));
-            OnPropertyChanged(nameof(BuildingPicturePropertiesIsDirty));
-
-            UpdatedBuildingPicturePropertyCommand.NotifyCanExecuteChanged();
-
-            DeleteSelectedBuildingPictureCommand.NotifyCanExecuteChanged();
-        }
-    }
-
     private bool _buildingPicturePropertiesIsDirty;
     public bool BuildingPicturePropertiesIsDirty
     {
@@ -1035,16 +993,149 @@ public partial class ResidentialsViewModel : ObservableObject
         }
     }
 
-    private string _buildingPictureTitle = string.Empty;
-    public string BuildingPictureTitle
+    private PictureBuilding? _selectedBuildingPicture;
+    public PictureBuilding? SelectedBuildingPicture
     {
-        get => _buildingPictureTitle;
+        get => _selectedBuildingPicture;
+        set
+        {
+            if (_selectedBuildingPicture == value)
+            {
+                return;
+            }
+
+            _selectedBuildingPicture = value;
+
+            // "quietly" clear values.
+            _buildingPictureIsMain = false;
+            _selectedBuildingPictureType = new(EnumBuildingPictureType.Unspecified);
+            _buildingPictureDescription = string.Empty;
+
+            if (_selectedBuildingPicture is not null)
+            {
+                // "quietly" update values.
+                _buildingPictureIsMain = _selectedBuildingPicture.IsMain;
+                _buildingPictureDescription = _selectedBuildingPicture.Description ?? string.Empty;
+                var lbl = BuildingPictureTypes.FirstOrDefault(x => x.Key == _selectedBuildingPicture.PictureType.Key);
+                if (lbl is not null)
+                {
+                    _selectedBuildingPictureType = lbl;
+                }
+                else
+                {
+                    Debug.WriteLine($"@SelectedBuildingPicture: could not find label for key {_selectedBuildingPicture.PictureType.Key}");
+                }
+
+                IsBuildingPictureEditPaneVisible = true;
+            }
+            else
+            {
+                Debug.WriteLine($"@SelectedBuildingPicture: value is null");
+            }
+
+            OnPropertyChanged(nameof(SelectedBuildingPicture));
+            _buildingPicturePropertiesIsDirty = false;
+
+            //_buildingPicturePropertiesIsDirty = false;
+            /*
+            if (SetProperty(ref _selectedBuildingPicture, value))
+            {
+                if (_selectedBuildingPicture is not null)
+                {
+                    IsBuildingPictureEditPaneVisible = true;
+
+                    Debug.WriteLine($"SelectedBuildingPicture changed: Label={_selectedBuildingPicture.Label.Text}, Description={_selectedBuildingPicture.Description}, IsMain={_selectedBuildingPicture.IsMain}");
+
+                    // "quietly" update values.
+                    _buildingPictureIsMain = _selectedBuildingPicture.IsMain;
+                    _buildingPictureLabel = _selectedBuildingPicture.Label;
+                    _buildingPictureDescription = _selectedBuildingPicture.Description ?? string.Empty;
+
+                    //_buildingPicturePropertiesIsDirty = false;
+                }
+                else
+                {
+                    Debug.WriteLine($"SelectedBuildingPicture changed: null");
+
+                    //IsBuildingPictureEditPaneVisible = false;
+                }
+            }
+            */
+
+            // notify updates.
+            OnPropertyChanged(nameof(SelectedBuildingPictureType));
+            OnPropertyChanged(nameof(BuildingPictureDescription));
+            OnPropertyChanged(nameof(BuildingPictureIsMain));
+            OnPropertyChanged(nameof(BuildingPicturePropertiesIsDirty));
+
+            UpdatedBuildingPicturePropertyCommand.NotifyCanExecuteChanged();
+            DeleteSelectedBuildingPictureCommand.NotifyCanExecuteChanged();
+        }
+    }
+
+    public ObservableCollection<BuildingPictureType> BuildingPictureTypes =
+    [
+        //new BuildingPictureType(EnumBuildingPictureType.Unspecified, "未指定"),
+        new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Madori),
+        new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Gaikan),
+        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Situnai),
+        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.LivingDining),
+        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Bedroom),
+        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Kitchen),
+        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Bathroom),
+        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Restroom),
+        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Washroom),
+        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.StorageSpace),
+        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Appliance),
+        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.FrontDoor),
+        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Balcony),
+        new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Entrance),
+        new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Neighborhood),
+        new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Other)
+    ];
+
+    private BuildingPictureType _selectedBuildingPictureType = new(EnumBuildingPictureType.Unspecified);
+    public BuildingPictureType SelectedBuildingPictureType
+    {
+        get => _selectedBuildingPictureType;
         set 
         {
-            if (SetProperty(ref _buildingPictureTitle, value))
+            /*
+            if (_selectedBuildingPictureType == value)
             {
-                BuildingPicturePropertiesIsDirty = true;
+                Debug.WriteLine($"BuildingPictureLabel: same {_selectedBuildingPictureType.Text}");
+                return;
             }
+
+            if (value is null)
+            {
+                Debug.WriteLine($"BuildingPictureLabel: null");
+                return;
+            }
+
+            _selectedBuildingPictureType = value;
+            BuildingPicturePropertiesIsDirty = true;
+
+            Debug.WriteLine($"Setting BuildingPictureLabel to: {(value is not null ? value.Text : "null")}");
+            BuildingPicturePropertiesIsDirty = true;
+
+            OnPropertyChanged(nameof(SelectedBuildingPictureType));
+            */
+            
+            if (SetProperty(ref _selectedBuildingPictureType, value))
+            {
+                if (_selectedBuildingPictureType is not null)
+                {
+                    Debug.WriteLine($"BuildingPictureLabel changed: {_selectedBuildingPictureType.Text}");
+
+                    BuildingPicturePropertiesIsDirty = true;
+                }
+                else
+                {
+                    Debug.WriteLine($"BuildingPictureLabel changed: null");
+                }
+            }
+
         }
     }
 
@@ -1073,7 +1164,6 @@ public partial class ResidentialsViewModel : ObservableObject
             }
         }
     }
-
 
     #endregion
 
@@ -1121,7 +1211,7 @@ public partial class ResidentialsViewModel : ObservableObject
 
     #region == Public Methods ==
 
-    public void SetEditorWin(Views.Rent.Residentials.Editor.EditorWindow win)
+    public void SetEditorWin(Views.Rent.Residentials.Bldg.EditorWindow win)
     {
         EditorWin = win;
     }
@@ -1163,6 +1253,23 @@ public partial class ResidentialsViewModel : ObservableObject
             BuildingPictures.Add(pic);
 
             IsEntryDirty = true;
+        }
+    }
+
+    public void DiscardUnsavedFiles()
+    {
+        if (_unsavedBuildingPictureFileList.Count <= 0)
+        {
+            return;
+        }
+        
+        foreach (var file in _unsavedBuildingPictureFileList)
+        {
+            if (File.Exists(file))
+            {
+                Debug.WriteLine($"Deleting unsaved file: {file}");
+                File.Delete(file);
+            }
         }
     }
 
@@ -1300,7 +1407,7 @@ public partial class ResidentialsViewModel : ObservableObject
     #region == Save ==
 
     [RelayCommand(CanExecute = nameof(CanSave))]
-    public async Task Save()
+    public void Save()
     {
         if (!IsEntryDirty)
         {
@@ -1325,12 +1432,15 @@ public partial class ResidentialsViewModel : ObservableObject
         {
             // If the Entry.Id is empty, generate a new ID and save as new.
             _entry.SetId(Guid.CreateVersion7().ToString());
-            var res = await SaveAsNew();
+            var res = SaveAsNew();
             if (res)
             {
                 // Clear these dirty flags.
                 IsEntryDirty = false;
                 _entry.IsDirty = false;
+
+                // Clear unsaved file list.
+                _unsavedBuildingPictureFileList.Clear();
 
                 if (EditorWin is not null)
                 {
@@ -1350,12 +1460,15 @@ public partial class ResidentialsViewModel : ObservableObject
         else
         {
             // If the Entry.Id is not empty, update the existing entry.
-            var res = await SaveAsUpdate();
+            var res = SaveAsUpdate();
             if (res)
             {
                 // Clear these dirty flags.
                 IsEntryDirty = false;
                 _entry.IsDirty = false;
+
+                // Clear unsaved file list.
+                _unsavedBuildingPictureFileList.Clear();
             }
         }
     }
@@ -1364,7 +1477,7 @@ public partial class ResidentialsViewModel : ObservableObject
         return IsEntryDirty;
     }
 
-    private Task<bool> SaveAsNew()
+    private bool SaveAsNew()
     {
         // In case..
         if (string.IsNullOrEmpty(_entry.Id))
@@ -1380,7 +1493,7 @@ public partial class ResidentialsViewModel : ObservableObject
             Debug.WriteLine(resInsert.Error.ErrText + Environment.NewLine + resInsert.Error.ErrDescription + Environment.NewLine + resInsert.Error.ErrPlace + Environment.NewLine + resInsert.Error.ErrPlaceParent);
 
             // TODO: return error object.
-            return Task.FromResult(false);
+            return false;
         }
         else
         {
@@ -1392,9 +1505,9 @@ public partial class ResidentialsViewModel : ObservableObject
         }
 
         // Return a completed task to satisfy the method's return type
-        return Task.FromResult(true);
+        return true;
     }
-    private Task<bool> SaveAsUpdate()
+    private bool SaveAsUpdate()
     {
         var resInsert = _dataAccessService.UpdateRentResidential(_entry);
         if (resInsert.IsError)
@@ -1403,7 +1516,7 @@ public partial class ResidentialsViewModel : ObservableObject
             Debug.WriteLine(resInsert.Error.ErrText + Environment.NewLine + resInsert.Error.ErrDescription + Environment.NewLine + resInsert.Error.ErrPlace + Environment.NewLine + resInsert.Error.ErrPlaceParent);
 
             // TODO: return error object.
-            return Task.FromResult(false);
+            return false;
         }
         else
         {
@@ -1415,12 +1528,12 @@ public partial class ResidentialsViewModel : ObservableObject
         }
 
         // Return a completed task to satisfy the method's return type
-        return Task.FromResult(true);
+        return true;
     }
 
     #endregion
 
-    #region == Modal Window ==
+    #region == Unit Window ==
 
     // Add New Modal window command
     [RelayCommand]
@@ -1441,8 +1554,8 @@ public partial class ResidentialsViewModel : ObservableObject
             return;
         }
 
-        var dialogWin = new Views.Rent.Residentials.Editor.Modal.ModalWindow();
-        dialogWin.Content = new Views.Rent.Residentials.Editor.Modal.ModalShell(dialogWin, new ViewModels.Rent.Residentials.Modal.ModalViewModel(), this);
+        var dialogWin = new Views.Rent.Residentials.Bldg.Unit.ModalWindow();
+        dialogWin.Content = new Views.Rent.Residentials.Bldg.Unit.ModalShell(dialogWin, new ViewModels.Rent.Residentials.Unit.ModalViewModel(), this);
 
         var hWndDialog = WinRT.Interop.WindowNative.GetWindowHandle(dialogWin);
         //Microsoft.UI.WindowId windowId1 = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hWnd1);
@@ -1535,8 +1648,7 @@ public partial class ResidentialsViewModel : ObservableObject
     [RelayCommand]
     public async Task AddNewBuildingPictures()
     {
-        //EventAddNewBuildingPictures?.Invoke(this, EventArgs.Empty);
-
+        // TODO: 
         var destDirectory = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(App.AppDataPictureFolder, "Rent"), "Residential_Building"), Guid.NewGuid().ToString("N"));
 
         Debug.WriteLine($"destDirectory={destDirectory}  @AddNewBuildingPictures()");
@@ -1558,6 +1670,7 @@ public partial class ResidentialsViewModel : ObservableObject
         openPicker.FileTypeFilter.Add(".jpeg");
         openPicker.FileTypeFilter.Add(".png");
         openPicker.FileTypeFilter.Add(".gif");
+        openPicker.FileTypeFilter.Add(".webp");
 
         // Open the picker for the user to pick a file
         var files = await openPicker.PickMultipleFilesAsync();
@@ -1575,10 +1688,13 @@ public partial class ResidentialsViewModel : ObservableObject
                 // TODO: set max file size?
 
                 var destFilePath = Path.Combine(destDirectory, System.IO.Path.GetFileName(file.Path));
-                Debug.WriteLine($"{file.Path} to {destFilePath}  @AddNewBuildingPictures()");
+                //Debug.WriteLine($"{file.Path} to {destFilePath}  @AddNewBuildingPictures()");
 
                 using var destinationStream = File.Create(destFilePath);
                 await sourceStream.CopyToAsync(destinationStream);
+
+                // Keep track of unsaved files to delete them when discarding.
+                _unsavedBuildingPictureFileList.Add(destFilePath);
             }
 
             //Debug.WriteLine(output.ToString());
@@ -1630,9 +1746,19 @@ public partial class ResidentialsViewModel : ObservableObject
                 asdf.IsMain = false;
             }
         }
+
         SelectedBuildingPicture.IsMain = BuildingPictureIsMain;
-        SelectedBuildingPicture.Title = BuildingPictureTitle;
         SelectedBuildingPicture.Description = BuildingPictureDescription;
+        //SelectedBuildingPicture.Label = BuildingPictureLabel;
+        var lbl = BuildingPictureTypes.FirstOrDefault(x => x.Key == SelectedBuildingPictureType.Key);
+        if (lbl is not null)
+        {
+            SelectedBuildingPicture.PictureType = lbl;
+        }
+        else
+        {
+            Debug.WriteLine($"@UpdatedBuildingPictureProperty: could not find label for key {SelectedBuildingPictureType.Key}");
+        }
 
         SelectedBuildingPicture.IsModified = true;
 

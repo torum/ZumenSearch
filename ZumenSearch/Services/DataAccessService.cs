@@ -21,15 +21,8 @@ public class DataAccessService : IDataAccessService
     {
         var res = new SqliteDataAccessResultWrapper();
 
-        // System.Data.SQLite
-        //connectionStringBuilder.DataSource = dataBaseFilePath;
-        //connectionStringBuilder.ForeignKeys = true;
-        // Microsoft.Data.Sqlite
-        connectionStringBuilder = new SqliteConnectionStringBuilder("Data Source=" + dataBaseFilePath);
+        connectionStringBuilder = new SqliteConnectionStringBuilder("Data Source=" + dataBaseFilePath);//+ ";Pooling=false"
 
-        // System.Data.SQLite
-        //using (var connection = new SQLiteConnection(connectionStringBuilder.ConnectionString))
-        // Microsoft.Data.Sqlite
         using (var connection = new SqliteConnection(connectionStringBuilder.ConnectionString))
         {
             try
@@ -57,7 +50,6 @@ public class DataAccessService : IDataAccessService
                     tableCmd.ExecuteNonQuery();
 
                     tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS rent_residentials (" +
-                        //"rent_residential_id TEXT NOT NULL PRIMARY KEY," +
                         "rent_id TEXT NOT NULL PRIMARY KEY," +
                         "comment TEXT NOT NULL," +
                         "FOREIGN KEY (rent_id) REFERENCES rents(rent_id) ON DELETE CASCADE" +
@@ -66,11 +58,10 @@ public class DataAccessService : IDataAccessService
 
                     tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS rent_residentials_pictures (" +
                         "picture_id TEXT NOT NULL PRIMARY KEY," +
-                        //"rent_residential_id TEXT NOT NULL," +
                         "rent_id TEXT NOT NULL," +
-                        "filepath TEXT NOT NULL," +
+                        "file_path TEXT NOT NULL," +
                         //"data BLOB," +
-                        "title TEXT NOT NULL," +
+                        "label TEXT NOT NULL," +
                         "description TEXT NOT NULL," +
                         "is_main INTEGER  NOT NULL," +
                         //"FOREIGN KEY (rent_residential_id) REFERENCES rent_residentials(rent_residential_id) ON DELETE CASCADE," +
@@ -257,7 +248,8 @@ public class DataAccessService : IDataAccessService
                             "VALUES ('{0}', '{1}', '{2}')",
                             pic.Id, entry.Id, pic.ImageLocation);
                         */
-                        var sqlInsertIntoRentLivingPicture = "INSERT INTO rent_residentials_pictures (picture_id, rent_id, filepath, title, description, is_main) VALUES (@PicId, @RentId, @Path, @Tit, @Desc, @Main)";
+                        var sqlInsertIntoRentLivingPicture = "INSERT INTO rent_residentials_pictures (picture_id, rent_id, file_path, label, description, is_main) " + 
+                            "VALUES (@PicId, @RentId, @Path, @Tit, @Desc, @Main)";
 
                         cmd.CommandText = sqlInsertIntoRentLivingPicture;
 
@@ -268,7 +260,7 @@ public class DataAccessService : IDataAccessService
                         //cmd.Parameters.AddWithValue("@RentResidentialId", entry.Id + "_1");
                         cmd.Parameters.AddWithValue("@RentId", entry.Id);
                         cmd.Parameters.AddWithValue("@Path", pic.ImageLocation);
-                        cmd.Parameters.AddWithValue("@Tit", pic.Title);
+                        cmd.Parameters.AddWithValue("@Tit", pic.PictureType.Key.ToString());
                         cmd.Parameters.AddWithValue("@Desc", pic.Description);
 
                         var paramIsMain = new SqliteParameter("@Main", System.Data.DbType.Int32);
@@ -452,7 +444,8 @@ public class DataAccessService : IDataAccessService
 
                         if (pic.IsNew)
                         {
-                            var sqlInsertIntoRentLivingPicture = "INSERT INTO rent_residentials_pictures (picture_id, rent_id, filepath, title, description, is_main) VALUES (@PicId, @RentId, @Path, @Tit, @Desc, @Main)";
+                            var sqlInsertIntoRentLivingPicture = "INSERT INTO rent_residentials_pictures (picture_id, rent_id, file_path, label, description, is_main) " +
+                                "VALUES (@PicId, @RentId, @Path, @Tit, @Desc, @Main)";
 
                             // 物件画像の追加
                             cmd.CommandText = sqlInsertIntoRentLivingPicture;
@@ -462,7 +455,7 @@ public class DataAccessService : IDataAccessService
                         else if (pic.IsModified)
                         {
                             var sqlUpdateRentLivingPicture = string.Format(
-                                "UPDATE rent_residentials_pictures SET title = @Tit, description = @Desc, is_main = @Main " +
+                                "UPDATE rent_residentials_pictures SET file_path = @Path, label = @Tit, description = @Desc, is_main = @Main " +
                                 "WHERE picture_id = '{0}'", pic.Id);
 
                             // 物件画像の更新
@@ -480,7 +473,7 @@ public class DataAccessService : IDataAccessService
                             //cmd.Parameters.AddWithValue("@RentResidentialId", entry.Id + "_1");
                             cmd.Parameters.AddWithValue("@RentId", entry.Id);
                             cmd.Parameters.AddWithValue("@Path", pic.ImageLocation);
-                            cmd.Parameters.AddWithValue("@Tit", pic.Title);
+                            cmd.Parameters.AddWithValue("@Tit", pic.PictureType.Key.ToString());
                             cmd.Parameters.AddWithValue("@Desc", pic.Description);
                             var paramIsMain = new SqliteParameter("@Main", System.Data.DbType.Int32);
                             if (pic.IsMain)
@@ -719,20 +712,13 @@ public class DataAccessService : IDataAccessService
         if (string.IsNullOrEmpty(keyword))
         {
             keyword = "*";
-            //Debug.WriteLine("using *");
         }
-        else
-        {
-            //Debug.WriteLine(keyword);
-        }
+
+        //Debug.WriteLine($"keyword is {keyword} @SelectRentResidentialsByNameKeyword() in DataAccessService");
 
         _readerWriterLock.EnterReadLock();
         try
         {
-
-            // System.Data.SQLite
-            //using var connection = new SQLiteConnection(connectionStringBuilder.ConnectionString);
-            // Microsoft.Data.Sqlite
             using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
             connection.Open();
 
@@ -762,6 +748,8 @@ public class DataAccessService : IDataAccessService
 
                 s = Convert.ToString(reader["feedName"]) ?? "";
                 entry.Name = s;
+
+                Debug.WriteLine($"Found rent residential entry: {entry.Name} @SelectRentResidentialsByNameKeyword() in DataAccessService");
 
                 s = Convert.ToString(reader["entryTitle"]);
                 if (!string.IsNullOrEmpty(s))
@@ -933,28 +921,22 @@ public class DataAccessService : IDataAccessService
             {
                 while (reader.Read())
                 {
-                    var rlpic = new PictureBuilding(Convert.ToString(reader["filepath"]) ?? string.Empty)
+                    var rlpic = new PictureBuilding(Convert.ToString(reader["file_path"]) ?? string.Empty)
                     {
-                        //Convert.ToString(reader["RentLivingPicture_ID"])
-                        /*
-                        byte[] imageBytes = (byte[])reader["PictureData"];
-                        rlpic.PictureData = imageBytes;
-
-                        rlpic.Picture = Methods.BitmapImageFromBytes(imageBytes);
-                        */
-
-                        Id = Convert.ToString(reader["picture_id"]), 
+                        Id = Convert.ToString(reader["picture_id"]) ?? string.Empty, 
                         //ImageLocation = Convert.ToString(reader["filepath"]),
-                        Title = Convert.ToString(reader["title"]) ?? string.Empty,
                         Description = Convert.ToString(reader["description"]) ?? string.Empty,
 
                         IsNew = false,
                         IsModified = false
                     };
 
-                    //if (ColumnExists(reader, "is_main"))
-                    //{
-                    //}
+                    var strTitle = Convert.ToString(reader["label"]);
+                    if (!string.IsNullOrEmpty(strTitle))
+                    {
+                        rlpic.SetLabelFromString(strTitle);
+                    }
+
                     var bln = Convert.ToInt32(reader["is_main"]);
                     if (bln > 0)
                     {

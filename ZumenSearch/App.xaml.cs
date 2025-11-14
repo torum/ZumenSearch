@@ -97,9 +97,9 @@ public partial class App : Application
             services.AddSingleton<Views.Rent.Residentials.SearchPage>();
             services.AddSingleton<Views.Rent.Residentials.SearchResultPage>();
             
-            services.AddTransient<Views.Rent.Residentials.Editor.EditorWindow>();
+            services.AddTransient<Views.Rent.Residentials.Bldg.EditorWindow>();
             services.AddTransient<ViewModels.Rent.Residentials.ResidentialsViewModel>();
-            services.AddEditorFactory<Views.Rent.Residentials.Editor.EditorShell>();
+            services.AddEditorFactory<Views.Rent.Residentials.Bldg.EditorShell>();
 
             services.AddSingleton<Views.Rent.Commercials.CommercialsPage>();
             services.AddSingleton<ViewModels.Rent.Commercials.CommercialsViewModel>();

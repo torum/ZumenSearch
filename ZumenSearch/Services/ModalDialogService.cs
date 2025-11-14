@@ -15,7 +15,7 @@ using ZumenSearch.Models;
 using ZumenSearch.Services;
 using ZumenSearch.ViewModels.Rent.Residentials;
 using ZumenSearch.Views.Dialogs;
-using ZumenSearch.Views.Rent.Residentials.Editor;
+using ZumenSearch.Views.Rent.Residentials.Bldg;
 
 namespace ZumenSearch.Services;
 
@@ -60,7 +60,7 @@ public class ModalDialogService : IModalDialogService
             Content = "編集画面の変更内容が保存されていません。"
         };
 
-        Debug.WriteLine("await dialog.ShowAsync()");
+        //Debug.WriteLine("await dialog.ShowAsync()");
         IsDialogOpened = true;
         var result = await dialog.ShowAsync();
         IsDialogOpened = false;
