@@ -36,9 +36,9 @@
                                 <Grid>
                                     <Image Source="{x:Bind ImageLocation}" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="280" MaxWidth="280" MaxHeight="210" MinHeight="210"/>
                                     <StackPanel Orientation="Vertical" Height="60" VerticalAlignment="Bottom" Padding="12" Background="{ThemeResource SystemControlBackgroundBaseMediumBrush}" Opacity=".75">
-                                        <TextBlock Text="{x:Bind PictureType.Text, Mode=OneWay}" Style="{StaticResource BodyStrongTextBlockStyle}" Foreground="{ThemeResource SystemControlForegroundAltHighBrush}"/>
+                                        <TextBlock Text="{x:Bind PictureType.Label, Mode=OneWay}" Style="{StaticResource BodyStrongTextBlockStyle}" Foreground="{ThemeResource SystemControlForegroundAltHighBrush}"/>
                                         <StackPanel Orientation="Horizontal">
-                                            <TextBlock Text="{Binding PictureType.Text, Mode=OneWay}" FontWeight="SemiBold" Foreground="{ThemeResource SystemControlForegroundAltHighBrush}"/>
+                                            <TextBlock Text="{Binding PictureType.Label, Mode=OneWay}" FontWeight="SemiBold" Foreground="{ThemeResource SystemControlForegroundAltHighBrush}"/>
                                             <TextBlock Text="{x:Bind Description, Mode=OneWay}" Style="{ThemeResource CaptionTextBlockStyle}" Foreground="{ThemeResource SystemControlForegroundAltHighBrush}"/>
                                         </StackPanel>
                                     </StackPanel>
@@ -62,7 +62,7 @@
                         <ComboBox.ItemTemplate>
                             <DataTemplate x:DataType="modresi:BuildingPictureType">
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="{x:Bind Text}" Margin="0,0,5,0"/>
+                                    <TextBlock Text="{x:Bind Label}" Margin="0,0,5,0"/>
                                 </StackPanel>
                             </DataTemplate>
                         </ComboBox.ItemTemplate>

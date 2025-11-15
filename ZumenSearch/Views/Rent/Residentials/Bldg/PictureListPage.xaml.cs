@@ -59,7 +59,7 @@ public sealed partial class PictureListPage : Page
             return;
         }
 
-        Debug.WriteLine($"PictureListPage ItemsView_SelectionChanged SelectedItem Changed to {picbldg.PictureType.Text}");
+        Debug.WriteLine($"PictureListPage ItemsView_SelectionChanged SelectedItem Changed to {picbldg.PictureType.Label}");
 
         ViewModel.SelectedBuildingPicture = picbldg;//sender.SelectedItem as Models.Rent.Residentials.PictureBuilding;
     }

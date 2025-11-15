@@ -41,45 +41,41 @@ public class BuildingPictureType(EnumBuildingPictureType key)
                 {EnumBuildingPictureType.Other, "その他"},
             };
 
-    public string Text => BuildingPictureTypeDictionary[Key];
+    public string Label => BuildingPictureTypeDictionary[Key];
 
-    public EnumBuildingPictureType Key { get; set; } = key;
+    public EnumBuildingPictureType Key => key;
 };
-
 
 public partial class PictureBuilding : PictureBase
 {
-    private BuildingPictureType _pictureType = new(EnumBuildingPictureType.Unspecified);
     public BuildingPictureType PictureType
     {
-        get => _pictureType;
+        get => field ?? new(EnumBuildingPictureType.Unspecified);
         set
         {
-            if (SetProperty(ref _pictureType, value))
+            if (SetProperty(ref field, value))
             {
             }
         }
     }
 
-    private string _description = string.Empty;
     public string Description
     {
-        get => _description;
+        get => field ?? string.Empty;
         set
         {
-            if (SetProperty(ref _description, value))
+            if (SetProperty(ref field, value))
             {
             }
         }
     }
 
-    private bool _isMain;
     public bool IsMain
     {
-        get => _isMain;
+        get => field;
         set
         {
-            if (SetProperty(ref _isMain, value))
+            if (SetProperty(ref field, value))
             {
             }
         }
@@ -95,7 +91,7 @@ public partial class PictureBuilding : PictureBase
         if (Enum.TryParse<EnumBuildingPictureType>(titleStr, out var result))
         {
             PictureType = new(result);
-            Debug.WriteLine($"SetLabelFromString: {titleStr} -> {PictureType.Text}");
+            Debug.WriteLine($"SetLabelFromString: {titleStr} -> {PictureType.Label}");
             return result;
         }
         else

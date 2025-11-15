@@ -102,7 +102,7 @@
 
                         <ItemsView.ItemTemplate>
                             <DataTemplate x:DataType="rent:EntryResidentialSearchResult">
-                                <ItemContainer AllowFocusOnInteraction="False" PointerPressed="ItemContainer_PointerPressed">
+                                <ItemContainer AllowFocusOnInteraction="False" PointerPressed="ItemContainer_PointerPressed" PointerReleased="ItemContainer_PointerReleased">
                                     <Grid>
                                         <Grid.RowDefinitions>
                                             <RowDefinition Height="*"/>

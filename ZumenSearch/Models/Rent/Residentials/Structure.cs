@@ -15,6 +15,7 @@ public enum EnumStructure
 // 賃貸住居用物件の「構造」クラス
 public class Structure(EnumStructure key, string label)
 {
-    public string Label { get; set; } = label;
-    public EnumStructure Key { get; set; } = key;
+    public string Label => label;
+
+    public EnumStructure Key => key;
 };

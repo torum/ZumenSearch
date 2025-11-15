@@ -15,6 +15,7 @@ public enum EnumKinds
 // 賃貸住居用物件の「種別」クラス
 public class Kind(string key, string label)
 {
-    public string Label { get; set; } = label;
-    public string Key { get; set; } = key;
+    public string Label => label;
+
+    public string Key => key;
 };

@@ -31,14 +31,12 @@ public partial class EntryResidentialFull : EntryBase
         //
     }
 
-
-    private ObservableCollection<PictureBuilding> _buildingPictures = [];
     public ObservableCollection<PictureBuilding> BuildingPictures
     {
-        get => _buildingPictures;
+        get => field ?? [];
         set
         {
-            if (SetProperty(ref _buildingPictures, value))
+            if (SetProperty(ref field, value))
             {
                 IsDirty = true;
             }

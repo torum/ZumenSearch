@@ -154,4 +154,12 @@ public sealed partial class SearchResultPage : Page
         // WinUI3 is so stupid.
         e.Handled = true;
     }
+
+    private void ItemContainer_PointerReleased(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
+    {
+        // Stupid WinUI3 can't handle double click properly.
+        // This prevents newly created window goes behind the main window.
+        // WinUI3 is so stupid.
+        e.Handled = true;
+    }
 }

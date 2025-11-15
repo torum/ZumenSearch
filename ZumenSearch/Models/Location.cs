@@ -23,19 +23,19 @@ public class Pref(string code, string municipalityCode, string name)
     public string Name { get; private set; } = name;
 };
 
-public class CountyAndCity
+public class CountyAndCity(string machiazaId, string county, string city)
 {
     // db:loc_machiaza_id
     public string MachiazaId
     {
         get; init;
-    }
+    } = machiazaId;
 
     // 郡 db:loc_county
-    public string County { get; init; }
+    public string County { get; init; } = county;
 
     // 市区町村 db:loc_city
-    public string City { get; init; }
+    public string City { get; init; } = city;
 
     public string Combined 
     {
@@ -51,41 +51,27 @@ public class CountyAndCity
             }
         }
     }
-
-    public CountyAndCity(string machiazaId, string county, string city)
-    {
-        MachiazaId = machiazaId;
-        County = county;
-        City = city;
-    }
 }
 
-public class WardAndOaza
+public class WardAndOaza(string machiazaId, string ward, string oaza)
 {
     // db:loc_machiaza_id
     public string MachiazaId
     {
         get; init;
-    }
+    } = machiazaId;
 
     // db:loc_ward
     public string Ward
     {
         get; init;
-    }
+    } = ward;
 
     // db:loc_oaza_cho
     public string Oaza
     {
         get; init;
-    }
-
-    public WardAndOaza(string machiazaId, string ward, string oaza)
-    {
-        MachiazaId = machiazaId;
-        Ward = ward;
-        Oaza = oaza;
-    }
+    } = oaza;
 
     public string Combined
     {
@@ -103,24 +89,18 @@ public class WardAndOaza
     }
 }
 
-public class Choume
+public class Choume(string machiazaId, string choume)
 {
     // db:loc_machiaza_id
     public string MachiazaId
     {
         get; init;
-    }
+    } = machiazaId;
 
     // db:loc_choume
     public string Chou
     {
         get; init;
-    }
-
-    public Choume(string machiazaId, string choume)
-    {
-        MachiazaId = machiazaId;
-        Chou = choume;
-    }
+    } = choume;
 }
 
