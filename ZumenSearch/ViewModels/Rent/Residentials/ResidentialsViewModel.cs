@@ -1,31 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.Data.Sqlite;
 using Microsoft.UI.Windowing;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Media.Animation;
-using Microsoft.UI.Xaml.Navigation;
-using Microsoft.VisualBasic;
 using Windows.System;
 using ZumenSearch.Models;
 using ZumenSearch.Models.Rent.Residentials;
 using ZumenSearch.Services;
-using ZumenSearch.Views;
-using ZumenSearch.Views.Rent.Residentials.Bldg;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace ZumenSearch.ViewModels.Rent.Residentials;
 
@@ -33,21 +21,26 @@ public partial class ResidentialsViewModel : ObservableObject
 {
     #region == プロパティ ==
 
-    public Views.Rent.Residentials.Bldg.EditorWindow? EditorWin {get; private set;}
-
     // Modal Editor window position and size
     public int ModalWinWidth = 1366;
     public int ModalWinHeight = 768;
     public int ModalWinLeft = 130;
     public int ModalWinTop = 130;
 
-    // The Entry property holds the COPY of current RentResidential entry being edited. Do not use it directly in the UI. Apply changes to this object in SaveAsync() to save the changes.
-    // MainViewModel creates a new instance of this class and call EditorShell.SetEntry(EntryResidentialFull) and sets this property.
-    private Models.Rent.Residentials.EntryResidentialFull _entry = new();
+    // Variable to hold reference to the Editor Window instance.
+    private Views.Rent.Residentials.Bldg.EditorWindow? _editorWin;
 
+    // The Entry property holds the COPY of current RentResidential entry being edited.
+    // Do not use it directly in the UI. Apply changes to this object in SaveAsync() to save the changes.
+    // MainViewModel creates a new instance of this class and call EditorShell.SetEntry(EntryResidentialFull) and sets this property.
+    private Models.Rent.Residentials.EntryResidentialFull _entry;
+
+    // Locak directory path to save blob data such as pictures and PDFs.
+    private string _entryDataDirectoryPath;
+    // Tmp file list to hold unsaved picture files. (if entry is not saved, delete on close)
     private readonly List<string> _unsavedBuildingPictureFileList = [];
 
-    private readonly string _windowTitleBase = "賃貸住居用";
+    // Title of the window.
 
     public string WindowTitle
     {
@@ -55,15 +48,15 @@ public partial class ResidentialsViewModel : ObservableObject
         {
             if (string.IsNullOrEmpty(Name))
             {
-                return _windowTitleBase;
+                return field;
             }
             else
             {
-                return $"{_windowTitleBase} - {Name}";
+                return $"{field} - {Name}";
             }
             
         }
-    }
+    } = "賃貸住居用";
 
     // This flag indicates if the entry is dirty (i.e., has unsaved changes).
     public bool IsEntryDirty
@@ -326,18 +319,17 @@ public partial class ResidentialsViewModel : ObservableObject
     }
 
     // 特定コード（４桁）建物全体は0000
-    private string _fudousanIdAdditionalCode = "0000"; // keep default value 0000.
     public string FudousanIdAdditionalCode
     {
-        get => _fudousanIdAdditionalCode ?? string.Empty; // keep non-null empty string.
+        get => field ?? string.Empty; // keep non-null empty string.
         set
         {
-            if (SetProperty(ref _fudousanIdAdditionalCode, value.Trim()))
+            if (SetProperty(ref field, value.Trim()))
             {
                 IsEntryDirty = true;
             }
         }
-    }
+    } = "0000";
 
     #endregion
 
@@ -396,15 +388,14 @@ public partial class ResidentialsViewModel : ObservableObject
             new Pref("47","470007", "沖縄県"),
     ];
 
-    private Pref? _selectedPef;
     public Pref? SelectedPef
     {
-        get => _selectedPef;
+        get;
         set
         {
-            if (SetProperty(ref _selectedPef, value))
+            if (SetProperty(ref field, value))
             {
-                if (_selectedPef is not null)
+                if (field is not null)
                 {
                     IsEntryDirty = true;
                     MachiazaId = null; // Reset MachiazaId
@@ -412,7 +403,7 @@ public partial class ResidentialsViewModel : ObservableObject
 
                 OnPropertyChanged(nameof(AddressPreview));
 
-                if (_selectedPef is null)
+                if (field is null)
                 {
                     Cities = null;
                     return;
@@ -420,7 +411,7 @@ public partial class ResidentialsViewModel : ObservableObject
 
                 var dataset = new List<CountyAndCity>();
 
-                dataset = _dataAccessLocationService.GetCountyAndCityByPref(_selectedPef.Name);
+                dataset = _dataAccessLocationService.GetCountyAndCityByPref(field.Name);
 
                 Cities = [.. dataset.DistinctBy(p => p.Combined)];
 
@@ -428,42 +419,40 @@ public partial class ResidentialsViewModel : ObservableObject
         }
     }
 
-    private ObservableCollection<CountyAndCity>? _cities = [];
     public ObservableCollection<CountyAndCity>? Cities
     {
-        get => _cities;
+        get;
         set
         {
-            if (SetProperty(ref _cities, value))
+            if (SetProperty(ref field, value))
             {
                 //
             }
         }
-    }
+    } = [];
 
-    private CountyAndCity? _selectedCity;
     public CountyAndCity? SelectedCity
     {
-        get => _selectedCity;
+        get;
         set
         {
-            if (SetProperty(ref _selectedCity, value))
+            if (SetProperty(ref field, value))
             {
-                if (_selectedCity is not null)
+                if (field is not null)
                 {
                     IsEntryDirty = true;
-                    MachiazaId = _selectedCity?.MachiazaId;
+                    MachiazaId = field?.MachiazaId;
                 }
 
                 OnPropertyChanged(nameof(AddressPreview));
 
-                if (_selectedPef is null)
+                if (SelectedPef is null)
                 {
                     Towns = null;
                     return;
                 }
 
-                if (_selectedCity is null)
+                if (field is null)
                 {
                     Towns = null;
                     return;
@@ -471,54 +460,52 @@ public partial class ResidentialsViewModel : ObservableObject
 
                 var dataset = new List<WardAndOaza>();
 
-                dataset = _dataAccessLocationService.GetWardAndOazaByPrefCountyCity(_selectedPef.Name, _selectedCity.County, _selectedCity.City);
+                dataset = _dataAccessLocationService.GetWardAndOazaByPrefCountyCity(SelectedPef.Name, field.County, field.City);
 
                 Towns = [.. dataset.DistinctBy(p => p.Combined)];
             }
         }
     }
 
-    private ObservableCollection<WardAndOaza>? _towns = [];
     public ObservableCollection<WardAndOaza>? Towns
     {
-        get => _towns;
+        get;
         set
         {
-            if (SetProperty(ref _towns, value))
+            if (SetProperty(ref field, value))
             {
                 //
             }
         }
-    }
+    } = [];
 
-    private WardAndOaza? _selectedTown;
     public WardAndOaza? SelectedTown
     {
-        get => _selectedTown;
+        get;
         set
         {
-            if (SetProperty(ref _selectedTown, value))
+            if (SetProperty(ref field, value))
             {
-                if (_selectedTown is not null)
+                if (field is not null)
                 {
                     IsEntryDirty = true;
-                    MachiazaId = _selectedTown?.MachiazaId;
+                    MachiazaId = field?.MachiazaId;
                 }
 
                 OnPropertyChanged(nameof(AddressPreview));
 
-                if (_selectedPef is null)
+                if (SelectedPef is null)
                 {
                     Chous = null;
                     return;
                 }
-                if (_selectedCity is null)
+                if (SelectedCity is null)
                 {
                     Chous = null;
                     return;
                 }
 
-                if (_selectedTown is null)
+                if (field is null)
                 {
                     Chous = null;
                     return;
@@ -528,39 +515,37 @@ public partial class ResidentialsViewModel : ObservableObject
 
                 var dataset = new List<Choume>();
 
-                dataset = _dataAccessLocationService.GetChoumeByPrefCountyCityWardOaza(_selectedPef.Name, _selectedCity.County, _selectedCity.City, _selectedTown.Ward, _selectedTown.Oaza);
+                dataset = _dataAccessLocationService.GetChoumeByPrefCountyCityWardOaza(SelectedPef.Name, SelectedCity.County, SelectedCity.City, field.Ward, field.Oaza);
 
                 Chous = [.. dataset.DistinctBy(p => p.Chou)];
             }
         }
     }
 
-    private ObservableCollection<Choume>? _chous = [];
     public ObservableCollection<Choume>? Chous
     {
-        get => _chous;
+        get;
         set
         {
-            if (SetProperty(ref _chous, value))
+            if (SetProperty(ref field, value))
             {
                 //
             }
         }
-    }
+    } = [];
 
-    private Choume? _selectedChou;
     public Choume? SelectedChou
     {
-        get => _selectedChou;
+        get;
         set
         {
-            if (SetProperty(ref _selectedChou, value))
+            if (SetProperty(ref field, value))
             {
-                if (_selectedChou is not null)
+                if (field is not null)
                 {
                     // The value (_selectedChou) may be an empty string (and it is OK).
                     IsEntryDirty = true;
-                    MachiazaId = _selectedChou?.MachiazaId;
+                    MachiazaId = field?.MachiazaId;
                 }
 
                 OnPropertyChanged(nameof(AddressPreview));
@@ -568,34 +553,32 @@ public partial class ResidentialsViewModel : ObservableObject
         }
     }
 
-    private string _edaban = string.Empty;
     public string Edaban
     {
-        get => _edaban;
+        get;
         set
         {
-            if (SetProperty(ref _edaban, value))
+            if (SetProperty(ref field, value))
             {
                 IsEntryDirty = true;
                 OnPropertyChanged(nameof(AddressPreview));
             }
         }
-    }
+    } = string.Empty;
 
     // TODO:
-    private string _postalCode = string.Empty;
     public string PostalCode
     {
-        get => _postalCode;
+        get;
         set
         {
-            if (SetProperty(ref _postalCode, value))
+            if (SetProperty(ref field, value))
             {
                 IsEntryDirty = true;
                 OnPropertyChanged(nameof(AddressPreview));
             }
         }
-    }
+    } = string.Empty;
 
     public string AddressPreview
     {
@@ -608,60 +591,58 @@ public partial class ResidentialsViewModel : ObservableObject
             }
 
             var s = string.Empty;
-            if (!string.IsNullOrEmpty(_edaban))
+            if (!string.IsNullOrEmpty(Edaban))
             {
-                s = "-" + _edaban;
+                s = "-" + Edaban;
             }
             // TODO:
-            return $"{SelectedPef.Name}{_selectedCity?.Combined}{_selectedTown?.Combined}{_selectedChou?.Chou}{s}";
+            return $"{SelectedPef.Name}{SelectedCity?.Combined}{SelectedTown?.Combined}{SelectedChou?.Chou}{s}";
         }
     }
 
     // 緯度（Lat）
-    private string _locationLatitude = string.Empty;
     public string LocationLatitude
     {
-        get => _locationLatitude;
+        get;
         set
         {
-            if (_locationLatitude == value)
+            if (field == value)
             {
                 return;
             }
 
-            _locationLatitude = value;
+            field = value;
             IsEntryDirty = true;
             OnPropertyChanged(nameof(LocationLatitude));
             OnPropertyChanged(nameof(GeoUri));
             ShowGoogleMapsCommand.NotifyCanExecuteChanged();
         }
-    }
+    } = string.Empty;
 
     // 経度（Lon）
-    private string _locationLongitude = string.Empty;
     public string LocationLongitude
     {
-        get => _locationLongitude;
+        get;
         set
         {
-            if (_locationLongitude == value)
+            if (field == value)
             {
                 return;
             }
 
-            _locationLongitude = value;
+            field = value;
             IsEntryDirty = true;
             OnPropertyChanged(nameof(LocationLongitude));
             OnPropertyChanged(nameof(GeoUri));
             ShowGoogleMapsCommand.NotifyCanExecuteChanged();
         }
-    }
+    } = string.Empty;
 
     public string GeoUri
     {
         get
         {
-            if (string.IsNullOrEmpty(_locationLatitude) || string.IsNullOrEmpty(_locationLongitude))
+            if (string.IsNullOrEmpty(LocationLatitude) || string.IsNullOrEmpty(LocationLongitude))
             {
                 return "https://maps.google.co.jp/";
             }
@@ -674,13 +655,12 @@ public partial class ResidentialsViewModel : ObservableObject
 
     #region == 交通プロパティ ==
 
-    private RailLine? _selectedRailLine1;
     public RailLine? SelectedRailLine1
     {
-        get => _selectedRailLine1;
+        get;
         set
         {
-            if (SetProperty(ref _selectedRailLine1, value))
+            if (SetProperty(ref field, value))
             {
                 IsEntryDirty = true;
                 // Clear  old value.
@@ -691,33 +671,31 @@ public partial class ResidentialsViewModel : ObservableObject
         }
     }
 
-    private RailStation? _selectecdRailStation1;
     public RailStation? SelectedRailStation1
     {
-        get => _selectecdRailStation1;
+        get;
         set
         {
-            if ((value is null) && (_selectecdRailStation1 is not null))
+            if ((value is null) && (field is not null))
             {
                 // Clear old value.
-                _selectecdRailStation1.StationName = string.Empty;
+                field.StationName = string.Empty;
                 OnPropertyChanged(nameof(SelectedRailStation1));
             }
 
-            if (SetProperty(ref _selectecdRailStation1, value))
+            if (SetProperty(ref field, value))
             {
                 IsEntryDirty = true;
             }
         }
     }
 
-    private string _ekiToho1 = string.Empty;
     public string EkiToho1
     {
-        get => _ekiToho1;
+        get;
         set
         {
-            if (_ekiToho1 == value)
+            if (field == value)
             {
                 return;
             }
@@ -731,40 +709,38 @@ public partial class ResidentialsViewModel : ObservableObject
 
             if (CanConvertToPositiveNumber(text))
             {
-                _ekiToho1 = text;
+                field = text;
                 IsEntryDirty = true;
             }
             else
             {
                 // TODO: show error
-                _ekiToho1 = string.Empty;
+                field = string.Empty;
                 //IsEntryDirty = true;
             }
 
             OnPropertyChanged(nameof(EkiToho1));
         }
-    }
+    } = string.Empty;
 
-    private string _busStop = string.Empty;
     public string BusStop
     {
-        get => _busStop;
+        get;
         set
         {
-            if (SetProperty(ref _busStop, value))
+            if (SetProperty(ref field, value))
             {
                 IsEntryDirty = true;
             }
         }
-    }
+    } = string.Empty;
 
-    private string _busJyousya1 = string.Empty;
     public string BusJyousya1
     {
-        get => _busJyousya1;
+        get;
         set
         {
-            if (_busJyousya1 == value)
+            if (field == value)
             {
                 return;
             }
@@ -778,27 +754,26 @@ public partial class ResidentialsViewModel : ObservableObject
 
             if (CanConvertToPositiveNumber(text))
             {
-                _busJyousya1 = text;
+                field = text;
                 IsEntryDirty = true;
             }
             else
             {
                 // TODO: show error
-                _busJyousya1 = string.Empty;
+                field = string.Empty;
                 //IsEntryDirty = true;
             }
 
             OnPropertyChanged(nameof(BusJyousya1));
         }
-    }
+    } = string.Empty;
 
-    private string _busStopToho1 = string.Empty;
     public string BusStopToho1
     {
-        get => _busStopToho1;
+        get;
         set
         {
-            if (_busStopToho1 == value)
+            if (field == value)
             {
                 return;
             }
@@ -812,71 +787,67 @@ public partial class ResidentialsViewModel : ObservableObject
 
             if (CanConvertToPositiveNumber(text))
             {
-                _busStopToho1 = text;
+                field = text;
                 IsEntryDirty = true;
             }
             else
             {
                 // TODO: show error
-                _busStopToho1 = string.Empty;
+                field = string.Empty;
                 //IsEntryDirty = true;
             }
 
             OnPropertyChanged(nameof(BusStopToho1));
         }
-    }
+    } = string.Empty;
 
     #endregion
 
     #region == 設備プロパティ ==
 
 
-    private bool _ap_IsAutolock;
     public bool Ap_IsAutolock
     {
-        get => _ap_IsAutolock;
+        get;
         set
         {
-            if (SetProperty(ref _ap_IsAutolock, value))
+            if (SetProperty(ref field, value))
             {
                 OnPropertyChanged(nameof(AppliancePreview));
             }
         }
     }
 
-    private bool _ap_IsElevator;
     public bool Ap_IsElevator
     {
-        get => _ap_IsElevator;
+        get;
         set
         {
-            if (SetProperty(ref _ap_IsElevator, value))
+            if (SetProperty(ref field, value))
             {
                 OnPropertyChanged(nameof(AppliancePreview));
             }
         }
     }
 
-    private bool _ap_IsSecurityCamera;
     public bool Ap_IsSecurityCamera
     {
-        get => _ap_IsSecurityCamera;
+        get;
         set
         {
-            if (SetProperty(ref _ap_IsSecurityCamera, value))
+            if (SetProperty(ref field, value))
             {
                 OnPropertyChanged(nameof(AppliancePreview));
             }
         }
     }
 
-    private bool _ap_IsParcelLocker;
     public bool Ap_IsParcelLocker
     {
-        get => _ap_IsParcelLocker;
+        get;
         set
         {
-            if (SetProperty(ref _ap_IsParcelLocker, value))
+            if (SetProperty(ref field, value))
             {
                 OnPropertyChanged(nameof(AppliancePreview));
             }
@@ -927,32 +898,31 @@ public partial class ResidentialsViewModel : ObservableObject
 
     #region == 備考プロパティ ==
 
-    private string _tatemonoMemo = string.Empty;
     public string TatemonoMemo
     {
-        get => _tatemonoMemo;
+        get;
         set
         {
-            if (SetProperty(ref _tatemonoMemo, value))
+            if (SetProperty(ref field, value))
             {
                 IsEntryDirty = true;
                 OnPropertyChanged(nameof(MemoPreview));
             }
         }
-    }
+    } = string.Empty;
 
     public string MemoPreview
     {
         get
         {
             string s;
-            if (_tatemonoMemo.Length > 14)
+            if (TatemonoMemo.Length > 14)
             {
-                s = _tatemonoMemo[..14] + "..." ;
+                s = TatemonoMemo[..14] + "..." ;
             }
             else
             {
-                s = _tatemonoMemo;
+                s = TatemonoMemo;
             }
 
             return s;
@@ -963,69 +933,55 @@ public partial class ResidentialsViewModel : ObservableObject
 
     #region == 写真プロパティ ==
 
-    private ObservableCollection<PictureBuilding> _buildingPictures = [];
     public ObservableCollection<PictureBuilding> BuildingPictures
     {
-        get => _buildingPictures;
+        get;
         set
         {
-            if (SetProperty(ref _buildingPictures, value))
+            if (SetProperty(ref field, value))
             {
                 IsEntryDirty = true;
+
+                OpenBuildingPictureDirectoryCommand.NotifyCanExecuteChanged();
             }
         }
-    }
+    } = [];
 
-    private bool _isBuildingPictureEditPaneVisible = false;
     public bool IsBuildingPictureEditPaneVisible
     {
-        get => _isBuildingPictureEditPaneVisible;
+        get;
         set
         {
-            if (SetProperty(ref _isBuildingPictureEditPaneVisible, value))
+            if (SetProperty(ref field, value))
             {
                //
             }
         }
-    }
+    } = false;
 
-    private bool _buildingPicturePropertiesIsDirty;
-    public bool BuildingPicturePropertiesIsDirty
-    {
-        get => _buildingPicturePropertiesIsDirty;
-        set
-        {
-            if (SetProperty(ref _buildingPicturePropertiesIsDirty, value))
-            {
-                UpdatedBuildingPicturePropertyCommand.NotifyCanExecuteChanged();
-            }
-        }
-    }
-
-    private PictureBuilding? _selectedBuildingPicture;
     public PictureBuilding? SelectedBuildingPicture
     {
-        get => _selectedBuildingPicture;
+        get;
         set
         {
-            if (_selectedBuildingPicture == value)
+            if (field == value)
             {
                 return;
             }
 
-            _selectedBuildingPicture = value;
+            field = value;
 
             // "quietly" clear values.
             _buildingPictureIsMain = false;
             _selectedBuildingPictureType = null;// Needed to be null.//new(EnumBuildingPictureType.Unspecified);
             _buildingPictureDescription = string.Empty;
 
-            if (_selectedBuildingPicture is not null)
+            if (field is not null)
             {
                 // "quietly" update values.
-                _buildingPictureIsMain = _selectedBuildingPicture.IsMain;
-                _buildingPictureDescription = _selectedBuildingPicture.Description ?? string.Empty;
-                var lbl = BuildingPictureTypes.FirstOrDefault(x => x.Key == _selectedBuildingPicture.PictureType.Key);
+                _buildingPictureIsMain = field.IsMain;
+                _buildingPictureDescription = field.Description ?? string.Empty;
+                var lbl = BuildingPictureTypes.FirstOrDefault(x => x.Key == field.PictureType.Key);
                 if (lbl is not null)
                 {
                     _selectedBuildingPictureType = lbl;
@@ -1033,52 +989,25 @@ public partial class ResidentialsViewModel : ObservableObject
                 else
                 {
                     // Unspecified.
-                    Debug.WriteLine($"@SelectedBuildingPicture: could not find label for key {_selectedBuildingPicture.PictureType.Key}");
+                    Debug.WriteLine($"@SelectedBuildingPicture: could not find label for key {field.PictureType.Key}");
                 }
 
                 IsBuildingPictureEditPaneVisible = true;
             }
             else
             {
+                IsBuildingPictureEditPaneVisible = false;
                 Debug.WriteLine($"@SelectedBuildingPicture: value is null");
             }
 
             OnPropertyChanged(nameof(SelectedBuildingPicture));
-            _buildingPicturePropertiesIsDirty = false;
-
-            //_buildingPicturePropertiesIsDirty = false;
-            /*
-            if (SetProperty(ref _selectedBuildingPicture, value))
-            {
-                if (_selectedBuildingPicture is not null)
-                {
-                    IsBuildingPictureEditPaneVisible = true;
-
-                    Debug.WriteLine($"SelectedBuildingPicture changed: Label={_selectedBuildingPicture.Label.Text}, Description={_selectedBuildingPicture.Description}, IsMain={_selectedBuildingPicture.IsMain}");
-
-                    // "quietly" update values.
-                    _buildingPictureIsMain = _selectedBuildingPicture.IsMain;
-                    _buildingPictureLabel = _selectedBuildingPicture.Label;
-                    _buildingPictureDescription = _selectedBuildingPicture.Description ?? string.Empty;
-
-                    //_buildingPicturePropertiesIsDirty = false;
-                }
-                else
-                {
-                    Debug.WriteLine($"SelectedBuildingPicture changed: null");
-
-                    //IsBuildingPictureEditPaneVisible = false;
-                }
-            }
-            */
 
             // notify updates.
             OnPropertyChanged(nameof(SelectedBuildingPictureType));
             OnPropertyChanged(nameof(BuildingPictureDescription));
             OnPropertyChanged(nameof(BuildingPictureIsMain));
-            OnPropertyChanged(nameof(BuildingPicturePropertiesIsDirty));
+            //OnPropertyChanged(nameof(BuildingPicturePropertiesIsDirty));
 
-            UpdatedBuildingPicturePropertyCommand.NotifyCanExecuteChanged();
             DeleteSelectedBuildingPictureCommand.NotifyCanExecuteChanged();
         }
     }
@@ -1110,35 +1039,23 @@ public partial class ResidentialsViewModel : ObservableObject
         get => _selectedBuildingPictureType;
         set 
         {
-            /*
-            if (_selectedBuildingPictureType == value)
+            if (SelectedBuildingPicture is null)
             {
-                Debug.WriteLine($"BuildingPictureLabel: same {_selectedBuildingPictureType.Text}");
+                // Should not happen.
+                Debug.WriteLine($"SelectedBuildingPictureType: SelectedBuildingPicture is null, cannot set value.");
                 return;
             }
-
-            if (value is null)
-            {
-                Debug.WriteLine($"BuildingPictureLabel: null");
-                return;
-            }
-
-            _selectedBuildingPictureType = value;
-            BuildingPicturePropertiesIsDirty = true;
-
-            Debug.WriteLine($"Setting BuildingPictureLabel to: {(value is not null ? value.Text : "null")}");
-            BuildingPicturePropertiesIsDirty = true;
-
-            OnPropertyChanged(nameof(SelectedBuildingPictureType));
-            */
 
             if (SetProperty(ref _selectedBuildingPictureType, value))
             {
                 if (_selectedBuildingPictureType is not null)
                 {
-                    Debug.WriteLine($"_selectedBuildingPictureType changed: {_selectedBuildingPictureType.Label}");
+                    //Debug.WriteLine($"_selectedBuildingPictureType changed: {_selectedBuildingPictureType.Label}");
 
-                    BuildingPicturePropertiesIsDirty = true;
+                    SelectedBuildingPicture.PictureType = _selectedBuildingPictureType;
+                    IsEntryDirty = true;
+                    SelectedBuildingPicture.IsModified = true;
+                    //BuildingPicturePropertiesIsDirty = true;
                 }
                 else
                 {
@@ -1155,9 +1072,19 @@ public partial class ResidentialsViewModel : ObservableObject
         get => _buildingPictureDescription;
         set
         {
+            if (SelectedBuildingPicture is null)
+            {
+                // Should not happen.
+                Debug.WriteLine($"BuildingPictureDescription: SelectedBuildingPicture is null, cannot set value.");
+                return;
+            }
+
             if (SetProperty(ref _buildingPictureDescription, value))
             {
-                BuildingPicturePropertiesIsDirty = true;
+                SelectedBuildingPicture.Description = _buildingPictureDescription;
+                IsEntryDirty = true;
+                SelectedBuildingPicture.IsModified = true;
+                //BuildingPicturePropertiesIsDirty = true;
             }
         }
     }
@@ -1168,9 +1095,28 @@ public partial class ResidentialsViewModel : ObservableObject
         get => _buildingPictureIsMain;
         set
         {
+            if (SelectedBuildingPicture is null)
+            {
+                // Should not happen.
+                Debug.WriteLine($"BuildingPictureIsMain: SelectedBuildingPicture is null, cannot set value.");
+                return;
+
+            }
+
             if (SetProperty(ref _buildingPictureIsMain, value))
             {
-                BuildingPicturePropertiesIsDirty = true;
+                if (_buildingPictureIsMain)
+                {
+                    foreach (var asdf in BuildingPictures)
+                    {
+                        asdf.IsMain = false;
+                    }
+                }
+
+                SelectedBuildingPicture.IsMain = _buildingPictureIsMain;
+                IsEntryDirty = true;
+                SelectedBuildingPicture.IsModified = true;
+                //BuildingPicturePropertiesIsDirty = true;
             }
         }
     }
@@ -1204,26 +1150,24 @@ public partial class ResidentialsViewModel : ObservableObject
 
     #endregion
 
-    #region == Constructor ==
-
-    // Constructor for the EditorViewModel class, initializes the data access service and the entry.
-    #pragma warning disable IDE0290
     public ResidentialsViewModel(IDataAccessService dataAccessService, IModalDialogService modalDialog, IDataAccessLocationService dataAccessLocationService)
     {
         _dataAccessService = dataAccessService;
         _dataAccessLocationService = dataAccessLocationService;
         _dlg = modalDialog;
 
-    }
-    #pragma warning restore IDE0290
+        _entry = new(Guid.CreateVersion7().ToString("N"), EnumEntryStatus.New);
+        _entryDataDirectoryPath = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(App.AppDataPictureFolder, "Rent"), "Residential_Building"), _entry.Id);
 
-    #endregion
+    }
 
     #region == Public Methods ==
 
     public void SetEditorWin(Views.Rent.Residentials.Bldg.EditorWindow win)
     {
-        EditorWin = win;
+        _editorWin = win;
+
+        _editorWin.SetEntryIdToWindow(_entry.Id);
     }
 
     public void SetEntry(Models.Rent.Residentials.EntryResidentialFull entry)
@@ -1234,6 +1178,7 @@ public partial class ResidentialsViewModel : ObservableObject
         }
 
         _entry = entry;
+        _entryDataDirectoryPath = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(App.AppDataPictureFolder, "Rent"), "Residential_Building"), _entry.Id);
 
         PopulateEntryValues();
 
@@ -1257,11 +1202,14 @@ public partial class ResidentialsViewModel : ObservableObject
             var pic = new Models.Rent.Residentials.PictureBuilding(filePath)
             {
                 IsNew = true,
-                Id = Guid.CreateVersion7().ToString()
+                Id = Guid.CreateVersion7().ToString("N")
+
             };
 
             BuildingPictures.Add(pic);
 
+            OpenBuildingPictureDirectoryCommand.NotifyCanExecuteChanged();
+            DeleteSelectedBuildingPictureCommand.NotifyCanExecuteChanged();
             IsEntryDirty = true;
         }
     }
@@ -1280,6 +1228,14 @@ public partial class ResidentialsViewModel : ObservableObject
                 Debug.WriteLine($"Deleting unsaved file: {file}");
                 File.Delete(file);
             }
+        }
+
+        // TODO: More like PDF etc.
+
+        if (Directory.Exists(_entryDataDirectoryPath))
+        {
+            Debug.WriteLine($"Deleting folder: {_entryDataDirectoryPath}");
+            Directory.Delete(_entryDataDirectoryPath, true);
         }
     }
 
@@ -1341,10 +1297,11 @@ public partial class ResidentialsViewModel : ObservableObject
 
         //TODO: Set other properties
 
+
+
         // Pictures
-
         BuildingPictures = new ObservableCollection<PictureBuilding>(_entry.BuildingPictures); // create a copy.
-
+        //OpenBuildingPictureDirectoryCommand.NotifyCanExecuteChanged();
     }
 
     private void SetValuesToEntry()
@@ -1353,15 +1310,15 @@ public partial class ResidentialsViewModel : ObservableObject
         _entry.Name = Name;
 
         // 所在地
-        _entry.LocPrefId = (_selectedPef is not null) ? _selectedPef.MunicipalityCode : string.Empty;
-        _entry.LocPrefecture = (_selectedPef is not null) ? _selectedPef.Name : string.Empty;
+        _entry.LocPrefId = (SelectedPef is not null) ? SelectedPef.MunicipalityCode : string.Empty;
+        _entry.LocPrefecture = (SelectedPef is not null) ? SelectedPef.Name : string.Empty;
         _entry.LocMachiazaId = (!string.IsNullOrEmpty(MachiazaId)) ? MachiazaId : string.Empty;
-        _entry.LocCounty = (_selectedCity is not null) ? _selectedCity.County : string.Empty;
-        _entry.LocCity = (_selectedCity is not null) ? _selectedCity.City : string.Empty;
-        _entry.LocWard = (_selectedTown is not null) ? _selectedTown.Ward : string.Empty;
-        _entry.LocOazaCho = (_selectedTown is not null) ? _selectedTown.Oaza : string.Empty;
-        _entry.LocChoume = (_selectedChou is not null) ? _selectedChou.Chou : string.Empty;
-        _entry.LocEdaban = (!string.IsNullOrEmpty(_edaban)) ? _edaban : string.Empty;
+        _entry.LocCounty = (SelectedCity is not null) ? SelectedCity.County : string.Empty;
+        _entry.LocCity = (SelectedCity is not null) ? SelectedCity.City : string.Empty;
+        _entry.LocWard = (SelectedTown is not null) ? SelectedTown.Ward : string.Empty;
+        _entry.LocOazaCho = (SelectedTown is not null) ? SelectedTown.Oaza : string.Empty;
+        _entry.LocChoume = (SelectedChou is not null) ? SelectedChou.Chou : string.Empty;
+        _entry.LocEdaban = (!string.IsNullOrEmpty(Edaban)) ? Edaban : string.Empty;
         _entry.LocLocationFull = AddressPreview;
 
 
@@ -1430,41 +1387,24 @@ public partial class ResidentialsViewModel : ObservableObject
             return;
         }
 
-        if (EditorWin is null)
-        {
-            Debug.WriteLine("TODO: Editor Window is null. ");
-        }
-
         // Apply values of vm to the entry object.
         SetValuesToEntry();
 
-        if (string.IsNullOrEmpty(_entry.Id))
+        //if (string.IsNullOrEmpty(_entry.Id))
+        if (_entry.EntryStatus == EnumEntryStatus.New)
         {
             // If the Entry.Id is empty, generate a new ID and save as new.
-            _entry.SetId(Guid.CreateVersion7().ToString());
+            //_entry.SetId(Guid.CreateVersion7().ToString());
             var res = SaveAsNew();
             if (res)
             {
+                _entry.EntryStatus = EnumEntryStatus.Saved;
                 // Clear these dirty flags.
                 IsEntryDirty = false;
                 _entry.IsDirty = false;
 
                 // Clear unsaved file list.
                 _unsavedBuildingPictureFileList.Clear();
-
-                if (EditorWin is not null)
-                {
-                    EditorWin.Id = _entry.Id;
-                }
-                else
-                {
-                    // TODO: error.
-                }
-            }
-            else
-            {
-                // Filed to save as new, so reset.
-                _entry.ClearId();
             }
         }
         else
@@ -1489,13 +1429,6 @@ public partial class ResidentialsViewModel : ObservableObject
 
     private bool SaveAsNew()
     {
-        // In case..
-        if (string.IsNullOrEmpty(_entry.Id))
-        {
-            // If the Entry.Id is empty, generate a new ID and save as new.
-            _entry.SetId(Guid.CreateVersion7().ToString());
-        }
-
          var resInsert = _dataAccessService.InsertRentResidential(_entry);
         if (resInsert.IsError)
         {
@@ -1557,7 +1490,7 @@ public partial class ResidentialsViewModel : ObservableObject
 
         Debug.WriteLine("ModalDialogService: ShowUnitDialog method called.");
 
-        if (EditorWin == null)
+        if (_editorWin == null)
         {
             // EditorWin should be initialized in the EditorShell constructor.
             Debug.WriteLine("EditorWin should be initialized in the EditorShell constructor.");
@@ -1571,7 +1504,7 @@ public partial class ResidentialsViewModel : ObservableObject
         //Microsoft.UI.WindowId windowId1 = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hWnd1);
         //Microsoft.UI.Windowing.AppWindow appWindow = Microsoft.UI.Windowing.AppWindow.GetFromWindowId(windowId1);
         //Microsoft.UI.Windowing.OverlappedPresenter presenter = appWindow.Presenter as Microsoft.UI.Windowing.OverlappedPresenter;
-        var hWndEditor = WinRT.Interop.WindowNative.GetWindowHandle(EditorWin);
+        var hWndEditor = WinRT.Interop.WindowNative.GetWindowHandle(_editorWin);
         SetWindowLong(hWndDialog, GWL_HWNDPARENT, hWndEditor);
 
         var appWindow = dialogWin.AppWindow;
@@ -1590,11 +1523,11 @@ public partial class ResidentialsViewModel : ObservableObject
             //ModalWinWidth = 
 
             // Activate the editor window again.
-            EditorWin.Activate();
+            _editorWin.Activate();
         };
 
         // Close the dialog when the editor window is closed.
-        EditorWin.Closed += (sender, e) =>
+        _editorWin.Closed += (sender, e) =>
         {
             dialogWin.Close();
         };
@@ -1658,17 +1591,14 @@ public partial class ResidentialsViewModel : ObservableObject
     [RelayCommand]
     public async Task AddNewBuildingPictures()
     {
-        // TODO: 
-        var destDirectory = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(App.AppDataPictureFolder, "Rent"), "Residential_Building"), Guid.NewGuid().ToString("N"));
+        Debug.WriteLine($"destDirectory={_entryDataDirectoryPath}  @AddNewBuildingPictures()");
 
-        Debug.WriteLine($"destDirectory={destDirectory}  @AddNewBuildingPictures()");
-
-        if (!Directory.Exists(destDirectory))
+        if (!Directory.Exists(_entryDataDirectoryPath))
         {
-            Directory.CreateDirectory(destDirectory);
+            Directory.CreateDirectory(_entryDataDirectoryPath);
         }
 
-        var hWnd = WinRT.Interop.WindowNative.GetWindowHandle(EditorWin);
+        var hWnd = WinRT.Interop.WindowNative.GetWindowHandle(_editorWin);
         var windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hWnd);
         var openPicker = new Microsoft.Windows.Storage.Pickers.FileOpenPicker(windowId);
         //WinRT.Interop.InitializeWithWindow.Initialize(openPicker, hWnd);
@@ -1691,17 +1621,17 @@ public partial class ResidentialsViewModel : ObservableObject
             foreach (var file in files)
             {
                 //output.Append(file.Path + "\n");
-                list.Add(file.Path);
-
                 using var sourceStream = File.Open(file.Path, FileMode.Open);
                 
                 // TODO: set max file size?
 
-                var destFilePath = Path.Combine(destDirectory, System.IO.Path.GetFileName(file.Path));
+                var destFilePath = Path.Combine(_entryDataDirectoryPath, System.IO.Path.GetFileName(file.Path));
                 //Debug.WriteLine($"{file.Path} to {destFilePath}  @AddNewBuildingPictures()");
 
                 using var destinationStream = File.Create(destFilePath);
                 await sourceStream.CopyToAsync(destinationStream);
+
+                list.Add(destFilePath);
 
                 // Keep track of unsaved files to delete them when discarding.
                 _unsavedBuildingPictureFileList.Add(destFilePath);
@@ -1720,75 +1650,50 @@ public partial class ResidentialsViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanDeleteSelectedBuildingPicture))]
     public void DeleteSelectedBuildingPicture()
     {
-        if (SelectedBuildingPicture == null)
+        if (SelectedBuildingPicture is null)
         {
             return;
         }
 
-        if (_entry.BuildingPictures.Remove(SelectedBuildingPicture))
+        if (BuildingPictures.Remove(SelectedBuildingPicture))
         {
-            _entry.BuildingPicturesToBeDeleted.Add(SelectedBuildingPicture);
+            if (_entry.BuildingPictures.Remove(SelectedBuildingPicture))
+            {
+                _entry.BuildingPicturesToBeDeleted.Add(SelectedBuildingPicture);
+            }
 
             IsEntryDirty = true;
-
-            BuildingPictures.Remove(SelectedBuildingPicture);
-
             SelectedBuildingPicture = null;
         }
     }
     private bool CanDeleteSelectedBuildingPicture()
     {
-        return SelectedBuildingPicture != null;
+        return SelectedBuildingPicture is not null;
     }
 
-    [RelayCommand(CanExecute = nameof(CanUpdatedBuildingPictureProperty))]
-    public void UpdatedBuildingPictureProperty()
+    [RelayCommand(CanExecute = nameof(CanOpenBuildingPictureDirectory))]
+    public void OpenBuildingPictureDirectory()
     {
-        if (SelectedBuildingPicture == null)
+        if (Directory.Exists(_entryDataDirectoryPath))
         {
-            return;
-        }
-
-        if (BuildingPictureIsMain)
-        {
-            foreach (var asdf in BuildingPictures)
+            try
             {
-                asdf.IsMain = false;
+                Process.Start("explorer.exe", _entryDataDirectoryPath);
+            }
+            catch (Exception ex)
+            {
+                // TODO: show error to user.
+                Debug.WriteLine($"Error opening folder: {ex.Message}");
             }
         }
-
-        SelectedBuildingPicture.IsMain = BuildingPictureIsMain;
-        SelectedBuildingPicture.Description = BuildingPictureDescription;
-        if (SelectedBuildingPictureType is not null)
-        {
-            var lbl = BuildingPictureTypes.FirstOrDefault(x => x.Key == SelectedBuildingPictureType.Key);
-            if (lbl is not null)
-            {
-                SelectedBuildingPicture.PictureType = lbl;
-            }
-            else
-            {
-                Debug.WriteLine($"@UpdatedBuildingPictureProperty: could not find label for key {SelectedBuildingPictureType.Key}");
-            }
-        }
-
-        SelectedBuildingPicture.IsModified = true;
-
-        IsEntryDirty = true;
-
-        BuildingPicturePropertiesIsDirty = false;
-        UpdatedBuildingPicturePropertyCommand.NotifyCanExecuteChanged();
     }
-    private bool CanUpdatedBuildingPictureProperty()
+    private bool CanOpenBuildingPictureDirectory()
     {
-        if (SelectedBuildingPicture != null)
+        if ((BuildingPictures.Count > 0) && Directory.Exists(_entryDataDirectoryPath))
         {
-            if (BuildingPicturePropertiesIsDirty)
-            {
-                return true;
-            }
+            return true;
         }
-        
+
         return false;
     }
 
@@ -1799,7 +1704,7 @@ public partial class ResidentialsViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanShowGoogleMaps))]
     public async Task ShowGoogleMaps()
     {
-        if (string.IsNullOrEmpty(_locationLatitude) || string.IsNullOrEmpty(_locationLongitude))
+        if (string.IsNullOrEmpty(LocationLatitude) || string.IsNullOrEmpty(LocationLongitude))
         {
             return;
         }
@@ -1810,7 +1715,7 @@ public partial class ResidentialsViewModel : ObservableObject
     }
     private bool CanShowGoogleMaps()
     {
-        if (string.IsNullOrEmpty(_locationLatitude) || string.IsNullOrEmpty(_locationLongitude))
+        if (string.IsNullOrEmpty(LocationLatitude) || string.IsNullOrEmpty(LocationLongitude))
         {
             return false;
         }
@@ -1825,12 +1730,12 @@ public partial class ResidentialsViewModel : ObservableObject
     [RelayCommand]
     public async Task ShowRailLineSelect1()
     {
-        if (EditorWin is null)
+        if (_editorWin is null)
         {
             return;
         }
 
-        var railLine = await _dlg.ShowRailLineSelectDialog(EditorWin);
+        var railLine = await _dlg.ShowRailLineSelectDialog(_editorWin);
 
         if (railLine is not null)
         {
@@ -1841,7 +1746,7 @@ public partial class ResidentialsViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanShowRailStationSelect1))]
     public async Task ShowRailStationSelect1()
     {
-        if (EditorWin is null)
+        if (_editorWin is null)
         {
             return;
         }
@@ -1851,7 +1756,7 @@ public partial class ResidentialsViewModel : ObservableObject
             return;
         }
 
-        var railStation = await _dlg.ShowRailStationSelectDialog(EditorWin, SelectedRailLine1.LineCode);
+        var railStation = await _dlg.ShowRailStationSelectDialog(_editorWin, SelectedRailLine1.LineCode);
 
         if (railStation is not null)
         {

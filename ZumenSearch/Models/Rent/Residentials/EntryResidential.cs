@@ -1,11 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using Microsoft.UI.Xaml.Media;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.ObjectModel;
 
 namespace ZumenSearch.Models.Rent.Residentials;
 
@@ -21,19 +14,11 @@ public partial class EntryResidentialSearchResult : EntryBase
 // 賃貸住居用の物件クラス（建物）
 public partial class EntryResidentialFull : EntryBase
 {
-    public EntryResidentialFull()
-    {
-        //
-    }
-
-    public EntryResidentialFull(string id) : base(id)
-    {
-        //
-    }
+    public EnumEntryStatus EntryStatus {get; set;}
 
     public ObservableCollection<PictureBuilding> BuildingPictures
     {
-        get => field ?? [];
+        get => field;
         set
         {
             if (SetProperty(ref field, value))
@@ -45,6 +30,19 @@ public partial class EntryResidentialFull : EntryBase
 
     // DBへの更新時にDBから削除されるべき物件写真のIDリスト
     public ObservableCollection<PictureBuilding> BuildingPicturesToBeDeleted = [];
+
+    /*
+    public EntryResidentialFull()
+    {
+        //
+    }
+    */
+
+    public EntryResidentialFull(string id, EnumEntryStatus status) : base(id)
+    {
+        EntryStatus = status;
+        BuildingPictures = [];
+    }
 
     /*
     // 建物管理

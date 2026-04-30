@@ -23,12 +23,7 @@ namespace ZumenSearch.Views.Rent.Residentials.Bldg;
 
 public sealed partial class EditorWindow : Window
 {
-    private readonly MainViewModel MainVM = App.GetService<MainViewModel>();
-
-    public string Id { get; set; } = string.Empty;
-
-    // Flag that tellls if this window is being closed automatically by closing the MainWindow.
-    public bool IsAutoClose { get; set; } = false;
+    public string Id { get; private set; } = string.Empty;
 
     public EditorWindow()
     {
@@ -41,14 +36,14 @@ public sealed partial class EditorWindow : Window
 
     }
 
-    private void Window_Closed(object sender, WindowEventArgs args)
+    public void SetEntryIdToWindow(string id)
     {
-        // Remove this window from the list of open editor windows if not Main window is closing.
-        if (!IsAutoClose)
+        if (string.IsNullOrEmpty(id))
         {
-            // Removes this window from the list of open editor windows. 
-            MainVM.EditorList.Remove(this);
+            throw new ArgumentNullException(nameof(id));
         }
+
+        Id = id;
     }
 
 }

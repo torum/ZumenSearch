@@ -21,17 +21,19 @@ namespace ZumenSearch.Services;
 
 public class ModalDialogService : IModalDialogService
 {
-    public bool IsDialogOpened {get; private set;}
+    private bool _isDialogOpened;
+    private readonly List<Window> _ownerWindowList;
 
     public ModalDialogService()
     {
         //
-        IsDialogOpened = false;
+        _isDialogOpened = false;
+        _ownerWindowList = new List<Window>();
     }
 
     public async Task<ContentDialogResult> ShowEditorCloseConfirmationDialog(Window win)
     {
-        if (IsDialogOpened)
+        if (_isDialogOpened && (_ownerWindowList.IndexOf(win) > -1))
         {
             // Prevents COM exepction causing by attempt to show multiple dialogs. (Window's close button is enabled even tho dialog is shown)
             return ContentDialogResult.None;
@@ -61,19 +63,23 @@ public class ModalDialogService : IModalDialogService
         };
 
         //Debug.WriteLine("await dialog.ShowAsync()");
-        IsDialogOpened = true;
+
+        _isDialogOpened = true;
+        _ownerWindowList.Add(win);
         var result = await dialog.ShowAsync();
-        IsDialogOpened = false;
+        _isDialogOpened = false;
+        _ownerWindowList.Remove(win);
         return result;
-    }
-
-    public void ShowUnitDialog(ViewModels.Rent.Residentials.ResidentialsViewModel editVM, EditorWindow editWin)
-    {
-
     }
 
     public async Task<RailLine?> ShowRailLineSelectDialog(Window win)
     {
+        if (_isDialogOpened && (_ownerWindowList.IndexOf(win) > -1))
+        {
+            // Prevents COM exepction causing by attempt to show multiple dialogs. (Window's close button is enabled even tho dialog is shown)
+            return null;
+        }
+
         if (win is null)
         {
             return null;
@@ -118,9 +124,11 @@ public class ModalDialogService : IModalDialogService
             }
         };
         */
-        IsDialogOpened = true;
+        _isDialogOpened = true;
+        _ownerWindowList.Add(win);
         var result = await dialog.ShowAsync();
-        IsDialogOpened = false;
+        _isDialogOpened = false;
+        _ownerWindowList.Remove(win);
         if (result == ContentDialogResult.Primary)
         {
             //
@@ -132,6 +140,12 @@ public class ModalDialogService : IModalDialogService
 
     public async Task<RailStation?> ShowRailStationSelectDialog(Window win, string railLineCode)
     {
+        if (_isDialogOpened && (_ownerWindowList.IndexOf(win) > -1))
+        {
+            // Prevents COM exepction causing by attempt to show multiple dialogs. (Window's close button is enabled even tho dialog is shown)
+            return null;
+        }
+
         if (win is null)
         {
             return null;
@@ -168,9 +182,11 @@ public class ModalDialogService : IModalDialogService
             }
         };
 
-        IsDialogOpened = true;
+        _isDialogOpened = true;
+        _ownerWindowList.Add(win);
         var result = await dialog.ShowAsync();
-        IsDialogOpened = false;
+        _ownerWindowList.Remove(win);
+        _isDialogOpened = false;
 
         if (result == ContentDialogResult.Primary)
         {

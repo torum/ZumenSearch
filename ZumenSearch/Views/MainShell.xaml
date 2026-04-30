@@ -132,7 +132,7 @@
                 </NavigationView.MenuItems>
 
                 <Grid Background="{ThemeResource LayerFillColorDefaultBrush}">
-                    <Frame x:Name="NavigationFrame" NavigationFailed="NavigationFrame_NavigationFailed"/>
+                    <Frame x:Name="NavigationFrame"/>
                 </Grid>
 
             </NavigationView>

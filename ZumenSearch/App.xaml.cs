@@ -17,21 +17,23 @@ namespace ZumenSearch;
 public partial class App : Application
 {
     // App basic info
-    private static readonly string _appName = "ZumenSearch";
-    private static readonly string _appDeveloper = "torum";
+    public static readonly string AppName = "ZumenSearch";
+    private static readonly string AppDeveloper = "torum";
 
     // Data folder path
-    private static readonly string _envDataFolder = System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);//ApplicationData 
-    public static string AppDataFolder { get; private set; } = System.IO.Path.Combine(System.IO.Path.Combine(_envDataFolder, _appDeveloper), _appName);
-    public static string AppDataPictureFolder { get; private set; } = System.IO.Path.Combine(AppDataFolder, "Pictures");
+    private static readonly string EnvDataFolder = System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);//ApplicationData 
+    public static string AppDataFolder { get; private set; } = System.IO.Path.Combine(System.IO.Path.Combine(EnvDataFolder, AppDeveloper), AppName);
+
+    // "BlobData" includes building/unit pictures, PDF and its thumbnail image files.
+    public static string AppDataPictureFolder { get; private set; } = System.IO.Path.Combine(AppDataFolder, "BlobData");
 
     // Config file path
-    public static string AppConfigFilePath { get; private set; } = System.IO.Path.Combine(AppDataFolder, _appName + ".config");
+    public static string AppConfigFilePath { get; private set; } = System.IO.Path.Combine(AppDataFolder, AppName + ".config");
 
     // Log file
     public bool IsSaveErrorLog = true;
-    public string LogFilePath = System.Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + System.IO.Path.DirectorySeparatorChar + _appName + "_errors.txt";
-    private readonly StringBuilder Errortxt = new();
+    public string LogFilePath = System.Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + System.IO.Path.DirectorySeparatorChar + AppName + "_errors.txt";
+    private readonly StringBuilder _errortxt = new();
 
     // DispatcherQueuecherQueue
     //public static readonly Microsoft.UI.Dispatching.DispatcherQueue CurrentDispatcherQueue = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
@@ -62,9 +64,9 @@ public partial class App : Application
         {
             Debug.WriteLine("IsMSIX");
             var envDataFolder = Windows.Storage.ApplicationData.Current.LocalFolder.Path;
-            AppDataFolder = System.IO.Path.Combine(System.IO.Path.Combine(envDataFolder, _appDeveloper), _appName);
-            AppConfigFilePath = System.IO.Path.Combine(AppDataFolder, _appName + ".config");
-            AppDataPictureFolder = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(AppDataFolder, _appDeveloper), _appName), "Pictures");
+            AppDataFolder = System.IO.Path.Combine(System.IO.Path.Combine(envDataFolder, AppDeveloper), AppName);
+            AppConfigFilePath = System.IO.Path.Combine(AppDataFolder, AppName + ".config");
+            AppDataPictureFolder = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(AppDataFolder, AppDeveloper), AppName), "Pictures");
         }
         else
         {
@@ -129,7 +131,7 @@ public partial class App : Application
         // If this is the first instance launched, then register it as the "main" instance.
         // If this isn't the first instance launched, then "main" will already be registered,
         // so retrieve it.
-        var mainInstance = Microsoft.Windows.AppLifecycle.AppInstance.FindOrRegisterForKey(_appName + "Main");
+        var mainInstance = Microsoft.Windows.AppLifecycle.AppInstance.FindOrRegisterForKey(AppName + "Main");
 
         // If the instance that's executing the OnLaunched handler right now
         // isn't the "main" instance.
@@ -149,14 +151,14 @@ public partial class App : Application
         }
 
         // Create the window and load settings and apply size and position etc.
-        MainWnd = App.GetService<MainWindow>(); ;
+        MainWnd = App.GetService<MainWindow>();
 
         // Activate the window.
         MainWnd?.Activate();
     }
 
     // Activated from other instance.
-    private void App_Activated(object? sender, Microsoft.Windows.AppLifecycle.AppActivationArguments e)
+    private static void App_Activated(object? sender, Microsoft.Windows.AppLifecycle.AppActivationArguments e)
     {
         App.MainWnd?.CurrentDispatcherQueue?.TryEnqueue(() =>
         {
@@ -214,10 +216,10 @@ public partial class App : Application
 
     public void AppendErrorLog(string kindTxt, string errorTxt)
     {
-        Errortxt.AppendLine(kindTxt + ": " + errorTxt);
+        _errortxt.AppendLine(kindTxt + ": " + errorTxt);
         var dt = DateTime.Now;
-        Errortxt.AppendLine($"Occured at {dt.ToString("yyyy/MM/dd HH:mm:ss")}");
-        Errortxt.AppendLine("");
+        _errortxt.AppendLine($"Occured at {dt.ToString("yyyy/MM/dd HH:mm:ss")}");
+        _errortxt.AppendLine("");
     }
 
     public void SaveErrorLog()
@@ -232,17 +234,19 @@ public partial class App : Application
             return;
         }
 
-        if (Errortxt.Length > 0)
+        if (_errortxt.Length <= 0)
         {
-            Errortxt.AppendLine("");
-            var dt = DateTime.Now;
-            Errortxt.AppendLine($"Saved at {dt.ToString("yyyy/MM/dd HH:mm:ss")}");
+            return;
+        }
 
-            var s = Errortxt.ToString();
-            if (!string.IsNullOrEmpty(s))
-            {
-                File.WriteAllText(LogFilePath, s);
-            }
+        _errortxt.AppendLine("");
+        var dt = DateTime.Now;
+        _errortxt.AppendLine($"Saved at {dt.ToString("yyyy/MM/dd HH:mm:ss")}");
+
+        var s = _errortxt.ToString();
+        if (!string.IsNullOrEmpty(s))
+        {
+            File.WriteAllText(LogFilePath, s);
         }
     }
 

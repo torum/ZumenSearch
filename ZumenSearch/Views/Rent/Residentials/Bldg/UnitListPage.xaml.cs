@@ -19,15 +19,14 @@ public sealed partial class UnitListPage : Page
 {
     //private Views.Rent.Residentials.Editor.EditorShell? _editorShell;
 
-    private ViewModels.Rent.Residentials.ResidentialsViewModel? _viewModel;
     public ViewModels.Rent.Residentials.ResidentialsViewModel? ViewModel
     {
-        get => _viewModel;
+        get;
         private set
         {
             if (value != null)
             {
-                _viewModel = value;
+                field = value;
                 //_viewModel.EventAddNew += (sender, arg) => OnEventAddNew(arg);
             }
         }

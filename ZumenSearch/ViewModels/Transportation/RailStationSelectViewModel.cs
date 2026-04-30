@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ZumenSearch.Models;
@@ -12,15 +11,14 @@ public partial class RailStationSelectViewModel : ObservableObject
 {
     private readonly string _railLineCode = string.Empty;
 
-    private string _query = string.Empty;
     public string Query
     {
-        get => _query;
+        get;
         set
         {
-            if (SetProperty(ref _query, value))
+            if (SetProperty(ref field, value))
             {
-                if (string.IsNullOrEmpty(_query))
+                if (string.IsNullOrEmpty(field))
                 {
                     SuggestedRailStations?.Clear();
                 }
@@ -28,32 +26,30 @@ public partial class RailStationSelectViewModel : ObservableObject
 
             SearchRailStationCommand.NotifyCanExecuteChanged();
         }
-    }
+    } = string.Empty;
 
-    private ObservableCollection<RailStation>? _suggestedRailStations = [];
     public ObservableCollection<RailStation>? SuggestedRailStations
     {
-        get => _suggestedRailStations;
+        get;
         set
         {
-            if (SetProperty(ref _suggestedRailStations, value))
+            if (SetProperty(ref field, value))
             {
                 //
             }
         }
-    }
+    } = [];
 
-    private RailStation? _selectedRailStation;
     public RailStation? SelectedRailStation
     {
-        get => _selectedRailStation;
+        get;
         set
         {
-            if (SetProperty(ref _selectedRailStation, value))
+            if (SetProperty(ref field, value))
             {
-                if (_selectedRailStation is not null)
+                if (field is not null)
                 {
-                    SelectionChanged?.Invoke(this, _selectedRailStation);
+                    SelectionChanged?.Invoke(this, field);
                 }
             }
         }
@@ -69,7 +65,7 @@ public partial class RailStationSelectViewModel : ObservableObject
         _dataAccessTransportationService = dataAccessTransportationService;
         _railLineCode = railLineCode;
 
-        SuggestedRailStations = _dataAccessTransportationService.GetRailStationsBy(_railLineCode, _query);
+        SuggestedRailStations = _dataAccessTransportationService.GetRailStationsBy(_railLineCode, Query);
     }
 
     [RelayCommand(CanExecute = nameof(CanSearchRailStation))]
@@ -81,7 +77,7 @@ public partial class RailStationSelectViewModel : ObservableObject
             return;
         }
 
-        SuggestedRailStations = _dataAccessTransportationService.GetRailStationsBy(_railLineCode, _query);
+        SuggestedRailStations = _dataAccessTransportationService.GetRailStationsBy(_railLineCode, Query);
 
     }
     private bool CanSearchRailStation()

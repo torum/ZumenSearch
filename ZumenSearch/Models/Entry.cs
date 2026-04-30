@@ -1,25 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Windows;
-using System.Windows.Input;
-using System.Xml;
-using System.Xml.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
-using ZumenSearch.Models;
-using ZumenSearch.ViewModels;
 
 namespace ZumenSearch.Models;
 
+public enum EnumEntryStatus
+{
+    Saved,
+    New,
+}
+
 public abstract partial class EntryBase : ObservableObject
 {
+    // I don't think we need this anymore....
     public bool IsDirty
     {
         get => field;
@@ -109,11 +101,13 @@ public abstract partial class EntryBase : ObservableObject
 
     #endregion
 
+    /*
     protected EntryBase()
     {
         // Instead of using a GUID, we initialize _id to an empty string to indicate that the entry is NEW.
         _id = string.Empty;//Guid.CreateVersion7() //Guid.NewGuid().ToString();
     }
+    */
 
     protected EntryBase(string id)
     {
@@ -133,6 +127,7 @@ public abstract partial class EntryBase : ObservableObject
         {
             throw new ArgumentException("Id cannot be null or empty.", nameof(id));
         }
+
         _id = id;
     }
 

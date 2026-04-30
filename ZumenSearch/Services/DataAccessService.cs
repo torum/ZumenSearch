@@ -263,6 +263,8 @@ public class DataAccessService : IDataAccessService
                         cmd.Parameters.AddWithValue("@Tit", pic.PictureType.Key.ToString());
                         cmd.Parameters.AddWithValue("@Desc", pic.Description);
 
+                        //Debug.WriteLine($"Inserting picture: {pic.ImageLocation}, {pic.Id}, isMain: {pic.IsMain} @DataAccess::InsertRentResidential");
+
                         var paramIsMain = new SqliteParameter("@Main", System.Data.DbType.Int32);
                         if (pic.IsMain)
                         {
@@ -384,9 +386,6 @@ public class DataAccessService : IDataAccessService
         _readerWriterLock.EnterWriteLock();
         try
         {
-            // System.Data.SQLite
-            //using var connection = new SQLiteConnection(connectionStringBuilder.ConnectionString);
-            // Microsoft.Data.Sqlite
             using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
             connection.Open();
 
@@ -822,7 +821,7 @@ public class DataAccessService : IDataAccessService
     {
         var res = new SqliteDataAccessSelectRentResidentialFullResultWrapper();
 
-        var entry = new Models.Rent.Residentials.EntryResidentialFull(id);
+        var entry = new Models.Rent.Residentials.EntryResidentialFull(id, EnumEntryStatus.Saved);
 
         if (string.IsNullOrEmpty(id))
         {
@@ -834,9 +833,6 @@ public class DataAccessService : IDataAccessService
         _readerWriterLock.EnterReadLock();
         try
         {
-            // System.Data.SQLite
-            //using var connection = new SQLiteConnection(connectionStringBuilder.ConnectionString);
-            // Microsoft.Data.Sqlite
             using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
             connection.Open();
 
@@ -948,6 +944,7 @@ public class DataAccessService : IDataAccessService
                     }
 
                     entry.BuildingPictures.Add(rlpic);
+
                 }
             }
 

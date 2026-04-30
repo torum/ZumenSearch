@@ -47,11 +47,10 @@ public partial class ModalViewModel : ObservableRecipient
         }
     }
 
-    private object? _selected;
     public object? Selected
     {
-        get => _selected;
-        set => SetProperty(ref _selected, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public event EventHandler<string>? EventBackToSummary;

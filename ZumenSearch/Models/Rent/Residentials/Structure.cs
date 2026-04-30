@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ZumenSearch.Models.Rent.Residentials;
+﻿namespace ZumenSearch.Models.Rent.Residentials;
 
 // 建物構造
 public enum EnumStructure

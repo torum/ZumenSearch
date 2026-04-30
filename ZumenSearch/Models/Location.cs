@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics.Metrics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ZumenSearch.Models;
+﻿namespace ZumenSearch.Models;
 
 
 // 賃貸住居用物件の「都道府県」クラス

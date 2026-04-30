@@ -1,21 +1,9 @@
-using Microsoft.UI.Windowing;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Xml;
 using System.Xml.Linq;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
+using Microsoft.UI.Windowing;
+using Microsoft.UI.Xaml;
 using ZumenSearch.ViewModels;
 
 namespace ZumenSearch.Views;
@@ -23,24 +11,26 @@ namespace ZumenSearch.Views;
 #pragma warning disable IDE0003
 public sealed partial class MainWindow : Window
 {
-    private Microsoft.UI.Dispatching.DispatcherQueue? _currentDispatcherQueue;// = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
-    public Microsoft.UI.Dispatching.DispatcherQueue? CurrentDispatcherQueue => _currentDispatcherQueue;
+    public Microsoft.UI.Dispatching.DispatcherQueue? CurrentDispatcherQueue
+    {
+        get; private set;
+    }
 
     private readonly MainViewModel _viewModel = App.GetService<MainViewModel>();
 
     // Window position and size
     // TODO: Change this lator.1920x1080
-    private int winRestoreWidth = 1274;//1024;
+    private int _winRestoreWidth = 1274;//1024;
     // TODO: Change this lator.
-    private int winRestoreHeight = 794;//768;
-    private int winRestoreTop = 100;
-    private int winRestoreleft = 100;
+    private int _winRestoreHeight = 794;//768;
+    private int _winRestoreTop = 100;
+    private int _winRestoreleft = 100;
 
     private OverlappedPresenterState winState = OverlappedPresenterState.Restored;
 
     public MainWindow()
     {
-        _currentDispatcherQueue = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
+        CurrentDispatcherQueue = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
 
         InitializeComponent();
 
@@ -72,7 +62,7 @@ public sealed partial class MainWindow : Window
                 if (winState == OverlappedPresenterState.Maximized)
                 {
                     // Sets restore size and position.
-                    appWindow.MoveAndResize(new Windows.Graphics.RectInt32(winRestoreleft, winRestoreTop, winRestoreWidth, winRestoreHeight));
+                    appWindow.MoveAndResize(new Windows.Graphics.RectInt32(_winRestoreleft, _winRestoreTop, _winRestoreWidth, _winRestoreHeight));
                     // Maximize the window.
                     presenter.Maximize();
 
@@ -86,7 +76,7 @@ public sealed partial class MainWindow : Window
                     // This should not happen, but just in case.
                     presenter.Restore();
                     // Sets restore size and position.
-                    appWindow.MoveAndResize(new Windows.Graphics.RectInt32(winRestoreleft, winRestoreTop, winRestoreWidth, winRestoreHeight));
+                    appWindow.MoveAndResize(new Windows.Graphics.RectInt32(_winRestoreleft, _winRestoreTop, _winRestoreWidth, _winRestoreHeight));
 
                     // TODO: TEMP
                     //appWindow.Move(new Windows.Graphics.PointInt32(winRestoreleft, winRestoreTop));
@@ -96,7 +86,7 @@ public sealed partial class MainWindow : Window
                 else
                 {
                     // Sets restore size and position.
-                    appWindow.MoveAndResize(new Windows.Graphics.RectInt32(winRestoreleft, winRestoreTop, winRestoreWidth, winRestoreHeight));
+                    appWindow.MoveAndResize(new Windows.Graphics.RectInt32(_winRestoreleft, _winRestoreTop, _winRestoreWidth, _winRestoreHeight));
 
                     // TODO: TEMP
                     //appWindow.Move(new Windows.Graphics.PointInt32(winRestoreleft, winRestoreTop));
@@ -152,7 +142,7 @@ public sealed partial class MainWindow : Window
         // TODO:
         //_viewModel.CleanUp();
         
-        _currentDispatcherQueue = null;
+        CurrentDispatcherQueue = null;
 
         // Save error logs.
         var app = App.Current as App;
@@ -174,10 +164,10 @@ public sealed partial class MainWindow : Window
                 }
                 else
                 {
-                    winRestoreHeight = (int)appWindow.Size.Height;
-                    winRestoreWidth = (int)appWindow.Size.Width;
-                    winRestoreTop = (int)appWindow.Position.Y;
-                    winRestoreleft = (int)appWindow.Position.X;
+                    _winRestoreHeight = (int)appWindow.Size.Height;
+                    _winRestoreWidth = (int)appWindow.Size.Width;
+                    _winRestoreTop = (int)appWindow.Position.Y;
+                    _winRestoreleft = (int)appWindow.Position.X;
                 }
             }
         }
@@ -256,7 +246,7 @@ public sealed partial class MainWindow : Window
             }
             else
             {
-                attrs.Value = winRestoreWidth.ToString();
+                attrs.Value = _winRestoreWidth.ToString();
             }
             mainWindow.SetAttributeNode(attrs);
 
@@ -267,7 +257,7 @@ public sealed partial class MainWindow : Window
             }
             else
             {
-                attrs.Value = winRestoreHeight.ToString();
+                attrs.Value = _winRestoreHeight.ToString();
             }
             mainWindow.SetAttributeNode(attrs);
 
@@ -278,7 +268,7 @@ public sealed partial class MainWindow : Window
             }
             else
             {
-                attrs.Value = winRestoreTop.ToString();
+                attrs.Value = _winRestoreTop.ToString();
             }
             mainWindow.SetAttributeNode(attrs);
 
@@ -289,7 +279,7 @@ public sealed partial class MainWindow : Window
             }
             else
             {
-                attrs.Value = winRestoreleft.ToString();
+                attrs.Value = _winRestoreleft.ToString();
             }
             mainWindow.SetAttributeNode(attrs);
 
@@ -426,28 +416,28 @@ public sealed partial class MainWindow : Window
                     if (hoge != null)
                     {
                         winTop = int.Parse(hoge.Value);
-                        winRestoreTop = winTop;
+                        _winRestoreTop = winTop;
                     }
 
                     hoge = mainWindow.Attribute("left");
                     if (hoge != null)
                     {
                         winLeft = int.Parse(hoge.Value);
-                        winRestoreleft = winLeft;
+                        _winRestoreleft = winLeft;
                     }
 
                     hoge = mainWindow.Attribute("height");
                     if (hoge != null)
                     {
                         winHeight = int.Parse(hoge.Value);
-                        winRestoreHeight = winHeight;
+                        _winRestoreHeight = winHeight;
                     }
 
                     hoge = mainWindow.Attribute("width");
                     if (hoge != null)
                     {
                         winWidth = int.Parse(hoge.Value);
-                        winRestoreWidth = winWidth;
+                        _winRestoreWidth = winWidth;
                     }
 
                 }

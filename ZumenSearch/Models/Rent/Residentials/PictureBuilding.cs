@@ -91,7 +91,7 @@ public partial class PictureBuilding : PictureBase
         if (Enum.TryParse<EnumBuildingPictureType>(titleStr, out var result))
         {
             PictureType = new(result);
-            Debug.WriteLine($"SetLabelFromString: {titleStr} -> {PictureType.Label}");
+            //Debug.WriteLine($"SetLabelFromString: {titleStr} -> {PictureType.Label}");
             return result;
         }
         else

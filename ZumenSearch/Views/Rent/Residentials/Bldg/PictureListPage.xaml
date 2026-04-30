@@ -22,6 +22,7 @@
         <Grid Grid.Row="0" Grid.ColumnSpan="2">
             <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Margin="0,0,24,0" HorizontalAlignment="Right">
                 <AppBarButton Name="AppBarButtonAddPicture" Icon="Add" Label="追加" Command="{x:Bind ViewModel.AddNewBuildingPicturesCommand}"/>
+                <AppBarButton Icon="OpenLocal" Label="開く" Command="{x:Bind ViewModel.OpenBuildingPictureDirectoryCommand}"/>
                 <AppBarButton Icon="Delete" Label="削除" Command="{x:Bind ViewModel.DeleteSelectedBuildingPictureCommand}"/>
                 <!--  Command="{x:Bind ViewModel.DeleteRentResidentialCommand}" CommandParameter="{x:Bind SearchResult.SelectedItem, Mode=OneWay}" -->
             </CommandBar>
@@ -48,7 +49,7 @@
 
                     </ItemsView.ItemTemplate>
                     <ItemsView.Layout>
-                        <UniformGridLayout MinRowSpacing="18" MinColumnSpacing="18"/>
+                        <UniformGridLayout MinRowSpacing="18" MinColumnSpacing="18" ItemsJustification="SpaceEvenly"/>
                     </ItemsView.Layout>
                 </ItemsView>
             </Border>
@@ -70,8 +71,9 @@
 
                     <TextBox Header="説明" Text="{x:Bind ViewModel.BuildingPictureDescription, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
                     <CheckBox Content="メインの写真" IsChecked="{x:Bind ViewModel.BuildingPictureIsMain, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
-
+                    <!--
                     <Button Content="更新" Command="{x:Bind ViewModel.UpdatedBuildingPicturePropertyCommand}" HorizontalAlignment="Right"></Button>
+                    -->
                 </StackPanel>
             </Border>
         </Grid>

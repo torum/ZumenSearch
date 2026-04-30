@@ -3,26 +3,15 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Windowing;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Animation;
-using Microsoft.UI.Xaml.Navigation;
 using Microsoft.Windows.ApplicationModel.Resources;
 using Windows.ApplicationModel;
-using Windows.UI.ApplicationSettings;
 using ZumenSearch.Helpers;
-using ZumenSearch.Models;
-using ZumenSearch.Models.Rent;
-using ZumenSearch.Models.Rent.Residentials;
 using ZumenSearch.Services;
 using ZumenSearch.Services.Extensions.AbstractFactory;
 using ZumenSearch.Views;
@@ -45,7 +34,7 @@ public partial class MainViewModel : ObservableObject
 
     private static MainShell Shell => App.GetService<MainShell>();
 
-    private static MainWindow MainWin => App.GetService<MainWindow>();
+    //private static MainWindow MainWin => App.GetService<MainWindow>();
 
     #region == Window management ==
 
@@ -69,19 +58,17 @@ public partial class MainViewModel : ObservableObject
     #region == Navigation ==
 
     // TODO: Do I need this property?
-    private bool _isBackEnabled = true;
     public bool IsBackEnabled // Implement partial property for AOT compatibility
     {
-        get => _isBackEnabled;
-        set => SetProperty(ref _isBackEnabled, value);
-    }
+        get;
+        set => SetProperty(ref field, value);
+    } = true;
 
     // TODO: Do I need this property?
-    private object? _selectedNavigationViewItem;
     public object? SelectedNavigationViewItem
     {
-        get => _selectedNavigationViewItem;
-        set => SetProperty(ref _selectedNavigationViewItem, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     #endregion
@@ -93,13 +80,12 @@ public partial class MainViewModel : ObservableObject
 
     #region == Search ==
 
-    private ObservableCollection<Models.Rent.Residentials.EntryResidentialSearchResult> _entResidentialSearchResult = [];
 
     public ObservableCollection<Models.Rent.Residentials.EntryResidentialSearchResult> RentResidentialSearchResult
     {
-        get => _entResidentialSearchResult;
-        set => SetProperty(ref _entResidentialSearchResult, value);
-    }
+        get;
+        set => SetProperty(ref field, value);
+    } = [];
 
     #endregion
 
@@ -184,7 +170,6 @@ public partial class MainViewModel : ObservableObject
             throw new ArgumentNullException(nameof(editorWindow));
         }
 
-        //MainViewModel mainShellViewModel = App.GetService<MainViewModel>();
         // Add to the list of editor windows.
         EditorList.Add(editorWindow);
 
@@ -199,80 +184,24 @@ public partial class MainViewModel : ObservableObject
 
         editorWindow.Closed += (sender, e) =>
         {
-            // Activate the main window again.
-            //App.MainWindow?.Activate(); // Not good when multiple editor windows are opened.
+            EditorList.Remove(editorWindow);
+
+            if (EditorList.Count == 0)
+            {
+                // No more editor windows are open, activate the main window again.
+                if (App.MainWnd?.AppWindow.Presenter is OverlappedPresenter presntr)
+                {
+                    presntr.Restore();
+                }
+                App.MainWnd?.Activate();
+            }
         };
 
-        // Window state and position.
-        //editorWindow.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(mainShellViewModel.EditorWinLeft, mainShellViewModel.EditorWinTop, mainShellViewModel.EditorWinWidth, mainShellViewModel.EditorWinHeight));
-        // TEMP:
         editorWindow.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(EditorWinLeft, EditorWinTop, EditorWinWidth, EditorWinHeight));
 
         //editorWindow.AppWindow.Show();
         editorWindow.Activate();
 
-        /*
-        Debug.WriteLine("AddNew command executed!");
-
-        Views.Rent.Residentials.Editor.EditorShell editorShell = _editorFactory.Create();
-        var editorWindow = editorShell.EditorWin;
-
-        if (editorWindow == null)
-        {
-            // EditorWin should be initialized in the EditorShell constructor.
-            throw new ArgumentNullException(nameof(editorWindow));
-        }
-
-        MainShellViewModel mainShellViewModel = App.GetService<MainShellViewModel>();
-        // Add to the list of editor windows.
-        mainShellViewModel.EditorList.Add(editorWindow);
-        */
-
-        /*
-        // This won't work since editor window closes AFTER the main window and miss the timing for the saving settings to the config file.
-        Microsoft.UI.Xaml.Window? win = App.MainWindow;
-        if (win != null)
-        {
-            win.Closed += (s, a) =>
-            {
-                // TODO: when close is canceled.
-                //editorEindow.CanClose
-
-                editorWindow.Close();
-            };
-        }
-        */
-
-        /*
-        // Window state and position.
-        //editorWindow.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(mainShellViewModel.EditorWinLeft, mainShellViewModel.EditorWinTop, mainShellViewModel.EditorWinWidth, mainShellViewModel.EditorWinHeight));
-        // TEMP:
-        editorWindow.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(mainShellViewModel.EditorWinLeft, mainShellViewModel.EditorWinTop, 1366, 768));
-        if (editorWindow.AppWindow.Presenter is OverlappedPresenter presenter)
-        {
-            presenter.IsResizable = false;
-        }
-
-        //editorWindow.AppWindow.Show();
-        editorWindow.Activate();
-        */
-
-        /*
-        //NavigationService.NavigateTo(typeof(RentLivingEditShellViewModel).FullName!, "test");
-
-        var editor = _editorFactory.Create();
-
-        var editorEindow = editor.Window;
-
-        App.MainWindow.Closed += (s, a) =>
-        {
-            // TODO: when close is canceled.
-            //editorEindow.CanClose
-            editorEindow.Close();
-        };
-
-        editorEindow.Show();
-        */
     }
 
     [RelayCommand]
@@ -375,25 +304,22 @@ public partial class MainViewModel : ObservableObject
         var editorShell = _editorFactory.Create();
 
         // Sets the instance of selected Entry.
-        editorShell.SetEntryToEntryViewModel(res.EntryFull);
+        //editorShell.SetEntryToEntryViewModel(res.EntryFull);
+
+        var entryViewModel = editorShell.ViewModel;
+        entryViewModel.SetEntry(res.EntryFull);
 
         var editorWindow = editorShell.EditorWin;
-
         if (editorWindow == null)
         {
             // EditorWin should be initialized in the EditorShell constructor.
             Debug.WriteLine("EditorWin must be initialized in the EditorShell constructor");
             return;
         }
+        editorWindow.SetEntryIdToWindow(selected.Id);
 
-        //MainViewModel mainShellViewModel = App.GetService<MainViewModel>();
-        // Add to the list of editor windows.
-        editorWindow.Id = selected.Id;
         EditorList.Add(editorWindow);
 
-        // Window state and position.
-        //editorWindow.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(mainShellViewModel.EditorWinLeft, mainShellViewModel.EditorWinTop, mainShellViewModel.EditorWinWidth, mainShellViewModel.EditorWinHeight));
-        // TEMP:
         editorWindow.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(EditorWinLeft, EditorWinTop, EditorWinWidth, EditorWinHeight));
         if (editorWindow.AppWindow.Presenter is OverlappedPresenter presenter)
         {
@@ -408,6 +334,8 @@ public partial class MainViewModel : ObservableObject
         {
             // Activate the main window again.
             //App.MainWnd?.Activate();
+
+            EditorList.Remove(editorWindow);
         };
 
         // Stupid WinUI3 needs a delay here to properly activate the window.

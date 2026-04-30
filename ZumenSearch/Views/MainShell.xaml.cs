@@ -1,25 +1,13 @@
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Media.Animation;
-using Microsoft.UI.Xaml.Navigation;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using System.Xml;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Media.Animation;
 using ZumenSearch.ViewModels;
-using ZumenSearch.ViewModels.Rent;
 using ZumenSearch.Views.Rent;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace ZumenSearch.Views;
 
@@ -94,11 +82,6 @@ public sealed partial class MainShell : Page
         };
     }
 
-    private void NavigationFrame_NavigationFailed(object sender, Microsoft.UI.Xaml.Navigation.NavigationFailedEventArgs e)
-    {
-        e.Handled = true;
-    }
-
     private void NavigationViewControl_Loaded(object sender, RoutedEventArgs e)
     {
         // Since we use ItemInvoked, we set selecteditem manually
@@ -149,8 +132,7 @@ public sealed partial class MainShell : Page
         {
             navigationViewSelectedItem = sender.SelectedItem as NavigationViewItem;
 
-            //NavView_Navigate("settings", args.RecommendedNavigationTransitionInfo);
-            NavigationFrame.Navigate(typeof(SettingsPage), NavigationFrame, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom });//, args.RecommendedNavigationTransitionInfo
+            NavigationFrame.Navigate(typeof(SettingsPage), NavigationFrame, new SuppressNavigationTransitionInfo());//, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom }
         }
         else if (args.InvokedItemContainer != null && (args.InvokedItemContainer.Tag != null))
         {
@@ -188,7 +170,7 @@ public sealed partial class MainShell : Page
             navigationViewSelectedItem = sender.SelectedItem as NavigationViewItem;
 
             // Pass Frame when navigate.
-            NavigationFrame.Navigate(item.Page, NavigationFrame, args.RecommendedNavigationTransitionInfo);//, args.RecommendedNavigationTransitionInfo
+            NavigationFrame.Navigate(item.Page, NavigationFrame, new SuppressNavigationTransitionInfo());//args.RecommendedNavigationTransitionInfo
         }
     }
 }

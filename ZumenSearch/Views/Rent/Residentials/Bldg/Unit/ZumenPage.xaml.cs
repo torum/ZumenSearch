@@ -18,15 +18,14 @@ namespace ZumenSearch.Views.Rent.Residentials.Bldg.Unit;
 
 public sealed partial class ZumenPage : Page
 {
-    private ViewModels.Rent.Residentials.Unit.ModalViewModel? _viewModel;
     public ViewModels.Rent.Residentials.Unit.ModalViewModel? ViewModel
     {
-        get => _viewModel;
+        get;
         private set
         {
             if (value != null)
             {
-                _viewModel = value;
+                field = value;
 
                 //_viewModel.EventBackToSummary += (sender, arg) => OnEventBackToSummary(arg);
             }

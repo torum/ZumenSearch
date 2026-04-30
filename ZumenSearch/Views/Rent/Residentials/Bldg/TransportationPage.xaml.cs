@@ -10,15 +10,14 @@ namespace ZumenSearch.Views.Rent.Residentials.Bldg;
 
 public sealed partial class TransportationPage : Page
 {
-    private ViewModels.Rent.Residentials.ResidentialsViewModel? _viewModel;
     public ViewModels.Rent.Residentials.ResidentialsViewModel? ViewModel
     {
-        get => _viewModel;
+        get;
         private set
         {
             if (value != null)
             {
-                _viewModel = value;
+                field = value;
             }
         }
     }

@@ -16,8 +16,6 @@ public interface IModalDialogService
 {
     Task<ContentDialogResult> ShowEditorCloseConfirmationDialog(Window win);
 
-    void ShowUnitDialog(ResidentialsViewModel editVM, EditorWindow editWin);
-
     Task<RailLine?> ShowRailLineSelectDialog(Window win);
 
     Task<RailStation?> ShowRailStationSelectDialog(Window win, string railLineCode);

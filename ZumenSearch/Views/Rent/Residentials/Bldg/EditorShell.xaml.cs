@@ -23,9 +23,7 @@ namespace ZumenSearch.Views.Rent.Residentials.Bldg;
 
 public sealed partial class EditorShell : Page
 {
-    private readonly MainViewModel MainVM = App.GetService<MainViewModel>();
-
-    public ViewModels.Rent.Residentials.ResidentialsViewModel ViewModel;
+    public ViewModels.Rent.Residentials.ResidentialsViewModel ViewModel {get; private set;}
 
     public Views.Rent.Residentials.Bldg.EditorWindow EditorWin { get; private set; }
 
@@ -45,6 +43,8 @@ public sealed partial class EditorShell : Page
         ("gyousya", "宅建業者", typeof(Views.Rent.Residentials.Bldg.GyousyaPage)),
         //("memo", "備考", typeof(Views.Rent.Residentials.Editor.MemoPage)),
     ];
+
+    //private readonly MainViewModel _mainVM = App.GetService<MainViewModel>();
 
     private readonly IModalDialogService _dlg;
 
@@ -68,10 +68,11 @@ public sealed partial class EditorShell : Page
         EditorWin.AppWindow.Closing += AppWindow_Closing;
         EditorWin.Title = "";
 
-        ViewModel.ModalWinWidth = MainVM.ModalWinWidth;
-        ViewModel.ModalWinHeight = MainVM.ModalWinHeight;
-        ViewModel.ModalWinTop = MainVM.ModalWinTop;
-        ViewModel.ModalWinLeft = MainVM.ModalWinLeft;
+        var mainVM = App.GetService<MainViewModel>();
+        ViewModel.ModalWinWidth = mainVM.ModalWinWidth;
+        ViewModel.ModalWinHeight = mainVM.ModalWinHeight;
+        ViewModel.ModalWinTop = mainVM.ModalWinTop;
+        ViewModel.ModalWinLeft = mainVM.ModalWinLeft;
 
         // subscribe to ViewModel events
         ViewModel.EventBackToSummary += (sender, arg) => OnEventBackToSummary();
@@ -163,15 +164,16 @@ public sealed partial class EditorShell : Page
             {
                 if (appWindow.Presenter is OverlappedPresenter)
                 {
-                    MainVM.EditorWinHeight = (int)appWindow.Size.Height;
-                    MainVM.EditorWinWidth = (int)appWindow.Size.Width;
-                    MainVM.EditorWinTop = (int)appWindow.Position.Y;
-                    MainVM.EditorWinLeft = (int)appWindow.Position.X;
+                    var mainVM = App.GetService<MainViewModel>();
+                    mainVM.EditorWinHeight = (int)appWindow.Size.Height;
+                    mainVM.EditorWinWidth = (int)appWindow.Size.Width;
+                    mainVM.EditorWinTop = (int)appWindow.Position.Y;
+                    mainVM.EditorWinLeft = (int)appWindow.Position.X;
 
-                    MainVM.ModalWinHeight = ViewModel.ModalWinHeight;
-                    MainVM.ModalWinWidth = ViewModel.ModalWinWidth;
-                    MainVM.ModalWinTop = ViewModel.ModalWinTop;
-                    MainVM.ModalWinLeft = ViewModel.ModalWinLeft;
+                    mainVM.ModalWinHeight = ViewModel.ModalWinHeight;
+                    mainVM.ModalWinWidth = ViewModel.ModalWinWidth;
+                    mainVM.ModalWinTop = ViewModel.ModalWinTop;
+                    mainVM.ModalWinLeft = ViewModel.ModalWinLeft;
                 }
             }
         }
@@ -251,25 +253,6 @@ public sealed partial class EditorShell : Page
             }
             //, args.RecommendedNavigationTransitionInfo
         }
-    }
-
-    // MainViewModel calls this method to set the entry.
-    public void SetEntryToEntryViewModel(Models.Rent.Residentials.EntryResidentialFull entry)
-    {
-        if (entry is null)
-        {
-            return;
-        }
-        //ViewModel.Entry = entry ?? throw new ArgumentNullException(nameof(entry));
-
-        ViewModel.SetEntry(entry);
-        EditorWin.Id = entry.Id; // Set the EditorWin Id to the Entry Id. 
-
-        // Just in case.
-        ViewModel.SetEditorWin(EditorWin);
-
-        // TODO: do this from VM.
-        EditorWin.Title = $"物件情報の編集（{entry.Name}）";
     }
 
     public void OnEventIsUnitOwnership(bool arg)

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ZumenSearch.Models;
@@ -10,15 +9,14 @@ namespace ZumenSearch.ViewModels.Transportation;
 
 public partial class RailLineSelectViewModel : ObservableObject
 {
-    private string _query = string.Empty;
     public string Query
     {
-        get => _query;
+        get;
         set
         {
-            if (SetProperty(ref _query, value))
+            if (SetProperty(ref field, value))
             {
-                if (string.IsNullOrEmpty(_query))
+                if (string.IsNullOrEmpty(field))
                 {
                     SuggestedRailLines?.Clear();
                 }
@@ -26,32 +24,30 @@ public partial class RailLineSelectViewModel : ObservableObject
 
             SearchRailLineCommand.NotifyCanExecuteChanged();
         }
-    }
+    } = string.Empty;
 
-    private ObservableCollection<RailLine>? _suggestedRailLines = [];
     public ObservableCollection<RailLine>? SuggestedRailLines
     {
-        get => _suggestedRailLines;
+        get;
         set
         {
-            if (SetProperty(ref _suggestedRailLines, value))
+            if (SetProperty(ref field, value))
             {
                 //
             }
         }
-    }
+    } = [];
 
-    private RailLine? _selectedRailLine;
     public RailLine? SelectedRailLine
     {
-        get => _selectedRailLine;
+        get;
         set
         {
-            if (SetProperty(ref _selectedRailLine, value))
+            if (SetProperty(ref field, value))
             {
-                if (_selectedRailLine is not null)
+                if (field is not null)
                 {
-                    SelectionChanged?.Invoke(this, _selectedRailLine);
+                    SelectionChanged?.Invoke(this, field);
                 }
             }
         }
@@ -77,7 +73,7 @@ public partial class RailLineSelectViewModel : ObservableObject
             return;
         }
 
-        SuggestedRailLines = _dataAccessTransportationService.GetRailLinesBy(_query);
+        SuggestedRailLines = _dataAccessTransportationService.GetRailLinesBy(Query);
 
     }
     private bool CanSearchRailLine()
