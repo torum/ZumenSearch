@@ -1,15 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
+using System.Diagnostics;
 using ZumenSearch.Services;
-using ZumenSearch.ViewModels;
-using ZumenSearch.Views.Rent;
 
 namespace ZumenSearch.Views;
 

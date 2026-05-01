@@ -1,8 +1,4 @@
-﻿using Microsoft.Data.Sqlite;
-using System;
-using System.Collections.Generic;
-using System.Data;
-using ZumenSearch.Models;
+﻿using ZumenSearch.Models;
 using ZumenSearch.Models.Rent.Residentials;
 
 namespace ZumenSearch.Services;

@@ -25,13 +25,13 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <BreadcrumbBar x:Name="BreadcrumbBar1" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center">
+                <BreadcrumbBar x:Name="BreadcrumbBar1" Grid.Row="0" Grid.Column="0" ItemsSource="{x:Bind ViewModel.BreadcrumbItemsUnit, Mode=OneWay}" VerticalAlignment="Center">
                     <BreadcrumbBar.ItemTemplate>
                         <DataTemplate x:DataType="mod:Breadcrumb">
-                            <BreadcrumbBarItem Content="{Binding}">
+                            <BreadcrumbBarItem>
                                 <BreadcrumbBarItem.ContentTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding Name}" FontSize="32" FontWeight="SemiBold" />
+                                    <DataTemplate x:DataType="mod:Breadcrumb">
+                                        <TextBlock Text="{x:Bind Name}" FontSize="32" FontWeight="SemiBold"/>
                                     </DataTemplate>
                                 </BreadcrumbBarItem.ContentTemplate>
                             </BreadcrumbBarItem>
@@ -58,18 +58,18 @@
             <NavigationView x:Name="NavView" Grid.Row="0" Margin="48,6,48,0" PaneDisplayMode="Top" Canvas.ZIndex="0" IsTitleBarAutoPaddingEnabled="True" SelectionFollowsFocus="Disabled" IsPaneToggleButtonVisible="False" IsSettingsVisible="False" IsBackButtonVisible="Collapsed" Loaded="NavView_Loaded" ItemInvoked="NavView_ItemInvoked">
                 <!--   BackRequested="NavView_BackRequested" -->
                 <NavigationView.MenuItems>
-                    <NavigationViewItem Content="基本"  Tag="room_summary"/>
+                    <NavigationViewItem Content="基本"  Tag="summary"/>
                     <!--<NavigationViewItem Content="現況" Tag="room_status"/>
                                 <NavigationViewItem Content="契約条件" Tag="room_contract"/>
                                 <NavigationViewItem Content="取引条件" Tag="room_transaction"/>
                                 <NavigationViewItem Content="設備" Tag="room_appliance" />-->
-                    <NavigationViewItem Content="写真" Tag="room_pictures" />
-                    <NavigationViewItem Content="貸主" Tag="room_kasinusi"/>
-                    <NavigationViewItem Content="宅建業者" Tag="room_gyousya"/>
+                    <NavigationViewItem Content="写真" Tag="pictures" />
+                    <NavigationViewItem Content="貸主" Tag="kasinusi"/>
+                    <NavigationViewItem Content="宅建業者" Tag="gyousya"/>
                 </NavigationView.MenuItems>
 
                 <NavigationView.FooterMenuItems>
-                    <NavigationViewItem Content="図面一覧" Tag="room_zumen"/>
+                    <NavigationViewItem Content="図面一覧" Tag="zumen"/>
                 </NavigationView.FooterMenuItems>
             </NavigationView>
 

@@ -1,8 +1,6 @@
 ﻿using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using ZumenSearch.Models;
 using ZumenSearch.ViewModels;
 
@@ -22,11 +20,6 @@ public sealed partial class ResidentialSearchPage : Page
         ViewModel = App.GetService<MainViewModel>();
         InitializeComponent();
 
-        //BreadcrumbBar1.ItemsSource = new string[] { "条件検索","asdf"};
-        BreadcrumbBar1.ItemsSource = new ObservableCollection<Breadcrumb>{
-            //new() { Name = "賃貸", Page = typeof(RentSearchViewModel).FullName!},
-            new() { Name = "住居用", Page = typeof(Views.Rent.ResidentialSearchPage).FullName! },
-        };
         BreadcrumbBar1.ItemClicked += BreadcrumbBar_ItemClicked;
     }
 

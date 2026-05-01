@@ -8,7 +8,8 @@
     xmlns:mod="using:ZumenSearch.Models"
     xmlns:ui="using:CommunityToolkit.WinUI"
     xmlns:controls="using:CommunityToolkit.WinUI.Controls"
-    xmlns:animations="using:CommunityToolkit.WinUI.Animations"
+    xmlns:animations="using:CommunityToolkit.WinUI.Animations" 
+    xmlns:framework="using:Microsoft.UI.Xaml"
     NavigationCacheMode="Required">
     <Page.Resources>
         <animations:ImplicitAnimationSet x:Name="ShowTransitions">
@@ -24,14 +25,14 @@
         <Grid x:Name="ContentArea">
             <StackPanel Spacing="12" Margin="0,24,0,0">
 
-                <controls:Segmented x:Name="segmentedControl" HorizontalAlignment="Center" SelectedIndex="0">
+                <controls:Segmented x:Name="SegmentedControl" HorizontalAlignment="Center" SelectedIndex="0">
                     <controls:SegmentedItem Content="交通１" Tag="one" />
                     <controls:SegmentedItem Content="交通２" Tag="two" />
                     <controls:SegmentedItem Content="交通３" Tag="three" />
                     <controls:SegmentedItem Content="交通４" Tag="four" />
                 </controls:Segmented>
 
-                <controls:SwitchPresenter Value="{Binding SelectedItem.Tag, ElementName=segmentedControl}">
+                <controls:SwitchPresenter Value="{x:Bind ((framework:FrameworkElement)SegmentedControl.SelectedItem).Tag, Mode=OneWay}">
                     <controls:Case Value="one">
                         <Border animations:Implicit.HideAnimations="{StaticResource HideTransitions}"
                             animations:Implicit.ShowAnimations="{StaticResource ShowTransitions}"

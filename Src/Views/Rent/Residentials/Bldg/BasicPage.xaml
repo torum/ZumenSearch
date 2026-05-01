@@ -56,7 +56,14 @@
                         </Grid.ColumnDefinitions>
 
                         <Grid Grid.Row="0" Grid.Column="0">
-                            <ComboBox Header="構造" HorizontalAlignment="Stretch" PlaceholderText="選択" SelectedIndex="-1" ItemsSource="{x:Bind ViewModel.Structures, Mode=OneWay}" DisplayMemberPath="Label" SelectedItem="{x:Bind ViewModel.SelectedStructure, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></ComboBox>
+                            <ComboBox Header="構造" HorizontalAlignment="Stretch" PlaceholderText="選択" SelectedIndex="-1" ItemsSource="{x:Bind ViewModel.Structures, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.SelectedStructure, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                <ComboBox.ItemTemplate>
+                                    <!-- Needed for AOT -->
+                                    <DataTemplate x:DataType="modresi:Structure">
+                                        <TextBlock Text="{x:Bind Label, Mode=OneTime}" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
                         </Grid>
 
                         <Grid Grid.Row="0" Grid.Column="1" Margin="12,0,0,0">

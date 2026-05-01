@@ -1,15 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.Diagnostics.Metrics;
-using System.Linq;
-using Microsoft.Data.Sqlite;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media.Animation;
+﻿using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
-using ZumenSearch.Models;
-using static Microsoft.Extensions.Logging.EventSource.LoggingEventSource;
 
 namespace ZumenSearch.Views.Rent.Residentials.Bldg;
 

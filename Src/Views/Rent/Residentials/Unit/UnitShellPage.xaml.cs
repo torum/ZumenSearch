@@ -1,19 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.Linq;
-using Microsoft.UI.Windowing;
-using Microsoft.UI.Xaml;
+﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
-using Windows.System;
-using Windows.UI.Core;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
 using ZumenSearch.Models;
 using ZumenSearch.Services;
-using ZumenSearch.ViewModels;
 
 namespace ZumenSearch.Views.Rent.Residentials.Unit;
 
@@ -27,18 +19,18 @@ public sealed partial class UnitShellPage : Page
     private NavigationViewItem? navigationViewSelectedItem;
 
     // List of ValueTuple holding the Navigation Tag and the relative Navigation Page
-    private readonly List<(string Tag, Type? Page)> _pages =
+    private readonly List<(string Tag, string Label, Type? Page)> _pages =
     [
-        ("room", null),
-        ("room_summary", typeof(Views.Rent.Residentials.Unit.BasicPage)),
-        ("room_status", typeof(Views.Rent.Residentials.Unit.StatusPage)),
-        ("room_contract", typeof(Views.Rent.Residentials.Unit.ContractPage)),
-        ("room_transaction", typeof(Views.Rent.Residentials.Unit.TransactionPage)),
-        ("room_appliance", typeof(Views.Rent.Residentials.Unit.AppliancePage)),
-        ("room_pictures", typeof(Views.Rent.Residentials.Unit.PicturePage)),
-        ("room_zumen", typeof(Views.Rent.Residentials.Unit.ZumenPage)),
-        ("room_kasinusi", typeof(Views.Rent.Residentials.Unit.KasinusiPage)),
-        ("room_gyousya", typeof(Views.Rent.Residentials.Unit.GyousyaPage)),
+        ("room", "", null),
+        ("summary", "基本", typeof(Views.Rent.Residentials.Unit.BasicPage)),
+        ("status", "ステータス", typeof(Views.Rent.Residentials.Unit.StatusPage)),
+        ("contract", "コンタクト", typeof(Views.Rent.Residentials.Unit.ContractPage)),
+        ("transaction", "契約", typeof(Views.Rent.Residentials.Unit.TransactionPage)),
+        ("appliance", "設備", typeof(Views.Rent.Residentials.Unit.AppliancePage)),
+        ("pictures", "写真", typeof(Views.Rent.Residentials.Unit.PicturePage)),
+        ("zumen", "図面一覧", typeof(Views.Rent.Residentials.Unit.ZumenPage)),
+        ("kasinusi", "貸主", typeof(Views.Rent.Residentials.Unit.KasinusiPage)),
+        ("gyousya", "宅建業者", typeof(Views.Rent.Residentials.Unit.GyousyaPage)),
     ];
 
     private readonly IDispatcherService _dispatcherService;
@@ -146,13 +138,28 @@ public sealed partial class UnitShellPage : Page
 
         if (ContentFrame.Navigate(typeof(ZumenSearch.Views.Rent.Residentials.Unit.BasicPage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom }))
         {
+            /*
             BreadcrumbBar1.ItemsSource = new ObservableCollection<Breadcrumb>{
                 new() { Name = "建物", Page = typeof(Views.Rent.Residentials.Bldg.BasicPage).FullName!},
                 new() { Name = "部屋", Page = typeof(Views.Rent.Residentials.Unit.BasicPage).FullName!},
                 new() { Name = "基本", Page = typeof(Views.Rent.Residentials.Unit.BasicPage).FullName!},
             };
+            */
 
-            NavView.SelectedItem = NavView.MenuItems.OfType<NavigationViewItem>().Where(n => n.Tag.Equals("room_summary")).First();
+            if (BreadcrumbBar1.ItemsSource is ObservableCollection<Breadcrumb> crumbs)
+            {
+                if (crumbs.Count > 1)
+                {
+                    var item = _pages.FirstOrDefault(p => p.Tag.Equals("summary"));
+                    if (item.Page is not null)
+                    {
+                        crumbs.RemoveAt(crumbs.Count - 1); // Remove the last breadcrumb if exists to avoid duplication.
+                        crumbs.Add(new Breadcrumb { Name = item.Label, Page = item.Page.FullName! });
+                    }
+                }
+            }
+
+            //NavView.SelectedItem = NavView.MenuItems.OfType<NavigationViewItem>().Where(n => n.Tag.Equals("summary")).First();
         }
     }
 
@@ -185,7 +192,7 @@ public sealed partial class UnitShellPage : Page
 
             if (item.Page is null)
             {
-                //Debug.WriteLine("NavView_ItemInvoked: Page is null for tag " + tag);
+                Debug.WriteLine("NavView_ItemInvoked: Page is null for tag " + tag);
                 sender.SelectedItem = navigationViewSelectedItem;
 
                 return;
@@ -193,7 +200,17 @@ public sealed partial class UnitShellPage : Page
 
             navigationViewSelectedItem = sender.SelectedItem as NavigationViewItem;
 
-            ContentFrame.Navigate(item.Page, ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom });
+            if (ContentFrame.Navigate(item.Page, ViewModel, new SuppressNavigationTransitionInfo()))
+            {
+                if (BreadcrumbBar1.ItemsSource is ObservableCollection<Breadcrumb> crumbs)
+                {
+                    if (crumbs.Count > 1)
+                    {
+                        crumbs.RemoveAt(crumbs.Count - 1); // Remove the last breadcrumb if exists to avoid duplication.
+                        crumbs.Add(new Breadcrumb { Name = item.Label, Page = item.Page.FullName! });
+                    }
+                }
+            }
         }
     }
 

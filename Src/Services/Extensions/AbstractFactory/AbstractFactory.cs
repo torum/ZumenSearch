@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ZumenSearch.Services.Extensions.AbstractFactory;
+﻿namespace ZumenSearch.Services.Extensions.AbstractFactory;
 
 public class AbstractFactory<T>(Func<T> factory) : IAbstractFactory<T>
 {

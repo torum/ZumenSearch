@@ -1,19 +1,5 @@
 ﻿using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
-using ZumenSearch.Models;
-using ZumenSearch.ViewModels;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Threading.Tasks;
-using System.Xml.Linq;
-using ZumenSearch.Services;
-using ZumenSearch.Views;
 
 namespace ZumenSearch.Views.Rent.Residentials.Bldg;
 

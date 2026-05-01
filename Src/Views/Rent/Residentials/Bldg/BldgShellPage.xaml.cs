@@ -1,22 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.UI.Windowing;
-using Microsoft.UI.Xaml;
+﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
-using Windows.Storage.Pickers;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 using ZumenSearch.Models;
 using ZumenSearch.Services;
-using ZumenSearch.ViewModels;
 
 namespace ZumenSearch.Views.Rent.Residentials.Bldg;
 
@@ -122,11 +112,6 @@ public sealed partial class BldgShellPage : Page
         {
             if (ContentFrame.Navigate(typeof(Views.Rent.Residentials.Bldg.BasicPage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom }))
             {
-                BreadcrumbBar1.ItemsSource = new ObservableCollection<Breadcrumb>{
-                    new() { Name = "建物", Page = typeof(Views.Rent.Residentials.Bldg.BasicPage).FullName!},
-                    new() { Name = "基本", Page = typeof(Views.Rent.Residentials.Bldg.BasicPage).FullName!},
-                };
-
                 NavView.SelectedItem = NavView.MenuItems.OfType<NavigationViewItem>().Where(n => n.Tag.Equals("summary")).First();
             }
         }
@@ -247,10 +232,24 @@ public sealed partial class BldgShellPage : Page
         // Pass Frame when navigate.  //, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft } //, new SuppressNavigationTransitionInfo() //new EntranceNavigationTransitionInfo()
         if (ContentFrame.Navigate(typeof(ZumenSearch.Views.Rent.Residentials.Bldg.BasicPage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom }))
         {
+            /*
             BreadcrumbBar1.ItemsSource = new ObservableCollection<Breadcrumb>{
                 new() { Name = "建物", Page = typeof(Views.Rent.Residentials.Bldg.BasicPage).FullName!},
                 new() { Name = "基本", Page = typeof(Views.Rent.Residentials.Bldg.BasicPage).FullName!},
             };
+            */
+            if (BreadcrumbBar1.ItemsSource is ObservableCollection<Breadcrumb> crumbs)
+            {
+                if (crumbs.Count > 1)
+                {
+                    var item = _pages.FirstOrDefault(p => p.Tag.Equals("summary"));
+                    if (item.Page is not null)
+                    {
+                        crumbs.RemoveAt(crumbs.Count - 1); // Remove the last breadcrumb if exists to avoid duplication.
+                        crumbs.Add(new Breadcrumb { Name = item.Label, Page = item.Page.FullName! });
+                    }
+                }
+            }
 
             NavView.SelectedItem = NavView.MenuItems.OfType<NavigationViewItem>().Where(n => n.Tag.Equals("summary")).First();
         }
@@ -285,10 +284,20 @@ public sealed partial class BldgShellPage : Page
 
             if (ContentFrame.Navigate(item.Page, ViewModel, new SuppressNavigationTransitionInfo())) //new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom })
             {
+                /*
                 BreadcrumbBar1.ItemsSource = new ObservableCollection<Breadcrumb>{
                     new() { Name = "建物", Page = typeof(Views.Rent.Residentials.Bldg.BasicPage).FullName!},
                     new() { Name = item.Label, Page = item.Page.FullName!},
                 };
+                */
+                if (BreadcrumbBar1.ItemsSource is ObservableCollection<Breadcrumb> crumbs)
+                {
+                    if (crumbs.Count > 1)
+                    {
+                        crumbs.RemoveAt(crumbs.Count - 1); // Remove the last breadcrumb if exists to avoid duplication.
+                        crumbs.Add(new Breadcrumb { Name = item.Label, Page = item.Page.FullName! });
+                    }
+                }
             }
             //, args.RecommendedNavigationTransitionInfo
         }

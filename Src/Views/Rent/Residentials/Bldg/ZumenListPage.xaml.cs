@@ -1,7 +1,5 @@
 ﻿using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
-using System.Diagnostics;
-using ZumenSearch.ViewModels.Rent;
 
 namespace ZumenSearch.Views.Rent.Residentials.Bldg;
 

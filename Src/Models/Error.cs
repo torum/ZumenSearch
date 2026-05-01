@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ZumenSearch.Models;
+﻿namespace ZumenSearch.Models;
 
 // ErrorInfo Class
 public class ErrorObject

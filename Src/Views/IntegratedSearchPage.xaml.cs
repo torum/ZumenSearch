@@ -47,9 +47,11 @@ public sealed partial class IntegratedSearchPage : Page
         InitializeComponent();
 
         //BreadcrumbBarMain.ItemsSource = new string[] { "ëççáåüçı" };
+        /*
         BreadcrumbBarMain.ItemsSource = new ObservableCollection<Breadcrumb>{
         new() { Name = "ëççáåüçı", Page = typeof(IntegratedSearchPage).FullName!},
     };
+        */
 
         var Items = new ObservableCollection<CustomDataObject>();
 

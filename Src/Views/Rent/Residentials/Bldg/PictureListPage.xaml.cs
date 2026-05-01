@@ -1,14 +1,6 @@
 ﻿using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Text;
-using Windows.Storage;
-using Windows.Storage.Pickers;
-using ZumenSearch.Models;
-using ZumenSearch.ViewModels.Rent;
 
 namespace ZumenSearch.Views.Rent.Residentials.Bldg;
 

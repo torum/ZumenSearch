@@ -10,44 +10,46 @@
     mc:Ignorable="d"
     NavigationCacheMode="Required">
 
-    <Grid x:Name="ContentArea" Margin="0,46,0,0">
+    <Grid x:Name="ContentArea" Margin="0,0,0,0">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0" Margin="48,0,48,0" BorderThickness="0,0,0,1" BorderBrush="{ThemeResource NavigationViewItemSeparatorForeground}">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
+        <Grid x:Name="HeaderGrid" Grid.Row="0" Padding="{StaticResource ContentPadding}">
+            <Grid Grid.Row="0" BorderThickness="0,0,0,1" BorderBrush="{ThemeResource NavigationViewItemSeparatorForeground}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
 
-            <BreadcrumbBar x:Name="BreadcrumbBar1" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center">
-                <BreadcrumbBar.ItemTemplate>
-                    <DataTemplate x:DataType="mod:Breadcrumb">
-                        <BreadcrumbBarItem Content="{Binding}">
-                            <BreadcrumbBarItem.ContentTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding Name}" FontSize="32" FontWeight="SemiBold" />
-                                </DataTemplate>
-                            </BreadcrumbBarItem.ContentTemplate>
-                        </BreadcrumbBarItem>
-                    </DataTemplate>
-                </BreadcrumbBar.ItemTemplate>
-            </BreadcrumbBar>
+                <BreadcrumbBar x:Name="BreadcrumbBar1" Grid.Row="0" Grid.Column="0" ItemsSource="{x:Bind ViewModel.BreadcrumbItemsResidentialSearchResult, Mode=OneWay}" VerticalAlignment="Center">
+                    <BreadcrumbBar.ItemTemplate>
+                        <DataTemplate x:DataType="mod:Breadcrumb">
+                            <BreadcrumbBarItem>
+                                <BreadcrumbBarItem.ContentTemplate>
+                                    <DataTemplate x:DataType="mod:Breadcrumb">
+                                        <TextBlock Text="{x:Bind Name}" FontSize="32" FontWeight="SemiBold"/>
+                                    </DataTemplate>
+                                </BreadcrumbBarItem.ContentTemplate>
+                            </BreadcrumbBarItem>
+                        </DataTemplate>
+                    </BreadcrumbBar.ItemTemplate>
+                </BreadcrumbBar>
 
-            <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,0,3,0">
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <AppBarButton Icon="Back" Label="戻る" Command="{x:Bind ViewModel.BackToRentResidentialCommand}"/>
-                    <AppBarButton Icon="Edit" Label="編集" Command="{x:Bind ViewModel.EditRentResidentialCommand}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}" Visibility="Collapsed"/>
-                    <AppBarButton Icon="Add" Label="新規" Command="{x:Bind ViewModel.AddNewRentResidentialCommand}"/>
+                <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,0,3,0">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <AppBarButton Icon="Back" Label="戻る" Command="{x:Bind ViewModel.BackToRentResidentialCommand}"/>
+                        <AppBarButton Icon="Edit" Label="編集" Command="{x:Bind ViewModel.EditRentResidentialCommand}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}" Visibility="Collapsed"/>
+                        <AppBarButton Icon="Add" Label="新規" Command="{x:Bind ViewModel.AddNewRentResidentialCommand}"/>
+                    </StackPanel>
                 </StackPanel>
-            </StackPanel>
 
+            </Grid>
         </Grid>
 
         <Grid Grid.Row="1">
@@ -56,7 +58,7 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <StackPanel Grid.Row="0" Margin="48,0,48,0">
+            <StackPanel Grid.Row="0" Padding="{StaticResource ContentPadding}">
 
                 <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Margin="0,0,24,0" HorizontalAlignment="Right">
                     <AppBarButton Icon="Edit" Label="編集" Command="{x:Bind ViewModel.EditRentResidentialCommand}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}"/>
@@ -85,14 +87,13 @@
 
             </StackPanel>
 
-            <Grid Grid.Row="1">
-                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="48,0,48,0">
+            <ScrollViewer Grid.Row="1" Padding="{StaticResource ContentPadding}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
 
-                    <ItemsView x:Name="SearchResultListView" Margin="0,12,0,0" AllowFocusOnInteraction="False" SelectionMode="Single" ItemsSource="{x:Bind ViewModel.RentResidentialSearchResult, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsItemInvokedEnabled="True" ItemInvoked="SearchResultListView_ItemInvoked">
-                        <!--  SelectedItem="{x:Bind ViewModel.SelectedRentResidentialItem, Mode=TwoWay}" -->
-                        
-                        <!-- Stupid WinUI3 can't handle double click properly. Also, with this, newly created window goes behind main window because WinUI3 is stupid. -->
-                        <!--
+                <ItemsView x:Name="SearchResultListView" Margin="0,12,0,0" AllowFocusOnInteraction="False" SelectionMode="Single" ItemsSource="{x:Bind ViewModel.RentResidentialSearchResult, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsItemInvokedEnabled="True" ItemInvoked="SearchResultListView_ItemInvoked">
+                    <!--  SelectedItem="{x:Bind ViewModel.SelectedRentResidentialItem, Mode=TwoWay}" -->
+
+                    <!-- Stupid WinUI3 can't handle double click properly. Also, with this, newly created window goes behind main window because WinUI3 is stupid. -->
+                    <!--
                         <behaviors:Interaction.Behaviors>
                             <behaviors:EventTriggerBehavior EventName="DoubleTapped">
                                 <behaviors:InvokeCommandAction Command="{x:Bind ViewModel.EditRentResidentialCommand}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}" />
@@ -100,30 +101,28 @@
                         </behaviors:Interaction.Behaviors>
                         -->
 
-                        <ItemsView.ItemTemplate>
-                            <DataTemplate x:DataType="rent:EntryResidentialSearchResult">
-                                <ItemContainer AllowFocusOnInteraction="False" PointerPressed="ItemContainer_PointerPressed" PointerReleased="ItemContainer_PointerReleased">
-                                    <Grid>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="*"/>
-                                            <RowDefinition Height="*"/>
-                                        </Grid.RowDefinitions>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Ellipse x:Name="Ellipse" Grid.RowSpan="2" Width ="32" Height="32" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center" Fill="{ThemeResource SystemControlBackgroundBaseMediumBrush}"/>
-                                        <TextBlock Grid.Column="1" Text="{x:Bind Name, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" x:Phase="1" Style="{ThemeResource BaseTextBlockStyle}" Margin="12,6,0,0"/>
-                                        <TextBlock  Grid.Column="1" Grid.Row="1" Text="{x:Bind Id, Mode=OneTime}" x:Phase="2" Style="{ThemeResource BodyTextBlockStyle}" Margin="12,0,0,6"/>
-                                    </Grid>
-                                </ItemContainer>
-                            </DataTemplate>
-                        </ItemsView.ItemTemplate>
-                    </ItemsView>
+                    <ItemsView.ItemTemplate>
+                        <DataTemplate x:DataType="rent:EntryResidentialSearchResult">
+                            <ItemContainer AllowFocusOnInteraction="False" PointerPressed="ItemContainer_PointerPressed" PointerReleased="ItemContainer_PointerReleased">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Ellipse x:Name="Ellipse" Grid.RowSpan="2" Width ="32" Height="32" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center" Fill="{ThemeResource SystemControlBackgroundBaseMediumBrush}"/>
+                                    <TextBlock Grid.Column="1" Text="{x:Bind Name, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" x:Phase="1" Style="{ThemeResource BaseTextBlockStyle}" Margin="12,6,0,0"/>
+                                    <TextBlock  Grid.Column="1" Grid.Row="1" Text="{x:Bind Id, Mode=OneTime}" x:Phase="2" Style="{ThemeResource BodyTextBlockStyle}" Margin="12,0,0,6"/>
+                                </Grid>
+                            </ItemContainer>
+                        </DataTemplate>
+                    </ItemsView.ItemTemplate>
+                </ItemsView>
 
-
-                </ScrollViewer>
-            </Grid>
+            </ScrollViewer>
         </Grid>
     </Grid>
 </Page>

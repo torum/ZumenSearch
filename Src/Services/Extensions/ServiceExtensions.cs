@@ -1,12 +1,12 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using System;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.DependencyInjection;
 using ZumenSearch.Services.Extensions.AbstractFactory;
 
 namespace ZumenSearch.Services.Extensions;
 
 public static class ServiceExtensions
 {
-    public static void AddEditorFactory<TEditor>(this IServiceCollection services)
+    public static void AddEditorFactory<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TEditor>(this IServiceCollection services)
         where TEditor : class
     {
         services.AddTransient<TEditor>();

@@ -1,15 +1,12 @@
-﻿using System;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
-using Microsoft.UI.Xaml;
+﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
+using System.Collections.ObjectModel;
 using ZumenSearch.Models;
 using ZumenSearch.Models.Rent.Residentials;
 using ZumenSearch.ViewModels;
-using ZumenSearch.Views;
 
 namespace ZumenSearch.Views.Rent;
 
@@ -30,11 +27,6 @@ public sealed partial class ResidentialSearchResultPage : Page
 
         InitializeComponent();
 
-        BreadcrumbBar1.ItemsSource = new ObservableCollection<Breadcrumb>{
-            //new() { Name = "賃貸", Page = typeof(Views.Rent.RentSearchPage).FullName!},
-            new() { Name = "住居用", Page = typeof(Views.Rent.ResidentialSearchPage).FullName! },
-            new() { Name = "検索結果", Page = typeof(Views.Rent.ResidentialSearchResultPage).FullName! },
-        };
         BreadcrumbBar1.ItemClicked += BreadcrumbBar_ItemClicked;
     }
 

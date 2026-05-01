@@ -1,21 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.Globalization;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.UI.Windowing;
-using Microsoft.UI.Xaml;
+﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Windows.Media.Playlists;
 using ZumenSearch.Models;
-using ZumenSearch.Services;
-using ZumenSearch.ViewModels.Rent;
 using ZumenSearch.Views.Dialogs;
-using ZumenSearch.Views.Rent.Residentials.Bldg;
 
 namespace ZumenSearch.Services;
 

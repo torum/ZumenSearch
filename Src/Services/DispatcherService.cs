@@ -1,10 +1,4 @@
 ﻿using CommunityToolkit.WinUI;
-using ZumenSearch.Services;
-using Microsoft.UI.Dispatching;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
 using System.Diagnostics;
 
 namespace ZumenSearch.Services;

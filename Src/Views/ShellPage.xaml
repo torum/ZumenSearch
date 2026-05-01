@@ -99,16 +99,12 @@
                                 </NavigationViewItem.Icon>
                             </NavigationViewItem>
 
-                            <NavigationViewItemSeparator />
-
                             <NavigationViewItem Tag="ZumenSearch.Views.Rent.Owners.OwnersPage" Content="貸主" ToolTipService.ToolTip="貸主" Icon="OtherUser"/>
 
                         </NavigationViewItem.MenuItems>
                     </NavigationViewItem>
 
-                    <NavigationViewItemSeparator />
-                    <NavigationViewItem Tag="ZumenSearch.Views.Brokers.BrokersPage" Content="宅建業者" ToolTipService.ToolTip="宅建業者" Icon="OtherUser">
-                    </NavigationViewItem>
+                    <NavigationViewItem Tag="ZumenSearch.Views.Brokers.BrokersPage" Content="宅建業者" ToolTipService.ToolTip="宅建業者" Icon="OtherUser"/>
 
                 </NavigationView.MenuItems>
 

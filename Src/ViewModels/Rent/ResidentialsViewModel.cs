@@ -47,7 +47,18 @@ public partial class ResidentialsViewModel : ObservableObject
     // Tmp file list to hold unsaved picture files. (if entry is not saved, delete on close)
     private readonly List<string> _unsavedBuildingPictureFileList = [];
 
-    // Title of the window.
+    public ObservableCollection<Breadcrumb> BreadcrumbItems { get; set; } =
+    [
+        new() { Name = "建物", Page = typeof(Views.Rent.Residentials.Bldg.BasicPage).FullName! },
+        new() { Name = "基本", Page = typeof(Views.Rent.Residentials.Bldg.BasicPage).FullName! }
+    ];
+
+    public ObservableCollection<Breadcrumb> BreadcrumbItemsUnit { get; set; } =
+    [
+        new() { Name = "建物", Page = typeof(Views.Rent.Residentials.Bldg.BasicPage).FullName! },
+        new() { Name = "部屋", Page = typeof(Views.Rent.Residentials.Unit.BasicPage).FullName! },
+        new() { Name = "基本", Page = typeof(Views.Rent.Residentials.Unit.BasicPage).FullName! }
+    ];
 
     public string WindowTitle
     {

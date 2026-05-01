@@ -39,7 +39,7 @@
                                     <StackPanel Orientation="Vertical" Height="60" VerticalAlignment="Bottom" Padding="12" Background="{ThemeResource SystemControlBackgroundBaseMediumBrush}" Opacity=".75">
                                         <TextBlock Text="{x:Bind PictureType.Label, Mode=OneWay}" Style="{StaticResource BodyStrongTextBlockStyle}" Foreground="{ThemeResource SystemControlForegroundAltHighBrush}"/>
                                         <StackPanel Orientation="Horizontal">
-                                            <TextBlock Text="{Binding PictureType.Label, Mode=OneWay}" FontWeight="SemiBold" Foreground="{ThemeResource SystemControlForegroundAltHighBrush}"/>
+                                            <TextBlock Text="{x:Bind PictureType.Label, Mode=OneWay}" FontWeight="SemiBold" Foreground="{ThemeResource SystemControlForegroundAltHighBrush}"/>
                                             <TextBlock Text="{x:Bind Description, Mode=OneWay}" Style="{ThemeResource CaptionTextBlockStyle}" Foreground="{ThemeResource SystemControlForegroundAltHighBrush}"/>
                                         </StackPanel>
                                     </StackPanel>

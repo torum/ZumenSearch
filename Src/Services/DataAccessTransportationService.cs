@@ -1,14 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Microsoft.Data.Sqlite;
 using System.Collections.ObjectModel;
 using System.Data;
-using System.Diagnostics;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Data.Sqlite;
-using Microsoft.Extensions.Logging;
 using ZumenSearch.Models;
-using ZumenSearch.Models.Rent.Residentials;
 
 namespace ZumenSearch.Services;
 

@@ -25,13 +25,13 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <BreadcrumbBar x:Name="BreadcrumbBar1" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center">
+                <BreadcrumbBar x:Name="BreadcrumbBar1" Grid.Row="0" Grid.Column="0" ItemsSource="{x:Bind ViewModel.BreadcrumbItemsResidential, Mode=OneWay}" VerticalAlignment="Center">
                     <BreadcrumbBar.ItemTemplate>
                         <DataTemplate x:DataType="mod:Breadcrumb">
-                            <BreadcrumbBarItem Content="{Binding}">
+                            <BreadcrumbBarItem>
                                 <BreadcrumbBarItem.ContentTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding Name}" FontSize="32" FontWeight="SemiBold"/>
+                                    <DataTemplate x:DataType="mod:Breadcrumb">
+                                        <TextBlock Text="{x:Bind Name}" FontSize="32" FontWeight="SemiBold"/>
                                     </DataTemplate>
                                 </BreadcrumbBarItem.ContentTemplate>
                             </BreadcrumbBarItem>

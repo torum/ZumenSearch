@@ -1,14 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.UI.Xaml;
+﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using ZumenSearch.Models;
-using ZumenSearch.ViewModels.Rent;
-using ZumenSearch.Views.Rent.Residentials.Bldg;
-using static ZumenSearch.Services.ModalDialogService;
 
 namespace ZumenSearch.Services;
 

@@ -1,9 +1,5 @@
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
-using System.Collections.ObjectModel;
-using ZumenSearch.Models;
-using ZumenSearch.ViewModels;
 
 namespace ZumenSearch.Views.Rent.Residentials.Unit;
 

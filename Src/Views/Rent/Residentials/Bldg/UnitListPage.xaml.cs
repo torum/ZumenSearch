@@ -1,17 +1,6 @@
-﻿using Microsoft.UI.Windowing;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media.Animation;
+﻿using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
-using System;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
-using Windows.System;
-using Windows.UI.Core;
-using ZumenSearch.Models;
-using ZumenSearch.ViewModels;
-using ZumenSearch.Views;
 
 namespace ZumenSearch.Views.Rent.Residentials.Bldg;
 

@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Reflection.Emit;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ZumenSearch.Models.Rent.Residentials;
+﻿namespace ZumenSearch.Models.Rent.Residentials;
 
 public enum EnumBuildingPictureType
 {

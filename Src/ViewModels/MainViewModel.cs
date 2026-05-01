@@ -1,17 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.IO;
-using System.Reflection;
-using System.Threading.Tasks;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.Windows.ApplicationModel.Resources;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Reflection;
 using Windows.ApplicationModel;
 using ZumenSearch.Helpers;
+using ZumenSearch.Models;
 using ZumenSearch.Services;
 using ZumenSearch.Services.Extensions.AbstractFactory;
 using ZumenSearch.Views;
@@ -60,18 +57,23 @@ public partial class MainViewModel : ObservableObject
     #region == Navigation ==
 
     // TODO: Do I need this property?
-    public bool IsBackEnabled // Implement partial property for AOT compatibility
-    {
-        get;
-        set => SetProperty(ref field, value);
-    } = true;
+    [ObservableProperty]
+    public partial bool IsBackEnabled // Implement partial property for AOT compatibility
+{ get; set; } = true;
 
     // TODO: Do I need this property?
-    public object? SelectedNavigationViewItem
-    {
-        get;
-        set => SetProperty(ref field, value);
-    }
+    [ObservableProperty]
+    public partial object? SelectedNavigationViewItem { get; set; }
+
+    public ObservableCollection<Breadcrumb> BreadcrumbItemsResidential { get; set; } =
+    [
+        new() { Name = "住居用", Page = typeof(Views.Rent.ResidentialSearchPage).FullName! }
+    ];
+    public ObservableCollection<Breadcrumb> BreadcrumbItemsResidentialSearchResult { get; set; } =
+    [
+        new() { Name = "住居用", Page = typeof(Views.Rent.ResidentialSearchPage).FullName! },
+        new() { Name = "検索結果", Page = typeof(Views.Rent.ResidentialSearchResultPage).FullName! },
+    ];
 
     #endregion
 
@@ -82,13 +84,7 @@ public partial class MainViewModel : ObservableObject
 
     #region == Search ==
 
-
-    public ObservableCollection<Models.Rent.Residentials.EntryResidentialSearchResult> RentResidentialSearchResult
-    {
-        get;
-        set => SetProperty(ref field, value);
-    } = [];
-
+    public ObservableCollection<Models.Rent.Residentials.EntryResidentialSearchResult> RentResidentialSearchResult { get; set; } = [];
     #endregion
 
     #endregion

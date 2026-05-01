@@ -22,6 +22,7 @@
         </Grid.RowDefinitions>
 
         <!--<BreadcrumbBar x:Name="BreadcrumbBarMain" Grid.Row="0"/>-->
+        <!--
         <BreadcrumbBar x:Name="BreadcrumbBarMain">
             <BreadcrumbBar.ItemTemplate>
                 <DataTemplate x:DataType="mod:Breadcrumb">
@@ -35,6 +36,7 @@
                 </DataTemplate>
             </BreadcrumbBar.ItemTemplate>
         </BreadcrumbBar>
+        -->
 
         <Grid Grid.Row="2">
 
@@ -129,7 +131,7 @@
                         </Style>
                     </GridView.ItemContainerStyle>
 
-
+<!--
                     <GridView.GroupStyle>
                         <GroupStyle HidesIfEmpty="True">
                             <GroupStyle.HeaderTemplate>
@@ -141,6 +143,7 @@
                             </GroupStyle.HeaderTemplate>
                         </GroupStyle>
                     </GridView.GroupStyle>
+                    -->
                 </GridView>
             </Grid>
 
