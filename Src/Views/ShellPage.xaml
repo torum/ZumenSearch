@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="ZumenSearch.Views.ShellPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:ZumenSearch.Views"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:ZumenSearch.ViewModels"
+    d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
+    NavigationCacheMode="Required"
+    mc:Ignorable="d"
+    Loaded="Page_Loaded">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="48"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Grid.Column="0" Height="48" IsHitTestVisible="True" VerticalAlignment="Top" Margin="0,0,0,0" SizeChanged="AppTitleBar_SizeChanged">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="48"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Grid Grid.Column="0">
+                <!-- NavigationView.PaneToggleButton: None draggable area(48px). Exclude from TitleBar -->
+                <Button x:Name="DummyButton" Height="36" Width="40" Margin="3,6,0,0" Visibility="Collapsed"/>
+            </Grid>
+            <Grid x:Name="AppTitleBar" Grid.Column="1">
+                <!-- Application TitleBar: SetTitleBar in code behinde -->
+                <TextBlock x:Name="AppTitleDummyTextBlock" Text="" Margin="0,0,0,0" Opacity="0.9" Visibility="Collapsed"/>
+            </Grid>
+        </Grid>
+
+        <Grid Grid.Row="0" Grid.Column="0" Grid.RowSpan="2">
+            <NavigationView x:Name="NavigationViewControl" 
+                            Loaded="NavigationViewControl_Loaded" 
+                            ItemInvoked="NavigationViewControl_ItemInvoked" 
+                            AlwaysShowHeader="False"
+                            IsBackButtonVisible="Collapsed" 
+                            IsPaneToggleButtonVisible="True" 
+                            IsBackEnabled="True" 
+                            PaneDisplayMode="Auto" 
+                            ExpandedModeThresholdWidth="1007"
+                            CompactModeThresholdWidth="640" 
+                            OpenPaneLength ="260" 
+                            IsSettingsVisible="True"  
+                            IsTabStop="False" 
+                            IsTitleBarAutoPaddingEnabled="False"
+                            DisplayModeChanged="NavigationViewControl_DisplayModeChanged"
+                            BackRequested="NavigationViewControl_BackRequested"
+                            PaneOpened="NavigationViewControl_PaneOpened"
+                            PaneClosed="NavigationViewControl_PaneClosed">
+                <NavigationView.HeaderTemplate>
+                    <DataTemplate>
+                        <Grid>
+                        </Grid>
+                    </DataTemplate>
+                </NavigationView.HeaderTemplate>
+                <NavigationView.PaneHeader>
+                    <Grid VerticalAlignment="Center">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"></ColumnDefinition>
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Margin="6,0,0,0" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left">
+                            <Image x:Name="AppTitleBarIcon" Source="/Assets/App.ico" HorizontalAlignment="Left" VerticalAlignment="Center" Width="18" Height="18" Margin="6,0,0,0" />
+                            <TextBlock x:Name="AppTitleBarText" Text="ZumenSearch" FontWeight="SemiBold" Margin="6,0,0,0" VerticalAlignment="Center" Opacity="0.9"/>
+                        </StackPanel>
+
+                    </Grid>
+                </NavigationView.PaneHeader>
+
+                <NavigationView.MenuItems>
+
+                    <NavigationViewItem Tag="Rent" Content="賃貸" ToolTipService.ToolTip="賃貸" IsExpanded="True">
+                        <NavigationViewItem.Icon>
+                            <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xe80f;"/>
+                        </NavigationViewItem.Icon>
+
+                        <NavigationViewItem.MenuItems>
+
+                            <NavigationViewItem Tag="ZumenSearch.Views.Rent.ResidentialSearchPage" Content="住居用" ToolTipService.ToolTip="賃貸住居用">
+                                <NavigationViewItem.Icon>
+                                    <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xe7c3;"/>
+                                </NavigationViewItem.Icon>
+                            </NavigationViewItem>
+
+                            <NavigationViewItem Tag="ZumenSearch.Views.Rent.Commercials.CommercialsPage" Content="事業用" ToolTipService.ToolTip="賃貸事業用">
+                                <NavigationViewItem.Icon>
+                                    <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xe7c3;"/>
+                                </NavigationViewItem.Icon>
+                            </NavigationViewItem>
+
+                            <NavigationViewItem Tag="ZumenSearch.Views.Rent.Parkings.ParkingsPage" Content="駐車場" ToolTipService.ToolTip="賃貸駐車場">
+                                <NavigationViewItem.Icon>
+                                    <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xe7c3;"/>
+                                </NavigationViewItem.Icon>
+                            </NavigationViewItem>
+
+                            <NavigationViewItemSeparator />
+
+                            <NavigationViewItem Tag="ZumenSearch.Views.Rent.Owners.OwnersPage" Content="貸主" ToolTipService.ToolTip="貸主" Icon="OtherUser"/>
+
+                        </NavigationViewItem.MenuItems>
+                    </NavigationViewItem>
+
+                    <NavigationViewItemSeparator />
+                    <NavigationViewItem Tag="ZumenSearch.Views.Brokers.BrokersPage" Content="宅建業者" ToolTipService.ToolTip="宅建業者" Icon="OtherUser">
+                    </NavigationViewItem>
+
+                </NavigationView.MenuItems>
+
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="48"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <Grid Grid.Row="0" SizeChanged="AppTitleBar_SizeChanged" Loaded="AppTitleBarGrid_Loaded">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Button x:Name="BackButton" Grid.Column="0" Height="36" Width="40" Margin="6,6,0,0" Style="{ThemeResource TitleBarBackButtonStyle}" IsEnabled="{x:Bind NavigationFrame.CanGoBack, Mode=OneWay}" Click="BackButton_Click" VerticalAlignment="Top"/>
+                        <AutoSuggestBox x:Name="SearchBox" Grid.Column="1" SizeChanged="AppTitleBar_SizeChanged" Margin="0,8,84,0" QueryIcon="Find" AutomationProperties.Name="Search" PlaceholderText="Find " HorizontalAlignment="Center" VerticalAlignment="Top" MinWidth="200" Width="340"></AutoSuggestBox>
+                    </Grid>
+
+                    <!-- NavigationView content frame -->
+                    <Frame x:Name="ContentFrame" Grid.Row="1" Navigated="NavigationViewControl_Navigated" Padding="0"></Frame>
+                </Grid>
+
+            </NavigationView>
+        </Grid>
+
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup>
+                <VisualState>
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="1800" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="NavigationViewControl.IsPaneToggleButtonVisible" Value="True" />
+                        <Setter Target="NavigationViewControl.PaneDisplayMode" Value="Left" />
+                        <Setter Target="NavigationViewControl.IsPaneOpen" Value="True" />
+                        <Setter Target="NavigationViewControl.OpenPaneLength" Value="320" />
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState>
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="1007" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="NavigationViewControl.IsPaneToggleButtonVisible" Value="True" />
+                        <Setter Target="NavigationViewControl.PaneDisplayMode" Value="Left" />
+                        <Setter Target="NavigationViewControl.IsPaneOpen" Value="True" />
+                        <Setter Target="NavigationViewControl.OpenPaneLength" Value="280" />
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState>
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="640" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="NavigationViewControl.IsPaneToggleButtonVisible" Value="True" />
+                        <Setter Target="NavigationViewControl.PaneDisplayMode" Value="CompactLeft" />
+                        <Setter Target="NavigationViewControl.IsPaneOpen" Value="False" />
+                        <Setter Target="NavigationViewControl.OpenPaneLength" Value="280" />
+                        <Setter Target="BackButton.Margin" Value="6,6,0,0"/>
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState>
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="340" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="NavigationViewControl.IsPaneToggleButtonVisible" Value="True" />
+                        <Setter Target="NavigationViewControl.PaneDisplayMode" Value="CompactLeft" />
+                        <Setter Target="NavigationViewControl.IsPaneOpen" Value="False" />
+                        <Setter Target="NavigationViewControl.OpenPaneLength" Value="230" />
+                        <Setter Target="SearchBox.Visibility" Value="Collapsed" />
+                        <Setter Target="BackButton.Margin" Value="24,6,0,0"/>
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState>
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="0" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="NavigationViewControl.IsPaneToggleButtonVisible" Value="True" />
+                        <Setter Target="NavigationViewControl.PaneDisplayMode" Value="CompactLeft" />
+                        <Setter Target="NavigationViewControl.IsPaneOpen" Value="False" />
+                        <Setter Target="NavigationViewControl.OpenPaneLength" Value="230" />
+                        <Setter Target="SearchBox.Visibility" Value="Collapsed" />
+                        <Setter Target="BackButton.Margin" Value="6,6,0,0"/>
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+
+    </Grid>
+</Page>

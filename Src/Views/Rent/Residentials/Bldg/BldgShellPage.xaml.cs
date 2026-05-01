@@ -1,0 +1,379 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading.Tasks;
+using Microsoft.UI.Windowing;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Media.Animation;
+using Microsoft.UI.Xaml.Navigation;
+using Windows.Storage.Pickers;
+using ZumenSearch.Models;
+using ZumenSearch.Services;
+using ZumenSearch.ViewModels;
+
+namespace ZumenSearch.Views.Rent.Residentials.Bldg;
+
+public sealed partial class BldgShellPage : Page
+{
+    public ViewModels.Rent.ResidentialsViewModel? ViewModel {get; private set;}
+
+    //public Views.Rent.Residentials.EditorWindow EditorWin { get; private set; }
+
+    public Frame NavigationFrame => ContentFrame;
+
+    // List of ValueTuple holding the Navigation Tag and the relative Navigation Page
+    private readonly List<(string Tag, string Label, Type? Page)> _pages =
+    [
+        ("building", "建物", null),
+        ("summary", "基本", typeof(Views.Rent.Residentials.Bldg.BasicPage)),
+        //("structure", "", typeof(Views.Rent.Residentials.Bldg.StructurePage)),
+        ("location", "所在地", typeof(Views.Rent.Residentials.Bldg.LocationPage)),
+        ("transportation", "交通", typeof(Views.Rent.Residentials.Bldg.TransportationPage)),
+        ("appliance", "設備", typeof(Views.Rent.Residentials.Bldg.AppliancePage)),
+        ("pictures", "写真", typeof(Views.Rent.Residentials.Bldg.PictureListPage)),
+        ("units", "部屋一覧", typeof(Views.Rent.Residentials.Bldg.UnitListPage)),
+        ("zumen", "図面一覧", typeof(Views.Rent.Residentials.Bldg.ZumenListPage)),
+        ("kasinusi", "貸主", typeof(Views.Rent.Residentials.Bldg.KasinusiPage)),
+        ("gyousya", "宅建業者", typeof(Views.Rent.Residentials.Bldg.GyousyaPage)),
+        //("memo", "備考", typeof(Views.Rent.Residentials.Editor.MemoPage)),
+    ];
+
+    //private readonly MainViewModel _mainVM = App.GetService<MainViewModel>();
+
+    private readonly IDispatcherService _dispatcherService;
+    private readonly IModalDialogService _dlg;
+
+    public BldgShellPage() : this(App.GetService<IModalDialogService>(), App.GetService<IDispatcherService>())
+    {
+        // parameterless ctor used by XAML activator; chains to DI ctor
+    }
+
+    public BldgShellPage(IModalDialogService modalDialog, IDispatcherService dispatcherService)//Views.Rent.Residentials.Bldg.EditorWindow win, ViewModels.Rent.Residentials.ResidentialsViewModel vm, IModalDialogService modalDialog
+    {
+
+        //EditorWin = win ?? throw new ArgumentNullException(nameof(win));
+        //ViewModel = vm ?? throw new ArgumentNullException(nameof(vm));
+        //ViewModel.SetEditorWin(win);// Must set Editor Winodw to VM.
+        //ViewModel.SetEditorShell(this);
+        _dlg = modalDialog;
+        _dispatcherService = dispatcherService;
+
+        InitializeComponent();
+        /*
+        BreadcrumbBar1.ItemClicked += BreadcrumbBar_ItemClicked;
+
+        //
+        EditorWin.Content = this;
+        EditorWin.ExtendsContentIntoTitleBar = true;
+        EditorWin.SetTitleBar(AppTitleBar);
+        EditorWin.Activated += EditorWindow_Activated;
+        EditorWin.Closed += EditorWindow_Closed;
+        EditorWin.AppWindow.Closing += AppWindow_Closing;
+        EditorWin.Title = "";
+
+        var mainVM = App.GetService<MainViewModel>();
+        ViewModel.ModalWinWidth = mainVM.ModalWinWidth;
+        ViewModel.ModalWinHeight = mainVM.ModalWinHeight;
+        ViewModel.ModalWinTop = mainVM.ModalWinTop;
+        ViewModel.ModalWinLeft = mainVM.ModalWinLeft;
+
+        // subscribe to ViewModel events
+        ViewModel.EventBackToSummary += (sender, arg) => OnEventBackToSummary();
+        ViewModel.EventEditLocation += (sender, arg) => OnEventEditLocation();
+        ViewModel.EventEditTransportation += (sender, arg) => OnEventEditTransportation();
+        ViewModel.EventEditAppliance += (sender, arg) => OnEventEditAppliance();
+        ViewModel.EventEditPictures += (sender, arg) => OnEventEditPictures();
+        ViewModel.EventEditUnits += (sender, arg) => OnEventEditUnits();
+        //
+        ViewModel.EventIsUnitOwnership += (sender, arg) => OnEventIsUnitOwnership(arg);
+
+        */
+    }
+
+    protected override void OnNavigatedTo(NavigationEventArgs e)
+    {
+        if ((e.Parameter is ViewModels.Rent.ResidentialsViewModel) && (e.Parameter != null))
+        {
+            //_editorShell = e.Parameter as Views.Rent.Residentials.EditorShell;
+            ViewModel = e.Parameter as ViewModels.Rent.ResidentialsViewModel;
+
+            ViewModel?.SetBldgShell(this);
+        }
+        else
+        {
+            Debug.WriteLine("BldgShellPage.OnNavigatedTo: Invalid parameter. Expected ResidentialsViewModel.");
+        }
+
+        Debug.WriteLine("BldgShellPage.OnNavigatedTo: ViewModel is " + (ViewModel != null ? "set" : "null"));
+
+        base.OnNavigatedTo(e);
+    }
+
+    private void BreadcrumbBar_ItemClicked(BreadcrumbBar sender, BreadcrumbBarItemClickedEventArgs args)
+    {
+        if (args.Index == 0)
+        {
+            if (ContentFrame.Navigate(typeof(Views.Rent.Residentials.Bldg.BasicPage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom }))
+            {
+                BreadcrumbBar1.ItemsSource = new ObservableCollection<Breadcrumb>{
+                    new() { Name = "建物", Page = typeof(Views.Rent.Residentials.Bldg.BasicPage).FullName!},
+                    new() { Name = "基本", Page = typeof(Views.Rent.Residentials.Bldg.BasicPage).FullName!},
+                };
+
+                NavView.SelectedItem = NavView.MenuItems.OfType<NavigationViewItem>().Where(n => n.Tag.Equals("summary")).First();
+            }
+        }
+    }
+
+    private async void AppWindow_Closing(Microsoft.UI.Windowing.AppWindow sender, Microsoft.UI.Windowing.AppWindowClosingEventArgs args)
+    {
+        /*
+        if (ViewModel == null)
+        {
+            return;
+        }
+
+        if (ViewModel.IsEntryDirty)
+        {
+            args.Cancel = true; // needs Cancel = true here in order to show dialog.
+
+            // show ConfirmationDialog
+            var result = await _dlg.ShowEditorCloseConfirmationDialog(EditorWin);
+
+            if (result == ContentDialogResult.Primary)
+            {
+                // Save and close.
+
+                ViewModel.Save();
+
+                if (ViewModel.IsEntryDirty == false)
+                {
+                    EditorWin.Close();
+                }
+            }
+            else if (result == ContentDialogResult.Secondary)
+            {
+                // Discard change and close.
+                ViewModel.DiscardUnsavedFiles();
+
+                ViewModel.IsEntryDirty = false;
+                EditorWin.Close();
+            }
+            else if (result == ContentDialogResult.None)
+            {
+                // Cancel.
+
+            }
+        }
+        */
+    }
+
+    public void EditorWindow_Activated(object sender, Microsoft.UI.Xaml.WindowActivatedEventArgs args)
+    {
+        /*
+        var resource = args.WindowActivationState == WindowActivationState.Deactivated ? "WindowCaptionForegroundDisabled" : "WindowCaptionForeground";
+        AppTitleBarText.Foreground = (SolidColorBrush)App.Current.Resources[resource];
+
+        //AppTitleBarIcon.Opacity = args.WindowActivationState == WindowActivationState.Deactivated ? 0.4 : 0.7;
+        //AppMenuBar.Opacity = args.WindowActivationState == WindowActivationState.Deactivated ? 0.4 : 0.7;
+
+        AppTitleBarIcon.Opacity = args.WindowActivationState == WindowActivationState.Deactivated ? 0.4 : 0.8;
+        //AppMenuBar.Opacity = args.WindowActivationState == WindowActivationState.Deactivated ? 0.4 : 0.8;
+        */
+    }
+
+    public void EditorWindow_Closed(object sender, WindowEventArgs args)
+    {
+        /*
+        if (sender is EditorWindow ewin)
+        {
+            // Save window size and position.
+            var appWindow = ewin.AppWindow;
+            if (appWindow != null)
+            {
+                if (appWindow.Presenter is OverlappedPresenter)
+                {
+                    var mainVM = App.GetService<MainViewModel>();
+                    mainVM.EditorWinHeight = (int)appWindow.Size.Height;
+                    mainVM.EditorWinWidth = (int)appWindow.Size.Width;
+                    mainVM.EditorWinTop = (int)appWindow.Position.Y;
+                    mainVM.EditorWinLeft = (int)appWindow.Position.X;
+
+                    mainVM.ModalWinHeight = ViewModel.ModalWinHeight;
+                    mainVM.ModalWinWidth = ViewModel.ModalWinWidth;
+                    mainVM.ModalWinTop = ViewModel.ModalWinTop;
+                    mainVM.ModalWinLeft = ViewModel.ModalWinLeft;
+                }
+            }
+        }
+        */
+    }
+
+    private void ContentFrame_NavigationFailed(object sender, NavigationFailedEventArgs e)
+    {
+        throw new Exception("Failed to load Page " + e.SourcePageType.FullName);
+    }
+
+    private void NavView_Loaded(object sender, RoutedEventArgs e)
+    {
+        // Since we use ItemInvoked, we set selecteditem manually
+        //NavView.SelectedItem = NavView.MenuItems.OfType<NavigationViewItem>().First();
+        // The same with above but more precise.
+        //NavView.SelectedItem = NavView.MenuItems.OfType<NavigationViewItem>().Where(n => n.Tag.Equals("summary")).First();
+
+        /*
+        // This is for hierarchical menu.
+        var firstMenuItem = NavView.MenuItems.OfType<NavigationViewItem>().First();
+        if (firstMenuItem != null)
+        {
+            var childItem = firstMenuItem.MenuItems.OfType<NavigationViewItem>().Where(n => n.Tag.Equals("summary"));
+            if (childItem != null)
+            {
+                childItem.First().IsSelected = true;
+                navigationViewSelectedItem = childItem.First();
+            }
+        }
+        */
+
+        Debug.WriteLine("NavView_Loaded: Navigating to BasicPage with ViewModel. ViewModel is " + (ViewModel != null ? "set" : "null"));
+
+        // Pass Frame when navigate.  //, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft } //, new SuppressNavigationTransitionInfo() //new EntranceNavigationTransitionInfo()
+        if (ContentFrame.Navigate(typeof(ZumenSearch.Views.Rent.Residentials.Bldg.BasicPage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom }))
+        {
+            BreadcrumbBar1.ItemsSource = new ObservableCollection<Breadcrumb>{
+                new() { Name = "建物", Page = typeof(Views.Rent.Residentials.Bldg.BasicPage).FullName!},
+                new() { Name = "基本", Page = typeof(Views.Rent.Residentials.Bldg.BasicPage).FullName!},
+            };
+
+            NavView.SelectedItem = NavView.MenuItems.OfType<NavigationViewItem>().Where(n => n.Tag.Equals("summary")).First();
+        }
+    }
+
+    private void NavView_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
+    {
+        if (_pages is null)
+        {
+            return;
+        }
+
+        if (args.IsSettingsInvoked == true)
+        {
+            // Do nothing. 
+        }
+        else if (args.InvokedItemContainer != null && (args.InvokedItemContainer.Tag != null))
+        {
+            if (args.InvokedItemContainer.Tag is not string tag || string.IsNullOrWhiteSpace(tag))
+            {
+                Debug.WriteLine("NavView_ItemInvoked: Invalid tag or null.");
+                return;
+            }
+
+            var item = _pages.FirstOrDefault(p => p.Tag.Equals(args.InvokedItemContainer.Tag.ToString()));
+
+            if (item.Page is null)
+            {
+                Debug.WriteLine("NavView_ItemInvoked: Page is null for tag " + tag);
+                return;
+            }
+
+            if (ContentFrame.Navigate(item.Page, ViewModel, new SuppressNavigationTransitionInfo())) //new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom })
+            {
+                BreadcrumbBar1.ItemsSource = new ObservableCollection<Breadcrumb>{
+                    new() { Name = "建物", Page = typeof(Views.Rent.Residentials.Bldg.BasicPage).FullName!},
+                    new() { Name = item.Label, Page = item.Page.FullName!},
+                };
+            }
+            //, args.RecommendedNavigationTransitionInfo
+        }
+    }
+
+    public void OnEventIsUnitOwnership(bool arg)
+    {
+        if (arg)
+        {
+            // hide the owner and zumen menu items.
+            NavigationViewItemZumen.Visibility = Visibility.Collapsed;
+            NavigationViewItemKasinusi.Visibility = Visibility.Collapsed;
+            NavigationViewItemGyousya.Visibility = Visibility.Collapsed;
+        }
+        else
+        {
+            // show the owner and zumen menu items.
+            NavigationViewItemZumen.Visibility = Visibility.Visible;
+            NavigationViewItemKasinusi.Visibility = Visibility.Visible;
+            NavigationViewItemGyousya.Visibility = Visibility.Visible;
+        }
+    }
+
+    public void OnEventBackToSummary()
+    {
+        ContentFrame.Navigate(typeof(Views.Rent.Residentials.Bldg.BasicPage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });
+    }
+
+    public void OnEventEditLocation()
+    {
+        ContentFrame.Navigate(typeof(Views.Rent.Residentials.Bldg.LocationPage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });
+    }
+
+    public void OnEventEditTransportation()
+    {
+        ContentFrame.Navigate(typeof(Views.Rent.Residentials.Bldg.TransportationPage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });
+    }
+
+    public void OnEventEditAppliance()
+    {
+        ContentFrame.Navigate(typeof(Views.Rent.Residentials.Bldg.AppliancePage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });
+    }
+
+    public void OnEventEditPictures()
+    {
+        ContentFrame.Navigate(typeof(Views.Rent.Residentials.Bldg.PictureListPage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });
+    }
+
+    public void OnEventEditUnits()
+    {
+        ContentFrame.Navigate(typeof(Views.Rent.Residentials.Bldg.UnitListPage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });
+    }
+
+    #region == TEMP code for modal window(for setting an owner) ==
+
+#pragma warning disable IDE0079
+#pragma warning disable SYSLIB1054
+
+    [DllImport("User32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+
+    internal static extern bool EnableWindow(IntPtr hWnd, bool bEnable);
+
+    internal const int GWL_HWNDPARENT = (-8);
+
+    internal static IntPtr SetWindowLong(IntPtr hWnd, int nIndex, IntPtr dwNewLong)
+    {
+        if (IntPtr.Size == 4)
+        {
+            return SetWindowLongPtr32(hWnd, nIndex, dwNewLong);
+        }
+        return SetWindowLongPtr64(hWnd, nIndex, dwNewLong);
+    }
+
+    // Import the Windows API function SetWindowLong for modifying window properties on 32-bit systems.
+    [DllImport("User32.dll", CharSet = CharSet.Auto, EntryPoint = "SetWindowLong")]
+    internal static extern IntPtr SetWindowLongPtr32(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
+
+    // Import the Windows API function SetWindowLongPtr for modifying window properties on 64-bit systems.
+    [DllImport("User32.dll", CharSet = CharSet.Auto, EntryPoint = "SetWindowLongPtr")]
+    internal static extern IntPtr SetWindowLongPtr64(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
+
+#pragma warning restore SYSLIB1054
+#pragma warning restore IDE0079
+
+    #endregion
+
+
+}
