@@ -6,6 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     xmlns:mod="using:ZumenSearch.Models"
+    xmlns:modresi="using:ZumenSearch.Models.Rent.Residentials"
     NavigationCacheMode="Required">
 
     <Grid x:Name="ContentArea" Padding="48,0,48,24">
@@ -15,16 +16,36 @@
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="0">
-            <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Margin="0,0,24,0" HorizontalAlignment="Right">
-                <AppBarButton Icon="Add" Label="追加" Command="{x:Bind ViewModel.AddNewUnitCommand}"/>
-                <AppBarButton Icon="Edit" Label="編集"/>
+            <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Margin="0,0,0,0" HorizontalAlignment="Right">
+                <AppBarButton Icon="Delete" Label="削除"/>
                 <AppBarButton Icon="Copy" Label="複製"/>
-                <AppBarButton Icon="Delete" Label="削除" Command="{x:Bind ViewModel.DeleteSelectedBuildingPictureCommand}"/>
+                <AppBarButton Icon="Edit" Label="編集" Command="{x:Bind ViewModel.EditSelectedUnitCommand}" CommandParameter="{x:Bind RoomsListView.SelectedItem, Mode=OneWay}"/>
+                <AppBarButton Icon="Add" Label="追加" Command="{x:Bind ViewModel.AddNewUnitCommand}"/>
             </CommandBar>
         </Grid>
         
         <Grid Grid.Row="1">
-
+            <ItemsView x:Name="RoomsListView" ItemsSource="{x:Bind ViewModel.Rooms, Mode=OneWay}" SelectionMode="Single" AllowFocusOnInteraction="False" IsItemInvokedEnabled="True" ItemInvoked="RoomsListView_ItemInvoked">
+                <ItemsView.ItemTemplate>
+                    <DataTemplate x:DataType="modresi:Room">
+                        <ItemContainer AllowFocusOnInteraction="False">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Ellipse x:Name="Ellipse" Grid.RowSpan="2" Width ="32" Height="32" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center" Fill="{ThemeResource SystemControlBackgroundBaseMediumBrush}"/>
+                                <TextBlock Grid.Row="0" Grid.Column="1" Text="{x:Bind RoomName, Mode=OneWay}" x:Phase="1" Style="{ThemeResource BaseTextBlockStyle}" Margin="12,6,0,0"/>
+                                <TextBlock Grid.Row="1" Grid.Column="1" Text="" Style="{ThemeResource BodyTextBlockStyle}" Margin="12,0,0,6"/>
+                            </Grid>
+                        </ItemContainer>
+                    </DataTemplate>
+                </ItemsView.ItemTemplate>
+            </ItemsView>
         </Grid>
     </Grid>
 

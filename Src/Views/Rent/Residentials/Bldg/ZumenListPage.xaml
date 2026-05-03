@@ -14,9 +14,10 @@
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="0">
-            <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Margin="0,0,24,0" HorizontalAlignment="Right">
-                <AppBarButton Name="AppBarButtonAddZumen" Icon="Add" Label="追加"/>
+            <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Margin="0,0,0,0" HorizontalAlignment="Right">
                 <AppBarButton Icon="Delete" Label="削除"/>
+                <AppBarButton Name="AppBarButtonReplaceZumen" Icon="Add" Label="置換"/>
+                <AppBarButton Name="AppBarButtonAddZumen" Icon="Add" Label="追加"/>
             </CommandBar>
         </Grid>
 

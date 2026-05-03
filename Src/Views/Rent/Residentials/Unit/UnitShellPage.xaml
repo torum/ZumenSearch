@@ -6,7 +6,8 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     xmlns:mod="using:ZumenSearch.Models"
-    NavigationCacheMode="Required">
+    NavigationCacheMode="Required"
+    Unloaded="Page_Unloaded">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -60,17 +61,17 @@
                 <!--   BackRequested="NavView_BackRequested" -->
                 <NavigationView.MenuItems>
                     <NavigationViewItem Content="基本"  Tag="summary"/>
-                    <!--<NavigationViewItem Content="現況" Tag="room_status"/>
-                                <NavigationViewItem Content="契約条件" Tag="room_contract"/>
-                                <NavigationViewItem Content="取引条件" Tag="room_transaction"/>
-                                <NavigationViewItem Content="設備" Tag="room_appliance" />-->
+                    <NavigationViewItem Content="現況" Tag="status"/>
+                    <NavigationViewItem Content="契約条件" Tag="contract"/>
+                    <NavigationViewItem Content="取引条件" Tag="transaction"/>
+                    <NavigationViewItem Content="設備" Tag="appliance" />
                     <NavigationViewItem Content="写真" Tag="pictures" />
-                    <NavigationViewItem Content="貸主" Tag="kasinusi"/>
-                    <NavigationViewItem Content="宅建業者" Tag="gyousya"/>
+                    <NavigationViewItem x:Name="NavigationViewItemZumen" Content="図面" Tag="zumen" Visibility="Collapsed"/>
+                    <NavigationViewItem x:Name="NavigationViewItemKasinusi" Content="貸主" Tag="kasinusi" Visibility="Collapsed"/>
+                    <NavigationViewItem x:Name="NavigationViewItemGyousya" Content="宅建業者" Tag="gyousya" Visibility="Collapsed"/>
                 </NavigationView.MenuItems>
 
                 <NavigationView.FooterMenuItems>
-                    <NavigationViewItem Content="図面一覧" Tag="zumen"/>
                 </NavigationView.FooterMenuItems>
             </NavigationView>
 

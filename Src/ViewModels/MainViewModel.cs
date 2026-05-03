@@ -9,7 +9,7 @@ using System.Reflection;
 using Windows.ApplicationModel;
 using ZumenSearch.Helpers;
 using ZumenSearch.Models;
-using ZumenSearch.Services;
+using ZumenSearch.Services.Contracts;
 using ZumenSearch.Services.Extensions.AbstractFactory;
 using ZumenSearch.Views;
 
@@ -46,12 +46,13 @@ public partial class MainViewModel : ObservableObject
     public int EditorWinLeft = 130;
     public int EditorWinTop = 130;
 
+    /*
     // Modal window position and size
     public int ModalWinWidth = 1366;
     public int ModalWinHeight = 768;
     public int ModalWinLeft = 130;
     public int ModalWinTop = 130;
-
+    */
     #endregion
 
     #region == Navigation ==
@@ -84,7 +85,17 @@ public partial class MainViewModel : ObservableObject
 
     #region == Search ==
 
-    public ObservableCollection<Models.Rent.Residentials.EntryResidentialSearchResult> RentResidentialSearchResult { get; set; } = [];
+    public ObservableCollection<Models.Rent.Residentials.EntryResidentialSearchResult> RentResidentialSearchResult
+    {
+        get; set
+        {
+            if (SetProperty(ref field, value))
+            {
+                //
+            }
+        }
+    } = [];
+
     #endregion
 
     #endregion
@@ -96,6 +107,8 @@ public partial class MainViewModel : ObservableObject
     private readonly INavigationService _navigationService;
 
     #endregion
+
+    private readonly CancellationTokenSource _cts = new();
 
     public MainViewModel(INavigationService navigationService, IAbstractFactory<Views.Rent.Residentials.ShellPage> editorFactory, IDataAccessService dataAccessService)
     {
@@ -211,12 +224,14 @@ public partial class MainViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void SearchRentResidential()
+    private async Task SearchRentResidential()
     {
         //SelectedRentResidentialItem = null;
         RentResidentialSearchResult.Clear();
 
-        var res = _dataAccessService.SelectRentResidentialsByNameKeyword("*");
+        var res = await Task.Run(() => _dataAccessService.SelectRentResidentialsByNameKeyword("*"), _cts.Token);
+
+        //var res = _dataAccessService.SelectRentResidentialsByNameKeyword("*");
 
         if (res.IsError)
         {

@@ -5,15 +5,26 @@ using Microsoft.UI.Xaml.Navigation;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using ZumenSearch.Models;
-using ZumenSearch.Services;
+using ZumenSearch.Services.Contracts;
 
 namespace ZumenSearch.Views.Rent.Residentials.Unit;
 
 public sealed partial class UnitShellPage : Page
 {
+    #region == Properties ==
+
     public ViewModels.Rent.ResidentialsViewModel? ViewModel
     {
-        get;private set;
+        get;
+        private set
+        {
+            if (field == value)
+                return;
+
+            field = value;
+
+            ViewModel?.EventIsUnitOwnership += (sender, arg) => OnEventIsUnitOwnership(arg);
+        }
     }
 
     private NavigationViewItem? navigationViewSelectedItem;
@@ -33,8 +44,16 @@ public sealed partial class UnitShellPage : Page
         ("gyousya", "宅建業者", typeof(Views.Rent.Residentials.Unit.GyousyaPage)),
     ];
 
+    #endregion
+
+    #region == Services ==
+
     private readonly IDispatcherService _dispatcherService;
     private readonly IModalDialogService _dlg;
+
+    #endregion
+
+    private bool _nvigated;
 
     public UnitShellPage() : this(App.GetService<IModalDialogService>(), App.GetService<IDispatcherService>())
     {
@@ -49,57 +68,22 @@ public sealed partial class UnitShellPage : Page
         InitializeComponent();
 
         BreadcrumbBar1.ItemClicked += BreadcrumbBar_ItemClicked;
-
-        /*
-        ViewModel = vm;//new ViewModels.Rent.Residentials.Editor.Modal.ModalViewModel();//App.GetService<RentLivingEditUnitShellViewModel>();
-        EditorVM = editorVm;
-        _mainWindow = mainWindow;
-        _dispatcherService = dispatcherService;
-
-        // Subscribe to ViewModel's events
-        ViewModel.EventBackToSummary += (sender, arg) => OnEventBackToSummary(arg);
-
-        InitializeComponent();
-
-        dialogWindow.ExtendsContentIntoTitleBar = true;
-        dialogWindow.SetTitleBar(AppTitleBar);
-
-        dialogWindow.Activated += UnitsWindow_Activated;
-        dialogWindow.Closed += UnitsWindow_Closed;
-        */
     }
 
-    public void UnitsWindow_Activated(object sender, Microsoft.UI.Xaml.WindowActivatedEventArgs args)
+    protected override void OnNavigatedTo(NavigationEventArgs e)
     {
-        //var resource = args.WindowActivationState == WindowActivationState.Deactivated ? "WindowCaptionForegroundDisabled" : "WindowCaptionForeground";
-        //AppTitleBarText.Foreground = (SolidColorBrush)App.Current.Resources[resource];
-
-    }
-
-    public void UnitsWindow_Closed(object sender, WindowEventArgs args)
-    {
-        //
-        /*
-        if (sender is ModalWindow mwin)
+        if ((e.Parameter is ViewModels.Rent.ResidentialsViewModel) && (e.Parameter != null))
         {
-            // Save window size and position.
-            var appWindow = mwin.AppWindow;
-            if (appWindow != null)
-            {
-                if (appWindow.Presenter is OverlappedPresenter)
-                {
-                    EditorVM.ModalWinWidth = (int)appWindow.Size.Width;
-                    EditorVM.ModalWinHeight = (int)appWindow.Size.Height;
-                    EditorVM.ModalWinTop = (int)appWindow.Position.Y;
-                    EditorVM.ModalWinLeft = (int)appWindow.Position.X;
-                }
-            }
-            else
-            {
-                //Debug.WriteLine("appWindow is null");
-            }
+            ViewModel = e.Parameter as ViewModels.Rent.ResidentialsViewModel;
+
+            ViewModel?.SetUnitShell(this);
         }
-        */
+        else
+        {
+            Debug.WriteLine("UnitShellPage.OnNavigatedTo: Invalid parameter. Expected ResidentialsViewModel.");
+        }
+
+        base.OnNavigatedTo(e);
     }
 
     private void NavView_Loaded(object sender, RoutedEventArgs e)
@@ -138,15 +122,14 @@ public sealed partial class UnitShellPage : Page
         }
         */
 
+        if (_nvigated)
+        {
+            return;
+        }
+
         if (ContentFrame.Navigate(typeof(ZumenSearch.Views.Rent.Residentials.Unit.BasicPage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom }))
         {
-            /*
-            BreadcrumbBar1.ItemsSource = new ObservableCollection<Breadcrumb>{
-                new() { Name = "建物", Page = typeof(Views.Rent.Residentials.Bldg.BasicPage).FullName!},
-                new() { Name = "部屋", Page = typeof(Views.Rent.Residentials.Unit.BasicPage).FullName!},
-                new() { Name = "基本", Page = typeof(Views.Rent.Residentials.Unit.BasicPage).FullName!},
-            };
-            */
+            _nvigated = true;
 
             if (BreadcrumbBar1.ItemsSource is ObservableCollection<Breadcrumb> crumbs)
             {
@@ -165,11 +148,6 @@ public sealed partial class UnitShellPage : Page
         }
     }
 
-    private void ContentFrame_NavigationFailed(object sender, NavigationFailedEventArgs e)
-    {
-        //throw new Exception("Failed to load Page " + e.SourcePageType.FullName);
-    }
-
     private void NavView_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
     {
         if (_pages is null)
@@ -185,7 +163,7 @@ public sealed partial class UnitShellPage : Page
         {
             if (args.InvokedItemContainer.Tag is not string tag || string.IsNullOrWhiteSpace(tag))
             {
-                Debug.WriteLine("NavView_ItemInvoked: Invalid tag or null.");
+                Debug.WriteLine("UnitShellPage: NavView_ItemInvoked: Invalid tag or null.");
                 sender.SelectedItem = navigationViewSelectedItem;
                 return;
             }
@@ -194,7 +172,7 @@ public sealed partial class UnitShellPage : Page
 
             if (item.Page is null)
             {
-                Debug.WriteLine("NavView_ItemInvoked: Page is null for tag " + tag);
+                Debug.WriteLine("UnitShellPage: NavView_ItemInvoked: Page is null for tag " + tag);
                 sender.SelectedItem = navigationViewSelectedItem;
 
                 return;
@@ -229,14 +207,36 @@ public sealed partial class UnitShellPage : Page
         */
     }
 
+    private void ContentFrame_NavigationFailed(object sender, NavigationFailedEventArgs e)
+    {
+        //throw new Exception("Failed to load Page " + e.SourcePageType.FullName);
+    }
+
     private void BreadcrumbBar_ItemClicked(BreadcrumbBar sender, BreadcrumbBarItemClickedEventArgs args)
     {
         if (args.Index == 0)
         {
-            var hoge = args.Item as Breadcrumb;
-
+            //var hoge = args.Item as Breadcrumb;
             //Debug.WriteLine("BreadcrumbBar_ItemClicked: " + hoge?.Name + ", Page: " + hoge?.Page);
             ViewModel?.GoToBldgShellPageCommand.Execute(null);
+        }
+    }
+
+    public void OnEventIsUnitOwnership(bool arg)
+    {
+        if (arg)
+        {
+            // show the owner and zumen menu items.
+            NavigationViewItemZumen.Visibility = Visibility.Visible;
+            NavigationViewItemKasinusi.Visibility = Visibility.Visible;
+            NavigationViewItemGyousya.Visibility = Visibility.Visible;
+        }
+        else
+        {
+            // hide the owner and zumen menu items.
+            NavigationViewItemZumen.Visibility = Visibility.Collapsed;
+            NavigationViewItemKasinusi.Visibility = Visibility.Collapsed;
+            NavigationViewItemGyousya.Visibility = Visibility.Collapsed;
         }
     }
 
@@ -263,20 +263,9 @@ public sealed partial class UnitShellPage : Page
         */
     }
 
-    protected override void OnNavigatedTo(NavigationEventArgs e)
+    private void Page_Unloaded(object sender, RoutedEventArgs e)
     {
-        if ((e.Parameter is ViewModels.Rent.ResidentialsViewModel) && (e.Parameter != null))
-        {
-            ViewModel = e.Parameter as ViewModels.Rent.ResidentialsViewModel;
 
-            ViewModel?.SetUnitShell(this);
-        }
-        else
-        {
-            Debug.WriteLine("UnitShellPage.OnNavigatedTo: Invalid parameter. Expected ResidentialsViewModel.");
-        }
-
-        base.OnNavigatedTo(e);
+        ViewModel?.EventIsUnitOwnership -= (sender, arg) => OnEventIsUnitOwnership(arg);
     }
-
 }

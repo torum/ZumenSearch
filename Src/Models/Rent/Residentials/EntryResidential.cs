@@ -26,22 +26,29 @@ public partial class EntryResidentialFull : EntryBase
                 IsDirty = true;
             }
         }
-    }
+    } = [];
 
     // DBへの更新時にDBから削除されるべき物件写真のIDリスト
     public ObservableCollection<PictureBuilding> BuildingPicturesToBeDeleted = [];
 
-    /*
-    public EntryResidentialFull()
+    public ObservableCollection<Room> Rooms
     {
-        //
-    }
-    */
+        get => field;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+            }
+        }
+    } = [];
+
+    // DBへの更新時にDBから削除されるべき部屋のIDリスト
+    public ObservableCollection<Room> RoomsToBeDeleted = [];
 
     public EntryResidentialFull(string id, EnumEntryStatus status) : base(id)
     {
         EntryStatus = status;
-        BuildingPictures = [];
     }
 
     /*

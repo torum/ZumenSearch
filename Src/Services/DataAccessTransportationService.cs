@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Data;
 using ZumenSearch.Models;
+using ZumenSearch.Services.Contracts;
 
 namespace ZumenSearch.Services;
 

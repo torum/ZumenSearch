@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.WinUI;
 using System.Diagnostics;
+using ZumenSearch.Services.Contracts;
 
 namespace ZumenSearch.Services;
 

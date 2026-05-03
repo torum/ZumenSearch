@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Text;
 using ZumenSearch.Helpers;
 using ZumenSearch.Services;
+using ZumenSearch.Services.Contracts;
 using ZumenSearch.Services.Extensions;
 using ZumenSearch.ViewModels;
 using ZumenSearch.Views;

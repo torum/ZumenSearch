@@ -3,7 +3,7 @@ using Microsoft.UI.Xaml;
 using System.Diagnostics;
 using System.Xml;
 using System.Xml.Linq;
-using ZumenSearch.Services;
+using ZumenSearch.Services.Contracts;
 using ZumenSearch.ViewModels;
 
 namespace ZumenSearch;
@@ -317,7 +317,7 @@ public sealed partial class MainWindow : Window
         // Set editor window element to root.
         root.AppendChild(editWindow);
 
-
+        /*
         // Modal window 
         var modalWindow = doc.CreateElement(string.Empty, "ModalWindow", string.Empty);
 
@@ -340,6 +340,8 @@ public sealed partial class MainWindow : Window
 
         // Set editor window element to root.
         root.AppendChild(modalWindow);
+        */
+
 
         // Options
         var xOpts = doc.CreateElement(string.Empty, "Opts", string.Empty);
@@ -462,6 +464,7 @@ public sealed partial class MainWindow : Window
                     }
                 }
 
+                /*
                 // Modal window element
                 var modalWindow = xdoc.Root.Element("ModalWindow");
                 if (modalWindow != null)
@@ -490,6 +493,7 @@ public sealed partial class MainWindow : Window
                         _viewModel.ModalWinWidth = int.Parse(hoge.Value);
                     }
                 }
+                */
 
                 // Options
                 var opts = xdoc.Root.Element("Opts");

@@ -2,17 +2,31 @@
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
+using System.Collections;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using ZumenSearch.Models;
-using ZumenSearch.Services;
+using ZumenSearch.Services.Contracts;
 
 namespace ZumenSearch.Views.Rent.Residentials.Bldg;
 
 public sealed partial class BldgShellPage : Page
 {
-    public ViewModels.Rent.ResidentialsViewModel? ViewModel {get; private set;}
+    #region == Properties ==
+
+    public ViewModels.Rent.ResidentialsViewModel? ViewModel {
+        get;
+        private set
+        {
+            if (field == value)
+                return;
+
+            field = value;
+
+            ViewModel?.EventIsUnitOwnership += (sender, arg) => OnEventIsUnitOwnership(arg);
+        }
+    }
 
     //public Views.Rent.Residentials.EditorWindow EditorWin { get; private set; }
 
@@ -35,10 +49,18 @@ public sealed partial class BldgShellPage : Page
         //("memo", "備考", typeof(Views.Rent.Residentials.Editor.MemoPage)),
     ];
 
+    #endregion
+
     //private readonly MainViewModel _mainVM = App.GetService<MainViewModel>();
+
+    #region == Services ==
 
     private readonly IDispatcherService _dispatcherService;
     private readonly IModalDialogService _dlg;
+
+    #endregion
+
+    private bool _nvigated;
 
     public BldgShellPage() : this(App.GetService<IModalDialogService>(), App.GetService<IDispatcherService>())
     {
@@ -56,8 +78,10 @@ public sealed partial class BldgShellPage : Page
         _dispatcherService = dispatcherService;
 
         InitializeComponent();
-        /*
+
         BreadcrumbBar1.ItemClicked += BreadcrumbBar_ItemClicked;
+
+        /*
 
         //
         EditorWin.Content = this;
@@ -82,7 +106,6 @@ public sealed partial class BldgShellPage : Page
         ViewModel.EventEditPictures += (sender, arg) => OnEventEditPictures();
         ViewModel.EventEditUnits += (sender, arg) => OnEventEditUnits();
         //
-        ViewModel.EventIsUnitOwnership += (sender, arg) => OnEventIsUnitOwnership(arg);
 
         */
     }
@@ -110,100 +133,10 @@ public sealed partial class BldgShellPage : Page
     {
         if (args.Index == 0)
         {
-            if (ContentFrame.Navigate(typeof(Views.Rent.Residentials.Bldg.BasicPage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom }))
-            {
-                NavView.SelectedItem = NavView.MenuItems.OfType<NavigationViewItem>().Where(n => n.Tag.Equals("summary")).First();
-            }
+            //var hoge = args.Item as Breadcrumb;
+            //Debug.WriteLine("BreadcrumbBar_ItemClicked: " + hoge?.Name + ", Page: " + hoge?.Page);
+            ViewModel?.GoToBldgShellPageCommand.Execute(null);
         }
-    }
-
-    private async void AppWindow_Closing(Microsoft.UI.Windowing.AppWindow sender, Microsoft.UI.Windowing.AppWindowClosingEventArgs args)
-    {
-        /*
-        if (ViewModel == null)
-        {
-            return;
-        }
-
-        if (ViewModel.IsEntryDirty)
-        {
-            args.Cancel = true; // needs Cancel = true here in order to show dialog.
-
-            // show ConfirmationDialog
-            var result = await _dlg.ShowEditorCloseConfirmationDialog(EditorWin);
-
-            if (result == ContentDialogResult.Primary)
-            {
-                // Save and close.
-
-                ViewModel.Save();
-
-                if (ViewModel.IsEntryDirty == false)
-                {
-                    EditorWin.Close();
-                }
-            }
-            else if (result == ContentDialogResult.Secondary)
-            {
-                // Discard change and close.
-                ViewModel.DiscardUnsavedFiles();
-
-                ViewModel.IsEntryDirty = false;
-                EditorWin.Close();
-            }
-            else if (result == ContentDialogResult.None)
-            {
-                // Cancel.
-
-            }
-        }
-        */
-    }
-
-    public void EditorWindow_Activated(object sender, Microsoft.UI.Xaml.WindowActivatedEventArgs args)
-    {
-        /*
-        var resource = args.WindowActivationState == WindowActivationState.Deactivated ? "WindowCaptionForegroundDisabled" : "WindowCaptionForeground";
-        AppTitleBarText.Foreground = (SolidColorBrush)App.Current.Resources[resource];
-
-        //AppTitleBarIcon.Opacity = args.WindowActivationState == WindowActivationState.Deactivated ? 0.4 : 0.7;
-        //AppMenuBar.Opacity = args.WindowActivationState == WindowActivationState.Deactivated ? 0.4 : 0.7;
-
-        AppTitleBarIcon.Opacity = args.WindowActivationState == WindowActivationState.Deactivated ? 0.4 : 0.8;
-        //AppMenuBar.Opacity = args.WindowActivationState == WindowActivationState.Deactivated ? 0.4 : 0.8;
-        */
-    }
-
-    public void EditorWindow_Closed(object sender, WindowEventArgs args)
-    {
-        /*
-        if (sender is EditorWindow ewin)
-        {
-            // Save window size and position.
-            var appWindow = ewin.AppWindow;
-            if (appWindow != null)
-            {
-                if (appWindow.Presenter is OverlappedPresenter)
-                {
-                    var mainVM = App.GetService<MainViewModel>();
-                    mainVM.EditorWinHeight = (int)appWindow.Size.Height;
-                    mainVM.EditorWinWidth = (int)appWindow.Size.Width;
-                    mainVM.EditorWinTop = (int)appWindow.Position.Y;
-                    mainVM.EditorWinLeft = (int)appWindow.Position.X;
-
-                    mainVM.ModalWinHeight = ViewModel.ModalWinHeight;
-                    mainVM.ModalWinWidth = ViewModel.ModalWinWidth;
-                    mainVM.ModalWinTop = ViewModel.ModalWinTop;
-                    mainVM.ModalWinLeft = ViewModel.ModalWinLeft;
-                }
-            }
-        }
-        */
-    }
-
-    private void ContentFrame_NavigationFailed(object sender, NavigationFailedEventArgs e)
-    {
-        throw new Exception("Failed to load Page " + e.SourcePageType.FullName);
     }
 
     private void NavView_Loaded(object sender, RoutedEventArgs e)
@@ -227,17 +160,18 @@ public sealed partial class BldgShellPage : Page
         }
         */
 
+        if (_nvigated)
+        {
+            return;
+        }
+
         //Debug.WriteLine("NavView_Loaded: Navigating to BasicPage with ViewModel. ViewModel is " + (ViewModel != null ? "set" : "null"));
 
         // Pass Frame when navigate.  //, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft } //, new SuppressNavigationTransitionInfo() //new EntranceNavigationTransitionInfo()
         if (ContentFrame.Navigate(typeof(ZumenSearch.Views.Rent.Residentials.Bldg.BasicPage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom }))
         {
-            /*
-            BreadcrumbBar1.ItemsSource = new ObservableCollection<Breadcrumb>{
-                new() { Name = "建物", Page = typeof(Views.Rent.Residentials.Bldg.BasicPage).FullName!},
-                new() { Name = "基本", Page = typeof(Views.Rent.Residentials.Bldg.BasicPage).FullName!},
-            };
-            */
+            _nvigated = true;
+
             if (BreadcrumbBar1.ItemsSource is ObservableCollection<Breadcrumb> crumbs)
             {
                 if (crumbs.Count > 1)
@@ -270,7 +204,7 @@ public sealed partial class BldgShellPage : Page
         {
             if (args.InvokedItemContainer.Tag is not string tag || string.IsNullOrWhiteSpace(tag))
             {
-                Debug.WriteLine("NavView_ItemInvoked: Invalid tag or null.");
+                Debug.WriteLine("BldgShellPage: NavView_ItemInvoked: Invalid tag or null.");
                 return;
             }
 
@@ -278,7 +212,7 @@ public sealed partial class BldgShellPage : Page
 
             if (item.Page is null)
             {
-                Debug.WriteLine("NavView_ItemInvoked: Page is null for tag " + tag);
+                Debug.WriteLine("BldgShellPage: NavView_ItemInvoked: Page is null for tag " + tag);
                 return;
             }
 
@@ -301,6 +235,11 @@ public sealed partial class BldgShellPage : Page
             }
             //, args.RecommendedNavigationTransitionInfo
         }
+    }
+
+    private void ContentFrame_NavigationFailed(object sender, NavigationFailedEventArgs e)
+    {
+        throw new Exception("Failed to load Page " + e.SourcePageType.FullName);
     }
 
     public void OnEventIsUnitOwnership(bool arg)
@@ -379,10 +318,15 @@ public sealed partial class BldgShellPage : Page
     [DllImport("User32.dll", CharSet = CharSet.Auto, EntryPoint = "SetWindowLongPtr")]
     internal static extern IntPtr SetWindowLongPtr64(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
 
+
 #pragma warning restore SYSLIB1054
 #pragma warning restore IDE0079
 
     #endregion
 
-
+    private void Page_Unloaded(object sender, RoutedEventArgs e)
+    {
+        //
+        ViewModel?.EventIsUnitOwnership -= (sender, arg) => OnEventIsUnitOwnership(arg);
+    }
 }

@@ -1,7 +1,7 @@
 ﻿using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Animation;
 
-namespace ZumenSearch.Services;
+namespace ZumenSearch.Services.Contracts;
 
 public interface INavigationService
 {

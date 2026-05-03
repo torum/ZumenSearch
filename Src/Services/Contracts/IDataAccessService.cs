@@ -1,7 +1,7 @@
 ﻿using ZumenSearch.Models;
 using ZumenSearch.Models.Rent.Residentials;
 
-namespace ZumenSearch.Services;
+namespace ZumenSearch.Services.Contracts;
 
 public interface IDataAccessService
 {

@@ -1,6 +1,7 @@
 ﻿using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using System.Diagnostics;
+using ZumenSearch.Models.Rent.Residentials;
 
 namespace ZumenSearch.Views.Rent.Residentials.Bldg;
 
@@ -44,4 +45,21 @@ public sealed partial class UnitListPage : Page
         base.OnNavigatedTo(e);
     }
 
+    private void RoomsListView_ItemInvoked(ItemsView sender, ItemsViewItemInvokedEventArgs args)
+    {
+        // Get the invoked item
+        var invokedItem = args.InvokedItem;
+
+        if (ViewModel is null)
+        {
+            return;
+        }
+
+        if (invokedItem is not Room)
+        {
+            return;
+        }
+
+        ViewModel.EditSelectedUnitCommand.Execute(invokedItem);
+    }
 }

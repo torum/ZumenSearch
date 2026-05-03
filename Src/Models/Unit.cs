@@ -2,18 +2,16 @@
 
 namespace ZumenSearch.Models;
 
-public abstract class PictureBase : ObservableObject
+public abstract class UnitBase : ObservableObject
 {
-    public string ImageLocation { get; set; } = string.Empty;
-
     public string Id { get; set; } = string.Empty;
 
     public bool IsNew { get; set; } = true;
 
     public bool IsModified { get; set; } = false;
 
-    protected PictureBase()
+    protected UnitBase(string id)
     {
-
+        Id = id;
     }
 };

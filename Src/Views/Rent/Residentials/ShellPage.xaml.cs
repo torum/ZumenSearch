@@ -1,17 +1,18 @@
-﻿using Microsoft.UI.Xaml;
+﻿using Microsoft.UI.Windowing;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
 using System.Diagnostics;
-using ZumenSearch.Services;
+using ZumenSearch.Services.Contracts;
 using ZumenSearch.ViewModels;
 
 namespace ZumenSearch.Views.Rent.Residentials;
 
 public sealed partial class ShellPage : Page
 {
-    public ViewModels.Rent.ResidentialsViewModel ViewModel {get; private set;}
+    public ViewModels.Rent.ResidentialsViewModel ViewModel { get; private set; }
 
     public Views.Rent.Residentials.EditorWindow EditorWin { get; private set; }
 
@@ -26,6 +27,9 @@ public sealed partial class ShellPage : Page
         ViewModel = vm ?? throw new ArgumentNullException(nameof(vm));
         ViewModel.SetEditorWin(win);// Must set Editor Winodw to VM.
         ViewModel.SetEditorShell(this);
+        
+        ViewModel.EventTitleChanged += (sender, arg) => OnEventTitleChanged(arg);
+
         _dlg = modalDialog;
 
         InitializeComponent();
@@ -39,14 +43,16 @@ public sealed partial class ShellPage : Page
         EditorWin.Activated += EditorWindow_Activated;
         EditorWin.Closed += EditorWindow_Closed;
         EditorWin.AppWindow.Closing += AppWindow_Closing;
-        EditorWin.Title = "";
-
+        EditorWin.Title = "賃貸住居用";
+        
+        /*
         var mainVM = App.GetService<MainViewModel>();
+        
         ViewModel.ModalWinWidth = mainVM.ModalWinWidth;
         ViewModel.ModalWinHeight = mainVM.ModalWinHeight;
         ViewModel.ModalWinTop = mainVM.ModalWinTop;
         ViewModel.ModalWinLeft = mainVM.ModalWinLeft;
-
+        */
     }
 
     private void Page_Loaded(object sender, RoutedEventArgs e)
@@ -58,7 +64,45 @@ public sealed partial class ShellPage : Page
 
     private async void AppWindow_Closing(Microsoft.UI.Windowing.AppWindow sender, Microsoft.UI.Windowing.AppWindowClosingEventArgs args)
     {
+        /*
+        if (ViewModel == null)
+        {
+            return;
+        }
 
+        if (ViewModel.IsEntryDirty)
+        {
+            args.Cancel = true; // needs Cancel = true here in order to show dialog.
+
+            // show ConfirmationDialog
+            var result = await _dlg.ShowEditorCloseConfirmationDialog(EditorWin);
+
+            if (result == ContentDialogResult.Primary)
+            {
+                // Save and close.
+
+                ViewModel.Save();
+
+                if (ViewModel.IsEntryDirty == false)
+                {
+                    EditorWin.Close();
+                }
+            }
+            else if (result == ContentDialogResult.Secondary)
+            {
+                // Discard change and close.
+                ViewModel.DiscardUnsavedFiles();
+
+                ViewModel.IsEntryDirty = false;
+                EditorWin.Close();
+            }
+            else if (result == ContentDialogResult.None)
+            {
+                // Cancel.
+
+            }
+        }
+        */
     }
 
     public void EditorWindow_Activated(object sender, Microsoft.UI.Xaml.WindowActivatedEventArgs args)
@@ -72,6 +116,29 @@ public sealed partial class ShellPage : Page
         EditorWin.Activated -= EditorWindow_Activated;
         EditorWin.Closed -= EditorWindow_Closed;
         EditorWin.AppWindow.Closing -= AppWindow_Closing;
+
+        if (sender is EditorWindow ewin)
+        {
+            // Save window size and position.
+            var appWindow = ewin.AppWindow;
+            if (appWindow != null)
+            {
+                if (appWindow.Presenter is OverlappedPresenter)
+                {
+                    var mainVM = App.GetService<MainViewModel>();
+                    mainVM.EditorWinHeight = (int)appWindow.Size.Height;
+                    mainVM.EditorWinWidth = (int)appWindow.Size.Width;
+                    mainVM.EditorWinTop = (int)appWindow.Position.Y;
+                    mainVM.EditorWinLeft = (int)appWindow.Position.X;
+
+                }
+            }
+        }
+    }
+
+    public void OnEventTitleChanged(EventArgs args)
+    {
+        EditorWin.Title = ViewModel?.WindowTitle ?? "賃貸住居用";
     }
 
     private void ContentFrame_NavigationFailed(object sender, NavigationFailedEventArgs e)

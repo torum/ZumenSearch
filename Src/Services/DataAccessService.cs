@@ -3,6 +3,7 @@ using System.Data;
 using System.Diagnostics;
 using ZumenSearch.Models;
 using ZumenSearch.Models.Rent.Residentials;
+using ZumenSearch.Services.Contracts;
 
 namespace ZumenSearch.Services;
 
@@ -40,7 +41,7 @@ public class DataAccessService : IDataAccessService
                         "loc_oaza_cho TEXT," +
                         "loc_choume TEXT," +
                         "loc_edaban TEXT," +
-                        "loc_location_full TEXT" + // 最後カンマ無し 注意
+                        "loc_location_full TEXT" + // Last column, no comma
                         ")";
                     tableCmd.ExecuteNonQuery();
 
@@ -60,6 +61,15 @@ public class DataAccessService : IDataAccessService
                         "description TEXT NOT NULL," +
                         "is_main INTEGER  NOT NULL," +
                         //"FOREIGN KEY (rent_residential_id) REFERENCES rent_residentials(rent_residential_id) ON DELETE CASCADE," +
+                        "FOREIGN KEY (rent_id) REFERENCES rent_residentials(rent_id) ON DELETE CASCADE," +
+                        "FOREIGN KEY (rent_id) REFERENCES rents(rent_id) ON DELETE CASCADE" +
+                        " )";
+                    tableCmd.ExecuteNonQuery();
+
+                    tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS rent_residentials_rooms (" +
+                        "room_id TEXT NOT NULL PRIMARY KEY," +
+                        "rent_id TEXT NOT NULL," +
+                        "name TEXT NOT NULL," +
                         "FOREIGN KEY (rent_id) REFERENCES rent_residentials(rent_id) ON DELETE CASCADE," +
                         "FOREIGN KEY (rent_id) REFERENCES rents(rent_id) ON DELETE CASCADE" +
                         " )";
@@ -207,13 +217,11 @@ public class DataAccessService : IDataAccessService
 
                 // TODO: more
 
-
-
                 res.AffectedCount = cmd.ExecuteNonQuery();
 
-                // Residentials table
                 cmd.Parameters.Clear();
 
+                // Residentials table
                 cmd.CommandType = CommandType.Text;
                 cmd.CommandText = "INSERT INTO rent_residentials (rent_id, comment) VALUES (@RentId, @Comment)"; //@RentResidentialId,  rent_residential_id, 
 
@@ -221,7 +229,6 @@ public class DataAccessService : IDataAccessService
                 cmd.Parameters.AddWithValue("@RentId", entry.Id);
                 cmd.Parameters.AddWithValue("@Comment", "");
 
-                //res.AffectedCount += cmd.ExecuteNonQuery();
                 cmd.ExecuteNonQuery();
 
                 // Picture (building) table
@@ -287,6 +294,32 @@ public class DataAccessService : IDataAccessService
                         }
                     }
                 }
+
+                // Room table
+                if (entry.Rooms.Count > 0)
+                {
+                    foreach (var pic in entry.Rooms)
+                    {
+                        var sqlInsertIntoRentLivingRoom = "INSERT INTO rent_residentials_rooms (room_id, rent_id, name) VALUES (@RoomId, @RentId, @Name)";
+
+                        cmd.CommandText = sqlInsertIntoRentLivingRoom;   
+
+                        // ループなので、前のパラメーターをクリアする。
+                        cmd.Parameters.Clear();
+
+                        cmd.Parameters.AddWithValue("@RoomId", pic.Id);
+                        cmd.Parameters.AddWithValue("@RentId", entry.Id);
+                        cmd.Parameters.AddWithValue("@Name", pic.RoomName);
+
+                        var r = cmd.ExecuteNonQuery();
+                        if (r > 0)
+                        {
+                            pic.IsNew = false;
+                            pic.IsModified = false;
+                        }
+                    }
+                }
+
 
                 // commit
                 cmd.Transaction.Commit();
@@ -390,7 +423,7 @@ public class DataAccessService : IDataAccessService
             {
                 cmd.CommandType = CommandType.Text;
 
-                // Main
+                // Rents table
                 var sql = "UPDATE rents SET ";
                 sql += string.Format("name = '{0}', ", EscapeSingleQuote(entry.Name));
                 sql += string.Format("loc_pref_id = '{0}', ", EscapeSingleQuote(entry.LocPrefId));
@@ -404,17 +437,14 @@ public class DataAccessService : IDataAccessService
                 sql += string.Format("loc_edaban = '{0}', ", EscapeSingleQuote(entry.LocEdaban));
                 sql += string.Format("loc_location_full = '{0}' ", EscapeSingleQuote(entry.LocLocationFull)); // 最後カンマ無し 注意
 
-
                 // TODO: more
 
-
-                //sql += string.Format("updated = '{0}'", updated.ToString("yyyy-MM-dd HH:mm:ss"));
                 sql += string.Format(" WHERE rent_id = '{0}'; ", entry.Id);
 
                 cmd.CommandText = sql;
                 res.AffectedCount = cmd.ExecuteNonQuery();
 
-                // Residentials
+                // Residentials table
                 sql = "UPDATE rent_residentials SET ";
                 sql += string.Format("comment = '{0}' ", EscapeSingleQuote("some comment"));
                 //sql += String.Format("title = '{0}', ", EscapeSingleQuote(feedTitle));
@@ -425,11 +455,10 @@ public class DataAccessService : IDataAccessService
 
                 cmd.CommandText = sql;
                 cmd.ExecuteNonQuery();
-
-                // Pictures (Building)
+                
                 cmd.Parameters.Clear();
 
-                // 物件写真の追加または更新
+                // Residentials pictures table - Insert or Update
                 if (entry.BuildingPictures.Count > 0)
                 {
                     foreach (var pic in entry.BuildingPictures)
@@ -514,8 +543,73 @@ public class DataAccessService : IDataAccessService
 
                 cmd.Parameters.Clear();
 
-                //
+                // Rooms table - Insert, Update, Delete
+                if (entry.Rooms.Count > 0)
+                {
+                    foreach (var room in entry.Rooms)
+                    {
+                        var exec = false;
 
+                        if (room.IsNew)
+                        {
+                            var sqlInsertIntoRentLivingRoom = "INSERT INTO rent_residentials_rooms (room_id, rent_id, name) VALUES (@roomId, @RentId, @Nam)";
+
+                            // 追加
+                            cmd.CommandText = sqlInsertIntoRentLivingRoom;
+                            exec = true;
+                        }
+                        else if (room.IsModified)
+                        {
+                            var sqlUpdateRentLivingRoom = string.Format("UPDATE rent_residentials_rooms SET name = @Nam WHERE room_id = '{0}'", room.Id);
+                            // 更新
+                            cmd.CommandText = sqlUpdateRentLivingRoom;
+
+                            exec = true;
+                        }
+
+                        if (exec)
+                        {
+                            // ループなので、前のパラメーターをクリアする。
+                            cmd.Parameters.Clear();
+
+                            cmd.Parameters.AddWithValue("@roomId", room.Id);
+                            //cmd.Parameters.AddWithValue("@RentResidentialId", entry.Id + "_1");
+                            cmd.Parameters.AddWithValue("@RentId", entry.Id);
+                            cmd.Parameters.AddWithValue("@Nam", room.RoomName);
+
+                            var result = cmd.ExecuteNonQuery();
+                            if (result > 0)
+                            {
+                                room.IsNew = false;
+                                room.IsModified = false;
+                            }
+                        }
+
+                    }
+                }
+
+                cmd.Parameters.Clear();
+
+                // 部屋の削除リストを処理
+                if (entry.RoomsToBeDeleted.Count > 0)
+                {
+                    foreach (var delr in entry.RoomsToBeDeleted)
+                    {
+                        // 削除
+                        var sqlDeleteRentLivingRoom = string.Format("DELETE FROM rent_residentials_rooms WHERE room_id = '{0}'", delr.Id);
+
+                        cmd.CommandText = sqlDeleteRentLivingRoom;
+                        var DelRentLivingRoomResult = cmd.ExecuteNonQuery();
+                        if (DelRentLivingRoomResult > 0)
+                        {
+                            // TODO:
+                            Debug.WriteLine("Room deleted");
+                        }
+                    }
+                    entry.RoomsToBeDeleted.Clear();
+                }
+
+                // Commit
                 cmd.Transaction.Commit();
             }
             catch (Exception e)
@@ -940,6 +1034,26 @@ public class DataAccessService : IDataAccessService
 
                     entry.BuildingPictures.Add(rlpic);
 
+                }
+            }
+
+            // 部屋
+            cmd.CommandText = string.Format("SELECT * FROM rent_residentials_rooms WHERE rent_id = '{0}'", id);
+            using (var reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    var roomId = Convert.ToString(reader["room_id"]) ?? string.Empty;
+                    var room = new Room(roomId)
+                    {
+                        RoomName = Convert.ToString(reader["name"]) ?? string.Empty,
+                        IsNew = false,
+                        IsModified = false
+                    };
+
+                    Debug.WriteLine($"Room ID: {room.Id}, Room Name: {room.RoomName}");
+
+                    entry.Rooms.Add(room);
                 }
             }
 

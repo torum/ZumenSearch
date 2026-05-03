@@ -2,7 +2,7 @@
 using Microsoft.UI.Xaml.Controls;
 using ZumenSearch.Models;
 
-namespace ZumenSearch.Services;
+namespace ZumenSearch.Services.Contracts;
 
 public interface IModalDialogService
 {
