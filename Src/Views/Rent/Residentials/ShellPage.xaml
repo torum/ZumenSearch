@@ -38,6 +38,10 @@
 
         </Grid>
 
+        <Frame x:Name="ContentFrame" Grid.Row="1" Navigated="ContentFrame_Navigated" NavigationFailed="ContentFrame_NavigationFailed"/>
+        
+        <!--
+
         <NavigationView x:Name="NavigationViewControl" 
                         Grid.Row="1"
                             ItemInvoked="NavigationViewControl_ItemInvoked" 
@@ -72,11 +76,11 @@
                 </Grid.RowDefinitions>
 
                 <Grid Grid.Row="0"></Grid>
-
-                <!-- NavigationView content frame -->
                 <Frame x:Name="ContentFrame" Grid.Row="1" Navigated="NavigationViewControl_Navigated" NavigationFailed="ContentFrame_NavigationFailed"/>
             </Grid>
 
         </NavigationView>
+        
+        -->
     </Grid>
 </Page>

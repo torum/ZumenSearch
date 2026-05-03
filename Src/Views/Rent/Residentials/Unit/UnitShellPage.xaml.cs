@@ -48,6 +48,8 @@ public sealed partial class UnitShellPage : Page
 
         InitializeComponent();
 
+        BreadcrumbBar1.ItemClicked += BreadcrumbBar_ItemClicked;
+
         /*
         ViewModel = vm;//new ViewModels.Rent.Residentials.Editor.Modal.ModalViewModel();//App.GetService<RentLivingEditUnitShellViewModel>();
         EditorVM = editorVm;
@@ -227,6 +229,17 @@ public sealed partial class UnitShellPage : Page
         */
     }
 
+    private void BreadcrumbBar_ItemClicked(BreadcrumbBar sender, BreadcrumbBarItemClickedEventArgs args)
+    {
+        if (args.Index == 0)
+        {
+            var hoge = args.Item as Breadcrumb;
+
+            //Debug.WriteLine("BreadcrumbBar_ItemClicked: " + hoge?.Name + ", Page: " + hoge?.Page);
+            ViewModel?.GoToBldgShellPageCommand.Execute(null);
+        }
+    }
+
     public void OnEventBackToSummary(string arg)
     {
         _dispatcherService?.TryEnqueue(() =>
@@ -254,7 +267,6 @@ public sealed partial class UnitShellPage : Page
     {
         if ((e.Parameter is ViewModels.Rent.ResidentialsViewModel) && (e.Parameter != null))
         {
-            //_editorShell = e.Parameter as Views.Rent.Residentials.EditorShell;
             ViewModel = e.Parameter as ViewModels.Rent.ResidentialsViewModel;
 
             ViewModel?.SetUnitShell(this);

@@ -197,6 +197,12 @@ public partial class MainViewModel : ObservableObject
             }
         };
 
+        /*
+        var dpi = Windows.Win32.PInvoke.GetDpiForWindow(new Windows.Win32.Foundation.HWND(WinRT.Interop.WindowNative.GetWindowHandle(this)));
+        var scalingFactor = (float)dpi / 96;
+        AppWindow.Resize(new Windows.Graphics.SizeInt32((int)(400.0f * scalingFactor), (int)(300.0f * scalingFactor)));
+        */
+
         editorWindow.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(EditorWinLeft, EditorWinTop, EditorWinWidth, EditorWinHeight));
 
         //editorWindow.AppWindow.Show();

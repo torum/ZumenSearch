@@ -41,6 +41,7 @@
 
                 <StackPanel Grid.Row="0" Grid.Column="1">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                        <AppBarButton Icon="Back" Label="戻る" Command="{x:Bind ViewModel.GoToBldgShellPageCommand}"/>
                         <AppBarButton Icon="Save" Label="保存" Command="{x:Bind ViewModel.SaveCommand}"/>
                     </StackPanel>
                 </StackPanel>

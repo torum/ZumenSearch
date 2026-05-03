@@ -100,6 +100,9 @@ public sealed partial class MainWindow : Window
 
                     foreach (var editor in _viewModel.EditorList)
                     {
+
+                        //if (editor ) IsDirty
+
                         editor.Activate();
                     }
                 }

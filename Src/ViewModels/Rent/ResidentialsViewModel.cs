@@ -29,24 +29,6 @@ public partial class ResidentialsViewModel : ObservableObject
     public int ModalWinLeft = 130;
     public int ModalWinTop = 130;
 
-    // Variable to hold reference to the Editor Window instance.
-    private Views.Rent.Residentials.EditorWindow? _editorWin;
-
-    // Variable to hold reference to the ShellPage instance. It is set from ShellPage's OnNavigatedTo() when this ViewModel is set as DataContext of the ShellPage.
-    private Views.Rent.Residentials.ShellPage? _shellPage;
-    private Views.Rent.Residentials.Bldg.BldgShellPage? _bldgShellPage;
-    private Views.Rent.Residentials.Unit.UnitShellPage? _unitShellPage;
-
-    // The Entry property holds the COPY of current RentResidential entry being edited.
-    // Do not use it directly in the UI. Apply changes to this object in SaveAsync() to save the changes.
-    // MainViewModel creates a new instance of this class and call EditorShell.SetEntry(EntryResidentialFull) and sets this property.
-    private Models.Rent.Residentials.EntryResidentialFull _entry;
-
-    // Locak directory path to save blob data such as pictures and PDFs.
-    private string _entryDataDirectoryPath;
-    // Tmp file list to hold unsaved picture files. (if entry is not saved, delete on close)
-    private readonly List<string> _unsavedBuildingPictureFileList = [];
-
     public ObservableCollection<Breadcrumb> BreadcrumbItems { get; set; } =
     [
         new() { Name = "建物", Page = typeof(Views.Rent.Residentials.Bldg.BasicPage).FullName! },
@@ -1159,16 +1141,36 @@ public partial class ResidentialsViewModel : ObservableObject
 
     #endregion
 
+    // Variable to hold reference to the Editor Window instance.
+    private Views.Rent.Residentials.EditorWindow? _editorWin;
+
+    // Variable to hold reference to the ShellPage instance. It is set from ShellPage's OnNavigatedTo() when this ViewModel is set as DataContext of the ShellPage.
+    private Views.Rent.Residentials.ShellPage? _shellPage;
+    private Views.Rent.Residentials.Bldg.BldgShellPage? _bldgShellPage;
+    private Views.Rent.Residentials.Unit.UnitShellPage? _unitShellPage;
+
+    private readonly MainWindow _mainWindow;
+
+    // The Entry property holds the COPY of current RentResidential entry being edited.
+    // Do not use it directly in the UI. Apply changes to this object in SaveAsync() to save the changes.
+    // MainViewModel creates a new instance of this class and call EditorShell.SetEntry(EntryResidentialFull) and sets this property.
+    private Models.Rent.Residentials.EntryResidentialFull _entry;
+
+    // Locak directory path to save blob data such as pictures and PDFs.
+    private string _entryDataDirectoryPath;
+    // Tmp file list to hold unsaved picture files. (if entry is not saved, delete on close)
+    private readonly List<string> _unsavedBuildingPictureFileList = [];
+
     #region == Services ==
-    
+
     // The IDataAccessService is used to access the data layer for saving and updating entries.
     private readonly IDataAccessService _dataAccessService;
     private readonly IDataAccessLocationService _dataAccessLocationService;
     private readonly IModalDialogService _dlg;
     private readonly IDispatcherService _dispatcherService;
-    private readonly MainWindow _mainWindow;
 
     #endregion
+
 
     public ResidentialsViewModel(MainWindow mainWindow, IDispatcherService dispatcherService, IDataAccessService dataAccessService, IModalDialogService modalDialog, IDataAccessLocationService dataAccessLocationService)
     {
@@ -1525,10 +1527,8 @@ public partial class ResidentialsViewModel : ObservableObject
             return;
         }
 
-        Debug.WriteLine("Navigating to Unit Shell Page.");
-
         // TODO: Views.Rent.Residentials.Bldg.Unit.ShellPage to ....
-        _shellPage?.NavigationFrame.Navigate(typeof(ZumenSearch.Views.Rent.Residentials.Unit.UnitShellPage), this, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom });//_mainWindow, _dispatcherService, _dlg, this
+        _shellPage?.NavigationFrame.Navigate(typeof(ZumenSearch.Views.Rent.Residentials.Unit.UnitShellPage), this, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });//_mainWindow, _dispatcherService, _dlg, this
 
         /*
         //TODO: 
@@ -1591,6 +1591,21 @@ public partial class ResidentialsViewModel : ObservableObject
     #endregion
 
     #region == Navigation == 
+
+    [RelayCommand]
+    private void GoToBldgShellPage()
+    {
+        if (_shellPage is null)
+        {
+            Debug.WriteLine("ShellPage is not set. Cannot navigate to Building Shell Page.");
+            return;
+        }
+
+        if (_shellPage.NavigationFrame.Navigate(typeof(Views.Rent.Residentials.Bldg.BldgShellPage), this, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft }))
+        {
+
+        }
+    }
 
     // Go Back command (don't use this?)
     [RelayCommand]

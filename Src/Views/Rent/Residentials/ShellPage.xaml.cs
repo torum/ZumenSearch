@@ -79,6 +79,7 @@ public sealed partial class ShellPage : Page
         throw new Exception("Failed to load Page " + e.SourcePageType.FullName);
     }
 
+    /*
     private void NavigationViewControl_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
     {
         if (args.IsSettingsInvoked == true)
@@ -108,27 +109,6 @@ public sealed partial class ShellPage : Page
     }
 
 
-    private void NavigationViewControl_Navigated(object sender, Microsoft.UI.Xaml.Navigation.NavigationEventArgs e)
-    {
-        if (ContentFrame.SourcePageType == typeof(Views.SettingsPage))
-        {
-            // SettingsItem is not part of NavView.MenuItems, and doesn't have a Tag.
-            NavigationViewControl.SelectedItem = (NavigationViewItem)NavigationViewControl.SettingsItem;
-        }
-        else if (ContentFrame.SourcePageType != null)
-        {
-            var selectedItem = FindNavigationViewItemWithTag(ContentFrame.SourcePageType.FullName!);
-            if (selectedItem != null)
-            {
-                NavigationViewControl.SelectedItem = selectedItem;
-            }
-            else
-            {
-                Debug.WriteLine("No menu item with tag matching the current page found in NavigationViewControl @Views.Rent.Residentials.ShellPage. Current page: " + ContentFrame.SourcePageType.FullName);
-            }
-        }
-    }
-
     private NavigationViewItem? FindNavigationViewItemWithTag(string tag)
     {
         foreach (var item in NavigationViewControl.MenuItems.OfType<NavigationViewItem>())
@@ -154,9 +134,29 @@ public sealed partial class ShellPage : Page
 
         return null;
     }
+    */
 
-    private void NavigationViewControl_Loaded(object sender, RoutedEventArgs e)
+
+    private void ContentFrame_Navigated(object sender, Microsoft.UI.Xaml.Navigation.NavigationEventArgs e)
     {
-
+        /*
+        if (ContentFrame.SourcePageType == typeof(Views.SettingsPage))
+        {
+            // SettingsItem is not part of NavView.MenuItems, and doesn't have a Tag.
+            NavigationViewControl.SelectedItem = (NavigationViewItem)NavigationViewControl.SettingsItem;
+        }
+        else if (ContentFrame.SourcePageType != null)
+        {
+            var selectedItem = FindNavigationViewItemWithTag(ContentFrame.SourcePageType.FullName!);
+            if (selectedItem != null)
+            {
+                NavigationViewControl.SelectedItem = selectedItem;
+            }
+            else
+            {
+                Debug.WriteLine("No menu item with tag matching the current page found in NavigationViewControl @Views.Rent.Residentials.ShellPage. Current page: " + ContentFrame.SourcePageType.FullName);
+            }
+        }
+        */
     }
 }

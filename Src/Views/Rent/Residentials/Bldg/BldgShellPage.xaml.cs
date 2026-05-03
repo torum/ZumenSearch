@@ -101,7 +101,7 @@ public sealed partial class BldgShellPage : Page
             Debug.WriteLine("BldgShellPage.OnNavigatedTo: Invalid parameter. Expected ResidentialsViewModel.");
         }
 
-        Debug.WriteLine("BldgShellPage.OnNavigatedTo: ViewModel is " + (ViewModel != null ? "set" : "null"));
+        //Debug.WriteLine("BldgShellPage.OnNavigatedTo: ViewModel is " + (ViewModel != null ? "set" : "null"));
 
         base.OnNavigatedTo(e);
     }
@@ -227,7 +227,7 @@ public sealed partial class BldgShellPage : Page
         }
         */
 
-        Debug.WriteLine("NavView_Loaded: Navigating to BasicPage with ViewModel. ViewModel is " + (ViewModel != null ? "set" : "null"));
+        //Debug.WriteLine("NavView_Loaded: Navigating to BasicPage with ViewModel. ViewModel is " + (ViewModel != null ? "set" : "null"));
 
         // Pass Frame when navigate.  //, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft } //, new SuppressNavigationTransitionInfo() //new EntranceNavigationTransitionInfo()
         if (ContentFrame.Navigate(typeof(ZumenSearch.Views.Rent.Residentials.Bldg.BasicPage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom }))
