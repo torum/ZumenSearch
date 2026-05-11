@@ -5,7 +5,7 @@ namespace ZumenSearch.Views.Rent.Residentials.Bldg;
 
 public sealed partial class LocationPage : Page
 {
-    public ViewModels.Rent.ResidentialsViewModel? ViewModel;
+    public ViewModels.Rent.Residentials.MainViewModel? ViewModel;
 
     public LocationPage()
     {
@@ -16,7 +16,7 @@ public sealed partial class LocationPage : Page
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
-        if (e.Parameter is ViewModels.Rent.ResidentialsViewModel vm)
+        if (e.Parameter is ViewModels.Rent.Residentials.MainViewModel vm)
         {
             ViewModel = vm;
         }

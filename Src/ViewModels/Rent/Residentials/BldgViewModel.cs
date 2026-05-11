@@ -1,115 +1,46 @@
-﻿using System;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Microsoft.UI.Xaml.Media.Animation;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Threading.Tasks;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using Microsoft.UI.Windowing;
-using Microsoft.UI.Xaml.Media.Animation;
+using System.Text;
 using Windows.System;
 using ZumenSearch.Models;
 using ZumenSearch.Models.Rent.Residentials;
 using ZumenSearch.Services.Contracts;
-using ZumenSearch.Views;
 
-namespace ZumenSearch.ViewModels.Rent;
+namespace ZumenSearch.ViewModels.Rent.Residentials;
 
-public partial class ResidentialsViewModel : ObservableObject
+public partial class BldgViewModel : ObservableObject
 {
-    #region == Shellプロパティ ==
+    #region == Private Variables ==
 
-    public ObservableCollection<Breadcrumb> BreadcrumbItems { get; set; } =
-    [
-        new() { Name = "建物", Page = typeof(Views.Rent.Residentials.Bldg.BasicPage).FullName! },
-        new() { Name = "基本", Page = typeof(Views.Rent.Residentials.Bldg.BasicPage).FullName! }
-    ];
+    private readonly ViewModels.Rent.Residentials.MainViewModel _mainViewModel;
 
-    public ObservableCollection<Breadcrumb> BreadcrumbItemsUnit { get; set; } =
-    [
-        new() { Name = "建物", Page = typeof(Views.Rent.Residentials.Bldg.BasicPage).FullName! },
-        new() { Name = "部屋", Page = typeof(Views.Rent.Residentials.Unit.BasicPage).FullName! },
-        new() { Name = "基本", Page = typeof(Views.Rent.Residentials.Unit.BasicPage).FullName! }
-    ];
+    // The Entry property holds the COPY of current RentResidential entry being edited.
+    // Do not use it directly in the UI. Apply changes to this object in SaveAsync() to save the changes.
+    // MainViewModel creates a new instance of this class and call EditorShell.SetEntry(EntryResidentialFull) and sets this property.
+    private readonly Models.Rent.Residentials.EntryResidentialFull _entry;
 
-    public string WindowTitle
-    {
-        get
-        {
-            if (string.IsNullOrEmpty(Name))
-            {
-                return field;
-            }
-            else
-            {
-                if (string.IsNullOrEmpty(RoomName))
-                {
-                    return $"{field} - {Name}";
-                }
-                else
-                {
-                    return $"{field} - {Name}: {RoomName}";
-                }
-            }
-            
-        }
-    } = "賃貸住居用";
+    // Local directory path to save blob data such as pictures and PDFs.
+    private string _entryDataDirectoryPath;
 
-    // This flag indicates if the building is dirty (i.e., has unsaved changes).
-    public bool IsBldgDirty
-    {
-        get => field;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-                //
-                SaveCommand.NotifyCanExecuteChanged();
-            }
-        }
-    }
-
-    // This flag indicates if the room is dirty (i.e., has unsaved changes).
-    public bool IsRoomDirty
-    {
-        get => field;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-                //
-                SaveCommand.NotifyCanExecuteChanged();
-            }
-        }
-    }
+    // Tmp file list to hold unsaved picture files. (if entry is not saved, delete on close)
+    private readonly List<string> _unsavedBuildingPictureFileList = [];
 
     #endregion
 
-    #region == 部屋基本プロパティ ==
+    #region == Public Properties ==
 
-    // 部屋番号
-    public string RoomName
-    {
-        get => field ?? string.Empty; // Ensure a non-null value is returned
-        set
-        {
-            if (SetProperty(ref field, value.Trim()))
-            {
-                IsRoomDirty = true;
-                _editRoom?.IsModified = true;
+    public EnumEntryStatus EntryStatus => _entry.EntryStatus;
 
-                OnPropertyChanged(nameof(WindowTitle));
-
-                EventTitleChanged?.Invoke(this, EventArgs.Empty);
-            }
-        }
-    }
-
-    #endregion
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(SaveCommand))]
+    public partial bool IsDirty { get; private set; }
 
     #region == 建物基本プロパティ == 
 
@@ -121,10 +52,12 @@ public partial class ResidentialsViewModel : ObservableObject
         {
             if (SetProperty(ref field, value.Trim()))
             {
-                IsBldgDirty = true;
-                OnPropertyChanged(nameof(WindowTitle));
+                IsDirty = true;
 
-                EventTitleChanged?.Invoke(this, EventArgs.Empty);
+                // Update title with dummy value.
+                _mainViewModel.WindowTitle = string.Empty;
+
+                //EventTitleChanged?.Invoke(this, EventArgs.Empty);//TODO
             }
         }
     }
@@ -151,7 +84,7 @@ public partial class ResidentialsViewModel : ObservableObject
         {
             if (SetProperty(ref field, value))
             {
-                IsBldgDirty = true;
+                IsDirty = true;
             }
         }
     }
@@ -164,11 +97,12 @@ public partial class ResidentialsViewModel : ObservableObject
         {
             if (SetProperty(ref field, value))
             {
-                IsBldgDirty = true;
+                IsDirty = true;
                 OnPropertyChanged(nameof(IsNotUnitOwnership));
 
+                // TODO:
                 // If this is set, then show/hide the owner and zumen from shell menu.
-                EventIsUnitOwnership?.Invoke(this, field);
+                //EventIsUnitOwnership?.Invoke(this, field);
             }
         }
     }
@@ -201,7 +135,7 @@ public partial class ResidentialsViewModel : ObservableObject
         {
             if (SetProperty(ref field, value))
             {
-                IsBldgDirty = true;
+                IsDirty = true;
             }
         }
     }
@@ -223,18 +157,18 @@ public partial class ResidentialsViewModel : ObservableObject
                 return;
             }
 
-            var text = ReplaceZenkakuNumber(value.Trim());
+            var text = Helpers.Common.ReplaceZenkakuNumber(value.Trim());
 
-            if (CanConvertToPositiveNumber(text))
+            if (Helpers.Common.CanConvertToPositiveNumber(text))
             {
                 field = text;
-                IsBldgDirty = true;
+                IsDirty = true;
             }
             else
             {
                 // TODO: show error
                 field = string.Empty;
-                //IsBldgDirty = true;
+                //IsDirty = true;
             }
 
             OnPropertyChanged(nameof(AboveGroundFloorCount));
@@ -257,18 +191,18 @@ public partial class ResidentialsViewModel : ObservableObject
                 return;
             }
 
-            var text = ReplaceZenkakuNumber(value.Trim());
+            var text = Helpers.Common.ReplaceZenkakuNumber(value.Trim());
 
-            if (CanConvertToPositiveNumber(text))
+            if (Helpers.Common.CanConvertToPositiveNumber(text))
             {
                 field = text;
-                IsBldgDirty = true;
+                IsDirty = true;
             }
             else
             {
                 // TODO: show error
                 field = string.Empty;
-                //IsBldgDirty = true;
+                //IsDirty = true;
             }
 
             OnPropertyChanged(nameof(BasementFloorCount));
@@ -291,18 +225,18 @@ public partial class ResidentialsViewModel : ObservableObject
                 return;
             }
 
-            var text = ReplaceZenkakuNumber(value.Trim());
+            var text = Helpers.Common.ReplaceZenkakuNumber(value.Trim());
 
-            if (CanConvertToPositiveNumber(text))
+            if (Helpers.Common.CanConvertToPositiveNumber(text))
             {
                 field = text;
-                IsBldgDirty = true;
+                IsDirty = true;
             }
             else
             {
                 // TODO: show error
                 field = string.Empty;
-                //IsBldgDirty = true;
+                //IsDirty = true;
             }
 
             OnPropertyChanged(nameof(TotalUnitCount));
@@ -317,7 +251,7 @@ public partial class ResidentialsViewModel : ObservableObject
         {
             if (SetProperty(ref field, value))
             {
-                IsBldgDirty = true;
+                IsDirty = true;
                 OnPropertyChanged(nameof(BuiltYearAndMonth));
                 OnPropertyChanged(nameof(BuiltYearAndMonthPreview));
             }
@@ -347,12 +281,12 @@ public partial class ResidentialsViewModel : ObservableObject
     // 不動産ID (13桁)
     public string FudousanId
     {
-        get => field ?? string.Empty; 
+        get => field ?? string.Empty;
         set
         {
             if (SetProperty(ref field, value.Trim()))
             {
-                IsBldgDirty = true;
+                IsDirty = true;
             }
         }
     }
@@ -365,7 +299,7 @@ public partial class ResidentialsViewModel : ObservableObject
         {
             if (SetProperty(ref field, value.Trim()))
             {
-                IsBldgDirty = true;
+                IsDirty = true;
             }
         }
     } = "0000";
@@ -374,7 +308,7 @@ public partial class ResidentialsViewModel : ObservableObject
 
     #region == 所在地プロパティ ==
 
-    private string? MachiazaId;
+    public string? MachiazaId;
 
     public ObservableCollection<Pref> Prefs =
     [
@@ -436,7 +370,7 @@ public partial class ResidentialsViewModel : ObservableObject
             {
                 if (field is not null)
                 {
-                    IsBldgDirty = true;
+                    IsDirty = true;
                     MachiazaId = null; // Reset MachiazaId
                 }
 
@@ -479,7 +413,7 @@ public partial class ResidentialsViewModel : ObservableObject
             {
                 if (field is not null)
                 {
-                    IsBldgDirty = true;
+                    IsDirty = true;
                     MachiazaId = field?.MachiazaId;
                 }
 
@@ -527,7 +461,7 @@ public partial class ResidentialsViewModel : ObservableObject
             {
                 if (field is not null)
                 {
-                    IsBldgDirty = true;
+                    IsDirty = true;
                     MachiazaId = field?.MachiazaId;
                 }
 
@@ -583,7 +517,7 @@ public partial class ResidentialsViewModel : ObservableObject
                 if (field is not null)
                 {
                     // The value (_selectedChou) may be an empty string (and it is OK).
-                    IsBldgDirty = true;
+                    IsDirty = true;
                     MachiazaId = field?.MachiazaId;
                 }
 
@@ -599,7 +533,7 @@ public partial class ResidentialsViewModel : ObservableObject
         {
             if (SetProperty(ref field, value))
             {
-                IsBldgDirty = true;
+                IsDirty = true;
                 OnPropertyChanged(nameof(AddressPreview));
             }
         }
@@ -613,7 +547,7 @@ public partial class ResidentialsViewModel : ObservableObject
         {
             if (SetProperty(ref field, value))
             {
-                IsBldgDirty = true;
+                IsDirty = true;
                 OnPropertyChanged(nameof(AddressPreview));
             }
         }
@@ -651,7 +585,7 @@ public partial class ResidentialsViewModel : ObservableObject
             }
 
             field = value;
-            IsBldgDirty = true;
+            IsDirty = true;
             OnPropertyChanged(nameof(LocationLatitude));
             OnPropertyChanged(nameof(GeoUri));
             ShowGoogleMapsCommand.NotifyCanExecuteChanged();
@@ -670,7 +604,7 @@ public partial class ResidentialsViewModel : ObservableObject
             }
 
             field = value;
-            IsBldgDirty = true;
+            IsDirty = true;
             OnPropertyChanged(nameof(LocationLongitude));
             OnPropertyChanged(nameof(GeoUri));
             ShowGoogleMapsCommand.NotifyCanExecuteChanged();
@@ -701,7 +635,7 @@ public partial class ResidentialsViewModel : ObservableObject
         {
             if (SetProperty(ref field, value))
             {
-                IsBldgDirty = true;
+                IsDirty = true;
                 // Clear  old value.
                 SelectedRailStation1 = null;
             }
@@ -724,7 +658,7 @@ public partial class ResidentialsViewModel : ObservableObject
 
             if (SetProperty(ref field, value))
             {
-                IsBldgDirty = true;
+                IsDirty = true;
             }
         }
     }
@@ -744,18 +678,18 @@ public partial class ResidentialsViewModel : ObservableObject
                 return;
             }
 
-            var text = ReplaceZenkakuNumber(value.Trim());
+            var text = Helpers.Common.ReplaceZenkakuNumber(value.Trim());
 
-            if (CanConvertToPositiveNumber(text))
+            if (Helpers.Common.CanConvertToPositiveNumber(text))
             {
                 field = text;
-                IsBldgDirty = true;
+                IsDirty = true;
             }
             else
             {
                 // TODO: show error
                 field = string.Empty;
-                //IsBldgDirty = true;
+                //IsDirty = true;
             }
 
             OnPropertyChanged(nameof(EkiToho1));
@@ -769,7 +703,7 @@ public partial class ResidentialsViewModel : ObservableObject
         {
             if (SetProperty(ref field, value))
             {
-                IsBldgDirty = true;
+                IsDirty = true;
             }
         }
     } = string.Empty;
@@ -789,18 +723,18 @@ public partial class ResidentialsViewModel : ObservableObject
                 return;
             }
 
-            var text = ReplaceZenkakuNumber(value.Trim());
+            var text = Helpers.Common.ReplaceZenkakuNumber(value.Trim());
 
-            if (CanConvertToPositiveNumber(text))
+            if (Helpers.Common.CanConvertToPositiveNumber(text))
             {
                 field = text;
-                IsBldgDirty = true;
+                IsDirty = true;
             }
             else
             {
                 // TODO: show error
                 field = string.Empty;
-                //IsBldgDirty = true;
+                //IsDirty = true;
             }
 
             OnPropertyChanged(nameof(BusJyousya1));
@@ -822,18 +756,18 @@ public partial class ResidentialsViewModel : ObservableObject
                 return;
             }
 
-            var text = ReplaceZenkakuNumber(value.Trim());
+            var text = Helpers.Common.ReplaceZenkakuNumber(value.Trim());
 
-            if (CanConvertToPositiveNumber(text))
+            if (Helpers.Common.CanConvertToPositiveNumber(text))
             {
                 field = text;
-                IsBldgDirty = true;
+                IsDirty = true;
             }
             else
             {
                 // TODO: show error
                 field = string.Empty;
-                //IsBldgDirty = true;
+                //IsDirty = true;
             }
 
             OnPropertyChanged(nameof(BusStopToho1));
@@ -944,7 +878,7 @@ public partial class ResidentialsViewModel : ObservableObject
         {
             if (SetProperty(ref field, value))
             {
-                IsBldgDirty = true;
+                IsDirty = true;
                 OnPropertyChanged(nameof(MemoPreview));
             }
         }
@@ -957,7 +891,7 @@ public partial class ResidentialsViewModel : ObservableObject
             string s;
             if (TatemonoMemo.Length > 14)
             {
-                s = TatemonoMemo[..14] + "..." ;
+                s = TatemonoMemo[..14] + "...";
             }
             else
             {
@@ -979,7 +913,7 @@ public partial class ResidentialsViewModel : ObservableObject
         {
             if (SetProperty(ref field, value))
             {
-                IsBldgDirty = true;
+                IsDirty = true;
 
                 OpenBuildingPictureDirectoryCommand.NotifyCanExecuteChanged();
             }
@@ -993,7 +927,7 @@ public partial class ResidentialsViewModel : ObservableObject
         {
             if (SetProperty(ref field, value))
             {
-               //
+                //
             }
         }
     } = false;
@@ -1076,7 +1010,7 @@ public partial class ResidentialsViewModel : ObservableObject
     public BuildingPictureType? SelectedBuildingPictureType
     {
         get => _selectedBuildingPictureType;
-        set 
+        set
         {
             if (SelectedBuildingPicture is null)
             {
@@ -1092,7 +1026,7 @@ public partial class ResidentialsViewModel : ObservableObject
                     //Debug.WriteLine($"_selectedBuildingPictureType changed: {_selectedBuildingPictureType.Label}");
 
                     SelectedBuildingPicture.PictureType = _selectedBuildingPictureType;
-                    IsBldgDirty = true;
+                    IsDirty = true;
                     SelectedBuildingPicture.IsModified = true;
                     //BuildingPicturePropertiesIsDirty = true;
                 }
@@ -1121,7 +1055,7 @@ public partial class ResidentialsViewModel : ObservableObject
             if (SetProperty(ref _buildingPictureDescription, value))
             {
                 SelectedBuildingPicture.Description = _buildingPictureDescription;
-                IsBldgDirty = true;
+                IsDirty = true;
                 SelectedBuildingPicture.IsModified = true;
                 //BuildingPicturePropertiesIsDirty = true;
             }
@@ -1153,7 +1087,7 @@ public partial class ResidentialsViewModel : ObservableObject
                 }
 
                 SelectedBuildingPicture.IsMain = _buildingPictureIsMain;
-                IsBldgDirty = true;
+                IsDirty = true;
                 SelectedBuildingPicture.IsModified = true;
                 //BuildingPicturePropertiesIsDirty = true;
             }
@@ -1164,14 +1098,14 @@ public partial class ResidentialsViewModel : ObservableObject
 
     #region == 部屋 ==
 
-    public ObservableCollection<Room> Rooms
+    public ObservableCollection<Models.Rent.Residentials.Room> Rooms
     {
         get;
         set
         {
             if (SetProperty(ref field, value))
             {
-                //IsBldgDirty = true;
+                IsDirty = true;
             }
         }
     } = [];
@@ -1179,173 +1113,48 @@ public partial class ResidentialsViewModel : ObservableObject
 
     #endregion
 
-    #region == Events
-
-    // The event handlers below are used to notify the UI about various actions that can be performed in the editor.
-    // EditorShell subscribes to these events to handle the actions accordingly.
-    public event EventHandler? EventBackToSummary;
-    public event EventHandler? EventEditLocation;
-    public event EventHandler? EventEditTransportation;
-    public event EventHandler? EventEditAppliance;
-    public event EventHandler? EventEditPictures;
-    public event EventHandler? EventEditUnits;
-
-    public event EventHandler<bool>? EventIsUnitOwnership; // show or hides navigationview' menu accordingly.
-
-    public event EventHandler? EventTitleChanged;
-
-    // Who subscribes to this event?
-    public event EventHandler? EventGoBack;
-
     #endregion
 
     #region == Services ==
 
-    // The IDataAccessService is used to access the data layer for saving and updating entries.
     private readonly IDataAccessService _dataAccessService;
     private readonly IDataAccessLocationService _dataAccessLocationService;
-    private readonly IModalDialogService _dlg;
-    private readonly IDispatcherService _dispatcherService;
 
     #endregion
 
-    private Views.Rent.Residentials.EditorWindow? _editorWin;
-
-    private Views.Rent.Residentials.ShellPage? _shellPage;
-    private Views.Rent.Residentials.Bldg.BldgShellPage? _bldgShellPage;
-    private Views.Rent.Residentials.Unit.UnitShellPage? _unitShellPage;
-
-    private readonly MainWindow _mainWindow;
-
-    // The Entry property holds the COPY of current RentResidential entry being edited.
-    // Do not use it directly in the UI. Apply changes to this object in SaveAsync() to save the changes.
-    // MainViewModel creates a new instance of this class and call EditorShell.SetEntry(EntryResidentialFull) and sets this property.
-    private Models.Rent.Residentials.EntryResidentialFull _entry;
-
-    private Models.Rent.Residentials.Room? _editRoom;
-
-    // Local directory path to save blob data such as pictures and PDFs.
-    private string _entryDataDirectoryPath;
-    // Tmp file list to hold unsaved picture files. (if entry is not saved, delete on close)
-    private readonly List<string> _unsavedBuildingPictureFileList = [];
-
-    public ResidentialsViewModel(MainWindow mainWindow, IDispatcherService dispatcherService, IDataAccessService dataAccessService, IModalDialogService modalDialog, IDataAccessLocationService dataAccessLocationService)
+    public BldgViewModel(ViewModels.Rent.Residentials.MainViewModel vm, Models.Rent.Residentials.EntryResidentialFull entry, IDataAccessService dataAccessService, IDataAccessLocationService dataAccessLocationService)
     {
+        _mainViewModel = vm;
         _dataAccessService = dataAccessService;
         _dataAccessLocationService = dataAccessLocationService;
-        _dlg = modalDialog;
-        _dispatcherService = dispatcherService;
-        _mainWindow = mainWindow;
-
-        _entry = new(Guid.CreateVersion7().ToString("N"), EnumEntryStatus.New);
-        _entryDataDirectoryPath = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(App.AppDataPictureFolder, "Rent"), "Residential_Building"), _entry.Id);
-
-    }
-
-    #region == Public Methods ==
-
-    public void SetEditorWin(Views.Rent.Residentials.EditorWindow win)
-    {
-        _editorWin = win;
-
-        _editorWin.SetEntryIdToWindow(_entry.Id);
-    }
-
-    public void SetEditorShell(Views.Rent.Residentials.ShellPage shell)
-    {
-        _shellPage = shell;
-    }
-
-    public void SetUnitShell(Views.Rent.Residentials.Unit.UnitShellPage shell)
-    {
-        _unitShellPage = shell;
-    }
-
-    public void SetBldgShell(Views.Rent.Residentials.Bldg.BldgShellPage shell)
-    {
-        _bldgShellPage = shell;
-    }
-
-    public void SetEntry(Models.Rent.Residentials.EntryResidentialFull entry)
-    {
-        if (entry is null)
-        {
-            return;
-        }
 
         _entry = entry;
         _entryDataDirectoryPath = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(App.AppDataPictureFolder, "Rent"), "Residential_Building"), _entry.Id);
 
-        PopulateEntryValues();
+        try
+        {
+            PopulateEntryValues();
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"BldgViewModel: {ex}");
+        }
+        finally
+        {
+            IsDirty = false;
+        }
 
-        IsBldgDirty = false;
-        IsRoomDirty = false;
     }
-
-    public void SetNewBuildingPictures(List<string> filePathList)
-    {
-        if (filePathList.Count <= 0)
-        {
-            return;
-        }
-
-        foreach (var filePath in filePathList) 
-        {
-            if (string.IsNullOrEmpty(filePath.Trim()))
-            {
-                continue;
-            }
-
-            var pic = new Models.Rent.Residentials.PictureBuilding(filePath)
-            {
-                IsNew = true,
-                Id = Guid.CreateVersion7().ToString("N")
-
-            };
-
-            BuildingPictures.Add(pic);
-
-            OpenBuildingPictureDirectoryCommand.NotifyCanExecuteChanged();
-            DeleteSelectedBuildingPictureCommand.NotifyCanExecuteChanged();
-            IsBldgDirty = true;
-        }
-    }
-
-    public void DiscardUnsavedFiles()
-    {
-        if (_unsavedBuildingPictureFileList.Count <= 0)
-        {
-            return;
-        }
-        
-        foreach (var file in _unsavedBuildingPictureFileList)
-        {
-            if (File.Exists(file))
-            {
-                Debug.WriteLine($"Deleting unsaved file: {file}");
-                File.Delete(file);
-            }
-        }
-
-        // TODO: More like PDF etc.
-
-        if (Directory.Exists(_entryDataDirectoryPath))
-        {
-            Debug.WriteLine($"Deleting folder: {_entryDataDirectoryPath}");
-            Directory.Delete(_entryDataDirectoryPath, true);
-        }
-    }
-
-    #endregion
 
     #region == Private Methods ==
+
 
     private void PopulateEntryValues()
     {
         // Basics
 
         Name = _entry.Name;
-                
+
         // Location
 
         if (!string.IsNullOrEmpty(_entry.LocPrefId))
@@ -1395,20 +1204,64 @@ public partial class ResidentialsViewModel : ObservableObject
         //TODO: Set other properties
 
 
-
-        // Pictures
+        // Pictures TODO:
         BuildingPictures = new ObservableCollection<PictureBuilding>(_entry.BuildingPictures); // create a copy.
         //OpenBuildingPictureDirectoryCommand.NotifyCanExecuteChanged();
 
+
         // Rooms
-        Rooms = new ObservableCollection<Room>(_entry.Rooms); // create a copy.
+        Rooms = new ObservableCollection<Models.Rent.Residentials.Room>(_entry.Rooms); // create a copy.
+        Rooms.CollectionChanged += (s, e) => 
+        {
+            // Unsubscribe from removed items
+            if (e.OldItems != null)
+            {
+                foreach (Models.Rent.Residentials.Room item in e.OldItems)
+                {
+                    Debug.WriteLine($"Item {item.RoomName} Removed from Rooms");
+                    IsDirty = true;
 
-        Debug.WriteLine($"PopulateEntryValues: Completed populating values from Entry to VM. Entry ID: {_entry.Id}, Rooms Count: {Rooms.Count}");
+                    item.PropertyChanged -= OnRoomPropertyChanged;
+                }
+            }
 
+            // Subscribe to PropertyChanged.
+            if (e.NewItems != null)
+            {
+                foreach (Models.Rent.Residentials.Room item in e.NewItems)
+                {
+                    Debug.WriteLine($"Item {item.RoomName} Added to Rooms");
+                    IsDirty = true;
+
+                    item.PropertyChanged += OnRoomPropertyChanged;
+                }
+            }
+        };
+
+        //Debug.WriteLine($"PopulateEntryValues: Completed populating values from Entry to VM. Entry ID: {_entry.Id}, Rooms Count: {Rooms.Count}");
+    }
+
+    private void OnRoomPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (sender is not Models.Rent.Residentials.Room)
+        {
+            Debug.WriteLine("OnItemPropertyChanged returned non room.");
+        }
+        // Catch the specific item property update here
+        //var updatedItem = sender as Models.Rent.Residentials.Room;
+
+        Debug.WriteLine($"Property {e.PropertyName} changed");
+
+        IsDirty = true;
     }
 
     private void SetValuesToEntry()
     {
+        if (!IsDirty)
+        {
+            return;
+        }
+
         // 物件名
         _entry.Name = Name;
 
@@ -1432,175 +1285,38 @@ public partial class ResidentialsViewModel : ObservableObject
         _entry.BuildingPictures = BuildingPictures;
 
         // 部屋
-        if (IsRoomDirty && _editRoom is not null)
-        {
-            _editRoom.RoomName = RoomName;
-            // TODO: More.
-
-            var existingRoom = Rooms.FirstOrDefault(r => r.Id == _editRoom.Id);
-            if (existingRoom is not null)
-            {
-                // Update existing room
-                var index = Rooms.IndexOf(existingRoom);
-                Rooms[index] = _editRoom;
-            }
-            else
-            {
-                // Add new room
-                Rooms.Add(_editRoom);
-            }
-        }
-        
         _entry.Rooms = Rooms;
 
-
     }
 
-    private static string ReplaceZenkakuNumber(string text)
+    private void SaveAsNew()
     {
-        return text
-        .Replace('０', '0')
-        .Replace('１', '1')
-        .Replace('２', '2')
-        .Replace('３', '3')
-        .Replace('４', '4')
-        .Replace('５', '5')
-        .Replace('６', '6')
-        .Replace('７', '7')
-        .Replace('８', '8')
-        .Replace('９', '9')
-        .Replace("，", "")
-        .Replace(",", "");
-    }
-
-    private static bool CanConvertToPositiveNumber(string text)
-    {
-        if (int.TryParse(text, out var result))
-        {
-            if (result > -1)
-            {
-                return true;
-            }
-            else
-            {
-                Debug.WriteLine("整数変換に失敗。（マイナス）");
-                return false;
-            }
-        }
-        else
-        {
-            Debug.WriteLine("整数変換に失敗。");
-            return false;
-        }
-    }
-
-    #endregion
-
-    #region == Commands ==
-
-    #region == Save ==
-
-    [RelayCommand(CanExecute = nameof(CanSave))]
-    public void Save()
-    {
-        if (IsBldgDirty && IsRoomDirty)
-        {
-
-        }
-        else if (IsBldgDirty)
-        {
-
-        }
-        else if (IsRoomDirty)
-        {
-
-        }
-        else
-        {
-            return;
-        }
-
-
-        if (string.IsNullOrEmpty(Name))
-        {
-            Debug.WriteLine("TODO: Name is null or empty. This field is required. Show alart and abort.");
-            return;
-        }
-
-        // Apply values of vm to the entry object.
-        SetValuesToEntry();
-
-        //if (string.IsNullOrEmpty(_entry.Id))
-        if (_entry.EntryStatus == EnumEntryStatus.New)
-        {
-            // If the Entry.Id is empty, generate a new ID and save as new.
-            //_entry.SetId(Guid.CreateVersion7().ToString());
-            var res = SaveAsNew();
-            if (res)
-            {
-                _entry.EntryStatus = EnumEntryStatus.Saved;
-                // Clear these dirty flags.
-                IsBldgDirty = false;
-                IsRoomDirty = false;
-                _entry.IsDirty = false;
-
-                // Clear unsaved file list.
-                _unsavedBuildingPictureFileList.Clear();
-                _editRoom?.IsModified = false;
-                _editRoom?.IsNew = false;
-            }
-        }
-        else
-        {
-            // If the Entry.Id is not empty, update the existing entry.
-            var res = SaveAsUpdate();
-            if (res)
-            {
-                // Clear these dirty flags.
-                IsBldgDirty = false;
-                IsRoomDirty = false;
-                _entry.IsDirty = false;
-
-                // Clear unsaved file list.
-                _unsavedBuildingPictureFileList.Clear();
-                _editRoom?.IsModified = false;
-                _editRoom?.IsNew = false;
-            }
-        }
-    }
-    private bool CanSave()
-    {
-        if (IsBldgDirty || IsRoomDirty)
-        {
-            return true;
-        }
-        return false;
-    }
-
-    private bool SaveAsNew()
-    {
-         var resInsert = _dataAccessService.InsertRentResidential(_entry);
+        var resInsert = _dataAccessService.InsertRentResidential(_entry);
         if (resInsert.IsError)
         {
             Debug.WriteLine("Error on insert. @SaveAsNew in ResidentialsViewModel");
             Debug.WriteLine(resInsert.Error.ErrText + Environment.NewLine + resInsert.Error.ErrDescription + Environment.NewLine + resInsert.Error.ErrPlace + Environment.NewLine + resInsert.Error.ErrPlaceParent);
 
             // TODO: return error object.
-            return false;
+            return;
         }
         else
         {
-            // Clear these dirty flags.
-            IsBldgDirty = false;
+            IsDirty = false;
             _entry.IsDirty = false;
 
+            _entry.EntryStatus = EnumEntryStatus.Saved;
+
             Debug.WriteLine("No errors on insert.");
+
+            // Update title with dummy value.
+            _mainViewModel.WindowTitle = string.Empty;
         }
 
-        // Return a completed task to satisfy the method's return type
-        return true;
+        return;
     }
-    private bool SaveAsUpdate()
+
+    private void SaveAsUpdate()
     {
         var resInsert = _dataAccessService.UpdateRentResidential(_entry);
         if (resInsert.IsError)
@@ -1609,216 +1325,133 @@ public partial class ResidentialsViewModel : ObservableObject
             Debug.WriteLine(resInsert.Error.ErrText + Environment.NewLine + resInsert.Error.ErrDescription + Environment.NewLine + resInsert.Error.ErrPlace + Environment.NewLine + resInsert.Error.ErrPlaceParent);
 
             // TODO: return error object.
-            return false;
+            return;
         }
         else
         {
-            // Clear these dirty flags.
-            IsBldgDirty = false;
+            IsDirty = false;
             _entry.IsDirty = false;
 
+            _entry.EntryStatus = EnumEntryStatus.Saved;
+
             Debug.WriteLine("No errors on update.");
-        }
 
-        // Return a completed task to satisfy the method's return type
-        return true;
+            // Update title with dummy value.
+            _mainViewModel.WindowTitle = string.Empty;
+        }
     }
 
     #endregion
 
-    #region == Unit ==
+    #region == Public Methods ==
 
-    // Add New Modal window command
-    [RelayCommand]
-    private void AddNewUnit()
+    public void SetNewBuildingPictures(List<string> filePathList)
     {
-        if (_shellPage is null)
-        {
-            Debug.WriteLine("ShellPage is not set. Cannot navigate to Unit Shell Page.");
-            return;
-        }
-
-        _editRoom = new Room(Guid.CreateVersion7().ToString("N"));
-
-        // TODO: Views.Rent.Residentials.Bldg.Unit.ShellPage to ....
-        _shellPage?.NavigationFrame.Navigate(typeof(ZumenSearch.Views.Rent.Residentials.Unit.UnitShellPage), this, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft});//_mainWindow, _dispatcherService, _dlg, this
-
-        /*
-        //TODO: 
-        
-        // Stupid WinUI3... 
-        // https://github.com/microsoft/microsoft-ui-xaml/issues/10396
-        // https://github.com/microsoft/WindowsAppSDK/discussions/3680
-
-        Debug.WriteLine("ModalDialogService: ShowUnitDialog method called.");
-
-        if (_editorWin == null)
-        {
-            // EditorWin should be initialized in the EditorShell constructor.
-            Debug.WriteLine("EditorWin should be initialized in the EditorShell constructor.");
-            return;
-        }
-
-        var dialogWin = new Views.Rent.Residentials.Bldg.Unit.ModalWindow();
-        dialogWin.Content = new Views.Rent.Residentials.Bldg.Unit.ShellPage(_mainWindow,_dispatcherService, dialogWin, new ViewModels.Rent.Residentials.Unit.ModalViewModel(), this);
-
-        var hWndDialog = WinRT.Interop.WindowNative.GetWindowHandle(dialogWin);
-        //Microsoft.UI.WindowId windowId1 = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hWnd1);
-        //Microsoft.UI.Windowing.AppWindow appWindow = Microsoft.UI.Windowing.AppWindow.GetFromWindowId(windowId1);
-        //Microsoft.UI.Windowing.OverlappedPresenter presenter = appWindow.Presenter as Microsoft.UI.Windowing.OverlappedPresenter;
-        var hWndEditor = WinRT.Interop.WindowNative.GetWindowHandle(_editorWin);
-        SetWindowLong(hWndDialog, GWL_HWNDPARENT, hWndEditor);
-
-        var appWindow = dialogWin.AppWindow;
-
-        var presenter = OverlappedPresenter.Create();
-
-        presenter.IsModal = true;
-        presenter.IsResizable = true;
-        presenter.PreferredMinimumWidth = 1274;
-        presenter.PreferredMinimumHeight = 794;
-
-        appWindow.SetPresenter(presenter);
-
-        dialogWin.Closed += (sender, e) =>
-        {
-            //ModalWinWidth = 
-
-            // Activate the editor window again.
-            _editorWin.Activate();
-        };
-
-        // Close the dialog when the editor window is closed.
-        _editorWin.Closed += (sender, e) =>
-        {
-            dialogWin.Close();
-        };
-
-        appWindow.MoveAndResize(new Windows.Graphics.RectInt32(ModalWinLeft, ModalWinTop, ModalWinWidth, ModalWinHeight));
-        appWindow.Show();
-        //dialogWin.Activate();
-
-        */
-    }
-
-    [RelayCommand]
-    private void EditSelectedUnit(Room room)
-    {
-        if (room is null)
-        {
-            Debug.WriteLine($"room is null. Cannot edit unit");
-            return;
-        }
-
-        // TODO:
-        if (_editRoom is not null && _editRoom.IsModified)
-        {
-            Debug.WriteLine("TODO: show warning : The current room has unsaved changes.");
-            return;
-        }
-
-        _editRoom = room;
-        RoomName = room.RoomName; // Set the value to trigger the setter logic if needed.
-        // TODO: Set other properties for editing.
-
-        _editRoom.IsModified = false;
-        IsRoomDirty = false;
-
-        if (_shellPage is null)
-        {
-            Debug.WriteLine("ShellPage is not set. Cannot navigate to Unit Shell Page.");
-            return;
-        }
-
-        _shellPage?.NavigationFrame.Navigate(typeof(ZumenSearch.Views.Rent.Residentials.Unit.UnitShellPage), this, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });
-    }
-
-    #endregion
-
-    #region == Navigation == 
-
-    [RelayCommand]
-    private void GoToBldgShellPage()
-    {
-        if (_shellPage is null)
-        {
-            Debug.WriteLine("ShellPage is not set. Cannot navigate to Building Shell Page.");
-            return;
-        }
-
-        if (_shellPage.NavigationFrame.CurrentSourcePageType == typeof(Views.Rent.Residentials.Bldg.BldgShellPage))
+        if (filePathList.Count <= 0)
         {
             return;
         }
 
-        if (_shellPage.NavigationFrame.CurrentSourcePageType == typeof(Views.Rent.Residentials.Unit.UnitShellPage))
+        foreach (var filePath in filePathList)
         {
-            // TODO:
-            if (_editRoom is not null && _editRoom.IsModified)
+            if (string.IsNullOrEmpty(filePath.Trim()))
             {
-                Debug.WriteLine("TODO: GoToBldgShellPage: show warning : The current room has unsaved changes.");
-                return;
+                continue;
+            }
+
+            var pic = new Models.Rent.Residentials.PictureBuilding(filePath)
+            {
+                IsNew = true,
+                Id = Guid.CreateVersion7().ToString("N")
+
+            };
+
+            BuildingPictures.Add(pic);
+
+            OpenBuildingPictureDirectoryCommand.NotifyCanExecuteChanged();
+            DeleteSelectedBuildingPictureCommand.NotifyCanExecuteChanged();
+            IsDirty = true;
+        }
+    }
+
+    public void DiscardUnsavedFiles()
+    {
+        if (_unsavedBuildingPictureFileList.Count <= 0)
+        {
+            return;
+        }
+
+        foreach (var file in _unsavedBuildingPictureFileList)
+        {
+            if (File.Exists(file))
+            {
+                Debug.WriteLine($"Deleting unsaved file: {file}");
+                File.Delete(file);
             }
         }
 
-        if (_shellPage.NavigationFrame.Navigate(typeof(Views.Rent.Residentials.Bldg.BldgShellPage), this, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight }))
+        // TODO: More like PDF etc.
+
+        if (Directory.Exists(_entryDataDirectoryPath))
         {
-
+            Debug.WriteLine($"Deleting folder: {_entryDataDirectoryPath}");
+            Directory.Delete(_entryDataDirectoryPath, true);
         }
-    }
-
-    // Go Back command (don't use this?)
-    [RelayCommand]
-    private void GoBack()
-    {
-        EventGoBack?.Invoke(this, EventArgs.Empty);
-    }
-
-    [RelayCommand]
-    public void GoBackToSummary()
-    { 
-        EventBackToSummary?.Invoke(this, EventArgs.Empty);
-    }
-
-    [RelayCommand]
-    public void EditLocation()
-    {
-        EventEditLocation?.Invoke(this, EventArgs.Empty);
-    }
-
-    [RelayCommand]
-    private void EditTransportation()
-    {
-        EventEditTransportation?.Invoke(this, EventArgs.Empty);
-    }
-
-    [RelayCommand]
-    public void EditAppliance()
-    {
-        EventEditAppliance?.Invoke(this, EventArgs.Empty);
-    }
-
-    [RelayCommand]
-    public void EditPictures()
-    {
-        EventEditPictures?.Invoke(this, EventArgs.Empty);
-    }
-
-    [RelayCommand]
-    public void EditUnits()
-    {
-        EventEditUnits?.Invoke(this, EventArgs.Empty);
     }
 
     #endregion
 
-    #region == Pictures ==
+    #region == Commands ==
+
+    #region == Save related commands ==
+
+    [RelayCommand(CanExecute = nameof(CanSave))]
+    public void Save()
+    {
+        // TODO: What if Unit.IsDirty??
+
+        if (!IsDirty)
+        {
+            return;
+        }
+
+        if (string.IsNullOrEmpty(Name))
+        {
+            Debug.WriteLine("TODO: Name is null or empty. This field is required. Show alart and abort.");
+            return;
+        }
+
+        SetValuesToEntry();
+
+        if (_entry.EntryStatus == EnumEntryStatus.New)
+        {
+            SaveAsNew();
+        }
+        else
+        {
+            SaveAsUpdate();
+        }
+
+    }
+    private bool CanSave()
+    {
+        if (IsDirty)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    #endregion
+
+    #region == Pictures related commands ==
 
     [RelayCommand]
     public async Task AddNewBuildingPictures()
     {
         Debug.WriteLine($"destDirectory={_entryDataDirectoryPath}  @AddNewBuildingPictures()");
-
+        // TODO:
+        /*
         if (!Directory.Exists(_entryDataDirectoryPath))
         {
             Directory.CreateDirectory(_entryDataDirectoryPath);
@@ -1848,7 +1481,7 @@ public partial class ResidentialsViewModel : ObservableObject
             {
                 //output.Append(file.Path + "\n");
                 using var sourceStream = File.Open(file.Path, FileMode.Open);
-                
+
                 // TODO: set max file size?
 
                 var destFilePath = Path.Combine(_entryDataDirectoryPath, System.IO.Path.GetFileName(file.Path));
@@ -1870,7 +1503,7 @@ public partial class ResidentialsViewModel : ObservableObject
         {
             Debug.WriteLine("Operation cancelled.");
         }
-
+        */
     }
 
     [RelayCommand(CanExecute = nameof(CanDeleteSelectedBuildingPicture))]
@@ -1883,12 +1516,14 @@ public partial class ResidentialsViewModel : ObservableObject
 
         if (BuildingPictures.Remove(SelectedBuildingPicture))
         {
+            //TODO:
+            /*
             if (_entry.BuildingPictures.Remove(SelectedBuildingPicture))
             {
                 _entry.BuildingPicturesToBeDeleted.Add(SelectedBuildingPicture);
             }
-
-            IsBldgDirty = true;
+            */
+            IsDirty = true;
             SelectedBuildingPicture = null;
         }
     }
@@ -1925,7 +1560,30 @@ public partial class ResidentialsViewModel : ObservableObject
 
     #endregion
 
-    #region == Location ==
+    #region == Unit related commands ==
+
+    // Add New Modal window command
+    [RelayCommand]
+    private void AddNewUnit()
+    {
+        _mainViewModel.Unit.SetEditUnit(new Room(Guid.CreateVersion7().ToString("N")));
+
+        _mainViewModel.GoToUnitShellPageCommand.Execute(this);
+    }
+
+    [RelayCommand]
+    private void EditSelectedUnit(Room room)
+    {
+        _mainViewModel.Unit.SetEditUnit(room);
+
+
+        _mainViewModel.GoToUnitShellPageCommand.Execute(this);
+
+    }
+
+    #endregion
+
+    #region == Location related commands ==
 
     [RelayCommand(CanExecute = nameof(CanShowGoogleMaps))]
     public async Task ShowGoogleMaps()
@@ -1951,27 +1609,33 @@ public partial class ResidentialsViewModel : ObservableObject
 
     #endregion
 
-    #region == Transportation ==
+    #region == Transportation related commands ==
 
     [RelayCommand]
     public async Task ShowRailLineSelect1()
     {
+        // TODO: 
+        /*
         if (_editorWin is null)
         {
             return;
         }
 
-        var railLine = await _dlg.ShowRailLineSelectDialog(_editorWin);
+        var railLine = await _dlgService.ShowRailLineSelectDialog(_editorWin);
 
         if (railLine is not null)
         {
             SelectedRailLine1 = railLine;
         }
+
+        */
     }
 
     [RelayCommand(CanExecute = nameof(CanShowRailStationSelect1))]
     public async Task ShowRailStationSelect1()
     {
+        // TODO:
+        /*
         if (_editorWin is null)
         {
             return;
@@ -1982,12 +1646,13 @@ public partial class ResidentialsViewModel : ObservableObject
             return;
         }
 
-        var railStation = await _dlg.ShowRailStationSelectDialog(_editorWin, SelectedRailLine1.LineCode);
+        var railStation = await _dlgService.ShowRailStationSelectDialog(_editorWin, SelectedRailLine1.LineCode);
 
         if (railStation is not null)
         {
             SelectedRailStation1 = railStation;
         }
+        */
     }
     private bool CanShowRailStationSelect1()
     {
@@ -2000,39 +1665,6 @@ public partial class ResidentialsViewModel : ObservableObject
     }
 
     #endregion
-
-    #endregion
-
-    #region == TEMP code for modal window(for setting an owner) ==
-
-#pragma warning disable IDE0079
-#pragma warning disable SYSLIB1054
-
-    [DllImport("User32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-
-    internal static extern bool EnableWindow(IntPtr hWnd, bool bEnable);
-
-    internal const int GWL_HWNDPARENT = (-8);
-
-    internal static IntPtr SetWindowLong(IntPtr hWnd, int nIndex, IntPtr dwNewLong)
-    {
-        if (IntPtr.Size == 4)
-        {
-            return SetWindowLongPtr32(hWnd, nIndex, dwNewLong);
-        }
-        return SetWindowLongPtr64(hWnd, nIndex, dwNewLong);
-    }
-
-    // Import the Windows API function SetWindowLong for modifying window properties on 32-bit systems.
-    [DllImport("User32.dll", CharSet = CharSet.Auto, EntryPoint = "SetWindowLong")]
-    internal static extern IntPtr SetWindowLongPtr32(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
-
-    // Import the Windows API function SetWindowLongPtr for modifying window properties on 64-bit systems.
-    [DllImport("User32.dll", CharSet = CharSet.Auto, EntryPoint = "SetWindowLongPtr")]
-    internal static extern IntPtr SetWindowLongPtr64(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
-
-#pragma warning restore SYSLIB1054
-#pragma warning restore IDE0079
 
     #endregion
 }

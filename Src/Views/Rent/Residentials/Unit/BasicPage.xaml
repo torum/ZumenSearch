@@ -13,7 +13,7 @@
             <StackPanel Spacing="12" Margin="0,24,0,0">
 
                 <Border Style="{StaticResource RoundCardBorderStyle}">
-                    <TextBox MinWidth="200" Width="250" Header="部屋番号" PlaceholderText="必須" Text="{x:Bind ViewModel.RoomName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left"/>
+                    <TextBox MinWidth="200" Width="250" Header="部屋番号" PlaceholderText="必須" Text="{x:Bind ViewModel.Unit.RoomName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left"/>
                 </Border>
                 <StackPanel Orientation="Horizontal" Margin="0,24,0,0">
                     <TextBlock Text="間取り" Margin="0 0 3 6" HorizontalAlignment="Left" VerticalAlignment="Bottom"/>

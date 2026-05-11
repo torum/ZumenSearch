@@ -13,7 +13,7 @@ public sealed partial class UnitShellPage : Page
 {
     #region == Properties ==
 
-    public ViewModels.Rent.ResidentialsViewModel? ViewModel
+    public ViewModels.Rent.Residentials.MainViewModel? ViewModel
     {
         get;
         private set
@@ -22,8 +22,8 @@ public sealed partial class UnitShellPage : Page
                 return;
 
             field = value;
-
-            ViewModel?.EventIsUnitOwnership += (sender, arg) => OnEventIsUnitOwnership(arg);
+            // TODO:
+            //ViewModel?.EventIsUnitOwnership += (sender, arg) => OnEventIsUnitOwnership(arg);
         }
     }
 
@@ -72,9 +72,9 @@ public sealed partial class UnitShellPage : Page
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
-        if ((e.Parameter is ViewModels.Rent.ResidentialsViewModel) && (e.Parameter != null))
+        if ((e.Parameter is ViewModels.Rent.Residentials.MainViewModel) && (e.Parameter != null))
         {
-            ViewModel = e.Parameter as ViewModels.Rent.ResidentialsViewModel;
+            ViewModel = e.Parameter as ViewModels.Rent.Residentials.MainViewModel;
 
             ViewModel?.SetUnitShell(this);
         }
@@ -265,7 +265,7 @@ public sealed partial class UnitShellPage : Page
 
     private void Page_Unloaded(object sender, RoutedEventArgs e)
     {
-
-        ViewModel?.EventIsUnitOwnership -= (sender, arg) => OnEventIsUnitOwnership(arg);
+        // TODO:
+        //ViewModel?.EventIsUnitOwnership -= (sender, arg) => OnEventIsUnitOwnership(arg);
     }
 }

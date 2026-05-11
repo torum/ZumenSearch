@@ -100,14 +100,6 @@ public abstract partial class EntryBase : ObservableObject
 
     #endregion
 
-    /*
-    protected EntryBase()
-    {
-        // Instead of using a GUID, we initialize _id to an empty string to indicate that the entry is NEW.
-        _id = string.Empty;//Guid.CreateVersion7() //Guid.NewGuid().ToString();
-    }
-    */
-
     protected EntryBase(string id)
     {
         _id = id;

@@ -5,30 +5,38 @@ using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
 using System.Diagnostics;
+using ZumenSearch.Models;
 using ZumenSearch.Services.Contracts;
+using ZumenSearch.Services.Extensions.AbstractFactory;
 using ZumenSearch.ViewModels;
 
 namespace ZumenSearch.Views.Rent.Residentials;
 
 public sealed partial class ShellPage : Page
 {
-    public ViewModels.Rent.ResidentialsViewModel ViewModel { get; private set; }
+    public ViewModels.Rent.Residentials.MainViewModel ViewModel { get; private set; }
 
-    public Views.Rent.Residentials.EditorWindow EditorWin { get; private set; }
+    public Views.Rent.Residentials.EditorWindow Win { get; private set; }
 
     public Frame NavigationFrame => ContentFrame;
 
-
     private readonly IModalDialogService _dlg;
 
-    public ShellPage(Views.Rent.Residentials.EditorWindow win, ViewModels.Rent.ResidentialsViewModel vm, IModalDialogService modalDialog)
+    //private IAbstractFactory<Models.Rent.Residentials.EntryResidentialFull, MainViewModel> _vmFactory;
+
+    public ShellPage(Views.Rent.Residentials.EditorWindow win, Models.Rent.Residentials.EntryResidentialFull entry, IAbstractFactory<Models.Rent.Residentials.EntryResidentialFull, ViewModels.Rent.Residentials.MainViewModel> vmFactory, IModalDialogService modalDialog)
     {
-        EditorWin = win ?? throw new ArgumentNullException(nameof(win));
-        ViewModel = vm ?? throw new ArgumentNullException(nameof(vm));
-        ViewModel.SetEditorWin(win);// Must set Editor Winodw to VM.
+        Win = win ?? throw new ArgumentNullException(nameof(win));
+
+        //Debug.WriteLine($"ShellPage {entry.Id}");
+
+        ViewModel = vmFactory.Create(entry);//ViewModel = vmFactory(entry);//_editorFactory.Create(new Models.Rent.Residentials.EntryResidentialFull(Guid.CreateVersion7().ToString("N"), EnumEntryStatus.New));
+
+        ViewModel.SetEditorWindow(win);// Must set Editor Winodw to VM.
         ViewModel.SetEditorShell(this);
-        
-        ViewModel.EventTitleChanged += (sender, arg) => OnEventTitleChanged(arg);
+
+        // TODO:
+        //ViewModel.EventTitleChanged += (sender, arg) => OnEventTitleChanged(arg);
 
         _dlg = modalDialog;
 
@@ -37,13 +45,13 @@ public sealed partial class ShellPage : Page
         //BreadcrumbBar1.ItemClicked += BreadcrumbBar_ItemClicked;
 
         //
-        EditorWin.Content = this;
-        EditorWin.ExtendsContentIntoTitleBar = true;
+        Win.Content = this;
+        Win.ExtendsContentIntoTitleBar = true;
         //EditorWin.SetTitleBar(AppTitleBar);
-        EditorWin.Activated += EditorWindow_Activated;
-        EditorWin.Closed += EditorWindow_Closed;
-        EditorWin.AppWindow.Closing += AppWindow_Closing;
-        EditorWin.Title = "賃貸住居用";
+        Win.Activated += EditorWindow_Activated;
+        Win.Closed += EditorWindow_Closed;
+        Win.AppWindow.Closing += AppWindow_Closing;
+        Win.Title = "賃貸住居用";
         
         /*
         var mainVM = App.GetService<MainViewModel>();
@@ -113,9 +121,9 @@ public sealed partial class ShellPage : Page
 
     public void EditorWindow_Closed(object sender, WindowEventArgs args)
     {
-        EditorWin.Activated -= EditorWindow_Activated;
-        EditorWin.Closed -= EditorWindow_Closed;
-        EditorWin.AppWindow.Closing -= AppWindow_Closing;
+        Win.Activated -= EditorWindow_Activated;
+        Win.Closed -= EditorWindow_Closed;
+        Win.AppWindow.Closing -= AppWindow_Closing;
 
         if (sender is EditorWindow ewin)
         {
@@ -138,7 +146,7 @@ public sealed partial class ShellPage : Page
 
     public void OnEventTitleChanged(EventArgs args)
     {
-        EditorWin.Title = ViewModel?.WindowTitle ?? "賃貸住居用";
+        Win.Title = ViewModel?.WindowTitle ?? "賃貸住居用";
     }
 
     private void ContentFrame_NavigationFailed(object sender, NavigationFailedEventArgs e)

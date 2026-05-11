@@ -12,6 +12,7 @@ using ZumenSearch.Models;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.Services.Extensions.AbstractFactory;
 using ZumenSearch.Views;
+using ZumenSearch.Views.Rent.Residentials;
 
 namespace ZumenSearch.ViewModels;
 
@@ -22,16 +23,16 @@ public partial class MainViewModel : ObservableObject
 
     private string _versionDescription;
 
+    #region == Public Properties ==
+
     public string VersionDescription
     {
         get => _versionDescription;
         private set => SetProperty(ref _versionDescription, value);
     }
 
-    #region == Properties ==
-
     // TODO:
-    private static ShellPage Shell => App.GetService<ShellPage>();
+    //private static ShellPage Shell => App.GetService<ShellPage>();
 
     //private static MainWindow MainWin => App.GetService<MainWindow>();
 
@@ -102,7 +103,10 @@ public partial class MainViewModel : ObservableObject
 
     #region == Services ==
 
-    private readonly IAbstractFactory<Views.Rent.Residentials.ShellPage> _editorFactory;
+    //private readonly IAbstractFactory<Views.Rent.Residentials.ShellPage> _editorFactory;
+    //private Func<Models.Rent.Residentials.EntryResidentialFull, Views.Rent.Residentials.ShellPage> _shellFactory;
+    private IAbstractFactory<Models.Rent.Residentials.EntryResidentialFull, Views.Rent.Residentials.ShellPage> _shellFactory;
+
     private readonly IDataAccessService _dataAccessService;
     private readonly INavigationService _navigationService;
 
@@ -110,10 +114,10 @@ public partial class MainViewModel : ObservableObject
 
     private readonly CancellationTokenSource _cts = new();
 
-    public MainViewModel(INavigationService navigationService, IAbstractFactory<Views.Rent.Residentials.ShellPage> editorFactory, IDataAccessService dataAccessService)
+    public MainViewModel(IAbstractFactory<Models.Rent.Residentials.EntryResidentialFull, Views.Rent.Residentials.ShellPage> shellFactory, INavigationService navigationService, IDataAccessService dataAccessService)//IAbstractFactory<Views.Rent.Residentials.ShellPage> editorFactory,
     {
-        //Debug.WriteLine("MainViewModel");
-        _editorFactory = editorFactory;
+        //_editorFactory = editorFactory;
+        _shellFactory = shellFactory;
         _dataAccessService = dataAccessService;
         _navigationService = navigationService;
 
@@ -171,6 +175,46 @@ public partial class MainViewModel : ObservableObject
     {
         //Debug.WriteLine("AddNew command executed!");
 
+        var shell = _shellFactory.Create(new Models.Rent.Residentials.EntryResidentialFull(Guid.CreateVersion7().ToString("N"), EnumEntryStatus.New));//_editorFactory.Create();
+
+        EditorList.Add(shell.Win);
+
+        if (shell.Win.AppWindow.Presenter is OverlappedPresenter presenter)
+        {
+            presenter.IsResizable = true;
+            presenter.IsModal = false;
+            presenter.IsAlwaysOnTop = false;
+            presenter.PreferredMinimumWidth = 1274;
+            presenter.PreferredMinimumHeight = 794;
+        }
+
+        shell.Win.Closed += (sender, e) =>
+        {
+            EditorList.Remove(shell.Win);
+
+            if (EditorList.Count == 0)
+            {
+                var mainWindow = App.GetService<MainWindow>();
+
+                // No more editor windows are open, activate the main window again.
+                if (mainWindow?.AppWindow.Presenter is OverlappedPresenter presntr)
+                {
+                    presntr.Restore();
+                }
+                mainWindow?.Activate();
+            }
+        };
+
+        //var dpi = Windows.Win32.PInvoke.GetDpiForWindow(new Windows.Win32.Foundation.HWND(WinRT.Interop.WindowNative.GetWindowHandle(this)));
+        //var scalingFactor = (float)dpi / 96;
+        //AppWindow.Resize(new Windows.Graphics.SizeInt32((int)(400.0f * scalingFactor), (int)(300.0f * scalingFactor)));
+
+        shell.Win.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(EditorWinLeft, EditorWinTop, EditorWinWidth, EditorWinHeight));
+
+        //editorWindow.AppWindow.Show();
+        shell.Win.Activate();
+
+        /*
         var editorShell = _editorFactory.Create();
 
         var editorWindow = editorShell.EditorWin;
@@ -210,17 +254,17 @@ public partial class MainViewModel : ObservableObject
             }
         };
 
-        /*
-        var dpi = Windows.Win32.PInvoke.GetDpiForWindow(new Windows.Win32.Foundation.HWND(WinRT.Interop.WindowNative.GetWindowHandle(this)));
-        var scalingFactor = (float)dpi / 96;
-        AppWindow.Resize(new Windows.Graphics.SizeInt32((int)(400.0f * scalingFactor), (int)(300.0f * scalingFactor)));
-        */
+        
+        //var dpi = Windows.Win32.PInvoke.GetDpiForWindow(new Windows.Win32.Foundation.HWND(WinRT.Interop.WindowNative.GetWindowHandle(this)));
+        //var scalingFactor = (float)dpi / 96;
+        //AppWindow.Resize(new Windows.Graphics.SizeInt32((int)(400.0f * scalingFactor), (int)(300.0f * scalingFactor)));
+        
 
         editorWindow.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(EditorWinLeft, EditorWinTop, EditorWinWidth, EditorWinHeight));
 
         //editorWindow.AppWindow.Show();
         editorWindow.Activate();
-
+        */
     }
 
     [RelayCommand]
@@ -261,7 +305,7 @@ public partial class MainViewModel : ObservableObject
             return;
         }
 
-        Debug.WriteLine($"EditRentResidentialCommand executed for {selected.Id}");
+        //Debug.WriteLine($"EditRentResidentialCommand executed for {selected.Id}");
 
         // Check if the selected item is already being edited in another window.
         EditorList.ForEach(async editorWindow =>
@@ -312,22 +356,22 @@ public partial class MainViewModel : ObservableObject
             return;
         }
 
-        var editorShell = _editorFactory.Create();
+        var editorShell = _shellFactory.Create(res.EntryFull);//_editorFactory.Create();
 
         // Sets the instance of selected Entry.
         //editorShell.SetEntryToEntryViewModel(res.EntryFull);
 
-        var entryViewModel = editorShell.ViewModel;
-        entryViewModel.SetEntry(res.EntryFull);
+        //var entryViewModel = editorShell.ViewModel;
+        //entryViewModel.SetEntry(res.EntryFull);
 
-        var editorWindow = editorShell.EditorWin;
+        var editorWindow = editorShell.Win;
         if (editorWindow == null)
         {
             // EditorWin should be initialized in the EditorShell constructor.
             Debug.WriteLine("EditorWin must be initialized in the EditorShell constructor");
             return;
         }
-        editorWindow.SetEntryIdToWindow(selected.Id);
+        editorWindow.SetEntryIdToWindow(res.EntryFull.Id);
 
         EditorList.Add(editorWindow);
 

@@ -6,7 +6,7 @@ using System.Xml.Linq;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.ViewModels;
 
-namespace ZumenSearch;
+namespace ZumenSearch.Views;
 
 public sealed partial class MainWindow : Window
 {
@@ -16,7 +16,7 @@ public sealed partial class MainWindow : Window
     // TODO: Change this lator.
     private int _winRestoreHeight = 794;//768;
     private int _winRestoreTop = 100;
-    private int _winRestoreleft = 100;
+    private int _winRestoreLeft = 100;
 
     private OverlappedPresenterState winState = OverlappedPresenterState.Restored;
 
@@ -52,10 +52,27 @@ public sealed partial class MainWindow : Window
                 presenter.PreferredMinimumWidth = 542;
                 presenter.PreferredMinimumHeight = 600;
 
+                if (_winRestoreWidth < 500)
+                {
+                    _winRestoreWidth = 500;
+                }
+                if (_winRestoreHeight < 500)
+                {
+                    _winRestoreHeight = 500;
+                }
+                if (_winRestoreTop < 0)
+                {
+                    _winRestoreTop = 0;
+                }
+                if (_winRestoreLeft < 0)
+                {
+                    _winRestoreLeft = 0;
+                }
+
                 if (winState == OverlappedPresenterState.Maximized)
                 {
                     // Sets restore size and position.
-                    appWindow.MoveAndResize(new Windows.Graphics.RectInt32(_winRestoreleft, _winRestoreTop, _winRestoreWidth, _winRestoreHeight));
+                    appWindow.MoveAndResize(new Windows.Graphics.RectInt32(_winRestoreLeft, _winRestoreTop, _winRestoreWidth, _winRestoreHeight));
                     // Maximize the window.
                     presenter.Maximize();
 
@@ -66,10 +83,12 @@ public sealed partial class MainWindow : Window
                 }
                 else if (winState == OverlappedPresenterState.Minimized)
                 {
+                    // Don't do anything. This is bad.
+
                     // This should not happen, but just in case.
-                    presenter.Restore();
+                    //presenter.Restore();
                     // Sets restore size and position.
-                    appWindow.MoveAndResize(new Windows.Graphics.RectInt32(_winRestoreleft, _winRestoreTop, _winRestoreWidth, _winRestoreHeight));
+                    //appWindow.MoveAndResize(new Windows.Graphics.RectInt32(_winRestoreleft, _winRestoreTop, _winRestoreWidth, _winRestoreHeight));
 
                     // TODO: TEMP
                     //appWindow.Move(new Windows.Graphics.PointInt32(winRestoreleft, winRestoreTop));
@@ -79,7 +98,7 @@ public sealed partial class MainWindow : Window
                 else
                 {
                     // Sets restore size and position.
-                    appWindow.MoveAndResize(new Windows.Graphics.RectInt32(_winRestoreleft, _winRestoreTop, _winRestoreWidth, _winRestoreHeight));
+                    appWindow.MoveAndResize(new Windows.Graphics.RectInt32(_winRestoreLeft, _winRestoreTop, _winRestoreWidth, _winRestoreHeight));
 
                     // TODO: TEMP
                     //appWindow.Move(new Windows.Graphics.PointInt32(winRestoreleft, winRestoreTop));
@@ -158,7 +177,7 @@ public sealed partial class MainWindow : Window
                     _winRestoreHeight = (int)appWindow.Size.Height;
                     _winRestoreWidth = (int)appWindow.Size.Width;
                     _winRestoreTop = (int)appWindow.Position.Y;
-                    _winRestoreleft = (int)appWindow.Position.X;
+                    _winRestoreLeft = (int)appWindow.Position.X;
                 }
             }
         }
@@ -270,7 +289,7 @@ public sealed partial class MainWindow : Window
             }
             else
             {
-                attrs.Value = _winRestoreleft.ToString();
+                attrs.Value = _winRestoreLeft.ToString();
             }
             mainWindow.SetAttributeNode(attrs);
 
@@ -416,7 +435,7 @@ public sealed partial class MainWindow : Window
                     if (hoge != null)
                     {
                         winLeft = int.Parse(hoge.Value);
-                        _winRestoreleft = winLeft;
+                        _winRestoreLeft = winLeft;
                     }
 
                     hoge = mainWindow.Attribute("height");
@@ -435,32 +454,52 @@ public sealed partial class MainWindow : Window
 
                 }
 
+                if (_viewModel.EditorWinWidth < 500)
+                {
+                    _viewModel.EditorWinWidth = 500;
+                }
+                if (_viewModel.EditorWinHeight < 500)
+                {
+                    _viewModel.EditorWinHeight = 500;
+                }
+                if (_viewModel.EditorWinTop < 0)
+                {
+                    _viewModel.EditorWinTop = 0;
+                }
+                if (_viewModel.EditorWinLeft < 0)
+                {
+                    _viewModel.EditorWinLeft = 0;
+                }
+
                 // Editor window element
                 var editWindow = xdoc.Root.Element("EditorWindow");
                 if (editWindow != null)
                 {
-                    var hoge = editWindow.Attribute("top");
-                    if (hoge != null)
+                    if (winState == OverlappedPresenterState.Restored)
                     {
-                        _viewModel.EditorWinTop = int.Parse(hoge.Value);
-                    }
+                        var hoge = editWindow.Attribute("top");
+                        if (hoge != null)
+                        {
+                            _viewModel.EditorWinTop = int.Parse(hoge.Value);
+                        }
 
-                    hoge = editWindow.Attribute("left");
-                    if (hoge != null)
-                    {
-                        _viewModel.EditorWinLeft = int.Parse(hoge.Value);
-                    }
+                        hoge = editWindow.Attribute("left");
+                        if (hoge != null)
+                        {
+                            _viewModel.EditorWinLeft = int.Parse(hoge.Value);
+                        }
 
-                    hoge = editWindow.Attribute("height");
-                    if (hoge != null)
-                    {
-                        _viewModel.EditorWinHeight = int.Parse(hoge.Value);
-                    }
+                        hoge = editWindow.Attribute("height");
+                        if (hoge != null)
+                        {
+                            _viewModel.EditorWinHeight = int.Parse(hoge.Value);
+                        }
 
-                    hoge = editWindow.Attribute("width");
-                    if (hoge != null)
-                    {
-                        _viewModel.EditorWinWidth = int.Parse(hoge.Value);
+                        hoge = editWindow.Attribute("width");
+                        if (hoge != null)
+                        {
+                            _viewModel.EditorWinWidth = int.Parse(hoge.Value);
+                        }
                     }
                 }
 

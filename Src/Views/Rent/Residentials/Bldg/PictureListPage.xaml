@@ -21,16 +21,16 @@
         
         <Grid Grid.Row="0" Grid.ColumnSpan="2">
             <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Margin="0,0,24,0" HorizontalAlignment="Right">
-                <AppBarButton Name="AppBarButtonAddPicture" Icon="Add" Label="追加" Command="{x:Bind ViewModel.AddNewBuildingPicturesCommand}"/>
-                <AppBarButton Icon="OpenLocal" Label="開く" Command="{x:Bind ViewModel.OpenBuildingPictureDirectoryCommand}"/>
-                <AppBarButton Icon="Delete" Label="削除" Command="{x:Bind ViewModel.DeleteSelectedBuildingPictureCommand}"/>
+                <AppBarButton Name="AppBarButtonAddPicture" Icon="Add" Label="追加" Command="{x:Bind ViewModel.Bldg.AddNewBuildingPicturesCommand}"/>
+                <AppBarButton Icon="OpenLocal" Label="開く" Command="{x:Bind ViewModel.Bldg.OpenBuildingPictureDirectoryCommand}"/>
+                <AppBarButton Icon="Delete" Label="削除" Command="{x:Bind ViewModel.Bldg.DeleteSelectedBuildingPictureCommand}"/>
                 <!--  Command="{x:Bind ViewModel.DeleteRentResidentialCommand}" CommandParameter="{x:Bind SearchResult.SelectedItem, Mode=OneWay}" -->
             </CommandBar>
         </Grid>
 
         <Grid Grid.Row="1" Grid.Column="0">
             <Border Style="{StaticResource RoundCardBorderStyle}">
-                <ItemsView ItemsSource="{x:Bind ViewModel.BuildingPictures, Mode=TwoWay}" SelectionChanged="ItemsView_SelectionChanged" MinWidth="300" MinHeight="225" ScrollViewer.HorizontalScrollMode="Disabled" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" SelectionMode="Single" IsItemInvokedEnabled="False">
+                <ItemsView ItemsSource="{x:Bind ViewModel.Bldg.BuildingPictures, Mode=TwoWay}" SelectionChanged="ItemsView_SelectionChanged" MinWidth="300" MinHeight="225" ScrollViewer.HorizontalScrollMode="Disabled" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" SelectionMode="Single" IsItemInvokedEnabled="False">
                     <ItemsView.ItemTemplate>
                         <DataTemplate  x:DataType="modresi:PictureBuilding">
                             <ItemContainer>
@@ -55,11 +55,11 @@
             </Border>
         </Grid>
 
-        <Grid Grid.Row="1" Grid.Column="1" Margin="12,0,0,0" Visibility="{x:Bind ViewModel.IsBuildingPictureEditPaneVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+        <Grid Grid.Row="1" Grid.Column="1" Margin="12,0,0,0" Visibility="{x:Bind ViewModel.Bldg.IsBuildingPictureEditPaneVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
             <Border Style="{StaticResource RoundCardBorderStyle}">
                 <StackPanel Spacing="12" Margin="6,0,6,6" MinWidth="260">
 
-                    <ComboBox x:Name="ComboBoxKinds" Header="タイプ" PlaceholderText="選択" Width="200" SelectedIndex="-1" ItemsSource="{x:Bind ViewModel.BuildingPictureTypes, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.SelectedBuildingPictureType, Mode=TwoWay}">
+                    <ComboBox x:Name="ComboBoxKinds" Header="タイプ" PlaceholderText="選択" Width="200" SelectedIndex="-1" ItemsSource="{x:Bind ViewModel.Bldg.BuildingPictureTypes, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.Bldg.SelectedBuildingPictureType, Mode=TwoWay}">
                         <ComboBox.ItemTemplate>
                             <DataTemplate x:DataType="modresi:BuildingPictureType">
                                 <StackPanel Orientation="Horizontal">
@@ -69,8 +69,8 @@
                         </ComboBox.ItemTemplate>
                     </ComboBox>
 
-                    <TextBox Header="説明" Text="{x:Bind ViewModel.BuildingPictureDescription, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
-                    <CheckBox Content="メインの写真" IsChecked="{x:Bind ViewModel.BuildingPictureIsMain, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
+                    <TextBox Header="説明" Text="{x:Bind ViewModel.Bldg.BuildingPictureDescription, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
+                    <CheckBox Content="メインの写真" IsChecked="{x:Bind ViewModel.Bldg.BuildingPictureIsMain, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
                     <!--
                     <Button Content="更新" Command="{x:Bind ViewModel.UpdatedBuildingPicturePropertyCommand}" HorizontalAlignment="Right"></Button>
                     -->

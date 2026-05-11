@@ -15,7 +15,7 @@ public sealed partial class BldgShellPage : Page
 {
     #region == Properties ==
 
-    public ViewModels.Rent.ResidentialsViewModel? ViewModel {
+    public ViewModels.Rent.Residentials.MainViewModel? ViewModel {
         get;
         private set
         {
@@ -24,7 +24,8 @@ public sealed partial class BldgShellPage : Page
 
             field = value;
 
-            ViewModel?.EventIsUnitOwnership += (sender, arg) => OnEventIsUnitOwnership(arg);
+            // TODO:
+            //ViewModel?.EventIsUnitOwnership += (sender, arg) => OnEventIsUnitOwnership(arg);
         }
     }
 
@@ -112,10 +113,10 @@ public sealed partial class BldgShellPage : Page
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
-        if ((e.Parameter is ViewModels.Rent.ResidentialsViewModel) && (e.Parameter != null))
+        if ((e.Parameter is ViewModels.Rent.Residentials.MainViewModel) && (e.Parameter != null))
         {
             //_editorShell = e.Parameter as Views.Rent.Residentials.EditorShell;
-            ViewModel = e.Parameter as ViewModels.Rent.ResidentialsViewModel;
+            ViewModel = e.Parameter as ViewModels.Rent.Residentials.MainViewModel;
 
             ViewModel?.SetBldgShell(this);
         }
@@ -326,7 +327,7 @@ public sealed partial class BldgShellPage : Page
 
     private void Page_Unloaded(object sender, RoutedEventArgs e)
     {
-        //
-        ViewModel?.EventIsUnitOwnership -= (sender, arg) => OnEventIsUnitOwnership(arg);
+        // TODO:
+        //ViewModel?.EventIsUnitOwnership -= (sender, arg) => OnEventIsUnitOwnership(arg);
     }
 }

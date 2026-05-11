@@ -7,7 +7,7 @@ public sealed partial class ZumenListPage : Page
 {
     //private Views.Rent.Residentials.Editor.EditorShell? _editorShell;
 
-    public ViewModels.Rent.ResidentialsViewModel? ViewModel
+    public ViewModels.Rent.Residentials.MainViewModel? ViewModel
     {
         get;
         private set
@@ -28,10 +28,10 @@ public sealed partial class ZumenListPage : Page
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
-        if ((e.Parameter is ViewModels.Rent.ResidentialsViewModel) && (e.Parameter != null))
+        if ((e.Parameter is ViewModels.Rent.Residentials.MainViewModel) && (e.Parameter != null))
         {
             //_editorShell = e.Parameter as Views.Rent.Residentials.EditorShell;
-            ViewModel = e.Parameter as ViewModels.Rent.ResidentialsViewModel;
+            ViewModel = e.Parameter as ViewModels.Rent.Residentials.MainViewModel;
         }
 
         base.OnNavigatedTo(e);

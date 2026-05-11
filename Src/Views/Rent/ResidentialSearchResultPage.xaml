@@ -61,8 +61,8 @@
             <StackPanel Grid.Row="0" Padding="{StaticResource ContentPadding}">
 
                 <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Margin="0,0,24,0" HorizontalAlignment="Right">
-                    <AppBarButton Icon="Edit" Label="編集" Command="{x:Bind ViewModel.EditRentResidentialCommand}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}"/>
-                    <AppBarButton Icon="Copy" Label="複製"/>
+                    <AppBarButton Icon="Delete" Label="削除" Command="{x:Bind ViewModel.DeleteRentResidentialCommand}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}"/>
+
                     <AppBarButton Icon="Sort" IsCompact="True" ToolTipService.ToolTip="Sort" Label="並べ替え" AutomationProperties.Name="Sort">
                         <AppBarButton.Flyout>
                             <MenuFlyout>
@@ -72,7 +72,8 @@
                             </MenuFlyout>
                         </AppBarButton.Flyout>
                     </AppBarButton>
-                    <AppBarButton Icon="Delete" Label="削除" Command="{x:Bind ViewModel.DeleteRentResidentialCommand}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}"/>
+                    <AppBarButton Icon="Copy" Label="複製"/>
+                    <AppBarButton Icon="Edit" Label="編集" Command="{x:Bind ViewModel.EditRentResidentialCommand}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}"/>
 
                     <!--<CommandBar.SecondaryCommands>
                             <AppBarButton Icon="Setting" Label="Settings">

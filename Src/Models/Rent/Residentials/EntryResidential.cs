@@ -14,11 +14,21 @@ public partial class EntryResidentialSearchResult : EntryBase
 // 賃貸住居用の物件クラス（建物）
 public partial class EntryResidentialFull : EntryBase
 {
-    public EnumEntryStatus EntryStatus {get; set;}
+    public EnumEntryStatus EntryStatus
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                
+            }
+        }
+    }
 
     public ObservableCollection<PictureBuilding> BuildingPictures
     {
-        get => field;
+        get;
         set
         {
             if (SetProperty(ref field, value))
@@ -33,7 +43,7 @@ public partial class EntryResidentialFull : EntryBase
 
     public ObservableCollection<Room> Rooms
     {
-        get => field;
+        get;
         set
         {
             if (SetProperty(ref field, value))

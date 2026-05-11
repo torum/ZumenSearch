@@ -7,9 +7,9 @@ public interface IDataAccessService
 {
     SqliteDataAccessResultWrapper InitializeDatabase(string dataBaseFilePath);
 
-    SqliteDataAccessResultWrapper InsertRentResidential(EntryResidentialFull entry);
+    SqliteDataAccessResultWrapper InsertRentResidential(Models.Rent.Residentials.EntryResidentialFull entry);
 
-    SqliteDataAccessResultWrapper UpdateRentResidential(EntryResidentialFull entry);
+    SqliteDataAccessResultWrapper UpdateRentResidential(Models.Rent.Residentials.EntryResidentialFull entry);
 
     SqliteDataAccessResultWrapper DeleteRentResidential(string rentId);
 
@@ -17,7 +17,7 @@ public interface IDataAccessService
 
     SqliteDataAccessSelectRentResidentialFullResultWrapper SelectRentResidentialById(string id);
 
-
+    SqliteDataAccessResultWrapper UpsertRentResidentialRoom(string rentId, Models.Rent.Residentials.Room room);
     /*
     SqliteDataAccessResultWrapper InsertFeed(string feedId, Uri feedUri, string feedName, string feedTitle, string feedDescription, DateTime updated, Uri? htmlUri);
 

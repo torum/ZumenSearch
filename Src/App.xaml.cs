@@ -7,6 +7,7 @@ using ZumenSearch.Helpers;
 using ZumenSearch.Services;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.Services.Extensions;
+using ZumenSearch.Services.Extensions.AbstractFactory;
 using ZumenSearch.ViewModels;
 using ZumenSearch.Views;
 
@@ -91,9 +92,9 @@ public partial class App : Application
             services.AddSingleton<INavigationService, NavigationService>();
 
             // Views and ViewModels
-            services.AddSingleton<ShellPage>();
-            services.AddSingleton<MainViewModel>();
-            services.AddSingleton<MainWindow>();
+            services.AddSingleton<Views.ShellPage>();
+            services.AddSingleton<ViewModels.MainViewModel>();
+            services.AddSingleton<Views.MainWindow>();
 
             services.AddSingleton<Views.IntegratedSearchPage>();
 
@@ -101,12 +102,13 @@ public partial class App : Application
             services.AddSingleton<Views.Rent.ResidentialSearchResultPage>();
 
             services.AddTransient<Views.Rent.Residentials.EditorWindow>();
-            services.AddTransient<ViewModels.Rent.ResidentialsViewModel>();
-            services.AddEditorFactory<Views.Rent.Residentials.ShellPage>();
-            //
-            //services.AddEditorFactory<Views.Rent.Residentials.Bldg.Unit.ShellPage>();
-            services.AddTransient<Views.Rent.Residentials.Bldg.BldgShellPage>();
-            services.AddTransient<Views.Rent.Residentials.Unit.UnitShellPage>();
+            services.AddTransient<Views.Rent.Residentials.ShellPage>();
+            services.AddTransient<ViewModels.Rent.Residentials.MainViewModel>();
+
+            services.AddEditorFactory<ViewModels.Rent.Residentials.MainViewModel, Models.Rent.Residentials.EntryResidentialFull>();
+            services.AddEditorFactory<Views.Rent.Residentials.ShellPage, Models.Rent.Residentials.EntryResidentialFull>();
+            // Instead of AddEditorFactory for each, typeof.. <,> registers all.
+            //services.AddSingleton(typeof(IAbstractFactory<,>), typeof(AbstractFactory<,>)); 
 
             services.AddSingleton<Views.Rent.Commercials.CommercialsPage>();
             services.AddSingleton<ViewModels.Rent.Commercials.CommercialsViewModel>();
@@ -118,7 +120,7 @@ public partial class App : Application
             services.AddSingleton<ViewModels.Rent.Owners.OwnersViewModel>();
 
             services.AddSingleton<Views.Brokers.BrokersPage>();
-            services.AddSingleton<SettingsPage>();
+            services.AddSingleton<Views.SettingsPage>();
         }).
         Build();
 

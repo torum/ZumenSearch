@@ -171,7 +171,7 @@ public class DataAccessService : IDataAccessService
         return res;
     }
 
-    public SqliteDataAccessResultWrapper InsertRentResidential(EntryResidentialFull entry)
+    public SqliteDataAccessResultWrapper InsertRentResidential(Models.Rent.Residentials.EntryResidentialFull entry)
     {
         var res = new SqliteDataAccessResultWrapper();
 
@@ -400,7 +400,7 @@ public class DataAccessService : IDataAccessService
         return res;
     }
 
-    public SqliteDataAccessResultWrapper UpdateRentResidential(EntryResidentialFull entry)
+    public SqliteDataAccessResultWrapper UpdateRentResidential(Models.Rent.Residentials.EntryResidentialFull entry)
     {
         var res = new SqliteDataAccessResultWrapper();
 
@@ -643,7 +643,7 @@ public class DataAccessService : IDataAccessService
         }
         catch (System.InvalidOperationException ex)
         {
-            Debug.WriteLine("Opps. InvalidOperationException@DataAccess::InsertFeed");
+            Debug.WriteLine("Opps. InvalidOperationException@DataAccess::UpdateRentResidential");
 
             res.IsError = true;
             res.Error.ErrType = ErrorObject.ErrTypes.DB;
@@ -1114,6 +1114,146 @@ public class DataAccessService : IDataAccessService
 
         return res;
     }
+
+    public SqliteDataAccessResultWrapper UpsertRentResidentialRoom(string rentId, Models.Rent.Residentials.Room room)
+    {
+        var res = new SqliteDataAccessResultWrapper();
+
+        if (string.IsNullOrEmpty(rentId))
+        {
+            res.IsError = true;
+            // TODO:
+            return res;
+        }
+
+        _readerWriterLock.EnterWriteLock();
+        try
+        {
+            using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
+            connection.Open();
+
+            using var cmd = connection.CreateCommand();
+            cmd.Transaction = connection.BeginTransaction();
+            try
+            {
+                cmd.CommandType = CommandType.Text;
+
+                // Upsert
+                var sqlInsertIntoRentLivingRoom = "INSERT INTO rent_residentials_rooms (room_id, rent_id, name) VALUES (@roomId, @RentId, @Nam) ";
+                sqlInsertIntoRentLivingRoom += "ON CONFLICT(room_id) ";
+                //sqlInsertIntoRentLivingRoom += string.Format("DO UPDATE SET name = '{0}'", EscapeSingleQuote(room.RoomName));
+                sqlInsertIntoRentLivingRoom += "DO UPDATE SET name = @Nam";
+
+                cmd.CommandText = sqlInsertIntoRentLivingRoom;
+
+                /*
+                if (room.IsNew)
+                {
+                    var sqlInsertIntoRentLivingRoom = "INSERT INTO rent_residentials_rooms (room_id, rent_id, name) VALUES (@roomId, @RentId, @Nam)";
+
+                    // 追加
+                    cmd.CommandText = sqlInsertIntoRentLivingRoom;
+
+                }
+                else if (room.IsModified)
+                {
+                    var sqlUpdateRentLivingRoom = string.Format("UPDATE rent_residentials_rooms SET name = @Nam WHERE room_id = '{0}'", room.Id);
+                    // 更新
+                    cmd.CommandText = sqlUpdateRentLivingRoom;
+
+                }
+                */
+                cmd.Parameters.AddWithValue("@roomId", room.Id);
+                cmd.Parameters.AddWithValue("@RentId", rentId);
+                cmd.Parameters.AddWithValue("@Nam", room.RoomName);
+
+                var result = cmd.ExecuteNonQuery();
+                if (result > 0)
+                {
+                    room.IsNew = false;
+                    room.IsModified = false;
+                }
+
+                // Commit
+                cmd.Transaction.Commit();
+            }
+            catch (Exception e)
+            {
+                cmd.Transaction.Rollback();
+
+                res.IsError = true;
+                res.Error.ErrType = ErrorObject.ErrTypes.DB;
+                res.Error.ErrCode = "";
+                res.Error.ErrText = e.Message;
+                res.Error.ErrDescription = "Exception";
+                res.Error.ErrDatetime = DateTime.Now;
+                res.Error.ErrPlace = "connection.Open(),Transaction.Commit";
+                res.Error.ErrPlaceParent = "DataAccess::UpsertRentResidentialRoom";
+
+                return res;
+            }
+        }
+        catch (System.Reflection.TargetInvocationException ex)
+        {
+            res.IsError = true;
+            res.Error.ErrType = ErrorObject.ErrTypes.DB;
+            res.Error.ErrCode = "";
+            res.Error.ErrText = ex.Message;
+            res.Error.ErrDescription = "TargetInvocationException";
+            res.Error.ErrDatetime = DateTime.Now;
+            res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
+            res.Error.ErrPlaceParent = "DataAccess::UpsertRentResidentialRoom";
+
+            return res;
+        }
+        catch (System.InvalidOperationException ex)
+        {
+            Debug.WriteLine("Opps. InvalidOperationException@DataAccess::UpsertRentResidentialRoom");
+
+            res.IsError = true;
+            res.Error.ErrType = ErrorObject.ErrTypes.DB;
+            res.Error.ErrCode = "";
+            res.Error.ErrText = ex.Message;
+            res.Error.ErrDescription = "InvalidOperationException";
+            res.Error.ErrDatetime = DateTime.Now;
+            res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
+            res.Error.ErrPlaceParent = "DataAccess::UpsertRentResidentialRoom";
+
+            return res;
+        }
+        catch (Exception e)
+        {
+            res.IsError = true;
+            res.Error.ErrType = ErrorObject.ErrTypes.DB;
+            res.Error.ErrCode = "";
+
+            if (e.InnerException != null)
+            {
+                res.Error.ErrText = e.InnerException.Message;
+                res.Error.ErrDescription = "InnerException";
+            }
+            else
+            {
+                res.Error.ErrText = e.Message;
+                res.Error.ErrDescription = "Exception";
+            }
+            res.Error.ErrDatetime = DateTime.Now;
+            res.Error.ErrPlace = "connection.Open(),BeginTransaction()";
+            res.Error.ErrPlaceParent = "DataAccess::UpsertRentResidentialRoom";
+
+            return res;
+        }
+        finally
+        {
+            _readerWriterLock.ExitWriteLock();
+        }
+
+        //Debug.WriteLine(string.Format("{0} Entries Inserted to DB", res.AffectedCount.ToString()));
+
+        return res;
+    }
+
+
 
     // ColumnExists check
     private static bool ColumnExists(IDataRecord dr, string columnName)

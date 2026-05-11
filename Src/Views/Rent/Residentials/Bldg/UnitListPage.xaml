@@ -19,13 +19,13 @@
             <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Margin="0,0,0,0" HorizontalAlignment="Right">
                 <AppBarButton Icon="Delete" Label="削除"/>
                 <AppBarButton Icon="Copy" Label="複製"/>
-                <AppBarButton Icon="Edit" Label="編集" Command="{x:Bind ViewModel.EditSelectedUnitCommand}" CommandParameter="{x:Bind RoomsListView.SelectedItem, Mode=OneWay}"/>
-                <AppBarButton Icon="Add" Label="追加" Command="{x:Bind ViewModel.AddNewUnitCommand}"/>
+                <AppBarButton Icon="Edit" Label="編集" Command="{x:Bind ViewModel.Bldg.EditSelectedUnitCommand}" CommandParameter="{x:Bind RoomsListView.SelectedItem, Mode=OneWay}"/>
+                <AppBarButton Icon="Add" Label="追加" Command="{x:Bind ViewModel.Bldg.AddNewUnitCommand}"/>
             </CommandBar>
         </Grid>
         
         <Grid Grid.Row="1">
-            <ItemsView x:Name="RoomsListView" ItemsSource="{x:Bind ViewModel.Rooms, Mode=OneWay}" SelectionMode="Single" AllowFocusOnInteraction="False" IsItemInvokedEnabled="True" ItemInvoked="RoomsListView_ItemInvoked">
+            <ItemsView x:Name="RoomsListView" ItemsSource="{x:Bind ViewModel.Bldg.Rooms, Mode=OneWay}" SelectionMode="Single" AllowFocusOnInteraction="False" IsItemInvokedEnabled="True" ItemInvoked="RoomsListView_ItemInvoked">
                 <ItemsView.ItemTemplate>
                     <DataTemplate x:DataType="modresi:Room">
                         <ItemContainer AllowFocusOnInteraction="False">

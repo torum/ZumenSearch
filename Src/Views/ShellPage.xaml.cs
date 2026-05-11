@@ -299,7 +299,7 @@ public sealed partial class ShellPage : Page
 
         if (this.SearchBox.Visibility != Visibility.Visible)
         {
-            Debug.WriteLine("SearchBox.Visibility != Visibility.Visible");
+            //Debug.WriteLine("SearchBox.Visibility != Visibility.Visible");
             width = 0;
             height = 0;
         }
@@ -316,7 +316,7 @@ public sealed partial class ShellPage : Page
 
         if (this.BackButton.Visibility != Visibility.Visible)
         {
-            Debug.WriteLine("BackButton.Visibility != Visibility.Visible");
+            //Debug.WriteLine("BackButton.Visibility != Visibility.Visible");
             width2 = 0;
             height2 = 0;
         }
