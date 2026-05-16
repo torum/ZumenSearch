@@ -1,4 +1,4 @@
-﻿namespace ZumenSearch.Models;
+﻿namespace ZumenSearch.Models.Common;
 
 public class Breadcrumb
 {

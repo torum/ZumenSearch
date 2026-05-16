@@ -4,24 +4,46 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
-using ZumenSearch.Models;
+using System.Xml.Linq;
+using ZumenSearch.Models.Base;
 using ZumenSearch.Models.Rent.Residentials;
 using ZumenSearch.Services.Contracts;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace ZumenSearch.ViewModels.Rent.Residentials;
 
 public partial class UnitViewModel : ObservableObject
 {
-
+    #region == Private variables ==
+    
     private ViewModels.Rent.Residentials.MainViewModel _mainViewModel;
-    private Models.Rent.Residentials.Room? _unit;
+    private Models.Rent.Residentials.UnitResidential? _unit;
+    
+    #endregion
 
     #region == Public Properties ==
 
-    // This flag indicates if the room is dirty (i.e., has unsaved changes).
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SaveCommand))]
     public partial bool IsDirty {  get; private set; }
+
+    /*
+    public bool IsDirty
+    {
+        get;
+        private set
+        {
+            if (SetProperty(ref field, value))
+            {
+                _mainViewModel.IsDirty = true;
+                SaveCommand.NotifyCanExecuteChanged();
+            }
+        }
+    }
+    */
+
+    [ObservableProperty]
+    public partial bool HasErrors { get; private set; }
 
     public string RoomName
     {
@@ -37,6 +59,44 @@ public partial class UnitViewModel : ObservableObject
 
                 //_mainViewModel.EventTitleChanged?.Invoke(this, EventArgs.Empty);//TODO
             }
+        }
+    }
+
+    public string Chinryou
+    {
+        get => field ?? string.Empty; // Ensure a non-null value is returned
+        set
+        {
+            if (field == value)
+            {
+                return;
+            }
+
+            if (value is null)
+            {
+                return;
+            }
+
+            if (value.Equals("0"))
+            {
+                field = "";
+                return;
+            }
+
+            var text = Helpers.Common.ReplaceZenkakuNumber(value.Trim());
+
+            if (Helpers.Common.CanConvertToPositiveNumber(text))
+            {
+                field = text;
+                IsDirty = true;
+            }
+            else
+            {
+                // TODO: show error
+                //field = string.Empty;
+            }
+
+            OnPropertyChanged();
         }
     }
 
@@ -65,7 +125,28 @@ public partial class UnitViewModel : ObservableObject
             return;
         }
 
-        _unit.RoomName = RoomName;
+        if (string.IsNullOrEmpty(RoomName))
+        {
+            // TODO: Show InfoBar?
+            HasErrors = true;
+            return;
+        }
+
+        _unit.Name = RoomName;
+
+        if (int.TryParse(Chinryou, out var result))
+        {
+            if (result > -1)
+            {
+                _unit.Chinryou = result;
+            }
+            else
+            {
+                Debug.WriteLine("整数変換に失敗。（マイナス）");
+            }
+        }
+
+
 
         // TODO: More.
 
@@ -96,19 +177,33 @@ public partial class UnitViewModel : ObservableObject
         }
     }
 
-    #region == Public Methods ==
-
-    public void SetEditUnit(Models.Rent.Residentials.Room room)
+    private void PopulateUnitValues()
     {
-        _unit = room;
+        if (_unit is null)
+        {
+            return;
+        }
 
-        RoomName = _unit.RoomName; // Set the value to trigger the setter logic if needed.
+        RoomName = _unit.Name; // Set the value to trigger the setter logic if needed.
+
+        var test = _unit.Chinryou.ToString();
+        Chinryou = _unit.Chinryou.ToString();
+
 
         // TODO: Set other properties for editing..
 
 
         _unit.IsModified = false;
         IsDirty = false;
+    }
+
+    #region == Public Methods ==
+
+    public void SetEditUnit(Models.Rent.Residentials.UnitResidential room)//SetEditUnit //PopulateUnitValues
+    {
+        _unit = room;
+
+        PopulateUnitValues();
     }
 
     #endregion
@@ -131,7 +226,7 @@ public partial class UnitViewModel : ObservableObject
 
         SetValuesToUnit();
 
-        if (_mainViewModel.Bldg.EntryStatus == Models.EnumEntryStatus.New)
+        if (_mainViewModel.Bldg.EntryStatus == EnumEntryStatus.New)
         {
             // update Bldg and done.
             UpdateBldg();
@@ -142,10 +237,10 @@ public partial class UnitViewModel : ObservableObject
         {
             // save room directry to db.
             // 
-            var resInsert = _dataAccessService.UpsertRentResidentialRoom(_mainViewModel.Id, _unit);
+            var resInsert = _dataAccessService.UpsertRentResidentialUnit(_mainViewModel.Id, _unit);
             if (resInsert.IsError)
             {
-                Debug.WriteLine("Error on UpsertRentResidentialRoom. @Save() in Residentials.MainViewModel");
+                Debug.WriteLine("Error on UpsertRentResidentialUnit. @Save() in Residentials.MainViewModel");
                 Debug.WriteLine(resInsert.Error.ErrText + Environment.NewLine + resInsert.Error.ErrDescription + Environment.NewLine + resInsert.Error.ErrPlace + Environment.NewLine + resInsert.Error.ErrPlaceParent);
 
                 // TODO: return error object.

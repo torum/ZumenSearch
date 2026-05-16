@@ -9,8 +9,10 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Text;
 using Windows.System;
-using ZumenSearch.Models;
+using ZumenSearch.Models.Base;
+using ZumenSearch.Models.Common;
 using ZumenSearch.Models.Rent.Residentials;
+using ZumenSearch.Services;
 using ZumenSearch.Services.Contracts;
 
 namespace ZumenSearch.ViewModels.Rent.Residentials;
@@ -36,11 +38,30 @@ public partial class BldgViewModel : ObservableObject
 
     #region == Public Properties ==
 
+    #region == ステータス ==
+
     public EnumEntryStatus EntryStatus => _entry.EntryStatus;
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SaveCommand))]
     public partial bool IsDirty { get; private set; }
+
+    /*
+    public bool IsDirty
+    {
+        get;
+        private set
+        {
+            if (SetProperty(ref field, value))
+            {
+                _mainViewModel.IsDirty = true;
+                SaveCommand.NotifyCanExecuteChanged();
+            }
+        }
+    }
+    */
+
+    #endregion
 
     #region == 建物基本プロパティ == 
 
@@ -92,7 +113,7 @@ public partial class BldgViewModel : ObservableObject
     // 区分所有か一括所有か
     public bool IsUnitOwnership
     {
-        get => field;
+        get;
         set
         {
             if (SetProperty(ref field, value))
@@ -100,9 +121,8 @@ public partial class BldgViewModel : ObservableObject
                 IsDirty = true;
                 OnPropertyChanged(nameof(IsNotUnitOwnership));
 
-                // TODO:
                 // If this is set, then show/hide the owner and zumen from shell menu.
-                //EventIsUnitOwnership?.Invoke(this, field);
+                EventIsUnitOwnershipChanged?.Invoke(this, field);
             }
         }
     }
@@ -906,7 +926,7 @@ public partial class BldgViewModel : ObservableObject
 
     #region == 写真プロパティ ==
 
-    public ObservableCollection<PictureBuilding> BuildingPictures
+    public ObservableCollection<PictureBldg> BuildingPictures
     {
         get;
         set
@@ -932,7 +952,7 @@ public partial class BldgViewModel : ObservableObject
         }
     } = false;
 
-    public PictureBuilding? SelectedBuildingPicture
+    public PictureBldg? SelectedBuildingPicture
     {
         get;
         set
@@ -1098,7 +1118,7 @@ public partial class BldgViewModel : ObservableObject
 
     #region == 部屋 ==
 
-    public ObservableCollection<Models.Rent.Residentials.Room> Rooms
+    public ObservableCollection<Models.Rent.Residentials.UnitResidential> Rooms
     {
         get;
         set
@@ -1110,8 +1130,25 @@ public partial class BldgViewModel : ObservableObject
         }
     } = [];
 
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(EditSelectedUnitCommand))]
+    public partial Models.Rent.Residentials.UnitResidential? SelectedRoom { get; set; }
+
 
     #endregion
+
+    #region == エラー ==
+
+    [ObservableProperty]
+    public partial bool HasErrors { get; private set; }
+
+    #endregion
+
+    #endregion
+
+    #region == Events ==
+
+    public event EventHandler<bool>? EventIsUnitOwnershipChanged; // show or hides navigationview' menu accordingly.
 
     #endregion
 
@@ -1147,7 +1184,6 @@ public partial class BldgViewModel : ObservableObject
     }
 
     #region == Private Methods ==
-
 
     private void PopulateEntryValues()
     {
@@ -1205,18 +1241,19 @@ public partial class BldgViewModel : ObservableObject
 
 
         // Pictures TODO:
-        BuildingPictures = new ObservableCollection<PictureBuilding>(_entry.BuildingPictures); // create a copy.
+        BuildingPictures = new ObservableCollection<PictureBldg>(_entry.BuildingPictures); // create a copy.
         //OpenBuildingPictureDirectoryCommand.NotifyCanExecuteChanged();
 
 
         // Rooms
-        Rooms = new ObservableCollection<Models.Rent.Residentials.Room>(_entry.Rooms); // create a copy.
+        Rooms = new ObservableCollection<Models.Rent.Residentials.UnitResidential>(_entry.Rooms); // create a copy.
+        /*
         Rooms.CollectionChanged += (s, e) => 
         {
             // Unsubscribe from removed items
             if (e.OldItems != null)
             {
-                foreach (Models.Rent.Residentials.Room item in e.OldItems)
+                foreach (Models.Rent.Residentials.UnitResidential item in e.OldItems)
                 {
                     Debug.WriteLine($"Item {item.RoomName} Removed from Rooms");
                     IsDirty = true;
@@ -1228,7 +1265,7 @@ public partial class BldgViewModel : ObservableObject
             // Subscribe to PropertyChanged.
             if (e.NewItems != null)
             {
-                foreach (Models.Rent.Residentials.Room item in e.NewItems)
+                foreach (Models.Rent.Residentials.UnitResidential item in e.NewItems)
                 {
                     Debug.WriteLine($"Item {item.RoomName} Added to Rooms");
                     IsDirty = true;
@@ -1237,13 +1274,13 @@ public partial class BldgViewModel : ObservableObject
                 }
             }
         };
-
+        */
         //Debug.WriteLine($"PopulateEntryValues: Completed populating values from Entry to VM. Entry ID: {_entry.Id}, Rooms Count: {Rooms.Count}");
     }
 
     private void OnRoomPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (sender is not Models.Rent.Residentials.Room)
+        if (sender is not Models.Rent.Residentials.UnitResidential)
         {
             Debug.WriteLine("OnItemPropertyChanged returned non room.");
         }
@@ -1259,6 +1296,13 @@ public partial class BldgViewModel : ObservableObject
     {
         if (!IsDirty)
         {
+            return;
+        }
+
+        if (string.IsNullOrEmpty(Name))
+        {
+            // TODO: Show InfoBar?
+            HasErrors = true;
             return;
         }
 
@@ -1345,32 +1389,51 @@ public partial class BldgViewModel : ObservableObject
 
     #region == Public Methods ==
 
-    public void SetNewBuildingPictures(List<string> filePathList)
+    public async Task SetNewBuildingPicturesAsync(List<string> filePathList)
     {
-        if (filePathList.Count <= 0)
+        if (filePathList is null) return;
+        if (filePathList.Count == 0) return;
+
+        Debug.WriteLine($"destDirectory={_entryDataDirectoryPath}  @SetNewBuildingPicturesAsync()");
+
+        if (!Directory.Exists(_entryDataDirectoryPath))
         {
-            return;
+            Directory.CreateDirectory(_entryDataDirectoryPath);
         }
 
-        foreach (var filePath in filePathList)
+        List<string> list = [];
+
+        foreach (var file in filePathList)
         {
-            if (string.IsNullOrEmpty(filePath.Trim()))
+            if (string.IsNullOrEmpty(file.Trim()))
             {
                 continue;
             }
 
-            var pic = new Models.Rent.Residentials.PictureBuilding(filePath)
-            {
-                IsNew = true,
-                Id = Guid.CreateVersion7().ToString("N")
+            using var sourceStream = File.Open(file, FileMode.Open);
 
+            // TODO: set max file size?
+
+            var destFilePath = Path.Combine(_entryDataDirectoryPath, System.IO.Path.GetFileName(file));
+            //Debug.WriteLine($"{file.Path} to {destFilePath}  @SetNewBuildingPicturesAsync()");
+
+            using var destinationStream = File.Create(destFilePath);
+            await sourceStream.CopyToAsync(destinationStream);
+
+            var pic = new Models.Rent.Residentials.PictureBldg(Guid.CreateVersion7().ToString("N"), destFilePath)
+            {
+                IsNew = true
             };
 
             BuildingPictures.Add(pic);
 
             OpenBuildingPictureDirectoryCommand.NotifyCanExecuteChanged();
             DeleteSelectedBuildingPictureCommand.NotifyCanExecuteChanged();
+
             IsDirty = true;
+
+            // Keep track of unsaved files to delete them when discarding.
+            _unsavedBuildingPictureFileList.Add(destFilePath);
         }
     }
 
@@ -1449,14 +1512,9 @@ public partial class BldgViewModel : ObservableObject
     [RelayCommand]
     public async Task AddNewBuildingPictures()
     {
-        Debug.WriteLine($"destDirectory={_entryDataDirectoryPath}  @AddNewBuildingPictures()");
-        // TODO:
-        /*
-        if (!Directory.Exists(_entryDataDirectoryPath))
-        {
-            Directory.CreateDirectory(_entryDataDirectoryPath);
-        }
+        // Handle this in the code behind since this ViewModel does not know about the Window which is required for the Picker.
 
+        /*
         var hWnd = WinRT.Interop.WindowNative.GetWindowHandle(_editorWin);
         var windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hWnd);
         var openPicker = new Microsoft.Windows.Storage.Pickers.FileOpenPicker(windowId);
@@ -1566,20 +1624,56 @@ public partial class BldgViewModel : ObservableObject
     [RelayCommand]
     private void AddNewUnit()
     {
-        _mainViewModel.Unit.SetEditUnit(new Room(Guid.CreateVersion7().ToString("N")));
+        _mainViewModel.Unit.SetEditUnit(new UnitResidential(Guid.CreateVersion7().ToString("N")));
 
         _mainViewModel.GoToUnitShellPageCommand.Execute(this);
     }
 
-    [RelayCommand]
-    private void EditSelectedUnit(Room room)
+    [RelayCommand(CanExecute = nameof(EditSelectedUnitCanExecute))]
+    private void EditSelectedUnit(UnitResidential room)
     {
+        if (room is null) return;
+
         _mainViewModel.Unit.SetEditUnit(room);
 
-
         _mainViewModel.GoToUnitShellPageCommand.Execute(this);
 
     }
+    public bool EditSelectedUnitCanExecute()
+    {
+        if (SelectedRoom is null) return false;
+        return true;
+    }
+
+    [RelayCommand(CanExecute = nameof(DupeSelectedUnitCanExecute))]
+    private void DupeSelectedUnit(UnitResidential room)
+    {
+        if (room is null) return;
+
+        //
+    }
+    public bool DupeSelectedUnitCanExecute()
+    {
+        if (SelectedRoom is null) return false;
+        return true;
+    }
+
+    [RelayCommand(CanExecute = nameof(DeleteSelectedUnitCanExecute))]
+    private void DeleteSelectedUnit(UnitResidential room)
+    {
+        if (room is null) return;
+
+        //
+
+        // Make sure to set it to null.
+        SelectedRoom = null;
+    }
+    public bool DeleteSelectedUnitCanExecute()
+    {
+        if (SelectedRoom is null) return false;
+        return true;
+    }
+    
 
     #endregion
 

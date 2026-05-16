@@ -5,7 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    xmlns:mod="using:ZumenSearch.Models"
+    xmlns:mod="using:ZumenSearch.Models.Common"
     NavigationCacheMode="Required" >
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled" Padding="48,0,48,24">
         <Grid x:Name="ContentArea">
@@ -13,30 +13,47 @@
             <StackPanel Spacing="12" Margin="0,24,0,0">
 
                 <Border Style="{StaticResource RoundCardBorderStyle}">
-                    <TextBox MinWidth="200" Width="250" Header="部屋番号" PlaceholderText="必須" Text="{x:Bind ViewModel.Unit.RoomName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left"/>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*" MinWidth="320"></ColumnDefinition>
+                            <ColumnDefinition Width="1*" MinWidth="320"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <Grid Grid.Row="0" Grid.Column="0">
+                            <TextBox MinWidth="200" Header="部屋番号" PlaceholderText="必須" Text="{x:Bind ViewModel.Unit.RoomName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch"/>
+                        </Grid>
+                        <Grid Grid.Row="0" Grid.Column="1" Margin="12,0,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                <ColumnDefinition Width="*"></ColumnDefinition>
+                            </Grid.ColumnDefinitions>
+                            <Grid Grid.Row="0" Grid.Column="0">
+                                <StackPanel>
+                                    <TextBlock Text="間取り" Margin="0,0,0,8"/>
+                                    <StackPanel Orientation="Horizontal">
+                                        <ComboBox SelectedIndex="0" Width="80" VerticalAlignment="Bottom">
+                                            <x:String>1</x:String>
+                                            <x:String>2</x:String>
+                                            <x:String>3</x:String>
+                                            <x:String>4</x:String>
+                                        </ComboBox>
+                                        <ComboBox SelectedIndex="0" Margin="6,0,0,0" Width="100" VerticalAlignment="Bottom">
+                                            <x:String>R</x:String>
+                                            <x:String>K</x:String>
+                                            <x:String>DK</x:String>
+                                            <x:String>LDK</x:String>
+                                        </ComboBox>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Grid>
+                            <Grid Grid.Row="0" Grid.Column="1" Margin="12,0,0,0">
+                                <TextBox Header="専有面積（平米）" MinWidth="120" HorizontalAlignment="Left"/>
+                            </Grid>
+                        </Grid>
+                    </Grid>
                 </Border>
-                <StackPanel Orientation="Horizontal" Margin="0,24,0,0">
-                    <TextBlock Text="間取り" Margin="0 0 3 6" HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
-                </StackPanel>
-
-                <StackPanel Orientation="Horizontal" Margin="0 6 12 0">
-                    <ComboBox SelectedIndex="0" Margin="0 0 3 6" VerticalAlignment="Bottom">
-                        <x:String>1</x:String>
-                        <x:String>2</x:String>
-                        <x:String>3</x:String>
-                        <x:String>4</x:String>
-                    </ComboBox>
-                    <ComboBox SelectedIndex="0" Margin="0 0 3 6" VerticalAlignment="Bottom">
-                        <x:String>R</x:String>
-                        <x:String>K</x:String>
-                        <x:String>DK</x:String>
-                        <x:String>LDK</x:String>
-                    </ComboBox>
-                </StackPanel>
-
-                <StackPanel Orientation="Horizontal" Margin="0,24,0,0">
-                    <TextBox Header="専有面積（平米）" Margin="0 0 3 6" HorizontalAlignment="Left" VerticalAlignment="Bottom" />
-                </StackPanel>
 
                 <Expander Header="位置・方位" Margin="0,24,0,0" Padding="6" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" IsExpanded="True">
                     <StackPanel HorizontalAlignment="Left" Margin="24,12,24,12">

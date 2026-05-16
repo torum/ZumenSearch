@@ -1,19 +1,19 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace ZumenSearch.Models;
+namespace ZumenSearch.Models.Base;
 
 public abstract class PictureBase : ObservableObject
 {
     public string ImageLocation { get; set; } = string.Empty;
 
-    public string Id { get; set; } = string.Empty;
+    public string Id { get;  } = string.Empty;
 
     public bool IsNew { get; set; } = true;
 
     public bool IsModified { get; set; } = false;
 
-    protected PictureBase()
+    protected PictureBase(string id)
     {
-
+        Id = id;
     }
 };

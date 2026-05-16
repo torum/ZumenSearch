@@ -7,131 +7,141 @@
     mc:Ignorable="d"
     NavigationCacheMode="Required">
 
-    <Grid x:Name="ContentArea">
-        <ScrollViewer>
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled" Padding="48,0,48,24">
+        <Grid x:Name="ContentArea">
+            <StackPanel Spacing="12" Margin="0,24,0,0">
 
-            <Grid Margin="24">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
+                <Border Style="{StaticResource RoundCardBorderStyle}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*" MinWidth="320"></ColumnDefinition>
+                            <ColumnDefinition Width="1*" MinWidth="320"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <Grid Grid.Row="0" Grid.Column="0">
+                            <TextBox Header="賃料（円）" Text="{x:Bind ViewModel.Unit.Chinryou, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MinWidth="200" HorizontalAlignment="Stretch"/>
+                        </Grid>
+                        <Grid Grid.Row="0" Grid.Column="1" Margin="12,0,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                <ColumnDefinition Width="*"></ColumnDefinition>
+                            </Grid.ColumnDefinitions>
+                            <Grid Grid.Row="0" Grid.Column="0">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBox MinWidth="200" Header="共益費・管理費（円）" HorizontalAlignment="Stretch"/>
+                                </StackPanel>
+                            </Grid>
+                            <Grid Grid.Row="0" Grid.Column="1" Margin="12,0,0,0">
+                                <StackPanel Orientation="Horizontal">
 
-                <StackPanel HorizontalAlignment="Stretch">
+                                </StackPanel>
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                </Border>
 
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,0">
-                        <TextBlock Text="賃料" Margin="0 0 3 6" HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
-                    </StackPanel>
-                    <StackPanel Margin="0 0 6 0">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBox Width="200" Margin="0 0 3 6" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                            <TextBox VerticalAlignment="Bottom" Text="円" Margin="0 0 3 6" />
-                        </StackPanel>
-                    </StackPanel>
+                <Border Style="{StaticResource RoundCardBorderStyle}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*" MinWidth="320"></ColumnDefinition>
+                            <ColumnDefinition Width="1*" MinWidth="320"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <Grid Grid.Row="0" Grid.Column="0">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBox MinWidth="200" Header="敷金" HorizontalAlignment="Stretch"/>
+                                <ComboBox SelectedIndex="0" Margin="6,0,0,0" VerticalAlignment="Bottom">
+                                    <ComboBoxItem>ヵ月</ComboBoxItem>
+                                    <ComboBoxItem>円</ComboBoxItem>
+                                </ComboBox>
+                            </StackPanel>
+                        </Grid>
+                        <Grid Grid.Row="0" Grid.Column="1" Margin="12,0,0,0">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBox MinWidth="200" Header="礼金" HorizontalAlignment="Stretch"/>
+                                <ComboBox SelectedIndex="0" Margin="6,0,0,0" VerticalAlignment="Bottom">
+                                    <ComboBoxItem>ヵ月</ComboBoxItem>
+                                    <ComboBoxItem>円</ComboBoxItem>
+                                </ComboBox>
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
+                </Border>
 
-                    <StackPanel Orientation="Horizontal" Margin="0,24,0,0">
-                        <TextBlock Text="管理費・共益費" Margin="0 0 3 6" HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
-                    </StackPanel>
-                    <StackPanel Margin="0 0 6 0">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBox Width="150" Margin="0 0 3 6" HorizontalAlignment="Left" VerticalAlignment="Center" />
-                            <TextBox VerticalAlignment="Bottom" Text="円" Margin="0 0 3 6"  />
-                        </StackPanel>
-                    </StackPanel>
 
-                    <StackPanel Orientation="Horizontal" Margin="0,24,0,0">
-                        <TextBlock Text="敷金・デポジット" Margin="0 0 3 6" HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
-                    </StackPanel>
-                    <StackPanel Margin="0 0 6 0">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBox Width="120" Margin="0 0 3 6" HorizontalAlignment="Left" VerticalAlignment="Bottom" />
-                            <ComboBox Width="58" SelectedIndex="0" Margin="0 0 3 6"  VerticalAlignment="Bottom">
-                                <ComboBoxItem>ヵ月</ComboBoxItem>
-                                <ComboBoxItem>円</ComboBoxItem>
-                            </ComboBox>
-                        </StackPanel>
-                    </StackPanel>
 
-                    <StackPanel Orientation="Horizontal" Margin="0,24,0,0">
-                        <TextBlock Text="礼金" Margin="0 0 3 6" HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
-                    </StackPanel>
-                    <StackPanel Margin="0 0 6 0">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBox Width="120" Margin="0 0 3 6" HorizontalAlignment="Left" VerticalAlignment="Bottom" />
-                            <ComboBox Width="58" SelectedIndex="0" Margin="0 0 3 6" VerticalAlignment="Bottom">
-                                <ComboBoxItem>ヵ月</ComboBoxItem>
-                                <ComboBoxItem>円</ComboBoxItem>
-                            </ComboBox>
-                        </StackPanel>
-                    </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,24,0,0">
+                    <TextBlock Text="契約種別" Margin="0 0 3 6" HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
+                </StackPanel>
+                <StackPanel Margin="0 0 6 0">
+                    <RadioButton Content="未指定" GroupName="torihikitaiyou" IsChecked="True"/>
+                    <RadioButton Content="普通借家契約" GroupName="torihikitaiyou"/>
+                    <RadioButton Content="定期借家契約" GroupName="torihikitaiyou"/>
+                </StackPanel>
 
-                    <StackPanel Orientation="Horizontal" Margin="0,24,0,0">
-                        <TextBlock Text="契約種別" Margin="0 0 3 6" HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
-                    </StackPanel>
-                    <StackPanel Margin="0 0 6 0">
-                        <RadioButton Content="未指定" GroupName="torihikitaiyou" IsChecked="True"/>
-                        <RadioButton Content="普通借家契約" GroupName="torihikitaiyou"/>
-                        <RadioButton Content="定期借家契約" GroupName="torihikitaiyou"/>
-                    </StackPanel>
-
-                    <StackPanel Orientation="Horizontal" Margin="0,24,0,0">
-                        <TextBlock Text="契約期間（年）" Margin="0 0 3 6" HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
-                    </StackPanel>
-                    <StackPanel Grid.Row="5" Grid.Column="0" Margin="0 0 6 0">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBox Width="34" Margin="0 0 3 6" HorizontalAlignment="Left" VerticalAlignment="Bottom" />
-                        </StackPanel>
-                    </StackPanel>
-
-                    <StackPanel Orientation="Horizontal" Margin="0,24,0,0">
-                        <TextBlock Text="更新料" Margin="0 0 3 6" HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
-                    </StackPanel>
-                    <StackPanel Grid.Row="5" Grid.Column="1" Margin="0 0 6 0">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBox Width="70" Margin="0 0 3 6" HorizontalAlignment="Left" VerticalAlignment="Bottom" />
-                            <ComboBox Width="70" SelectedIndex="0" Margin="0 0 3 6" HorizontalAlignment="Left" VerticalAlignment="Bottom">
-                                <ComboBoxItem>ヵ月</ComboBoxItem>
-                                <ComboBoxItem>円</ComboBoxItem>
-                            </ComboBox>
-                        </StackPanel>
-                    </StackPanel>
-                    
-                    <StackPanel Orientation="Horizontal" Margin="0,24,0,0">
-                        <TextBlock Text="再契約手数料" Margin="0 0 3 6" HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
-                    </StackPanel>
-                    <StackPanel Grid.Row="5" Grid.Column="1" Margin="0 0 6 0">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBox Width="70" Margin="0 0 3 6" HorizontalAlignment="Left" VerticalAlignment="Bottom" />
-                            <ComboBox Width="70" SelectedIndex="1" Margin="0 0 3 6" HorizontalAlignment="Left" VerticalAlignment="Bottom">
-                                <ComboBoxItem>ヵ月</ComboBoxItem>
-                                <ComboBoxItem>円</ComboBoxItem>
-                            </ComboBox>
-                        </StackPanel>
-                    </StackPanel>
-                    
-                    <Expander Header="その他費用" Margin="0 24 0 0" Padding="6" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" IsExpanded="True">
-                        <StackPanel HorizontalAlignment="Left" Margin="24,12,24,12">
-                            <TextBox Header="保証会社" Width="280" Margin="6 6 6 6" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
-                            <TextBox Header="住宅保険" Width="280" Margin="6 12 6 6" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
-                            <TextBox Header="その他" Width="280" Margin="6 12 6 6" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
-                        </StackPanel>
-                    </Expander>
-
-                    <Expander Header="その他条件" Margin="0 24 0 0" Padding="6" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" IsExpanded="True">
-                        <StackPanel HorizontalAlignment="Left" Margin="24,12,24,12">
-                            <CheckBox Margin="6" Content="ペット相談" />
-                            <CheckBox Margin="6" Content="2人入居可" />
-                            <CheckBox Margin="6" Content="保証人不要" />
-                            <CheckBox Margin="6" Content="事務所使用相談" />
-                            <TextBox Header="その他" Width="280" Margin="6 12 6 6" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
-                        </StackPanel>
-                    </Expander>
-
-                    
-                    <StackPanel Margin="0 24 0 24">
-                        <TextBox Header="備考" MinHeight="200" HorizontalAlignment="Stretch" VerticalAlignment="Top" AcceptsReturn="True" ScrollViewer.VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" />
+                <StackPanel Orientation="Horizontal" Margin="0,24,0,0">
+                    <TextBlock Text="契約期間（年）" Margin="0 0 3 6" HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
+                </StackPanel>
+                <StackPanel Grid.Row="5" Grid.Column="0" Margin="0 0 6 0">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBox Width="34" Margin="0 0 3 6" HorizontalAlignment="Left" VerticalAlignment="Bottom" />
                     </StackPanel>
                 </StackPanel>
-            </Grid>
 
-        </ScrollViewer>
-    </Grid>
+                <StackPanel Orientation="Horizontal" Margin="0,24,0,0">
+                    <TextBlock Text="更新料" Margin="0 0 3 6" HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
+                </StackPanel>
+                <StackPanel Grid.Row="5" Grid.Column="1" Margin="0 0 6 0">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBox Width="70" Margin="0 0 3 6" HorizontalAlignment="Left" VerticalAlignment="Bottom" />
+                        <ComboBox Width="70" SelectedIndex="0" Margin="0 0 3 6" HorizontalAlignment="Left" VerticalAlignment="Bottom">
+                            <ComboBoxItem>ヵ月</ComboBoxItem>
+                            <ComboBoxItem>円</ComboBoxItem>
+                        </ComboBox>
+                    </StackPanel>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" Margin="0,24,0,0">
+                    <TextBlock Text="再契約手数料" Margin="0 0 3 6" HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
+                </StackPanel>
+                <StackPanel Grid.Row="5" Grid.Column="1" Margin="0 0 6 0">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBox Width="70" Margin="0 0 3 6" HorizontalAlignment="Left" VerticalAlignment="Bottom" />
+                        <ComboBox Width="70" SelectedIndex="1" Margin="0 0 3 6" HorizontalAlignment="Left" VerticalAlignment="Bottom">
+                            <ComboBoxItem>ヵ月</ComboBoxItem>
+                            <ComboBoxItem>円</ComboBoxItem>
+                        </ComboBox>
+                    </StackPanel>
+                </StackPanel>
+
+                <Expander Header="その他費用" Margin="0 24 0 0" Padding="6" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" IsExpanded="True">
+                    <StackPanel HorizontalAlignment="Left" Margin="24,12,24,12">
+                        <TextBox Header="保証会社" Width="280" Margin="6 6 6 6" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
+                        <TextBox Header="住宅保険" Width="280" Margin="6 12 6 6" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
+                        <TextBox Header="その他" Width="280" Margin="6 12 6 6" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
+                    </StackPanel>
+                </Expander>
+
+                <Expander Header="その他条件" Margin="0 24 0 0" Padding="6" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" IsExpanded="True">
+                    <StackPanel HorizontalAlignment="Left" Margin="24,12,24,12">
+                        <CheckBox Margin="6" Content="ペット相談" />
+                        <CheckBox Margin="6" Content="2人入居可" />
+                        <CheckBox Margin="6" Content="保証人不要" />
+                        <CheckBox Margin="6" Content="事務所使用相談" />
+                        <TextBox Header="その他" Width="280" Margin="6 12 6 6" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
+                    </StackPanel>
+                </Expander>
+
+
+                <StackPanel Margin="0 24 0 24">
+                    <TextBox Header="備考" MinHeight="200" HorizontalAlignment="Stretch" VerticalAlignment="Top" AcceptsReturn="True" ScrollViewer.VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" />
+                </StackPanel>
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
+    
 </Page>

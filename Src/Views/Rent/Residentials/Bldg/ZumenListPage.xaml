@@ -15,9 +15,16 @@
 
         <Grid Grid.Row="0">
             <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Margin="0,0,0,0" HorizontalAlignment="Right">
-                <AppBarButton Icon="Delete" Label="削除"/>
-                <AppBarButton Name="AppBarButtonReplaceZumen" Icon="Add" Label="置換"/>
-                <AppBarButton Name="AppBarButtonAddZumen" Icon="Add" Label="追加"/>
+                <AppBarButton Icon="Add" Label="追加"/>
+                <AppBarButton Icon="More" Label="その他">
+                    <AppBarButton.Flyout>
+                        <MenuFlyout Placement="Bottom">
+                            <ToggleMenuFlyoutItem Text="置換" Icon="Switch"></ToggleMenuFlyoutItem>
+                            <MenuFlyoutSeparator/>
+                            <ToggleMenuFlyoutItem Text="削除" Icon="Delete"></ToggleMenuFlyoutItem>
+                        </MenuFlyout>
+                    </AppBarButton.Flyout>
+                </AppBarButton>
             </CommandBar>
         </Grid>
 

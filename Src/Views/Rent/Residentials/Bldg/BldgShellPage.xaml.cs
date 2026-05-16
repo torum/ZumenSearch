@@ -6,7 +6,7 @@ using System.Collections;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using ZumenSearch.Models;
+using ZumenSearch.Models.Common;
 using ZumenSearch.Services.Contracts;
 
 namespace ZumenSearch.Views.Rent.Residentials.Bldg;
@@ -52,8 +52,6 @@ public sealed partial class BldgShellPage : Page
 
     #endregion
 
-    //private readonly MainViewModel _mainVM = App.GetService<MainViewModel>();
-
     #region == Services ==
 
     private readonly IDispatcherService _dispatcherService;
@@ -62,6 +60,7 @@ public sealed partial class BldgShellPage : Page
     #endregion
 
     private bool _nvigated;
+    private bool _initialized;
 
     public BldgShellPage() : this(App.GetService<IModalDialogService>(), App.GetService<IDispatcherService>())
     {
@@ -70,45 +69,27 @@ public sealed partial class BldgShellPage : Page
 
     public BldgShellPage(IModalDialogService modalDialog, IDispatcherService dispatcherService)//Views.Rent.Residentials.Bldg.EditorWindow win, ViewModels.Rent.Residentials.ResidentialsViewModel vm, IModalDialogService modalDialog
     {
-
-        //EditorWin = win ?? throw new ArgumentNullException(nameof(win));
-        //ViewModel = vm ?? throw new ArgumentNullException(nameof(vm));
-        //ViewModel.SetEditorWin(win);// Must set Editor Winodw to VM.
-        //ViewModel.SetEditorShell(this);
         _dlg = modalDialog;
         _dispatcherService = dispatcherService;
 
         InitializeComponent();
 
         BreadcrumbBar1.ItemClicked += BreadcrumbBar_ItemClicked;
+    }
 
-        /*
+    private void Init()
+    {
+        if (_initialized) return;
 
-        //
-        EditorWin.Content = this;
-        EditorWin.ExtendsContentIntoTitleBar = true;
-        EditorWin.SetTitleBar(AppTitleBar);
-        EditorWin.Activated += EditorWindow_Activated;
-        EditorWin.Closed += EditorWindow_Closed;
-        EditorWin.AppWindow.Closing += AppWindow_Closing;
-        EditorWin.Title = "";
+        _initialized = true;
 
-        var mainVM = App.GetService<MainViewModel>();
-        ViewModel.ModalWinWidth = mainVM.ModalWinWidth;
-        ViewModel.ModalWinHeight = mainVM.ModalWinHeight;
-        ViewModel.ModalWinTop = mainVM.ModalWinTop;
-        ViewModel.ModalWinLeft = mainVM.ModalWinLeft;
+        ViewModel?.Bldg.EventIsUnitOwnershipChanged += (sender, arg) => OnEventIsUnitOwnershipChanged(arg);
 
-        // subscribe to ViewModel events
-        ViewModel.EventBackToSummary += (sender, arg) => OnEventBackToSummary();
-        ViewModel.EventEditLocation += (sender, arg) => OnEventEditLocation();
-        ViewModel.EventEditTransportation += (sender, arg) => OnEventEditTransportation();
-        ViewModel.EventEditAppliance += (sender, arg) => OnEventEditAppliance();
-        ViewModel.EventEditPictures += (sender, arg) => OnEventEditPictures();
-        ViewModel.EventEditUnits += (sender, arg) => OnEventEditUnits();
-        //
-
-        */
+        // needs this.
+        if (ViewModel is not null)
+        {
+            OnEventIsUnitOwnershipChanged(ViewModel.Bldg.IsUnitOwnership);
+        }
     }
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -117,8 +98,12 @@ public sealed partial class BldgShellPage : Page
         {
             //_editorShell = e.Parameter as Views.Rent.Residentials.EditorShell;
             ViewModel = e.Parameter as ViewModels.Rent.Residentials.MainViewModel;
+            if (!_initialized)
+            {
+                Init();
 
-            ViewModel?.SetBldgShell(this);
+                ViewModel?.SetBldgShell(this);
+            }
         }
         else
         {
@@ -169,7 +154,7 @@ public sealed partial class BldgShellPage : Page
         //Debug.WriteLine("NavView_Loaded: Navigating to BasicPage with ViewModel. ViewModel is " + (ViewModel != null ? "set" : "null"));
 
         // Pass Frame when navigate.  //, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft } //, new SuppressNavigationTransitionInfo() //new EntranceNavigationTransitionInfo()
-        if (ContentFrame.Navigate(typeof(ZumenSearch.Views.Rent.Residentials.Bldg.BasicPage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom }))
+        if (ContentFrame.Navigate(typeof(ZumenSearch.Views.Rent.Residentials.Bldg.BasicPage), ViewModel, new EntranceNavigationTransitionInfo()))//new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom }
         {
             _nvigated = true;
 
@@ -217,7 +202,7 @@ public sealed partial class BldgShellPage : Page
                 return;
             }
 
-            if (ContentFrame.Navigate(item.Page, ViewModel, new SuppressNavigationTransitionInfo())) //new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom })
+            if (ContentFrame.Navigate(item.Page, ViewModel, new DrillInNavigationTransitionInfo())) //new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom })SuppressNavigationTransitionInfo
             {
                 /*
                 BreadcrumbBar1.ItemsSource = new ObservableCollection<Breadcrumb>{
@@ -243,7 +228,7 @@ public sealed partial class BldgShellPage : Page
         throw new Exception("Failed to load Page " + e.SourcePageType.FullName);
     }
 
-    public void OnEventIsUnitOwnership(bool arg)
+    public void OnEventIsUnitOwnershipChanged(bool arg)
     {
         if (arg)
         {

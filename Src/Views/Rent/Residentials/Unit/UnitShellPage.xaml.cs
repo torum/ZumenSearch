@@ -4,7 +4,7 @@ using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using ZumenSearch.Models;
+using ZumenSearch.Models.Common;
 using ZumenSearch.Services.Contracts;
 
 namespace ZumenSearch.Views.Rent.Residentials.Unit;
@@ -34,8 +34,8 @@ public sealed partial class UnitShellPage : Page
     [
         ("room", "", null),
         ("summary", "基本", typeof(Views.Rent.Residentials.Unit.BasicPage)),
-        ("status", "ステータス", typeof(Views.Rent.Residentials.Unit.StatusPage)),
-        ("contract", "コンタクト", typeof(Views.Rent.Residentials.Unit.ContractPage)),
+        ("status", "現況", typeof(Views.Rent.Residentials.Unit.StatusPage)),
+        ("contract", "契約条件", typeof(Views.Rent.Residentials.Unit.ContractPage)),
         ("transaction", "契約", typeof(Views.Rent.Residentials.Unit.TransactionPage)),
         ("appliance", "設備", typeof(Views.Rent.Residentials.Unit.AppliancePage)),
         ("pictures", "写真", typeof(Views.Rent.Residentials.Unit.PicturePage)),
@@ -54,6 +54,7 @@ public sealed partial class UnitShellPage : Page
     #endregion
 
     private bool _nvigated;
+    private bool _initialized;
 
     public UnitShellPage() : this(App.GetService<IModalDialogService>(), App.GetService<IDispatcherService>())
     {
@@ -69,6 +70,20 @@ public sealed partial class UnitShellPage : Page
 
         BreadcrumbBar1.ItemClicked += BreadcrumbBar_ItemClicked;
     }
+    private void Init()
+    {
+        if (_initialized) return;
+
+        _initialized = true;
+
+        ViewModel?.Bldg.EventIsUnitOwnershipChanged += (sender, arg) => OnEventIsUnitOwnershipChanged(arg);
+
+        // needs this.
+        if (ViewModel is not null)
+        {
+            OnEventIsUnitOwnershipChanged(ViewModel.Bldg.IsUnitOwnership);
+        }
+    }
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
@@ -76,7 +91,12 @@ public sealed partial class UnitShellPage : Page
         {
             ViewModel = e.Parameter as ViewModels.Rent.Residentials.MainViewModel;
 
-            ViewModel?.SetUnitShell(this);
+            if (!_initialized)
+            {
+                Init();
+
+                ViewModel?.SetUnitShell(this);
+            }
         }
         else
         {
@@ -127,7 +147,7 @@ public sealed partial class UnitShellPage : Page
             return;
         }
 
-        if (ContentFrame.Navigate(typeof(ZumenSearch.Views.Rent.Residentials.Unit.BasicPage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom }))
+        if (ContentFrame.Navigate(typeof(ZumenSearch.Views.Rent.Residentials.Unit.BasicPage), ViewModel, new EntranceNavigationTransitionInfo()))
         {
             _nvigated = true;
 
@@ -180,7 +200,7 @@ public sealed partial class UnitShellPage : Page
 
             navigationViewSelectedItem = sender.SelectedItem as NavigationViewItem;
 
-            if (ContentFrame.Navigate(item.Page, ViewModel, new SuppressNavigationTransitionInfo()))
+            if (ContentFrame.Navigate(item.Page, ViewModel, new DrillInNavigationTransitionInfo()))
             {
                 if (BreadcrumbBar1.ItemsSource is ObservableCollection<Breadcrumb> crumbs)
                 {
@@ -222,7 +242,7 @@ public sealed partial class UnitShellPage : Page
         }
     }
 
-    public void OnEventIsUnitOwnership(bool arg)
+    public void OnEventIsUnitOwnershipChanged(bool arg)
     {
         if (arg)
         {

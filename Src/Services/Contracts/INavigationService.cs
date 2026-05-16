@@ -5,7 +5,7 @@ namespace ZumenSearch.Services.Contracts;
 
 public interface INavigationService
 {
-    void NavigateTo(object? selectedPage, SlideNavigationTransitionEffect effect);
+    bool NavigateTo(object? selectedPage, SlideNavigationTransitionEffect effect);
     void NavigateToMainSearch();
     void Initialize(Frame frame);
     void GoBack();

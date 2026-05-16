@@ -1,5 +1,7 @@
-﻿using Microsoft.UI.Xaml.Controls;
+﻿using Microsoft.UI;
+using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
+using Microsoft.Windows.Storage.Pickers;
 using System.Diagnostics;
 
 namespace ZumenSearch.Views.Rent.Residentials.Bldg;
@@ -45,13 +47,57 @@ public sealed partial class PictureListPage : Page
             return;
         }
 
-        if (sender.SelectedItem is not Models.Rent.Residentials.PictureBuilding picbldg)
+        if (sender.SelectedItem is not Models.Rent.Residentials.PictureBldg picbldg)
         {
             return;
         }
 
-        Debug.WriteLine($"PictureListPage ItemsView_SelectionChanged SelectedItem Changed to {picbldg.PictureType.Label}");
+        //Debug.WriteLine($"PictureListPage ItemsView_SelectionChanged SelectedItem Changed to {picbldg.PictureType.Label}");
 
-        ViewModel.Bldg.SelectedBuildingPicture = picbldg;//sender.SelectedItem as Models.Rent.Residentials.PictureBuilding;
+        ViewModel?.Bldg.SelectedBuildingPicture = picbldg;//sender.SelectedItem as Models.Rent.Residentials.PictureBuilding;
+    }
+
+    private async void AppBarButtonAddPicture_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    {
+        if (ViewModel is null)
+        {
+            return;
+        }
+
+        if (sender is AppBarButton button)
+        {
+            button.IsEnabled = false;
+            var openPicker = new Microsoft.Windows.Storage.Pickers.FileOpenPicker(button.XamlRoot.ContentIslandEnvironment.AppWindowId);
+
+            // Set options for your file picker
+            openPicker.ViewMode = Microsoft.Windows.Storage.Pickers.PickerViewMode.List;
+            openPicker.SuggestedStartLocation = Microsoft.Windows.Storage.Pickers.PickerLocationId.PicturesLibrary;
+            openPicker.FileTypeFilter.Add(".jpg");
+            openPicker.FileTypeFilter.Add(".jpeg");
+            openPicker.FileTypeFilter.Add(".png");
+            openPicker.FileTypeFilter.Add(".gif");
+            openPicker.FileTypeFilter.Add(".webp");
+
+            // Open the picker for the user to pick a file
+            var files = await openPicker.PickMultipleFilesAsync();
+            if (files.Count > 0)
+            {
+                List<string> list = [];
+                foreach (var file in files)
+                {
+                    list.Add(file.Path);
+                }
+
+                await ViewModel.Bldg.SetNewBuildingPicturesAsync(list);
+            }
+            else
+            {
+                Debug.WriteLine("Operation cancelled.");
+            }
+
+            button.IsEnabled = true;
+
+        }
+
     }
 }

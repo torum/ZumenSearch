@@ -24,11 +24,10 @@ public sealed partial class MainWindow : Window
     private readonly MainViewModel _viewModel;
     private readonly IDispatcherService _dispatcherService;
 
-    public MainWindow(IDispatcherService dispatcherService, MainViewModel viewModel)//, ShellPage mainShell
+    public MainWindow(IDispatcherService dispatcherService, ViewModels.MainViewModel viewModel)
     {
         _dispatcherService = dispatcherService;
         _viewModel = viewModel;
-        //_mainShell = mainShell;
 
         InitializeComponent();
 
@@ -46,6 +45,8 @@ public sealed partial class MainWindow : Window
 
         if (appWindow != null)
         {
+            appWindow.Closing += AppWindow_Closing;
+
             // Window state
             if (appWindow.Presenter is OverlappedPresenter presenter)
             {
@@ -106,44 +107,60 @@ public sealed partial class MainWindow : Window
                     //presenter.IsResizable = false;
                 }
             }
-
-            // TODO: Check editor window CanClose before closing the main window.
-            appWindow.Closing += (s, a) =>
-            {
-                // TODO: Currently, WinUI3 does not have "App.Current?.Windows". So, we cannot loop through all windows.
-
-                // Temporary workaround for closing all editor windows when the main window is closed.
-                if (_viewModel.EditorList.Count > 0)
-                {
-                    a.Cancel = true;
-
-                    foreach (var editor in _viewModel.EditorList)
-                    {
-
-                        //if (editor ) IsDirty
-
-                        editor.Activate();
-                    }
-                }
-
-                /*
-                // Loop window list and close all windows.           
-                foreach (var editor in _viewModel.EditorList)
-                {
-                    // TODO: check if the editor can be closed or not. Keep deleted window list.
-                    //editorEindow.CanClose
-
-                    editor.IsAutoClose = true;
-                    editor.Close();
-                }
-                // TODO: when close is canceled.
-                //a.Cancel = true; // Prevents closing the window immediately.    
-                a.Cancel = false;
-                */
-            };
         }
 
-        //_mainShell.CallMeWhenMainWindowIsReady(this);
+    }
+
+    private async void AppWindow_Closing(Microsoft.UI.Windowing.AppWindow sender, Microsoft.UI.Windowing.AppWindowClosingEventArgs args)
+    {
+        // TODO: Currently, WinUI3 does not have "App.Current?.Windows". So, we cannot loop through all windows.
+        // Temporary workaround for closing all editor windows when the main window is closed.
+        if (_viewModel.EditorList.Count > 0)
+        {
+            var isCancel = false;
+
+            foreach (var editor in _viewModel.EditorList)
+            {
+                if (editor.ViewModel is null)
+                {
+                    continue;
+                }
+
+                if (editor.ViewModel.Bldg.IsDirty || editor.ViewModel.Unit.IsDirty)
+                {
+                    args.Cancel = true;
+                    isCancel = true;
+                    editor.Activate();
+                    break;
+                }
+            }
+
+            if (!isCancel)
+            {
+                foreach (var editor in _viewModel.EditorList)
+                {
+                    editor.IsAutoClose = true;
+
+                    editor.Close();
+                }
+            }
+        }
+
+
+        /*
+        // Loop window list and close all windows.           
+        foreach (var editor in _viewModel.EditorList)
+        {
+            // TODO: check if the editor can be closed or not. Keep deleted window list.
+            //editorEindow.CanClose
+
+            editor.IsAutoClose = true;
+            editor.Close();
+        }
+        // TODO: when close is canceled.
+        //a.Cancel = true; // Prevents closing the window immediately.    
+        a.Cancel = false;
+        */
     }
 
     private void Window_Closed(object sender, WindowEventArgs args)
@@ -185,8 +202,6 @@ public sealed partial class MainWindow : Window
 
     private void SaveSetting()
     {
-        #region == Save setting ==
-
         var winHeight = 794;
         var winWidth = 1274;
         var winTop = 100;
@@ -379,8 +394,6 @@ public sealed partial class MainWindow : Window
         {
             Debug.WriteLine("MainWindow_Closed: " + ex + " while saving : " + App.AppConfigFilePath);
         }
-
-        #endregion
     }
 
     private void LoadSetting()

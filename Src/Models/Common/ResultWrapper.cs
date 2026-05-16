@@ -1,6 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 
-namespace ZumenSearch.Models;
+namespace ZumenSearch.Models.Common;
 
 // Result Wrapper Class
 public abstract class ResultWrapper
@@ -21,11 +21,17 @@ public class SqliteDataAccessInsertResultWrapper: SqliteDataAccessResultWrapper
 
 public class SqliteDataAccessSelectRentResidentialResultWrapper : SqliteDataAccessResultWrapper
 {
-    public ObservableCollection<Models.Rent.Residentials.EntryResidentialSearchResult> SelectedEntries = [];
+    public ObservableCollection<Rent.Residentials.EntryResidentialSearchResult> SelectedEntries = [];
 }
 
 public class SqliteDataAccessSelectRentResidentialFullResultWrapper : SqliteDataAccessResultWrapper
 {
-    public Models.Rent.Residentials.EntryResidentialFull? EntryFull;
+    public Rent.Residentials.EntryResidentialFull? EntryFull;
 }
+
+public class SqliteDataAccessSelectRentResidentialUnitsResultWrapper : SqliteDataAccessResultWrapper
+{
+    public ObservableCollection<Rent.Residentials.UnitResidentialSearchResult> SelectedUnits = [];
+}
+//
 

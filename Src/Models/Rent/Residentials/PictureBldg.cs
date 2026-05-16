@@ -1,4 +1,6 @@
-﻿namespace ZumenSearch.Models.Rent.Residentials;
+﻿using ZumenSearch.Models.Base;
+
+namespace ZumenSearch.Models.Rent.Residentials;
 
 public enum EnumBuildingPictureType
 {
@@ -37,7 +39,7 @@ public class BuildingPictureType(EnumBuildingPictureType key)
     public EnumBuildingPictureType Key => key;
 };
 
-public partial class PictureBuilding : PictureBase
+public partial class PictureBldg : PictureBase
 {
     public BuildingPictureType PictureType
     {
@@ -72,7 +74,7 @@ public partial class PictureBuilding : PictureBase
         }
     }
 
-    public PictureBuilding(string imageLocation)
+    public PictureBldg(string id, string imageLocation) : base(id)
     {
         ImageLocation = imageLocation;
     }

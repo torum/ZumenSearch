@@ -4,7 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:mod="using:ZumenSearch.Models"
+    xmlns:mod="using:ZumenSearch.Models.Common"
     xmlns:modresi="using:ZumenSearch.Models.Rent.Residentials"
     mc:Ignorable="d"
     NavigationCacheMode="Required">
@@ -20,11 +20,22 @@
         </Grid.ColumnDefinitions>
         
         <Grid Grid.Row="0" Grid.ColumnSpan="2">
-            <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Margin="0,0,24,0" HorizontalAlignment="Right">
-                <AppBarButton Name="AppBarButtonAddPicture" Icon="Add" Label="追加" Command="{x:Bind ViewModel.Bldg.AddNewBuildingPicturesCommand}"/>
+            <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Margin="0,0,0,0" HorizontalAlignment="Right">
+                <AppBarButton Name="AppBarButtonAddPicture" Icon="Add" Label="追加" Click="AppBarButtonAddPicture_Click"/>
+                <!--  Command="{x:Bind ViewModel.Bldg.AddNewBuildingPicturesCommand}" -->
+                <!--
                 <AppBarButton Icon="OpenLocal" Label="開く" Command="{x:Bind ViewModel.Bldg.OpenBuildingPictureDirectoryCommand}"/>
                 <AppBarButton Icon="Delete" Label="削除" Command="{x:Bind ViewModel.Bldg.DeleteSelectedBuildingPictureCommand}"/>
-                <!--  Command="{x:Bind ViewModel.DeleteRentResidentialCommand}" CommandParameter="{x:Bind SearchResult.SelectedItem, Mode=OneWay}" -->
+                -->
+                <AppBarButton Icon="More" Label="その他">
+                    <AppBarButton.Flyout>
+                        <MenuFlyout Placement="Bottom">
+                            <ToggleMenuFlyoutItem Text="開く" Icon="OpenLocal" Command="{x:Bind ViewModel.Bldg.OpenBuildingPictureDirectoryCommand, Mode=OneWay}"></ToggleMenuFlyoutItem>
+                            <MenuFlyoutSeparator/>
+                            <ToggleMenuFlyoutItem Text="削除" Icon="Delete" Command="{x:Bind ViewModel.Bldg.DeleteSelectedBuildingPictureCommand, Mode=OneWay}"></ToggleMenuFlyoutItem>
+                        </MenuFlyout>
+                    </AppBarButton.Flyout>
+                </AppBarButton>
             </CommandBar>
         </Grid>
 
@@ -32,7 +43,7 @@
             <Border Style="{StaticResource RoundCardBorderStyle}">
                 <ItemsView ItemsSource="{x:Bind ViewModel.Bldg.BuildingPictures, Mode=TwoWay}" SelectionChanged="ItemsView_SelectionChanged" MinWidth="300" MinHeight="225" ScrollViewer.HorizontalScrollMode="Disabled" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" SelectionMode="Single" IsItemInvokedEnabled="False">
                     <ItemsView.ItemTemplate>
-                        <DataTemplate  x:DataType="modresi:PictureBuilding">
+                        <DataTemplate  x:DataType="modresi:PictureBldg">
                             <ItemContainer>
                                 <Grid>
                                     <Image Source="{x:Bind ImageLocation}" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="280" MaxWidth="280" MaxHeight="210" MinHeight="210"/>

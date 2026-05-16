@@ -5,7 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    xmlns:mod="using:ZumenSearch.Models"
+    xmlns:mod="using:ZumenSearch.Models.Common"
     NavigationCacheMode="Required"
     Unloaded="Page_Unloaded">
     <Grid>
@@ -61,8 +61,8 @@
                 <!--   BackRequested="NavView_BackRequested" -->
                 <NavigationView.MenuItems>
                     <NavigationViewItem Content="基本"  Tag="summary"/>
-                    <NavigationViewItem Content="現況" Tag="status"/>
                     <NavigationViewItem Content="契約条件" Tag="contract"/>
+                    <NavigationViewItem Content="現況" Tag="status"/>
                     <NavigationViewItem Content="取引条件" Tag="transaction"/>
                     <NavigationViewItem Content="設備" Tag="appliance" />
                     <NavigationViewItem Content="写真" Tag="pictures" />

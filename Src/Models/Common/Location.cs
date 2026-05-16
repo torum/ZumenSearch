@@ -1,4 +1,4 @@
-﻿namespace ZumenSearch.Models;
+﻿namespace ZumenSearch.Models.Common;
 
 
 // 賃貸住居用物件の「都道府県」クラス

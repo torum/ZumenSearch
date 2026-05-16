@@ -21,6 +21,8 @@ public static class Common
         .Replace('８', '8')
         .Replace('９', '9')
         .Replace("，", "")
+        .Replace("、", "")
+        .Replace(",", "")
         .Replace(",", "");
     }
 

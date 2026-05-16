@@ -29,10 +29,12 @@ public class DispatcherService : IDispatcherService
                 catch (System.Runtime.InteropServices.COMException)
                 {
                     // Dispatcher or WinRT object invalid: swallow/log and avoid rethrowing.
+                    Debug.WriteLine($"DispatcherService System.Runtime.InteropServices.COMException");
                 }
                 catch (ObjectDisposedException)
                 {
                     // Queue or UI object disposed: swallow/log.
+                    Debug.WriteLine($"DispatcherService ObjectDisposedException");
                 }
                 catch (Exception ex)
                 {

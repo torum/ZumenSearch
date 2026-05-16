@@ -10,22 +10,21 @@ namespace ZumenSearch.Views;
 
 public sealed partial class ShellPage : Page
 {
+    public ViewModels.MainViewModel ViewModel { get; private set; }
+
     public Frame NavigationFrame => ContentFrame;
 
     private MainWindow? _mainWindow;
     private bool _activated;
 
     private readonly INavigationService _navigationService;
-    //private readonly MainViewModel _viewModel;
 
-    public ShellPage(INavigationService navigationService)//MainViewModel vm, 
+    public ShellPage(INavigationService navigationService, ViewModels.MainViewModel viewModel)
     {
-        //_viewModel = vm ?? throw new ArgumentNullException(nameof(vm));
-
         _navigationService = navigationService;
+        ViewModel = viewModel;
 
         InitializeComponent();
-
     }
 
     public void CallMeWhenMainWindowIsReady(MainWindow wnd)
@@ -40,20 +39,23 @@ public sealed partial class ShellPage : Page
     private void Page_Loaded(object sender, RoutedEventArgs e)
     {
         // Note: ContentFrame as param (instead of ViewModel) is expected by SearchPage for further navigation, such as navigating to SearchResultPage.
-        ContentFrame.Navigate(typeof(ZumenSearch.Views.Rent.ResidentialSearchPage), ContentFrame, new Microsoft.UI.Xaml.Media.Animation.EntranceNavigationTransitionInfo());//, //
-        
-        var selectedItem = FindNavigationViewItemWithTag("ZumenSearch.Views.Rent.ResidentialSearchPage");
-        if (selectedItem != null)
+        //ContentFrame.Navigate(typeof(ZumenSearch.Views.Rent.ResidentialSearchPage), ContentFrame, new Microsoft.UI.Xaml.Media.Animation.EntranceNavigationTransitionInfo());//, //
+        if (ContentFrame.Navigate(typeof(ZumenSearch.Views.RentSearchPage), ContentFrame, new Microsoft.UI.Xaml.Media.Animation.EntranceNavigationTransitionInfo()))
         {
-            NavigationViewControl.SelectedItem = selectedItem;
-            //NavigationViewControl.Header = ((NavigationViewItem)NavigationViewControl.SelectedItem)?.Content?.ToString();
+            /*
+            var selectedItem = FindNavigationViewItemWithTag("ZumenSearch.Views.Rent.ResidentialSearchPage");//"ZumenSearch.Views.Rent.ResidentialSearchPage"
+            if (selectedItem != null)
+            {
+                NavigationViewControl.SelectedItem = selectedItem;
+                //NavigationViewControl.Header = ((NavigationViewItem)NavigationViewControl.SelectedItem)?.Content?.ToString();
+            }
+            else
+            {
+                Debug.WriteLine("No menu item with tag matching the current page found in NavigationViewControl @ZumenSearch.Views.ShellPage. Current page: " + ContentFrame.SourcePageType.FullName);
+            }
+            */
+            SetRegionsForCustomTitleBar("Page_Loaded");
         }
-        else
-        {
-            Debug.WriteLine("No menu item with tag matching the current page found in NavigationViewControl @ZumenSearch.Views.ShellPage. Current page: " + ContentFrame.SourcePageType.FullName);
-        }
-
-        SetRegionsForCustomTitleBar("Page_Loaded");
     }
 
     private void MainWindow_Activated(object sender, WindowActivatedEventArgs args)
@@ -83,59 +85,12 @@ public sealed partial class ShellPage : Page
 
     private void NavigationViewControl_DisplayModeChanged(NavigationView sender, NavigationViewDisplayModeChangedEventArgs args)
     {
-        /*
-        AppTitleBar.Margin = new Thickness()
-        {
-            Left = sender.CompactPaneLength * (sender.DisplayMode == NavigationViewDisplayMode.Minimal ? 2 : 1),
-            Top = AppTitleBar.Margin.Top,
-            Right = AppTitleBar.Margin.Right,
-            Bottom = AppTitleBar.Margin.Bottom
-        };
-        */
-
         SetRegionsForCustomTitleBar("NavigationViewControl_DisplayModeChanged");
     }
 
     private void NavigationViewControl_Loaded(object sender, RoutedEventArgs e)
     {
         SetRegionsForCustomTitleBar("NavigationViewControl_Loaded");
-
-
-        // Since we use ItemInvoked, we set selecteditem manually
-        //NavigationViewControl.SelectedItem = NavigationViewControl.MenuItems.OfType<NavigationViewItem>().First();
-        /*
-        var firstMenuItem = NavigationViewControl.MenuItems.OfType<NavigationViewItem>().First();
-        if (firstMenuItem != null)
-        {
-            var childItem = firstMenuItem.MenuItems.OfType<NavigationViewItem>().Where(n => n.Tag.Equals("ZumenSearch.Views.Rent.RentPage"));
-            if (childItem != null)
-            {
-                childItem.First().IsSelected = true;
-                navigationViewSelectedItem = childItem.First();
-            }
-            else { Debug.WriteLine("No child menu item with tag 'RentResidentials' found in NavView."); }
-        }
-        else
-        {
-            Debug.WriteLine("No first menu item found in NavView.");
-        }
-        */
-        /*
-        var childItem = NavigationViewControl.MenuItems.OfType<NavigationViewItem>().Where(n => n.Tag.Equals("RentResidentials"));
-        if (childItem != null)
-        {
-            childItem.First().IsSelected = true;
-            navigationViewSelectedItem = childItem.First();
-        }
-        else 
-        { 
-            Debug.WriteLine("No child menu item with tag 'RentResidentials' found in NavView."); 
-        }
-        */
-
-        // Pass Frame when navigate.  //, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft } //, new SuppressNavigationTransitionInfo() //new EntranceNavigationTransitionInfo()
-        //NavigationFrame.Navigate(typeof(Rent.RentSearchPage), NavigationFrame, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom });
-        //NavigationFrame.Navigate(typeof(Views.Rent.Residentials.SearchPage), NavigationFrame, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom });//
     }
 
     private void NavigationViewControl_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
@@ -152,49 +107,6 @@ public sealed partial class ShellPage : Page
         {
             Debug.WriteLine("NavigationViewControl_ItemInvoked: No valid item invoked. IsSettingsInvoked: " + args.IsSettingsInvoked + ", InvokedItemContainer: " + (args.InvokedItemContainer != null) + ", Tag: " + (args.InvokedItemContainer?.Tag != null));
         }
-
-
-
-        /*
-        if (_pages is null)
-        {
-            return;
-        }
-
-        if (args.IsSettingsInvoked == true)
-        {
-            navigationViewSelectedItem = sender.SelectedItem as NavigationViewItem;
-
-            NavigationFrame.Navigate(typeof(SettingsPage), NavigationFrame, new SuppressNavigationTransitionInfo());//, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom }
-        }
-        else if (args.InvokedItemContainer != null && (args.InvokedItemContainer.Tag != null))
-        {
-
-            if (args.InvokedItemContainer.Tag is not string tag || string.IsNullOrWhiteSpace(tag))
-            {
-                Debug.WriteLine("NavigationViewControl_ItemInvoked: Invalid tag or null.");
-                //sender.SelectedItem = navigationViewSelectedItem;
-                return;
-            }
-
-
-            var item = _pages.FirstOrDefault(p => p.Tag.Equals(args.InvokedItemContainer.Tag.ToString()));
-
-            if (item.Page is null)
-            {
-                Debug.WriteLine("NavView_ItemInvoked: Page is null for tag " + tag);
-                // Don't. crash when complact menu.
-                //sender.SelectedItem = navigationViewSelectedItem;
-
-                return;
-            }
-
-            navigationViewSelectedItem = sender.SelectedItem as NavigationViewItem;
-
-            // Pass Frame when navigate.
-            NavigationFrame.Navigate(item.Page, NavigationFrame, new SuppressNavigationTransitionInfo());//args.RecommendedNavigationTransitionInfo
-        }
-        */
     }
 
     private void NavigationViewControl_Navigated(object sender, Microsoft.UI.Xaml.Navigation.NavigationEventArgs e)
@@ -205,6 +117,10 @@ public sealed partial class ShellPage : Page
         {
             // SettingsItem is not part of NavView.MenuItems, and doesn't have a Tag.
             NavigationViewControl.SelectedItem = (NavigationViewItem)NavigationViewControl.SettingsItem;
+
+            // Hide SearchBox
+            //SearchBox.Visibility = Visibility.Visible;
+            //SetRegionsForCustomTitleBar("NavigationViewControl_Navigated");
         }
         else if (ContentFrame.SourcePageType != null)
         {
@@ -217,6 +133,18 @@ public sealed partial class ShellPage : Page
             else
             {
                 //Debug.WriteLine("No menu item with tag matching the current page found in NavView. Current page: " + ContentFrame.SourcePageType.FullName);
+            }
+
+            if (ContentFrame.SourcePageType == typeof(Views.RentSearchPage))
+            {
+                // Hide SearchBox
+                //SearchBox.Visibility = Visibility.Collapsed;
+                //SetRegionsForCustomTitleBar("NavigationViewControl_Navigated");
+            }
+            else
+            {
+                //SearchBox.Visibility = Visibility.Visible;
+                //SetRegionsForCustomTitleBar("NavigationViewControl_Navigated");
             }
         }
     }
@@ -294,8 +222,8 @@ public sealed partial class ShellPage : Page
         var scaleAdjustment = this.XamlRoot.RasterizationScale;
 
         // Back button size
-        var width = this.SearchBox.Width;//ActualWidth won't work in certain cases.
-        var height = this.SearchBox.Height;//ActualHeight won't work in certain cases.
+        var width = this.SearchBox.ActualWidth;//ActualWidth won't work in certain cases.
+        var height = this.SearchBox.ActualHeight;//ActualHeight won't work in certain cases.
 
         if (this.SearchBox.Visibility != Visibility.Visible)
         {
@@ -311,8 +239,8 @@ public sealed partial class ShellPage : Page
         Windows.Graphics.RectInt32 SearchBoxRect = GetRect(bounds1, scaleAdjustment);
 
         // Back button size
-        var width2 = this.BackButton.Width;//ActualWidth won't work in certain cases.
-        var height2 = this.BackButton.Height;//ActualHeight won't work in certain cases.
+        var width2 = this.BackButton.ActualWidth;//ActualWidth won't work in certain cases.
+        var height2 = this.BackButton.ActualHeight;//ActualHeight won't work in certain cases.
 
         if (this.BackButton.Visibility != Visibility.Visible)
         {
@@ -345,4 +273,56 @@ public sealed partial class ShellPage : Page
         );
     }
 
+    private void SearchBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
+    {
+        if (args.ChosenSuggestion is Models.Common.AutoSuggestItem asi)
+        {
+            Debug.WriteLine($"QuerySubmitted ChosenSuggestion is {asi.Name}");
+
+            if (ViewModel.EditRentResidentialEntryCommand.CanExecute(asi.Id))
+            {
+                ViewModel.EditRentResidentialEntryCommand.Execute(asi.Id);
+            }
+        }
+        else
+        {
+            Debug.WriteLine($"QuerySubmitted No ChosenSuggestion QueryText is {args.QueryText}");
+            //UpdateSuggestion(args.QueryText);
+        }
+    }
+
+    private void SearchBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
+    {
+        if (sender is not AutoSuggestBox asb)
+        {
+            return;
+        }
+
+        var squery = asb.Text;
+        if (args.Reason == AutoSuggestionBoxTextChangeReason.UserInput)
+        {
+            UpdateSuggestion(squery);
+        }
+    }
+
+    private void UpdateSuggestion(string squery)
+    {
+        if (ViewModel.SearchRentForAutoSuggestCommand.CanExecute(squery))
+        {
+            ViewModel.SearchRentForAutoSuggestCommand.Execute(squery);
+        }
+    }
+
+    private void SearchBox_SuggestionChosen(AutoSuggestBox sender, AutoSuggestBoxSuggestionChosenEventArgs args)
+    {
+        if (args.SelectedItem is Models.Common.AutoSuggestItem selectedItem)
+        {
+            if (string.IsNullOrEmpty(selectedItem.Id)) return;
+
+            //Debug.WriteLine($"SuggestionChosen {selectedItem.Name}");
+
+            // Set the text box content to the property you want the user to see
+            sender.Text = selectedItem.Name;
+        }
+    }
 }

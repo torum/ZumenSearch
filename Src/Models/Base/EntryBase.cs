@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace ZumenSearch.Models;
+namespace ZumenSearch.Models.Base;
 
 public enum EnumEntryStatus
 {
@@ -10,7 +10,7 @@ public enum EnumEntryStatus
 
 public abstract partial class EntryBase : ObservableObject
 {
-    // I don't think we need this anymore....
+    // TODO: I don't think we need this anymore....
     public bool IsDirty
     {
         get => field;

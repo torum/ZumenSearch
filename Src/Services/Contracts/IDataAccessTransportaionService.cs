@@ -1,5 +1,5 @@
 ﻿using System.Collections.ObjectModel;
-using ZumenSearch.Models;
+using ZumenSearch.Models.Common;
 
 namespace ZumenSearch.Services.Contracts;
 

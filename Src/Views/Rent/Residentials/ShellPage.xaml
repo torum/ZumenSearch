@@ -6,7 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     NavigationCacheMode="Required"
     xmlns:helpers="using:ZumenSearch.Helpers"
-    xmlns:mod="using:ZumenSearch.Models"
+    xmlns:mod="using:ZumenSearch.Models.Common"
     mc:Ignorable="d"
     Loaded="Page_Loaded">
 

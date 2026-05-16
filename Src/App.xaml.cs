@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.UI.Xaml;
+using SQLitePCL;
 using System.Diagnostics;
 using System.Text;
 using ZumenSearch.Helpers;
@@ -59,6 +60,9 @@ public partial class App : Application
 
     public App()
     {
+        //
+        Batteries_V2.Init();
+
         CurrentDispatcherQueue = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
 
         if (RuntimeHelper.IsMSIX)
@@ -96,7 +100,7 @@ public partial class App : Application
             services.AddSingleton<ViewModels.MainViewModel>();
             services.AddSingleton<Views.MainWindow>();
 
-            services.AddSingleton<Views.IntegratedSearchPage>();
+            services.AddSingleton<Views.RentSearchPage>();
 
             services.AddSingleton<Views.Rent.ResidentialSearchPage>();
             services.AddSingleton<Views.Rent.ResidentialSearchResultPage>();
@@ -165,7 +169,6 @@ public partial class App : Application
         navigationService.Initialize(shell.NavigationFrame);
         main.Content = shell;
         shell.CallMeWhenMainWindowIsReady(main);
-
         // Activate the window.
         main?.Activate();
     }

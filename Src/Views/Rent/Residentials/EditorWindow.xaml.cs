@@ -1,10 +1,15 @@
-﻿using Microsoft.UI.Xaml;
+﻿using Microsoft.UI.Windowing;
+using Microsoft.UI.Xaml;
 
 namespace ZumenSearch.Views.Rent.Residentials;
 
 public sealed partial class EditorWindow : Window
 {
-    public string Id { get; private set; } = string.Empty;
+    public string? Id { get; private set; } = string.Empty;
+
+    public bool IsAutoClose { get; set; }
+
+    public ViewModels.Rent.Residentials.MainViewModel? ViewModel { get; private set; }
 
     public EditorWindow()
     {
@@ -25,6 +30,11 @@ public sealed partial class EditorWindow : Window
         }
 
         Id = id;
+    }
+
+    public void SetViewModelToWindow(ViewModels.Rent.Residentials.MainViewModel vm)
+    {
+        ViewModel = vm;
     }
 
 }

@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.Logging;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.Windows.ApplicationModel.Resources;
@@ -8,7 +9,9 @@ using System.Diagnostics;
 using System.Reflection;
 using Windows.ApplicationModel;
 using ZumenSearch.Helpers;
-using ZumenSearch.Models;
+using ZumenSearch.Models.Base;
+using ZumenSearch.Models.Common;
+using ZumenSearch.Services;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.Services.Extensions.AbstractFactory;
 using ZumenSearch.Views;
@@ -18,7 +21,6 @@ namespace ZumenSearch.ViewModels;
 
 public partial class MainViewModel : ObservableObject
 {
-    //private MainWindow _mainWindow;
     private static readonly ResourceLoader _resourceLoader = new();
 
     private string _versionDescription;
@@ -77,6 +79,16 @@ public partial class MainViewModel : ObservableObject
         new() { Name = "検索結果", Page = typeof(Views.Rent.ResidentialSearchResultPage).FullName! },
     ];
 
+    public ObservableCollection<Breadcrumb> BreadcrumbItemsRent { get; set; } =
+    [
+        new() { Name = "総合検索", Page = typeof(Views.RentSearchPage).FullName! }
+    ];
+    public ObservableCollection<Breadcrumb> BreadcrumbItemsRentSearchResult { get; set; } =
+    [
+        new() { Name = "総合検索", Page = typeof(Views.RentSearchPage).FullName! },
+        new() { Name = "検索結果", Page = typeof(Views.RentSearchResultPage).FullName! },
+    ];
+
     #endregion
 
     #region == Database ==
@@ -86,7 +98,34 @@ public partial class MainViewModel : ObservableObject
 
     #region == Search ==
 
-    public ObservableCollection<Models.Rent.Residentials.EntryResidentialSearchResult> RentResidentialSearchResult
+    public ObservableCollection<Models.Rent.Residentials.EntryResidentialSearchResult> RentResidentialEntrySearchResult
+    {
+        get; set
+        {
+            if (SetProperty(ref field, value))
+            {
+                //
+            }
+        }
+    } = [];
+
+    public ObservableCollection<Models.Rent.Residentials.UnitResidentialSearchResult> RentResidentialUnitSearchResult
+    {
+        get; set
+        {
+            if (SetProperty(ref field, value))
+            {
+                //
+            }
+        }
+    } = [];
+
+
+    #endregion
+
+    #region == AutoSuggest ==
+
+    public ObservableCollection<Models.Common.AutoSuggestItem> AutoSuggestList
     {
         get; set
         {
@@ -109,41 +148,50 @@ public partial class MainViewModel : ObservableObject
 
     private readonly IDataAccessService _dataAccessService;
     private readonly INavigationService _navigationService;
+    private readonly IDispatcherService _dispatcherService;
 
     #endregion
 
     private readonly CancellationTokenSource _cts = new();
 
-    public MainViewModel(IAbstractFactory<Models.Rent.Residentials.EntryResidentialFull, Views.Rent.Residentials.ShellPage> shellFactory, INavigationService navigationService, IDataAccessService dataAccessService)//IAbstractFactory<Views.Rent.Residentials.ShellPage> editorFactory,
+    public MainViewModel(IAbstractFactory<Models.Rent.Residentials.EntryResidentialFull, Views.Rent.Residentials.ShellPage> shellFactory, INavigationService navigationService, IDataAccessService dataAccessService, IDispatcherService dispatcherService)//IAbstractFactory<Views.Rent.Residentials.ShellPage> editorFactory,
     {
-        //_editorFactory = editorFactory;
         _shellFactory = shellFactory;
         _dataAccessService = dataAccessService;
         _navigationService = navigationService;
+        _dispatcherService = dispatcherService;
 
         _versionDescription = GetVersionDescription();
 
-        InitializeDatabaseAsync();
+        InitializeDatabase();
     }
 
     #region == Private Methods ==
 
-    private void InitializeDatabaseAsync()
+    private void InitializeDatabase()
     {
-        var filePath = Path.Combine(App.AppDataFolder, "ZumenSearch.db");
-
-        var res = _dataAccessService.InitializeDatabase(filePath);
-        if (res.IsError)
+        try
         {
-            Debug.WriteLine("InitializeDatabase @InitializeDatabaseAsync in MainViewModel");
+            var filePath = Path.Combine(App.AppDataFolder, "ZumenSearch.db");
 
-            Debug.WriteLine(res.Error.ErrText + Environment.NewLine + res.Error.ErrDescription + Environment.NewLine + res.Error.ErrPlace + Environment.NewLine + res.Error.ErrPlaceParent);
+            var res = _dataAccessService.InitializeDatabase(filePath);
+            if (res.IsError)
+            {
+                Debug.WriteLine("InitializeDatabase @InitializeDatabase in MainViewModel");
 
-            //ErrorMain = res.Error;
-            //IsMainErrorInfoBarVisible = true;
+                Debug.WriteLine(res.Error.ErrText + Environment.NewLine + res.Error.ErrDescription + Environment.NewLine + res.Error.ErrPlace + Environment.NewLine + res.Error.ErrPlaceParent);
 
-            // TODO: Show error message to user
+                //ErrorMain = res.Error;
+                //IsMainErrorInfoBarVisible = true;
+
+                // TODO: Show error message to user
+            }
         }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"InitializeDatabase: {ex}");
+        }
+
     }
 
     private static string GetVersionDescription()
@@ -170,6 +218,7 @@ public partial class MainViewModel : ObservableObject
 
     #region == Commands ==
 
+    // 新規物件追加（建物）
     [RelayCommand]
     private void AddNewRentResidential()
     {
@@ -187,7 +236,7 @@ public partial class MainViewModel : ObservableObject
             presenter.PreferredMinimumWidth = 1274;
             presenter.PreferredMinimumHeight = 794;
         }
-
+        /*
         shell.Win.Closed += (sender, e) =>
         {
             EditorList.Remove(shell.Win);
@@ -204,6 +253,11 @@ public partial class MainViewModel : ObservableObject
                 mainWindow?.Activate();
             }
         };
+        */
+
+        shell.Win.SetEntryIdToWindow(shell.ViewModel.Id);
+        shell.Win.SetViewModelToWindow(shell.ViewModel);
+
 
         //var dpi = Windows.Win32.PInvoke.GetDpiForWindow(new Windows.Win32.Foundation.HWND(WinRT.Interop.WindowNative.GetWindowHandle(this)));
         //var scalingFactor = (float)dpi / 96;
@@ -267,39 +321,13 @@ public partial class MainViewModel : ObservableObject
         */
     }
 
-    [RelayCommand]
-    private async Task SearchRentResidential()
+    // 編集（建物）
+    [RelayCommand(CanExecute = nameof(EditRentResidentialEntryCanExecute))]
+    public void EditRentResidentialEntry(Models.Rent.Residentials.EntryResidentialSearchResult? selected)//Models.Rent.Residentials.EntryResidentialSearchResult? selected
     {
-        //SelectedRentResidentialItem = null;
-        RentResidentialSearchResult.Clear();
+        var rentId = selected?.Id;
 
-        var res = await Task.Run(() => _dataAccessService.SelectRentResidentialsByNameKeyword("*"), _cts.Token);
-
-        //var res = _dataAccessService.SelectRentResidentialsByNameKeyword("*");
-
-        if (res.IsError)
-        {
-            Debug.WriteLine(res.Error.ErrText + Environment.NewLine + res.Error.ErrDescription + Environment.NewLine + res.Error.ErrPlace + Environment.NewLine + res.Error.ErrPlaceParent);
-
-            //ErrorMain = res.Error;
-            //IsMainErrorInfoBarVisible = true;
-
-            // TODO: Show error message to user
-        }
-        else
-        {
-            RentResidentialSearchResult = new(res.SelectedEntries);
-
-            _navigationService.NavigateTo("ZumenSearch.Views.Rent.ResidentialSearchResultPage", SlideNavigationTransitionEffect.FromLeft);//Navigate(typeof(Views.Rent.Residentials.SearchResultPage), null, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });
-        }
-    }
-
-    [RelayCommand]
-    public async Task EditRentResidential(Models.Rent.Residentials.EntryResidentialSearchResult? selected)
-    {
-        var isFound = false;
-
-        if (selected == null)
+        if (string.IsNullOrEmpty(rentId))//if (selected == null)
         {
             Debug.WriteLine("EditRentResidentialCommand executed but no item is selected.");
             return;
@@ -307,14 +335,16 @@ public partial class MainViewModel : ObservableObject
 
         //Debug.WriteLine($"EditRentResidentialCommand executed for {selected.Id}");
 
+        var isFound = false;
+
         // Check if the selected item is already being edited in another window.
         EditorList.ForEach(async editorWindow =>
         {
-            Debug.WriteLine($"Checking editor window with Id: {editorWindow.Id} for selected item with Id: {selected.Id}");
-            if (editorWindow.Id == selected.Id)
+            Debug.WriteLine($"Checking editor window with Id: {editorWindow.Id} for selected item with Id: {rentId}");
+            if (editorWindow.Id == rentId)
             {
                 // If the editor window for this item is already open, activate it.
-                Debug.WriteLine($"Editor window for {selected.Id} is already open. Activating it.");
+                Debug.WriteLine($"Editor window for {rentId} is already open. Activating it.");
                 isFound = true;
 
                 // Stupid WinUI3 needs a delay here to properly activate the window.
@@ -337,7 +367,7 @@ public partial class MainViewModel : ObservableObject
         }
 
         // Access Database to get the full entry data.
-        var res = _dataAccessService.SelectRentResidentialById(selected.Id);// Go back to UI thred. Let's not do > .ConfigureAwait(false);
+        var res = _dataAccessService.SelectRentResidentialById(rentId);// Go back to UI thred. Let's not do > .ConfigureAwait(false);
         if (res.IsError)
         {
             Debug.WriteLine(res.Error.ErrText + Environment.NewLine + res.Error.ErrDescription + Environment.NewLine + res.Error.ErrPlace + Environment.NewLine + res.Error.ErrPlaceParent);
@@ -352,7 +382,7 @@ public partial class MainViewModel : ObservableObject
 
         if (res.EntryFull == null)
         {
-            Debug.WriteLine($"EntryResidentialFull for {selected.Id} is null. Cannot open editor.");
+            Debug.WriteLine($"EntryResidentialFull for {rentId} is null. Cannot open editor.");
             return;
         }
 
@@ -371,7 +401,8 @@ public partial class MainViewModel : ObservableObject
             Debug.WriteLine("EditorWin must be initialized in the EditorShell constructor");
             return;
         }
-        editorWindow.SetEntryIdToWindow(res.EntryFull.Id);
+        editorWindow.SetEntryIdToWindow(editorShell.ViewModel.Id);
+        editorWindow.SetViewModelToWindow(editorShell.ViewModel);
 
         EditorList.Add(editorWindow);
 
@@ -385,6 +416,7 @@ public partial class MainViewModel : ObservableObject
             presenter.PreferredMinimumHeight = 794;
         }
 
+        /*
         editorWindow.Closed += (sender, e) =>
         {
             // Activate the main window again.
@@ -392,6 +424,7 @@ public partial class MainViewModel : ObservableObject
 
             EditorList.Remove(editorWindow);
         };
+        */
 
         editorWindow.AppWindow.Show();
         editorWindow.Activate();
@@ -399,13 +432,182 @@ public partial class MainViewModel : ObservableObject
         mainWindow?.AppWindow.MoveInZOrderBelow(editorWindow.AppWindow.Id);
         editorWindow.AppWindow.MoveInZOrderAtTop();
     }
+    public bool EditRentResidentialEntryCanExecute(Models.Rent.Residentials.EntryResidentialSearchResult? selected)
+    {
+        if (selected is null)
+        {
+            return false;
+        }
 
-    [RelayCommand]
-    private void DeleteRentResidential(Models.Rent.Residentials.EntryResidentialSearchResult? selected)
+        return true;
+    }
+
+    // 編集（部屋）TODO:
+    [RelayCommand(CanExecute = nameof(EditRentResidentialUnitCanExecute))]
+    public void EditRentResidentialUnit(Models.Rent.Residentials.UnitResidentialSearchResult? selected)
     {
         if (selected == null)
         {
-            Debug.WriteLine("DeleteRentResidentialAsync executed but no item is selected.");
+            Debug.WriteLine("EditRentResidentialUnit executed but no item is selected.");
+            return;
+        }
+
+        // TODO;
+        Debug.WriteLine($"TODO: EditRentResidentialUnit executed for {selected.Id} (EntryId = {selected.EntryId})");
+    }
+    public bool EditRentResidentialUnitCanExecute(Models.Rent.Residentials.UnitResidentialSearchResult? selected)
+    {
+        if (selected is null)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    // クイック検索Box（建物）TODO:
+    [RelayCommand(CanExecute = nameof(SearchRentForAutoSuggestCanExecute))]
+    private async Task SearchRentForAutoSuggest(string? queryText)
+    {
+        if (string.IsNullOrWhiteSpace(queryText))
+        {
+            AutoSuggestList.Clear();
+            return;
+        }
+
+        // TODO: Residentials only for now.
+        Debug.WriteLine($"SearchRentForAutoSuggest {queryText}");
+
+        AutoSuggestList.Clear();
+
+        queryText = queryText.Trim();
+
+        var res = await Task.Run(() => _dataAccessService.SelectRentResidentialsByNameKeyword(queryText), _cts.Token);
+        //var res = _dataAccessService.SelectRentResidentialsByNameKeyword("*");
+
+        if (res.IsError)
+        {
+            Debug.WriteLine(res.Error.ErrText + Environment.NewLine + res.Error.ErrDescription + Environment.NewLine + res.Error.ErrPlace + Environment.NewLine + res.Error.ErrPlaceParent);
+
+            //ErrorMain = res.Error;
+            //IsMainErrorInfoBarVisible = true;
+
+            // TODO: Show error message to user
+        }
+        else
+        {
+            if (res.AffectedCount > 0 && res.SelectedEntries.Count > 0)
+            {
+                foreach (var item in res.SelectedEntries)
+                {
+                    var autoSuggest = new AutoSuggestItem();
+                    autoSuggest.Name = item.Name;
+                    autoSuggest.Id = item.Id;
+                    AutoSuggestList.Add(autoSuggest);
+                }
+            }
+            else
+            {
+                // TODO:
+                //Debug.WriteLine("result 0");
+                var autoSuggest = new AutoSuggestItem();
+                autoSuggest.Name = "Result 0";
+                autoSuggest.Id = "";
+                AutoSuggestList.Add(autoSuggest);
+            }
+        }
+    }
+    public bool SearchRentForAutoSuggestCanExecute(string? queryText)
+    {
+        if (string.IsNullOrEmpty(queryText))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    // 物件検索 TODO:
+    [RelayCommand(CanExecute = nameof(SearchRentResidentialEntryCanExecute))]
+    private async Task SearchRentResidentialEntry(string? queryText)
+    {
+        var query = string.Empty;
+
+        if (string.IsNullOrEmpty(queryText))
+        {
+            //RentResidentialEntrySearchResult.Clear();
+            //return;
+            query = "*";
+        }
+        else
+        {
+            query = queryText.Trim();
+        }
+
+        RentResidentialEntrySearchResult.Clear();
+
+        var res = await Task.Run(() => _dataAccessService.SelectRentResidentialsByNameKeyword(query), _cts.Token);
+        //var res = _dataAccessService.SelectRentResidentialsByNameKeyword("*");
+
+        if (res.IsError)
+        {
+            Debug.WriteLine(res.Error.ErrText + Environment.NewLine + res.Error.ErrDescription + Environment.NewLine + res.Error.ErrPlace + Environment.NewLine + res.Error.ErrPlaceParent);
+
+            //ErrorMain = res.Error;
+            //IsMainErrorInfoBarVisible = true;
+
+            // TODO: Show error message to user
+        }
+        else
+        {
+            RentResidentialEntrySearchResult = new(res.SelectedEntries);
+
+            _navigationService.NavigateTo("ZumenSearch.Views.RentSearchResultPage", SlideNavigationTransitionEffect.FromLeft);//Navigate(typeof(Views.Rent.Residentials.SearchResultPage), null, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });
+        }
+    }
+    public bool SearchRentResidentialEntryCanExecute(string? queryText)
+    {
+        /*
+        if (string.IsNullOrEmpty(queryText))
+        {
+            return false;
+        }
+        */
+        return true;
+    }
+
+    // 部屋検索
+    [RelayCommand]
+    private async Task SearchRentResidentialUnit()
+    {
+        RentResidentialUnitSearchResult.Clear();
+
+        var res = await Task.Run(() => _dataAccessService.SelectRentResidentialUnits(), _cts.Token);
+
+        if (res.IsError)
+        {
+            Debug.WriteLine(res.Error.ErrText + Environment.NewLine + res.Error.ErrDescription + Environment.NewLine + res.Error.ErrPlace + Environment.NewLine + res.Error.ErrPlaceParent);
+
+            //ErrorMain = res.Error;
+            //IsMainErrorInfoBarVisible = true;
+
+            // TODO: Show error message to user
+        }
+        else
+        {
+            RentResidentialUnitSearchResult = new(res.SelectedUnits);
+
+            _navigationService.NavigateTo("ZumenSearch.Views.Rent.ResidentialSearchResultPage", SlideNavigationTransitionEffect.FromLeft);//Navigate(typeof(Views.Rent.Residentials.SearchResultPage), null, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });
+        }
+    }
+
+    // 物件削除
+    [RelayCommand(CanExecute = nameof(DeleteRentResidentialEntryCanExecute))]
+    private void DeleteRentResidentialEntry(Models.Rent.Residentials.EntryResidentialSearchResult? selected)
+    {
+        if (selected == null)
+        {
+            Debug.WriteLine("DeleteRentResidential executed but no item is selected.");
             return;
         }
 
@@ -446,7 +648,7 @@ public partial class MainViewModel : ObservableObject
         }
         else
         {
-            if (RentResidentialSearchResult.Remove(selected))
+            if (RentResidentialEntrySearchResult.Remove(selected))
             {
                 // Successfully removed the selected item from the search result.
             }
@@ -456,16 +658,50 @@ public partial class MainViewModel : ObservableObject
             }
         }
     }
+    public bool DeleteRentResidentialEntryCanExecute(Models.Rent.Residentials.EntryResidentialSearchResult? selected)
+    {
+        if (selected is null)
+        {
+            return false;
+        }
 
-    [RelayCommand(CanExecute = nameof(BackToCanExecute))]
-    private void BackToRentResidential()
+        return true;
+    }
+
+    // 部屋削除（TODO）
+    [RelayCommand(CanExecute = nameof(DeleteRentResidentialUnitCanExecute))]
+    private void DeleteRentResidentialUnit(Models.Rent.Residentials.UnitResidentialSearchResult? selected)
+    {
+        if (selected == null)
+        {
+            Debug.WriteLine("DeleteRentResidentialUnit executed but no item is selected.");
+            return;
+        }
+
+        // TODO:
+        Debug.WriteLine($"TODO: DeleteRentResidentialUnit executed for {selected.Id} (EntryId = {selected.EntryId})");
+    }
+    public bool DeleteRentResidentialUnitCanExecute(Models.Rent.Residentials.UnitResidentialSearchResult? selected)
+    {
+        if (selected is null)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    // GoBack（ナビゲーション）
+    [RelayCommand(CanExecute = nameof(GoBackCanExecute))]
+    private void GoBack()
     {
         //_navigationService.NavigateTo("ZumenSearch.Views.Rent.Residentials.SearchPage");
         _navigationService.GoBack();
     }
-    public bool BackToCanExecute()
+    public bool GoBackCanExecute()
     {
         return _navigationService.CanGoBack(); 
     }
+
     #endregion
 }

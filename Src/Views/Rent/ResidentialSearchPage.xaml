@@ -5,7 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     mc:Ignorable="d"
-    xmlns:mod="using:ZumenSearch.Models"
+    xmlns:mod="using:ZumenSearch.Models.Common"
     NavigationCacheMode="Required">
 
     <Grid x:Name="ContentArea" Margin="0,0,0,0">
@@ -41,7 +41,7 @@
 
                 <StackPanel Grid.Row="0" Grid.Column="1">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,3,0">
-                        <AppBarButton Icon="Find" Label="検索" Command="{x:Bind ViewModel.SearchRentResidentialCommand}"/>
+                        <AppBarButton Icon="Find" Label="検索" Command="{x:Bind ViewModel.SearchRentResidentialUnitCommand}"/>
                         <AppBarButton Icon="Add" Label="新規" Command="{x:Bind ViewModel.AddNewRentResidentialCommand}"/>
                     </StackPanel>
                 </StackPanel>
@@ -211,9 +211,7 @@
                 </StackPanel>
 
             </Grid>
-
         </ScrollViewer>
-
 
         <VisualStateManager.VisualStateGroups>
             <VisualStateGroup>
@@ -249,8 +247,8 @@
                         <AdaptiveTrigger MinWindowWidth="340" />
                     </VisualState.StateTriggers>
                     <VisualState.Setters>
-                        <Setter Target="HeaderGrid.Padding" Value="0" />
-                        <Setter Target="BodyScrollViewer.Padding" Value="0" />
+                        <Setter Target="HeaderGrid.Padding" Value="{StaticResource ContentPaddingCompact}" />
+                        <Setter Target="BodyScrollViewer.Padding" Value="{StaticResource ContentPaddingCompact}" />
                     </VisualState.Setters>
                 </VisualState>
                 <VisualState>
@@ -258,12 +256,13 @@
                         <AdaptiveTrigger MinWindowWidth="0" />
                     </VisualState.StateTriggers>
                     <VisualState.Setters>
-                        <Setter Target="BodyScrollViewer.Padding" Value="{StaticResource ContentPadding}" />
-                        <Setter Target="HeaderGrid.Padding" Value="{StaticResource ContentPadding}" />
+                        <Setter Target="BodyScrollViewer.Padding" Value="{StaticResource ContentPaddingCompact}" />
+                        <Setter Target="HeaderGrid.Padding" Value="{StaticResource ContentPaddingCompact}" />
                     </VisualState.Setters>
                 </VisualState>
             </VisualStateGroup>
         </VisualStateManager.VisualStateGroups>
+        
     </Grid>
 
 </Page>

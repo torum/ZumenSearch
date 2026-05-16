@@ -22,8 +22,6 @@ public sealed partial class ShellPage : Page
 
     private readonly IModalDialogService _dlg;
 
-    //private IAbstractFactory<Models.Rent.Residentials.EntryResidentialFull, MainViewModel> _vmFactory;
-
     public ShellPage(Views.Rent.Residentials.EditorWindow win, Models.Rent.Residentials.EntryResidentialFull entry, IAbstractFactory<Models.Rent.Residentials.EntryResidentialFull, ViewModels.Rent.Residentials.MainViewModel> vmFactory, IModalDialogService modalDialog)
     {
         Win = win ?? throw new ArgumentNullException(nameof(win));
@@ -32,11 +30,8 @@ public sealed partial class ShellPage : Page
 
         ViewModel = vmFactory.Create(entry);//ViewModel = vmFactory(entry);//_editorFactory.Create(new Models.Rent.Residentials.EntryResidentialFull(Guid.CreateVersion7().ToString("N"), EnumEntryStatus.New));
 
-        ViewModel.SetEditorWindow(win);// Must set Editor Winodw to VM.
+        //ViewModel.SetEditorWindow(win);// Must set Editor Winodw to VM.
         ViewModel.SetEditorShell(this);
-
-        // TODO:
-        //ViewModel.EventTitleChanged += (sender, arg) => OnEventTitleChanged(arg);
 
         _dlg = modalDialog;
 
@@ -65,52 +60,9 @@ public sealed partial class ShellPage : Page
 
     private void Page_Loaded(object sender, RoutedEventArgs e)
     {
-        ContentFrame.Navigate(typeof(ZumenSearch.Views.Rent.Residentials.Bldg.BldgShellPage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom });
+        ContentFrame.Navigate(typeof(ZumenSearch.Views.Rent.Residentials.Bldg.BldgShellPage), ViewModel, new EntranceNavigationTransitionInfo()); // //new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom }
 
         //ContentFrame.Navigate(typeof(ZumenSearch.Views.Rent.Residentials.Unit.UnitShellPage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom });
-    }
-
-    private async void AppWindow_Closing(Microsoft.UI.Windowing.AppWindow sender, Microsoft.UI.Windowing.AppWindowClosingEventArgs args)
-    {
-        /*
-        if (ViewModel == null)
-        {
-            return;
-        }
-
-        if (ViewModel.IsEntryDirty)
-        {
-            args.Cancel = true; // needs Cancel = true here in order to show dialog.
-
-            // show ConfirmationDialog
-            var result = await _dlg.ShowEditorCloseConfirmationDialog(EditorWin);
-
-            if (result == ContentDialogResult.Primary)
-            {
-                // Save and close.
-
-                ViewModel.Save();
-
-                if (ViewModel.IsEntryDirty == false)
-                {
-                    EditorWin.Close();
-                }
-            }
-            else if (result == ContentDialogResult.Secondary)
-            {
-                // Discard change and close.
-                ViewModel.DiscardUnsavedFiles();
-
-                ViewModel.IsEntryDirty = false;
-                EditorWin.Close();
-            }
-            else if (result == ContentDialogResult.None)
-            {
-                // Cancel.
-
-            }
-        }
-        */
     }
 
     public void EditorWindow_Activated(object sender, Microsoft.UI.Xaml.WindowActivatedEventArgs args)
@@ -119,28 +71,80 @@ public sealed partial class ShellPage : Page
         AppTitleBarText.Foreground = (SolidColorBrush)App.Current.Resources[resource];
     }
 
-    public void EditorWindow_Closed(object sender, WindowEventArgs args)
+    private async void AppWindow_Closing(Microsoft.UI.Windowing.AppWindow sender, Microsoft.UI.Windowing.AppWindowClosingEventArgs args)
     {
-        Win.Activated -= EditorWindow_Activated;
-        Win.Closed -= EditorWindow_Closed;
-        Win.AppWindow.Closing -= AppWindow_Closing;
-
-        if (sender is EditorWindow ewin)
+        if (ViewModel == null)
         {
-            // Save window size and position.
-            var appWindow = ewin.AppWindow;
-            if (appWindow != null)
-            {
-                if (appWindow.Presenter is OverlappedPresenter)
-                {
-                    var mainVM = App.GetService<MainViewModel>();
-                    mainVM.EditorWinHeight = (int)appWindow.Size.Height;
-                    mainVM.EditorWinWidth = (int)appWindow.Size.Width;
-                    mainVM.EditorWinTop = (int)appWindow.Position.Y;
-                    mainVM.EditorWinLeft = (int)appWindow.Position.X;
+            return;
+        }
 
+        if (ViewModel.Bldg.IsDirty || ViewModel.Unit.IsDirty)
+        {
+            args.Cancel = true; // needs Cancel = true here in order to show dialog.
+
+            // show ConfirmationDialog
+            var result = await _dlg.ShowEditorCloseConfirmationDialog(Win);
+
+            if (result == ContentDialogResult.Primary)
+            {
+                if (ViewModel.Bldg.IsDirty)
+                {
+                    ViewModel.Bldg.Save();
+                }
+
+                if (ViewModel.Unit.IsDirty)
+                {
+                    ViewModel.Unit.Save();
+                }
+
+                if ((ViewModel.Bldg.IsDirty == false) && (ViewModel.Unit.IsDirty == false))
+                {
+                    Win.Close();
                 }
             }
+            else if (result == ContentDialogResult.Secondary)
+            {
+                // Discard change and close.
+                ViewModel.Bldg.DiscardUnsavedFiles();
+
+                Win.Close();
+            }
+            else if (result == ContentDialogResult.None)
+            {
+                // Cancel.
+
+            }
+        }
+    }
+
+    public void EditorWindow_Closed(object sender, WindowEventArgs args)
+    {
+        if (sender is not EditorWindow ewin)
+        {
+            return;
+        }
+
+        ewin.Activated -= EditorWindow_Activated;
+        ewin.Closed -= EditorWindow_Closed;
+        ewin.AppWindow.Closing -= AppWindow_Closing;
+
+        var mainVM = App.GetService<MainViewModel>();
+        // Save window size and position.
+        var appWindow = ewin.AppWindow;
+        if (appWindow != null)
+        {
+            if (appWindow.Presenter is OverlappedPresenter)
+            {
+                mainVM.EditorWinHeight = (int)appWindow.Size.Height;
+                mainVM.EditorWinWidth = (int)appWindow.Size.Width;
+                mainVM.EditorWinTop = (int)appWindow.Position.Y;
+                mainVM.EditorWinLeft = (int)appWindow.Position.X;
+            }
+        }
+
+        if (!ewin.IsAutoClose)
+        {
+            mainVM.EditorList.Remove(ewin);
         }
     }
 

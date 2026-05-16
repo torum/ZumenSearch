@@ -1,6 +1,6 @@
 ﻿using Microsoft.Data.Sqlite;
 using System.Data;
-using ZumenSearch.Models;
+using ZumenSearch.Models.Common;
 using ZumenSearch.Services.Contracts;
 
 namespace ZumenSearch.Services;

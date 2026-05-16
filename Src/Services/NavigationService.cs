@@ -11,7 +11,8 @@ public class NavigationService : INavigationService
 
     private readonly Dictionary<string, Type> _pageMap = new()
         {            
-            { "ZumenSearch.Views.SearchPage", typeof(Views.IntegratedSearchPage) },
+            { "ZumenSearch.Views.RentSearchPage", typeof(Views.RentSearchPage) },
+            { "ZumenSearch.Views.RentSearchResultPage", typeof(Views.RentSearchResultPage) },
             { "ZumenSearch.Views.Rent.ResidentialSearchPage", typeof(Views.Rent.ResidentialSearchPage) },
             { "ZumenSearch.Views.Rent.ResidentialSearchResultPage", typeof(Views.Rent.ResidentialSearchResultPage) },
             { "ZumenSearch.Views.Rent.Commercials.CommercialsPage", typeof(Views.Rent.Commercials.CommercialsPage) },
@@ -26,8 +27,10 @@ public class NavigationService : INavigationService
         _frame = frame;
     }
 
-    public void NavigateTo(object? selectedPage, SlideNavigationTransitionEffect effect)
+    public bool NavigateTo(object? selectedPage, SlideNavigationTransitionEffect effect)
     {
+        if (_frame is null) return false;
+
         string? tag = null;
         if (selectedPage is NavigationViewItem navItem)
         {
@@ -38,19 +41,20 @@ public class NavigationService : INavigationService
             tag = str;
         }
 
-        if (tag != null && _pageMap.TryGetValue(tag, out var pageType) && _frame?.CurrentSourcePageType != pageType)
+        if (tag != null && _pageMap.TryGetValue(tag, out var pageType) && _frame.CurrentSourcePageType != pageType)
         {
-            _frame?.Navigate(pageType, _frame, new SlideNavigationTransitionInfo() { Effect = effect});//new SuppressNavigationTransitionInfo()
+            return _frame.Navigate(pageType, _frame, new SlideNavigationTransitionInfo() { Effect = effect});//new SuppressNavigationTransitionInfo()
         }
         else
         {
             Debug.WriteLine("NavigationService.NavigateTo: No valid page found for tag " + tag);
+            return false;
         }
     }
 
     public void NavigateToMainSearch()
     {
-        _frame?.Navigate(typeof(Views.IntegratedSearchPage), _frame, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom });
+        _frame?.Navigate(typeof(Views.RentSearchPage), _frame, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom });
     }
 
     public void GoBack()

@@ -7,7 +7,7 @@
     mc:Ignorable="d"
     xmlns:controls="using:CommunityToolkit.WinUI.Controls"
     xmlns:ui="using:CommunityToolkit.WinUI"
-    xmlns:mod="using:ZumenSearch.Models"
+    xmlns:mod="using:ZumenSearch.Models.Common"
     xmlns:modresi="using:ZumenSearch.Models.Rent.Residentials"
     NavigationCacheMode="Required">
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled" Padding="48,0,48,24">
@@ -27,7 +27,7 @@
                         <Grid Grid.Row="0" Grid.Column="0">
                             <TextBox Header="物件名" PlaceholderText="必須" Text="{x:Bind ViewModel.Bldg.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch"/>
                         </Grid>
-                        <Grid Grid.Row="0" Grid.Column="1" Margin="12,0,0,0" >
+                        <Grid Grid.Row="0" Grid.Column="1" Margin="12,0,0,0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"></ColumnDefinition>
                                 <ColumnDefinition Width="*"></ColumnDefinition>
@@ -41,8 +41,8 @@
                                     </DataTemplate>
                                 </ComboBox.ItemTemplate>
                             </ComboBox>
-                            <Grid Grid.Row="0" Grid.Column="1" Margin="12,12,0,0">
-                                <CheckBox x:Name="CheckBoxUnitOwnership" Content="区分所有" IsChecked="{x:Bind ViewModel.Bldg.IsUnitOwnership, Mode=TwoWay}" HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
+                            <Grid Grid.Row="0" Grid.Column="1">
+                                <CheckBox x:Name="CheckBoxUnitOwnership" Margin="12,12,0,0" Content="区分所有" IsChecked="{x:Bind ViewModel.Bldg.IsUnitOwnership, Mode=TwoWay}" HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
                             </Grid>
                         </Grid>
                     </Grid>

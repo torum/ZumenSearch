@@ -1,8 +1,9 @@
 ﻿using System.Collections.ObjectModel;
+using ZumenSearch.Models.Base;
 
 namespace ZumenSearch.Models.Rent.Residentials;
 
-// 賃貸住居用の検索結果表示用物件クラス（建物）
+// 賃貸住居用建物の検索結果表示用物件クラス（建物）
 public partial class EntryResidentialSearchResult : EntryBase
 {
     public EntryResidentialSearchResult(string id) : base(id)
@@ -26,7 +27,7 @@ public partial class EntryResidentialFull : EntryBase
         }
     }
 
-    public ObservableCollection<PictureBuilding> BuildingPictures
+    public ObservableCollection<PictureBldg> BuildingPictures
     {
         get;
         set
@@ -39,9 +40,9 @@ public partial class EntryResidentialFull : EntryBase
     } = [];
 
     // DBへの更新時にDBから削除されるべき物件写真のIDリスト
-    public ObservableCollection<PictureBuilding> BuildingPicturesToBeDeleted = [];
+    public ObservableCollection<PictureBldg> BuildingPicturesToBeDeleted = [];
 
-    public ObservableCollection<Room> Rooms
+    public ObservableCollection<UnitResidential> Rooms
     {
         get;
         set
@@ -54,7 +55,7 @@ public partial class EntryResidentialFull : EntryBase
     } = [];
 
     // DBへの更新時にDBから削除されるべき部屋のIDリスト
-    public ObservableCollection<Room> RoomsToBeDeleted = [];
+    public ObservableCollection<UnitResidential> RoomsToBeDeleted = [];
 
     public EntryResidentialFull(string id, EnumEntryStatus status) : base(id)
     {

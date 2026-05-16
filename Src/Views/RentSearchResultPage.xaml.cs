@@ -8,9 +8,9 @@ using ZumenSearch.Models;
 using ZumenSearch.Models.Rent.Residentials;
 using ZumenSearch.ViewModels;
 
-namespace ZumenSearch.Views.Rent;
+namespace ZumenSearch.Views;
 
-public sealed partial class ResidentialSearchResultPage : Page
+public sealed partial class RentSearchResultPage : Page
 {
     public MainViewModel ViewModel
     {
@@ -21,7 +21,7 @@ public sealed partial class ResidentialSearchResultPage : Page
 
     private Frame? ContentFrame;
 
-    public ResidentialSearchResultPage()
+    public RentSearchResultPage()
     {
         ViewModel = App.GetService<MainViewModel>();
 
@@ -40,7 +40,7 @@ public sealed partial class ResidentialSearchResultPage : Page
 
         if (args.Index == 0)
         {
-            ContentFrame.Navigate(typeof(Views.Rent.ResidentialSearchPage), ContentFrame, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });
+            ContentFrame.Navigate(typeof(Views.RentSearchPage), ContentFrame, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });
         }
         else if ( args.Index == 1)
         {
@@ -129,16 +129,17 @@ public sealed partial class ResidentialSearchResultPage : Page
             return;
         }
 
-        if (invokedItem is not UnitResidentialSearchResult)
+        if (invokedItem is not EntryResidentialSearchResult)
         {
             return;
         }
 
         // Needs ItemContainer_PointerPressed Handled = true; to avoid stealing child window focus. Strupid WinUI3.
-        if (ViewModel.EditRentResidentialUnitCommand.CanExecute(invokedItem))
+        if (ViewModel.EditRentResidentialEntryCommand.CanExecute(invokedItem))
         {
-            ViewModel.EditRentResidentialUnitCommand.Execute(invokedItem);
+            ViewModel.EditRentResidentialEntryCommand.Execute(invokedItem);
         }
+
     }
 
     private void ItemContainer_PointerPressed(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)

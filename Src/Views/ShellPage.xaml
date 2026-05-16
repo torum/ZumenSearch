@@ -7,6 +7,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="using:ZumenSearch.ViewModels"
+    xmlns:mod="using:ZumenSearch.Models.Common"
     d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
     NavigationCacheMode="Required"
     mc:Ignorable="d"
@@ -71,7 +72,6 @@
 
                     </Grid>
                 </NavigationView.PaneHeader>
-
                 <NavigationView.MenuItems>
 
                     <NavigationViewItem Tag="Rent" Content="賃貸" ToolTipService.ToolTip="賃貸" IsExpanded="True">
@@ -81,6 +81,12 @@
 
                         <NavigationViewItem.MenuItems>
 
+                            <NavigationViewItem Tag="ZumenSearch.Views.RentSearchPage" Content="総合検索" ToolTipService.ToolTip="検索">
+                                <NavigationViewItem.Icon>
+                                    <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xe7c3;"/>
+                                </NavigationViewItem.Icon>
+                            </NavigationViewItem>
+                            
                             <NavigationViewItem Tag="ZumenSearch.Views.Rent.ResidentialSearchPage" Content="住居用" ToolTipService.ToolTip="賃貸住居用">
                                 <NavigationViewItem.Icon>
                                     <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xe7c3;"/>
@@ -107,7 +113,6 @@
                     <NavigationViewItem Tag="ZumenSearch.Views.Brokers.BrokersPage" Content="宅建業者" ToolTipService.ToolTip="宅建業者" Icon="OtherUser"/>
 
                 </NavigationView.MenuItems>
-
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="48"/>
@@ -120,13 +125,35 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <Button x:Name="BackButton" Grid.Column="0" Height="36" Width="40" Margin="6,6,0,0" Style="{ThemeResource TitleBarBackButtonStyle}" IsEnabled="{x:Bind NavigationFrame.CanGoBack, Mode=OneWay}" Click="BackButton_Click" VerticalAlignment="Top"/>
-                        <AutoSuggestBox x:Name="SearchBox" Grid.Column="1" SizeChanged="AppTitleBar_SizeChanged" Margin="0,8,84,0" QueryIcon="Find" AutomationProperties.Name="Search" PlaceholderText="Find " HorizontalAlignment="Center" VerticalAlignment="Top" MinWidth="200" Width="340"></AutoSuggestBox>
+                        <AutoSuggestBox x:Name="SearchBox" Visibility="Collapsed" Grid.Column="1" ItemsSource="{x:Bind ViewModel.AutoSuggestList, Mode=OneWay}" UpdateTextOnSelect="False" TextChanged="SearchBox_TextChanged" SuggestionChosen="SearchBox_SuggestionChosen" QuerySubmitted="SearchBox_QuerySubmitted" SizeChanged="AppTitleBar_SizeChanged" Margin="0,8,84,0" QueryIcon="Find" AutomationProperties.Name="Search" PlaceholderText="Find " HorizontalAlignment="Center" VerticalAlignment="Top" MinWidth="200" Width="340">
+                            <AutoSuggestBox.ItemTemplate>
+                                <DataTemplate x:DataType="mod:AutoSuggestItem">
+                                    <Grid Padding="4" ColumnDefinitions="Auto, *">
+
+                                        <!-- Icon Visual Anchor -->
+                                        <FontIcon Grid.Column="0" Glyph="&#xe7c3;"  Margin="0,0,12,0" VerticalAlignment="Center"/>
+
+                                        <!-- Text Details -->
+                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                            <TextBlock Text="{x:Bind Name}" 
+                                   FontWeight="SemiBold" 
+                                   FontSize="14"/>
+                                            <TextBlock Text="{x:Bind Id}" 
+                                   Foreground="Gray" 
+                                   FontSize="12"/>
+                                        </StackPanel>
+
+                                    </Grid>
+                                </DataTemplate>
+                            </AutoSuggestBox.ItemTemplate>
+
+
+                        </AutoSuggestBox>
                     </Grid>
 
                     <!-- NavigationView content frame -->
                     <Frame x:Name="ContentFrame" Grid.Row="1" Navigated="NavigationViewControl_Navigated" Padding="0"></Frame>
                 </Grid>
-
             </NavigationView>
         </Grid>
 
@@ -137,9 +164,10 @@
                         <AdaptiveTrigger MinWindowWidth="1800" />
                     </VisualState.StateTriggers>
                     <VisualState.Setters>
-                        <Setter Target="NavigationViewControl.IsPaneToggleButtonVisible" Value="True" />
                         <Setter Target="NavigationViewControl.PaneDisplayMode" Value="Left" />
-                        <Setter Target="NavigationViewControl.IsPaneOpen" Value="True" />
+                        <!-- 
+                        <Setter Target="NavigationViewControl.IsPaneToggleButtonVisible" Value="True" />
+                        <Setter Target="NavigationViewControl.IsPaneOpen" Value="False" /> -->
                         <Setter Target="NavigationViewControl.OpenPaneLength" Value="320" />
                     </VisualState.Setters>
                 </VisualState>
@@ -148,9 +176,10 @@
                         <AdaptiveTrigger MinWindowWidth="1007" />
                     </VisualState.StateTriggers>
                     <VisualState.Setters>
-                        <Setter Target="NavigationViewControl.IsPaneToggleButtonVisible" Value="True" />
                         <Setter Target="NavigationViewControl.PaneDisplayMode" Value="Left" />
-                        <Setter Target="NavigationViewControl.IsPaneOpen" Value="True" />
+                        <!-- 
+                        <Setter Target="NavigationViewControl.IsPaneToggleButtonVisible" Value="True" />
+                        <Setter Target="NavigationViewControl.IsPaneOpen" Value="False" /> -->
                         <Setter Target="NavigationViewControl.OpenPaneLength" Value="280" />
                     </VisualState.Setters>
                 </VisualState>
@@ -159,11 +188,12 @@
                         <AdaptiveTrigger MinWindowWidth="640" />
                     </VisualState.StateTriggers>
                     <VisualState.Setters>
+                        <Setter Target="NavigationViewControl.PaneDisplayMode" Value="LeftCompact" />
+                        <!-- 
                         <Setter Target="NavigationViewControl.IsPaneToggleButtonVisible" Value="True" />
-                        <Setter Target="NavigationViewControl.PaneDisplayMode" Value="CompactLeft" />
-                        <Setter Target="NavigationViewControl.IsPaneOpen" Value="False" />
+                        <Setter Target="NavigationViewControl.IsPaneOpen" Value="False" /> -->
                         <Setter Target="NavigationViewControl.OpenPaneLength" Value="280" />
-                        <Setter Target="BackButton.Margin" Value="6,6,0,0"/>
+                        <Setter Target="BackButton.Margin" Value="6,5,0,0"/>
                     </VisualState.Setters>
                 </VisualState>
                 <VisualState>
@@ -171,12 +201,13 @@
                         <AdaptiveTrigger MinWindowWidth="340" />
                     </VisualState.StateTriggers>
                     <VisualState.Setters>
+                        <Setter Target="NavigationViewControl.PaneDisplayMode" Value="Auto" />
+                        <!-- 
                         <Setter Target="NavigationViewControl.IsPaneToggleButtonVisible" Value="True" />
-                        <Setter Target="NavigationViewControl.PaneDisplayMode" Value="CompactLeft" />
-                        <Setter Target="NavigationViewControl.IsPaneOpen" Value="False" />
+                        <Setter Target="NavigationViewControl.IsPaneOpen" Value="False" /> -->
                         <Setter Target="NavigationViewControl.OpenPaneLength" Value="230" />
                         <Setter Target="SearchBox.Visibility" Value="Collapsed" />
-                        <Setter Target="BackButton.Margin" Value="24,6,0,0"/>
+                        <Setter Target="BackButton.Margin" Value="48,4,0,0"/>
                     </VisualState.Setters>
                 </VisualState>
                 <VisualState>
@@ -184,12 +215,13 @@
                         <AdaptiveTrigger MinWindowWidth="0" />
                     </VisualState.StateTriggers>
                     <VisualState.Setters>
+                        <Setter Target="NavigationViewControl.PaneDisplayMode" Value="Auto" />
+                        <!-- 
                         <Setter Target="NavigationViewControl.IsPaneToggleButtonVisible" Value="True" />
-                        <Setter Target="NavigationViewControl.PaneDisplayMode" Value="CompactLeft" />
-                        <Setter Target="NavigationViewControl.IsPaneOpen" Value="False" />
+                        <Setter Target="NavigationViewControl.IsPaneOpen" Value="False" /> -->
                         <Setter Target="NavigationViewControl.OpenPaneLength" Value="230" />
                         <Setter Target="SearchBox.Visibility" Value="Collapsed" />
-                        <Setter Target="BackButton.Margin" Value="6,6,0,0"/>
+                        <Setter Target="BackButton.Margin" Value="48,4,0,0"/>
                     </VisualState.Setters>
                 </VisualState>
             </VisualStateGroup>

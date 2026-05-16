@@ -55,11 +55,30 @@ public sealed partial class UnitListPage : Page
             return;
         }
 
-        if (invokedItem is not Room)
+        if (invokedItem is not UnitResidential)
+        {
+            ViewModel.Bldg.SelectedRoom = null;
+            return;
+        }
+
+        ViewModel.Bldg.SelectedRoom = invokedItem as UnitResidential;
+
+        ViewModel.Bldg.EditSelectedUnitCommand.Execute(invokedItem);
+    }
+
+    private void RoomsListView_SelectionChanged(ItemsView sender, ItemsViewSelectionChangedEventArgs args)
+    {
+        if (ViewModel is null)
         {
             return;
         }
 
-        ViewModel.Bldg.EditSelectedUnitCommand.Execute(invokedItem);
+        if (sender.SelectedItem is not UnitResidential)
+        {
+            ViewModel.Bldg.SelectedRoom = null;
+            return;
+        }
+
+        ViewModel.Bldg.SelectedRoom = sender.SelectedItem as UnitResidential;
     }
 }

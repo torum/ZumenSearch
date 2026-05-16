@@ -146,7 +146,7 @@
 
             <!-- NavigationView resources -->
             <Thickness x:Key="NavigationViewContentMargin">0,0,0,0</Thickness>
-            <Thickness x:Key="NavigationViewMinimalContentMargin">24,0,0,0</Thickness>
+            <Thickness x:Key="NavigationViewMinimalContentMargin">0,0,0,0</Thickness>
             <!--
             <SolidColorBrush x:Key="NavigationViewContentBackground" Color="Transparent"/>
             -->

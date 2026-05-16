@@ -13,7 +13,8 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Windows.Storage.Search;
 using Windows.System;
-using ZumenSearch.Models;
+using ZumenSearch.Models.Base;
+using ZumenSearch.Models.Common;
 using ZumenSearch.Models.Rent.Residentials;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.Views;
@@ -33,10 +34,6 @@ public partial class MainViewModel : ObservableObject
     #region == Public Properties ==
 
     public string Id => _id;
-
-    //public Views.Rent.Residentials.EditorWindow Win { get; init; }
-
-    //public Views.Rent.Residentials.ShellPage Shell { get; init; }
 
     public UnitViewModel Unit { get; init; }
 
@@ -65,7 +62,7 @@ public partial class MainViewModel : ObservableObject
         {
             if (string.IsNullOrEmpty(Bldg.Name))
             {
-                return field;
+                return $"{field} (新規)";
             }
             else
             {
@@ -105,7 +102,6 @@ public partial class MainViewModel : ObservableObject
     public event EventHandler? EventEditUnits;
 
     // TODO:
-    //public event EventHandler<bool>? EventIsUnitOwnership; // show or hides navigationview' menu accordingly.
     //public event EventHandler? EventTitleChanged;
 
     // Who subscribes to this event?
@@ -123,9 +119,9 @@ public partial class MainViewModel : ObservableObject
 
     #endregion
 
-    private string _id = string.Empty;
+    private readonly string _id = string.Empty;
     private Views.Rent.Residentials.ShellPage? _shell;
-    private Views.Rent.Residentials.EditorWindow? _win;
+    //private Views.Rent.Residentials.EditorWindow? _win;
 
     public MainViewModel(Models.Rent.Residentials.EntryResidentialFull entry, IDispatcherService dispatcherService, IDataAccessService dataAccessService, IModalDialogService modalDialogService, IDataAccessLocationService dataAccessLocationService)
     {
@@ -153,12 +149,15 @@ public partial class MainViewModel : ObservableObject
 
     #region == Public Methods ==
 
+    /*
     public void SetEditorWindow(Views.Rent.Residentials.EditorWindow win)
     {
         _win = win;
 
         _win.SetEntryIdToWindow(_id);
+        _win.SetViewModelToWindow(this);
     }
+    */
 
     public void SetEditorShell(Views.Rent.Residentials.ShellPage shell)
     {
@@ -205,7 +204,7 @@ public partial class MainViewModel : ObservableObject
             }
         }
 
-        if (_shell.NavigationFrame.Navigate(typeof(Views.Rent.Residentials.Bldg.BldgShellPage), this, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight }))
+        if (_shell.NavigationFrame.Navigate(typeof(Views.Rent.Residentials.Bldg.BldgShellPage), this, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight })) // //
         {
 
         }
@@ -235,7 +234,7 @@ public partial class MainViewModel : ObservableObject
             }
         }
 
-        if (_shell.NavigationFrame.Navigate(typeof(Views.Rent.Residentials.Unit.UnitShellPage), this, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight }))
+        if (_shell.NavigationFrame.Navigate(typeof(Views.Rent.Residentials.Unit.UnitShellPage), this, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft })) //
         {
 
         }
