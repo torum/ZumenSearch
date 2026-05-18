@@ -27,6 +27,7 @@ public partial class EntryResidentialFull : EntryBase
         }
     }
 
+    // 物件写真（建物）リスト
     public ObservableCollection<PictureBldg> BuildingPictures
     {
         get;
@@ -42,6 +43,23 @@ public partial class EntryResidentialFull : EntryBase
     // DBへの更新時にDBから削除されるべき物件写真のIDリスト
     public ObservableCollection<PictureBldg> BuildingPicturesToBeDeleted = [];
 
+    // 図面（建物）リスト
+    public ObservableCollection<PdfBldg> BuildingPdfs
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+            }
+        }
+    } = [];
+
+    // DBへの更新時にDBから削除されるべき図面のIDリスト
+    public ObservableCollection<PdfBldg> BuildingPdfsToBeDeleted = [];
+
+    // 部屋のリスト
     public ObservableCollection<UnitResidential> Rooms
     {
         get;
@@ -56,6 +74,7 @@ public partial class EntryResidentialFull : EntryBase
 
     // DBへの更新時にDBから削除されるべき部屋のIDリスト
     public ObservableCollection<UnitResidential> RoomsToBeDeleted = [];
+
 
     public EntryResidentialFull(string id, EnumEntryStatus status) : base(id)
     {
@@ -167,24 +186,6 @@ public partial class EntryResidentialFull : EntryBase
     // 建物設備備考
     //
 
-
-    // 写真一覧
-    public ObservableCollection<RentLivingPicture> RentLivingPictures { get; set; } = new ObservableCollection<RentLivingPicture>();
-
-    // 写真のDBへの更新時にDBから削除されるべき物件写真のIDリスト
-    public List<string> RentLivingPicturesToBeDeletedIDs = new List<string>();
-
-    // 図面一覧
-    public ObservableCollection<RentLivingPdf> RentLivingPdfs { get; set; } = new ObservableCollection<RentLivingPdf>();
-
-    // 図面のDBへの更新時にDBから削除されるべき図面のIDリスト
-    public List<string> RentLivingPdfsToBeDeletedIDs = new List<string>();
-
-    // 部屋一覧
-    public ObservableCollection<RentLivingRoom> RentLivingRooms { get; set; } = new ObservableCollection<RentLivingRoom>();
-
-    // DBへの更新時にDBから削除されるべき部屋のIDリスト
-    public List<string> RentLivingRoomToBeDeletedIDs = new List<string>();
     */
 
 

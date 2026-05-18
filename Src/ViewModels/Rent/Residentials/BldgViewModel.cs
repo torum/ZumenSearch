@@ -1,6 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Animation;
+using Microsoft.UI.Xaml.Media.Imaging;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -8,6 +10,9 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Text;
+using Windows.Data.Pdf;
+using Windows.Storage;
+using Windows.Storage.Streams;
 using Windows.System;
 using ZumenSearch.Models.Base;
 using ZumenSearch.Models.Common;
@@ -33,6 +38,10 @@ public partial class BldgViewModel : ObservableObject
 
     // Tmp file list to hold unsaved picture files. (if entry is not saved, delete on close)
     private readonly List<string> _unsavedBuildingPictureFileList = [];
+
+    //
+    private readonly List<string> _unsavedBuildingPdfFileList = [];
+    private readonly List<string> _unsavedBuildingPdfThumbnailFileList = [];
 
     #endregion
 
@@ -935,11 +944,12 @@ public partial class BldgViewModel : ObservableObject
             {
                 IsDirty = true;//?
 
-                OpenBuildingPictureDirectoryCommand.NotifyCanExecuteChanged();
+                OpenBuildingBlobDirectoryCommand.NotifyCanExecuteChanged();
             }
         }
     } = [];
 
+    // TODO: remove this.
     public PictureBldg? SelectedBuildingPicture
     {
         get;
@@ -990,10 +1000,10 @@ public partial class BldgViewModel : ObservableObject
             */
 
             OnPropertyChanged();
-            DeleteSelectedBuildingPictureCommand.NotifyCanExecuteChanged();
+            DeleteBuildingPictureCommand.NotifyCanExecuteChanged();
         }
     }
-    
+
     /*
 
 
@@ -1087,6 +1097,25 @@ public partial class BldgViewModel : ObservableObject
     */
 
     #endregion
+
+    #region == PDF ==
+
+    public ObservableCollection<PdfBldg> BuildingPdfs
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;//?
+
+                OpenBuildingBlobDirectoryCommand.NotifyCanExecuteChanged();
+            }
+        }
+    } = [];
+
+    #endregion
+
 
     #region == 部屋 ==
 
@@ -1212,9 +1241,8 @@ public partial class BldgViewModel : ObservableObject
         //TODO: Set other properties
 
 
-        // Pictures TODO:
+        // Pictures:
         BuildingPictures = new ObservableCollection<Models.Rent.Residentials.PictureBldg>(_entry.BuildingPictures); // create a copy.
-        //OpenBuildingPictureDirectoryCommand.NotifyCanExecuteChanged();
 
         foreach (var item in BuildingPictures)
         {
@@ -1250,36 +1278,46 @@ public partial class BldgViewModel : ObservableObject
             }
         };
 
-        // Rooms
-        Rooms = new ObservableCollection<Models.Rent.Residentials.UnitResidential>(_entry.Rooms); // create a copy.
-        /*
-        Rooms.CollectionChanged += (s, e) => 
+        // PDFs
+        BuildingPdfs = new ObservableCollection<Models.Rent.Residentials.PdfBldg>(_entry.BuildingPdfs); // create a copy.
+
+        foreach (var item in BuildingPdfs)
+        {
+            item.ParentViewModel = _mainViewModel;//this;
+            item.IsModified = false; // Needed this.
+            item.PropertyChanged += OnBuildingPdfPropertyChanged;
+        }
+
+        BuildingPdfs.CollectionChanged += (s, e) =>
         {
             // Unsubscribe from removed items
             if (e.OldItems != null)
             {
-                foreach (Models.Rent.Residentials.UnitResidential item in e.OldItems)
+                foreach (Models.Rent.Residentials.PdfBldg item in e.OldItems)
                 {
-                    Debug.WriteLine($"Item {item.RoomName} Removed from Rooms");
+                    Debug.WriteLine($"Item {item.Id} Removed from BuildingPdfs");
                     IsDirty = true;
 
-                    item.PropertyChanged -= OnRoomPropertyChanged;
+                    item.PropertyChanged -= OnBuildingPdfPropertyChanged;
                 }
             }
 
             // Subscribe to PropertyChanged.
             if (e.NewItems != null)
             {
-                foreach (Models.Rent.Residentials.UnitResidential item in e.NewItems)
+                foreach (Models.Rent.Residentials.PdfBldg item in e.NewItems)
                 {
-                    Debug.WriteLine($"Item {item.RoomName} Added to Rooms");
+                    Debug.WriteLine($"Item {item.Id} Added to BuildingPdfs");
                     IsDirty = true;
 
-                    item.PropertyChanged += OnRoomPropertyChanged;
+                    item.PropertyChanged += OnBuildingPdfPropertyChanged;
                 }
             }
         };
-        */
+
+        // Rooms
+        Rooms = new ObservableCollection<Models.Rent.Residentials.UnitResidential>(_entry.Rooms); // create a copy.
+
         //Debug.WriteLine($"PopulateEntryValues: Completed populating values from Entry to VM. Entry ID: {_entry.Id}, Rooms Count: {Rooms.Count}");
     }
 
@@ -1315,18 +1353,36 @@ public partial class BldgViewModel : ObservableObject
         }
     }
 
-    private void OnRoomPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    private void OnBuildingPdfPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (sender is not Models.Rent.Residentials.UnitResidential)
+        if (sender is not ZumenSearch.Models.Rent.Residentials.PdfBldg pdfBldg)
         {
-            Debug.WriteLine("OnItemPropertyChanged returned non room.");
+            Debug.WriteLine("OnBuildingPdfPropertyChanged returned non PdfBldg.");
+            return;
         }
-        // Catch the specific item property update here
-        //var updatedItem = sender as Models.Rent.Residentials.Room;
 
-        Debug.WriteLine($"Property {e.PropertyName} changed");
+        //Debug.WriteLine($"Property {e.PropertyName} changed");
 
-        IsDirty = true;
+        if (pdfBldg.IsModified)
+        {
+            IsDirty = true;
+
+            var prop = e.PropertyName ?? string.Empty;
+            if (prop.Equals("IsMain"))
+            {
+                if (pdfBldg.IsMain)
+                {
+                    // Clear all other pdfs
+                    foreach (var item in BuildingPdfs)
+                    {
+                        if (item != pdfBldg)
+                        {
+                            item.IsMain = false;
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private void SetValuesToEntry()
@@ -1365,6 +1421,9 @@ public partial class BldgViewModel : ObservableObject
         // 写真
         _entry.BuildingPictures = BuildingPictures;
 
+        // 図面
+        _entry.BuildingPdfs = BuildingPdfs;
+
         // 部屋
         _entry.Rooms = Rooms;
 
@@ -1383,12 +1442,16 @@ public partial class BldgViewModel : ObservableObject
         }
         else
         {
-            IsDirty = false;
-            _entry.IsDirty = false;
-
-            _entry.EntryStatus = EnumEntryStatus.Saved;
-
             Debug.WriteLine("No errors on insert.");
+
+            IsDirty = false;
+
+            _unsavedBuildingPictureFileList.Clear();
+            _unsavedBuildingPdfThumbnailFileList.Clear();
+            _unsavedBuildingPdfFileList.Clear();
+
+            _entry.IsDirty = false;
+            _entry.EntryStatus = EnumEntryStatus.Saved;
 
             // Update title with dummy value.
             _mainViewModel.WindowTitle = string.Empty;
@@ -1410,12 +1473,16 @@ public partial class BldgViewModel : ObservableObject
         }
         else
         {
-            IsDirty = false;
-            _entry.IsDirty = false;
-
-            _entry.EntryStatus = EnumEntryStatus.Saved;
-
             Debug.WriteLine("No errors on update.");
+
+            IsDirty = false;
+
+            _unsavedBuildingPictureFileList.Clear();
+            _unsavedBuildingPdfThumbnailFileList.Clear();
+            _unsavedBuildingPdfFileList.Clear();
+
+            _entry.IsDirty = false;
+            _entry.EntryStatus = EnumEntryStatus.Saved;
 
             // Update title with dummy value.
             _mainViewModel.WindowTitle = string.Empty;
@@ -1440,32 +1507,39 @@ public partial class BldgViewModel : ObservableObject
 
         List<string> list = [];
 
-        foreach (var file in filePathList)
+        foreach (var filePath in filePathList)
         {
-            if (string.IsNullOrEmpty(file.Trim()))
+            if (string.IsNullOrEmpty(filePath.Trim()))
             {
                 continue;
             }
 
-            using var sourceStream = File.Open(file, FileMode.Open);
-
+            // TODO: check file ext for valid image type.
             // TODO: set max file size?
 
-            var destFilePath = Path.Combine(_entryDataDirectoryPath, System.IO.Path.GetFileName(file));
-            //Debug.WriteLine($"{file.Path} to {destFilePath}  @SetNewBuildingPicturesAsync()");
+            // TODO: Create thumbnail image?
+
+
+            using var sourceStream = File.Open(filePath, FileMode.Open);
+
+            string newId = Guid.CreateVersion7().ToString("N");
+            string extension = Path.GetExtension(System.IO.Path.GetFileName(filePath));
+            var destFilePath = Path.Combine(_entryDataDirectoryPath, newId+ extension);
+            //Debug.WriteLine($"{file} to {destFilePath}  @SetNewBuildingPicturesAsync()");
 
             using var destinationStream = File.Create(destFilePath);
             await sourceStream.CopyToAsync(destinationStream);
 
-            var pic = new Models.Rent.Residentials.PictureBldg(Guid.CreateVersion7().ToString("N"), destFilePath)
+            var pic = new Models.Rent.Residentials.PictureBldg(newId, destFilePath)
             {
-                IsNew = true
+                IsNew = true,
+                ParentViewModel = _mainViewModel
             };
 
             BuildingPictures.Add(pic);
 
-            OpenBuildingPictureDirectoryCommand.NotifyCanExecuteChanged();
-            DeleteSelectedBuildingPictureCommand.NotifyCanExecuteChanged();
+            OpenBuildingBlobDirectoryCommand.NotifyCanExecuteChanged();
+            DeleteBuildingPictureCommand.NotifyCanExecuteChanged();
 
             IsDirty = true;
 
@@ -1474,28 +1548,147 @@ public partial class BldgViewModel : ObservableObject
         }
     }
 
-    public void DiscardUnsavedFiles()
+
+    public async Task SetNewBuildingPdfsAsync(List<string> filePathList)
     {
-        if (_unsavedBuildingPictureFileList.Count <= 0)
+        if (filePathList is null) return;
+        if (filePathList.Count == 0) return;
+
+        Debug.WriteLine($"destDirectory={_entryDataDirectoryPath}  @SetNewBuildingPdfsAsync()");
+
+        if (!Directory.Exists(_entryDataDirectoryPath))
         {
-            return;
+            Directory.CreateDirectory(_entryDataDirectoryPath);
         }
 
-        foreach (var file in _unsavedBuildingPictureFileList)
+        List<string> list = [];
+
+        foreach (var filePath in filePathList)
         {
-            if (File.Exists(file))
+            if (string.IsNullOrEmpty(filePath.Trim()))
             {
-                Debug.WriteLine($"Deleting unsaved file: {file}");
-                File.Delete(file);
+                continue;
+            }
+
+            // TODO: check file ext for valid image type.
+            // TODO: set max file size?
+
+
+            string extension = Path.GetExtension(System.IO.Path.GetFileName(filePath));
+            if (!extension.Equals(".pdf")) // TODO: check case.
+            {
+                continue;
+            }
+
+            //using var sourceStream = File.Open(file, FileMode.Open);
+
+            StorageFile sfile = await StorageFile.GetFileFromPathAsync(filePath);
+            PdfDocument pdfDocument = await PdfDocument.LoadFromFileAsync(sfile);
+
+            if (pdfDocument.PageCount > 0)
+            {
+                using PdfPage pdfPage = pdfDocument.GetPage(0);
+                using var stream = new InMemoryRandomAccessStream();
+
+                // Set screen standard DPI
+                //float targetDpi = 96f;
+                //float scaleFactor = targetDpi / 72f; 
+                //uint calculatedWidth = (uint)Math.Round(pdfPage.Size.Width * scaleFactor);
+
+                var options = new PdfPageRenderOptions
+                {
+                    // Set the desired target width in pixels (e.g., 1024px)
+                    // Aspect ratio is locked; height scales automatically.
+                    DestinationWidth = 512//calculatedWidth//1024
+                };
+
+                await pdfPage.RenderToStreamAsync(stream, options);
+
+                //var bitmapImage = new BitmapImage();
+                //await bitmapImage.SetSourceAsync(stream);
+
+                string newId = Guid.CreateVersion7().ToString("N");
+                var thumbnailDestFilePath = Path.Combine(_entryDataDirectoryPath, newId + ".bmp");
+
+                using var destinationStream = File.Create(thumbnailDestFilePath);
+                using var managedSourceStream = stream.AsStreamForRead();
+                await managedSourceStream.CopyToAsync(destinationStream);
+
+                // Keep track of unsaved files to delete them when discarding.
+                _unsavedBuildingPdfThumbnailFileList.Add(thumbnailDestFilePath);
+
+                var pdfDestFilePath = Path.Combine(_entryDataDirectoryPath, newId + extension);
+                File.Copy(filePath, pdfDestFilePath);
+
+                // Keep track of unsaved files to delete them when discarding.
+                _unsavedBuildingPdfFileList.Add(pdfDestFilePath);
+
+                var pdf = new Models.Rent.Residentials.PdfBldg(newId, pdfDestFilePath, thumbnailDestFilePath)
+                {
+                    IsNew = true,
+                    ParentViewModel = _mainViewModel
+                };
+
+                BuildingPdfs.Add(pdf);
+
+                OpenBuildingBlobDirectoryCommand.NotifyCanExecuteChanged();
+                DeleteBuildingPdfCommand.NotifyCanExecuteChanged();
+
+                IsDirty = true;
+            }
+            else
+            {
+                Debug.WriteLine("0 page.");
+            }
+        }
+    }
+
+
+    public void DiscardUnsavedFiles()
+    {
+        if (_unsavedBuildingPictureFileList.Count > 0)
+        {
+            foreach (var file in _unsavedBuildingPictureFileList)
+            {
+                if (File.Exists(file))
+                {
+                    Debug.WriteLine($"Deleting unsaved picture file: {file}");
+                    File.Delete(file);
+                }
             }
         }
 
-        // TODO: More like PDF etc.
-
-        if (Directory.Exists(_entryDataDirectoryPath))
+        if (_unsavedBuildingPdfThumbnailFileList.Count > 0)
         {
-            Debug.WriteLine($"Deleting folder: {_entryDataDirectoryPath}");
-            Directory.Delete(_entryDataDirectoryPath, true);
+            foreach (var file in _unsavedBuildingPdfThumbnailFileList)
+            {
+                if (File.Exists(file))
+                {
+                    Debug.WriteLine($"Deleting unsaved PDF Thumbnail file: {file}");
+                    File.Delete(file);
+                }
+            }
+        }
+
+        if (_unsavedBuildingPdfFileList.Count > 0)
+        {
+            foreach (var file in _unsavedBuildingPdfFileList)
+            {
+                if (File.Exists(file))
+                {
+                    Debug.WriteLine($"Deleting unsaved PDF file: {file}");
+                    File.Delete(file);
+                }
+            }
+        }
+
+        if (_entry.EntryStatus == EnumEntryStatus.New)
+        {
+            if (Directory.Exists(_entryDataDirectoryPath))
+            {
+                Debug.WriteLine($"Deleting folder: {_entryDataDirectoryPath}");
+                Directory.Delete(_entryDataDirectoryPath, true);
+            }
         }
     }
 
@@ -1544,7 +1737,7 @@ public partial class BldgViewModel : ObservableObject
 
     #endregion
 
-    #region == Pictures related commands ==
+    #region == Pictures and Pdf related commands ==
 
     [RelayCommand]
     public async Task AddNewBuildingPictures()
@@ -1601,8 +1794,8 @@ public partial class BldgViewModel : ObservableObject
         */
     }
 
-    [RelayCommand(CanExecute = nameof(CanDeleteSelectedBuildingPicture))]
-    public void DeleteSelectedBuildingPicture(Models.Rent.Residentials.PictureBldg picBldg)
+    [RelayCommand(CanExecute = nameof(CanDeleteBuildingPicture))]
+    public void DeleteBuildingPicture(Models.Rent.Residentials.PictureBldg picBldg)
     {
         if (picBldg is null)
         {
@@ -1617,13 +1810,34 @@ public partial class BldgViewModel : ObservableObject
             IsDirty = true;
         }
     }
-    private bool CanDeleteSelectedBuildingPicture(Models.Rent.Residentials.PictureBldg picBldg)
+    private bool CanDeleteBuildingPicture(Models.Rent.Residentials.PictureBldg picBldg)
     {
         return picBldg is not null;
     }
 
-    [RelayCommand(CanExecute = nameof(CanOpenBuildingPictureDirectory))]
-    public void OpenBuildingPictureDirectory()
+    [RelayCommand(CanExecute = nameof(CanDeleteBuildingPdf))]
+    public void DeleteBuildingPdf(Models.Rent.Residentials.PdfBldg pdfBldg)
+    {
+        if (pdfBldg is null)
+        {
+            return;
+        }
+
+        // TODO: show dialog to comfirm.
+
+        if (BuildingPdfs.Remove(pdfBldg))
+        {
+            _entry.BuildingPdfsToBeDeleted.Add(pdfBldg);
+            IsDirty = true;
+        }
+    }
+    private bool CanDeleteBuildingPdf(Models.Rent.Residentials.PdfBldg pdfBldg)
+    {
+        return pdfBldg is not null;
+    }
+
+    [RelayCommand(CanExecute = nameof(CanOpenBuildingBlobDirectory))]
+    public void OpenBuildingBlobDirectory()
     {
         if (Directory.Exists(_entryDataDirectoryPath))
         {
@@ -1638,9 +1852,9 @@ public partial class BldgViewModel : ObservableObject
             }
         }
     }
-    private bool CanOpenBuildingPictureDirectory()
+    private bool CanOpenBuildingBlobDirectory()
     {
-        if ((BuildingPictures.Count > 0) && Directory.Exists(_entryDataDirectoryPath))
+        if (Directory.Exists(_entryDataDirectoryPath))
         {
             return true;
         }

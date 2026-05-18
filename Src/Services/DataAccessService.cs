@@ -64,12 +64,22 @@ public class DataAccessService : IDataAccessService
                     "picture_id TEXT NOT NULL PRIMARY KEY," +
                     "rent_id TEXT NOT NULL," +
                     "file_path TEXT NOT NULL," +
-                    //"data BLOB," +
                     "label TEXT NOT NULL," + // TODO: wanna change this to "type".
                     "description TEXT NOT NULL," +
                     "is_main INTEGER  NOT NULL," +
-                    //"FOREIGN KEY (rent_residential_id) REFERENCES rent_residentials(rent_residential_id) ON DELETE CASCADE," +
-                    "FOREIGN KEY (rent_id) REFERENCES rent_residentials(rent_id) ON DELETE CASCADE," +
+                    "FOREIGN KEY (rent_id) REFERENCES rent_residentials(rent_id) ON DELETE CASCADE," + //?
+                    "FOREIGN KEY (rent_id) REFERENCES rents(rent_id) ON DELETE CASCADE" +
+                    " )";
+                tableCmd.ExecuteNonQuery();
+
+                tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS rent_residentials_pdfs (" +
+                    "pdf_id TEXT NOT NULL PRIMARY KEY," +
+                    "rent_id TEXT NOT NULL," +
+                    "file_path TEXT NOT NULL," +
+                    "thumb_path TEXT NOT NULL," + 
+                    "description TEXT NOT NULL," +
+                    "is_main INTEGER  NOT NULL," +
+                    "FOREIGN KEY (rent_id) REFERENCES rent_residentials(rent_id) ON DELETE CASCADE," + //?
                     "FOREIGN KEY (rent_id) REFERENCES rents(rent_id) ON DELETE CASCADE" +
                     " )";
                 tableCmd.ExecuteNonQuery();
@@ -79,7 +89,7 @@ public class DataAccessService : IDataAccessService
                     "rent_id TEXT NOT NULL," +
                     "name TEXT NOT NULL," +
                     "chinryou INTEGER NOT NULL DEFAULT 0," +
-                    "FOREIGN KEY (rent_id) REFERENCES rent_residentials(rent_id) ON DELETE CASCADE," +
+                    "FOREIGN KEY (rent_id) REFERENCES rent_residentials(rent_id) ON DELETE CASCADE," + //?
                     "FOREIGN KEY (rent_id) REFERENCES rents(rent_id) ON DELETE CASCADE" +
                     " )";
                 tableCmd.ExecuteNonQuery();
@@ -322,6 +332,70 @@ public class DataAccessService : IDataAccessService
                     }
                 }
 
+                // PDF (building) table
+                if (entry.BuildingPdfs.Count > 0)
+                {
+                    foreach (var pic in entry.BuildingPdfs)
+                    {
+                        // Insertなので全てIsNewのはず・・・
+                        //if (pic.IsNew)
+                        /*
+                        string sqlInsertIntoRentLivingPicture = String.Format(
+                                        "INSERT INTO rent_residentials_pictures (picture_id, rent_id, picture_filepath, picture_data) " +
+                                        "VALUES ('{0}', '{1}', '{2}', @0)",
+                                        pic.Id, entry.Id, pic.ImageLocation);
+                        */
+                        /*
+                        string sqlInsertIntoRentLivingPicture = String.Format(
+                            "INSERT INTO rent_residentials_pictures (picture_id, rent_id, picture_filepath) " +
+                            "VALUES ('{0}', '{1}', '{2}')",
+                            pic.Id, entry.Id, pic.ImageLocation);
+                        */
+                        var sqlInsertIntoRentLivingPicture = "INSERT INTO rent_residentials_pdfs (pdf_id, rent_id, file_path, thumb_path, description, is_main) " +
+                            "VALUES (@PdfId, @RentId, @Path, @Thumb, @Desc, @Main)";
+
+                        cmd.CommandText = sqlInsertIntoRentLivingPicture;
+
+                        // ループなので、前のパラメーターをクリアする。
+                        cmd.Parameters.Clear();
+
+                        cmd.Parameters.AddWithValue("@PdfId", pic.Id);
+                        //cmd.Parameters.AddWithValue("@RentResidentialId", entry.Id + "_1");
+                        cmd.Parameters.AddWithValue("@RentId", entry.Id);
+                        cmd.Parameters.AddWithValue("@Path", pic.PdfLocation);
+                        cmd.Parameters.AddWithValue("@Thumb", pic.ThumbnailLocation);
+                        cmd.Parameters.AddWithValue("@Desc", pic.Description);
+
+                        //Debug.WriteLine($"Inserting picture: {pic.ImageLocation}, {pic.Id}, isMain: {pic.IsMain} @DataAccess::InsertRentResidential");
+
+                        var paramIsMain = new SqliteParameter("@Main", System.Data.DbType.Int32);
+                        if (pic.IsMain)
+                        {
+                            paramIsMain.Value = 1;
+                        }
+                        else
+                        {
+                            paramIsMain.Value = 0;
+                        }
+                        cmd.Parameters.Add(paramIsMain);
+
+                        /*
+                        var parameter1 = new SqliteParameter("@0", System.Data.DbType.Binary)
+                        {
+                            Value = pic.PictureData;
+                        };
+                        cmd.Parameters.Add(parameter1);
+                        */
+
+                        var r = cmd.ExecuteNonQuery();
+                        if (r > 0)
+                        {
+                            pic.IsNew = false;
+                            pic.IsModified = false;
+                        }
+                    }
+                }
+
                 // Room table
                 if (entry.Rooms.Count > 0)
                 {
@@ -486,7 +560,7 @@ public class DataAccessService : IDataAccessService
                 
                 cmd.Parameters.Clear();
 
-                // Residentials pictures table - Insert or Update
+                // 写真（建物）Residentials pictures table - Insert or Update
                 if (entry.BuildingPictures.Count > 0)
                 {
                     foreach (var pic in entry.BuildingPictures)
@@ -571,7 +645,91 @@ public class DataAccessService : IDataAccessService
 
                 cmd.Parameters.Clear();
 
-                // Rooms table - Insert, Update, Delete
+                // PDF（建物）Residentials pdfs table - Insert or Update
+                if (entry.BuildingPdfs.Count > 0)
+                {
+                    foreach (var pdf in entry.BuildingPdfs)
+                    {
+                        var exec = false;
+
+                        if (pdf.IsNew)
+                        {
+                            var sqlInsertIntoRentLivingPdf = "INSERT INTO rent_residentials_pdfs (pdf_id, rent_id, file_path, thumb_path, description, is_main) " +
+                                "VALUES (@PdfId, @RentId, @Path, @Thumb, @Desc, @Main)";
+
+                            // PDFの追加
+                            cmd.CommandText = sqlInsertIntoRentLivingPdf;
+
+                            exec = true;
+                        }
+                        else if (pdf.IsModified)
+                        {
+                            var sqlUpdateRentLivingPdf = string.Format(
+                                "UPDATE rent_residentials_pdfs SET file_path = @Path, thumb_path = @Thumb, description = @Desc, is_main = @Main " +
+                                "WHERE pdf_id = '{0}'", pdf.Id);
+
+                            // PDFの更新
+                            cmd.CommandText = sqlUpdateRentLivingPdf;
+
+                            exec = true;
+                        }
+
+                        if (exec)
+                        {
+                            // ループなので、前のパラメーターをクリアする。
+                            cmd.Parameters.Clear();
+
+                            cmd.Parameters.AddWithValue("@PdfId", pdf.Id);
+                            cmd.Parameters.AddWithValue("@RentId", entry.Id);
+                            cmd.Parameters.AddWithValue("@Path", pdf.PdfLocation);
+                            cmd.Parameters.AddWithValue("@Thumb", pdf.ThumbnailLocation);
+                            cmd.Parameters.AddWithValue("@Desc", pdf.Description);
+                            var paramIsMain = new SqliteParameter("@Main", System.Data.DbType.Int32);
+                            if (pdf.IsMain)
+                            {
+                                paramIsMain.Value = 1;
+                            }
+                            else
+                            {
+                                paramIsMain.Value = 0;
+                            }
+                            cmd.Parameters.Add(paramIsMain);
+
+                            var result = cmd.ExecuteNonQuery();
+                            if (result > 0)
+                            {
+                                pdf.IsNew = false;
+                                pdf.IsModified = false;
+                            }
+                        }
+
+                    }
+                }
+
+                cmd.Parameters.Clear();
+
+                // PDF（建物）の削除リストを処理
+                if (entry.BuildingPdfsToBeDeleted.Count > 0)
+                {
+                    foreach (var delp in entry.BuildingPdfsToBeDeleted)
+                    {
+                        // 削除
+                        var sqlDeleteRentLivingPdf = string.Format("DELETE FROM rent_residentials_pdfs WHERE pdf_id = '{0}'", delp.Id);
+
+                        cmd.CommandText = sqlDeleteRentLivingPdf;
+                        var DelRentLivingPdfResult = cmd.ExecuteNonQuery();
+                        if (DelRentLivingPdfResult > 0)
+                        {
+                            // TODO:
+                            Debug.WriteLine("Pdf deleted");
+                        }
+                    }
+                    entry.BuildingPdfsToBeDeleted.Clear();
+                }
+
+                cmd.Parameters.Clear();
+
+                // 部屋 Rooms table - Insert, Update, Delete
                 if (entry.Rooms.Count > 0)
                 {
                     foreach (var room in entry.Rooms)
@@ -1030,7 +1188,7 @@ public class DataAccessService : IDataAccessService
                 }
             }
 
-            // 物件写真
+            // 物件写真（建物）
             cmd.CommandText = string.Format("SELECT * FROM rent_residentials_pictures WHERE rent_id = '{0}'", id);
             using (var reader = cmd.ExecuteReader())
             {
@@ -1038,7 +1196,7 @@ public class DataAccessService : IDataAccessService
                 {
                     var picid = Convert.ToString(reader["picture_id"]) ?? string.Empty;
                     var picpath = Convert.ToString(reader["file_path"]) ?? string.Empty;
-                    if (!string.IsNullOrEmpty(picid) && !string.IsNullOrEmpty(picid))
+                    if (!string.IsNullOrEmpty(picid) && !string.IsNullOrEmpty(picpath))
                     {
                         var rlpic = new PictureBldg(picid, picpath)
                         {
@@ -1069,6 +1227,43 @@ public class DataAccessService : IDataAccessService
                     else
                     {
                         Debug.WriteLine("picture_id or file_path is null/empty.");
+                    }
+                }
+            }
+
+            // PDF（建物）
+            cmd.CommandText = string.Format("SELECT * FROM rent_residentials_pdfs WHERE rent_id = '{0}'", id);
+            using (var reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    var pdfid = Convert.ToString(reader["pdf_id"]) ?? string.Empty;
+                    var pdfpath = Convert.ToString(reader["file_path"]) ?? string.Empty;
+                    var thumbpath = Convert.ToString(reader["thumb_path"]) ?? string.Empty;
+                    if (!string.IsNullOrEmpty(pdfid) && !string.IsNullOrEmpty(pdfpath) && !string.IsNullOrEmpty(thumbpath))
+                    {
+                        var rlpdf = new PdfBldg(pdfid, pdfpath, thumbpath)
+                        {
+                            Description = Convert.ToString(reader["description"]) ?? string.Empty,
+                            IsNew = false,
+                            IsModified = false
+                        };
+
+                        var bln = Convert.ToInt32(reader["is_main"]);
+                        if (bln > 0)
+                        {
+                            rlpdf.IsMain = true;
+                        }
+                        else
+                        {
+                            rlpdf.IsMain = false;
+                        }
+
+                        entry.BuildingPdfs.Add(rlpdf);
+                    }
+                    else
+                    {
+                        Debug.WriteLine("pdf_id or file_path or thumb_path is null/empty.");
                     }
                 }
             }

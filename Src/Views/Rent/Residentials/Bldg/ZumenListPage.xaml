@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:modresi="using:ZumenSearch.Models.Rent.Residentials"
     mc:Ignorable="d"
     NavigationCacheMode="Required">
 
@@ -15,13 +16,13 @@
 
         <Grid Grid.Row="0">
             <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Margin="0,0,0,0" HorizontalAlignment="Right">
-                <AppBarButton Icon="Add" Label="追加"/>
+                <AppBarButton Name="AppBarButtonAddPdf" Icon="Add" Label="追加" Click="AppBarButtonAddPdf_Click"/>
                 <AppBarButton Icon="More" Label="その他">
                     <AppBarButton.Flyout>
                         <MenuFlyout Placement="Bottom">
-                            <MenuFlyoutItem Text="置換" Icon="Switch"></MenuFlyoutItem>
+                            <MenuFlyoutItem Text="保存場所を開く" Icon="OpenLocal" Command="{x:Bind ViewModel.Bldg.OpenBuildingBlobDirectoryCommand, Mode=OneWay}"></MenuFlyoutItem>
                             <MenuFlyoutSeparator/>
-                            <MenuFlyoutItem Text="削除" Icon="Delete"></MenuFlyoutItem>
+                            <MenuFlyoutItem Text="すべて削除" Icon="Delete"></MenuFlyoutItem>
                         </MenuFlyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>
@@ -29,6 +30,43 @@
         </Grid>
 
         <Grid Grid.Row="1">
+            <ScrollViewer HorizontalScrollMode="Disabled">
+                <ItemsRepeater x:Name="ItemsView" ItemsSource="{x:Bind ViewModel.Bldg.BuildingPdfs, Mode=TwoWay}" MinWidth="300" MinHeight="225" ScrollViewer.HorizontalScrollMode="Disabled" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                    <!--  SelectionChanged="ItemsView_SelectionChanged" SelectionMode="Single" IsItemInvokedEnabled="False"  -->
+                    <ItemsRepeater.ItemTemplate>
+                        <DataTemplate x:DataType="modresi:PdfBldg">
+                            <Border Style="{StaticResource RoundCardBorderStyle}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid Grid.Row="0" Grid.Column="0">
+                                        <Image Source="{x:Bind ThumbnailLocation}" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="280" MaxWidth="280" MaxHeight="190" MinHeight="190"/>
+                                    </Grid>
+                                    <Grid Grid.Row="0" Grid.Column="1">
+                                        <StackPanel Spacing="12" Margin="24,0,6,6" MinWidth="260">
+                                            <StackPanel Orientation="Horizontal">
+                                                <CheckBox Content="メインの図面" Margin="0,0,0,0" VerticalAlignment="Bottom" IsChecked="{x:Bind IsMain, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
+                                            </StackPanel>
+                                            <TextBox Header="説明" Margin="0,0,0,0" Text="{x:Bind Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
+                                            <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Margin="0,0,0,0" HorizontalAlignment="Right">
+                                                <AppBarButton Icon="Delete" Label="削除" ToolTipService.ToolTip="PDFを削除" Command="{x:Bind ParentViewModel.Bldg.DeleteBuildingPdfCommand, Mode=OneWay}" CommandParameter="{x:Bind}"/>
+                                            </CommandBar>
+                                        </StackPanel>
+                                    </Grid>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsRepeater.ItemTemplate>
+                    <ItemsRepeater.Layout>
+                        <StackLayout Orientation="Vertical" Spacing="12" />
+                        <!--
+                    <UniformGridLayout MinRowSpacing="18" MinColumnSpacing="18" ItemsJustification="SpaceEvenly"/>
+                    -->
+                    </ItemsRepeater.Layout>
+                </ItemsRepeater>
+            </ScrollViewer>
         </Grid>
     </Grid>
 </Page>
