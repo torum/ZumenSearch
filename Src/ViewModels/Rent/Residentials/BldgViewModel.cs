@@ -933,24 +933,12 @@ public partial class BldgViewModel : ObservableObject
         {
             if (SetProperty(ref field, value))
             {
-                IsDirty = true;
+                IsDirty = true;//?
 
                 OpenBuildingPictureDirectoryCommand.NotifyCanExecuteChanged();
             }
         }
     } = [];
-
-    public bool IsBuildingPictureEditPaneVisible
-    {
-        get;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-                //
-            }
-        }
-    } = false;
 
     public PictureBldg? SelectedBuildingPicture
     {
@@ -963,7 +951,7 @@ public partial class BldgViewModel : ObservableObject
             }
 
             field = value;
-
+            /*
             // "quietly" clear values.
             _buildingPictureIsMain = false;
             _selectedBuildingPictureType = null;// Needed to be null.//new(EnumBuildingPictureType.Unspecified);
@@ -993,38 +981,21 @@ public partial class BldgViewModel : ObservableObject
                 Debug.WriteLine($"@SelectedBuildingPicture: value is null");
             }
 
-            OnPropertyChanged(nameof(SelectedBuildingPicture));
 
             // notify updates.
             OnPropertyChanged(nameof(SelectedBuildingPictureType));
             OnPropertyChanged(nameof(BuildingPictureDescription));
             OnPropertyChanged(nameof(BuildingPictureIsMain));
             //OnPropertyChanged(nameof(BuildingPicturePropertiesIsDirty));
+            */
 
+            OnPropertyChanged();
             DeleteSelectedBuildingPictureCommand.NotifyCanExecuteChanged();
         }
     }
+    
+    /*
 
-    public ObservableCollection<BuildingPictureType> BuildingPictureTypes =
-    [
-        //new BuildingPictureType(EnumBuildingPictureType.Unspecified, "未指定"),
-        new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Madori),
-        new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Gaikan),
-        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Situnai),
-        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.LivingDining),
-        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Bedroom),
-        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Kitchen),
-        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Bathroom),
-        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Restroom),
-        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Washroom),
-        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.StorageSpace),
-        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Appliance),
-        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.FrontDoor),
-        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Balcony),
-        new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Entrance),
-        new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Neighborhood),
-        new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Other)
-    ];
 
     private BuildingPictureType? _selectedBuildingPictureType = new(EnumBuildingPictureType.Unspecified);
     public BuildingPictureType? SelectedBuildingPictureType
@@ -1113,6 +1084,7 @@ public partial class BldgViewModel : ObservableObject
             }
         }
     }
+    */
 
     #endregion
 
@@ -1241,9 +1213,42 @@ public partial class BldgViewModel : ObservableObject
 
 
         // Pictures TODO:
-        BuildingPictures = new ObservableCollection<PictureBldg>(_entry.BuildingPictures); // create a copy.
+        BuildingPictures = new ObservableCollection<Models.Rent.Residentials.PictureBldg>(_entry.BuildingPictures); // create a copy.
         //OpenBuildingPictureDirectoryCommand.NotifyCanExecuteChanged();
 
+        foreach (var item in BuildingPictures)
+        {
+            item.ParentViewModel = _mainViewModel;//this;
+            item.IsModified = false; // Needed this.
+            item.PropertyChanged += OnBuildingPicturePropertyChanged;
+        }
+
+        BuildingPictures.CollectionChanged += (s, e) =>
+        {
+            // Unsubscribe from removed items
+            if (e.OldItems != null)
+            {
+                foreach (Models.Rent.Residentials.PictureBldg item in e.OldItems)
+                {
+                    Debug.WriteLine($"Item {item.Id} Removed from BuildingPictures");
+                    IsDirty = true;
+
+                    item.PropertyChanged -= OnBuildingPicturePropertyChanged;
+                }
+            }
+
+            // Subscribe to PropertyChanged.
+            if (e.NewItems != null)
+            {
+                foreach (Models.Rent.Residentials.PictureBldg item in e.NewItems)
+                {
+                    Debug.WriteLine($"Item {item.Id} Added to BuildingPictures");
+                    IsDirty = true;
+
+                    item.PropertyChanged += OnBuildingPicturePropertyChanged;
+                }
+            }
+        };
 
         // Rooms
         Rooms = new ObservableCollection<Models.Rent.Residentials.UnitResidential>(_entry.Rooms); // create a copy.
@@ -1276,6 +1281,38 @@ public partial class BldgViewModel : ObservableObject
         };
         */
         //Debug.WriteLine($"PopulateEntryValues: Completed populating values from Entry to VM. Entry ID: {_entry.Id}, Rooms Count: {Rooms.Count}");
+    }
+
+    private void OnBuildingPicturePropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (sender is not ZumenSearch.Models.Rent.Residentials.PictureBldg picBldg)
+        {
+            Debug.WriteLine("OnBuildingPicturePropertyChanged returned non PictureBldg.");
+            return;
+        }
+
+        //Debug.WriteLine($"Property {e.PropertyName} changed");
+
+        if (picBldg.IsModified)
+        {
+            IsDirty = true;
+
+            var prop = e.PropertyName ?? string.Empty;
+            if (prop.Equals("IsMain"))
+            {
+                if (picBldg.IsMain)
+                {
+                    // Clear all other pics
+                    foreach (var item in BuildingPictures)
+                    {
+                        if (item != picBldg)
+                        {
+                            item.IsMain = false;
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private void OnRoomPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -1565,29 +1602,24 @@ public partial class BldgViewModel : ObservableObject
     }
 
     [RelayCommand(CanExecute = nameof(CanDeleteSelectedBuildingPicture))]
-    public void DeleteSelectedBuildingPicture()
+    public void DeleteSelectedBuildingPicture(Models.Rent.Residentials.PictureBldg picBldg)
     {
-        if (SelectedBuildingPicture is null)
+        if (picBldg is null)
         {
             return;
         }
 
-        if (BuildingPictures.Remove(SelectedBuildingPicture))
+        // TODO: show dialog to comfirm.
+
+        if (BuildingPictures.Remove(picBldg))
         {
-            //TODO:
-            /*
-            if (_entry.BuildingPictures.Remove(SelectedBuildingPicture))
-            {
-                _entry.BuildingPicturesToBeDeleted.Add(SelectedBuildingPicture);
-            }
-            */
+            _entry.BuildingPicturesToBeDeleted.Add(picBldg);
             IsDirty = true;
-            SelectedBuildingPicture = null;
         }
     }
-    private bool CanDeleteSelectedBuildingPicture()
+    private bool CanDeleteSelectedBuildingPicture(Models.Rent.Residentials.PictureBldg picBldg)
     {
-        return SelectedBuildingPicture is not null;
+        return picBldg is not null;
     }
 
     [RelayCommand(CanExecute = nameof(CanOpenBuildingPictureDirectory))]
@@ -1661,9 +1693,18 @@ public partial class BldgViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(DeleteSelectedUnitCanExecute))]
     private void DeleteSelectedUnit(UnitResidential room)
     {
-        if (room is null) return;
+        if (room is null)
+        {
+            return;
+        }
 
-        //
+        // TODO: show dialog to comfirm.
+
+        if (Rooms.Remove(room))
+        {
+            _entry.RoomsToBeDeleted.Add(room);
+            IsDirty = true;
+        }
 
         // Make sure to set it to null.
         SelectedRoom = null;

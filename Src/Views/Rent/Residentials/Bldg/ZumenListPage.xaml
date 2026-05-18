@@ -19,9 +19,9 @@
                 <AppBarButton Icon="More" Label="その他">
                     <AppBarButton.Flyout>
                         <MenuFlyout Placement="Bottom">
-                            <ToggleMenuFlyoutItem Text="置換" Icon="Switch"></ToggleMenuFlyoutItem>
+                            <MenuFlyoutItem Text="置換" Icon="Switch"></MenuFlyoutItem>
                             <MenuFlyoutSeparator/>
-                            <ToggleMenuFlyoutItem Text="削除" Icon="Delete"></ToggleMenuFlyoutItem>
+                            <MenuFlyoutItem Text="削除" Icon="Delete"></MenuFlyoutItem>
                         </MenuFlyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>

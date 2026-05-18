@@ -1,4 +1,6 @@
-﻿using ZumenSearch.Models.Base;
+﻿using System.Collections.ObjectModel;
+using System.Diagnostics;
+using ZumenSearch.Models.Base;
 
 namespace ZumenSearch.Models.Rent.Residentials;
 
@@ -41,57 +43,119 @@ public class BuildingPictureType(EnumBuildingPictureType key)
 
 public partial class PictureBldg : PictureBase
 {
+    public ViewModels.Rent.Residentials.MainViewModel? ParentViewModel { get; set; }
+
+    // Do not use SetProperty. PropertyChanged is being subscribed.
     public BuildingPictureType PictureType
     {
-        get => field ?? new(EnumBuildingPictureType.Unspecified);
+        get;
         set
         {
-            if (SetProperty(ref field, value))
-            {
-            }
-        }
-    }
+            if (field == value) return;
 
+            if (value is not null)
+            {
+                // Set this before raize PropertyChanged.
+                IsModified = true;
+
+                // Raize PropertyChanged event here.
+                field = value;
+            }
+            else
+            {
+                field = new(EnumBuildingPictureType.Unspecified);
+            }
+
+            OnPropertyChanged();
+        }
+    } = new(EnumBuildingPictureType.Unspecified);
+
+    public readonly ObservableCollection<BuildingPictureType> BuildingPictureTypes =
+    [
+        //new BuildingPictureType(EnumBuildingPictureType.Unspecified, "未指定"),
+        new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Madori),
+        new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Gaikan),
+        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Situnai),
+        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.LivingDining),
+        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Bedroom),
+        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Kitchen),
+        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Bathroom),
+        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Restroom),
+        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Washroom),
+        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.StorageSpace),
+        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Appliance),
+        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.FrontDoor),
+        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Balcony),
+        new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Entrance),
+        new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Neighborhood),
+        new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Other)
+    ];
+
+    // Do not use SetProperty.
     public string Description
     {
-        get => field ?? string.Empty;
+        get;
         set
         {
-            if (SetProperty(ref field, value))
-            {
-            }
-        }
-    }
+            if (field == value) return;
 
+            if (value is not null)
+            {
+                // Set this before raize PropertyChanged.
+                IsModified = true;
+
+                // Raize PropertyChanged event here.
+                field = value;
+            }
+            else
+            {
+                field = string.Empty;
+            }
+
+            OnPropertyChanged();
+        }
+    } = string.Empty;
+
+    // Do not use SetProperty.
     public bool IsMain
     {
-        get => field;
+        get;
         set
         {
-            if (SetProperty(ref field, value))
-            {
-            }
+            if (field == value) return;
+
+            // Set this before raize PropertyChanged.
+            IsModified = true;
+
+            // Raize PropertyChanged event here.
+            field = value;
+
+            OnPropertyChanged();
         }
     }
 
     public PictureBldg(string id, string imageLocation) : base(id)
     {
         ImageLocation = imageLocation;
+
+        IsModified = false;
     }
 
     public EnumBuildingPictureType? SetLabelFromString(string titleStr)
     {
         if (Enum.TryParse<EnumBuildingPictureType>(titleStr, out var result))
         {
-            PictureType = new(result);
+            //PictureType = new(result); // Not good for assigning to combobox. So select from BuildingPictureTypes.
+            PictureType = BuildingPictureTypes.FirstOrDefault<BuildingPictureType>(x => x.Key == result) ?? new(EnumBuildingPictureType.Unspecified);
+
             //Debug.WriteLine($"SetLabelFromString: {titleStr} -> {PictureType.Label}");
             return result;
         }
         else
         {
             PictureType = new(EnumBuildingPictureType.Unspecified);
+
             return EnumBuildingPictureType.Unspecified;
         }
     }
-
 };

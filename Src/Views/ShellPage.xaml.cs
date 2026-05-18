@@ -222,8 +222,8 @@ public sealed partial class ShellPage : Page
         var scaleAdjustment = this.XamlRoot.RasterizationScale;
 
         // Back button size
-        var width = this.SearchBox.ActualWidth;//ActualWidth won't work in certain cases.
-        var height = this.SearchBox.ActualHeight;//ActualHeight won't work in certain cases.
+        var width = this.SearchBox.ActualWidth;//ActualWidth won't work in certain cases. e.g. when visivility changed.
+        var height = this.SearchBox.ActualHeight;//ActualHeight won't work in certain cases. e.g. when visivility changed.
 
         if (this.SearchBox.Visibility != Visibility.Visible)
         {
@@ -239,8 +239,8 @@ public sealed partial class ShellPage : Page
         Windows.Graphics.RectInt32 SearchBoxRect = GetRect(bounds1, scaleAdjustment);
 
         // Back button size
-        var width2 = this.BackButton.ActualWidth;//ActualWidth won't work in certain cases.
-        var height2 = this.BackButton.ActualHeight;//ActualHeight won't work in certain cases.
+        var width2 = this.BackButton.ActualWidth;//ActualWidth won't work in certain cases. e.g. when visivility changed.
+        var height2 = this.BackButton.ActualHeight;//ActualHeight won't work in certain cases. e.g. when visivility changed.
 
         if (this.BackButton.Visibility != Visibility.Visible)
         {

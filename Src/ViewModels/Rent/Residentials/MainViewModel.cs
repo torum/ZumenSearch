@@ -196,10 +196,13 @@ public partial class MainViewModel : ObservableObject
 
         if (_shell.NavigationFrame.CurrentSourcePageType == typeof(Views.Rent.Residentials.Unit.UnitShellPage))
         {
-            // TODO:
+            // TODO: UnitShellPage's OnNavigatingFrom can be also utilize for this.
             if (Unit.IsDirty)
             {
                 Debug.WriteLine("TODO: GoToBldgShellPage: show warning : The current room has unsaved changes.");
+                
+                // TODO: show dialog or
+                
                 return;
             }
         }

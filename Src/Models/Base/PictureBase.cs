@@ -4,7 +4,17 @@ namespace ZumenSearch.Models.Base;
 
 public abstract class PictureBase : ObservableObject
 {
-    public string ImageLocation { get; set; } = string.Empty;
+    public string ImageLocation
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;
+            }
+        }
+    } = string.Empty;
 
     public string Id { get;  } = string.Empty;
 

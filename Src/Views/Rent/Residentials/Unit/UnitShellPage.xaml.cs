@@ -106,6 +106,26 @@ public sealed partial class UnitShellPage : Page
         base.OnNavigatedTo(e);
     }
 
+    protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
+    {
+        base.OnNavigatingFrom(e);
+
+        if (ViewModel is null)
+        {
+            return;
+        }
+
+        if (ViewModel.Unit.IsDirty)
+        {
+            // ViewModel(MainViewModel)'s GoToBldgShellPage() also watch the IsDirty flag.
+
+            e.Cancel = true;
+            Debug.WriteLine("OnNavigatingFrom UnitShellPage ViewModel.Unit.IsDirty");
+
+            // TODO: show dialog or somthin
+        }
+    }
+
     private void NavView_Loaded(object sender, RoutedEventArgs e)
     {
         // Since we use ItemInvoked, we set selecteditem manually

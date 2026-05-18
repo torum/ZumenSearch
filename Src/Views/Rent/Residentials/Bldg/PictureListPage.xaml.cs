@@ -40,6 +40,7 @@ public sealed partial class PictureListPage : Page
         base.OnNavigatedTo(e);
     }
 
+    /*
     private void ItemsView_SelectionChanged(ItemsView sender, ItemsViewSelectionChangedEventArgs args)
     {
         if (ViewModel is null)
@@ -56,6 +57,7 @@ public sealed partial class PictureListPage : Page
 
         ViewModel?.Bldg.SelectedBuildingPicture = picbldg;//sender.SelectedItem as Models.Rent.Residentials.PictureBuilding;
     }
+    */
 
     private async void AppBarButtonAddPicture_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {

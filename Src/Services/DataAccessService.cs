@@ -65,7 +65,7 @@ public class DataAccessService : IDataAccessService
                     "rent_id TEXT NOT NULL," +
                     "file_path TEXT NOT NULL," +
                     //"data BLOB," +
-                    "label TEXT NOT NULL," +
+                    "label TEXT NOT NULL," + // TODO: wanna change this to "type".
                     "description TEXT NOT NULL," +
                     "is_main INTEGER  NOT NULL," +
                     //"FOREIGN KEY (rent_residential_id) REFERENCES rent_residentials(rent_residential_id) ON DELETE CASCADE," +
@@ -95,7 +95,19 @@ public class DataAccessService : IDataAccessService
                     // need to catch "duplicate column name" errors.
                     Debug.WriteLine("SqliteException on ADD COLUMN chinryou @InitializeDatabase: " + ex.Message);
                 }
-
+                /*
+                try
+                {
+                    tableCmd.CommandText = "ALTER TABLE rent_residentials_pictures ADD COLUMN type INTEGER NOT NULL DEFAULT '';";
+                    tableCmd.ExecuteNonQuery();
+                }
+                catch (SqliteException ex)
+                {
+                    // SQLite does not support "IF NOT EXISTS" for ADD COLUMN.
+                    // need to catch "duplicate column name" errors.
+                    Debug.WriteLine("SqliteException on ADD COLUMN type @InitializeDatabase: " + ex.Message);
+                }
+                */
                 //
                 //tableCmd.CommandText = "drop trigger if exists trigger_delete_old_entries";
                 //tableCmd.ExecuteNonQuery();
