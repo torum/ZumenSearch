@@ -34,7 +34,7 @@ public partial class BldgViewModel : ObservableObject
     private readonly Models.Rent.Residentials.EntryResidentialFull _entry;
 
     // Local directory path to save blob data such as pictures and PDFs.
-    private string _entryDataDirectoryPath;
+    //private string _entryDataDirectoryPath;
 
     // Tmp file list to hold unsaved picture files. (if entry is not saved, delete on close)
     private readonly List<string> _unsavedBuildingPictureFileList = [];
@@ -1116,7 +1116,6 @@ public partial class BldgViewModel : ObservableObject
 
     #endregion
 
-
     #region == 部屋 ==
 
     public ObservableCollection<Models.Rent.Residentials.UnitResidential> Rooms
@@ -1167,7 +1166,7 @@ public partial class BldgViewModel : ObservableObject
         _dataAccessLocationService = dataAccessLocationService;
 
         _entry = entry;
-        _entryDataDirectoryPath = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(App.AppDataPictureFolder, "Rent"), "Residential_Building"), _entry.Id);
+        
 
         try
         {
@@ -1477,15 +1476,36 @@ public partial class BldgViewModel : ObservableObject
 
             IsDirty = false;
 
-            _unsavedBuildingPictureFileList.Clear();
-            _unsavedBuildingPdfThumbnailFileList.Clear();
-            _unsavedBuildingPdfFileList.Clear();
-
             _entry.IsDirty = false;
             _entry.EntryStatus = EnumEntryStatus.Saved;
 
             // Update title with dummy value.
             _mainViewModel.WindowTitle = string.Empty;
+
+            // Clean up deleted picture file.
+            if (_entry.BuildingPicturesToBeDeleted.Count > 0)
+            {
+                foreach (var file in _entry.BuildingPicturesToBeDeleted)
+                {
+                    File.Delete(file.ImageLocation);
+                }
+                _entry.BuildingPicturesToBeDeleted.Clear();
+            }
+
+            // Clean up deleted PDF and thumb file.
+            if (_entry.BuildingPdfsToBeDeleted.Count > 0)
+            {
+                foreach (var file in _entry.BuildingPdfsToBeDeleted)
+                {
+                    File.Delete(file.PdfLocation);
+                    File.Delete(file.ThumbnailLocation);
+                }
+                _entry.BuildingPdfsToBeDeleted.Clear();
+            }
+
+            _unsavedBuildingPictureFileList.Clear();
+            _unsavedBuildingPdfThumbnailFileList.Clear();
+            _unsavedBuildingPdfFileList.Clear();
         }
     }
 
@@ -1498,11 +1518,11 @@ public partial class BldgViewModel : ObservableObject
         if (filePathList is null) return;
         if (filePathList.Count == 0) return;
 
-        Debug.WriteLine($"destDirectory={_entryDataDirectoryPath}  @SetNewBuildingPicturesAsync()");
+        Debug.WriteLine($"destDirectory={_mainViewModel.EntryDataDirectoryPath}  @SetNewBuildingPicturesAsync()");
 
-        if (!Directory.Exists(_entryDataDirectoryPath))
+        if (!Directory.Exists(_mainViewModel.EntryDataDirectoryPath))
         {
-            Directory.CreateDirectory(_entryDataDirectoryPath);
+            Directory.CreateDirectory(_mainViewModel.EntryDataDirectoryPath);
         }
 
         List<string> list = [];
@@ -1524,7 +1544,7 @@ public partial class BldgViewModel : ObservableObject
 
             string newId = Guid.CreateVersion7().ToString("N");
             string extension = Path.GetExtension(System.IO.Path.GetFileName(filePath));
-            var destFilePath = Path.Combine(_entryDataDirectoryPath, newId+ extension);
+            var destFilePath = Path.Combine(_mainViewModel.EntryDataDirectoryPath, newId+ extension);
             //Debug.WriteLine($"{file} to {destFilePath}  @SetNewBuildingPicturesAsync()");
 
             using var destinationStream = File.Create(destFilePath);
@@ -1548,17 +1568,16 @@ public partial class BldgViewModel : ObservableObject
         }
     }
 
-
     public async Task SetNewBuildingPdfsAsync(List<string> filePathList)
     {
         if (filePathList is null) return;
         if (filePathList.Count == 0) return;
 
-        Debug.WriteLine($"destDirectory={_entryDataDirectoryPath}  @SetNewBuildingPdfsAsync()");
+        Debug.WriteLine($"destDirectory={_mainViewModel.EntryDataDirectoryPath}  @SetNewBuildingPdfsAsync()");
 
-        if (!Directory.Exists(_entryDataDirectoryPath))
+        if (!Directory.Exists(_mainViewModel.EntryDataDirectoryPath))
         {
-            Directory.CreateDirectory(_entryDataDirectoryPath);
+            Directory.CreateDirectory(_mainViewModel.EntryDataDirectoryPath);
         }
 
         List<string> list = [];
@@ -1608,7 +1627,7 @@ public partial class BldgViewModel : ObservableObject
                 //await bitmapImage.SetSourceAsync(stream);
 
                 string newId = Guid.CreateVersion7().ToString("N");
-                var thumbnailDestFilePath = Path.Combine(_entryDataDirectoryPath, newId + ".bmp");
+                var thumbnailDestFilePath = Path.Combine(_mainViewModel.EntryDataDirectoryPath, newId + ".bmp");
 
                 using var destinationStream = File.Create(thumbnailDestFilePath);
                 using var managedSourceStream = stream.AsStreamForRead();
@@ -1617,7 +1636,7 @@ public partial class BldgViewModel : ObservableObject
                 // Keep track of unsaved files to delete them when discarding.
                 _unsavedBuildingPdfThumbnailFileList.Add(thumbnailDestFilePath);
 
-                var pdfDestFilePath = Path.Combine(_entryDataDirectoryPath, newId + extension);
+                var pdfDestFilePath = Path.Combine(_mainViewModel.EntryDataDirectoryPath, newId + extension);
                 File.Copy(filePath, pdfDestFilePath);
 
                 // Keep track of unsaved files to delete them when discarding.
@@ -1643,8 +1662,7 @@ public partial class BldgViewModel : ObservableObject
         }
     }
 
-
-    public void DiscardUnsavedFiles()
+    private void DiscardUnsavedFiles()
     {
         if (_unsavedBuildingPictureFileList.Count > 0)
         {
@@ -1656,6 +1674,7 @@ public partial class BldgViewModel : ObservableObject
                     File.Delete(file);
                 }
             }
+            _unsavedBuildingPictureFileList.Clear();
         }
 
         if (_unsavedBuildingPdfThumbnailFileList.Count > 0)
@@ -1668,6 +1687,7 @@ public partial class BldgViewModel : ObservableObject
                     File.Delete(file);
                 }
             }
+            _unsavedBuildingPdfThumbnailFileList.Clear();
         }
 
         if (_unsavedBuildingPdfFileList.Count > 0)
@@ -1680,16 +1700,24 @@ public partial class BldgViewModel : ObservableObject
                     File.Delete(file);
                 }
             }
+            _unsavedBuildingPdfFileList.Clear();
         }
 
         if (_entry.EntryStatus == EnumEntryStatus.New)
         {
-            if (Directory.Exists(_entryDataDirectoryPath))
+            if (Directory.Exists(_mainViewModel.EntryDataDirectoryPath))
             {
-                Debug.WriteLine($"Deleting folder: {_entryDataDirectoryPath}");
-                Directory.Delete(_entryDataDirectoryPath, true);
+                Debug.WriteLine($"Deleting folder: {_mainViewModel.EntryDataDirectoryPath}");
+                Directory.Delete(_mainViewModel.EntryDataDirectoryPath, true);
             }
         }
+    }
+
+    public void DiscardChanges()
+    {
+        DiscardUnsavedFiles();
+
+        IsDirty = false;
     }
 
     #endregion
@@ -1772,7 +1800,7 @@ public partial class BldgViewModel : ObservableObject
 
                 // TODO: set max file size?
 
-                var destFilePath = Path.Combine(_entryDataDirectoryPath, System.IO.Path.GetFileName(file.Path));
+                var destFilePath = Path.Combine(_mainViewModel.EntryDataDirectoryPath, System.IO.Path.GetFileName(file.Path));
                 //Debug.WriteLine($"{file.Path} to {destFilePath}  @AddNewBuildingPictures()");
 
                 using var destinationStream = File.Create(destFilePath);
@@ -1839,11 +1867,11 @@ public partial class BldgViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanOpenBuildingBlobDirectory))]
     public void OpenBuildingBlobDirectory()
     {
-        if (Directory.Exists(_entryDataDirectoryPath))
+        if (Directory.Exists(_mainViewModel.EntryDataDirectoryPath))
         {
             try
             {
-                Process.Start("explorer.exe", _entryDataDirectoryPath);
+                Process.Start("explorer.exe", _mainViewModel.EntryDataDirectoryPath);
             }
             catch (Exception ex)
             {
@@ -1854,7 +1882,7 @@ public partial class BldgViewModel : ObservableObject
     }
     private bool CanOpenBuildingBlobDirectory()
     {
-        if (Directory.Exists(_entryDataDirectoryPath))
+        if (Directory.Exists(_mainViewModel.EntryDataDirectoryPath))
         {
             return true;
         }
@@ -1916,6 +1944,8 @@ public partial class BldgViewModel : ObservableObject
 
         if (Rooms.Remove(room))
         {
+            // No. Don't
+            //if (_entry.Rooms.Remove(room)) { }
             _entry.RoomsToBeDeleted.Add(room);
             IsDirty = true;
         }

@@ -1,4 +1,6 @@
-﻿using Microsoft.UI.Xaml.Controls;
+﻿using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using System.Diagnostics;
 using ZumenSearch.Models.Rent.Residentials;
@@ -45,6 +47,7 @@ public sealed partial class UnitListPage : Page
         base.OnNavigatedTo(e);
     }
 
+    /*
     private void RoomsListView_ItemInvoked(ItemsView sender, ItemsViewItemInvokedEventArgs args)
     {
         // Get the invoked item
@@ -80,5 +83,68 @@ public sealed partial class UnitListPage : Page
         }
 
         ViewModel.Bldg.SelectedRoom = sender.SelectedItem as UnitResidential;
+    }
+    */
+
+    private static T? FindParent<T>(DependencyObject child) where T : DependencyObject
+    {
+        DependencyObject parent = VisualTreeHelper.GetParent(child);
+        while (parent != null && parent is not T)
+        {
+            parent = VisualTreeHelper.GetParent(parent);
+        }
+
+        if (parent is not null)
+        {
+            return parent as T;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    private void RoomsListView_DoubleTapped(object sender, Microsoft.UI.Xaml.Input.DoubleTappedRoutedEventArgs e)
+    {
+        if (sender is not ListView listView)
+        {
+            return;
+        }
+
+        if (ViewModel is null)
+        {
+            return;
+        }
+
+        // UI element that was double-clicked
+        FrameworkElement element = (FrameworkElement)e.OriginalSource;
+
+        var container = FindParent<ListViewItem>(element);
+
+        if (container is null)
+        {
+            //ViewModel.Bldg.SelectedRoom = null;
+            return;
+        }
+
+        if (listView.SelectedItem != container.Content)
+        {
+            //ViewModel.Bldg.SelectedRoom = null;
+            return;
+        }
+
+
+        if (listView.SelectedItem is not UnitResidential room)
+        {
+            //ViewModel.Bldg.SelectedRoom = null;
+            return;
+        }
+
+        //ViewModel.Bldg.SelectedRoom = room as UnitResidential;
+
+        if (ViewModel.Bldg.EditSelectedUnitCommand.CanExecute(room))
+        {
+            ViewModel.Bldg.EditSelectedUnitCommand.Execute(room);
+        }
     }
 }

@@ -38,8 +38,8 @@ public sealed partial class UnitShellPage : Page
         ("contract", "契約条件", typeof(Views.Rent.Residentials.Unit.ContractPage)),
         ("transaction", "契約", typeof(Views.Rent.Residentials.Unit.TransactionPage)),
         ("appliance", "設備", typeof(Views.Rent.Residentials.Unit.AppliancePage)),
-        ("pictures", "写真", typeof(Views.Rent.Residentials.Unit.PicturePage)),
-        ("zumen", "図面一覧", typeof(Views.Rent.Residentials.Unit.ZumenPage)),
+        ("pictures", "写真", typeof(Views.Rent.Residentials.Unit.PictureListPage)),
+        ("zumen", "図面", typeof(Views.Rent.Residentials.Unit.ZumenPage)),
         ("kasinusi", "貸主", typeof(Views.Rent.Residentials.Unit.KasinusiPage)),
         ("gyousya", "宅建業者", typeof(Views.Rent.Residentials.Unit.GyousyaPage)),
     ];
@@ -106,7 +106,7 @@ public sealed partial class UnitShellPage : Page
         base.OnNavigatedTo(e);
     }
 
-    protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
+    protected async override void OnNavigatingFrom(NavigatingCancelEventArgs e)
     {
         base.OnNavigatingFrom(e);
 
@@ -117,12 +117,58 @@ public sealed partial class UnitShellPage : Page
 
         if (ViewModel.Unit.IsDirty)
         {
-            // ViewModel(MainViewModel)'s GoToBldgShellPage() also watch the IsDirty flag.
+            //Debug.WriteLine("UnitShellPage OnNavigatingFrom ViewModel.Unit.IsDirty");
 
             e.Cancel = true;
-            Debug.WriteLine("OnNavigatingFrom UnitShellPage ViewModel.Unit.IsDirty");
 
-            // TODO: show dialog or somthin
+            // show ConfirmationDialog
+            var result = await _dlg.ShowLeaveUnitDirtyConfirmationDialog(this.XamlRoot);
+
+            if (result == ContentDialogResult.Primary)
+            {
+                if (ViewModel.Unit.IsDirty)
+                {
+                    ViewModel.Unit.Save();
+                }
+
+                if (ViewModel.Unit.IsDirty == false)
+                {
+                    var _frame = ViewModel.ResidentialNavigationService?.GetFrame();
+                    if (_frame is not null)
+                    {
+                        _frame.Navigate(e.SourcePageType, e.Parameter, e.NavigationTransitionInfo);
+                    }
+                    else
+                    {
+                        Debug.WriteLine("OnNavigatingFrom _nav.GetFrame() returned null.");
+                    }
+                }
+            }
+            else if (result == ContentDialogResult.Secondary)
+            {
+                // Discard change and navigate.
+                //ViewModel.Unit.DiscardUnsavedFiles();
+                ViewModel.Unit.DiscardChanges();
+
+                var _frame = ViewModel.ResidentialNavigationService?.GetFrame();
+                if (_frame is not null)
+                {
+                    _frame?.Navigate(e.SourcePageType,e.Parameter,e.NavigationTransitionInfo);
+                }
+                else
+                {
+                    Debug.WriteLine("OnNavigatingFrom _nav.GetFrame() returned null.");
+                }
+
+            }
+            else if (result == ContentDialogResult.None)
+            {
+                // Cancel.
+            }
+        }
+        else
+        {
+            ViewModel.Unit.LeavingUnitCleanUp();
         }
     }
 
@@ -141,8 +187,6 @@ public sealed partial class UnitShellPage : Page
         //SystemNavigationManager.GetForCurrentView().BackRequested += System_BackRequested;
         */
 
-        NavView.SelectedItem = NavView.MenuItems.OfType<NavigationViewItem>().First();
-        navigationViewSelectedItem = NavView.SelectedItem as NavigationViewItem;
 
         /*
         var firstMenuItem = NavView.MenuItems.OfType<NavigationViewItem>().First();
@@ -161,6 +205,12 @@ public sealed partial class UnitShellPage : Page
             Debug.WriteLine("No first menu item found in NavView.");
         }
         */
+
+
+
+        //NavView.SelectedItem = NavView.MenuItems.OfType<NavigationViewItem>().First();
+        //navigationViewSelectedItem = NavView.SelectedItem as NavigationViewItem;
+
 
         if (_nvigated)
         {
@@ -184,7 +234,7 @@ public sealed partial class UnitShellPage : Page
                 }
             }
 
-            //NavView.SelectedItem = NavView.MenuItems.OfType<NavigationViewItem>().Where(n => n.Tag.Equals("summary")).First();
+            NavView.SelectedItem = NavView.MenuItems.OfType<NavigationViewItem>().Where(n => n.Tag.Equals("summary")).First();
         }
     }
 

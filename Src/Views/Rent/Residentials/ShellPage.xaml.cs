@@ -21,21 +21,22 @@ public sealed partial class ShellPage : Page
     public Frame NavigationFrame => ContentFrame;
 
     private readonly IModalDialogService _dlg;
+    private readonly INavigationResidentialService _nav;
 
-    public ShellPage(Views.Rent.Residentials.EditorWindow win, Models.Rent.Residentials.EntryResidentialFull entry, IAbstractFactory<Models.Rent.Residentials.EntryResidentialFull, ViewModels.Rent.Residentials.MainViewModel> vmFactory, IModalDialogService modalDialog)
+    public ShellPage(Views.Rent.Residentials.EditorWindow win, Models.Rent.Residentials.EntryResidentialFull entry, IAbstractFactory<Models.Rent.Residentials.EntryResidentialFull, ViewModels.Rent.Residentials.MainViewModel> vmFactory, IModalDialogService modalDialogService, INavigationResidentialService navigationResidentialService)
     {
-        Win = win ?? throw new ArgumentNullException(nameof(win));
-
         //Debug.WriteLine($"ShellPage {entry.Id}");
 
+        Win = win ?? throw new ArgumentNullException(nameof(win));
+        _dlg = modalDialogService;
         ViewModel = vmFactory.Create(entry);//ViewModel = vmFactory(entry);//_editorFactory.Create(new Models.Rent.Residentials.EntryResidentialFull(Guid.CreateVersion7().ToString("N"), EnumEntryStatus.New));
-
-        //ViewModel.SetEditorWindow(win);// Must set Editor Winodw to VM.
         ViewModel.SetEditorShell(this);
 
-        _dlg = modalDialog;
-
         InitializeComponent();
+
+        _nav = navigationResidentialService;
+        _nav.Initialize(ContentFrame, Win);
+        ViewModel.SetEditorNavigationService(_nav);
 
         //BreadcrumbBar1.ItemClicked += BreadcrumbBar_ItemClicked;
 
@@ -105,14 +106,16 @@ public sealed partial class ShellPage : Page
             else if (result == ContentDialogResult.Secondary)
             {
                 // Discard change and close.
-                ViewModel.Bldg.DiscardUnsavedFiles();
+                //ViewModel.Bldg.DiscardUnsavedFiles();
+                //ViewModel.Unit.DiscardUnsavedFiles();
+                ViewModel.Bldg.DiscardChanges();
+                ViewModel.Unit.DiscardChanges();
 
                 Win.Close();
             }
             else if (result == ContentDialogResult.None)
             {
                 // Cancel.
-
             }
         }
     }

@@ -35,12 +35,12 @@ public partial class EntryResidentialFull : EntryBase
         {
             if (SetProperty(ref field, value))
             {
-                IsDirty = true;
+                IsDirty = true; //?
             }
         }
     } = [];
 
-    // DBへの更新時にDBから削除されるべき物件写真のIDリスト
+    // DBへの更新時にDBから削除されるべき物件写真（建物）のIDリスト
     public ObservableCollection<PictureBldg> BuildingPicturesToBeDeleted = [];
 
     // 図面（建物）リスト
@@ -74,7 +74,6 @@ public partial class EntryResidentialFull : EntryBase
 
     // DBへの更新時にDBから削除されるべき部屋のIDリスト
     public ObservableCollection<UnitResidential> RoomsToBeDeleted = [];
-
 
     public EntryResidentialFull(string id, EnumEntryStatus status) : base(id)
     {

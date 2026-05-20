@@ -7,7 +7,7 @@ namespace ZumenSearch.Models.Rent.Residentials;
 public enum EnumBuildingPictureType
 {
     //Unspecified, Madori, Gaikan, Situnai, LivingDining, Bedroom, Kitchen, Bathroom, Restroom, Washroom, StorageSpace, Appliance, FrontDoor, Balcony, Entrance, Neighborhood, Other
-    Unspecified, Madori, Gaikan, Entrance, Neighborhood, Other
+    Unspecified, Gaikan, Entrance, Neighborhood, Other
 }
 
 public class BuildingPictureType(EnumBuildingPictureType key)
@@ -18,7 +18,7 @@ public class BuildingPictureType(EnumBuildingPictureType key)
     } = new Dictionary<EnumBuildingPictureType, string>()
     {
                 {EnumBuildingPictureType.Unspecified, "未指定"},
-                {EnumBuildingPictureType.Madori, "間取り図"},
+                //{EnumBuildingPictureType.Madori, "間取り図"},
                 {EnumBuildingPictureType.Gaikan, "外観"},
                 //{EnumBuildingPictureType.Situnai, "室内"},
                 //{EnumBuildingPictureType.LivingDining, "リビング・ダイニング"},
@@ -63,7 +63,8 @@ public partial class PictureBldg : PictureBase
             }
             else
             {
-                field = new(EnumBuildingPictureType.Unspecified);
+                // DO NOT DO THIS. This raize unneccesary property changed events that triggers IsDirty.
+                //field = new(EnumBuildingPictureType.Unspecified);
             }
 
             OnPropertyChanged();
@@ -73,7 +74,7 @@ public partial class PictureBldg : PictureBase
     public readonly ObservableCollection<BuildingPictureType> BuildingPictureTypes =
     [
         //new BuildingPictureType(EnumBuildingPictureType.Unspecified, "未指定"),
-        new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Madori),
+        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Madori),
         new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Gaikan),
         //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Situnai),
         //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.LivingDining),

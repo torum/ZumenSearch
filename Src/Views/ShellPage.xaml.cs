@@ -40,7 +40,7 @@ public sealed partial class ShellPage : Page
     {
         // Note: ContentFrame as param (instead of ViewModel) is expected by SearchPage for further navigation, such as navigating to SearchResultPage.
         //ContentFrame.Navigate(typeof(ZumenSearch.Views.Rent.ResidentialSearchPage), ContentFrame, new Microsoft.UI.Xaml.Media.Animation.EntranceNavigationTransitionInfo());//, //
-        if (ContentFrame.Navigate(typeof(ZumenSearch.Views.RentSearchPage), ContentFrame, new Microsoft.UI.Xaml.Media.Animation.EntranceNavigationTransitionInfo()))
+        if (ContentFrame.Navigate(typeof(ZumenSearch.Views.SearchPage), ContentFrame, new Microsoft.UI.Xaml.Media.Animation.EntranceNavigationTransitionInfo()))
         {
             /*
             var selectedItem = FindNavigationViewItemWithTag("ZumenSearch.Views.Rent.ResidentialSearchPage");//"ZumenSearch.Views.Rent.ResidentialSearchPage"
@@ -135,7 +135,7 @@ public sealed partial class ShellPage : Page
                 //Debug.WriteLine("No menu item with tag matching the current page found in NavView. Current page: " + ContentFrame.SourcePageType.FullName);
             }
 
-            if (ContentFrame.SourcePageType == typeof(Views.RentSearchPage))
+            if (ContentFrame.SourcePageType == typeof(Views.SearchPage))
             {
                 // Hide SearchBox
                 //SearchBox.Visibility = Visibility.Collapsed;

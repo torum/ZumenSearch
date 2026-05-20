@@ -94,13 +94,14 @@ public partial class App : Application
             services.AddSingleton<IDataAccessTransportationService, DataAccessTransportationService>();
             services.AddSingleton<IDispatcherService>(new DispatcherService(CurrentDispatcherQueue));
             services.AddSingleton<INavigationService, NavigationService>();
+            services.AddTransient<INavigationResidentialService, NavigationResidentialService>();
 
             // Views and ViewModels
             services.AddSingleton<Views.ShellPage>();
             services.AddSingleton<ViewModels.MainViewModel>();
             services.AddSingleton<Views.MainWindow>();
 
-            services.AddSingleton<Views.RentSearchPage>();
+            services.AddSingleton<Views.SearchPage>();
 
             services.AddSingleton<Views.Rent.ResidentialSearchPage>();
             services.AddSingleton<Views.Rent.ResidentialSearchResultPage>();

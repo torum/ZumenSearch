@@ -10,7 +10,7 @@ using ZumenSearch.ViewModels;
 
 namespace ZumenSearch.Views;
 
-public sealed partial class RentSearchResultPage : Page
+public sealed partial class SearchResultPage : Page
 {
     public MainViewModel ViewModel
     {
@@ -21,7 +21,7 @@ public sealed partial class RentSearchResultPage : Page
 
     private Frame? ContentFrame;
 
-    public RentSearchResultPage()
+    public SearchResultPage()
     {
         ViewModel = App.GetService<MainViewModel>();
 
@@ -40,7 +40,7 @@ public sealed partial class RentSearchResultPage : Page
 
         if (args.Index == 0)
         {
-            ContentFrame.Navigate(typeof(Views.RentSearchPage), ContentFrame, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });
+            ContentFrame.Navigate(typeof(Views.SearchPage), ContentFrame, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });
         }
         else if ( args.Index == 1)
         {

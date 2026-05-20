@@ -2,6 +2,8 @@
 using CommunityToolkit.Mvvm.Input;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Text;
 using System.Xml.Linq;
@@ -19,14 +21,17 @@ public partial class UnitViewModel : ObservableObject
     private ViewModels.Rent.Residentials.MainViewModel _mainViewModel;
     private Models.Rent.Residentials.UnitResidential? _unit;
     
+    // Tmp file list to hold unsaved picture files. (if entry is not saved, delete on close)
+    private readonly List<string> _unsavedUnitPictureFileList = [];
+
     #endregion
 
     #region == Public Properties ==
-
+    
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SaveCommand))]
     public partial bool IsDirty {  get; private set; }
-
+    
     /*
     public bool IsDirty
     {
@@ -35,7 +40,6 @@ public partial class UnitViewModel : ObservableObject
         {
             if (SetProperty(ref field, value))
             {
-                _mainViewModel.IsDirty = true;
                 SaveCommand.NotifyCanExecuteChanged();
             }
         }
@@ -53,7 +57,9 @@ public partial class UnitViewModel : ObservableObject
             if (SetProperty(ref field, value.Trim()))
             {
                 IsDirty = true;
-                //_editRoom?.IsModified = true;
+
+                // Update title with dummy value.
+                _mainViewModel.WindowTitle = string.Empty;
 
                 //OnPropertyChanged(nameof(WindowTitle));//TODO
 
@@ -99,6 +105,20 @@ public partial class UnitViewModel : ObservableObject
             OnPropertyChanged();
         }
     }
+
+    public ObservableCollection<PictureUnit> UnitPictures
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;//?
+
+                OpenUnitBlobDirectoryCommand.NotifyCanExecuteChanged();
+            }
+        }
+    } = [];
 
     #endregion
 
@@ -151,7 +171,25 @@ public partial class UnitViewModel : ObservableObject
         // TODO: More.
 
 
-        //_unit.IsModified = true;
+        // 写真
+        //_unit.UnitPictures = UnitPictures;
+        foreach (var pic in UnitPictures)
+        {
+            var existingPic = _unit.UnitPictures.FirstOrDefault(r => r.Id == pic.Id);
+            if (existingPic is not null)
+            {
+                // Update existing pic
+                var index = _unit.UnitPictures.IndexOf(existingPic);
+                _unit.UnitPictures[index] = pic;
+
+            }
+            else
+            {
+                // Add new pic
+                _unit.UnitPictures.Add(pic);
+            }
+        }
+
     }
 
     private void UpdateBldg()
@@ -168,13 +206,14 @@ public partial class UnitViewModel : ObservableObject
             // Update existing room
             var index = _mainViewModel.Bldg.Rooms.IndexOf(existingRoom);
             _mainViewModel.Bldg.Rooms[index] = _unit;
-
         }
         else
         {
             // Add new room
             _mainViewModel.Bldg.Rooms.Add(_unit);
         }
+
+        
     }
 
     private void PopulateUnitValues()
@@ -186,15 +225,83 @@ public partial class UnitViewModel : ObservableObject
 
         RoomName = _unit.Name; // Set the value to trigger the setter logic if needed.
 
-        var test = _unit.Chinryou.ToString();
+        //var test = _unit.Chinryou.ToString();
         Chinryou = _unit.Chinryou.ToString();
 
 
         // TODO: Set other properties for editing..
 
+        // Pictures
+        UnitPictures = new ObservableCollection<Models.Rent.Residentials.PictureUnit>(_unit.UnitPictures); // create a copy.
+        foreach (var item in UnitPictures)
+        {
+            item.ParentViewModel = _mainViewModel;//this;
+            item.IsModified = false; // Needed this.
+            item.PropertyChanged += OnUnitPicturePropertyChanged;
+        }
+
+        UnitPictures.CollectionChanged += (s, e) =>
+        {
+            // Unsubscribe from removed items
+            if (e.OldItems != null)
+            {
+                foreach (Models.Rent.Residentials.PictureUnit item in e.OldItems)
+                {
+                    Debug.WriteLine($"Item {item.Id} Removed from UnitPictures");
+                    IsDirty = true;
+
+                    item.PropertyChanged -= OnUnitPicturePropertyChanged;
+                }
+            }
+
+            // Subscribe to PropertyChanged.
+            if (e.NewItems != null)
+            {
+                foreach (Models.Rent.Residentials.PictureUnit item in e.NewItems)
+                {
+                    Debug.WriteLine($"Item {item.Id} Added to UnitPictures");
+                    IsDirty = true;
+
+                    item.PropertyChanged += OnUnitPicturePropertyChanged;
+                }
+            }
+        };
+
+        // TODO: PDFs
 
         _unit.IsModified = false;
         IsDirty = false;
+    }
+
+    private void OnUnitPicturePropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (sender is not ZumenSearch.Models.Rent.Residentials.PictureUnit picUnit)
+        {
+            Debug.WriteLine("OnUnitPicturePropertyChanged returned non PictureUnit.");
+            return;
+        }
+
+        if (picUnit.IsModified)
+        {
+            Debug.WriteLine($"Property {e.PropertyName} changed");
+            IsDirty = true;
+
+            var prop = e.PropertyName ?? string.Empty;
+            if (prop.Equals("IsMain"))
+            {
+                if (picUnit.IsMain)
+                {
+                    // Clear all other pics
+                    foreach (var item in UnitPictures)
+                    {
+                        if (item != picUnit)
+                        {
+                            item.IsMain = false;
+                        }
+                    }
+                }
+            }
+        }
     }
 
     #region == Public Methods ==
@@ -204,6 +311,102 @@ public partial class UnitViewModel : ObservableObject
         _unit = room;
 
         PopulateUnitValues();
+
+        _unit.IsModified = false;
+        IsDirty = false;
+    }
+
+    public void LeavingUnitCleanUp()
+    {
+        foreach (var item in UnitPictures)
+        {
+            item.PropertyChanged -= OnUnitPicturePropertyChanged;
+        }
+
+        UnitPictures.Clear();
+
+        //IsDirty = false;
+    }
+
+    public async Task SetNewUnitPicturesAsync(List<string> filePathList)
+    {
+        if (filePathList is null) return;
+        if (filePathList.Count == 0) return;
+        
+        Debug.WriteLine($"destDirectory={_mainViewModel.EntryDataDirectoryPath}  @SetNewUnitPicturesAsync()");
+
+        if (!Directory.Exists(_mainViewModel.EntryDataDirectoryPath))
+        {
+            Directory.CreateDirectory(_mainViewModel.EntryDataDirectoryPath);
+        }
+
+        List<string> list = [];
+
+        foreach (var filePath in filePathList)
+        {
+            if (string.IsNullOrEmpty(filePath.Trim()))
+            {
+                continue;
+            }
+
+            // TODO: check file ext for valid image type.
+            // TODO: set max file size?
+
+            // TODO: Create thumbnail image?
+
+
+            using var sourceStream = File.Open(filePath, FileMode.Open);
+
+            string newId = Guid.CreateVersion7().ToString("N");
+            string extension = Path.GetExtension(System.IO.Path.GetFileName(filePath));
+            var destFilePath = Path.Combine(_mainViewModel.EntryDataDirectoryPath, newId + extension);
+            //Debug.WriteLine($"{file} to {destFilePath}  @SetNewBuildingPicturesAsync()");
+
+            using var destinationStream = File.Create(destFilePath);
+            await sourceStream.CopyToAsync(destinationStream);
+
+            var pic = new Models.Rent.Residentials.PictureUnit(newId, destFilePath)
+            {
+                IsNew = true,
+                ParentViewModel = _mainViewModel
+            };
+
+            UnitPictures.Add(pic);
+
+            OpenUnitBlobDirectoryCommand.NotifyCanExecuteChanged();
+            DeleteUnitPictureCommand.NotifyCanExecuteChanged();
+
+            IsDirty = true;
+
+            // Keep track of unsaved files to delete them when discarding.
+            _unsavedUnitPictureFileList.Add(destFilePath);
+        }
+
+    }
+
+    private void DiscardUnsavedFiles()
+    {
+        if (_unsavedUnitPictureFileList.Count > 0)
+        {
+            foreach (var file in _unsavedUnitPictureFileList)
+            {
+                if (File.Exists(file))
+                {
+                    Debug.WriteLine($"Deleting unsaved picture file: {file}");
+                    File.Delete(file);
+                }
+            }
+
+            _unsavedUnitPictureFileList.Clear();
+        }
+    }
+
+    public void DiscardChanges()
+    {
+        DiscardUnsavedFiles();
+
+        _unit = null;
+        IsDirty = false;
     }
 
     #endregion
@@ -250,11 +453,26 @@ public partial class UnitViewModel : ObservableObject
             {
                 UpdateBldg();
 
+                // Clean up deleted picture file.
+                if (_unit.UnitPicturesToBeDeleted.Count > 0)
+                {
+                    foreach (var file in _unit.UnitPicturesToBeDeleted)
+                    {
+                        if (_unit.UnitPictures.Remove(file))
+                        {
+                            File.Delete(file.ImageLocation);
+                        }
+                    }
+
+                    _unit.UnitPicturesToBeDeleted.Clear();
+                }
+
+                _unsavedUnitPictureFileList.Clear();
+
                 IsDirty = false;
             }
         }
     }
-
     private bool CanSave()
     {
         if (IsDirty)
@@ -262,6 +480,65 @@ public partial class UnitViewModel : ObservableObject
             return true;
         }
         return false;
+    }
+
+    [RelayCommand(CanExecute = nameof(CanOpenUnitBlobDirectory))]
+    public void OpenUnitBlobDirectory()
+    {
+        if (Directory.Exists(_mainViewModel.EntryDataDirectoryPath))
+        {
+            try
+            {
+                Process.Start("explorer.exe", _mainViewModel.EntryDataDirectoryPath);
+            }
+            catch (Exception ex)
+            {
+                // TODO: show error to user.
+                Debug.WriteLine($"Error opening folder: {ex.Message}");
+            }
+        }
+    }
+    private bool CanOpenUnitBlobDirectory()
+    {
+        if (Directory.Exists(_mainViewModel.EntryDataDirectoryPath))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    [RelayCommand(CanExecute = nameof(CanDeleteUnitPicture))]
+    public void DeleteUnitPicture(Models.Rent.Residentials.PictureUnit picUnit)
+    {
+        if (_unit is null)
+        {
+            return;
+        }
+
+        if (picUnit is null)
+        {
+            return;
+        }
+
+        // TODO: show dialog to comfirm.
+
+        if (UnitPictures.Remove(picUnit))
+        {
+            // TODO: should I? Prob no.
+            /*
+            if (_unit.UnitPictures.Remove(picUnit))
+            {
+                
+            }
+            */
+            _unit.UnitPicturesToBeDeleted.Add(picUnit);
+            IsDirty = true;
+        }
+    }
+    private bool CanDeleteUnitPicture(Models.Rent.Residentials.PictureUnit picUnit)
+    {
+        return picUnit is not null;
     }
 
     #endregion

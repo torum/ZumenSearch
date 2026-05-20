@@ -81,12 +81,12 @@ public partial class MainViewModel : ObservableObject
 
     public ObservableCollection<Breadcrumb> BreadcrumbItemsRent { get; set; } =
     [
-        new() { Name = "総合検索", Page = typeof(Views.RentSearchPage).FullName! }
+        new() { Name = "総合検索", Page = typeof(Views.SearchPage).FullName! }
     ];
     public ObservableCollection<Breadcrumb> BreadcrumbItemsRentSearchResult { get; set; } =
     [
-        new() { Name = "総合検索", Page = typeof(Views.RentSearchPage).FullName! },
-        new() { Name = "検索結果", Page = typeof(Views.RentSearchResultPage).FullName! },
+        new() { Name = "総合検索", Page = typeof(Views.SearchPage).FullName! },
+        new() { Name = "検索結果", Page = typeof(Views.SearchResultPage).FullName! },
     ];
 
     #endregion
@@ -97,6 +97,13 @@ public partial class MainViewModel : ObservableObject
     #endregion
 
     #region == Search ==
+
+    // Rent or BuySell
+    [ObservableProperty]
+    public partial int SegIndex { get; set; } = 0;
+
+    [ObservableProperty]
+    public partial string SearchQuery { get; set; } = string.Empty;
 
     public ObservableCollection<Models.Rent.Residentials.EntryResidentialSearchResult> RentResidentialEntrySearchResult
     {
@@ -222,9 +229,7 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void AddNewRentResidential()
     {
-        //Debug.WriteLine("AddNew command executed!");
-
-        var shell = _shellFactory.Create(new Models.Rent.Residentials.EntryResidentialFull(Guid.CreateVersion7().ToString("N"), EnumEntryStatus.New));//_editorFactory.Create();
+        var shell = _shellFactory.Create(new Models.Rent.Residentials.EntryResidentialFull(Guid.CreateVersion7().ToString("N"), EnumEntryStatus.New));
 
         EditorList.Add(shell.Win);
 
@@ -236,28 +241,9 @@ public partial class MainViewModel : ObservableObject
             presenter.PreferredMinimumWidth = 1274;
             presenter.PreferredMinimumHeight = 794;
         }
-        /*
-        shell.Win.Closed += (sender, e) =>
-        {
-            EditorList.Remove(shell.Win);
-
-            if (EditorList.Count == 0)
-            {
-                var mainWindow = App.GetService<MainWindow>();
-
-                // No more editor windows are open, activate the main window again.
-                if (mainWindow?.AppWindow.Presenter is OverlappedPresenter presntr)
-                {
-                    presntr.Restore();
-                }
-                mainWindow?.Activate();
-            }
-        };
-        */
 
         shell.Win.SetEntryIdToWindow(shell.ViewModel.Id);
         shell.Win.SetViewModelToWindow(shell.ViewModel);
-
 
         //var dpi = Windows.Win32.PInvoke.GetDpiForWindow(new Windows.Win32.Foundation.HWND(WinRT.Interop.WindowNative.GetWindowHandle(this)));
         //var scalingFactor = (float)dpi / 96;
@@ -267,58 +253,6 @@ public partial class MainViewModel : ObservableObject
 
         //editorWindow.AppWindow.Show();
         shell.Win.Activate();
-
-        /*
-        var editorShell = _editorFactory.Create();
-
-        var editorWindow = editorShell.EditorWin;
-
-        if (editorWindow == null)
-        {
-            // EditorWin should be initialized in the EditorShell constructor.
-            throw new ArgumentNullException(nameof(editorWindow));
-        }
-
-        // Add to the list of editor windows.
-        EditorList.Add(editorWindow);
-
-        if (editorWindow.AppWindow.Presenter is OverlappedPresenter presenter)
-        {
-            presenter.IsResizable = true;
-            presenter.IsModal = false;
-            presenter.IsAlwaysOnTop = false;
-            presenter.PreferredMinimumWidth = 1274;
-            presenter.PreferredMinimumHeight = 794;
-        }
-
-        editorWindow.Closed += (sender, e) =>
-        {
-            EditorList.Remove(editorWindow);
-
-            if (EditorList.Count == 0)
-            {
-                var mainWindow = App.GetService<MainWindow>();
-
-                // No more editor windows are open, activate the main window again.
-                if (mainWindow?.AppWindow.Presenter is OverlappedPresenter presntr)
-                {
-                    presntr.Restore();
-                }
-                mainWindow?.Activate();
-            }
-        };
-
-        
-        //var dpi = Windows.Win32.PInvoke.GetDpiForWindow(new Windows.Win32.Foundation.HWND(WinRT.Interop.WindowNative.GetWindowHandle(this)));
-        //var scalingFactor = (float)dpi / 96;
-        //AppWindow.Resize(new Windows.Graphics.SizeInt32((int)(400.0f * scalingFactor), (int)(300.0f * scalingFactor)));
-        
-
-        editorWindow.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(EditorWinLeft, EditorWinTop, EditorWinWidth, EditorWinHeight));
-
-        //editorWindow.AppWindow.Show();
-        editorWindow.Activate();
-        */
     }
 
     // 編集（建物）
@@ -347,10 +281,6 @@ public partial class MainViewModel : ObservableObject
                 Debug.WriteLine($"Editor window for {rentId} is already open. Activating it.");
                 isFound = true;
 
-                // Stupid WinUI3 needs a delay here to properly activate the window.
-                //await Task.Delay(30);
-                //await Task.Yield();
-
                 editorWindow.Activate();
                 var mainWindow = App.GetService<MainWindow>();
                 mainWindow?.AppWindow.MoveInZOrderBelow(editorWindow.AppWindow.Id);
@@ -376,7 +306,6 @@ public partial class MainViewModel : ObservableObject
             //IsMainErrorInfoBarVisible = true;
 
             // TODO: Show error message to user
-
             return;
         }
 
@@ -388,12 +317,6 @@ public partial class MainViewModel : ObservableObject
 
         var editorShell = _shellFactory.Create(res.EntryFull);//_editorFactory.Create();
 
-        // Sets the instance of selected Entry.
-        //editorShell.SetEntryToEntryViewModel(res.EntryFull);
-
-        //var entryViewModel = editorShell.ViewModel;
-        //entryViewModel.SetEntry(res.EntryFull);
-
         var editorWindow = editorShell.Win;
         if (editorWindow == null)
         {
@@ -401,6 +324,7 @@ public partial class MainViewModel : ObservableObject
             Debug.WriteLine("EditorWin must be initialized in the EditorShell constructor");
             return;
         }
+
         editorWindow.SetEntryIdToWindow(editorShell.ViewModel.Id);
         editorWindow.SetViewModelToWindow(editorShell.ViewModel);
 
@@ -415,16 +339,6 @@ public partial class MainViewModel : ObservableObject
             presenter.PreferredMinimumWidth = 1274;
             presenter.PreferredMinimumHeight = 794;
         }
-
-        /*
-        editorWindow.Closed += (sender, e) =>
-        {
-            // Activate the main window again.
-            //App.MainWnd?.Activate();
-
-            EditorList.Remove(editorWindow);
-        };
-        */
 
         editorWindow.AppWindow.Show();
         editorWindow.Activate();
@@ -533,16 +447,23 @@ public partial class MainViewModel : ObservableObject
     {
         var query = string.Empty;
 
-        if (string.IsNullOrEmpty(queryText))
+        if (string.IsNullOrWhiteSpace(queryText))
         {
-            //RentResidentialEntrySearchResult.Clear();
-            //return;
-            query = "*";
+            if (string.IsNullOrWhiteSpace(SearchQuery))
+            {
+                query = "*";
+            }
+            else
+            {
+                query = SearchQuery.Trim();
+            }
         }
         else
         {
             query = queryText.Trim();
         }
+
+        //Debug.WriteLine($"queryText is {queryText}");
 
         RentResidentialEntrySearchResult.Clear();
 
@@ -562,7 +483,7 @@ public partial class MainViewModel : ObservableObject
         {
             RentResidentialEntrySearchResult = new(res.SelectedEntries);
 
-            _navigationService.NavigateTo("ZumenSearch.Views.RentSearchResultPage", SlideNavigationTransitionEffect.FromLeft);//Navigate(typeof(Views.Rent.Residentials.SearchResultPage), null, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });
+            _navigationService.NavigateTo("ZumenSearch.Views.SearchResultPage", SlideNavigationTransitionEffect.FromLeft);//Navigate(typeof(Views.Rent.Residentials.SearchResultPage), null, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });
         }
     }
     public bool SearchRentResidentialEntryCanExecute(string? queryText)

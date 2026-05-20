@@ -35,12 +35,26 @@
                 </AppBarButton>
             </CommandBar>
         </Grid>
-        
+
         <Grid Grid.Row="1">
-            <ItemsView x:Name="RoomsListView" ItemsSource="{x:Bind ViewModel.Bldg.Rooms, Mode=OneWay}" SelectionMode="Single" AllowFocusOnInteraction="False" IsItemInvokedEnabled="True" ItemInvoked="RoomsListView_ItemInvoked" SelectionChanged="RoomsListView_SelectionChanged">
-                <ItemsView.ItemTemplate>
-                    <DataTemplate x:DataType="modresi:UnitResidential">
-                        <ItemContainer AllowFocusOnInteraction="False">
+            <Border Style="{StaticResource RoundCardBorderStyle}">
+                <ListView x:Name="RoomsListView" ItemsSource="{x:Bind ViewModel.Bldg.Rooms, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.Bldg.SelectedRoom, Mode=TwoWay}" SelectionMode="Single" AllowFocusOnInteraction="False" IsDoubleTapEnabled="True" DoubleTapped="RoomsListView_DoubleTapped">
+                    <!--
+                    <ListView.ContextFlyout>
+                        <MenuFlyout>
+                            <MenuFlyoutItem Command="{x:Bind ViewModel.QueueFilterSelectCommand}" CommandParameter="{x:Bind FilterQueueListBox.SelectedItem, Mode=OneWay}">
+                                <MenuFlyoutItem.Icon>
+                                    <PathIcon Width="NaN" Height="NaN" Margin="0" Data="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm8.856-3.845A1.25 1.25 0 0 0 9 9.248v5.504a1.25 1.25 0 0 0 1.856 1.093l5.757-3.189a.75.75 0 0 0 0-1.312l-5.757-3.189Z"/>
+                                </MenuFlyoutItem.Icon>
+                                <MenuFlyoutItem.KeyboardAccelerators>
+                                    <KeyboardAccelerator Key="Enter" />
+                                </MenuFlyoutItem.KeyboardAccelerators>
+                            </MenuFlyoutItem>
+                        </MenuFlyout>
+                    </ListView.ContextFlyout>
+                    -->
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="modresi:UnitResidential">
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
@@ -54,10 +68,10 @@
                                 <TextBlock Grid.Row="0" Grid.Column="1" Text="{x:Bind Name, Mode=OneWay}" x:Phase="1" Style="{ThemeResource BaseTextBlockStyle}" Margin="12,6,0,0"/>
                                 <TextBlock Grid.Row="1" Grid.Column="1" Text="" Style="{ThemeResource BodyTextBlockStyle}" Margin="12,0,0,6"/>
                             </Grid>
-                        </ItemContainer>
-                    </DataTemplate>
-                </ItemsView.ItemTemplate>
-            </ItemsView>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </Border>
         </Grid>
     </Grid>
 

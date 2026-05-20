@@ -11,8 +11,8 @@ public class NavigationService : INavigationService
 
     private readonly Dictionary<string, Type> _pageMap = new()
         {            
-            { "ZumenSearch.Views.RentSearchPage", typeof(Views.RentSearchPage) },
-            { "ZumenSearch.Views.RentSearchResultPage", typeof(Views.RentSearchResultPage) },
+            { "ZumenSearch.Views.SearchPage", typeof(Views.SearchPage) },
+            { "ZumenSearch.Views.SearchResultPage", typeof(Views.SearchResultPage) },
             { "ZumenSearch.Views.Rent.ResidentialSearchPage", typeof(Views.Rent.ResidentialSearchPage) },
             { "ZumenSearch.Views.Rent.ResidentialSearchResultPage", typeof(Views.Rent.ResidentialSearchResultPage) },
             { "ZumenSearch.Views.Rent.Commercials.CommercialsPage", typeof(Views.Rent.Commercials.CommercialsPage) },
@@ -54,7 +54,7 @@ public class NavigationService : INavigationService
 
     public void NavigateToMainSearch()
     {
-        _frame?.Navigate(typeof(Views.RentSearchPage), _frame, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom });
+        _frame?.Navigate(typeof(Views.SearchPage), _frame, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom });
     }
 
     public void GoBack()

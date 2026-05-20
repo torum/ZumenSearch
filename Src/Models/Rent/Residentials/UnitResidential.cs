@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Text;
 using ZumenSearch.Models.Base;
 using static System.Net.Mime.MediaTypeNames;
@@ -30,6 +31,22 @@ public partial class UnitResidentialSearchResult : UnitBase
 
 public partial class UnitResidential : UnitBase
 {
+    // 物件写真（部屋）リスト
+    public ObservableCollection<PictureUnit> UnitPictures
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;//?
+            }
+        }
+    } = [];
+
+    // DBへの更新時にDBから削除されるべき物件写真（部屋）のIDリスト
+    public ObservableCollection<PictureUnit> UnitPicturesToBeDeleted = [];
+
     public int Chinryou
     {
         get;

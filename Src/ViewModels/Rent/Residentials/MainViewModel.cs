@@ -19,6 +19,7 @@ using ZumenSearch.Models.Rent.Residentials;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.Views;
 using ZumenSearch.Views.Rent.Residentials;
+using ZumenSearch.Views.Rent.Residentials.Unit;
 
 namespace ZumenSearch.ViewModels.Rent.Residentials;
 
@@ -39,6 +40,11 @@ public partial class MainViewModel : ObservableObject
 
     public BldgViewModel Bldg { get; init; }
 
+    public INavigationResidentialService? ResidentialNavigationService => _nav;
+
+    // Local directory path to save blob data such as pictures and PDFs.
+    public string EntryDataDirectoryPath { get; init; }
+
     public ObservableCollection<Breadcrumb> BreadcrumbItems { get; set; } =
     [
         new() { Name = "建物", Page = typeof(Views.Rent.Residentials.Bldg.BasicPage).FullName! },
@@ -52,6 +58,7 @@ public partial class MainViewModel : ObservableObject
         new() { Name = "基本", Page = typeof(Views.Rent.Residentials.Unit.BasicPage).FullName! }
     ];
 
+    // TODO:
     public string WindowTitle
     {
         set
@@ -79,7 +86,7 @@ public partial class MainViewModel : ObservableObject
                 }
                 else
                 {
-                    str = $"{str} (更新)";
+                    str = $"{str} (編集)";
                 }
 
                 return str;
@@ -116,7 +123,7 @@ public partial class MainViewModel : ObservableObject
     private readonly IDataAccessLocationService _dataAccessLocationService;
     private readonly IModalDialogService _dlgService;
     private readonly IDispatcherService _dispatcherService;
-
+    private INavigationResidentialService? _nav;
     #endregion
 
     private readonly string _id = string.Empty;
@@ -133,6 +140,7 @@ public partial class MainViewModel : ObservableObject
         _dispatcherService = dispatcherService;
 
         _id = entry.Id;//Guid.CreateVersion7().ToString("N");
+        EntryDataDirectoryPath = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(App.AppDataPictureFolder, "Rent"), "Residential_Building"), _id);
 
         //Debug.WriteLine($"MainViewModel {entry.Id}");
 
@@ -162,6 +170,11 @@ public partial class MainViewModel : ObservableObject
     public void SetEditorShell(Views.Rent.Residentials.ShellPage shell)
     {
         _shell = shell;
+    }
+
+    public void SetEditorNavigationService(INavigationResidentialService nav)
+    {
+        _nav = nav;
     }
 
     public void SetUnitShell(Views.Rent.Residentials.Unit.UnitShellPage shell)
@@ -196,14 +209,11 @@ public partial class MainViewModel : ObservableObject
 
         if (_shell.NavigationFrame.CurrentSourcePageType == typeof(Views.Rent.Residentials.Unit.UnitShellPage))
         {
-            // TODO: UnitShellPage's OnNavigatingFrom can be also utilize for this.
             if (Unit.IsDirty)
             {
-                Debug.WriteLine("TODO: GoToBldgShellPage: show warning : The current room has unsaved changes.");
-                
-                // TODO: show dialog or
-                
-                return;
+                //UnitShellPage's OnNavigatingFrom takes care of this.
+                //Debug.WriteLine("GoToBldgShellPage: show warning : The current room has unsaved changes.");
+                //return;
             }
         }
 
@@ -232,7 +242,7 @@ public partial class MainViewModel : ObservableObject
             // TODO:
             if (Bldg.IsDirty)
             {
-                Debug.WriteLine("TODO: GoToBldgShellPage: show warning : The current building has unsaved changes.");
+                Debug.WriteLine("TODO: GoToBldgShellPage: show warning? : The current building has unsaved changes.");
                 //return;// TODO: no need to block this?
             }
         }
@@ -243,7 +253,7 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
-    // Go Back command (don't use this?)
+    // TODO remove these commands below.
     [RelayCommand]
     private void GoBack()
     {

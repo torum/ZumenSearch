@@ -74,6 +74,12 @@
                 </NavigationView.PaneHeader>
                 <NavigationView.MenuItems>
 
+                    <NavigationViewItem Tag="ZumenSearch.Views.SearchPage" Content="総合検索" ToolTipService.ToolTip="検索">
+                        <NavigationViewItem.Icon>
+                            <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xe7c3;"/>
+                        </NavigationViewItem.Icon>
+                    </NavigationViewItem>
+
                     <NavigationViewItem Tag="Rent" Content="賃貸" ToolTipService.ToolTip="賃貸" IsExpanded="True">
                         <NavigationViewItem.Icon>
                             <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xe80f;"/>
@@ -81,12 +87,6 @@
 
                         <NavigationViewItem.MenuItems>
 
-                            <NavigationViewItem Tag="ZumenSearch.Views.RentSearchPage" Content="総合検索" ToolTipService.ToolTip="検索">
-                                <NavigationViewItem.Icon>
-                                    <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xe7c3;"/>
-                                </NavigationViewItem.Icon>
-                            </NavigationViewItem>
-                            
                             <NavigationViewItem Tag="ZumenSearch.Views.Rent.ResidentialSearchPage" Content="住居用" ToolTipService.ToolTip="賃貸住居用">
                                 <NavigationViewItem.Icon>
                                     <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xe7c3;"/>

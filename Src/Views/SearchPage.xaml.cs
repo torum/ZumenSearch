@@ -38,11 +38,11 @@ public class CustomDataObject
     // ... Methods ...
 }
 
-public sealed partial class RentSearchPage : Page
+public sealed partial class SearchPage : Page
 {
     private MainViewModel ViewModel { get; init; }
 
-    public RentSearchPage()
+    public SearchPage()
     {
         ViewModel = App.GetService<MainViewModel>();
 

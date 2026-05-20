@@ -20,7 +20,7 @@ public class ModalDialogService : IModalDialogService
 
     public async Task<ContentDialogResult> ShowEditorCloseConfirmationDialog(Window win)
     {
-        if (_isDialogOpened && (_ownerWindowList.IndexOf(win) > -1))
+        if (_isDialogOpened)// && (_ownerWindowList.IndexOf(win) > -1)
         {
             // Prevents COM exepction causing by attempt to show multiple dialogs. (Window's close button is enabled even tho dialog is shown)
             return ContentDialogResult.None;
@@ -52,16 +52,71 @@ public class ModalDialogService : IModalDialogService
         //Debug.WriteLine("await dialog.ShowAsync()");
 
         _isDialogOpened = true;
-        _ownerWindowList.Add(win);
+        //_ownerWindowList.Add(win);
         var result = await dialog.ShowAsync();
         _isDialogOpened = false;
-        _ownerWindowList.Remove(win);
+        //_ownerWindowList.Remove(win);
+        return result;
+    }
+
+
+    public async Task<ContentDialogResult> ShowLeaveUnitDirtyConfirmationDialog(XamlRoot root)
+    {
+        if (_isDialogOpened)
+        {
+            System.Diagnostics.Debug.WriteLine("_isDialogOpened");
+            // Prevents COM exepction causing by attempt to show multiple dialogs. (Window's close button is enabled even tho dialog is shown)
+            return ContentDialogResult.None;
+        }
+        /*
+        if (_isDialogOpened && (_ownerWindowList.IndexOf(win) > -1))
+        {
+            // Prevents COM exepction causing by attempt to show multiple dialogs. (Window's close button is enabled even tho dialog is shown)
+            return ContentDialogResult.None;
+        }
+
+        if (win is null)
+        {
+            return ContentDialogResult.None;
+        }
+
+        if (win.Content is null)
+        {
+            return ContentDialogResult.None;
+        }
+        */
+
+        if (root is null)
+        {
+            return ContentDialogResult.None;
+        }
+
+        var dialog = new ContentDialog
+        {
+            XamlRoot = root,
+            Title = "保存の確認（部屋）",
+            IsPrimaryButtonEnabled = true,
+            PrimaryButtonText = "保存して移動する",
+            DefaultButton = ContentDialogButton.Primary,
+            IsSecondaryButtonEnabled = true,
+            SecondaryButtonText = "変更を破棄して移動する",
+            CloseButtonText = "キャンセル",
+            Content = "部屋の変更内容が保存されていません。"
+        };
+
+        //Debug.WriteLine("await dialog.ShowAsync()");
+
+        _isDialogOpened = true;
+        //_ownerWindowList.Add(win);
+        var result = await dialog.ShowAsync();
+        _isDialogOpened = false;
+        //_ownerWindowList.Remove(win);
         return result;
     }
 
     public async Task<RailLine?> ShowRailLineSelectDialog(Window win)
     {
-        if (_isDialogOpened && (_ownerWindowList.IndexOf(win) > -1))
+        if (_isDialogOpened)// && (_ownerWindowList.IndexOf(win) > -1)
         {
             // Prevents COM exepction causing by attempt to show multiple dialogs. (Window's close button is enabled even tho dialog is shown)
             return null;
@@ -112,10 +167,10 @@ public class ModalDialogService : IModalDialogService
         };
         */
         _isDialogOpened = true;
-        _ownerWindowList.Add(win);
+        //_ownerWindowList.Add(win);
         var result = await dialog.ShowAsync();
         _isDialogOpened = false;
-        _ownerWindowList.Remove(win);
+        //_ownerWindowList.Remove(win);
         if (result == ContentDialogResult.Primary)
         {
             //
@@ -127,7 +182,7 @@ public class ModalDialogService : IModalDialogService
 
     public async Task<RailStation?> ShowRailStationSelectDialog(Window win, string railLineCode)
     {
-        if (_isDialogOpened && (_ownerWindowList.IndexOf(win) > -1))
+        if (_isDialogOpened)// && (_ownerWindowList.IndexOf(win) > -1)
         {
             // Prevents COM exepction causing by attempt to show multiple dialogs. (Window's close button is enabled even tho dialog is shown)
             return null;
@@ -170,9 +225,9 @@ public class ModalDialogService : IModalDialogService
         };
 
         _isDialogOpened = true;
-        _ownerWindowList.Add(win);
+        //_ownerWindowList.Add(win);
         var result = await dialog.ShowAsync();
-        _ownerWindowList.Remove(win);
+        //_ownerWindowList.Remove(win);
         _isDialogOpened = false;
 
         if (result == ContentDialogResult.Primary)
