@@ -11,7 +11,7 @@ using ZumenSearch.Services.Contracts;
 
 namespace ZumenSearch.Views.Rent.Residentials.Bldg;
 
-public sealed partial class BldgShellPage : Page
+internal sealed partial class BldgShellPage : Page
 {
     #region == Properties ==
 

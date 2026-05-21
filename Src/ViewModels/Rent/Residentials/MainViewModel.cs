@@ -23,12 +23,12 @@ using ZumenSearch.Views.Rent.Residentials.Unit;
 
 namespace ZumenSearch.ViewModels.Rent.Residentials;
 
-public partial class MainViewModel : ObservableObject
+internal sealed partial class MainViewModel : ObservableObject
 {
     #region == Private Variables ==
 
-    private Views.Rent.Residentials.Bldg.BldgShellPage? _bldgShellPage;
-    private Views.Rent.Residentials.Unit.UnitShellPage? _unitShellPage;
+    //private Views.Rent.Residentials.Bldg.BldgShellPage? _bldgShellPage;
+    //private Views.Rent.Residentials.Unit.UnitShellPage? _unitShellPage;
 
     #endregion
 
@@ -101,18 +101,20 @@ public partial class MainViewModel : ObservableObject
 
     // The event handlers below are used to notify the UI about various actions that can be performed in the editor.
     // EditorShell subscribes to these events to handle the actions accordingly.
+    /*
     public event EventHandler? EventBackToSummary;
     public event EventHandler? EventEditLocation;
     public event EventHandler? EventEditTransportation;
     public event EventHandler? EventEditAppliance;
     public event EventHandler? EventEditPictures;
     public event EventHandler? EventEditUnits;
+    */
 
     // TODO:
     //public event EventHandler? EventTitleChanged;
 
     // Who subscribes to this event?
-    public event EventHandler? EventGoBack;
+    //public event EventHandler? EventGoBack;
 
     #endregion
 
@@ -124,10 +126,11 @@ public partial class MainViewModel : ObservableObject
     private readonly IModalDialogService _dlgService;
     private readonly IDispatcherService _dispatcherService;
     private INavigationResidentialService? _nav;
+
     #endregion
 
     private readonly string _id = string.Empty;
-    private Views.Rent.Residentials.ShellPage? _shell;
+    //private Views.Rent.Residentials.ShellPage? _shell;
     //private Views.Rent.Residentials.EditorWindow? _win;
 
     public MainViewModel(Models.Rent.Residentials.EntryResidentialFull entry, IDispatcherService dispatcherService, IDataAccessService dataAccessService, IModalDialogService modalDialogService, IDataAccessLocationService dataAccessLocationService)
@@ -157,19 +160,9 @@ public partial class MainViewModel : ObservableObject
 
     #region == Public Methods ==
 
-    /*
-    public void SetEditorWindow(Views.Rent.Residentials.EditorWindow win)
-    {
-        _win = win;
-
-        _win.SetEntryIdToWindow(_id);
-        _win.SetViewModelToWindow(this);
-    }
-    */
-
     public void SetEditorShell(Views.Rent.Residentials.ShellPage shell)
     {
-        _shell = shell;
+        //_shell = shell;
     }
 
     public void SetEditorNavigationService(INavigationResidentialService nav)
@@ -179,12 +172,12 @@ public partial class MainViewModel : ObservableObject
 
     public void SetUnitShell(Views.Rent.Residentials.Unit.UnitShellPage shell)
     {
-        _unitShellPage = shell;
+        //_unitShellPage = shell;
     }
 
     public void SetBldgShell(Views.Rent.Residentials.Bldg.BldgShellPage shell)
     {
-        _bldgShellPage = shell;
+        //_bldgShellPage = shell;
     }
 
     #endregion
@@ -196,6 +189,35 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void GoToBldgShellPage()
     {
+        var frame = _nav?.GetFrame();
+        if (frame is null)
+        {
+            Debug.WriteLine("Nav service is not set. Cannot navigate to Building Shell Page.");
+
+            return;
+        }
+
+        if (frame.CurrentSourcePageType == typeof(Views.Rent.Residentials.Bldg.BldgShellPage))
+        {
+            return;
+        }
+
+        if (frame.CurrentSourcePageType == typeof(Views.Rent.Residentials.Unit.UnitShellPage))
+        {
+            if (Unit.IsDirty)
+            {
+                //UnitShellPage's OnNavigatingFrom takes care of this.
+                //Debug.WriteLine("GoToBldgShellPage: show warning : The current room has unsaved changes.");
+                //return;
+            }
+        }
+
+        if (frame.Navigate(typeof(Views.Rent.Residentials.Bldg.BldgShellPage), this, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight })) // //
+        {
+
+        }
+
+        /*
         if (_shell is null)
         {
             Debug.WriteLine("ShellPage is not set. Cannot navigate to Building Shell Page.");
@@ -221,11 +243,40 @@ public partial class MainViewModel : ObservableObject
         {
 
         }
+        */
     }
 
     [RelayCommand]
     private void GoToUnitShellPage()
     {
+        var frame = _nav?.GetFrame();
+        if (frame is null)
+        {
+            Debug.WriteLine("Nav service is not set. Cannot navigate to Building Shell Page.");
+            return;
+        }
+
+        if (frame.CurrentSourcePageType == typeof(Views.Rent.Residentials.Unit.UnitShellPage))
+        {
+            return;
+        }
+
+        if (frame.CurrentSourcePageType == typeof(Views.Rent.Residentials.Bldg.BldgShellPage))
+        {
+            // TODO:
+            if (Bldg.IsDirty)
+            {
+                Debug.WriteLine("TODO: GoToBldgShellPage: show warning? : The current building has unsaved changes.");
+                //return;// TODO: no need to block this?
+            }
+        }
+
+        if (frame.Navigate(typeof(Views.Rent.Residentials.Unit.UnitShellPage), this, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft })) //
+        {
+
+
+        }
+        /*
         if (_shell is null)
         {
             Debug.WriteLine("ShellPage is not set. Cannot navigate to Building Shell Page.");
@@ -251,50 +302,10 @@ public partial class MainViewModel : ObservableObject
         {
 
         }
+        */
     }
 
-    // TODO remove these commands below.
-    [RelayCommand]
-    private void GoBack()
-    {
-        EventGoBack?.Invoke(this, EventArgs.Empty);
-    }
 
-    [RelayCommand]
-    public void GoBackToSummary()
-    { 
-        EventBackToSummary?.Invoke(this, EventArgs.Empty);
-    }
-
-    [RelayCommand]
-    public void EditLocation()
-    {
-        EventEditLocation?.Invoke(this, EventArgs.Empty);
-    }
-
-    [RelayCommand]
-    private void EditTransportation()
-    {
-        EventEditTransportation?.Invoke(this, EventArgs.Empty);
-    }
-
-    [RelayCommand]
-    public void EditAppliance()
-    {
-        EventEditAppliance?.Invoke(this, EventArgs.Empty);
-    }
-
-    [RelayCommand]
-    public void EditPictures()
-    {
-        EventEditPictures?.Invoke(this, EventArgs.Empty);
-    }
-
-    [RelayCommand]
-    public void EditUnits()
-    {
-        EventEditUnits?.Invoke(this, EventArgs.Empty);
-    }
 
     #endregion
 

@@ -7,7 +7,7 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace ZumenSearch.Models.Rent.Residentials;
 
-public partial class UnitResidentialSearchResult : UnitBase
+internal sealed partial class UnitResidentialSearchResult : UnitBase
 {
     public string EntryId { get; init; }
 
@@ -29,7 +29,7 @@ public partial class UnitResidentialSearchResult : UnitBase
     }
 }
 
-public partial class UnitResidential : UnitBase
+internal sealed partial class UnitResidential : UnitBase
 {
     // 物件写真（部屋）リスト
     public ObservableCollection<PictureUnit> UnitPictures

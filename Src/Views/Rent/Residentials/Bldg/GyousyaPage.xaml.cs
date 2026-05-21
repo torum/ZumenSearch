@@ -3,7 +3,7 @@ using Microsoft.UI.Xaml.Navigation;
 
 namespace ZumenSearch.Views.Rent.Residentials.Bldg;
 
-public sealed partial class GyousyaPage : Page
+internal sealed partial class GyousyaPage : Page
 {
     //private Views.Rent.Residentials.Editor.EditorShell? _editorShell;
 
@@ -23,14 +23,6 @@ public sealed partial class GyousyaPage : Page
     {
         //ViewModel = new GyousyaViewModel();//App.GetService<RentLivingEditZumenViewModel>();
         InitializeComponent();
-    }
-
-    private void BreadcrumbBar_ItemClicked(BreadcrumbBar sender, BreadcrumbBarItemClickedEventArgs args)
-    {
-        if (args.Index == 0)
-        {
-            ViewModel?.GoBackToSummary();
-        }
     }
 
     protected override void OnNavigatedTo(NavigationEventArgs e)

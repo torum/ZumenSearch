@@ -10,7 +10,7 @@ public enum EnumBuildingPictureType
     Unspecified, Gaikan, Entrance, Neighborhood, Other
 }
 
-public class BuildingPictureType(EnumBuildingPictureType key)
+public sealed class BuildingPictureType(EnumBuildingPictureType key)
 {
     private Dictionary<EnumBuildingPictureType, string> BuildingPictureTypeDictionary
     {
@@ -41,7 +41,7 @@ public class BuildingPictureType(EnumBuildingPictureType key)
     public EnumBuildingPictureType Key => key;
 };
 
-public partial class PictureBldg : PictureBase
+internal sealed partial class PictureBldg : PictureBase
 {
     public ViewModels.Rent.Residentials.MainViewModel? ParentViewModel { get; set; }
 

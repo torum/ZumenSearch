@@ -22,7 +22,7 @@ using ZumenSearch.Services.Contracts;
 
 namespace ZumenSearch.ViewModels.Rent.Residentials;
 
-public partial class BldgViewModel : ObservableObject
+internal sealed partial class BldgViewModel : ObservableObject
 {
     #region == Private Variables ==
 
@@ -49,7 +49,7 @@ public partial class BldgViewModel : ObservableObject
 
     #region == ステータス ==
 
-    public EnumEntryStatus EntryStatus => _entry.EntryStatus;
+    internal EnumEntryStatus EntryStatus => _entry.EntryStatus;
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SaveCommand))]
@@ -935,7 +935,7 @@ public partial class BldgViewModel : ObservableObject
 
     #region == 写真プロパティ ==
 
-    public ObservableCollection<PictureBldg> BuildingPictures
+    internal ObservableCollection<PictureBldg> BuildingPictures
     {
         get;
         set
@@ -950,7 +950,7 @@ public partial class BldgViewModel : ObservableObject
     } = [];
 
     // TODO: remove this.
-    public PictureBldg? SelectedBuildingPicture
+    internal PictureBldg? SelectedBuildingPicture
     {
         get;
         set
@@ -1100,7 +1100,7 @@ public partial class BldgViewModel : ObservableObject
 
     #region == PDF ==
 
-    public ObservableCollection<PdfBldg> BuildingPdfs
+    internal ObservableCollection<PdfBldg> BuildingPdfs
     {
         get;
         set
@@ -1118,7 +1118,7 @@ public partial class BldgViewModel : ObservableObject
 
     #region == 部屋 ==
 
-    public ObservableCollection<Models.Rent.Residentials.UnitResidential> Rooms
+    internal ObservableCollection<Models.Rent.Residentials.UnitResidential> Rooms
     {
         get;
         set
@@ -1132,7 +1132,7 @@ public partial class BldgViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(EditSelectedUnitCommand))]
-    public partial Models.Rent.Residentials.UnitResidential? SelectedRoom { get; set; }
+    internal partial Models.Rent.Residentials.UnitResidential? SelectedRoom { get; set; }
 
 
     #endregion
@@ -1159,7 +1159,7 @@ public partial class BldgViewModel : ObservableObject
 
     #endregion
 
-    public BldgViewModel(ViewModels.Rent.Residentials.MainViewModel vm, Models.Rent.Residentials.EntryResidentialFull entry, IDataAccessService dataAccessService, IDataAccessLocationService dataAccessLocationService)
+    internal BldgViewModel(ViewModels.Rent.Residentials.MainViewModel vm, Models.Rent.Residentials.EntryResidentialFull entry, IDataAccessService dataAccessService, IDataAccessLocationService dataAccessLocationService)
     {
         _mainViewModel = vm;
         _dataAccessService = dataAccessService;
@@ -1509,9 +1509,62 @@ public partial class BldgViewModel : ObservableObject
         }
     }
 
+    private void DiscardUnsavedFiles()
+    {
+        if (_unsavedBuildingPictureFileList.Count > 0)
+        {
+            foreach (var file in _unsavedBuildingPictureFileList)
+            {
+                if (File.Exists(file))
+                {
+                    Debug.WriteLine($"Deleting unsaved picture file: {file}");
+                    File.Delete(file);
+                }
+            }
+            _unsavedBuildingPictureFileList.Clear();
+        }
+
+        if (_unsavedBuildingPdfThumbnailFileList.Count > 0)
+        {
+            foreach (var file in _unsavedBuildingPdfThumbnailFileList)
+            {
+                if (File.Exists(file))
+                {
+                    Debug.WriteLine($"Deleting unsaved PDF Thumbnail file: {file}");
+                    File.Delete(file);
+                }
+            }
+            _unsavedBuildingPdfThumbnailFileList.Clear();
+        }
+
+        if (_unsavedBuildingPdfFileList.Count > 0)
+        {
+            foreach (var file in _unsavedBuildingPdfFileList)
+            {
+                if (File.Exists(file))
+                {
+                    Debug.WriteLine($"Deleting unsaved PDF file: {file}");
+                    File.Delete(file);
+                }
+            }
+            _unsavedBuildingPdfFileList.Clear();
+        }
+
+        if (_entry.EntryStatus == EnumEntryStatus.New)
+        {
+            if (Directory.Exists(_mainViewModel.EntryDataDirectoryPath))
+            {
+                Debug.WriteLine($"Deleting folder: {_mainViewModel.EntryDataDirectoryPath}");
+                Directory.Delete(_mainViewModel.EntryDataDirectoryPath, true);
+            }
+        }
+    }
+
     #endregion
 
     #region == Public Methods ==
+
+    // TODO: change these to commands.
 
     public async Task SetNewBuildingPicturesAsync(List<string> filePathList)
     {
@@ -1662,57 +1715,6 @@ public partial class BldgViewModel : ObservableObject
         }
     }
 
-    private void DiscardUnsavedFiles()
-    {
-        if (_unsavedBuildingPictureFileList.Count > 0)
-        {
-            foreach (var file in _unsavedBuildingPictureFileList)
-            {
-                if (File.Exists(file))
-                {
-                    Debug.WriteLine($"Deleting unsaved picture file: {file}");
-                    File.Delete(file);
-                }
-            }
-            _unsavedBuildingPictureFileList.Clear();
-        }
-
-        if (_unsavedBuildingPdfThumbnailFileList.Count > 0)
-        {
-            foreach (var file in _unsavedBuildingPdfThumbnailFileList)
-            {
-                if (File.Exists(file))
-                {
-                    Debug.WriteLine($"Deleting unsaved PDF Thumbnail file: {file}");
-                    File.Delete(file);
-                }
-            }
-            _unsavedBuildingPdfThumbnailFileList.Clear();
-        }
-
-        if (_unsavedBuildingPdfFileList.Count > 0)
-        {
-            foreach (var file in _unsavedBuildingPdfFileList)
-            {
-                if (File.Exists(file))
-                {
-                    Debug.WriteLine($"Deleting unsaved PDF file: {file}");
-                    File.Delete(file);
-                }
-            }
-            _unsavedBuildingPdfFileList.Clear();
-        }
-
-        if (_entry.EntryStatus == EnumEntryStatus.New)
-        {
-            if (Directory.Exists(_mainViewModel.EntryDataDirectoryPath))
-            {
-                Debug.WriteLine($"Deleting folder: {_mainViewModel.EntryDataDirectoryPath}");
-                Directory.Delete(_mainViewModel.EntryDataDirectoryPath, true);
-            }
-        }
-    }
-
     public void DiscardChanges()
     {
         DiscardUnsavedFiles();
@@ -1823,7 +1825,7 @@ public partial class BldgViewModel : ObservableObject
     }
 
     [RelayCommand(CanExecute = nameof(CanDeleteBuildingPicture))]
-    public void DeleteBuildingPicture(Models.Rent.Residentials.PictureBldg picBldg)
+    internal void DeleteBuildingPicture(Models.Rent.Residentials.PictureBldg picBldg)
     {
         if (picBldg is null)
         {
@@ -1844,7 +1846,7 @@ public partial class BldgViewModel : ObservableObject
     }
 
     [RelayCommand(CanExecute = nameof(CanDeleteBuildingPdf))]
-    public void DeleteBuildingPdf(Models.Rent.Residentials.PdfBldg pdfBldg)
+    internal void DeleteBuildingPdf(Models.Rent.Residentials.PdfBldg pdfBldg)
     {
         if (pdfBldg is null)
         {

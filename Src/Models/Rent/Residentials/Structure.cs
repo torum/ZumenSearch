@@ -7,7 +7,7 @@ public enum EnumStructure
 }
 
 // 賃貸住居用物件の「構造」クラス
-public class Structure(EnumStructure key, string label)
+public sealed class Structure(EnumStructure key, string label)
 {
     public string Label => label;
 

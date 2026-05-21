@@ -3,7 +3,7 @@ using ZumenSearch.Models.Rent.Residentials;
 
 namespace ZumenSearch.Services.Contracts;
 
-public interface IDataAccessService
+internal interface IDataAccessService
 {
     SqliteDataAccessResultWrapper InitializeDatabase(string dataBaseFilePath);
 

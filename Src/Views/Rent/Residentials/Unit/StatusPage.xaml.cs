@@ -4,7 +4,7 @@ using Microsoft.UI.Xaml.Navigation;
 
 namespace ZumenSearch.Views.Rent.Residentials.Unit;
 
-public sealed partial class StatusPage : Page
+internal sealed partial class StatusPage : Page
 {
     public ViewModels.Rent.Residentials.MainViewModel? ViewModel
     {

@@ -7,7 +7,7 @@ using ZumenSearch.Models.Rent.Residentials;
 
 namespace ZumenSearch.Views.Rent.Residentials.Bldg;
 
-public sealed partial class UnitListPage : Page
+internal sealed partial class UnitListPage : Page
 {
     //private Views.Rent.Residentials.Editor.EditorShell? _editorShell;
 

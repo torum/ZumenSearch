@@ -8,7 +8,7 @@ using ZumenSearch.ViewModels;
 
 namespace ZumenSearch.Views;
 
-public sealed partial class MainWindow : Window
+internal sealed partial class MainWindow : Window
 {
     // Window position and size
     // TODO: Change this lator.1920x1080

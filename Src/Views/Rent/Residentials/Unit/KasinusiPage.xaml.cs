@@ -4,7 +4,7 @@ using Microsoft.UI.Xaml.Navigation;
 
 namespace ZumenSearch.Views.Rent.Residentials.Unit;
 
-public sealed partial class KasinusiPage : Page
+internal sealed partial class KasinusiPage : Page
 {
     public ViewModels.Rent.Residentials.MainViewModel? ViewModel
     {

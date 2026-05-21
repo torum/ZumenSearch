@@ -10,7 +10,7 @@ public enum EnumUnitPictureType
     //Unspecified, Madori, Gaikan, Entrance, Neighborhood, Other
 }
 
-public class UnitPictureType(EnumUnitPictureType key)
+public sealed class UnitPictureType(EnumUnitPictureType key)
 {
     private Dictionary<EnumUnitPictureType, string> UnitPictureTypeDictionary
     {
@@ -41,7 +41,7 @@ public class UnitPictureType(EnumUnitPictureType key)
     public EnumUnitPictureType Key => key;
 };
 
-public partial class PictureUnit : PictureBase
+internal sealed partial class PictureUnit : PictureBase
 {
     public ViewModels.Rent.Residentials.MainViewModel? ParentViewModel { get; set; }
 

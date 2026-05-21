@@ -7,7 +7,7 @@ public enum EnumKinds
 }
 
 // 賃貸住居用物件の「種別」クラス
-public class Kind(string key, string label)
+public sealed class Kind(string key, string label)
 {
     public string Label => label;
 

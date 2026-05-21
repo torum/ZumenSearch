@@ -4,7 +4,7 @@ using ZumenSearch.Models.Base;
 
 namespace ZumenSearch.Models.Rent.Residentials;
 
-public partial class PdfBldg : PdfBase
+internal sealed partial class PdfBldg : PdfBase
 {
     public ViewModels.Rent.Residentials.MainViewModel? ParentViewModel { get; set; }
 

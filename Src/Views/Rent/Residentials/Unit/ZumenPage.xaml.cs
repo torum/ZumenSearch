@@ -3,7 +3,7 @@ using Microsoft.UI.Xaml.Navigation;
 
 namespace ZumenSearch.Views.Rent.Residentials.Unit;
 
-public sealed partial class ZumenPage : Page
+internal sealed partial class ZumenPage : Page
 {
     public ViewModels.Rent.Residentials.MainViewModel? ViewModel
     {

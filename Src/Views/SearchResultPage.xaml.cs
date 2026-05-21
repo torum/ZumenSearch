@@ -10,7 +10,7 @@ using ZumenSearch.ViewModels;
 
 namespace ZumenSearch.Views;
 
-public sealed partial class SearchResultPage : Page
+internal sealed partial class SearchResultPage : Page
 {
     public MainViewModel ViewModel
     {

@@ -1,6 +1,7 @@
 using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
 using System.Diagnostics;
@@ -8,7 +9,7 @@ using ZumenSearch.Services.Contracts;
 
 namespace ZumenSearch.Views;
 
-public sealed partial class ShellPage : Page
+internal sealed partial class ShellPage : Page
 {
     public ViewModels.MainViewModel ViewModel { get; private set; }
 
@@ -323,6 +324,15 @@ public sealed partial class ShellPage : Page
 
             // Set the text box content to the property you want the user to see
             sender.Text = selectedItem.Name;
+        }
+    }
+
+    private void BackAccelerator_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+    {
+        if (this.ContentFrame != null && this.ContentFrame.CanGoBack)
+        {
+            this.ContentFrame.GoBack();
+            args.Handled = true;
         }
     }
 }

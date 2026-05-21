@@ -3,7 +3,7 @@ using Microsoft.UI.Xaml.Navigation;
 
 namespace ZumenSearch.Views.Rent.Residentials.Bldg;
 
-public sealed partial class KasinusiPage : Page
+internal sealed partial class KasinusiPage : Page
 {
     //private Views.Rent.Residentials.Editor.EditorShell? _editorShell;
 

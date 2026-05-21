@@ -3,7 +3,7 @@ using Microsoft.UI.Xaml;
 
 namespace ZumenSearch.Views.Rent.Residentials;
 
-public sealed partial class EditorWindow : Window
+internal sealed partial class EditorWindow : Window
 {
     public string? Id { get; private set; } = string.Empty;
 

@@ -19,7 +19,7 @@ using ZumenSearch.Views.Rent.Residentials;
 
 namespace ZumenSearch.ViewModels;
 
-public partial class MainViewModel : ObservableObject
+internal sealed partial class MainViewModel : ObservableObject
 {
     private static readonly ResourceLoader _resourceLoader = new();
 

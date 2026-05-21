@@ -9,7 +9,7 @@ using ZumenSearch.Services.Contracts;
 
 namespace ZumenSearch.Views.Rent.Residentials.Unit;
 
-public sealed partial class UnitShellPage : Page
+internal sealed partial class UnitShellPage : Page
 {
     #region == Properties ==
 

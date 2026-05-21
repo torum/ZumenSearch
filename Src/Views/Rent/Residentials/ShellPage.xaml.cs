@@ -1,6 +1,7 @@
 ﻿using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
@@ -12,7 +13,7 @@ using ZumenSearch.ViewModels;
 
 namespace ZumenSearch.Views.Rent.Residentials;
 
-public sealed partial class ShellPage : Page
+internal sealed partial class ShellPage : Page
 {
     public ViewModels.Rent.Residentials.MainViewModel ViewModel { get; private set; }
 
@@ -240,5 +241,14 @@ public sealed partial class ShellPage : Page
             }
         }
         */
+    }
+
+    private void BackAccelerator_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+    {
+        if (this.ContentFrame != null && this.ContentFrame.CanGoBack)
+        {
+            this.ContentFrame.GoBack();
+            args.Handled = true;
+        }
     }
 }

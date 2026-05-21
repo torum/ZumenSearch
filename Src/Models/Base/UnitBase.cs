@@ -2,7 +2,7 @@
 
 namespace ZumenSearch.Models.Base;
 
-public abstract class UnitBase : ObservableObject
+internal abstract class UnitBase : ObservableObject
 {
     public string Id { get; }
 

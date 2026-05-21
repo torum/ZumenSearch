@@ -4,7 +4,7 @@ using ZumenSearch.Models.Base;
 namespace ZumenSearch.Models.Rent.Residentials;
 
 // 賃貸住居用建物の検索結果表示用物件クラス（建物）
-public partial class EntryResidentialSearchResult : EntryBase
+internal sealed partial class EntryResidentialSearchResult : EntryBase
 {
     public EntryResidentialSearchResult(string id) : base(id)
     {
@@ -13,7 +13,7 @@ public partial class EntryResidentialSearchResult : EntryBase
 }
 
 // 賃貸住居用の物件クラス（建物）
-public partial class EntryResidentialFull : EntryBase
+internal sealed partial class EntryResidentialFull : EntryBase
 {
     public EnumEntryStatus EntryStatus
     {

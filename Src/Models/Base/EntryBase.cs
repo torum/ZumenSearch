@@ -2,13 +2,13 @@
 
 namespace ZumenSearch.Models.Base;
 
-public enum EnumEntryStatus
+internal enum EnumEntryStatus
 {
     Saved,
     New,
 }
 
-public abstract partial class EntryBase : ObservableObject
+internal abstract partial class EntryBase : ObservableObject
 {
     // TODO: I don't think we need this anymore....
     public bool IsDirty

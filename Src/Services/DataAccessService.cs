@@ -11,7 +11,7 @@ using static Microsoft.Extensions.Logging.EventSource.LoggingEventSource;
 
 namespace ZumenSearch.Services;
 
-public class DataAccessService : IDataAccessService
+internal sealed class DataAccessService : IDataAccessService
 {
     private SqliteConnectionStringBuilder connectionStringBuilder = [];
 

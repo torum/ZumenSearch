@@ -4,7 +4,7 @@ using System.Diagnostics;
 
 namespace ZumenSearch.Views.Rent.Residentials.Bldg;
 
-public sealed partial class ZumenListPage : Page
+internal sealed partial class ZumenListPage : Page
 {
     public ViewModels.Rent.Residentials.MainViewModel? ViewModel
     {

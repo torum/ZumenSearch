@@ -2,7 +2,7 @@
 
 namespace ZumenSearch.Models.Base;
 
-public abstract class PdfBase : ObservableObject
+internal abstract class PdfBase : ObservableObject
 {
     public string PdfLocation
     {

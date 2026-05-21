@@ -8,8 +8,11 @@
     xmlns:helpers="using:ZumenSearch.Helpers"
     xmlns:mod="using:ZumenSearch.Models.Common"
     mc:Ignorable="d"
-    Loaded="Page_Loaded">
-
+    Loaded="Page_Loaded"
+    KeyboardAcceleratorPlacementMode="Hidden">
+    <Page.KeyboardAccelerators>
+        <KeyboardAccelerator Key="Left" Modifiers="Menu" Invoked="BackAccelerator_Invoked" />
+    </Page.KeyboardAccelerators>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="40"/>

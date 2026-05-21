@@ -14,7 +14,7 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace ZumenSearch.ViewModels.Rent.Residentials;
 
-public partial class UnitViewModel : ObservableObject
+internal sealed partial class UnitViewModel : ObservableObject
 {
     #region == Private variables ==
     
@@ -106,7 +106,7 @@ public partial class UnitViewModel : ObservableObject
         }
     }
 
-    public ObservableCollection<PictureUnit> UnitPictures
+    internal ObservableCollection<PictureUnit> UnitPictures
     {
         get;
         set
@@ -304,9 +304,26 @@ public partial class UnitViewModel : ObservableObject
         }
     }
 
+    private void DiscardUnsavedFiles()
+    {
+        if (_unsavedUnitPictureFileList.Count > 0)
+        {
+            foreach (var file in _unsavedUnitPictureFileList)
+            {
+                if (File.Exists(file))
+                {
+                    Debug.WriteLine($"Deleting unsaved picture file: {file}");
+                    File.Delete(file);
+                }
+            }
+
+            _unsavedUnitPictureFileList.Clear();
+        }
+    }
+
     #region == Public Methods ==
 
-    public void SetEditUnit(Models.Rent.Residentials.UnitResidential room)//SetEditUnit //PopulateUnitValues
+    internal void SetEditUnit(Models.Rent.Residentials.UnitResidential room)//SetEditUnit //PopulateUnitValues
     {
         _unit = room;
 
@@ -316,6 +333,7 @@ public partial class UnitViewModel : ObservableObject
         IsDirty = false;
     }
 
+    // TODO: Convert this to command
     public void LeavingUnitCleanUp()
     {
         foreach (var item in UnitPictures)
@@ -327,6 +345,8 @@ public partial class UnitViewModel : ObservableObject
 
         //IsDirty = false;
     }
+
+    // TODO: change these below to commands.
 
     public async Task SetNewUnitPicturesAsync(List<string> filePathList)
     {
@@ -382,23 +402,6 @@ public partial class UnitViewModel : ObservableObject
             _unsavedUnitPictureFileList.Add(destFilePath);
         }
 
-    }
-
-    private void DiscardUnsavedFiles()
-    {
-        if (_unsavedUnitPictureFileList.Count > 0)
-        {
-            foreach (var file in _unsavedUnitPictureFileList)
-            {
-                if (File.Exists(file))
-                {
-                    Debug.WriteLine($"Deleting unsaved picture file: {file}");
-                    File.Delete(file);
-                }
-            }
-
-            _unsavedUnitPictureFileList.Clear();
-        }
     }
 
     public void DiscardChanges()
@@ -509,7 +512,7 @@ public partial class UnitViewModel : ObservableObject
     }
 
     [RelayCommand(CanExecute = nameof(CanDeleteUnitPicture))]
-    public void DeleteUnitPicture(Models.Rent.Residentials.PictureUnit picUnit)
+    private void DeleteUnitPicture(Models.Rent.Residentials.PictureUnit picUnit)
     {
         if (_unit is null)
         {

@@ -38,11 +38,11 @@
 
         <Grid Grid.Row="1">
             <Border Style="{StaticResource RoundCardBorderStyle}">
-                <ListView x:Name="RoomsListView" ItemsSource="{x:Bind ViewModel.Bldg.Rooms, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.Bldg.SelectedRoom, Mode=TwoWay}" SelectionMode="Single" AllowFocusOnInteraction="False" IsDoubleTapEnabled="True" DoubleTapped="RoomsListView_DoubleTapped">
-                    <!--
+                <ListView x:Name="RoomsListView" ItemsSource="{x:Bind ViewModel.Bldg.Rooms, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.Bldg.SelectedRoom, Mode=TwoWay}" SelectionMode="Single" AllowFocusOnInteraction="True" IsDoubleTapEnabled="True" DoubleTapped="RoomsListView_DoubleTapped">
+
                     <ListView.ContextFlyout>
                         <MenuFlyout>
-                            <MenuFlyoutItem Command="{x:Bind ViewModel.QueueFilterSelectCommand}" CommandParameter="{x:Bind FilterQueueListBox.SelectedItem, Mode=OneWay}">
+                            <MenuFlyoutItem Command="{x:Bind ViewModel.Bldg.EditSelectedUnitCommand}" CommandParameter="{x:Bind RoomsListView.SelectedItem, Mode=OneWay}">
                                 <MenuFlyoutItem.Icon>
                                     <PathIcon Width="NaN" Height="NaN" Margin="0" Data="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm8.856-3.845A1.25 1.25 0 0 0 9 9.248v5.504a1.25 1.25 0 0 0 1.856 1.093l5.757-3.189a.75.75 0 0 0 0-1.312l-5.757-3.189Z"/>
                                 </MenuFlyoutItem.Icon>
@@ -52,7 +52,7 @@
                             </MenuFlyoutItem>
                         </MenuFlyout>
                     </ListView.ContextFlyout>
-                    -->
+
                     <ListView.ItemTemplate>
                         <DataTemplate x:DataType="modresi:UnitResidential">
                             <Grid>

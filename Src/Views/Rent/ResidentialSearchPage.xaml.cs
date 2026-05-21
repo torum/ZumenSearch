@@ -6,7 +6,7 @@ using ZumenSearch.ViewModels;
 
 namespace ZumenSearch.Views.Rent;
 
-public sealed partial class ResidentialSearchPage : Page
+internal sealed partial class ResidentialSearchPage : Page
 {
     public MainViewModel ViewModel
     {

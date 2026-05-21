@@ -22,7 +22,7 @@ public class AbstractFactory<TParam, T> : IAbstractFactory<TParam, T>
     public T Create(TParam param) => _factory(param);
 }
 */
-public class AbstractFactory<TParam, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T> : IAbstractFactory<TParam, T>
+internal sealed class AbstractFactory<TParam, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T> : IAbstractFactory<TParam, T>
 {
     private readonly IServiceProvider _serviceProvider;
 
