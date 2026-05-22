@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controls="using:Microsoft.UI.Xaml.Controls"
     xmlns:converters="using:CommunityToolkit.WinUI.Converters"
+    xmlns:myconverters="using:ZumenSearch.Helpers.Converters"
     xmlns:local="using:ZumenSearch">
     <Application.Resources>
         <ResourceDictionary>
@@ -143,6 +144,7 @@
             
             <!-- Converters -->
             <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+            <myconverters:ErrorToBorderBrushConverter x:Key="ErrorBrushConverter"/>
 
             <!-- NavigationView resources -->
             <Thickness x:Key="NavigationViewContentMargin">0,0,0,0</Thickness>

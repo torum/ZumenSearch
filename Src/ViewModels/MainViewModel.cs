@@ -149,10 +149,7 @@ internal sealed partial class MainViewModel : ObservableObject
 
     #region == Services ==
 
-    //private readonly IAbstractFactory<Views.Rent.Residentials.ShellPage> _editorFactory;
-    //private Func<Models.Rent.Residentials.EntryResidentialFull, Views.Rent.Residentials.ShellPage> _shellFactory;
-    private IAbstractFactory<Models.Rent.Residentials.EntryResidentialFull, Views.Rent.Residentials.ShellPage> _shellFactory;
-
+    private readonly IAbstractFactory<Models.Rent.Residentials.EntryResidential, Views.Rent.Residentials.ShellPage> _shellFactory;
     private readonly IDataAccessService _dataAccessService;
     private readonly INavigationService _navigationService;
     private readonly IDispatcherService _dispatcherService;
@@ -161,7 +158,7 @@ internal sealed partial class MainViewModel : ObservableObject
 
     private readonly CancellationTokenSource _cts = new();
 
-    public MainViewModel(IAbstractFactory<Models.Rent.Residentials.EntryResidentialFull, Views.Rent.Residentials.ShellPage> shellFactory, INavigationService navigationService, IDataAccessService dataAccessService, IDispatcherService dispatcherService)//IAbstractFactory<Views.Rent.Residentials.ShellPage> editorFactory,
+    public MainViewModel(IAbstractFactory<Models.Rent.Residentials.EntryResidential, Views.Rent.Residentials.ShellPage> shellFactory, INavigationService navigationService, IDataAccessService dataAccessService, IDispatcherService dispatcherService)//IAbstractFactory<Views.Rent.Residentials.ShellPage> editorFactory,
     {
         _shellFactory = shellFactory;
         _dataAccessService = dataAccessService;
@@ -229,7 +226,7 @@ internal sealed partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void AddNewRentResidential()
     {
-        var shell = _shellFactory.Create(new Models.Rent.Residentials.EntryResidentialFull(Guid.CreateVersion7().ToString("N"), EnumEntryStatus.New));
+        var shell = _shellFactory.Create(new Models.Rent.Residentials.EntryResidential(Guid.CreateVersion7().ToString("N"), EnumEntryStatus.New));
 
         EditorList.Add(shell.Win);
 

@@ -29,6 +29,22 @@ internal sealed partial class SearchResultPage : Page
 
         BreadcrumbBar1.ItemClicked += BreadcrumbBar_ItemClicked;
     }
+    protected override void OnNavigatedTo(NavigationEventArgs e)
+    {
+        if ((e.Parameter is Frame) && (e.Parameter != null))
+        {
+            ContentFrame = e.Parameter as Frame;
+        }
+
+        base.OnNavigatedTo(e);
+
+        this.SearchResultListView.Focus(Microsoft.UI.Xaml.FocusState.Programmatic);
+    }
+
+    private void Page_Loaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    {
+        this.SearchResultListView.Focus(Microsoft.UI.Xaml.FocusState.Programmatic);
+    }
 
     private void BreadcrumbBar_ItemClicked(BreadcrumbBar sender, BreadcrumbBarItemClickedEventArgs args)
     {
@@ -46,17 +62,6 @@ internal sealed partial class SearchResultPage : Page
         {
             //shell.NavFrame.Navigate(typeof(Views.Rent.Residentials.SearchPage), shell.NavFrame, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });
         }
-    }
-
-    protected override void OnNavigatedTo(NavigationEventArgs e)
-    {
-
-        if ((e.Parameter is Frame) && (e.Parameter != null))
-        {
-            ContentFrame = e.Parameter as Frame;
-        }
-
-        base.OnNavigatedTo(e);
     }
 
     private void SearchResult_DoubleTapped(object sender, Microsoft.UI.Xaml.Input.DoubleTappedRoutedEventArgs e)

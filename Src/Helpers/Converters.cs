@@ -1,8 +1,10 @@
-﻿using System;
+﻿using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Data;
+using Microsoft.UI.Xaml.Media;
+using System;
 
-namespace ZumenSearch.Helpers;
+namespace ZumenSearch.Helpers.Converters;
 
 public partial class EnumToBooleanConverter : IValueConverter
 {
@@ -35,5 +37,24 @@ public partial class EnumToBooleanConverter : IValueConverter
         }
 
         throw new ArgumentException("ExceptionEnumToBooleanConverterParameterMustBeAnEnumName");
+    }
+}
+
+// BorderBrush="{x:Bind ViewModel.HasNameErrors, Mode=OneWay, Converter={StaticResource ErrorBrushConverter}}"
+public partial class ErrorToBorderBrushConverter : IValueConverter
+{
+    public object? Convert(object value, Type targetType, object parameter, string language)
+    {
+        bool hasError = value is bool && (bool)value;
+
+        // Return Red brush if there is an error, otherwise rely on the default Theme Brush
+        return hasError
+            ? new SolidColorBrush(Colors.Red)
+            : null;
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, string language)
+    {
+        throw new NotImplementedException();
     }
 }

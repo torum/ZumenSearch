@@ -18,10 +18,8 @@ internal abstract class UnitBase : ObservableObject
         }
     }
 
-    // TODO: I don't think we need this anymore....??
     public bool IsNew { get; set; } = true;
 
-    // TODO: I don't think we need this anymore....??
     public bool IsModified { get; set; } = false;
 
     protected UnitBase(string id)

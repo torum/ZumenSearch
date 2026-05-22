@@ -88,7 +88,7 @@
             </StackPanel>
 
             <ScrollViewer Grid.Row="1" Padding="{StaticResource ContentPadding}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-
+<!--  -->
                 <ItemsView x:Name="SearchResultListView" Margin="0,12,0,0" AllowFocusOnInteraction="False" SelectionMode="Single" ItemsSource="{x:Bind ViewModel.RentResidentialUnitSearchResult, Mode=OneWay}" IsItemInvokedEnabled="True" ItemInvoked="SearchResultListView_ItemInvoked">
                     <!--  SelectedItem="{x:Bind ViewModel.SelectedRentResidentialItem, Mode=TwoWay}" -->
 

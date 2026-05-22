@@ -85,6 +85,12 @@ public sealed partial class SearchPage : Page
     {
         base.OnNavigatedTo(e);
 
+        this.SearchAutoSuggestBox.Focus(Microsoft.UI.Xaml.FocusState.Programmatic);
+    }
+
+    private void Page_Loaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    {
+        this.SearchAutoSuggestBox.Focus(Microsoft.UI.Xaml.FocusState.Programmatic);
     }
 
     private void AutoSuggestBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
@@ -94,4 +100,5 @@ public sealed partial class SearchPage : Page
             ViewModel.SearchRentResidentialEntryCommand.Execute(args.QueryText);
         }
     }
+
 }

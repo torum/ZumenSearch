@@ -1,31 +1,41 @@
 ﻿using System.Collections.ObjectModel;
+using System.Globalization;
 using ZumenSearch.Models.Base;
 
 namespace ZumenSearch.Models.Rent.Residentials;
 
-// 賃貸住居用建物の検索結果表示用物件クラス（建物）
+// 検索結果一覧表示用（建物）
 internal sealed partial class EntryResidentialSearchResult : EntryBase
 {
+    // TODO:
+
     public EntryResidentialSearchResult(string id) : base(id)
     {
         //
     }
 }
 
-// 賃貸住居用の物件クラス（建物）
-internal sealed partial class EntryResidentialFull : EntryBase
+// 編集用（建物）
+internal sealed partial class EntryResidential : EntryBase
 {
-    public EnumEntryStatus EntryStatus
+    // ステータス（保存済みか新規か）
+    public EnumEntryStatus EntryStatus { get; set; }
+
+    // 物件に属する部屋のリスト
+    public ObservableCollection<UnitResidential> Rooms
     {
         get;
         set
         {
             if (SetProperty(ref field, value))
             {
-                
+                IsDirty = true;
             }
         }
-    }
+    } = [];
+
+    // DBへの更新時にDBから削除されるべき部屋のIDリスト
+    public ObservableCollection<UnitResidential> RoomsToBeDeleted = [];
 
     // 物件写真（建物）リスト
     public ObservableCollection<PictureBldg> BuildingPictures
@@ -59,8 +69,21 @@ internal sealed partial class EntryResidentialFull : EntryBase
     // DBへの更新時にDBから削除されるべき図面のIDリスト
     public ObservableCollection<PdfBldg> BuildingPdfsToBeDeleted = [];
 
-    // 部屋のリスト
-    public ObservableCollection<UnitResidential> Rooms
+    // 物件種別
+    public Models.Rent.Residentials.Kind BuildingKind
+    {
+        get => field ?? new(Models.Rent.Residentials.EnumKinds.Unspecified, "未指定");
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+            }
+        }
+    }
+
+    // 区分所有か一括所有か
+    public bool IsUnitOwnership
     {
         get;
         set
@@ -70,122 +93,185 @@ internal sealed partial class EntryResidentialFull : EntryBase
                 IsDirty = true;
             }
         }
-    } = [];
-
-    // DBへの更新時にDBから削除されるべき部屋のIDリスト
-    public ObservableCollection<UnitResidential> RoomsToBeDeleted = [];
-
-    public EntryResidentialFull(string id, EnumEntryStatus status) : base(id)
-    {
-        EntryStatus = status;
     }
-
-    /*
-    // 建物管理
-    //
 
     // 建物構造
-    //
-
-    // 築年
-    private int _builtYear;
-    public int BuiltYear
+    public Models.Rent.Residentials.Structure BuildingStructure
     {
-        get
-        {
-            return _builtYear;
-        }
+        get => field ?? new(Models.Rent.Residentials.EnumStructure.Unspecified, "未指定");
         set
         {
-            if (_builtYear == value) return;
-
-            _builtYear = value;
-            this.NotifyPropertyChanged("BuiltYear");
-
-            // 変更フラグ
-            IsDirty = true;
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+            }
         }
     }
 
-    // 地上n階建て
-    private int _floors;
-    public int Floors
+    // 地上階
+    public string AboveGroundFloorCount
     {
-        get
-        {
-            return _floors;
-        }
+        get => field ?? string.Empty;
         set
         {
-            if (_floors == value) return;
+            if (field == value)
+            {
+                return;
+            }
 
-            _floors = value;
-            this.NotifyPropertyChanged("Floors");
+            if (value is null)
+            {
+                return;
+            }
 
-            // 変更フラグ
-            IsDirty = true;
+            var text = Helpers.Common.ReplaceZenkakuNumber(value.Trim());
+
+            if (Helpers.Common.CanConvertToPositiveNumber(text))
+            {
+                field = text;
+                IsDirty = true;
+            }
+            else
+            {
+                // TODO: show error
+                field = string.Empty;
+                IsDirty = true;
+            }
+
+            OnPropertyChanged();
         }
     }
 
-    // 地下n階建て
-    private int _floorsBasement;
-    public int FloorsBasement
+    // 地下階
+    public string BasementFloorCount
     {
-        get
-        {
-            return _floorsBasement;
-        }
+        get => field ?? string.Empty;
         set
         {
-            if (_floorsBasement == value) return;
+            if (field == value)
+            {
+                return;
+            }
 
-            _floorsBasement = value;
-            this.NotifyPropertyChanged("FloorsBasement");
+            if (value is null)
+            {
+                return;
+            }
 
-            // 変更フラグ
-            IsDirty = true;
+            var text = Helpers.Common.ReplaceZenkakuNumber(value.Trim());
+
+            if (Helpers.Common.CanConvertToPositiveNumber(text))
+            {
+                field = text;
+                IsDirty = true;
+            }
+            else
+            {
+                // TODO: show error
+                field = string.Empty;
+                IsDirty = true;
+            }
+
+            OnPropertyChanged();
         }
     }
 
     // 総戸数
-    private int _totalRoomNumber;
-    public int TotalRoomNumber
+    public string TotalUnitCount
     {
-        get
-        {
-            return _totalRoomNumber;
-        }
+        get => field ?? string.Empty;
         set
         {
-            if (_totalRoomNumber == value) return;
+            if (field == value)
+            {
+                return;
+            }
 
-            _totalRoomNumber = value;
-            this.NotifyPropertyChanged("TotalRoomNumber");
+            if (value is null)
+            {
+                return;
+            }
 
-            // 変更フラグ
-            IsDirty = true;
+            var text = Helpers.Common.ReplaceZenkakuNumber(value.Trim());
+
+            if (Helpers.Common.CanConvertToPositiveNumber(text))
+            {
+                field = text;
+                IsDirty = true;
+            }
+            else
+            {
+                // TODO: show error
+                field = string.Empty;
+                IsDirty = true;
+            }
+
+            OnPropertyChanged();
         }
     }
 
-    // 取引態様
-    //
+    // 築年月
+    public DateTimeOffset? BuiltYearAndMonth
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+                OnPropertyChanged();
+            }
+        }
+    }
 
-    // 建物備考
-    //
+    // 不動産ID (13桁)
+    public string FudousanId
+    {
+        get => field ?? string.Empty;
+        set
+        {
+            // TODO: check 13桁.
 
-    // 建物設備
-    //
+            if (SetProperty(ref field, value.Trim()))
+            {
+                IsDirty = true;
+            }
+        }
+    }
 
-    //
+    // 特定コード（４桁）建物全体は0000
+    public string FudousanIdAdditionalCode
+    {
+        get => field ?? string.Empty; // keep non-null empty string.
+        set
+        {
+            // TODO: check ４桁.
 
-    //
-    
-    //
+            if (SetProperty(ref field, value.Trim()))
+            {
+                IsDirty = true;
+            }
+        }
+    } = "0000";
 
-    // 建物設備備考
-    //
+    // 備考
+    public string Remarks
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+            }
+        }
+    } = string.Empty;
 
-    */
+    // TODO: More.
 
 
+    public EntryResidential(string id, EnumEntryStatus status) : base(id)
+    {
+        EntryStatus = status;
+    }
 }

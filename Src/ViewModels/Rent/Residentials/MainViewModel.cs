@@ -1,37 +1,17 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml.Media.Animation;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Globalization;
-using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
-using Windows.Storage.Search;
-using Windows.System;
 using ZumenSearch.Models.Base;
 using ZumenSearch.Models.Common;
-using ZumenSearch.Models.Rent.Residentials;
 using ZumenSearch.Services.Contracts;
-using ZumenSearch.Views;
-using ZumenSearch.Views.Rent.Residentials;
-using ZumenSearch.Views.Rent.Residentials.Unit;
 
 namespace ZumenSearch.ViewModels.Rent.Residentials;
 
 internal sealed partial class MainViewModel : ObservableObject
 {
-    #region == Private Variables ==
-
-    //private Views.Rent.Residentials.Bldg.BldgShellPage? _bldgShellPage;
-    //private Views.Rent.Residentials.Unit.UnitShellPage? _unitShellPage;
-
-    #endregion
-
     #region == Public Properties ==
 
     public string Id => _id;
@@ -58,6 +38,12 @@ internal sealed partial class MainViewModel : ObservableObject
         new() { Name = "基本", Page = typeof(Views.Rent.Residentials.Unit.BasicPage).FullName! }
     ];
 
+    [ObservableProperty]
+    public partial bool IsInfoBarErrorOpen { get; set; }
+
+    [ObservableProperty]
+    public partial string InfoBarErrorMessage { get; set; } = string.Empty;
+
     // TODO:
     public string WindowTitle
     {
@@ -75,9 +61,9 @@ internal sealed partial class MainViewModel : ObservableObject
             {
                 var str = $"{field} - {Bldg.Name}";
 
-                if (!string.IsNullOrEmpty(Unit.RoomName))
+                if (!string.IsNullOrEmpty(Unit.Name))
                 {
-                    str =  $"{str}: {Unit.RoomName}";
+                    str =  $"{str}: {Unit.Name}";
                 }
 
                 if (Bldg.EntryStatus == EnumEntryStatus.New)
@@ -129,14 +115,14 @@ internal sealed partial class MainViewModel : ObservableObject
 
     #endregion
 
-    private readonly string _id = string.Empty;
-    //private Views.Rent.Residentials.ShellPage? _shell;
-    //private Views.Rent.Residentials.EditorWindow? _win;
+    #region == Private Variables ==
 
-    public MainViewModel(Models.Rent.Residentials.EntryResidentialFull entry, IDispatcherService dispatcherService, IDataAccessService dataAccessService, IModalDialogService modalDialogService, IDataAccessLocationService dataAccessLocationService)
+    private readonly string _id = string.Empty;
+
+    #endregion
+
+    public MainViewModel(Models.Rent.Residentials.EntryResidential entry, IDispatcherService dispatcherService, IDataAccessService dataAccessService, IModalDialogService modalDialogService, IDataAccessLocationService dataAccessLocationService)
     {
-        //Win = editorWindow;
-        //Shell = shellPage;
         _dataAccessService = dataAccessService;
         _dataAccessLocationService = dataAccessLocationService;
         _dlgService = modalDialogService;
@@ -144,8 +130,6 @@ internal sealed partial class MainViewModel : ObservableObject
 
         _id = entry.Id;//Guid.CreateVersion7().ToString("N");
         EntryDataDirectoryPath = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(App.AppDataPictureFolder, "Rent"), "Residential_Building"), _id);
-
-        //Debug.WriteLine($"MainViewModel {entry.Id}");
 
         Unit = new UnitViewModel(this, dataAccessService);
         Bldg = new BldgViewModel(this, entry, dataAccessService, dataAccessLocationService);

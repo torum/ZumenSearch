@@ -10,7 +10,8 @@
     xmlns:controls="using:CommunityToolkit.WinUI.Controls"
     xmlns:framework="using:Microsoft.UI.Xaml"
     mc:Ignorable="d"
-    NavigationCacheMode="Required">
+    NavigationCacheMode="Required"
+    Loaded="Page_Loaded">
 
     <Page.Resources>
         <CollectionViewSource x:Name="cvsProjects" IsSourceGrouped="True" ItemsPath="Activities"/>
@@ -70,7 +71,7 @@
                     <controls:SegmentedItem Content="売買" Tag="two" />
                 </controls:Segmented>
 
-                <AutoSuggestBox x:Name="SearchAutoSuggestBox" PlaceholderText="検索キーワードを入力" Text="{x:Bind ViewModel.SearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" QueryIcon="Find" MaxWidth="500" QuerySubmitted="AutoSuggestBox_QuerySubmitted"/>
+                <AutoSuggestBox x:Name="SearchAutoSuggestBox" TabIndex="0" PlaceholderText="検索キーワードを入力" Text="{x:Bind ViewModel.SearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" QueryIcon="Find" MaxWidth="500" QuerySubmitted="AutoSuggestBox_QuerySubmitted"/>
 
                 <controls:SwitchPresenter Value="{x:Bind ((framework:FrameworkElement)SegmentedControl.SelectedItem).Tag, Mode=OneWay}">
                     <controls:Case Value="one">

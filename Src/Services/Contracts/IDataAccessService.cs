@@ -7,9 +7,9 @@ internal interface IDataAccessService
 {
     SqliteDataAccessResultWrapper InitializeDatabase(string dataBaseFilePath);
 
-    SqliteDataAccessResultWrapper InsertRentResidential(Models.Rent.Residentials.EntryResidentialFull entry);
+    SqliteDataAccessResultWrapper InsertRentResidential(Models.Rent.Residentials.EntryResidential entry);
 
-    SqliteDataAccessResultWrapper UpdateRentResidential(Models.Rent.Residentials.EntryResidentialFull entry);
+    SqliteDataAccessResultWrapper UpdateRentResidential(Models.Rent.Residentials.EntryResidential entry);
 
     SqliteDataAccessResultWrapper DeleteRentResidential(string rentId);
 

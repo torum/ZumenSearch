@@ -1,15 +1,9 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media.Animation;
-using Microsoft.UI.Xaml.Media.Imaging;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
-using System.Text;
 using Windows.Data.Pdf;
 using Windows.Storage;
 using Windows.Storage.Streams;
@@ -17,34 +11,12 @@ using Windows.System;
 using ZumenSearch.Models.Base;
 using ZumenSearch.Models.Common;
 using ZumenSearch.Models.Rent.Residentials;
-using ZumenSearch.Services;
 using ZumenSearch.Services.Contracts;
 
 namespace ZumenSearch.ViewModels.Rent.Residentials;
 
 internal sealed partial class BldgViewModel : ObservableObject
 {
-    #region == Private Variables ==
-
-    private readonly ViewModels.Rent.Residentials.MainViewModel _mainViewModel;
-
-    // The Entry property holds the COPY of current RentResidential entry being edited.
-    // Do not use it directly in the UI. Apply changes to this object in SaveAsync() to save the changes.
-    // MainViewModel creates a new instance of this class and call EditorShell.SetEntry(EntryResidentialFull) and sets this property.
-    private readonly Models.Rent.Residentials.EntryResidentialFull _entry;
-
-    // Local directory path to save blob data such as pictures and PDFs.
-    //private string _entryDataDirectoryPath;
-
-    // Tmp file list to hold unsaved picture files. (if entry is not saved, delete on close)
-    private readonly List<string> _unsavedBuildingPictureFileList = [];
-
-    //
-    private readonly List<string> _unsavedBuildingPdfFileList = [];
-    private readonly List<string> _unsavedBuildingPdfThumbnailFileList = [];
-
-    #endregion
-
     #region == Public Properties ==
 
     #region == ステータス ==
@@ -70,9 +42,12 @@ internal sealed partial class BldgViewModel : ObservableObject
     }
     */
 
+    [ObservableProperty]
+    public partial bool HasErrors { get; private set; }
+
     #endregion
 
-    #region == 建物基本プロパティ == 
+    #region == 基本プロパティ == 
 
     // 物件名
     public string Name
@@ -84,6 +59,8 @@ internal sealed partial class BldgViewModel : ObservableObject
             {
                 IsDirty = true;
 
+                ValidateName(value);
+
                 // Update title with dummy value.
                 _mainViewModel.WindowTitle = string.Empty;
 
@@ -92,24 +69,43 @@ internal sealed partial class BldgViewModel : ObservableObject
         }
     }
 
+    [ObservableProperty]
+    public partial bool NameHasError { get; private set; }
+
+    [ObservableProperty]
+    public partial string NameErrorMessage { get; private set; } = string.Empty;
+
+    private void ValidateName(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            NameErrorMessage = "物件名（必須項目）を入力してください";
+            NameHasError = true;
+
+            HasErrors = true;
+        }
+        else
+        {
+            NameHasError = false;
+        }
+    }
+
     // 物件種別
-    public ObservableCollection<Kind> Kinds =
+    public ObservableCollection<Models.Rent.Residentials.Kind> Kinds =
     [
         //new Kind(EnumKinds.Unspecified.ToString(), "未指定"),
-        new Kind(Models.Rent.Residentials.EnumKinds.Apartment.ToString(), "アパート"),
-        new Kind(Models.Rent.Residentials.EnumKinds.Mansion.ToString(), "マンション"),
-        new Kind(Models.Rent.Residentials.EnumKinds.House.ToString(), "一戸建て"),
-        new Kind(Models.Rent.Residentials.EnumKinds.TerraceHouse.ToString(), "テラスハウス"),
-        new Kind(Models.Rent.Residentials.EnumKinds.TownHouse.ToString(), "タウンハウス"),
-        new Kind(Models.Rent.Residentials.EnumKinds.ShareHouse.ToString(), "シェアハウス"),
-        new Kind(Models.Rent.Residentials.EnumKinds.Dormitory.ToString(), "寮・下宿")
+        new Kind(Models.Rent.Residentials.EnumKinds.Apartment, "アパート"),
+        new Kind(Models.Rent.Residentials.EnumKinds.Mansion, "マンション"),
+        new Kind(Models.Rent.Residentials.EnumKinds.House, "一戸建て"),
+        new Kind(Models.Rent.Residentials.EnumKinds.TerraceHouse, "テラスハウス"),
+        new Kind(Models.Rent.Residentials.EnumKinds.TownHouse, "タウンハウス"),
+        new Kind(Models.Rent.Residentials.EnumKinds.ShareHouse, "シェアハウス"),
+        new Kind(Models.Rent.Residentials.EnumKinds.Dormitory, "寮・下宿")
     ];
 
-    // The SelectedKind property holds the currently selected kind from the ComboBox in the UI.
-    //private Kind _selectedKind = new(Models.Rent.Residentials.EnumKinds.Unspecified.ToString(), "");
-    public Kind SelectedKind
+    public Models.Rent.Residentials.Kind SelectedKind
     {
-        get => field ?? new(Models.Rent.Residentials.EnumKinds.Unspecified.ToString(), "");
+        get => field ?? new(Models.Rent.Residentials.EnumKinds.Unspecified, "未指定");
         set
         {
             if (SetProperty(ref field, value))
@@ -128,7 +124,7 @@ internal sealed partial class BldgViewModel : ObservableObject
             if (SetProperty(ref field, value))
             {
                 IsDirty = true;
-                OnPropertyChanged(nameof(IsNotUnitOwnership));
+                //OnPropertyChanged(nameof(IsNotUnitOwnership));
 
                 // If this is set, then show/hide the owner and zumen from shell menu.
                 EventIsUnitOwnershipChanged?.Invoke(this, field);
@@ -136,10 +132,10 @@ internal sealed partial class BldgViewModel : ObservableObject
         }
     }
 
-    public bool IsNotUnitOwnership => !IsUnitOwnership;
+    //public bool IsNotUnitOwnership => !IsUnitOwnership;
 
     // 建物構造
-    public ObservableCollection<Structure> Structures =
+    public ObservableCollection<Models.Rent.Residentials.Structure> Structures =
     [
         //new Structure(EnumStructure.Unspecified.ToString(), "未指定"),
         new Structure(Models.Rent.Residentials.EnumStructure.Wood, "木造"),
@@ -156,10 +152,9 @@ internal sealed partial class BldgViewModel : ObservableObject
         new Structure(Models.Rent.Residentials.EnumStructure.Other, "その他")
     ];
 
-    //private Structure _selectedStructure = new(Models.Rent.Residentials.EnumStructure.Unspecified, "");
-    public Structure SelectedStructure
+    public Models.Rent.Residentials.Structure SelectedStructure
     {
-        get => field ?? new(Models.Rent.Residentials.EnumStructure.Unspecified, "");
+        get => field ?? new(Models.Rent.Residentials.EnumStructure.Unspecified, "未指定");
         set
         {
             if (SetProperty(ref field, value))
@@ -170,7 +165,6 @@ internal sealed partial class BldgViewModel : ObservableObject
     }
 
     // 地上階
-    //private string _aboveGroundFloorCount = string.Empty;
     public string AboveGroundFloorCount
     {
         get => field ?? string.Empty;
@@ -200,7 +194,7 @@ internal sealed partial class BldgViewModel : ObservableObject
                 //IsDirty = true;
             }
 
-            OnPropertyChanged(nameof(AboveGroundFloorCount));
+            OnPropertyChanged();
         }
     }
 
@@ -234,7 +228,7 @@ internal sealed partial class BldgViewModel : ObservableObject
                 //IsDirty = true;
             }
 
-            OnPropertyChanged(nameof(BasementFloorCount));
+            OnPropertyChanged();
         }
     }
 
@@ -268,20 +262,20 @@ internal sealed partial class BldgViewModel : ObservableObject
                 //IsDirty = true;
             }
 
-            OnPropertyChanged(nameof(TotalUnitCount));
+            OnPropertyChanged();
         }
     }
 
     // 築年月
     public DateTimeOffset? BuiltYearAndMonth
     {
-        get => field;
+        get;
         set
         {
             if (SetProperty(ref field, value))
             {
                 IsDirty = true;
-                OnPropertyChanged(nameof(BuiltYearAndMonth));
+                OnPropertyChanged();
                 OnPropertyChanged(nameof(BuiltYearAndMonthPreview));
             }
         }
@@ -313,6 +307,8 @@ internal sealed partial class BldgViewModel : ObservableObject
         get => field ?? string.Empty;
         set
         {
+            // TODO: check 13桁.
+
             if (SetProperty(ref field, value.Trim()))
             {
                 IsDirty = true;
@@ -326,12 +322,46 @@ internal sealed partial class BldgViewModel : ObservableObject
         get => field ?? string.Empty; // keep non-null empty string.
         set
         {
+            // TODO: check （４桁）
+
             if (SetProperty(ref field, value.Trim()))
             {
                 IsDirty = true;
             }
         }
     } = "0000";
+
+    // 備考
+    public string Remarks
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+                OnPropertyChanged(nameof(RemarksPreview));
+            }
+        }
+    } = string.Empty;
+
+    public string RemarksPreview
+    {
+        get
+        {
+            string s;
+            if (Remarks.Length > 14)
+            {
+                s = Remarks[..14] + "...";
+            }
+            else
+            {
+                s = Remarks;
+            }
+
+            return s;
+        }
+    }
 
     #endregion
 
@@ -898,41 +928,6 @@ internal sealed partial class BldgViewModel : ObservableObject
 
     #endregion
 
-    #region == 備考プロパティ ==
-
-    public string TatemonoMemo
-    {
-        get;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-                IsDirty = true;
-                OnPropertyChanged(nameof(MemoPreview));
-            }
-        }
-    } = string.Empty;
-
-    public string MemoPreview
-    {
-        get
-        {
-            string s;
-            if (TatemonoMemo.Length > 14)
-            {
-                s = TatemonoMemo[..14] + "...";
-            }
-            else
-            {
-                s = TatemonoMemo;
-            }
-
-            return s;
-        }
-    }
-
-    #endregion
-
     #region == 写真プロパティ ==
 
     internal ObservableCollection<PictureBldg> BuildingPictures
@@ -1098,7 +1093,7 @@ internal sealed partial class BldgViewModel : ObservableObject
 
     #endregion
 
-    #region == PDF ==
+    #region == PDFプロパティ ==
 
     internal ObservableCollection<PdfBldg> BuildingPdfs
     {
@@ -1116,7 +1111,7 @@ internal sealed partial class BldgViewModel : ObservableObject
 
     #endregion
 
-    #region == 部屋 ==
+    #region == 部屋プロパティ ==
 
     internal ObservableCollection<Models.Rent.Residentials.UnitResidential> Rooms
     {
@@ -1137,13 +1132,6 @@ internal sealed partial class BldgViewModel : ObservableObject
 
     #endregion
 
-    #region == エラー ==
-
-    [ObservableProperty]
-    public partial bool HasErrors { get; private set; }
-
-    #endregion
-
     #endregion
 
     #region == Events ==
@@ -1159,7 +1147,23 @@ internal sealed partial class BldgViewModel : ObservableObject
 
     #endregion
 
-    internal BldgViewModel(ViewModels.Rent.Residentials.MainViewModel vm, Models.Rent.Residentials.EntryResidentialFull entry, IDataAccessService dataAccessService, IDataAccessLocationService dataAccessLocationService)
+    #region == Private Variables ==
+
+    private readonly ViewModels.Rent.Residentials.MainViewModel _mainViewModel;
+
+    // The Entry property holds the COPY of current RentResidential entry being edited.
+    // Do not use it directly in the UI. Apply changes to this object in SaveAsync() to save the changes.
+    // MainViewModel creates a new instance of this class and call EditorShell.SetEntry(EntryResidentialFull) and sets this property.
+    private readonly Models.Rent.Residentials.EntryResidential _entry;
+
+    // Tmp file list to hold unsaved picture files. (if entry is not saved, delete on close)
+    private readonly List<string> _unsavedBuildingPictureFileList = [];
+    private readonly List<string> _unsavedBuildingPdfFileList = [];
+    private readonly List<string> _unsavedBuildingPdfThumbnailFileList = [];
+
+    #endregion
+
+    internal BldgViewModel(ViewModels.Rent.Residentials.MainViewModel vm, Models.Rent.Residentials.EntryResidential entry, IDataAccessService dataAccessService, IDataAccessLocationService dataAccessLocationService)
     {
         _mainViewModel = vm;
         _dataAccessService = dataAccessService;
@@ -1167,10 +1171,14 @@ internal sealed partial class BldgViewModel : ObservableObject
 
         _entry = entry;
         
-
         try
         {
             PopulateEntryValues();
+
+            // Reset errors
+            NameHasError = false;
+            // TODO: more.
+            HasErrors = false;
         }
         catch (Exception ex)
         {
@@ -1578,7 +1586,7 @@ internal sealed partial class BldgViewModel : ObservableObject
             Directory.CreateDirectory(_mainViewModel.EntryDataDirectoryPath);
         }
 
-        List<string> list = [];
+        //List<string> list = [];
 
         foreach (var filePath in filePathList)
         {
@@ -1633,7 +1641,7 @@ internal sealed partial class BldgViewModel : ObservableObject
             Directory.CreateDirectory(_mainViewModel.EntryDataDirectoryPath);
         }
 
-        List<string> list = [];
+        //List<string> list = [];
 
         foreach (var filePath in filePathList)
         {
@@ -1731,18 +1739,24 @@ internal sealed partial class BldgViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanSave))]
     public void Save()
     {
-        // TODO: What if Unit.IsDirty??
-
         if (!IsDirty)
         {
             return;
         }
 
-        if (string.IsNullOrEmpty(Name))
+        // Validate input.
+        ValidateName(Name);
+        // TODO: more.
+        if (HasErrors)
         {
-            Debug.WriteLine("TODO: Name is null or empty. This field is required. Show alart and abort.");
+            // TODO: Show InfoBar.
+            _mainViewModel.InfoBarErrorMessage = "入力項目に誤りがあります。保存出来ませんでした。";
+            _mainViewModel.IsInfoBarErrorOpen = true;
+
+            HasErrors = false;
             return;
         }
+
 
         SetValuesToEntry();
 

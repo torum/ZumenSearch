@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Text;
+using CommunityToolkit.Mvvm.ComponentModel;
 using ZumenSearch.Models.Base;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace ZumenSearch.Models.Rent.Residentials;
 
+// 検索結果一覧表示用（部屋）
 internal sealed partial class UnitResidentialSearchResult : UnitBase
 {
     public string EntryId { get; init; }
@@ -29,6 +30,7 @@ internal sealed partial class UnitResidentialSearchResult : UnitBase
     }
 }
 
+// 部屋（編集用）
 internal sealed partial class UnitResidential : UnitBase
 {
     // 物件写真（部屋）リスト
@@ -47,7 +49,8 @@ internal sealed partial class UnitResidential : UnitBase
     // DBへの更新時にDBから削除されるべき物件写真（部屋）のIDリスト
     public ObservableCollection<PictureUnit> UnitPicturesToBeDeleted = [];
 
-    public int Chinryou
+    // 賃料（円）
+    public decimal Chinryou
     {
         get;
         set
@@ -67,10 +70,73 @@ internal sealed partial class UnitResidential : UnitBase
             {
                 // TODO: show error
                 //field = string.Empty;
+                //IsModified = true;
+
                 throw new ArgumentOutOfRangeException("Chinryou", "Must be at least 0.");
             }
         }
     }
+
+
+    [ObservableProperty]
+    public partial decimal KyouekiFee { get; set; }
+
+    [ObservableProperty]
+    public partial decimal Shikikin { get; set; }
+
+    [ObservableProperty]
+    public partial string ShikikinUnit { get; set; } = "ヵ月";
+
+    [ObservableProperty]
+    public partial decimal Reikin { get; set; }
+
+    [ObservableProperty]
+    public partial string ReikinUnit { get; set; } = "ヵ月";
+
+    [ObservableProperty]
+    public partial string ContractType { get; set; } = "未指定";
+
+    [ObservableProperty]
+    public partial int ContractPeriodYears { get; set; }
+
+    [ObservableProperty]
+    public partial decimal RenewalFee { get; set; }
+
+    [ObservableProperty]
+    public partial string RenewalFeeUnit { get; set; } = "ヵ月";
+
+    [ObservableProperty]
+    public partial decimal RecontractFee { get; set; }
+
+    [ObservableProperty]
+    public partial string RecontractFeeUnit { get; set; } = "円";
+
+    [ObservableProperty]
+    public partial string GuarantorCompany { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string HousingInsurance { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string OtherFees { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial bool PetFriendly { get; set; }
+
+    [ObservableProperty]
+    public partial bool TwoPersonOccupancy { get; set; }
+
+    [ObservableProperty]
+    public partial bool NoGuarantorNeeded { get; set; }
+
+    [ObservableProperty]
+    public partial bool OfficeUseAllowed { get; set; }
+
+    [ObservableProperty]
+    public partial string OtherConditions { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string Remarks { get; set; } = string.Empty;
 
     public UnitResidential(string id) : base(id)
     {

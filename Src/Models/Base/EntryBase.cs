@@ -13,7 +13,7 @@ internal abstract partial class EntryBase : ObservableObject
     // TODO: I don't think we need this anymore....
     public bool IsDirty
     {
-        get => field;
+        get;
         set
         {
             field = value;
@@ -21,7 +21,7 @@ internal abstract partial class EntryBase : ObservableObject
         }
     }
 
-    protected string _id;
+    protected private string _id;
     public string Id => _id;
 
     public string Name

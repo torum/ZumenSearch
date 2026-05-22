@@ -6,9 +6,9 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:mod="using:ZumenSearch.Models.Common"
     xmlns:rent="using:ZumenSearch.Models.Rent.Residentials"
-
     mc:Ignorable="d"
-    NavigationCacheMode="Required">
+    NavigationCacheMode="Required"
+    Loaded="Page_Loaded">
 
     <Grid x:Name="ContentArea" Margin="0,0,0,0">
         <Grid.RowDefinitions>
@@ -91,7 +91,7 @@
 
             <ScrollViewer Grid.Row="1" Padding="{StaticResource ContentPadding}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
 
-                <ItemsView x:Name="SearchResultListView" Margin="0,12,0,0" AllowFocusOnInteraction="False" SelectionMode="Single" ItemsSource="{x:Bind ViewModel.RentResidentialEntrySearchResult, Mode=OneWay}" IsItemInvokedEnabled="True" ItemInvoked="SearchResultListView_ItemInvoked">
+                <ItemsView x:Name="SearchResultListView" Margin="0,12,0,0" AllowFocusOnInteraction="True" SelectionMode="Single" ItemsSource="{x:Bind ViewModel.RentResidentialEntrySearchResult, Mode=OneWay}" IsItemInvokedEnabled="True" ItemInvoked="SearchResultListView_ItemInvoked">
                     <!--  SelectedItem="{x:Bind ViewModel.SelectedRentResidentialItem, Mode=TwoWay}" -->
 
                     <!-- Stupid WinUI3 can't handle double click properly. Also, with this, newly created window goes behind main window because WinUI3 is stupid. -->
@@ -125,6 +125,12 @@
                             </ItemContainer>
                         </DataTemplate>
                     </ItemsView.ItemTemplate>
+
+                    <ItemsView.Layout>
+                        <UniformGridLayout MaximumRowsOrColumns="10" 
+                           MinRowSpacing="6" 
+                           MinColumnSpacing="6"/>
+                    </ItemsView.Layout>
                 </ItemsView>
 
             </ScrollViewer>

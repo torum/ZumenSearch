@@ -5,7 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    xmlns:mod="using:ZumenSearch.Models.Common"
+    xmlns:mod="using:ZumenSearch.Models.Common" 
     NavigationCacheMode="Required" >
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled" Padding="48,0,48,24">
         <Grid x:Name="ContentArea">
@@ -22,7 +22,15 @@
                             <ColumnDefinition Width="1*" MinWidth="320"></ColumnDefinition>
                         </Grid.ColumnDefinitions>
                         <Grid Grid.Row="0" Grid.Column="0">
-                            <TextBox MinWidth="200" Header="部屋番号" PlaceholderText="必須" Text="{x:Bind ViewModel.Unit.RoomName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch"/>
+                            <StackPanel>
+                                <Border Visibility="{x:Bind ViewModel.Unit.NameHasError, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}">
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                        <ImageIcon x:Name="IconHostError" Source="ms-appx:///Assets/SvgIcons/ic_fluent_error_circle_16_color.svg" Width="16" Height="16" Margin="0,0,0,0"/>
+                                        <TextBlock Text="{x:Bind ViewModel.Unit.NameErrorMessage, Mode=OneWay}" Margin="8,0,0,0"></TextBlock>
+                                    </StackPanel>
+                                </Border>
+                                <TextBox MinWidth="200" Header="部屋番号" PlaceholderText="必須" Text="{x:Bind ViewModel.Unit.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom"/>
+                            </StackPanel>
                         </Grid>
                         <Grid Grid.Row="0" Grid.Column="1" Margin="12,0,0,0">
                             <Grid.ColumnDefinitions>
@@ -30,7 +38,7 @@
                                 <ColumnDefinition Width="*"></ColumnDefinition>
                             </Grid.ColumnDefinitions>
                             <Grid Grid.Row="0" Grid.Column="0">
-                                <StackPanel>
+                                <StackPanel VerticalAlignment="Bottom">
                                     <TextBlock Text="間取り" Margin="0,0,0,8"/>
                                     <StackPanel Orientation="Horizontal">
                                         <ComboBox SelectedIndex="0" Width="80" VerticalAlignment="Bottom">
@@ -49,7 +57,7 @@
                                 </StackPanel>
                             </Grid>
                             <Grid Grid.Row="0" Grid.Column="1" Margin="12,0,0,0">
-                                <TextBox Header="専有面積（平米）" MinWidth="120" HorizontalAlignment="Left"/>
+                                <TextBox Header="専有面積（平米）" MinWidth="120" HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
                             </Grid>
                         </Grid>
                     </Grid>

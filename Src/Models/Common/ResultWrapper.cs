@@ -26,7 +26,7 @@ internal sealed class SqliteDataAccessSelectRentResidentialResultWrapper : Sqlit
 
 internal sealed class SqliteDataAccessSelectRentResidentialFullResultWrapper : SqliteDataAccessResultWrapper
 {
-    public Rent.Residentials.EntryResidentialFull? EntryFull;
+    public Rent.Residentials.EntryResidential? EntryFull;
 }
 
 internal sealed class SqliteDataAccessSelectRentResidentialUnitsResultWrapper : SqliteDataAccessResultWrapper

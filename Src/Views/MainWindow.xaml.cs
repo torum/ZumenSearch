@@ -33,9 +33,12 @@ internal sealed partial class MainWindow : Window
 
         ExtendsContentIntoTitleBar = true;
 
+        this.Title = "ZumenSearch ";
+        this.AppWindow.Title = "ZumenSearch ";
+        this.AppWindow.SetIcon(Path.Combine(AppContext.BaseDirectory, "Assets\\App.ico"));
+
         //Content = _mainShell;
 
-        this.Title = "ZumenSearch ";
 
         LoadSetting();
 

@@ -1,31 +1,16 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Text;
-using System.Xml.Linq;
 using ZumenSearch.Models.Base;
 using ZumenSearch.Models.Rent.Residentials;
 using ZumenSearch.Services.Contracts;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace ZumenSearch.ViewModels.Rent.Residentials;
 
 internal sealed partial class UnitViewModel : ObservableObject
 {
-    #region == Private variables ==
-    
-    private ViewModels.Rent.Residentials.MainViewModel _mainViewModel;
-    private Models.Rent.Residentials.UnitResidential? _unit;
-    
-    // Tmp file list to hold unsaved picture files. (if entry is not saved, delete on close)
-    private readonly List<string> _unsavedUnitPictureFileList = [];
-
-    #endregion
-
     #region == Public Properties ==
     
     [ObservableProperty]
@@ -49,22 +34,62 @@ internal sealed partial class UnitViewModel : ObservableObject
     [ObservableProperty]
     public partial bool HasErrors { get; private set; }
 
-    public string RoomName
+
+    public string Name
     {
         get => field ?? string.Empty; // Ensure a non-null value is returned
         set
         {
-            if (SetProperty(ref field, value.Trim()))
+            if (SetProperty(ref field, value))
             {
                 IsDirty = true;
 
+                ValidateName(value);
+
                 // Update title with dummy value.
                 _mainViewModel.WindowTitle = string.Empty;
-
-                //OnPropertyChanged(nameof(WindowTitle));//TODO
-
-                //_mainViewModel.EventTitleChanged?.Invoke(this, EventArgs.Empty);//TODO
             }
+
+            /*
+            if (field == value) return;
+            if (value is null) return;
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                NameErrorMessage = "Can not empty.";
+                NameHasError = true;
+                return;
+            }
+
+            field = value;
+            IsDirty = true;
+            NameHasError = false;
+
+            // Update title with dummy value.
+            _mainViewModel.WindowTitle = string.Empty;
+
+            OnPropertyChanged();
+            */
+        }
+    }
+
+    [ObservableProperty]
+    public partial bool NameHasError { get; private set; }
+
+    [ObservableProperty]
+    public partial string NameErrorMessage { get; private set; } = string.Empty;
+
+    private void ValidateName(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            NameErrorMessage = "部屋名（必須項目）を入力してください";
+            NameHasError = true;
+
+            HasErrors = true;
+        }
+        else
+        {
+            NameHasError = false;
         }
     }
 
@@ -122,7 +147,21 @@ internal sealed partial class UnitViewModel : ObservableObject
 
     #endregion
 
+    #region == Services ==
+
     private readonly IDataAccessService _dataAccessService;
+    
+    #endregion
+
+    #region == Private variables ==
+
+    private ViewModels.Rent.Residentials.MainViewModel _mainViewModel;
+    private Models.Rent.Residentials.UnitResidential? _unit;
+
+    // Tmp file list to hold unsaved picture files. (if entry is not saved, delete on close)
+    private readonly List<string> _unsavedUnitPictureFileList = [];
+
+    #endregion
 
     public UnitViewModel(ViewModels.Rent.Residentials.MainViewModel vm, IDataAccessService dataAccessService)
     {
@@ -131,6 +170,8 @@ internal sealed partial class UnitViewModel : ObservableObject
 
         //_unit = new Room(Guid.CreateVersion7().ToString("N"));
     }
+
+    #region == Private Methods ==
 
     private void SetValuesToUnit()
     {
@@ -145,14 +186,14 @@ internal sealed partial class UnitViewModel : ObservableObject
             return;
         }
 
-        if (string.IsNullOrEmpty(RoomName))
+        if (string.IsNullOrEmpty(Name))
         {
             // TODO: Show InfoBar?
             HasErrors = true;
             return;
         }
 
-        _unit.Name = RoomName;
+        _unit.Name = Name;
 
         if (int.TryParse(Chinryou, out var result))
         {
@@ -213,7 +254,7 @@ internal sealed partial class UnitViewModel : ObservableObject
             _mainViewModel.Bldg.Rooms.Add(_unit);
         }
 
-        
+
     }
 
     private void PopulateUnitValues()
@@ -223,7 +264,7 @@ internal sealed partial class UnitViewModel : ObservableObject
             return;
         }
 
-        RoomName = _unit.Name; // Set the value to trigger the setter logic if needed.
+        Name = _unit.Name; // Set the value to trigger the setter logic if needed.
 
         //var test = _unit.Chinryou.ToString();
         Chinryou = _unit.Chinryou.ToString();
@@ -321,13 +362,22 @@ internal sealed partial class UnitViewModel : ObservableObject
         }
     }
 
+    #endregion
+
     #region == Public Methods ==
 
     internal void SetEditUnit(Models.Rent.Residentials.UnitResidential room)//SetEditUnit //PopulateUnitValues
     {
         _unit = room;
 
+        // TODO: reset all ..
+
         PopulateUnitValues();
+
+        // Reset errors
+        NameHasError = false;
+        // TODO: more.
+        HasErrors = false;
 
         _unit.IsModified = false;
         IsDirty = false;
@@ -429,6 +479,20 @@ internal sealed partial class UnitViewModel : ObservableObject
             Debug.WriteLine("_unit is null. Can't save room.");
             return;
         }
+
+        // Validate input.
+        ValidateName(Name);
+        // TODO: more.
+        if (HasErrors)
+        {
+            // TODO: Show InfoBar.
+            _mainViewModel.InfoBarErrorMessage = "入力項目に誤りがあります。保存出来ませんでした。";
+            _mainViewModel.IsInfoBarErrorOpen = true;
+
+            HasErrors = false;
+            return;
+        }
+
 
         SetValuesToUnit();
 

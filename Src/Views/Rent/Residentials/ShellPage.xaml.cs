@@ -24,7 +24,7 @@ internal sealed partial class ShellPage : Page
     private readonly IModalDialogService _dlg;
     private readonly INavigationResidentialService _nav;
 
-    public ShellPage(Views.Rent.Residentials.EditorWindow win, Models.Rent.Residentials.EntryResidentialFull entry, IAbstractFactory<Models.Rent.Residentials.EntryResidentialFull, ViewModels.Rent.Residentials.MainViewModel> vmFactory, IModalDialogService modalDialogService, INavigationResidentialService navigationResidentialService)
+    public ShellPage(Views.Rent.Residentials.EditorWindow win, Models.Rent.Residentials.EntryResidential entry, IAbstractFactory<Models.Rent.Residentials.EntryResidential, ViewModels.Rent.Residentials.MainViewModel> vmFactory, IModalDialogService modalDialogService, INavigationResidentialService navigationResidentialService)
     {
         //Debug.WriteLine($"ShellPage {entry.Id}");
 

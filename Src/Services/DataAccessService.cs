@@ -7,7 +7,6 @@ using ZumenSearch.Models.Base;
 using ZumenSearch.Models.Common;
 using ZumenSearch.Models.Rent.Residentials;
 using ZumenSearch.Services.Contracts;
-using static Microsoft.Extensions.Logging.EventSource.LoggingEventSource;
 
 namespace ZumenSearch.Services;
 
@@ -226,7 +225,7 @@ internal sealed class DataAccessService : IDataAccessService
         return res;
     }
 
-    public SqliteDataAccessResultWrapper InsertRentResidential(Models.Rent.Residentials.EntryResidentialFull entry)
+    public SqliteDataAccessResultWrapper InsertRentResidential(Models.Rent.Residentials.EntryResidential entry)
     {
         var res = new SqliteDataAccessResultWrapper();
 
@@ -565,7 +564,7 @@ internal sealed class DataAccessService : IDataAccessService
         return res;
     }
 
-    public SqliteDataAccessResultWrapper UpdateRentResidential(Models.Rent.Residentials.EntryResidentialFull entry)
+    public SqliteDataAccessResultWrapper UpdateRentResidential(Models.Rent.Residentials.EntryResidential entry)
     {
         var res = new SqliteDataAccessResultWrapper();
 
@@ -1210,7 +1209,7 @@ internal sealed class DataAccessService : IDataAccessService
     {
         var res = new SqliteDataAccessSelectRentResidentialFullResultWrapper();
 
-        var entry = new Models.Rent.Residentials.EntryResidentialFull(id, EnumEntryStatus.Saved);
+        var entry = new Models.Rent.Residentials.EntryResidential(id, EnumEntryStatus.Saved);
 
         if (string.IsNullOrEmpty(id))
         {

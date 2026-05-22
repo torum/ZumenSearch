@@ -16,6 +16,7 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="40"/>
+            <RowDefinition Height="Auto" MaxHeight="120"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
@@ -41,7 +42,13 @@
 
         </Grid>
 
-        <Frame x:Name="ContentFrame" Grid.Row="1" Navigated="ContentFrame_Navigated" NavigationFailed="ContentFrame_NavigationFailed"/>
+        <Border Grid.Row="1">
+            <InfoBar Severity="Error" 
+             IsOpen="{x:Bind ViewModel.IsInfoBarErrorOpen, Mode=TwoWay}" 
+             Message="{x:Bind ViewModel.InfoBarErrorMessage, Mode=OneWay}" />
+        </Border>
+
+        <Frame x:Name="ContentFrame" Grid.Row="2" Navigated="ContentFrame_Navigated" NavigationFailed="ContentFrame_NavigationFailed"/>
         
         <!--
 
@@ -85,5 +92,6 @@
         </NavigationView>
         
         -->
+
     </Grid>
 </Page>
