@@ -6,7 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:mod="using:ZumenSearch.Models.Common"
     xmlns:rent="using:ZumenSearch.Models.Rent.Residentials"
-
+Loaded="Page_Loaded"
     mc:Ignorable="d"
     NavigationCacheMode="Required">
 
@@ -88,8 +88,9 @@
             </StackPanel>
 
             <ScrollViewer Grid.Row="1" Padding="{StaticResource ContentPadding}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-<!--  -->
-                <ItemsView x:Name="SearchResultListView" Margin="0,12,0,0" AllowFocusOnInteraction="False" SelectionMode="Single" ItemsSource="{x:Bind ViewModel.RentResidentialUnitSearchResult, Mode=OneWay}" IsItemInvokedEnabled="True" ItemInvoked="SearchResultListView_ItemInvoked">
+
+                <ItemsView x:Name="SearchResultListView" Margin="0,12,0,0" AllowFocusOnInteraction="False" SelectionMode="Single" ItemsSource="{x:Bind ViewModel.RentResidentialUnitSearchResult, Mode=OneWay}">
+                    <!-- IsItemInvokedEnabled="True" ItemInvoked="SearchResultListView_ItemInvoked" -->
                     <!--  SelectedItem="{x:Bind ViewModel.SelectedRentResidentialItem, Mode=TwoWay}" -->
 
                     <!-- Stupid WinUI3 can't handle double click properly. Also, with this, newly created window goes behind main window because WinUI3 is stupid. -->
@@ -103,7 +104,11 @@
 
                     <ItemsView.ItemTemplate>
                         <DataTemplate x:DataType="rent:UnitResidentialSearchResult">
-                            <ItemContainer AllowFocusOnInteraction="False" PointerPressed="ItemContainer_PointerPressed" PointerReleased="ItemContainer_PointerReleased">
+                            <ItemContainer IsDoubleTapEnabled="True" DoubleTapped="SearchResult_DoubleTapped" PointerPressed="ItemContainer_PointerPressed" PointerReleased="ItemContainer_PointerReleased">
+                                <!--  AllowFocusOnInteraction="False" -->
+                                <ItemContainer.KeyboardAccelerators>
+                                    <KeyboardAccelerator Key="Enter" Modifiers="None" Invoked="ItemsViewKeyboardAccelerator_Invoked" />
+                                </ItemContainer.KeyboardAccelerators>
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="*"/>

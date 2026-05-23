@@ -4,6 +4,7 @@ using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using ZumenSearch.Models;
 using ZumenSearch.Models.Rent.Residentials;
 using ZumenSearch.ViewModels;
@@ -66,8 +67,96 @@ internal sealed partial class SearchResultPage : Page
 
     private void SearchResult_DoubleTapped(object sender, Microsoft.UI.Xaml.Input.DoubleTappedRoutedEventArgs e)
     {
+        e.Handled = true;
         // Stupid WinUI3 can't handle double click properly.
         // Also, with this, newly created window goes behind main window because WinUI3 is stupid.
+
+        // OriginalSource is the specific element (e.g., TextBlock or Grid) that was tapped
+        if (e.OriginalSource is not FrameworkElement element)
+        {
+            return;
+        }
+
+        var container = FindParent<Microsoft.UI.Xaml.Controls.ItemContainer>(element);
+        if (container is null)
+        {
+            return;
+        }
+
+        if (container.DataContext is not EntryResidentialSearchResult searchresult)
+        {
+            Debug.WriteLine($"Not EntryResidentialSearchResult. {container.DataContext?.GetType().FullName} @SearchResult_DoubleTapped");
+            return;
+        }
+
+        if (ViewModel is null)
+        {
+            return;
+        }
+
+        if (ViewModel.EditRentResidentialEntryCommand.CanExecute(searchresult))
+        {
+            ViewModel.EditRentResidentialEntryCommand.Execute(searchresult);
+        }
+
+        /*
+        if (sender is not Microsoft.UI.Xaml.Controls.ItemContainer listView)
+        {
+            Debug.WriteLine($"Not ItemContainer. {sender.GetType().FullName}  @SearchResult_DoubleTapped");
+            return;
+        }
+
+        if (e.OriginalSource is not FrameworkElement element)
+        {
+            Debug.WriteLine($"Not FrameworkElement. {sender.GetType().FullName}  @SearchResult_DoubleTapped");
+            return;
+        }
+
+        // The DataContext of that element is the data item bound to the row
+        if (element.DataContext is not EntryResidentialSearchResult clickedItem)
+        {
+            Debug.WriteLine($"Not EntryResidentialSearchResult. {element.DataContext?.GetType().FullName} @SearchResult_DoubleTapped");
+            return;
+        }
+
+        // Process your item here
+        Debug.WriteLine($"Double-tapped: {clickedItem.Name}");
+
+        if (ViewModel is null)
+        {
+            return;
+        }
+
+        if (ViewModel.EditRentResidentialEntryCommand.CanExecute(clickedItem))
+        {
+            ViewModel.EditRentResidentialEntryCommand.Execute(clickedItem);
+        }
+        */
+
+        /*
+        if (sender is not Microsoft.UI.Xaml.Controls.ItemContainer listView)
+        {
+            Debug.WriteLine($"Not ItemContainer. {sender.GetType().FullName}  @SearchResult_DoubleTapped");
+            return;
+        }
+
+        if (listView.DataContext is not EntryResidentialSearchResult searchresult)
+        {
+            Debug.WriteLine($"Not EntryResidentialSearchResult. {listView.DataContext?.GetType().FullName} @SearchResult_DoubleTapped");
+            return;
+        }
+
+        if (ViewModel is null)
+        {
+            return;
+        }
+
+        if (ViewModel.EditRentResidentialEntryCommand.CanExecute(searchresult))
+        {
+            ViewModel.EditRentResidentialEntryCommand.Execute(searchresult);
+        }
+        */
+
 
         /*
         if (sender is not ListView listView)
@@ -82,13 +171,13 @@ internal sealed partial class SearchResultPage : Page
 
         if (container is null)
         {
-            Debug.WriteLine("container is null @SearchResult_DoubleTapped()");
+            System.Diagnostics.Debug.WriteLine("container is null @SearchResult_DoubleTapped()");
             return;
         }
 
         if (listView.SelectedItem != container.Content)
         {
-            Debug.WriteLine("(listView.SelectedItem != container.Content) @SearchResult_DoubleTapped()");
+            System.Diagnostics.Debug.WriteLine("(listView.SelectedItem != container.Content) @SearchResult_DoubleTapped()");
             return;
         }
 
@@ -102,8 +191,15 @@ internal sealed partial class SearchResultPage : Page
             return;
         }
 
-        ViewModel.EditRentResidential(searchresult);
+        if (ViewModel.EditRentResidentialEntryCommand.CanExecute(searchresult))
+        {
+            ViewModel.EditRentResidentialEntryCommand.Execute(searchresult);
+        }
         */
+
+
+
+
     }
 
     private static T? FindParent<T>(DependencyObject child) where T : DependencyObject
@@ -144,7 +240,6 @@ internal sealed partial class SearchResultPage : Page
         {
             ViewModel.EditRentResidentialEntryCommand.Execute(invokedItem);
         }
-
     }
 
     private void ItemContainer_PointerPressed(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
@@ -161,5 +256,38 @@ internal sealed partial class SearchResultPage : Page
         // This prevents newly created window goes behind the main window.
         // WinUI3 is so stupid.
         e.Handled = true;
+    }
+
+    private void ItemsViewKeyboardAccelerator_Invoked(Microsoft.UI.Xaml.Input.KeyboardAccelerator sender, Microsoft.UI.Xaml.Input.KeyboardAcceleratorInvokedEventArgs args)
+    {
+        Debug.WriteLine($"sender {sender}, element{args.Element} @ItemContainerKeyboardAccelerator_Invoked");
+        
+        args.Handled = true;
+
+        if (args.Element is not FrameworkElement)
+        {
+            return;
+        }
+
+        if (args.Element is not Microsoft.UI.Xaml.Controls.ItemContainer element)
+        {
+            return;
+        }
+
+        if (element.DataContext is not EntryResidentialSearchResult searchresult)
+        {
+            Debug.WriteLine($"Not EntryResidentialSearchResult. {element.DataContext?.GetType().FullName} @ItemContainerKeyboardAccelerator_Invoked");
+            return;
+        }
+
+        if (ViewModel is null)
+        {
+            return;
+        }
+
+        if (ViewModel.EditRentResidentialEntryCommand.CanExecute(searchresult))
+        {
+            ViewModel.EditRentResidentialEntryCommand.Execute(searchresult);
+        }
     }
 }

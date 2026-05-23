@@ -91,21 +91,18 @@
 
             <ScrollViewer Grid.Row="1" Padding="{StaticResource ContentPadding}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
 
-                <ItemsView x:Name="SearchResultListView" Margin="0,12,0,0" AllowFocusOnInteraction="True" SelectionMode="Single" ItemsSource="{x:Bind ViewModel.RentResidentialEntrySearchResult, Mode=OneWay}" IsItemInvokedEnabled="True" ItemInvoked="SearchResultListView_ItemInvoked">
+                <ItemsView x:Name="SearchResultListView" Margin="0,12,0,0" AllowFocusOnInteraction="False" SelectionMode="Single" ItemsSource="{x:Bind ViewModel.RentResidentialEntrySearchResult, Mode=OneWay}">
+                    <!--  IsDoubleTapEnabled="False" IsItemInvokedEnabled="True" ItemInvoked="SearchResultListView_ItemInvoked" -->
                     <!--  SelectedItem="{x:Bind ViewModel.SelectedRentResidentialItem, Mode=TwoWay}" -->
 
-                    <!-- Stupid WinUI3 can't handle double click properly. Also, with this, newly created window goes behind main window because WinUI3 is stupid. -->
-                    <!--
-                        <behaviors:Interaction.Behaviors>
-                            <behaviors:EventTriggerBehavior EventName="DoubleTapped">
-                                <behaviors:InvokeCommandAction Command="{x:Bind ViewModel.EditRentResidentialCommand}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}" />
-                            </behaviors:EventTriggerBehavior>
-                        </behaviors:Interaction.Behaviors>
-                        -->
-
+                    <!-- Stupid WinUI3 can't handle double click/ItemInvoked properly. Also, with this, newly created window goes behind main window. -->
                     <ItemsView.ItemTemplate>
                         <DataTemplate x:DataType="rent:EntryResidentialSearchResult">
-                            <ItemContainer AllowFocusOnInteraction="False" PointerPressed="ItemContainer_PointerPressed" PointerReleased="ItemContainer_PointerReleased">
+                            <ItemContainer DataContext="{x:Bind}" IsDoubleTapEnabled="True" DoubleTapped="SearchResult_DoubleTapped" PointerPressed="ItemContainer_PointerPressed" PointerReleased="ItemContainer_PointerReleased">
+                                <!--  -->
+                                <ItemContainer.KeyboardAccelerators>
+                                    <KeyboardAccelerator Key="Enter" Modifiers="None" Invoked="ItemsViewKeyboardAccelerator_Invoked" />
+                                </ItemContainer.KeyboardAccelerators>
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="*"/>

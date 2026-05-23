@@ -4,6 +4,7 @@ using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using ZumenSearch.Models;
 using ZumenSearch.Models.Rent.Residentials;
 using ZumenSearch.ViewModels;
@@ -50,19 +51,51 @@ internal sealed partial class ResidentialSearchResultPage : Page
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
-
         if ((e.Parameter is Frame) && (e.Parameter != null))
         {
             ContentFrame = e.Parameter as Frame;
         }
 
         base.OnNavigatedTo(e);
+
+        this.SearchResultListView.Focus(Microsoft.UI.Xaml.FocusState.Programmatic);
     }
 
     private void SearchResult_DoubleTapped(object sender, Microsoft.UI.Xaml.Input.DoubleTappedRoutedEventArgs e)
     {
+        e.Handled = true;
         // Stupid WinUI3 can't handle double click properly.
         // Also, with this, newly created window goes behind main window because WinUI3 is stupid.
+
+        /*
+        if (e.OriginalSource is not FrameworkElement element)
+        {
+            return;
+        }
+
+        var container = FindParent<Microsoft.UI.Xaml.Controls.ItemContainer>(element);
+        if (container is null)
+        {
+            return;
+        }
+
+        if (container.DataContext is not EntryResidentialSearchResult searchresult)
+        {
+            Debug.WriteLine($"Not EntryResidentialSearchResult. {container.DataContext?.GetType().FullName} @SearchResult_DoubleTapped");
+            return;
+        }
+
+        if (ViewModel is null)
+        {
+            return;
+        }
+
+        if (ViewModel.EditRentResidentialEntryCommand.CanExecute(searchresult))
+        {
+            ViewModel.EditRentResidentialEntryCommand.Execute(searchresult);
+        }
+
+        */
 
         /*
         if (sender is not ListView listView)
@@ -155,5 +188,44 @@ internal sealed partial class ResidentialSearchResultPage : Page
         // This prevents newly created window goes behind the main window.
         // WinUI3 is so stupid.
         e.Handled = true;
+    }
+
+    private void Page_Loaded(object sender, RoutedEventArgs e)
+    {
+        this.SearchResultListView.Focus(Microsoft.UI.Xaml.FocusState.Programmatic);
+    }
+
+    private void ItemsViewKeyboardAccelerator_Invoked(Microsoft.UI.Xaml.Input.KeyboardAccelerator sender, Microsoft.UI.Xaml.Input.KeyboardAcceleratorInvokedEventArgs args)
+    {
+        Debug.WriteLine($"sender {sender}, element{args.Element} @ItemContainerKeyboardAccelerator_Invoked");
+        /*
+        args.Handled = true;
+
+        if (args.Element is not FrameworkElement)
+        {
+            return;
+        }
+
+        if (args.Element is not Microsoft.UI.Xaml.Controls.ItemContainer element)
+        {
+            return;
+        }
+
+        if (element.DataContext is not EntryResidentialSearchResult searchresult)
+        {
+            Debug.WriteLine($"Not EntryResidentialSearchResult. {element.DataContext?.GetType().FullName} @ItemContainerKeyboardAccelerator_Invoked");
+            return;
+        }
+
+        if (ViewModel is null)
+        {
+            return;
+        }
+
+        if (ViewModel.EditRentResidentialEntryCommand.CanExecute(searchresult))
+        {
+            ViewModel.EditRentResidentialEntryCommand.Execute(searchresult);
+        }
+        */
     }
 }
