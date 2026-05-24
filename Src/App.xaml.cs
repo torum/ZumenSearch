@@ -78,6 +78,24 @@ public partial class App : Application
             //
         }
 
+        try
+        {
+            if (!System.IO.Directory.Exists(App.AppDataFolder))
+            {
+                System.IO.Directory.CreateDirectory(App.AppDataFolder);
+            }
+            if (!System.IO.Directory.Exists(App.AppDataPictureFolder))
+            {
+                System.IO.Directory.CreateDirectory(App.AppDataPictureFolder);
+            }
+        }
+        catch (Exception ex)
+        {
+            // Log the exception for debugging
+            AppendErrorLog("Failed to create folders on startup.", ex.ToString());
+            SaveErrorLog();
+        }
+
         InitializeComponent();
 
         Host = Microsoft.Extensions.Hosting.Host.
@@ -89,9 +107,9 @@ public partial class App : Application
             // TODO:
             //services.AddSingleton<IThemeSelectorService, ThemeSelectorService>();
             services.AddSingleton<IDataAccessService, DataAccessService>();
-            services.AddSingleton<IModalDialogService, ModalDialogService>();
-            services.AddSingleton<IDataAccessLocationService, DataAccessLocationService>();
-            services.AddSingleton<IDataAccessTransportationService, DataAccessTransportationService>();
+            services.AddTransient<IModalDialogService, ModalDialogService>();
+            services.AddTransient<IDataAccessLocationService, DataAccessLocationService>();
+            services.AddTransient<IDataAccessTransportationService, DataAccessTransportationService>();
             services.AddSingleton<IDispatcherService>(new DispatcherService(CurrentDispatcherQueue));
             services.AddSingleton<INavigationService, NavigationService>();
             services.AddTransient<INavigationResidentialService, NavigationResidentialService>();

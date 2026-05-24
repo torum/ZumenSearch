@@ -20,11 +20,7 @@ internal sealed partial class BasicPage : Page
         }
     }
 
-    public enum RentLivingKinds
-    {
-
-        Unspecified, Apartment, Mansion, House, TerraceHouse, TownHouse, ShareHouse, Dormitory
-    }
+    private bool _initialized;
 
     public BasicPage()
     {
@@ -40,10 +36,16 @@ internal sealed partial class BasicPage : Page
         ViewModel.EventEditTransportation += (sender, arg) => OnEventEditTransportation(arg);
         ViewModel.EventEditAppliance += (sender, arg) => OnEventEditAppliance(arg);
         */
-
-
     }
 
+    private void Init()
+    {
+        if (_initialized) return;
+
+        _initialized = true;
+
+        this.TextBoxName.Focus(Microsoft.UI.Xaml.FocusState.Programmatic);
+    }
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
@@ -51,9 +53,18 @@ internal sealed partial class BasicPage : Page
         {
             //_editorShell = e.Parameter as Views.Rent.Residentials.Editor.EditorShell;
             ViewModel = e.Parameter as ViewModels.Rent.Residentials.MainViewModel;
+
+            if (!_initialized)
+            {
+                //Init();
+            }
         }
 
         base.OnNavigatedTo(e);
     }
 
+    private void Page_Loaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    {
+        Init();
+    }
 }

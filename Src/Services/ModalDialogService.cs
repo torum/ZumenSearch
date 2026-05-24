@@ -8,17 +8,22 @@ namespace ZumenSearch.Services;
 
 public class ModalDialogService : IModalDialogService
 {
+    private XamlRoot? _xamlRoot;
     private bool _isDialogOpened;
-    private readonly List<Window> _ownerWindowList;
+    private readonly List<Window> _ownerWindowList; // I made the service transient, so this won't be needed. But needs to be checked lator.
 
     public ModalDialogService()
     {
-        //
         _isDialogOpened = false;
         _ownerWindowList = new List<Window>();
     }
 
-    public async Task<ContentDialogResult> ShowEditorCloseConfirmationDialog(Window win)
+    public void Initialize(XamlRoot xamlRoot)
+    {
+        _xamlRoot = xamlRoot;
+    }
+
+    public async Task<ContentDialogResult> ShowEditorCloseConfirmationDialog()
     {
         if (_isDialogOpened)// && (_ownerWindowList.IndexOf(win) > -1)
         {
@@ -26,19 +31,14 @@ public class ModalDialogService : IModalDialogService
             return ContentDialogResult.None;
         }
 
-        if (win is null)
-        {
-            return ContentDialogResult.None;
-        }
-
-        if (win.Content is null)
+        if (_xamlRoot is null)
         {
             return ContentDialogResult.None;
         }
 
         var dialog = new ContentDialog
         {
-            XamlRoot = win.Content.XamlRoot,
+            XamlRoot = _xamlRoot,
             Title = "保存の確認",
             IsPrimaryButtonEnabled = true,
             PrimaryButtonText = "保存して閉じる",
@@ -60,7 +60,7 @@ public class ModalDialogService : IModalDialogService
     }
 
 
-    public async Task<ContentDialogResult> ShowLeaveUnitDirtyConfirmationDialog(XamlRoot root)
+    public async Task<ContentDialogResult> ShowLeaveUnitDirtyConfirmationDialog()
     {
         if (_isDialogOpened)
         {
@@ -86,14 +86,14 @@ public class ModalDialogService : IModalDialogService
         }
         */
 
-        if (root is null)
+        if (_xamlRoot is null)
         {
             return ContentDialogResult.None;
         }
 
         var dialog = new ContentDialog
         {
-            XamlRoot = root,
+            XamlRoot = _xamlRoot,
             Title = "保存の確認（部屋）",
             IsPrimaryButtonEnabled = true,
             PrimaryButtonText = "保存して移動する",
@@ -114,27 +114,24 @@ public class ModalDialogService : IModalDialogService
         return result;
     }
 
-    public async Task<RailLine?> ShowRailLineSelectDialog(Window win)
+    public async Task<RailLine?> ShowRailLineSelectDialog()
     {
         if (_isDialogOpened)// && (_ownerWindowList.IndexOf(win) > -1)
         {
             // Prevents COM exepction causing by attempt to show multiple dialogs. (Window's close button is enabled even tho dialog is shown)
+            System.Diagnostics.Debug.WriteLine("_isDialogOpened @ShowRailLineSelectDialog");
             return null;
         }
 
-        if (win is null)
+        if (_xamlRoot is null)
         {
-            return null;
-        }
-
-        if (win.Content is null)
-        {
+            System.Diagnostics.Debug.WriteLine("_xamlRoot is null @ShowRailLineSelectDialog");
             return null;
         }
 
         var dialog = new ContentDialog
         {
-            XamlRoot = win.Content.XamlRoot,
+            XamlRoot = _xamlRoot,
             Title = "路線の選択",
             IsPrimaryButtonEnabled = false,
             PrimaryButtonText = "確定",
@@ -180,7 +177,7 @@ public class ModalDialogService : IModalDialogService
         return null;
     }
 
-    public async Task<RailStation?> ShowRailStationSelectDialog(Window win, string railLineCode)
+    public async Task<RailStation?> ShowRailStationSelectDialog(string railLineCode)
     {
         if (_isDialogOpened)// && (_ownerWindowList.IndexOf(win) > -1)
         {
@@ -188,19 +185,14 @@ public class ModalDialogService : IModalDialogService
             return null;
         }
 
-        if (win is null)
-        {
-            return null;
-        }
-
-        if (win.Content is null)
+        if (_xamlRoot is null)
         {
             return null;
         }
 
         var dialog = new ContentDialog
         {
-            XamlRoot = win.Content.XamlRoot,
+            XamlRoot = _xamlRoot,
             Title = "駅の選択",
             IsPrimaryButtonEnabled = false,
             PrimaryButtonText = "確定",

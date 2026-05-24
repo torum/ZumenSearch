@@ -6,11 +6,13 @@ namespace ZumenSearch.Services.Contracts;
 
 public interface IModalDialogService
 {
-    Task<ContentDialogResult> ShowEditorCloseConfirmationDialog(Window win);
+    void Initialize(XamlRoot xamlRoot);
 
-    Task<ContentDialogResult> ShowLeaveUnitDirtyConfirmationDialog(XamlRoot root);
+    Task<ContentDialogResult> ShowEditorCloseConfirmationDialog();
+
+    Task<ContentDialogResult> ShowLeaveUnitDirtyConfirmationDialog();
     
-    Task<RailLine?> ShowRailLineSelectDialog(Window win);
+    Task<RailLine?> ShowRailLineSelectDialog();
 
-    Task<RailStation?> ShowRailStationSelectDialog(Window win, string railLineCode);
+    Task<RailStation?> ShowRailStationSelectDialog(string railLineCode);
 }

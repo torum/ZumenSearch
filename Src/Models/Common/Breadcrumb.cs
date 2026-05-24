@@ -1,6 +1,6 @@
 ﻿namespace ZumenSearch.Models.Common;
 
-public class Breadcrumb
+public sealed class Breadcrumb
 {
     public string? Name
     {

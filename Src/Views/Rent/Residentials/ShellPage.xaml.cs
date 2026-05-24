@@ -29,19 +29,21 @@ internal sealed partial class ShellPage : Page
         //Debug.WriteLine($"ShellPage {entry.Id}");
 
         Win = win ?? throw new ArgumentNullException(nameof(win));
-        _dlg = modalDialogService;
+        
+        // Creates VM with entry.
         ViewModel = vmFactory.Create(entry);//ViewModel = vmFactory(entry);//_editorFactory.Create(new Models.Rent.Residentials.EntryResidentialFull(Guid.CreateVersion7().ToString("N"), EnumEntryStatus.New));
         ViewModel.SetEditorShell(this);
 
         InitializeComponent();
 
         _nav = navigationResidentialService;
-        _nav.Initialize(ContentFrame, Win);
+        _nav.Initialize(this.ContentFrame, Win);
         ViewModel.SetEditorNavigationService(_nav);
 
-        //BreadcrumbBar1.ItemClicked += BreadcrumbBar_ItemClicked;
+        _dlg = modalDialogService;
+        //_dlg.Initialize(this.XamlRoot); XamlRoot is null at this point. Moved to loaded.
+        //ViewModel.SetEditorDialogService(_dlg);
 
-        //
         Win.Content = this;
         Win.ExtendsContentIntoTitleBar = true;
         //EditorWin.SetTitleBar(AppTitleBar);
@@ -62,8 +64,14 @@ internal sealed partial class ShellPage : Page
 
     private void Page_Loaded(object sender, RoutedEventArgs e)
     {
-        ContentFrame.Navigate(typeof(ZumenSearch.Views.Rent.Residentials.Bldg.BldgShellPage), ViewModel, new EntranceNavigationTransitionInfo()); // //new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom }
+        // XamlRoot is no longer null.
+        _dlg.Initialize(this.XamlRoot);
+        ViewModel.SetEditorDialogService(_dlg);
 
+        if (ContentFrame.Navigate(typeof(ZumenSearch.Views.Rent.Residentials.Bldg.BldgShellPage), ViewModel, new EntranceNavigationTransitionInfo()))
+        {
+            
+        }
         //ContentFrame.Navigate(typeof(ZumenSearch.Views.Rent.Residentials.Unit.UnitShellPage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom });
     }
 
@@ -85,7 +93,7 @@ internal sealed partial class ShellPage : Page
             args.Cancel = true; // needs Cancel = true here in order to show dialog.
 
             // show ConfirmationDialog
-            var result = await _dlg.ShowEditorCloseConfirmationDialog(Win);
+            var result = await _dlg.ShowEditorCloseConfirmationDialog();
 
             if (result == ContentDialogResult.Primary)
             {

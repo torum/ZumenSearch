@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.ObjectModel;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using System.Collections.ObjectModel;
 using ZumenSearch.Models.Common;
 using ZumenSearch.Services.Contracts;
 
@@ -61,7 +60,9 @@ public partial class RailLineSelectViewModel : ObservableObject
     {
         _dataAccessTransportationService = dataAccessTransportationService;
 
+        // TODO: try catch
         SuggestedRailLines = _dataAccessTransportationService.GetRailLinesBy(string.Empty);
+
     }
 
     [RelayCommand(CanExecute = nameof(CanSearchRailLine))]
@@ -73,6 +74,7 @@ public partial class RailLineSelectViewModel : ObservableObject
             return;
         }
 
+        // TODO: try catch
         SuggestedRailLines = _dataAccessTransportationService.GetRailLinesBy(Query);
 
     }

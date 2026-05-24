@@ -100,6 +100,7 @@
             </StackPanel>
 
             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <!--
                 <VisualStateManager.VisualStateGroups>
                     <VisualStateGroup>
                         <VisualState>
@@ -113,7 +114,7 @@
                         </VisualState>
                     </VisualStateGroup>
                 </VisualStateManager.VisualStateGroups>
-
+-->
 
                 <Grid Margin="0,24,0,0">
                 <GridView x:Name="BasicGridView" HorizontalAlignment="Center" HorizontalContentAlignment="Center">

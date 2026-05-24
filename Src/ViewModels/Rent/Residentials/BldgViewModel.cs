@@ -17,6 +17,12 @@ namespace ZumenSearch.ViewModels.Rent.Residentials;
 
 internal sealed partial class BldgViewModel : ObservableObject
 {
+    //Constants
+
+    //Static Fields (Readonly first, then mutable)
+
+    //Instance Fields (Readonly first, then mutable)
+
     #region == Public Properties ==
 
     #region == ステータス ==
@@ -42,6 +48,7 @@ internal sealed partial class BldgViewModel : ObservableObject
     }
     */
 
+    // TODO: update this to hold more info such as page so that it can be navigated to the page.
     [ObservableProperty]
     public partial bool HasErrors { get; private set; }
 
@@ -369,58 +376,9 @@ internal sealed partial class BldgViewModel : ObservableObject
 
     public string? MachiazaId;
 
-    public ObservableCollection<Pref> Prefs =
-    [
-        new Pref("01","010006", "北海道"),
-        new Pref("02","020001", "青森県"),
-            new Pref("03","030007", "岩手県"),
-            new Pref("04","040002", "宮城県"),
-            new Pref("05","050008", "秋田県"),
-            new Pref("06","060003", "山形県"),
-            new Pref("07","070009", "福島県"),
-            new Pref("08","080004", "茨城県"),
-            new Pref("09","090000", "栃木県"),
-            new Pref("10","100005", "群馬県"),
-            new Pref("11","110001", "埼玉県"),
-            new Pref("12","120006", "千葉県"),
-            new Pref("13","130001", "東京都"),
-            new Pref("14","140007", "神奈川県"),
-            new Pref("15","150002", "新潟県"),
-            new Pref("16","160008", "富山県"),
-            new Pref("17","170003", "石川県"),
-            new Pref("18","180009", "福井県"),
-            new Pref("19","190004", "山梨県"),
-            new Pref("20","200000", "長野県"),
-            new Pref("21","210005", "岐阜県"),
-            new Pref("22","220001", "静岡県"),
-            new Pref("23","230006", "愛知県"),
-            new Pref("24","240001", "三重県"),
-            new Pref("25","250007", "滋賀県"),
-            new Pref("26","260002", "京都府"),
-            new Pref("27","270008", "大阪府"),
-            new Pref("28","280003", "兵庫県"),
-            new Pref("29","290009", "奈良県"),
-            new Pref("30","300004", "和歌山県"),
-            new Pref("31","310000", "鳥取県"),
-            new Pref("32","320005", "島根県"),
-            new Pref("33","330001", "岡山県"),
-            new Pref("34","340006", "広島県"),
-            new Pref("35","350001", "山口県"),
-            new Pref("36","360007", "徳島県"),
-            new Pref("37","370002", "香川県"),
-            new Pref("38","380008", "愛媛県"),
-            new Pref("39","390003", "高知県"),
-            new Pref("40","400009", "福岡県"),
-            new Pref("41","410004", "佐賀県"),
-            new Pref("42","420000", "長崎県"),
-            new Pref("43","430005", "熊本県"),
-            new Pref("44","440001", "大分県"),
-            new Pref("45","450006", "宮崎県"),
-            new Pref("46","460001", "鹿児島県"),
-            new Pref("47","470007", "沖縄県"),
-    ];
+    public ObservableCollection<Prefecture> Prefectures = new(new PrefectureList().Prefectures);
 
-    public Pref? SelectedPef
+    public Prefecture? SelectedPef
     {
         get;
         set
@@ -833,10 +791,11 @@ internal sealed partial class BldgViewModel : ObservableObject
         }
     } = string.Empty;
 
+    // TODO: more.
+
     #endregion
 
     #region == 設備プロパティ ==
-
 
     public bool Ap_IsAutolock
     {
@@ -886,7 +845,6 @@ internal sealed partial class BldgViewModel : ObservableObject
         }
     }
 
-
     public string AppliancePreview
     {
         get
@@ -926,6 +884,8 @@ internal sealed partial class BldgViewModel : ObservableObject
         }
     }
 
+    // TODO: more.
+
     #endregion
 
     #region == 写真プロパティ ==
@@ -943,153 +903,6 @@ internal sealed partial class BldgViewModel : ObservableObject
             }
         }
     } = [];
-
-    // TODO: remove this.
-    internal PictureBldg? SelectedBuildingPicture
-    {
-        get;
-        set
-        {
-            if (field == value)
-            {
-                return;
-            }
-
-            field = value;
-            /*
-            // "quietly" clear values.
-            _buildingPictureIsMain = false;
-            _selectedBuildingPictureType = null;// Needed to be null.//new(EnumBuildingPictureType.Unspecified);
-            _buildingPictureDescription = string.Empty;
-
-            if (field is not null)
-            {
-                // "quietly" update values.
-                _buildingPictureIsMain = field.IsMain;
-                _buildingPictureDescription = field.Description ?? string.Empty;
-                var lbl = BuildingPictureTypes.FirstOrDefault(x => x.Key == field.PictureType.Key);
-                if (lbl is not null)
-                {
-                    _selectedBuildingPictureType = lbl;
-                }
-                else
-                {
-                    // Unspecified.
-                    Debug.WriteLine($"@SelectedBuildingPicture: could not find label for key {field.PictureType.Key}");
-                }
-
-                IsBuildingPictureEditPaneVisible = true;
-            }
-            else
-            {
-                IsBuildingPictureEditPaneVisible = false;
-                Debug.WriteLine($"@SelectedBuildingPicture: value is null");
-            }
-
-
-            // notify updates.
-            OnPropertyChanged(nameof(SelectedBuildingPictureType));
-            OnPropertyChanged(nameof(BuildingPictureDescription));
-            OnPropertyChanged(nameof(BuildingPictureIsMain));
-            //OnPropertyChanged(nameof(BuildingPicturePropertiesIsDirty));
-            */
-
-            OnPropertyChanged();
-            DeleteBuildingPictureCommand.NotifyCanExecuteChanged();
-        }
-    }
-
-    /*
-
-
-    private BuildingPictureType? _selectedBuildingPictureType = new(EnumBuildingPictureType.Unspecified);
-    public BuildingPictureType? SelectedBuildingPictureType
-    {
-        get => _selectedBuildingPictureType;
-        set
-        {
-            if (SelectedBuildingPicture is null)
-            {
-                // Should not happen.
-                Debug.WriteLine($"SelectedBuildingPictureType: SelectedBuildingPicture is null, cannot set value.");
-                return;
-            }
-
-            if (SetProperty(ref _selectedBuildingPictureType, value))
-            {
-                if (_selectedBuildingPictureType is not null)
-                {
-                    //Debug.WriteLine($"_selectedBuildingPictureType changed: {_selectedBuildingPictureType.Label}");
-
-                    SelectedBuildingPicture.PictureType = _selectedBuildingPictureType;
-                    IsDirty = true;
-                    SelectedBuildingPicture.IsModified = true;
-                    //BuildingPicturePropertiesIsDirty = true;
-                }
-                else
-                {
-                    Debug.WriteLine($"_selectedBuildingPictureType changed: null");
-                }
-            }
-
-        }
-    }
-
-    private string _buildingPictureDescription = string.Empty;
-    public string BuildingPictureDescription
-    {
-        get => _buildingPictureDescription;
-        set
-        {
-            if (SelectedBuildingPicture is null)
-            {
-                // Should not happen.
-                Debug.WriteLine($"BuildingPictureDescription: SelectedBuildingPicture is null, cannot set value.");
-                return;
-            }
-
-            if (SetProperty(ref _buildingPictureDescription, value))
-            {
-                SelectedBuildingPicture.Description = _buildingPictureDescription;
-                IsDirty = true;
-                SelectedBuildingPicture.IsModified = true;
-                //BuildingPicturePropertiesIsDirty = true;
-            }
-        }
-    }
-
-    private bool _buildingPictureIsMain;
-    public bool BuildingPictureIsMain
-    {
-        get => _buildingPictureIsMain;
-        set
-        {
-            if (SelectedBuildingPicture is null)
-            {
-                // Should not happen.
-                Debug.WriteLine($"BuildingPictureIsMain: SelectedBuildingPicture is null, cannot set value.");
-                return;
-
-            }
-
-            if (SetProperty(ref _buildingPictureIsMain, value))
-            {
-                if (_buildingPictureIsMain)
-                {
-                    foreach (var asdf in BuildingPictures)
-                    {
-                        asdf.IsMain = false;
-                    }
-                }
-
-                SelectedBuildingPicture.IsMain = _buildingPictureIsMain;
-                IsDirty = true;
-                SelectedBuildingPicture.IsModified = true;
-                //BuildingPicturePropertiesIsDirty = true;
-            }
-        }
-    }
-    */
 
     #endregion
 
@@ -1128,7 +941,6 @@ internal sealed partial class BldgViewModel : ObservableObject
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(EditSelectedUnitCommand))]
     internal partial Models.Rent.Residentials.UnitResidential? SelectedRoom { get; set; }
-
 
     #endregion
 
@@ -1178,6 +990,7 @@ internal sealed partial class BldgViewModel : ObservableObject
             // Reset errors
             NameHasError = false;
             // TODO: more.
+
             HasErrors = false;
         }
         catch (Exception ex)
@@ -1191,6 +1004,16 @@ internal sealed partial class BldgViewModel : ObservableObject
 
     }
 
+    //Finalizers / Destructors
+
+    //Delegates and Events
+
+    //Properties (Public first, then internal/private)
+
+    //Methods (Grouped by feature or accessibility)
+
+    //Nested Types (Enums, Structs, Classes)
+
     #region == Private Methods ==
 
     private void PopulateEntryValues()
@@ -1203,7 +1026,7 @@ internal sealed partial class BldgViewModel : ObservableObject
 
         if (!string.IsNullOrEmpty(_entry.LocPrefId))
         {
-            var hoge = Prefs.FirstOrDefault<Pref>(p => p.MunicipalityCode.Equals(_entry.LocPrefId));
+            var hoge = Prefectures.FirstOrDefault<Prefecture>(p => p.MunicipalityCode.Equals(_entry.LocPrefId));
             if (hoge is not null)
             {
                 SelectedPef = hoge;
@@ -1574,61 +1397,6 @@ internal sealed partial class BldgViewModel : ObservableObject
 
     // TODO: change these to commands.
 
-    public async Task SetNewBuildingPicturesAsync(List<string> filePathList)
-    {
-        if (filePathList is null) return;
-        if (filePathList.Count == 0) return;
-
-        Debug.WriteLine($"destDirectory={_mainViewModel.EntryDataDirectoryPath}  @SetNewBuildingPicturesAsync()");
-
-        if (!Directory.Exists(_mainViewModel.EntryDataDirectoryPath))
-        {
-            Directory.CreateDirectory(_mainViewModel.EntryDataDirectoryPath);
-        }
-
-        //List<string> list = [];
-
-        foreach (var filePath in filePathList)
-        {
-            if (string.IsNullOrEmpty(filePath.Trim()))
-            {
-                continue;
-            }
-
-            // TODO: check file ext for valid image type.
-            // TODO: set max file size?
-
-            // TODO: Create thumbnail image?
-
-
-            using var sourceStream = File.Open(filePath, FileMode.Open);
-
-            string newId = Guid.CreateVersion7().ToString("N");
-            string extension = Path.GetExtension(System.IO.Path.GetFileName(filePath));
-            var destFilePath = Path.Combine(_mainViewModel.EntryDataDirectoryPath, newId+ extension);
-            //Debug.WriteLine($"{file} to {destFilePath}  @SetNewBuildingPicturesAsync()");
-
-            using var destinationStream = File.Create(destFilePath);
-            await sourceStream.CopyToAsync(destinationStream);
-
-            var pic = new Models.Rent.Residentials.PictureBldg(newId, destFilePath)
-            {
-                IsNew = true,
-                ParentViewModel = _mainViewModel
-            };
-
-            BuildingPictures.Add(pic);
-
-            OpenBuildingBlobDirectoryCommand.NotifyCanExecuteChanged();
-            DeleteBuildingPictureCommand.NotifyCanExecuteChanged();
-
-            IsDirty = true;
-
-            // Keep track of unsaved files to delete them when discarding.
-            _unsavedBuildingPictureFileList.Add(destFilePath);
-        }
-    }
-
     public async Task SetNewBuildingPdfsAsync(List<string> filePathList)
     {
         if (filePathList is null) return;
@@ -1783,63 +1551,70 @@ internal sealed partial class BldgViewModel : ObservableObject
 
     #region == Pictures and Pdf related commands ==
 
-    [RelayCommand]
-    public async Task AddNewBuildingPictures()
+    [RelayCommand(CanExecute = nameof(CanAddNewBuildingPictures))]
+    private async Task AddNewBuildingPictures(List<string> filePathList)
     {
-        // Handle this in the code behind since this ViewModel does not know about the Window which is required for the Picker.
+        // File open is handleed in the code behind since this ViewModel does not know about the Window which is required for the Picker.
 
-        /*
-        var hWnd = WinRT.Interop.WindowNative.GetWindowHandle(_editorWin);
-        var windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hWnd);
-        var openPicker = new Microsoft.Windows.Storage.Pickers.FileOpenPicker(windowId);
-        //WinRT.Interop.InitializeWithWindow.Initialize(openPicker, hWnd);
+        if (filePathList is null) return;
+        if (filePathList.Count == 0) return;
 
-        // Set options for your file picker
-        openPicker.ViewMode = Microsoft.Windows.Storage.Pickers.PickerViewMode.List;
-        openPicker.SuggestedStartLocation = Microsoft.Windows.Storage.Pickers.PickerLocationId.PicturesLibrary;
-        openPicker.FileTypeFilter.Add(".jpg");
-        openPicker.FileTypeFilter.Add(".jpeg");
-        openPicker.FileTypeFilter.Add(".png");
-        openPicker.FileTypeFilter.Add(".gif");
-        openPicker.FileTypeFilter.Add(".webp");
+        Debug.WriteLine($"destDirectory={_mainViewModel.EntryDataDirectoryPath}  @SetNewBuildingPicturesAsync()");
 
-        // Open the picker for the user to pick a file
-        var files = await openPicker.PickMultipleFilesAsync();
-        if (files.Count > 0)
+        if (!Directory.Exists(_mainViewModel.EntryDataDirectoryPath))
         {
-            //StringBuilder output = new("");
-            List<string> list = [];
-            foreach (var file in files)
+            Directory.CreateDirectory(_mainViewModel.EntryDataDirectoryPath);
+        }
+
+        //List<string> list = [];
+
+        foreach (var filePath in filePathList)
+        {
+            if (string.IsNullOrEmpty(filePath.Trim()))
             {
-                //output.Append(file.Path + "\n");
-                using var sourceStream = File.Open(file.Path, FileMode.Open);
-
-                // TODO: set max file size?
-
-                var destFilePath = Path.Combine(_mainViewModel.EntryDataDirectoryPath, System.IO.Path.GetFileName(file.Path));
-                //Debug.WriteLine($"{file.Path} to {destFilePath}  @AddNewBuildingPictures()");
-
-                using var destinationStream = File.Create(destFilePath);
-                await sourceStream.CopyToAsync(destinationStream);
-
-                list.Add(destFilePath);
-
-                // Keep track of unsaved files to delete them when discarding.
-                _unsavedBuildingPictureFileList.Add(destFilePath);
+                continue;
             }
 
-            //Debug.WriteLine(output.ToString());
-            SetNewBuildingPictures(list);
+            // TODO: check file ext for valid image type.
+            // TODO: set max file size?
+
+            // TODO: Create thumbnail image?
+
+
+            using var sourceStream = File.Open(filePath, FileMode.Open);
+
+            string newId = Guid.CreateVersion7().ToString("N");
+            string extension = Path.GetExtension(System.IO.Path.GetFileName(filePath));
+            var destFilePath = Path.Combine(_mainViewModel.EntryDataDirectoryPath, newId + extension);
+            //Debug.WriteLine($"{file} to {destFilePath}  @SetNewBuildingPicturesAsync()");
+
+            using var destinationStream = File.Create(destFilePath);
+            await sourceStream.CopyToAsync(destinationStream);
+
+            var pic = new Models.Rent.Residentials.PictureBldg(newId, destFilePath)
+            {
+                IsNew = true,
+                ParentViewModel = _mainViewModel
+            };
+
+            BuildingPictures.Add(pic);
+
+            OpenBuildingBlobDirectoryCommand.NotifyCanExecuteChanged();
+            DeleteBuildingPictureCommand.NotifyCanExecuteChanged();
+
+            IsDirty = true;
+
+            // Keep track of unsaved files to delete them when discarding.
+            _unsavedBuildingPictureFileList.Add(destFilePath);
         }
-        else
-        {
-            Debug.WriteLine("Operation cancelled.");
-        }
-        */
+    }
+    private static bool CanAddNewBuildingPictures()
+    {
+        return true;
     }
 
     [RelayCommand(CanExecute = nameof(CanDeleteBuildingPicture))]
-    internal void DeleteBuildingPicture(Models.Rent.Residentials.PictureBldg picBldg)
+    private void DeleteBuildingPicture(Models.Rent.Residentials.PictureBldg picBldg)
     {
         if (picBldg is null)
         {
@@ -1854,13 +1629,13 @@ internal sealed partial class BldgViewModel : ObservableObject
             IsDirty = true;
         }
     }
-    private bool CanDeleteBuildingPicture(Models.Rent.Residentials.PictureBldg picBldg)
+    private static bool CanDeleteBuildingPicture(Models.Rent.Residentials.PictureBldg picBldg)
     {
         return picBldg is not null;
     }
 
     [RelayCommand(CanExecute = nameof(CanDeleteBuildingPdf))]
-    internal void DeleteBuildingPdf(Models.Rent.Residentials.PdfBldg pdfBldg)
+    private void DeleteBuildingPdf(Models.Rent.Residentials.PdfBldg pdfBldg)
     {
         if (pdfBldg is null)
         {
@@ -1875,13 +1650,13 @@ internal sealed partial class BldgViewModel : ObservableObject
             IsDirty = true;
         }
     }
-    private bool CanDeleteBuildingPdf(Models.Rent.Residentials.PdfBldg pdfBldg)
+    private static bool CanDeleteBuildingPdf(Models.Rent.Residentials.PdfBldg pdfBldg)
     {
         return pdfBldg is not null;
     }
 
     [RelayCommand(CanExecute = nameof(CanOpenBuildingBlobDirectory))]
-    public void OpenBuildingBlobDirectory()
+    private void OpenBuildingBlobDirectory()
     {
         if (Directory.Exists(_mainViewModel.EntryDataDirectoryPath))
         {
@@ -2009,30 +1784,26 @@ internal sealed partial class BldgViewModel : ObservableObject
     [RelayCommand]
     public async Task ShowRailLineSelect1()
     {
-        // TODO: 
-        /*
-        if (_editorWin is null)
+        if (_mainViewModel.ResidentialDialogService is null)
         {
+            Debug.WriteLine("_mainViewModel.ResidentialDialogService is null");
             return;
         }
 
-        var railLine = await _dlgService.ShowRailLineSelectDialog(_editorWin);
+        var railLine = await _mainViewModel.ResidentialDialogService.ShowRailLineSelectDialog();
 
         if (railLine is not null)
         {
             SelectedRailLine1 = railLine;
         }
-
-        */
     }
 
     [RelayCommand(CanExecute = nameof(CanShowRailStationSelect1))]
     public async Task ShowRailStationSelect1()
     {
-        // TODO:
-        /*
-        if (_editorWin is null)
+        if (_mainViewModel.ResidentialDialogService is null)
         {
+            Debug.WriteLine("_mainViewModel.ResidentialDialogService is null");
             return;
         }
 
@@ -2041,13 +1812,12 @@ internal sealed partial class BldgViewModel : ObservableObject
             return;
         }
 
-        var railStation = await _dlgService.ShowRailStationSelectDialog(_editorWin, SelectedRailLine1.LineCode);
+        var railStation = await _mainViewModel.ResidentialDialogService.ShowRailStationSelectDialog(SelectedRailLine1.LineCode);
 
         if (railStation is not null)
         {
             SelectedRailStation1 = railStation;
         }
-        */
     }
     private bool CanShowRailStationSelect1()
     {

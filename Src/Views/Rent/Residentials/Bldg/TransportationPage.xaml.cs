@@ -5,17 +5,7 @@ namespace ZumenSearch.Views.Rent.Residentials.Bldg;
 
 internal sealed partial class TransportationPage : Page
 {
-    public ViewModels.Rent.Residentials.MainViewModel? ViewModel
-    {
-        get;
-        private set
-        {
-            if (value != null)
-            {
-                field = value;
-            }
-        }
-    }
+    public ViewModels.Rent.Residentials.MainViewModel? ViewModel { get; private set; }
 
     public TransportationPage()
     {

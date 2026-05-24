@@ -56,6 +56,10 @@
                             BackRequested="NavigationViewControl_BackRequested"
                             PaneOpened="NavigationViewControl_PaneOpened"
                             PaneClosed="NavigationViewControl_PaneClosed">
+                <NavigationView.Resources>
+                    <!-- Changes the layout box size reserved for the icon; default 16 -->
+                    <x:Double x:Key="NavigationViewItemOnLeftIconBoxHeight">20</x:Double>
+                </NavigationView.Resources>
                 <NavigationView.HeaderTemplate>
                     <DataTemplate>
                         <Grid>
@@ -69,7 +73,7 @@
                             <ColumnDefinition Width="Auto"></ColumnDefinition>
                         </Grid.ColumnDefinitions>
 
-                        <StackPanel Grid.Column="0" Margin="6,0,0,0" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left">
+                        <StackPanel Grid.Column="0" Margin="36,0,0,0" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left">
                             <Image x:Name="AppTitleBarIcon" Source="/Assets/App.ico" HorizontalAlignment="Left" VerticalAlignment="Center" Width="18" Height="18" Margin="6,0,0,0" />
                             <TextBlock x:Name="AppTitleBarText" Text="ZumenSearch" FontWeight="SemiBold" Margin="6,0,0,0" VerticalAlignment="Center" Opacity="0.9"/>
                         </StackPanel>
@@ -80,41 +84,58 @@
 
                     <NavigationViewItem Tag="ZumenSearch.Views.SearchPage" Content="総合検索" ToolTipService.ToolTip="検索">
                         <NavigationViewItem.Icon>
-                            <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xe7c3;"/>
+                            <ImageIcon Source="ms-appx:///Assets/SvgIcons/ic_fluent_search_sparkle_20_color.svg"></ImageIcon>
                         </NavigationViewItem.Icon>
                     </NavigationViewItem>
 
                     <NavigationViewItem Tag="Rent" Content="賃貸" ToolTipService.ToolTip="賃貸" IsExpanded="True">
                         <NavigationViewItem.Icon>
-                            <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xe80f;"/>
+                            <ImageIcon Source="ms-appx:///Assets/SvgIcons/ic_fluent_building_home_20_color.svg"></ImageIcon>
                         </NavigationViewItem.Icon>
 
                         <NavigationViewItem.MenuItems>
 
                             <NavigationViewItem Tag="ZumenSearch.Views.Rent.ResidentialSearchPage" Content="住居用" ToolTipService.ToolTip="賃貸住居用">
                                 <NavigationViewItem.Icon>
-                                    <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xe7c3;"/>
+                                    <ImageIcon Source="ms-appx:///Assets/SvgIcons/ic_fluent_building_people_20_color.svg"></ImageIcon>
+                                    <!--
+                                    <ImageIcon Width="20" Height="20">
+                                        <ImageIcon.Source>
+                                            <SvgImageSource UriSource="ms-appx:///Assets/SvgIcons/ic_fluent_building_home_20_color.svg" 
+                                RasterizePixelWidth="20" 
+                                RasterizePixelHeight="20"/>
+                                        </ImageIcon.Source>
+                                    </ImageIcon>
+                                    -->
                                 </NavigationViewItem.Icon>
                             </NavigationViewItem>
 
                             <NavigationViewItem Tag="ZumenSearch.Views.Rent.Commercials.CommercialsPage" Content="事業用" ToolTipService.ToolTip="賃貸事業用">
                                 <NavigationViewItem.Icon>
-                                    <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xe7c3;"/>
+                                    <ImageIcon Source="ms-appx:///Assets/SvgIcons/ic_fluent_building_store_20_color.svg"></ImageIcon>
                                 </NavigationViewItem.Icon>
                             </NavigationViewItem>
 
                             <NavigationViewItem Tag="ZumenSearch.Views.Rent.Parkings.ParkingsPage" Content="駐車場" ToolTipService.ToolTip="賃貸駐車場">
                                 <NavigationViewItem.Icon>
-                                    <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xe7c3;"/>
+                                    <ImageIcon Source="ms-appx:///Assets/SvgIcons/ic_fluent_vehicle_car_20_filled.svg"></ImageIcon>
                                 </NavigationViewItem.Icon>
                             </NavigationViewItem>
 
-                            <NavigationViewItem Tag="ZumenSearch.Views.Rent.Owners.OwnersPage" Content="貸主" ToolTipService.ToolTip="貸主" Icon="OtherUser"/>
+                            <NavigationViewItem Tag="ZumenSearch.Views.Rent.Owners.OwnersPage" Content="貸主" ToolTipService.ToolTip="貸主">
+                                <NavigationViewItem.Icon>
+                                    <ImageIcon Source="ms-appx:///Assets/SvgIcons/ic_fluent_people_20_color.svg"></ImageIcon>
+                                </NavigationViewItem.Icon>
+                            </NavigationViewItem>
 
                         </NavigationViewItem.MenuItems>
                     </NavigationViewItem>
 
-                    <NavigationViewItem Tag="ZumenSearch.Views.Brokers.BrokersPage" Content="宅建業者" ToolTipService.ToolTip="宅建業者" Icon="OtherUser"/>
+                    <NavigationViewItem Tag="ZumenSearch.Views.Brokers.BrokersPage" Content="宅建業者" ToolTipService.ToolTip="宅建業者">
+                        <NavigationViewItem.Icon>
+                            <ImageIcon Source="ms-appx:///Assets/SvgIcons/ic_fluent_layer_diagonal_person_20_color.svg"></ImageIcon>
+                        </NavigationViewItem.Icon>
+                    </NavigationViewItem>
 
                 </NavigationView.MenuItems>
                 <Grid>
@@ -132,8 +153,11 @@
                         <AutoSuggestBox x:Name="SearchBox" Visibility="Collapsed" Grid.Column="1" ItemsSource="{x:Bind ViewModel.AutoSuggestList, Mode=OneWay}" UpdateTextOnSelect="False" TextChanged="SearchBox_TextChanged" SuggestionChosen="SearchBox_SuggestionChosen" QuerySubmitted="SearchBox_QuerySubmitted" SizeChanged="AppTitleBar_SizeChanged" Margin="0,8,84,0" QueryIcon="Find" AutomationProperties.Name="Search" PlaceholderText="Find " HorizontalAlignment="Center" VerticalAlignment="Top" MinWidth="200" Width="340">
                             <AutoSuggestBox.ItemTemplate>
                                 <DataTemplate x:DataType="mod:AutoSuggestItem">
-                                    <Grid Padding="4" ColumnDefinitions="Auto, *">
-
+                                    <Grid Padding="4">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
                                         <!-- Icon Visual Anchor -->
                                         <FontIcon Grid.Column="0" Glyph="&#xe7c3;"  Margin="0,0,12,0" VerticalAlignment="Center"/>
 

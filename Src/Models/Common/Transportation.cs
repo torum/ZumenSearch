@@ -1,7 +1,7 @@
 ﻿namespace ZumenSearch.Models.Common;
 
 
-public class RailLine
+public sealed class RailLine
 {
     // 路線コード（カラム名:line_cd）
     public string LineCode
@@ -58,7 +58,7 @@ public class RailLine
 }
 
 
-public class RailStation
+public sealed class RailStation
 {
     // 駅コード（カラム名: station_cd）
     public string StationCode

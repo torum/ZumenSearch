@@ -66,11 +66,12 @@ internal sealed partial class PictureListPage : Page
         if (sender is AppBarButton button)
         {
             button.IsEnabled = false;
-            var openPicker = new Microsoft.Windows.Storage.Pickers.FileOpenPicker(button.XamlRoot.ContentIslandEnvironment.AppWindowId);
-
-            // Set options for your file picker
-            openPicker.ViewMode = Microsoft.Windows.Storage.Pickers.PickerViewMode.List;
-            openPicker.SuggestedStartLocation = Microsoft.Windows.Storage.Pickers.PickerLocationId.PicturesLibrary;
+            var openPicker = new Microsoft.Windows.Storage.Pickers.FileOpenPicker(button.XamlRoot.ContentIslandEnvironment.AppWindowId)
+            {
+                // Set options for your file picker
+                ViewMode = Microsoft.Windows.Storage.Pickers.PickerViewMode.List,
+                SuggestedStartLocation = Microsoft.Windows.Storage.Pickers.PickerLocationId.PicturesLibrary
+            };
             openPicker.FileTypeFilter.Add(".jpg");
             openPicker.FileTypeFilter.Add(".jpeg");
             openPicker.FileTypeFilter.Add(".png");
@@ -87,7 +88,11 @@ internal sealed partial class PictureListPage : Page
                     list.Add(file.Path);
                 }
 
-                await ViewModel.Bldg.SetNewBuildingPicturesAsync(list);
+                if (ViewModel.Bldg.AddNewBuildingPicturesCommand.CanExecute(list))
+                {
+                    await ViewModel.Bldg.AddNewBuildingPicturesCommand.ExecuteAsync(list);
+                    //await ViewModel.Bldg.AddNewBuildingPictures(list);
+                }
             }
             else
             {

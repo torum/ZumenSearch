@@ -1,7 +1,7 @@
 ﻿namespace ZumenSearch.Models.Common;
 
 // ErrorInfo Class
-public class ErrorObject
+public sealed class ErrorObject
 {
     public enum ErrTypes
     {

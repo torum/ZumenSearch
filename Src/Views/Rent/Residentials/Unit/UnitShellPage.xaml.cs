@@ -122,7 +122,7 @@ internal sealed partial class UnitShellPage : Page
             e.Cancel = true;
 
             // show ConfirmationDialog
-            var result = await _dlg.ShowLeaveUnitDirtyConfirmationDialog(this.XamlRoot);
+            var result = await _dlg.ShowLeaveUnitDirtyConfirmationDialog();
 
             if (result == ContentDialogResult.Primary)
             {

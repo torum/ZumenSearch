@@ -32,14 +32,14 @@ internal sealed partial class SearchResultPage : Page
     }
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
+        base.OnNavigatedTo(e);
+
         if ((e.Parameter is Frame) && (e.Parameter != null))
         {
             ContentFrame = e.Parameter as Frame;
+
+            this.SearchResultListView.Focus(Microsoft.UI.Xaml.FocusState.Programmatic);
         }
-
-        base.OnNavigatedTo(e);
-
-        this.SearchResultListView.Focus(Microsoft.UI.Xaml.FocusState.Programmatic);
     }
 
     private void Page_Loaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)

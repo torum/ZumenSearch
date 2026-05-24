@@ -20,7 +20,9 @@ internal sealed partial class MainViewModel : ObservableObject
 
     public BldgViewModel Bldg { get; init; }
 
-    public INavigationResidentialService? ResidentialNavigationService => _nav;
+    public INavigationResidentialService? ResidentialNavigationService => _navService;
+
+    public IModalDialogService? ResidentialDialogService => _dlgService;
 
     // Local directory path to save blob data such as pictures and PDFs.
     public string EntryDataDirectoryPath { get; init; }
@@ -44,7 +46,7 @@ internal sealed partial class MainViewModel : ObservableObject
     [ObservableProperty]
     public partial string InfoBarErrorMessage { get; set; } = string.Empty;
 
-    // TODO:
+    // TODO: split into parts so that xaml can use span to colorlize them.
     public string WindowTitle
     {
         set
@@ -81,6 +83,7 @@ internal sealed partial class MainViewModel : ObservableObject
         }
     } = "賃貸住居用";
 
+
     #endregion
 
     #region == Events
@@ -109,9 +112,9 @@ internal sealed partial class MainViewModel : ObservableObject
     // The IDataAccessService is used to access the data layer for saving and updating entries.
     private readonly IDataAccessService _dataAccessService;
     private readonly IDataAccessLocationService _dataAccessLocationService;
-    private readonly IModalDialogService _dlgService;
+    private IModalDialogService? _dlgService;
     private readonly IDispatcherService _dispatcherService;
-    private INavigationResidentialService? _nav;
+    private INavigationResidentialService? _navService;
 
     #endregion
 
@@ -121,11 +124,10 @@ internal sealed partial class MainViewModel : ObservableObject
 
     #endregion
 
-    public MainViewModel(Models.Rent.Residentials.EntryResidential entry, IDispatcherService dispatcherService, IDataAccessService dataAccessService, IModalDialogService modalDialogService, IDataAccessLocationService dataAccessLocationService)
+    public MainViewModel(Models.Rent.Residentials.EntryResidential entry, IDispatcherService dispatcherService, IDataAccessService dataAccessService, IDataAccessLocationService dataAccessLocationService)
     {
         _dataAccessService = dataAccessService;
         _dataAccessLocationService = dataAccessLocationService;
-        _dlgService = modalDialogService;
         _dispatcherService = dispatcherService;
 
         _id = entry.Id;//Guid.CreateVersion7().ToString("N");
@@ -151,7 +153,12 @@ internal sealed partial class MainViewModel : ObservableObject
 
     public void SetEditorNavigationService(INavigationResidentialService nav)
     {
-        _nav = nav;
+        _navService = nav;
+    }
+
+    public void SetEditorDialogService(IModalDialogService dialog)
+    {
+        _dlgService = dialog;
     }
 
     public void SetUnitShell(Views.Rent.Residentials.Unit.UnitShellPage shell)
@@ -173,7 +180,7 @@ internal sealed partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void GoToBldgShellPage()
     {
-        var frame = _nav?.GetFrame();
+        var frame = _navService?.GetFrame();
         if (frame is null)
         {
             Debug.WriteLine("Nav service is not set. Cannot navigate to Building Shell Page.");
@@ -233,7 +240,7 @@ internal sealed partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void GoToUnitShellPage()
     {
-        var frame = _nav?.GetFrame();
+        var frame = _navService?.GetFrame();
         if (frame is null)
         {
             Debug.WriteLine("Nav service is not set. Cannot navigate to Building Shell Page.");

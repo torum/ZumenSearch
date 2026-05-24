@@ -34,9 +34,9 @@
                                             <ColumnDefinition Width="1*" MinWidth="320"/>
                                         </Grid.ColumnDefinitions>
                                         <Grid Grid.Column="0">
-                                            <ComboBox x:Name="ComboBoxPref" Header="都道府県" PlaceholderText="選択" SelectionChanged="ComboBoxPref_SelectionChanged" SelectedIndex="-1" ItemsSource="{x:Bind ViewModel.Bldg.Prefs, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.Bldg.SelectedPef, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch">
+                                            <ComboBox x:Name="ComboBoxPref" Header="都道府県" PlaceholderText="選択" SelectionChanged="ComboBoxPref_SelectionChanged" SelectedIndex="-1" ItemsSource="{x:Bind ViewModel.Bldg.Prefectures, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.Bldg.SelectedPef, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch">
                                                 <ComboBox.ItemTemplate>
-                                                    <DataTemplate x:DataType="mod:Pref">
+                                                    <DataTemplate x:DataType="mod:Prefecture">
                                                         <StackPanel Orientation="Horizontal">
                                                             <TextBlock Text="{x:Bind Name}" Margin="0,0,5,0"/>
                                                         </StackPanel>

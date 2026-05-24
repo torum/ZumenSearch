@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.ObjectModel;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using System.Collections.ObjectModel;
 using ZumenSearch.Models.Common;
 using ZumenSearch.Services.Contracts;
 
@@ -55,7 +54,6 @@ public partial class RailStationSelectViewModel : ObservableObject
         }
     }
 
-
     public event EventHandler<RailStation>? SelectionChanged;
 
     private readonly IDataAccessTransportationService _dataAccessTransportationService;
@@ -65,6 +63,7 @@ public partial class RailStationSelectViewModel : ObservableObject
         _dataAccessTransportationService = dataAccessTransportationService;
         _railLineCode = railLineCode;
 
+        // TODO: try catch
         SuggestedRailStations = _dataAccessTransportationService.GetRailStationsBy(_railLineCode, Query);
     }
 
@@ -77,6 +76,7 @@ public partial class RailStationSelectViewModel : ObservableObject
             return;
         }
 
+        // TODO: try catch
         SuggestedRailStations = _dataAccessTransportationService.GetRailStationsBy(_railLineCode, Query);
 
     }

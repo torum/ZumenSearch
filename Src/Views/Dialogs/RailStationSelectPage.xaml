@@ -20,15 +20,19 @@
                 <ColumnDefinition Width="Auto"></ColumnDefinition>
             </Grid.ColumnDefinitions>
             <Grid Grid.Column="0">
-                <TextBox Header="駅名" Text="{x:Bind ViewModel.Query, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0" HorizontalAlignment="Stretch" VerticalAlignment="Bottom"></TextBox>
+                <TextBox x:Name="TextBoxStation" Header="駅名" Text="{x:Bind ViewModel.Query, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0" HorizontalAlignment="Stretch" VerticalAlignment="Bottom">
+                    <TextBox.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="Enter" Invoked="KeyboardAccelerator_Invoked" />
+                    </TextBox.KeyboardAccelerators>
+                </TextBox>
             </Grid>
             <Grid Grid.Column="1" Margin="6,0,0,0">
                 <Button Content="検索" VerticalAlignment="Bottom" Command="{x:Bind ViewModel.SearchRailStationCommand}"></Button>
             </Grid>
         </Grid>
         <Grid Grid.Row="1" Margin="0,6,0,0">
-            <Border Style="{StaticResource RoundCardBorderStyle}">
-                <ListView x:Name="SelectionListView" ItemsSource="{x:Bind ViewModel.SuggestedRailStations, Mode=OneWay}" SelectionMode="Single" SelectedItem="{x:Bind ViewModel.SelectedRailStation,Mode=TwoWay}" Height="150" Width="230">
+            <Border Style="{StaticResource RoundCardBorderStyle}" Padding="0">
+                <ListView x:Name="SelectionListView" ItemsSource="{x:Bind ViewModel.SuggestedRailStations, Mode=OneWay}" SelectionMode="Single" SelectedItem="{x:Bind ViewModel.SelectedRailStation,Mode=TwoWay}" Margin="0,6,0,6" Height="150" Width="260">
                     <ListView.ItemTemplate>
                         <DataTemplate x:DataType="mod:RailStation">
                             <TextBlock Text="{x:Bind StationName}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"></TextBlock>

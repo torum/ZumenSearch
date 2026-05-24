@@ -377,6 +377,7 @@ internal sealed partial class UnitViewModel : ObservableObject
         // Reset errors
         NameHasError = false;
         // TODO: more.
+
         HasErrors = false;
 
         _unit.IsModified = false;

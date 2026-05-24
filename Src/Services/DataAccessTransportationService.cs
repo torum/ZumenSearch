@@ -1,4 +1,5 @@
 ﻿using Microsoft.Data.Sqlite;
+using Microsoft.UI.Xaml;
 using System.Collections.ObjectModel;
 using System.Data;
 using ZumenSearch.Models.Common;
@@ -8,7 +9,10 @@ namespace ZumenSearch.Services;
 
 public class DataAccessTransportationService : IDataAccessTransportationService
 {
-    private readonly SqliteConnectionStringBuilder connectionStringBuilder = new("Data Source=rail_lines.db");
+    private readonly SqliteConnectionStringBuilder connectionStringBuilder;// = new("Data Source=rail_lines.db");
+    private readonly string railLineDbPath;
+    private readonly string railStationDbPath;
+
 
     //private readonly ReaderWriterLockSlim _readerWriterLock = new();
 
@@ -16,8 +20,12 @@ public class DataAccessTransportationService : IDataAccessTransportationService
     {
         //connectionStringBuilder = new SqliteConnectionStringBuilder("Data Source=rail_lines.db");
 
-        //connectionStringBuilder.DataSource = "rail_line.db";
+        //connectionStringBuilder.DataSource = "rail_lines.db";
         //connectionStringBuilder.DataSource = "rail_stations.db";
+
+        railLineDbPath = Path.Combine(AppContext.BaseDirectory, "Data", "rail_lines.db");
+        railStationDbPath = Path.Combine(AppContext.BaseDirectory, "Data", "rail_stations.db");
+        connectionStringBuilder = new SqliteConnectionStringBuilder($"Data Source={railLineDbPath};");
     }
 
     public ObservableCollection<RailLine> GetRailLinesBy(string query)
@@ -33,7 +41,7 @@ public class DataAccessTransportationService : IDataAccessTransportationService
 
         query = EscapeSingleQuote(query.Trim());
 
-        connectionStringBuilder.DataSource = "rail_lines.db";
+        connectionStringBuilder.DataSource = railLineDbPath;//"rail_lines.db";
 
         using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
         connection.Open();
@@ -77,7 +85,7 @@ public class DataAccessTransportationService : IDataAccessTransportationService
 
         query = EscapeSingleQuote(query.Trim());
 
-        connectionStringBuilder.DataSource = "rail_stations.db";
+        connectionStringBuilder.DataSource = railStationDbPath;// = "rail_stations.db";
 
         using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
         connection.Open();

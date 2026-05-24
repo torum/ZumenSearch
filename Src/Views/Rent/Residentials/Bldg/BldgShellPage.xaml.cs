@@ -90,6 +90,8 @@ internal sealed partial class BldgShellPage : Page
         {
             OnEventIsUnitOwnershipChanged(ViewModel.Bldg.IsUnitOwnership);
         }
+
+        //
     }
 
     protected override void OnNavigatedTo(NavigationEventArgs e)

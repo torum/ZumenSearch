@@ -1,6 +1,6 @@
 ﻿namespace ZumenSearch.Models.Common;
 
-public class AutoSuggestItem
+public sealed class AutoSuggestItem
 {
     public string? Name
     {

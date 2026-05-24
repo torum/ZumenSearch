@@ -95,6 +95,7 @@ internal sealed class DataAccessService : IDataAccessService
                     " )";
                 tableCmd.ExecuteNonQuery();
 
+                /*
                 // ADD COLUMN chinryou.
                 try
                 {
@@ -107,6 +108,7 @@ internal sealed class DataAccessService : IDataAccessService
                     // need to catch "duplicate column name" errors.
                     Debug.WriteLine("SqliteException on ADD COLUMN chinryou @InitializeDatabase: " + ex.Message);
                 }
+                */
 
                 tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS rent_residential_room_pictures (" +
                     "picture_id TEXT NOT NULL PRIMARY KEY," +
@@ -122,6 +124,7 @@ internal sealed class DataAccessService : IDataAccessService
                     " )";
                 tableCmd.ExecuteNonQuery();
 
+                /*
                 // ADD COLUMN room_id.
                 try
                 {
@@ -134,6 +137,8 @@ internal sealed class DataAccessService : IDataAccessService
                     // need to catch "duplicate column name" errors.
                     Debug.WriteLine("SqliteException on ADD COLUMN room_id @InitializeDatabase: " + ex.Message);
                 }
+                */
+                AddColumnsIfNotExist(connection);
 
                 //
                 //tableCmd.CommandText = "drop trigger if exists trigger_delete_old_entries";
@@ -223,6 +228,73 @@ internal sealed class DataAccessService : IDataAccessService
         }
 
         return res;
+    }
+
+    private void AddColumnsIfNotExist(SqliteConnection conn)
+    {
+        // ADD COLUMN chinryou for rent_residential_rooms.
+        var cmd = conn.CreateCommand();
+        cmd.CommandText = "PRAGMA table_info(rent_residential_room_pictures);";
+        bool exists = false;
+        using (var reader = cmd.ExecuteReader())
+        {
+            while (reader.Read())
+            {
+                if (reader.GetString(1) == "room_id")
+                {
+                    exists = true;
+                    break;
+                }
+            }
+            if (!exists)
+            {
+                var altcmd = conn.CreateCommand();
+
+                try
+                {
+                    // ADD COLUMN chinryou
+                    altcmd.CommandText = "ALTER TABLE rent_residential_rooms ADD COLUMN chinryou INTEGER NOT NULL DEFAULT 0;";
+                    altcmd.ExecuteNonQuery();
+                }
+                catch (SqliteException ex)
+                {
+                    Debug.WriteLine("SqliteException on ADD COLUMN chinryou @InitializeDatabase: " + ex.Message);
+                }
+            }
+            reader.Close();
+        }
+
+        // ADD COLUMN room_id for rent_residential_room_pictures.
+        cmd.CommandText = "PRAGMA table_info(rent_residential_room_pictures);";
+        exists = false;
+        using (var reader = cmd.ExecuteReader())
+        {
+            while (reader.Read())
+            {
+                if (reader.GetString(1) == "room_id")
+                {
+                    exists = true;
+                    break;
+                }
+            }
+
+            if (!exists)
+            {
+                var altcmd = conn.CreateCommand();
+
+                try
+                {
+                    // ADD COLUMN room_id.
+                    altcmd.CommandText = "ALTER TABLE rent_residential_room_pictures ADD COLUMN room_id TEXT NOT NULL DEFAULT '';";
+                    altcmd.ExecuteNonQuery();
+                }
+                catch (SqliteException ex)
+                {
+                    Debug.WriteLine("SqliteException on ADD COLUMN room_id @InitializeDatabase: " + ex.Message);
+                }
+            }
+            reader.Close();
+        }
     }
 
     public SqliteDataAccessResultWrapper InsertRentResidential(Models.Rent.Residentials.EntryResidential entry)

@@ -33,6 +33,15 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove=".gitignore" />
+    <None Remove="Assets\SvgIcons\ic_fluent_building_20_color.svg" />
+    <None Remove="Assets\SvgIcons\ic_fluent_building_multiple_20_color.svg" />
+    <None Remove="Assets\SvgIcons\ic_fluent_building_people_20_color.svg" />
+    <None Remove="Assets\SvgIcons\ic_fluent_building_store_20_color.svg" />
+    <None Remove="Assets\SvgIcons\ic_fluent_home_20_color.svg" />
+    <None Remove="Assets\SvgIcons\ic_fluent_layer_diagonal_person_20_color.svg" />
+    <None Remove="Assets\SvgIcons\ic_fluent_people_20_color.svg" />
+    <None Remove="Assets\SvgIcons\ic_fluent_search_sparkle_20_color.svg" />
+    <None Remove="Assets\SvgIcons\ic_fluent_vehicle_car_20_filled.svg" />
   </ItemGroup>
 
   <ItemGroup>

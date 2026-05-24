@@ -343,7 +343,7 @@ internal sealed partial class MainViewModel : ObservableObject
         mainWindow?.AppWindow.MoveInZOrderBelow(editorWindow.AppWindow.Id);
         editorWindow.AppWindow.MoveInZOrderAtTop();
     }
-    public bool EditRentResidentialEntryCanExecute(Models.Rent.Residentials.EntryResidentialSearchResult? selected)
+    public static bool EditRentResidentialEntryCanExecute(Models.Rent.Residentials.EntryResidentialSearchResult? selected)
     {
         if (selected is null)
         {
@@ -366,7 +366,7 @@ internal sealed partial class MainViewModel : ObservableObject
         // TODO;
         Debug.WriteLine($"TODO: EditRentResidentialUnit executed for {selected.Id} (EntryId = {selected.EntryId})");
     }
-    public bool EditRentResidentialUnitCanExecute(Models.Rent.Residentials.UnitResidentialSearchResult? selected)
+    public static bool EditRentResidentialUnitCanExecute(Models.Rent.Residentials.UnitResidentialSearchResult? selected)
     {
         if (selected is null)
         {
@@ -411,9 +411,11 @@ internal sealed partial class MainViewModel : ObservableObject
             {
                 foreach (var item in res.SelectedEntries)
                 {
-                    var autoSuggest = new AutoSuggestItem();
-                    autoSuggest.Name = item.Name;
-                    autoSuggest.Id = item.Id;
+                    var autoSuggest = new AutoSuggestItem
+                    {
+                        Name = item.Name,
+                        Id = item.Id
+                    };
                     AutoSuggestList.Add(autoSuggest);
                 }
             }
@@ -421,14 +423,16 @@ internal sealed partial class MainViewModel : ObservableObject
             {
                 // TODO:
                 //Debug.WriteLine("result 0");
-                var autoSuggest = new AutoSuggestItem();
-                autoSuggest.Name = "Result 0";
-                autoSuggest.Id = "";
+                var autoSuggest = new AutoSuggestItem
+                {
+                    Name = "Result 0",
+                    Id = ""
+                };
                 AutoSuggestList.Add(autoSuggest);
             }
         }
     }
-    public bool SearchRentForAutoSuggestCanExecute(string? queryText)
+    public static bool SearchRentForAutoSuggestCanExecute(string? queryText)
     {
         if (string.IsNullOrEmpty(queryText))
         {
@@ -483,7 +487,7 @@ internal sealed partial class MainViewModel : ObservableObject
             _navigationService.NavigateTo("ZumenSearch.Views.SearchResultPage", SlideNavigationTransitionEffect.FromLeft);//Navigate(typeof(Views.Rent.Residentials.SearchResultPage), null, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });
         }
     }
-    public bool SearchRentResidentialEntryCanExecute(string? queryText)
+    public static bool SearchRentResidentialEntryCanExecute(string? queryText)
     {
         /*
         if (string.IsNullOrEmpty(queryText))
@@ -576,7 +580,7 @@ internal sealed partial class MainViewModel : ObservableObject
             }
         }
     }
-    public bool DeleteRentResidentialEntryCanExecute(Models.Rent.Residentials.EntryResidentialSearchResult? selected)
+    public static bool DeleteRentResidentialEntryCanExecute(Models.Rent.Residentials.EntryResidentialSearchResult? selected)
     {
         if (selected is null)
         {
@@ -599,7 +603,7 @@ internal sealed partial class MainViewModel : ObservableObject
         // TODO:
         Debug.WriteLine($"TODO: DeleteRentResidentialUnit executed for {selected.Id} (EntryId = {selected.EntryId})");
     }
-    public bool DeleteRentResidentialUnitCanExecute(Models.Rent.Residentials.UnitResidentialSearchResult? selected)
+    public static bool DeleteRentResidentialUnitCanExecute(Models.Rent.Residentials.UnitResidentialSearchResult? selected)
     {
         if (selected is null)
         {

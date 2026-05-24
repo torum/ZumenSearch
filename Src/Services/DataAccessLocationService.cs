@@ -7,13 +7,14 @@ namespace ZumenSearch.Services;
 
 public class DataAccessLocationService : IDataAccessLocationService
 {
-    private readonly SqliteConnectionStringBuilder connectionStringBuilder = new("Data Source=mt_town_all.db");
+    private readonly SqliteConnectionStringBuilder connectionStringBuilder;
 
     //private readonly ReaderWriterLockSlim _readerWriterLock = new();
 
     public DataAccessLocationService()
     {
-        //connectionStringBuilder = new SqliteConnectionStringBuilder("Data Source=mt_town_all.db");
+        string dbPath = Path.Combine(AppContext.BaseDirectory, "Data", "mt_town_all.db");
+        connectionStringBuilder = new SqliteConnectionStringBuilder($"Data Source={dbPath}");
     }
 
     public List<CountyAndCity> GetCountyAndCityByPref(string pref)

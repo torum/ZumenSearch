@@ -53,7 +53,7 @@
                                             <TextBox x:Name="TextBoxRailLine1" Header="路線" IsReadOnly="True" IsEnabled="False" TextChanged="TextBoxRailLine1_TextChanged" Text="{x:Bind ViewModel.Bldg.SelectedRailLine1.LineName, Mode=OneWay}" Margin="0" HorizontalAlignment="Stretch"></TextBox>
                                         </Grid>
                                         <Grid Grid.Column="1" Margin="6,0,0,0">
-                                            <Button VerticalAlignment="Bottom" Content="選択" Command="{x:Bind ViewModel.Bldg.ShowRailLineSelect1Command, Mode=OneWay}"></Button>
+                                            <Button x:Name="ButtonRailLine1" VerticalAlignment="Bottom" Content="選択" Command="{x:Bind ViewModel.Bldg.ShowRailLineSelect1Command, Mode=OneWay}"></Button>
                                         </Grid>
                                     </Grid>
                                     <Grid Grid.Column="1">
