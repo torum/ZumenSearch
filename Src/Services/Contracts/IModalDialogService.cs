@@ -11,7 +11,7 @@ public interface IModalDialogService
     Task<ContentDialogResult> ShowEditorCloseConfirmationDialog();
 
     Task<ContentDialogResult> ShowLeaveUnitDirtyConfirmationDialog();
-    
+
     Task<RailLine?> ShowRailLineSelectDialog();
 
     Task<RailStation?> ShowRailStationSelectDialog(string railLineCode);

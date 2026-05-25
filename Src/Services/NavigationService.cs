@@ -10,7 +10,7 @@ public class NavigationService : INavigationService
     private Frame? _frame;
 
     private readonly Dictionary<string, Type> _pageMap = new()
-        {            
+        {
             { "ZumenSearch.Views.SearchPage", typeof(Views.SearchPage) },
             { "ZumenSearch.Views.SearchResultPage", typeof(Views.SearchResultPage) },
             { "ZumenSearch.Views.Rent.ResidentialSearchPage", typeof(Views.Rent.ResidentialSearchPage) },
@@ -43,7 +43,7 @@ public class NavigationService : INavigationService
 
         if (tag != null && _pageMap.TryGetValue(tag, out var pageType) && _frame.CurrentSourcePageType != pageType)
         {
-            return _frame.Navigate(pageType, _frame, new SlideNavigationTransitionInfo() { Effect = effect});//new SuppressNavigationTransitionInfo()
+            return _frame.Navigate(pageType, _frame, new SlideNavigationTransitionInfo() { Effect = effect });//new SuppressNavigationTransitionInfo()
         }
         else
         {

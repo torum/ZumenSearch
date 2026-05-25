@@ -1,24 +1,12 @@
-﻿using Microsoft.UI;
-using Microsoft.UI.Xaml.Controls;
+﻿using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
-using Microsoft.Windows.Storage.Pickers;
 using System.Diagnostics;
 
 namespace ZumenSearch.Views.Rent.Residentials.Bldg;
 
 internal sealed partial class PictureListPage : Page
 {
-    public ViewModels.Rent.Residentials.MainViewModel? ViewModel
-    {
-        get;
-        private set
-        {
-            if (value != null)
-            {
-                field = value;
-            }
-        }
-    }
+    public ViewModels.Rent.Residentials.MainViewModel? ViewModel { get; private set; }
 
     public PictureListPage()
     {

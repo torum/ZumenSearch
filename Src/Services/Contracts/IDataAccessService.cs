@@ -1,5 +1,4 @@
 ﻿using ZumenSearch.Models.Common;
-using ZumenSearch.Models.Rent.Residentials;
 
 namespace ZumenSearch.Services.Contracts;
 

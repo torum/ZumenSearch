@@ -64,7 +64,7 @@
                     <NavigationViewItem Content="契約条件" Tag="contract"/>
                     <NavigationViewItem Content="現況" Tag="status"/>
                     <NavigationViewItem Content="取引条件" Tag="transaction"/>
-                    <NavigationViewItem Content="設備" Tag="appliance" />
+                    <NavigationViewItem Content="設備" Tag="appliances" />
                     <NavigationViewItem Content="写真" Tag="pictures" />
                     <NavigationViewItem x:Name="NavigationViewItemZumen" Content="図面" Tag="zumen" Visibility="Collapsed"/>
                     <NavigationViewItem x:Name="NavigationViewItemKasinusi" Content="貸主" Tag="kasinusi" Visibility="Collapsed"/>

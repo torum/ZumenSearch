@@ -9,20 +9,7 @@ namespace ZumenSearch.Views.Rent.Residentials.Bldg;
 
 internal sealed partial class UnitListPage : Page
 {
-    //private Views.Rent.Residentials.Editor.EditorShell? _editorShell;
-
-    public ViewModels.Rent.Residentials.MainViewModel? ViewModel
-    {
-        get;
-        private set
-        {
-            if (value != null)
-            {
-                field = value;
-                //_viewModel.EventAddNew += (sender, arg) => OnEventAddNew(arg);
-            }
-        }
-    }
+    public ViewModels.Rent.Residentials.MainViewModel? ViewModel { get; private set; }
 
     public UnitListPage()
     {

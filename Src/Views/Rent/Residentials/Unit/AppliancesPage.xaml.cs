@@ -3,23 +3,11 @@ using Microsoft.UI.Xaml.Navigation;
 
 namespace ZumenSearch.Views.Rent.Residentials.Unit;
 
-internal sealed partial class AppliancePage : Page
+internal sealed partial class AppliancesPage : Page
 {
-    public ViewModels.Rent.Residentials.MainViewModel? ViewModel
-    {
-        get;
-        private set
-        {
-            if (value != null)
-            {
-                field = value;
+    public ViewModels.Rent.Residentials.MainViewModel? ViewModel { get; private set; }
 
-                //_viewModel.EventBackToSummary += (sender, arg) => OnEventBackToSummary(arg);
-            }
-        }
-    }
-
-    public AppliancePage()
+    public AppliancesPage()
     {
         //ViewModel = new ViewModels.Rent.Residentials.Editor.Modal.ApplianceViewModel();
         InitializeComponent();

@@ -1,5 +1,4 @@
 ﻿using Microsoft.Data.Sqlite;
-using Microsoft.Extensions.Logging;
 using System.Data;
 using System.Diagnostics;
 using ZumenSearch.Helpers;
@@ -49,7 +48,8 @@ internal sealed class DataAccessService : IDataAccessService
                     "loc_oaza_cho TEXT," +
                     "loc_choume TEXT," +
                     "loc_edaban TEXT," +
-                    "loc_location_full TEXT" + // Last column, no comma
+                    "loc_location_full TEXT," +
+                    "created_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc'))" + // Last column, no comma
                     ")";
                 tableCmd.ExecuteNonQuery();
 
@@ -57,6 +57,7 @@ internal sealed class DataAccessService : IDataAccessService
                     "rent_id TEXT NOT NULL PRIMARY KEY," +
                     //"residential_id TEXT NOT NULL," +
                     "comment TEXT NOT NULL," +
+                    "updated_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc'))," +
                     "FOREIGN KEY (rent_id) REFERENCES rents(rent_id) ON DELETE CASCADE" +
                     ")";
                 tableCmd.ExecuteNonQuery();
@@ -77,9 +78,11 @@ internal sealed class DataAccessService : IDataAccessService
                     "pdf_id TEXT NOT NULL PRIMARY KEY," +
                     "rent_id TEXT NOT NULL," +
                     "file_path TEXT NOT NULL," +
-                    "thumb_path TEXT NOT NULL," + 
+                    "thumb_path TEXT NOT NULL," +
                     "description TEXT NOT NULL," +
                     "is_main INTEGER  NOT NULL," +
+                    "created_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc'))," +
+                    "updated_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc'))," +
                     "FOREIGN KEY (rent_id) REFERENCES rent_residentials(rent_id) ON DELETE CASCADE," + //?
                     "FOREIGN KEY (rent_id) REFERENCES rents(rent_id) ON DELETE CASCADE" +
                     " )";
@@ -90,25 +93,12 @@ internal sealed class DataAccessService : IDataAccessService
                     "rent_id TEXT NOT NULL," +
                     "name TEXT NOT NULL," +
                     "chinryou INTEGER NOT NULL DEFAULT 0," +
+                    "created_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc'))," +
+                    "updated_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc'))," +
                     "FOREIGN KEY (rent_id) REFERENCES rent_residentials(rent_id) ON DELETE CASCADE," + //?
                     "FOREIGN KEY (rent_id) REFERENCES rents(rent_id) ON DELETE CASCADE" +
                     " )";
                 tableCmd.ExecuteNonQuery();
-
-                /*
-                // ADD COLUMN chinryou.
-                try
-                {
-                    tableCmd.CommandText = "ALTER TABLE rent_residential_rooms ADD COLUMN chinryou INTEGER NOT NULL DEFAULT 0;";
-                    tableCmd.ExecuteNonQuery();
-                }
-                catch (SqliteException ex)
-                {
-                    // SQLite does not support "IF NOT EXISTS" for ADD COLUMN.
-                    // need to catch "duplicate column name" errors.
-                    Debug.WriteLine("SqliteException on ADD COLUMN chinryou @InitializeDatabase: " + ex.Message);
-                }
-                */
 
                 tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS rent_residential_room_pictures (" +
                     "picture_id TEXT NOT NULL PRIMARY KEY," +
@@ -232,15 +222,16 @@ internal sealed class DataAccessService : IDataAccessService
 
     private void AddColumnsIfNotExist(SqliteConnection conn)
     {
-        // ADD COLUMN chinryou for rent_residential_rooms.
+        #region == add to rents ==
+
         var cmd = conn.CreateCommand();
-        cmd.CommandText = "PRAGMA table_info(rent_residential_room_pictures);";
+        cmd.CommandText = "PRAGMA table_info(rents);";
         bool exists = false;
         using (var reader = cmd.ExecuteReader())
         {
             while (reader.Read())
             {
-                if (reader.GetString(1) == "room_id")
+                if (reader.GetString(1) == "created_at")
                 {
                     exists = true;
                     break;
@@ -252,7 +243,74 @@ internal sealed class DataAccessService : IDataAccessService
 
                 try
                 {
-                    // ADD COLUMN chinryou
+                    altcmd.CommandText = "ALTER TABLE rents ADD COLUMN created_at TEXT NOT NULL DEFAULT '';";
+                    altcmd.ExecuteNonQuery();
+                }
+                catch (SqliteException ex)
+                {
+                    Debug.WriteLine("SqliteException on ADD COLUMN created_at @InitializeDatabase: " + ex.Message);
+                }
+            }
+            reader.Close();
+        }
+
+        #endregion
+
+        #region == add to rent_residentials ==
+
+        cmd = conn.CreateCommand();
+        cmd.CommandText = "PRAGMA table_info(rent_residentials);";
+        exists = false;
+        using (var reader = cmd.ExecuteReader())
+        {
+            while (reader.Read())
+            {
+                if (reader.GetString(1) == "updated_at")
+                {
+                    exists = true;
+                    break;
+                }
+            }
+            if (!exists)
+            {
+                var altcmd = conn.CreateCommand();
+
+                try
+                {
+                    altcmd.CommandText = "ALTER TABLE rent_residentials ADD COLUMN updated_at TEXT NOT NULL DEFAULT '';";
+                    altcmd.ExecuteNonQuery();
+                }
+                catch (SqliteException ex)
+                {
+                    Debug.WriteLine("SqliteException on ADD COLUMN updated_at @InitializeDatabase: " + ex.Message);
+                }
+            }
+            reader.Close();
+        }
+
+        #endregion
+
+        #region == add to rent_residential_rooms ==
+
+        cmd = conn.CreateCommand();
+        cmd.CommandText = "PRAGMA table_info(rent_residential_rooms);";
+        exists = false;
+        using (var reader = cmd.ExecuteReader())
+        {
+            while (reader.Read())
+            {
+                if (reader.GetString(1) == "chinryou")
+                {
+                    exists = true;
+                    break;
+                }
+            }
+            if (!exists)
+            {
+                var altcmd = conn.CreateCommand();
+
+                try
+                {
                     altcmd.CommandText = "ALTER TABLE rent_residential_rooms ADD COLUMN chinryou INTEGER NOT NULL DEFAULT 0;";
                     altcmd.ExecuteNonQuery();
                 }
@@ -261,10 +319,124 @@ internal sealed class DataAccessService : IDataAccessService
                     Debug.WriteLine("SqliteException on ADD COLUMN chinryou @InitializeDatabase: " + ex.Message);
                 }
             }
+
+            exists = false;
+            while (reader.Read())
+            {
+                if (reader.GetString(1) == "created_at")
+                {
+                    exists = true;
+                    break;
+                }
+            }
+
+            if (!exists)
+            {
+                var altcmd = conn.CreateCommand();
+
+                try
+                {
+                    altcmd.CommandText = "ALTER TABLE rent_residential_rooms ADD COLUMN created_at TEXT NOT NULL DEFAULT '';";
+                    altcmd.ExecuteNonQuery();
+                }
+                catch (SqliteException ex)
+                {
+                    Debug.WriteLine("SqliteException on ADD COLUMN created_at @InitializeDatabase: " + ex.Message);
+                }
+            }
+
+            exists = false;
+            while (reader.Read())
+            {
+                if (reader.GetString(1) == "updated_at")
+                {
+                    exists = true;
+                    break;
+                }
+            }
+
+            if (!exists)
+            {
+                var altcmd = conn.CreateCommand();
+
+                try
+                {
+                    altcmd.CommandText = "ALTER TABLE rent_residential_rooms ADD COLUMN updated_at TEXT NOT NULL DEFAULT '';";
+                    altcmd.ExecuteNonQuery();
+                }
+                catch (SqliteException ex)
+                {
+                    Debug.WriteLine("SqliteException on ADD COLUMN updated_at @InitializeDatabase: " + ex.Message);
+                }
+            }
+
             reader.Close();
         }
 
-        // ADD COLUMN room_id for rent_residential_room_pictures.
+        #endregion
+
+        #region == add to rent_residential_pdfs ==
+
+        cmd.CommandText = "PRAGMA table_info(rent_residential_pdfs);";
+        exists = false;
+        using (var reader = cmd.ExecuteReader())
+        {
+            while (reader.Read())
+            {
+                if (reader.GetString(1) == "created_at")
+                {
+                    exists = true;
+                    break;
+                }
+            }
+
+            if (!exists)
+            {
+                var altcmd = conn.CreateCommand();
+
+                try
+                {
+                    altcmd.CommandText = "ALTER TABLE rent_residential_pdfs ADD COLUMN created_at TEXT NOT NULL DEFAULT '';";
+                    altcmd.ExecuteNonQuery();
+                }
+                catch (SqliteException ex)
+                {
+                    Debug.WriteLine("SqliteException on ADD COLUMN created_at @InitializeDatabase: " + ex.Message);
+                }
+            }
+
+            exists = false;
+            while (reader.Read())
+            {
+                if (reader.GetString(1) == "updated_at")
+                {
+                    exists = true;
+                    break;
+                }
+            }
+
+            if (!exists)
+            {
+                var altcmd = conn.CreateCommand();
+
+                try
+                {
+                    altcmd.CommandText = "ALTER TABLE rent_residential_pdfs ADD COLUMN updated_at TEXT NOT NULL DEFAULT '';";
+                    altcmd.ExecuteNonQuery();
+                }
+                catch (SqliteException ex)
+                {
+                    Debug.WriteLine("SqliteException on ADD COLUMN updated_at @InitializeDatabase: " + ex.Message);
+                }
+            }
+
+            reader.Close();
+        }
+
+        #endregion
+
+        #region == add to rent_residential_room_pictures ==
+
         cmd.CommandText = "PRAGMA table_info(rent_residential_room_pictures);";
         exists = false;
         using (var reader = cmd.ExecuteReader())
@@ -284,7 +456,6 @@ internal sealed class DataAccessService : IDataAccessService
 
                 try
                 {
-                    // ADD COLUMN room_id.
                     altcmd.CommandText = "ALTER TABLE rent_residential_room_pictures ADD COLUMN room_id TEXT NOT NULL DEFAULT '';";
                     altcmd.ExecuteNonQuery();
                 }
@@ -295,6 +466,8 @@ internal sealed class DataAccessService : IDataAccessService
             }
             reader.Close();
         }
+
+        #endregion
     }
 
     public SqliteDataAccessResultWrapper InsertRentResidential(Models.Rent.Residentials.EntryResidential entry)
@@ -376,7 +549,7 @@ internal sealed class DataAccessService : IDataAccessService
                             "VALUES ('{0}', '{1}', '{2}')",
                             pic.Id, entry.Id, pic.ImageLocation);
                         */
-                        var sqlInsertIntoRentLivingPicture = "INSERT INTO rent_residential_pictures (picture_id, rent_id, file_path, label, description, is_main) " + 
+                        var sqlInsertIntoRentLivingPicture = "INSERT INTO rent_residential_pictures (picture_id, rent_id, file_path, label, description, is_main) " +
                             "VALUES (@PicId, @RentId, @Path, @Tit, @Desc, @Main)";
 
                         cmd.CommandText = sqlInsertIntoRentLivingPicture;
@@ -492,7 +665,7 @@ internal sealed class DataAccessService : IDataAccessService
                     {
                         var sqlInsertIntoRentLivingRoom = "INSERT INTO rent_residential_rooms (room_id, rent_id, name, chinryou) VALUES (@RoomId, @RentId, @Name, @Chinryou)";
 
-                        cmd.CommandText = sqlInsertIntoRentLivingRoom;   
+                        cmd.CommandText = sqlInsertIntoRentLivingRoom;
 
                         // ループなので、前のパラメーターをクリアする。
                         cmd.Parameters.Clear();
@@ -685,13 +858,13 @@ internal sealed class DataAccessService : IDataAccessService
                 sql += string.Format("comment = '{0}' ", EscapeSingleQuote("some comment"));
                 //sql += String.Format("title = '{0}', ", EscapeSingleQuote(feedTitle));
                 //sql += String.Format("description = '{0}', ", EscapeSingleQuote(feedDescription));
-                //sql += String.Format("updated = '{0}'", updated.ToString("yyyy-MM-dd HH:mm:ss"));
+                sql += String.Format("updated_at = '{0}'", DateTimeOffset.UtcNow.ToString("s"));//ToString("yyyy-MM-dd HH:mm:ss"));
 
                 sql += string.Format(" WHERE rent_id = '{0}'; ", entry.Id);
 
                 cmd.CommandText = sql;
                 cmd.ExecuteNonQuery();
-                
+
                 cmd.Parameters.Clear();
 
                 // 写真（建物）Residentials pictures table - Insert or Update
@@ -801,7 +974,7 @@ internal sealed class DataAccessService : IDataAccessService
                         else if (pdf.IsModified)
                         {
                             var sqlUpdateRentLivingPdf = string.Format(
-                                "UPDATE rent_residential_pdfs SET file_path = @Path, thumb_path = @Thumb, description = @Desc, is_main = @Main " +
+                                "UPDATE rent_residential_pdfs SET file_path = @Path, thumb_path = @Thumb, description = @Desc, is_main = @Main, updated_at = @Updated " +
                                 "WHERE pdf_id = '{0}'", pdf.Id);
 
                             // PDFの更新
@@ -820,6 +993,7 @@ internal sealed class DataAccessService : IDataAccessService
                             cmd.Parameters.AddWithValue("@Path", pdf.PdfLocation);
                             cmd.Parameters.AddWithValue("@Thumb", pdf.ThumbnailLocation);
                             cmd.Parameters.AddWithValue("@Desc", pdf.Description);
+                            cmd.Parameters.AddWithValue("@Updated", DateTimeOffset.UtcNow.ToString("s"));
                             var paramIsMain = new SqliteParameter("@Main", System.Data.DbType.Int32);
                             if (pdf.IsMain)
                             {
@@ -886,7 +1060,7 @@ internal sealed class DataAccessService : IDataAccessService
                         else if (room.IsModified)
                         {
                             //var sqlUpdateRentLivingRoom = string.Format("UPDATE rent_residential_rooms SET name = @Nam WHERE room_id = '{0}'", room.Id);
-                            var sqlUpdateRentLivingRoom = "UPDATE rent_residential_rooms SET name = @Nam, chinryou = @Chinryou WHERE room_id = @roomId";
+                            var sqlUpdateRentLivingRoom = "UPDATE rent_residential_rooms SET name = @Nam, chinryou = @Chinryou, updated_at = @Updated WHERE room_id = @roomId";
                             // 更新
                             cmd.CommandText = sqlUpdateRentLivingRoom;
 
@@ -903,6 +1077,7 @@ internal sealed class DataAccessService : IDataAccessService
                             cmd.Parameters.AddWithValue("@RentId", entry.Id);
                             cmd.Parameters.AddWithValue("@Nam", room.Name);
                             cmd.Parameters.AddWithValue("@Chinryou", room.Chinryou);
+                            cmd.Parameters.AddWithValue("@Updated", DateTimeOffset.UtcNow.ToString("s"));
 
                             var result = cmd.ExecuteNonQuery();
                             if (result > 0)
@@ -1472,7 +1647,7 @@ internal sealed class DataAccessService : IDataAccessService
                 }
             }
 
-            foreach(var room in entry.Rooms)
+            foreach (var room in entry.Rooms)
             {
                 // 物件写真（部屋）
                 cmd.CommandText = string.Format("SELECT * FROM rent_residential_room_pictures WHERE room_id = '{0}'", room.Id);
@@ -1603,7 +1778,7 @@ internal sealed class DataAccessService : IDataAccessService
                 var sqlInsertIntoRentLivingRoom = "INSERT INTO rent_residential_rooms (room_id, rent_id, name, chinryou) VALUES (@roomId, @RentId, @Nam, @Chinryou) ";
                 sqlInsertIntoRentLivingRoom += "ON CONFLICT(room_id) ";
                 //sqlInsertIntoRentLivingRoom += string.Format("DO UPDATE SET name = '{0}'", EscapeSingleQuote(room.RoomName));
-                sqlInsertIntoRentLivingRoom += "DO UPDATE SET name = @Nam, chinryou = @Chinryou";
+                sqlInsertIntoRentLivingRoom += "DO UPDATE SET name = @Nam, chinryou = @Chinryou, updated_at = @Updated";
 
                 cmd.CommandText = sqlInsertIntoRentLivingRoom;
 
@@ -1628,6 +1803,7 @@ internal sealed class DataAccessService : IDataAccessService
                 cmd.Parameters.AddWithValue("@RentId", rentId);
                 cmd.Parameters.AddWithValue("@Nam", room.Name);
                 cmd.Parameters.AddWithValue("@Chinryou", room.Chinryou);
+                cmd.Parameters.AddWithValue("@Updated", DateTimeOffset.UtcNow.ToString("s"));
 
                 var result = cmd.ExecuteNonQuery();
                 if (result > 0)
@@ -1635,7 +1811,7 @@ internal sealed class DataAccessService : IDataAccessService
                     room.IsNew = false;
                     room.IsModified = false;
                 }
-                
+
                 cmd.Parameters.Clear();
 
                 // 写真（部屋）rent_residential_room_pictures table - Insert or Update
@@ -1844,7 +2020,7 @@ internal sealed class DataAccessService : IDataAccessService
                     continue;
                 }
 
-                var unit = new Models.Rent.Residentials.UnitResidentialSearchResult(rid,eid);
+                var unit = new Models.Rent.Residentials.UnitResidentialSearchResult(rid, eid);
 
                 var s = Convert.ToString(reader["unitName"]) ?? "";
                 unit.Name = s;

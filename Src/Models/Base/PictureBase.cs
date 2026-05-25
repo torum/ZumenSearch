@@ -16,7 +16,7 @@ internal abstract class PictureBase : ObservableObject
         }
     } = string.Empty;
 
-    public string Id { get;  } = string.Empty;
+    public string Id { get; } = string.Empty;
 
     public bool IsNew { get; set; } = true;
 

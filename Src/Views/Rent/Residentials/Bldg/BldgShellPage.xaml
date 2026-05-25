@@ -66,7 +66,8 @@
                     <NavigationViewItem Content="基本" Tag="summary" />
                     <NavigationViewItem Content="所在地" Tag="location" />
                     <NavigationViewItem Content="交通" Tag="transportation" />
-                    <NavigationViewItem Content="設備" Tag="appliance" />
+                    <NavigationViewItem Content="設備" Tag="facilities" />
+                    <NavigationViewItem Content="管理" Tag="kanri" />
                     <NavigationViewItem Content="写真" Tag="pictures" />
                     <NavigationViewItem x:Name="NavigationViewItemZumen" Content="図面" Tag="zumen"/>
                     <!-- <NavigationViewItem Content="備考" Tag="memo" /> -->

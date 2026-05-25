@@ -1,5 +1,4 @@
-﻿using Microsoft.UI.Windowing;
-using Microsoft.UI.Xaml;
+﻿using Microsoft.UI.Xaml;
 
 namespace ZumenSearch.Views.Rent.Residentials;
 

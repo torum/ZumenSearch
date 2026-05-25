@@ -5,8 +5,6 @@ using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
-using System.Diagnostics;
-using ZumenSearch.Models;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.Services.Extensions.AbstractFactory;
 using ZumenSearch.ViewModels;
@@ -29,7 +27,7 @@ internal sealed partial class ShellPage : Page
         //Debug.WriteLine($"ShellPage {entry.Id}");
 
         Win = win ?? throw new ArgumentNullException(nameof(win));
-        
+
         // Creates VM with entry.
         ViewModel = vmFactory.Create(entry);//ViewModel = vmFactory(entry);//_editorFactory.Create(new Models.Rent.Residentials.EntryResidentialFull(Guid.CreateVersion7().ToString("N"), EnumEntryStatus.New));
         ViewModel.SetEditorShell(this);
@@ -51,7 +49,7 @@ internal sealed partial class ShellPage : Page
         Win.Closed += EditorWindow_Closed;
         Win.AppWindow.Closing += AppWindow_Closing;
         Win.Title = "賃貸住居用";
-        
+
         /*
         var mainVM = App.GetService<MainViewModel>();
         
@@ -70,7 +68,7 @@ internal sealed partial class ShellPage : Page
 
         if (ContentFrame.Navigate(typeof(ZumenSearch.Views.Rent.Residentials.Bldg.BldgShellPage), ViewModel, new EntranceNavigationTransitionInfo()))
         {
-            
+
         }
         //ContentFrame.Navigate(typeof(ZumenSearch.Views.Rent.Residentials.Unit.UnitShellPage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom });
     }

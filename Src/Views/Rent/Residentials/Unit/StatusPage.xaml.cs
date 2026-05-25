@@ -6,19 +6,7 @@ namespace ZumenSearch.Views.Rent.Residentials.Unit;
 
 internal sealed partial class StatusPage : Page
 {
-    public ViewModels.Rent.Residentials.MainViewModel? ViewModel
-    {
-        get;
-        private set
-        {
-            if (value != null)
-            {
-                field = value;
-
-                //_viewModel.EventBackToSummary += (sender, arg) => OnEventBackToSummary(arg);
-            }
-        }
-    }
+    public ViewModels.Rent.Residentials.MainViewModel? ViewModel { get; private set; }
 
     public StatusPage()
     {

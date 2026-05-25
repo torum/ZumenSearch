@@ -1,5 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
+using System.Diagnostics.CodeAnalysis;
 using ZumenSearch.Services.Extensions.AbstractFactory;
 
 namespace ZumenSearch.Services.Extensions;

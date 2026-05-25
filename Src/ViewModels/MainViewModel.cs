@@ -1,6 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.Extensions.Logging;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.Windows.ApplicationModel.Resources;
@@ -11,11 +10,9 @@ using Windows.ApplicationModel;
 using ZumenSearch.Helpers;
 using ZumenSearch.Models.Base;
 using ZumenSearch.Models.Common;
-using ZumenSearch.Services;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.Services.Extensions.AbstractFactory;
 using ZumenSearch.Views;
-using ZumenSearch.Views.Rent.Residentials;
 
 namespace ZumenSearch.ViewModels;
 
@@ -63,7 +60,7 @@ internal sealed partial class MainViewModel : ObservableObject
     // TODO: Do I need this property?
     [ObservableProperty]
     public partial bool IsBackEnabled // Implement partial property for AOT compatibility
-{ get; set; } = true;
+    { get; set; } = true;
 
     // TODO: Do I need this property?
     [ObservableProperty]
@@ -622,7 +619,7 @@ internal sealed partial class MainViewModel : ObservableObject
     }
     public bool GoBackCanExecute()
     {
-        return _navigationService.CanGoBack(); 
+        return _navigationService.CanGoBack();
     }
 
     #endregion

@@ -14,7 +14,7 @@ internal class SqliteDataAccessResultWrapper : ResultWrapper
     public int AffectedCount = 0;
 }
 
-internal sealed class SqliteDataAccessInsertResultWrapper: SqliteDataAccessResultWrapper
+internal sealed class SqliteDataAccessInsertResultWrapper : SqliteDataAccessResultWrapper
 {
     //public List<EntryItem> InsertedEntries = new();
 }

@@ -101,18 +101,18 @@ internal sealed partial class BldgViewModel : ObservableObject
     public ObservableCollection<Models.Rent.Residentials.Kind> Kinds =
     [
         //new Kind(EnumKinds.Unspecified.ToString(), "未指定"),
-        new Kind(Models.Rent.Residentials.EnumKinds.Apartment, "アパート"),
-        new Kind(Models.Rent.Residentials.EnumKinds.Mansion, "マンション"),
-        new Kind(Models.Rent.Residentials.EnumKinds.House, "一戸建て"),
-        new Kind(Models.Rent.Residentials.EnumKinds.TerraceHouse, "テラスハウス"),
-        new Kind(Models.Rent.Residentials.EnumKinds.TownHouse, "タウンハウス"),
-        new Kind(Models.Rent.Residentials.EnumKinds.ShareHouse, "シェアハウス"),
-        new Kind(Models.Rent.Residentials.EnumKinds.Dormitory, "寮・下宿")
+        new Kind(Models.Rent.Residentials.EntryResidential.EnumKinds.Apartment, "アパート"),
+        new Kind(Models.Rent.Residentials.EntryResidential.EnumKinds.Mansion, "マンション"),
+        new Kind(Models.Rent.Residentials.EntryResidential.EnumKinds.House, "一戸建て"),
+        new Kind(Models.Rent.Residentials.EntryResidential.EnumKinds.TerraceHouse, "テラスハウス"),
+        new Kind(Models.Rent.Residentials.EntryResidential.EnumKinds.TownHouse, "タウンハウス"),
+        new Kind(Models.Rent.Residentials.EntryResidential.EnumKinds.ShareHouse, "シェアハウス"),
+        new Kind(Models.Rent.Residentials.EntryResidential.EnumKinds.Dormitory, "寮・下宿")
     ];
 
     public Models.Rent.Residentials.Kind SelectedKind
     {
-        get => field ?? new(Models.Rent.Residentials.EnumKinds.Unspecified, "未指定");
+        get => field ?? new(Models.Rent.Residentials.EntryResidential.EnumKinds.Unspecified, "未指定");
         set
         {
             if (SetProperty(ref field, value))
@@ -131,7 +131,8 @@ internal sealed partial class BldgViewModel : ObservableObject
             if (SetProperty(ref field, value))
             {
                 IsDirty = true;
-                //OnPropertyChanged(nameof(IsNotUnitOwnership));
+                
+                //
 
                 // If this is set, then show/hide the owner and zumen from shell menu.
                 EventIsUnitOwnershipChanged?.Invoke(this, field);
@@ -145,23 +146,23 @@ internal sealed partial class BldgViewModel : ObservableObject
     public ObservableCollection<Models.Rent.Residentials.Structure> Structures =
     [
         //new Structure(EnumStructure.Unspecified.ToString(), "未指定"),
-        new Structure(Models.Rent.Residentials.EnumStructure.Wood, "木造"),
-        new Structure(Models.Rent.Residentials.EnumStructure.Block, "ブロック造"),
-        new Structure(Models.Rent.Residentials.EnumStructure.LightSteel, "軽量鉄骨造"),
-        new Structure(Models.Rent.Residentials.EnumStructure.Steel, "鉄骨造"),
-        new Structure(Models.Rent.Residentials.EnumStructure.RC, "鉄筋コンクリート(RC)造"),
-        new Structure(Models.Rent.Residentials.EnumStructure.SRC, "鉄骨鉄筋コンクリート(SRC)造"),
-        new Structure(Models.Rent.Residentials.EnumStructure.ALC, "軽量気泡コンクリート(ALC)造"),
-        new Structure(Models.Rent.Residentials.EnumStructure.PC, "プレキャストコンクリート(PC)造"),
-        new Structure(Models.Rent.Residentials.EnumStructure.HPC, "鉄骨プレキャストコンクリート(HPC)造"),
-        new Structure(Models.Rent.Residentials.EnumStructure.RB, "鉄筋ブロック造"),
-        new Structure(Models.Rent.Residentials.EnumStructure.CFT, "コンクリート充填鋼管(CFT)造"),
-        new Structure(Models.Rent.Residentials.EnumStructure.Other, "その他")
+        new Structure(Models.Rent.Residentials.EntryResidential.EnumStructure.Wood, "木造"),
+        new Structure(Models.Rent.Residentials.EntryResidential.EnumStructure.Block, "ブロック造"),
+        new Structure(Models.Rent.Residentials.EntryResidential.EnumStructure.LightSteel, "軽量鉄骨造"),
+        new Structure(Models.Rent.Residentials.EntryResidential.EnumStructure.Steel, "鉄骨造"),
+        new Structure(Models.Rent.Residentials.EntryResidential.EnumStructure.RC, "鉄筋コンクリート(RC)造"),
+        new Structure(Models.Rent.Residentials.EntryResidential.EnumStructure.SRC, "鉄骨鉄筋コンクリート(SRC)造"),
+        new Structure(Models.Rent.Residentials.EntryResidential.EnumStructure.ALC, "軽量気泡コンクリート(ALC)造"),
+        new Structure(Models.Rent.Residentials.EntryResidential.EnumStructure.PC, "プレキャストコンクリート(PC)造"),
+        new Structure(Models.Rent.Residentials.EntryResidential.EnumStructure.HPC, "鉄骨プレキャストコンクリート(HPC)造"),
+        new Structure(Models.Rent.Residentials.EntryResidential.EnumStructure.RB, "鉄筋ブロック造"),
+        new Structure(Models.Rent.Residentials.EntryResidential.EnumStructure.CFT, "コンクリート充填鋼管(CFT)造"),
+        new Structure(Models.Rent.Residentials.EntryResidential.EnumStructure.Other, "その他")
     ];
 
     public Models.Rent.Residentials.Structure SelectedStructure
     {
-        get => field ?? new(Models.Rent.Residentials.EnumStructure.Unspecified, "未指定");
+        get => field ?? new(Models.Rent.Residentials.EntryResidential.EnumStructure.Unspecified, "未指定");
         set
         {
             if (SetProperty(ref field, value))
@@ -797,65 +798,72 @@ internal sealed partial class BldgViewModel : ObservableObject
 
     #region == 設備プロパティ ==
 
-    public bool Ap_IsAutolock
+    #region == 一般 ==
+
+    public bool HasAutolock
     {
         get;
         set
         {
             if (SetProperty(ref field, value))
             {
+                IsDirty = true;
                 OnPropertyChanged(nameof(AppliancePreview));
             }
         }
     }
 
-    public bool Ap_IsElevator
+    public bool HasElevator
     {
         get;
         set
         {
             if (SetProperty(ref field, value))
             {
+                IsDirty = true;
                 OnPropertyChanged(nameof(AppliancePreview));
             }
         }
     }
 
-    public bool Ap_IsSecurityCamera
+    public bool HasSecurityCamera
     {
         get;
         set
         {
             if (SetProperty(ref field, value))
             {
+                IsDirty = true;
                 OnPropertyChanged(nameof(AppliancePreview));
             }
         }
     }
 
-    public bool Ap_IsParcelLocker
+    public bool HasParcelLocker
     {
         get;
         set
         {
             if (SetProperty(ref field, value))
             {
+                IsDirty = true;
                 OnPropertyChanged(nameof(AppliancePreview));
             }
         }
     }
 
+    // TODO: Do I use this now?
     public string AppliancePreview
     {
         get
         {
             var s = string.Empty;
 
-            if (Ap_IsAutolock)
+            if (HasAutolock)
             {
                 s += "オートロック";
             }
-            if (Ap_IsElevator)
+            if (HasElevator)
             {
                 if (!string.IsNullOrEmpty(s))
                 {
@@ -863,7 +871,7 @@ internal sealed partial class BldgViewModel : ObservableObject
                 }
                 s += "エレベーター";
             }
-            if (Ap_IsSecurityCamera)
+            if (HasSecurityCamera)
             {
                 if (!string.IsNullOrEmpty(s))
                 {
@@ -871,7 +879,7 @@ internal sealed partial class BldgViewModel : ObservableObject
                 }
                 s += "防犯カメラ";
             }
-            if (Ap_IsParcelLocker)
+            if (HasParcelLocker)
             {
                 if (!string.IsNullOrEmpty(s))
                 {
@@ -884,7 +892,221 @@ internal sealed partial class BldgViewModel : ObservableObject
         }
     }
 
+    #endregion
+
+    #region == 電気 ==
+
+    public bool HasElectric
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+            }
+        }
+    } = false;
+
+    public ObservableCollection<Models.Rent.Residentials.ElectricKind> ElectricKinds =
+    [
+        new ElectricKind(Models.Rent.Residentials.EntryResidential.EnumElectricKind.AllElectric, "オール電化"),
+        new ElectricKind(Models.Rent.Residentials.EntryResidential.EnumElectricKind.Unspecified, "未指定")
+    ];
+
+    public Models.Rent.Residentials.ElectricKind SelectedElectricKind
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+            }
+        }
+    } = new ElectricKind(Models.Rent.Residentials.EntryResidential.EnumElectricKind.Unspecified, "未指定");
+
+    public string ElectricDetail
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+            }
+        }
+    } = string.Empty;
+
+    #endregion
+
     // TODO: more.
+
+    #endregion
+
+    #region == 管理プロパティ ==
+
+    public ObservableCollection<Models.Rent.Residentials.KanriShutai> KanriShutais =
+    [
+        new KanriShutai(Models.Rent.Residentials.EntryResidential.EnumKanriShutai.Unspecified, "未指定"),
+        new KanriShutai(Models.Rent.Residentials.EntryResidential.EnumKanriShutai.Jisya, "自社管理"),
+        new KanriShutai(Models.Rent.Residentials.EntryResidential.EnumKanriShutai.Tasya, "他社管理"),
+        new KanriShutai(Models.Rent.Residentials.EntryResidential.EnumKanriShutai.Kashinushi, "貸主管理")
+    ];
+
+    public Models.Rent.Residentials.KanriShutai? SelectedKanriShutai
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+
+                if (field is null)
+                {
+                    Debug.WriteLine("SelectedKanriShutai is null");
+                    return;
+                }
+
+                // Toggle Visibilities
+                IsKanriUnspecified = field.Key == Models.Rent.Residentials.EntryResidential.EnumKanriShutai.Unspecified;
+                IsKanriJisya = field.Key == Models.Rent.Residentials.EntryResidential.EnumKanriShutai.Jisya;
+                IsKanriTasya = field.Key == Models.Rent.Residentials.EntryResidential.EnumKanriShutai.Tasya;
+                IsKanriKashinushi = field.Key == Models.Rent.Residentials.EntryResidential.EnumKanriShutai.Kashinushi;
+            }
+        }
+    }
+
+    [ObservableProperty]
+    public partial bool IsKanriUnspecified { get; set; } = true;
+
+    [ObservableProperty]
+    public partial bool IsKanriJisya { get; set; }
+
+    [ObservableProperty]
+    public partial bool IsKanriTasya { get; set; }
+
+    [ObservableProperty]
+    public partial bool IsKanriKashinushi { get; set; }
+
+    // （自社管理）管理内容:建物維持管理 
+    public bool KanriIsMaintenanceManagementIfIsKanriJisya
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+            }
+        }
+    }
+
+    // （自社管理）管理内容:入居者管理
+    public bool KanriIsTenantManagementIfIsKanriJisya
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+            }
+        }
+    }
+
+    // （自社管理）管理内容:入金管理
+    public bool KanriIsPaymentManagementIfIsKanriJisya
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+            }
+        }
+    }
+
+    // （自社管理）管理内容:その他管理
+    public bool KanriIsOtherManagementIfIsKanriJisya
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+            }
+        }
+    }
+
+    // （自社管理）管理備考
+    public string KanriRemarkIfIsKanriJisya
+    {
+        get => field ?? string.Empty; // Ensure a non-null value is returned
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+            }
+        }
+    }
+
+    // （他社管理）管理会社名
+    public string KanriNameOfCompanyIfIsKanriTasya
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+            }
+        }
+    } = string.Empty;
+
+    // （他社管理）管理会社連絡先
+    public string KanriContactInfoOfCompanyIfIsKanriTasya
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+            }
+        }
+    } = string.Empty;
+
+    // （他社管理）備考
+    public string KanriRemarkIfIsKanriTasya
+    {
+        get => field ?? string.Empty; // Ensure a non-null value is returned
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+            }
+        }
+    }
+
+    // （貸主管理）備考
+    public string KanriRemarkIfIsKanriKashinushi
+    {
+        get => field ?? string.Empty; // Ensure a non-null value is returned
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+            }
+        }
+    }
+
 
     #endregion
 
@@ -982,7 +1204,7 @@ internal sealed partial class BldgViewModel : ObservableObject
         _dataAccessLocationService = dataAccessLocationService;
 
         _entry = entry;
-        
+
         try
         {
             PopulateEntryValues();
@@ -1749,7 +1971,7 @@ internal sealed partial class BldgViewModel : ObservableObject
         if (SelectedRoom is null) return false;
         return true;
     }
-    
+
 
     #endregion
 

@@ -1,15 +1,12 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.UI.Xaml;
-using SQLitePCL;
 using System.Diagnostics;
 using System.Text;
 using ZumenSearch.Helpers;
 using ZumenSearch.Services;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.Services.Extensions;
-using ZumenSearch.Services.Extensions.AbstractFactory;
-using ZumenSearch.ViewModels;
 using ZumenSearch.Views;
 
 namespace ZumenSearch;
@@ -31,7 +28,7 @@ public partial class App : Application
     public static string AppConfigFilePath { get; private set; } = System.IO.Path.Combine(AppDataFolder, AppName + ".config");
 
     // Log file
-    public bool IsSaveErrorLog = true;
+    public bool IsSaveErrorLog = false;
     public string LogFilePath = System.Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + System.IO.Path.DirectorySeparatorChar + AppName + "_errors.txt";
     private readonly StringBuilder _errortxt = new();
 
@@ -60,8 +57,11 @@ public partial class App : Application
 
     public App()
     {
-        //
-        Batteries_V2.Init();
+#if DEBUG
+        IsSaveErrorLog = true;
+#else
+        IsSaveErrorLog = false;
+#endif
 
         CurrentDispatcherQueue = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
 

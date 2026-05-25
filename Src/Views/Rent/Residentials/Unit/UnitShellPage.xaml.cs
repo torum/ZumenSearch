@@ -13,19 +13,7 @@ internal sealed partial class UnitShellPage : Page
 {
     #region == Properties ==
 
-    public ViewModels.Rent.Residentials.MainViewModel? ViewModel
-    {
-        get;
-        private set
-        {
-            if (field == value)
-                return;
-
-            field = value;
-            // TODO:
-            //ViewModel?.EventIsUnitOwnership += (sender, arg) => OnEventIsUnitOwnership(arg);
-        }
-    }
+    public ViewModels.Rent.Residentials.MainViewModel? ViewModel { get; private set; }
 
     private NavigationViewItem? navigationViewSelectedItem;
 
@@ -37,7 +25,7 @@ internal sealed partial class UnitShellPage : Page
         ("status", "現況", typeof(Views.Rent.Residentials.Unit.StatusPage)),
         ("contract", "契約条件", typeof(Views.Rent.Residentials.Unit.ContractPage)),
         ("transaction", "契約", typeof(Views.Rent.Residentials.Unit.TransactionPage)),
-        ("appliance", "設備", typeof(Views.Rent.Residentials.Unit.AppliancePage)),
+        ("appliances", "設備", typeof(Views.Rent.Residentials.Unit.AppliancesPage)),
         ("pictures", "写真", typeof(Views.Rent.Residentials.Unit.PictureListPage)),
         ("zumen", "図面", typeof(Views.Rent.Residentials.Unit.ZumenPage)),
         ("kasinusi", "貸主", typeof(Views.Rent.Residentials.Unit.KasinusiPage)),
@@ -153,7 +141,7 @@ internal sealed partial class UnitShellPage : Page
                 var _frame = ViewModel.ResidentialNavigationService?.GetFrame();
                 if (_frame is not null)
                 {
-                    _frame?.Navigate(e.SourcePageType,e.Parameter,e.NavigationTransitionInfo);
+                    _frame?.Navigate(e.SourcePageType, e.Parameter, e.NavigationTransitionInfo);
                 }
                 else
                 {

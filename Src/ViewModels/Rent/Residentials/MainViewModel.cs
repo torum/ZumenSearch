@@ -65,7 +65,7 @@ internal sealed partial class MainViewModel : ObservableObject
 
                 if (!string.IsNullOrEmpty(Unit.Name))
                 {
-                    str =  $"{str}: {Unit.Name}";
+                    str = $"{str}: {Unit.Name}";
                 }
 
                 if (Bldg.EntryStatus == EnumEntryStatus.New)
@@ -79,7 +79,7 @@ internal sealed partial class MainViewModel : ObservableObject
 
                 return str;
             }
-            
+
         }
     } = "賃貸住居用";
 

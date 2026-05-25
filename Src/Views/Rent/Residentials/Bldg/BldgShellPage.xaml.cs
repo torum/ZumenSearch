@@ -2,7 +2,6 @@
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
-using System.Collections;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -15,21 +14,7 @@ internal sealed partial class BldgShellPage : Page
 {
     #region == Properties ==
 
-    public ViewModels.Rent.Residentials.MainViewModel? ViewModel {
-        get;
-        private set
-        {
-            if (field == value)
-                return;
-
-            field = value;
-
-            // TODO:
-            //ViewModel?.EventIsUnitOwnership += (sender, arg) => OnEventIsUnitOwnership(arg);
-        }
-    }
-
-    //public Views.Rent.Residentials.EditorWindow EditorWin { get; private set; }
+    public ViewModels.Rent.Residentials.MainViewModel? ViewModel { get; private set; }
 
     public Frame NavigationFrame => ContentFrame;
 
@@ -38,16 +23,15 @@ internal sealed partial class BldgShellPage : Page
     [
         ("building", "建物", null),
         ("summary", "基本", typeof(Views.Rent.Residentials.Bldg.BasicPage)),
-        //("structure", "", typeof(Views.Rent.Residentials.Bldg.StructurePage)),
         ("location", "所在地", typeof(Views.Rent.Residentials.Bldg.LocationPage)),
         ("transportation", "交通", typeof(Views.Rent.Residentials.Bldg.TransportationPage)),
-        ("appliance", "設備", typeof(Views.Rent.Residentials.Bldg.AppliancePage)),
+        ("facilities", "設備", typeof(Views.Rent.Residentials.Bldg.FacilitiesPage)),
+        ("kanri", "管理", typeof(Views.Rent.Residentials.Bldg.KanriPage)),
         ("pictures", "写真", typeof(Views.Rent.Residentials.Bldg.PictureListPage)),
         ("units", "部屋", typeof(Views.Rent.Residentials.Bldg.UnitListPage)),
         ("zumen", "図面", typeof(Views.Rent.Residentials.Bldg.ZumenListPage)),
         ("kasinusi", "貸主", typeof(Views.Rent.Residentials.Bldg.KasinusiPage)),
-        ("gyousya", "宅建業者", typeof(Views.Rent.Residentials.Bldg.GyousyaPage)),
-        //("memo", "備考", typeof(Views.Rent.Residentials.Editor.MemoPage)),
+        ("gyousya", "宅建業者", typeof(Views.Rent.Residentials.Bldg.GyousyaPage))
     ];
 
     #endregion
@@ -265,7 +249,7 @@ internal sealed partial class BldgShellPage : Page
 
     public void OnEventEditAppliance()
     {
-        ContentFrame.Navigate(typeof(Views.Rent.Residentials.Bldg.AppliancePage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });
+        ContentFrame.Navigate(typeof(Views.Rent.Residentials.Bldg.FacilitiesPage), ViewModel, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });
     }
 
     public void OnEventEditPictures()

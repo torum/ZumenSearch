@@ -12,11 +12,11 @@ namespace ZumenSearch.ViewModels.Rent.Residentials;
 internal sealed partial class UnitViewModel : ObservableObject
 {
     #region == Public Properties ==
-    
+
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SaveCommand))]
-    public partial bool IsDirty {  get; private set; }
-    
+    public partial bool IsDirty { get; private set; }
+
     /*
     public bool IsDirty
     {
@@ -150,7 +150,7 @@ internal sealed partial class UnitViewModel : ObservableObject
     #region == Services ==
 
     private readonly IDataAccessService _dataAccessService;
-    
+
     #endregion
 
     #region == Private variables ==
@@ -403,7 +403,7 @@ internal sealed partial class UnitViewModel : ObservableObject
     {
         if (filePathList is null) return;
         if (filePathList.Count == 0) return;
-        
+
         Debug.WriteLine($"destDirectory={_mainViewModel.EntryDataDirectoryPath}  @SetNewUnitPicturesAsync()");
 
         if (!Directory.Exists(_mainViewModel.EntryDataDirectoryPath))
@@ -468,7 +468,7 @@ internal sealed partial class UnitViewModel : ObservableObject
     #region == Commands ==
 
     [RelayCommand(CanExecute = nameof(CanSave))]
-    public void Save() 
+    public void Save()
     {
         if (!IsDirty)
         {

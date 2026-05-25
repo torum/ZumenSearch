@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.ObjectModel;
-using System.Text;
-using CommunityToolkit.Mvvm.ComponentModel;
 using ZumenSearch.Models.Base;
 
 namespace ZumenSearch.Models.Rent.Residentials;
+
+#pragma warning disable IDE0290 // Use primary constructor
 
 // 検索結果一覧表示用（部屋）
 internal sealed partial class UnitResidentialSearchResult : UnitBase
@@ -60,7 +59,7 @@ internal sealed partial class UnitResidential : UnitBase
                 return;
             }
 
-            if (value > -1) 
+            if (value > -1)
             {
                 field = value;
                 OnPropertyChanged();

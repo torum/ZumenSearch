@@ -5,7 +5,7 @@ namespace ZumenSearch.Views.Rent.Residentials.Bldg;
 
 internal sealed partial class LocationPage : Page
 {
-    public ViewModels.Rent.Residentials.MainViewModel? ViewModel;
+    public ViewModels.Rent.Residentials.MainViewModel? ViewModel { get; private set; }
 
     public LocationPage()
     {

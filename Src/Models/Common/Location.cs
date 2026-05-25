@@ -83,7 +83,7 @@ public sealed class CountyAndCity(string machiazaId, string county, string city)
     // 市区町村 db:loc_city
     public string City { get; init; } = city;
 
-    public string Combined 
+    public string Combined
     {
         get
         {

@@ -3,9 +3,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
-using ZumenSearch.Models;
 using ZumenSearch.Models.Rent.Residentials;
 using ZumenSearch.ViewModels;
 
@@ -34,7 +32,7 @@ internal sealed partial class ResidentialSearchResultPage : Page
     private void BreadcrumbBar_ItemClicked(BreadcrumbBar sender, BreadcrumbBarItemClickedEventArgs args)
     {
         //ViewModel.NavigationService.NavigateTo(items[args.Index].Page!);
-        
+
         //MainShell shell = App.GetService<MainShell>();
 
         if (ContentFrame is null) return;
@@ -43,7 +41,7 @@ internal sealed partial class ResidentialSearchResultPage : Page
         {
             ContentFrame.Navigate(typeof(Views.Rent.ResidentialSearchPage), ContentFrame, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });
         }
-        else if ( args.Index == 1)
+        else if (args.Index == 1)
         {
             //shell.NavFrame.Navigate(typeof(Views.Rent.Residentials.SearchPage), shell.NavFrame, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });
         }

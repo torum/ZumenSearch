@@ -12,19 +12,19 @@ public sealed class ErrorObject
     public ErrTypes ErrType { get; set; }
 
     // HTTP error code?
-    public string ErrCode { get; set; } 
+    public string ErrCode { get; set; }
 
     // eg Error title, or type of Exception, .
     public string ErrDescription { get; set; }
 
     // Raw exception error messages, API error text translated via dictionary.
-    public string ErrText { get; set;}
+    public string ErrText { get; set; }
 
     // eg method name, or PATH info for REST
     public string ErrPlace { get; set; }
 
     // class name or site address 
-    public string ErrPlaceParent { get; set; }  
+    public string ErrPlaceParent { get; set; }
 
     //
     public DateTime ErrDatetime { get; set; }

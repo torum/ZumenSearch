@@ -3,13 +3,12 @@ using Microsoft.UI.Xaml.Navigation;
 
 namespace ZumenSearch.Views.Rent.Residentials.Bldg;
 
-internal sealed partial class GyousyaPage : Page
+internal sealed partial class KanriPage : Page
 {
     public ViewModels.Rent.Residentials.MainViewModel? ViewModel { get; private set; }
 
-    public GyousyaPage()
+    public KanriPage()
     {
-        //ViewModel = new GyousyaViewModel();//App.GetService<RentLivingEditZumenViewModel>();
         InitializeComponent();
     }
 
@@ -17,8 +16,6 @@ internal sealed partial class GyousyaPage : Page
     {
         if ((e.Parameter is ViewModels.Rent.Residentials.MainViewModel) && (e.Parameter != null))
         {
-            //_editorShell = e.Parameter as Views.Rent.Residentials.Editor.EditorShell;
-            //ViewModel = _editorShell?.ViewModel as ViewModels.Rent.Residentials.Editor.EditorViewModel;
             ViewModel = e.Parameter as ViewModels.Rent.Residentials.MainViewModel;
         }
 

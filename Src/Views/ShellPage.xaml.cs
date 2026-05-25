@@ -113,7 +113,7 @@ internal sealed partial class ShellPage : Page
     private void NavigationViewControl_Navigated(object sender, Microsoft.UI.Xaml.Navigation.NavigationEventArgs e)
     {
         NavigationViewControl.IsBackEnabled = ContentFrame.CanGoBack;
-        
+
         if (ContentFrame.SourcePageType == typeof(Views.SettingsPage))
         {
             // SettingsItem is not part of NavView.MenuItems, and doesn't have a Tag.
@@ -126,7 +126,7 @@ internal sealed partial class ShellPage : Page
         else if (ContentFrame.SourcePageType != null)
         {
             var selectedItem = FindNavigationViewItemWithTag(ContentFrame.SourcePageType.FullName!);
-            if (selectedItem != null) 
+            if (selectedItem != null)
             {
                 NavigationViewControl.SelectedItem = selectedItem;
                 //NavigationViewControl.Header = ((NavigationViewItem)NavigationViewControl.SelectedItem)?.Content?.ToString();
