@@ -22,7 +22,6 @@ internal sealed partial class UnitShellPage : Page
     [
         ("room", "", null),
         ("summary", "基本", typeof(Views.Rent.Residentials.Unit.BasicPage)),
-        ("status", "現況", typeof(Views.Rent.Residentials.Unit.StatusPage)),
         ("contract", "契約条件", typeof(Views.Rent.Residentials.Unit.ContractPage)),
         ("transaction", "契約", typeof(Views.Rent.Residentials.Unit.TransactionPage)),
         ("appliances", "設備", typeof(Views.Rent.Residentials.Unit.AppliancesPage)),

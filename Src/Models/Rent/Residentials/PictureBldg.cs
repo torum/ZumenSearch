@@ -44,6 +44,27 @@ internal sealed partial class PictureBldg : PictureBase
 {
     public ViewModels.Rent.Residentials.MainViewModel? ParentViewModel { get; set; }
 
+    public readonly ObservableCollection<BuildingPictureType> BuildingPictureTypes =
+    [
+        //new BuildingPictureType(EnumBuildingPictureType.Unspecified, "未指定"),
+        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Madori),
+        new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Gaikan),
+        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Situnai),
+        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.LivingDining),
+        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Bedroom),
+        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Kitchen),
+        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Bathroom),
+        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Restroom),
+        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Washroom),
+        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.StorageSpace),
+        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Appliance),
+        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.FrontDoor),
+        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Balcony),
+        new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Entrance),
+        new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Neighborhood),
+        new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Other)
+    ];
+
     // Do not use SetProperty. PropertyChanged is being subscribed.
     public BuildingPictureType PictureType
     {
@@ -69,27 +90,6 @@ internal sealed partial class PictureBldg : PictureBase
             OnPropertyChanged();
         }
     } = new(EnumBuildingPictureType.Unspecified);
-
-    public readonly ObservableCollection<BuildingPictureType> BuildingPictureTypes =
-    [
-        //new BuildingPictureType(EnumBuildingPictureType.Unspecified, "未指定"),
-        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Madori),
-        new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Gaikan),
-        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Situnai),
-        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.LivingDining),
-        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Bedroom),
-        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Kitchen),
-        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Bathroom),
-        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Restroom),
-        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Washroom),
-        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.StorageSpace),
-        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Appliance),
-        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.FrontDoor),
-        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Balcony),
-        new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Entrance),
-        new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Neighborhood),
-        new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Other)
-    ];
 
     // Do not use SetProperty.
     public string Description

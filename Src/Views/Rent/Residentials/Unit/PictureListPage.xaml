@@ -80,7 +80,7 @@
                                                         </DataTemplate>
                                                     </ComboBox.ItemTemplate>
                                                 </ComboBox>
-                                                <CheckBox Content="メインの写真" Margin="24,0,0,0" VerticalAlignment="Bottom" IsChecked="{x:Bind IsMain, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
+                                                <CheckBox Content="メインの写真" Margin="12,0,0,0" VerticalAlignment="Bottom" IsChecked="{x:Bind IsMain, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
                                             </StackPanel>
                                             <TextBox Header="説明" Margin="0,0,0,0" Text="{x:Bind Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
                                             <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Margin="0,0,0,0" HorizontalAlignment="Right">

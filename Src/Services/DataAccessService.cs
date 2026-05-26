@@ -78,6 +78,7 @@ internal sealed class DataAccessService : IDataAccessService
                     "pdf_id TEXT NOT NULL PRIMARY KEY," +
                     "rent_id TEXT NOT NULL," +
                     "file_path TEXT NOT NULL," +
+                    "type TEXT NOT NULL," + // This uses "type" instead of label.
                     "thumb_path TEXT NOT NULL," +
                     "description TEXT NOT NULL," +
                     "is_main INTEGER  NOT NULL," +
@@ -430,6 +431,31 @@ internal sealed class DataAccessService : IDataAccessService
                 }
             }
 
+            exists = false;
+            while (reader.Read())
+            {
+                if (reader.GetString(1) == "type")
+                {
+                    exists = true;
+                    break;
+                }
+            }
+
+            if (!exists)
+            {
+                var altcmd = conn.CreateCommand();
+
+                try
+                {
+                    altcmd.CommandText = "ALTER TABLE rent_residential_pdfs ADD COLUMN type TEXT NOT NULL DEFAULT '';";
+                    altcmd.ExecuteNonQuery();
+                }
+                catch (SqliteException ex)
+                {
+                    Debug.WriteLine("SqliteException on ADD COLUMN type @InitializeDatabase: " + ex.Message);
+                }
+            }
+
             reader.Close();
         }
 
@@ -613,8 +639,8 @@ internal sealed class DataAccessService : IDataAccessService
                             "VALUES ('{0}', '{1}', '{2}')",
                             pic.Id, entry.Id, pic.ImageLocation);
                         */
-                        var sqlInsertIntoRentLivingPicture = "INSERT INTO rent_residential_pdfs (pdf_id, rent_id, file_path, thumb_path, description, is_main) " +
-                            "VALUES (@PdfId, @RentId, @Path, @Thumb, @Desc, @Main)";
+                        var sqlInsertIntoRentLivingPicture = "INSERT INTO rent_residential_pdfs (pdf_id, rent_id, file_path, thumb_path, type, description, is_main) " +
+                            "VALUES (@PdfId, @RentId, @Path, @Thumb, @Type, @Desc, @Main)";
 
                         cmd.CommandText = sqlInsertIntoRentLivingPicture;
 
@@ -626,6 +652,7 @@ internal sealed class DataAccessService : IDataAccessService
                         cmd.Parameters.AddWithValue("@RentId", entry.Id);
                         cmd.Parameters.AddWithValue("@Path", pic.PdfLocation);
                         cmd.Parameters.AddWithValue("@Thumb", pic.ThumbnailLocation);
+                        cmd.Parameters.AddWithValue("@Type", pic.PdfType.Key.ToString());
                         cmd.Parameters.AddWithValue("@Desc", pic.Description);
 
                         //Debug.WriteLine($"Inserting picture: {pic.ImageLocation}, {pic.Id}, isMain: {pic.IsMain} @DataAccess::InsertRentResidential");
@@ -855,10 +882,10 @@ internal sealed class DataAccessService : IDataAccessService
 
                 // Residentials table
                 sql = "UPDATE rent_residentials SET ";
-                sql += string.Format("comment = '{0}' ", EscapeSingleQuote("some comment"));
+                sql += string.Format("comment = '{0}', ", EscapeSingleQuote("some comment"));
                 //sql += String.Format("title = '{0}', ", EscapeSingleQuote(feedTitle));
                 //sql += String.Format("description = '{0}', ", EscapeSingleQuote(feedDescription));
-                sql += String.Format("updated_at = '{0}'", DateTimeOffset.UtcNow.ToString("s"));//ToString("yyyy-MM-dd HH:mm:ss"));
+                sql += String.Format("updated_at = '{0}' ", DateTimeOffset.UtcNow.ToString("s"));//ToString("yyyy-MM-dd HH:mm:ss"));
 
                 sql += string.Format(" WHERE rent_id = '{0}'; ", entry.Id);
 
@@ -963,8 +990,8 @@ internal sealed class DataAccessService : IDataAccessService
 
                         if (pdf.IsNew)
                         {
-                            var sqlInsertIntoRentLivingPdf = "INSERT INTO rent_residential_pdfs (pdf_id, rent_id, file_path, thumb_path, description, is_main) " +
-                                "VALUES (@PdfId, @RentId, @Path, @Thumb, @Desc, @Main)";
+                            var sqlInsertIntoRentLivingPdf = "INSERT INTO rent_residential_pdfs (pdf_id, rent_id, file_path, thumb_path, type, description, is_main) " +
+                                "VALUES (@PdfId, @RentId, @Path, @Thumb, @Type, @Desc, @Main)";
 
                             // PDFの追加
                             cmd.CommandText = sqlInsertIntoRentLivingPdf;
@@ -974,7 +1001,7 @@ internal sealed class DataAccessService : IDataAccessService
                         else if (pdf.IsModified)
                         {
                             var sqlUpdateRentLivingPdf = string.Format(
-                                "UPDATE rent_residential_pdfs SET file_path = @Path, thumb_path = @Thumb, description = @Desc, is_main = @Main, updated_at = @Updated " +
+                                "UPDATE rent_residential_pdfs SET file_path = @Path, thumb_path = @Thumb, type = @Type, description = @Desc, is_main = @Main, updated_at = @Updated " +
                                 "WHERE pdf_id = '{0}'", pdf.Id);
 
                             // PDFの更新
@@ -991,6 +1018,7 @@ internal sealed class DataAccessService : IDataAccessService
                             cmd.Parameters.AddWithValue("@PdfId", pdf.Id);
                             cmd.Parameters.AddWithValue("@RentId", entry.Id);
                             cmd.Parameters.AddWithValue("@Path", pdf.PdfLocation);
+                            cmd.Parameters.AddWithValue("@Type", pdf.PdfType.Key.ToString());
                             cmd.Parameters.AddWithValue("@Thumb", pdf.ThumbnailLocation);
                             cmd.Parameters.AddWithValue("@Desc", pdf.Description);
                             cmd.Parameters.AddWithValue("@Updated", DateTimeOffset.UtcNow.ToString("s"));
@@ -1606,6 +1634,12 @@ internal sealed class DataAccessService : IDataAccessService
                             IsNew = false,
                             IsModified = false
                         };
+
+                        var strType = Convert.ToString(reader["type"]);
+                        if (!string.IsNullOrEmpty(strType))
+                        {
+                            rlpdf.SetTypeFromString(strType);
+                        }
 
                         var bln = Convert.ToInt32(reader["is_main"]);
                         if (bln > 0)

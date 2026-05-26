@@ -47,7 +47,16 @@
                                     <Grid Grid.Row="0" Grid.Column="1">
                                         <StackPanel Spacing="12" Margin="24,0,6,6" MinWidth="260">
                                             <StackPanel Orientation="Horizontal">
-                                                <CheckBox Content="メインの図面" Margin="0,0,0,0" VerticalAlignment="Bottom" IsChecked="{x:Bind IsMain, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
+                                                <ComboBox x:Name="ComboBoxKinds" Header="タイプ" PlaceholderText="選択" Width="200" ItemsSource="{x:Bind BuildingPdfTypes, Mode=OneWay}" SelectedItem="{x:Bind PdfType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                                    <ComboBox.ItemTemplate>
+                                                        <DataTemplate x:DataType="modresi:BuildingPdfType">
+                                                            <StackPanel Orientation="Horizontal">
+                                                                <TextBlock Text="{x:Bind Label}" Margin="0,0,5,0"/>
+                                                            </StackPanel>
+                                                        </DataTemplate>
+                                                    </ComboBox.ItemTemplate>
+                                                </ComboBox>
+                                                <CheckBox Content="メインの図面" Margin="12,0,0,0" VerticalAlignment="Bottom" IsChecked="{x:Bind IsMain, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
                                             </StackPanel>
                                             <TextBox Header="説明" Margin="0,0,0,0" Text="{x:Bind Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
                                             <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Margin="0,0,0,0" HorizontalAlignment="Right">

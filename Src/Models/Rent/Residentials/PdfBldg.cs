@@ -1,10 +1,70 @@
-﻿using ZumenSearch.Models.Base;
+﻿using System.Collections.ObjectModel;
+using ZumenSearch.Models.Base;
 
 namespace ZumenSearch.Models.Rent.Residentials;
+
+public enum EnumBuildingPdfType
+{
+    Unspecified,
+    Maisoku,
+    Architectural,
+    Other
+}
+public sealed class BuildingPdfType(EnumBuildingPdfType key)
+{
+    private Dictionary<EnumBuildingPdfType, string> BuildingPdfTypeDictionary
+    {
+        get;
+    } = new Dictionary<EnumBuildingPdfType, string>()
+    {
+                {EnumBuildingPdfType.Unspecified, "未指定"},
+                {EnumBuildingPdfType.Maisoku, "募集図面"},
+                {EnumBuildingPdfType.Architectural, "建築図面"},
+                {EnumBuildingPdfType.Other, "その他"},
+    };
+
+    public string Label => BuildingPdfTypeDictionary[Key];
+
+    public EnumBuildingPdfType Key => key;
+};
 
 internal sealed partial class PdfBldg : PdfBase
 {
     public ViewModels.Rent.Residentials.MainViewModel? ParentViewModel { get; set; }
+
+    public readonly ObservableCollection<BuildingPdfType> BuildingPdfTypes =
+        [
+        //new BuildingPictureType(EnumBuildingPictureType.Unspecified, "未指定"),
+        new BuildingPdfType(Models.Rent.Residentials.EnumBuildingPdfType.Maisoku),
+        new BuildingPdfType(Models.Rent.Residentials.EnumBuildingPdfType.Architectural),
+        new BuildingPdfType(Models.Rent.Residentials.EnumBuildingPdfType.Other)
+        ];
+
+    // Do not use SetProperty. PropertyChanged is being subscribed.
+    public BuildingPdfType PdfType
+    {
+        get;
+        set
+        {
+            if (field == value) return;
+
+            if (value is not null)
+            {
+                // Set this before raize PropertyChanged.
+                IsModified = true;
+
+                // Raize PropertyChanged event here.
+                field = value;
+            }
+            else
+            {
+                // DO NOT DO THIS. This raize unneccesary property changed events that triggers IsDirty.
+                //field = new(EnumBuildingPdfType.Unspecified);
+            }
+
+            OnPropertyChanged();
+        }
+    } = new(EnumBuildingPdfType.Unspecified);
 
     // Do not use SetProperty. PropertyChanged is being subscribed.
     public string Description
@@ -55,5 +115,21 @@ internal sealed partial class PdfBldg : PdfBase
         ThumbnailLocation = thumbnailLocation;
 
         IsModified = false;
+    }
+
+    public EnumBuildingPdfType? SetTypeFromString(string Str)
+    {
+        if (Enum.TryParse<EnumBuildingPdfType>(Str, out var result))
+        {
+            PdfType = BuildingPdfTypes.FirstOrDefault<BuildingPdfType>(x => x.Key == result) ?? new(EnumBuildingPdfType.Unspecified);
+
+            return result;
+        }
+        else
+        {
+            PdfType = new(EnumBuildingPdfType.Unspecified);
+
+            return EnumBuildingPdfType.Unspecified;
+        }
     }
 };

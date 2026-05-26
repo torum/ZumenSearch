@@ -1,4 +1,7 @@
-﻿namespace ZumenSearch.Models.Rent.Residentials;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using System.Collections.ObjectModel;
+
+namespace ZumenSearch.Models.Rent.Residentials;
 
 #pragma warning disable IDE0290 // Use primary constructor
 

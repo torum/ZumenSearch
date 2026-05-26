@@ -62,7 +62,6 @@
                 <NavigationView.MenuItems>
                     <NavigationViewItem Content="基本"  Tag="summary"/>
                     <NavigationViewItem Content="契約条件" Tag="contract"/>
-                    <NavigationViewItem Content="現況" Tag="status"/>
                     <NavigationViewItem Content="取引条件" Tag="transaction"/>
                     <NavigationViewItem Content="設備" Tag="appliances" />
                     <NavigationViewItem Content="写真" Tag="pictures" />
