@@ -57,8 +57,8 @@
                             PaneOpened="NavigationViewControl_PaneOpened"
                             PaneClosed="NavigationViewControl_PaneClosed">
                 <NavigationView.Resources>
-                    <!-- Changes the layout box size reserved for the icon; default 16 -->
-                    <x:Double x:Key="NavigationViewItemOnLeftIconBoxHeight">20</x:Double>
+                    <!-- Changes the layout box size reserved for the icon; default 16, can be 20 -->
+                    <x:Double x:Key="NavigationViewItemOnLeftIconBoxHeight">16</x:Double>
                 </NavigationView.Resources>
                 <NavigationView.HeaderTemplate>
                     <DataTemplate>
@@ -84,20 +84,29 @@
 
                     <NavigationViewItem Tag="ZumenSearch.Views.SearchPage" Content="総合検索" ToolTipService.ToolTip="検索">
                         <NavigationViewItem.Icon>
+                            <!--
                             <ImageIcon Source="ms-appx:///Assets/SvgIcons/ic_fluent_search_sparkle_20_color.svg"></ImageIcon>
+                            -->
+                            <FontIcon Glyph="&#xe721;"/>
                         </NavigationViewItem.Icon>
                     </NavigationViewItem>
 
                     <NavigationViewItem Tag="Rent" Content="賃貸" ToolTipService.ToolTip="賃貸" IsExpanded="True">
                         <NavigationViewItem.Icon>
+                            <!--
                             <ImageIcon Source="ms-appx:///Assets/SvgIcons/ic_fluent_building_home_20_color.svg"></ImageIcon>
+                            -->
+                            <FontIcon Glyph="&#xe838;"/> 
                         </NavigationViewItem.Icon>
 
                         <NavigationViewItem.MenuItems>
 
                             <NavigationViewItem Tag="ZumenSearch.Views.Rent.ResidentialSearchPage" Content="住居用" ToolTipService.ToolTip="賃貸住居用">
                                 <NavigationViewItem.Icon>
+                                    <!--
                                     <ImageIcon Source="ms-appx:///Assets/SvgIcons/ic_fluent_building_people_20_color.svg"></ImageIcon>
+                                    -->
+                                    <FontIcon Glyph="&#xe7c3;"/>
                                     <!--
                                     <ImageIcon Width="20" Height="20">
                                         <ImageIcon.Source>
@@ -112,19 +121,28 @@
 
                             <NavigationViewItem Tag="ZumenSearch.Views.Rent.Commercials.CommercialsPage" Content="事業用" ToolTipService.ToolTip="賃貸事業用">
                                 <NavigationViewItem.Icon>
+                                    <!--
                                     <ImageIcon Source="ms-appx:///Assets/SvgIcons/ic_fluent_building_store_20_color.svg"></ImageIcon>
+                                    -->
+                                    <FontIcon Glyph="&#xe7c3;"/>
                                 </NavigationViewItem.Icon>
                             </NavigationViewItem>
 
                             <NavigationViewItem Tag="ZumenSearch.Views.Rent.Parkings.ParkingsPage" Content="駐車場" ToolTipService.ToolTip="賃貸駐車場">
                                 <NavigationViewItem.Icon>
+                                    <!--
                                     <ImageIcon Source="ms-appx:///Assets/SvgIcons/ic_fluent_vehicle_car_20_filled.svg"></ImageIcon>
+                                    -->
+                                    <FontIcon Glyph="&#xe7c3;"/>
                                 </NavigationViewItem.Icon>
                             </NavigationViewItem>
 
                             <NavigationViewItem Tag="ZumenSearch.Views.Rent.Owners.OwnersPage" Content="貸主" ToolTipService.ToolTip="貸主">
                                 <NavigationViewItem.Icon>
+                                    <!--
                                     <ImageIcon Source="ms-appx:///Assets/SvgIcons/ic_fluent_people_20_color.svg"></ImageIcon>
+                                    -->
+                                    <FontIcon Glyph="&#xe7c3;"/>
                                 </NavigationViewItem.Icon>
                             </NavigationViewItem>
 
@@ -133,7 +151,10 @@
 
                     <NavigationViewItem Tag="ZumenSearch.Views.Brokers.BrokersPage" Content="宅建業者" ToolTipService.ToolTip="宅建業者">
                         <NavigationViewItem.Icon>
+                            <!--
                             <ImageIcon Source="ms-appx:///Assets/SvgIcons/ic_fluent_layer_diagonal_person_20_color.svg"></ImageIcon>
+                            -->
+                            <FontIcon Glyph="&#xe7c3;"/>
                         </NavigationViewItem.Icon>
                     </NavigationViewItem>
 

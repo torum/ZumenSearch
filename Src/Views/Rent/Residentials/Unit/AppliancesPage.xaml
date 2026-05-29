@@ -4,40 +4,32 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:controls="using:CommunityToolkit.WinUI.Controls"
     mc:Ignorable="d"
     NavigationCacheMode="Required">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled" Padding="48,0,48,24">
+        <Grid x:Name="ContentArea">
+            <StackPanel Spacing="12" Margin="0,24,0,0">
 
-    <Grid x:Name="ContentArea">
-        <ScrollViewer>
+                <Border Style="{StaticResource RoundCardBorderStyle}">
+                    <controls:WrapPanel VerticalSpacing="12" HorizontalSpacing="6">
+                        <CheckBox Width="160" Content="エアコン" />
+                        <CheckBox Width="160" Content="バストイレ別" />
+                        <CheckBox Width="160" Content="フローリング" />
+                        <CheckBox Width="160" Content="追い焚き" />
+                        <CheckBox Width="160" Content="ガスコンロ" />
+                        <CheckBox Width="160" Content="IH" />
+                        <CheckBox Width="160" Content="コンロ２口以上" />
+                        <CheckBox Width="160" Content="ロフト" />
+                        <CheckBox Width="160" Content="室内洗濯機置き場" />
+                    </controls:WrapPanel>
+                </Border>
 
-            <Grid Margin="24">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
+                <Border Style="{StaticResource RoundCardBorderStyle}">
+                    <TextBox Header="備考" MinHeight="100" HorizontalAlignment="Stretch" VerticalAlignment="Top" AcceptsReturn="True" ScrollViewer.VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" />
+                </Border>
 
-                <StackPanel HorizontalAlignment="Stretch">
-                    
-                    <StackPanel HorizontalAlignment="Left" Margin="0,0,24,12">
-                        <CheckBox Margin="6" Content="バストイレ別" />
-                        <CheckBox Margin="6" Content="室内洗濯機置き場" />
-                        <CheckBox Margin="6" Content="エアコン" />
-                        <CheckBox Margin="6" Content="フローリング" />
-                        <CheckBox Margin="6" Content="ロフト" />
-                        <CheckBox Margin="6" Content="追い焚き" />
-                        <CheckBox Margin="6" Content="ガスコンロ" />
-                        <CheckBox Margin="6" Content="IH" />
-                        <CheckBox Margin="6" Content="コンロ２口以上" />
-                    </StackPanel>
-
-                    <TextBox Header="その他設備" Margin="0,12,0,12" HorizontalAlignment="Stretch" />
-
-                    <StackPanel Margin="0,24,0,24">
-                        <TextBox Header="備考" MinHeight="200" HorizontalAlignment="Stretch" VerticalAlignment="Top" AcceptsReturn="True" ScrollViewer.VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" />
-                    </StackPanel>
-                </StackPanel>
-
-            </Grid>
-
-        </ScrollViewer>
-    </Grid>
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
 </Page>

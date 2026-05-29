@@ -189,6 +189,10 @@
                     </Grid>
                 </Border>
 
+                <Border Style="{StaticResource RoundCardBorderStyle}">
+                    <TextBox Header="備考" MinHeight="100" HorizontalAlignment="Stretch" VerticalAlignment="Top" AcceptsReturn="True" ScrollViewer.VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" />
+                </Border>
+                
             </StackPanel>
 
         </Grid>

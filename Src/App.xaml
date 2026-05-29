@@ -145,7 +145,6 @@
             <!-- Converters -->
             <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
             <myconverters:ErrorToBorderBrushConverter x:Key="ErrorBrushConverter"/>
-            <myconverters:EnumToBooleanConverter x:Key="EnumToBooleanConverter"/>
 
             <!-- NavigationView resources -->
             <Thickness x:Key="NavigationViewContentMargin">0,0,0,0</Thickness>

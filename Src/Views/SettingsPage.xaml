@@ -7,9 +7,6 @@
     xmlns:myconverters="using:ZumenSearch.Helpers.Converters"
     xmlns:xaml="using:Microsoft.UI.Xaml"
     mc:Ignorable="d">
-    <Page.Resources>
-        <myconverters:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
-    </Page.Resources>
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <Grid x:Name="ContentArea">
 

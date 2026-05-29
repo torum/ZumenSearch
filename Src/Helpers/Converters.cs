@@ -2,37 +2,9 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Media;
+using System.Globalization;
 
 namespace ZumenSearch.Helpers.Converters;
-
-// not really used
-public partial class EnumToBooleanConverter : IValueConverter
-{
-    // Converts Enum (or string) to Boolean
-    public object Convert(object value, Type targetType, object parameter, string language)
-    {
-        if (value == null || parameter == null)
-            return false;
-
-        string? enumValue = value?.ToString();
-        string? targetValue = parameter?.ToString();
-
-        return string.Equals(enumValue, targetValue, StringComparison.OrdinalIgnoreCase);
-    }
-
-    // Converts Boolean back to Enum
-    public object ConvertBack(object value, Type targetType, object parameter, string language)
-    {
-        if (value is bool isChecked && isChecked && parameter != null)
-        {
-            // Parse the target enum type
-            //return Enum.Parse(targetType, parameter.ToString());
-            return Enum.Parse(targetType, parameter.ToString() ?? string.Empty);
-        }
-
-        return DependencyProperty.UnsetValue;
-    }
-}
 
 // not used for now.
 public partial class ThemeEnumToBooleanConverter : IValueConverter

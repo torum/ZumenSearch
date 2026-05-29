@@ -13,17 +13,17 @@
         <Grid x:Name="ContentArea">
             <StackPanel Spacing="12" Margin="0,24,0,0">
 
-                <Expander Header="一般" Margin="0" Padding="6" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" IsExpanded="False">
-                    <controls:WrapPanel x:Name="HorizontalWrapPanel" Margin="24,12,24,12">
+                <Expander Header="一般" Margin="0" Padding="24" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" IsExpanded="False">
+                    <controls:WrapPanel x:Name="HorizontalWrapPanel" Margin="0" VerticalSpacing="12" HorizontalSpacing="6">
                         <CheckBox Margin="0,0,0,0" Content="エレベータ" IsChecked="{x:Bind ViewModel.Bldg.HasElevator,Mode=TwoWay}"/>
-                        <CheckBox Margin="12,0,0,0" Content="オートロック" IsChecked="{x:Bind ViewModel.Bldg.HasAutolock,Mode=TwoWay}"/>
-                        <CheckBox Margin="12,0,0,0" Content="防犯カメラ" IsChecked="{x:Bind ViewModel.Bldg.HasSecurityCamera,Mode=TwoWay}"/>
-                        <CheckBox Margin="12,0,0,0" Content="宅配ボックス" IsChecked="{x:Bind ViewModel.Bldg.HasParcelLocker,Mode=TwoWay}"/>
+                        <CheckBox Margin="0,0,0,0" Content="オートロック" IsChecked="{x:Bind ViewModel.Bldg.HasAutolock,Mode=TwoWay}"/>
+                        <CheckBox Margin="0,0,0,0" Content="防犯カメラ" IsChecked="{x:Bind ViewModel.Bldg.HasSecurityCamera,Mode=TwoWay}"/>
+                        <CheckBox Margin="0,0,0,0" Content="宅配ボックス" IsChecked="{x:Bind ViewModel.Bldg.HasParcelLocker,Mode=TwoWay}"/>
                     </controls:WrapPanel>
                 </Expander>
 
-                <Expander Header="電気" Margin="0" Padding="6" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" IsExpanded="False">
-                    <StackPanel Margin="24,12,24,12" Spacing="12" VerticalAlignment="Bottom" HorizontalAlignment="Stretch">
+                <Expander Header="電気" Margin="0" Padding="24" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" IsExpanded="False">
+                    <StackPanel Spacing="12" VerticalAlignment="Bottom" HorizontalAlignment="Stretch">
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,0">
                             <CheckBox Content="あり" Margin="0,0,0,0" IsChecked="{x:Bind ViewModel.Bldg.HasElectric, Mode=TwoWay}"/>
                         </StackPanel>
@@ -38,8 +38,8 @@
                     </StackPanel>
                 </Expander>
 
-                <Expander Header="ガス" Margin="0" Padding="6" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" IsExpanded="False">
-                    <StackPanel Margin="24,12,24,12" VerticalAlignment="Bottom">
+                <Expander Header="ガス" Margin="0" Padding="24" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" IsExpanded="False">
+                    <StackPanel VerticalAlignment="Bottom">
                         <StackPanel Margin="0,0,0,8" Orientation="Horizontal">
                             <CheckBox Content="あり" Margin="0,0,0,0"/>
                         </StackPanel>
@@ -62,9 +62,9 @@
                     </StackPanel>
                 </Expander>
 
-                <Expander Header="水道" Margin="0" Padding="6" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" IsExpanded="False">
-                    <StackPanel Margin="24,12,24,0">
-                        <StackPanel Margin="0,0,0,12" VerticalAlignment="Bottom">
+                <Expander Header="水道" Margin="0" Padding="24" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" IsExpanded="False">
+                    <StackPanel Spacing="24">
+                        <StackPanel Margin="0" VerticalAlignment="Bottom">
                             <TextBlock><Run Text="上水道" /></TextBlock>
                             <StackPanel Margin="0,0,0,0" Orientation="Horizontal">
                                 <RadioButton
@@ -87,7 +87,7 @@
                             </StackPanel>
                             <TextBox Header="詳細（[公営・私営・井戸・他]、メーター[専用・子・割当・他]）" Margin="0,8,0,0" />
                         </StackPanel>
-                        <StackPanel Margin="0,12,0,12" VerticalAlignment="Bottom">
+                        <StackPanel Margin="0" VerticalAlignment="Bottom">
                             <TextBlock><Run Text="下水道" /></TextBlock>
                             <StackPanel Margin="0,0,0,0" Orientation="Horizontal">
                                 <RadioButton
@@ -113,9 +113,9 @@
                     </StackPanel>
                 </Expander>
 
-                <Expander Header="共聴設備" Margin="0" Padding="6" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" IsExpanded="False">
-                    <StackPanel Margin="24,12,24,0">
-                        <StackPanel Margin="0,0,0,8" VerticalAlignment="Bottom">
+                <Expander Header="共聴設備" Margin="0" Padding="24" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" IsExpanded="False">
+                    <StackPanel Margin="0">
+                        <StackPanel Margin="0,0,0,0" VerticalAlignment="Bottom">
                             <StackPanel Margin="0,0,0,8" Orientation="Horizontal">
                                 <CheckBox
                                                     Name="TVKind_Desi"
@@ -138,20 +138,20 @@
                                                     Margin="12,0,0,0"
                                                     Content="有線放送" />
                             </StackPanel>
-                            <StackPanel Margin="0,0,0,20" Orientation="Horizontal">
+                            <StackPanel Margin="0,0,0,0" Orientation="Horizontal">
                                 <CheckBox Margin="0,8,0,0" Content="インターネット" />
                                 <CheckBox Margin="12,8,0,0" Content="光ファイバー" />
                                 <CheckBox Margin="12,8,0,0" Content="インターネット無料" />
                             </StackPanel>
-                            <TextBox Header="TV アンテナ [有り（[UHF・VHF・BS・CS]）・無し・その他]" Margin="0,0,0,8" />
-                            <TextBox Header="インターネット [設備有り・無し・その他]" Margin="0,0,0,8" />
+                            <TextBox Header="TV アンテナ [有り（[UHF・VHF・BS・CS]）・無し・その他]" Margin="0,12,0,0" />
+                            <TextBox Header="インターネット [設備有り・無し・その他]" Margin="0,12,0,0" />
                         </StackPanel>
                     </StackPanel>
                 </Expander>
 
-                <Expander Header="駐車場" Margin="0,0,0,0" Padding="6" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" IsExpanded="False">
-                    <StackPanel Margin="24,12,24,0" HorizontalAlignment="Stretch">
-                        <StackPanel Margin="0,0,0,12" Orientation="Horizontal">
+                <Expander Header="駐車場" Margin="0,0,0,0" Padding="24" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" IsExpanded="False">
+                    <StackPanel Margin="0" HorizontalAlignment="Stretch">
+                        <StackPanel Margin="0,0,0,0" Orientation="Horizontal">
                             <CheckBox Margin="0,0,0,0" Content="あり" />
                             <CheckBox Margin="12,0,0,0" Content="駐車場無料" />
                         </StackPanel>
@@ -186,14 +186,14 @@
                                 <TextBox Header="距離（m）" />
                             </StackPanel>
                         </StackPanel>
-                        <StackPanel Margin="0,0,0,12" HorizontalAlignment="Stretch">
+                        <StackPanel Margin="0,0,0,0" HorizontalAlignment="Stretch">
                             <TextBox Header="備考" HorizontalAlignment="Stretch"/>
                         </StackPanel>
                     </StackPanel>
                 </Expander>
 
-                <Expander Header="駐輪場" Margin="0,0,0,0" Padding="6" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" IsExpanded="False">
-                    <StackPanel Margin="24,12,24,0" HorizontalAlignment="Stretch">
+                <Expander Header="駐輪場" Margin="0,0,0,0" Padding="24" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" IsExpanded="False">
+                    <StackPanel Margin="0" HorizontalAlignment="Stretch">
                         <StackPanel Margin="0,0,0,12" Orientation="Horizontal">
                             <CheckBox Margin="0,0,0,0" Content="あり" />
                             <CheckBox Margin="12,0,0,0" Content="駐輪場無料" />
@@ -215,14 +215,14 @@
                                 </StackPanel>
                             </StackPanel>
                         </StackPanel>
-                        <StackPanel Margin="0,0,0,12" HorizontalAlignment="Stretch">
+                        <StackPanel Margin="0,0,0,02" HorizontalAlignment="Stretch">
                             <TextBox Header="備考" HorizontalAlignment="Stretch"/>
                         </StackPanel>
                     </StackPanel>
                 </Expander>
 
-                <Expander Header="バイク置き場" Margin="0,0,0,0" Padding="6" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" IsExpanded="False">
-                    <StackPanel Margin="24,12,24,0" HorizontalAlignment="Stretch">
+                <Expander Header="バイク置き場" Margin="0,0,0,0" Padding="24" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" IsExpanded="False">
+                    <StackPanel Margin="0" HorizontalAlignment="Stretch">
                         <StackPanel Margin="0,0,0,12" Orientation="Horizontal">
                             <CheckBox Margin="0,0,0,0" Content="あり" />
                             <CheckBox Margin="12,0,0,0" Content="バイク置き場無料" />
@@ -247,7 +247,7 @@
 
                         </StackPanel>
 
-                        <StackPanel Margin="0,0,0,12" HorizontalAlignment="Stretch">
+                        <StackPanel Margin="0,0,0,0" HorizontalAlignment="Stretch">
                             <TextBox Header="備考" HorizontalAlignment="Stretch"/>
                         </StackPanel>
                     </StackPanel>

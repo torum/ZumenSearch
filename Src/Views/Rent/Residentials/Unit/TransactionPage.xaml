@@ -7,102 +7,120 @@
     mc:Ignorable="d"
     NavigationCacheMode="Required">
 
-    <Grid x:Name="ContentArea">
-        <ScrollViewer>
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled" Padding="48,0,48,24">
+        <Grid x:Name="ContentArea">
+            <StackPanel Spacing="12" Margin="0,24,0,0">
 
-            <Grid Margin="24">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-
-                <StackPanel HorizontalAlignment="Stretch">
-
-
-                    <StackPanel>
-                        <TextBlock Text="媒介"></TextBlock>
-                    </StackPanel>
-                    <StackPanel Padding="24,12,12,12">
-                        <RadioButton Content="未指定" GroupName="motozuke" IsChecked="True"/>
-                        <RadioButton Content="直物（自社元付）" GroupName="motozuke"/>
-                        <RadioButton Content="先物（他社元付）" GroupName="motozuke"/>
-                    </StackPanel>
-
-                    <TextBlock Text="取引態様" Margin="0,24,24,0"></TextBlock>
-                    <StackPanel Padding="24,12,12,12">
-                        <RadioButton Content="未指定" GroupName="torihikitaiyou" IsChecked="True"/>
-                        <RadioButton Content="一般" GroupName="torihikitaiyou"/>
-                        <RadioButton Content="専任" GroupName="torihikitaiyou"/>
-                        <RadioButton Content="専属専任" GroupName="torihikitaiyou"/>
-                        <RadioButton Content="代理" GroupName="torihikitaiyou"/>
-                        <RadioButton Content="貸主" GroupName="torihikitaiyou"/>
-                    </StackPanel>
-
-                    <TextBlock Text="手数料" Margin="0,24,24,0"></TextBlock>
-                    <StackPanel Padding="24,12,12,12">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-
-                            <StackPanel Grid.Row="0" Grid.Column="0">
-                                <TextBlock Text="貸主"/>
-                                <StackPanel Orientation="Horizontal" Margin="0 6 12 0">
-                                    <TextBox Text="" Width="42" Margin="0 0 3 6" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
-                                    <ComboBox SelectedIndex="0" Margin="0 0 3 6" VerticalAlignment="Bottom">
-                                        <ComboBoxItem>％</ComboBoxItem>
-                                        <ComboBoxItem>円</ComboBoxItem>
-                                    </ComboBox>
-                                </StackPanel>
-                            </StackPanel>
-
-                            <StackPanel Grid.Row="0" Grid.Column="1">
-                                <TextBlock Text="借主"/>
-                                <StackPanel Orientation="Horizontal" Margin="0 6 12 0">
-                                    <TextBox Text="" Width="42" Margin="0 0 3 6" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
-                                    <ComboBox SelectedIndex="0" Margin="0 0 3 6" VerticalAlignment="Bottom">
-                                        <ComboBoxItem>％</ComboBoxItem>
-                                        <ComboBoxItem>円</ComboBoxItem>
-                                    </ComboBox>
-                                </StackPanel>
-                            </StackPanel>
-
-                            <StackPanel Grid.Row="1" Grid.Column="0">
-                                <TextBlock Text="元付"/>
-                                <StackPanel Orientation="Horizontal" Margin="0 6 12 0">
-                                    <TextBox Text="" Width="42" Margin="0 0 3 6" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
-                                    <ComboBox SelectedIndex="0" Margin="0 0 3 6" VerticalAlignment="Bottom">
-                                        <ComboBoxItem>％</ComboBoxItem>
-                                        <ComboBoxItem>円</ComboBoxItem>
-                                    </ComboBox>
-                                </StackPanel>
-                            </StackPanel>
-
-                            <StackPanel Grid.Row="1" Grid.Column="1">
-                                <TextBlock Text="客付け"/>
-                                <StackPanel Orientation="Horizontal" Margin="0 6 12 0">
-                                    <TextBox Text="" Width="42" Margin="0 0 3 6" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
-                                    <ComboBox SelectedIndex="0" Margin="0 0 3 6" VerticalAlignment="Bottom">
-                                        <ComboBoxItem>％</ComboBoxItem>
-                                        <ComboBoxItem>円</ComboBoxItem>
-                                    </ComboBox>
-                                </StackPanel>
-                            </StackPanel>
-
+                <Border Style="{StaticResource RoundCardBorderStyle}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*" MinWidth="320"></ColumnDefinition>
+                            <ColumnDefinition Width="1*" MinWidth="320"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <Grid Grid.Row="0" Grid.Column="0">
+                            <ComboBox Header="媒介形態" Width="180" SelectedIndex="-1" Margin="0,0,0,0" VerticalAlignment="Bottom">
+                                <ComboBoxItem>先物（他社元付）</ComboBoxItem>
+                                <ComboBoxItem>自社元付</ComboBoxItem>
+                                <ComboBoxItem>自社管理</ComboBoxItem>
+                                <ComboBoxItem>自社物件/自社所有</ComboBoxItem>
+                            </ComboBox>
                         </Grid>
+                        <Grid Grid.Row="0" Grid.Column="1" Margin="12,0,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                <ColumnDefinition Width="*"></ColumnDefinition>
+                            </Grid.ColumnDefinitions>
+                            <Grid Grid.Row="0" Grid.Column="0">
+                                <ComboBox Header="取引態様" Width="180" SelectedIndex="-1" Margin="0,0,0,0" VerticalAlignment="Bottom">
+                                    <ComboBoxItem>一般媒介</ComboBoxItem>
+                                    <ComboBoxItem>専任媒介</ComboBoxItem>
+                                    <ComboBoxItem>専属専任媒介</ComboBoxItem>
+                                    <ComboBoxItem>代理</ComboBoxItem>
+                                    <ComboBoxItem>貸主</ComboBoxItem>
+                                </ComboBox>
+                            </Grid>
+                            <Grid Grid.Row="0" Grid.Column="1" Margin="12,0,0,0">
+                                <StackPanel Orientation="Horizontal">
+
+                                </StackPanel>
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource RoundCardBorderStyle}">
+                    <StackPanel>
+
+                        <TextBlock Text="手数料" Margin="0"></TextBlock>
+                        <StackPanel Margin="0,12,0,0">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Row="0" Grid.Column="0">
+                                    <TextBlock Text="貸主"/>
+                                    <StackPanel Orientation="Horizontal" Margin="0 6 12 0">
+                                        <TextBox Text="" Width="42" Margin="0 0 3 6" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                        <ComboBox SelectedIndex="0" Margin="0 0 3 6" VerticalAlignment="Bottom">
+                                            <ComboBoxItem>％</ComboBoxItem>
+                                            <ComboBoxItem>円</ComboBoxItem>
+                                        </ComboBox>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <StackPanel Grid.Row="0" Grid.Column="1">
+                                    <TextBlock Text="借主"/>
+                                    <StackPanel Orientation="Horizontal" Margin="0 6 12 0">
+                                        <TextBox Text="" Width="42" Margin="0 0 3 6" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                        <ComboBox SelectedIndex="0" Margin="0 0 3 6" VerticalAlignment="Bottom">
+                                            <ComboBoxItem>％</ComboBoxItem>
+                                            <ComboBoxItem>円</ComboBoxItem>
+                                        </ComboBox>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <StackPanel Grid.Row="1" Grid.Column="0">
+                                    <TextBlock Text="元付"/>
+                                    <StackPanel Orientation="Horizontal" Margin="0 6 12 0">
+                                        <TextBox Text="" Width="42" Margin="0 0 3 6" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                        <ComboBox SelectedIndex="0" Margin="0 0 3 6" VerticalAlignment="Bottom">
+                                            <ComboBoxItem>％</ComboBoxItem>
+                                            <ComboBoxItem>円</ComboBoxItem>
+                                        </ComboBox>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <StackPanel Grid.Row="1" Grid.Column="1">
+                                    <TextBlock Text="客付け"/>
+                                    <StackPanel Orientation="Horizontal" Margin="0 6 12 0">
+                                        <TextBox Text="" Width="42" Margin="0 0 3 6" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBox>
+                                        <ComboBox SelectedIndex="0" Margin="0 0 3 6" VerticalAlignment="Bottom">
+                                            <ComboBoxItem>％</ComboBoxItem>
+                                            <ComboBoxItem>円</ComboBoxItem>
+                                        </ComboBox>
+                                    </StackPanel>
+                                </StackPanel>
+
+                            </Grid>
+                        </StackPanel>
                     </StackPanel>
+                </Border>
 
-                    <StackPanel Margin="0 24 0 24">
-                        <TextBox Header="備考" MinHeight="200" HorizontalAlignment="Stretch" VerticalAlignment="Top" AcceptsReturn="True" ScrollViewer.VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" />
-                    </StackPanel>
+                <Border Style="{StaticResource RoundCardBorderStyle}">
+                    <TextBox Header="備考" MinHeight="100" HorizontalAlignment="Stretch" VerticalAlignment="Top" AcceptsReturn="True" ScrollViewer.VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" />
+                </Border>
 
-                </StackPanel>
-            </Grid>
-
-        </ScrollViewer>
-    </Grid>
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
+    
 </Page>
