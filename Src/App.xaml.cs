@@ -63,6 +63,7 @@ public partial class App : Application
         IsSaveErrorLog = false;
 #endif
 
+
         CurrentDispatcherQueue = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
 
         if (RuntimeHelper.IsMSIX)
@@ -95,6 +96,11 @@ public partial class App : Application
             AppendErrorLog("Failed to create folders on startup.", ex.ToString());
             SaveErrorLog();
         }
+
+        var culture = new System.Globalization.CultureInfo("ja-JP");
+        System.Globalization.CultureInfo.CurrentCulture = culture;
+        System.Globalization.CultureInfo.CurrentUICulture = culture;
+        Microsoft.Windows.Globalization.ApplicationLanguages.PrimaryLanguageOverride = "ja-JP";
 
         InitializeComponent();
 

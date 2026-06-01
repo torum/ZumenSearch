@@ -944,6 +944,8 @@ internal sealed class DataAccessService : IDataAccessService
 
                 cmd.CommandText = sql;
 
+                cmd.Parameters.AddWithValue("@rent_id", entry.Id);
+
                 cmd.Parameters.AddWithValue("@building_kind", entry.BuildingKind.Key.ToString());
                 cmd.Parameters.AddWithValue("@is_unit_ownership", entry.IsUnitOwnership ? 1 : 0);// bool to int
                 cmd.Parameters.AddWithValue("@building_structure", entry.BuildingStructure.Key.ToString());
@@ -1455,8 +1457,6 @@ internal sealed class DataAccessService : IDataAccessService
             using var cmd = connection.CreateCommand();
             if (keyword == "*")
             {
-                //cmd.CommandText = String.Format("SELECT * FROM entries INNER JOIN feeds USING (feed_id) WHERE feed_id = '{0}' AND archived = '{1}' ORDER BY published DESC LIMIT 1000", feedId, bool.FalseString);
-
                 cmd.CommandText = "SELECT rents.name as feedName, rent_residentials.remarks as entryTitle, rents.rent_id as entryId FROM rent_residentials INNER JOIN rents USING (rent_id)";
             }
             else
@@ -1592,7 +1592,7 @@ internal sealed class DataAccessService : IDataAccessService
                 "rent_residentials.remarks as resiRemarks, " +
                 // TODO: more fields to be added here.
 
-                "rent_residentials.updated_at as resiUpdatedAt " +
+                "rent_residentials.updated_at as resiUpdatedAt, " +
                 "rents.rent_id as entryId " +
                 "FROM rent_residentials INNER JOIN rents USING (rent_id) WHERE rents.rent_id = '{0}'", id);
 
@@ -1848,11 +1848,11 @@ internal sealed class DataAccessService : IDataAccessService
             res.Error.ErrText = ex.Message;
             res.Error.ErrDatetime = DateTime.Now;
             res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
-            res.Error.ErrPlaceParent = "DataAccess::SelectRentResidentialsByNameKeyword";
+            res.Error.ErrPlaceParent = "DataAccess::SelectRentResidentialById";
         }
         catch (System.InvalidOperationException ex)
         {
-            Debug.WriteLine("Opps. InvalidOperationException@DataAccess::SelectRentResidentialsByNameKeyword");
+            Debug.WriteLine("Opps. InvalidOperationException@DataAccess::SelectRentResidentialById");
 
             res.IsError = true;
             res.Error.ErrType = ErrorObject.ErrTypes.DB;
@@ -1861,7 +1861,7 @@ internal sealed class DataAccessService : IDataAccessService
             res.Error.ErrText = ex.Message;
             res.Error.ErrDatetime = DateTime.Now;
             res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
-            res.Error.ErrPlaceParent = "DataAccess::SelectRentResidentialsByNameKeyword";
+            res.Error.ErrPlaceParent = "DataAccess::SelectRentResidentialById";
         }
         catch (Exception e)
         {
@@ -1870,19 +1870,19 @@ internal sealed class DataAccessService : IDataAccessService
             res.Error.ErrCode = "";
             if (e.InnerException != null)
             {
-                Debug.WriteLine(e.InnerException.Message + " @DataAccess::SelectRentResidentialsByNameKeyword");
+                Debug.WriteLine(e.InnerException.Message + " @DataAccess::SelectRentResidentialById");
                 res.Error.ErrDescription = "InnerException";
                 res.Error.ErrText = e.InnerException.Message;
             }
             else
             {
-                Debug.WriteLine(e.Message + " @DataAccess::SelectRentResidentialsByNameKeyword");
+                Debug.WriteLine(e.Message + " @DataAccess::SelectRentResidentialById");
                 res.Error.ErrDescription = "Exception";
                 res.Error.ErrText = e.Message;
             }
             res.Error.ErrDatetime = DateTime.Now;
             res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
-            res.Error.ErrPlaceParent = "DataAccess::SelectRentResidentialsByNameKeyword";
+            res.Error.ErrPlaceParent = "DataAccess::SelectRentResidentialById";
         }
         finally
         {

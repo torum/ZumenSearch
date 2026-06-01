@@ -154,24 +154,24 @@ internal sealed partial class BldgViewModel : ObservableObject
     // 建物構造
     public ObservableCollection<Structure> Structures =
     [
-        //new Structure(EnumStructure.Unspecified.ToString(), "未指定"),
-        new Structure(Models.Rent.Residentials.Bldg.EnumStructure.Wood),
-        new Structure(Models.Rent.Residentials.Bldg.EnumStructure.Block),
-        new Structure(Models.Rent.Residentials.Bldg.EnumStructure.LightSteel),
-        new Structure(Models.Rent.Residentials.Bldg.EnumStructure.Steel),
-        new Structure(Models.Rent.Residentials.Bldg.EnumStructure.RC),
-        new Structure(Models.Rent.Residentials.Bldg.EnumStructure.SRC),
-        new Structure(Models.Rent.Residentials.Bldg.EnumStructure.ALC),
-        new Structure(Models.Rent.Residentials.Bldg.EnumStructure.PC),
-        new Structure(Models.Rent.Residentials.Bldg.EnumStructure.HPC),
-        new Structure(Models.Rent.Residentials.Bldg.EnumStructure.RB),
-        new Structure(Models.Rent.Residentials.Bldg.EnumStructure.CFT),
-        new Structure(Models.Rent.Residentials.Bldg.EnumStructure.Other)
+        //new Structure(EnumStructures.Unspecified.ToString(), "未指定"),
+        new Structure(Models.Rent.Residentials.Bldg.EnumStructures.Wood),
+        new Structure(Models.Rent.Residentials.Bldg.EnumStructures.Block),
+        new Structure(Models.Rent.Residentials.Bldg.EnumStructures.LightSteel),
+        new Structure(Models.Rent.Residentials.Bldg.EnumStructures.Steel),
+        new Structure(Models.Rent.Residentials.Bldg.EnumStructures.RC),
+        new Structure(Models.Rent.Residentials.Bldg.EnumStructures.SRC),
+        new Structure(Models.Rent.Residentials.Bldg.EnumStructures.ALC),
+        new Structure(Models.Rent.Residentials.Bldg.EnumStructures.PC),
+        new Structure(Models.Rent.Residentials.Bldg.EnumStructures.HPC),
+        new Structure(Models.Rent.Residentials.Bldg.EnumStructures.RB),
+        new Structure(Models.Rent.Residentials.Bldg.EnumStructures.CFT),
+        new Structure(Models.Rent.Residentials.Bldg.EnumStructures.Other)
     ];
 
     public Structure SelectedStructure
     {
-        get => field ?? new(Models.Rent.Residentials.Bldg.EnumStructure.Unspecified);
+        get => field ?? new(Models.Rent.Residentials.Bldg.EnumStructures.Unspecified);
         set
         {
             if (SetProperty(ref field, value))
@@ -1262,25 +1262,23 @@ internal sealed partial class BldgViewModel : ObservableObject
 
         Name = _entry.Name;
 
-        SelectedKind = _entry.BuildingKind;
+        //SelectedKind = _entry.BuildingKind;
+        var kindkey = Kinds.FirstOrDefault(k => k.Key == _entry.BuildingKind.Key);
+        SelectedKind = kindkey is null ? new(Models.Rent.Residentials.Bldg.EnumKinds.Unspecified) : kindkey;
+
         IsUnitOwnership = _entry.IsUnitOwnership;
-        SelectedStructure = _entry.BuildingStructure;
+
+        //SelectedStructure = _entry.BuildingStructure;
+        var Structurekey = Structures.FirstOrDefault(k => k.Key == _entry.BuildingStructure.Key);
+        SelectedStructure = Structurekey is null ? new(Models.Rent.Residentials.Bldg.EnumStructures.Unspecified) : Structurekey;
 
         AboveGroundFloorCount = _entry.AboveGroundFloorCount == 0 ? string.Empty : _entry.AboveGroundFloorCount.ToString();
         BasementFloorCount = _entry.BasementFloorCount == 0 ? string.Empty : _entry.BasementFloorCount.ToString();
         TotalUnitCount = _entry.TotalUnitCount == 0 ? string.Empty : _entry.TotalUnitCount.ToString();
-        if (_entry.BuiltYearAndMonth.Year != 1900)
-        {
-            BuiltYearAndMonth = _entry.BuiltYearAndMonth;
-        }
-        else
-        {
-            BuiltYearAndMonth = null;
-        }
+        BuiltYearAndMonth = _entry.BuiltYearAndMonth.Year != 1900 ? _entry.BuiltYearAndMonth : null;
         FudousanId = _entry.FudousanId;
         FudousanIdAdditionalCode = _entry.FudousanIdAdditionalCode;
         Remarks = _entry.Remarks;
-
 
 
         // Location

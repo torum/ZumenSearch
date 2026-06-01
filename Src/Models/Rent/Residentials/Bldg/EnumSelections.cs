@@ -35,36 +35,36 @@ internal sealed class Kind(EnumKinds key)
 };
 
 // Structure: 建物構造
-public enum EnumStructure
+public enum EnumStructures
 {
     Unspecified, Wood, Block, LightSteel, Steel, RC, SRC, ALC, PC, HPC, RB, CFT, Other
 }
 
-internal sealed class Structure(EnumStructure key)
+internal sealed class Structure(EnumStructures key)
 {
-    private Dictionary<EnumStructure, string> BuildingStructureTypeDictionary
+    private Dictionary<EnumStructures, string> BuildingStructureTypeDictionary
     {
         get;
-    } = new Dictionary<EnumStructure, string>()
+    } = new Dictionary<EnumStructures, string>()
         {
-            {EnumStructure.Unspecified, "未指定"},
-            {EnumStructure.Wood, "木造"},
-            {EnumStructure.Block, "ブロック造"},
-            {EnumStructure.LightSteel, "軽量鉄骨造"},
-            {EnumStructure.Steel, "鉄骨造"},
-            {EnumStructure.RC, "鉄筋コンクリート(RC)造"},
-            {EnumStructure.SRC, "鉄骨鉄筋コンクリート(SRC)造"},
-            {EnumStructure.ALC, "軽量気泡コンクリート(ALC)造"},
-            {EnumStructure.PC, "プレキャストコンクリート(PC)造"},
-            {EnumStructure.HPC, "鉄骨プレキャストコンクリート(HPC)造"},
-            {EnumStructure.RB, "鉄筋ブロック造"},
-            {EnumStructure.CFT, "コンクリート充填鋼管(CFT)造"},
-            {EnumStructure.Other, "その他"}
+            {EnumStructures.Unspecified, "未指定"},
+            {EnumStructures.Wood, "木造"},
+            {EnumStructures.Block, "ブロック造"},
+            {EnumStructures.LightSteel, "軽量鉄骨造"},
+            {EnumStructures.Steel, "鉄骨造"},
+            {EnumStructures.RC, "鉄筋コンクリート(RC)造"},
+            {EnumStructures.SRC, "鉄骨鉄筋コンクリート(SRC)造"},
+            {EnumStructures.ALC, "軽量気泡コンクリート(ALC)造"},
+            {EnumStructures.PC, "プレキャストコンクリート(PC)造"},
+            {EnumStructures.HPC, "鉄骨プレキャストコンクリート(HPC)造"},
+            {EnumStructures.RB, "鉄筋ブロック造"},
+            {EnumStructures.CFT, "コンクリート充填鋼管(CFT)造"},
+            {EnumStructures.Other, "その他"}
 
         };
     public string Label => BuildingStructureTypeDictionary[Key];
 
-    public EnumStructure Key => key;
+    public EnumStructures Key => key;
 };
 
 //

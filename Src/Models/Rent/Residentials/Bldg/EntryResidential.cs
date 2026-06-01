@@ -115,7 +115,7 @@ internal sealed partial class EntryResidential : EntryBase
     // 建物構造
     public Structure BuildingStructure
     {
-        get => field ?? new(EnumStructure.Unspecified);
+        get => field ?? new(EnumStructures.Unspecified);
         set
         {
             if (SetProperty(ref field, value))
@@ -867,11 +867,11 @@ internal sealed partial class EntryResidential : EntryBase
     {
         if (string.IsNullOrEmpty(Str))
         {
-            BuildingStructure = new Structure(EnumStructure.Unspecified);
+            BuildingStructure = new Structure(EnumStructures.Unspecified);
             return;
         }
 
-        if (Enum.TryParse<EnumStructure>(Str, out var result))
+        if (Enum.TryParse<EnumStructures>(Str, out var result))
         {
             BuildingStructure = new Structure(result);
         }

@@ -98,7 +98,7 @@
                         </Grid.ColumnDefinitions>
                         <Grid Grid.Row="0" Grid.Column="0">
                             <!-- 築年月（西暦 ）-->
-                            <DatePicker Header="築年月（西暦）" DayVisible="False" SelectedDate="{x:Bind ViewModel.Bldg.BuiltYearAndMonth, Mode=TwoWay}" HorizontalAlignment="Left"/>
+                            <DatePicker Header="築年月（西暦）" DayVisible="False" Language="ja-JP" SelectedDate="{x:Bind ViewModel.Bldg.BuiltYearAndMonth, Mode=TwoWay}" HorizontalAlignment="Left"/>
                         </Grid>
                         <Grid Grid.Row="0" Grid.Column="1" Margin="12,0,0,0">
                             <!-- 和暦（IsReadOnly） -->
