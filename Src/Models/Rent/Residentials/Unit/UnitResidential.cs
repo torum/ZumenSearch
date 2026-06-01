@@ -2,7 +2,7 @@
 using System.Collections.ObjectModel;
 using ZumenSearch.Models.Base;
 
-namespace ZumenSearch.Models.Rent.Residentials;
+namespace ZumenSearch.Models.Rent.Residentials.Unit;
 
 #pragma warning disable IDE0290 // Use primary constructor
 

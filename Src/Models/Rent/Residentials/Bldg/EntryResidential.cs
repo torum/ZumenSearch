@@ -1,8 +1,10 @@
 ﻿using System.Collections.ObjectModel;
+using System.Globalization;
 using ZumenSearch.Models.Base;
 using ZumenSearch.Models.Common;
+using static System.Net.Mime.MediaTypeNames;
 
-namespace ZumenSearch.Models.Rent.Residentials;
+namespace ZumenSearch.Models.Rent.Residentials.Bldg;
 
 #pragma warning disable IDE0290 // Use primary constructor
 
@@ -17,11 +19,6 @@ internal sealed partial class EntryResidentialSearchResult : EntryBase
     }
 }
 
-
-
-
-
-// TODO: 
 // 編集用（建物）
 internal sealed partial class EntryResidential : EntryBase
 {
@@ -35,7 +32,7 @@ internal sealed partial class EntryResidential : EntryBase
     #region == 物件に属するリスト == 
 
     // 物件に属する部屋のリスト
-    public ObservableCollection<UnitResidential> Rooms
+    public ObservableCollection<Models.Rent.Residentials.Unit.UnitResidential> Rooms
     {
         get;
         set
@@ -48,7 +45,7 @@ internal sealed partial class EntryResidential : EntryBase
     } = [];
 
     // DBへの更新時にDBから削除されるべき部屋のIDリスト
-    public ObservableCollection<UnitResidential> RoomsToBeDeleted = [];
+    public ObservableCollection<Models.Rent.Residentials.Unit.UnitResidential> RoomsToBeDeleted = [];
 
     // 物件写真（建物）リスト
     public ObservableCollection<PictureBldg> BuildingPictures
@@ -86,16 +83,11 @@ internal sealed partial class EntryResidential : EntryBase
 
     #region == 基本 ==
 
-    // Kind：物件種目（アパート・マンション・一戸建て・他）
-    public enum EnumKinds
-    {
-        Unspecified, Apartment, Mansion, House, TerraceHouse, TownHouse, ShareHouse, Dormitory
-    }
 
     // 物件種別
-    public Models.Rent.Residentials.Kind BuildingKind
+    public Kind BuildingKind
     {
-        get => field ?? new(EnumKinds.Unspecified, "未指定");
+        get => field ?? new(EnumKinds.Unspecified);
         set
         {
             if (SetProperty(ref field, value))
@@ -118,16 +110,12 @@ internal sealed partial class EntryResidential : EntryBase
         }
     }
 
-    // Structure: 建物構造
-    public enum EnumStructure
-    {
-        Unspecified, Wood, Block, LightSteel, Steel, RC, SRC, ALC, PC, HPC, RB, CFT, Other
-    }
+
 
     // 建物構造
-    public Models.Rent.Residentials.Structure BuildingStructure
+    public Structure BuildingStructure
     {
-        get => field ?? new(EnumStructure.Unspecified, "未指定");
+        get => field ?? new(EnumStructure.Unspecified);
         set
         {
             if (SetProperty(ref field, value))
@@ -138,21 +126,20 @@ internal sealed partial class EntryResidential : EntryBase
     }
 
     // 地上階
-    public string AboveGroundFloorCount
+    public int AboveGroundFloorCount
     {
-        get => field ?? string.Empty;
+        get;
         set
         {
             if (field == value)
             {
                 return;
             }
+            
+            field = value;
+            IsDirty = true;
 
-            if (value is null)
-            {
-                return;
-            }
-
+            /*
             var text = Helpers.Common.ReplaceZenkakuNumber(value.Trim());
 
             if (Helpers.Common.CanConvertToPositiveNumber(text))
@@ -166,14 +153,29 @@ internal sealed partial class EntryResidential : EntryBase
                 field = string.Empty;
                 IsDirty = true;
             }
+            */
 
             OnPropertyChanged();
         }
     }
 
     // 地下階
-    public string BasementFloorCount
+    public int BasementFloorCount
     {
+        get;
+        set
+        {
+            if (field == value)
+            {
+                return;
+            }
+
+            field = value;
+            IsDirty = true;
+
+            OnPropertyChanged();
+        }
+        /*
         get => field ?? string.Empty;
         set
         {
@@ -203,11 +205,26 @@ internal sealed partial class EntryResidential : EntryBase
 
             OnPropertyChanged();
         }
+        */
     }
 
     // 総戸数
-    public string TotalUnitCount
+    public int TotalUnitCount
     {
+        get;
+        set
+        {
+            if (field == value)
+            {
+                return;
+            }
+
+            field = value;
+            IsDirty = true;
+
+            OnPropertyChanged();
+        }
+        /*
         get => field ?? string.Empty;
         set
         {
@@ -237,10 +254,11 @@ internal sealed partial class EntryResidential : EntryBase
 
             OnPropertyChanged();
         }
+        */
     }
 
     // 築年月
-    public DateTimeOffset? BuiltYearAndMonth
+    public DateTimeOffset BuiltYearAndMonth
     {
         get;
         set
@@ -251,7 +269,7 @@ internal sealed partial class EntryResidential : EntryBase
                 OnPropertyChanged();
             }
         }
-    }
+    } = new DateTimeOffset(1900, 1, 1, 0, 0, 0, TimeSpan.Zero);
 
     // 不動産ID (13桁)
     public string FudousanId
@@ -829,5 +847,44 @@ internal sealed partial class EntryResidential : EntryBase
     public EntryResidential(string id, EnumEntryStatus status) : base(id)
     {
         EntryStatus = status;
+    }
+
+    public void SetKindTypeFromString(string Str)
+    {
+        if (string.IsNullOrEmpty(Str))
+        {
+            BuildingKind = new Kind(EnumKinds.Unspecified);
+            return;
+        }
+
+        if (Enum.TryParse<EnumKinds>(Str, out var result))
+        {
+            BuildingKind = new Kind(result);
+        }
+    }
+
+    public void SetStructureTypeFromString(string Str)
+    {
+        if (string.IsNullOrEmpty(Str))
+        {
+            BuildingStructure = new Structure(EnumStructure.Unspecified);
+            return;
+        }
+
+        if (Enum.TryParse<EnumStructure>(Str, out var result))
+        {
+            BuildingStructure = new Structure(result);
+        }
+    }
+
+    public void SetBuildYearMonthFromString(string str)
+    {
+        if (string.IsNullOrEmpty(str))
+        {
+            BuiltYearAndMonth = new DateTimeOffset(1900, 1, 1, 0, 0, 0, TimeSpan.Zero); ;
+            return;
+        }
+        
+        BuiltYearAndMonth = DateTimeOffset.Parse(str, CultureInfo.InvariantCulture);
     }
 }

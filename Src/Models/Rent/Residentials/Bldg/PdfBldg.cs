@@ -1,7 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using ZumenSearch.Models.Base;
 
-namespace ZumenSearch.Models.Rent.Residentials;
+namespace ZumenSearch.Models.Rent.Residentials.Bldg;
 
 public enum EnumBuildingPdfType
 {
@@ -35,9 +35,9 @@ internal sealed partial class PdfBldg : PdfBase
     public readonly ObservableCollection<BuildingPdfType> BuildingPdfTypes =
         [
         //new BuildingPictureType(EnumBuildingPictureType.Unspecified, "未指定"),
-        new BuildingPdfType(Models.Rent.Residentials.EnumBuildingPdfType.Maisoku),
-        new BuildingPdfType(Models.Rent.Residentials.EnumBuildingPdfType.Architectural),
-        new BuildingPdfType(Models.Rent.Residentials.EnumBuildingPdfType.Other)
+        new BuildingPdfType(Models.Rent.Residentials.Bldg.EnumBuildingPdfType.Maisoku),
+        new BuildingPdfType(Models.Rent.Residentials.Bldg.EnumBuildingPdfType.Architectural),
+        new BuildingPdfType(Models.Rent.Residentials.Bldg.EnumBuildingPdfType.Other)
         ];
 
     // Do not use SetProperty. PropertyChanged is being subscribed.

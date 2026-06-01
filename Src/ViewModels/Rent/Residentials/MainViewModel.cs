@@ -16,9 +16,9 @@ internal sealed partial class MainViewModel : ObservableObject
 
     public string Id => _id;
 
-    public UnitViewModel Unit { get; init; }
+    public Unit.UnitViewModel Unit { get; init; }
 
-    public BldgViewModel Bldg { get; init; }
+    public Bldg.BldgViewModel Bldg { get; init; }
 
     public INavigationResidentialService? ResidentialNavigationService => _navService;
 
@@ -124,7 +124,7 @@ internal sealed partial class MainViewModel : ObservableObject
 
     #endregion
 
-    public MainViewModel(Models.Rent.Residentials.EntryResidential entry, IDispatcherService dispatcherService, IDataAccessService dataAccessService, IDataAccessLocationService dataAccessLocationService)
+    public MainViewModel(Models.Rent.Residentials.Bldg.EntryResidential entry, IDispatcherService dispatcherService, IDataAccessService dataAccessService, IDataAccessLocationService dataAccessLocationService)
     {
         _dataAccessService = dataAccessService;
         _dataAccessLocationService = dataAccessLocationService;
@@ -133,8 +133,8 @@ internal sealed partial class MainViewModel : ObservableObject
         _id = entry.Id;//Guid.CreateVersion7().ToString("N");
         EntryDataDirectoryPath = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(App.AppDataPictureFolder, "Rent"), "Residential_Building"), _id);
 
-        Unit = new UnitViewModel(this, dataAccessService);
-        Bldg = new BldgViewModel(this, entry, dataAccessService, dataAccessLocationService);
+        Unit = new Unit.UnitViewModel(this, dataAccessService);
+        Bldg = new Bldg.BldgViewModel(this, entry, dataAccessService, dataAccessLocationService);
 
         // Update title with dummy value.
         WindowTitle = string.Empty;

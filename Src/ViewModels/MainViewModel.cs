@@ -102,7 +102,7 @@ internal sealed partial class MainViewModel : ObservableObject
     [ObservableProperty]
     public partial string SearchQuery { get; set; } = string.Empty;
 
-    public ObservableCollection<Models.Rent.Residentials.EntryResidentialSearchResult> RentResidentialEntrySearchResult
+    public ObservableCollection<Models.Rent.Residentials.Bldg.EntryResidentialSearchResult> RentResidentialEntrySearchResult
     {
         get; set
         {
@@ -113,7 +113,7 @@ internal sealed partial class MainViewModel : ObservableObject
         }
     } = [];
 
-    public ObservableCollection<Models.Rent.Residentials.UnitResidentialSearchResult> RentResidentialUnitSearchResult
+    public ObservableCollection<Models.Rent.Residentials.Unit.UnitResidentialSearchResult> RentResidentialUnitSearchResult
     {
         get; set
         {
@@ -146,7 +146,7 @@ internal sealed partial class MainViewModel : ObservableObject
 
     #region == Services ==
 
-    private readonly IAbstractFactory<Models.Rent.Residentials.EntryResidential, Views.Rent.Residentials.ShellPage> _shellFactory;
+    private readonly IAbstractFactory<Models.Rent.Residentials.Bldg.EntryResidential, Views.Rent.Residentials.ShellPage> _shellFactory;
     private readonly IDataAccessService _dataAccessService;
     private readonly INavigationService _navigationService;
     private readonly IDispatcherService _dispatcherService;
@@ -155,7 +155,7 @@ internal sealed partial class MainViewModel : ObservableObject
 
     private readonly CancellationTokenSource _cts = new();
 
-    public MainViewModel(IAbstractFactory<Models.Rent.Residentials.EntryResidential, Views.Rent.Residentials.ShellPage> shellFactory, INavigationService navigationService, IDataAccessService dataAccessService, IDispatcherService dispatcherService)//IAbstractFactory<Views.Rent.Residentials.ShellPage> editorFactory,
+    public MainViewModel(IAbstractFactory<Models.Rent.Residentials.Bldg.EntryResidential, Views.Rent.Residentials.ShellPage> shellFactory, INavigationService navigationService, IDataAccessService dataAccessService, IDispatcherService dispatcherService)//IAbstractFactory<Views.Rent.Residentials.ShellPage> editorFactory,
     {
         _shellFactory = shellFactory;
         _dataAccessService = dataAccessService;
@@ -223,7 +223,7 @@ internal sealed partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void AddNewRentResidential()
     {
-        var shell = _shellFactory.Create(new Models.Rent.Residentials.EntryResidential(Guid.CreateVersion7().ToString("N"), EnumEntryStatus.New));
+        var shell = _shellFactory.Create(new Models.Rent.Residentials.Bldg.EntryResidential(Guid.CreateVersion7().ToString("N"), EnumEntryStatus.New));
 
         EditorList.Add(shell.Win);
 
@@ -251,7 +251,7 @@ internal sealed partial class MainViewModel : ObservableObject
 
     // 編集（建物）
     [RelayCommand(CanExecute = nameof(EditRentResidentialEntryCanExecute))]
-    public void EditRentResidentialEntry(Models.Rent.Residentials.EntryResidentialSearchResult? selected)//Models.Rent.Residentials.EntryResidentialSearchResult? selected
+    public void EditRentResidentialEntry(Models.Rent.Residentials.Bldg.EntryResidentialSearchResult? selected)//Models.Rent.Residentials.EntryResidentialSearchResult? selected
     {
         var rentId = selected?.Id;
 
@@ -340,7 +340,7 @@ internal sealed partial class MainViewModel : ObservableObject
         mainWindow?.AppWindow.MoveInZOrderBelow(editorWindow.AppWindow.Id);
         editorWindow.AppWindow.MoveInZOrderAtTop();
     }
-    public static bool EditRentResidentialEntryCanExecute(Models.Rent.Residentials.EntryResidentialSearchResult? selected)
+    public static bool EditRentResidentialEntryCanExecute(Models.Rent.Residentials.Bldg.EntryResidentialSearchResult? selected)
     {
         if (selected is null)
         {
@@ -352,7 +352,7 @@ internal sealed partial class MainViewModel : ObservableObject
 
     // 編集（部屋）TODO:
     [RelayCommand(CanExecute = nameof(EditRentResidentialUnitCanExecute))]
-    public void EditRentResidentialUnit(Models.Rent.Residentials.UnitResidentialSearchResult? selected)
+    public void EditRentResidentialUnit(Models.Rent.Residentials.Unit.UnitResidentialSearchResult? selected)
     {
         if (selected == null)
         {
@@ -363,7 +363,7 @@ internal sealed partial class MainViewModel : ObservableObject
         // TODO;
         Debug.WriteLine($"TODO: EditRentResidentialUnit executed for {selected.Id} (EntryId = {selected.EntryId})");
     }
-    public static bool EditRentResidentialUnitCanExecute(Models.Rent.Residentials.UnitResidentialSearchResult? selected)
+    public static bool EditRentResidentialUnitCanExecute(Models.Rent.Residentials.Unit.UnitResidentialSearchResult? selected)
     {
         if (selected is null)
         {
@@ -522,7 +522,7 @@ internal sealed partial class MainViewModel : ObservableObject
 
     // 物件削除
     [RelayCommand(CanExecute = nameof(DeleteRentResidentialEntryCanExecute))]
-    private void DeleteRentResidentialEntry(Models.Rent.Residentials.EntryResidentialSearchResult? selected)
+    private void DeleteRentResidentialEntry(Models.Rent.Residentials.Bldg.EntryResidentialSearchResult? selected)
     {
         if (selected == null)
         {
@@ -577,7 +577,7 @@ internal sealed partial class MainViewModel : ObservableObject
             }
         }
     }
-    public static bool DeleteRentResidentialEntryCanExecute(Models.Rent.Residentials.EntryResidentialSearchResult? selected)
+    public static bool DeleteRentResidentialEntryCanExecute(Models.Rent.Residentials.Bldg.EntryResidentialSearchResult? selected)
     {
         if (selected is null)
         {
@@ -589,7 +589,7 @@ internal sealed partial class MainViewModel : ObservableObject
 
     // 部屋削除（TODO）
     [RelayCommand(CanExecute = nameof(DeleteRentResidentialUnitCanExecute))]
-    private void DeleteRentResidentialUnit(Models.Rent.Residentials.UnitResidentialSearchResult? selected)
+    private void DeleteRentResidentialUnit(Models.Rent.Residentials.Unit.UnitResidentialSearchResult? selected)
     {
         if (selected == null)
         {
@@ -600,7 +600,7 @@ internal sealed partial class MainViewModel : ObservableObject
         // TODO:
         Debug.WriteLine($"TODO: DeleteRentResidentialUnit executed for {selected.Id} (EntryId = {selected.EntryId})");
     }
-    public static bool DeleteRentResidentialUnitCanExecute(Models.Rent.Residentials.UnitResidentialSearchResult? selected)
+    public static bool DeleteRentResidentialUnitCanExecute(Models.Rent.Residentials.Unit.UnitResidentialSearchResult? selected)
     {
         if (selected is null)
         {

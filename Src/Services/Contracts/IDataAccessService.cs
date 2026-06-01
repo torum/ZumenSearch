@@ -6,9 +6,9 @@ internal interface IDataAccessService
 {
     SqliteDataAccessResultWrapper InitializeDatabase(string dataBaseFilePath);
 
-    SqliteDataAccessResultWrapper InsertRentResidential(Models.Rent.Residentials.EntryResidential entry);
+    SqliteDataAccessResultWrapper InsertRentResidential(Models.Rent.Residentials.Bldg.EntryResidential entry);
 
-    SqliteDataAccessResultWrapper UpdateRentResidential(Models.Rent.Residentials.EntryResidential entry);
+    SqliteDataAccessResultWrapper UpdateRentResidential(Models.Rent.Residentials.Bldg.EntryResidential entry);
 
     SqliteDataAccessResultWrapper DeleteRentResidential(string rentId);
 
@@ -16,7 +16,7 @@ internal interface IDataAccessService
 
     SqliteDataAccessSelectRentResidentialFullResultWrapper SelectRentResidentialById(string id);
 
-    SqliteDataAccessResultWrapper UpsertRentResidentialUnit(string rentId, Models.Rent.Residentials.UnitResidential room);
+    SqliteDataAccessResultWrapper UpsertRentResidentialUnit(string rentId, Models.Rent.Residentials.Unit.UnitResidential room);
 
     SqliteDataAccessSelectRentResidentialUnitsResultWrapper SelectRentResidentialUnits();
 

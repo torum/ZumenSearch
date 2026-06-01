@@ -10,10 +10,10 @@ using Windows.Storage.Streams;
 using Windows.System;
 using ZumenSearch.Models.Base;
 using ZumenSearch.Models.Common;
-using ZumenSearch.Models.Rent.Residentials;
+using ZumenSearch.Models.Rent.Residentials.Bldg;
 using ZumenSearch.Services.Contracts;
 
-namespace ZumenSearch.ViewModels.Rent.Residentials;
+namespace ZumenSearch.ViewModels.Rent.Residentials.Bldg;
 
 internal sealed partial class BldgViewModel : ObservableObject
 {
@@ -70,8 +70,6 @@ internal sealed partial class BldgViewModel : ObservableObject
 
                 // Update title with dummy value.
                 _mainViewModel.WindowTitle = string.Empty;
-
-                //EventTitleChanged?.Invoke(this, EventArgs.Empty);//TODO
             }
         }
     }
@@ -90,29 +88,40 @@ internal sealed partial class BldgViewModel : ObservableObject
             NameHasError = true;
 
             HasErrors = true;
+
+            return;
         }
-        else
+
+        var realLength = new StringInfo(value).LengthInTextElements;
+        if (realLength > 100)
         {
-            NameHasError = false;
+            NameErrorMessage = "物件名は100文字以内で入力してください";
+            NameHasError = true;
+
+            HasErrors = true;
+
+            return;
         }
+
+        NameHasError = false;
     }
 
     // 物件種別
-    public ObservableCollection<Models.Rent.Residentials.Kind> Kinds =
+    public ObservableCollection<Kind> Kinds =
     [
         //new Kind(EnumKinds.Unspecified.ToString(), "未指定"),
-        new Kind(Models.Rent.Residentials.EntryResidential.EnumKinds.Apartment, "アパート"),
-        new Kind(Models.Rent.Residentials.EntryResidential.EnumKinds.Mansion, "マンション"),
-        new Kind(Models.Rent.Residentials.EntryResidential.EnumKinds.House, "一戸建て"),
-        new Kind(Models.Rent.Residentials.EntryResidential.EnumKinds.TerraceHouse, "テラスハウス"),
-        new Kind(Models.Rent.Residentials.EntryResidential.EnumKinds.TownHouse, "タウンハウス"),
-        new Kind(Models.Rent.Residentials.EntryResidential.EnumKinds.ShareHouse, "シェアハウス"),
-        new Kind(Models.Rent.Residentials.EntryResidential.EnumKinds.Dormitory, "寮・下宿")
+        new Kind(Models.Rent.Residentials.Bldg.EnumKinds.Apartment),
+        new Kind(Models.Rent.Residentials.Bldg.EnumKinds.Mansion),
+        new Kind(Models.Rent.Residentials.Bldg.EnumKinds.House),
+        new Kind(Models.Rent.Residentials.Bldg.EnumKinds.TerraceHouse),
+        new Kind(Models.Rent.Residentials.Bldg.EnumKinds.TownHouse),
+        new Kind(Models.Rent.Residentials.Bldg.EnumKinds.ShareHouse),
+        new Kind(Models.Rent.Residentials.Bldg.EnumKinds.Dormitory)
     ];
 
-    public Models.Rent.Residentials.Kind SelectedKind
+    public Kind SelectedKind
     {
-        get => field ?? new(Models.Rent.Residentials.EntryResidential.EnumKinds.Unspecified, "未指定");
+        get => field ?? new(Models.Rent.Residentials.Bldg.EnumKinds.Unspecified);
         set
         {
             if (SetProperty(ref field, value))
@@ -143,26 +152,26 @@ internal sealed partial class BldgViewModel : ObservableObject
     //public bool IsNotUnitOwnership => !IsUnitOwnership;
 
     // 建物構造
-    public ObservableCollection<Models.Rent.Residentials.Structure> Structures =
+    public ObservableCollection<Structure> Structures =
     [
         //new Structure(EnumStructure.Unspecified.ToString(), "未指定"),
-        new Structure(Models.Rent.Residentials.EntryResidential.EnumStructure.Wood, "木造"),
-        new Structure(Models.Rent.Residentials.EntryResidential.EnumStructure.Block, "ブロック造"),
-        new Structure(Models.Rent.Residentials.EntryResidential.EnumStructure.LightSteel, "軽量鉄骨造"),
-        new Structure(Models.Rent.Residentials.EntryResidential.EnumStructure.Steel, "鉄骨造"),
-        new Structure(Models.Rent.Residentials.EntryResidential.EnumStructure.RC, "鉄筋コンクリート(RC)造"),
-        new Structure(Models.Rent.Residentials.EntryResidential.EnumStructure.SRC, "鉄骨鉄筋コンクリート(SRC)造"),
-        new Structure(Models.Rent.Residentials.EntryResidential.EnumStructure.ALC, "軽量気泡コンクリート(ALC)造"),
-        new Structure(Models.Rent.Residentials.EntryResidential.EnumStructure.PC, "プレキャストコンクリート(PC)造"),
-        new Structure(Models.Rent.Residentials.EntryResidential.EnumStructure.HPC, "鉄骨プレキャストコンクリート(HPC)造"),
-        new Structure(Models.Rent.Residentials.EntryResidential.EnumStructure.RB, "鉄筋ブロック造"),
-        new Structure(Models.Rent.Residentials.EntryResidential.EnumStructure.CFT, "コンクリート充填鋼管(CFT)造"),
-        new Structure(Models.Rent.Residentials.EntryResidential.EnumStructure.Other, "その他")
+        new Structure(Models.Rent.Residentials.Bldg.EnumStructure.Wood),
+        new Structure(Models.Rent.Residentials.Bldg.EnumStructure.Block),
+        new Structure(Models.Rent.Residentials.Bldg.EnumStructure.LightSteel),
+        new Structure(Models.Rent.Residentials.Bldg.EnumStructure.Steel),
+        new Structure(Models.Rent.Residentials.Bldg.EnumStructure.RC),
+        new Structure(Models.Rent.Residentials.Bldg.EnumStructure.SRC),
+        new Structure(Models.Rent.Residentials.Bldg.EnumStructure.ALC),
+        new Structure(Models.Rent.Residentials.Bldg.EnumStructure.PC),
+        new Structure(Models.Rent.Residentials.Bldg.EnumStructure.HPC),
+        new Structure(Models.Rent.Residentials.Bldg.EnumStructure.RB),
+        new Structure(Models.Rent.Residentials.Bldg.EnumStructure.CFT),
+        new Structure(Models.Rent.Residentials.Bldg.EnumStructure.Other)
     ];
 
-    public Models.Rent.Residentials.Structure SelectedStructure
+    public Structure SelectedStructure
     {
-        get => field ?? new(Models.Rent.Residentials.EntryResidential.EnumStructure.Unspecified, "未指定");
+        get => field ?? new(Models.Rent.Residentials.Bldg.EnumStructure.Unspecified);
         set
         {
             if (SetProperty(ref field, value))
@@ -190,7 +199,12 @@ internal sealed partial class BldgViewModel : ObservableObject
 
             var text = Helpers.Common.ReplaceZenkakuNumber(value.Trim());
 
-            if (Helpers.Common.CanConvertToPositiveNumber(text))
+            if (string.IsNullOrEmpty(text))
+            {
+                field = string.Empty;
+                IsDirty = true;
+            }
+            else if (Helpers.Common.CanConvertToPositiveNumber(text))
             {
                 field = text;
                 IsDirty = true;
@@ -198,8 +212,6 @@ internal sealed partial class BldgViewModel : ObservableObject
             else
             {
                 // TODO: show error
-                field = string.Empty;
-                //IsDirty = true;
             }
 
             OnPropertyChanged();
@@ -224,7 +236,12 @@ internal sealed partial class BldgViewModel : ObservableObject
 
             var text = Helpers.Common.ReplaceZenkakuNumber(value.Trim());
 
-            if (Helpers.Common.CanConvertToPositiveNumber(text))
+            if (string.IsNullOrEmpty(text))
+            {
+                field = string.Empty;
+                IsDirty = true;
+            }
+            else if (Helpers.Common.CanConvertToPositiveNumber(text))
             {
                 field = text;
                 IsDirty = true;
@@ -232,8 +249,6 @@ internal sealed partial class BldgViewModel : ObservableObject
             else
             {
                 // TODO: show error
-                field = string.Empty;
-                //IsDirty = true;
             }
 
             OnPropertyChanged();
@@ -258,7 +273,12 @@ internal sealed partial class BldgViewModel : ObservableObject
 
             var text = Helpers.Common.ReplaceZenkakuNumber(value.Trim());
 
-            if (Helpers.Common.CanConvertToPositiveNumber(text))
+            if (string.IsNullOrEmpty(text))
+            {
+                field = string.Empty;
+                IsDirty = true;
+            }
+            else if (Helpers.Common.CanConvertToPositiveNumber(text))
             {
                 field = text;
                 IsDirty = true;
@@ -266,8 +286,6 @@ internal sealed partial class BldgViewModel : ObservableObject
             else
             {
                 // TODO: show error
-                field = string.Empty;
-                //IsDirty = true;
             }
 
             OnPropertyChanged();
@@ -908,13 +926,13 @@ internal sealed partial class BldgViewModel : ObservableObject
         }
     } = false;
 
-    public ObservableCollection<Models.Rent.Residentials.ElectricKind> ElectricKinds =
+    public ObservableCollection<ElectricKind> ElectricKinds =
     [
-        new ElectricKind(Models.Rent.Residentials.EntryResidential.EnumElectricKind.AllElectric, "オール電化"),
-        new ElectricKind(Models.Rent.Residentials.EntryResidential.EnumElectricKind.Unspecified, "未指定")
+        new ElectricKind(Models.Rent.Residentials.Bldg.EntryResidential.EnumElectricKind.AllElectric, "オール電化"),
+        new ElectricKind(Models.Rent.Residentials.Bldg.EntryResidential.EnumElectricKind.Unspecified, "未指定")
     ];
 
-    public Models.Rent.Residentials.ElectricKind SelectedElectricKind
+    public ElectricKind SelectedElectricKind
     {
         get;
         set
@@ -924,7 +942,7 @@ internal sealed partial class BldgViewModel : ObservableObject
                 IsDirty = true;
             }
         }
-    } = new ElectricKind(Models.Rent.Residentials.EntryResidential.EnumElectricKind.Unspecified, "未指定");
+    } = new ElectricKind(Models.Rent.Residentials.Bldg.EntryResidential.EnumElectricKind.Unspecified, "未指定");
 
     public string ElectricDetail
     {
@@ -943,18 +961,18 @@ internal sealed partial class BldgViewModel : ObservableObject
     // TODO: more.
 
     #endregion
-
+                
     #region == 管理プロパティ ==
 
-    public ObservableCollection<Models.Rent.Residentials.KanriShutai> KanriShutais =
+    public ObservableCollection<KanriShutai> KanriShutais =
     [
-        new KanriShutai(Models.Rent.Residentials.EntryResidential.EnumKanriShutai.Unspecified, "未指定"),
-        new KanriShutai(Models.Rent.Residentials.EntryResidential.EnumKanriShutai.Jisya, "自社管理"),
-        new KanriShutai(Models.Rent.Residentials.EntryResidential.EnumKanriShutai.Tasya, "他社管理"),
-        new KanriShutai(Models.Rent.Residentials.EntryResidential.EnumKanriShutai.Kashinushi, "貸主管理")
+        new KanriShutai(Models.Rent.Residentials.Bldg.EntryResidential.EnumKanriShutai.Unspecified, "未指定"),
+        new KanriShutai(Models.Rent.Residentials.Bldg.EntryResidential.EnumKanriShutai.Jisya, "自社管理"),
+        new KanriShutai(Models.Rent.Residentials.Bldg.EntryResidential.EnumKanriShutai.Tasya, "他社管理"),
+        new KanriShutai(Models.Rent.Residentials.Bldg.EntryResidential.EnumKanriShutai.Kashinushi, "貸主管理")
     ];
 
-    public Models.Rent.Residentials.KanriShutai? SelectedKanriShutai
+    public KanriShutai? SelectedKanriShutai
     {
         get;
         set
@@ -970,10 +988,10 @@ internal sealed partial class BldgViewModel : ObservableObject
                 }
 
                 // Toggle Visibilities
-                IsKanriUnspecified = field.Key == Models.Rent.Residentials.EntryResidential.EnumKanriShutai.Unspecified;
-                IsKanriJisya = field.Key == Models.Rent.Residentials.EntryResidential.EnumKanriShutai.Jisya;
-                IsKanriTasya = field.Key == Models.Rent.Residentials.EntryResidential.EnumKanriShutai.Tasya;
-                IsKanriKashinushi = field.Key == Models.Rent.Residentials.EntryResidential.EnumKanriShutai.Kashinushi;
+                IsKanriUnspecified = field.Key == Models.Rent.Residentials.Bldg.EntryResidential.EnumKanriShutai.Unspecified;
+                IsKanriJisya = field.Key == Models.Rent.Residentials.Bldg.EntryResidential.EnumKanriShutai.Jisya;
+                IsKanriTasya = field.Key == Models.Rent.Residentials.Bldg.EntryResidential.EnumKanriShutai.Tasya;
+                IsKanriKashinushi = field.Key == Models.Rent.Residentials.Bldg.EntryResidential.EnumKanriShutai.Kashinushi;
             }
         }
     }
@@ -1148,7 +1166,7 @@ internal sealed partial class BldgViewModel : ObservableObject
 
     #region == 部屋プロパティ ==
 
-    internal ObservableCollection<Models.Rent.Residentials.UnitResidential> Rooms
+    internal ObservableCollection<Models.Rent.Residentials.Unit.UnitResidential> Rooms
     {
         get;
         set
@@ -1162,7 +1180,7 @@ internal sealed partial class BldgViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(EditSelectedUnitCommand))]
-    internal partial Models.Rent.Residentials.UnitResidential? SelectedRoom { get; set; }
+    internal partial Models.Rent.Residentials.Unit.UnitResidential? SelectedRoom { get; set; }
 
     #endregion
 
@@ -1188,7 +1206,7 @@ internal sealed partial class BldgViewModel : ObservableObject
     // The Entry property holds the COPY of current RentResidential entry being edited.
     // Do not use it directly in the UI. Apply changes to this object in SaveAsync() to save the changes.
     // MainViewModel creates a new instance of this class and call EditorShell.SetEntry(EntryResidentialFull) and sets this property.
-    private readonly Models.Rent.Residentials.EntryResidential _entry;
+    private readonly Models.Rent.Residentials.Bldg.EntryResidential _entry;
 
     // Tmp file list to hold unsaved picture files. (if entry is not saved, delete on close)
     private readonly List<string> _unsavedBuildingPictureFileList = [];
@@ -1197,7 +1215,7 @@ internal sealed partial class BldgViewModel : ObservableObject
 
     #endregion
 
-    internal BldgViewModel(ViewModels.Rent.Residentials.MainViewModel vm, Models.Rent.Residentials.EntryResidential entry, IDataAccessService dataAccessService, IDataAccessLocationService dataAccessLocationService)
+    internal BldgViewModel(ViewModels.Rent.Residentials.MainViewModel vm, Models.Rent.Residentials.Bldg.EntryResidential entry, IDataAccessService dataAccessService, IDataAccessLocationService dataAccessLocationService)
     {
         _mainViewModel = vm;
         _dataAccessService = dataAccessService;
@@ -1243,6 +1261,27 @@ internal sealed partial class BldgViewModel : ObservableObject
         // Basics
 
         Name = _entry.Name;
+
+        SelectedKind = _entry.BuildingKind;
+        IsUnitOwnership = _entry.IsUnitOwnership;
+        SelectedStructure = _entry.BuildingStructure;
+
+        AboveGroundFloorCount = _entry.AboveGroundFloorCount == 0 ? string.Empty : _entry.AboveGroundFloorCount.ToString();
+        BasementFloorCount = _entry.BasementFloorCount == 0 ? string.Empty : _entry.BasementFloorCount.ToString();
+        TotalUnitCount = _entry.TotalUnitCount == 0 ? string.Empty : _entry.TotalUnitCount.ToString();
+        if (_entry.BuiltYearAndMonth.Year != 1900)
+        {
+            BuiltYearAndMonth = _entry.BuiltYearAndMonth;
+        }
+        else
+        {
+            BuiltYearAndMonth = null;
+        }
+        FudousanId = _entry.FudousanId;
+        FudousanIdAdditionalCode = _entry.FudousanIdAdditionalCode;
+        Remarks = _entry.Remarks;
+
+
 
         // Location
 
@@ -1294,7 +1333,7 @@ internal sealed partial class BldgViewModel : ObservableObject
 
 
         // Pictures:
-        BuildingPictures = new ObservableCollection<Models.Rent.Residentials.PictureBldg>(_entry.BuildingPictures); // create a copy.
+        BuildingPictures = new ObservableCollection<Models.Rent.Residentials.Bldg.PictureBldg>(_entry.BuildingPictures); // create a copy.
 
         foreach (var item in BuildingPictures)
         {
@@ -1308,7 +1347,7 @@ internal sealed partial class BldgViewModel : ObservableObject
             // Unsubscribe from removed items
             if (e.OldItems != null)
             {
-                foreach (Models.Rent.Residentials.PictureBldg item in e.OldItems)
+                foreach (Models.Rent.Residentials.Bldg.PictureBldg item in e.OldItems)
                 {
                     Debug.WriteLine($"Item {item.Id} Removed from BuildingPictures");
                     IsDirty = true;
@@ -1320,7 +1359,7 @@ internal sealed partial class BldgViewModel : ObservableObject
             // Subscribe to PropertyChanged.
             if (e.NewItems != null)
             {
-                foreach (Models.Rent.Residentials.PictureBldg item in e.NewItems)
+                foreach (Models.Rent.Residentials.Bldg.PictureBldg item in e.NewItems)
                 {
                     Debug.WriteLine($"Item {item.Id} Added to BuildingPictures");
                     IsDirty = true;
@@ -1331,7 +1370,7 @@ internal sealed partial class BldgViewModel : ObservableObject
         };
 
         // PDFs
-        BuildingPdfs = new ObservableCollection<Models.Rent.Residentials.PdfBldg>(_entry.BuildingPdfs); // create a copy.
+        BuildingPdfs = new ObservableCollection<Models.Rent.Residentials.Bldg.PdfBldg>(_entry.BuildingPdfs); // create a copy.
 
         foreach (var item in BuildingPdfs)
         {
@@ -1345,7 +1384,7 @@ internal sealed partial class BldgViewModel : ObservableObject
             // Unsubscribe from removed items
             if (e.OldItems != null)
             {
-                foreach (Models.Rent.Residentials.PdfBldg item in e.OldItems)
+                foreach (Models.Rent.Residentials.Bldg.PdfBldg item in e.OldItems)
                 {
                     Debug.WriteLine($"Item {item.Id} Removed from BuildingPdfs");
                     IsDirty = true;
@@ -1357,7 +1396,7 @@ internal sealed partial class BldgViewModel : ObservableObject
             // Subscribe to PropertyChanged.
             if (e.NewItems != null)
             {
-                foreach (Models.Rent.Residentials.PdfBldg item in e.NewItems)
+                foreach (Models.Rent.Residentials.Bldg.PdfBldg item in e.NewItems)
                 {
                     Debug.WriteLine($"Item {item.Id} Added to BuildingPdfs");
                     IsDirty = true;
@@ -1368,14 +1407,14 @@ internal sealed partial class BldgViewModel : ObservableObject
         };
 
         // Rooms
-        Rooms = new ObservableCollection<Models.Rent.Residentials.UnitResidential>(_entry.Rooms); // create a copy.
+        Rooms = new ObservableCollection<Models.Rent.Residentials.Unit.UnitResidential>(_entry.Rooms); // create a copy.
 
         //Debug.WriteLine($"PopulateEntryValues: Completed populating values from Entry to VM. Entry ID: {_entry.Id}, Rooms Count: {Rooms.Count}");
     }
 
     private void OnBuildingPicturePropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (sender is not ZumenSearch.Models.Rent.Residentials.PictureBldg picBldg)
+        if (sender is not Models.Rent.Residentials.Bldg.PictureBldg picBldg)
         {
             Debug.WriteLine("OnBuildingPicturePropertyChanged returned non PictureBldg.");
             return;
@@ -1407,7 +1446,7 @@ internal sealed partial class BldgViewModel : ObservableObject
 
     private void OnBuildingPdfPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (sender is not ZumenSearch.Models.Rent.Residentials.PdfBldg pdfBldg)
+        if (sender is not Models.Rent.Residentials.Bldg.PdfBldg pdfBldg)
         {
             Debug.WriteLine("OnBuildingPdfPropertyChanged returned non PdfBldg.");
             return;
@@ -1453,6 +1492,20 @@ internal sealed partial class BldgViewModel : ObservableObject
 
         // 物件名
         _entry.Name = Name;
+
+        _entry.BuildingKind = SelectedKind;
+        _entry.IsUnitOwnership = IsUnitOwnership;
+        _entry.BuildingStructure = SelectedStructure;
+        _entry.AboveGroundFloorCount = int.TryParse(AboveGroundFloorCount, out var aboveGroundFloorCount) ? aboveGroundFloorCount : 0; //Convert.ToInt32(AboveGroundFloorCount)
+        _entry.BasementFloorCount = int.TryParse(BasementFloorCount, out var basementFloorCount) ? basementFloorCount : 0;
+        _entry.TotalUnitCount = int.TryParse(TotalUnitCount, out var totalUnitCount) ? totalUnitCount : 0;
+        _entry.BuiltYearAndMonth = BuiltYearAndMonth ?? new DateTimeOffset(1900, 1, 1, 0, 0, 0, TimeSpan.Zero);
+        _entry.FudousanId = FudousanId;
+        _entry.FudousanIdAdditionalCode = FudousanIdAdditionalCode;
+        _entry.Remarks = Remarks;
+        // TODO: Set other properties
+
+
 
         // 所在地
         _entry.LocPrefId = (SelectedPef is not null) ? SelectedPef.MunicipalityCode : string.Empty;
@@ -1693,7 +1746,7 @@ internal sealed partial class BldgViewModel : ObservableObject
                 // Keep track of unsaved files to delete them when discarding.
                 _unsavedBuildingPdfFileList.Add(pdfDestFilePath);
 
-                var pdf = new Models.Rent.Residentials.PdfBldg(newId, pdfDestFilePath, thumbnailDestFilePath)
+                var pdf = new Models.Rent.Residentials.Bldg.PdfBldg(newId, pdfDestFilePath, thumbnailDestFilePath)
                 {
                     IsNew = true,
                     ParentViewModel = _mainViewModel
@@ -1813,7 +1866,7 @@ internal sealed partial class BldgViewModel : ObservableObject
             using var destinationStream = File.Create(destFilePath);
             await sourceStream.CopyToAsync(destinationStream);
 
-            var pic = new Models.Rent.Residentials.PictureBldg(newId, destFilePath)
+            var pic = new Models.Rent.Residentials.Bldg.PictureBldg(newId, destFilePath)
             {
                 IsNew = true,
                 ParentViewModel = _mainViewModel
@@ -1836,7 +1889,7 @@ internal sealed partial class BldgViewModel : ObservableObject
     }
 
     [RelayCommand(CanExecute = nameof(CanDeleteBuildingPicture))]
-    private void DeleteBuildingPicture(Models.Rent.Residentials.PictureBldg picBldg)
+    private void DeleteBuildingPicture(Models.Rent.Residentials.Bldg.PictureBldg picBldg)
     {
         if (picBldg is null)
         {
@@ -1851,13 +1904,13 @@ internal sealed partial class BldgViewModel : ObservableObject
             IsDirty = true;
         }
     }
-    private static bool CanDeleteBuildingPicture(Models.Rent.Residentials.PictureBldg picBldg)
+    private static bool CanDeleteBuildingPicture(Models.Rent.Residentials.Bldg.PictureBldg picBldg)
     {
         return picBldg is not null;
     }
 
     [RelayCommand(CanExecute = nameof(CanDeleteBuildingPdf))]
-    private void DeleteBuildingPdf(Models.Rent.Residentials.PdfBldg pdfBldg)
+    private void DeleteBuildingPdf(Models.Rent.Residentials.Bldg.PdfBldg pdfBldg)
     {
         if (pdfBldg is null)
         {
@@ -1872,7 +1925,7 @@ internal sealed partial class BldgViewModel : ObservableObject
             IsDirty = true;
         }
     }
-    private static bool CanDeleteBuildingPdf(Models.Rent.Residentials.PdfBldg pdfBldg)
+    private static bool CanDeleteBuildingPdf(Models.Rent.Residentials.Bldg.PdfBldg pdfBldg)
     {
         return pdfBldg is not null;
     }
@@ -1911,13 +1964,13 @@ internal sealed partial class BldgViewModel : ObservableObject
     [RelayCommand]
     private void AddNewUnit()
     {
-        _mainViewModel.Unit.SetEditUnit(new UnitResidential(Guid.CreateVersion7().ToString("N")));
+        _mainViewModel.Unit.SetEditUnit(new Models.Rent.Residentials.Unit.UnitResidential(Guid.CreateVersion7().ToString("N")));
 
         _mainViewModel.GoToUnitShellPageCommand.Execute(this);
     }
 
     [RelayCommand(CanExecute = nameof(EditSelectedUnitCanExecute))]
-    private void EditSelectedUnit(UnitResidential room)
+    private void EditSelectedUnit(Models.Rent.Residentials.Unit.UnitResidential room)
     {
         if (room is null) return;
 
@@ -1933,7 +1986,7 @@ internal sealed partial class BldgViewModel : ObservableObject
     }
 
     [RelayCommand(CanExecute = nameof(DupeSelectedUnitCanExecute))]
-    private void DupeSelectedUnit(UnitResidential room)
+    private void DupeSelectedUnit(Models.Rent.Residentials.Unit.UnitResidential room)
     {
         if (room is null) return;
 
@@ -1946,7 +1999,7 @@ internal sealed partial class BldgViewModel : ObservableObject
     }
 
     [RelayCommand(CanExecute = nameof(DeleteSelectedUnitCanExecute))]
-    private void DeleteSelectedUnit(UnitResidential room)
+    private void DeleteSelectedUnit(Models.Rent.Residentials.Unit.UnitResidential room)
     {
         if (room is null)
         {

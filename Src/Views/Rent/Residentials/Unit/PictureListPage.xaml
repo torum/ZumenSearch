@@ -5,7 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:mod="using:ZumenSearch.Models.Common"
-    xmlns:modresi="using:ZumenSearch.Models.Rent.Residentials"
+    xmlns:modresi="using:ZumenSearch.Models.Rent.Residentials.Unit"
     xmlns:local="using:ZumenSearch.Views.Rent.Residentials.Unit"
     mc:Ignorable="d"
     NavigationCacheMode="Required">

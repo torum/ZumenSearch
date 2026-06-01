@@ -21,17 +21,17 @@ internal sealed class SqliteDataAccessInsertResultWrapper : SqliteDataAccessResu
 
 internal sealed class SqliteDataAccessSelectRentResidentialResultWrapper : SqliteDataAccessResultWrapper
 {
-    public ObservableCollection<Rent.Residentials.EntryResidentialSearchResult> SelectedEntries = [];
+    public ObservableCollection<Rent.Residentials.Bldg.EntryResidentialSearchResult> SelectedEntries = [];
 }
 
 internal sealed class SqliteDataAccessSelectRentResidentialFullResultWrapper : SqliteDataAccessResultWrapper
 {
-    public Rent.Residentials.EntryResidential? EntryFull;
+    public Rent.Residentials.Bldg.EntryResidential? EntryFull;
 }
 
 internal sealed class SqliteDataAccessSelectRentResidentialUnitsResultWrapper : SqliteDataAccessResultWrapper
 {
-    public ObservableCollection<Rent.Residentials.UnitResidentialSearchResult> SelectedUnits = [];
+    public ObservableCollection<Rent.Residentials.Unit.UnitResidentialSearchResult> SelectedUnits = [];
 }
 //
 

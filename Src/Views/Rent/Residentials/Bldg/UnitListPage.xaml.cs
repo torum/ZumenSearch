@@ -121,7 +121,7 @@ internal sealed partial class UnitListPage : Page
         }
 
 
-        if (listView.SelectedItem is not UnitResidential room)
+        if (listView.SelectedItem is not Models.Rent.Residentials.Unit.UnitResidential room)
         {
             //ViewModel.Bldg.SelectedRoom = null;
             return;

@@ -160,7 +160,7 @@ internal sealed partial class ResidentialSearchResultPage : Page
             return;
         }
 
-        if (invokedItem is not UnitResidentialSearchResult)
+        if (invokedItem is not Models.Rent.Residentials.Unit.UnitResidentialSearchResult)
         {
             return;
         }

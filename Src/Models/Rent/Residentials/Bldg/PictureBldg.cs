@@ -1,7 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using ZumenSearch.Models.Base;
 
-namespace ZumenSearch.Models.Rent.Residentials;
+namespace ZumenSearch.Models.Rent.Residentials.Bldg;
 
 public enum EnumBuildingPictureType
 {
@@ -48,7 +48,7 @@ internal sealed partial class PictureBldg : PictureBase
     [
         //new BuildingPictureType(EnumBuildingPictureType.Unspecified, "未指定"),
         //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Madori),
-        new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Gaikan),
+        new BuildingPictureType(Models.Rent.Residentials.Bldg.EnumBuildingPictureType.Gaikan),
         //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Situnai),
         //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.LivingDining),
         //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Bedroom),
@@ -60,9 +60,9 @@ internal sealed partial class PictureBldg : PictureBase
         //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Appliance),
         //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.FrontDoor),
         //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Balcony),
-        new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Entrance),
-        new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Neighborhood),
-        new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Other)
+        new BuildingPictureType(Models.Rent.Residentials.Bldg.EnumBuildingPictureType.Entrance),
+        new BuildingPictureType(Models.Rent.Residentials.Bldg.EnumBuildingPictureType.Neighborhood),
+        new BuildingPictureType(Models.Rent.Residentials.Bldg.EnumBuildingPictureType.Other)
     ];
 
     // Do not use SetProperty. PropertyChanged is being subscribed.

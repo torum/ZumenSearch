@@ -7,7 +7,7 @@ using ZumenSearch.Models.Base;
 using ZumenSearch.Models.Rent.Residentials;
 using ZumenSearch.Services.Contracts;
 
-namespace ZumenSearch.ViewModels.Rent.Residentials;
+namespace ZumenSearch.ViewModels.Rent.Residentials.Unit;
 
 internal sealed partial class UnitViewModel : ObservableObject
 {
@@ -131,7 +131,7 @@ internal sealed partial class UnitViewModel : ObservableObject
         }
     }
 
-    internal ObservableCollection<PictureUnit> UnitPictures
+    internal ObservableCollection<Models.Rent.Residentials.Unit.PictureUnit> UnitPictures
     {
         get;
         set
@@ -156,7 +156,7 @@ internal sealed partial class UnitViewModel : ObservableObject
     #region == Private variables ==
 
     private ViewModels.Rent.Residentials.MainViewModel _mainViewModel;
-    private Models.Rent.Residentials.UnitResidential? _unit;
+    private Models.Rent.Residentials.Unit.UnitResidential? _unit;
 
     // Tmp file list to hold unsaved picture files. (if entry is not saved, delete on close)
     private readonly List<string> _unsavedUnitPictureFileList = [];
@@ -273,7 +273,7 @@ internal sealed partial class UnitViewModel : ObservableObject
         // TODO: Set other properties for editing..
 
         // Pictures
-        UnitPictures = new ObservableCollection<Models.Rent.Residentials.PictureUnit>(_unit.UnitPictures); // create a copy.
+        UnitPictures = new ObservableCollection<Models.Rent.Residentials.Unit.PictureUnit>(_unit.UnitPictures); // create a copy.
         foreach (var item in UnitPictures)
         {
             item.ParentViewModel = _mainViewModel;//this;
@@ -286,7 +286,7 @@ internal sealed partial class UnitViewModel : ObservableObject
             // Unsubscribe from removed items
             if (e.OldItems != null)
             {
-                foreach (Models.Rent.Residentials.PictureUnit item in e.OldItems)
+                foreach (Models.Rent.Residentials.Unit.PictureUnit item in e.OldItems)
                 {
                     Debug.WriteLine($"Item {item.Id} Removed from UnitPictures");
                     IsDirty = true;
@@ -298,7 +298,7 @@ internal sealed partial class UnitViewModel : ObservableObject
             // Subscribe to PropertyChanged.
             if (e.NewItems != null)
             {
-                foreach (Models.Rent.Residentials.PictureUnit item in e.NewItems)
+                foreach (Models.Rent.Residentials.Unit.PictureUnit item in e.NewItems)
                 {
                     Debug.WriteLine($"Item {item.Id} Added to UnitPictures");
                     IsDirty = true;
@@ -316,7 +316,7 @@ internal sealed partial class UnitViewModel : ObservableObject
 
     private void OnUnitPicturePropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (sender is not ZumenSearch.Models.Rent.Residentials.PictureUnit picUnit)
+        if (sender is not Models.Rent.Residentials.Unit.PictureUnit picUnit)
         {
             Debug.WriteLine("OnUnitPicturePropertyChanged returned non PictureUnit.");
             return;
@@ -366,7 +366,7 @@ internal sealed partial class UnitViewModel : ObservableObject
 
     #region == Public Methods ==
 
-    internal void SetEditUnit(Models.Rent.Residentials.UnitResidential room)//SetEditUnit //PopulateUnitValues
+    internal void SetEditUnit(Models.Rent.Residentials.Unit.UnitResidential room)//SetEditUnit //PopulateUnitValues
     {
         _unit = room;
 
@@ -436,7 +436,7 @@ internal sealed partial class UnitViewModel : ObservableObject
             using var destinationStream = File.Create(destFilePath);
             await sourceStream.CopyToAsync(destinationStream);
 
-            var pic = new Models.Rent.Residentials.PictureUnit(newId, destFilePath)
+            var pic = new Models.Rent.Residentials.Unit.PictureUnit(newId, destFilePath)
             {
                 IsNew = true,
                 ParentViewModel = _mainViewModel
@@ -577,7 +577,7 @@ internal sealed partial class UnitViewModel : ObservableObject
     }
 
     [RelayCommand(CanExecute = nameof(CanDeleteUnitPicture))]
-    private void DeleteUnitPicture(Models.Rent.Residentials.PictureUnit picUnit)
+    private void DeleteUnitPicture(Models.Rent.Residentials.Unit.PictureUnit picUnit)
     {
         if (_unit is null)
         {
@@ -604,7 +604,7 @@ internal sealed partial class UnitViewModel : ObservableObject
             IsDirty = true;
         }
     }
-    private bool CanDeleteUnitPicture(Models.Rent.Residentials.PictureUnit picUnit)
+    private bool CanDeleteUnitPicture(Models.Rent.Residentials.Unit.PictureUnit picUnit)
     {
         return picUnit is not null;
     }

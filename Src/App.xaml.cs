@@ -128,8 +128,8 @@ public partial class App : Application
             services.AddTransient<Views.Rent.Residentials.ShellPage>();
             services.AddTransient<ViewModels.Rent.Residentials.MainViewModel>();
 
-            services.AddEditorFactory<ViewModels.Rent.Residentials.MainViewModel, Models.Rent.Residentials.EntryResidential>();
-            services.AddEditorFactory<Views.Rent.Residentials.ShellPage, Models.Rent.Residentials.EntryResidential>();
+            services.AddEditorFactory<ViewModels.Rent.Residentials.MainViewModel, Models.Rent.Residentials.Bldg.EntryResidential>();
+            services.AddEditorFactory<Views.Rent.Residentials.ShellPage, Models.Rent.Residentials.Bldg.EntryResidential>();
             // Instead of AddEditorFactory for each, typeof.. <,> registers all.
             //services.AddSingleton(typeof(IAbstractFactory<,>), typeof(AbstractFactory<,>)); 
 

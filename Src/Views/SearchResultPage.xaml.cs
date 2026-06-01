@@ -81,7 +81,7 @@ internal sealed partial class SearchResultPage : Page
             return;
         }
 
-        if (container.DataContext is not EntryResidentialSearchResult searchresult)
+        if (container.DataContext is not Models.Rent.Residentials.Bldg.EntryResidentialSearchResult searchresult)
         {
             Debug.WriteLine($"Not EntryResidentialSearchResult. {container.DataContext?.GetType().FullName} @SearchResult_DoubleTapped");
             return;
@@ -228,7 +228,7 @@ internal sealed partial class SearchResultPage : Page
             return;
         }
 
-        if (invokedItem is not EntryResidentialSearchResult)
+        if (invokedItem is not Models.Rent.Residentials.Bldg.EntryResidentialSearchResult)
         {
             return;
         }
@@ -272,7 +272,7 @@ internal sealed partial class SearchResultPage : Page
             return;
         }
 
-        if (element.DataContext is not EntryResidentialSearchResult searchresult)
+        if (element.DataContext is not Models.Rent.Residentials.Bldg.EntryResidentialSearchResult searchresult)
         {
             Debug.WriteLine($"Not EntryResidentialSearchResult. {element.DataContext?.GetType().FullName} @ItemContainerKeyboardAccelerator_Invoked");
             return;
