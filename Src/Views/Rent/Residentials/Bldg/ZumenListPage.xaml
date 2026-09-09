@@ -8,7 +8,7 @@
     mc:Ignorable="d"
     NavigationCacheMode="Required">
 
-    <Grid x:Name="ContentArea" Padding="48,0,48,24">
+    <Grid x:Name="ContentArea" Padding="36,0,36,24">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -20,7 +20,7 @@
                 <AppBarButton Icon="More" Label="その他">
                     <AppBarButton.Flyout>
                         <MenuFlyout Placement="Bottom">
-                            <MenuFlyoutItem Text="保存場所を開く" Icon="OpenLocal" Command="{x:Bind ViewModel.Bldg.OpenBuildingBlobDirectoryCommand, Mode=OneWay}"></MenuFlyoutItem>
+                            <MenuFlyoutItem Text="保存場所を開く" Icon="OpenLocal" Command="{x:Bind ViewModel.OpenBuildingBlobDirectoryCommand, Mode=OneWay}"></MenuFlyoutItem>
                             <MenuFlyoutSeparator/>
                             <MenuFlyoutItem Text="すべて削除" Icon="Delete"></MenuFlyoutItem>
                         </MenuFlyout>
@@ -31,10 +31,10 @@
 
         <Grid Grid.Row="1">
             <ScrollViewer HorizontalScrollMode="Disabled">
-                <ItemsRepeater x:Name="ItemsView" ItemsSource="{x:Bind ViewModel.Bldg.BuildingPdfs, Mode=TwoWay}" MinWidth="300" MinHeight="225" ScrollViewer.HorizontalScrollMode="Disabled" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <ItemsRepeater x:Name="ItemsView" ItemsSource="{x:Bind ViewModel.BuildingPdfs, Mode=TwoWay}" MinWidth="300" MinHeight="225" ScrollViewer.HorizontalScrollMode="Disabled" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <!--  SelectionChanged="ItemsView_SelectionChanged" SelectionMode="Single" IsItemInvokedEnabled="False"  -->
                     <ItemsRepeater.ItemTemplate>
-                        <DataTemplate x:DataType="modresi:PdfBldg">
+                        <DataTemplate x:DataType="modresi:Pdf">
                             <Border Style="{StaticResource RoundCardBorderStyle}">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
@@ -60,7 +60,7 @@
                                             </StackPanel>
                                             <TextBox Header="説明" Margin="0,0,0,0" Text="{x:Bind Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
                                             <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Margin="0,0,0,0" HorizontalAlignment="Right">
-                                                <AppBarButton Icon="Delete" Label="削除" ToolTipService.ToolTip="PDFを削除" Command="{x:Bind ParentViewModel.Bldg.DeleteBuildingPdfCommand, Mode=OneWay}" CommandParameter="{x:Bind}"/>
+                                                <AppBarButton Icon="Delete" Label="削除" ToolTipService.ToolTip="PDFを削除" Command="{x:Bind ParentViewModel.DeleteBuildingPdfCommand, Mode=OneWay}" CommandParameter="{x:Bind}"/>
                                             </CommandBar>
                                         </StackPanel>
                                     </Grid>

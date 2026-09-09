@@ -4,12 +4,11 @@ using System.Diagnostics;
 using ZumenSearch.Helpers;
 using ZumenSearch.Models.Base;
 using ZumenSearch.Models.Common;
-using ZumenSearch.Models.Rent.Residentials;
 using ZumenSearch.Services.Contracts;
 
 namespace ZumenSearch.Services;
 
-internal sealed class DataAccessService : IDataAccessService
+public sealed class DataAccessService : IDataAccessService
 {
     private SqliteConnectionStringBuilder connectionStringBuilder = [];
 
@@ -27,7 +26,8 @@ internal sealed class DataAccessService : IDataAccessService
 
             if (!RuntimeHelper.IsMSIX)
             {
-                Debug.WriteLine("* Microsoft.Data.Sqlite SqliteConnection() calls Windows.Storage.ApplicationData.Current.get() results in System.InvalidOperationException \"Operation is not valid due to the current state of the object.\" Since we are in unpackaged, we can safely ignore the exception.");
+                // https://github.com/dotnet/efcore/issues/38275
+                //Debug.WriteLine("* Microsoft.Data.Sqlite SqliteConnection() calls Windows.Storage.ApplicationData.Current.get() results in System.InvalidOperationException \"Operation is not valid due to the current state of the object.\" Since we are in unpackaged, we can safely ignore the exception.");
             }
 
             connection.Open();
@@ -529,11 +529,11 @@ internal sealed class DataAccessService : IDataAccessService
         #endregion
     }
 
-    public SqliteDataAccessResultWrapper InsertRentResidential(Models.Rent.Residentials.Bldg.EntryResidential entry)
+    public SqliteDataAccessResultWrapper InsertRentResidential(Models.Rent.Residentials.Bldg.Property building)
     {
         var res = new SqliteDataAccessResultWrapper();
 
-        if (string.IsNullOrEmpty(entry.Id))
+        if (string.IsNullOrEmpty(building.Id))
         {
             res.IsError = true;
             // TODO:
@@ -558,19 +558,19 @@ internal sealed class DataAccessService : IDataAccessService
                 cmd.CommandText = "INSERT INTO rents (rent_id, name, loc_pref_id, loc_prefecture, loc_machiaza_id, loc_county, loc_city, loc_ward, loc_oaza_cho, loc_choume, loc_edaban, loc_location_full) " +
                     "VALUES (@RentId, @Name, @LocPrefId, @LocPrefecture, @LocMachiazaId, @LocCounty, @LocCity, @LocWard, @LocOazaCho, @LocChoume, @LocEdaban, @LocLocationFull)";
 
-                cmd.Parameters.AddWithValue("@RentId", entry.Id);
-                cmd.Parameters.AddWithValue("@Name", entry.Name);
+                cmd.Parameters.AddWithValue("@RentId", building.Id);
+                cmd.Parameters.AddWithValue("@Name", building.Name);
 
-                cmd.Parameters.AddWithValue("@LocPrefId", entry.LocPrefId);
-                cmd.Parameters.AddWithValue("@LocPrefecture", entry.LocPrefecture);
-                cmd.Parameters.AddWithValue("@LocMachiazaId", entry.LocMachiazaId);
-                cmd.Parameters.AddWithValue("@LocCounty", entry.LocCounty);
-                cmd.Parameters.AddWithValue("@LocCity", entry.LocCity);
-                cmd.Parameters.AddWithValue("@LocWard", entry.LocWard);
-                cmd.Parameters.AddWithValue("@LocOazaCho", entry.LocOazaCho);
-                cmd.Parameters.AddWithValue("@LocChoume", entry.LocChoume);
-                cmd.Parameters.AddWithValue("@LocEdaban", entry.LocEdaban);
-                cmd.Parameters.AddWithValue("@LocLocationFull", entry.LocLocationFull);
+                cmd.Parameters.AddWithValue("@LocPrefId", building.LocPrefId);
+                cmd.Parameters.AddWithValue("@LocPrefecture", building.LocPrefecture);
+                cmd.Parameters.AddWithValue("@LocMachiazaId", building.LocMachiazaId);
+                cmd.Parameters.AddWithValue("@LocCounty", building.LocCounty);
+                cmd.Parameters.AddWithValue("@LocCity", building.LocCity);
+                cmd.Parameters.AddWithValue("@LocWard", building.LocWard);
+                cmd.Parameters.AddWithValue("@LocOazaCho", building.LocOazaCho);
+                cmd.Parameters.AddWithValue("@LocChoume", building.LocChoume);
+                cmd.Parameters.AddWithValue("@LocEdaban", building.LocEdaban);
+                cmd.Parameters.AddWithValue("@LocLocationFull", building.LocLocationFull);
                 // TODO: more
 
                 res.AffectedCount = cmd.ExecuteNonQuery();
@@ -582,18 +582,18 @@ internal sealed class DataAccessService : IDataAccessService
                 cmd.CommandText = "INSERT INTO rent_residentials (rent_id, building_kind, is_unit_ownership, building_structure, aboveground_floor_count, basement_floor_count, total_unit_count, built_year_month, fudousan_id, fudousan_id_additional_code, remarks, updated_at) " +
                     "VALUES (@RentId, @BuildingKind, @IsUnitOwnership, @BuildingStructure, @AboveGroundFloorCount, @BasementFloorCount, @TotalUnitCount, @BuiltYearMonth, @FudousanId, @FudousanIdAdditionalCode, @Remarks, @updated_at)";
 
-                cmd.Parameters.AddWithValue("@RentId", entry.Id);
+                cmd.Parameters.AddWithValue("@RentId", building.Id);
 
-                cmd.Parameters.AddWithValue("@BuildingKind", entry.BuildingKind.Key.ToString());
-                cmd.Parameters.AddWithValue("@IsUnitOwnership", entry.IsUnitOwnership ? 1 : 0); // bool to int
-                cmd.Parameters.AddWithValue("@BuildingStructure", entry.BuildingStructure.Key.ToString());
-                cmd.Parameters.AddWithValue("@AboveGroundFloorCount", entry.AboveGroundFloorCount);// int
-                cmd.Parameters.AddWithValue("@BasementFloorCount", entry.BasementFloorCount);// int
-                cmd.Parameters.AddWithValue("@TotalUnitCount", entry.TotalUnitCount);// int
-                cmd.Parameters.AddWithValue("@BuiltYearMonth", entry.BuiltYearAndMonth.ToString("s"));
-                cmd.Parameters.AddWithValue("@FudousanId", entry.FudousanId);
-                cmd.Parameters.AddWithValue("@FudousanIdAdditionalCode", entry.FudousanIdAdditionalCode);
-                cmd.Parameters.AddWithValue("@Remarks", entry.Remarks);
+                cmd.Parameters.AddWithValue("@BuildingKind", building.BuildingKind.Key.ToString());
+                cmd.Parameters.AddWithValue("@IsUnitOwnership", building.IsUnitOwnership ? 1 : 0); // bool to int
+                cmd.Parameters.AddWithValue("@BuildingStructure", building.BuildingStructure.Key.ToString());
+                cmd.Parameters.AddWithValue("@AboveGroundFloorCount", building.AboveGroundFloorCount);// int
+                cmd.Parameters.AddWithValue("@BasementFloorCount", building.BasementFloorCount);// int
+                cmd.Parameters.AddWithValue("@TotalUnitCount", building.TotalUnitCount);// int
+                cmd.Parameters.AddWithValue("@BuiltYearMonth", building.BuiltYearAndMonth.ToString("s"));
+                cmd.Parameters.AddWithValue("@FudousanId", building.FudousanId);
+                cmd.Parameters.AddWithValue("@FudousanIdAdditionalCode", building.FudousanIdAdditionalCode);
+                cmd.Parameters.AddWithValue("@Remarks", building.Remarks);
                 // TODO: more
 
 
@@ -602,9 +602,9 @@ internal sealed class DataAccessService : IDataAccessService
                 cmd.ExecuteNonQuery();
 
                 // Picture (building) table
-                if (entry.BuildingPictures.Count > 0)
+                if (building.BuildingPictures.Count > 0)
                 {
-                    foreach (var pic in entry.BuildingPictures)
+                    foreach (var pic in building.BuildingPictures)
                     {
                         // Insertなので全てIsNewのはず・・・
                         //if (pic.IsNew)
@@ -612,13 +612,13 @@ internal sealed class DataAccessService : IDataAccessService
                         string sqlInsertIntoRentLivingPicture = String.Format(
                                         "INSERT INTO rent_residential_pictures (picture_id, rent_id, picture_filepath, picture_data) " +
                                         "VALUES ('{0}', '{1}', '{2}', @0)",
-                                        pic.Id, entry.Id, pic.ImageLocation);
+                                        pic.Id, building.Id, pic.ImageLocation);
                         */
                         /*
                         string sqlInsertIntoRentLivingPicture = String.Format(
                             "INSERT INTO rent_residential_pictures (picture_id, rent_id, picture_filepath) " +
                             "VALUES ('{0}', '{1}', '{2}')",
-                            pic.Id, entry.Id, pic.ImageLocation);
+                            pic.Id, building.Id, pic.ImageLocation);
                         */
                         var sqlInsertIntoRentLivingPicture = "INSERT INTO rent_residential_pictures (picture_id, rent_id, file_path, type, description, is_main) " +
                             "VALUES (@PicId, @RentId, @Path, @Type, @Desc, @Main)";
@@ -629,8 +629,8 @@ internal sealed class DataAccessService : IDataAccessService
                         cmd.Parameters.Clear();
 
                         cmd.Parameters.AddWithValue("@PicId", pic.Id);
-                        //cmd.Parameters.AddWithValue("@RentResidentialId", entry.Id + "_1");
-                        cmd.Parameters.AddWithValue("@RentId", entry.Id);
+                        //cmd.Parameters.AddWithValue("@RentResidentialId", building.Id + "_1");
+                        cmd.Parameters.AddWithValue("@RentId", building.Id);
                         cmd.Parameters.AddWithValue("@Path", pic.ImageLocation);
                         cmd.Parameters.AddWithValue("@Type", pic.PictureType.Key.ToString());
                         cmd.Parameters.AddWithValue("@Desc", pic.Description);
@@ -666,9 +666,9 @@ internal sealed class DataAccessService : IDataAccessService
                 }
 
                 // PDF (building) table
-                if (entry.BuildingPdfs.Count > 0)
+                if (building.BuildingPdfs.Count > 0)
                 {
-                    foreach (var pic in entry.BuildingPdfs)
+                    foreach (var pic in building.BuildingPdfs)
                     {
                         // Insertなので全てIsNewのはず・・・
                         //if (pic.IsNew)
@@ -676,13 +676,13 @@ internal sealed class DataAccessService : IDataAccessService
                         string sqlInsertIntoRentLivingPicture = String.Format(
                                         "INSERT INTO rent_residential_pictures (picture_id, rent_id, picture_filepath, picture_data) " +
                                         "VALUES ('{0}', '{1}', '{2}', @0)",
-                                        pic.Id, entry.Id, pic.ImageLocation);
+                                        pic.Id, building.Id, pic.ImageLocation);
                         */
                         /*
                         string sqlInsertIntoRentLivingPicture = String.Format(
                             "INSERT INTO rent_residential_pictures (picture_id, rent_id, picture_filepath) " +
                             "VALUES ('{0}', '{1}', '{2}')",
-                            pic.Id, entry.Id, pic.ImageLocation);
+                            pic.Id, building.Id, pic.ImageLocation);
                         */
                         var sqlInsertIntoRentLivingPicture = "INSERT INTO rent_residential_pdfs (pdf_id, rent_id, file_path, thumb_path, type, description, is_main) " +
                             "VALUES (@PdfId, @RentId, @Path, @Thumb, @Type, @Desc, @Main)";
@@ -693,8 +693,8 @@ internal sealed class DataAccessService : IDataAccessService
                         cmd.Parameters.Clear();
 
                         cmd.Parameters.AddWithValue("@PdfId", pic.Id);
-                        //cmd.Parameters.AddWithValue("@RentResidentialId", entry.Id + "_1");
-                        cmd.Parameters.AddWithValue("@RentId", entry.Id);
+                        //cmd.Parameters.AddWithValue("@RentResidentialId", building.Id + "_1");
+                        cmd.Parameters.AddWithValue("@RentId", building.Id);
                         cmd.Parameters.AddWithValue("@Path", pic.PdfLocation);
                         cmd.Parameters.AddWithValue("@Thumb", pic.ThumbnailLocation);
                         cmd.Parameters.AddWithValue("@Type", pic.PdfType.Key.ToString());
@@ -731,9 +731,9 @@ internal sealed class DataAccessService : IDataAccessService
                 }
 
                 // Room table
-                if (entry.Rooms.Count > 0)
+                if (building.Rooms.Count > 0)
                 {
-                    foreach (var unit in entry.Rooms)
+                    foreach (var unit in building.Rooms)
                     {
                         var sqlInsertIntoRentLivingRoom = "INSERT INTO rent_residential_rooms (room_id, rent_id, name, chinryou) VALUES (@RoomId, @RentId, @Name, @Chinryou)";
 
@@ -743,7 +743,7 @@ internal sealed class DataAccessService : IDataAccessService
                         cmd.Parameters.Clear();
 
                         cmd.Parameters.AddWithValue("@RoomId", unit.Id);
-                        cmd.Parameters.AddWithValue("@RentId", entry.Id);
+                        cmd.Parameters.AddWithValue("@RentId", building.Id);
                         cmd.Parameters.AddWithValue("@Name", unit.Name);
                         cmd.Parameters.AddWithValue("@Chinryou", unit.Chinryou);
 
@@ -774,7 +774,7 @@ internal sealed class DataAccessService : IDataAccessService
 
                                     cmd.Parameters.AddWithValue("@PicId", pic.Id);
                                     cmd.Parameters.AddWithValue("@roomId", unit.Id);
-                                    cmd.Parameters.AddWithValue("@RentId", entry.Id);
+                                    cmd.Parameters.AddWithValue("@RentId", building.Id);
                                     cmd.Parameters.AddWithValue("@Path", pic.ImageLocation);
                                     cmd.Parameters.AddWithValue("@type", pic.PictureType.Key.ToString());
                                     cmd.Parameters.AddWithValue("@Desc", pic.Description);
@@ -881,11 +881,11 @@ internal sealed class DataAccessService : IDataAccessService
         return res;
     }
 
-    public SqliteDataAccessResultWrapper UpdateRentResidential(Models.Rent.Residentials.Bldg.EntryResidential entry)
+    public SqliteDataAccessResultWrapper UpdateRentResidential(Models.Rent.Residentials.Bldg.Property building)
     {
         var res = new SqliteDataAccessResultWrapper();
 
-        if (string.IsNullOrEmpty(entry.Id))
+        if (string.IsNullOrEmpty(building.Id))
         {
             res.IsError = true;
             // TODO:
@@ -906,21 +906,21 @@ internal sealed class DataAccessService : IDataAccessService
 
                 // Rents table
                 var sql = "UPDATE rents SET ";
-                sql += string.Format("name = '{0}', ", EscapeSingleQuote(entry.Name));
-                sql += string.Format("loc_pref_id = '{0}', ", EscapeSingleQuote(entry.LocPrefId));
-                sql += string.Format("loc_prefecture = '{0}', ", EscapeSingleQuote(entry.LocPrefecture));
-                sql += string.Format("loc_machiaza_id = '{0}', ", EscapeSingleQuote(entry.LocMachiazaId));
-                sql += string.Format("loc_county = '{0}', ", EscapeSingleQuote(entry.LocCounty));
-                sql += string.Format("loc_city = '{0}', ", EscapeSingleQuote(entry.LocCity));
-                sql += string.Format("loc_ward = '{0}', ", EscapeSingleQuote(entry.LocWard));
-                sql += string.Format("loc_oaza_cho = '{0}', ", EscapeSingleQuote(entry.LocOazaCho));
-                sql += string.Format("loc_choume = '{0}', ", EscapeSingleQuote(entry.LocChoume));
-                sql += string.Format("loc_edaban = '{0}', ", EscapeSingleQuote(entry.LocEdaban));
-                sql += string.Format("loc_location_full = '{0}' ", EscapeSingleQuote(entry.LocLocationFull)); // 最後カンマ無し 注意
+                sql += string.Format("name = '{0}', ", EscapeSingleQuote(building.Name));
+                sql += string.Format("loc_pref_id = '{0}', ", EscapeSingleQuote(building.LocPrefId));
+                sql += string.Format("loc_prefecture = '{0}', ", EscapeSingleQuote(building.LocPrefecture));
+                sql += string.Format("loc_machiaza_id = '{0}', ", EscapeSingleQuote(building.LocMachiazaId));
+                sql += string.Format("loc_county = '{0}', ", EscapeSingleQuote(building.LocCounty));
+                sql += string.Format("loc_city = '{0}', ", EscapeSingleQuote(building.LocCity));
+                sql += string.Format("loc_ward = '{0}', ", EscapeSingleQuote(building.LocWard));
+                sql += string.Format("loc_oaza_cho = '{0}', ", EscapeSingleQuote(building.LocOazaCho));
+                sql += string.Format("loc_choume = '{0}', ", EscapeSingleQuote(building.LocChoume));
+                sql += string.Format("loc_edaban = '{0}', ", EscapeSingleQuote(building.LocEdaban));
+                sql += string.Format("loc_location_full = '{0}' ", EscapeSingleQuote(building.LocLocationFull)); // 最後カンマ無し 注意
 
                 // TODO: more
 
-                sql += string.Format(" WHERE rent_id = '{0}'; ", entry.Id);
+                sql += string.Format(" WHERE rent_id = '{0}'; ", building.Id);
 
                 cmd.CommandText = sql;
                 res.AffectedCount = cmd.ExecuteNonQuery();
@@ -944,18 +944,18 @@ internal sealed class DataAccessService : IDataAccessService
 
                 cmd.CommandText = sql;
 
-                cmd.Parameters.AddWithValue("@rent_id", entry.Id);
+                cmd.Parameters.AddWithValue("@rent_id", building.Id);
 
-                cmd.Parameters.AddWithValue("@building_kind", entry.BuildingKind.Key.ToString());
-                cmd.Parameters.AddWithValue("@is_unit_ownership", entry.IsUnitOwnership ? 1 : 0);// bool to int
-                cmd.Parameters.AddWithValue("@building_structure", entry.BuildingStructure.Key.ToString());
-                cmd.Parameters.AddWithValue("@aboveground_floor_count", entry.AboveGroundFloorCount);// int
-                cmd.Parameters.AddWithValue("@basement_floor_count", entry.BasementFloorCount);// int
-                cmd.Parameters.AddWithValue("@total_unit_count", entry.TotalUnitCount);// int
-                cmd.Parameters.AddWithValue("@built_year_month", entry.BuiltYearAndMonth.ToString("s"));
-                cmd.Parameters.AddWithValue("@fudousan_id", entry.FudousanId);
-                cmd.Parameters.AddWithValue("@fudousan_id_additional_code", entry.FudousanIdAdditionalCode);
-                cmd.Parameters.AddWithValue("@remarks", entry.Remarks);
+                cmd.Parameters.AddWithValue("@building_kind", building.BuildingKind.Key.ToString());
+                cmd.Parameters.AddWithValue("@is_unit_ownership", building.IsUnitOwnership ? 1 : 0);// bool to int
+                cmd.Parameters.AddWithValue("@building_structure", building.BuildingStructure.Key.ToString());
+                cmd.Parameters.AddWithValue("@aboveground_floor_count", building.AboveGroundFloorCount);// int
+                cmd.Parameters.AddWithValue("@basement_floor_count", building.BasementFloorCount);// int
+                cmd.Parameters.AddWithValue("@total_unit_count", building.TotalUnitCount);// int
+                cmd.Parameters.AddWithValue("@built_year_month", building.BuiltYearAndMonth.ToString("s"));
+                cmd.Parameters.AddWithValue("@fudousan_id", building.FudousanId);
+                cmd.Parameters.AddWithValue("@fudousan_id_additional_code", building.FudousanIdAdditionalCode);
+                cmd.Parameters.AddWithValue("@remarks", building.Remarks);
                 // more
 
                 cmd.Parameters.AddWithValue("@updated_at", DateTimeOffset.UtcNow.ToString("s"));
@@ -965,9 +965,9 @@ internal sealed class DataAccessService : IDataAccessService
                 cmd.Parameters.Clear();
 
                 // 写真（建物）Residentials pictures table - Insert or Update
-                if (entry.BuildingPictures.Count > 0)
+                if (building.BuildingPictures.Count > 0)
                 {
-                    foreach (var pic in entry.BuildingPictures)
+                    foreach (var pic in building.BuildingPictures)
                     {
                         var exec = false;
 
@@ -999,8 +999,8 @@ internal sealed class DataAccessService : IDataAccessService
                             cmd.Parameters.Clear();
 
                             cmd.Parameters.AddWithValue("@PicId", pic.Id);
-                            //cmd.Parameters.AddWithValue("@RentResidentialId", entry.Id + "_1");
-                            cmd.Parameters.AddWithValue("@RentId", entry.Id);
+                            //cmd.Parameters.AddWithValue("@RentResidentialId", building.Id + "_1");
+                            cmd.Parameters.AddWithValue("@RentId", building.Id);
                             cmd.Parameters.AddWithValue("@Path", pic.ImageLocation);
                             cmd.Parameters.AddWithValue("@Type", pic.PictureType.Key.ToString());
                             cmd.Parameters.AddWithValue("@Desc", pic.Description);
@@ -1029,9 +1029,9 @@ internal sealed class DataAccessService : IDataAccessService
                 cmd.Parameters.Clear();
 
                 // 物件写真の削除リストを処理
-                if (entry.BuildingPicturesToBeDeleted.Count > 0)
+                if (building.BuildingPicturesToBeDeleted.Count > 0)
                 {
-                    foreach (var delp in entry.BuildingPicturesToBeDeleted)
+                    foreach (var delp in building.BuildingPicturesToBeDeleted)
                     {
                         // 削除
                         var sqlDeleteRentLivingPicture = string.Format("DELETE FROM rent_residential_pictures WHERE picture_id = '{0}'", delp.Id);
@@ -1052,9 +1052,9 @@ internal sealed class DataAccessService : IDataAccessService
                 cmd.Parameters.Clear();
 
                 // PDF（建物）Residentials pdfs table - Insert or Update
-                if (entry.BuildingPdfs.Count > 0)
+                if (building.BuildingPdfs.Count > 0)
                 {
-                    foreach (var pdf in entry.BuildingPdfs)
+                    foreach (var pdf in building.BuildingPdfs)
                     {
                         var exec = false;
 
@@ -1086,7 +1086,7 @@ internal sealed class DataAccessService : IDataAccessService
                             cmd.Parameters.Clear();
 
                             cmd.Parameters.AddWithValue("@PdfId", pdf.Id);
-                            cmd.Parameters.AddWithValue("@RentId", entry.Id);
+                            cmd.Parameters.AddWithValue("@RentId", building.Id);
                             cmd.Parameters.AddWithValue("@Path", pdf.PdfLocation);
                             cmd.Parameters.AddWithValue("@Type", pdf.PdfType.Key.ToString());
                             cmd.Parameters.AddWithValue("@Thumb", pdf.ThumbnailLocation);
@@ -1117,9 +1117,9 @@ internal sealed class DataAccessService : IDataAccessService
                 cmd.Parameters.Clear();
 
                 // PDF（建物）の削除リストを処理
-                if (entry.BuildingPdfsToBeDeleted.Count > 0)
+                if (building.BuildingPdfsToBeDeleted.Count > 0)
                 {
-                    foreach (var delp in entry.BuildingPdfsToBeDeleted)
+                    foreach (var delp in building.BuildingPdfsToBeDeleted)
                     {
                         // 削除
                         var sqlDeleteRentLivingPdf = string.Format("DELETE FROM rent_residential_pdfs WHERE pdf_id = '{0}'", delp.Id);
@@ -1141,9 +1141,9 @@ internal sealed class DataAccessService : IDataAccessService
 
                 // This currently may no be called since rooms are independently updated.(insert is a different story.)
                 // 部屋 Rooms table - Insert, Update, Delete
-                if (entry.Rooms.Count > 0)
+                if (building.Rooms.Count > 0)
                 {
-                    foreach (var room in entry.Rooms)
+                    foreach (var room in building.Rooms)
                     {
                         var exec = false;
 
@@ -1172,7 +1172,7 @@ internal sealed class DataAccessService : IDataAccessService
 
                             cmd.Parameters.AddWithValue("@roomId", room.Id);
                             //cmd.Parameters.AddWithValue("@RentResidentialId", entry.Id + "_1");
-                            cmd.Parameters.AddWithValue("@RentId", entry.Id);
+                            cmd.Parameters.AddWithValue("@RentId", building.Id);
                             cmd.Parameters.AddWithValue("@Nam", room.Name);
                             cmd.Parameters.AddWithValue("@Chinryou", room.Chinryou);
                             cmd.Parameters.AddWithValue("@Updated", DateTimeOffset.UtcNow.ToString("s"));
@@ -1205,7 +1205,7 @@ internal sealed class DataAccessService : IDataAccessService
 
                                     cmd.Parameters.AddWithValue("@PicId", pic.Id);
                                     cmd.Parameters.AddWithValue("@roomId", room.Id);
-                                    cmd.Parameters.AddWithValue("@RentId", entry.Id);
+                                    cmd.Parameters.AddWithValue("@RentId", building.Id);
                                     cmd.Parameters.AddWithValue("@Path", pic.ImageLocation);
                                     cmd.Parameters.AddWithValue("@type", pic.PictureType.Key.ToString());
                                     cmd.Parameters.AddWithValue("@Desc", pic.Description);
@@ -1235,9 +1235,9 @@ internal sealed class DataAccessService : IDataAccessService
                 cmd.Parameters.Clear();
 
                 // 部屋の削除リストを処理
-                if (entry.RoomsToBeDeleted.Count > 0)
+                if (building.RoomsToBeDeleted.Count > 0)
                 {
-                    foreach (var delr in entry.RoomsToBeDeleted)
+                    foreach (var delr in building.RoomsToBeDeleted)
                     {
                         // 削除
                         var sqlDeleteRentLivingRoom = string.Format("DELETE FROM rent_residential_rooms WHERE room_id = '{0}'", delr.Id);
@@ -1250,7 +1250,7 @@ internal sealed class DataAccessService : IDataAccessService
                             Debug.WriteLine("Room deleted");
                         }
                     }
-                    entry.RoomsToBeDeleted.Clear();
+                    building.RoomsToBeDeleted.Clear();
                 }
 
                 // Commit
@@ -1437,9 +1437,9 @@ internal sealed class DataAccessService : IDataAccessService
         return res;
     }
 
-    public SqliteDataAccessSelectRentResidentialResultWrapper SelectRentResidentialsByNameKeyword(string keyword)
+    public SqliteDataAccessSelectRentResidentialBuildingsResultWrapper SelectRentResidentialsByNameKeyword(string keyword)
     {
-        var res = new SqliteDataAccessSelectRentResidentialResultWrapper();
+        var res = new SqliteDataAccessSelectRentResidentialBuildingsResultWrapper();
 
         if (string.IsNullOrEmpty(keyword))
         {
@@ -1474,7 +1474,7 @@ internal sealed class DataAccessService : IDataAccessService
                     continue;
                 }
 
-                var entry = new Models.Rent.Residentials.Bldg.EntryResidentialSearchResult(s);
+                var entry = new Models.Rent.Residentials.PropertySearchResultItem(s);
 
                 s = Convert.ToString(reader["feedName"]) ?? "";
                 entry.Name = s;
@@ -1492,7 +1492,7 @@ internal sealed class DataAccessService : IDataAccessService
 
                 res.AffectedCount++;
 
-                res.SelectedEntries.Add(entry);
+                res.PropertySearchResult.Add(entry);
             }
         }
         catch (System.Reflection.TargetInvocationException ex)
@@ -1548,11 +1548,11 @@ internal sealed class DataAccessService : IDataAccessService
         return res;
     }
 
-    public SqliteDataAccessSelectRentResidentialFullResultWrapper SelectRentResidentialById(string id)
+    public SqliteDataAccessSelectRentResidentialBuildingSingleResultWrapper SelectRentResidentialById(string id)
     {
-        var res = new SqliteDataAccessSelectRentResidentialFullResultWrapper();
+        var res = new SqliteDataAccessSelectRentResidentialBuildingSingleResultWrapper();
 
-        var entry = new Models.Rent.Residentials.Bldg.EntryResidential(id, EnumEntryStatus.Saved);
+        var entry = new Models.Rent.Residentials.Bldg.Property(id, EnumPropertyStatus.Saved);
 
         if (string.IsNullOrEmpty(id))
         {
@@ -1691,7 +1691,7 @@ internal sealed class DataAccessService : IDataAccessService
                     var picpath = Convert.ToString(reader["file_path"]) ?? string.Empty;
                     if (!string.IsNullOrEmpty(picid) && !string.IsNullOrEmpty(picpath))
                     {
-                        var rlpic = new Models.Rent.Residentials.Bldg.PictureBldg(picid, picpath)
+                        var rlpic = new Models.Rent.Residentials.Bldg.Picture(picid, picpath)
                         {
                             Description = Convert.ToString(reader["description"]) ?? string.Empty,
 
@@ -1735,7 +1735,7 @@ internal sealed class DataAccessService : IDataAccessService
                     var thumbpath = Convert.ToString(reader["thumb_path"]) ?? string.Empty;
                     if (!string.IsNullOrEmpty(pdfid) && !string.IsNullOrEmpty(pdfpath) && !string.IsNullOrEmpty(thumbpath))
                     {
-                        var rlpdf = new Models.Rent.Residentials.Bldg.PdfBldg(pdfid, pdfpath, thumbpath)
+                        var rlpdf = new Models.Rent.Residentials.Bldg.Pdf(pdfid, pdfpath, thumbpath)
                         {
                             Description = Convert.ToString(reader["description"]) ?? string.Empty,
                             IsNew = false,
@@ -1774,7 +1774,7 @@ internal sealed class DataAccessService : IDataAccessService
                 while (reader.Read())
                 {
                     var roomId = Convert.ToString(reader["room_id"]) ?? string.Empty;
-                    var room = new Models.Rent.Residentials.Unit.UnitResidential(roomId)
+                    var room = new Models.Rent.Residentials.Room.Listing(roomId, entry)
                     {
                         Name = Convert.ToString(reader["name"]) ?? string.Empty,
                         Chinryou = Convert.ToInt32(reader["chinryou"]),
@@ -1800,7 +1800,7 @@ internal sealed class DataAccessService : IDataAccessService
                         var picpath = Convert.ToString(reader["file_path"]) ?? string.Empty;
                         if (!string.IsNullOrEmpty(picid) && !string.IsNullOrEmpty(picpath))
                         {
-                            var rlpic = new Models.Rent.Residentials.Unit.PictureUnit(picid, picpath)
+                            var rlpic = new Models.Rent.Residentials.Room.Picture(picid, picpath)
                             {
                                 Description = Convert.ToString(reader["description"]) ?? string.Empty,
 
@@ -1837,7 +1837,7 @@ internal sealed class DataAccessService : IDataAccessService
             // Reset entry Isdirty flag.
             entry.IsDirty = false;
 
-            res.EntryFull = entry;
+            res.Building = entry;
         }
         catch (System.Reflection.TargetInvocationException ex)
         {
@@ -1892,7 +1892,7 @@ internal sealed class DataAccessService : IDataAccessService
         return res;
     }
 
-    public SqliteDataAccessResultWrapper UpsertRentResidentialUnit(string rentId, Models.Rent.Residentials.Unit.UnitResidential room)
+    public SqliteDataAccessResultWrapper UpsertRentResidentialUnit(string rentId, Models.Rent.Residentials.Room.Listing room)
     {
         var res = new SqliteDataAccessResultWrapper();
 
@@ -2128,9 +2128,9 @@ internal sealed class DataAccessService : IDataAccessService
         return res;
     }
 
-    public SqliteDataAccessSelectRentResidentialUnitsResultWrapper SelectRentResidentialUnits()
+    public SqliteDataAccessSelectRentResidentialRoomsResultWrapper SelectRentResidentialRooms()
     {
-        var res = new SqliteDataAccessSelectRentResidentialUnitsResultWrapper();
+        var res = new SqliteDataAccessSelectRentResidentialRoomsResultWrapper();
 
         _readerWriterLock.EnterReadLock();
         try
@@ -2161,7 +2161,7 @@ internal sealed class DataAccessService : IDataAccessService
                     continue;
                 }
 
-                var unit = new Models.Rent.Residentials.Unit.UnitResidentialSearchResult(rid, eid);
+                var unit = new Models.Rent.Residentials.ListingSearchResultItem(rid, eid);
 
                 var s = Convert.ToString(reader["unitName"]) ?? "";
                 unit.Name = s;
@@ -2171,7 +2171,7 @@ internal sealed class DataAccessService : IDataAccessService
                 s = Convert.ToString(reader["entryName"]);
                 if (!string.IsNullOrEmpty(s))
                 {
-                    unit.EntryName = s;
+                    unit.PropertyName = s;
                 }
 
                 // Reset entry Isdirty flag.
@@ -2179,7 +2179,7 @@ internal sealed class DataAccessService : IDataAccessService
 
                 res.AffectedCount++;
 
-                res.SelectedUnits.Add(unit);
+                res.ListingSearchResult.Add(unit);
             }
         }
         catch (System.Reflection.TargetInvocationException ex)

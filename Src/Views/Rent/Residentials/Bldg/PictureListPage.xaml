@@ -10,7 +10,7 @@
     mc:Ignorable="d"
     NavigationCacheMode="Required">
 
-    <Grid x:Name="ContentArea" Padding="48,0,48,24">
+    <Grid x:Name="ContentArea" Padding="36,0,36,24">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -19,17 +19,17 @@
         <Grid Grid.Row="0">
             <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Margin="0,0,0,0" HorizontalAlignment="Right">
                 <AppBarButton Name="AppBarButtonAddPicture" Icon="Add" Label="追加" Click="AppBarButtonAddPicture_Click"/>
-                <!--  Command="{x:Bind ViewModel.Bldg.AddNewBuildingPicturesCommand}" -->
+                <!--  Command="{x:Bind ViewModel.AddNewBuildingPicturesCommand}" -->
                 <!--
-                <AppBarButton Icon="OpenLocal" Label="開く" Command="{x:Bind ViewModel.Bldg.OpenBuildingPictureDirectoryCommand}"/>
-                <AppBarButton Icon="Delete" Label="削除" Command="{x:Bind ViewModel.Bldg.DeleteSelectedBuildingPictureCommand}"/>
+                <AppBarButton Icon="OpenLocal" Label="開く" Command="{x:Bind ViewModel.OpenBuildingPictureDirectoryCommand}"/>
+                <AppBarButton Icon="Delete" Label="削除" Command="{x:Bind ViewModel.DeleteSelectedBuildingPictureCommand}"/>
 
                 <AppBarButton Icon="More" Label="その他">
                     <AppBarButton.Flyout>
                         <MenuFlyout Placement="Bottom">
-                            <ToggleMenuFlyoutItem Text="開く" Icon="OpenLocal" Command="{x:Bind ViewModel.Bldg.OpenBuildingPictureDirectoryCommand, Mode=OneWay}"></ToggleMenuFlyoutItem>
+                            <ToggleMenuFlyoutItem Text="開く" Icon="OpenLocal" Command="{x:Bind ViewModel.OpenBuildingPictureDirectoryCommand, Mode=OneWay}"></ToggleMenuFlyoutItem>
                             <MenuFlyoutSeparator/>
-                            <ToggleMenuFlyoutItem Text="削除" Icon="Delete" Command="{x:Bind ViewModel.Bldg.DeleteSelectedBuildingPictureCommand, Mode=OneWay}"></ToggleMenuFlyoutItem>
+                            <ToggleMenuFlyoutItem Text="削除" Icon="Delete" Command="{x:Bind ViewModel.DeleteSelectedBuildingPictureCommand, Mode=OneWay}"></ToggleMenuFlyoutItem>
                         </MenuFlyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>
@@ -37,7 +37,7 @@
                 <AppBarButton Icon="More" Label="その他">
                     <AppBarButton.Flyout>
                         <MenuFlyout Placement="Bottom">
-                            <MenuFlyoutItem Text="保存場所を開く" Icon="OpenLocal" Command="{x:Bind ViewModel.Bldg.OpenBuildingBlobDirectoryCommand, Mode=OneWay}"></MenuFlyoutItem>
+                            <MenuFlyoutItem Text="保存場所を開く" Icon="OpenLocal" Command="{x:Bind ViewModel.OpenBuildingBlobDirectoryCommand, Mode=OneWay}"></MenuFlyoutItem>
                             <MenuFlyoutSeparator/>
                             <MenuFlyoutItem Text="すべて削除" Icon="Delete"></MenuFlyoutItem>
                         </MenuFlyout>
@@ -49,10 +49,10 @@
         <Grid Grid.Row="1">
             <ScrollViewer HorizontalScrollMode="Disabled">
                 <!-- TODO: chnage this to listview -->
-                <ItemsRepeater x:Name="ItemsView" ItemsSource="{x:Bind ViewModel.Bldg.BuildingPictures, Mode=TwoWay}" MinWidth="300" MinHeight="225" ScrollViewer.HorizontalScrollMode="Disabled" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <ItemsRepeater x:Name="ItemsView" ItemsSource="{x:Bind ViewModel.BuildingPictures, Mode=TwoWay}" MinWidth="300" MinHeight="225" ScrollViewer.HorizontalScrollMode="Disabled" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                 <!--  SelectionChanged="ItemsView_SelectionChanged" SelectionMode="Single" IsItemInvokedEnabled="False"  -->
                 <ItemsRepeater.ItemTemplate>
-                    <DataTemplate x:DataType="modresi:PictureBldg">
+                    <DataTemplate x:DataType="modresi:Picture">
                         <Border Style="{StaticResource RoundCardBorderStyle}">
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -84,7 +84,7 @@
                                         </StackPanel>
                                         <TextBox Header="説明" Margin="0,0,0,0" Text="{x:Bind Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
                                         <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Margin="0,0,0,0" HorizontalAlignment="Right">
-                                                <AppBarButton Icon="Delete" Label="削除" ToolTipService.ToolTip="写真を削除" Command="{x:Bind ParentViewModel.Bldg.DeleteBuildingPictureCommand, Mode=OneWay}" CommandParameter="{x:Bind}"/>
+                                                <AppBarButton Icon="Delete" Label="削除" ToolTipService.ToolTip="写真を削除" Command="{x:Bind ParentViewModel.DeleteBuildingPictureCommand, Mode=OneWay}" CommandParameter="{x:Bind}"/>
                                         </CommandBar>
                                     </StackPanel>
                                 </Grid>

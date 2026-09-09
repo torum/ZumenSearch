@@ -10,8 +10,7 @@
     xmlns:controls="using:CommunityToolkit.WinUI.Controls"
     xmlns:framework="using:Microsoft.UI.Xaml"
     mc:Ignorable="d"
-    NavigationCacheMode="Required"
-    Loaded="Page_Loaded">
+    NavigationCacheMode="Required">
 
     <Page.Resources>
         <CollectionViewSource x:Name="cvsProjects" IsSourceGrouped="True" ItemsPath="Activities"/>
@@ -40,7 +39,7 @@
                             <BreadcrumbBarItem>
                                 <BreadcrumbBarItem.ContentTemplate>
                                     <DataTemplate x:DataType="mod:Breadcrumb">
-                                        <TextBlock Text="{x:Bind Name}" FontSize="32" FontWeight="SemiBold"/>
+                                        <TextBlock Text="{x:Bind Name}" FontSize="28" FontWeight="SemiBold"/>
                                     </DataTemplate>
                                 </BreadcrumbBarItem.ContentTemplate>
                             </BreadcrumbBarItem>
@@ -50,8 +49,22 @@
 
                 <StackPanel Grid.Row="0" Grid.Column="1">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,3,0">
-                        <AppBarButton Icon="Find" Label="検索" Command="{x:Bind ViewModel.SearchRentResidentialEntryCommand}" CommandParameter="{x:Bind ViewModel.SearchQuery, Mode=OneWay}"/>
+
+                        <AppBarButton Icon="Find" Label="検索" Command="{x:Bind ViewModel.SearchRentResidentialBldgCommand}" CommandParameter="{x:Bind ViewModel.SearchQuery, Mode=OneWay}"/>
+                        <!--
                         <AppBarButton Icon="Add" Label="新規" Command="{x:Bind ViewModel.AddNewRentResidentialCommand}"/>
+                        -->
+                        <AppBarButton Icon="Add" Label="新規">
+                            <AppBarButton.Flyout>
+                                <MenuFlyout Placement="Bottom">
+                                    <MenuFlyoutItem Text="賃貸：住居用" Command="{x:Bind ViewModel.AddNewRentResidentialBldgCommand}"/>
+                                    <MenuFlyoutItem Text="賃貸：事業用"/>
+                                    <MenuFlyoutItem Text="賃貸：駐車場"/>
+                                    <MenuFlyoutSeparator/>
+                                    <MenuFlyoutItem Text="貸主"/>
+                                </MenuFlyout>
+                            </AppBarButton.Flyout>
+                        </AppBarButton>
                     </StackPanel>
                 </StackPanel>
 

@@ -9,32 +9,32 @@
     xmlns:mod="using:ZumenSearch.Models.Common"
     xmlns:modresi="using:ZumenSearch.Models.Rent.Residentials.Bldg"
     NavigationCacheMode="Required">
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled" Padding="48,0,48,24">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled" Padding="36,0,36,24">
         <Grid x:Name="ContentArea">
             <StackPanel Spacing="12" Margin="0,24,0,0">
 
                 <Expander Header="一般" Margin="0" Padding="24" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" IsExpanded="False">
                     <controls:WrapPanel x:Name="HorizontalWrapPanel" Margin="0" VerticalSpacing="12" HorizontalSpacing="6">
-                        <CheckBox Margin="0,0,0,0" Content="エレベータ" IsChecked="{x:Bind ViewModel.Bldg.HasElevator,Mode=TwoWay}"/>
-                        <CheckBox Margin="0,0,0,0" Content="オートロック" IsChecked="{x:Bind ViewModel.Bldg.HasAutolock,Mode=TwoWay}"/>
-                        <CheckBox Margin="0,0,0,0" Content="防犯カメラ" IsChecked="{x:Bind ViewModel.Bldg.HasSecurityCamera,Mode=TwoWay}"/>
-                        <CheckBox Margin="0,0,0,0" Content="宅配ボックス" IsChecked="{x:Bind ViewModel.Bldg.HasParcelLocker,Mode=TwoWay}"/>
+                        <CheckBox Margin="0,0,0,0" Content="エレベータ" IsChecked="{x:Bind ViewModel.HasElevator,Mode=TwoWay}"/>
+                        <CheckBox Margin="0,0,0,0" Content="オートロック" IsChecked="{x:Bind ViewModel.HasAutolock,Mode=TwoWay}"/>
+                        <CheckBox Margin="0,0,0,0" Content="防犯カメラ" IsChecked="{x:Bind ViewModel.HasSecurityCamera,Mode=TwoWay}"/>
+                        <CheckBox Margin="0,0,0,0" Content="宅配ボックス" IsChecked="{x:Bind ViewModel.HasParcelLocker,Mode=TwoWay}"/>
                     </controls:WrapPanel>
                 </Expander>
 
                 <Expander Header="電気" Margin="0" Padding="24" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" IsExpanded="False">
                     <StackPanel Spacing="12" VerticalAlignment="Bottom" HorizontalAlignment="Stretch">
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,0">
-                            <CheckBox Content="あり" Margin="0,0,0,0" IsChecked="{x:Bind ViewModel.Bldg.HasElectric, Mode=TwoWay}"/>
+                            <CheckBox Content="あり" Margin="0,0,0,0" IsChecked="{x:Bind ViewModel.HasElectric, Mode=TwoWay}"/>
                         </StackPanel>
-                        <RadioButtons Header="種類" MaxColumns="3" Margin="0,0,0,0" ItemsSource="{x:Bind ViewModel.Bldg.ElectricKinds}" SelectedItem="{x:Bind ViewModel.Bldg.SelectedElectricKind, Mode=TwoWay}" >
+                        <RadioButtons Header="種類" MaxColumns="3" Margin="0,0,0,0" ItemsSource="{x:Bind ViewModel.ElectricKinds}" SelectedItem="{x:Bind ViewModel.SelectedElectricKind, Mode=TwoWay}" >
                             <RadioButtons.ItemTemplate>
                                 <DataTemplate x:DataType="modresi:ElectricKind">
                                     <TextBlock Text="{x:Bind Label, Mode=OneTime}" VerticalAlignment="Center"/>
                                 </DataTemplate>
                             </RadioButtons.ItemTemplate>
                         </RadioButtons>
-                        <TextBox Header="詳細（事業者、住所、電話連絡先、容量[*アンペア]、メーター[専用・子・割当・他]）" Text="{x:Bind ViewModel.Bldg.ElectricDetail, Mode=TwoWay}" Margin="0,0,0,0" HorizontalAlignment="Stretch"/>
+                        <TextBox Header="詳細（事業者、住所、電話連絡先、容量[*アンペア]、メーター[専用・子・割当・他]）" Text="{x:Bind ViewModel.ElectricDetail, Mode=TwoWay}" Margin="0,0,0,0" HorizontalAlignment="Stretch"/>
                     </StackPanel>
                 </Expander>
 

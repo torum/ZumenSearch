@@ -4,9 +4,9 @@ using System.Diagnostics;
 
 namespace ZumenSearch.Views.Rent.Residentials.Bldg;
 
-internal sealed partial class PictureListPage : Page
+public sealed partial class PictureListPage : Page
 {
-    public ViewModels.Rent.Residentials.MainViewModel? ViewModel { get; private set; }
+    public ViewModels.Rent.Residentials.Bldg.MainViewModel? ViewModel { get; private set; }
 
     public PictureListPage()
     {
@@ -17,9 +17,9 @@ internal sealed partial class PictureListPage : Page
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
-        if ((e.Parameter is ViewModels.Rent.Residentials.MainViewModel) && (e.Parameter != null))
+        if ((e.Parameter is ViewModels.Rent.Residentials.Bldg.MainViewModel) && (e.Parameter != null))
         {
-            ViewModel = e.Parameter as ViewModels.Rent.Residentials.MainViewModel;
+            ViewModel = e.Parameter as ViewModels.Rent.Residentials.Bldg.MainViewModel;
         }
 
         base.OnNavigatedTo(e);
@@ -76,9 +76,9 @@ internal sealed partial class PictureListPage : Page
                     list.Add(file.Path);
                 }
 
-                if (ViewModel.Bldg.AddNewBuildingPicturesCommand.CanExecute(list))
+                if (ViewModel.AddNewBuildingPicturesCommand.CanExecute(list))
                 {
-                    await ViewModel.Bldg.AddNewBuildingPicturesCommand.ExecuteAsync(list);
+                    await ViewModel.AddNewBuildingPicturesCommand.ExecuteAsync(list);
                     //await ViewModel.Bldg.AddNewBuildingPictures(list);
                 }
             }

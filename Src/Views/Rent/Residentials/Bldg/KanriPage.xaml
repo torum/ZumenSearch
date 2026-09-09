@@ -8,7 +8,7 @@
     xmlns:modresi="using:ZumenSearch.Models.Rent.Residentials.Bldg"
     mc:Ignorable="d"
     NavigationCacheMode="Required">
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled" Padding="48,0,48,24">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled" Padding="36,0,36,24">
         <Grid x:Name="ContentArea">
             <StackPanel Spacing="12" Margin="0,24,0,0">
 
@@ -20,7 +20,7 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" MinWidth="320"></ColumnDefinition>
                         </Grid.ColumnDefinitions>
-                        <RadioButtons Header="建物管理主体" MaxColumns="4" ItemsSource="{x:Bind ViewModel.Bldg.KanriShutais, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.Bldg.SelectedKanriShutai, Mode=TwoWay}" VerticalAlignment="Bottom">
+                        <RadioButtons Header="建物管理主体" MaxColumns="4" ItemsSource="{x:Bind ViewModel.KanriShutais, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.SelectedKanriShutai, Mode=TwoWay}" VerticalAlignment="Bottom">
                             <RadioButtons.ItemTemplate>
                                 <DataTemplate x:DataType="modresi:KanriShutai">
                                     <StackPanel Orientation="Horizontal">
@@ -32,7 +32,7 @@
                     </Grid>
                 </Border>
 
-                <Border Style="{StaticResource RoundCardBorderStyle}" Visibility="{x:Bind ViewModel.Bldg.IsKanriJisya, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}">
+                <Border Style="{StaticResource RoundCardBorderStyle}" Visibility="{x:Bind ViewModel.IsKanriJisya, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"></RowDefinition>
@@ -45,22 +45,22 @@
                         <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
                             <TextBlock Text="管理内容"></TextBlock>
                             <controls:WrapPanel x:Name="HorizontalWrapPanel" Margin="0,8,24,12">
-                                <CheckBox Margin="0,0,0,0" Content="建物維持管理" IsChecked="{x:Bind ViewModel.Bldg.KanriIsMaintenanceManagementIfIsKanriJisya,Mode=TwoWay}"/>
-                                <CheckBox Margin="12,0,0,0" Content="入居者管理" IsChecked="{x:Bind ViewModel.Bldg.KanriIsTenantManagementIfIsKanriJisya,Mode=TwoWay}"/>
-                                <CheckBox Margin="12,0,0,0" Content="家賃入金管理" IsChecked="{x:Bind ViewModel.Bldg.KanriIsPaymentManagementIfIsKanriJisya,Mode=TwoWay}"/>
-                                <CheckBox Margin="12,0,0,0" Content="その他" IsChecked="{x:Bind ViewModel.Bldg.KanriIsOtherManagementIfIsKanriJisya,Mode=TwoWay}"/>
+                                <CheckBox Margin="0,0,0,0" Content="建物維持管理" IsChecked="{x:Bind ViewModel.KanriIsMaintenanceManagementIfIsKanriJisya,Mode=TwoWay}"/>
+                                <CheckBox Margin="12,0,0,0" Content="入居者管理" IsChecked="{x:Bind ViewModel.KanriIsTenantManagementIfIsKanriJisya,Mode=TwoWay}"/>
+                                <CheckBox Margin="12,0,0,0" Content="家賃入金管理" IsChecked="{x:Bind ViewModel.KanriIsPaymentManagementIfIsKanriJisya,Mode=TwoWay}"/>
+                                <CheckBox Margin="12,0,0,0" Content="その他" IsChecked="{x:Bind ViewModel.KanriIsOtherManagementIfIsKanriJisya,Mode=TwoWay}"/>
                             </controls:WrapPanel>
                         </StackPanel>
                         <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,0">
                             <TextBox Header="備考" 
-                             Text="{x:Bind ViewModel.Bldg.KanriRemarkIfIsKanriJisya, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             Text="{x:Bind ViewModel.KanriRemarkIfIsKanriJisya, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                              TextWrapping="Wrap" AcceptsReturn="True" IsSpellCheckEnabled="False"
                              MinWidth="400" MinHeight="160" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ScrollViewer.VerticalScrollBarVisibility="Auto"/>
                         </Grid>
                     </Grid>
                 </Border>
 
-                <Border Style="{StaticResource RoundCardBorderStyle}" Visibility="{x:Bind ViewModel.Bldg.IsKanriTasya, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}">
+                <Border Style="{StaticResource RoundCardBorderStyle}" Visibility="{x:Bind ViewModel.IsKanriTasya, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"></RowDefinition>
@@ -71,32 +71,32 @@
                             <ColumnDefinition Width="1*" MinWidth="320"></ColumnDefinition>
                         </Grid.ColumnDefinitions>
                         <Grid Grid.Row="0" Grid.Column="0">
-                            <TextBox Header="管理会社名" Text="{x:Bind ViewModel.Bldg.KanriNameOfCompanyIfIsKanriTasya, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
+                            <TextBox Header="管理会社名" Text="{x:Bind ViewModel.KanriNameOfCompanyIfIsKanriTasya, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
                         </Grid>
                         <Grid Grid.Row="0" Grid.Column="1" Margin="12,0,0,0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"></ColumnDefinition>
                                 <ColumnDefinition Width="*"></ColumnDefinition>
                             </Grid.ColumnDefinitions>
-                            <TextBox Header="連絡先" Text="{x:Bind ViewModel.Bldg.KanriContactInfoOfCompanyIfIsKanriTasya, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="300"></TextBox>
+                            <TextBox Header="連絡先" Text="{x:Bind ViewModel.KanriContactInfoOfCompanyIfIsKanriTasya, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="300"></TextBox>
                         </Grid>
                         <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,12,0,0">
                             <TextBox Header="備考" 
-                             Text="{x:Bind ViewModel.Bldg.KanriRemarkIfIsKanriTasya, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             Text="{x:Bind ViewModel.KanriRemarkIfIsKanriTasya, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                              TextWrapping="Wrap" AcceptsReturn="True" IsSpellCheckEnabled="False"
                              MinWidth="400" MinHeight="160" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ScrollViewer.VerticalScrollBarVisibility="Auto"/>
                         </Grid>
                     </Grid>
                 </Border>
 
-                <Border Style="{StaticResource RoundCardBorderStyle}" Visibility="{x:Bind ViewModel.Bldg.IsKanriKashinushi, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}">
+                <Border Style="{StaticResource RoundCardBorderStyle}" Visibility="{x:Bind ViewModel.IsKanriKashinushi, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"></RowDefinition>
                         </Grid.RowDefinitions>
                         <Grid Grid.Row="0" Grid.Column="0" Margin="0,0,0,0">
                             <TextBox Header="備考" 
-                             Text="{x:Bind ViewModel.Bldg.KanriRemarkIfIsKanriKashinushi, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             Text="{x:Bind ViewModel.KanriRemarkIfIsKanriKashinushi, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                              TextWrapping="Wrap" AcceptsReturn="True" IsSpellCheckEnabled="False"
                              MinWidth="400" MinHeight="160" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ScrollViewer.VerticalScrollBarVisibility="Auto"/>
                         </Grid>

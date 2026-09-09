@@ -3,35 +3,34 @@
 namespace ZumenSearch.Models.Common;
 
 // Result Wrapper Class
-internal abstract class ResultWrapper
+public abstract class ResultWrapper
 {
     public ErrorObject Error = new();
     public bool IsError = false;
 }
 
-internal class SqliteDataAccessResultWrapper : ResultWrapper
+public class SqliteDataAccessResultWrapper : ResultWrapper
 {
     public int AffectedCount = 0;
 }
 
-internal sealed class SqliteDataAccessInsertResultWrapper : SqliteDataAccessResultWrapper
+public sealed class SqliteDataAccessInsertResultWrapper : SqliteDataAccessResultWrapper
 {
     //public List<EntryItem> InsertedEntries = new();
 }
 
-internal sealed class SqliteDataAccessSelectRentResidentialResultWrapper : SqliteDataAccessResultWrapper
+public sealed class SqliteDataAccessSelectRentResidentialBuildingsResultWrapper : SqliteDataAccessResultWrapper
 {
-    public ObservableCollection<Rent.Residentials.Bldg.EntryResidentialSearchResult> SelectedEntries = [];
+    public ObservableCollection<Rent.Residentials.PropertySearchResultItem> PropertySearchResult = [];
 }
 
-internal sealed class SqliteDataAccessSelectRentResidentialFullResultWrapper : SqliteDataAccessResultWrapper
+public sealed class SqliteDataAccessSelectRentResidentialBuildingSingleResultWrapper : SqliteDataAccessResultWrapper
 {
-    public Rent.Residentials.Bldg.EntryResidential? EntryFull;
+    public Rent.Residentials.Bldg.Property? Building;
 }
 
-internal sealed class SqliteDataAccessSelectRentResidentialUnitsResultWrapper : SqliteDataAccessResultWrapper
+public sealed class SqliteDataAccessSelectRentResidentialRoomsResultWrapper : SqliteDataAccessResultWrapper
 {
-    public ObservableCollection<Rent.Residentials.Unit.UnitResidentialSearchResult> SelectedUnits = [];
+    public ObservableCollection<Rent.Residentials.ListingSearchResultItem> ListingSearchResult = [];
 }
-//
 

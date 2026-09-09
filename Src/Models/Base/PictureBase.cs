@@ -2,7 +2,7 @@
 
 namespace ZumenSearch.Models.Base;
 
-internal abstract class PictureBase : ObservableObject
+public abstract class PictureBase : ObservableObject
 {
     public string ImageLocation
     {

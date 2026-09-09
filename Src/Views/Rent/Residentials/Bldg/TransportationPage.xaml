@@ -21,7 +21,7 @@
             <animations:OpacityAnimation EasingMode="EaseOut" From="1" To="0" Duration="0:0:0.1" />
         </animations:ImplicitAnimationSet>
     </Page.Resources>
-    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled" Padding="48,0,48,24">
+    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled" Padding="36,0,36,24">
         <Grid x:Name="ContentArea">
             <StackPanel Spacing="12" Margin="0,24,0,0">
 
@@ -50,10 +50,10 @@
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
                                         <Grid Grid.Column="0">
-                                            <TextBox x:Name="TextBoxRailLine1" Header="路線" IsReadOnly="True" IsEnabled="False" TextChanged="TextBoxRailLine1_TextChanged" Text="{x:Bind ViewModel.Bldg.SelectedRailLine1.LineName, Mode=OneWay}" Margin="0" HorizontalAlignment="Stretch"></TextBox>
+                                            <TextBox x:Name="TextBoxRailLine1" Header="路線" IsReadOnly="True" IsEnabled="False" TextChanged="TextBoxRailLine1_TextChanged" Text="{x:Bind ViewModel.SelectedRailLine1.LineName, Mode=OneWay}" Margin="0" HorizontalAlignment="Stretch"></TextBox>
                                         </Grid>
                                         <Grid Grid.Column="1" Margin="6,0,0,0">
-                                            <Button x:Name="ButtonRailLine1" VerticalAlignment="Bottom" Content="選択" Command="{x:Bind ViewModel.Bldg.ShowRailLineSelect1Command, Mode=OneWay}"></Button>
+                                            <Button x:Name="ButtonRailLine1" VerticalAlignment="Bottom" Content="選択" Command="{x:Bind ViewModel.ShowRailLineSelect1Command, Mode=OneWay}"></Button>
                                         </Grid>
                                     </Grid>
                                     <Grid Grid.Column="1">
@@ -62,15 +62,15 @@
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
                                         <Grid Grid.Column="0">
-                                            <TextBox x:Name="TextBoxRailStation1" Header="駅名" IsReadOnly="True" IsEnabled="False" TextChanged="TextBoxRailStation1_TextChanged" Text="{x:Bind ViewModel.Bldg.SelectedRailStation1.StationName, Mode=OneWay}" Margin="12,0,0,0" HorizontalAlignment="Stretch"></TextBox>
+                                            <TextBox x:Name="TextBoxRailStation1" Header="駅名" IsReadOnly="True" IsEnabled="False" TextChanged="TextBoxRailStation1_TextChanged" Text="{x:Bind ViewModel.SelectedRailStation1.StationName, Mode=OneWay}" Margin="12,0,0,0" HorizontalAlignment="Stretch"></TextBox>
                                         </Grid>
                                         <Grid Grid.Column="1" Margin="6,0,0,0">
-                                            <Button VerticalAlignment="Bottom" Content="選択" Command="{x:Bind ViewModel.Bldg.ShowRailStationSelect1Command, Mode=OneWay}"></Button>
+                                            <Button VerticalAlignment="Bottom" Content="選択" Command="{x:Bind ViewModel.ShowRailStationSelect1Command, Mode=OneWay}"></Button>
                                         </Grid>
                                     </Grid>
                                 </Grid>
                                 <Grid>
-                                    <TextBox Header="駅から徒歩（分）" PlaceholderText="半角英数" Text="{x:Bind ViewModel.Bldg.EkiToho1, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MinWidth="90" Margin="0" HorizontalAlignment="Left"></TextBox>
+                                    <TextBox Header="駅から徒歩（分）" PlaceholderText="半角英数" Text="{x:Bind ViewModel.EkiToho1, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MinWidth="90" Margin="0" HorizontalAlignment="Left"></TextBox>
                                 </Grid>
 
                                 <Grid>
@@ -83,12 +83,12 @@
                                         <RowDefinition Height="Auto"></RowDefinition>
                                     </Grid.RowDefinitions>
                                     <Grid Grid.Row="0" Grid.Column="0">
-                                        <TextBox Header="バス停名" Text="{x:Bind ViewModel.Bldg.BusStop, Mode=TwoWay}" HorizontalAlignment="Stretch"></TextBox>
+                                        <TextBox Header="バス停名" Text="{x:Bind ViewModel.BusStop, Mode=TwoWay}" HorizontalAlignment="Stretch"></TextBox>
                                     </Grid>
                                     <Grid Grid.Row="1" Grid.Column="0">
                                         <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,12,0,0">
-                                            <TextBox Header="バス乗車時間（分）" PlaceholderText="半角英数" Text="{x:Bind ViewModel.Bldg.BusJyousya1, Mode=TwoWay}" MinWidth="90" Margin="0" HorizontalAlignment="Left"></TextBox>
-                                            <TextBox Header="バス停から徒歩（分）" PlaceholderText="半角英数" Text="{x:Bind ViewModel.Bldg.BusStopToho1, Mode=TwoWay}" MinWidth="90" Margin="12,0,0,0" HorizontalAlignment="Left"></TextBox>
+                                            <TextBox Header="バス乗車時間（分）" PlaceholderText="半角英数" Text="{x:Bind ViewModel.BusJyousya1, Mode=TwoWay}" MinWidth="90" Margin="0" HorizontalAlignment="Left"></TextBox>
+                                            <TextBox Header="バス停から徒歩（分）" PlaceholderText="半角英数" Text="{x:Bind ViewModel.BusStopToho1, Mode=TwoWay}" MinWidth="90" Margin="12,0,0,0" HorizontalAlignment="Left"></TextBox>
                                         </StackPanel>
                                     </Grid>
                                 </Grid>

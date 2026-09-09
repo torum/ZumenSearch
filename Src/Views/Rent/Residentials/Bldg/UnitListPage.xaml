@@ -6,10 +6,10 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     xmlns:mod="using:ZumenSearch.Models.Common"
-    xmlns:modresi="using:ZumenSearch.Models.Rent.Residentials.Unit"
+    xmlns:modresi="using:ZumenSearch.Models.Rent.Residentials.Room"
     NavigationCacheMode="Required">
 
-    <Grid x:Name="ContentArea" Padding="48,0,48,24">
+    <Grid x:Name="ContentArea" Padding="36,0,36,24">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -17,19 +17,14 @@
 
         <Grid Grid.Row="0">
             <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Margin="0,0,0,0" HorizontalAlignment="Right">
-                <!--
-                <AppBarButton Icon="Delete" Label="削除"/>
-                <AppBarButton Icon="Copy" Label="複製"/>
-                <AppBarButton Icon="Edit" Label="編集" Command="{x:Bind ViewModel.Bldg.EditSelectedUnitCommand, Mode=OneWay}" CommandParameter="{x:Bind RoomsListView.SelectedItem, Mode=OneWay}"/>
-                -->
-                <AppBarButton Icon="Add" Label="追加" Command="{x:Bind ViewModel.Bldg.AddNewUnitCommand, Mode=OneWay}"/>
+                <AppBarButton Icon="Add" Label="追加" Command="{x:Bind ViewModel.AddNewUnitCommand, Mode=OneWay}"/>
                 <AppBarButton Icon="More" Label="その他">
                     <AppBarButton.Flyout>
                         <MenuFlyout Placement="Bottom">
-                            <MenuFlyoutItem Text="編集" Icon="Edit" Command="{x:Bind ViewModel.Bldg.EditSelectedUnitCommand, Mode=OneWay}" CommandParameter="{x:Bind RoomsListView.SelectedItem, Mode=OneWay}"></MenuFlyoutItem>
-                            <MenuFlyoutItem Text="複製" Icon="Copy" Command="{x:Bind ViewModel.Bldg.DupeSelectedUnitCommand, Mode=OneWay}" CommandParameter="{x:Bind RoomsListView.SelectedItem, Mode=OneWay}"></MenuFlyoutItem>
+                            <MenuFlyoutItem Text="編集" Icon="Edit" Command="{x:Bind ViewModel.EditSelectedUnitCommand, Mode=OneWay}" CommandParameter="{x:Bind RoomsListView.SelectedItem, Mode=OneWay}"></MenuFlyoutItem>
+                            <MenuFlyoutItem Text="複製" Icon="Copy" Command="{x:Bind ViewModel.DupeSelectedUnitCommand, Mode=OneWay}" CommandParameter="{x:Bind RoomsListView.SelectedItem, Mode=OneWay}"></MenuFlyoutItem>
                             <MenuFlyoutSeparator/>
-                            <MenuFlyoutItem Text="削除" Icon="Delete" Command="{x:Bind ViewModel.Bldg.DeleteSelectedUnitCommand, Mode=OneWay}" CommandParameter="{x:Bind RoomsListView.SelectedItem, Mode=OneWay}"></MenuFlyoutItem>
+                            <MenuFlyoutItem Text="削除" Icon="Delete" Command="{x:Bind ViewModel.DeleteSelectedUnitCommand, Mode=OneWay}" CommandParameter="{x:Bind RoomsListView.SelectedItem, Mode=OneWay}"></MenuFlyoutItem>
                         </MenuFlyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>
@@ -38,39 +33,51 @@
 
         <Grid Grid.Row="1">
             <Border Style="{StaticResource RoundCardBorderStyle}">
-                <ListView x:Name="RoomsListView" ItemsSource="{x:Bind ViewModel.Bldg.Rooms, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.Bldg.SelectedRoom, Mode=TwoWay}" SelectionMode="Single" AllowFocusOnInteraction="True" IsDoubleTapEnabled="True" DoubleTapped="RoomsListView_DoubleTapped">
-
-                    <ListView.ContextFlyout>
+                <ItemsView x:Name="RoomsListView" Margin="0,0,0,0" ItemsSource="{x:Bind ViewModel.Rooms, Mode=OneWay}" SelectionMode="Single" AllowFocusOnInteraction="False" IsItemInvokedEnabled="False">
+                    <ItemsView.ContextFlyout>
                         <MenuFlyout>
-                            <MenuFlyoutItem Command="{x:Bind ViewModel.Bldg.EditSelectedUnitCommand}" CommandParameter="{x:Bind RoomsListView.SelectedItem, Mode=OneWay}">
-                                <MenuFlyoutItem.Icon>
-                                    <PathIcon Width="NaN" Height="NaN" Margin="0" Data="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm8.856-3.845A1.25 1.25 0 0 0 9 9.248v5.504a1.25 1.25 0 0 0 1.856 1.093l5.757-3.189a.75.75 0 0 0 0-1.312l-5.757-3.189Z"/>
-                                </MenuFlyoutItem.Icon>
+                            <MenuFlyoutItem Text="編集" Icon="Edit" Command="{x:Bind ViewModel.EditSelectedUnitCommand}" CommandParameter="{x:Bind RoomsListView.SelectedItem, Mode=OneWay}">
                                 <MenuFlyoutItem.KeyboardAccelerators>
                                     <KeyboardAccelerator Key="Enter" />
                                 </MenuFlyoutItem.KeyboardAccelerators>
                             </MenuFlyoutItem>
+                            <MenuFlyoutItem Text="複製" Icon="Copy" Command="{x:Bind ViewModel.DupeSelectedUnitCommand, Mode=OneWay}" CommandParameter="{x:Bind RoomsListView.SelectedItem, Mode=OneWay}"></MenuFlyoutItem>
+                            <MenuFlyoutSeparator/>
+                            <MenuFlyoutItem Text="削除" Icon="Delete" Command="{x:Bind ViewModel.DeleteSelectedUnitCommand, Mode=OneWay}" CommandParameter="{x:Bind RoomsListView.SelectedItem, Mode=OneWay}"></MenuFlyoutItem>
                         </MenuFlyout>
-                    </ListView.ContextFlyout>
-
-                    <ListView.ItemTemplate>
-                        <DataTemplate x:DataType="modresi:UnitResidential">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="*"/>
-                                </Grid.RowDefinitions>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Ellipse x:Name="Ellipse" Grid.RowSpan="2" Width ="32" Height="32" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center" Fill="{ThemeResource SystemControlBackgroundBaseMediumBrush}"/>
-                                <TextBlock Grid.Row="0" Grid.Column="1" Text="{x:Bind Name, Mode=OneWay}" x:Phase="1" Style="{ThemeResource BaseTextBlockStyle}" Margin="12,6,0,0"/>
-                                <TextBlock Grid.Row="1" Grid.Column="1" Text="" Style="{ThemeResource BodyTextBlockStyle}" Margin="12,0,0,6"/>
-                            </Grid>
+                    </ItemsView.ContextFlyout>
+                    <ItemsView.ItemTemplate>
+                        <DataTemplate x:DataType="modresi:Listing">
+                            <ItemContainer DataContext="{x:Bind}" IsDoubleTapEnabled="True" DoubleTapped="ItemContainer_DoubleTapped" PointerPressed="ItemContainer_PointerPressed" PointerReleased="ItemContainer_PointerReleased" RightTapped="ItemContainer_RightTapped">
+                                <!-- If ItemInvoked is enabled and used, this won't be necessary. But if ItemInvoked is not used, this is necessary to handle Enter key. -->
+                                <ItemContainer.KeyboardAccelerators>
+                                    <KeyboardAccelerator Key="Enter" Modifiers="None" Invoked="ItemContainerKeyboardAccelerator_Invoked" />
+                                </ItemContainer.KeyboardAccelerators>
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Ellipse x:Name="Ellipse" Grid.RowSpan="2" Width ="32" Height="32" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center" Fill="{ThemeResource SystemControlBackgroundBaseMediumBrush}"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{x:Bind Name, Mode=OneWay}" x:Phase="1" Style="{ThemeResource BaseTextBlockStyle}" Margin="12,6,0,0"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="1" Text="" Style="{ThemeResource BodyTextBlockStyle}" Margin="12,0,0,6"/>
+                                </Grid>
+                            </ItemContainer>
                         </DataTemplate>
-                    </ListView.ItemTemplate>
-                </ListView>
+                    </ItemsView.ItemTemplate>
+                    <ItemsView.Layout>
+                        <StackLayout Spacing="12"></StackLayout>
+                        <!--
+                        <UniformGridLayout MaximumRowsOrColumns="10" 
+                           MinRowSpacing="6" 
+                           MinColumnSpacing="6"/>
+                        -->
+                    </ItemsView.Layout>
+                </ItemsView>
             </Border>
         </Grid>
     </Grid>

@@ -1,8 +1,7 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml.Media.Animation;
-using Microsoft.Windows.ApplicationModel.Resources;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Reflection;
@@ -16,64 +15,39 @@ using ZumenSearch.Views;
 
 namespace ZumenSearch.ViewModels;
 
-internal sealed partial class MainViewModel : ObservableObject
+public partial class MainViewModel : ObservableObject
 {
-    private static readonly ResourceLoader _resourceLoader = new();
-
-    private string _versionDescription;
-
     #region == Public Properties ==
 
-    public string VersionDescription
-    {
-        get => _versionDescription;
-        private set => SetProperty(ref _versionDescription, value);
-    }
-
-    // TODO:
-    //private static ShellPage Shell => App.GetService<ShellPage>();
-
-    //private static MainWindow MainWin => App.GetService<MainWindow>();
+    [ObservableProperty]
+    public partial string VersionDescription { get; set; }
 
     #region == Window management ==
 
-    // Marking EditorList as readonly to fix IDE0044
-    public readonly List<Views.Rent.Residentials.EditorWindow> EditorList = [];
+    public readonly List<Views.Rent.Residentials.Bldg.EditorWindow> BldgEditorList = [];
+    public int BldgEditorWinWidth = 1366;
+    public int BldgEditorWinHeight = 768;
+    public int BldgEditorWinLeft = 130;
+    public int BldgEditorWinTop = 130;
 
-    // Editor window position and size
-    public int EditorWinWidth = 1366;
-    public int EditorWinHeight = 768;
-    public int EditorWinLeft = 130;
-    public int EditorWinTop = 130;
+    public readonly List<Views.Rent.Residentials.Room.EditorWindow> RoomEditorList = [];
+    public int RoomEditorWinWidth = 1366;
+    public int RoomEditorWinHeight = 768;
+    public int RoomEditorWinLeft = 130;
+    public int RoomEditorWinTop = 130;
 
-    /*
-    // Modal window position and size
-    public int ModalWinWidth = 1366;
-    public int ModalWinHeight = 768;
-    public int ModalWinLeft = 130;
-    public int ModalWinTop = 130;
-    */
     #endregion
 
     #region == Navigation ==
 
-    // TODO: Do I need this property?
-    [ObservableProperty]
-    public partial bool IsBackEnabled // Implement partial property for AOT compatibility
-    { get; set; } = true;
-
-    // TODO: Do I need this property?
-    [ObservableProperty]
-    public partial object? SelectedNavigationViewItem { get; set; }
-
     public ObservableCollection<Breadcrumb> BreadcrumbItemsResidential { get; set; } =
     [
-        new() { Name = "住居用", Page = typeof(Views.Rent.ResidentialSearchPage).FullName! }
+        new() { Name = "住居用", Page = typeof(Views.Rent.Residentials.SearchPage).FullName! }
     ];
     public ObservableCollection<Breadcrumb> BreadcrumbItemsResidentialSearchResult { get; set; } =
     [
-        new() { Name = "住居用", Page = typeof(Views.Rent.ResidentialSearchPage).FullName! },
-        new() { Name = "検索結果", Page = typeof(Views.Rent.ResidentialSearchResultPage).FullName! },
+        new() { Name = "住居用", Page = typeof(Views.Rent.Residentials.SearchPage).FullName! },
+        new() { Name = "検索結果", Page = typeof(Views.Rent.Residentials.SearchResultPage).FullName! },
     ];
 
     public ObservableCollection<Breadcrumb> BreadcrumbItemsRent { get; set; } =
@@ -102,7 +76,7 @@ internal sealed partial class MainViewModel : ObservableObject
     [ObservableProperty]
     public partial string SearchQuery { get; set; } = string.Empty;
 
-    public ObservableCollection<Models.Rent.Residentials.Bldg.EntryResidentialSearchResult> RentResidentialEntrySearchResult
+    public ObservableCollection<Models.Rent.Residentials.PropertySearchResultItem> RentResidentialBldgSearchResult
     {
         get; set
         {
@@ -113,7 +87,7 @@ internal sealed partial class MainViewModel : ObservableObject
         }
     } = [];
 
-    public ObservableCollection<Models.Rent.Residentials.Unit.UnitResidentialSearchResult> RentResidentialUnitSearchResult
+    public ObservableCollection<Models.Rent.Residentials.ListingSearchResultItem> RentResidentialRoomSearchResult
     {
         get; set
         {
@@ -144,25 +118,25 @@ internal sealed partial class MainViewModel : ObservableObject
 
     #endregion
 
+    private readonly CancellationTokenSource _cts = new();
+
     #region == Services ==
 
-    private readonly IAbstractFactory<Models.Rent.Residentials.Bldg.EntryResidential, Views.Rent.Residentials.ShellPage> _shellFactory;
+    private readonly IAbstractFactory<Models.Rent.Residentials.Bldg.Property, Views.Rent.Residentials.Bldg.ShellPage> _shellFactory;
     private readonly IDataAccessService _dataAccessService;
     private readonly INavigationService _navigationService;
     private readonly IDispatcherService _dispatcherService;
 
     #endregion
 
-    private readonly CancellationTokenSource _cts = new();
-
-    public MainViewModel(IAbstractFactory<Models.Rent.Residentials.Bldg.EntryResidential, Views.Rent.Residentials.ShellPage> shellFactory, INavigationService navigationService, IDataAccessService dataAccessService, IDispatcherService dispatcherService)//IAbstractFactory<Views.Rent.Residentials.ShellPage> editorFactory,
+    public MainViewModel(IAbstractFactory<Models.Rent.Residentials.Bldg.Property, Views.Rent.Residentials.Bldg.ShellPage> shellFactory, INavigationService navigationService, IDataAccessService dataAccessService, IDispatcherService dispatcherService)
     {
         _shellFactory = shellFactory;
         _dataAccessService = dataAccessService;
         _navigationService = navigationService;
         _dispatcherService = dispatcherService;
 
-        _versionDescription = GetVersionDescription();
+        VersionDescription = GetVersionDescription();
 
         InitializeDatabase();
     }
@@ -221,11 +195,11 @@ internal sealed partial class MainViewModel : ObservableObject
 
     // 新規物件追加（建物）
     [RelayCommand]
-    private void AddNewRentResidential()
+    private void AddNewRentResidentialBldg()
     {
-        var shell = _shellFactory.Create(new Models.Rent.Residentials.Bldg.EntryResidential(Guid.CreateVersion7().ToString("N"), EnumEntryStatus.New));
+        var shell = _shellFactory.Create(new Models.Rent.Residentials.Bldg.Property(Guid.CreateVersion7().ToString("N"), EnumPropertyStatus.New));
 
-        EditorList.Add(shell.Win);
+        BldgEditorList.Add(shell.Win);
 
         if (shell.Win.AppWindow.Presenter is OverlappedPresenter presenter)
         {
@@ -236,26 +210,27 @@ internal sealed partial class MainViewModel : ObservableObject
             presenter.PreferredMinimumHeight = 794;
         }
 
-        shell.Win.SetEntryIdToWindow(shell.ViewModel.Id);
+        shell.Win.SetPropertyIdToWindow(shell.ViewModel.Id);
         shell.Win.SetViewModelToWindow(shell.ViewModel);
 
         //var dpi = Windows.Win32.PInvoke.GetDpiForWindow(new Windows.Win32.Foundation.HWND(WinRT.Interop.WindowNative.GetWindowHandle(this)));
         //var scalingFactor = (float)dpi / 96;
         //AppWindow.Resize(new Windows.Graphics.SizeInt32((int)(400.0f * scalingFactor), (int)(300.0f * scalingFactor)));
 
-        shell.Win.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(EditorWinLeft, EditorWinTop, EditorWinWidth, EditorWinHeight));
+        shell.Win.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(BldgEditorWinLeft, BldgEditorWinTop, BldgEditorWinWidth, BldgEditorWinHeight));
 
         //editorWindow.AppWindow.Show();
         shell.Win.Activate();
+        shell.Win.AppWindow.MoveInZOrderAtTop();
     }
 
     // 編集（建物）
-    [RelayCommand(CanExecute = nameof(EditRentResidentialEntryCanExecute))]
-    public void EditRentResidentialEntry(Models.Rent.Residentials.Bldg.EntryResidentialSearchResult? selected)//Models.Rent.Residentials.EntryResidentialSearchResult? selected
+    [RelayCommand(CanExecute = nameof(EditRentResidentialBldgCanExecute))]
+    public void EditRentResidentialBldg(Models.Rent.Residentials.PropertySearchResultItem? selected)
     {
         var rentId = selected?.Id;
 
-        if (string.IsNullOrEmpty(rentId))//if (selected == null)
+        if (string.IsNullOrEmpty(rentId))
         {
             Debug.WriteLine("EditRentResidentialCommand executed but no item is selected.");
             return;
@@ -266,9 +241,9 @@ internal sealed partial class MainViewModel : ObservableObject
         var isFound = false;
 
         // Check if the selected item is already being edited in another window.
-        EditorList.ForEach(async editorWindow =>
+        BldgEditorList.ForEach(editorWindow =>
         {
-            Debug.WriteLine($"Checking editor window with Id: {editorWindow.Id} for selected item with Id: {rentId}");
+            //Debug.WriteLine($"Checking editor window with Id: {editorWindow.Id} for selected item with Id: {rentId}");
             if (editorWindow.Id == rentId)
             {
                 // If the editor window for this item is already open, activate it.
@@ -276,8 +251,10 @@ internal sealed partial class MainViewModel : ObservableObject
                 isFound = true;
 
                 editorWindow.Activate();
-                var mainWindow = App.GetService<MainWindow>();
-                mainWindow?.AppWindow.MoveInZOrderBelow(editorWindow.AppWindow.Id);
+                
+                // Do I need this anymore?
+                //var mainWindow = App.GetService<MainWindow>();
+                //mainWindow?.AppWindow.MoveInZOrderBelow(editorWindow.AppWindow.Id);
                 editorWindow.AppWindow.MoveInZOrderAtTop();
 
                 return;
@@ -303,13 +280,13 @@ internal sealed partial class MainViewModel : ObservableObject
             return;
         }
 
-        if (res.EntryFull == null)
+        if (res.Building is null)
         {
-            Debug.WriteLine($"EntryResidentialFull for {rentId} is null. Cannot open editor.");
+            Debug.WriteLine($"Building for {rentId} is null. Cannot open editor.");
             return;
         }
 
-        var editorShell = _shellFactory.Create(res.EntryFull);//_editorFactory.Create();
+        var editorShell = _shellFactory.Create(res.Building);//_editorFactory.Create();
 
         var editorWindow = editorShell.Win;
         if (editorWindow == null)
@@ -319,12 +296,15 @@ internal sealed partial class MainViewModel : ObservableObject
             return;
         }
 
-        editorWindow.SetEntryIdToWindow(editorShell.ViewModel.Id);
+        editorWindow.SetPropertyIdToWindow(editorShell.ViewModel.Id);
         editorWindow.SetViewModelToWindow(editorShell.ViewModel);
 
-        EditorList.Add(editorWindow);
+        // To update the title/name and other properties in the editor window, we need to pass the selected search result to the editor's ViewModel.
+        editorShell.ViewModel.SetSearchResult(selected);
 
-        editorWindow.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(EditorWinLeft, EditorWinTop, EditorWinWidth, EditorWinHeight));
+        BldgEditorList.Add(editorWindow);
+
+        editorWindow.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(BldgEditorWinLeft, BldgEditorWinTop, BldgEditorWinWidth, BldgEditorWinHeight));
         if (editorWindow.AppWindow.Presenter is OverlappedPresenter presenter)
         {
             presenter.IsResizable = true;
@@ -336,11 +316,15 @@ internal sealed partial class MainViewModel : ObservableObject
 
         editorWindow.AppWindow.Show();
         editorWindow.Activate();
-        var mainWindow = App.GetService<MainWindow>();
-        mainWindow?.AppWindow.MoveInZOrderBelow(editorWindow.AppWindow.Id);
+
+        // Do I need this anymore?
+        //var mainWindow = App.GetService<MainWindow>();
+        //mainWindow?.AppWindow.MoveInZOrderBelow(editorWindow.AppWindow.Id);
+
         editorWindow.AppWindow.MoveInZOrderAtTop();
     }
-    public static bool EditRentResidentialEntryCanExecute(Models.Rent.Residentials.Bldg.EntryResidentialSearchResult? selected)
+
+    public static bool EditRentResidentialBldgCanExecute(Models.Rent.Residentials.PropertySearchResultItem? selected)
     {
         if (selected is null)
         {
@@ -351,19 +335,19 @@ internal sealed partial class MainViewModel : ObservableObject
     }
 
     // 編集（部屋）TODO:
-    [RelayCommand(CanExecute = nameof(EditRentResidentialUnitCanExecute))]
-    public void EditRentResidentialUnit(Models.Rent.Residentials.Unit.UnitResidentialSearchResult? selected)
+    [RelayCommand(CanExecute = nameof(EditRentResidentialRoomCanExecute))]
+    public void EditRentResidentialRoom(Models.Rent.Residentials.ListingSearchResultItem? selected)
     {
         if (selected == null)
         {
-            Debug.WriteLine("EditRentResidentialUnit executed but no item is selected.");
+            Debug.WriteLine("EditRentResidentialRoom executed but no item is selected.");
             return;
         }
 
         // TODO;
-        Debug.WriteLine($"TODO: EditRentResidentialUnit executed for {selected.Id} (EntryId = {selected.EntryId})");
+        Debug.WriteLine($"TODO: EditRentResidentialRoom executed for {selected.Id} (PropertyId = {selected.PropertyId})");
     }
-    public static bool EditRentResidentialUnitCanExecute(Models.Rent.Residentials.Unit.UnitResidentialSearchResult? selected)
+    public static bool EditRentResidentialRoomCanExecute(Models.Rent.Residentials.ListingSearchResultItem? selected)
     {
         if (selected is null)
         {
@@ -404,9 +388,9 @@ internal sealed partial class MainViewModel : ObservableObject
         }
         else
         {
-            if (res.AffectedCount > 0 && res.SelectedEntries.Count > 0)
+            if (res.AffectedCount > 0 && res.PropertySearchResult.Count > 0)
             {
-                foreach (var item in res.SelectedEntries)
+                foreach (var item in res.PropertySearchResult)
                 {
                     var autoSuggest = new AutoSuggestItem
                     {
@@ -440,8 +424,8 @@ internal sealed partial class MainViewModel : ObservableObject
     }
 
     // 物件検索 TODO:
-    [RelayCommand(CanExecute = nameof(SearchRentResidentialEntryCanExecute))]
-    private async Task SearchRentResidentialEntry(string? queryText)
+    [RelayCommand(CanExecute = nameof(SearchRentResidentialBldgCanExecute))]
+    private async Task SearchRentResidentialBldg(string? queryText)
     {
         var query = string.Empty;
 
@@ -463,7 +447,7 @@ internal sealed partial class MainViewModel : ObservableObject
 
         //Debug.WriteLine($"queryText is {queryText}");
 
-        RentResidentialEntrySearchResult.Clear();
+        RentResidentialBldgSearchResult.Clear();
 
         var res = await Task.Run(() => _dataAccessService.SelectRentResidentialsByNameKeyword(query), _cts.Token);
         //var res = _dataAccessService.SelectRentResidentialsByNameKeyword("*");
@@ -479,12 +463,14 @@ internal sealed partial class MainViewModel : ObservableObject
         }
         else
         {
-            RentResidentialEntrySearchResult = new(res.SelectedEntries);
+            RentResidentialBldgSearchResult = new(res.PropertySearchResult);
 
             _navigationService.NavigateTo("ZumenSearch.Views.SearchResultPage", SlideNavigationTransitionEffect.FromLeft);//Navigate(typeof(Views.Rent.Residentials.SearchResultPage), null, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });
+
+            //_navigationService.NavigateTo("ZumenSearch.Views.Rent.Residentials.Bldg.BldgShellPage", SlideNavigationTransitionEffect.FromLeft);//Navigate(typeof(Views.Rent.Residentials.SearchResultPage), null, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });
         }
     }
-    public static bool SearchRentResidentialEntryCanExecute(string? queryText)
+    public static bool SearchRentResidentialBldgCanExecute(string? queryText)
     {
         /*
         if (string.IsNullOrEmpty(queryText))
@@ -497,11 +483,11 @@ internal sealed partial class MainViewModel : ObservableObject
 
     // 部屋検索
     [RelayCommand]
-    private async Task SearchRentResidentialUnit()
+    private async Task SearchRentResidentialRoom()
     {
-        RentResidentialUnitSearchResult.Clear();
+        RentResidentialRoomSearchResult.Clear();
 
-        var res = await Task.Run(() => _dataAccessService.SelectRentResidentialUnits(), _cts.Token);
+        var res = await Task.Run(() => _dataAccessService.SelectRentResidentialRooms(), _cts.Token);
 
         if (res.IsError)
         {
@@ -514,15 +500,15 @@ internal sealed partial class MainViewModel : ObservableObject
         }
         else
         {
-            RentResidentialUnitSearchResult = new(res.SelectedUnits);
+            RentResidentialRoomSearchResult = new(res.ListingSearchResult);
 
-            _navigationService.NavigateTo("ZumenSearch.Views.Rent.ResidentialSearchResultPage", SlideNavigationTransitionEffect.FromLeft);//Navigate(typeof(Views.Rent.Residentials.SearchResultPage), null, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });
+            _navigationService.NavigateTo("ZumenSearch.Views.Rent.Residentials.SearchResultPage", SlideNavigationTransitionEffect.FromLeft);//Navigate(typeof(Views.Rent.Residentials.SearchResultPage), null, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });
         }
     }
 
     // 物件削除
-    [RelayCommand(CanExecute = nameof(DeleteRentResidentialEntryCanExecute))]
-    private void DeleteRentResidentialEntry(Models.Rent.Residentials.Bldg.EntryResidentialSearchResult? selected)
+    [RelayCommand(CanExecute = nameof(DeleteRentResidentialBldgCanExecute))]
+    private void DeleteRentResidentialBldg(Models.Rent.Residentials.PropertySearchResultItem? selected)
     {
         if (selected == null)
         {
@@ -533,7 +519,7 @@ internal sealed partial class MainViewModel : ObservableObject
         var isFound = false;
 
         // TODO: Check if the selected item is already being edited in another window.
-        EditorList.ForEach(editorWindow =>
+        BldgEditorList.ForEach(editorWindow =>
         {
             Debug.WriteLine($"Checking editor window with Id: {editorWindow.Id} for selected item with Id: {selected.Id}");
             if (editorWindow.Id == selected.Id)
@@ -567,7 +553,7 @@ internal sealed partial class MainViewModel : ObservableObject
         }
         else
         {
-            if (RentResidentialEntrySearchResult.Remove(selected))
+            if (RentResidentialBldgSearchResult.Remove(selected))
             {
                 // Successfully removed the selected item from the search result.
             }
@@ -577,7 +563,8 @@ internal sealed partial class MainViewModel : ObservableObject
             }
         }
     }
-    public static bool DeleteRentResidentialEntryCanExecute(Models.Rent.Residentials.Bldg.EntryResidentialSearchResult? selected)
+
+    private static bool DeleteRentResidentialBldgCanExecute(Models.Rent.Residentials.PropertySearchResultItem? selected)
     {
         if (selected is null)
         {
@@ -588,19 +575,19 @@ internal sealed partial class MainViewModel : ObservableObject
     }
 
     // 部屋削除（TODO）
-    [RelayCommand(CanExecute = nameof(DeleteRentResidentialUnitCanExecute))]
-    private void DeleteRentResidentialUnit(Models.Rent.Residentials.Unit.UnitResidentialSearchResult? selected)
+    [RelayCommand(CanExecute = nameof(DeleteRentResidentialRoomCanExecute))]
+    private void DeleteRentResidentialRoom(Models.Rent.Residentials.ListingSearchResultItem? selected)
     {
-        if (selected == null)
+        if (selected is null)
         {
-            Debug.WriteLine("DeleteRentResidentialUnit executed but no item is selected.");
+            Debug.WriteLine("DeleteRentResidentialRoom executed but no item is selected.");
             return;
         }
 
         // TODO:
-        Debug.WriteLine($"TODO: DeleteRentResidentialUnit executed for {selected.Id} (EntryId = {selected.EntryId})");
+        Debug.WriteLine($"TODO: DeleteRentResidentialRoom executed for {selected.Id} (PropertyId = {selected.PropertyId})");
     }
-    public static bool DeleteRentResidentialUnitCanExecute(Models.Rent.Residentials.Unit.UnitResidentialSearchResult? selected)
+    private static bool DeleteRentResidentialRoomCanExecute(Models.Rent.Residentials.ListingSearchResultItem? selected)
     {
         if (selected is null)
         {

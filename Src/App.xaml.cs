@@ -1,13 +1,13 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.UI.Xaml;
 using System.Diagnostics;
-using System.Text;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using ZumenSearch.Helpers;
 using ZumenSearch.Services;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.Services.Extensions;
-using ZumenSearch.Views;
 
 namespace ZumenSearch;
 
@@ -22,23 +22,17 @@ public partial class App : Application
     public static string AppDataFolder { get; private set; } = System.IO.Path.Combine(System.IO.Path.Combine(EnvDataFolder, AppDeveloper), AppName);
 
     // "BlobData" includes building/unit pictures, PDF and its thumbnail image files.
-    public static string AppDataPictureFolder { get; private set; } = System.IO.Path.Combine(AppDataFolder, "BlobData");
+    public static string AppDataPictureFolder { get; private set; } = System.IO.Path.Combine(AppDataFolder, "Blob");
 
     // Config file path
     public static string AppConfigFilePath { get; private set; } = System.IO.Path.Combine(AppDataFolder, AppName + ".config");
 
-    // Log file
-    public bool IsSaveErrorLog = false;
-    public string LogFilePath = System.Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + System.IO.Path.DirectorySeparatorChar + AppName + "_errors.txt";
-    private readonly StringBuilder _errortxt = new();
+    //public static Window Window { get; private set; } = null!;
 
-    // DispatcherQueuecherQueue
-    public Microsoft.UI.Dispatching.DispatcherQueue? CurrentDispatcherQueue
-    {
-        get; private set;
-    }
+    public static Microsoft.UI.Dispatching.DispatcherQueue CurrentDispatcherQueue { get; private set; } = null!;
 
-    // Getneric Host
+    //public static nint WindowHandle => WinRT.Interop.WindowNative.GetWindowHandle(Window);
+
     public IHost Host
     {
         get;
@@ -57,14 +51,12 @@ public partial class App : Application
 
     public App()
     {
-#if DEBUG
-        IsSaveErrorLog = true;
-#else
-        IsSaveErrorLog = false;
-#endif
+        var culture = new System.Globalization.CultureInfo("ja-JP");
+        System.Globalization.CultureInfo.CurrentCulture = culture;
+        System.Globalization.CultureInfo.CurrentUICulture = culture;
+        Microsoft.Windows.Globalization.ApplicationLanguages.PrimaryLanguageOverride = "ja-JP";
 
-
-        CurrentDispatcherQueue = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
+        InitializeComponent();
 
         if (RuntimeHelper.IsMSIX)
         {
@@ -73,10 +65,6 @@ public partial class App : Application
             AppDataFolder = System.IO.Path.Combine(System.IO.Path.Combine(envDataFolder, AppDeveloper), AppName);
             AppConfigFilePath = System.IO.Path.Combine(AppDataFolder, AppName + ".config");
             AppDataPictureFolder = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(AppDataFolder, AppDeveloper), AppName), "Pictures");
-        }
-        else
-        {
-            //
         }
 
         try
@@ -92,66 +80,52 @@ public partial class App : Application
         }
         catch (Exception ex)
         {
+            Debug.WriteLine("CreateDirectory@App(): " + ex.Message);
+
             // Log the exception for debugging
-            AppendErrorLog("Failed to create folders on startup.", ex.ToString());
-            SaveErrorLog();
+            //AppendErrorLog("Failed to create folders on startup.", ex.ToString());
+            //SaveErrorLog();
         }
 
-        var culture = new System.Globalization.CultureInfo("ja-JP");
-        System.Globalization.CultureInfo.CurrentCulture = culture;
-        System.Globalization.CultureInfo.CurrentUICulture = culture;
-        Microsoft.Windows.Globalization.ApplicationLanguages.PrimaryLanguageOverride = "ja-JP";
-
-        InitializeComponent();
+        // Used for DispatcherService (passed as a parameter) to enqueue actions to the UI thread.
+        CurrentDispatcherQueue = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
 
         Host = Microsoft.Extensions.Hosting.Host.
-        CreateDefaultBuilder().
-        UseContentRoot(AppContext.BaseDirectory).
-        ConfigureServices((context, services) =>
-        {
-            // Services
-            // TODO:
-            //services.AddSingleton<IThemeSelectorService, ThemeSelectorService>();
-            services.AddSingleton<IDataAccessService, DataAccessService>();
-            services.AddTransient<IModalDialogService, ModalDialogService>();
-            services.AddTransient<IDataAccessLocationService, DataAccessLocationService>();
-            services.AddTransient<IDataAccessTransportationService, DataAccessTransportationService>();
-            services.AddSingleton<IDispatcherService>(new DispatcherService(CurrentDispatcherQueue));
-            services.AddSingleton<INavigationService, NavigationService>();
-            services.AddTransient<INavigationResidentialService, NavigationResidentialService>();
+            CreateDefaultBuilder().
+            UseContentRoot(AppContext.BaseDirectory).
+            ConfigureServices((context, services) =>
+            {
+                // Services
+                services.AddSingleton<IDispatcherService>(new DispatcherService(CurrentDispatcherQueue));
+                services.AddSingleton<INavigationService, NavigationService>();
+                services.AddSingleton<IDataAccessService, DataAccessService>();
+                services.AddTransient<INavigationResidentialService, NavigationResidentialService>();
+                services.AddTransient<IModalDialogService, ModalDialogService>();
+                services.AddTransient<IDataAccessLocationService, DataAccessLocationService>();
+                services.AddTransient<IDataAccessTransportationService, DataAccessTransportationService>();
 
-            // Views and ViewModels
-            services.AddSingleton<Views.ShellPage>();
-            services.AddSingleton<ViewModels.MainViewModel>();
-            services.AddSingleton<Views.MainWindow>();
+                // Views and ViewModels
+                services.AddSingleton<ViewModels.MainViewModel>();
+                services.AddSingleton<Views.MainWindow>();
+                services.AddSingleton<Views.ShellPage>();
 
-            services.AddSingleton<Views.SearchPage>();
+                services.AddTransient<ViewModels.Rent.Residentials.Bldg.MainViewModel>();
+                services.AddTransient<Views.Rent.Residentials.Bldg.EditorWindow>();
+                services.AddTransient<Views.Rent.Residentials.Bldg.ShellPage>();
 
-            services.AddSingleton<Views.Rent.ResidentialSearchPage>();
-            services.AddSingleton<Views.Rent.ResidentialSearchResultPage>();
+                services.AddTransient<ViewModels.Rent.Residentials.Room.MainViewModel>();
+                services.AddTransient<Views.Rent.Residentials.Room.EditorWindow>();
+                services.AddTransient<Views.Rent.Residentials.Room.ShellPage>();
 
-            services.AddTransient<Views.Rent.Residentials.EditorWindow>();
-            services.AddTransient<Views.Rent.Residentials.ShellPage>();
-            services.AddTransient<ViewModels.Rent.Residentials.MainViewModel>();
+                services.AddEditorFactory<ViewModels.Rent.Residentials.Bldg.MainViewModel, Models.Rent.Residentials.Bldg.Property>();
+                services.AddEditorFactory<Views.Rent.Residentials.Bldg.ShellPage, Models.Rent.Residentials.Bldg.Property>();
+                services.AddEditorFactory<ViewModels.Rent.Residentials.Room.MainViewModel, Models.Rent.Residentials.Room.Listing>();
+                services.AddEditorFactory<Views.Rent.Residentials.Room.ShellPage, Models.Rent.Residentials.Room.Listing>();
+                // Instead of AddEditorFactory for each, typeof.. <,> registers all.
+                //services.AddSingleton(typeof(IAbstractFactory<,>), typeof(AbstractFactory<,>)); 
 
-            services.AddEditorFactory<ViewModels.Rent.Residentials.MainViewModel, Models.Rent.Residentials.Bldg.EntryResidential>();
-            services.AddEditorFactory<Views.Rent.Residentials.ShellPage, Models.Rent.Residentials.Bldg.EntryResidential>();
-            // Instead of AddEditorFactory for each, typeof.. <,> registers all.
-            //services.AddSingleton(typeof(IAbstractFactory<,>), typeof(AbstractFactory<,>)); 
-
-            services.AddSingleton<Views.Rent.Commercials.CommercialsPage>();
-            services.AddSingleton<ViewModels.Rent.Commercials.CommercialsViewModel>();
-
-            services.AddSingleton<Views.Rent.Parkings.ParkingsPage>();
-            services.AddSingleton<ViewModels.Rent.Parkings.ParkingsViewModel>();
-
-            services.AddSingleton<Views.Rent.Owners.OwnersPage>();
-            services.AddSingleton<ViewModels.Rent.Owners.OwnersViewModel>();
-
-            services.AddSingleton<Views.Brokers.BrokersPage>();
-            services.AddSingleton<Views.SettingsPage>();
-        }).
-        Build();
+            }).
+            Build();
 
         UnhandledException += App_UnhandledException;
         TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
@@ -187,15 +161,16 @@ public partial class App : Application
         }
 
         // Create the window and load settings and apply size and position etc.
-        //var main = App.GetService<MainWindow>();
-        var navigationService = GetService<INavigationService>();
-        var main = GetService<MainWindow>();
-        var shell = GetService<ShellPage>();
-        navigationService.Initialize(shell.NavigationFrame);
+        var main = GetService<Views.MainWindow>();
+        var shell = GetService<Views.ShellPage>();
         main.Content = shell;
-        shell.CallMeWhenMainWindowIsReady(main);
-        // Activate the window.
-        main?.Activate();
+
+        var navigationService = GetService<INavigationService>();
+        navigationService.Initialize(shell.NavigationFrame);
+
+        shell.CallMeAfterMainWindowIsCreated(main);
+
+        main.Activate();
     }
 
     // Activated from other instance.
@@ -203,7 +178,7 @@ public partial class App : Application
     {
         CurrentDispatcherQueue?.TryEnqueue(() =>
         {
-            var main = App.GetService<MainWindow>();
+            var main = App.GetService<Views.MainWindow>();
 
             // Due to the bag of the Winui3, the window may not be activated.
             // see https://github.com/microsoft/microsoft-ui-xaml/issues/7595
@@ -217,9 +192,6 @@ public partial class App : Application
     {
         Debug.WriteLine("App_UnhandledException", e.Message);
         Debug.WriteLine($"StackTrace: {e.Exception.StackTrace}, Source: {e.Exception.Source}");
-        AppendErrorLog("App_UnhandledException", e.Message + System.Environment.NewLine + $"StackTrace: {e.Exception.StackTrace}, Source: {e.Exception.Source}");
-
-        SaveErrorLog();
     }
 
     private void TaskScheduler_UnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
@@ -230,8 +202,6 @@ public partial class App : Application
         }
 
         Debug.WriteLine("TaskScheduler_UnobservedTaskException: " + exception.Message);
-        AppendErrorLog("TaskScheduler_UnobservedTaskException", exception.Message);
-        SaveErrorLog();
 
         e.SetObserved();
     }
@@ -247,49 +217,10 @@ public partial class App : Application
         {
             // can ignore.
             Debug.WriteLine("CurrentDomain_UnhandledException (TaskCanceledException): " + exception.Message);
-            AppendErrorLog("CurrentDomain_UnhandledException (TaskCanceledException)", exception.Message);
         }
         else
         {
             Debug.WriteLine("CurrentDomain_UnhandledException: " + exception.Message);
-            AppendErrorLog("CurrentDomain_UnhandledException", exception.Message);
-            SaveErrorLog();
-        }
-    }
-
-    public void AppendErrorLog(string kindTxt, string errorTxt)
-    {
-        _errortxt.AppendLine(kindTxt + ": " + errorTxt);
-        var dt = DateTime.Now;
-        _errortxt.AppendLine($"Occured at {dt.ToString("yyyy/MM/dd HH:mm:ss")}");
-        _errortxt.AppendLine("");
-    }
-
-    public void SaveErrorLog()
-    {
-        if (!IsSaveErrorLog)
-        {
-            return;
-        }
-
-        if (string.IsNullOrEmpty(LogFilePath))
-        {
-            return;
-        }
-
-        if (_errortxt.Length <= 0)
-        {
-            return;
-        }
-
-        _errortxt.AppendLine("");
-        var dt = DateTime.Now;
-        _errortxt.AppendLine($"Saved at {dt.ToString("yyyy/MM/dd HH:mm:ss")}");
-
-        var s = _errortxt.ToString();
-        if (!string.IsNullOrEmpty(s))
-        {
-            File.WriteAllText(LogFilePath, s);
         }
     }
 

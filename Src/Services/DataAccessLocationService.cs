@@ -22,6 +22,7 @@ public class DataAccessLocationService : IDataAccessLocationService
         var dataset = new List<CountyAndCity>();
 
         using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
+        // TODO; Try catch for connection.Open() and log error if fails
         connection.Open();
         using var cmd = connection.CreateCommand();
         cmd.CommandText = string.Format("SELECT machiaza_id, county, city FROM mt_town_all WHERE pref LIKE '{0}'", pref);

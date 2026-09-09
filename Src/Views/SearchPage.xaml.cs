@@ -1,6 +1,7 @@
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using System.Collections.ObjectModel;
+using ZumenSearch.Services.Contracts;
 using ZumenSearch.ViewModels;
 
 namespace ZumenSearch.Views;
@@ -38,11 +39,14 @@ public class CustomDataObject
 
 public sealed partial class SearchPage : Page
 {
-    private MainViewModel ViewModel { get; init; }
+    public ViewModels.MainViewModel ViewModel { get;}
+
+    private readonly INavigationService _navigationService;
 
     public SearchPage()
     {
         ViewModel = App.GetService<MainViewModel>();
+        _navigationService = App.GetService<INavigationService>();
 
         InitializeComponent();
 
@@ -79,23 +83,11 @@ public sealed partial class SearchPage : Page
         BasicGridView.ItemsSource = Items;
     }
 
-    protected override void OnNavigatedTo(NavigationEventArgs e)
-    {
-        base.OnNavigatedTo(e);
-
-        this.SearchAutoSuggestBox.Focus(Microsoft.UI.Xaml.FocusState.Programmatic);
-    }
-
-    private void Page_Loaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
-    {
-        this.SearchAutoSuggestBox.Focus(Microsoft.UI.Xaml.FocusState.Programmatic);
-    }
-
     private void AutoSuggestBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
     {
-        if (ViewModel.SearchRentResidentialEntryCommand.CanExecute(args.QueryText))
+        if (ViewModel.SearchRentResidentialBldgCommand.CanExecute(args.QueryText))
         {
-            ViewModel.SearchRentResidentialEntryCommand.Execute(args.QueryText);
+            ViewModel.SearchRentResidentialBldgCommand.Execute(args.QueryText);
         }
     }
 

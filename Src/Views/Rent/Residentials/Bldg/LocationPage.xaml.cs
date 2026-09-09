@@ -3,9 +3,9 @@ using Microsoft.UI.Xaml.Navigation;
 
 namespace ZumenSearch.Views.Rent.Residentials.Bldg;
 
-internal sealed partial class LocationPage : Page
+public sealed partial class LocationPage : Page
 {
-    public ViewModels.Rent.Residentials.MainViewModel? ViewModel { get; private set; }
+    public ViewModels.Rent.Residentials.Bldg.MainViewModel? ViewModel { get; private set; }
 
     public LocationPage()
     {
@@ -16,7 +16,7 @@ internal sealed partial class LocationPage : Page
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
-        if (e.Parameter is ViewModels.Rent.Residentials.MainViewModel vm)
+        if (e.Parameter is ViewModels.Rent.Residentials.Bldg.MainViewModel vm)
         {
             ViewModel = vm;
         }

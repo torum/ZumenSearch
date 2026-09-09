@@ -3,9 +3,9 @@ using Microsoft.UI.Xaml.Navigation;
 
 namespace ZumenSearch.Views.Rent.Residentials.Bldg;
 
-internal sealed partial class FacilitiesPage : Page
+public sealed partial class FacilitiesPage : Page
 {
-    public ViewModels.Rent.Residentials.MainViewModel? ViewModel { get; private set; }
+    public ViewModels.Rent.Residentials.Bldg.MainViewModel? ViewModel { get; private set; }
 
     public FacilitiesPage()
     {
@@ -19,10 +19,10 @@ internal sealed partial class FacilitiesPage : Page
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
-        if ((e.Parameter is ViewModels.Rent.Residentials.MainViewModel) && (e.Parameter != null))
+        if ((e.Parameter is ViewModels.Rent.Residentials.Bldg.MainViewModel) && (e.Parameter != null))
         {
             //_editorShell = e.Parameter as Views.Rent.Residentials.EditorShell;
-            ViewModel = e.Parameter as ViewModels.Rent.Residentials.MainViewModel;
+            ViewModel = e.Parameter as ViewModels.Rent.Residentials.Bldg.MainViewModel;
         }
 
         base.OnNavigatedTo(e);

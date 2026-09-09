@@ -1,0 +1,201 @@
+﻿<Page
+    x:Class="ZumenSearch.Views.Rent.Residentials.Room.BasicPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    xmlns:mod="using:ZumenSearch.Models.Common" 
+    NavigationCacheMode="Required"
+    Loaded="Page_Loaded">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled" Padding="36,0,36,24">
+        <Grid x:Name="ContentArea">
+
+            <StackPanel Spacing="12" Margin="0,24,0,0">
+
+                <Border Style="{StaticResource RoundCardBorderStyle}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*" MinWidth="320"></ColumnDefinition>
+                            <ColumnDefinition Width="1*" MinWidth="320"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <Grid Grid.Row="0" Grid.Column="0">
+                            <StackPanel>
+                                <Border Visibility="{x:Bind ViewModel.NameHasError, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}">
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                        <ImageIcon x:Name="IconHostError" Source="ms-appx:///Assets/SvgIcons/ic_fluent_error_circle_16_color.svg" Width="16" Height="16" Margin="0,0,0,0"/>
+                                        <TextBlock Text="{x:Bind ViewModel.NameErrorMessage, Mode=OneWay}" Margin="8,0,0,0"></TextBlock>
+                                    </StackPanel>
+                                </Border>
+                                <TextBox x:Name="TextBoxName" TabIndex="0" MinWidth="200" Header="部屋番号" PlaceholderText="必須" Text="{x:Bind ViewModel.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom"/>
+                            </StackPanel>
+                        </Grid>
+                        <Grid Grid.Row="0" Grid.Column="1" Margin="12,0,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                <ColumnDefinition Width="*"></ColumnDefinition>
+                            </Grid.ColumnDefinitions>
+                            <Grid Grid.Row="0" Grid.Column="0">
+                                <StackPanel VerticalAlignment="Bottom">
+                                    <TextBlock Text="間取り" Margin="0,0,0,8"/>
+                                    <StackPanel Orientation="Horizontal">
+                                        <ComboBox SelectedIndex="0" Width="80" VerticalAlignment="Bottom">
+                                            <x:String>1</x:String>
+                                            <x:String>2</x:String>
+                                            <x:String>3</x:String>
+                                            <x:String>4</x:String>
+                                        </ComboBox>
+                                        <ComboBox SelectedIndex="0" Margin="6,0,0,0" Width="100" VerticalAlignment="Bottom">
+                                            <x:String>R</x:String>
+                                            <x:String>K</x:String>
+                                            <x:String>DK</x:String>
+                                            <x:String>LDK</x:String>
+                                        </ComboBox>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Grid>
+                            <Grid Grid.Row="0" Grid.Column="1" Margin="12,0,0,0">
+                                <TextBox Header="専有面積（平米）" MinWidth="120" HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource RoundCardBorderStyle}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*" MinWidth="320"></ColumnDefinition>
+                            <ColumnDefinition Width="1*" MinWidth="320"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <Grid Grid.Row="0" Grid.Column="0">
+                            <StackPanel Orientation="Horizontal" Margin="0" VerticalAlignment="Bottom">
+                                <ComboBox Header="所在階" Width="80" Margin="0" SelectedIndex="0" HorizontalAlignment="Left" VerticalAlignment="Bottom">
+                                    <x:String>地上</x:String>
+                                    <x:String>地下</x:String>
+                                </ComboBox>
+                                <TextBox Width="60" Margin="6,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Bottom" />
+                                <CheckBox Margin="12,0,0,0" Content="角部屋" VerticalAlignment="Bottom"/>
+                            </StackPanel>
+                        </Grid>
+                        <Grid Grid.Row="0" Grid.Column="1" Margin="12,0,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                <ColumnDefinition Width="*"></ColumnDefinition>
+                            </Grid.ColumnDefinitions>
+                            <Grid Grid.Row="0" Grid.Column="0">
+                                <ComboBox Header="主要採光面" Margin="0" HorizontalAlignment="Left" VerticalAlignment="Bottom" SelectedIndex="-1">
+                                    <x:String>北</x:String>
+                                    <x:String>北東</x:String>
+                                    <x:String>東</x:String>
+                                    <x:String>南東</x:String>
+                                    <x:String>南</x:String>
+                                    <x:String>南西</x:String>
+                                    <x:String>西</x:String>
+                                    <x:String>北西</x:String>
+                                </ComboBox>
+                            </Grid>
+                            <Grid Grid.Row="0" Grid.Column="1" Margin="12,0,0,0">
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource RoundCardBorderStyle}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*" MinWidth="320"></ColumnDefinition>
+                            <ColumnDefinition Width="1*" MinWidth="320"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <Grid Grid.Row="0" Grid.Column="0">
+                            <StackPanel Orientation="Horizontal" Margin="0" VerticalAlignment="Bottom">
+                                <ComboBox Header="現況" Width="224" Margin="0" SelectedIndex="0">
+                                    <ComboBoxItem>未指定</ComboBoxItem>
+                                    <ComboBoxItem>解約・退去予定</ComboBoxItem>
+                                    <ComboBoxItem>空室</ComboBoxItem>
+                                    <ComboBoxItem>申し込み済み</ComboBoxItem>
+                                    <ComboBoxItem>契約済・入居中</ComboBoxItem>
+                                    <ComboBoxItem>その他・不明</ComboBoxItem>
+                                </ComboBox>
+                                <CheckBox Content="募集中" Margin="12,0,0,0" VerticalAlignment="Bottom"></CheckBox>
+                            </StackPanel>
+                        </Grid>
+                        <Grid Grid.Row="0" Grid.Column="1" Margin="12,0,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                <ColumnDefinition Width="*"></ColumnDefinition>
+                            </Grid.ColumnDefinitions>
+                            <Grid Grid.Row="0" Grid.Column="0">
+                                <StackPanel Orientation="Horizontal">
+                                    <ComboBox Header="入居可能日" Width="100" SelectedIndex="-1" Margin="0"  VerticalAlignment="Bottom">
+                                        <ComboBoxItem>１月</ComboBoxItem>
+                                        <ComboBoxItem>２月</ComboBoxItem>
+                                        <ComboBoxItem>３月</ComboBoxItem>
+                                        <ComboBoxItem>４月</ComboBoxItem>
+                                        <ComboBoxItem>５月</ComboBoxItem>
+                                        <ComboBoxItem>６月</ComboBoxItem>
+                                        <ComboBoxItem>７月</ComboBoxItem>
+                                        <ComboBoxItem>８月</ComboBoxItem>
+                                        <ComboBoxItem>９月</ComboBoxItem>
+                                        <ComboBoxItem>１０月</ComboBoxItem>
+                                        <ComboBoxItem>１１月</ComboBoxItem>
+                                        <ComboBoxItem>１２月</ComboBoxItem>
+                                    </ComboBox>
+                                    <ComboBox Width="90" SelectedIndex="-1" Margin="6,0,0,0" VerticalAlignment="Bottom">
+                                        <ComboBoxItem>上旬</ComboBoxItem>
+                                        <ComboBoxItem>中旬</ComboBoxItem>
+                                        <ComboBoxItem>下旬</ComboBoxItem>
+                                    </ComboBox>
+                                </StackPanel>
+                            </Grid>
+                            <Grid Grid.Row="0" Grid.Column="1" Margin="12,0,0,0">
+                                <CheckBox Content="入居即可" Margin="0,0,0,0" VerticalAlignment="Bottom"></CheckBox>
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource RoundCardBorderStyle}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*" MinWidth="320"></ColumnDefinition>
+                            <ColumnDefinition Width="1*" MinWidth="320"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <Grid Grid.Row="0" Grid.Column="0">
+                            <DatePicker Header="現況確認日" Margin="0 0 6 6" HorizontalAlignment="Left" IsEnabled="True"/>
+                        </Grid>
+                        <Grid Grid.Row="0" Grid.Column="1" Margin="12,0,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                <ColumnDefinition Width="*"></ColumnDefinition>
+                            </Grid.ColumnDefinitions>
+                            <Grid Grid.Row="0" Grid.Column="0">
+                                <Button Content="本日確認" Margin="0,0,0,6" Padding="6" VerticalAlignment="Bottom" />
+                            </Grid>
+                            <Grid Grid.Row="0" Grid.Column="1" Margin="12,0,0,0">
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource RoundCardBorderStyle}">
+                    <TextBox Header="備考" MinHeight="100" HorizontalAlignment="Stretch" VerticalAlignment="Top" AcceptsReturn="True" ScrollViewer.VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" />
+                </Border>
+                
+            </StackPanel>
+
+        </Grid>
+    </ScrollViewer>
+</Page>
+

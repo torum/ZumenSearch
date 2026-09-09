@@ -13,8 +13,8 @@ public class NavigationService : INavigationService
         {
             { "ZumenSearch.Views.SearchPage", typeof(Views.SearchPage) },
             { "ZumenSearch.Views.SearchResultPage", typeof(Views.SearchResultPage) },
-            { "ZumenSearch.Views.Rent.ResidentialSearchPage", typeof(Views.Rent.ResidentialSearchPage) },
-            { "ZumenSearch.Views.Rent.ResidentialSearchResultPage", typeof(Views.Rent.ResidentialSearchResultPage) },
+            { "ZumenSearch.Views.Rent.Residentials.SearchPage", typeof(Views.Rent.Residentials.SearchPage) },
+            { "ZumenSearch.Views.Rent.Residentials.SearchResultPage", typeof(Views.Rent.Residentials.SearchResultPage) },
             { "ZumenSearch.Views.Rent.Commercials.CommercialsPage", typeof(Views.Rent.Commercials.CommercialsPage) },
             { "ZumenSearch.Views.Rent.Parkings.ParkingsPage", typeof(Views.Rent.Parkings.ParkingsPage) },
             { "ZumenSearch.Views.Rent.Owners.OwnersPage", typeof(Views.Rent.Owners.OwnersPage) },
@@ -47,7 +47,7 @@ public class NavigationService : INavigationService
         }
         else
         {
-            Debug.WriteLine("NavigationService.NavigateTo: No valid page found for tag " + tag);
+            Debug.WriteLine("NavigationService.NavigateTo: No valid page found for " + tag);
             return false;
         }
     }

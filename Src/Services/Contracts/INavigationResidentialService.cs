@@ -5,10 +5,9 @@ namespace ZumenSearch.Services.Contracts;
 
 public interface INavigationResidentialService
 {
-    void Initialize(Frame frame, Window win);
+    void Initialize(Frame frame);//, Window win
 
     Frame? GetFrame();
 
-    Window? GetWindow();
-
+    //Window? GetWindow();
 }

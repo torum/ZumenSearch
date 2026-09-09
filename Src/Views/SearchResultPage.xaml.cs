@@ -3,26 +3,26 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
+using ZumenSearch.Models.Common;
 using ZumenSearch.Models.Rent.Residentials;
+using ZumenSearch.Services.Contracts;
 using ZumenSearch.ViewModels;
 
 namespace ZumenSearch.Views;
 
-internal sealed partial class SearchResultPage : Page
+public sealed partial class SearchResultPage : Page
 {
-    public MainViewModel ViewModel
-    {
-        get;
-    }
+    public MainViewModel ViewModel { get; }
 
-    //private MainShell? Shell => App.GetService<MainShell>();
 
-    private Frame? ContentFrame;
+    private readonly INavigationService _navigationService;
 
     public SearchResultPage()
     {
         ViewModel = App.GetService<MainViewModel>();
+        _navigationService = App.GetService<INavigationService>();
 
         InitializeComponent();
 
@@ -32,12 +32,7 @@ internal sealed partial class SearchResultPage : Page
     {
         base.OnNavigatedTo(e);
 
-        if ((e.Parameter is Frame) && (e.Parameter != null))
-        {
-            ContentFrame = e.Parameter as Frame;
-
-            this.SearchResultListView.Focus(Microsoft.UI.Xaml.FocusState.Programmatic);
-        }
+        this.SearchResultListView.Focus(Microsoft.UI.Xaml.FocusState.Programmatic);
     }
 
     private void Page_Loaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
@@ -47,19 +42,12 @@ internal sealed partial class SearchResultPage : Page
 
     private void BreadcrumbBar_ItemClicked(BreadcrumbBar sender, BreadcrumbBarItemClickedEventArgs args)
     {
-        //ViewModel.NavigationService.NavigateTo(items[args.Index].Page!);
-
-        //MainShell shell = App.GetService<MainShell>();
-
-        if (ContentFrame is null) return;
-
         if (args.Index == 0)
         {
-            ContentFrame.Navigate(typeof(Views.SearchPage), ContentFrame, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });
-        }
-        else if (args.Index == 1)
-        {
-            //shell.NavFrame.Navigate(typeof(Views.Rent.Residentials.SearchPage), shell.NavFrame, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft });
+            if (args.Item is Breadcrumb breadcrumb)
+            {
+                _navigationService.NavigateTo(breadcrumb.Page, SlideNavigationTransitionEffect.FromLeft);
+            }
         }
     }
 
@@ -81,9 +69,9 @@ internal sealed partial class SearchResultPage : Page
             return;
         }
 
-        if (container.DataContext is not Models.Rent.Residentials.Bldg.EntryResidentialSearchResult searchresult)
+        if (container.DataContext is not Models.Rent.Residentials.PropertySearchResultItem searchresult)
         {
-            Debug.WriteLine($"Not EntryResidentialSearchResult. {container.DataContext?.GetType().FullName} @SearchResult_DoubleTapped");
+            Debug.WriteLine($"Not PropertySearchResult. {container.DataContext?.GetType().FullName} @SearchResult_DoubleTapped");
             return;
         }
 
@@ -92,9 +80,9 @@ internal sealed partial class SearchResultPage : Page
             return;
         }
 
-        if (ViewModel.EditRentResidentialEntryCommand.CanExecute(searchresult))
+        if (ViewModel.EditRentResidentialBldgCommand.CanExecute(searchresult))
         {
-            ViewModel.EditRentResidentialEntryCommand.Execute(searchresult);
+            ViewModel.EditRentResidentialBldgCommand.Execute(searchresult);
         }
 
         /*
@@ -228,15 +216,15 @@ internal sealed partial class SearchResultPage : Page
             return;
         }
 
-        if (invokedItem is not Models.Rent.Residentials.Bldg.EntryResidentialSearchResult)
+        if (invokedItem is not Models.Rent.Residentials.PropertySearchResultItem)
         {
             return;
         }
 
         // Needs ItemContainer_PointerPressed Handled = true; to avoid stealing child window focus. Strupid WinUI3.
-        if (ViewModel.EditRentResidentialEntryCommand.CanExecute(invokedItem))
+        if (ViewModel.EditRentResidentialBldgCommand.CanExecute(invokedItem))
         {
-            ViewModel.EditRentResidentialEntryCommand.Execute(invokedItem);
+            ViewModel.EditRentResidentialBldgCommand.Execute(invokedItem);
         }
     }
 
@@ -272,9 +260,9 @@ internal sealed partial class SearchResultPage : Page
             return;
         }
 
-        if (element.DataContext is not Models.Rent.Residentials.Bldg.EntryResidentialSearchResult searchresult)
+        if (element.DataContext is not Models.Rent.Residentials.PropertySearchResultItem searchresult)
         {
-            Debug.WriteLine($"Not EntryResidentialSearchResult. {element.DataContext?.GetType().FullName} @ItemContainerKeyboardAccelerator_Invoked");
+            Debug.WriteLine($"Not PropertySearchResult. {element.DataContext?.GetType().FullName} @ItemContainerKeyboardAccelerator_Invoked");
             return;
         }
 
@@ -283,9 +271,31 @@ internal sealed partial class SearchResultPage : Page
             return;
         }
 
-        if (ViewModel.EditRentResidentialEntryCommand.CanExecute(searchresult))
+        if (ViewModel.EditRentResidentialBldgCommand.CanExecute(searchresult))
         {
-            ViewModel.EditRentResidentialEntryCommand.Execute(searchresult);
+            ViewModel.EditRentResidentialBldgCommand.Execute(searchresult);
         }
+    }
+
+    private void ItemContainer_RightTapped(object sender, Microsoft.UI.Xaml.Input.RightTappedRoutedEventArgs e)
+    {
+        if (e.OriginalSource is not FrameworkElement element)
+        {
+            return;
+        }
+
+        var container = FindParent<Microsoft.UI.Xaml.Controls.ItemContainer>(element);
+        if (container is null)
+        {
+            return;
+        }
+
+        if (container.DataContext is not Models.Rent.Residentials.PropertySearchResultItem searchresult)
+        {
+            Debug.WriteLine($"Not PropertySearchResult. {container.DataContext?.GetType().FullName} @ItemContainer_RightTapped");
+            return;
+        }
+
+        container.IsSelected = true;
     }
 }

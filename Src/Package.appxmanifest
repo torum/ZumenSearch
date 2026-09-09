@@ -9,15 +9,15 @@
   IgnorableNamespaces="uap rescap systemai">
 
   <Identity
-    Name="d6606934-f27a-4137-9280-16564d30f7db"
-    Publisher="CN=torum"
+    Name="A4A915AD-FE64-4ABC-A8A9-CD454F503F52"
+    Publisher="CN=AppPublisher"
     Version="1.0.0.0" />
 
-  <mp:PhoneIdentity PhoneProductId="d6606934-f27a-4137-9280-16564d30f7db" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
+  <mp:PhoneIdentity PhoneProductId="A4A915AD-FE64-4ABC-A8A9-CD454F503F52" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
     <DisplayName>ZumenSearch</DisplayName>
-    <PublisherDisplayName>torum</PublisherDisplayName>
+    <PublisherDisplayName>AppPublisher</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
 
@@ -27,10 +27,9 @@
   </Dependencies>
 
   <Resources>
-	<Resource Language="x-generate"/>
-    <Resource Language="ja-JP" />
+    <Resource Language="x-generate"/>
   </Resources>
-	
+
   <Applications>
     <Application Id="App"
       Executable="$targetnametoken$.exe"

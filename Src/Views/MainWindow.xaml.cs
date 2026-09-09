@@ -4,24 +4,19 @@ using System.Diagnostics;
 using System.Xml;
 using System.Xml.Linq;
 using ZumenSearch.Services.Contracts;
-using ZumenSearch.ViewModels;
 
 namespace ZumenSearch.Views;
 
-internal sealed partial class MainWindow : Window
+public sealed partial class MainWindow : Window
 {
-    // Window position and size
-    // TODO: Change this lator.1920x1080
-    private int _winRestoreWidth = 1274;//1024;
-    // TODO: Change this lator.
-    private int _winRestoreHeight = 794;//768;
+    private OverlappedPresenterState _winState = OverlappedPresenterState.Restored;
+
+    private int _winRestoreWidth = 1274;
+    private int _winRestoreHeight = 794;
     private int _winRestoreTop = 100;
     private int _winRestoreLeft = 100;
 
-    private OverlappedPresenterState winState = OverlappedPresenterState.Restored;
-
-    //private readonly ShellPage _mainShell;
-    private readonly MainViewModel _viewModel;
+    private readonly ViewModels.MainViewModel _viewModel;
     private readonly IDispatcherService _dispatcherService;
 
     public MainWindow(IDispatcherService dispatcherService, ViewModels.MainViewModel viewModel)
@@ -32,37 +27,112 @@ internal sealed partial class MainWindow : Window
         InitializeComponent();
 
         ExtendsContentIntoTitleBar = true;
+        //SetTitleBar(AppTitleBar);
 
-        this.Title = "ZumenSearch ";
-        this.AppWindow.Title = "ZumenSearch ";
-        this.AppWindow.SetIcon(Path.Combine(AppContext.BaseDirectory, "Assets\\App.ico"));
+        //this.AppWindow.SetIcon(Path.Combine(AppContext.BaseDirectory, "Assets\\App.ico"));
+        this.AppWindow.SetIcon("Assets/App.ico");
 
-        //Content = _mainShell;
-
+        this.AppWindow.Closing += AppWindow_Closing;
+        this.Closed += Window_Closed;
+        this.SizeChanged += Window_SizeChanged;
 
         LoadSetting();
 
-        // Restore window size and position
-
-        var appWindow = this.AppWindow;
-
-        if (appWindow != null)
+        if (this.AppWindow.Presenter is OverlappedPresenter presenter)
         {
-            appWindow.Closing += AppWindow_Closing;
+            presenter.PreferredMinimumWidth = 542;
+            presenter.PreferredMinimumHeight = 600;
 
-            // Window state
-            if (appWindow.Presenter is OverlappedPresenter presenter)
+            if (_winState == OverlappedPresenterState.Maximized)
             {
-                presenter.PreferredMinimumWidth = 542;
-                presenter.PreferredMinimumHeight = 600;
+                this.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(_winRestoreLeft, _winRestoreTop, _winRestoreWidth, _winRestoreHeight));
+                presenter.Maximize();
+            }
+            else if (_winState == OverlappedPresenterState.Minimized)
+            {
+                this.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(_winRestoreLeft, _winRestoreTop, _winRestoreWidth, _winRestoreHeight));
+            }
+            else
+            {
+                this.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(_winRestoreLeft, _winRestoreTop, _winRestoreWidth, _winRestoreHeight));
+            }
+        }
+    }
 
-                if (_winRestoreWidth < 500)
+    private void LoadSetting()
+    {
+        System.IO.Directory.CreateDirectory(App.AppDataFolder);
+
+        int winHeight;
+        int winWidth;
+        int winTop;
+        int winLeft;
+
+        if (System.IO.File.Exists(App.AppConfigFilePath))
+        {
+            var xdoc = XDocument.Load(App.AppConfigFilePath);
+            //Debug.WriteLine(xdoc.ToString());
+
+            if (xdoc.Root != null)
+            {
+                // Main window
+                var mainWindow = xdoc.Root.Element("MainWindow");
+                if (mainWindow != null)
                 {
-                    _winRestoreWidth = 500;
+                    var hoge = mainWindow.Attribute("state");
+                    if (hoge != null)
+                    {
+                        if (hoge.Value == "Maximized")
+                        {
+                            _winState = OverlappedPresenterState.Maximized;
+                        }
+                        else if (hoge.Value == "Normal")
+                        {
+                            _winState = OverlappedPresenterState.Restored;
+                        }
+                        else if (hoge.Value == "Minimized")
+                        {
+                            // Let's not minimized on startup, so restore it.
+                            _winState = OverlappedPresenterState.Restored;
+                        }
+                    }
+
+                    hoge = mainWindow.Attribute("top");
+                    if (hoge != null)
+                    {
+                        winTop = int.Parse(hoge.Value);
+                        _winRestoreTop = winTop;
+                    }
+
+                    hoge = mainWindow.Attribute("left");
+                    if (hoge != null)
+                    {
+                        winLeft = int.Parse(hoge.Value);
+                        _winRestoreLeft = winLeft;
+                    }
+
+                    hoge = mainWindow.Attribute("height");
+                    if (hoge != null)
+                    {
+                        winHeight = int.Parse(hoge.Value);
+                        _winRestoreHeight = winHeight;
+                    }
+
+                    hoge = mainWindow.Attribute("width");
+                    if (hoge != null)
+                    {
+                        winWidth = int.Parse(hoge.Value);
+                        _winRestoreWidth = winWidth;
+                    }
                 }
-                if (_winRestoreHeight < 500)
+
+                if (_winRestoreWidth < 542)
                 {
-                    _winRestoreHeight = 500;
+                    _winRestoreWidth = 542;
+                }
+                if (_winRestoreHeight < 600)
+                {
+                    _winRestoreHeight = 600;
                 }
                 if (_winRestoreTop < 0)
                 {
@@ -73,74 +143,135 @@ internal sealed partial class MainWindow : Window
                     _winRestoreLeft = 0;
                 }
 
-                if (winState == OverlappedPresenterState.Maximized)
+                // BldgEditorWindow element
+                var editWindow = xdoc.Root.Element("BldgEditorWindow");
+                if (editWindow != null)
                 {
-                    // Sets restore size and position.
-                    appWindow.MoveAndResize(new Windows.Graphics.RectInt32(_winRestoreLeft, _winRestoreTop, _winRestoreWidth, _winRestoreHeight));
-                    // Maximize the window.
-                    presenter.Maximize();
+                    var hoge = editWindow.Attribute("top");
+                    if (hoge != null)
+                    {
+                        _viewModel.BldgEditorWinTop = int.Parse(hoge.Value);
+                    }
 
-                    // TODO: TEMP
-                    //appWindow.Move(new Windows.Graphics.PointInt32(winRestoreleft, winRestoreTop));
-                    //appWindow.Resize(new Windows.Graphics.SizeInt32(1920, 1080));
-                    //presenter.IsResizable = false;
+                    hoge = editWindow.Attribute("left");
+                    if (hoge != null)
+                    {
+                        _viewModel.BldgEditorWinLeft = int.Parse(hoge.Value);
+                    }
+
+                    hoge = editWindow.Attribute("height");
+                    if (hoge != null)
+                    {
+                        _viewModel.BldgEditorWinHeight = int.Parse(hoge.Value);
+                    }
+
+                    hoge = editWindow.Attribute("width");
+                    if (hoge != null)
+                    {
+                        _viewModel.BldgEditorWinWidth = int.Parse(hoge.Value);
+                    }
                 }
-                else if (winState == OverlappedPresenterState.Minimized)
+
+                if (_viewModel.BldgEditorWinWidth < 500)
                 {
-                    // Don't do anything. This is bad.
-
-                    // This should not happen, but just in case.
-                    //presenter.Restore();
-                    // Sets restore size and position.
-                    //appWindow.MoveAndResize(new Windows.Graphics.RectInt32(_winRestoreleft, _winRestoreTop, _winRestoreWidth, _winRestoreHeight));
-
-                    // TODO: TEMP
-                    //appWindow.Move(new Windows.Graphics.PointInt32(winRestoreleft, winRestoreTop));
-                    //appWindow.Resize(new Windows.Graphics.SizeInt32(1920, 1080));
-                    //presenter.IsResizable = false;
+                    _viewModel.BldgEditorWinWidth = 500;
                 }
-                else
+                if (_viewModel.BldgEditorWinHeight < 500)
                 {
-                    // Sets restore size and position.
-                    appWindow.MoveAndResize(new Windows.Graphics.RectInt32(_winRestoreLeft, _winRestoreTop, _winRestoreWidth, _winRestoreHeight));
+                    _viewModel.BldgEditorWinHeight = 500;
+                }
+                if (_viewModel.BldgEditorWinTop < 0)
+                {
+                    _viewModel.BldgEditorWinTop = 0;
+                }
+                if (_viewModel.BldgEditorWinLeft < 0)
+                {
+                    _viewModel.BldgEditorWinLeft = 0;
+                }
 
-                    // TODO: TEMP
-                    //appWindow.Move(new Windows.Graphics.PointInt32(winRestoreleft, winRestoreTop));
-                    //appWindow.Resize(new Windows.Graphics.SizeInt32(1920, 1080));
-                    //presenter.IsResizable = false;
+
+                // RoomEditorWindow element
+                editWindow = xdoc.Root.Element("RoomEditorWindow");
+                if (editWindow != null)
+                {
+                    var hoge = editWindow.Attribute("top");
+                    if (hoge != null)
+                    {
+                        _viewModel.RoomEditorWinTop = int.Parse(hoge.Value);
+                    }
+
+                    hoge = editWindow.Attribute("left");
+                    if (hoge != null)
+                    {
+                        _viewModel.RoomEditorWinLeft = int.Parse(hoge.Value);
+                    }
+
+                    hoge = editWindow.Attribute("height");
+                    if (hoge != null)
+                    {
+                        _viewModel.RoomEditorWinHeight = int.Parse(hoge.Value);
+                    }
+
+                    hoge = editWindow.Attribute("width");
+                    if (hoge != null)
+                    {
+                        _viewModel.RoomEditorWinWidth = int.Parse(hoge.Value);
+                    }
+                }
+
+                if (_viewModel.RoomEditorWinWidth < 500)
+                {
+                    _viewModel.RoomEditorWinWidth = 500;
+                }
+                if (_viewModel.RoomEditorWinHeight < 500)
+                {
+                    _viewModel.RoomEditorWinHeight = 500;
+                }
+                if (_viewModel.RoomEditorWinTop < 0)
+                {
+                    _viewModel.RoomEditorWinTop = 0;
+                }
+                if (_viewModel.RoomEditorWinLeft < 0)
+                {
+                    _viewModel.RoomEditorWinLeft = 0;
                 }
             }
         }
-
     }
 
     private async void AppWindow_Closing(Microsoft.UI.Windowing.AppWindow sender, Microsoft.UI.Windowing.AppWindowClosingEventArgs args)
     {
-        // TODO: Currently, WinUI3 does not have "App.Current?.Windows". So, we cannot loop through all windows.
-        // Temporary workaround for closing all editor windows when the main window is closed.
-        if (_viewModel.EditorList.Count > 0)
-        {
-            var isCancel = false;
+        var isCancel = false;
 
-            foreach (var editor in _viewModel.EditorList)
+        if (_viewModel.RoomEditorList.Count > 0)
+        {
+            foreach (var editor in _viewModel.RoomEditorList)
             {
                 if (editor.ViewModel is null)
                 {
+                    Debug.WriteLine("AppWindow_Closing: editor.ViewModel is null");
                     continue;
                 }
-
-                if (editor.ViewModel.Bldg.IsDirty || editor.ViewModel.Unit.IsDirty)
+                if (editor.ViewModel.IsDirty)
                 {
                     args.Cancel = true;
                     isCancel = true;
                     editor.Activate();
+                    editor.AppWindow.MoveInZOrderAtTop();
+
+                    // Show comfirmation dialog to user to save changes or not.
+                    if (editor.Content is Views.Rent.Residentials.Room.ShellPage shell)
+                    {
+                        await shell.ShowEditorCloseConfirmationDialog();
+                    }
+
                     break;
                 }
             }
 
             if (!isCancel)
             {
-                foreach (var editor in _viewModel.EditorList)
+                foreach (var editor in _viewModel.RoomEditorList.ToList()) // Create snapshot of the list to avoid collection modification issues during iteration
                 {
                     editor.IsAutoClose = true;
 
@@ -149,21 +280,47 @@ internal sealed partial class MainWindow : Window
             }
         }
 
-
-        /*
-        // Loop window list and close all windows.           
-        foreach (var editor in _viewModel.EditorList)
+        if (isCancel)
         {
-            // TODO: check if the editor can be closed or not. Keep deleted window list.
-            //editorEindow.CanClose
-
-            editor.IsAutoClose = true;
-            editor.Close();
+            return;
         }
-        // TODO: when close is canceled.
-        //a.Cancel = true; // Prevents closing the window immediately.    
-        a.Cancel = false;
-        */
+
+        if (_viewModel.BldgEditorList.Count > 0)
+        {
+            foreach (var editor in _viewModel.BldgEditorList)
+            {
+                if (editor.ViewModel is null)
+                {
+                    Debug.WriteLine("AppWindow_Closing: editor.ViewModel is null");
+                    continue;
+                }
+                if (editor.ViewModel.IsDirty)
+                {
+                    args.Cancel = true;
+                    isCancel = true;
+                    editor.Activate();
+                    editor.AppWindow.MoveInZOrderAtTop();
+
+                    // Show comfirmation dialog to user to save changes or not.
+                    if (editor.Content is Views.Rent.Residentials.Bldg.ShellPage shell)
+                    {
+                        await shell.ShowEditorCloseConfirmationDialog();
+                    }
+
+                    break;
+                }
+            }
+
+            if (!isCancel)
+            {
+                foreach (var editor in _viewModel.BldgEditorList.ToList()) // Create snapshot of the list to avoid collection modification issues during iteration
+                {
+                    editor.IsAutoClose = true;
+
+                    editor.Close();
+                }
+            }
+        }
     }
 
     private void Window_Closed(object sender, WindowEventArgs args)
@@ -174,33 +331,6 @@ internal sealed partial class MainWindow : Window
         // TODO:
         //_viewModel.CleanUp();
 
-        // Save error logs.
-        var app = App.Current as App;
-        app?.SaveErrorLog();
-    }
-
-    private void Window_SizeChanged(object sender, WindowSizeChangedEventArgs args)
-    {
-        var appWindow = this.AppWindow;
-        if (appWindow != null)
-        {
-            if (appWindow.Presenter is OverlappedPresenter presenter)
-            {
-                if (presenter.State == OverlappedPresenterState.Maximized)
-                {
-                }
-                else if (presenter.State == OverlappedPresenterState.Minimized)
-                {
-                }
-                else
-                {
-                    _winRestoreHeight = (int)appWindow.Size.Height;
-                    _winRestoreWidth = (int)appWindow.Size.Width;
-                    _winRestoreTop = (int)appWindow.Position.Y;
-                    _winRestoreLeft = (int)appWindow.Position.X;
-                }
-            }
-        }
     }
 
     private void SaveSetting()
@@ -210,40 +340,32 @@ internal sealed partial class MainWindow : Window
         var winTop = 100;
         var winLeft = 100;
         var winState = OverlappedPresenterState.Restored;
-        var isDebugSaveLog = true;
 
-        var app = App.Current as App;
-        if (app is not null)
+        if (this.AppWindow.Presenter is OverlappedPresenter presenter)
         {
-            isDebugSaveLog = app.IsSaveErrorLog;
-        }
-
-        // Window size, position and state.
-        var appWindow = this.AppWindow;
-        if (appWindow != null)
-        {
-            if (appWindow.Presenter is OverlappedPresenter presenter)
+            if (presenter.State == OverlappedPresenterState.Maximized)
             {
-                if (presenter.State == OverlappedPresenterState.Maximized)
-                {
-                    winState = OverlappedPresenterState.Maximized;
-                }
-                else if (presenter.State == OverlappedPresenterState.Minimized)
-                {
-                    winState = OverlappedPresenterState.Restored;
-                }
-                else
-                {
-                    winState = OverlappedPresenterState.Restored;
-                }
-
-                // TODO: needs "Window.RestoreBounds Property"
-                //if (winState == OverlappedPresenterState.Restored) {}
-                winHeight = (int)appWindow.Size.Height;
-                winWidth = (int)appWindow.Size.Width;
-                winTop = (int)appWindow.Position.Y;
-                winLeft = (int)appWindow.Position.X;
+                winState = OverlappedPresenterState.Maximized;
             }
+            else if (presenter.State == OverlappedPresenterState.Minimized)
+            {
+                winState = OverlappedPresenterState.Minimized;
+            }
+            else if (presenter.State == OverlappedPresenterState.Restored)
+            {
+                winState = OverlappedPresenterState.Restored;
+            }
+            else
+            {
+                winState = OverlappedPresenterState.Restored;
+            }
+
+            // TODO: needs "Window.RestoreBounds Property"
+            //if (winState == OverlappedPresenterState.Restored) {}
+            winHeight = (int)this.AppWindow.Size.Height;
+            winWidth = (int)this.AppWindow.Size.Width;
+            winTop = (int)this.AppWindow.Position.Y;
+            winLeft = (int)this.AppWindow.Position.X;
         }
 
         XmlDocument doc = new();
@@ -253,10 +375,6 @@ internal sealed partial class MainWindow : Window
         // Root Document Element
         var root = doc.CreateElement(string.Empty, "App", string.Empty);
         doc.AppendChild(root);
-
-        //XmlAttribute attrs = doc.CreateAttribute("Version");
-        //attrs.Value = _appVer;
-        //root.SetAttributeNode(attrs);
 
         XmlAttribute attrs;
 
@@ -325,6 +443,10 @@ internal sealed partial class MainWindow : Window
             {
                 attrs.Value = "Minimized";
             }
+            else
+            {
+                attrs.Value = "Normal";
+            }
             mainWindow.SetAttributeNode(attrs);
 
             // Set main window element to root.
@@ -332,23 +454,46 @@ internal sealed partial class MainWindow : Window
         }
 
         // Editor window
-        var editWindow = doc.CreateElement(string.Empty, "EditorWindow", string.Empty);
+        var editWindow = doc.CreateElement(string.Empty, "BldgEditorWindow", string.Empty);
 
         // Editor window attributes
         attrs = doc.CreateAttribute("width");
-        attrs.Value = _viewModel.EditorWinWidth.ToString();
+        attrs.Value = _viewModel.BldgEditorWinWidth.ToString();
         editWindow.SetAttributeNode(attrs);
 
         attrs = doc.CreateAttribute("height");
-        attrs.Value = _viewModel.EditorWinHeight.ToString();
+        attrs.Value = _viewModel.BldgEditorWinHeight.ToString();
         editWindow.SetAttributeNode(attrs);
 
         attrs = doc.CreateAttribute("top");
-        attrs.Value = _viewModel.EditorWinTop.ToString();
+        attrs.Value = _viewModel.BldgEditorWinTop.ToString();
         editWindow.SetAttributeNode(attrs);
 
         attrs = doc.CreateAttribute("left");
-        attrs.Value = _viewModel.EditorWinLeft.ToString();
+        attrs.Value = _viewModel.BldgEditorWinLeft.ToString();
+        editWindow.SetAttributeNode(attrs);
+
+        // Set editor window element to root.
+        root.AppendChild(editWindow);
+
+        // Editor window
+        editWindow = doc.CreateElement(string.Empty, "RoomEditorWindow", string.Empty);
+
+        // Editor window attributes
+        attrs = doc.CreateAttribute("width");
+        attrs.Value = _viewModel.RoomEditorWinWidth.ToString();
+        editWindow.SetAttributeNode(attrs);
+
+        attrs = doc.CreateAttribute("height");
+        attrs.Value = _viewModel.RoomEditorWinHeight.ToString();
+        editWindow.SetAttributeNode(attrs);
+
+        attrs = doc.CreateAttribute("top");
+        attrs.Value = _viewModel.RoomEditorWinTop.ToString();
+        editWindow.SetAttributeNode(attrs);
+
+        attrs = doc.CreateAttribute("left");
+        attrs.Value = _viewModel.RoomEditorWinLeft.ToString();
         editWindow.SetAttributeNode(attrs);
 
         // Set editor window element to root.
@@ -380,196 +525,27 @@ internal sealed partial class MainWindow : Window
         */
 
 
-        // Options
-        var xOpts = doc.CreateElement(string.Empty, "Opts", string.Empty);
-        attrs = doc.CreateAttribute("IsDebugSaveLog");
-        attrs.Value = isDebugSaveLog.ToString();
-        xOpts.SetAttributeNode(attrs);
-
-        root.AppendChild(xOpts);
-
         try
         {
             doc.Save(App.AppConfigFilePath);
         }
-        //catch (System.IO.FileNotFoundException) { }
         catch (Exception ex)
         {
             Debug.WriteLine("MainWindow_Closed: " + ex + " while saving : " + App.AppConfigFilePath);
         }
     }
 
-    private void LoadSetting()
+    private void Window_SizeChanged(object sender, WindowSizeChangedEventArgs args)
     {
-        System.IO.Directory.CreateDirectory(App.AppDataFolder);
-
-        int winHeight;
-        int winWidth;
-        int winTop;
-        int winLeft;
-
-        var isDebugSaveLog = true;
-
-        if (System.IO.File.Exists(App.AppConfigFilePath))
+        if (this.AppWindow.Presenter is OverlappedPresenter presenter)
         {
-            var xdoc = XDocument.Load(App.AppConfigFilePath);
-            //Debug.WriteLine(xdoc.ToString());
-
-            // Main window
-            //if (App.MainWindow != null && xdoc.Root != null)
-            if (xdoc.Root != null)
+            if (presenter.State == OverlappedPresenterState.Restored)
             {
-                // Main window element
-                var mainWindow = xdoc.Root.Element("MainWindow");
-                if (mainWindow != null)
-                {
-                    var hoge = mainWindow.Attribute("state");
-                    if (hoge != null)
-                    {
-                        if (hoge.Value == "Maximized")
-                        {
-                            winState = OverlappedPresenterState.Maximized;
-                        }
-                        else if (hoge.Value == "Normal")
-                        {
-                            winState = OverlappedPresenterState.Restored;
-                        }
-                        else if (hoge.Value == "Minimized")
-                        {
-                            winState = OverlappedPresenterState.Restored;
-                        }
-                    }
-
-                    hoge = mainWindow.Attribute("top");
-                    if (hoge != null)
-                    {
-                        winTop = int.Parse(hoge.Value);
-                        _winRestoreTop = winTop;
-                    }
-
-                    hoge = mainWindow.Attribute("left");
-                    if (hoge != null)
-                    {
-                        winLeft = int.Parse(hoge.Value);
-                        _winRestoreLeft = winLeft;
-                    }
-
-                    hoge = mainWindow.Attribute("height");
-                    if (hoge != null)
-                    {
-                        winHeight = int.Parse(hoge.Value);
-                        _winRestoreHeight = winHeight;
-                    }
-
-                    hoge = mainWindow.Attribute("width");
-                    if (hoge != null)
-                    {
-                        winWidth = int.Parse(hoge.Value);
-                        _winRestoreWidth = winWidth;
-                    }
-
-                }
-
-                if (_viewModel.EditorWinWidth < 500)
-                {
-                    _viewModel.EditorWinWidth = 500;
-                }
-                if (_viewModel.EditorWinHeight < 500)
-                {
-                    _viewModel.EditorWinHeight = 500;
-                }
-                if (_viewModel.EditorWinTop < 0)
-                {
-                    _viewModel.EditorWinTop = 0;
-                }
-                if (_viewModel.EditorWinLeft < 0)
-                {
-                    _viewModel.EditorWinLeft = 0;
-                }
-
-                // Editor window element
-                var editWindow = xdoc.Root.Element("EditorWindow");
-                if (editWindow != null)
-                {
-                    if (winState == OverlappedPresenterState.Restored)
-                    {
-                        var hoge = editWindow.Attribute("top");
-                        if (hoge != null)
-                        {
-                            _viewModel.EditorWinTop = int.Parse(hoge.Value);
-                        }
-
-                        hoge = editWindow.Attribute("left");
-                        if (hoge != null)
-                        {
-                            _viewModel.EditorWinLeft = int.Parse(hoge.Value);
-                        }
-
-                        hoge = editWindow.Attribute("height");
-                        if (hoge != null)
-                        {
-                            _viewModel.EditorWinHeight = int.Parse(hoge.Value);
-                        }
-
-                        hoge = editWindow.Attribute("width");
-                        if (hoge != null)
-                        {
-                            _viewModel.EditorWinWidth = int.Parse(hoge.Value);
-                        }
-                    }
-                }
-
-                /*
-                // Modal window element
-                var modalWindow = xdoc.Root.Element("ModalWindow");
-                if (modalWindow != null)
-                {
-                    var hoge = modalWindow.Attribute("top");
-                    if (hoge != null)
-                    {
-                        _viewModel.ModalWinTop = int.Parse(hoge.Value);
-                    }
-
-                    hoge = modalWindow.Attribute("left");
-                    if (hoge != null)
-                    {
-                        _viewModel.ModalWinLeft = int.Parse(hoge.Value);
-                    }
-
-                    hoge = modalWindow.Attribute("height");
-                    if (hoge != null)
-                    {
-                        _viewModel.ModalWinHeight = int.Parse(hoge.Value);
-                    }
-
-                    hoge = modalWindow.Attribute("width");
-                    if (hoge != null)
-                    {
-                        _viewModel.ModalWinWidth = int.Parse(hoge.Value);
-                    }
-                }
-                */
-
-                // Options
-                var opts = xdoc.Root.Element("Opts");
-                if (opts != null)
-                {
-                    var xvalue = opts.Attribute("IsDebugSaveLog");
-                    if (xvalue != null)
-                    {
-                        if (!string.IsNullOrEmpty(xvalue.Value))
-                        {
-                            isDebugSaveLog = xvalue.Value == "True";
-                        }
-                    }
-                }
+                _winRestoreHeight = (int)this.AppWindow.Size.Height;
+                _winRestoreWidth = (int)this.AppWindow.Size.Width;
+                _winRestoreTop = (int)this.AppWindow.Position.Y;
+                _winRestoreLeft = (int)this.AppWindow.Position.X;
             }
         }
-
-        // Apply settings
-
-        // Options
-        var app = App.Current as App;
-        app?.IsSaveErrorLog = isDebugSaveLog;
     }
 }

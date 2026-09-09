@@ -1,10 +1,9 @@
-﻿namespace ZumenSearch.Services.Contracts
+﻿namespace ZumenSearch.Services.Contracts;
+
+public interface IDispatcherService
 {
-    public interface IDispatcherService
-    {
-        bool TryEnqueue(Action action);
-        Task EnqueueAsync(Action action);
-        Task<T> EnqueueAsync<T>(Func<T> function);
-        Task EnqueueAsync(Func<Task> function);
-    }
+    bool TryEnqueue(Action action);
+    Task EnqueueAsync(Action action);
+    Task<T> EnqueueAsync<T>(Func<T> function);
+    Task EnqueueAsync(Func<Task> function);
 }

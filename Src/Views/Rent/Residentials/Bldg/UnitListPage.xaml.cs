@@ -3,75 +3,31 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using System.Diagnostics;
-using ZumenSearch.Models.Rent.Residentials;
 
 namespace ZumenSearch.Views.Rent.Residentials.Bldg;
 
-internal sealed partial class UnitListPage : Page
+public sealed partial class UnitListPage : Page
 {
-    public ViewModels.Rent.Residentials.MainViewModel? ViewModel { get; private set; }
+    public ViewModels.Rent.Residentials.Bldg.MainViewModel? ViewModel { get; private set; }
 
     public UnitListPage()
     {
-        //ViewModel = new ViewModels.Rent.Residentials.Editor.UnitListViewModel();//App.GetService<RentLivingEditUnitShellViewModel>();
-
         InitializeComponent();
-
     }
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
-        if ((e.Parameter is ViewModels.Rent.Residentials.MainViewModel) && (e.Parameter != null))
+        if ((e.Parameter is ViewModels.Rent.Residentials.Bldg.MainViewModel) && (e.Parameter != null))
         {
-            //_editorShell = e.Parameter as Views.Rent.Residentials.EditorShell;
-            ViewModel = e.Parameter as ViewModels.Rent.Residentials.MainViewModel;
+            ViewModel = e.Parameter as ViewModels.Rent.Residentials.Bldg.MainViewModel;
         }
         else
         {
-            Debug.WriteLine("UnitListPage.OnNavigatedTo: Invalid parameter. Expected ResidentialsViewModel.");
+            Debug.WriteLine("UnitListPage.OnNavigatedTo: Invalid parameter. Expected ViewModels.Rent.Residentials.Bldg.MainViewModel.");
         }
 
         base.OnNavigatedTo(e);
     }
-
-    /*
-    private void RoomsListView_ItemInvoked(ItemsView sender, ItemsViewItemInvokedEventArgs args)
-    {
-        // Get the invoked item
-        var invokedItem = args.InvokedItem;
-
-        if (ViewModel is null)
-        {
-            return;
-        }
-
-        if (invokedItem is not UnitResidential)
-        {
-            ViewModel.Bldg.SelectedRoom = null;
-            return;
-        }
-
-        ViewModel.Bldg.SelectedRoom = invokedItem as UnitResidential;
-
-        ViewModel.Bldg.EditSelectedUnitCommand.Execute(invokedItem);
-    }
-
-    private void RoomsListView_SelectionChanged(ItemsView sender, ItemsViewSelectionChangedEventArgs args)
-    {
-        if (ViewModel is null)
-        {
-            return;
-        }
-
-        if (sender.SelectedItem is not UnitResidential)
-        {
-            ViewModel.Bldg.SelectedRoom = null;
-            return;
-        }
-
-        ViewModel.Bldg.SelectedRoom = sender.SelectedItem as UnitResidential;
-    }
-    */
 
     private static T? FindParent<T>(DependencyObject child) where T : DependencyObject
     {
@@ -91,10 +47,23 @@ internal sealed partial class UnitListPage : Page
         }
     }
 
-    private void RoomsListView_DoubleTapped(object sender, Microsoft.UI.Xaml.Input.DoubleTappedRoutedEventArgs e)
+    private void ItemContainer_DoubleTapped(object sender, Microsoft.UI.Xaml.Input.DoubleTappedRoutedEventArgs e)
     {
-        if (sender is not ListView listView)
+        // OriginalSource is the specific element (e.g., TextBlock or Grid) that was tapped
+        if (e.OriginalSource is not FrameworkElement element)
         {
+            return;
+        }
+
+        var container = FindParent<Microsoft.UI.Xaml.Controls.ItemContainer>(element);
+        if (container is null)
+        {
+            return;
+        }
+
+        if (container.DataContext is not Models.Rent.Residentials.Room.Listing room)
+        {
+            Debug.WriteLine($"Not Room. {container.DataContext?.GetType().FullName} @ItemContainer_DoubleTapped");
             return;
         }
 
@@ -103,35 +72,88 @@ internal sealed partial class UnitListPage : Page
             return;
         }
 
-        // UI element that was double-clicked
-        FrameworkElement element = (FrameworkElement)e.OriginalSource;
+        if (ViewModel.EditSelectedUnitCommand.CanExecute(room))
+        {
+            ViewModel.EditSelectedUnitCommand.Execute(room);
+        }
+    }
 
-        var container = FindParent<ListViewItem>(element);
+    private void ItemContainer_PointerPressed(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
+    {
+        // Stupid WinUI3 can't handle double click properly.
+        // This prevents newly created window goes behind the main window.
 
+        e.Handled = true;
+    }
+
+    private void ItemContainer_PointerReleased(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
+    {
+        // Stupid WinUI3 can't handle double click properly.
+        // This prevents newly created window goes behind the main window.
+
+        //e.Handled = true;
+    }
+
+    private void ItemContainerKeyboardAccelerator_Invoked(Microsoft.UI.Xaml.Input.KeyboardAccelerator sender, Microsoft.UI.Xaml.Input.KeyboardAcceleratorInvokedEventArgs args)
+    {
+        Debug.WriteLine($"sender {sender}, element{args.Element} @ItemContainerKeyboardAccelerator_Invoked");
+
+        args.Handled = true;
+
+        if (args.Element is not FrameworkElement)
+        {
+            return;
+        }
+
+        if (args.Element is not Microsoft.UI.Xaml.Controls.ItemContainer element)
+        {
+            return;
+        }
+
+        if (element.DataContext is not Models.Rent.Residentials.Room.Listing room)
+        {
+            Debug.WriteLine($"Not Room. {element.DataContext?.GetType().FullName} @ItemContainerKeyboardAccelerator_Invoked");
+            return;
+        }
+
+        if (ViewModel is null)
+        {
+            return;
+        }
+        else
+        {
+            Debug.WriteLine($"ViewModel is not null. {ViewModel.GetType().FullName} @ItemContainerKeyboardAccelerator_Invoked");
+        }
+
+        if (ViewModel.EditSelectedUnitCommand.CanExecute(room))
+        {
+            ViewModel.EditSelectedUnitCommand.Execute(room);
+        }
+        else
+        {
+            Debug.WriteLine($"EditSelectedUnitCommand cannot execute. @ItemContainerKeyboardAccelerator_Invoked");
+        }
+    }
+
+    private void ItemContainer_RightTapped(object sender, Microsoft.UI.Xaml.Input.RightTappedRoutedEventArgs e)
+    {
+        if (e.OriginalSource is not FrameworkElement element)
+        {
+            return;
+        }
+
+        var container = FindParent<Microsoft.UI.Xaml.Controls.ItemContainer>(element);
         if (container is null)
         {
-            //ViewModel.Bldg.SelectedRoom = null;
             return;
         }
 
-        if (listView.SelectedItem != container.Content)
+        if (container.DataContext is not Models.Rent.Residentials.Room.Listing room)
         {
-            //ViewModel.Bldg.SelectedRoom = null;
+            Debug.WriteLine($"Not Room. {container.DataContext?.GetType().FullName} @ItemContainer_RightTapped");
             return;
         }
 
-
-        if (listView.SelectedItem is not Models.Rent.Residentials.Unit.UnitResidential room)
-        {
-            //ViewModel.Bldg.SelectedRoom = null;
-            return;
-        }
-
-        //ViewModel.Bldg.SelectedRoom = room as UnitResidential;
-
-        if (ViewModel.Bldg.EditSelectedUnitCommand.CanExecute(room))
-        {
-            ViewModel.Bldg.EditSelectedUnitCommand.Execute(room);
-        }
+        container.IsSelected = true;
     }
 }
