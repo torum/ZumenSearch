@@ -8,6 +8,29 @@ using ZumenSearch.Services.Contracts;
 
 namespace ZumenSearch.Services;
 
+/*
+ * DataAccessService.cs
+ * 
+ * This class provides data access services for the application, specifically for managing properties and listings and related data.
+ * It handles database initialization, insertion, and updating of  properties, rooms, pictures, and PDFs.
+ * The service uses SQLite as the underlying database and ensures thread safety with a ReaderWriterLockSlim.
+ * 
+ * Key functionalities include:
+ * - Initializing the database and creating necessary tables if they do not exist.
+ * - Inserting new properties and listings along with their associated pictures and PDFs.
+ * - Updating existing properties and listings and their related data.
+ * 
+ * Note: The service is designed to work with the application's models and view models, facilitating seamless data management.
+ */
+
+// <summary>
+// DataAccessService provides data access functionalities for managing properties and listings and related data in the application.
+// </summary>
+
+// TODO:
+// * Consider implementing IDisposable to properly dispose of the ReaderWriterLockSlim and any other disposable resources used by this service.
+// * Rename "rents" table to "properties" and "rent_id" to "property_id" for better clarity and consistency with the domain model.
+
 public sealed class DataAccessService : IDataAccessService
 {
     private SqliteConnectionStringBuilder connectionStringBuilder = [];
@@ -755,9 +778,9 @@ public sealed class DataAccessService : IDataAccessService
                         }
 
                         // Room Pics
-                        if (unit.UnitPictures.Count > 0)
+                        if (unit.Pictures.Count > 0)
                         {
-                            foreach (var pic in unit.UnitPictures)
+                            foreach (var pic in unit.Pictures)
                             {
                                 // Upsert
                                 var sqlUpsertRoom = "INSERT INTO rent_residential_room_pictures (picture_id, room_id, rent_id, file_path, type, description, is_main) VALUES (@PicId, @roomId, @RentId, @Path, @type, @Desc, @Main) ";
@@ -1186,9 +1209,9 @@ public sealed class DataAccessService : IDataAccessService
                         }
 
                         // room Pic
-                        if (room.UnitPictures.Count > 0)
+                        if (room.Pictures.Count > 0)
                         {
-                            foreach (var pic in room.UnitPictures)
+                            foreach (var pic in room.Pictures)
                             {
                                 // Upsert
                                 var sqlUpsertRoom = "INSERT INTO rent_residential_room_pictures (picture_id, room_id, rent_id, file_path, type, description, is_main) VALUES (@PicId, @roomId, @RentId, @Path, @type, @Desc, @Main) ";
@@ -1419,7 +1442,7 @@ public sealed class DataAccessService : IDataAccessService
             {
                 res.Error.ErrDescription = "Exception";
                 res.Error.ErrText = e.Message;
-                Debug.WriteLine(e.Message + " @DataAccess::DeleteFeed");
+                Debug.WriteLine(e.Message + " @DataAccess::DeleteRentResidential");
             }
             res.Error.ErrDatetime = DateTime.Now;
             res.Error.ErrPlace = "connection.Open(),cmd.ExecuteNonQuery()";
@@ -1774,7 +1797,7 @@ public sealed class DataAccessService : IDataAccessService
                 while (reader.Read())
                 {
                     var roomId = Convert.ToString(reader["room_id"]) ?? string.Empty;
-                    var room = new Models.Rent.Residentials.Room.Listing(roomId, entry)
+                    var room = new Models.Rent.Residentials.Room.Listing(roomId, entry.Id, entry.Name)
                     {
                         Name = Convert.ToString(reader["name"]) ?? string.Empty,
                         Chinryou = Convert.ToInt32(reader["chinryou"]),
@@ -1783,7 +1806,7 @@ public sealed class DataAccessService : IDataAccessService
                     };
 
                     //Debug.WriteLine($"Room ID: {room.Id}, Room Name: {room.RoomName}");
-
+                    
                     entry.Rooms.Add(room);
                 }
             }
@@ -1792,44 +1815,42 @@ public sealed class DataAccessService : IDataAccessService
             {
                 // 物件写真（部屋）
                 cmd.CommandText = string.Format("SELECT * FROM rent_residential_room_pictures WHERE room_id = '{0}'", room.Id);
-                using (var reader = cmd.ExecuteReader())
+                using var reader = cmd.ExecuteReader();
+                while (reader.Read())
                 {
-                    while (reader.Read())
+                    var picid = Convert.ToString(reader["picture_id"]) ?? string.Empty;
+                    var picpath = Convert.ToString(reader["file_path"]) ?? string.Empty;
+                    if (!string.IsNullOrEmpty(picid) && !string.IsNullOrEmpty(picpath))
                     {
-                        var picid = Convert.ToString(reader["picture_id"]) ?? string.Empty;
-                        var picpath = Convert.ToString(reader["file_path"]) ?? string.Empty;
-                        if (!string.IsNullOrEmpty(picid) && !string.IsNullOrEmpty(picpath))
+                        var rlpic = new Models.Rent.Residentials.Room.Picture(picid, picpath)
                         {
-                            var rlpic = new Models.Rent.Residentials.Room.Picture(picid, picpath)
-                            {
-                                Description = Convert.ToString(reader["description"]) ?? string.Empty,
+                            Description = Convert.ToString(reader["description"]) ?? string.Empty,
 
-                                IsNew = false,
-                                IsModified = false
-                            };
+                            IsNew = false,
+                            IsModified = false
+                        };
 
-                            var strType = Convert.ToString(reader["type"]); 
-                            if (!string.IsNullOrEmpty(strType))
-                            {
-                                rlpic.SetLabelFromString(strType);
-                            }
+                        var strType = Convert.ToString(reader["type"]);
+                        if (!string.IsNullOrEmpty(strType))
+                        {
+                            rlpic.SetLabelFromString(strType);
+                        }
 
-                            var bln = Convert.ToInt32(reader["is_main"]);
-                            if (bln > 0)
-                            {
-                                rlpic.IsMain = true;
-                            }
-                            else
-                            {
-                                rlpic.IsMain = false;
-                            }
-
-                            room.UnitPictures.Add(rlpic);
+                        var bln = Convert.ToInt32(reader["is_main"]);
+                        if (bln > 0)
+                        {
+                            rlpic.IsMain = true;
                         }
                         else
                         {
-                            Debug.WriteLine("picture_id or file_path is null/empty.");
+                            rlpic.IsMain = false;
                         }
+
+                        room.Pictures.Add(rlpic);
+                    }
+                    else
+                    {
+                        Debug.WriteLine("picture_id or file_path is null/empty.");
                     }
                 }
             }
@@ -1892,7 +1913,7 @@ public sealed class DataAccessService : IDataAccessService
         return res;
     }
 
-    public SqliteDataAccessResultWrapper UpsertRentResidentialUnit(string rentId, Models.Rent.Residentials.Room.Listing room)
+    public SqliteDataAccessResultWrapper UpsertRentResidentialListing(string rentId, Models.Rent.Residentials.Room.Listing room)
     {
         var res = new SqliteDataAccessResultWrapper();
 
@@ -1956,9 +1977,9 @@ public sealed class DataAccessService : IDataAccessService
                 cmd.Parameters.Clear();
 
                 // 写真（部屋）rent_residential_room_pictures table - Insert or Update
-                if (room.UnitPictures.Count > 0)
+                if (room.Pictures.Count > 0)
                 {
-                    foreach (var pic in room.UnitPictures)
+                    foreach (var pic in room.Pictures)
                     {
                         /*
                         var exec = false;
@@ -2028,9 +2049,9 @@ public sealed class DataAccessService : IDataAccessService
                 }
 
                 // 写真（部屋）の削除リストを処理
-                if (room.UnitPicturesToBeDeleted.Count > 0)
+                if (room.PicturesToBeDeleted.Count > 0)
                 {
-                    foreach (var delr in room.UnitPicturesToBeDeleted)
+                    foreach (var delr in room.PicturesToBeDeleted)
                     {
                         // 削除
                         var sqlDeleteRentLivingRoom = string.Format("DELETE FROM rent_residential_room_pictures WHERE picture_id = '{0}'", delr.Id);
@@ -2128,7 +2149,7 @@ public sealed class DataAccessService : IDataAccessService
         return res;
     }
 
-    public SqliteDataAccessSelectRentResidentialRoomsResultWrapper SelectRentResidentialRooms()
+    public SqliteDataAccessSelectRentResidentialRoomsResultWrapper SelectRentResidentialListings()
     {
         var res = new SqliteDataAccessSelectRentResidentialRoomsResultWrapper();
 
@@ -2140,7 +2161,7 @@ public sealed class DataAccessService : IDataAccessService
 
             using var cmd = connection.CreateCommand();
 
-            cmd.CommandText = "SELECT rents.name as entryName, rent_residential_rooms.name as unitName, rent_residential_rooms.room_id as roomId, rents.rent_id as entryId FROM rent_residential_rooms INNER JOIN rents USING (rent_id)  INNER JOIN rent_residentials USING (rent_id)";
+            cmd.CommandText = "SELECT rents.name as entryName, rent_residential_rooms.name as unitName, rent_residential_rooms.room_id as roomId, rents.rent_id as entryId FROM rent_residential_rooms INNER JOIN rents USING (rent_id) INNER JOIN rent_residentials USING (rent_id)";
             //cmd.CommandText = string.Format("SELECT rents.name as feedName, rent_residentials.comment as entryTitle, rents.rent_id as entryId FROM rent_residentials INNER JOIN rents USING (rent_id) WHERE rents.name LIKE '{0}'", keyword);
 
             using var reader = cmd.ExecuteReader();
@@ -2231,6 +2252,213 @@ public sealed class DataAccessService : IDataAccessService
         {
             _readerWriterLock.ExitReadLock();
         }
+
+        return res;
+    }
+
+    public SqliteDataAccessSelectRentResidentialRoomSingleResultWrapper SelectRentResidentialListingById(string rentId, string roomId)
+    {
+        var res = new SqliteDataAccessSelectRentResidentialRoomSingleResultWrapper();
+
+        if (string.IsNullOrEmpty(roomId))
+        {
+            res.IsError = true;
+            // TODO:
+            return res;
+        }
+
+        if (string.IsNullOrEmpty(rentId))
+        {
+            res.IsError = true;
+            // TODO:
+            return res;
+        }
+
+        _readerWriterLock.EnterReadLock();
+        try
+        {
+            using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
+            connection.Open();
+
+            using var cmd = connection.CreateCommand();
+            cmd.CommandText = "SELECT rents.rent_id as buildingId, rents.name as buildingName, rent_residential_rooms.room_id as roomId, rent_residential_rooms.name as roomName, rent_residential_rooms.chinryou as chinryou FROM rent_residential_rooms INNER JOIN rents USING (rent_id)";//INNER JOIN rent_residentials USING (rent_id)
+
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                //var Id = Convert.ToString(reader["roomId"]) ?? string.Empty;
+                var Id = reader.GetString(reader.GetOrdinal("roomId")) ?? string.Empty;
+                if (Id.Equals(roomId))
+                {
+                    var room = new Models.Rent.Residentials.Room.Listing(roomId, rentId, reader.GetString(reader.GetOrdinal("buildingName")) ?? string.Empty)
+                    {
+                        Name = reader.GetString(reader.GetOrdinal("roomName")) ?? string.Empty,
+                        Chinryou = reader.GetInt32(reader.GetOrdinal("chinryou")),
+                        IsNew = false,
+                        IsModified = false
+                    };
+
+                    //Debug.WriteLine($"Room ID: {room.Id}, Room Name: {room.RoomName}");
+                    res.Room = room;
+                    // break;
+                }
+            }
+
+        }
+        catch (System.Reflection.TargetInvocationException ex)
+        {
+            res.IsError = true;
+            res.Error.ErrType = ErrorObject.ErrTypes.DB;
+            res.Error.ErrCode = "";
+            res.Error.ErrDescription = "TargetInvocationException";
+            res.Error.ErrText = ex.Message;
+            res.Error.ErrDatetime = DateTime.Now;
+            res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
+            res.Error.ErrPlaceParent = "DataAccess::SelectRentResidentialRoomById";
+        }
+        catch (System.InvalidOperationException ex)
+        {
+            Debug.WriteLine("Opps. InvalidOperationException@DataAccess::SelectRentResidentialRoomById");
+
+            res.IsError = true;
+            res.Error.ErrType = ErrorObject.ErrTypes.DB;
+            res.Error.ErrCode = "";
+            res.Error.ErrDescription = "InvalidOperationException";
+            res.Error.ErrText = ex.Message;
+            res.Error.ErrDatetime = DateTime.Now;
+            res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
+            res.Error.ErrPlaceParent = "DataAccess::SelectRentResidentialRoomById";
+        }
+        catch (Exception e)
+        {
+            res.IsError = true;
+            res.Error.ErrType = ErrorObject.ErrTypes.DB;
+            res.Error.ErrCode = "";
+            if (e.InnerException != null)
+            {
+                Debug.WriteLine(e.InnerException.Message + " @DataAccess::SelectRentResidentialRoomById");
+                res.Error.ErrDescription = "InnerException";
+                res.Error.ErrText = e.InnerException.Message;
+            }
+            else
+            {
+                Debug.WriteLine(e.Message + " @DataAccess::SelectRentResidentialRoomById");
+                res.Error.ErrDescription = "Exception";
+                res.Error.ErrText = e.Message;
+            }
+            res.Error.ErrDatetime = DateTime.Now;
+            res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
+            res.Error.ErrPlaceParent = "DataAccess::SelectRentResidentialRoomById";
+        }
+        finally
+        {
+            _readerWriterLock.ExitReadLock();
+        }
+
+        return res;
+    }
+
+    public SqliteDataAccessResultWrapper DeleteRentResidentialListing(string roomId)
+    {
+        var res = new SqliteDataAccessResultWrapper();
+
+        if (string.IsNullOrEmpty(roomId))
+        {
+            res.IsError = true;
+            // TODO:
+            return res;
+        }
+
+        _readerWriterLock.EnterWriteLock();
+        try
+        {
+            // System.Data.SQLite
+            //using var connection = new SQLiteConnection(connectionStringBuilder.ConnectionString);
+            // Microsoft.Data.Sqlite
+            using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
+            connection.Open();
+
+            using var cmd = connection.CreateCommand();
+
+            cmd.Transaction = connection.BeginTransaction();
+            try
+            {
+                cmd.CommandText = string.Format("DELETE FROM rent_residential_rooms WHERE room_id = '{0}';", roomId);
+                res.AffectedCount = cmd.ExecuteNonQuery();
+
+                cmd.Transaction.Commit();
+            }
+            catch (Exception e)
+            {
+                cmd.Transaction.Rollback();
+
+                res.IsError = true;
+                res.Error.ErrType = ErrorObject.ErrTypes.DB;
+                res.Error.ErrCode = "";
+                res.Error.ErrText = e.Message;
+                res.Error.ErrDescription = "Exception";
+                res.Error.ErrDatetime = DateTime.Now;
+                res.Error.ErrPlace = "cmd.ExecuteNonQuery(),Transaction.Commit()";
+                res.Error.ErrPlaceParent = "DataAccess::DeleteRentResidentialListing";
+
+                return res;
+            }
+        }
+        catch (System.Reflection.TargetInvocationException ex)
+        {
+            res.IsError = true;
+            res.Error.ErrType = ErrorObject.ErrTypes.DB;
+            res.Error.ErrCode = "";
+            res.Error.ErrText = ex.Message;
+            res.Error.ErrDescription = "TargetInvocationException";
+            res.Error.ErrDatetime = DateTime.Now;
+            res.Error.ErrPlace = "connection.Open(),cmd.ExecuteNonQuery()";
+            res.Error.ErrPlaceParent = "DataAccess::DeleteRentResidentialListing";
+
+            return res;
+        }
+        catch (System.InvalidOperationException ex)
+        {
+            res.IsError = true;
+            res.Error.ErrType = ErrorObject.ErrTypes.DB;
+            res.Error.ErrCode = "";
+            res.Error.ErrText = ex.Message;
+            res.Error.ErrDescription = "InvalidOperationException";
+            res.Error.ErrDatetime = DateTime.Now;
+            res.Error.ErrPlace = "connection.Open(),cmd.ExecuteNonQuery()";
+            res.Error.ErrPlaceParent = "DataAccess::DeleteRentResidentialListing";
+
+            return res;
+        }
+        catch (Exception e)
+        {
+            res.IsError = true;
+            res.Error.ErrType = ErrorObject.ErrTypes.DB;
+            res.Error.ErrCode = "";
+            if (e.InnerException != null)
+            {
+                res.Error.ErrDescription = "InnerException";
+                res.Error.ErrText = e.Message + " " + e.InnerException.Message;
+                Debug.WriteLine(e.InnerException.Message + " @DataAccess::DeleteRentResidentialListing");
+            }
+            else
+            {
+                res.Error.ErrDescription = "Exception";
+                res.Error.ErrText = e.Message;
+                Debug.WriteLine(e.Message + " @DataAccess::DeleteRentResidentialListing");
+            }
+            res.Error.ErrDatetime = DateTime.Now;
+            res.Error.ErrPlace = "connection.Open(),cmd.ExecuteNonQuery()";
+            res.Error.ErrPlaceParent = "DataAccess::DeleteRentResidentialListing";
+
+            return res;
+        }
+        finally
+        {
+            _readerWriterLock.ExitWriteLock();
+        }
+
+        //Debug.WriteLine(string.Format("{0} feed Deleted from DB", res.AffectedCount));
 
         return res;
     }

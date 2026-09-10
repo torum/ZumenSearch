@@ -5,6 +5,7 @@ using ZumenSearch.Models.Base;
 
 namespace ZumenSearch.Models.Rent.Residentials;
 
+#pragma warning disable IDE0079 // Remove unnecessary suppression
 #pragma warning disable IDE0290 // Use primary constructor
 
 // 検索結果一覧表示用（建物）

@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.Logging;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml.Media.Animation;
 using System.Collections.ObjectModel;
@@ -122,16 +123,18 @@ public partial class MainViewModel : ObservableObject
 
     #region == Services ==
 
-    private readonly IAbstractFactory<Models.Rent.Residentials.Bldg.Property, Views.Rent.Residentials.Bldg.ShellPage> _shellFactory;
+    private readonly IAbstractFactory<Models.Rent.Residentials.Bldg.Property, Views.Rent.Residentials.Bldg.ShellPage> _shellRentResidentialPropertyFactory;
+    private readonly IAbstractFactory<Models.Rent.Residentials.Room.Listing, Views.Rent.Residentials.Room.ShellPage> _shellRentResidentialListingFactory;
     private readonly IDataAccessService _dataAccessService;
     private readonly INavigationService _navigationService;
     private readonly IDispatcherService _dispatcherService;
 
     #endregion
 
-    public MainViewModel(IAbstractFactory<Models.Rent.Residentials.Bldg.Property, Views.Rent.Residentials.Bldg.ShellPage> shellFactory, INavigationService navigationService, IDataAccessService dataAccessService, IDispatcherService dispatcherService)
+    public MainViewModel(IAbstractFactory<Models.Rent.Residentials.Bldg.Property, Views.Rent.Residentials.Bldg.ShellPage> shellRentResidentialPropertyFactory, IAbstractFactory<Models.Rent.Residentials.Room.Listing, Views.Rent.Residentials.Room.ShellPage> shellRentResidentialListingFactory, INavigationService navigationService, IDataAccessService dataAccessService, IDispatcherService dispatcherService)
     {
-        _shellFactory = shellFactory;
+        _shellRentResidentialPropertyFactory = shellRentResidentialPropertyFactory;
+        _shellRentResidentialListingFactory = shellRentResidentialListingFactory;
         _dataAccessService = dataAccessService;
         _navigationService = navigationService;
         _dispatcherService = dispatcherService;
@@ -193,15 +196,14 @@ public partial class MainViewModel : ObservableObject
 
     #region == Commands ==
 
-    // 新規物件追加（建物）
     [RelayCommand]
     private void AddNewRentResidentialBldg()
     {
-        var shell = _shellFactory.Create(new Models.Rent.Residentials.Bldg.Property(Guid.CreateVersion7().ToString("N"), EnumPropertyStatus.New));
+        var shell = _shellRentResidentialPropertyFactory.Create(new Models.Rent.Residentials.Bldg.Property(Guid.CreateVersion7().ToString("N"), EnumPropertyStatus.New));
 
-        BldgEditorList.Add(shell.Win);
+        BldgEditorList.Add(shell.Window);
 
-        if (shell.Win.AppWindow.Presenter is OverlappedPresenter presenter)
+        if (shell.Window.AppWindow.Presenter is OverlappedPresenter presenter)
         {
             presenter.IsResizable = true;
             presenter.IsModal = false;
@@ -210,21 +212,20 @@ public partial class MainViewModel : ObservableObject
             presenter.PreferredMinimumHeight = 794;
         }
 
-        shell.Win.SetPropertyIdToWindow(shell.ViewModel.Id);
-        shell.Win.SetViewModelToWindow(shell.ViewModel);
+        shell.Window.SetPropertyIdToWindow(shell.ViewModel.Id);
+        shell.Window.SetViewModelToWindow(shell.ViewModel);
 
         //var dpi = Windows.Win32.PInvoke.GetDpiForWindow(new Windows.Win32.Foundation.HWND(WinRT.Interop.WindowNative.GetWindowHandle(this)));
         //var scalingFactor = (float)dpi / 96;
         //AppWindow.Resize(new Windows.Graphics.SizeInt32((int)(400.0f * scalingFactor), (int)(300.0f * scalingFactor)));
 
-        shell.Win.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(BldgEditorWinLeft, BldgEditorWinTop, BldgEditorWinWidth, BldgEditorWinHeight));
+        shell.Window.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(BldgEditorWinLeft, BldgEditorWinTop, BldgEditorWinWidth, BldgEditorWinHeight));
 
         //editorWindow.AppWindow.Show();
-        shell.Win.Activate();
-        shell.Win.AppWindow.MoveInZOrderAtTop();
+        shell.Window.Activate();
+        shell.Window.AppWindow.MoveInZOrderAtTop();
     }
 
-    // 編集（建物）
     [RelayCommand(CanExecute = nameof(EditRentResidentialBldgCanExecute))]
     public void EditRentResidentialBldg(Models.Rent.Residentials.PropertySearchResultItem? selected)
     {
@@ -286,9 +287,9 @@ public partial class MainViewModel : ObservableObject
             return;
         }
 
-        var editorShell = _shellFactory.Create(res.Building);//_editorFactory.Create();
+        var editorShell = _shellRentResidentialPropertyFactory.Create(res.Building);//_editorFactory.Create();
 
-        var editorWindow = editorShell.Win;
+        var editorWindow = editorShell.Window;
         if (editorWindow == null)
         {
             // EditorWin should be initialized in the EditorShell constructor.
@@ -334,18 +335,109 @@ public partial class MainViewModel : ObservableObject
         return true;
     }
 
-    // 編集（部屋）TODO:
     [RelayCommand(CanExecute = nameof(EditRentResidentialRoomCanExecute))]
     public void EditRentResidentialRoom(Models.Rent.Residentials.ListingSearchResultItem? selected)
     {
-        if (selected == null)
+        if (selected is null)
         {
-            Debug.WriteLine("EditRentResidentialRoom executed but no item is selected.");
+            Debug.WriteLine("EditRentResidentialRoomCommand executed but no item is selected.");
             return;
         }
 
-        // TODO;
-        Debug.WriteLine($"TODO: EditRentResidentialRoom executed for {selected.Id} (PropertyId = {selected.PropertyId})");
+        var roomId = selected.Id;
+        var buildingId = selected.PropertyId;
+
+        if (string.IsNullOrEmpty(roomId))
+        {
+            Debug.WriteLine("EditRentResidentialRoomCommand executed but room id is null or empty.");
+            return;
+        }
+
+        //Debug.WriteLine($"EditRentResidentialRoomCommand executed for {selected.Id}");
+
+        var isFound = false;
+
+        // Check if the selected item is already being edited in another window.
+        RoomEditorList.ForEach(editorWindow =>
+        {
+            //Debug.WriteLine($"Checking editor window with Id: {editorWindow.Id} for selected item with Id: {roomId}");
+            if (editorWindow.Id == roomId)
+            {
+                // If the editor window for this item is already open, activate it.
+                Debug.WriteLine($"Editor window for {roomId} is already open. Activating it.");
+                isFound = true;
+
+                editorWindow.Activate();
+
+                // Do I need this anymore?
+                //var mainWindow = App.GetService<MainWindow>();
+                //mainWindow?.AppWindow.MoveInZOrderBelow(editorWindow.AppWindow.Id);
+                editorWindow.AppWindow.MoveInZOrderAtTop();
+
+                return;
+            }
+        });
+
+        if (isFound)
+        {
+            // If the editor window for this item is already open, no need to create a new one.
+            return;
+        }
+        
+        // Access Database to get the full entry data.
+        var res = _dataAccessService.SelectRentResidentialListingById(buildingId, roomId);// Go back to UI thred. Let's not do > .ConfigureAwait(false);
+        if (res.IsError)
+        {
+            Debug.WriteLine(res.Error.ErrText + Environment.NewLine + res.Error.ErrDescription + Environment.NewLine + res.Error.ErrPlace + Environment.NewLine + res.Error.ErrPlaceParent);
+
+            //ErrorMain = res.Error;
+            //IsMainErrorInfoBarVisible = true;
+
+            // TODO: Show error message to user
+            return;
+        }
+
+        if (res.Room is null)
+        {
+            Debug.WriteLine($"Room for {roomId} is null. Cannot open editor.");
+            return;
+        }
+
+        var editorShell = _shellRentResidentialListingFactory.Create(res.Room);
+        var editorWindow = editorShell.Window;
+        if (editorWindow == null)
+        {
+            // EditorWin should be initialized in the EditorShell constructor.
+            Debug.WriteLine("EditorWin must be initialized in the EditorShell constructor");
+            return;
+        }
+
+        editorWindow.SetListingIdToWindow(editorShell.ViewModel.Id);
+        editorWindow.SetViewModelToWindow(editorShell.ViewModel);
+
+        // To update the title/name and other properties in the editor window, we need to pass the selected search result to the editor's ViewModel.
+        editorShell.ViewModel.SetSearchResult(selected);
+
+        RoomEditorList.Add(editorWindow);
+
+        editorWindow.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(RoomEditorWinLeft, RoomEditorWinTop, RoomEditorWinWidth, RoomEditorWinHeight));
+        if (editorWindow.AppWindow.Presenter is OverlappedPresenter presenter)
+        {
+            presenter.IsResizable = true;
+            presenter.IsModal = false;
+            presenter.IsAlwaysOnTop = false;
+            presenter.PreferredMinimumWidth = 1274;
+            presenter.PreferredMinimumHeight = 794;
+        }
+
+        editorWindow.AppWindow.Show();
+        editorWindow.Activate();
+
+        // Do I need this anymore?
+        //var mainWindow = App.GetService<MainWindow>();
+        //mainWindow?.AppWindow.MoveInZOrderBelow(editorWindow.AppWindow.Id);
+
+        editorWindow.AppWindow.MoveInZOrderAtTop();
     }
     public static bool EditRentResidentialRoomCanExecute(Models.Rent.Residentials.ListingSearchResultItem? selected)
     {
@@ -487,7 +579,7 @@ public partial class MainViewModel : ObservableObject
     {
         RentResidentialRoomSearchResult.Clear();
 
-        var res = await Task.Run(() => _dataAccessService.SelectRentResidentialRooms(), _cts.Token);
+        var res = await Task.Run(() => _dataAccessService.SelectRentResidentialListings(), _cts.Token);
 
         if (res.IsError)
         {
@@ -518,28 +610,35 @@ public partial class MainViewModel : ObservableObject
 
         var isFound = false;
 
-        // TODO: Check if the selected item is already being edited in another window.
-        BldgEditorList.ForEach(editorWindow =>
+        // Check if the selected item is already being edited in editor window.
+        foreach (var editorWindow in BldgEditorList.ToList())
         {
-            Debug.WriteLine($"Checking editor window with Id: {editorWindow.Id} for selected item with Id: {selected.Id}");
+            //Debug.WriteLine($"Checking editor window with Id: {editorWindow.Id} for selected item with Id: {selected.Id}");
             if (editorWindow.Id == selected.Id)
             {
                 // If the editor window for this item is already open, activate it.
-                Debug.WriteLine($"Editor window for {selected.Id} is already open. Activating it.");
-                isFound = true;
-                // TODO: show confirm close dialog?.
-                editorWindow.Activate();
-                return;
+                Debug.WriteLine($"Editor window for {selected.Id} is already open. Closing if not IsDirty otherwise activating it.");
+                
+                if (editorWindow.ViewModel?.IsDirty == false)
+                {
+                    editorWindow.IsAutoClose = true;
+
+                    editorWindow.Close();
+                }
+                else
+                {
+                    isFound = true;
+                    editorWindow.Activate();
+                }
+                break;
             }
-        });
+        }
 
         if (isFound)
         {
             // If the editor window for this item is already open, just return.
             return;
         }
-
-        Debug.WriteLine($"DeleteRentResidentialCommand executed for {selected.Id}");
 
         var res = _dataAccessService.DeleteRentResidential(selected.Id);
         if (res.IsError)
@@ -561,9 +660,10 @@ public partial class MainViewModel : ObservableObject
             {
                 Debug.WriteLine($"Selected item {selected.Id} not found in the search result or could not remove.");
             }
+
+            Debug.WriteLine($"DeleteRentResidentialCommand executed for {selected.Id}");
         }
     }
-
     private static bool DeleteRentResidentialBldgCanExecute(Models.Rent.Residentials.PropertySearchResultItem? selected)
     {
         if (selected is null)
@@ -574,7 +674,7 @@ public partial class MainViewModel : ObservableObject
         return true;
     }
 
-    // 部屋削除（TODO）
+    // 部屋削除
     [RelayCommand(CanExecute = nameof(DeleteRentResidentialRoomCanExecute))]
     private void DeleteRentResidentialRoom(Models.Rent.Residentials.ListingSearchResultItem? selected)
     {
@@ -584,8 +684,78 @@ public partial class MainViewModel : ObservableObject
             return;
         }
 
-        // TODO:
-        Debug.WriteLine($"TODO: DeleteRentResidentialRoom executed for {selected.Id} (PropertyId = {selected.PropertyId})");
+        //Debug.WriteLine($"TODO: DeleteRentResidentialRoom executed for {selected.Id} (PropertyId = {selected.PropertyId})");
+
+        var isFound = false;
+
+        // Check if the selected item is already being edited in editor window.
+        foreach (var editorWindow in RoomEditorList.ToList())
+        {
+            //Debug.WriteLine($"Checking editor window with Id: {editorWindow.Id} for selected item with Id: {selected.Id}");
+            if (editorWindow.Id == selected.Id)
+            {
+                // If the editor window for this item is already open, activate it.
+                Debug.WriteLine($"Editor window for {selected.Id} is already open. Closing if not IsDirty otherwise activating it.");
+                
+                if (editorWindow.ViewModel?.IsDirty == false)
+                {
+                    editorWindow.IsAutoClose = true;
+
+                    editorWindow.Close();
+                }
+                else
+                {
+                    isFound = true;
+                    editorWindow.Activate();
+                }
+                break;
+            }
+        }
+
+        if (isFound)
+        {
+            return;
+        }
+
+        var res = _dataAccessService.DeleteRentResidentialListing(selected.Id);
+        if (res.IsError)
+        {
+            Debug.WriteLine(res.Error.ErrText + Environment.NewLine + res.Error.ErrDescription + Environment.NewLine + res.Error.ErrPlace + Environment.NewLine + res.Error.ErrPlaceParent);
+
+            //ErrorMain = res.Error;
+            //IsMainErrorInfoBarVisible = true;
+
+            // TODO: Show error message to user
+        }
+        else
+        {
+            if (RentResidentialRoomSearchResult.Remove(selected))
+            {
+                // Successfully removed the selected item from the search result.
+            }
+            else
+            {
+                Debug.WriteLine($"Selected item {selected.Id} not found in the search result or could not remove.");
+            }
+
+            Debug.WriteLine($"DeleteRentResidentialRoomCommand executed for {selected.Id}");
+        }
+
+        // Check if the selected item is already being edited in another window.
+        BldgEditorList.ForEach(editorWindow =>
+        {
+            Debug.WriteLine($"Checking editor window with Id: {editorWindow.Id} for selected item with Id: {selected.PropertyId}");
+            if (editorWindow.Id == selected.PropertyId)
+            {
+                // If the editor window for this item is already open, remove the room.
+                Debug.WriteLine($"Editor window for {selected.PropertyId} is already open. Removing room.");
+
+                // remove room from the editor window's ViewModel if it exists.
+                editorWindow.ViewModel?.RemoveRoom(selected.Id);
+
+                return;
+            }
+        });
     }
     private static bool DeleteRentResidentialRoomCanExecute(Models.Rent.Residentials.ListingSearchResultItem? selected)
     {

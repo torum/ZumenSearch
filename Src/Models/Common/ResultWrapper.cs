@@ -34,3 +34,9 @@ public sealed class SqliteDataAccessSelectRentResidentialRoomsResultWrapper : Sq
     public ObservableCollection<Rent.Residentials.ListingSearchResultItem> ListingSearchResult = [];
 }
 
+public sealed class SqliteDataAccessSelectRentResidentialRoomSingleResultWrapper : SqliteDataAccessResultWrapper
+{
+    public string BuildingName = string.Empty;
+    public Rent.Residentials.Room.Listing? Room;
+}
+

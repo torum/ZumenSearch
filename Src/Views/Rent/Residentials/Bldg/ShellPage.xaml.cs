@@ -16,11 +16,8 @@ namespace ZumenSearch.Views.Rent.Residentials.Bldg;
 public sealed partial class ShellPage : Page
 {
     public ViewModels.Rent.Residentials.Bldg.MainViewModel ViewModel { get; private set; }
-    public Views.Rent.Residentials.Bldg.EditorWindow Win { get; private set; }
+    public Views.Rent.Residentials.Bldg.EditorWindow Window { get; private set; }
     public Frame NavigationFrame => ContentFrame;
-
-    private bool _nvigated;
-    //private bool _initialized;
 
     // List of ValueTuple holding the Navigation Tag and the relative Navigation Page
     private readonly List<(string Tag, string Label, Type? Page)> _pages =
@@ -38,54 +35,48 @@ public sealed partial class ShellPage : Page
         ("gyousya", "宅建業者", typeof(Views.Rent.Residentials.Bldg.GyousyaPage))
     ];
 
-    private readonly INavigationResidentialService _nav;
+    private readonly INavigationGenericService _navService;
     private readonly IDispatcherService _dispatcherService;
-    private readonly IModalDialogService _dlg;
+    private readonly IModalDialogService _dlgService;
     private bool _isClosing;
+    private Views.Rent.Residentials.Room.EditorWindow? _closingWindow;
+    private bool _nvigated;
 
-    public ShellPage(Views.Rent.Residentials.Bldg.EditorWindow win, Models.Rent.Residentials.Bldg.Property entry, IAbstractFactory<Models.Rent.Residentials.Bldg.Property, ViewModels.Rent.Residentials.Bldg.MainViewModel> vmFactory, INavigationResidentialService navigationResidentialService, IDispatcherService dispatcherService, IModalDialogService modalDialog)
+    public ShellPage(Views.Rent.Residentials.Bldg.EditorWindow window, Models.Rent.Residentials.Bldg.Property building, IAbstractFactory<Models.Rent.Residentials.Bldg.Property, ViewModels.Rent.Residentials.Bldg.MainViewModel> vmFactory, INavigationGenericService navigationResidentialService, IDispatcherService dispatcherService, IModalDialogService modalDialog)
     {
-        //Debug.WriteLine($"ShellPage {entry.Id}");
+        //Debug.WriteLine($"ShellPage {building.Id}");
 
-        Win = win ?? throw new ArgumentNullException(nameof(win));
+        Window = window;
+        Window.Content = this;
 
-        _dlg = modalDialog;
+        ViewModel = vmFactory.Create(building);
+
+        _dlgService = modalDialog;
         _dispatcherService = dispatcherService;
-
-        // Creates VM with entry.
-        ViewModel = vmFactory.Create(entry);
-        //ViewModel.SetEditorShell(this);
-        Win.Content = this;
+        _navService = navigationResidentialService;
 
         InitializeComponent();
 
+        // Initialize the navigation service with the ContentFrame and set it in the ViewModel.
+        _navService.Initialize(this.ContentFrame, _pages);
+        ViewModel.SetNavigationService(_navService);
+
         this.Loaded += ShellPage_Loaded;
         this.Unloaded += ShellPage_Unloaded;
-        BreadcrumbBar1.ItemClicked += BreadcrumbBar_ItemClicked;
+        this.BreadcrumbBar1.ItemClicked += BreadcrumbBar_ItemClicked;
 
-        _nav = navigationResidentialService;
-        _nav.Initialize(this.ContentFrame);
-        ViewModel.SetEditorNavigationService(_nav);
-
-        //_dlg = modalDialogService;
-
-        Win.ExtendsContentIntoTitleBar = true;
-        Win.Activated += EditorWindow_Activated;
-        Win.Closed += EditorWindow_Closed;
-        Win.AppWindow.Closing += AppWindow_Closing;
-        Win.Title = "賃貸住居用";
-    }
-
-    private void ShellPage_Unloaded(object sender, RoutedEventArgs e)
-    {
-        //
+        Window.Title = "賃貸住居用：建物";
+        Window.ExtendsContentIntoTitleBar = true;
+        Window.Activated += Window_Activated;
+        Window.Closed += Window_Closed;
+        Window.AppWindow.Closing += AppWindow_Closing;
     }
 
     private void ShellPage_Loaded(object sender, RoutedEventArgs e)
     {
         // XamlRoot is no longer null.
-        _dlg.Initialize(this.XamlRoot);
-        ViewModel.SetEditorDialogService(_dlg);
+        _dlgService.Initialize(this.XamlRoot);
+        ViewModel.SetDialogService(_dlgService);
 
         if (ContentFrame.Navigate(typeof(ZumenSearch.Views.Rent.Residentials.Bldg.BasicPage), ViewModel, new EntranceNavigationTransitionInfo()))
         {
@@ -93,7 +84,12 @@ public sealed partial class ShellPage : Page
         }
     }
 
-    public void EditorWindow_Activated(object sender, Microsoft.UI.Xaml.WindowActivatedEventArgs args)
+    private void ShellPage_Unloaded(object sender, RoutedEventArgs e)
+    {
+        //
+    }
+
+    public void Window_Activated(object sender, Microsoft.UI.Xaml.WindowActivatedEventArgs args)
     {
         var resource = args.WindowActivationState == WindowActivationState.Deactivated ? "WindowCaptionForegroundDisabled" : "WindowCaptionForeground";
         AppTitleBarText.Foreground = (SolidColorBrush)App.Current.Resources[resource];
@@ -103,6 +99,15 @@ public sealed partial class ShellPage : Page
     {
         if (_isClosing)
         {
+            // Prevent re-entrancy if already in the process of closing.
+            args.Cancel = true;
+            if (_closingWindow is not null)
+            {
+                // Activate the child editor window that is currently being closed.
+                _closingWindow.Activate();
+                _closingWindow.AppWindow.MoveInZOrderAtTop();
+            }
+
             return;
         }
 
@@ -114,7 +119,7 @@ public sealed partial class ShellPage : Page
                 return;
             }
 
-            var isCancel = false;
+            var isCanceled = false;
             var childEditors = ViewModel.ChildEditorList.ToList();
 
             if (childEditors.Count > 0)
@@ -129,21 +134,24 @@ public sealed partial class ShellPage : Page
                     if (editor.ViewModel.IsDirty)
                     {
                         args.Cancel = true;
-                        isCancel = true;
+                        isCanceled = true;
+
                         editor.Activate();
                         editor.AppWindow.MoveInZOrderAtTop();
 
-                        // Show confirmation dialog to user to save changes or not.
+                        _closingWindow = editor;
                         if (editor.Content is Views.Rent.Residentials.Room.ShellPage shell)
                         {
+                            // Show confirmation dialog to user to save changes or not.
                             await shell.ShowEditorCloseConfirmationDialog();
                         }
+                        _closingWindow = null;
 
                         break;
                     }
                 }
 
-                if (!isCancel)
+                if (!isCanceled)
                 {
                     // Close() may modify ChildEditorList through Closed handlers.
                     // Enumerate the snapshot instead of the live List<T>.
@@ -155,7 +163,7 @@ public sealed partial class ShellPage : Page
                 }
             }
 
-            if (isCancel)
+            if (isCanceled)
             {
                 args.Cancel = true;
                 return;
@@ -169,6 +177,7 @@ public sealed partial class ShellPage : Page
         }
         finally
         {
+            _closingWindow = null;
             _isClosing = false;
         }
     }
@@ -183,7 +192,7 @@ public sealed partial class ShellPage : Page
         if (ViewModel.IsDirty)
         {
             // show ConfirmationDialog
-            var result = await _dlg.ShowEditorCloseConfirmationDialog();
+            var result = await _dlgService.ShowEditorCloseConfirmationDialog();
 
             if (result == ContentDialogResult.Primary)
             {
@@ -194,7 +203,7 @@ public sealed partial class ShellPage : Page
 
                 if (ViewModel.IsDirty == false)
                 {
-                    Win.Close();
+                    Window.Close();
                 }
             }
             else if (result == ContentDialogResult.Secondary)
@@ -202,7 +211,7 @@ public sealed partial class ShellPage : Page
                 // Discard change and close.
                 ViewModel.DiscardChanges();
 
-                Win.Close();
+                Window.Close();
             }
             else if (result == ContentDialogResult.None)
             {
@@ -211,15 +220,15 @@ public sealed partial class ShellPage : Page
         }
     }
 
-    public void EditorWindow_Closed(object sender, WindowEventArgs args)
+    public void Window_Closed(object sender, WindowEventArgs args)
     {
         if (sender is not EditorWindow ewin)
         {
             return;
         }
 
-        ewin.Activated -= EditorWindow_Activated;
-        ewin.Closed -= EditorWindow_Closed;
+        ewin.Activated -= Window_Activated;
+        ewin.Closed -= Window_Closed;
         ewin.AppWindow.Closing -= AppWindow_Closing;
 
         var mainVM = App.GetService<ViewModels.MainViewModel>();
@@ -338,7 +347,7 @@ public sealed partial class ShellPage : Page
 
     public void OnEventTitleChanged(EventArgs args)
     {
-        Win.Title = ViewModel?.WindowTitle ?? "賃貸住居用";
+        Window.Title = ViewModel?.WindowTitle ?? "賃貸住居用：建物";
     }
 
     private void ContentFrame_NavigationFailed(object sender, NavigationFailedEventArgs e)

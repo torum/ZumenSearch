@@ -5,16 +5,15 @@ using System.ComponentModel;
 using System.Diagnostics;
 using ZumenSearch.Models.Base;
 using ZumenSearch.Models.Common;
-using ZumenSearch.Models.Rent.Residentials;
 using ZumenSearch.Services;
 using ZumenSearch.Services.Contracts;
-using ZumenSearch.ViewModels.Rent.Residentials.Bldg;
 
 namespace ZumenSearch.ViewModels.Rent.Residentials.Room;
 
 public sealed partial class MainViewModel : ObservableObject
 {
     #region == Public Properties ==
+
     public string Id => _id;
 
     public ObservableCollection<Breadcrumb> BreadcrumbItems { get; set; } =
@@ -33,20 +32,31 @@ public sealed partial class MainViewModel : ObservableObject
     {
         get
         {
-            if (string.IsNullOrEmpty(_building.Name))
+            if (string.IsNullOrEmpty(_room.PropertyName))
             {
-                return $"{field} (新規)";
+                string str;
+
+                if (_room.ListingStatus == EnumListingStatus.New)
+                {
+                    str = $"{field} (新規)";
+                }
+                else
+                {
+                    str = $"{field} (編集)";
+                }
+
+                return str;
             }
             else
             {
-                var str = $"{field} : {_building.Name}";
+                var str = $"{field}：{_room.PropertyName}";
 
                 if (!string.IsNullOrEmpty(Name))
                 {
-                    str = $"{str}: {Name}";
+                    str = $"{str}：{Name}";
                 }
 
-                if (_building.PropertyStatus == EnumPropertyStatus.New)
+                if (_room.ListingStatus == EnumListingStatus.New)
                 {
                     str = $"{str} (新規)";
                 }
@@ -198,39 +208,44 @@ public sealed partial class MainViewModel : ObservableObject
 
     #endregion
 
+    #region == Private variables ==
+
+    private readonly string _id = string.Empty;
+
+    private Models.Rent.Residentials.Room.Listing _room;
+
+    //private Models.Rent.Residentials.Bldg.Property _building;
+
+    public ViewModels.Rent.Residentials.Bldg.MainViewModel? ParentViewModel { get; private set; } // Holding a reference to the parent ViewModel (Bldg.MainViewModel) (only IF opened by it) to allow communication between the windows.
+
+    // Holds the selected search result from the MainWindow which is used to update title/name and other properties.
+    private Models.Rent.Residentials.ListingSearchResultItem? _selectedSearchResult;
+
+    // Tmp file list to hold unsaved picture files. (if entry is not saved, delete on close)
+    private readonly List<string> _unsavedPictureFileList = [];
+
+    #endregion
+
     #region == Services ==
 
     private readonly IDataAccessService _dataAccessService;
     private readonly IDispatcherService _dispatcherService;
     private IModalDialogService? _dlgService;
-    private INavigationResidentialService? _navService;
-
-    #endregion
-
-    #region == Private variables ==
-
-    private readonly string _id = string.Empty;
-
-    private Models.Rent.Residentials.Room.Listing? _room;
-
-    private Models.Rent.Residentials.Bldg.Property _building;
-
-    // Tmp file list to hold unsaved picture files. (if entry is not saved, delete on close)
-    private readonly List<string> _unsavedUnitPictureFileList = [];
+    private INavigationGenericService? _navService;
 
     #endregion
 
     public MainViewModel(Models.Rent.Residentials.Room.Listing room, IDispatcherService dispatcherService, IDataAccessService dataAccessService)
     {
         _room = room;
-        _building = room.Building ?? throw new ArgumentNullException(nameof(room.Building), "Building cannot be null when creating MainViewModel.");
+        _id = room.Id;
+
+        //_building = room.Building ?? throw new ArgumentNullException(nameof(room.Building), "Building cannot be null when creating MainViewModel.");
         
         _dispatcherService = dispatcherService;
         _dataAccessService = dataAccessService;
 
-        _id = room.Id;
-
-        PopulateUnitValues();
+        PopulateValues();
 
         // Reset errors
         NameHasError = false;
@@ -240,13 +255,11 @@ public sealed partial class MainViewModel : ObservableObject
 
         _room.IsModified = false;
         IsDirty = false;
-
-        //_room = new Room(Guid.CreateVersion7().ToString("N"));
     }
 
     #region == Private Methods ==
 
-    private void SetValuesToUnit()
+    private void SetValues()
     {
         if (!IsDirty)
         {
@@ -289,18 +302,18 @@ public sealed partial class MainViewModel : ObservableObject
         //_room.UnitPictures = UnitPictures;
         foreach (var pic in UnitPictures)
         {
-            var existingPic = _room.UnitPictures.FirstOrDefault(r => r.Id == pic.Id);
+            var existingPic = _room.Pictures.FirstOrDefault(r => r.Id == pic.Id);
             if (existingPic is not null)
             {
                 // Update existing pic
-                var index = _room.UnitPictures.IndexOf(existingPic);
-                _room.UnitPictures[index] = pic;
+                var index = _room.Pictures.IndexOf(existingPic);
+                _room.Pictures[index] = pic;
 
             }
             else
             {
                 // Add new pic
-                _room.UnitPictures.Add(pic);
+                _room.Pictures.Add(pic);
             }
         }
 
@@ -310,31 +323,33 @@ public sealed partial class MainViewModel : ObservableObject
     {
         if (_room is null)
         {
-            Debug.WriteLine("_room is null. Can't save room.");
+            Debug.WriteLine("_room is null. Can't update room in the parent vm.");
             return;
         }
 
-        if (_building is null)
+        if (ParentViewModel is null)
         {
-            Debug.WriteLine("_building is null. Can't save room.");
+            Debug.WriteLine("ParentViewModel is null. Can't update room in the parent vm.");
             return;
         }
 
-        var existingRoom = _building.Rooms.FirstOrDefault(r => r.Id == _room.Id);
+        var existingRoom = ParentViewModel.Rooms.FirstOrDefault(r => r.Id == _room.Id);
         if (existingRoom is not null)
         {
             // Update existing room
-            var index = _building.Rooms.IndexOf(existingRoom);
-            _building.Rooms[index] = _room;
+            var index = ParentViewModel.Rooms.IndexOf(existingRoom);
+            ParentViewModel.Rooms[index] = _room;
         }
         else
         {
             // Add new room
-            _building.Rooms.Add(_room);
+            ParentViewModel.Rooms.Add(_room);
         }
+
+        //Debug.WriteLine($"Room {_room.Name} updated in Building {ParentViewModel?.Name}");
     }
 
-    private void PopulateUnitValues()
+    private void PopulateValues()
     {
         if (_room is null)
         {
@@ -350,7 +365,7 @@ public sealed partial class MainViewModel : ObservableObject
         // TODO: Set other properties for editing..
 
         // Pictures
-        UnitPictures = new ObservableCollection<Models.Rent.Residentials.Room.Picture>(_room.UnitPictures); // create a copy.
+        UnitPictures = new ObservableCollection<Models.Rent.Residentials.Room.Picture>(_room.Pictures); // create a copy.
         foreach (var item in UnitPictures)
         {
             item.ParentViewModel = this;
@@ -424,9 +439,9 @@ public sealed partial class MainViewModel : ObservableObject
 
     private void DiscardUnsavedFiles()
     {
-        if (_unsavedUnitPictureFileList.Count > 0)
+        if (_unsavedPictureFileList.Count > 0)
         {
-            foreach (var file in _unsavedUnitPictureFileList)
+            foreach (var file in _unsavedPictureFileList)
             {
                 if (File.Exists(file))
                 {
@@ -435,7 +450,7 @@ public sealed partial class MainViewModel : ObservableObject
                 }
             }
 
-            _unsavedUnitPictureFileList.Clear();
+            _unsavedPictureFileList.Clear();
         }
     }
 
@@ -443,43 +458,28 @@ public sealed partial class MainViewModel : ObservableObject
 
     #region == Public Methods ==
 
-    public void SetEditorNavigationService(INavigationResidentialService nav)
+    public void SetNavigationService(INavigationGenericService nav)
     {
         _navService = nav;
     }
 
-    public void SetEditorDialogService(IModalDialogService dialog)
+    public void SetDialogService(IModalDialogService dialog)
     {
         _dlgService = dialog;
     }
-    /*
-    public void SetEditBldg(Models.Rent.Residentials.Bldg.EntryResidential entry)//SetEditUnit //PopulateUnitValues
+
+    public void SetParentViewModel(ViewModels.Rent.Residentials.Bldg.MainViewModel parentVM)
     {
-        _entry = entry;
-
-        // TODO: 
-
-        IsDirty = false;
+        // When created by the parent ViewModel (Bldg.MainViewModel), set a reference to it to allow communication between the windows.
+        ParentViewModel = parentVM;
     }
 
-    public void SetEditUnit(Models.Rent.Residentials.Unit.UnitResidential room)//SetEditUnit //PopulateUnitValues
+    public void SetSearchResult(Models.Rent.Residentials.ListingSearchResultItem? searchResult)
     {
-        _room = room;
-
-        // TODO: reset all ..
-
-        PopulateUnitValues();
-
-        // Reset errors
-        NameHasError = false;
-        // TODO: more.
-
-        HasErrors = false;
-
-        _room.IsModified = false;
-        IsDirty = false;
+        // When created by main window, store the selected search result to update title/name and other properties in the main window.
+        _selectedSearchResult = searchResult;
     }
-    */
+
     // TODO: Convert this to command
     public void LeavingUnitCleanUp()
     {
@@ -556,7 +556,7 @@ public sealed partial class MainViewModel : ObservableObject
     {
         DiscardUnsavedFiles();
 
-        _room = null;
+        //_room = null;
         IsDirty = false;
     }
 
@@ -591,18 +591,19 @@ public sealed partial class MainViewModel : ObservableObject
             return;
         }
 
-        SetValuesToUnit();
+        SetValues();
 
         // TODO:
 
-
+        /*
         if (_building is null)
         {
             Debug.WriteLine("_building is null. Can't save room.");
             return;
         }
+        */
 
-        if (_building.PropertyStatus == EnumPropertyStatus.New)
+        if (_room.ListingStatus == EnumListingStatus.New)
         {
             // TODO:
 
@@ -615,7 +616,7 @@ public sealed partial class MainViewModel : ObservableObject
         {
             // save room directry to db.
             // 
-            var resInsert = _dataAccessService.UpsertRentResidentialUnit(_building.Id, _room);
+            var resInsert = _dataAccessService.UpsertRentResidentialListing(_room.PropertyId, _room);
             if (resInsert.IsError)
             {
                 Debug.WriteLine("Error on UpsertRentResidentialUnit. @Save() in Residentials.MainViewModel");
@@ -629,25 +630,28 @@ public sealed partial class MainViewModel : ObservableObject
                 UpdateBldg();
 
                 // Clean up deleted picture file.
-                if (_room.UnitPicturesToBeDeleted.Count > 0)
+                if (_room.PicturesToBeDeleted.Count > 0)
                 {
-                    foreach (var file in _room.UnitPicturesToBeDeleted)
+                    foreach (var file in _room.PicturesToBeDeleted)
                     {
-                        if (_room.UnitPictures.Remove(file))
+                        if (_room.Pictures.Remove(file))
                         {
                             File.Delete(file.ImageLocation);
                         }
                     }
 
-                    _room.UnitPicturesToBeDeleted.Clear();
+                    _room.PicturesToBeDeleted.Clear();
                 }
 
-                _unsavedUnitPictureFileList.Clear();
+                _unsavedPictureFileList.Clear();
 
                 IsDirty = false;
             }
         }
-    }
+
+        // Update the selected search result's values such asname if it exists.
+        _selectedSearchResult?.Name = Name;
+    }   
     private bool CanSave()
     {
         if (IsDirty)
@@ -713,7 +717,7 @@ public sealed partial class MainViewModel : ObservableObject
                 
             }
             */
-            _room.UnitPicturesToBeDeleted.Add(picUnit);
+            _room.PicturesToBeDeleted.Add(picUnit);
             IsDirty = true;
         }
     }

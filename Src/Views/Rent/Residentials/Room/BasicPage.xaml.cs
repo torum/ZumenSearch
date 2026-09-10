@@ -15,6 +15,7 @@ public sealed partial class BasicPage : Page
         InitializeComponent();
 
     }
+
     private void Init()
     {
         if (_initialized) return;

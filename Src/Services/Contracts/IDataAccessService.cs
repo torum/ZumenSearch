@@ -16,10 +16,13 @@ public interface IDataAccessService
 
     SqliteDataAccessSelectRentResidentialBuildingSingleResultWrapper SelectRentResidentialById(string id);
 
-    SqliteDataAccessResultWrapper UpsertRentResidentialUnit(string rentId, Models.Rent.Residentials.Room.Listing room);
+    SqliteDataAccessResultWrapper UpsertRentResidentialListing(string rentId, Models.Rent.Residentials.Room.Listing room);
 
-    SqliteDataAccessSelectRentResidentialRoomsResultWrapper SelectRentResidentialRooms();
+    SqliteDataAccessSelectRentResidentialRoomsResultWrapper SelectRentResidentialListings();
 
+    SqliteDataAccessSelectRentResidentialRoomSingleResultWrapper SelectRentResidentialListingById(string rentId, string roomId);
+
+    SqliteDataAccessResultWrapper DeleteRentResidentialListing(string roomId);
 }
 
 

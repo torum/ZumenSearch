@@ -2,6 +2,9 @@
 
 namespace ZumenSearch.Models.Base;
 
+#pragma warning disable IDE0290 // Use primary constructor
+#pragma warning disable IDE0079 // Remove unnecessary suppression
+
 public enum EnumPropertyStatus
 {
     Saved,

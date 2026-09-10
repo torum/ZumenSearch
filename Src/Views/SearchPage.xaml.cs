@@ -1,4 +1,6 @@
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
 using System.Collections.ObjectModel;
 using ZumenSearch.Services.Contracts;
@@ -50,6 +52,8 @@ public sealed partial class SearchPage : Page
 
         InitializeComponent();
 
+        this.Loaded += Page_Loaded;
+
         //BreadcrumbBarMain.ItemsSource = new string[] { "ëççáåüçı" };
         /*
         BreadcrumbBarMain.ItemsSource = new ObservableCollection<Breadcrumb>{
@@ -83,6 +87,11 @@ public sealed partial class SearchPage : Page
         BasicGridView.ItemsSource = Items;
     }
 
+    private void Page_Loaded(object sender, RoutedEventArgs e)
+    {
+        this.SearchAutoSuggestBox.Focus(Microsoft.UI.Xaml.FocusState.Programmatic);
+    }
+
     private void AutoSuggestBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
     {
         if (ViewModel.SearchRentResidentialBldgCommand.CanExecute(args.QueryText))
@@ -90,5 +99,6 @@ public sealed partial class SearchPage : Page
             ViewModel.SearchRentResidentialBldgCommand.Execute(args.QueryText);
         }
     }
+
 
 }

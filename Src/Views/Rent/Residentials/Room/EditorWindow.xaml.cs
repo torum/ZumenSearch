@@ -21,7 +21,7 @@ public sealed partial class EditorWindow : Window
 
     }
 
-    public void SetRoomIdToWindow(string id)
+    public void SetListingIdToWindow(string id)
     {
         if (string.IsNullOrEmpty(id))
         {

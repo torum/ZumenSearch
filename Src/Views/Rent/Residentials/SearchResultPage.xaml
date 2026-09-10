@@ -6,7 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:mod="using:ZumenSearch.Models.Common"
     xmlns:rent="using:ZumenSearch.Models.Rent.Residentials"
-Loaded="Page_Loaded"
+    Loaded="Page_Loaded"
     mc:Ignorable="d"
     NavigationCacheMode="Required">
 
@@ -61,7 +61,6 @@ Loaded="Page_Loaded"
 
                 <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Margin="0,0,24,0" HorizontalAlignment="Right">
                     <AppBarButton Icon="Delete" Label="削除" Command="{x:Bind ViewModel.DeleteRentResidentialRoomCommand}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}"/>
-
                     <AppBarButton Icon="Sort" IsCompact="True" ToolTipService.ToolTip="Sort" Label="並べ替え" AutomationProperties.Name="Sort" IsEnabled="False">
                         <AppBarButton.Flyout>
                             <MenuFlyout>
@@ -73,14 +72,6 @@ Loaded="Page_Loaded"
                     </AppBarButton>
                     <AppBarButton Icon="Copy" Label="複製" IsEnabled="False"/>
                     <AppBarButton Icon="Edit" Label="編集" Command="{x:Bind ViewModel.EditRentResidentialRoomCommand}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}"/>
-
-                    <!--<CommandBar.SecondaryCommands>
-                            <AppBarButton Icon="Setting" Label="Settings">
-                                <AppBarButton.KeyboardAccelerators>
-                                    <KeyboardAccelerator Modifiers="Control" Key="I" />
-                                </AppBarButton.KeyboardAccelerators>
-                            </AppBarButton>
-                        </CommandBar.SecondaryCommands>-->
                 </CommandBar>
 
                 <Border BorderThickness="0,1,0,0" BorderBrush="{ThemeResource NavigationViewItemSeparatorForeground}"></Border>
@@ -90,9 +81,21 @@ Loaded="Page_Loaded"
             <ScrollViewer Grid.Row="1" Padding="{StaticResource ContentPadding}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
 
                 <ItemsView x:Name="SearchResultListView" Margin="0,12,0,0" ItemsSource="{x:Bind ViewModel.RentResidentialRoomSearchResult, Mode=OneWay}" AllowFocusOnInteraction="False" SelectionMode="Single">
+                    <ItemsView.ContextFlyout>
+                        <MenuFlyout>
+                            <MenuFlyoutItem Text="編集" Icon="Edit" Command="{x:Bind ViewModel.EditRentResidentialRoomCommand}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}">
+                                <MenuFlyoutItem.KeyboardAccelerators>
+                                    <KeyboardAccelerator Key="Enter" />
+                                </MenuFlyoutItem.KeyboardAccelerators>
+                            </MenuFlyoutItem>
+                            <MenuFlyoutItem Text="複製" Icon="Copy"></MenuFlyoutItem>
+                            <MenuFlyoutSeparator/>
+                            <MenuFlyoutItem Text="削除" Icon="Delete" Command="{x:Bind ViewModel.DeleteRentResidentialRoomCommand, Mode=OneWay}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}"></MenuFlyoutItem>
+                        </MenuFlyout>
+                    </ItemsView.ContextFlyout>
                     <ItemsView.ItemTemplate>
                         <DataTemplate x:DataType="rent:ListingSearchResultItem">
-                            <ItemContainer IsDoubleTapEnabled="True" DoubleTapped="SearchResult_DoubleTapped" PointerPressed="ItemContainer_PointerPressed" PointerReleased="ItemContainer_PointerReleased">
+                            <ItemContainer DataContext="{x:Bind}" IsDoubleTapEnabled="True" DoubleTapped="SearchResult_DoubleTapped" PointerPressed="ItemContainer_PointerPressed" PointerReleased="ItemContainer_PointerReleased" RightTapped="ItemContainer_RightTapped">
                                 <ItemContainer.KeyboardAccelerators>
                                     <KeyboardAccelerator Key="Enter" Modifiers="None" Invoked="ItemsViewKeyboardAccelerator_Invoked" />
                                 </ItemContainer.KeyboardAccelerators>

@@ -27,12 +27,11 @@ public sealed partial class MainViewModel : ObservableObject
 
     public string Id => _id;
 
-    public INavigationResidentialService? ResidentialNavigationService => _navService;
+    public INavigationGenericService? ResidentialNavigationService => _navService;
 
     public readonly List<Views.Rent.Residentials.Room.EditorWindow> ChildEditorList = [];
 
     // Local directory path to save blob data such as pictures and PDFs.
-
 
     public ObservableCollection<Breadcrumb> BreadcrumbItems { get; set; } =
     [
@@ -47,7 +46,6 @@ public sealed partial class MainViewModel : ObservableObject
     [ObservableProperty]
     public partial string InfoBarErrorMessage { get; set; } = string.Empty;
 
-    // TODO: split into parts so that xaml can use span to colorlize them.
     public string WindowTitle
     {
         get
@@ -58,13 +56,7 @@ public sealed partial class MainViewModel : ObservableObject
             }
             else
             {
-                var str = $"{field} : {Name}";
-                /*
-                if (!string.IsNullOrEmpty(Unit.Name))
-                {
-                    str = $"{str}: {Unit.Name}";
-                }
-                */
+                var str = $"{field}：{Name}";
 
                 if (PropertyStatus == EnumPropertyStatus.New)
                 {
@@ -130,7 +122,8 @@ public sealed partial class MainViewModel : ObservableObject
                 // Update title with dummy value.
                 WindowTitle = string.Empty;
 
-                _selectedSearchResult?.Name = value; // Update the selected search result's name if it exists
+                // Moved to after the save.
+                //_selectedSearchResult?.Name = value; // Update the selected search result's name if it exists
             }
         }
     }
@@ -1279,20 +1272,21 @@ public sealed partial class MainViewModel : ObservableObject
     private readonly IDataAccessLocationService _dataAccessLocationService;
     private readonly IDispatcherService _dispatcherService;
     private IModalDialogService? _dlgService;
-    private INavigationResidentialService? _navService;// ??
+    private INavigationGenericService? _navService;
 
     #endregion
 
     public MainViewModel(Models.Rent.Residentials.Bldg.Property building, IAbstractFactory<Models.Rent.Residentials.Room.Listing, Views.Rent.Residentials.Room.ShellPage> shellFactory, IDispatcherService dispatcherService, IDataAccessService dataAccessService, IDataAccessLocationService dataAccessLocationService)
     {
         _building = building;
+        _id = building.Id;
+
         _shellFactory = shellFactory;
 
         _dataAccessService = dataAccessService;
         _dataAccessLocationService = dataAccessLocationService;
         _dispatcherService = dispatcherService;
 
-        _id = building.Id;//Guid.CreateVersion7().ToString("N");
         //EntryDataDirectoryPath = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(App.AppDataPictureFolder, "Rent"), "Residential_Building"), _id);
 
         // Update title with dummy value.
@@ -1471,6 +1465,40 @@ public sealed partial class MainViewModel : ObservableObject
         // Rooms
         Rooms = new ObservableCollection<Models.Rent.Residentials.Room.Listing>(_building.Rooms); // create a copy.
 
+        foreach (var item in Rooms)
+        {
+            //
+            item.IsModified = false; // Needed this.
+            item.PropertyChanged += OnRoomPropertyChanged;
+        }
+
+        Rooms.CollectionChanged += (s, e) =>
+        {
+            // Unsubscribe from removed items
+            if (e.OldItems != null)
+            {
+                foreach (Models.Rent.Residentials.Room.Listing item in e.OldItems)
+                {
+                    //Debug.WriteLine($"Item {item.Id} Removed from Rooms");
+                    //IsDirty = true;
+
+                    item.PropertyChanged -= OnRoomPropertyChanged;
+                }
+            }
+
+            // Subscribe to PropertyChanged.
+            if (e.NewItems != null)
+            {
+                foreach (Models.Rent.Residentials.Room.Listing item in e.NewItems)
+                {
+                    //Debug.WriteLine($"Item {item.Id} Added to Rooms");
+                    //IsDirty = true;
+
+                    item.PropertyChanged += OnRoomPropertyChanged;
+                }
+            }
+        };
+
         //Debug.WriteLine($"PopulateEntryValues: Completed populating values from Entry to VM. Entry ID: {_building.Id}, Rooms Count: {Rooms.Count}");
     }
 
@@ -1535,6 +1563,41 @@ public sealed partial class MainViewModel : ObservableObject
                     }
                 }
             }
+        }
+    }
+
+    private void OnRoomPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (sender is not Models.Rent.Residentials.Room.Listing room)
+        {
+            Debug.WriteLine("OnRoomPropertyChanged returned non Room.");
+            return;
+        }
+
+        Debug.WriteLine($"Property {e.PropertyName} changed");
+
+        if (room.IsModified)
+        {
+            /*
+            IsDirty = true;
+
+            var prop = e.PropertyName ?? string.Empty;
+            
+            if (prop.Equals("IsMain"))
+            {
+                if (picBldg.IsMain)
+                {
+                    // Clear all other pics
+                    foreach (var item in BuildingPictures)
+                    {
+                        if (item != picBldg)
+                        {
+                            item.IsMain = false;
+                        }
+                    }
+                }
+            }
+            */
         }
     }
 
@@ -1732,12 +1795,12 @@ public sealed partial class MainViewModel : ObservableObject
 
     #region == Public Methods ==
 
-    public void SetEditorNavigationService(INavigationResidentialService nav)
+    public void SetNavigationService(INavigationGenericService nav)
     {
         _navService = nav;
     }
 
-    public void SetEditorDialogService(IModalDialogService dialog)
+    public void SetDialogService(IModalDialogService dialog)
     {
         _dlgService = dialog;
     }
@@ -1745,6 +1808,18 @@ public sealed partial class MainViewModel : ObservableObject
     public void SetSearchResult(Models.Rent.Residentials.PropertySearchResultItem? searchResult)
     {
         _selectedSearchResult = searchResult;
+    }
+
+    public void RemoveRoom(string roomId)
+    {
+        if (string.IsNullOrEmpty(roomId)) return;
+        var room = Rooms.FirstOrDefault(r => r.Id == roomId);
+        if (room is null) return;
+        if (Rooms.Contains(room))
+        {
+            Rooms.Remove(room);
+            //IsDirty = true;
+        }
     }
 
     // TODO: change these to commands.
@@ -1876,7 +1951,6 @@ public sealed partial class MainViewModel : ObservableObject
             return;
         }
 
-
         SetValuesToEntry();
 
         if (_building.PropertyStatus == EnumPropertyStatus.New)
@@ -1886,6 +1960,14 @@ public sealed partial class MainViewModel : ObservableObject
         else
         {
             SaveAsUpdate();
+        }
+
+        // Update the selected search result's values such asname if it exists.
+        _selectedSearchResult?.Name = Name;
+
+        foreach (var room in Rooms)
+        {
+            room.PropertyName = Name;
         }
 
     }
@@ -1910,7 +1992,7 @@ public sealed partial class MainViewModel : ObservableObject
         if (filePathList is null) return;
         if (filePathList.Count == 0) return;
 
-        Debug.WriteLine($"destDirectory={_building.PropertyDataDirectoryPath}  @SetNewBuildingPicturesAsync()");
+        //Debug.WriteLine($"destDirectory={_building.PropertyDataDirectoryPath}  @SetNewBuildingPicturesAsync()");
 
         if (!Directory.Exists(_building.PropertyDataDirectoryPath))
         {
@@ -2034,21 +2116,23 @@ public sealed partial class MainViewModel : ObservableObject
 
     #endregion
 
-    #region == Unit related commands ==
+    #region == Rooms related commands ==
 
     // Add New Modal window command
     [RelayCommand]
     private void AddNewUnit() 
     {
-        var editorShell = _shellFactory.Create(new Models.Rent.Residentials.Room.Listing(Guid.CreateVersion7().ToString("N"), _building));
-        editorShell.SetParentViewModel(this);
+        var editorShell = _shellFactory.Create(new Models.Rent.Residentials.Room.Listing(Guid.CreateVersion7().ToString("N"), _building.Id, Name));
+        //editorShell.SetParentViewModel(this);
+
+        editorShell.ViewModel.SetParentViewModel(this);
 
         var mainVM = App.GetService<ViewModels.MainViewModel>();
-        mainVM.RoomEditorList.Add(editorShell.Win);
-        this.ChildEditorList.Add(editorShell.Win);
+        mainVM.RoomEditorList.Add(editorShell.Window);
+        this.ChildEditorList.Add(editorShell.Window);
         //shell.ParentWin = shell.Win;
 
-        if (editorShell.Win.AppWindow.Presenter is OverlappedPresenter presenter)
+        if (editorShell.Window.AppWindow.Presenter is OverlappedPresenter presenter)
         {
             presenter.IsResizable = true;
             presenter.IsModal = false;
@@ -2057,18 +2141,18 @@ public sealed partial class MainViewModel : ObservableObject
             presenter.PreferredMinimumHeight = 794;
         }
 
-        editorShell.Win.SetRoomIdToWindow(editorShell.ViewModel.Id);
-        editorShell.Win.SetViewModelToWindow(editorShell.ViewModel);
+        editorShell.Window.SetListingIdToWindow(editorShell.ViewModel.Id);
+        editorShell.Window.SetViewModelToWindow(editorShell.ViewModel);
 
         //var dpi = Windows.Win32.PInvoke.GetDpiForWindow(new Windows.Win32.Foundation.HWND(WinRT.Interop.WindowNative.GetWindowHandle(this)));
         //var scalingFactor = (float)dpi / 96;
         //AppWindow.Resize(new Windows.Graphics.SizeInt32((int)(400.0f * scalingFactor), (int)(300.0f * scalingFactor)));
 
-        editorShell.Win.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(mainVM.RoomEditorWinLeft, mainVM.RoomEditorWinTop, mainVM.RoomEditorWinWidth, mainVM.RoomEditorWinHeight));
+        editorShell.Window.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(mainVM.RoomEditorWinLeft, mainVM.RoomEditorWinTop, mainVM.RoomEditorWinWidth, mainVM.RoomEditorWinHeight));
 
         //editorWindow.AppWindow.Show();
-        editorShell.Win.Activate();
-        editorShell.Win.AppWindow.MoveInZOrderAtTop();
+        editorShell.Window.Activate();
+        editorShell.Window.AppWindow.MoveInZOrderAtTop();
     }
 
     [RelayCommand(CanExecute = nameof(EditSelectedUnitCanExecute))]
@@ -2082,7 +2166,7 @@ public sealed partial class MainViewModel : ObservableObject
         _mainViewModel.GoToUnitShellPageCommand.Execute(this);
         */
 
-        var rentId = room.Building?.Id;
+        var rentId = room.PropertyId;
         var unitId = room.Id;
 
         if (string.IsNullOrEmpty(rentId))//if (selected == null)
@@ -2113,7 +2197,7 @@ public sealed partial class MainViewModel : ObservableObject
 
                 if (editWin.Content is Views.Rent.Residentials.Room.ShellPage editShell)
                 {
-                    editShell.Win?.AppWindow.MoveInZOrderBelow(editWin.AppWindow.Id);
+                    editShell.Window?.AppWindow.MoveInZOrderBelow(editWin.AppWindow.Id);
                 }
 
                 editWin.AppWindow.MoveInZOrderAtTop();
@@ -2183,9 +2267,11 @@ public sealed partial class MainViewModel : ObservableObject
         //var editorShell = _shellFactory.Create(res.EntryFull);
 
         var editorShell = _shellFactory.Create(room);
-        editorShell.SetParentViewModel(this);
+        //editorShell.SetParentViewModel(this);
 
-        var editorWindow = editorShell.Win;
+        editorShell.ViewModel.SetParentViewModel(this);
+
+        var editorWindow = editorShell.Window;
         if (editorWindow == null)
         {
             // EditorWin should be initialized in the EditorShell constructor.
@@ -2193,7 +2279,7 @@ public sealed partial class MainViewModel : ObservableObject
             return;
         }
 
-        editorWindow.SetRoomIdToWindow(editorShell.ViewModel.Id);
+        editorWindow.SetListingIdToWindow(editorShell.ViewModel.Id);
         editorWindow.SetViewModelToWindow(editorShell.ViewModel);
 
         mainVM.RoomEditorList.Add(editorWindow);
@@ -2217,7 +2303,7 @@ public sealed partial class MainViewModel : ObservableObject
         //mainWindow?.AppWindow.MoveInZOrderBelow(editorWindow.AppWindow.Id);
         if (editorWindow.Content is Views.Rent.Residentials.Room.ShellPage shell)
         {
-            shell.Win?.AppWindow.MoveInZOrderBelow(editorWindow.AppWindow.Id);
+            shell.Window?.AppWindow.MoveInZOrderBelow(editorWindow.AppWindow.Id);
         }
         editorWindow.AppWindow.MoveInZOrderAtTop();
 

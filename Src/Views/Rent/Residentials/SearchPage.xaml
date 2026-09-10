@@ -54,7 +54,7 @@
                 <StackPanel>
 
                     <VariableSizedWrapGrid Orientation="Horizontal" Margin="0" >
-                        <TextBox MinWidth="350" Header="物件名" PlaceholderText="Type your text here" Margin="0,24,24,0"/>
+                        <TextBox x:Name="TextBoxName" MinWidth="350" Header="物件名" PlaceholderText="Type your text here" Margin="0,24,24,0"/>
                         <TextBox MinWidth="350" Header="所在地" PlaceholderText="Type your text here" Margin="0,24,24,0"/>
                     </VariableSizedWrapGrid>
 

@@ -1,4 +1,5 @@
-﻿using Microsoft.UI.Xaml.Controls;
+﻿using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.ViewModels;
@@ -21,5 +22,11 @@ public sealed partial class SearchPage : Page
 
         InitializeComponent();
 
+        this.Loaded += Page_Loaded;
+    }
+
+    private void Page_Loaded(object sender, RoutedEventArgs e)
+    {
+        this.TextBoxName.Focus(Microsoft.UI.Xaml.FocusState.Programmatic);
     }
 }

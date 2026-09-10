@@ -29,24 +29,6 @@ public sealed partial class UnitListPage : Page
         base.OnNavigatedTo(e);
     }
 
-    private static T? FindParent<T>(DependencyObject child) where T : DependencyObject
-    {
-        DependencyObject parent = VisualTreeHelper.GetParent(child);
-        while (parent != null && parent is not T)
-        {
-            parent = VisualTreeHelper.GetParent(parent);
-        }
-
-        if (parent is not null)
-        {
-            return parent as T;
-        }
-        else
-        {
-            return null;
-        }
-    }
-
     private void ItemContainer_DoubleTapped(object sender, Microsoft.UI.Xaml.Input.DoubleTappedRoutedEventArgs e)
     {
         // OriginalSource is the specific element (e.g., TextBlock or Grid) that was tapped
@@ -78,11 +60,28 @@ public sealed partial class UnitListPage : Page
         }
     }
 
+    private static T? FindParent<T>(DependencyObject child) where T : DependencyObject
+    {
+        DependencyObject parent = VisualTreeHelper.GetParent(child);
+        while (parent != null && parent is not T)
+        {
+            parent = VisualTreeHelper.GetParent(parent);
+        }
+
+        if (parent is not null)
+        {
+            return parent as T;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
     private void ItemContainer_PointerPressed(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
     {
-        // Stupid WinUI3 can't handle double click properly.
+        // WinUI3 can't handle double click properly.
         // This prevents newly created window goes behind the main window.
-
         e.Handled = true;
     }
 
@@ -90,13 +89,34 @@ public sealed partial class UnitListPage : Page
     {
         // Stupid WinUI3 can't handle double click properly.
         // This prevents newly created window goes behind the main window.
+        e.Handled = true;
+    }
 
-        //e.Handled = true;
+    private void ItemContainer_RightTapped(object sender, Microsoft.UI.Xaml.Input.RightTappedRoutedEventArgs e)
+    {
+        if (e.OriginalSource is not FrameworkElement element)
+        {
+            return;
+        }
+
+        var container = FindParent<Microsoft.UI.Xaml.Controls.ItemContainer>(element);
+        if (container is null)
+        {
+            return;
+        }
+
+        if (container.DataContext is not Models.Rent.Residentials.Room.Listing room)
+        {
+            Debug.WriteLine($"Not Room. {container.DataContext?.GetType().FullName} @ItemContainer_RightTapped");
+            return;
+        }
+
+        container.IsSelected = true;
     }
 
     private void ItemContainerKeyboardAccelerator_Invoked(Microsoft.UI.Xaml.Input.KeyboardAccelerator sender, Microsoft.UI.Xaml.Input.KeyboardAcceleratorInvokedEventArgs args)
     {
-        Debug.WriteLine($"sender {sender}, element{args.Element} @ItemContainerKeyboardAccelerator_Invoked");
+        //Debug.WriteLine($"sender {sender}, element{args.Element} @ItemContainerKeyboardAccelerator_Invoked");
 
         args.Handled = true;
 
@@ -135,25 +155,4 @@ public sealed partial class UnitListPage : Page
         }
     }
 
-    private void ItemContainer_RightTapped(object sender, Microsoft.UI.Xaml.Input.RightTappedRoutedEventArgs e)
-    {
-        if (e.OriginalSource is not FrameworkElement element)
-        {
-            return;
-        }
-
-        var container = FindParent<Microsoft.UI.Xaml.Controls.ItemContainer>(element);
-        if (container is null)
-        {
-            return;
-        }
-
-        if (container.DataContext is not Models.Rent.Residentials.Room.Listing room)
-        {
-            Debug.WriteLine($"Not Room. {container.DataContext?.GetType().FullName} @ItemContainer_RightTapped");
-            return;
-        }
-
-        container.IsSelected = true;
-    }
 }

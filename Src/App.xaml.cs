@@ -99,7 +99,7 @@ public partial class App : Application
                 services.AddSingleton<IDispatcherService>(new DispatcherService(CurrentDispatcherQueue));
                 services.AddSingleton<INavigationService, NavigationService>();
                 services.AddSingleton<IDataAccessService, DataAccessService>();
-                services.AddTransient<INavigationResidentialService, NavigationResidentialService>();
+                services.AddTransient<INavigationGenericService, NavigationGenericService>();
                 services.AddTransient<IModalDialogService, ModalDialogService>();
                 services.AddTransient<IDataAccessLocationService, DataAccessLocationService>();
                 services.AddTransient<IDataAccessTransportationService, DataAccessTransportationService>();

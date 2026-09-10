@@ -4,16 +4,34 @@ using ZumenSearch.Models.Base;
 
 namespace ZumenSearch.Models.Rent.Residentials.Room;
 
+#pragma warning disable IDE0079 // Remove unnecessary suppression
 #pragma warning disable IDE0290 // Use primary constructor
-
 
 // 部屋（編集用）
 public sealed partial class Listing : ListingBase
 {
-    public Models.Rent.Residentials.Bldg.Property Building { get; private set; }
+    // Holding a reference to the parent Building (Property) object to allow communication between the Room Listing and its parent Building.
+    //public Models.Rent.Residentials.Bldg.Property? Building { get; private set; }
+
+    public string PropertyId { get; private set; }
+
+    public string PropertyName
+    {
+        get => field ?? string.Empty;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+
+            }
+        }
+    }
+
+    // ステータス（保存済みか新規か）
+    public EnumListingStatus ListingStatus { get; set; }
 
     // 物件写真（部屋）リスト
-    public ObservableCollection<Picture> UnitPictures
+    public ObservableCollection<Picture> Pictures
     {
         get;
         set
@@ -26,7 +44,7 @@ public sealed partial class Listing : ListingBase
     } = [];
 
     // DBへの更新時にDBから削除されるべき物件写真（部屋）のIDリスト
-    public ObservableCollection<Picture> UnitPicturesToBeDeleted = [];
+    public ObservableCollection<Picture> PicturesToBeDeleted = [];
 
     // 賃料（円）
     public decimal Chinryou
@@ -117,8 +135,9 @@ public sealed partial class Listing : ListingBase
     [ObservableProperty]
     public partial string Remarks { get; set; } = string.Empty;
 
-    public Listing(string id, Models.Rent.Residentials.Bldg.Property building) : base(id)
+    public Listing(string id, string propertyId, string propertyName) : base(id)
     {
-        Building = building;
+        PropertyId = propertyId;
+        PropertyName = propertyName;
     }
 }

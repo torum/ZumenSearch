@@ -16,8 +16,8 @@ namespace ZumenSearch.Views.Rent.Residentials.Room;
 public sealed partial class ShellPage : Page
 {
     public ViewModels.Rent.Residentials.Room.MainViewModel ViewModel { get; private set; }
-    public Views.Rent.Residentials.Room.EditorWindow Win { get; private set; }
-    public ViewModels.Rent.Residentials.Bldg.MainViewModel? ParentViewModel { get; private set; }
+    //public ViewModels.Rent.Residentials.Bldg.MainViewModel? ParentViewModel { get; private set; } // Holding a reference to the parent ViewModel (Bldg.MainViewModel) (only IF opened by it) to allow communication between the Room ShellPage and its parent Bldg ShellPage.
+    public Views.Rent.Residentials.Room.EditorWindow Window { get; private set; }
 
     public Frame NavigationFrame => ContentFrame;
 
@@ -29,7 +29,7 @@ public sealed partial class ShellPage : Page
         ("room", "", null),
         ("summary", "基本", typeof(Views.Rent.Residentials.Room.BasicPage)),
         ("contract", "契約条件", typeof(Views.Rent.Residentials.Room.ContractPage)),
-        ("transaction", "契約", typeof(Views.Rent.Residentials.Room.TransactionPage)),
+        ("transaction", "取引条件", typeof(Views.Rent.Residentials.Room.TransactionPage)),
         ("appliances", "設備", typeof(Views.Rent.Residentials.Room.AppliancesPage)),
         ("pictures", "写真", typeof(Views.Rent.Residentials.Room.PictureListPage)),
         ("zumen", "図面", typeof(Views.Rent.Residentials.Room.ZumenPage)),
@@ -37,55 +37,44 @@ public sealed partial class ShellPage : Page
         ("gyousya", "宅建業者", typeof(Views.Rent.Residentials.Room.GyousyaPage)),
     ];
 
-    private readonly INavigationResidentialService _nav;
+    private readonly INavigationGenericService _navService;
     private readonly IDispatcherService _dispatcherService;
-    private readonly IModalDialogService _dlg;
+    private readonly IModalDialogService _dlgService;
 
-    public ShellPage(Views.Rent.Residentials.Room.EditorWindow win, Models.Rent.Residentials.Room.Listing room, IAbstractFactory<Models.Rent.Residentials.Room.Listing, ViewModels.Rent.Residentials.Room.MainViewModel> vmFactory, INavigationResidentialService navigationResidentialService, IDispatcherService dispatcherService, IModalDialogService modalDialogService)
+    public ShellPage(Views.Rent.Residentials.Room.EditorWindow window, Models.Rent.Residentials.Room.Listing room, IAbstractFactory<Models.Rent.Residentials.Room.Listing, ViewModels.Rent.Residentials.Room.MainViewModel> vmFactory, INavigationGenericService navigationResidentialService, IDispatcherService dispatcherService, IModalDialogService modalDialogService)
     {
         //Debug.WriteLine($"ShellPage {entry.Id}");
 
-        Win = win ?? throw new ArgumentNullException(nameof(win));
-        Win.Content = this;
+        Window = window;
+        Window.Content = this;
 
-        _dlg = modalDialogService;
-        _dispatcherService = dispatcherService;
-
-        // Creates VM with entry.
         ViewModel = vmFactory.Create(room);
+
+        _dlgService = modalDialogService;
+        _dispatcherService = dispatcherService;
+        _navService = navigationResidentialService;
 
         InitializeComponent();
 
         this.Loaded += ShellPage_Loaded;
         this.Unloaded += ShellPage_Unloaded;
-        BreadcrumbBar1.ItemClicked += BreadcrumbBar_ItemClicked;
+        this.BreadcrumbBar1.ItemClicked += BreadcrumbBar_ItemClicked;
 
-        _nav = navigationResidentialService;
-        _nav.Initialize(this.ContentFrame);
-        ViewModel.SetEditorNavigationService(_nav);
+        _navService.Initialize(this.ContentFrame, _pages);
+        ViewModel.SetNavigationService(_navService);
 
-        Win.ExtendsContentIntoTitleBar = true;
-        Win.Activated += EditorWindow_Activated;
-        Win.Closed += EditorWindow_Closed;
-        Win.AppWindow.Closing += AppWindow_Closing;
-        Win.Title = "賃貸住居用";
-    }
-
-    public void SetParentViewModel(ViewModels.Rent.Residentials.Bldg.MainViewModel parentVM)
-    {
-        ParentViewModel = parentVM;
-    }
-
-    private void ShellPage_Unloaded(object sender, RoutedEventArgs e)
-    {
-        //
+        Window.Title = "賃貸住居用：部屋";
+        Window.ExtendsContentIntoTitleBar = true;
+        Window.Activated += Window_Activated;
+        Window.Closed += Window_Closed;
+        Window.AppWindow.Closing += AppWindow_Closing;
     }
 
     private void ShellPage_Loaded(object sender, RoutedEventArgs e)
     {
         // XamlRoot is no longer null.
-        _dlg.Initialize(this.XamlRoot);
-        ViewModel.SetEditorDialogService(_dlg);
+        _dlgService.Initialize(this.XamlRoot);
+        ViewModel.SetDialogService(_dlgService);
 
         if (ContentFrame.Navigate(typeof(ZumenSearch.Views.Rent.Residentials.Room.BasicPage), ViewModel, new EntranceNavigationTransitionInfo()))
         {
@@ -93,7 +82,12 @@ public sealed partial class ShellPage : Page
         }
     }
 
-    public void EditorWindow_Activated(object sender, Microsoft.UI.Xaml.WindowActivatedEventArgs args)
+    private void ShellPage_Unloaded(object sender, RoutedEventArgs e)
+    {
+        //
+    }
+
+    public void Window_Activated(object sender, Microsoft.UI.Xaml.WindowActivatedEventArgs args)
     {
         var resource = args.WindowActivationState == WindowActivationState.Deactivated ? "WindowCaptionForegroundDisabled" : "WindowCaptionForeground";
         AppTitleBarText.Foreground = (SolidColorBrush)App.Current.Resources[resource];
@@ -124,7 +118,7 @@ public sealed partial class ShellPage : Page
         if (ViewModel.IsDirty)
         {
             // show ConfirmationDialog
-            var result = await _dlg.ShowEditorCloseConfirmationDialog();
+            var result = await _dlgService.ShowEditorCloseConfirmationDialog();
 
             if (result == ContentDialogResult.Primary)
             {
@@ -135,7 +129,7 @@ public sealed partial class ShellPage : Page
 
                 if (ViewModel.IsDirty == false)
                 {
-                    Win.Close();
+                    Window.Close();
                 }
             }
             else if (result == ContentDialogResult.Secondary)
@@ -143,7 +137,7 @@ public sealed partial class ShellPage : Page
                 // Discard change and close.
                 ViewModel.DiscardChanges();
 
-                Win.Close();
+                Window.Close();
             }
             else if (result == ContentDialogResult.None)
             {
@@ -152,15 +146,15 @@ public sealed partial class ShellPage : Page
         }
     }
 
-    public void EditorWindow_Closed(object sender, WindowEventArgs args)
+    public void Window_Closed(object sender, WindowEventArgs args)
     {
         if (sender is not EditorWindow ewin)
         {
             return;
         }
 
-        ewin.Activated -= EditorWindow_Activated;
-        ewin.Closed -= EditorWindow_Closed;
+        ewin.Activated -= Window_Activated;
+        ewin.Closed -= Window_Closed;
         ewin.AppWindow.Closing -= AppWindow_Closing;
 
         var mainVM = App.GetService<ViewModels.MainViewModel>();
@@ -185,8 +179,15 @@ public sealed partial class ShellPage : Page
         }
         */
         mainVM.RoomEditorList.Remove(ewin);
-        ParentViewModel?.ChildEditorList.Remove(ewin);
+        ViewModel.ParentViewModel?.ChildEditorList.Remove(ewin);
     }
+
+    /*
+    public void SetParentViewModel(ViewModels.Rent.Residentials.Bldg.MainViewModel parentVM)
+    {
+        ParentViewModel = parentVM;
+    }
+    */
 
     private void BreadcrumbBar_ItemClicked(BreadcrumbBar sender, BreadcrumbBarItemClickedEventArgs args)
     {
@@ -281,7 +282,7 @@ public sealed partial class ShellPage : Page
 
     public void OnEventTitleChanged(EventArgs args)
     {
-        Win.Title = ViewModel?.WindowTitle ?? "賃貸住居用";
+        Window.Title = ViewModel?.WindowTitle ?? "賃貸住居用：部屋";
     }
 
     private void ContentFrame_NavigationFailed(object sender, NavigationFailedEventArgs e)
