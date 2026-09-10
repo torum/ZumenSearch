@@ -16,7 +16,7 @@ public sealed partial class Property : PropertyBase
     #region == ステータス ==
 
     // ステータス（保存済みか新規か）
-    public EnumPropertyStatus PropertyStatus { get; set; }
+    public EnumPropertyStatus PropertyStatus { get; set; } = EnumPropertyStatus.New;
 
     #endregion
 

@@ -212,12 +212,15 @@ public sealed partial class MainViewModel : ObservableObject
 
     private readonly string _id = string.Empty;
 
-    private Models.Rent.Residentials.Room.Listing _room;
+    private readonly Models.Rent.Residentials.Room.Listing _room;
 
-    //private Models.Rent.Residentials.Bldg.Property _building;
+    // TODO: Use WeakReferenceMessenger from CommunityToolkit.Mvvm (aka MVVM Toolkit) to send the selected search result from the MainWindow to this ViewModel.
+    // https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/messenger
+    // Holding a reference to the parent ViewModel (Bldg.MainViewModel) (only IF opened by it) to allow communication between the windows.
+    public ViewModels.Rent.Residentials.Bldg.MainViewModel? ParentViewModel { get; private set; }
 
-    public ViewModels.Rent.Residentials.Bldg.MainViewModel? ParentViewModel { get; private set; } // Holding a reference to the parent ViewModel (Bldg.MainViewModel) (only IF opened by it) to allow communication between the windows.
-
+    // TODO: Use WeakReferenceMessenger from CommunityToolkit.Mvvm (aka MVVM Toolkit) to send the selected search result from the MainWindow to this ViewModel.
+    // https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/messenger
     // Holds the selected search result from the MainWindow which is used to update title/name and other properties.
     private Models.Rent.Residentials.ListingSearchResultItem? _selectedSearchResult;
 
@@ -240,8 +243,6 @@ public sealed partial class MainViewModel : ObservableObject
         _room = room;
         _id = room.Id;
 
-        //_building = room.Building ?? throw new ArgumentNullException(nameof(room.Building), "Building cannot be null when creating MainViewModel.");
-        
         _dispatcherService = dispatcherService;
         _dataAccessService = dataAccessService;
 
@@ -319,18 +320,20 @@ public sealed partial class MainViewModel : ObservableObject
 
     }
 
-    private void UpdateBldg()
+    // TODO: Use WeakReferenceMessenger from CommunityToolkit.Mvvm (aka MVVM Toolkit) to send the selected search result from the MainWindow to this ViewModel.
+    // https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/messenger
+    private bool UpdateBldg()
     {
         if (_room is null)
         {
             Debug.WriteLine("_room is null. Can't update room in the parent vm.");
-            return;
+            return false;
         }
 
         if (ParentViewModel is null)
         {
             Debug.WriteLine("ParentViewModel is null. Can't update room in the parent vm.");
-            return;
+            return false;
         }
 
         var existingRoom = ParentViewModel.Rooms.FirstOrDefault(r => r.Id == _room.Id);
@@ -346,7 +349,9 @@ public sealed partial class MainViewModel : ObservableObject
             ParentViewModel.Rooms.Add(_room);
         }
 
+
         //Debug.WriteLine($"Room {_room.Name} updated in Building {ParentViewModel?.Name}");
+        return true;
     }
 
     private void PopulateValues()
@@ -468,12 +473,16 @@ public sealed partial class MainViewModel : ObservableObject
         _dlgService = dialog;
     }
 
+    // TODO: Use WeakReferenceMessenger from CommunityToolkit.Mvvm (aka MVVM Toolkit) to send the selected search result from the MainWindow to this ViewModel.
+    // https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/messenger
     public void SetParentViewModel(ViewModels.Rent.Residentials.Bldg.MainViewModel parentVM)
     {
         // When created by the parent ViewModel (Bldg.MainViewModel), set a reference to it to allow communication between the windows.
         ParentViewModel = parentVM;
     }
 
+    // TODO: Use WeakReferenceMessenger from CommunityToolkit.Mvvm (aka MVVM Toolkit) to send the selected search result from the MainWindow to this ViewModel.
+    // https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/messenger
     public void SetSearchResult(Models.Rent.Residentials.ListingSearchResultItem? searchResult)
     {
         // When created by main window, store the selected search result to update title/name and other properties in the main window.
@@ -603,19 +612,18 @@ public sealed partial class MainViewModel : ObservableObject
         }
         */
 
-        if (_room.ListingStatus == EnumListingStatus.New)
+        if ((_room.PropertyStatus == EnumPropertyStatus.New) && (ParentViewModel is not null))
         {
-            // TODO:
-
             // update Bldg and done.
-            UpdateBldg();
+            if (UpdateBldg())
+            {
+                ParentViewModel?.SetIsDirty(true);
 
-            IsDirty = false;
+                IsDirty = false;
+            }
         }
         else
-        {
-            // save room directry to db.
-            // 
+        { 
             var resInsert = _dataAccessService.UpsertRentResidentialListing(_room.PropertyId, _room);
             if (resInsert.IsError)
             {
@@ -627,6 +635,10 @@ public sealed partial class MainViewModel : ObservableObject
             }
             else
             {
+                _room.IsModified = false;
+                _room.IsNew = false;
+                _room.ListingStatus = EnumListingStatus.Saved;
+
                 UpdateBldg();
 
                 // Clean up deleted picture file.

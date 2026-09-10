@@ -300,6 +300,8 @@ public partial class MainViewModel : ObservableObject
         editorWindow.SetPropertyIdToWindow(editorShell.ViewModel.Id);
         editorWindow.SetViewModelToWindow(editorShell.ViewModel);
 
+        // TODO: Use WeakReferenceMessenger from CommunityToolkit.Mvvm (aka MVVM Toolkit) to send the selected search result from the MainWindow to this ViewModel.
+        // https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/messenger
         // To update the title/name and other properties in the editor window, we need to pass the selected search result to the editor's ViewModel.
         editorShell.ViewModel.SetSearchResult(selected);
 
@@ -415,6 +417,8 @@ public partial class MainViewModel : ObservableObject
         editorWindow.SetListingIdToWindow(editorShell.ViewModel.Id);
         editorWindow.SetViewModelToWindow(editorShell.ViewModel);
 
+        // TODO: Use WeakReferenceMessenger from CommunityToolkit.Mvvm (aka MVVM Toolkit) to send the selected search result from the MainWindow to this ViewModel.
+        // https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/messenger
         // To update the title/name and other properties in the editor window, we need to pass the selected search result to the editor's ViewModel.
         editorShell.ViewModel.SetSearchResult(selected);
 
@@ -750,6 +754,8 @@ public partial class MainViewModel : ObservableObject
                 // If the editor window for this item is already open, remove the room.
                 Debug.WriteLine($"Editor window for {selected.PropertyId} is already open. Removing room.");
 
+                // TODO: Use WeakReferenceMessenger from CommunityToolkit.Mvvm (aka MVVM Toolkit) to send the selected search result from the MainWindow to this ViewModel.
+                // https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/messenger
                 // remove room from the editor window's ViewModel if it exists.
                 editorWindow.ViewModel?.RemoveRoom(selected.Id);
 

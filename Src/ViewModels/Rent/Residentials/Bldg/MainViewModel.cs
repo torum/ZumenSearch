@@ -1260,6 +1260,8 @@ public sealed partial class MainViewModel : ObservableObject
     private readonly List<string> _unsavedBuildingPdfFileList = [];
     private readonly List<string> _unsavedBuildingPdfThumbnailFileList = [];
 
+    // TODO: Use WeakReferenceMessenger from CommunityToolkit.Mvvm (aka MVVM Toolkit) to send the selected search result from the MainWindow to this ViewModel.
+    // https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/messenger
     // Holds the selected search result from the MainWindow which is used to update title/name and other properties.
     private Models.Rent.Residentials.PropertySearchResultItem? _selectedSearchResult;
 
@@ -1479,7 +1481,7 @@ public sealed partial class MainViewModel : ObservableObject
             {
                 foreach (Models.Rent.Residentials.Room.Listing item in e.OldItems)
                 {
-                    //Debug.WriteLine($"Item {item.Id} Removed from Rooms");
+                    Debug.WriteLine($"Item {item.Id} Removed from Rooms");
                     //IsDirty = true;
 
                     item.PropertyChanged -= OnRoomPropertyChanged;
@@ -1491,7 +1493,7 @@ public sealed partial class MainViewModel : ObservableObject
             {
                 foreach (Models.Rent.Residentials.Room.Listing item in e.NewItems)
                 {
-                    //Debug.WriteLine($"Item {item.Id} Added to Rooms");
+                    Debug.WriteLine($"Item {item.Id} Added to Rooms");
                     //IsDirty = true;
 
                     item.PropertyChanged += OnRoomPropertyChanged;
@@ -1659,7 +1661,7 @@ public sealed partial class MainViewModel : ObservableObject
 
     }
 
-    private void SaveAsNew()
+    private bool SaveAsNew()
     {
         var resInsert = _dataAccessService.InsertRentResidential(_building);
         if (resInsert.IsError)
@@ -1668,7 +1670,7 @@ public sealed partial class MainViewModel : ObservableObject
             Debug.WriteLine(resInsert.Error.ErrText + Environment.NewLine + resInsert.Error.ErrDescription + Environment.NewLine + resInsert.Error.ErrPlace + Environment.NewLine + resInsert.Error.ErrPlaceParent);
 
             // TODO: return error object.
-            return;
+            return false;
         }
         else
         {
@@ -1687,10 +1689,10 @@ public sealed partial class MainViewModel : ObservableObject
             WindowTitle = string.Empty;
         }
 
-        return;
+        return true;
     }
 
-    private void SaveAsUpdate()
+    private bool SaveAsUpdate()
     {
         var resInsert = _dataAccessService.UpdateRentResidential(_building);
         if (resInsert.IsError)
@@ -1699,7 +1701,7 @@ public sealed partial class MainViewModel : ObservableObject
             Debug.WriteLine(resInsert.Error.ErrText + Environment.NewLine + resInsert.Error.ErrDescription + Environment.NewLine + resInsert.Error.ErrPlace + Environment.NewLine + resInsert.Error.ErrPlaceParent);
 
             // TODO: return error object.
-            return;
+            return false;
         }
         else
         {
@@ -1737,6 +1739,8 @@ public sealed partial class MainViewModel : ObservableObject
             _unsavedBuildingPictureFileList.Clear();
             _unsavedBuildingPdfThumbnailFileList.Clear();
             _unsavedBuildingPdfFileList.Clear();
+
+            return true;
         }
     }
 
@@ -1805,11 +1809,15 @@ public sealed partial class MainViewModel : ObservableObject
         _dlgService = dialog;
     }
 
+    // TODO: Use WeakReferenceMessenger from CommunityToolkit.Mvvm (aka MVVM Toolkit) to send the selected search result from the MainWindow to this ViewModel.
+    // https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/messenger
     public void SetSearchResult(Models.Rent.Residentials.PropertySearchResultItem? searchResult)
     {
         _selectedSearchResult = searchResult;
     }
 
+    // TODO: Use WeakReferenceMessenger from CommunityToolkit.Mvvm (aka MVVM Toolkit) to send the selected search result from the MainWindow to this ViewModel.
+    // https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/messenger
     public void RemoveRoom(string roomId)
     {
         if (string.IsNullOrEmpty(roomId)) return;
@@ -1818,8 +1826,14 @@ public sealed partial class MainViewModel : ObservableObject
         if (Rooms.Contains(room))
         {
             Rooms.Remove(room);
-            //IsDirty = true;
         }
+    }
+
+    // TODO: Use WeakReferenceMessenger from CommunityToolkit.Mvvm (aka MVVM Toolkit) to send the selected search result from the MainWindow to this ViewModel.
+    // https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/messenger
+    public void SetIsDirty(bool value)
+    {
+        IsDirty = value;
     }
 
     // TODO: change these to commands.
@@ -1953,23 +1967,29 @@ public sealed partial class MainViewModel : ObservableObject
 
         SetValuesToEntry();
 
+        bool saveResult = false;
+
         if (_building.PropertyStatus == EnumPropertyStatus.New)
         {
-            SaveAsNew();
+            saveResult = SaveAsNew();
         }
         else
         {
-            SaveAsUpdate();
+            saveResult = SaveAsUpdate();
         }
 
-        // Update the selected search result's values such asname if it exists.
-        _selectedSearchResult?.Name = Name;
-
-        foreach (var room in Rooms)
+        if (saveResult)
         {
-            room.PropertyName = Name;
-        }
+            // Update the selected search result's values such asname if it exists.
+            _selectedSearchResult?.Name = Name;
 
+            foreach (var room in Rooms)
+            {
+                room.PropertyName = Name;
+                room.PropertyStatus = EnumPropertyStatus.Saved;
+                room.ListingStatus = EnumListingStatus.Saved;//just in case.
+            }
+        }
     }
     private bool CanSave()
     {

@@ -28,7 +28,8 @@ public sealed partial class Listing : ListingBase
     }
 
     // ステータス（保存済みか新規か）
-    public EnumListingStatus ListingStatus { get; set; }
+    public EnumPropertyStatus PropertyStatus { get; set; } = EnumPropertyStatus.New;
+    public EnumListingStatus ListingStatus { get; set; } = EnumListingStatus.New;
 
     // 物件写真（部屋）リスト
     public ObservableCollection<Picture> Pictures

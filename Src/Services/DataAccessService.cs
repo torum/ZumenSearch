@@ -1203,6 +1203,7 @@ public sealed class DataAccessService : IDataAccessService
                             var result = cmd.ExecuteNonQuery();
                             if (result > 0)
                             {
+                                room.ListingStatus = EnumListingStatus.Saved;
                                 room.IsNew = false;
                                 room.IsModified = false;
                             }
@@ -1801,6 +1802,8 @@ public sealed class DataAccessService : IDataAccessService
                     {
                         Name = Convert.ToString(reader["name"]) ?? string.Empty,
                         Chinryou = Convert.ToInt32(reader["chinryou"]),
+                        PropertyStatus = EnumPropertyStatus.Saved,
+                        ListingStatus = EnumListingStatus.Saved,
                         IsNew = false,
                         IsModified = false
                     };
@@ -1972,6 +1975,8 @@ public sealed class DataAccessService : IDataAccessService
                 {
                     room.IsNew = false;
                     room.IsModified = false;
+                    room.PropertyStatus = EnumPropertyStatus.Saved;
+                    room.ListingStatus = EnumListingStatus.Saved;
                 }
 
                 cmd.Parameters.Clear();
@@ -2294,6 +2299,8 @@ public sealed class DataAccessService : IDataAccessService
                     {
                         Name = reader.GetString(reader.GetOrdinal("roomName")) ?? string.Empty,
                         Chinryou = reader.GetInt32(reader.GetOrdinal("chinryou")),
+                        PropertyStatus = EnumPropertyStatus.Saved,
+                        ListingStatus = EnumListingStatus.Saved,
                         IsNew = false,
                         IsModified = false
                     };
