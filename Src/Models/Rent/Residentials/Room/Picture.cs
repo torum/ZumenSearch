@@ -42,7 +42,7 @@ public sealed class UnitPictureType(EnumUnitPictureType key)
 
 public sealed partial class Picture : PictureBase
 {
-    public ViewModels.Rent.Residentials.Room.MainViewModel? ParentViewModel { get; set; }
+    public ViewModels.Rent.Residentials.Room.ListingViewModel? ParentViewModel { get; set; }
 
     // Do not use SetProperty. PropertyChanged is being subscribed.
     public UnitPictureType PictureType

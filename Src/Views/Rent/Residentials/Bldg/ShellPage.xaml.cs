@@ -15,10 +15,11 @@ namespace ZumenSearch.Views.Rent.Residentials.Bldg;
 
 public sealed partial class ShellPage : Page
 {
-    public ViewModels.Rent.Residentials.Bldg.MainViewModel ViewModel { get; private set; }
+    public ViewModels.Rent.Residentials.Bldg.PropertyViewModel ViewModel { get; private set; }
     public Views.Rent.Residentials.Bldg.EditorWindow Window { get; private set; }
     public Frame NavigationFrame => ContentFrame;
 
+    // TODO:
     // List of ValueTuple holding the Navigation Tag and the relative Navigation Page
     private readonly List<(string Tag, string Label, Type? Page)> _pages =
     [
@@ -42,7 +43,7 @@ public sealed partial class ShellPage : Page
     private Views.Rent.Residentials.Room.EditorWindow? _closingWindow;
     private bool _nvigated;
 
-    public ShellPage(Views.Rent.Residentials.Bldg.EditorWindow window, Models.Rent.Residentials.Bldg.Property building, IAbstractFactory<Models.Rent.Residentials.Bldg.Property, ViewModels.Rent.Residentials.Bldg.MainViewModel> vmFactory, INavigationGenericService navigationResidentialService, IDispatcherService dispatcherService, IModalDialogService modalDialog)
+    public ShellPage(Views.Rent.Residentials.Bldg.EditorWindow window, Models.Rent.Residentials.Bldg.Property building, IAbstractFactory<Models.Rent.Residentials.Bldg.Property, ViewModels.Rent.Residentials.Bldg.PropertyViewModel> vmFactory, INavigationGenericService navigationResidentialService, IDispatcherService dispatcherService, IModalDialogService modalDialog)
     {
         //Debug.WriteLine($"ShellPage {building.Id}");
 
@@ -116,6 +117,8 @@ public sealed partial class ShellPage : Page
         {
             if (ViewModel == null)
             {
+                _closingWindow = null;
+                _isClosing = false;
                 return;
             }
 

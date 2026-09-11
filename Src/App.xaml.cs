@@ -109,17 +109,17 @@ public partial class App : Application
                 services.AddSingleton<Views.MainWindow>();
                 services.AddSingleton<Views.ShellPage>();
 
-                services.AddTransient<ViewModels.Rent.Residentials.Bldg.MainViewModel>();
+                services.AddTransient<ViewModels.Rent.Residentials.Bldg.PropertyViewModel>();
                 services.AddTransient<Views.Rent.Residentials.Bldg.EditorWindow>();
                 services.AddTransient<Views.Rent.Residentials.Bldg.ShellPage>();
 
-                services.AddTransient<ViewModels.Rent.Residentials.Room.MainViewModel>();
+                services.AddTransient<ViewModels.Rent.Residentials.Room.ListingViewModel>();
                 services.AddTransient<Views.Rent.Residentials.Room.EditorWindow>();
                 services.AddTransient<Views.Rent.Residentials.Room.ShellPage>();
 
-                services.AddEditorFactory<ViewModels.Rent.Residentials.Bldg.MainViewModel, Models.Rent.Residentials.Bldg.Property>();
+                services.AddEditorFactory<ViewModels.Rent.Residentials.Bldg.PropertyViewModel, Models.Rent.Residentials.Bldg.Property>();
                 services.AddEditorFactory<Views.Rent.Residentials.Bldg.ShellPage, Models.Rent.Residentials.Bldg.Property>();
-                services.AddEditorFactory<ViewModels.Rent.Residentials.Room.MainViewModel, Models.Rent.Residentials.Room.Listing>();
+                services.AddEditorFactory<ViewModels.Rent.Residentials.Room.ListingViewModel, Models.Rent.Residentials.Room.Listing>();
                 services.AddEditorFactory<Views.Rent.Residentials.Room.ShellPage, Models.Rent.Residentials.Room.Listing>();
                 // Instead of AddEditorFactory for each, typeof.. <,> registers all.
                 //services.AddSingleton(typeof(IAbstractFactory<,>), typeof(AbstractFactory<,>)); 

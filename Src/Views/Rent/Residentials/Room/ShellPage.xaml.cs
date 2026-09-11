@@ -15,7 +15,7 @@ namespace ZumenSearch.Views.Rent.Residentials.Room;
 
 public sealed partial class ShellPage : Page
 {
-    public ViewModels.Rent.Residentials.Room.MainViewModel ViewModel { get; private set; }
+    public ViewModels.Rent.Residentials.Room.ListingViewModel ViewModel { get; private set; }
     //public ViewModels.Rent.Residentials.Bldg.MainViewModel? ParentViewModel { get; private set; } // Holding a reference to the parent ViewModel (Bldg.MainViewModel) (only IF opened by it) to allow communication between the Room ShellPage and its parent Bldg ShellPage.
     public Views.Rent.Residentials.Room.EditorWindow Window { get; private set; }
 
@@ -41,7 +41,7 @@ public sealed partial class ShellPage : Page
     private readonly IDispatcherService _dispatcherService;
     private readonly IModalDialogService _dlgService;
 
-    public ShellPage(Views.Rent.Residentials.Room.EditorWindow window, Models.Rent.Residentials.Room.Listing room, IAbstractFactory<Models.Rent.Residentials.Room.Listing, ViewModels.Rent.Residentials.Room.MainViewModel> vmFactory, INavigationGenericService navigationResidentialService, IDispatcherService dispatcherService, IModalDialogService modalDialogService)
+    public ShellPage(Views.Rent.Residentials.Room.EditorWindow window, Models.Rent.Residentials.Room.Listing room, IAbstractFactory<Models.Rent.Residentials.Room.Listing, ViewModels.Rent.Residentials.Room.ListingViewModel> vmFactory, INavigationGenericService navigationResidentialService, IDispatcherService dispatcherService, IModalDialogService modalDialogService)
     {
         //Debug.WriteLine($"ShellPage {entry.Id}");
 
@@ -157,6 +157,8 @@ public sealed partial class ShellPage : Page
         ewin.Closed -= Window_Closed;
         ewin.AppWindow.Closing -= AppWindow_Closing;
 
+        ViewModel.CleanUp();
+
         var mainVM = App.GetService<ViewModels.MainViewModel>();
         // Save window size and position.
         var appWindow = ewin.AppWindow;
@@ -171,23 +173,10 @@ public sealed partial class ShellPage : Page
             }
         }
 
-        /*
-        if (!ewin.IsAutoClose)
-        {
-            mainVM.RoomEditorList.Remove(ewin);
-            ParentViewModel?.ChildEditorList.Remove(ewin);
-        }
-        */
         mainVM.RoomEditorList.Remove(ewin);
-        ViewModel.ParentViewModel?.ChildEditorList.Remove(ewin);
+        // TODO: use messanger.
+        ViewModel.BldgViewModel?.ChildEditorList.Remove(ewin);
     }
-
-    /*
-    public void SetParentViewModel(ViewModels.Rent.Residentials.Bldg.MainViewModel parentVM)
-    {
-        ParentViewModel = parentVM;
-    }
-    */
 
     private void BreadcrumbBar_ItemClicked(BreadcrumbBar sender, BreadcrumbBarItemClickedEventArgs args)
     {

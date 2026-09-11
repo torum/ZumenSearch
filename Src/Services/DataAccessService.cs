@@ -29,7 +29,6 @@ namespace ZumenSearch.Services;
 
 // TODO:
 // * Consider implementing IDisposable to properly dispose of the ReaderWriterLockSlim and any other disposable resources used by this service.
-// * Rename "rents" table to "properties" and "rent_id" to "property_id" for better clarity and consistency with the domain model.
 
 public sealed class DataAccessService : IDataAccessService
 {
@@ -59,8 +58,8 @@ public sealed class DataAccessService : IDataAccessService
             tableCmd.Transaction = connection.BeginTransaction();
             try
             {
-                tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS rents (" +
-                    "rent_id TEXT NOT NULL PRIMARY KEY," +
+                tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS property (" +
+                    "property_id TEXT NOT NULL PRIMARY KEY," +
                     "name TEXT NOT NULL," +
                     "loc_pref_id TEXT," +
                     "loc_prefecture TEXT," +
@@ -77,7 +76,7 @@ public sealed class DataAccessService : IDataAccessService
                 tableCmd.ExecuteNonQuery();
 
                 tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS rent_residentials (" +
-                    "rent_id TEXT NOT NULL PRIMARY KEY," +
+                    "property_id TEXT NOT NULL PRIMARY KEY," +
                     //"residential_id TEXT NOT NULL," +
                     "building_kind TEXT NOT NULL," +
                     "is_unit_ownership INTEGER  NOT NULL," +
@@ -93,25 +92,25 @@ public sealed class DataAccessService : IDataAccessService
 
 
                     "updated_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc'))," +
-                    "FOREIGN KEY (rent_id) REFERENCES rents(rent_id) ON DELETE CASCADE" +
+                    "FOREIGN KEY (property_id) REFERENCES property(property_id) ON DELETE CASCADE" +
                     ")";
                 tableCmd.ExecuteNonQuery();
 
                 tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS rent_residential_pictures (" +
                     "picture_id TEXT NOT NULL PRIMARY KEY," +
-                    "rent_id TEXT NOT NULL," +
+                    "property_id TEXT NOT NULL," +
                     "file_path TEXT NOT NULL," +
                     "type TEXT NOT NULL," + 
                     "description TEXT NOT NULL," +
                     "is_main INTEGER NOT NULL," +
-                    "FOREIGN KEY (rent_id) REFERENCES rent_residentials(rent_id) ON DELETE CASCADE," + //?
-                    "FOREIGN KEY (rent_id) REFERENCES rents(rent_id) ON DELETE CASCADE" +
+                    "FOREIGN KEY (property_id) REFERENCES rent_residentials(property_id) ON DELETE CASCADE," + //?
+                    "FOREIGN KEY (property_id) REFERENCES property(property_id) ON DELETE CASCADE" +
                     " )";
                 tableCmd.ExecuteNonQuery();
 
                 tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS rent_residential_pdfs (" +
                     "pdf_id TEXT NOT NULL PRIMARY KEY," +
-                    "rent_id TEXT NOT NULL," +
+                    "property_id TEXT NOT NULL," +
                     "file_path TEXT NOT NULL," +
                     "type TEXT NOT NULL," + 
                     "thumb_path TEXT NOT NULL," +
@@ -119,34 +118,34 @@ public sealed class DataAccessService : IDataAccessService
                     "is_main INTEGER  NOT NULL," +
                     "created_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc'))," +
                     "updated_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc'))," +
-                    "FOREIGN KEY (rent_id) REFERENCES rent_residentials(rent_id) ON DELETE CASCADE," + //?
-                    "FOREIGN KEY (rent_id) REFERENCES rents(rent_id) ON DELETE CASCADE" +
+                    "FOREIGN KEY (property_id) REFERENCES rent_residentials(property_id) ON DELETE CASCADE," + //?
+                    "FOREIGN KEY (property_id) REFERENCES property(property_id) ON DELETE CASCADE" +
                     " )";
                 tableCmd.ExecuteNonQuery();
 
                 tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS rent_residential_rooms (" +
                     "room_id TEXT NOT NULL PRIMARY KEY," +
-                    "rent_id TEXT NOT NULL," +
+                    "property_id TEXT NOT NULL," +
                     "name TEXT NOT NULL," +
                     "chinryou INTEGER NOT NULL DEFAULT 0," +
                     "created_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc'))," +
                     "updated_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc'))," +
-                    "FOREIGN KEY (rent_id) REFERENCES rent_residentials(rent_id) ON DELETE CASCADE," + //?
-                    "FOREIGN KEY (rent_id) REFERENCES rents(rent_id) ON DELETE CASCADE" +
+                    "FOREIGN KEY (property_id) REFERENCES rent_residentials(property_id) ON DELETE CASCADE," + //?
+                    "FOREIGN KEY (property_id) REFERENCES property(property_id) ON DELETE CASCADE" +
                     " )";
                 tableCmd.ExecuteNonQuery();
 
                 tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS rent_residential_room_pictures (" +
                     "picture_id TEXT NOT NULL PRIMARY KEY," +
                     "room_id TEXT NOT NULL," +
-                    "rent_id TEXT NOT NULL," +
+                    "property_id TEXT NOT NULL," +
                     "file_path TEXT NOT NULL," +
                     "type TEXT NOT NULL," + 
                     "description TEXT NOT NULL," +
                     "is_main INTEGER  NOT NULL," +
                     "FOREIGN KEY (room_id) REFERENCES rent_residential_rooms(room_id) ON DELETE CASCADE," +
-                    "FOREIGN KEY (rent_id) REFERENCES rent_residentials(rent_id) ON DELETE CASCADE," + //?
-                    "FOREIGN KEY (rent_id) REFERENCES rents(rent_id) ON DELETE CASCADE" +
+                    "FOREIGN KEY (property_id) REFERENCES rent_residentials(property_id) ON DELETE CASCADE," + //?
+                    "FOREIGN KEY (property_id) REFERENCES property(property_id) ON DELETE CASCADE" +
                     " )";
                 tableCmd.ExecuteNonQuery();
 
@@ -260,9 +259,9 @@ public sealed class DataAccessService : IDataAccessService
     {
         var cmd = conn.CreateCommand();
 
-        #region == add to rents ==
+        #region == add to property ==
 
-        cmd.CommandText = "PRAGMA table_info(rents);";
+        cmd.CommandText = "PRAGMA table_info(property);";
         bool exists = false;
         using (var reader = cmd.ExecuteReader())
         {
@@ -280,7 +279,7 @@ public sealed class DataAccessService : IDataAccessService
 
                 try
                 {
-                    altcmd.CommandText = "ALTER TABLE rents ADD COLUMN created_at TEXT NOT NULL DEFAULT '';";
+                    altcmd.CommandText = "ALTER TABLE property ADD COLUMN created_at TEXT NOT NULL DEFAULT '';";
                     altcmd.ExecuteNonQuery();
                 }
                 catch (SqliteException ex)
@@ -578,7 +577,7 @@ public sealed class DataAccessService : IDataAccessService
             {
                 // Main rent table
                 cmd.CommandType = CommandType.Text;
-                cmd.CommandText = "INSERT INTO rents (rent_id, name, loc_pref_id, loc_prefecture, loc_machiaza_id, loc_county, loc_city, loc_ward, loc_oaza_cho, loc_choume, loc_edaban, loc_location_full) " +
+                cmd.CommandText = "INSERT INTO property (property_id, name, loc_pref_id, loc_prefecture, loc_machiaza_id, loc_county, loc_city, loc_ward, loc_oaza_cho, loc_choume, loc_edaban, loc_location_full) " +
                     "VALUES (@RentId, @Name, @LocPrefId, @LocPrefecture, @LocMachiazaId, @LocCounty, @LocCity, @LocWard, @LocOazaCho, @LocChoume, @LocEdaban, @LocLocationFull)";
 
                 cmd.Parameters.AddWithValue("@RentId", building.Id);
@@ -602,7 +601,7 @@ public sealed class DataAccessService : IDataAccessService
 
                 // Residentials table
                 cmd.CommandType = CommandType.Text;
-                cmd.CommandText = "INSERT INTO rent_residentials (rent_id, building_kind, is_unit_ownership, building_structure, aboveground_floor_count, basement_floor_count, total_unit_count, built_year_month, fudousan_id, fudousan_id_additional_code, remarks, updated_at) " +
+                cmd.CommandText = "INSERT INTO rent_residentials (property_id, building_kind, is_unit_ownership, building_structure, aboveground_floor_count, basement_floor_count, total_unit_count, built_year_month, fudousan_id, fudousan_id_additional_code, remarks, updated_at) " +
                     "VALUES (@RentId, @BuildingKind, @IsUnitOwnership, @BuildingStructure, @AboveGroundFloorCount, @BasementFloorCount, @TotalUnitCount, @BuiltYearMonth, @FudousanId, @FudousanIdAdditionalCode, @Remarks, @updated_at)";
 
                 cmd.Parameters.AddWithValue("@RentId", building.Id);
@@ -633,17 +632,17 @@ public sealed class DataAccessService : IDataAccessService
                         //if (pic.IsNew)
                         /*
                         string sqlInsertIntoRentLivingPicture = String.Format(
-                                        "INSERT INTO rent_residential_pictures (picture_id, rent_id, picture_filepath, picture_data) " +
+                                        "INSERT INTO rent_residential_pictures (picture_id, property_id, picture_filepath, picture_data) " +
                                         "VALUES ('{0}', '{1}', '{2}', @0)",
                                         pic.Id, building.Id, pic.ImageLocation);
                         */
                         /*
                         string sqlInsertIntoRentLivingPicture = String.Format(
-                            "INSERT INTO rent_residential_pictures (picture_id, rent_id, picture_filepath) " +
+                            "INSERT INTO rent_residential_pictures (picture_id, property_id, picture_filepath) " +
                             "VALUES ('{0}', '{1}', '{2}')",
                             pic.Id, building.Id, pic.ImageLocation);
                         */
-                        var sqlInsertIntoRentLivingPicture = "INSERT INTO rent_residential_pictures (picture_id, rent_id, file_path, type, description, is_main) " +
+                        var sqlInsertIntoRentLivingPicture = "INSERT INTO rent_residential_pictures (picture_id, property_id, file_path, type, description, is_main) " +
                             "VALUES (@PicId, @RentId, @Path, @Type, @Desc, @Main)";
 
                         cmd.CommandText = sqlInsertIntoRentLivingPicture;
@@ -697,17 +696,17 @@ public sealed class DataAccessService : IDataAccessService
                         //if (pic.IsNew)
                         /*
                         string sqlInsertIntoRentLivingPicture = String.Format(
-                                        "INSERT INTO rent_residential_pictures (picture_id, rent_id, picture_filepath, picture_data) " +
+                                        "INSERT INTO rent_residential_pictures (picture_id, property_id, picture_filepath, picture_data) " +
                                         "VALUES ('{0}', '{1}', '{2}', @0)",
                                         pic.Id, building.Id, pic.ImageLocation);
                         */
                         /*
                         string sqlInsertIntoRentLivingPicture = String.Format(
-                            "INSERT INTO rent_residential_pictures (picture_id, rent_id, picture_filepath) " +
+                            "INSERT INTO rent_residential_pictures (picture_id, property_id, picture_filepath) " +
                             "VALUES ('{0}', '{1}', '{2}')",
                             pic.Id, building.Id, pic.ImageLocation);
                         */
-                        var sqlInsertIntoRentLivingPicture = "INSERT INTO rent_residential_pdfs (pdf_id, rent_id, file_path, thumb_path, type, description, is_main) " +
+                        var sqlInsertIntoRentLivingPicture = "INSERT INTO rent_residential_pdfs (pdf_id, property_id, file_path, thumb_path, type, description, is_main) " +
                             "VALUES (@PdfId, @RentId, @Path, @Thumb, @Type, @Desc, @Main)";
 
                         cmd.CommandText = sqlInsertIntoRentLivingPicture;
@@ -758,7 +757,7 @@ public sealed class DataAccessService : IDataAccessService
                 {
                     foreach (var unit in building.Rooms)
                     {
-                        var sqlInsertIntoRentLivingRoom = "INSERT INTO rent_residential_rooms (room_id, rent_id, name, chinryou) VALUES (@RoomId, @RentId, @Name, @Chinryou)";
+                        var sqlInsertIntoRentLivingRoom = "INSERT INTO rent_residential_rooms (room_id, property_id, name, chinryou) VALUES (@RoomId, @RentId, @Name, @Chinryou)";
 
                         cmd.CommandText = sqlInsertIntoRentLivingRoom;
 
@@ -773,7 +772,9 @@ public sealed class DataAccessService : IDataAccessService
                         var r = cmd.ExecuteNonQuery();
                         if (r > 0)
                         {
-                            unit.IsNew = false;
+                            unit.PropertyStatus = EnumPropertyStatus.Saved;
+                            unit.ListingStatus = EnumListingStatus.Saved;
+                            //unit.IsNew = false;
                             unit.IsModified = false;
                         }
 
@@ -783,7 +784,7 @@ public sealed class DataAccessService : IDataAccessService
                             foreach (var pic in unit.Pictures)
                             {
                                 // Upsert
-                                var sqlUpsertRoom = "INSERT INTO rent_residential_room_pictures (picture_id, room_id, rent_id, file_path, type, description, is_main) VALUES (@PicId, @roomId, @RentId, @Path, @type, @Desc, @Main) ";
+                                var sqlUpsertRoom = "INSERT INTO rent_residential_room_pictures (picture_id, room_id, property_id, file_path, type, description, is_main) VALUES (@PicId, @roomId, @RentId, @Path, @type, @Desc, @Main) ";
                                 sqlUpsertRoom += "ON CONFLICT(picture_id) ";
                                 sqlUpsertRoom += "DO UPDATE SET file_path = @Path, type = @type, description = @Desc, is_main = @Main";
                                 var exec = true;
@@ -901,6 +902,9 @@ public sealed class DataAccessService : IDataAccessService
 
         //Debug.WriteLine(string.Format("{0} Entries Inserted to DB", res.AffectedCount.ToString()));
 
+        building.IsModified = false;
+        building.PropertyStatus = EnumPropertyStatus.Saved;
+
         return res;
     }
 
@@ -927,8 +931,8 @@ public sealed class DataAccessService : IDataAccessService
             {
                 cmd.CommandType = CommandType.Text;
 
-                // Rents table
-                var sql = "UPDATE rents SET ";
+                // property table
+                var sql = "UPDATE property SET ";
                 sql += string.Format("name = '{0}', ", EscapeSingleQuote(building.Name));
                 sql += string.Format("loc_pref_id = '{0}', ", EscapeSingleQuote(building.LocPrefId));
                 sql += string.Format("loc_prefecture = '{0}', ", EscapeSingleQuote(building.LocPrefecture));
@@ -943,7 +947,7 @@ public sealed class DataAccessService : IDataAccessService
 
                 // TODO: more
 
-                sql += string.Format(" WHERE rent_id = '{0}'; ", building.Id);
+                sql += string.Format(" WHERE property_id = '{0}'; ", building.Id);
 
                 cmd.CommandText = sql;
                 res.AffectedCount = cmd.ExecuteNonQuery();
@@ -958,16 +962,16 @@ public sealed class DataAccessService : IDataAccessService
                 //sql += String.Format("description = '{0}', ", EscapeSingleQuote(feedDescription));
                 sql += String.Format("updated_at = '{0}' ", DateTimeOffset.UtcNow.ToString("s"));//ToString("yyyy-MM-dd HH:mm:ss"));
 
-                sql += string.Format(" WHERE rent_id = '{0}'; ", entry.Id);
+                sql += string.Format(" WHERE property_id = '{0}'; ", entry.Id);
                 */
                 sql = "UPDATE rent_residentials SET " +
                     "building_kind = @building_kind, is_unit_ownership = @is_unit_ownership, building_structure = @building_structure, aboveground_floor_count = @aboveground_floor_count, basement_floor_count = @basement_floor_count, total_unit_count = @total_unit_count, built_year_month = @built_year_month, fudousan_id = @fudousan_id, fudousan_id_additional_code = @fudousan_id_additional_code, remarks = @remarks, " + 
                     "updated_at = @updated_at " + 
-                    "WHERE rent_id = @rent_id;";
+                    "WHERE property_id = @property_id;";
 
                 cmd.CommandText = sql;
 
-                cmd.Parameters.AddWithValue("@rent_id", building.Id);
+                cmd.Parameters.AddWithValue("@property_id", building.Id);
 
                 cmd.Parameters.AddWithValue("@building_kind", building.BuildingKind.Key.ToString());
                 cmd.Parameters.AddWithValue("@is_unit_ownership", building.IsUnitOwnership ? 1 : 0);// bool to int
@@ -996,7 +1000,7 @@ public sealed class DataAccessService : IDataAccessService
 
                         if (pic.IsNew)
                         {
-                            var sqlInsertIntoRentLivingPicture = "INSERT INTO rent_residential_pictures (picture_id, rent_id, file_path, type, description, is_main) " +
+                            var sqlInsertIntoRentLivingPicture = "INSERT INTO rent_residential_pictures (picture_id, property_id, file_path, type, description, is_main) " +
                                 "VALUES (@PicId, @RentId, @Path, @Type, @Desc, @Main)";
 
                             // 物件画像の追加
@@ -1083,7 +1087,7 @@ public sealed class DataAccessService : IDataAccessService
 
                         if (pdf.IsNew)
                         {
-                            var sqlInsertIntoRentLivingPdf = "INSERT INTO rent_residential_pdfs (pdf_id, rent_id, file_path, thumb_path, type, description, is_main) " +
+                            var sqlInsertIntoRentLivingPdf = "INSERT INTO rent_residential_pdfs (pdf_id, property_id, file_path, thumb_path, type, description, is_main) " +
                                 "VALUES (@PdfId, @RentId, @Path, @Thumb, @Type, @Desc, @Main)";
 
                             // PDFの追加
@@ -1170,15 +1174,15 @@ public sealed class DataAccessService : IDataAccessService
                     {
                         var exec = false;
 
-                        if (room.IsNew)
+                        if (room.PropertyStatus == EnumPropertyStatus.New)
                         {
-                            var sqlInsertIntoRentLivingRoom = "INSERT INTO rent_residential_rooms (room_id, rent_id, name, chinryou) VALUES (@roomId, @RentId, @Nam, @Chinryou)";
+                            var sqlInsertIntoRentLivingRoom = "INSERT INTO rent_residential_rooms (room_id, property_id, name, chinryou) VALUES (@roomId, @RentId, @Nam, @Chinryou)";
 
                             // 追加
                             cmd.CommandText = sqlInsertIntoRentLivingRoom;
                             exec = true;
                         }
-                        else if (room.IsModified)
+                        else if (room.IsModified || room.PropertyStatus == EnumPropertyStatus.Saved)
                         {
                             //var sqlUpdateRentLivingRoom = string.Format("UPDATE rent_residential_rooms SET name = @Nam WHERE room_id = '{0}'", room.Id);
                             var sqlUpdateRentLivingRoom = "UPDATE rent_residential_rooms SET name = @Nam, chinryou = @Chinryou, updated_at = @Updated WHERE room_id = @roomId";
@@ -1203,8 +1207,9 @@ public sealed class DataAccessService : IDataAccessService
                             var result = cmd.ExecuteNonQuery();
                             if (result > 0)
                             {
+                                room.PropertyStatus = EnumPropertyStatus.Saved;
                                 room.ListingStatus = EnumListingStatus.Saved;
-                                room.IsNew = false;
+                                //room.IsNew = false;
                                 room.IsModified = false;
                             }
                         }
@@ -1215,7 +1220,7 @@ public sealed class DataAccessService : IDataAccessService
                             foreach (var pic in room.Pictures)
                             {
                                 // Upsert
-                                var sqlUpsertRoom = "INSERT INTO rent_residential_room_pictures (picture_id, room_id, rent_id, file_path, type, description, is_main) VALUES (@PicId, @roomId, @RentId, @Path, @type, @Desc, @Main) ";
+                                var sqlUpsertRoom = "INSERT INTO rent_residential_room_pictures (picture_id, room_id, property_id, file_path, type, description, is_main) VALUES (@PicId, @roomId, @RentId, @Path, @type, @Desc, @Main) ";
                                 sqlUpsertRoom += "ON CONFLICT(picture_id) ";
                                 sqlUpsertRoom += "DO UPDATE SET file_path = @Path, type = @type, description = @Desc, is_main = @Main";
                                 exec = true;
@@ -1381,7 +1386,7 @@ public sealed class DataAccessService : IDataAccessService
             cmd.Transaction = connection.BeginTransaction();
             try
             {
-                cmd.CommandText = string.Format("DELETE FROM rents WHERE rent_id = '{0}';", rentId);
+                cmd.CommandText = string.Format("DELETE FROM property WHERE property_id = '{0}';", rentId);
                 res.AffectedCount = cmd.ExecuteNonQuery();
 
                 cmd.Transaction.Commit();
@@ -1481,11 +1486,11 @@ public sealed class DataAccessService : IDataAccessService
             using var cmd = connection.CreateCommand();
             if (keyword == "*")
             {
-                cmd.CommandText = "SELECT rents.name as feedName, rent_residentials.remarks as entryTitle, rents.rent_id as entryId FROM rent_residentials INNER JOIN rents USING (rent_id)";
+                cmd.CommandText = "SELECT property.name as feedName, rent_residentials.remarks as entryTitle, property.property_id as entryId FROM rent_residentials INNER JOIN property USING (property_id)";
             }
             else
             {
-                cmd.CommandText = string.Format("SELECT rents.name as feedName, rent_residentials.remarks as entryTitle, rents.rent_id as entryId FROM rent_residentials INNER JOIN rents USING (rent_id) WHERE rents.name LIKE '%{0}%'", keyword);
+                cmd.CommandText = string.Format("SELECT property.name as feedName, rent_residentials.remarks as entryTitle, property.property_id as entryId FROM rent_residentials INNER JOIN property USING (property_id) WHERE property.name LIKE '%{0}%'", keyword);
             }
 
             using var reader = cmd.ExecuteReader();
@@ -1512,7 +1517,7 @@ public sealed class DataAccessService : IDataAccessService
                 }
 
                 // Reset entry Isdirty flag.
-                entry.IsDirty = false;
+                entry.IsModified = false;
 
                 res.AffectedCount++;
 
@@ -1592,17 +1597,17 @@ public sealed class DataAccessService : IDataAccessService
             connection.Open();
 
             using var cmd = connection.CreateCommand();
-            cmd.CommandText = string.Format("SELECT rents.name as entryName, " +
-                "rents.loc_pref_id as locPrefId, " +
-                "rents.loc_prefecture as locPrefecture, " +
-                "rents.loc_machiaza_id as locMachiazaId, " +
-                "rents.loc_county as locCounty, " +
-                "rents.loc_city as locCity, " +
-                "rents.loc_ward as locWard, " +
-                "rents.loc_oaza_cho as locOazaCho, " +
-                "rents.loc_choume as locChoume, " +
-                "rents.loc_edaban as locEdaban, " +
-                "rents.loc_location_full as locLocationFull, " +
+            cmd.CommandText = string.Format("SELECT property.name as entryName, " +
+                "property.loc_pref_id as locPrefId, " +
+                "property.loc_prefecture as locPrefecture, " +
+                "property.loc_machiaza_id as locMachiazaId, " +
+                "property.loc_county as locCounty, " +
+                "property.loc_city as locCity, " +
+                "property.loc_ward as locWard, " +
+                "property.loc_oaza_cho as locOazaCho, " +
+                "property.loc_choume as locChoume, " +
+                "property.loc_edaban as locEdaban, " +
+                "property.loc_location_full as locLocationFull, " +
 
                 "rent_residentials.building_kind as resiBuildingKind, " +
                 "rent_residentials.is_unit_ownership as resiUnitOwnership, " +
@@ -1617,8 +1622,8 @@ public sealed class DataAccessService : IDataAccessService
                 // TODO: more fields to be added here.
 
                 "rent_residentials.updated_at as resiUpdatedAt, " +
-                "rents.rent_id as entryId " +
-                "FROM rent_residentials INNER JOIN rents USING (rent_id) WHERE rents.rent_id = '{0}'", id);
+                "property.property_id as entryId " +
+                "FROM rent_residentials INNER JOIN property USING (property_id) WHERE property.property_id = '{0}'", id);
 
             using (var reader = cmd.ExecuteReader())
             {
@@ -1706,7 +1711,7 @@ public sealed class DataAccessService : IDataAccessService
             }
 
             // 物件写真（建物）
-            cmd.CommandText = string.Format("SELECT * FROM rent_residential_pictures WHERE rent_id = '{0}'", id);
+            cmd.CommandText = string.Format("SELECT * FROM rent_residential_pictures WHERE property_id = '{0}'", id);
             using (var reader = cmd.ExecuteReader())
             {
                 while (reader.Read())
@@ -1749,7 +1754,7 @@ public sealed class DataAccessService : IDataAccessService
             }
 
             // PDF（建物）
-            cmd.CommandText = string.Format("SELECT * FROM rent_residential_pdfs WHERE rent_id = '{0}'", id);
+            cmd.CommandText = string.Format("SELECT * FROM rent_residential_pdfs WHERE property_id = '{0}'", id);
             using (var reader = cmd.ExecuteReader())
             {
                 while (reader.Read())
@@ -1792,7 +1797,7 @@ public sealed class DataAccessService : IDataAccessService
             }
 
             // 部屋
-            cmd.CommandText = string.Format("SELECT * FROM rent_residential_rooms WHERE rent_id = '{0}'", id);
+            cmd.CommandText = string.Format("SELECT * FROM rent_residential_rooms WHERE property_id = '{0}'", id);
             using (var reader = cmd.ExecuteReader())
             {
                 while (reader.Read())
@@ -1804,7 +1809,7 @@ public sealed class DataAccessService : IDataAccessService
                         Chinryou = Convert.ToInt32(reader["chinryou"]),
                         PropertyStatus = EnumPropertyStatus.Saved,
                         ListingStatus = EnumListingStatus.Saved,
-                        IsNew = false,
+                        //IsNew = false,
                         IsModified = false
                     };
 
@@ -1859,7 +1864,8 @@ public sealed class DataAccessService : IDataAccessService
             }
 
             // Reset entry Isdirty flag.
-            entry.IsDirty = false;
+            entry.PropertyStatus = EnumPropertyStatus.Saved;
+            entry.IsModified = false;
 
             res.Building = entry;
         }
@@ -1940,7 +1946,7 @@ public sealed class DataAccessService : IDataAccessService
                 cmd.CommandType = CommandType.Text;
 
                 // Upsert
-                var sqlInsertIntoRentLivingRoom = "INSERT INTO rent_residential_rooms (room_id, rent_id, name, chinryou) VALUES (@roomId, @RentId, @Nam, @Chinryou) ";
+                var sqlInsertIntoRentLivingRoom = "INSERT INTO rent_residential_rooms (room_id, property_id, name, chinryou) VALUES (@roomId, @RentId, @Nam, @Chinryou) ";
                 sqlInsertIntoRentLivingRoom += "ON CONFLICT(room_id) ";
                 //sqlInsertIntoRentLivingRoom += string.Format("DO UPDATE SET name = '{0}'", EscapeSingleQuote(room.RoomName));
                 sqlInsertIntoRentLivingRoom += "DO UPDATE SET name = @Nam, chinryou = @Chinryou, updated_at = @Updated";
@@ -1950,7 +1956,7 @@ public sealed class DataAccessService : IDataAccessService
                 /*
                 if (room.IsNew)
                 {
-                    var sqlInsertIntoRentLivingRoom = "INSERT INTO rent_residential_rooms (room_id, rent_id, name) VALUES (@roomId, @RentId, @Nam)";
+                    var sqlInsertIntoRentLivingRoom = "INSERT INTO rent_residential_rooms (room_id, property_id, name) VALUES (@roomId, @RentId, @Nam)";
 
                     // 追加
                     cmd.CommandText = sqlInsertIntoRentLivingRoom;
@@ -1973,7 +1979,7 @@ public sealed class DataAccessService : IDataAccessService
                 var result = cmd.ExecuteNonQuery();
                 if (result > 0)
                 {
-                    room.IsNew = false;
+                    //room.IsNew = false;
                     room.IsModified = false;
                     room.PropertyStatus = EnumPropertyStatus.Saved;
                     room.ListingStatus = EnumListingStatus.Saved;
@@ -1991,7 +1997,7 @@ public sealed class DataAccessService : IDataAccessService
 
                         if (pic.IsNew)
                         {
-                            var sqlInsertIntoRentLivingPicture = "INSERT INTO rent_residential_room_pictures (picture_id, rent_id, file_path, label, description, is_main) " +
+                            var sqlInsertIntoRentLivingPicture = "INSERT INTO rent_residential_room_pictures (picture_id, property_id, file_path, label, description, is_main) " +
                                 "VALUES (@PicId, @RentId, @Path, @Tit, @Desc, @Main)";
 
                             // 物件画像の追加
@@ -2013,7 +2019,7 @@ public sealed class DataAccessService : IDataAccessService
                         */
 
                         // Upsert
-                        var sqlUpsertRoom = "INSERT INTO rent_residential_room_pictures (picture_id, room_id, rent_id, file_path, type, description, is_main) VALUES (@PicId, @roomId, @RentId, @Path, @type, @Desc, @Main) ";
+                        var sqlUpsertRoom = "INSERT INTO rent_residential_room_pictures (picture_id, room_id, property_id, file_path, type, description, is_main) VALUES (@PicId, @roomId, @RentId, @Path, @type, @Desc, @Main) ";
                         sqlUpsertRoom += "ON CONFLICT(picture_id) ";
                         sqlUpsertRoom += "DO UPDATE SET file_path = @Path, type = @type, description = @Desc, is_main = @Main";
                         var exec = true;
@@ -2166,8 +2172,8 @@ public sealed class DataAccessService : IDataAccessService
 
             using var cmd = connection.CreateCommand();
 
-            cmd.CommandText = "SELECT rents.name as entryName, rent_residential_rooms.name as unitName, rent_residential_rooms.room_id as roomId, rents.rent_id as entryId FROM rent_residential_rooms INNER JOIN rents USING (rent_id) INNER JOIN rent_residentials USING (rent_id)";
-            //cmd.CommandText = string.Format("SELECT rents.name as feedName, rent_residentials.comment as entryTitle, rents.rent_id as entryId FROM rent_residentials INNER JOIN rents USING (rent_id) WHERE rents.name LIKE '{0}'", keyword);
+            cmd.CommandText = "SELECT property.name as entryName, rent_residential_rooms.name as unitName, rent_residential_rooms.room_id as roomId, property.property_id as entryId FROM rent_residential_rooms INNER JOIN property USING (property_id) INNER JOIN rent_residentials USING (property_id)";
+            //cmd.CommandText = string.Format("SELECT property.name as feedName, rent_residentials.comment as entryTitle, property.property_id as entryId FROM rent_residentials INNER JOIN property USING (property_id) WHERE property.name LIKE '{0}'", keyword);
 
             using var reader = cmd.ExecuteReader();
 
@@ -2286,7 +2292,7 @@ public sealed class DataAccessService : IDataAccessService
             connection.Open();
 
             using var cmd = connection.CreateCommand();
-            cmd.CommandText = "SELECT rents.rent_id as buildingId, rents.name as buildingName, rent_residential_rooms.room_id as roomId, rent_residential_rooms.name as roomName, rent_residential_rooms.chinryou as chinryou FROM rent_residential_rooms INNER JOIN rents USING (rent_id)";//INNER JOIN rent_residentials USING (rent_id)
+            cmd.CommandText = "SELECT property.property_id as buildingId, property.name as buildingName, rent_residential_rooms.room_id as roomId, rent_residential_rooms.name as roomName, rent_residential_rooms.chinryou as chinryou FROM rent_residential_rooms INNER JOIN property USING (property_id)";//INNER JOIN rent_residentials USING (property_id)
 
             using var reader = cmd.ExecuteReader();
             while (reader.Read())
@@ -2301,7 +2307,7 @@ public sealed class DataAccessService : IDataAccessService
                         Chinryou = reader.GetInt32(reader.GetOrdinal("chinryou")),
                         PropertyStatus = EnumPropertyStatus.Saved,
                         ListingStatus = EnumListingStatus.Saved,
-                        IsNew = false,
+                        //IsNew = false,
                         IsModified = false
                     };
 

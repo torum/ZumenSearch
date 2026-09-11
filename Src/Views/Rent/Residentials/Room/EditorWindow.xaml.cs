@@ -8,7 +8,7 @@ public sealed partial class EditorWindow : Window
 
     public bool IsAutoClose { get; set; }
 
-    public ViewModels.Rent.Residentials.Room.MainViewModel? ViewModel { get; private set; }
+    public ViewModels.Rent.Residentials.Room.ListingViewModel? ViewModel { get; private set; }
 
     public EditorWindow()
     {
@@ -31,7 +31,7 @@ public sealed partial class EditorWindow : Window
         Id = id;
     }
 
-    public void SetViewModelToWindow(ViewModels.Rent.Residentials.Room.MainViewModel vm)
+    public void SetViewModelToWindow(ViewModels.Rent.Residentials.Room.ListingViewModel vm)
     {
         ViewModel = vm;
     }

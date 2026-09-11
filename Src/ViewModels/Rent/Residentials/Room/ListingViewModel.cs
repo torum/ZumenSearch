@@ -1,16 +1,18 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using ZumenSearch.Models.Base;
 using ZumenSearch.Models.Common;
+using ZumenSearch.Models.Messenger;
 using ZumenSearch.Services;
 using ZumenSearch.Services.Contracts;
 
 namespace ZumenSearch.ViewModels.Rent.Residentials.Room;
 
-public sealed partial class MainViewModel : ObservableObject
+public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<PropertyStatusUpdatedMessage>, IRecipient<PropertyNameUpdatedMessage>
 {
     #region == Public Properties ==
 
@@ -217,7 +219,7 @@ public sealed partial class MainViewModel : ObservableObject
     // TODO: Use WeakReferenceMessenger from CommunityToolkit.Mvvm (aka MVVM Toolkit) to send the selected search result from the MainWindow to this ViewModel.
     // https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/messenger
     // Holding a reference to the parent ViewModel (Bldg.MainViewModel) (only IF opened by it) to allow communication between the windows.
-    public ViewModels.Rent.Residentials.Bldg.MainViewModel? ParentViewModel { get; private set; }
+    public ViewModels.Rent.Residentials.Bldg.PropertyViewModel? BldgViewModel { get; private set; }
 
     // TODO: Use WeakReferenceMessenger from CommunityToolkit.Mvvm (aka MVVM Toolkit) to send the selected search result from the MainWindow to this ViewModel.
     // https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/messenger
@@ -238,7 +240,7 @@ public sealed partial class MainViewModel : ObservableObject
 
     #endregion
 
-    public MainViewModel(Models.Rent.Residentials.Room.Listing room, IDispatcherService dispatcherService, IDataAccessService dataAccessService)
+    public ListingViewModel(Models.Rent.Residentials.Room.Listing room, IDispatcherService dispatcherService, IDataAccessService dataAccessService)
     {
         _room = room;
         _id = room.Id;
@@ -256,7 +258,29 @@ public sealed partial class MainViewModel : ObservableObject
 
         _room.IsModified = false;
         IsDirty = false;
+
+        // Ready to receive messages.
+        this.IsActive = true;
     }
+
+    #region == Messages ==
+
+    public void Receive(PropertyStatusUpdatedMessage propertyStatus)
+    {
+        Debug.WriteLine("Received PropertyStatusUpdatedMessage @ListingViewModel");
+        _room.PropertyStatus = propertyStatus.Value;
+    }
+
+    public void Receive(PropertyNameUpdatedMessage propertyName)
+    {
+        Debug.WriteLine("Received PropertyNameUpdatedMessage @ListingViewModel");
+        _room.PropertyName = propertyName.Value;
+
+        // Update window title with dummy string.
+        WindowTitle = string.Empty;
+    }
+
+    #endregion
 
     #region == Private Methods ==
 
@@ -330,27 +354,27 @@ public sealed partial class MainViewModel : ObservableObject
             return false;
         }
 
-        if (ParentViewModel is null)
+        if (BldgViewModel is null)
         {
-            Debug.WriteLine("ParentViewModel is null. Can't update room in the parent vm.");
+            Debug.WriteLine("BldgViewModel is null. Can't update room in the parent vm.");
             return false;
         }
 
-        var existingRoom = ParentViewModel.Rooms.FirstOrDefault(r => r.Id == _room.Id);
+        var existingRoom = BldgViewModel.Rooms.FirstOrDefault(r => r.Id == _room.Id);
         if (existingRoom is not null)
         {
             // Update existing room
-            var index = ParentViewModel.Rooms.IndexOf(existingRoom);
-            ParentViewModel.Rooms[index] = _room;
+            var index = BldgViewModel.Rooms.IndexOf(existingRoom);
+            BldgViewModel.Rooms[index] = _room;
         }
         else
         {
             // Add new room
-            ParentViewModel.Rooms.Add(_room);
+            BldgViewModel.Rooms.Add(_room);
         }
 
 
-        //Debug.WriteLine($"Room {_room.Name} updated in Building {ParentViewModel?.Name}");
+        //Debug.WriteLine($"Room {_room.Name} updated in Building {BldgViewModel?.Name}");
         return true;
     }
 
@@ -475,10 +499,10 @@ public sealed partial class MainViewModel : ObservableObject
 
     // TODO: Use WeakReferenceMessenger from CommunityToolkit.Mvvm (aka MVVM Toolkit) to send the selected search result from the MainWindow to this ViewModel.
     // https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/messenger
-    public void SetParentViewModel(ViewModels.Rent.Residentials.Bldg.MainViewModel parentVM)
+    public void SetBldgViewModel(ViewModels.Rent.Residentials.Bldg.PropertyViewModel buildingVM)
     {
         // When created by the parent ViewModel (Bldg.MainViewModel), set a reference to it to allow communication between the windows.
-        ParentViewModel = parentVM;
+        BldgViewModel = buildingVM;
     }
 
     // TODO: Use WeakReferenceMessenger from CommunityToolkit.Mvvm (aka MVVM Toolkit) to send the selected search result from the MainWindow to this ViewModel.
@@ -489,8 +513,7 @@ public sealed partial class MainViewModel : ObservableObject
         _selectedSearchResult = searchResult;
     }
 
-    // TODO: Convert this to command
-    public void LeavingUnitCleanUp()
+    public void CleanUp()
     {
         foreach (var item in UnitPictures)
         {
@@ -499,7 +522,10 @@ public sealed partial class MainViewModel : ObservableObject
 
         UnitPictures.Clear();
 
-        //IsDirty = false;
+        // Unsubscribe
+        //WeakReferenceMessenger.Default.UnregisterAll(this);
+        //or
+        this.IsActive = false;
     }
 
     // TODO: change these below to commands.
@@ -612,14 +638,20 @@ public sealed partial class MainViewModel : ObservableObject
         }
         */
 
-        if ((_room.PropertyStatus == EnumPropertyStatus.New) && (ParentViewModel is not null))
+        if (_room.PropertyStatus == EnumPropertyStatus.New)
         {
             // update Bldg and done.
             if (UpdateBldg())
             {
-                ParentViewModel?.SetIsDirty(true);
+                // TODO: Use WeakReferenceMessenger from CommunityToolkit.Mvvm (aka MVVM Toolkit) to send the selected search result from the MainWindow to this ViewModel.
+                BldgViewModel?.SetIsDirty(true);
 
                 IsDirty = false;
+            }
+            else
+            {
+                // Should not happen. 
+                // TODO: Show error to user.
             }
         }
         else
@@ -636,7 +668,7 @@ public sealed partial class MainViewModel : ObservableObject
             else
             {
                 _room.IsModified = false;
-                _room.IsNew = false;
+                _room.PropertyStatus = EnumPropertyStatus.Saved;// just in case.
                 _room.ListingStatus = EnumListingStatus.Saved;
 
                 UpdateBldg();
@@ -691,7 +723,6 @@ public sealed partial class MainViewModel : ObservableObject
         }
         */
     }
-
     private bool CanOpenRoomBlobDirectory()
     {
         /*
@@ -739,4 +770,5 @@ public sealed partial class MainViewModel : ObservableObject
     }
 
     #endregion
+
 }

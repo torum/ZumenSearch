@@ -30,7 +30,7 @@ public sealed class BuildingPdfType(EnumBuildingPdfType key)
 
 public sealed partial class Pdf : PdfBase
 {
-    public ViewModels.Rent.Residentials.Bldg.MainViewModel? ParentViewModel { get; set; }
+    public ViewModels.Rent.Residentials.Bldg.PropertyViewModel? ParentViewModel { get; set; }
 
     public readonly ObservableCollection<BuildingPdfType> BuildingPdfTypes =
         [

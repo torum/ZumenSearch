@@ -1,8 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI.Windowing;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Media.Animation;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -14,14 +13,14 @@ using Windows.Storage.Streams;
 using Windows.System;
 using ZumenSearch.Models.Base;
 using ZumenSearch.Models.Common;
+using ZumenSearch.Models.Messenger;
 using ZumenSearch.Models.Rent.Residentials.Bldg;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.Services.Extensions.AbstractFactory;
-using ZumenSearch.Views;
 
 namespace ZumenSearch.ViewModels.Rent.Residentials.Bldg;
 
-public sealed partial class MainViewModel : ObservableObject
+public sealed partial class PropertyViewModel : ObservableObject
 {
     #region == Public Properties ==
 
@@ -1278,7 +1277,7 @@ public sealed partial class MainViewModel : ObservableObject
 
     #endregion
 
-    public MainViewModel(Models.Rent.Residentials.Bldg.Property building, IAbstractFactory<Models.Rent.Residentials.Room.Listing, Views.Rent.Residentials.Room.ShellPage> shellFactory, IDispatcherService dispatcherService, IDataAccessService dataAccessService, IDataAccessLocationService dataAccessLocationService)
+    public PropertyViewModel(Models.Rent.Residentials.Bldg.Property building, IAbstractFactory<Models.Rent.Residentials.Room.Listing, Views.Rent.Residentials.Room.ShellPage> shellFactory, IDispatcherService dispatcherService, IDataAccessService dataAccessService, IDataAccessLocationService dataAccessLocationService)
     {
         _building = building;
         _id = building.Id;
@@ -1407,7 +1406,7 @@ public sealed partial class MainViewModel : ObservableObject
             {
                 foreach (Models.Rent.Residentials.Bldg.Picture item in e.OldItems)
                 {
-                    Debug.WriteLine($"Item {item.Id} Removed from BuildingPictures");
+                    Debug.WriteLine($"Item {item.Id} Removed from BuildingPictures. @CollectionChanged in PopulateEntryValues of Bldg.MainViewModel");
                     IsDirty = true;
 
                     item.PropertyChanged -= OnBuildingPicturePropertyChanged;
@@ -1419,7 +1418,7 @@ public sealed partial class MainViewModel : ObservableObject
             {
                 foreach (Models.Rent.Residentials.Bldg.Picture item in e.NewItems)
                 {
-                    Debug.WriteLine($"Item {item.Id} Added to BuildingPictures");
+                    Debug.WriteLine($"Item {item.Id} Added to BuildingPictures. @CollectionChanged in PopulateEntryValues of Bldg.MainViewModel");
                     IsDirty = true;
 
                     item.PropertyChanged += OnBuildingPicturePropertyChanged;
@@ -1444,7 +1443,7 @@ public sealed partial class MainViewModel : ObservableObject
             {
                 foreach (Models.Rent.Residentials.Bldg.Pdf item in e.OldItems)
                 {
-                    Debug.WriteLine($"Item {item.Id} Removed from BuildingPdfs");
+                    Debug.WriteLine($"Item {item.Id} Removed from BuildingPdfs, @CollectionChanged in PopulateEntryValues of Bldg.MainViewModel");
                     IsDirty = true;
 
                     item.PropertyChanged -= OnBuildingPdfPropertyChanged;
@@ -1456,7 +1455,7 @@ public sealed partial class MainViewModel : ObservableObject
             {
                 foreach (Models.Rent.Residentials.Bldg.Pdf item in e.NewItems)
                 {
-                    Debug.WriteLine($"Item {item.Id} Added to BuildingPdfs");
+                    Debug.WriteLine($"Item {item.Id} Added to BuildingPdfs. @CollectionChanged in PopulateEntryValues of Bldg.MainViewModel");
                     IsDirty = true;
 
                     item.PropertyChanged += OnBuildingPdfPropertyChanged;
@@ -1481,7 +1480,7 @@ public sealed partial class MainViewModel : ObservableObject
             {
                 foreach (Models.Rent.Residentials.Room.Listing item in e.OldItems)
                 {
-                    Debug.WriteLine($"Item {item.Id} Removed from Rooms");
+                    Debug.WriteLine($"Item {item.Id} Removed from Rooms. @Rooms.CollectionChanged in PopulateEntryValues of Bldg.MainViewModel");
                     //IsDirty = true;
 
                     item.PropertyChanged -= OnRoomPropertyChanged;
@@ -1493,7 +1492,7 @@ public sealed partial class MainViewModel : ObservableObject
             {
                 foreach (Models.Rent.Residentials.Room.Listing item in e.NewItems)
                 {
-                    Debug.WriteLine($"Item {item.Id} Added to Rooms");
+                    Debug.WriteLine($"Item {item.Id} Added to Rooms. @Rooms.CollectionChanged in PopulateEntryValues of Bldg.MainViewModel");
                     //IsDirty = true;
 
                     item.PropertyChanged += OnRoomPropertyChanged;
@@ -1576,7 +1575,7 @@ public sealed partial class MainViewModel : ObservableObject
             return;
         }
 
-        Debug.WriteLine($"Property {e.PropertyName} changed");
+        //Debug.WriteLine($"Property {e.PropertyName} changed");
 
         if (room.IsModified)
         {
@@ -1682,7 +1681,7 @@ public sealed partial class MainViewModel : ObservableObject
             _unsavedBuildingPdfThumbnailFileList.Clear();
             _unsavedBuildingPdfFileList.Clear();
 
-            _building.IsDirty = false;
+            _building.IsModified = false;
             _building.PropertyStatus = EnumPropertyStatus.Saved;
 
             // Update title with dummy value.
@@ -1709,7 +1708,7 @@ public sealed partial class MainViewModel : ObservableObject
 
             IsDirty = false;
 
-            _building.IsDirty = false;
+            _building.IsModified = false;
             _building.PropertyStatus = EnumPropertyStatus.Saved;
 
             // Update title with dummy value.
@@ -1823,10 +1822,7 @@ public sealed partial class MainViewModel : ObservableObject
         if (string.IsNullOrEmpty(roomId)) return;
         var room = Rooms.FirstOrDefault(r => r.Id == roomId);
         if (room is null) return;
-        if (Rooms.Contains(room))
-        {
-            Rooms.Remove(room);
-        }
+        Rooms.Remove(room);
     }
 
     // TODO: Use WeakReferenceMessenger from CommunityToolkit.Mvvm (aka MVVM Toolkit) to send the selected search result from the MainWindow to this ViewModel.
@@ -1967,7 +1963,7 @@ public sealed partial class MainViewModel : ObservableObject
 
         SetValuesToEntry();
 
-        bool saveResult = false;
+        bool saveResult;
 
         if (_building.PropertyStatus == EnumPropertyStatus.New)
         {
@@ -1983,12 +1979,36 @@ public sealed partial class MainViewModel : ObservableObject
             // Update the selected search result's values such asname if it exists.
             _selectedSearchResult?.Name = Name;
 
+            // Jjust in case.
+            _building.PropertyStatus = EnumPropertyStatus.Saved;
+            _building.IsModified = false;
+
             foreach (var room in Rooms)
             {
                 room.PropertyName = Name;
                 room.PropertyStatus = EnumPropertyStatus.Saved;
-                room.ListingStatus = EnumListingStatus.Saved;//just in case.
+                room.ListingStatus = EnumListingStatus.Saved;
             }
+
+            // Just in case.
+            foreach (var room in _building.Rooms)
+            {
+                room.PropertyName = Name;
+                room.PropertyStatus = EnumPropertyStatus.Saved;
+                room.ListingStatus = EnumListingStatus.Saved;
+            }
+
+            WeakReferenceMessenger.Default.Send(new Models.Messenger.PropertyStatusUpdatedMessage(Models.Base.EnumPropertyStatus.Saved));
+            WeakReferenceMessenger.Default.Send(new Models.Messenger.PropertyNameUpdatedMessage(Name));
+            /*
+            // Check opened child windows and notify property status has been changed. (name may have been changed as well)
+            foreach (var editorWindow in ChildEditorList.ToList())
+            {
+                Debug.WriteLine($"Editor window for {Id} is already open. Updating property status.");
+                editorWindow.ViewModel?.UpdatePropertyStatusAndName(EnumPropertyStatus.Saved, Name);
+                break;
+            }
+            */
         }
     }
     private bool CanSave()
@@ -2145,7 +2165,7 @@ public sealed partial class MainViewModel : ObservableObject
         var editorShell = _shellFactory.Create(new Models.Rent.Residentials.Room.Listing(Guid.CreateVersion7().ToString("N"), _building.Id, Name));
         //editorShell.SetParentViewModel(this);
 
-        editorShell.ViewModel.SetParentViewModel(this);
+        editorShell.ViewModel.SetBldgViewModel(this);
 
         var mainVM = App.GetService<ViewModels.MainViewModel>();
         mainVM.RoomEditorList.Add(editorShell.Window);
@@ -2289,7 +2309,7 @@ public sealed partial class MainViewModel : ObservableObject
         var editorShell = _shellFactory.Create(room);
         //editorShell.SetParentViewModel(this);
 
-        editorShell.ViewModel.SetParentViewModel(this);
+        editorShell.ViewModel.SetBldgViewModel(this);
 
         var editorWindow = editorShell.Window;
         if (editorWindow == null)
@@ -2328,7 +2348,7 @@ public sealed partial class MainViewModel : ObservableObject
         editorWindow.AppWindow.MoveInZOrderAtTop();
 
     }
-    public bool EditSelectedUnitCanExecute(Models.Rent.Residentials.Room.Listing room)
+    public static bool EditSelectedUnitCanExecute(Models.Rent.Residentials.Room.Listing room)
     {
         if (room is null) return false;
         return true;
@@ -2341,7 +2361,7 @@ public sealed partial class MainViewModel : ObservableObject
 
         //
     }
-    public bool DupeSelectedUnitCanExecute(Models.Rent.Residentials.Room.Listing room)
+    public static bool DupeSelectedUnitCanExecute(Models.Rent.Residentials.Room.Listing room)
     {
         if (room is null) return false;
         return true;
@@ -2368,7 +2388,7 @@ public sealed partial class MainViewModel : ObservableObject
         // Make sure to set it to null.
         //SelectedRoom = null;
     }
-    public bool DeleteSelectedUnitCanExecute(Models.Rent.Residentials.Room.Listing room)
+    public static bool DeleteSelectedUnitCanExecute(Models.Rent.Residentials.Room.Listing room)
     {
         if (room is null) return false;
         return true;

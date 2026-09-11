@@ -13,14 +13,18 @@ public enum EnumPropertyStatus
 
 public abstract partial class PropertyBase : ObservableObject
 {
-    // TODO: I don't think we need this anymore....
-    public bool IsDirty
+    public bool IsModified
     {
         get;
         set
         {
+            if (field == value)
+            {
+                return;
+            }
+
             field = value;
-            OnPropertyChanged(nameof(IsDirty));
+            OnPropertyChanged();
         }
     }
 
@@ -34,7 +38,7 @@ public abstract partial class PropertyBase : ObservableObject
         {
             if (SetProperty(ref field, value))
             {
-                IsDirty = true;
+                IsModified = true;
             }
         }
     }

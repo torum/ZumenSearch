@@ -30,7 +30,7 @@ public sealed partial class Property : PropertyBase
         {
             if (SetProperty(ref field, value))
             {
-                IsDirty = true;
+                IsModified = true;
             }
         }
     } = [];
@@ -46,7 +46,7 @@ public sealed partial class Property : PropertyBase
         {
             if (SetProperty(ref field, value))
             {
-                IsDirty = true; //?
+                IsModified = true; //?
             }
         }
     } = [];
@@ -62,7 +62,7 @@ public sealed partial class Property : PropertyBase
         {
             if (SetProperty(ref field, value))
             {
-                IsDirty = true;
+                IsModified = true;
             }
         }
     } = [];
@@ -82,7 +82,7 @@ public sealed partial class Property : PropertyBase
         {
             if (SetProperty(ref field, value))
             {
-                IsDirty = true;
+                IsModified = true;
             }
         }
     }
@@ -95,7 +95,7 @@ public sealed partial class Property : PropertyBase
         {
             if (SetProperty(ref field, value))
             {
-                IsDirty = true;
+                IsModified = true;
             }
         }
     }
@@ -110,7 +110,7 @@ public sealed partial class Property : PropertyBase
         {
             if (SetProperty(ref field, value))
             {
-                IsDirty = true;
+                IsModified = true;
             }
         }
     }
@@ -127,7 +127,7 @@ public sealed partial class Property : PropertyBase
             }
             
             field = value;
-            IsDirty = true;
+            IsModified = true;
 
             /*
             var text = Helpers.Common.ReplaceZenkakuNumber(value.Trim());
@@ -161,7 +161,7 @@ public sealed partial class Property : PropertyBase
             }
 
             field = value;
-            IsDirty = true;
+            IsModified = true;
 
             OnPropertyChanged();
         }
@@ -210,7 +210,7 @@ public sealed partial class Property : PropertyBase
             }
 
             field = value;
-            IsDirty = true;
+            IsModified = true;
 
             OnPropertyChanged();
         }
@@ -255,8 +255,8 @@ public sealed partial class Property : PropertyBase
         {
             if (SetProperty(ref field, value))
             {
-                IsDirty = true;
-                OnPropertyChanged();
+                IsModified = true;
+                //OnPropertyChanged();
             }
         }
     } = new DateTimeOffset(1900, 1, 1, 0, 0, 0, TimeSpan.Zero);
@@ -271,7 +271,7 @@ public sealed partial class Property : PropertyBase
 
             if (SetProperty(ref field, value.Trim()))
             {
-                IsDirty = true;
+                IsModified = true;
             }
         }
     }
@@ -286,7 +286,7 @@ public sealed partial class Property : PropertyBase
 
             if (SetProperty(ref field, value.Trim()))
             {
-                IsDirty = true;
+                IsModified = true;
             }
         }
     } = "0000";
@@ -299,7 +299,7 @@ public sealed partial class Property : PropertyBase
         {
             if (SetProperty(ref field, value))
             {
-                IsDirty = true;
+                IsModified = true;
             }
         }
     } = string.Empty;
@@ -317,7 +317,7 @@ public sealed partial class Property : PropertyBase
         {
             if (SetProperty(ref field, value))
             {
-                IsDirty = true;
+                IsModified = true;
             }
         }
     }
@@ -329,7 +329,7 @@ public sealed partial class Property : PropertyBase
         {
             if (SetProperty(ref field, value))
             {
-                IsDirty = true;
+                IsModified = true;
             }
         }
     }
@@ -341,7 +341,7 @@ public sealed partial class Property : PropertyBase
         {
             if (SetProperty(ref field, value))
             {
-                IsDirty = true;
+                IsModified = true;
             }
         }
     }
@@ -353,7 +353,7 @@ public sealed partial class Property : PropertyBase
         {
             if (SetProperty(ref field, value))
             {
-                IsDirty = true;
+                IsModified = true;
             }
         }
     }
@@ -365,7 +365,7 @@ public sealed partial class Property : PropertyBase
         {
             if (SetProperty(ref field, value))
             {
-                IsDirty = true;
+                IsModified = true;
             }
         }
     } = string.Empty;
@@ -378,7 +378,7 @@ public sealed partial class Property : PropertyBase
         {
             if (SetProperty(ref field, value))
             {
-                IsDirty = true;
+                IsModified = true;
             }
         }
     } = string.Empty;
@@ -391,7 +391,7 @@ public sealed partial class Property : PropertyBase
         {
             if (SetProperty(ref field, value))
             {
-                IsDirty = true;
+                IsModified = true;
             }
         }
     } = string.Empty;
@@ -404,7 +404,7 @@ public sealed partial class Property : PropertyBase
         {
             if (SetProperty(ref field, value))
             {
-                IsDirty = true;
+                IsModified = true;
             }
         }
     } = string.Empty;
@@ -433,7 +433,7 @@ public sealed partial class Property : PropertyBase
         {
             if (SetProperty(ref field, value))
             {
-                IsDirty = true;
+                IsModified = true;
             }
         }
     }
@@ -445,7 +445,7 @@ public sealed partial class Property : PropertyBase
         {
             if (SetProperty(ref field, value))
             {
-                IsDirty = true;
+                IsModified = true;
             }
         }
     }
@@ -457,7 +457,7 @@ public sealed partial class Property : PropertyBase
         {
             if (SetProperty(ref field, value))
             {
-                IsDirty = true;
+                IsModified = true;
             }
         }
     } = string.Empty;
@@ -469,7 +469,7 @@ public sealed partial class Property : PropertyBase
         {
             if (SetProperty(ref field, value))
             {
-                IsDirty = true;
+                IsModified = true;
             }
         }
     } = string.Empty;
@@ -481,7 +481,7 @@ public sealed partial class Property : PropertyBase
         {
             if (SetProperty(ref field, value))
             {
-                IsDirty = true;
+                IsModified = true;
             }
         }
     } = string.Empty;
@@ -493,7 +493,7 @@ public sealed partial class Property : PropertyBase
         {
             if (SetProperty(ref field, value))
             {
-                IsDirty = true;
+                IsModified = true;
             }
         }
     } = string.Empty;
@@ -513,7 +513,7 @@ public sealed partial class Property : PropertyBase
         {
             if (SetProperty(ref field, value))
             {
-                IsDirty = true;
+                IsModified = true;
             }
         }
     }
@@ -525,7 +525,7 @@ public sealed partial class Property : PropertyBase
         {
             if (SetProperty(ref field, value))
             {
-                IsDirty = true;
+                IsModified = true;
             }
         }
     }
@@ -537,7 +537,7 @@ public sealed partial class Property : PropertyBase
         {
             if (SetProperty(ref field, value))
             {
-                IsDirty = true;
+                IsModified = true;
             }
         }
     }
@@ -549,7 +549,7 @@ public sealed partial class Property : PropertyBase
         {
             if (SetProperty(ref field, value))
             {
-                IsDirty = true;
+                IsModified = true;
             }
         }
     }
@@ -570,7 +570,7 @@ public sealed partial class Property : PropertyBase
         {
             if (SetProperty(ref field, value))
             {
-                IsDirty = true;
+                IsModified = true;
             }
         }
     } = false;
@@ -582,7 +582,7 @@ public sealed partial class Property : PropertyBase
         {
             if (SetProperty(ref field, value))
             {
-                IsDirty = true;
+                IsModified = true;
             }
         }
     } = EnumElectricKind.Unspecified;
@@ -594,7 +594,7 @@ public sealed partial class Property : PropertyBase
         {
             if (SetProperty(ref field, value))
             {
-                IsDirty = true;
+                IsModified = true;
             }
         }
     } = string.Empty;

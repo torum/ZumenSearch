@@ -27,7 +27,7 @@ public abstract class ListingBase : ObservableObject
         }
     }
 
-    public bool IsNew { get; set; } = true;
+    //public bool IsNew { get; set; } = true;
 
     public bool IsModified { get; set; } = false;
 

@@ -5,7 +5,7 @@ namespace ZumenSearch.Views.Rent.Residentials.Bldg;
 
 public sealed partial class FacilitiesPage : Page
 {
-    public ViewModels.Rent.Residentials.Bldg.MainViewModel? ViewModel { get; private set; }
+    public ViewModels.Rent.Residentials.Bldg.PropertyViewModel? ViewModel { get; private set; }
 
     public FacilitiesPage()
     {
@@ -19,10 +19,10 @@ public sealed partial class FacilitiesPage : Page
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
-        if ((e.Parameter is ViewModels.Rent.Residentials.Bldg.MainViewModel) && (e.Parameter != null))
+        if ((e.Parameter is ViewModels.Rent.Residentials.Bldg.PropertyViewModel) && (e.Parameter != null))
         {
             //_editorShell = e.Parameter as Views.Rent.Residentials.EditorShell;
-            ViewModel = e.Parameter as ViewModels.Rent.Residentials.Bldg.MainViewModel;
+            ViewModel = e.Parameter as ViewModels.Rent.Residentials.Bldg.PropertyViewModel;
         }
 
         base.OnNavigatedTo(e);

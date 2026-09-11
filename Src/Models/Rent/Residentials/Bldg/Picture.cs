@@ -42,7 +42,7 @@ public sealed class BuildingPictureType(EnumBuildingPictureType key)
 
 public sealed partial class Picture : PictureBase
 {
-    public ViewModels.Rent.Residentials.Bldg.MainViewModel? ParentViewModel { get; set; }
+    public ViewModels.Rent.Residentials.Bldg.PropertyViewModel? ParentViewModel { get; set; }
 
     public readonly ObservableCollection<BuildingPictureType> BuildingPictureTypes =
     [

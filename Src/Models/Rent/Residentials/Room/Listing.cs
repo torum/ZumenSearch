@@ -10,9 +10,6 @@ namespace ZumenSearch.Models.Rent.Residentials.Room;
 // 部屋（編集用）
 public sealed partial class Listing : ListingBase
 {
-    // Holding a reference to the parent Building (Property) object to allow communication between the Room Listing and its parent Building.
-    //public Models.Rent.Residentials.Bldg.Property? Building { get; private set; }
-
     public string PropertyId { get; private set; }
 
     public string PropertyName
@@ -27,6 +24,8 @@ public sealed partial class Listing : ListingBase
         }
     }
 
+    // TODO: Clarify the difference between IsNew and ListingStatus.
+    // IsNew indicates whether the listing is newly created, while ListingStatus indicates whether the listing has been saved to the database or not.
     // ステータス（保存済みか新規か）
     public EnumPropertyStatus PropertyStatus { get; set; } = EnumPropertyStatus.New;
     public EnumListingStatus ListingStatus { get; set; } = EnumListingStatus.New;
