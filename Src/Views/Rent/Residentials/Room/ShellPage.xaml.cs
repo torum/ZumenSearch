@@ -1,4 +1,5 @@
-﻿using Microsoft.UI.Windowing;
+﻿using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
@@ -173,9 +174,10 @@ public sealed partial class ShellPage : Page
             }
         }
 
-        mainVM.RoomEditorList.Remove(ewin);
-        // TODO: use messanger.
-        ViewModel.BldgViewModel?.ChildEditorList.Remove(ewin);
+        //mainVM.RoomEditorList.Remove(ewin);
+
+        // Update the selected search result's values such as name if it exists. Also, update building window's rooms list.
+        WeakReferenceMessenger.Default.Send(new Models.Messenger.ListingWindowClosedMessage(ewin));
     }
 
     private void BreadcrumbBar_ItemClicked(BreadcrumbBar sender, BreadcrumbBarItemClickedEventArgs args)

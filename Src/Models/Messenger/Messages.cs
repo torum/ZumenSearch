@@ -5,18 +5,43 @@ using System.Text;
 
 namespace ZumenSearch.Models.Messenger;
 
-public class PropertyStatusUpdatedMessage : ValueChangedMessage<Models.Base.EnumPropertyStatus>
+public class PropertyUpdatedMessage : ValueChangedMessage<Models.Base.PropertyBase>
 {
-    public PropertyStatusUpdatedMessage(Models.Base.EnumPropertyStatus value) : base(value)
+    public PropertyUpdatedMessage(Models.Base.PropertyBase value) : base(value)
     {
 
     }
 }
 
-public class PropertyNameUpdatedMessage : ValueChangedMessage<string>
+public class ListingUpdatedMessage : ValueChangedMessage<Models.Rent.Residentials.Room.Listing>
 {
-    public PropertyNameUpdatedMessage(string value) : base(value)
+    public ListingUpdatedMessage(Models.Rent.Residentials.Room.Listing value) : base(value)
     {
 
     }
 }
+
+public class ListingDeletedMessage : ValueChangedMessage<string>
+{
+    public ListingDeletedMessage(string value) : base(value)
+    {
+
+    }
+}
+
+public class ListingWindowClosedMessage : ValueChangedMessage<Views.Rent.Residentials.Room.EditorWindow> 
+{
+    public ListingWindowClosedMessage(Views.Rent.Residentials.Room.EditorWindow value) : base(value)
+    {
+
+    }
+}
+
+public class PropertyWindowClosedMessage : ValueChangedMessage<Views.Rent.Residentials.Bldg.EditorWindow>
+{
+    public PropertyWindowClosedMessage(Views.Rent.Residentials.Bldg.EditorWindow value) : base(value)
+    {
+
+    }
+}
+

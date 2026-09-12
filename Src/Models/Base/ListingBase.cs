@@ -13,6 +13,12 @@ public enum EnumListingStatus
 
 public abstract class ListingBase : ObservableObject
 {
+    // TODO: Clarify the difference between IsNew and ListingStatus.
+    // IsNew indicates whether the listing is newly created, while ListingStatus indicates whether the listing has been saved to the database or not.
+    // ステータス（保存済みか新規か）
+    public EnumPropertyStatus PropertyStatus { get; set; } = EnumPropertyStatus.New;
+    public EnumListingStatus ListingStatus { get; set; } = EnumListingStatus.New;
+
     public string Id { get; }
 
     public string Name

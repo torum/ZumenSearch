@@ -24,12 +24,6 @@ public sealed partial class Listing : ListingBase
         }
     }
 
-    // TODO: Clarify the difference between IsNew and ListingStatus.
-    // IsNew indicates whether the listing is newly created, while ListingStatus indicates whether the listing has been saved to the database or not.
-    // ステータス（保存済みか新規か）
-    public EnumPropertyStatus PropertyStatus { get; set; } = EnumPropertyStatus.New;
-    public EnumListingStatus ListingStatus { get; set; } = EnumListingStatus.New;
-
     // 物件写真（部屋）リスト
     public ObservableCollection<Picture> Pictures
     {
@@ -135,9 +129,10 @@ public sealed partial class Listing : ListingBase
     [ObservableProperty]
     public partial string Remarks { get; set; } = string.Empty;
 
-    public Listing(string id, string propertyId, string propertyName) : base(id)
+    public Listing(string id, string propertyId, EnumPropertyStatus propertyStatus, string propertyName) : base(id)
     {
         PropertyId = propertyId;
         PropertyName = propertyName;
+        PropertyStatus = propertyStatus;
     }
 }

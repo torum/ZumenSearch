@@ -12,7 +12,7 @@ using ZumenSearch.Services.Contracts;
 
 namespace ZumenSearch.ViewModels.Rent.Residentials.Room;
 
-public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<PropertyStatusUpdatedMessage>, IRecipient<PropertyNameUpdatedMessage>
+public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<PropertyUpdatedMessage>
 {
     #region == Public Properties ==
 
@@ -194,7 +194,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         }
     }
 
-    public ObservableCollection<Models.Rent.Residentials.Room.Picture> UnitPictures
+    public ObservableCollection<Models.Rent.Residentials.Room.Picture> Pictures
     {
         get;
         set
@@ -215,16 +215,6 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
     private readonly string _id = string.Empty;
 
     private readonly Models.Rent.Residentials.Room.Listing _room;
-
-    // TODO: Use WeakReferenceMessenger from CommunityToolkit.Mvvm (aka MVVM Toolkit) to send the selected search result from the MainWindow to this ViewModel.
-    // https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/messenger
-    // Holding a reference to the parent ViewModel (Bldg.MainViewModel) (only IF opened by it) to allow communication between the windows.
-    public ViewModels.Rent.Residentials.Bldg.PropertyViewModel? BldgViewModel { get; private set; }
-
-    // TODO: Use WeakReferenceMessenger from CommunityToolkit.Mvvm (aka MVVM Toolkit) to send the selected search result from the MainWindow to this ViewModel.
-    // https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/messenger
-    // Holds the selected search result from the MainWindow which is used to update title/name and other properties.
-    private Models.Rent.Residentials.ListingSearchResultItem? _selectedSearchResult;
 
     // Tmp file list to hold unsaved picture files. (if entry is not saved, delete on close)
     private readonly List<string> _unsavedPictureFileList = [];
@@ -265,19 +255,17 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
 
     #region == Messages ==
 
-    public void Receive(PropertyStatusUpdatedMessage propertyStatus)
+    public void Receive(PropertyUpdatedMessage property)
     {
-        Debug.WriteLine("Received PropertyStatusUpdatedMessage @ListingViewModel");
-        _room.PropertyStatus = propertyStatus.Value;
-    }
+        var building = property.Value;
+        if (building is not null) 
+        {
+            _room.PropertyStatus = building.PropertyStatus;
 
-    public void Receive(PropertyNameUpdatedMessage propertyName)
-    {
-        Debug.WriteLine("Received PropertyNameUpdatedMessage @ListingViewModel");
-        _room.PropertyName = propertyName.Value;
-
-        // Update window title with dummy string.
-        WindowTitle = string.Empty;
+            _room.PropertyName = building.Name;
+            // Update window title with dummy string.
+            WindowTitle = string.Empty;
+        }
     }
 
     #endregion
@@ -324,8 +312,8 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
 
 
         // 写真
-        //_room.UnitPictures = UnitPictures;
-        foreach (var pic in UnitPictures)
+        //_room.Pictures = Pictures;
+        foreach (var pic in Pictures)
         {
             var existingPic = _room.Pictures.FirstOrDefault(r => r.Id == pic.Id);
             if (existingPic is not null)
@@ -344,40 +332,6 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
 
     }
 
-    // TODO: Use WeakReferenceMessenger from CommunityToolkit.Mvvm (aka MVVM Toolkit) to send the selected search result from the MainWindow to this ViewModel.
-    // https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/messenger
-    private bool UpdateBldg()
-    {
-        if (_room is null)
-        {
-            Debug.WriteLine("_room is null. Can't update room in the parent vm.");
-            return false;
-        }
-
-        if (BldgViewModel is null)
-        {
-            Debug.WriteLine("BldgViewModel is null. Can't update room in the parent vm.");
-            return false;
-        }
-
-        var existingRoom = BldgViewModel.Rooms.FirstOrDefault(r => r.Id == _room.Id);
-        if (existingRoom is not null)
-        {
-            // Update existing room
-            var index = BldgViewModel.Rooms.IndexOf(existingRoom);
-            BldgViewModel.Rooms[index] = _room;
-        }
-        else
-        {
-            // Add new room
-            BldgViewModel.Rooms.Add(_room);
-        }
-
-
-        //Debug.WriteLine($"Room {_room.Name} updated in Building {BldgViewModel?.Name}");
-        return true;
-    }
-
     private void PopulateValues()
     {
         if (_room is null)
@@ -394,25 +348,25 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         // TODO: Set other properties for editing..
 
         // Pictures
-        UnitPictures = new ObservableCollection<Models.Rent.Residentials.Room.Picture>(_room.Pictures); // create a copy.
-        foreach (var item in UnitPictures)
+        Pictures = new ObservableCollection<Models.Rent.Residentials.Room.Picture>(_room.Pictures); // create a copy.
+        foreach (var item in Pictures)
         {
             item.ParentViewModel = this;
             item.IsModified = false; // Needed this.
-            item.PropertyChanged += OnUnitPicturePropertyChanged;
+            item.PropertyChanged += OnPicturePropertyChanged;
         }
 
-        UnitPictures.CollectionChanged += (s, e) =>
+        Pictures.CollectionChanged += (s, e) =>
         {
             // Unsubscribe from removed items
             if (e.OldItems != null)
             {
                 foreach (Models.Rent.Residentials.Room.Picture item in e.OldItems)
                 {
-                    Debug.WriteLine($"Item {item.Id} Removed from UnitPictures");
+                    Debug.WriteLine($"Item {item.Id} Removed from Pictures");
                     IsDirty = true;
 
-                    item.PropertyChanged -= OnUnitPicturePropertyChanged;
+                    item.PropertyChanged -= OnPicturePropertyChanged;
                 }
             }
 
@@ -421,10 +375,10 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
             {
                 foreach (Models.Rent.Residentials.Room.Picture item in e.NewItems)
                 {
-                    Debug.WriteLine($"Item {item.Id} Added to UnitPictures");
+                    Debug.WriteLine($"Item {item.Id} Added to Pictures");
                     IsDirty = true;
 
-                    item.PropertyChanged += OnUnitPicturePropertyChanged;
+                    item.PropertyChanged += OnPicturePropertyChanged;
                 }
             }
         };
@@ -435,11 +389,11 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         IsDirty = false;
     }
 
-    private void OnUnitPicturePropertyChanged(object? sender, PropertyChangedEventArgs e)
+    private void OnPicturePropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (sender is not Models.Rent.Residentials.Room.Picture picUnit)
         {
-            Debug.WriteLine("OnUnitPicturePropertyChanged returned non PictureUnit.");
+            Debug.WriteLine("OnPicturePropertyChanged returned non PictureUnit.");
             return;
         }
 
@@ -454,7 +408,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
                 if (picUnit.IsMain)
                 {
                     // Clear all other pics
-                    foreach (var item in UnitPictures)
+                    foreach (var item in Pictures)
                     {
                         if (item != picUnit)
                         {
@@ -497,30 +451,14 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         _dlgService = dialog;
     }
 
-    // TODO: Use WeakReferenceMessenger from CommunityToolkit.Mvvm (aka MVVM Toolkit) to send the selected search result from the MainWindow to this ViewModel.
-    // https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/messenger
-    public void SetBldgViewModel(ViewModels.Rent.Residentials.Bldg.PropertyViewModel buildingVM)
-    {
-        // When created by the parent ViewModel (Bldg.MainViewModel), set a reference to it to allow communication between the windows.
-        BldgViewModel = buildingVM;
-    }
-
-    // TODO: Use WeakReferenceMessenger from CommunityToolkit.Mvvm (aka MVVM Toolkit) to send the selected search result from the MainWindow to this ViewModel.
-    // https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/messenger
-    public void SetSearchResult(Models.Rent.Residentials.ListingSearchResultItem? searchResult)
-    {
-        // When created by main window, store the selected search result to update title/name and other properties in the main window.
-        _selectedSearchResult = searchResult;
-    }
-
     public void CleanUp()
     {
-        foreach (var item in UnitPictures)
+        foreach (var item in Pictures)
         {
-            item.PropertyChanged -= OnUnitPicturePropertyChanged;
+            item.PropertyChanged -= OnPicturePropertyChanged;
         }
 
-        UnitPictures.Clear();
+        Pictures.Clear();
 
         // Unsubscribe
         //WeakReferenceMessenger.Default.UnregisterAll(this);
@@ -574,7 +512,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
                 ParentViewModel = _mainViewModel
             };
 
-            UnitPictures.Add(pic);
+            Pictures.Add(pic);
 
             OpenUnitBlobDirectoryCommand.NotifyCanExecuteChanged();
             DeleteUnitPictureCommand.NotifyCanExecuteChanged();
@@ -630,29 +568,16 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
 
         // TODO:
 
-        /*
-        if (_building is null)
-        {
-            Debug.WriteLine("_building is null. Can't save room.");
-            return;
-        }
-        */
-
         if (_room.PropertyStatus == EnumPropertyStatus.New)
         {
-            // update Bldg and done.
-            if (UpdateBldg())
-            {
-                // TODO: Use WeakReferenceMessenger from CommunityToolkit.Mvvm (aka MVVM Toolkit) to send the selected search result from the MainWindow to this ViewModel.
-                BldgViewModel?.SetIsDirty(true);
+            Debug.WriteLine("(_room.PropertyStatus == EnumPropertyStatus.New) @ListingViewModel on Save");
+            Debug.WriteLine($"_room.ListingStatus = {_room.ListingStatus}");
+            // Building window is open and unsaved state. So, update it and done (don't save room here because we don't save save room without building).
 
-                IsDirty = false;
-            }
-            else
-            {
-                // Should not happen. 
-                // TODO: Show error to user.
-            }
+            // Update the selected search result's values such as name if it exists. Also, update building window's rooms list.
+            WeakReferenceMessenger.Default.Send(new Models.Messenger.ListingUpdatedMessage(_room));
+
+            IsDirty = false;
         }
         else
         { 
@@ -671,8 +596,6 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
                 _room.PropertyStatus = EnumPropertyStatus.Saved;// just in case.
                 _room.ListingStatus = EnumListingStatus.Saved;
 
-                UpdateBldg();
-
                 // Clean up deleted picture file.
                 if (_room.PicturesToBeDeleted.Count > 0)
                 {
@@ -689,12 +612,13 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
 
                 _unsavedPictureFileList.Clear();
 
+                // Update the selected search result's values such as name if it exists. Also, update building window's rooms list.
+                WeakReferenceMessenger.Default.Send(new Models.Messenger.ListingUpdatedMessage(_room));
+
                 IsDirty = false;
             }
         }
 
-        // Update the selected search result's values such asname if it exists.
-        _selectedSearchResult?.Name = Name;
     }   
     private bool CanSave()
     {
@@ -751,11 +675,11 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
 
         // TODO: show dialog to comfirm.
 
-        if (UnitPictures.Remove(picUnit))
+        if (Pictures.Remove(picUnit))
         {
             // TODO: should I? Prob no.
             /*
-            if (_room.UnitPictures.Remove(picUnit))
+            if (_room.Pictures.Remove(picUnit))
             {
                 
             }

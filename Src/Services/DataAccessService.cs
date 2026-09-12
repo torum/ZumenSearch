@@ -1803,11 +1803,10 @@ public sealed class DataAccessService : IDataAccessService
                 while (reader.Read())
                 {
                     var roomId = Convert.ToString(reader["room_id"]) ?? string.Empty;
-                    var room = new Models.Rent.Residentials.Room.Listing(roomId, entry.Id, entry.Name)
+                    var room = new Models.Rent.Residentials.Room.Listing(roomId, entry.Id, EnumPropertyStatus.Saved, entry.Name)
                     {
                         Name = Convert.ToString(reader["name"]) ?? string.Empty,
                         Chinryou = Convert.ToInt32(reader["chinryou"]),
-                        PropertyStatus = EnumPropertyStatus.Saved,
                         ListingStatus = EnumListingStatus.Saved,
                         //IsNew = false,
                         IsModified = false
@@ -2301,11 +2300,10 @@ public sealed class DataAccessService : IDataAccessService
                 var Id = reader.GetString(reader.GetOrdinal("roomId")) ?? string.Empty;
                 if (Id.Equals(roomId))
                 {
-                    var room = new Models.Rent.Residentials.Room.Listing(roomId, rentId, reader.GetString(reader.GetOrdinal("buildingName")) ?? string.Empty)
+                    var room = new Models.Rent.Residentials.Room.Listing(roomId, rentId, EnumPropertyStatus.Saved, reader.GetString(reader.GetOrdinal("buildingName")) ?? string.Empty)
                     {
                         Name = reader.GetString(reader.GetOrdinal("roomName")) ?? string.Empty,
                         Chinryou = reader.GetInt32(reader.GetOrdinal("chinryou")),
-                        PropertyStatus = EnumPropertyStatus.Saved,
                         ListingStatus = EnumListingStatus.Saved,
                         //IsNew = false,
                         IsModified = false

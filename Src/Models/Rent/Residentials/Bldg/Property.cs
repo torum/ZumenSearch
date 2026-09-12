@@ -13,12 +13,6 @@ public sealed partial class Property : PropertyBase
 {
     public string PropertyDataDirectoryPath { get; init; }
 
-    #region == ステータス ==
-
-    // ステータス（保存済みか新規か）
-    public EnumPropertyStatus PropertyStatus { get; set; } = EnumPropertyStatus.New;
-
-    #endregion
 
     #region == 物件に属するリスト == 
 

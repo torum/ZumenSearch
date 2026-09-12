@@ -49,7 +49,7 @@
         <Grid Grid.Row="1">
             <ScrollViewer HorizontalScrollMode="Disabled">
                 <!-- TODO: chnage this to listview -->
-                <ItemsRepeater x:Name="ItemsView" ItemsSource="{x:Bind ViewModel.UnitPictures, Mode=TwoWay}" MinWidth="300" MinHeight="225" ScrollViewer.HorizontalScrollMode="Disabled" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <ItemsRepeater x:Name="ItemsView" ItemsSource="{x:Bind ViewModel.Pictures, Mode=TwoWay}" MinWidth="300" MinHeight="225" ScrollViewer.HorizontalScrollMode="Disabled" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <!--  SelectionChanged="ItemsView_SelectionChanged" SelectionMode="Single" IsItemInvokedEnabled="False"  -->
                     <ItemsRepeater.ItemTemplate>
                         <DataTemplate x:DataType="modresi:Picture">

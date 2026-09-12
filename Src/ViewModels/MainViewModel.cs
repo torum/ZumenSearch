@@ -1,7 +1,9 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Windowing;
+using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Media.Animation;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -10,13 +12,14 @@ using Windows.ApplicationModel;
 using ZumenSearch.Helpers;
 using ZumenSearch.Models.Base;
 using ZumenSearch.Models.Common;
+using ZumenSearch.Models.Messenger;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.Services.Extensions.AbstractFactory;
 using ZumenSearch.Views;
 
 namespace ZumenSearch.ViewModels;
 
-public partial class MainViewModel : ObservableObject
+public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpdatedMessage>, IRecipient<ListingUpdatedMessage>, IRecipient<ListingWindowClosedMessage>, IRecipient<PropertyWindowClosedMessage>
 {
     #region == Public Properties ==
 
@@ -119,7 +122,11 @@ public partial class MainViewModel : ObservableObject
 
     #endregion
 
+    #region == Private Variables ==
+
     private readonly CancellationTokenSource _cts = new();
+
+    #endregion
 
     #region == Services ==
 
@@ -142,7 +149,72 @@ public partial class MainViewModel : ObservableObject
         VersionDescription = GetVersionDescription();
 
         InitializeDatabase();
+
+        // Ready to receive messages.
+        this.IsActive = true;
     }
+
+    #region == Messages ==
+
+    public void Receive(PropertyUpdatedMessage property)
+    {
+        var building = property.Value;
+        if (building is not null)
+        {
+            foreach (var item in RentResidentialBldgSearchResult)
+            {
+                if (!item.Id.Equals(building.Id))
+                {
+                    continue;
+                }
+
+                item.Name = building.Name;
+            }
+        }
+    }
+
+    public void Receive(ListingUpdatedMessage listing)
+    {
+        var room = listing.Value;
+        if (room is not null)
+        {
+            foreach (var item in RentResidentialRoomSearchResult)
+            {
+                if (!item.Id.Equals(room.Id))
+                {
+                    continue;
+                }
+
+                item.Name = room.Name;
+            }
+        }
+    }
+
+    public void Receive(ListingWindowClosedMessage window)
+    {
+        var ewin = window.Value;
+
+        if (ewin is null)
+        {
+            return;
+        }
+        
+        this.RoomEditorList.Remove(ewin);
+    }
+
+    public void Receive(PropertyWindowClosedMessage window)
+    {
+        var ewin = window.Value;
+
+        if (ewin is null)
+        {
+            return;
+        }
+
+        this.BldgEditorList.Remove(ewin);
+    }
+
+    #endregion
 
     #region == Private Methods ==
 
@@ -248,7 +320,7 @@ public partial class MainViewModel : ObservableObject
             if (editorWindow.Id == rentId)
             {
                 // If the editor window for this item is already open, activate it.
-                Debug.WriteLine($"Editor window for {rentId} is already open. Activating it.");
+                //Debug.WriteLine($"Editor window for {rentId} is already open. Activating it.");
                 isFound = true;
 
                 editorWindow.Activate();
@@ -303,7 +375,7 @@ public partial class MainViewModel : ObservableObject
         // TODO: Use WeakReferenceMessenger from CommunityToolkit.Mvvm (aka MVVM Toolkit) to send the selected search result from the MainWindow to this ViewModel.
         // https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/messenger
         // To update the title/name and other properties in the editor window, we need to pass the selected search result to the editor's ViewModel.
-        editorShell.ViewModel.SetSearchResult(selected);
+        //editorShell.ViewModel.SetSearchResult(selected);
 
         BldgEditorList.Add(editorWindow);
 
@@ -366,7 +438,7 @@ public partial class MainViewModel : ObservableObject
             if (editorWindow.Id == roomId)
             {
                 // If the editor window for this item is already open, activate it.
-                Debug.WriteLine($"Editor window for {roomId} is already open. Activating it.");
+                //Debug.WriteLine($"Editor window for {roomId} is already open. Activating it.");
                 isFound = true;
 
                 editorWindow.Activate();
@@ -420,7 +492,7 @@ public partial class MainViewModel : ObservableObject
         // TODO: Use WeakReferenceMessenger from CommunityToolkit.Mvvm (aka MVVM Toolkit) to send the selected search result from the MainWindow to this ViewModel.
         // https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/messenger
         // To update the title/name and other properties in the editor window, we need to pass the selected search result to the editor's ViewModel.
-        editorShell.ViewModel.SetSearchResult(selected);
+        //editorShell.ViewModel.SetSearchResult(selected);
 
         RoomEditorList.Add(editorWindow);
 
@@ -621,7 +693,7 @@ public partial class MainViewModel : ObservableObject
             if (editorWindow.Id == selected.Id)
             {
                 // If the editor window for this item is already open, activate it.
-                Debug.WriteLine($"Editor window for {selected.Id} is already open. Closing if not IsDirty otherwise activating it.");
+                //Debug.WriteLine($"Editor window for {selected.Id} is already open. Closing if not IsDirty otherwise activating it.");
                 
                 if (editorWindow.ViewModel?.IsDirty == false)
                 {
@@ -699,7 +771,7 @@ public partial class MainViewModel : ObservableObject
             if (editorWindow.Id == selected.Id)
             {
                 // If the editor window for this item is already open, activate it.
-                Debug.WriteLine($"Editor window for {selected.Id} is already open. Closing if not IsDirty otherwise activating it.");
+                //Debug.WriteLine($"Editor window for {selected.Id} is already open. Closing if not IsDirty otherwise activating it.");
                 
                 if (editorWindow.ViewModel?.IsDirty == false)
                 {
@@ -752,12 +824,10 @@ public partial class MainViewModel : ObservableObject
             if (editorWindow.Id == selected.PropertyId)
             {
                 // If the editor window for this item is already open, remove the room.
-                Debug.WriteLine($"Editor window for {selected.PropertyId} is already open. Removing room.");
+                //Debug.WriteLine($"Editor window for {selected.PropertyId} is already open. Removing room.");
 
-                // TODO: Use WeakReferenceMessenger from CommunityToolkit.Mvvm (aka MVVM Toolkit) to send the selected search result from the MainWindow to this ViewModel.
-                // https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/messenger
                 // remove room from the editor window's ViewModel if it exists.
-                editorWindow.ViewModel?.RemoveRoom(selected.Id);
+                WeakReferenceMessenger.Default.Send(new Models.Messenger.ListingDeletedMessage(selected.Id));
 
                 return;
             }

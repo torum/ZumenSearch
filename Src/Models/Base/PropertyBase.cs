@@ -13,6 +13,9 @@ public enum EnumPropertyStatus
 
 public abstract partial class PropertyBase : ObservableObject
 {
+    // ステータス（保存済みか新規か）
+    public EnumPropertyStatus PropertyStatus { get; set; } = EnumPropertyStatus.New;
+
     public bool IsModified
     {
         get;

@@ -15,12 +15,13 @@ using ZumenSearch.Models.Base;
 using ZumenSearch.Models.Common;
 using ZumenSearch.Models.Messenger;
 using ZumenSearch.Models.Rent.Residentials.Bldg;
+using ZumenSearch.Models.Rent.Residentials.Room;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.Services.Extensions.AbstractFactory;
 
 namespace ZumenSearch.ViewModels.Rent.Residentials.Bldg;
 
-public sealed partial class PropertyViewModel : ObservableObject
+public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<ListingUpdatedMessage>, IRecipient<ListingWindowClosedMessage>, IRecipient<ListingDeletedMessage>
 {
     #region == Public Properties ==
 
@@ -28,7 +29,6 @@ public sealed partial class PropertyViewModel : ObservableObject
 
     public INavigationGenericService? ResidentialNavigationService => _navService;
 
-    public readonly List<Views.Rent.Residentials.Room.EditorWindow> ChildEditorList = [];
 
     // Local directory path to save blob data such as pictures and PDFs.
 
@@ -57,7 +57,7 @@ public sealed partial class PropertyViewModel : ObservableObject
             {
                 var str = $"{field}：{Name}";
 
-                if (PropertyStatus == EnumPropertyStatus.New)
+                if (_building.PropertyStatus == EnumPropertyStatus.New)
                 {
                     str = $"{str} (新規)";
                 }
@@ -76,8 +76,6 @@ public sealed partial class PropertyViewModel : ObservableObject
     } = "賃貸住居用";
 
     #region == ステータス ==
-
-    public EnumPropertyStatus PropertyStatus => _building.PropertyStatus;
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SaveCommand))]
@@ -1183,7 +1181,7 @@ public sealed partial class PropertyViewModel : ObservableObject
 
     #region == 写真プロパティ ==
 
-    public ObservableCollection<Picture> BuildingPictures
+    public ObservableCollection<Models.Rent.Residentials.Bldg.Picture> BuildingPictures
     {
         get;
         set
@@ -1201,7 +1199,7 @@ public sealed partial class PropertyViewModel : ObservableObject
 
     #region == PDFプロパティ ==
 
-    public ObservableCollection<Pdf> BuildingPdfs
+    public ObservableCollection<Models.Rent.Residentials.Bldg.Pdf> BuildingPdfs
     {
         get;
         set
@@ -1254,15 +1252,12 @@ public sealed partial class PropertyViewModel : ObservableObject
     // MainViewModel creates a new instance of this class and call EditorShell.SetEntry(EntryResidentialFull) and sets this property.
     private readonly Models.Rent.Residentials.Bldg.Property _building;
 
+    public readonly List<Views.Rent.Residentials.Room.EditorWindow> ChildEditorList = [];
+
     // Tmp file list to hold unsaved picture files. (if entry is not saved, delete on close)
     private readonly List<string> _unsavedBuildingPictureFileList = [];
     private readonly List<string> _unsavedBuildingPdfFileList = [];
     private readonly List<string> _unsavedBuildingPdfThumbnailFileList = [];
-
-    // TODO: Use WeakReferenceMessenger from CommunityToolkit.Mvvm (aka MVVM Toolkit) to send the selected search result from the MainWindow to this ViewModel.
-    // https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/messenger
-    // Holds the selected search result from the MainWindow which is used to update title/name and other properties.
-    private Models.Rent.Residentials.PropertySearchResultItem? _selectedSearchResult;
 
     #endregion
 
@@ -1311,7 +1306,73 @@ public sealed partial class PropertyViewModel : ObservableObject
         {
             IsDirty = false;
         }
+
+        // Ready to receive messages.
+        this.IsActive = true;
     }
+
+    #region == Messages ==
+
+    public void Receive(ListingUpdatedMessage listing)
+    {
+        Debug.WriteLine("Received ListingUpdatedMessage @PropertyViewModel");
+
+        var room = listing.Value;
+        if (room is null)
+        {
+            return;
+        }
+
+        var existingRoom = this.Rooms.FirstOrDefault(r => r.Id == room.Id);
+        if (existingRoom is not null)
+        {
+            // Update existing room
+            var index = this.Rooms.IndexOf(existingRoom);
+            this.Rooms[index] = room;
+        }
+        else
+        {
+            // Add new room
+            this.Rooms.Add(room);
+        }
+
+        if (room.ListingStatus == EnumListingStatus.New)
+        {
+            Debug.WriteLine("(room.ListingStatus == EnumListingStatus.New) @PropertyViewModel");
+            IsDirty = true;
+        }
+        else
+        {
+            Debug.WriteLine("(room.ListingStatus != EnumListingStatus.New) @PropertyViewModel");
+        }
+    }
+
+    public void Receive(ListingDeletedMessage listingId)
+    {
+        var id = listingId.Value;
+        if (string.IsNullOrEmpty(id))
+        {
+            return;
+        }
+
+        var room = Rooms.FirstOrDefault(r => r.Id == id);
+        if (room is null) return;
+        Rooms.Remove(room);
+    }
+
+    public void Receive(ListingWindowClosedMessage window)
+    {
+        var ewin = window.Value;
+
+        if (ewin is null)
+        {
+            return;
+        }
+
+        this.ChildEditorList.Remove(ewin);
+    }
+
+    #endregion
 
     #region == Private Methods ==
 
@@ -1808,30 +1869,6 @@ public sealed partial class PropertyViewModel : ObservableObject
         _dlgService = dialog;
     }
 
-    // TODO: Use WeakReferenceMessenger from CommunityToolkit.Mvvm (aka MVVM Toolkit) to send the selected search result from the MainWindow to this ViewModel.
-    // https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/messenger
-    public void SetSearchResult(Models.Rent.Residentials.PropertySearchResultItem? searchResult)
-    {
-        _selectedSearchResult = searchResult;
-    }
-
-    // TODO: Use WeakReferenceMessenger from CommunityToolkit.Mvvm (aka MVVM Toolkit) to send the selected search result from the MainWindow to this ViewModel.
-    // https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/messenger
-    public void RemoveRoom(string roomId)
-    {
-        if (string.IsNullOrEmpty(roomId)) return;
-        var room = Rooms.FirstOrDefault(r => r.Id == roomId);
-        if (room is null) return;
-        Rooms.Remove(room);
-    }
-
-    // TODO: Use WeakReferenceMessenger from CommunityToolkit.Mvvm (aka MVVM Toolkit) to send the selected search result from the MainWindow to this ViewModel.
-    // https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/messenger
-    public void SetIsDirty(bool value)
-    {
-        IsDirty = value;
-    }
-
     // TODO: change these to commands.
     public async Task SetNewBuildingPdfsAsync(List<string> filePathList)
     {
@@ -1977,7 +2014,7 @@ public sealed partial class PropertyViewModel : ObservableObject
         if (saveResult)
         {
             // Update the selected search result's values such asname if it exists.
-            _selectedSearchResult?.Name = Name;
+            //_selectedSearchResult?.Name = Name;
 
             // Jjust in case.
             _building.PropertyStatus = EnumPropertyStatus.Saved;
@@ -1998,17 +2035,8 @@ public sealed partial class PropertyViewModel : ObservableObject
                 room.ListingStatus = EnumListingStatus.Saved;
             }
 
-            WeakReferenceMessenger.Default.Send(new Models.Messenger.PropertyStatusUpdatedMessage(Models.Base.EnumPropertyStatus.Saved));
-            WeakReferenceMessenger.Default.Send(new Models.Messenger.PropertyNameUpdatedMessage(Name));
-            /*
-            // Check opened child windows and notify property status has been changed. (name may have been changed as well)
-            foreach (var editorWindow in ChildEditorList.ToList())
-            {
-                Debug.WriteLine($"Editor window for {Id} is already open. Updating property status.");
-                editorWindow.ViewModel?.UpdatePropertyStatusAndName(EnumPropertyStatus.Saved, Name);
-                break;
-            }
-            */
+            //WeakReferenceMessenger.Default.Send(new Models.Messenger.PropertyStatusUpdatedMessage(Models.Base.EnumPropertyStatus.Saved));
+            WeakReferenceMessenger.Default.Send(new Models.Messenger.PropertyUpdatedMessage(_building as Models.Base.PropertyBase));
         }
     }
     private bool CanSave()
@@ -2162,15 +2190,13 @@ public sealed partial class PropertyViewModel : ObservableObject
     [RelayCommand]
     private void AddNewUnit() 
     {
-        var editorShell = _shellFactory.Create(new Models.Rent.Residentials.Room.Listing(Guid.CreateVersion7().ToString("N"), _building.Id, Name));
-        //editorShell.SetParentViewModel(this);
-
-        editorShell.ViewModel.SetBldgViewModel(this);
+        var editorShell = _shellFactory.Create(new Models.Rent.Residentials.Room.Listing(Guid.CreateVersion7().ToString("N"), _building.Id, _building.PropertyStatus, Name));
 
         var mainVM = App.GetService<ViewModels.MainViewModel>();
         mainVM.RoomEditorList.Add(editorShell.Window);
+
         this.ChildEditorList.Add(editorShell.Window);
-        //shell.ParentWin = shell.Win;
+
 
         if (editorShell.Window.AppWindow.Presenter is OverlappedPresenter presenter)
         {
@@ -2200,12 +2226,6 @@ public sealed partial class PropertyViewModel : ObservableObject
     {
         if (room is null) return;
 
-        /*
-        _mainViewModel.Unit.SetEditUnit(room);
-
-        _mainViewModel.GoToUnitShellPageCommand.Execute(this);
-        */
-
         var rentId = room.PropertyId;
         var unitId = room.Id;
 
@@ -2217,8 +2237,6 @@ public sealed partial class PropertyViewModel : ObservableObject
 
         //Debug.WriteLine($"EditRentResidentialCommand executed for {selected.Id}");
 
-        //var isFound = false;
-
         var mainVM = App.GetService<ViewModels.MainViewModel>();
 
         // Check if the selected item is already being edited in another window.
@@ -2229,7 +2247,7 @@ public sealed partial class PropertyViewModel : ObservableObject
                 continue;
             }
 
-            Debug.WriteLine($"Editor window for {unitId} is already open. Activating it.");
+            //Debug.WriteLine($"Editor window for {unitId} is already open. Activating it.");
 
             try
             {
@@ -2252,64 +2270,9 @@ public sealed partial class PropertyViewModel : ObservableObject
                 mainVM.RoomEditorList.Remove(editWin);
                 ChildEditorList.Remove(editWin);
             }
-            /*
-            //Debug.WriteLine($"Checking editor window with Id: {editorWindow.Id} for selected item with Id: {unitId}");
-            if (editorWindow.Id == unitId)
-            {
-                // If the editor window for this item is already open, activate it.
-                Debug.WriteLine($"Editor window for {unitId} is already open. Activating it.");
-                isFound = true;
-
-                editorWindow.Activate();
-
-                // TODO:
-                //var mainWindow = App.GetService<MainWindow>();
-                //mainWindow?.AppWindow.MoveInZOrderBelow(editorWindow.AppWindow.Id);
-                if (editorWindow.Content is Views.Rent.Residentials.Room.ShellPage shell)
-                {
-                    shell.Win?.AppWindow.MoveInZOrderBelow(editorWindow.AppWindow.Id);
-                }
-                editorWindow.AppWindow.MoveInZOrderAtTop();
-
-                return;
-            }
-            */
         }
-        /*
-        if (isFound)
-        {
-            // If the editor window for this item is already open, no need to create a new one.
-            return;
-        }
-        */
-
-        /*
-        // Access Database to get the full entry data.
-        var res = _dataAccessService.SelectRentResidentialById(rentId);// Go back to UI thred. Let's not do > .ConfigureAwait(false);
-        if (res.IsError)
-        {
-            Debug.WriteLine(res.Error.ErrText + Environment.NewLine + res.Error.ErrDescription + Environment.NewLine + res.Error.ErrPlace + Environment.NewLine + res.Error.ErrPlaceParent);
-
-            //ErrorMain = res.Error;
-            //IsMainErrorInfoBarVisible = true;
-
-            // TODO: Show error message to user
-            return;
-        }
-
-        if (res.EntryFull == null)
-        {
-            Debug.WriteLine($"EntryResidentialFull for {rentId} is null. Cannot open editor.");
-            return;
-        }
-        */
-
-        //var editorShell = _shellFactory.Create(res.EntryFull);
 
         var editorShell = _shellFactory.Create(room);
-        //editorShell.SetParentViewModel(this);
-
-        editorShell.ViewModel.SetBldgViewModel(this);
 
         var editorWindow = editorShell.Window;
         if (editorWindow == null)
@@ -2323,6 +2286,7 @@ public sealed partial class PropertyViewModel : ObservableObject
         editorWindow.SetViewModelToWindow(editorShell.ViewModel);
 
         mainVM.RoomEditorList.Add(editorWindow);
+
         this.ChildEditorList.Add(editorWindow);
 
         editorWindow.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(mainVM.RoomEditorWinLeft, mainVM.RoomEditorWinTop, mainVM.RoomEditorWinWidth, mainVM.RoomEditorWinHeight));
@@ -2338,9 +2302,6 @@ public sealed partial class PropertyViewModel : ObservableObject
         editorWindow.AppWindow.Show();
         editorWindow.Activate();
 
-        // TODO:
-        //var mainWindow = App.GetService<MainWindow>();
-        //mainWindow?.AppWindow.MoveInZOrderBelow(editorWindow.AppWindow.Id);
         if (editorWindow.Content is Views.Rent.Residentials.Room.ShellPage shell)
         {
             shell.Window?.AppWindow.MoveInZOrderBelow(editorWindow.AppWindow.Id);
