@@ -45,3 +45,11 @@ public class PropertyWindowClosedMessage : ValueChangedMessage<Views.Rent.Reside
     }
 }
 
+public class PropertyIsUnitOwnershipChangedMessage : ValueChangedMessage<bool>
+{
+    public PropertyIsUnitOwnershipChangedMessage(bool value) : base(value)
+    {
+
+    }
+}
+

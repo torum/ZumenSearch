@@ -1,5 +1,6 @@
 ﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using System.Diagnostics;
 using ZumenSearch.Models.Common;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.Views.Dialogs;
@@ -27,12 +28,14 @@ public class ModalDialogService : IModalDialogService
     {
         if (_isDialogOpened)// && (_ownerWindowList.IndexOf(win) > -1)
         {
+            Debug.WriteLine("ModalDialogService: _isDialogOpened");
             // Prevents COM exepction causing by attempt to show multiple dialogs. (Window's close button is enabled even tho dialog is shown)
             return ContentDialogResult.None;
         }
 
         if (_xamlRoot is null)
         {
+            Debug.WriteLine("ModalDialogService: _xamlRoot is null. Not initialized");
             return ContentDialogResult.None;
         }
 

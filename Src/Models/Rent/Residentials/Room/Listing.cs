@@ -10,8 +10,10 @@ namespace ZumenSearch.Models.Rent.Residentials.Room;
 // 部屋（編集用）
 public sealed partial class Listing : ListingBase
 {
+    // 物件（建物のIDを保持）
     public string PropertyId { get; private set; }
 
+    // 物件（建物の名前を保持 - タイトル等に表示）
     public string PropertyName
     {
         get => field ?? string.Empty;
@@ -24,7 +26,7 @@ public sealed partial class Listing : ListingBase
         }
     }
 
-    // 物件写真（部屋）リスト
+    // 部屋写真リスト
     public ObservableCollection<Picture> Pictures
     {
         get;
@@ -37,7 +39,7 @@ public sealed partial class Listing : ListingBase
         }
     } = [];
 
-    // DBへの更新時にDBから削除されるべき物件写真（部屋）のIDリスト
+    // DBへの更新時にDBから削除されるべき部屋写真のIDリスト
     public ObservableCollection<Picture> PicturesToBeDeleted = [];
 
     // 賃料（円）

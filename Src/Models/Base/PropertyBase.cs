@@ -11,25 +11,11 @@ public enum EnumPropertyStatus
     New,
 }
 
-public abstract partial class PropertyBase : ObservableObject
+public abstract partial class PropertyBase : ObservableObject // TODO: Remove ObservableObject?
 {
-    // ステータス（保存済みか新規か）
     public EnumPropertyStatus PropertyStatus { get; set; } = EnumPropertyStatus.New;
 
-    public bool IsModified
-    {
-        get;
-        set
-        {
-            if (field == value)
-            {
-                return;
-            }
-
-            field = value;
-            OnPropertyChanged();
-        }
-    }
+    public bool IsModified { get; set; } = false;
 
     protected private string _id;
     public string Id => _id;

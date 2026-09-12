@@ -75,12 +75,33 @@ public sealed partial class ShellPage : Page
         SetRegionsForCustomTitleBar("AppTitleBar_SizeChanged");
     }
 
-    private void BackAccelerator_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+    private void KeyboardAccelerator_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
     {
-        if (this.ContentFrame != null && this.ContentFrame.CanGoBack)
+        if (args.KeyboardAccelerator.Key == Windows.System.VirtualKey.F1)
         {
-            this.ContentFrame.GoBack();
+            // set this first.
             args.Handled = true;
+
+            // TODO:
+
+            return;
+        }
+
+        if (args.KeyboardAccelerator.Modifiers == Windows.System.VirtualKeyModifiers.Menu)
+        {
+            if (args.KeyboardAccelerator.Key == Windows.System.VirtualKey.Left)
+            {
+                // set this first.
+                args.Handled = true;
+
+                if (this.ContentFrame != null && this.ContentFrame.CanGoBack)
+                {
+                    this.ContentFrame.GoBack();
+                }
+
+                return;
+            }
+
         }
     }
 

@@ -10,7 +10,8 @@
     KeyboardAcceleratorPlacementMode="Hidden"
     mc:Ignorable="d">
     <Page.KeyboardAccelerators>
-        <KeyboardAccelerator Key="Left" Modifiers="Menu" Invoked="BackAccelerator_Invoked" />
+        <KeyboardAccelerator Key="Left" Modifiers="Menu" Invoked="KeyboardAccelerator_Invoked" />
+        <KeyboardAccelerator Key="S" Modifiers="Control" Invoked="KeyboardAccelerator_Invoked"/>
     </Page.KeyboardAccelerators>
     <Grid>
         <Grid.RowDefinitions>
@@ -90,24 +91,24 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <NavigationView x:Name="NavView" Grid.Row="0" Margin="36,3,36,0" PaneDisplayMode="Top" Canvas.ZIndex="0" IsTitleBarAutoPaddingEnabled="True" SelectionFollowsFocus="Disabled" IsPaneToggleButtonVisible="False" IsSettingsVisible="False" IsBackButtonVisible="Collapsed" Loaded="NavView_Loaded" ItemInvoked="NavView_ItemInvoked">
+            <NavigationView x:Name="NavView" Grid.Row="0" Margin="36,3,36,0" PaneDisplayMode="Top" Canvas.ZIndex="0" IsTitleBarAutoPaddingEnabled="True" SelectionFollowsFocus="Disabled" IsPaneToggleButtonVisible="False" IsSettingsVisible="False" IsBackButtonVisible="Collapsed" Loaded="NavView_Loaded" ItemInvoked="NavView_ItemInvoked" BackRequested="NavView_BackRequested">
                 <!--   BackRequested="NavView_BackRequested" -->
                 <NavigationView.MenuItems>
-                    <NavigationViewItem Content="基本"  Tag="summary"/>
-                    <NavigationViewItem Content="契約条件" Tag="contract"/>
-                    <NavigationViewItem Content="取引条件" Tag="transaction"/>
-                    <NavigationViewItem Content="設備" Tag="appliances" />
-                    <NavigationViewItem Content="写真" Tag="pictures" />
-                    <NavigationViewItem x:Name="NavigationViewItemZumen" Content="図面" Tag="zumen" Visibility="Collapsed"/>
-                    <NavigationViewItem x:Name="NavigationViewItemKasinusi" Content="貸主" Tag="kasinusi" Visibility="Collapsed"/>
-                    <NavigationViewItem x:Name="NavigationViewItemGyousya" Content="宅建業者" Tag="gyousya" Visibility="Collapsed"/>
+                    <NavigationViewItem Content="基本"  Tag="ZumenSearch.Views.Rent.Residentials.Room.BasicPage"/>
+                    <NavigationViewItem Content="契約条件" Tag="ZumenSearch.Views.Rent.Residentials.Room.ContractPage"/>
+                    <NavigationViewItem Content="取引条件" Tag="ZumenSearch.Views.Rent.Residentials.Room.TransactionPage"/>
+                    <NavigationViewItem Content="設備" Tag="ZumenSearch.Views.Rent.Residentials.Room.AppliancesPage" />
+                    <NavigationViewItem Content="写真" Tag="ZumenSearch.Views.Rent.Residentials.Room.PictureListPage" />
+                    <NavigationViewItem x:Name="NavigationViewItemZumen" Content="図面" Tag="ZumenSearch.Views.Rent.Residentials.Room.ZumenPage" Visibility="{x:Bind ViewModel.IsUnitOwnershipVisible, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"/>
+                    <NavigationViewItem x:Name="NavigationViewItemKasinusi" Content="貸主" Tag="ZumenSearch.Views.Rent.Residentials.Room.KasinusiPage" Visibility="{x:Bind ViewModel.IsUnitOwnershipVisible, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"/>
+                    <NavigationViewItem x:Name="NavigationViewItemGyousya" Content="宅建業者" Tag="ZumenSearch.Views.Rent.Residentials.Room.GyousyaPage" Visibility="{x:Bind ViewModel.IsUnitOwnershipVisible, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"/>
                 </NavigationView.MenuItems>
 
                 <NavigationView.FooterMenuItems>
                 </NavigationView.FooterMenuItems>
             </NavigationView>
 
-            <Frame x:Name="ContentFrame" Grid.Row="1" NavigationFailed="ContentFrame_NavigationFailed"/>
+            <Frame x:Name="ContentFrame" Grid.Row="1" NavigationFailed="ContentFrame_NavigationFailed" Navigated="ContentFrame_Navigated"/>
 
 
         </Grid>

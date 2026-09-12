@@ -117,10 +117,10 @@ public partial class App : Application
                 services.AddTransient<Views.Rent.Residentials.Room.EditorWindow>();
                 services.AddTransient<Views.Rent.Residentials.Room.ShellPage>();
 
-                services.AddEditorFactory<ViewModels.Rent.Residentials.Bldg.PropertyViewModel, Models.Rent.Residentials.Bldg.Property>();
-                services.AddEditorFactory<Views.Rent.Residentials.Bldg.ShellPage, Models.Rent.Residentials.Bldg.Property>();
-                services.AddEditorFactory<ViewModels.Rent.Residentials.Room.ListingViewModel, Models.Rent.Residentials.Room.Listing>();
-                services.AddEditorFactory<Views.Rent.Residentials.Room.ShellPage, Models.Rent.Residentials.Room.Listing>();
+                services.AddGenericFactory<ViewModels.Rent.Residentials.Bldg.PropertyViewModel, Models.Rent.Residentials.Bldg.Property, Services.Contracts.INavigationGenericService, Services.Contracts.IModalDialogService> ();
+                services.AddGenericFactory<Views.Rent.Residentials.Bldg.ShellPage, Models.Rent.Residentials.Bldg.Property>();
+                services.AddGenericFactory<ViewModels.Rent.Residentials.Room.ListingViewModel, Models.Rent.Residentials.Room.Listing, Services.Contracts.INavigationGenericService, Services.Contracts.IModalDialogService> ();
+                services.AddGenericFactory<Views.Rent.Residentials.Room.ShellPage, Models.Rent.Residentials.Room.Listing>();
                 // Instead of AddEditorFactory for each, typeof.. <,> registers all.
                 //services.AddSingleton(typeof(IAbstractFactory<,>), typeof(AbstractFactory<,>)); 
 

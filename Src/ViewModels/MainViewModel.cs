@@ -138,12 +138,17 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
 
     #endregion
 
-    public MainViewModel(IAbstractFactory<Models.Rent.Residentials.Bldg.Property, Views.Rent.Residentials.Bldg.ShellPage> shellRentResidentialPropertyFactory, IAbstractFactory<Models.Rent.Residentials.Room.Listing, Views.Rent.Residentials.Room.ShellPage> shellRentResidentialListingFactory, INavigationService navigationService, IDataAccessService dataAccessService, IDispatcherService dispatcherService)
+    public MainViewModel(
+        IAbstractFactory<Models.Rent.Residentials.Bldg.Property, Views.Rent.Residentials.Bldg.ShellPage> shellRentResidentialPropertyFactory, 
+        IAbstractFactory<Models.Rent.Residentials.Room.Listing, Views.Rent.Residentials.Room.ShellPage> shellRentResidentialListingFactory, 
+        INavigationService navigationService, 
+        IDataAccessService dataAccessService, 
+        IDispatcherService dispatcherService)
     {
         _shellRentResidentialPropertyFactory = shellRentResidentialPropertyFactory;
         _shellRentResidentialListingFactory = shellRentResidentialListingFactory;
-        _dataAccessService = dataAccessService;
         _navigationService = navigationService;
+        _dataAccessService = dataAccessService;
         _dispatcherService = dispatcherService;
 
         VersionDescription = GetVersionDescription();

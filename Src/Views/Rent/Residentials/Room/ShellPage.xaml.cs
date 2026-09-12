@@ -28,41 +28,46 @@ public sealed partial class ShellPage : Page
     private readonly List<(string Tag, string Label, Type? Page)> _pages =
     [
         ("room", "", null),
-        ("summary", "基本", typeof(Views.Rent.Residentials.Room.BasicPage)),
-        ("contract", "契約条件", typeof(Views.Rent.Residentials.Room.ContractPage)),
-        ("transaction", "取引条件", typeof(Views.Rent.Residentials.Room.TransactionPage)),
-        ("appliances", "設備", typeof(Views.Rent.Residentials.Room.AppliancesPage)),
-        ("pictures", "写真", typeof(Views.Rent.Residentials.Room.PictureListPage)),
-        ("zumen", "図面", typeof(Views.Rent.Residentials.Room.ZumenPage)),
-        ("kasinusi", "貸主", typeof(Views.Rent.Residentials.Room.KasinusiPage)),
-        ("gyousya", "宅建業者", typeof(Views.Rent.Residentials.Room.GyousyaPage)),
+        ("ZumenSearch.Views.Rent.Residentials.Room.BasicPage", "基本", typeof(Views.Rent.Residentials.Room.BasicPage)),
+        ("ZumenSearch.Views.Rent.Residentials.Room.ContractPage", "契約条件", typeof(Views.Rent.Residentials.Room.ContractPage)),
+        ("ZumenSearch.Views.Rent.Residentials.Room.TransactionPage", "取引条件", typeof(Views.Rent.Residentials.Room.TransactionPage)),
+        ("ZumenSearch.Views.Rent.Residentials.Room.AppliancesPage", "設備", typeof(Views.Rent.Residentials.Room.AppliancesPage)),
+        ("ZumenSearch.Views.Rent.Residentials.Room.PictureListPage", "写真", typeof(Views.Rent.Residentials.Room.PictureListPage)),
+        ("ZumenSearch.Views.Rent.Residentials.Room.ZumenPage", "図面", typeof(Views.Rent.Residentials.Room.ZumenPage)),
+        ("ZumenSearch.Views.Rent.Residentials.Room.KasinusiPage", "貸主", typeof(Views.Rent.Residentials.Room.KasinusiPage)),
+        ("ZumenSearch.Views.Rent.Residentials.Room.GyousyaPage", "宅建業者", typeof(Views.Rent.Residentials.Room.GyousyaPage)),
     ];
 
-    private readonly INavigationGenericService _navService;
+    private readonly INavigationGenericService _navigationlService;
     private readonly IDispatcherService _dispatcherService;
-    private readonly IModalDialogService _dlgService;
+    private readonly IModalDialogService _dialogService;
 
-    public ShellPage(Views.Rent.Residentials.Room.EditorWindow window, Models.Rent.Residentials.Room.Listing room, IAbstractFactory<Models.Rent.Residentials.Room.Listing, ViewModels.Rent.Residentials.Room.ListingViewModel> vmFactory, INavigationGenericService navigationResidentialService, IDispatcherService dispatcherService, IModalDialogService modalDialogService)
+    public ShellPage(
+        Views.Rent.Residentials.Room.EditorWindow window, 
+        Models.Rent.Residentials.Room.Listing room, 
+        IAbstractFactory<Models.Rent.Residentials.Room.Listing, Services.Contracts.INavigationGenericService, IModalDialogService, ViewModels.Rent.Residentials.Room.ListingViewModel> vmFactory, 
+        INavigationGenericService navigationlService, 
+        IDispatcherService dispatcherService, 
+        IModalDialogService dialogService)
     {
         //Debug.WriteLine($"ShellPage {entry.Id}");
 
         Window = window;
         Window.Content = this;
 
-        ViewModel = vmFactory.Create(room);
-
-        _dlgService = modalDialogService;
+        _navigationlService = navigationlService;
         _dispatcherService = dispatcherService;
-        _navService = navigationResidentialService;
+        _dialogService = dialogService;
+
+        ViewModel = vmFactory.Create(room, _navigationlService, _dialogService);
 
         InitializeComponent();
+
+        _navigationlService.Initialize(this.ContentFrame, _pages);
 
         this.Loaded += ShellPage_Loaded;
         this.Unloaded += ShellPage_Unloaded;
         this.BreadcrumbBar1.ItemClicked += BreadcrumbBar_ItemClicked;
-
-        _navService.Initialize(this.ContentFrame, _pages);
-        ViewModel.SetNavigationService(_navService);
 
         Window.Title = "賃貸住居用：部屋";
         Window.ExtendsContentIntoTitleBar = true;
@@ -74,8 +79,7 @@ public sealed partial class ShellPage : Page
     private void ShellPage_Loaded(object sender, RoutedEventArgs e)
     {
         // XamlRoot is no longer null.
-        _dlgService.Initialize(this.XamlRoot);
-        ViewModel.SetDialogService(_dlgService);
+        _dialogService.Initialize(this.XamlRoot);
 
         if (ContentFrame.Navigate(typeof(ZumenSearch.Views.Rent.Residentials.Room.BasicPage), ViewModel, new EntranceNavigationTransitionInfo()))
         {
@@ -119,7 +123,7 @@ public sealed partial class ShellPage : Page
         if (ViewModel.IsDirty)
         {
             // show ConfirmationDialog
-            var result = await _dlgService.ShowEditorCloseConfirmationDialog();
+            var result = await _dialogService.ShowEditorCloseConfirmationDialog();
 
             if (result == ContentDialogResult.Primary)
             {
@@ -207,7 +211,7 @@ public sealed partial class ShellPage : Page
             {
                 if (crumbs.Count > 1)
                 {
-                    var item = _pages.FirstOrDefault(p => p.Tag.Equals("summary"));
+                    var item = _pages.FirstOrDefault(p => p.Tag.Equals("ZumenSearch.Views.Rent.Residentials.Room.BasicPage"));
                     if (item.Page is not null)
                     {
                         crumbs.RemoveAt(crumbs.Count - 1); // Remove the last breadcrumb if exists to avoid duplication.
@@ -216,7 +220,7 @@ public sealed partial class ShellPage : Page
                 }
             }
 
-            NavView.SelectedItem = NavView.MenuItems.OfType<NavigationViewItem>().Where(n => n.Tag.Equals("summary")).First();
+            NavView.SelectedItem = NavView.MenuItems.OfType<NavigationViewItem>().Where(n => n.Tag.Equals("ZumenSearch.Views.Rent.Residentials.Room.BasicPage")).First();
         }
     }
 
@@ -262,22 +266,107 @@ public sealed partial class ShellPage : Page
         }
     }
 
-    private void BackAccelerator_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+    private void NavView_BackRequested(NavigationView sender, NavigationViewBackRequestedEventArgs args)
     {
-        if (this.ContentFrame != null && this.ContentFrame.CanGoBack)
-        {
-            this.ContentFrame.GoBack();
-            args.Handled = true;
-        }
-    }
-
-    public void OnEventTitleChanged(EventArgs args)
-    {
-        Window.Title = ViewModel?.WindowTitle ?? "賃貸住居用：部屋";
+        if (this.ContentFrame.CanGoBack) this.ContentFrame.GoBack();
     }
 
     private void ContentFrame_NavigationFailed(object sender, NavigationFailedEventArgs e)
     {
         throw new Exception("Failed to load Page " + e.SourcePageType.FullName);
     }
+
+    private void ContentFrame_Navigated(object sender, NavigationEventArgs e)
+    {
+        this.NavView.IsBackEnabled = this.ContentFrame.CanGoBack;
+
+        if (this.ContentFrame.SourcePageType != null)
+        {
+            var selectedItem = FindNavigationViewItemWithTag(this.ContentFrame.SourcePageType.FullName!);
+            if (selectedItem != null)
+            {
+                this.NavView.SelectedItem = selectedItem;
+                //NavigationViewControl.Header = ((NavigationViewItem)NavigationViewControl.SelectedItem)?.Content?.ToString();
+            }
+            else
+            {
+                Debug.WriteLine($"No menu item with tag matching the current page found in NavView. Current page: {ContentFrame.SourcePageType.FullName}");
+            }
+        }
+    }
+
+    private NavigationViewItem? FindNavigationViewItemWithTag(string tag)
+    {
+        foreach (var item in this.NavView.MenuItems.OfType<NavigationViewItem>())
+        {
+            if (item.Tag.Equals(tag))
+            {
+                this.NavView.SelectedItem = item;
+                return item;
+            }
+
+            if (item.MenuItems.Count > 0)
+            {
+                foreach (var subItem in item.MenuItems.OfType<NavigationViewItem>())
+                {
+                    if (subItem.Tag.Equals(tag))
+                    {
+                        this.NavView.SelectedItem = subItem;
+                        return subItem;
+                    }
+                }
+            }
+        }
+
+        foreach (var item in this.NavView.FooterMenuItems.OfType<NavigationViewItem>())
+        {
+            if (item.Tag.Equals(tag))
+            {
+                this.NavView.SelectedItem = item;
+                return item;
+            }
+        }
+
+        return null;
+    }
+
+    private void KeyboardAccelerator_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+    {
+        // set this first.
+        args.Handled = true;
+
+        if (args.KeyboardAccelerator.Key == Windows.System.VirtualKey.F1)
+        {
+            // TODO:
+
+            return;
+        }
+
+        if (args.KeyboardAccelerator.Modifiers == Windows.System.VirtualKeyModifiers.Menu)
+        {
+            if (args.KeyboardAccelerator.Key == Windows.System.VirtualKey.Left)
+            {
+                if (this.ContentFrame != null && this.ContentFrame.CanGoBack)
+                {
+                    this.ContentFrame.GoBack();
+                }
+
+                return;
+            }
+        }
+
+        if (args.KeyboardAccelerator.Modifiers == Windows.System.VirtualKeyModifiers.Control)
+        {
+            if (args.KeyboardAccelerator.Key == Windows.System.VirtualKey.S)
+            {
+                if (ViewModel.SaveCommand.CanExecute(null))
+                {
+                    ViewModel.SaveCommand.Execute(null);
+                }
+
+                return;
+            }
+        }
+    }
+
 }

@@ -12,7 +12,7 @@ using ZumenSearch.Services.Contracts;
 
 namespace ZumenSearch.ViewModels.Rent.Residentials.Room;
 
-public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<PropertyUpdatedMessage>
+public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<PropertyUpdatedMessage>, IRecipient<PropertyIsUnitOwnershipChangedMessage>
 {
     #region == Public Properties ==
 
@@ -94,9 +94,20 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
     }
     */
 
+    public bool IsUnitOwnershipVisible
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+
+            }
+        }
+    }
+
     [ObservableProperty]
     public partial bool HasErrors { get; private set; }
-
 
     public string Name
     {
@@ -225,15 +236,23 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
 
     private readonly IDataAccessService _dataAccessService;
     private readonly IDispatcherService _dispatcherService;
-    private IModalDialogService? _dlgService;
-    private INavigationGenericService? _navService;
+    private readonly IModalDialogService? _dialogService;
+    private readonly INavigationGenericService _navigationService;
 
     #endregion
 
-    public ListingViewModel(Models.Rent.Residentials.Room.Listing room, IDispatcherService dispatcherService, IDataAccessService dataAccessService)
+    public ListingViewModel(
+        Models.Rent.Residentials.Room.Listing room, 
+        INavigationGenericService navigationService,
+        IModalDialogService dialogService,
+        IDispatcherService dispatcherService, 
+        IDataAccessService dataAccessService)
     {
         _room = room;
         _id = room.Id;
+
+        _navigationService = navigationService; // _navigationService.NavigateTo("ZumenSearch.Views.Rent.Residentials.Bldg.RoomListPage", this, new DrillInNavigationTransitionInfo());
+        _dialogService = dialogService;
 
         _dispatcherService = dispatcherService;
         _dataAccessService = dataAccessService;
@@ -267,6 +286,12 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
             WindowTitle = string.Empty;
         }
     }
+
+    public void Receive(PropertyIsUnitOwnershipChangedMessage isUnitOwnership)
+    {
+        IsUnitOwnershipVisible = isUnitOwnership.Value;
+    }
+    
 
     #endregion
 
@@ -440,16 +465,6 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
     #endregion
 
     #region == Public Methods ==
-
-    public void SetNavigationService(INavigationGenericService nav)
-    {
-        _navService = nav;
-    }
-
-    public void SetDialogService(IModalDialogService dialog)
-    {
-        _dlgService = dialog;
-    }
 
     public void CleanUp()
     {

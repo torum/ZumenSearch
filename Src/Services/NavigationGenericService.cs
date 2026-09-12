@@ -1,7 +1,9 @@
 ﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Animation;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
+using ZumenSearch.Models.Common;
 using ZumenSearch.Services.Contracts;
 
 namespace ZumenSearch.Services;
@@ -23,9 +25,18 @@ public class NavigationGenericService : INavigationGenericService
         return _frame;
     }
 
-    public bool NavigateTo(object? selectedPage, SlideNavigationTransitionEffect effect)
+    public bool NavigateTo(object? selectedPage, object? _param, SlideNavigationTransitionEffect effect)
     {
-        if (_frame is null) return false;
+        if (_frame is null)
+        {
+            Debug.WriteLine("NavigationGenericService: _frame is null. Not initialized.");
+            return false; 
+        }
+        if (_pages is null)
+        {
+            Debug.WriteLine("NavigationGenericService: _pages is null. Not initialized.");
+            return false;
+        }
 
         string? tag = null;
         if (selectedPage is NavigationViewItem navItem)
@@ -37,22 +48,27 @@ public class NavigationGenericService : INavigationGenericService
             tag = str;
         }
 
-        // TODO:
-
-        // var item = _pages.FirstOrDefault(p => p.Tag.Equals("summary"));
-
-        /*
-        if (tag != null && _pageMap.TryGetValue(tag, out var pageType) && _frame.CurrentSourcePageType != pageType)
+        if (string.IsNullOrEmpty(tag))
         {
-            return _frame.Navigate(pageType, _frame, new SlideNavigationTransitionInfo() { Effect = effect });//new SuppressNavigationTransitionInfo()
+            return false;
+        }
+
+        var item = _pages.FirstOrDefault(p => p.Tag.Equals(tag));
+
+        if (item.Page is null)
+        {
+            Debug.WriteLine("NavigationGenericService.NavigateTo: Page is null for tag " + tag);
+            return false;
+        }
+
+        if (_frame.Navigate(item.Page, _param, new DrillInNavigationTransitionInfo())) //new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom })SuppressNavigationTransitionInfo
+        {
+            return true;
         }
         else
         {
-            Debug.WriteLine("NavigationService.NavigateTo: No valid page found for " + tag);
+            Debug.WriteLine("NavigationGenericService.NavigateTo: No valid page found for " + tag);
             return false;
         }
-        */
-
-        return true;//tmp
     }
 }

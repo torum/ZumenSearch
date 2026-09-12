@@ -6,11 +6,11 @@ using System.Diagnostics;
 
 namespace ZumenSearch.Views.Rent.Residentials.Bldg;
 
-public sealed partial class UnitListPage : Page
+public sealed partial class RoomListPage : Page
 {
     public ViewModels.Rent.Residentials.Bldg.PropertyViewModel? ViewModel { get; private set; }
 
-    public UnitListPage()
+    public RoomListPage()
     {
         InitializeComponent();
     }
@@ -23,7 +23,7 @@ public sealed partial class UnitListPage : Page
         }
         else
         {
-            Debug.WriteLine("UnitListPage.OnNavigatedTo: Invalid parameter. Expected ViewModels.Rent.Residentials.Bldg.MainViewModel.");
+            Debug.WriteLine("RoomListPage.OnNavigatedTo: Invalid parameter. Expected ViewModels.Rent.Residentials.Bldg.MainViewModel.");
         }
 
         base.OnNavigatedTo(e);

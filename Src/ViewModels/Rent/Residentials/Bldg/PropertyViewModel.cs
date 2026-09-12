@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI.Windowing;
+using Microsoft.UI.Xaml.Media.Animation;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -27,7 +28,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
     public string Id => _id;
 
-    public INavigationGenericService? ResidentialNavigationService => _navService;
+    //public INavigationGenericService? ResidentialNavigationService => _navigationService;
 
 
     // Local directory path to save blob data such as pictures and PDFs.
@@ -196,6 +197,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
                 // If this is set, then show/hide the owner and zumen from shell menu.
                 //EventIsUnitOwnershipChanged?.Invoke(this, field);
+                WeakReferenceMessenger.Default.Send(new Models.Messenger.PropertyIsUnitOwnershipChangedMessage(value));
             }
         }
     }
@@ -1267,21 +1269,31 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
     private readonly IDataAccessService _dataAccessService;
     private readonly IDataAccessLocationService _dataAccessLocationService;
     private readonly IDispatcherService _dispatcherService;
-    private IModalDialogService? _dlgService;
-    private INavigationGenericService? _navService;
+    private readonly IModalDialogService _dialogService;
+    private readonly INavigationGenericService _navigationService;
 
     #endregion
 
-    public PropertyViewModel(Models.Rent.Residentials.Bldg.Property building, IAbstractFactory<Models.Rent.Residentials.Room.Listing, Views.Rent.Residentials.Room.ShellPage> shellFactory, IDispatcherService dispatcherService, IDataAccessService dataAccessService, IDataAccessLocationService dataAccessLocationService)
+    public PropertyViewModel(
+        Models.Rent.Residentials.Bldg.Property building, 
+        INavigationGenericService navigationService,
+        IModalDialogService dialogService,
+        IAbstractFactory<Models.Rent.Residentials.Room.Listing, Views.Rent.Residentials.Room.ShellPage> shellFactory, 
+        IDispatcherService dispatcherService, 
+        IDataAccessService dataAccessService, 
+        IDataAccessLocationService dataAccessLocationService)
     {
         _building = building;
         _id = building.Id;
 
+        _navigationService = navigationService; // _navigationService.NavigateTo("ZumenSearch.Views.Rent.Residentials.Bldg.RoomListPage", this, new DrillInNavigationTransitionInfo());
+        _dialogService = dialogService;
+
         _shellFactory = shellFactory;
 
+        _dispatcherService = dispatcherService;
         _dataAccessService = dataAccessService;
         _dataAccessLocationService = dataAccessLocationService;
-        _dispatcherService = dispatcherService;
 
         //EntryDataDirectoryPath = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(App.AppDataPictureFolder, "Rent"), "Residential_Building"), _id);
 
@@ -1315,7 +1327,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
     public void Receive(ListingUpdatedMessage listing)
     {
-        Debug.WriteLine("Received ListingUpdatedMessage @PropertyViewModel");
+        //Debug.WriteLine("Received ListingUpdatedMessage @PropertyViewModel");
 
         var room = listing.Value;
         if (room is null)
@@ -1338,12 +1350,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
         if (room.ListingStatus == EnumListingStatus.New)
         {
-            Debug.WriteLine("(room.ListingStatus == EnumListingStatus.New) @PropertyViewModel");
+            //Debug.WriteLine("(room.ListingStatus == EnumListingStatus.New) @PropertyViewModel");
             IsDirty = true;
-        }
-        else
-        {
-            Debug.WriteLine("(room.ListingStatus != EnumListingStatus.New) @PropertyViewModel");
         }
     }
 
@@ -1541,8 +1549,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             {
                 foreach (Models.Rent.Residentials.Room.Listing item in e.OldItems)
                 {
-                    Debug.WriteLine($"Item {item.Id} Removed from Rooms. @Rooms.CollectionChanged in PopulateEntryValues of Bldg.MainViewModel");
-                    //IsDirty = true;
+                    //Debug.WriteLine($"Item {item.Id} Removed from Rooms. @Rooms.CollectionChanged in PopulateEntryValues of Bldg.MainViewModel");
+                    //IsDirty = true; // Don't
 
                     item.PropertyChanged -= OnRoomPropertyChanged;
                 }
@@ -1553,8 +1561,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             {
                 foreach (Models.Rent.Residentials.Room.Listing item in e.NewItems)
                 {
-                    Debug.WriteLine($"Item {item.Id} Added to Rooms. @Rooms.CollectionChanged in PopulateEntryValues of Bldg.MainViewModel");
-                    //IsDirty = true;
+                    //Debug.WriteLine($"Item {item.Id} Added to Rooms. @Rooms.CollectionChanged in PopulateEntryValues of Bldg.MainViewModel");
+                    //IsDirty = true; // don't
 
                     item.PropertyChanged += OnRoomPropertyChanged;
                 }
@@ -1858,16 +1866,6 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
     #endregion
 
     #region == Public Methods ==
-
-    public void SetNavigationService(INavigationGenericService nav)
-    {
-        _navService = nav;
-    }
-
-    public void SetDialogService(IModalDialogService dialog)
-    {
-        _dlgService = dialog;
-    }
 
     // TODO: change these to commands.
     public async Task SetNewBuildingPdfsAsync(List<string> filePathList)
@@ -2191,12 +2189,12 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
     private void AddNewUnit() 
     {
         var editorShell = _shellFactory.Create(new Models.Rent.Residentials.Room.Listing(Guid.CreateVersion7().ToString("N"), _building.Id, _building.PropertyStatus, Name));
+        editorShell.ViewModel.IsUnitOwnershipVisible = this.IsUnitOwnership;
 
         var mainVM = App.GetService<ViewModels.MainViewModel>();
         mainVM.RoomEditorList.Add(editorShell.Window);
 
         this.ChildEditorList.Add(editorShell.Window);
-
 
         if (editorShell.Window.AppWindow.Presenter is OverlappedPresenter presenter)
         {
@@ -2273,6 +2271,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         }
 
         var editorShell = _shellFactory.Create(room);
+        editorShell.ViewModel.IsUnitOwnershipVisible = this.IsUnitOwnership;
 
         var editorWindow = editorShell.Window;
         if (editorWindow == null)
@@ -2389,13 +2388,13 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
     [RelayCommand]
     public async Task ShowRailLineSelect1()
     {
-        if (_dlgService is null)
+        if (_dialogService is null)
         {
             Debug.WriteLine("_dlgService is null");
             return;
         }
 
-        var railLine = await _dlgService.ShowRailLineSelectDialog();
+        var railLine = await _dialogService.ShowRailLineSelectDialog();
 
         if (railLine is not null)
         {
@@ -2406,7 +2405,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
     [RelayCommand(CanExecute = nameof(CanShowRailStationSelect1))]
     public async Task ShowRailStationSelect1()
     {
-        if (_dlgService is null)
+        if (_dialogService is null)
         {
             Debug.WriteLine("_dlgService is null");
             return;
@@ -2417,7 +2416,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             return;
         }
 
-        var railStation = await _dlgService.ShowRailStationSelectDialog(SelectedRailLine1.LineCode);
+        var railStation = await _dialogService.ShowRailStationSelectDialog(SelectedRailLine1.LineCode);
 
         if (railStation is not null)
         {

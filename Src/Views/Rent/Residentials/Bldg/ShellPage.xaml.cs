@@ -9,6 +9,7 @@ using Microsoft.UI.Xaml.Navigation;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using ZumenSearch.Models.Common;
+using ZumenSearch.Services;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.Services.Extensions.AbstractFactory;
 
@@ -20,48 +21,53 @@ public sealed partial class ShellPage : Page
     public Views.Rent.Residentials.Bldg.EditorWindow Window { get; private set; }
     public Frame NavigationFrame => ContentFrame;
 
-    // TODO:
     // List of ValueTuple holding the Navigation Tag and the relative Navigation Page
     private readonly List<(string Tag, string Label, Type? Page)> _pages =
     [
         ("building", "建物", null),
-        ("summary", "基本", typeof(Views.Rent.Residentials.Bldg.BasicPage)),
-        ("location", "所在地", typeof(Views.Rent.Residentials.Bldg.LocationPage)),
-        ("transportation", "交通", typeof(Views.Rent.Residentials.Bldg.TransportationPage)),
-        ("facilities", "設備", typeof(Views.Rent.Residentials.Bldg.FacilitiesPage)),
-        ("kanri", "管理", typeof(Views.Rent.Residentials.Bldg.KanriPage)),
-        ("pictures", "写真", typeof(Views.Rent.Residentials.Bldg.PictureListPage)),
-        ("units", "部屋", typeof(Views.Rent.Residentials.Bldg.UnitListPage)),
-        ("zumen", "図面", typeof(Views.Rent.Residentials.Bldg.ZumenListPage)),
-        ("kasinusi", "貸主", typeof(Views.Rent.Residentials.Bldg.KasinusiPage)),
-        ("gyousya", "宅建業者", typeof(Views.Rent.Residentials.Bldg.GyousyaPage))
+        ("ZumenSearch.Views.Rent.Residentials.Bldg.BasicPage", "基本", typeof(Views.Rent.Residentials.Bldg.BasicPage)),
+        ("ZumenSearch.Views.Rent.Residentials.Bldg.LocationPage", "所在地", typeof(Views.Rent.Residentials.Bldg.LocationPage)),
+        ("ZumenSearch.Views.Rent.Residentials.Bldg.TransportationPage", "交通", typeof(Views.Rent.Residentials.Bldg.TransportationPage)),
+        ("ZumenSearch.Views.Rent.Residentials.Bldg.FacilitiesPage", "設備", typeof(Views.Rent.Residentials.Bldg.FacilitiesPage)),
+        ("ZumenSearch.Views.Rent.Residentials.Bldg.KanriPage", "管理", typeof(Views.Rent.Residentials.Bldg.KanriPage)),
+        ("ZumenSearch.Views.Rent.Residentials.Bldg.PictureListPage", "写真", typeof(Views.Rent.Residentials.Bldg.PictureListPage)),
+        ("ZumenSearch.Views.Rent.Residentials.Bldg.RoomListPage", "部屋", typeof(Views.Rent.Residentials.Bldg.RoomListPage)),
+        ("ZumenSearch.Views.Rent.Residentials.Bldg.ZumenListPage", "図面", typeof(Views.Rent.Residentials.Bldg.ZumenListPage)),
+        ("ZumenSearch.Views.Rent.Residentials.Bldg.KasinusiPage", "貸主", typeof(Views.Rent.Residentials.Bldg.KasinusiPage)),
+        ("ZumenSearch.Views.Rent.Residentials.Bldg.GyousyaPage", "宅建業者", typeof(Views.Rent.Residentials.Bldg.GyousyaPage))
     ];
 
-    private readonly INavigationGenericService _navService;
-    private readonly IDispatcherService _dispatcherService;
-    private readonly IModalDialogService _dlgService;
     private bool _isClosing;
     private Views.Rent.Residentials.Room.EditorWindow? _closingWindow;
     private bool _nvigated;
 
-    public ShellPage(Views.Rent.Residentials.Bldg.EditorWindow window, Models.Rent.Residentials.Bldg.Property building, IAbstractFactory<Models.Rent.Residentials.Bldg.Property, ViewModels.Rent.Residentials.Bldg.PropertyViewModel> vmFactory, INavigationGenericService navigationResidentialService, IDispatcherService dispatcherService, IModalDialogService modalDialog)
+    private readonly INavigationGenericService _navigationService;
+    private readonly IDispatcherService _dispatcherService;
+    private readonly IModalDialogService _dialogService;
+
+    public ShellPage(
+        Views.Rent.Residentials.Bldg.EditorWindow window, 
+        Models.Rent.Residentials.Bldg.Property building,
+        IAbstractFactory<Models.Rent.Residentials.Bldg.Property, INavigationGenericService, IModalDialogService, ViewModels.Rent.Residentials.Bldg.PropertyViewModel> vmFactory, 
+        INavigationGenericService navigationService, 
+        IDispatcherService dispatcherService, 
+        IModalDialogService dialogService)
     {
         //Debug.WriteLine($"ShellPage {building.Id}");
 
         Window = window;
         Window.Content = this;
 
-        ViewModel = vmFactory.Create(building);
-
-        _dlgService = modalDialog;
+        _navigationService = navigationService;
         _dispatcherService = dispatcherService;
-        _navService = navigationResidentialService;
+        _dialogService = dialogService;
+
+        ViewModel = vmFactory.Create(building, _navigationService, _dialogService);
 
         InitializeComponent();
 
-        // Initialize the navigation service with the ContentFrame and set it in the ViewModel.
-        _navService.Initialize(this.ContentFrame, _pages);
-        ViewModel.SetNavigationService(_navService);
+        // Initialize the navigation service with the ContentFrame and pages.
+        _navigationService.Initialize(this.ContentFrame, _pages);
 
         this.Loaded += ShellPage_Loaded;
         this.Unloaded += ShellPage_Unloaded;
@@ -77,8 +83,7 @@ public sealed partial class ShellPage : Page
     private void ShellPage_Loaded(object sender, RoutedEventArgs e)
     {
         // XamlRoot is no longer null.
-        _dlgService.Initialize(this.XamlRoot);
-        ViewModel.SetDialogService(_dlgService);
+        _dialogService.Initialize(this.XamlRoot);
 
         if (ContentFrame.Navigate(typeof(ZumenSearch.Views.Rent.Residentials.Bldg.BasicPage), ViewModel, new EntranceNavigationTransitionInfo()))
         {
@@ -196,7 +201,7 @@ public sealed partial class ShellPage : Page
         if (ViewModel.IsDirty)
         {
             // show ConfirmationDialog
-            var result = await _dlgService.ShowEditorCloseConfirmationDialog();
+            var result = await _dialogService.ShowEditorCloseConfirmationDialog();
 
             if (result == ContentDialogResult.Primary)
             {
@@ -281,7 +286,7 @@ public sealed partial class ShellPage : Page
             {
                 if (crumbs.Count > 1)
                 {
-                    var item = _pages.FirstOrDefault(p => p.Tag.Equals("summary"));
+                    var item = _pages.FirstOrDefault(p => p.Tag.Equals("ZumenSearch.Views.Rent.Residentials.Bldg.BasicPage"));
                     if (item.Page is not null)
                     {
                         crumbs.RemoveAt(crumbs.Count - 1); // Remove the last breadcrumb if exists to avoid duplication.
@@ -290,7 +295,7 @@ public sealed partial class ShellPage : Page
                 }
             }
 
-            NavView.SelectedItem = NavView.MenuItems.OfType<NavigationViewItem>().Where(n => n.Tag.Equals("summary")).First();
+            NavView.SelectedItem = NavView.MenuItems.OfType<NavigationViewItem>().Where(n => n.Tag.Equals("ZumenSearch.Views.Rent.Residentials.Bldg.BasicPage")).First();
         }
     }
 
@@ -336,22 +341,111 @@ public sealed partial class ShellPage : Page
         }
     }
 
-    private void BackAccelerator_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+    private void NavView_BackRequested(NavigationView sender, NavigationViewBackRequestedEventArgs args)
     {
-        if (this.ContentFrame != null && this.ContentFrame.CanGoBack)
-        {
-            this.ContentFrame.GoBack();
-            args.Handled = true;
-        }
-    }
-
-    public void OnEventTitleChanged(EventArgs args)
-    {
-        Window.Title = ViewModel?.WindowTitle ?? "賃貸住居用：建物";
+        if (this.ContentFrame.CanGoBack) this.ContentFrame.GoBack();
     }
 
     private void ContentFrame_NavigationFailed(object sender, NavigationFailedEventArgs e)
     {
         throw new Exception("Failed to load Page " + e.SourcePageType.FullName);
     }
+
+    private void ContentFrame_Navigated(object sender, NavigationEventArgs e)
+    {
+        this.NavView.IsBackEnabled = this.ContentFrame.CanGoBack;
+
+        if (this.ContentFrame.SourcePageType != null)
+        {
+            var selectedItem = FindNavigationViewItemWithTag(this.ContentFrame.SourcePageType.FullName!);
+            if (selectedItem != null)
+            {
+                this.NavView.SelectedItem = selectedItem;
+                //NavigationViewControl.Header = ((NavigationViewItem)NavigationViewControl.SelectedItem)?.Content?.ToString();
+            }
+            else
+            {
+                Debug.WriteLine($"No menu item with tag matching the current page found in NavView. Current page: { ContentFrame.SourcePageType.FullName}");
+            }
+        }
+    }
+
+    private NavigationViewItem? FindNavigationViewItemWithTag(string tag)
+    {
+        foreach (var item in this.NavView.MenuItems.OfType<NavigationViewItem>())
+        {
+            if (item.Tag.Equals(tag))
+            {
+                this.NavView.SelectedItem = item;
+                return item;
+            }
+
+            if (item.MenuItems.Count > 0)
+            {
+                foreach (var subItem in item.MenuItems.OfType<NavigationViewItem>())
+                {
+                    if (subItem.Tag.Equals(tag))
+                    {
+                        this.NavView.SelectedItem = subItem;
+                        return subItem;
+                    }
+                }
+            }
+        }
+
+        foreach (var item in this.NavView.FooterMenuItems.OfType<NavigationViewItem>())
+        {
+            if (item.Tag.Equals(tag))
+            {
+                this.NavView.SelectedItem = item;
+                return item;
+            }
+        }
+
+        return null;
+    }
+
+    private async void KeyboardAccelerator_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+    {
+        //Debug.WriteLine("KeyboardAccelerator_Invoked");
+
+        // set this first.
+        args.Handled = true;
+
+        if (args.KeyboardAccelerator.Key == Windows.System.VirtualKey.F1)
+        {
+            // TODO:
+
+            return;
+        }
+
+        if (args.KeyboardAccelerator.Modifiers == Windows.System.VirtualKeyModifiers.Menu)
+        {
+            if (args.KeyboardAccelerator.Key == Windows.System.VirtualKey.Left)
+            {
+                if (this.ContentFrame != null && this.ContentFrame.CanGoBack)
+                {
+                    this.ContentFrame.GoBack();
+                }
+
+                return;
+            }
+
+        }
+
+        if (args.KeyboardAccelerator.Modifiers == Windows.System.VirtualKeyModifiers.Control)
+        {
+            if (args.KeyboardAccelerator.Key == Windows.System.VirtualKey.S)
+            {
+                if (ViewModel.SaveCommand.CanExecute(null))
+                {
+                    ViewModel.SaveCommand.Execute(null);
+                }
+
+                return;
+            }
+
+        }
+    }
+
 }

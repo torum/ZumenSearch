@@ -38,3 +38,36 @@ public sealed class AbstractFactory<TParam, [DynamicallyAccessedMembers(Dynamica
     }
 }
 
+public class AbstractFactory<TParam1, TParam2, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TResult> : IAbstractFactory<TParam1, TParam2, TResult>
+    where TResult : class
+{
+    private readonly IServiceProvider _serviceProvider;
+
+    public AbstractFactory(IServiceProvider serviceProvider)
+    {
+        _serviceProvider = serviceProvider;
+    }
+
+    public TResult Create(TParam1 param1, TParam2 param2)
+    {
+        // ActivatorUtilities will match param1 and param2 by their types to the constructor
+        return ActivatorUtilities.CreateInstance<TResult>(_serviceProvider, param1!, param2!);
+    }
+}
+
+public class AbstractFactory<TParam1, TParam2, TParam3, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TResult> : IAbstractFactory<TParam1, TParam2, TParam3, TResult>
+    where TResult : class
+{
+    private readonly IServiceProvider _serviceProvider;
+
+    public AbstractFactory(IServiceProvider serviceProvider)
+    {
+        _serviceProvider = serviceProvider;
+    }
+
+    public TResult Create(TParam1 param1, TParam2 param2, TParam3 param3)
+    {
+        // ActivatorUtilities will match param1 and param2 by their types to the constructor
+        return ActivatorUtilities.CreateInstance<TResult>(_serviceProvider, param1!, param2!, param3!);
+    }
+}

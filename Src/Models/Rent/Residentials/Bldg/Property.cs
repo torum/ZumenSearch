@@ -13,7 +13,6 @@ public sealed partial class Property : PropertyBase
 {
     public string PropertyDataDirectoryPath { get; init; }
 
-
     #region == 物件に属するリスト == 
 
     // 物件に属する部屋のリスト

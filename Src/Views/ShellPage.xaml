@@ -10,7 +10,7 @@
     KeyboardAcceleratorPlacementMode="Hidden"
     mc:Ignorable="d">
     <Page.KeyboardAccelerators>
-        <KeyboardAccelerator Key="Left" Modifiers="Menu" Invoked="BackAccelerator_Invoked" />
+        <KeyboardAccelerator Key="Left" Modifiers="Menu" Invoked="KeyboardAccelerator_Invoked" />
     </Page.KeyboardAccelerators>
     <Grid>
         <Grid.RowDefinitions>
