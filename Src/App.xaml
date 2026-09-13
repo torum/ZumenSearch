@@ -28,6 +28,7 @@
             <!-- Converters -->
             <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
             <myconverters:ErrorToBorderBrushConverter x:Key="ErrorBrushConverter"/>
+            <myconverters:ValidationToBrushConverter x:Key="ValidationToBrushConverter"/>
 
             <!-- NavigationView resources -->
             <CornerRadius x:Key="NavigationViewContentGridCornerRadius">0</CornerRadius>

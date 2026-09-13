@@ -15,8 +15,6 @@ using Windows.System;
 using ZumenSearch.Models.Base;
 using ZumenSearch.Models.Common;
 using ZumenSearch.Models.Messenger;
-using ZumenSearch.Models.Rent.Residentials.Bldg;
-using ZumenSearch.Models.Rent.Residentials.Room;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.Services.Extensions.AbstractFactory;
 
@@ -26,25 +24,14 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 {
     #region == Public Properties ==
 
-    public string Id => _id;
-
-    //public INavigationGenericService? ResidentialNavigationService => _navigationService;
-
-
-    // Local directory path to save blob data such as pictures and PDFs.
-
-    public ObservableCollection<Breadcrumb> BreadcrumbItems { get; set; } =
-    [
-        new() { Name = "建物", Page = typeof(Views.Rent.Residentials.Bldg.BasicPage).FullName! },
-        new() { Name = "基本", Page = typeof(Views.Rent.Residentials.Bldg.BasicPage).FullName! }
-    ];
-
+    // TODO: Do I need this?
+    //public string Id => _id;
 
     [ObservableProperty]
-    public partial bool IsInfoBarErrorOpen { get; set; }
+    [NotifyCanExecuteChangedFor(nameof(SaveCommand))]
+    public partial bool IsDirty { get; private set; }
 
-    [ObservableProperty]
-    public partial string InfoBarErrorMessage { get; set; } = string.Empty;
+    #region == 画面表示関連 ==
 
     public string WindowTitle
     {
@@ -76,30 +63,31 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         }
     } = "賃貸住居用";
 
-    #region == ステータス ==
+    public ObservableCollection<Breadcrumb> BreadcrumbItems { get; set; } =
+    [
+        new() { Name = "建物", Page = typeof(Views.Rent.Residentials.Bldg.BasicPage).FullName! },
+        new() { Name = "基本", Page = typeof(Views.Rent.Residentials.Bldg.BasicPage).FullName! }
+    ];
 
-    [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(SaveCommand))]
-    public partial bool IsDirty { get; private set; }
+    #endregion
+
+    #region == エラー関連 ==
 
     /*
-    public bool IsDirty
-    {
-        get;
-        private set
-        {
-            if (SetProperty(ref field, value))
-            {
-                _mainViewModel.IsDirty = true;
-                SaveCommand.NotifyCanExecuteChanged();
-            }
-        }
-    }
-    */
-
     // TODO: update this to hold more info such as page so that it can be navigated to the page.
     [ObservableProperty]
     public partial bool HasErrors { get; private set; }
+    */
+
+    // InfoBarError is researved only for unsavable error.
+    [ObservableProperty]
+    public partial bool IsInfoBarErrorOpen { get; set; }
+
+    [ObservableProperty]
+    public partial string InfoBarErrorMessage { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial bool IsNameHasError { get; private set; }
 
     #endregion
 
@@ -111,7 +99,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         get => field ?? string.Empty; // Ensure a non-null value is returned
         set
         {
-            if (SetProperty(ref field, value.Trim()))
+            if (SetProperty(ref field, value))
             {
                 IsDirty = true;
 
@@ -126,52 +114,20 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         }
     }
 
-    [ObservableProperty]
-    public partial bool NameHasError { get; private set; }
-
-    [ObservableProperty]
-    public partial string NameErrorMessage { get; private set; } = string.Empty;
-
-    private void ValidateName(string value)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            NameErrorMessage = "物件名（必須項目）を入力してください";
-            NameHasError = true;
-
-            HasErrors = true;
-
-            return;
-        }
-
-        var realLength = new StringInfo(value).LengthInTextElements;
-        if (realLength > 100)
-        {
-            NameErrorMessage = "物件名は100文字以内で入力してください";
-            NameHasError = true;
-
-            HasErrors = true;
-
-            return;
-        }
-
-        NameHasError = false;
-    }
-
     // 物件種別
-    public ObservableCollection<Kind> Kinds =
+    public ObservableCollection<Models.Rent.Residentials.Bldg.Kind> Kinds =
     [
         //new Kind(EnumKinds.Unspecified.ToString(), "未指定"),
-        new Kind(Models.Rent.Residentials.Bldg.EnumKinds.Apartment),
-        new Kind(Models.Rent.Residentials.Bldg.EnumKinds.Mansion),
-        new Kind(Models.Rent.Residentials.Bldg.EnumKinds.House),
-        new Kind(Models.Rent.Residentials.Bldg.EnumKinds.TerraceHouse),
-        new Kind(Models.Rent.Residentials.Bldg.EnumKinds.TownHouse),
-        new Kind(Models.Rent.Residentials.Bldg.EnumKinds.ShareHouse),
-        new Kind(Models.Rent.Residentials.Bldg.EnumKinds.Dormitory)
+        new Models.Rent.Residentials.Bldg.Kind(Models.Rent.Residentials.Bldg.EnumKinds.Apartment),
+        new Models.Rent.Residentials.Bldg.Kind(Models.Rent.Residentials.Bldg.EnumKinds.Mansion),
+        new Models.Rent.Residentials.Bldg.Kind(Models.Rent.Residentials.Bldg.EnumKinds.House),
+        new Models.Rent.Residentials.Bldg.Kind(Models.Rent.Residentials.Bldg.EnumKinds.TerraceHouse),
+        new Models.Rent.Residentials.Bldg.Kind(Models.Rent.Residentials.Bldg.EnumKinds.TownHouse),
+        new Models.Rent.Residentials.Bldg.Kind(Models.Rent.Residentials.Bldg.EnumKinds.ShareHouse),
+        new Models.Rent.Residentials.Bldg.Kind(Models.Rent.Residentials.Bldg.EnumKinds.Dormitory)
     ];
 
-    public Kind SelectedKind
+    public Models.Rent.Residentials.Bldg.Kind SelectedKind
     {
         get => field ?? new(Models.Rent.Residentials.Bldg.EnumKinds.Unspecified);
         set
@@ -193,7 +149,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             {
                 IsDirty = true;
 
-                //
+                IsUnitOwnershipVisible = !value;
 
                 // If this is set, then show/hide the owner and zumen from shell menu.
                 //EventIsUnitOwnershipChanged?.Invoke(this, field);
@@ -202,27 +158,28 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         }
     }
 
-    //public bool IsNotUnitOwnership => !IsUnitOwnership;
+    [ObservableProperty]
+    public partial bool IsUnitOwnershipVisible { get; private set; } = true;
 
     // 建物構造
-    public ObservableCollection<Structure> Structures =
+    public ObservableCollection<Models.Rent.Residentials.Bldg.Structure> Structures =
     [
         //new Structure(EnumStructures.Unspecified.ToString(), "未指定"),
-        new Structure(Models.Rent.Residentials.Bldg.EnumStructures.Wood),
-        new Structure(Models.Rent.Residentials.Bldg.EnumStructures.Block),
-        new Structure(Models.Rent.Residentials.Bldg.EnumStructures.LightSteel),
-        new Structure(Models.Rent.Residentials.Bldg.EnumStructures.Steel),
-        new Structure(Models.Rent.Residentials.Bldg.EnumStructures.RC),
-        new Structure(Models.Rent.Residentials.Bldg.EnumStructures.SRC),
-        new Structure(Models.Rent.Residentials.Bldg.EnumStructures.ALC),
-        new Structure(Models.Rent.Residentials.Bldg.EnumStructures.PC),
-        new Structure(Models.Rent.Residentials.Bldg.EnumStructures.HPC),
-        new Structure(Models.Rent.Residentials.Bldg.EnumStructures.RB),
-        new Structure(Models.Rent.Residentials.Bldg.EnumStructures.CFT),
-        new Structure(Models.Rent.Residentials.Bldg.EnumStructures.Other)
+        new Models.Rent.Residentials.Bldg.Structure(Models.Rent.Residentials.Bldg.EnumStructures.Wood),
+        new Models.Rent.Residentials.Bldg.Structure(Models.Rent.Residentials.Bldg.EnumStructures.Block),
+        new Models.Rent.Residentials.Bldg.Structure(Models.Rent.Residentials.Bldg.EnumStructures.LightSteel),
+        new Models.Rent.Residentials.Bldg.Structure(Models.Rent.Residentials.Bldg.EnumStructures.Steel),
+        new Models.Rent.Residentials.Bldg.Structure(Models.Rent.Residentials.Bldg.EnumStructures.RC),
+        new Models.Rent.Residentials.Bldg.Structure(Models.Rent.Residentials.Bldg.EnumStructures.SRC),
+        new Models.Rent.Residentials.Bldg.Structure(Models.Rent.Residentials.Bldg.EnumStructures.ALC),
+        new Models.Rent.Residentials.Bldg.Structure(Models.Rent.Residentials.Bldg.EnumStructures.PC),
+        new Models.Rent.Residentials.Bldg.Structure(Models.Rent.Residentials.Bldg.EnumStructures.HPC),
+        new Models.Rent.Residentials.Bldg.Structure(Models.Rent.Residentials.Bldg.EnumStructures.RB),
+        new Models.Rent.Residentials.Bldg.Structure(Models.Rent.Residentials.Bldg.EnumStructures.CFT),
+        new Models.Rent.Residentials.Bldg.Structure(Models.Rent.Residentials.Bldg.EnumStructures.Other)
     ];
 
-    public Structure SelectedStructure
+    public Models.Rent.Residentials.Bldg.Structure SelectedStructure
     {
         get => field ?? new(Models.Rent.Residentials.Bldg.EnumStructures.Unspecified);
         set
@@ -979,13 +936,13 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         }
     } = false;
 
-    public ObservableCollection<ElectricKind> ElectricKinds =
+    public ObservableCollection<Models.Rent.Residentials.Bldg.ElectricKind> ElectricKinds =
     [
-        new ElectricKind(Models.Rent.Residentials.Bldg.Property.EnumElectricKind.AllElectric, "オール電化"),
-        new ElectricKind(Models.Rent.Residentials.Bldg.Property.EnumElectricKind.Unspecified, "未指定")
+        new Models.Rent.Residentials.Bldg.ElectricKind(Models.Rent.Residentials.Bldg.Property.EnumElectricKind.AllElectric, "オール電化"),
+        new Models.Rent.Residentials.Bldg.ElectricKind(Models.Rent.Residentials.Bldg.Property.EnumElectricKind.Unspecified, "未指定")
     ];
 
-    public ElectricKind SelectedElectricKind
+    public Models.Rent.Residentials.Bldg.ElectricKind SelectedElectricKind
     {
         get;
         set
@@ -995,7 +952,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
                 IsDirty = true;
             }
         }
-    } = new ElectricKind(Models.Rent.Residentials.Bldg.Property.EnumElectricKind.Unspecified, "未指定");
+    } = new Models.Rent.Residentials.Bldg.ElectricKind(Models.Rent.Residentials.Bldg.Property.EnumElectricKind.Unspecified, "未指定");
 
     public string ElectricDetail
     {
@@ -1017,15 +974,15 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
     #region == 管理プロパティ ==
 
-    public ObservableCollection<KanriShutai> KanriShutais =
+    public ObservableCollection<Models.Rent.Residentials.Bldg.KanriShutai> KanriShutais =
     [
-        new KanriShutai(Models.Rent.Residentials.Bldg.Property.EnumKanriShutai.Unspecified, "未指定"),
-        new KanriShutai(Models.Rent.Residentials.Bldg.Property.EnumKanriShutai.Jisya, "自社管理"),
-        new KanriShutai(Models.Rent.Residentials.Bldg.Property.EnumKanriShutai.Tasya, "他社管理"),
-        new KanriShutai(Models.Rent.Residentials.Bldg.Property.EnumKanriShutai.Kashinushi, "貸主管理")
+        new Models.Rent.Residentials.Bldg.KanriShutai(Models.Rent.Residentials.Bldg.Property.EnumKanriShutai.Unspecified, "未指定"),
+        new Models.Rent.Residentials.Bldg.KanriShutai(Models.Rent.Residentials.Bldg.Property.EnumKanriShutai.Jisya, "自社管理"),
+        new Models.Rent.Residentials.Bldg.KanriShutai(Models.Rent.Residentials.Bldg.Property.EnumKanriShutai.Tasya, "他社管理"),
+        new Models.Rent.Residentials.Bldg.KanriShutai(Models.Rent.Residentials.Bldg.Property.EnumKanriShutai.Kashinushi, "貸主管理")
     ];
 
-    public KanriShutai? SelectedKanriShutai
+    public Models.Rent.Residentials.Bldg.KanriShutai? SelectedKanriShutai
     {
         get;
         set
@@ -1254,6 +1211,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
     // MainViewModel creates a new instance of this class and call EditorShell.SetEntry(EntryResidentialFull) and sets this property.
     private readonly Models.Rent.Residentials.Bldg.Property _building;
 
+    // Child windows.
     public readonly List<Views.Rent.Residentials.Room.EditorWindow> ChildEditorList = [];
 
     // Tmp file list to hold unsaved picture files. (if entry is not saved, delete on close)
@@ -1305,10 +1263,10 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             PopulateEntryValues();
 
             // Reset errors
-            NameHasError = false;
+            IsNameHasError = false;
             // TODO: more.
 
-            HasErrors = false;
+            //HasErrors = false;
         }
         catch (Exception ex)
         {
@@ -1382,6 +1340,112 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
     #endregion
 
+    #region == Public Methods ==
+
+    // TODO: change these to commands.
+    public async Task SetNewBuildingPdfsAsync(List<string> filePathList)
+    {
+        if (filePathList is null) return;
+        if (filePathList.Count == 0) return;
+
+        Debug.WriteLine($"destDirectory={_building.PropertyDataDirectoryPath}  @SetNewBuildingPdfsAsync()");
+
+        if (!Directory.Exists(_building.PropertyDataDirectoryPath))
+        {
+            Directory.CreateDirectory(_building.PropertyDataDirectoryPath);
+        }
+
+        //List<string> list = [];
+
+        foreach (var filePath in filePathList)
+        {
+            if (string.IsNullOrEmpty(filePath.Trim()))
+            {
+                continue;
+            }
+
+            // TODO: check file ext for valid image type.
+            // TODO: set max file size?
+
+
+            string extension = Path.GetExtension(System.IO.Path.GetFileName(filePath));
+            if (!extension.Equals(".pdf")) // TODO: check case.
+            {
+                continue;
+            }
+
+            //using var sourceStream = File.Open(file, FileMode.Open);
+
+            StorageFile sfile = await StorageFile.GetFileFromPathAsync(filePath);
+            PdfDocument pdfDocument = await PdfDocument.LoadFromFileAsync(sfile);
+
+            if (pdfDocument.PageCount > 0)
+            {
+                using PdfPage pdfPage = pdfDocument.GetPage(0);
+                using var stream = new InMemoryRandomAccessStream();
+
+                // Set screen standard DPI
+                //float targetDpi = 96f;
+                //float scaleFactor = targetDpi / 72f; 
+                //uint calculatedWidth = (uint)Math.Round(pdfPage.Size.Width * scaleFactor);
+
+                var options = new PdfPageRenderOptions
+                {
+                    // Set the desired target width in pixels (e.g., 1024px)
+                    // Aspect ratio is locked; height scales automatically.
+                    DestinationWidth = 512//calculatedWidth//1024
+                };
+
+                await pdfPage.RenderToStreamAsync(stream, options);
+
+                //var bitmapImage = new BitmapImage();
+                //await bitmapImage.SetSourceAsync(stream);
+
+                string newId = Guid.CreateVersion7().ToString("N");
+                var thumbnailDestFilePath = Path.Combine(_building.PropertyDataDirectoryPath, newId + ".bmp");
+
+                using var destinationStream = File.Create(thumbnailDestFilePath);
+                using var managedSourceStream = stream.AsStreamForRead();
+                await managedSourceStream.CopyToAsync(destinationStream);
+
+                // Keep track of unsaved files to delete them when discarding.
+                _unsavedBuildingPdfThumbnailFileList.Add(thumbnailDestFilePath);
+
+                var pdfDestFilePath = Path.Combine(_building.PropertyDataDirectoryPath, newId + extension);
+                File.Copy(filePath, pdfDestFilePath);
+
+                // Keep track of unsaved files to delete them when discarding.
+                _unsavedBuildingPdfFileList.Add(pdfDestFilePath);
+
+                var pdf = new Models.Rent.Residentials.Bldg.Pdf(newId, pdfDestFilePath, thumbnailDestFilePath)
+                {
+                    IsNew = true,
+                    ParentViewModel = this
+                };
+
+                BuildingPdfs.Add(pdf);
+
+                OpenBuildingBlobDirectoryCommand.NotifyCanExecuteChanged();
+                DeleteBuildingPdfCommand.NotifyCanExecuteChanged();
+
+                IsDirty = true;
+            }
+            else
+            {
+                Debug.WriteLine("0 page.");
+            }
+        }
+    }
+
+    public void DiscardChanges()
+    {
+        DiscardUnsavedFiles();
+
+        IsDirty = false;
+    }
+
+    #endregion
+
     #region == Private Methods ==
 
     private void PopulateEntryValues()
@@ -1395,6 +1459,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         SelectedKind = kindkey is null ? new(Models.Rent.Residentials.Bldg.EnumKinds.Unspecified) : kindkey;
 
         IsUnitOwnership = _building.IsUnitOwnership;
+
+        //IsUnitOwnershipVisible = !IsUnitOwnership;
 
         //SelectedStructure = _building.BuildingStructure;
         var Structurekey = Structures.FirstOrDefault(k => k.Key == _building.BuildingStructure.Key);
@@ -1671,17 +1737,39 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         }
     }
 
+    private bool ValidateName(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            InfoBarErrorMessage = "物件名（必須項目）が入力されていません。保存出来ませんでした。";
+            //NameErrorMessage = "物件名（必須項目）を入力してください。";
+            IsNameHasError = true;
+
+            //HasErrors = true;
+
+            return true;
+        }
+
+        var realLength = new StringInfo(value).LengthInTextElements;
+        if (realLength > 100)
+        {
+            InfoBarErrorMessage = "物件名は100文字以内で入力してください。保存出来ませんでした。";
+            //NameErrorMessage = "物件名は100文字以内で入力してください";
+            IsNameHasError = true;
+
+            //HasErrors = true;
+
+            return true;
+        }
+
+        IsNameHasError = false;
+        return false;
+    }
+
     private void SetValuesToEntry()
     {
         if (!IsDirty)
         {
-            return;
-        }
-
-        if (string.IsNullOrEmpty(Name))
-        {
-            // TODO: Show InfoBar?
-            HasErrors = true;
             return;
         }
 
@@ -1734,10 +1822,15 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         var resInsert = _dataAccessService.InsertRentResidential(_building);
         if (resInsert.IsError)
         {
-            Debug.WriteLine("Error on insert. @SaveAsNew in ResidentialsViewModel");
+            Debug.WriteLine("Error on insert. @SaveAsNew in Residentials PropertyViewModel");
+
             Debug.WriteLine(resInsert.Error.ErrText + Environment.NewLine + resInsert.Error.ErrDescription + Environment.NewLine + resInsert.Error.ErrPlace + Environment.NewLine + resInsert.Error.ErrPlaceParent);
 
-            // TODO: return error object.
+            // TODO: fix format.
+            var errText = resInsert.Error.ErrText + Environment.NewLine + resInsert.Error.ErrDescription + Environment.NewLine + resInsert.Error.ErrPlace + Environment.NewLine + resInsert.Error.ErrPlaceParent;
+            InfoBarErrorMessage = errText;
+            IsInfoBarErrorOpen = true;
+
             return false;
         }
         else
@@ -1768,7 +1861,11 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             Debug.WriteLine("Error on update. @SaveAsUpdate in ResidentialsViewModel");
             Debug.WriteLine(resInsert.Error.ErrText + Environment.NewLine + resInsert.Error.ErrDescription + Environment.NewLine + resInsert.Error.ErrPlace + Environment.NewLine + resInsert.Error.ErrPlaceParent);
 
-            // TODO: return error object.
+            // TODO: fix format.
+            var errText = resInsert.Error.ErrText + Environment.NewLine + resInsert.Error.ErrDescription + Environment.NewLine + resInsert.Error.ErrPlace + Environment.NewLine + resInsert.Error.ErrPlaceParent;
+            InfoBarErrorMessage = errText;
+            IsInfoBarErrorOpen = true;
+
             return false;
         }
         else
@@ -1865,112 +1962,6 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
     #endregion
 
-    #region == Public Methods ==
-
-    // TODO: change these to commands.
-    public async Task SetNewBuildingPdfsAsync(List<string> filePathList)
-    {
-        if (filePathList is null) return;
-        if (filePathList.Count == 0) return;
-
-        Debug.WriteLine($"destDirectory={_building.PropertyDataDirectoryPath}  @SetNewBuildingPdfsAsync()");
-
-        if (!Directory.Exists(_building.PropertyDataDirectoryPath))
-        {
-            Directory.CreateDirectory(_building.PropertyDataDirectoryPath);
-        }
-
-        //List<string> list = [];
-
-        foreach (var filePath in filePathList)
-        {
-            if (string.IsNullOrEmpty(filePath.Trim()))
-            {
-                continue;
-            }
-
-            // TODO: check file ext for valid image type.
-            // TODO: set max file size?
-
-
-            string extension = Path.GetExtension(System.IO.Path.GetFileName(filePath));
-            if (!extension.Equals(".pdf")) // TODO: check case.
-            {
-                continue;
-            }
-
-            //using var sourceStream = File.Open(file, FileMode.Open);
-
-            StorageFile sfile = await StorageFile.GetFileFromPathAsync(filePath);
-            PdfDocument pdfDocument = await PdfDocument.LoadFromFileAsync(sfile);
-
-            if (pdfDocument.PageCount > 0)
-            {
-                using PdfPage pdfPage = pdfDocument.GetPage(0);
-                using var stream = new InMemoryRandomAccessStream();
-
-                // Set screen standard DPI
-                //float targetDpi = 96f;
-                //float scaleFactor = targetDpi / 72f; 
-                //uint calculatedWidth = (uint)Math.Round(pdfPage.Size.Width * scaleFactor);
-
-                var options = new PdfPageRenderOptions
-                {
-                    // Set the desired target width in pixels (e.g., 1024px)
-                    // Aspect ratio is locked; height scales automatically.
-                    DestinationWidth = 512//calculatedWidth//1024
-                };
-
-                await pdfPage.RenderToStreamAsync(stream, options);
-
-                //var bitmapImage = new BitmapImage();
-                //await bitmapImage.SetSourceAsync(stream);
-
-                string newId = Guid.CreateVersion7().ToString("N");
-                var thumbnailDestFilePath = Path.Combine(_building.PropertyDataDirectoryPath, newId + ".bmp");
-
-                using var destinationStream = File.Create(thumbnailDestFilePath);
-                using var managedSourceStream = stream.AsStreamForRead();
-                await managedSourceStream.CopyToAsync(destinationStream);
-
-                // Keep track of unsaved files to delete them when discarding.
-                _unsavedBuildingPdfThumbnailFileList.Add(thumbnailDestFilePath);
-
-                var pdfDestFilePath = Path.Combine(_building.PropertyDataDirectoryPath, newId + extension);
-                File.Copy(filePath, pdfDestFilePath);
-
-                // Keep track of unsaved files to delete them when discarding.
-                _unsavedBuildingPdfFileList.Add(pdfDestFilePath);
-
-                var pdf = new Models.Rent.Residentials.Bldg.Pdf(newId, pdfDestFilePath, thumbnailDestFilePath)
-                {
-                    IsNew = true,
-                    ParentViewModel = this
-                };
-
-                BuildingPdfs.Add(pdf);
-
-                OpenBuildingBlobDirectoryCommand.NotifyCanExecuteChanged();
-                DeleteBuildingPdfCommand.NotifyCanExecuteChanged();
-
-                IsDirty = true;
-            }
-            else
-            {
-                Debug.WriteLine("0 page.");
-            }
-        }
-    }
-
-    public void DiscardChanges()
-    {
-        DiscardUnsavedFiles();
-
-        IsDirty = false;
-    }
-
-    #endregion
-
     #region == Commands ==
 
     #region == Save related commands ==
@@ -1984,17 +1975,14 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         }
 
         // Validate input.
-        ValidateName(Name);
-        // TODO: more.
-        if (HasErrors)
+        if (ValidateName(Name))
         {
-            // TODO: Show InfoBar.
-            InfoBarErrorMessage = "入力項目に誤りがあります。保存出来ませんでした。";
+            //InfoBarErrorMessage = "入力項目に誤りがあります。保存出来ませんでした。";
             IsInfoBarErrorOpen = true;
-
-            HasErrors = false;
             return;
         }
+
+        // TODO: more.
 
         SetValuesToEntry();
 
@@ -2011,6 +1999,9 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
         if (saveResult)
         {
+            // Clear error infobar.
+            IsInfoBarErrorOpen = false;
+
             // Update the selected search result's values such asname if it exists.
             //_selectedSearchResult?.Name = Name;
 
@@ -2188,7 +2179,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
     [RelayCommand]
     private void AddNewUnit() 
     {
-        var editorShell = _shellFactory.Create(new Models.Rent.Residentials.Room.Listing(Guid.CreateVersion7().ToString("N"), _building.Id, _building.PropertyStatus, Name));
+        var newId = Guid.CreateVersion7().ToString("N");
+        var editorShell = _shellFactory.Create(new Models.Rent.Residentials.Room.Listing(newId, _building.Id, _building.PropertyStatus, Name));
         editorShell.ViewModel.IsUnitOwnershipVisible = this.IsUnitOwnership;
 
         var mainVM = App.GetService<ViewModels.MainViewModel>();
@@ -2204,9 +2196,6 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             presenter.PreferredMinimumWidth = 1274;
             presenter.PreferredMinimumHeight = 794;
         }
-
-        editorShell.Window.SetListingIdToWindow(editorShell.ViewModel.Id);
-        editorShell.Window.SetViewModelToWindow(editorShell.ViewModel);
 
         //var dpi = Windows.Win32.PInvoke.GetDpiForWindow(new Windows.Win32.Foundation.HWND(WinRT.Interop.WindowNative.GetWindowHandle(this)));
         //var scalingFactor = (float)dpi / 96;
@@ -2280,9 +2269,6 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             Debug.WriteLine("EditorWin must be initialized in the EditorShell constructor");
             return;
         }
-
-        editorWindow.SetListingIdToWindow(editorShell.ViewModel.Id);
-        editorWindow.SetViewModelToWindow(editorShell.ViewModel);
 
         mainVM.RoomEditorList.Add(editorWindow);
 

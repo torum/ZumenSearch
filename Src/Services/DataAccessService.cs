@@ -1,6 +1,8 @@
 ﻿using Microsoft.Data.Sqlite;
+using Microsoft.UI.Xaml.Data;
 using System.Data;
 using System.Diagnostics;
+using System.Xml.Linq;
 using ZumenSearch.Helpers;
 using ZumenSearch.Models.Base;
 using ZumenSearch.Models.Common;
@@ -71,6 +73,9 @@ public sealed class DataAccessService : IDataAccessService
                     "loc_choume TEXT," +
                     "loc_edaban TEXT," +
                     "loc_location_full TEXT," +
+
+
+                    "updated_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc'))," +
                     "created_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc'))" + // Last column, no comma
                     ")";
                 tableCmd.ExecuteNonQuery();
@@ -90,8 +95,7 @@ public sealed class DataAccessService : IDataAccessService
                     "remarks TEXT NOT NULL," +
 
 
-
-                    "updated_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc'))," +
+                    //"updated_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc'))," +
                     "FOREIGN KEY (property_id) REFERENCES property(property_id) ON DELETE CASCADE" +
                     ")";
                 tableCmd.ExecuteNonQuery();
@@ -265,6 +269,7 @@ public sealed class DataAccessService : IDataAccessService
         bool exists = false;
         using (var reader = cmd.ExecuteReader())
         {
+            // created_at
             while (reader.Read())
             {
                 if (reader.GetString(1) == "created_at")
@@ -279,12 +284,41 @@ public sealed class DataAccessService : IDataAccessService
 
                 try
                 {
-                    altcmd.CommandText = "ALTER TABLE property ADD COLUMN created_at TEXT NOT NULL DEFAULT '';";
+                    altcmd.CommandText = "ALTER TABLE property ADD COLUMN created_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc'));";
                     altcmd.ExecuteNonQuery();
                 }
                 catch (SqliteException ex)
                 {
                     Debug.WriteLine("SqliteException on ADD COLUMN created_at @InitializeDatabase: " + ex.Message);
+                }
+            }
+
+            reader.Close();
+        }
+
+        using (var reader = cmd.ExecuteReader())
+        {
+            exists = false;
+            while (reader.Read())
+            {
+                if (reader.GetString(1) == "updated_at")
+                {
+                    exists = true;
+                    break;
+                }
+            }
+            if (!exists)
+            {
+                var altcmd = conn.CreateCommand();
+
+                try
+                {
+                    altcmd.CommandText = "ALTER TABLE property ADD COLUMN updated_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc'));";
+                    altcmd.ExecuteNonQuery();
+                }
+                catch (SqliteException ex)
+                {
+                    Debug.WriteLine("SqliteException on ADD COLUMN updated_at @InitializeDatabase: " + ex.Message);
                 }
             }
             reader.Close();
@@ -293,7 +327,7 @@ public sealed class DataAccessService : IDataAccessService
         #endregion
 
         #region == add to rent_residentials ==
-
+        /*
         cmd.CommandText = "PRAGMA table_info(rent_residentials);";
         using (var reader = cmd.ExecuteReader())
         {
@@ -322,7 +356,7 @@ public sealed class DataAccessService : IDataAccessService
             }
             reader.Close();
         }
-
+        */
         #endregion
 
         #region == add to rent_residential_rooms ==
@@ -577,8 +611,8 @@ public sealed class DataAccessService : IDataAccessService
             {
                 // Main rent table
                 cmd.CommandType = CommandType.Text;
-                cmd.CommandText = "INSERT INTO property (property_id, name, loc_pref_id, loc_prefecture, loc_machiaza_id, loc_county, loc_city, loc_ward, loc_oaza_cho, loc_choume, loc_edaban, loc_location_full) " +
-                    "VALUES (@RentId, @Name, @LocPrefId, @LocPrefecture, @LocMachiazaId, @LocCounty, @LocCity, @LocWard, @LocOazaCho, @LocChoume, @LocEdaban, @LocLocationFull)";
+                cmd.CommandText = "INSERT INTO property (property_id, name, loc_pref_id, loc_prefecture, loc_machiaza_id, loc_county, loc_city, loc_ward, loc_oaza_cho, loc_choume, loc_edaban, loc_location_full, updated_at) " +
+                    "VALUES (@RentId, @Name, @LocPrefId, @LocPrefecture, @LocMachiazaId, @LocCounty, @LocCity, @LocWard, @LocOazaCho, @LocChoume, @LocEdaban, @LocLocationFull, @updated_at)";
 
                 cmd.Parameters.AddWithValue("@RentId", building.Id);
                 cmd.Parameters.AddWithValue("@Name", building.Name);
@@ -595,14 +629,15 @@ public sealed class DataAccessService : IDataAccessService
                 cmd.Parameters.AddWithValue("@LocLocationFull", building.LocLocationFull);
                 // TODO: more
 
+                cmd.Parameters.AddWithValue("@updated_at", DateTimeOffset.UtcNow.ToString("s"));
                 res.AffectedCount = cmd.ExecuteNonQuery();
 
                 cmd.Parameters.Clear();
 
                 // Residentials table
                 cmd.CommandType = CommandType.Text;
-                cmd.CommandText = "INSERT INTO rent_residentials (property_id, building_kind, is_unit_ownership, building_structure, aboveground_floor_count, basement_floor_count, total_unit_count, built_year_month, fudousan_id, fudousan_id_additional_code, remarks, updated_at) " +
-                    "VALUES (@RentId, @BuildingKind, @IsUnitOwnership, @BuildingStructure, @AboveGroundFloorCount, @BasementFloorCount, @TotalUnitCount, @BuiltYearMonth, @FudousanId, @FudousanIdAdditionalCode, @Remarks, @updated_at)";
+                cmd.CommandText = "INSERT INTO rent_residentials (property_id, building_kind, is_unit_ownership, building_structure, aboveground_floor_count, basement_floor_count, total_unit_count, built_year_month, fudousan_id, fudousan_id_additional_code, remarks) " +
+                    "VALUES (@RentId, @BuildingKind, @IsUnitOwnership, @BuildingStructure, @AboveGroundFloorCount, @BasementFloorCount, @TotalUnitCount, @BuiltYearMonth, @FudousanId, @FudousanIdAdditionalCode, @Remarks)";
 
                 cmd.Parameters.AddWithValue("@RentId", building.Id);
 
@@ -617,9 +652,6 @@ public sealed class DataAccessService : IDataAccessService
                 cmd.Parameters.AddWithValue("@FudousanIdAdditionalCode", building.FudousanIdAdditionalCode);
                 cmd.Parameters.AddWithValue("@Remarks", building.Remarks);
                 // TODO: more
-
-
-                cmd.Parameters.AddWithValue("@updated_at", DateTimeOffset.UtcNow.ToString("s"));
 
                 cmd.ExecuteNonQuery();
 
@@ -943,10 +975,10 @@ public sealed class DataAccessService : IDataAccessService
                 sql += string.Format("loc_oaza_cho = '{0}', ", EscapeSingleQuote(building.LocOazaCho));
                 sql += string.Format("loc_choume = '{0}', ", EscapeSingleQuote(building.LocChoume));
                 sql += string.Format("loc_edaban = '{0}', ", EscapeSingleQuote(building.LocEdaban));
-                sql += string.Format("loc_location_full = '{0}' ", EscapeSingleQuote(building.LocLocationFull)); // 最後カンマ無し 注意
-
+                sql += string.Format("loc_location_full = '{0}', ", EscapeSingleQuote(building.LocLocationFull));
                 // TODO: more
 
+                sql += String.Format("updated_at = '{0}' ", DateTimeOffset.UtcNow.ToString("s")); // 最後カンマ無し 注意
                 sql += string.Format(" WHERE property_id = '{0}'; ", building.Id);
 
                 cmd.CommandText = sql;
@@ -965,8 +997,8 @@ public sealed class DataAccessService : IDataAccessService
                 sql += string.Format(" WHERE property_id = '{0}'; ", entry.Id);
                 */
                 sql = "UPDATE rent_residentials SET " +
-                    "building_kind = @building_kind, is_unit_ownership = @is_unit_ownership, building_structure = @building_structure, aboveground_floor_count = @aboveground_floor_count, basement_floor_count = @basement_floor_count, total_unit_count = @total_unit_count, built_year_month = @built_year_month, fudousan_id = @fudousan_id, fudousan_id_additional_code = @fudousan_id_additional_code, remarks = @remarks, " + 
-                    "updated_at = @updated_at " + 
+                    "building_kind = @building_kind, is_unit_ownership = @is_unit_ownership, building_structure = @building_structure, aboveground_floor_count = @aboveground_floor_count, basement_floor_count = @basement_floor_count, total_unit_count = @total_unit_count, built_year_month = @built_year_month, fudousan_id = @fudousan_id, fudousan_id_additional_code = @fudousan_id_additional_code, remarks = @remarks " + // 最後カンマ無し 注意
+                    //"updated_at = @updated_at " + // 最後カンマ無し 注意
                     "WHERE property_id = @property_id;";
 
                 cmd.CommandText = sql;
@@ -985,7 +1017,7 @@ public sealed class DataAccessService : IDataAccessService
                 cmd.Parameters.AddWithValue("@remarks", building.Remarks);
                 // more
 
-                cmd.Parameters.AddWithValue("@updated_at", DateTimeOffset.UtcNow.ToString("s"));
+                //cmd.Parameters.AddWithValue("@updated_at", DateTimeOffset.UtcNow.ToString("s"));
 
                 cmd.ExecuteNonQuery();
 
@@ -1466,6 +1498,96 @@ public sealed class DataAccessService : IDataAccessService
         return res;
     }
 
+    public SqliteDataAccessSelectRecentPropertiesResultWrapper SelectRecentProperties()
+    {
+        var res = new SqliteDataAccessSelectRecentPropertiesResultWrapper();
+
+        _readerWriterLock.EnterReadLock();
+        try
+        {
+            using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
+            connection.Open();
+            using var cmd = connection.CreateCommand();
+            cmd.CommandText = "SELECT * FROM property ORDER BY updated_at DESC LIMIT 10"; // limit 10 for now.
+
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                var id = reader.GetString(reader.GetOrdinal("property_id")) ?? string.Empty; //Convert.ToString(reader["property_id"]);
+                if (string.IsNullOrEmpty(id))
+                {
+                    Debug.WriteLine("DataAccess::SelectRecentProperties: property_id is null or empty .");
+                    continue;
+                }
+
+                var entry = new Models.PropertySearchResultItem(id);
+
+                var name = reader.GetString(reader.GetOrdinal("name")) ?? string.Empty;//Convert.ToString(reader["name"]) ?? "";
+                entry.Name = name;
+
+                var createdAt = reader.GetString(reader.GetOrdinal("created_at")) ?? string.Empty;//Convert.ToString(reader["created_at"]) ?? string.Empty;
+                entry.CreatedAt = createdAt;
+                var updatedAt = reader.GetString(reader.GetOrdinal("updated_at")) ?? string.Empty;//Convert.ToString(reader["updated_at"]) ?? string.Empty;
+                entry.UpdatedAt = updatedAt;
+
+                res.AffectedCount++;
+
+                res.PropertySearchResult.Add(entry);
+            }
+        }
+        catch (System.Reflection.TargetInvocationException ex)
+        {
+            res.IsError = true;
+            res.Error.ErrType = ErrorObject.ErrTypes.DB;
+            res.Error.ErrCode = "";
+            res.Error.ErrDescription = "TargetInvocationException";
+            res.Error.ErrText = ex.Message;
+            res.Error.ErrDatetime = DateTime.Now;
+            res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
+            res.Error.ErrPlaceParent = "DataAccess::SelectRecentProperties";
+        }
+        catch (System.InvalidOperationException ex)
+        {
+            Debug.WriteLine("Opps. InvalidOperationException@DataAccess::SelectRecentProperties");
+
+            res.IsError = true;
+            res.Error.ErrType = ErrorObject.ErrTypes.DB;
+            res.Error.ErrCode = "";
+            res.Error.ErrDescription = "InvalidOperationException";
+            res.Error.ErrText = ex.Message;
+            res.Error.ErrDatetime = DateTime.Now;
+            res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
+            res.Error.ErrPlaceParent = "DataAccess::SelectRecentProperties";
+        }
+        catch (Exception e)
+        {
+            res.IsError = true;
+            res.Error.ErrType = ErrorObject.ErrTypes.DB;
+            res.Error.ErrCode = "";
+            if (e.InnerException != null)
+            {
+                Debug.WriteLine(e.InnerException.Message + " @DataAccess::SelectRecentProperties");
+                res.Error.ErrDescription = "InnerException";
+                res.Error.ErrText = e.InnerException.Message;
+            }
+            else
+            {
+                Debug.WriteLine(e.Message + " @DataAccess::SelectRecentProperties");
+                res.Error.ErrDescription = "Exception";
+                res.Error.ErrText = e.Message;
+            }
+            res.Error.ErrDatetime = DateTime.Now;
+            res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
+            res.Error.ErrPlaceParent = "DataAccess::SelectRecentProperties";
+        }
+        finally
+        {
+            _readerWriterLock.ExitReadLock();
+        }
+
+        return res;
+    }
+
     public SqliteDataAccessSelectRentResidentialBuildingsResultWrapper SelectRentResidentialsByNameKeyword(string keyword)
     {
         var res = new SqliteDataAccessSelectRentResidentialBuildingsResultWrapper();
@@ -1608,6 +1730,7 @@ public sealed class DataAccessService : IDataAccessService
                 "property.loc_choume as locChoume, " +
                 "property.loc_edaban as locEdaban, " +
                 "property.loc_location_full as locLocationFull, " +
+                "property.updated_at as UpdatedAt, " +
 
                 "rent_residentials.building_kind as resiBuildingKind, " +
                 "rent_residentials.is_unit_ownership as resiUnitOwnership, " +
@@ -1621,7 +1744,7 @@ public sealed class DataAccessService : IDataAccessService
                 "rent_residentials.remarks as resiRemarks, " +
                 // TODO: more fields to be added here.
 
-                "rent_residentials.updated_at as resiUpdatedAt, " +
+                //"rent_residentials.updated_at as UpdatedAt, " +
                 "property.property_id as entryId " +
                 "FROM rent_residentials INNER JOIN property USING (property_id) WHERE property.property_id = '{0}'", id);
 
@@ -1944,11 +2067,21 @@ public sealed class DataAccessService : IDataAccessService
             {
                 cmd.CommandType = CommandType.Text;
 
-                // Upsert
+                // Update updated_at in the property table.
+                var sql = "UPDATE property SET ";
+                sql += String.Format("updated_at = '{0}' ", DateTimeOffset.UtcNow.ToString("s"));
+                sql += string.Format(" WHERE property_id = '{0}'; ", rentId);
+
+                cmd.CommandText = sql;
+                cmd.ExecuteNonQuery();
+
+                cmd.Parameters.Clear();
+
+                // Upsert into rent_residential_rooms
                 var sqlInsertIntoRentLivingRoom = "INSERT INTO rent_residential_rooms (room_id, property_id, name, chinryou) VALUES (@roomId, @RentId, @Nam, @Chinryou) ";
                 sqlInsertIntoRentLivingRoom += "ON CONFLICT(room_id) ";
                 //sqlInsertIntoRentLivingRoom += string.Format("DO UPDATE SET name = '{0}'", EscapeSingleQuote(room.RoomName));
-                sqlInsertIntoRentLivingRoom += "DO UPDATE SET name = @Nam, chinryou = @Chinryou, updated_at = @Updated";
+                sqlInsertIntoRentLivingRoom += "DO UPDATE SET name = @Nam, chinryou = @Chinryou"; //, updated_at = @Updated
 
                 cmd.CommandText = sqlInsertIntoRentLivingRoom;
 
@@ -1973,7 +2106,7 @@ public sealed class DataAccessService : IDataAccessService
                 cmd.Parameters.AddWithValue("@RentId", rentId);
                 cmd.Parameters.AddWithValue("@Nam", room.Name);
                 cmd.Parameters.AddWithValue("@Chinryou", room.Chinryou);
-                cmd.Parameters.AddWithValue("@Updated", DateTimeOffset.UtcNow.ToString("s"));
+                //cmd.Parameters.AddWithValue("@Updated", DateTimeOffset.UtcNow.ToString("s"));
 
                 var result = cmd.ExecuteNonQuery();
                 if (result > 0)
@@ -1983,6 +2116,7 @@ public sealed class DataAccessService : IDataAccessService
                     room.PropertyStatus = EnumPropertyStatus.Saved;
                     room.ListingStatus = EnumListingStatus.Saved;
                 }
+                res.AffectedCount = result;
 
                 cmd.Parameters.Clear();
 

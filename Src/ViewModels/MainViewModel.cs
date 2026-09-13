@@ -9,10 +9,12 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Reflection;
 using Windows.ApplicationModel;
+using Windows.Media.Playlists;
 using ZumenSearch.Helpers;
 using ZumenSearch.Models.Base;
 using ZumenSearch.Models.Common;
 using ZumenSearch.Models.Messenger;
+using ZumenSearch.Services;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.Services.Extensions.AbstractFactory;
 using ZumenSearch.Views;
@@ -102,6 +104,16 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         }
     } = [];
 
+    public ObservableCollection<Models.PropertySearchResultItem> RecentProperties
+    {
+        get; set
+        {
+            if (SetProperty(ref field, value))
+            {
+                //
+            }
+        }
+    } = [];
 
     #endregion
 
@@ -155,6 +167,8 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
 
         InitializeDatabase();
 
+        GetRecentPropertiesCommand.Execute(null); //GetRecentProperties();
+
         // Ready to receive messages.
         this.IsActive = true;
     }
@@ -164,34 +178,40 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
     public void Receive(PropertyUpdatedMessage property)
     {
         var building = property.Value;
-        if (building is not null)
+        if (building is null)
         {
-            foreach (var item in RentResidentialBldgSearchResult)
-            {
-                if (!item.Id.Equals(building.Id))
-                {
-                    continue;
-                }
-
-                item.Name = building.Name;
-            }
+            return;
         }
+
+        foreach (var item in RentResidentialBldgSearchResult)
+        {
+            if (!item.Id.Equals(building.Id))
+            {
+                continue;
+            }
+
+            item.Name = building.Name;
+        }
+
+        GetRecentPropertiesCommand.Execute(null);
     }
 
     public void Receive(ListingUpdatedMessage listing)
     {
         var room = listing.Value;
-        if (room is not null)
+        if (room is null)
         {
-            foreach (var item in RentResidentialRoomSearchResult)
-            {
-                if (!item.Id.Equals(room.Id))
-                {
-                    continue;
-                }
+            return;
+        }
 
-                item.Name = room.Name;
+        foreach (var item in RentResidentialRoomSearchResult)
+        {
+            if (!item.Id.Equals(room.Id))
+            {
+                continue;
             }
+
+            item.Name = room.Name;
         }
     }
 
@@ -274,9 +294,38 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
     #region == Commands ==
 
     [RelayCommand]
+    private async Task GetRecentProperties()
+    {
+        /*
+        _dispatcherService.TryEnqueue(async () =>
+        {
+
+        });
+        */
+        RecentProperties.Clear();
+
+        var res = await Task.Run(() => _dataAccessService.SelectRecentProperties(), _cts.Token);
+
+        if (res.IsError)
+        {
+            Debug.WriteLine(res.Error.ErrText + Environment.NewLine + res.Error.ErrDescription + Environment.NewLine + res.Error.ErrPlace + Environment.NewLine + res.Error.ErrPlaceParent);
+
+            //ErrorMain = res.Error;
+            //IsMainErrorInfoBarVisible = true;
+
+            // TODO: Show error message to user
+        }
+        else
+        {
+            RecentProperties = new(res.PropertySearchResult);
+        }
+    }
+
+    [RelayCommand]
     private void AddNewRentResidentialBldg()
     {
-        var shell = _shellRentResidentialPropertyFactory.Create(new Models.Rent.Residentials.Bldg.Property(Guid.CreateVersion7().ToString("N"), EnumPropertyStatus.New));
+        var newId = Guid.CreateVersion7().ToString("N");
+        var shell = _shellRentResidentialPropertyFactory.Create(new Models.Rent.Residentials.Bldg.Property(newId, EnumPropertyStatus.New));
 
         BldgEditorList.Add(shell.Window);
 
@@ -288,9 +337,6 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
             presenter.PreferredMinimumWidth = 1274;
             presenter.PreferredMinimumHeight = 794;
         }
-
-        shell.Window.SetPropertyIdToWindow(shell.ViewModel.Id);
-        shell.Window.SetViewModelToWindow(shell.ViewModel);
 
         //var dpi = Windows.Win32.PInvoke.GetDpiForWindow(new Windows.Win32.Foundation.HWND(WinRT.Interop.WindowNative.GetWindowHandle(this)));
         //var scalingFactor = (float)dpi / 96;
@@ -374,14 +420,6 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
             return;
         }
 
-        editorWindow.SetPropertyIdToWindow(editorShell.ViewModel.Id);
-        editorWindow.SetViewModelToWindow(editorShell.ViewModel);
-
-        // TODO: Use WeakReferenceMessenger from CommunityToolkit.Mvvm (aka MVVM Toolkit) to send the selected search result from the MainWindow to this ViewModel.
-        // https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/messenger
-        // To update the title/name and other properties in the editor window, we need to pass the selected search result to the editor's ViewModel.
-        //editorShell.ViewModel.SetSearchResult(selected);
-
         BldgEditorList.Add(editorWindow);
 
         editorWindow.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(BldgEditorWinLeft, BldgEditorWinTop, BldgEditorWinWidth, BldgEditorWinHeight));
@@ -396,10 +434,6 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
 
         editorWindow.AppWindow.Show();
         editorWindow.Activate();
-
-        // Do I need this anymore?
-        //var mainWindow = App.GetService<MainWindow>();
-        //mainWindow?.AppWindow.MoveInZOrderBelow(editorWindow.AppWindow.Id);
 
         editorWindow.AppWindow.MoveInZOrderAtTop();
     }
@@ -490,14 +524,6 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
             Debug.WriteLine("EditorWin must be initialized in the EditorShell constructor");
             return;
         }
-
-        editorWindow.SetListingIdToWindow(editorShell.ViewModel.Id);
-        editorWindow.SetViewModelToWindow(editorShell.ViewModel);
-
-        // TODO: Use WeakReferenceMessenger from CommunityToolkit.Mvvm (aka MVVM Toolkit) to send the selected search result from the MainWindow to this ViewModel.
-        // https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/messenger
-        // To update the title/name and other properties in the editor window, we need to pass the selected search result to the editor's ViewModel.
-        //editorShell.ViewModel.SetSearchResult(selected);
 
         RoomEditorList.Add(editorWindow);
 
@@ -596,7 +622,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         return true;
     }
 
-    // 物件検索 TODO:
+    // 物件検索
     [RelayCommand(CanExecute = nameof(SearchRentResidentialBldgCanExecute))]
     private async Task SearchRentResidentialBldg(string? queryText)
     {

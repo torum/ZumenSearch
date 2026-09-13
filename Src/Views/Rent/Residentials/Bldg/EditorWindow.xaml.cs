@@ -16,10 +16,9 @@ public sealed partial class EditorWindow : Window
         InitializeComponent();
 
         ExtendsContentIntoTitleBar = true;
-        //AppWindow.SetIcon(Path.Combine(AppContext.BaseDirectory, "Assets/XmlClients.ico"));
-        //Content = null;
-        //Title = "AppDisplayName".GetLocalized();
 
+        //this.AppWindow.SetIcon(Path.Combine(AppContext.BaseDirectory, "Assets\\App.ico"));
+        this.AppWindow.SetIcon("Assets/App.ico");
     }
 
     public void SetPropertyIdToWindow(string id)

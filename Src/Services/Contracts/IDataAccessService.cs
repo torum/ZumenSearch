@@ -12,6 +12,8 @@ public interface IDataAccessService
 
     SqliteDataAccessResultWrapper DeleteRentResidential(string rentId);
 
+    SqliteDataAccessSelectRecentPropertiesResultWrapper SelectRecentProperties();
+
     SqliteDataAccessSelectRentResidentialBuildingsResultWrapper SelectRentResidentialsByNameKeyword(string keyword);
 
     SqliteDataAccessSelectRentResidentialBuildingSingleResultWrapper SelectRentResidentialById(string id);

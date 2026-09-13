@@ -43,6 +43,8 @@ public class DataAccessTransportationService : IDataAccessTransportationService
         connectionStringBuilder.DataSource = railLineDbPath;//"rail_lines.db";
 
         using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
+
+        // TODO: try catch
         connection.Open();
         using var cmd = connection.CreateCommand();
         if (string.IsNullOrEmpty(query))

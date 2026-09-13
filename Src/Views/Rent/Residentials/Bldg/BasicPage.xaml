@@ -29,13 +29,18 @@
                         <Grid Grid.Row="0" Grid.Column="0">
                             <!-- 物件名 -->
                             <StackPanel>
+                                <!--
                                 <Border Visibility="{x:Bind ViewModel.NameHasError, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}">
                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
                                         <ImageIcon x:Name="IconHostError" Source="ms-appx:///Assets/SvgIcons/ic_fluent_error_circle_16_color.svg" Width="16" Height="16" Margin="0,0,0,0"/>
                                         <TextBlock Text="{x:Bind ViewModel.NameErrorMessage, Mode=OneWay}" Margin="8,0,0,0"></TextBlock>
                                     </StackPanel>
                                 </Border>
-                                <TextBox x:Name="TextBoxName" TabIndex="0" MinWidth="200" Header="物件名" PlaceholderText="必須" MaxLength="200" Text="{x:Bind ViewModel.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom"/>
+                                -->
+                                <TextBox x:Name="TextBoxName" TabIndex="0" MinWidth="200" Header="物件名" PlaceholderText="必須" MaxLength="200" 
+                                         Text="{x:Bind ViewModel.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                         BorderBrush="{x:Bind ViewModel.IsNameHasError, Converter={StaticResource ValidationToBrushConverter}, Mode=OneWay}"
+                                         HorizontalAlignment="Stretch" VerticalAlignment="Bottom"/>
                             </StackPanel>
                         </Grid>
                         <Grid Grid.Row="0" Grid.Column="1" Margin="12,0,0,0">

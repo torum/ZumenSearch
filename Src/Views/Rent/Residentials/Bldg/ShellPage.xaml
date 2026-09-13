@@ -11,7 +11,6 @@
     mc:Ignorable="d">
     <Page.KeyboardAccelerators>
         <KeyboardAccelerator Key="Left" Modifiers="Menu" Invoked="KeyboardAccelerator_Invoked" />
-        <KeyboardAccelerator Key="S" Modifiers="Control" Invoked="KeyboardAccelerator_Invoked"/>
     </Page.KeyboardAccelerators>
     <Grid>
         <Grid.RowDefinitions>
@@ -77,7 +76,11 @@
 
                 <StackPanel Grid.Row="0" Grid.Column="1">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                        <AppBarButton Icon="Save" Label="保存" Command="{x:Bind ViewModel.SaveCommand}"/>
+                        <AppBarButton Icon="Save" Label="保存" ToolTipService.ToolTip="保存（Ctrl+S）" Command="{x:Bind ViewModel.SaveCommand}">
+                            <AppBarButton.KeyboardAccelerators>
+                                <KeyboardAccelerator Key="S" Modifiers="Control"/>
+                            </AppBarButton.KeyboardAccelerators>
+                        </AppBarButton>
                     </StackPanel>
                 </StackPanel>
 
@@ -92,19 +95,19 @@
             </Grid.RowDefinitions>
 
             <NavigationView x:Name="NavView" Grid.Row="0" Margin="36,3,36,0" PaneDisplayMode="Top" Canvas.ZIndex="0" IsTitleBarAutoPaddingEnabled="True" SelectionFollowsFocus="Disabled" IsPaneToggleButtonVisible="False" IsSettingsVisible="False" IsBackButtonVisible="Collapsed" Loaded="NavView_Loaded" ItemInvoked="NavView_ItemInvoked" BackRequested="NavView_BackRequested">
+                <NavigationView.KeyboardAccelerators>
+                    <KeyboardAccelerator Key="Left" Modifiers="Menu" Invoked="KeyboardAccelerator_Invoked" />
+                </NavigationView.KeyboardAccelerators>
                 <NavigationView.MenuItems>
-                    <!-- <NavigationViewItemHeader Content="賃貸：住居用"/>
-                    <NavigationViewItemSeparator />  -->
                     <NavigationViewItem Content="基本" Tag="ZumenSearch.Views.Rent.Residentials.Bldg.BasicPage" />
                     <NavigationViewItem Content="所在地" Tag="ZumenSearch.Views.Rent.Residentials.Bldg.LocationPage" />
                     <NavigationViewItem Content="交通" Tag="ZumenSearch.Views.Rent.Residentials.Bldg.TransportationPage" />
                     <NavigationViewItem Content="設備" Tag="ZumenSearch.Views.Rent.Residentials.Bldg.FacilitiesPage" />
                     <NavigationViewItem Content="管理" Tag="ZumenSearch.Views.Rent.Residentials.Bldg.KanriPage" />
                     <NavigationViewItem Content="写真" Tag="ZumenSearch.Views.Rent.Residentials.Bldg.PictureListPage" />
-                    <NavigationViewItem x:Name="NavigationViewItemZumen" Content="図面" Tag="ZumenSearch.Views.Rent.Residentials.Bldg.ZumenListPage"/>
-                    <!-- <NavigationViewItem Content="備考" Tag="memo" /> -->
-                    <NavigationViewItem x:Name="NavigationViewItemKasinusi" Content="貸主" Tag="ZumenSearch.Views.Rent.Residentials.Bldg.KasinusiPage"/>
-                    <NavigationViewItem x:Name="NavigationViewItemGyousya" Content="宅建業者" Tag="ZumenSearch.Views.Rent.Residentials.Bldg.GyousyaPage"/>
+                    <NavigationViewItem Content="図面" Tag="ZumenSearch.Views.Rent.Residentials.Bldg.ZumenListPage" Visibility="{x:Bind ViewModel.IsUnitOwnershipVisible, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"/>
+                    <NavigationViewItem Content="貸主" Tag="ZumenSearch.Views.Rent.Residentials.Bldg.KasinusiPage" Visibility="{x:Bind ViewModel.IsUnitOwnershipVisible, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"/>
+                    <NavigationViewItem Content="宅建業者" Tag="ZumenSearch.Views.Rent.Residentials.Bldg.GyousyaPage" Visibility="{x:Bind ViewModel.IsUnitOwnershipVisible, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"/>
                 </NavigationView.MenuItems>
 
                 <NavigationView.FooterMenuItems>

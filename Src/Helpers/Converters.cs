@@ -56,3 +56,24 @@ public partial class ErrorToBorderBrushConverter : IValueConverter
         throw new NotImplementedException();
     }
 }
+
+public partial class ValidationToBrushConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, string language)
+    {
+        // Example condition: If an 'IsValid' boolean property is false, turn the border red
+        if (value is bool hasError && hasError)
+        {
+            return new SolidColorBrush(Colors.Red);
+        }
+
+        // Default fallback color (corresponds to system default theme brush)
+        //return App.Current.Resources["TextControlBorderBrush"] as Brush;
+        return (App.Current.Resources["TextControlBorderBrush"] as Brush)!;
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, string language)
+    {
+        throw new NotImplementedException();
+    }
+}

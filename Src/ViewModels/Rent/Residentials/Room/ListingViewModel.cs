@@ -16,19 +16,27 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
 {
     #region == Public Properties ==
 
-    public string Id => _id;
-
-    public ObservableCollection<Breadcrumb> BreadcrumbItems { get; set; } =
-    [
-        new() { Name = "部屋", Page = typeof(Views.Rent.Residentials.Room.BasicPage).FullName! },
-        new() { Name = "基本", Page = typeof(Views.Rent.Residentials.Room.BasicPage).FullName! }
-    ];
+    //public string Id => _id;
 
     [ObservableProperty]
-    public partial bool IsInfoBarErrorOpen { get; set; }
+    [NotifyCanExecuteChangedFor(nameof(SaveCommand))]
+    public partial bool IsDirty { get; private set; }
 
-    [ObservableProperty]
-    public partial string InfoBarErrorMessage { get; set; } = string.Empty;
+    /*
+    public bool IsDirty
+    {
+        get;
+        private set
+        {
+            if (SetProperty(ref field, value))
+            {
+                SaveCommand.NotifyCanExecuteChanged();
+            }
+        }
+    }
+    */
+
+    #region == 画面表示関連 ==
 
     public string WindowTitle
     {
@@ -76,23 +84,11 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         }
     } = "賃貸住居用";
 
-    [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(SaveCommand))]
-    public partial bool IsDirty { get; private set; }
-
-    /*
-    public bool IsDirty
-    {
-        get;
-        private set
-        {
-            if (SetProperty(ref field, value))
-            {
-                SaveCommand.NotifyCanExecuteChanged();
-            }
-        }
-    }
-    */
+    public ObservableCollection<Breadcrumb> BreadcrumbItems { get; set; } =
+    [
+        new() { Name = "部屋", Page = typeof(Views.Rent.Residentials.Room.BasicPage).FullName! },
+        new() { Name = "基本", Page = typeof(Views.Rent.Residentials.Room.BasicPage).FullName! }
+    ];
 
     public bool IsUnitOwnershipVisible
     {
@@ -106,8 +102,27 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         }
     }
 
+    #endregion
+
+    #region == エラー関連 ==
+
+    /*
     [ObservableProperty]
     public partial bool HasErrors { get; private set; }
+    */
+
+    [ObservableProperty]
+    public partial bool IsInfoBarErrorOpen { get; set; }
+
+    [ObservableProperty]
+    public partial string InfoBarErrorMessage { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial bool IsNameHasError { get; private set; }
+
+    #endregion
+
+    #region == 基本プロパティ == 
 
     public string Name
     {
@@ -146,26 +161,9 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         }
     }
 
-    [ObservableProperty]
-    public partial bool NameHasError { get; private set; }
+    #endregion
 
-    [ObservableProperty]
-    public partial string NameErrorMessage { get; private set; } = string.Empty;
-
-    private void ValidateName(string value)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            NameErrorMessage = "部屋名（必須項目）を入力してください";
-            NameHasError = true;
-
-            HasErrors = true;
-        }
-        else
-        {
-            NameHasError = false;
-        }
-    }
+    #region == 契約条件 == 
 
     public string Chinryou
     {
@@ -205,6 +203,10 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         }
     }
 
+    #endregion
+
+    #region == 写真プロパティ ==
+
     public ObservableCollection<Models.Rent.Residentials.Room.Picture> Pictures
     {
         get;
@@ -218,6 +220,8 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
             }
         }
     } = [];
+
+    #endregion
 
     #endregion
 
@@ -260,10 +264,10 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         PopulateValues();
 
         // Reset errors
-        NameHasError = false;
+        IsNameHasError = false;
         // TODO: more.
 
-        HasErrors = false;
+        //HasErrors = false;
 
         _room.IsModified = false;
         IsDirty = false;
@@ -291,11 +295,111 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
     {
         IsUnitOwnershipVisible = isUnitOwnership.Value;
     }
-    
+
+
+    #endregion
+
+    #region == Public Methods ==
+
+    public void CleanUp()
+    {
+        foreach (var item in Pictures)
+        {
+            item.PropertyChanged -= OnPicturePropertyChanged;
+        }
+
+        Pictures.Clear();
+
+        // Unsubscribe
+        //WeakReferenceMessenger.Default.UnregisterAll(this);
+        //or
+        this.IsActive = false;
+    }
+
+    // TODO: change these below to commands.
+
+    public async Task SetNewUnitPicturesAsync(List<string> filePathList)
+    {
+        /*
+        if (filePathList is null) return;
+        if (filePathList.Count == 0) return;
+
+        Debug.WriteLine($"destDirectory={_mainViewModel.EntryDataDirectoryPath}  @SetNewUnitPicturesAsync()");
+
+        if (!Directory.Exists(_mainViewModel.EntryDataDirectoryPath))
+        {
+            Directory.CreateDirectory(_mainViewModel.EntryDataDirectoryPath);
+        }
+
+        List<string> list = [];
+
+        foreach (var filePath in filePathList)
+        {
+            if (string.IsNullOrEmpty(filePath.Trim()))
+            {
+                continue;
+            }
+
+            // TODO: check file ext for valid image type.
+            // TODO: set max file size?
+
+            // TODO: Create thumbnail image?
+
+
+            using var sourceStream = File.Open(filePath, FileMode.Open);
+
+            string newId = Guid.CreateVersion7().ToString("N");
+            string extension = Path.GetExtension(System.IO.Path.GetFileName(filePath));
+            var destFilePath = Path.Combine(_mainViewModel.EntryDataDirectoryPath, newId + extension);
+            //Debug.WriteLine($"{file} to {destFilePath}  @SetNewBuildingPicturesAsync()");
+
+            using var destinationStream = File.Create(destFilePath);
+            await sourceStream.CopyToAsync(destinationStream);
+
+            var pic = new Models.Rent.Residentials.Unit.PictureUnit(newId, destFilePath)
+            {
+                IsNew = true,
+                ParentViewModel = _mainViewModel
+            };
+
+            Pictures.Add(pic);
+
+            OpenUnitBlobDirectoryCommand.NotifyCanExecuteChanged();
+            DeleteUnitPictureCommand.NotifyCanExecuteChanged();
+
+            IsDirty = true;
+
+            // Keep track of unsaved files to delete them when discarding.
+            _unsavedUnitPictureFileList.Add(destFilePath);
+        }
+        */
+    }
+
+    public void DiscardChanges()
+    {
+        DiscardUnsavedFiles();
+
+        //_room = null;
+        IsDirty = false;
+    }
 
     #endregion
 
     #region == Private Methods ==
+
+    private bool ValidateName(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            InfoBarErrorMessage = "部屋名（必須項目）が入力されていません。保存出来ませんでした。";
+            IsNameHasError = true;
+
+            return true;
+        }
+
+        IsNameHasError = false;
+        return false;
+    }
 
     private void SetValues()
     {
@@ -307,13 +411,6 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         if (_room is null)
         {
             Debug.WriteLine("_room is null. Can't set room.");
-            return;
-        }
-
-        if (string.IsNullOrEmpty(Name))
-        {
-            // TODO: Show InfoBar?
-            HasErrors = true;
             return;
         }
 
@@ -464,92 +561,6 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
 
     #endregion
 
-    #region == Public Methods ==
-
-    public void CleanUp()
-    {
-        foreach (var item in Pictures)
-        {
-            item.PropertyChanged -= OnPicturePropertyChanged;
-        }
-
-        Pictures.Clear();
-
-        // Unsubscribe
-        //WeakReferenceMessenger.Default.UnregisterAll(this);
-        //or
-        this.IsActive = false;
-    }
-
-    // TODO: change these below to commands.
-
-    public async Task SetNewUnitPicturesAsync(List<string> filePathList)
-    {
-        /*
-        if (filePathList is null) return;
-        if (filePathList.Count == 0) return;
-
-        Debug.WriteLine($"destDirectory={_mainViewModel.EntryDataDirectoryPath}  @SetNewUnitPicturesAsync()");
-
-        if (!Directory.Exists(_mainViewModel.EntryDataDirectoryPath))
-        {
-            Directory.CreateDirectory(_mainViewModel.EntryDataDirectoryPath);
-        }
-
-        List<string> list = [];
-
-        foreach (var filePath in filePathList)
-        {
-            if (string.IsNullOrEmpty(filePath.Trim()))
-            {
-                continue;
-            }
-
-            // TODO: check file ext for valid image type.
-            // TODO: set max file size?
-
-            // TODO: Create thumbnail image?
-
-
-            using var sourceStream = File.Open(filePath, FileMode.Open);
-
-            string newId = Guid.CreateVersion7().ToString("N");
-            string extension = Path.GetExtension(System.IO.Path.GetFileName(filePath));
-            var destFilePath = Path.Combine(_mainViewModel.EntryDataDirectoryPath, newId + extension);
-            //Debug.WriteLine($"{file} to {destFilePath}  @SetNewBuildingPicturesAsync()");
-
-            using var destinationStream = File.Create(destFilePath);
-            await sourceStream.CopyToAsync(destinationStream);
-
-            var pic = new Models.Rent.Residentials.Unit.PictureUnit(newId, destFilePath)
-            {
-                IsNew = true,
-                ParentViewModel = _mainViewModel
-            };
-
-            Pictures.Add(pic);
-
-            OpenUnitBlobDirectoryCommand.NotifyCanExecuteChanged();
-            DeleteUnitPictureCommand.NotifyCanExecuteChanged();
-
-            IsDirty = true;
-
-            // Keep track of unsaved files to delete them when discarding.
-            _unsavedUnitPictureFileList.Add(destFilePath);
-        }
-        */
-    }
-
-    public void DiscardChanges()
-    {
-        DiscardUnsavedFiles();
-
-        //_room = null;
-        IsDirty = false;
-    }
-
-    #endregion
-
     #region == Commands ==
 
     [RelayCommand(CanExecute = nameof(CanSave))]
@@ -567,17 +578,14 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         }
 
         // Validate input.
-        ValidateName(Name);
-        // TODO: more.
-        if (HasErrors)
+        if (ValidateName(Name)) 
         {
-            // TODO: Show InfoBar.
-            InfoBarErrorMessage = "入力項目に誤りがあります。保存出来ませんでした。";
+            //InfoBarErrorMessage = "入力項目に誤りがあります。保存出来ませんでした。";
             IsInfoBarErrorOpen = true;
-
-            HasErrors = false;
             return;
         }
+
+        // TODO: more.
 
         SetValues();
 

@@ -46,23 +46,25 @@ public sealed partial class ShellPage : Page
     private readonly IModalDialogService _dialogService;
 
     public ShellPage(
-        Views.Rent.Residentials.Bldg.EditorWindow window, 
         Models.Rent.Residentials.Bldg.Property building,
-        IAbstractFactory<Models.Rent.Residentials.Bldg.Property, INavigationGenericService, IModalDialogService, ViewModels.Rent.Residentials.Bldg.PropertyViewModel> vmFactory, 
+        IAbstractFactory<Models.Rent.Residentials.Bldg.Property, INavigationGenericService, IModalDialogService, ViewModels.Rent.Residentials.Bldg.PropertyViewModel> vmFactory,
+        Views.Rent.Residentials.Bldg.EditorWindow window,
         INavigationGenericService navigationService, 
         IDispatcherService dispatcherService, 
         IModalDialogService dialogService)
     {
         //Debug.WriteLine($"ShellPage {building.Id}");
 
-        Window = window;
-        Window.Content = this;
-
         _navigationService = navigationService;
         _dispatcherService = dispatcherService;
         _dialogService = dialogService;
 
         ViewModel = vmFactory.Create(building, _navigationService, _dialogService);
+
+        Window = window;
+        Window.Content = this;
+        Window.SetPropertyIdToWindow(building.Id);
+        Window.SetViewModelToWindow(ViewModel);
 
         InitializeComponent();
 

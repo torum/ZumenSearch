@@ -2,6 +2,7 @@
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
@@ -11,6 +12,7 @@ using System.Diagnostics;
 using ZumenSearch.Models.Common;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.Services.Extensions.AbstractFactory;
+using ZumenSearch.Views.Rent.Residentials.Bldg;
 
 namespace ZumenSearch.Views.Rent.Residentials.Room;
 
@@ -43,23 +45,25 @@ public sealed partial class ShellPage : Page
     private readonly IModalDialogService _dialogService;
 
     public ShellPage(
-        Views.Rent.Residentials.Room.EditorWindow window, 
         Models.Rent.Residentials.Room.Listing room, 
-        IAbstractFactory<Models.Rent.Residentials.Room.Listing, Services.Contracts.INavigationGenericService, IModalDialogService, ViewModels.Rent.Residentials.Room.ListingViewModel> vmFactory, 
+        IAbstractFactory<Models.Rent.Residentials.Room.Listing, Services.Contracts.INavigationGenericService, IModalDialogService, ViewModels.Rent.Residentials.Room.ListingViewModel> vmFactory,
+        Views.Rent.Residentials.Room.EditorWindow window,
         INavigationGenericService navigationlService, 
         IDispatcherService dispatcherService, 
         IModalDialogService dialogService)
     {
         //Debug.WriteLine($"ShellPage {entry.Id}");
 
-        Window = window;
-        Window.Content = this;
-
         _navigationlService = navigationlService;
         _dispatcherService = dispatcherService;
         _dialogService = dialogService;
 
         ViewModel = vmFactory.Create(room, _navigationlService, _dialogService);
+
+        Window = window;
+        Window.Content = this;
+        Window.SetListingIdToWindow(room.Id);
+        Window.SetViewModelToWindow(ViewModel);
 
         InitializeComponent();
 

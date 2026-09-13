@@ -47,7 +47,7 @@ public class NavigationService : INavigationService
         }
         else
         {
-            Debug.WriteLine("NavigationService.NavigateTo: No valid page found for " + tag);
+            Debug.WriteLine("NavigationService.NavigateTo: No valid page found (or navigated to the same page) for " + tag);
             return false;
         }
     }

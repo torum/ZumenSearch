@@ -19,6 +19,11 @@ public sealed class SqliteDataAccessInsertResultWrapper : SqliteDataAccessResult
     //public List<EntryItem> InsertedEntries = new();
 }
 
+public sealed class SqliteDataAccessSelectRecentPropertiesResultWrapper : SqliteDataAccessResultWrapper
+{
+    public ObservableCollection<Models.PropertySearchResultItem> PropertySearchResult = [];
+}
+
 public sealed class SqliteDataAccessSelectRentResidentialBuildingsResultWrapper : SqliteDataAccessResultWrapper
 {
     public ObservableCollection<Rent.Residentials.PropertySearchResultItem> PropertySearchResult = [];
