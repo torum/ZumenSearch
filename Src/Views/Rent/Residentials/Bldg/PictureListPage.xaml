@@ -60,7 +60,7 @@
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 <Grid Grid.Row="0" Grid.Column="0">
-                                    <Image Source="{x:Bind ImageLocation}" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="280" MaxWidth="280" MaxHeight="190" MinHeight="190"/>
+                                        <Image Source="{x:Bind ThumbImage, Mode=OneWay}" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="280" MaxWidth="280" MaxHeight="190" MinHeight="190"/>
                                     <StackPanel Orientation="Vertical" Height="60" VerticalAlignment="Bottom" Padding="12" Background="{ThemeResource SystemControlBackgroundBaseMediumBrush}" Opacity=".75">
                                         <TextBlock Text="{x:Bind PictureType.Label, Mode=OneWay}" Style="{StaticResource BodyStrongTextBlockStyle}" Foreground="{ThemeResource SystemControlForegroundAltHighBrush}"/>
                                         <StackPanel Orientation="Horizontal">

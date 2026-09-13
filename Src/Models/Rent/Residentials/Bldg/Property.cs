@@ -11,8 +11,6 @@ namespace ZumenSearch.Models.Rent.Residentials.Bldg;
 // 編集用（建物）
 public sealed partial class Property : PropertyBase
 {
-    public string PropertyDataDirectoryPath { get; init; }
-
     #region == 物件に属するリスト == 
 
     // 物件に属する部屋のリスト
@@ -827,11 +825,9 @@ public sealed partial class Property : PropertyBase
     // TODO: More.
 
 
-    public Property(string id, EnumPropertyStatus status) : base(id)
+    public Property(string id, EnumPropertyKind kind, EnumPropertyStatus status) : base(id, kind)
     {
         PropertyStatus = status;
-
-        PropertyDataDirectoryPath = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(App.AppDataPictureFolder, "Rent"), "Residential_Building"), id);
     }
 
     public void SetKindTypeFromString(string Str)

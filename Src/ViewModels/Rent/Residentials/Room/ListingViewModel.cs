@@ -231,6 +231,8 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
 
     private readonly Models.Rent.Residentials.Room.Listing _room;
 
+    private readonly string _propertyDataDirectoryPath = string.Empty;
+
     // Tmp file list to hold unsaved picture files. (if entry is not saved, delete on close)
     private readonly List<string> _unsavedPictureFileList = [];
 
@@ -260,6 +262,8 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
 
         _dispatcherService = dispatcherService;
         _dataAccessService = dataAccessService;
+
+        _propertyDataDirectoryPath = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(App.AppDataPictureFolder, "Rent"), "Residential_Building"), _room.PropertyId);
 
         PopulateValues();
 
@@ -314,65 +318,6 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         //WeakReferenceMessenger.Default.UnregisterAll(this);
         //or
         this.IsActive = false;
-    }
-
-    // TODO: change these below to commands.
-
-    public async Task SetNewUnitPicturesAsync(List<string> filePathList)
-    {
-        /*
-        if (filePathList is null) return;
-        if (filePathList.Count == 0) return;
-
-        Debug.WriteLine($"destDirectory={_mainViewModel.EntryDataDirectoryPath}  @SetNewUnitPicturesAsync()");
-
-        if (!Directory.Exists(_mainViewModel.EntryDataDirectoryPath))
-        {
-            Directory.CreateDirectory(_mainViewModel.EntryDataDirectoryPath);
-        }
-
-        List<string> list = [];
-
-        foreach (var filePath in filePathList)
-        {
-            if (string.IsNullOrEmpty(filePath.Trim()))
-            {
-                continue;
-            }
-
-            // TODO: check file ext for valid image type.
-            // TODO: set max file size?
-
-            // TODO: Create thumbnail image?
-
-
-            using var sourceStream = File.Open(filePath, FileMode.Open);
-
-            string newId = Guid.CreateVersion7().ToString("N");
-            string extension = Path.GetExtension(System.IO.Path.GetFileName(filePath));
-            var destFilePath = Path.Combine(_mainViewModel.EntryDataDirectoryPath, newId + extension);
-            //Debug.WriteLine($"{file} to {destFilePath}  @SetNewBuildingPicturesAsync()");
-
-            using var destinationStream = File.Create(destFilePath);
-            await sourceStream.CopyToAsync(destinationStream);
-
-            var pic = new Models.Rent.Residentials.Unit.PictureUnit(newId, destFilePath)
-            {
-                IsNew = true,
-                ParentViewModel = _mainViewModel
-            };
-
-            Pictures.Add(pic);
-
-            OpenUnitBlobDirectoryCommand.NotifyCanExecuteChanged();
-            DeleteUnitPictureCommand.NotifyCanExecuteChanged();
-
-            IsDirty = true;
-
-            // Keep track of unsaved files to delete them when discarding.
-            _unsavedUnitPictureFileList.Add(destFilePath);
-        }
-        */
     }
 
     public void DiscardChanges()
@@ -600,6 +545,9 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
             // Update the selected search result's values such as name if it exists. Also, update building window's rooms list.
             WeakReferenceMessenger.Default.Send(new Models.Messenger.ListingUpdatedMessage(_room));
 
+            // Clear error infobar.
+            IsInfoBarErrorOpen = false;
+
             IsDirty = false;
         }
         else
@@ -610,11 +558,18 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
                 Debug.WriteLine("Error on UpsertRentResidentialUnit. @Save() in Residentials.MainViewModel");
                 Debug.WriteLine(resInsert.Error.ErrText + Environment.NewLine + resInsert.Error.ErrDescription + Environment.NewLine + resInsert.Error.ErrPlace + Environment.NewLine + resInsert.Error.ErrPlaceParent);
 
-                // TODO: return error object.
+                // TODO: fix format.
+                var errText = resInsert.Error.ErrText + Environment.NewLine + resInsert.Error.ErrDescription + Environment.NewLine + resInsert.Error.ErrPlace + Environment.NewLine + resInsert.Error.ErrPlaceParent;
+                InfoBarErrorMessage = errText;
+                IsInfoBarErrorOpen = true;
+
                 return;
             }
             else
             {
+                // Clear error infobar.
+                IsInfoBarErrorOpen = false;
+
                 _room.IsModified = false;
                 _room.PropertyStatus = EnumPropertyStatus.Saved;// just in case.
                 _room.ListingStatus = EnumListingStatus.Saved;
@@ -652,6 +607,66 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         return false;
     }
 
+    [RelayCommand(CanExecute = nameof(CanAddNewRoomPictures))]
+    public async Task AddNewRoomPictures(List<string> filePathList)
+    {
+        if (filePathList is null) return;
+        if (filePathList.Count == 0) return;
+
+        Debug.WriteLine($"destDirectory={_propertyDataDirectoryPath}  @AddNewRoomPictures()");
+        
+        if (!Directory.Exists(_propertyDataDirectoryPath))
+        {
+            Directory.CreateDirectory(_propertyDataDirectoryPath);
+        }
+
+        //List<string> list = [];
+
+        foreach (var filePath in filePathList)
+        {
+            if (string.IsNullOrEmpty(filePath.Trim()))
+            {
+                continue;
+            }
+
+            // TODO: check file ext for valid image type.
+            // TODO: set max file size?
+
+            // TODO: Create thumbnail image?
+
+
+            using var sourceStream = File.Open(filePath, FileMode.Open);
+
+            string newId = Guid.CreateVersion7().ToString("N");
+            string extension = Path.GetExtension(System.IO.Path.GetFileName(filePath));
+            var destFilePath = Path.Combine(_propertyDataDirectoryPath, newId + extension);
+            //Debug.WriteLine($"{file} to {destFilePath}  @SetNewBuildingPicturesAsync()");
+
+            using var destinationStream = File.Create(destFilePath);
+            await sourceStream.CopyToAsync(destinationStream);
+
+            var pic = new Models.Rent.Residentials.Room.Picture(newId, destFilePath)
+            {
+                IsNew = true,
+                ParentViewModel = this
+            };
+
+            Pictures.Add(pic);
+
+            OpenRoomBlobDirectoryCommand.NotifyCanExecuteChanged();
+            DeleteRoomPictureCommand.NotifyCanExecuteChanged();
+
+            IsDirty = true;
+
+            // Keep track of unsaved files to delete them when discarding.
+            _unsavedPictureFileList.Add(destFilePath);
+        }
+    }
+    private static bool CanAddNewRoomPictures()
+    {
+        return true;
+    }
+
     [RelayCommand(CanExecute = nameof(CanOpenRoomBlobDirectory))]
     public void OpenRoomBlobDirectory()
     {
@@ -672,15 +687,12 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
     }
     private bool CanOpenRoomBlobDirectory()
     {
-        /*
-        if (Directory.Exists(_mainViewModel.EntryDataDirectoryPath))
+        if (Directory.Exists(_propertyDataDirectoryPath))
         {
             return true;
         }
 
         return false;
-        */
-        return true;
     }
 
     [RelayCommand(CanExecute = nameof(CanDeleteRoomPicture))]

@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml.Media.Animation;
+using System.Collections;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -1211,6 +1212,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
     // MainViewModel creates a new instance of this class and call EditorShell.SetEntry(EntryResidentialFull) and sets this property.
     private readonly Models.Rent.Residentials.Bldg.Property _building;
 
+    private readonly string _propertyDataDirectoryPath = string.Empty;
+
     // Child windows.
     public readonly List<Views.Rent.Residentials.Room.EditorWindow> ChildEditorList = [];
 
@@ -1253,7 +1256,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         _dataAccessService = dataAccessService;
         _dataAccessLocationService = dataAccessLocationService;
 
-        //EntryDataDirectoryPath = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(App.AppDataPictureFolder, "Rent"), "Residential_Building"), _id);
+        _propertyDataDirectoryPath = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(App.AppDataPictureFolder, "Rent"), "Residential_Building"), _id);
 
         // Update title with dummy value.
         WindowTitle = string.Empty;
@@ -1348,11 +1351,11 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         if (filePathList is null) return;
         if (filePathList.Count == 0) return;
 
-        Debug.WriteLine($"destDirectory={_building.PropertyDataDirectoryPath}  @SetNewBuildingPdfsAsync()");
+        Debug.WriteLine($"destDirectory={_propertyDataDirectoryPath}  @SetNewBuildingPdfsAsync()");
 
-        if (!Directory.Exists(_building.PropertyDataDirectoryPath))
+        if (!Directory.Exists(_propertyDataDirectoryPath))
         {
-            Directory.CreateDirectory(_building.PropertyDataDirectoryPath);
+            Directory.CreateDirectory(_propertyDataDirectoryPath);
         }
 
         //List<string> list = [];
@@ -1402,7 +1405,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
                 //await bitmapImage.SetSourceAsync(stream);
 
                 string newId = Guid.CreateVersion7().ToString("N");
-                var thumbnailDestFilePath = Path.Combine(_building.PropertyDataDirectoryPath, newId + ".bmp");
+                var thumbnailDestFilePath = Path.Combine(_propertyDataDirectoryPath, newId + ".bmp");
 
                 using var destinationStream = File.Create(thumbnailDestFilePath);
                 using var managedSourceStream = stream.AsStreamForRead();
@@ -1411,7 +1414,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
                 // Keep track of unsaved files to delete them when discarding.
                 _unsavedBuildingPdfThumbnailFileList.Add(thumbnailDestFilePath);
 
-                var pdfDestFilePath = Path.Combine(_building.PropertyDataDirectoryPath, newId + extension);
+                var pdfDestFilePath = Path.Combine(_propertyDataDirectoryPath, newId + extension);
                 File.Copy(filePath, pdfDestFilePath);
 
                 // Keep track of unsaved files to delete them when discarding.
@@ -1802,15 +1805,30 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         _building.LocEdaban = (!string.IsNullOrEmpty(Edaban)) ? Edaban : string.Empty;
         _building.LocLocationFull = AddressPreview;
 
-
         //TODO: Set other properties for Entry.
         //////////////////
 
+        // Reset ThumbnailImageFilePath here.
+        _building.ThumbnailImageFilePath = string.Empty;
+
         // 写真
         _building.BuildingPictures = BuildingPictures;
+        var thumbImg = BuildingPictures.FirstOrDefault(i => i.IsMain == true);
+        if (thumbImg is not null)
+        {
+            _building.ThumbnailImageFilePath = thumbImg.ImageLocation;
+        }
 
         // 図面
         _building.BuildingPdfs = BuildingPdfs;
+        if (string.IsNullOrWhiteSpace(_building.ThumbnailImageFilePath))
+        {
+            var thumbPdf = BuildingPdfs.FirstOrDefault(i => i.IsMain == true);
+            if (thumbPdf is not null)
+            {
+                _building.ThumbnailImageFilePath = thumbPdf.ThumbnailLocation;
+            }
+        }
 
         // 部屋
         _building.Rooms = Rooms;
@@ -1952,10 +1970,10 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
         if (_building.PropertyStatus == EnumPropertyStatus.New)
         {
-            if (Directory.Exists(_building.PropertyDataDirectoryPath))
+            if (Directory.Exists(_propertyDataDirectoryPath))
             {
-                Debug.WriteLine($"Deleting folder: {_building.PropertyDataDirectoryPath}");
-                Directory.Delete(_building.PropertyDataDirectoryPath, true);
+                Debug.WriteLine($"Deleting folder: {_propertyDataDirectoryPath}");
+                Directory.Delete(_propertyDataDirectoryPath, true);
             }
         }
     }
@@ -2051,9 +2069,9 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
         //Debug.WriteLine($"destDirectory={_building.PropertyDataDirectoryPath}  @SetNewBuildingPicturesAsync()");
 
-        if (!Directory.Exists(_building.PropertyDataDirectoryPath))
+        if (!Directory.Exists(_propertyDataDirectoryPath))
         {
-            Directory.CreateDirectory(_building.PropertyDataDirectoryPath);
+            Directory.CreateDirectory(_propertyDataDirectoryPath);
         }
 
         //List<string> list = [];
@@ -2075,7 +2093,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
             string newId = Guid.CreateVersion7().ToString("N");
             string extension = Path.GetExtension(System.IO.Path.GetFileName(filePath));
-            var destFilePath = Path.Combine(_building.PropertyDataDirectoryPath, newId + extension);
+            var destFilePath = Path.Combine(_propertyDataDirectoryPath, newId + extension);
             //Debug.WriteLine($"{file} to {destFilePath}  @SetNewBuildingPicturesAsync()");
 
             using var destinationStream = File.Create(destFilePath);
@@ -2148,11 +2166,11 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
     [RelayCommand(CanExecute = nameof(CanOpenBuildingBlobDirectory))]
     private void OpenBuildingBlobDirectory()
     {
-        if (Directory.Exists(_building.PropertyDataDirectoryPath))
+        if (Directory.Exists(_propertyDataDirectoryPath))
         {
             try
             {
-                Process.Start("explorer.exe", _building.PropertyDataDirectoryPath);
+                Process.Start("explorer.exe", _propertyDataDirectoryPath);
             }
             catch (Exception ex)
             {
@@ -2163,7 +2181,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
     }
     private bool CanOpenBuildingBlobDirectory()
     {
-        if (Directory.Exists(_building.PropertyDataDirectoryPath))
+        if (Directory.Exists(_propertyDataDirectoryPath))
         {
             return true;
         }

@@ -13,8 +13,7 @@ public sealed partial class PropertySearchResultItem : PropertyBase
 {
     // TODO: more
 
-    public PropertySearchResultItem(string id) : base(id)
-
+    public PropertySearchResultItem(string id, EnumPropertyKind kind) : base(id, kind)
     {
         //
     }

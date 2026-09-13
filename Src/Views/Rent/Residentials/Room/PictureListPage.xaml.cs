@@ -56,7 +56,11 @@ public sealed partial class PictureListPage : Page
                     list.Add(file.Path);
                 }
 
-                await ViewModel.SetNewUnitPicturesAsync(list);
+                if (ViewModel.AddNewRoomPicturesCommand.CanExecute(list))
+                {
+                    await ViewModel.AddNewRoomPicturesCommand.ExecuteAsync(list);
+                    //await ViewModel.SetNewUnitPicturesAsync(list);
+                }
             }
             else
             {
@@ -64,8 +68,6 @@ public sealed partial class PictureListPage : Page
             }
 
             button.IsEnabled = true;
-
         }
-
     }
 }

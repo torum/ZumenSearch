@@ -5,6 +5,7 @@ using Microsoft.UI.Xaml.Navigation;
 using System.Collections.ObjectModel;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.ViewModels;
+using System.Diagnostics;
 
 namespace ZumenSearch.Views;
 
@@ -46,6 +47,35 @@ public sealed partial class SearchPage : Page
 
     private void BasicGridView_ItemClick(object sender, ItemClickEventArgs e)
     {
-        // TODO:
+        if (e.ClickedItem is not Models.PropertySearchResultItem item)
+        {
+            return;
+        }
+
+        if (item.PropertyKind == Models.Base.EnumPropertyKind.RentResidential)
+        {
+            if (ViewModel.EditRentResidentialBldgCommand.CanExecute(item))
+            {
+                ViewModel.EditRentResidentialBldgCommand.Execute(item);
+            }
+        }
+        else
+        {
+            // TODO: RentResidentialBldg only for now.
+            Debug.WriteLine($"EnumPropertyKind is not RentResidential @BasicGridView_ItemClick {item.PropertyKind}");
+        }
+    }
+
+    private void Image_ImageFailed(object sender, ExceptionRoutedEventArgs e)
+    {
+        if (sender is Microsoft.UI.Xaml.Controls.Image img)
+        {
+            System.Diagnostics.Debug.WriteLine($"Image failed to load: {img.Source}"); 
+            /*
+            img.Source = new Microsoft.UI.Xaml.Media.Imaging.BitmapImage(
+                new Uri("ms-appx:///Assets/FallbackPlaceholder.png")
+            );
+            */
+        }
     }
 }

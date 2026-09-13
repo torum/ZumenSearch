@@ -42,7 +42,7 @@
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
                                     <Grid Grid.Row="0" Grid.Column="0">
-                                        <Image Source="{x:Bind ThumbnailLocation}" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="280" MaxWidth="280" MaxHeight="190" MinHeight="190"/>
+                                        <Image Source="{x:Bind ThumbImage, Mode=OneWay}" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="280" MaxWidth="280" MaxHeight="190" MinHeight="190"/>
                                     </Grid>
                                     <Grid Grid.Row="0" Grid.Column="1">
                                         <StackPanel Spacing="12" Margin="24,0,6,6" MinWidth="260">

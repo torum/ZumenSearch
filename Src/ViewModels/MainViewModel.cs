@@ -191,6 +191,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
             }
 
             item.Name = building.Name;
+            item.ThumbnailImageFilePath = building.ThumbnailImageFilePath;
         }
 
         GetRecentPropertiesCommand.Execute(null);
@@ -325,7 +326,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
     private void AddNewRentResidentialBldg()
     {
         var newId = Guid.CreateVersion7().ToString("N");
-        var shell = _shellRentResidentialPropertyFactory.Create(new Models.Rent.Residentials.Bldg.Property(newId, EnumPropertyStatus.New));
+        var shell = _shellRentResidentialPropertyFactory.Create(new Models.Rent.Residentials.Bldg.Property(newId, EnumPropertyKind.RentResidential, EnumPropertyStatus.New));
 
         BldgEditorList.Add(shell.Window);
 
@@ -350,7 +351,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
     }
 
     [RelayCommand(CanExecute = nameof(EditRentResidentialBldgCanExecute))]
-    public void EditRentResidentialBldg(Models.Rent.Residentials.PropertySearchResultItem? selected)
+    public void EditRentResidentialBldg(Models.Base.PropertyBase? selected) 
     {
         var rentId = selected?.Id;
 
@@ -437,10 +438,10 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
 
         editorWindow.AppWindow.MoveInZOrderAtTop();
     }
-
-    public static bool EditRentResidentialBldgCanExecute(Models.Rent.Residentials.PropertySearchResultItem? selected)
+    public static bool EditRentResidentialBldgCanExecute(Models.Base.PropertyBase? selected)
     {
         if (selected is null)
+        //if (string.IsNullOrEmpty(rentId))
         {
             return false;
         }

@@ -89,22 +89,24 @@
 
                 <controls:SwitchPresenter Value="{x:Bind ((framework:FrameworkElement)SegmentedControl.SelectedItem).Tag, Mode=OneWay}">
                     <controls:Case Value="one">
-                        <VariableSizedWrapGrid x:Name="RentSearchTarget" Orientation="Horizontal" HorizontalAlignment="Center" MaximumRowsOrColumns="3" Margin="0">
-                            <RadioButton Content="物件名" GroupName="RentMainSearchText" IsChecked="True"/>
+                        <VariableSizedWrapGrid x:Name="RentSearchTarget" Orientation="Horizontal" HorizontalAlignment="Center" MaximumRowsOrColumns="4">
+                            <RadioButton Content="物件名" GroupName="RentMainSearchText" IsChecked="True" Margin="0,0,12,6"/>
                             <RadioButton Content="所在地" GroupName="RentMainSearchText"/>
                             <RadioButton Content="沿線名" GroupName="RentMainSearchText"/>
                             <RadioButton Content="最寄り駅" GroupName="RentMainSearchText"/>
                             <RadioButton Content="不動産ID" GroupName="RentMainSearchText"/>
+                            <RadioButton Content="宅建業者名" GroupName="RentMainSearchText"/>
                             <RadioButton Content="貸主名" GroupName="RentMainSearchText"/>
                         </VariableSizedWrapGrid>
                     </controls:Case>
                     <controls:Case Value="two">
-                        <VariableSizedWrapGrid x:Name="BuySellSearchTarget" Orientation="Horizontal" HorizontalAlignment="Center" MaximumRowsOrColumns="3" Margin="0">
-                            <RadioButton Content="物件名" GroupName="BuySellMainSearchText" IsChecked="True"/>
+                        <VariableSizedWrapGrid x:Name="BuySellSearchTarget" Orientation="Horizontal" HorizontalAlignment="Center" MaximumRowsOrColumns="4">
+                            <RadioButton Content="物件名" GroupName="BuySellMainSearchText" IsChecked="True" Margin="0,0,12,6"/>
                             <RadioButton Content="所在地" GroupName="BuySellMainSearchText"/>
                             <RadioButton Content="沿線名" GroupName="BuySellMainSearchText"/>
                             <RadioButton Content="最寄り駅" GroupName="BuySellMainSearchText"/>
                             <RadioButton Content="不動産ID" GroupName="BuySellMainSearchText"/>
+                            <RadioButton Content="宅建業者名" GroupName="RentMainSearchText"/>
                         </VariableSizedWrapGrid>
                     </controls:Case>
                 </controls:SwitchPresenter>
@@ -134,13 +136,14 @@
                     <GridView x:Name="BasicGridView" ItemsSource="{x:Bind ViewModel.RecentProperties, Mode=OneWay}" SelectionMode="Single" IsItemClickEnabled="True" ItemClick="BasicGridView_ItemClick" HorizontalAlignment="Center" HorizontalContentAlignment="Center">
                     <GridView.ItemTemplate>
                             <DataTemplate x:DataType="mod:PropertySearchResultItem">
-                            <Grid Width="200" Height="150" CornerRadius="4" Background="AliceBlue" Opacity="0.3">
-                                <!-- <Image Source="{x:Bind ImageLocation}" Stretch="UniformToFill"/>  -->
-                                <StackPanel Orientation="Vertical" Height="40" VerticalAlignment="Bottom" Padding="5,1,5,1" Background="LightGray" Opacity=".75">
-                                    <TextBlock Text="{x:Bind Name}"/>
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="Updated: " Style="{ThemeResource CaptionTextBlockStyle}" Foreground="{ThemeResource SystemControlPageTextBaseMediumBrush}"/>
-                                        <TextBlock Text="{x:Bind UpdatedAt}" Style="{ThemeResource CaptionTextBlockStyle}" Foreground="{ThemeResource SystemControlPageTextBaseMediumBrush}"/>
+                                <Grid Width="200" Height="150" CornerRadius="4" Background="Transparent">
+                                    <Image Source="{x:Bind ThumbImage, TargetNullValue={x:Null}, Mode=OneWay}" ImageFailed="Image_ImageFailed"  Stretch="UniformToFill"/>
+
+                                    <StackPanel Orientation="Vertical" Height="40" VerticalAlignment="Bottom" Padding="5,1,5,1" Background="LightGray" Opacity=".75">
+                                        <TextBlock Text="{x:Bind Name, Mode=OneWay}"/>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="Updated: " Style="{ThemeResource CaptionTextBlockStyle}" Foreground="{ThemeResource SystemControlPageTextBaseMediumBrush}"/>
+                                            <TextBlock Text="{x:Bind UpdatedAt, Mode=OneWay}" Style="{ThemeResource CaptionTextBlockStyle}" Foreground="{ThemeResource SystemControlPageTextBaseMediumBrush}"/>
                                     </StackPanel>
                                 </StackPanel>
                             </Grid>

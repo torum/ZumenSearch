@@ -6,6 +6,7 @@ using System.Xml.Linq;
 using ZumenSearch.Helpers;
 using ZumenSearch.Models.Base;
 using ZumenSearch.Models.Common;
+using ZumenSearch.Models.Rent.Residentials.Bldg;
 using ZumenSearch.Services.Contracts;
 
 namespace ZumenSearch.Services;
@@ -62,7 +63,9 @@ public sealed class DataAccessService : IDataAccessService
             {
                 tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS property (" +
                     "property_id TEXT NOT NULL PRIMARY KEY," +
+                    "property_kind TEXT NOT NULL," +
                     "name TEXT NOT NULL," +
+                    "thumbnail_path TEXT," +
                     "loc_pref_id TEXT," +
                     "loc_prefecture TEXT," +
                     "loc_machiaza_id TEXT," +
@@ -117,7 +120,7 @@ public sealed class DataAccessService : IDataAccessService
                     "property_id TEXT NOT NULL," +
                     "file_path TEXT NOT NULL," +
                     "type TEXT NOT NULL," + 
-                    "thumb_path TEXT NOT NULL," +
+                    "thumbnail_path TEXT NOT NULL," +
                     "description TEXT NOT NULL," +
                     "is_main INTEGER  NOT NULL," +
                     "created_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc'))," +
@@ -611,12 +614,13 @@ public sealed class DataAccessService : IDataAccessService
             {
                 // Main rent table
                 cmd.CommandType = CommandType.Text;
-                cmd.CommandText = "INSERT INTO property (property_id, name, loc_pref_id, loc_prefecture, loc_machiaza_id, loc_county, loc_city, loc_ward, loc_oaza_cho, loc_choume, loc_edaban, loc_location_full, updated_at) " +
-                    "VALUES (@RentId, @Name, @LocPrefId, @LocPrefecture, @LocMachiazaId, @LocCounty, @LocCity, @LocWard, @LocOazaCho, @LocChoume, @LocEdaban, @LocLocationFull, @updated_at)";
+                cmd.CommandText = "INSERT INTO property (property_id, name, property_kind, thumbnail_path, loc_pref_id, loc_prefecture, loc_machiaza_id, loc_county, loc_city, loc_ward, loc_oaza_cho, loc_choume, loc_edaban, loc_location_full, updated_at) " +
+                    "VALUES (@RentId, @Name, @PropertyKind, @Thumb, @LocPrefId, @LocPrefecture, @LocMachiazaId, @LocCounty, @LocCity, @LocWard, @LocOazaCho, @LocChoume, @LocEdaban, @LocLocationFull, @updated_at)";
 
                 cmd.Parameters.AddWithValue("@RentId", building.Id);
                 cmd.Parameters.AddWithValue("@Name", building.Name);
-
+                cmd.Parameters.AddWithValue("@PropertyKind", building.PropertyKind.ToString());
+                cmd.Parameters.AddWithValue("@Thumb", building.ThumbnailImageFilePath);
                 cmd.Parameters.AddWithValue("@LocPrefId", building.LocPrefId);
                 cmd.Parameters.AddWithValue("@LocPrefecture", building.LocPrefecture);
                 cmd.Parameters.AddWithValue("@LocMachiazaId", building.LocMachiazaId);
@@ -738,7 +742,7 @@ public sealed class DataAccessService : IDataAccessService
                             "VALUES ('{0}', '{1}', '{2}')",
                             pic.Id, building.Id, pic.ImageLocation);
                         */
-                        var sqlInsertIntoRentLivingPicture = "INSERT INTO rent_residential_pdfs (pdf_id, property_id, file_path, thumb_path, type, description, is_main) " +
+                        var sqlInsertIntoRentLivingPicture = "INSERT INTO rent_residential_pdfs (pdf_id, property_id, file_path, thumbnail_path, type, description, is_main) " +
                             "VALUES (@PdfId, @RentId, @Path, @Thumb, @Type, @Desc, @Main)";
 
                         cmd.CommandText = sqlInsertIntoRentLivingPicture;
@@ -966,6 +970,8 @@ public sealed class DataAccessService : IDataAccessService
                 // property table
                 var sql = "UPDATE property SET ";
                 sql += string.Format("name = '{0}', ", EscapeSingleQuote(building.Name));
+                sql += string.Format("property_kind = '{0}', ", EscapeSingleQuote(building.PropertyKind.ToString()));
+                sql += string.Format("thumbnail_path = '{0}', ", EscapeSingleQuote(building.ThumbnailImageFilePath));
                 sql += string.Format("loc_pref_id = '{0}', ", EscapeSingleQuote(building.LocPrefId));
                 sql += string.Format("loc_prefecture = '{0}', ", EscapeSingleQuote(building.LocPrefecture));
                 sql += string.Format("loc_machiaza_id = '{0}', ", EscapeSingleQuote(building.LocMachiazaId));
@@ -1119,7 +1125,7 @@ public sealed class DataAccessService : IDataAccessService
 
                         if (pdf.IsNew)
                         {
-                            var sqlInsertIntoRentLivingPdf = "INSERT INTO rent_residential_pdfs (pdf_id, property_id, file_path, thumb_path, type, description, is_main) " +
+                            var sqlInsertIntoRentLivingPdf = "INSERT INTO rent_residential_pdfs (pdf_id, property_id, file_path, thumbnail_path, type, description, is_main) " +
                                 "VALUES (@PdfId, @RentId, @Path, @Thumb, @Type, @Desc, @Main)";
 
                             // PDFの追加
@@ -1130,7 +1136,7 @@ public sealed class DataAccessService : IDataAccessService
                         else if (pdf.IsModified)
                         {
                             var sqlUpdateRentLivingPdf = string.Format(
-                                "UPDATE rent_residential_pdfs SET file_path = @Path, thumb_path = @Thumb, type = @Type, description = @Desc, is_main = @Main, updated_at = @Updated " +
+                                "UPDATE rent_residential_pdfs SET file_path = @Path, thumbnail_path = @Thumb, type = @Type, description = @Desc, is_main = @Main, updated_at = @Updated " +
                                 "WHERE pdf_id = '{0}'", pdf.Id);
 
                             // PDFの更新
@@ -1520,10 +1526,27 @@ public sealed class DataAccessService : IDataAccessService
                     continue;
                 }
 
-                var entry = new Models.PropertySearchResultItem(id);
+                var enumKind = EnumPropertyKind.Unknown;
+                var kind = reader.GetString(reader.GetOrdinal("property_kind")) ?? string.Empty;
+                if (!string.IsNullOrEmpty(kind))
+                {
+                    if (Enum.TryParse<Models.Base.EnumPropertyKind>(kind, out var parsedKind))
+                    {
+                        enumKind = parsedKind;
+                    }
+                    else
+                    {
+                        Debug.WriteLine($"property_kind ({kind}) parse failed. @SelectRecentProperties()");
+                    }
+                }
+
+                var entry = new Models.PropertySearchResultItem(id, enumKind);
 
                 var name = reader.GetString(reader.GetOrdinal("name")) ?? string.Empty;//Convert.ToString(reader["name"]) ?? "";
                 entry.Name = name;
+
+                var thumb = reader.GetString(reader.GetOrdinal("thumbnail_path")) ?? string.Empty;
+                entry.ThumbnailImageFilePath = thumb;
 
                 var createdAt = reader.GetString(reader.GetOrdinal("created_at")) ?? string.Empty;//Convert.ToString(reader["created_at"]) ?? string.Empty;
                 entry.CreatedAt = createdAt;
@@ -1608,11 +1631,11 @@ public sealed class DataAccessService : IDataAccessService
             using var cmd = connection.CreateCommand();
             if (keyword == "*")
             {
-                cmd.CommandText = "SELECT property.name as feedName, rent_residentials.remarks as entryTitle, property.property_id as entryId FROM rent_residentials INNER JOIN property USING (property_id)";
+                cmd.CommandText = "SELECT property.name as propertyName, property.property_kind as propertyKind, rent_residentials.remarks as entryTitle, property.property_id as entryId FROM rent_residentials INNER JOIN property USING (property_id)";
             }
             else
             {
-                cmd.CommandText = string.Format("SELECT property.name as feedName, rent_residentials.remarks as entryTitle, property.property_id as entryId FROM rent_residentials INNER JOIN property USING (property_id) WHERE property.name LIKE '%{0}%'", keyword);
+                cmd.CommandText = string.Format("SELECT property.name as propertyName, property.property_kind as propertyKind, rent_residentials.remarks as entryTitle, property.property_id as entryId FROM rent_residentials INNER JOIN property USING (property_id) WHERE property.name LIKE '%{0}%'", keyword);
             }
 
             using var reader = cmd.ExecuteReader();
@@ -1625,9 +1648,19 @@ public sealed class DataAccessService : IDataAccessService
                     continue;
                 }
 
-                var entry = new Models.Rent.Residentials.PropertySearchResultItem(s);
+                var enumKind = EnumPropertyKind.Unknown;
+                var kind = reader.GetString(reader.GetOrdinal("propertyKind")) ?? string.Empty;
+                if (!string.IsNullOrEmpty(kind))
+                {
+                    if (Enum.TryParse<Models.Base.EnumPropertyKind>(kind, out var parsedKind))
+                    {
+                        enumKind = parsedKind;
+                    }
+                }
 
-                s = Convert.ToString(reader["feedName"]) ?? "";
+                var entry = new Models.Rent.Residentials.PropertySearchResultItem(s, enumKind);
+
+                s = Convert.ToString(reader["propertyName"]) ?? "";
                 entry.Name = s;
 
                 //Debug.WriteLine($"Found rent residential entry: {entry.Name} @SelectRentResidentialsByNameKeyword() in DataAccessService");
@@ -1703,7 +1736,7 @@ public sealed class DataAccessService : IDataAccessService
     {
         var res = new SqliteDataAccessSelectRentResidentialBuildingSingleResultWrapper();
 
-        var entry = new Models.Rent.Residentials.Bldg.Property(id, EnumPropertyStatus.Saved);
+        var entry = new Models.Rent.Residentials.Bldg.Property(id, EnumPropertyKind.RentResidential, EnumPropertyStatus.Saved);
 
         if (string.IsNullOrEmpty(id))
         {
@@ -1719,7 +1752,8 @@ public sealed class DataAccessService : IDataAccessService
             connection.Open();
 
             using var cmd = connection.CreateCommand();
-            cmd.CommandText = string.Format("SELECT property.name as entryName, " +
+            cmd.CommandText = string.Format("SELECT property.name as propertyName, " +
+                "property.property_kind as propertyKind, " +
                 "property.loc_pref_id as locPrefId, " +
                 "property.loc_prefecture as locPrefecture, " +
                 "property.loc_machiaza_id as locMachiazaId, " +
@@ -1745,21 +1779,33 @@ public sealed class DataAccessService : IDataAccessService
                 // TODO: more fields to be added here.
 
                 //"rent_residentials.updated_at as UpdatedAt, " +
-                "property.property_id as entryId " +
+                "property.property_id as propertyId " +
                 "FROM rent_residentials INNER JOIN property USING (property_id) WHERE property.property_id = '{0}'", id);
 
             using (var reader = cmd.ExecuteReader())
             {
                 while (reader.Read())
                 {
-                    var s = Convert.ToString(reader["entryId"]);
+                    var s = Convert.ToString(reader["propertyId"]);
                     if (string.IsNullOrEmpty(s))
                     {
-                        Debug.WriteLine("DataAccess::SelectRentResidentialsById: entryId is null or empty for a rent residential entry.");
+                        Debug.WriteLine("DataAccess::SelectRentResidentialsById: propertyId is null or empty for a rent residential entry.");
                         continue;
                     }
 
-                    s = Convert.ToString(reader["entryName"]) ?? "";
+                    /*
+                    var enumKind = EnumPropertyKind.Unknown;
+                    var kind = reader.GetString(reader.GetOrdinal("propertyKind")) ?? string.Empty;
+                    if (!string.IsNullOrEmpty(kind))
+                    {
+                        if (Enum.TryParse<Models.Base.EnumPropertyKind>(kind, out var parsedKind))
+                        {
+                            enumKind = parsedKind;
+                        }
+                    }
+                    */
+
+                    s = Convert.ToString(reader["propertyName"]) ?? "";
                     entry.Name = s;
 
                     s = Convert.ToString(reader["locPrefId"]) ?? "";
@@ -1884,7 +1930,7 @@ public sealed class DataAccessService : IDataAccessService
                 {
                     var pdfid = Convert.ToString(reader["pdf_id"]) ?? string.Empty;
                     var pdfpath = Convert.ToString(reader["file_path"]) ?? string.Empty;
-                    var thumbpath = Convert.ToString(reader["thumb_path"]) ?? string.Empty;
+                    var thumbpath = Convert.ToString(reader["thumbnail_path"]) ?? string.Empty;
                     if (!string.IsNullOrEmpty(pdfid) && !string.IsNullOrEmpty(pdfpath) && !string.IsNullOrEmpty(thumbpath))
                     {
                         var rlpdf = new Models.Rent.Residentials.Bldg.Pdf(pdfid, pdfpath, thumbpath)
@@ -1914,7 +1960,7 @@ public sealed class DataAccessService : IDataAccessService
                     }
                     else
                     {
-                        Debug.WriteLine("pdf_id or file_path or thumb_path is null/empty.");
+                        Debug.WriteLine("pdf_id or file_path or thumbnail_path is null/empty.");
                     }
                 }
             }

@@ -1,4 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Media.Imaging;
+using System.Diagnostics;
 
 namespace ZumenSearch.Models.Base;
 
@@ -11,9 +14,22 @@ public enum EnumPropertyStatus
     New,
 }
 
-public abstract partial class PropertyBase : ObservableObject // TODO: Remove ObservableObject?
+public enum EnumPropertyKind
+{
+    RentResidential,
+    RentCommercial,
+    RentParking,
+    SaleResidential,
+    SaleCommercial,
+    SaleLand,
+    Unknown
+}
+
+public abstract partial class PropertyBase : ObservableObject
 {
     public EnumPropertyStatus PropertyStatus { get; set; } = EnumPropertyStatus.New;
+
+    public EnumPropertyKind PropertyKind { get; init; } = EnumPropertyKind.Unknown;
 
     public bool IsModified { get; set; } = false;
 
@@ -21,6 +37,47 @@ public abstract partial class PropertyBase : ObservableObject // TODO: Remove Ob
     public string Id => _id;
 
     public string Name
+    {
+        get => field ?? string.Empty; // Ensure a non-null value is returned
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;
+            }
+        }
+    }
+
+    public ImageSource? ThumbImage 
+    {
+        get => field ?? CreateThumb();
+        set; 
+    }
+
+    private BitmapImage? CreateThumb()
+    {
+        if (string.IsNullOrEmpty(ThumbnailImageFilePath))
+        {
+            //Debug.WriteLine("ThumbnailImageFilePath is empty. (PropertyBase)");
+            return null;
+        }
+
+        if (!Path.Exists(ThumbnailImageFilePath))
+        {
+            Debug.WriteLine($"File ThumbnailImageFilePath does not exists. (PropertyBase) {ThumbnailImageFilePath}");
+            return null;
+        }
+
+        BitmapImage bitmapImage = new()
+        {
+            DecodePixelWidth = 280
+        };
+        Uri uri = new(ThumbnailImageFilePath);
+        bitmapImage.UriSource = uri;
+        return bitmapImage;
+    }
+
+    public string ThumbnailImageFilePath
     {
         get => field ?? string.Empty; // Ensure a non-null value is returned
         set
@@ -96,9 +153,10 @@ public abstract partial class PropertyBase : ObservableObject // TODO: Remove Ob
 
     #endregion
 
-    protected PropertyBase(string id)
+    protected PropertyBase(string id, EnumPropertyKind kind)
     {
         _id = id;
+        PropertyKind = kind;
     }
 
     #region == Public Methods ==

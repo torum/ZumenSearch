@@ -16,7 +16,7 @@ public sealed partial class PropertySearchResultItem : PropertyBase
     public string CreatedAt = string.Empty;
     public string UpdatedAt = string.Empty;
 
-    public PropertySearchResultItem(string id) : base(id)
+    public PropertySearchResultItem(string id, EnumPropertyKind propertyKind) : base(id, propertyKind)
     {
         //
     }
