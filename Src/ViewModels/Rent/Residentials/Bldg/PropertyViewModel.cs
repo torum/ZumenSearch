@@ -1256,7 +1256,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         _dataAccessService = dataAccessService;
         _dataAccessLocationService = dataAccessLocationService;
 
-        _propertyDataDirectoryPath = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(App.AppDataPictureFolder, "Rent"), "Residential_Building"), _id);
+        // TODO:
+        _propertyDataDirectoryPath = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(App.PropertyBlobDataFolder, "Rent"), "Residential"), _id);
 
         // Update title with dummy value.
         WindowTitle = string.Empty;
@@ -1344,101 +1345,6 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
     #endregion
 
     #region == Public Methods ==
-
-    // TODO: change these to commands.
-    public async Task SetNewBuildingPdfsAsync(List<string> filePathList)
-    {
-        if (filePathList is null) return;
-        if (filePathList.Count == 0) return;
-
-        Debug.WriteLine($"destDirectory={_propertyDataDirectoryPath}  @SetNewBuildingPdfsAsync()");
-
-        if (!Directory.Exists(_propertyDataDirectoryPath))
-        {
-            Directory.CreateDirectory(_propertyDataDirectoryPath);
-        }
-
-        //List<string> list = [];
-
-        foreach (var filePath in filePathList)
-        {
-            if (string.IsNullOrEmpty(filePath.Trim()))
-            {
-                continue;
-            }
-
-            // TODO: check file ext for valid image type.
-            // TODO: set max file size?
-
-
-            string extension = Path.GetExtension(System.IO.Path.GetFileName(filePath));
-            if (!extension.Equals(".pdf")) // TODO: check case.
-            {
-                continue;
-            }
-
-            //using var sourceStream = File.Open(file, FileMode.Open);
-
-            StorageFile sfile = await StorageFile.GetFileFromPathAsync(filePath);
-            PdfDocument pdfDocument = await PdfDocument.LoadFromFileAsync(sfile);
-
-            if (pdfDocument.PageCount > 0)
-            {
-                using PdfPage pdfPage = pdfDocument.GetPage(0);
-                using var stream = new InMemoryRandomAccessStream();
-
-                // Set screen standard DPI
-                //float targetDpi = 96f;
-                //float scaleFactor = targetDpi / 72f; 
-                //uint calculatedWidth = (uint)Math.Round(pdfPage.Size.Width * scaleFactor);
-
-                var options = new PdfPageRenderOptions
-                {
-                    // Set the desired target width in pixels (e.g., 1024px)
-                    // Aspect ratio is locked; height scales automatically.
-                    DestinationWidth = 512//calculatedWidth//1024
-                };
-
-                await pdfPage.RenderToStreamAsync(stream, options);
-
-                //var bitmapImage = new BitmapImage();
-                //await bitmapImage.SetSourceAsync(stream);
-
-                string newId = Guid.CreateVersion7().ToString("N");
-                var thumbnailDestFilePath = Path.Combine(_propertyDataDirectoryPath, newId + ".bmp");
-
-                using var destinationStream = File.Create(thumbnailDestFilePath);
-                using var managedSourceStream = stream.AsStreamForRead();
-                await managedSourceStream.CopyToAsync(destinationStream);
-
-                // Keep track of unsaved files to delete them when discarding.
-                _unsavedBuildingPdfThumbnailFileList.Add(thumbnailDestFilePath);
-
-                var pdfDestFilePath = Path.Combine(_propertyDataDirectoryPath, newId + extension);
-                File.Copy(filePath, pdfDestFilePath);
-
-                // Keep track of unsaved files to delete them when discarding.
-                _unsavedBuildingPdfFileList.Add(pdfDestFilePath);
-
-                var pdf = new Models.Rent.Residentials.Bldg.Pdf(newId, pdfDestFilePath, thumbnailDestFilePath)
-                {
-                    IsNew = true,
-                    ParentViewModel = this
-                };
-
-                BuildingPdfs.Add(pdf);
-
-                OpenBuildingBlobDirectoryCommand.NotifyCanExecuteChanged();
-                DeleteBuildingPdfCommand.NotifyCanExecuteChanged();
-
-                IsDirty = true;
-            }
-            else
-            {
-                Debug.WriteLine("0 page.");
-            }
-        }
-    }
 
     public void DiscardChanges()
     {
@@ -1528,7 +1434,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
 
         // Pictures:
-        BuildingPictures = new ObservableCollection<Models.Rent.Residentials.Bldg.Picture>(_building.BuildingPictures); // create a copy.
+        BuildingPictures = new ObservableCollection<Models.Rent.Residentials.Bldg.Picture>(_building.Pictures); // create a copy.
 
         foreach (var item in BuildingPictures)
         {
@@ -1565,7 +1471,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         };
 
         // PDFs
-        BuildingPdfs = new ObservableCollection<Models.Rent.Residentials.Bldg.Pdf>(_building.BuildingPdfs); // create a copy.
+        BuildingPdfs = new ObservableCollection<Models.Rent.Residentials.Bldg.Pdf>(_building.Pdfs); // create a copy.
 
         foreach (var item in BuildingPdfs)
         {
@@ -1812,7 +1718,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         _building.ThumbnailImageFilePath = string.Empty;
 
         // 写真
-        _building.BuildingPictures = BuildingPictures;
+        _building.Pictures = BuildingPictures;
         var thumbImg = BuildingPictures.FirstOrDefault(i => i.IsMain == true);
         if (thumbImg is not null)
         {
@@ -1820,7 +1726,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         }
 
         // 図面
-        _building.BuildingPdfs = BuildingPdfs;
+        _building.Pdfs = BuildingPdfs;
         if (string.IsNullOrWhiteSpace(_building.ThumbnailImageFilePath))
         {
             var thumbPdf = BuildingPdfs.FirstOrDefault(i => i.IsMain == true);
@@ -1854,21 +1760,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         else
         {
             Debug.WriteLine("No errors on insert.");
-
-            IsDirty = false;
-
-            _unsavedBuildingPictureFileList.Clear();
-            _unsavedBuildingPdfThumbnailFileList.Clear();
-            _unsavedBuildingPdfFileList.Clear();
-
-            _building.IsModified = false;
-            _building.PropertyStatus = EnumPropertyStatus.Saved;
-
-            // Update title with dummy value.
-            WindowTitle = string.Empty;
+            return true;
         }
-
-        return true;
     }
 
     private bool SaveAsUpdate()
@@ -1889,40 +1782,6 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         else
         {
             Debug.WriteLine("No errors on update.");
-
-            IsDirty = false;
-
-            _building.IsModified = false;
-            _building.PropertyStatus = EnumPropertyStatus.Saved;
-
-            // Update title with dummy value.
-            WindowTitle = string.Empty;
-
-            // Clean up deleted picture file.
-            if (_building.BuildingPicturesToBeDeleted.Count > 0)
-            {
-                foreach (var file in _building.BuildingPicturesToBeDeleted)
-                {
-                    File.Delete(file.ImageLocation);
-                }
-                _building.BuildingPicturesToBeDeleted.Clear();
-            }
-
-            // Clean up deleted PDF and thumb file.
-            if (_building.BuildingPdfsToBeDeleted.Count > 0)
-            {
-                foreach (var file in _building.BuildingPdfsToBeDeleted)
-                {
-                    File.Delete(file.PdfLocation);
-                    File.Delete(file.ThumbnailLocation);
-                }
-                _building.BuildingPdfsToBeDeleted.Clear();
-            }
-
-            _unsavedBuildingPictureFileList.Clear();
-            _unsavedBuildingPdfThumbnailFileList.Clear();
-            _unsavedBuildingPdfFileList.Clear();
-
             return true;
         }
     }
@@ -2017,11 +1876,60 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
         if (saveResult)
         {
+            IsDirty = false;
+
+            _building.IsModified = false;
+            _building.PropertyStatus = EnumPropertyStatus.Saved;
+
+            // Update title with dummy value.
+            WindowTitle = string.Empty;
+
             // Clear error infobar.
             IsInfoBarErrorOpen = false;
 
-            // Update the selected search result's values such asname if it exists.
-            //_selectedSearchResult?.Name = Name;
+            // Clean up deleted picture file.
+            if (_building.BuildingPicturesToBeDeleted.Count > 0)
+            {
+                foreach (var file in _building.BuildingPicturesToBeDeleted)
+                {
+                    File.Delete(file.ImageLocation);
+                }
+                _building.BuildingPicturesToBeDeleted.Clear();
+            }
+
+            // Clean up deleted PDF and thumb file.
+            if (_building.BuildingPdfsToBeDeleted.Count > 0)
+            {
+                foreach (var file in _building.BuildingPdfsToBeDeleted)
+                {
+                    File.Delete(file.PdfLocation);
+                    File.Delete(file.ThumbnailLocation);
+                }
+                _building.BuildingPdfsToBeDeleted.Clear();
+            }
+
+            // Clear rooms pic and pdfs
+            if (_building.RoomsToBeDeleted.Count > 0)
+            {
+                foreach (var room in _building.RoomsToBeDeleted)
+                {
+                    foreach (var roomPic in room.Pictures)
+                    {
+                        File.Delete(roomPic.ImageLocation);
+                    }
+
+                    foreach (var roomPdf in room.Pdfs)
+                    {
+                        File.Delete(roomPdf.PdfLocation);
+                        File.Delete(roomPdf.ThumbnailLocation);
+                    }
+                }
+                _building.RoomsToBeDeleted.Clear();
+            }
+
+            _unsavedBuildingPictureFileList.Clear();
+            _unsavedBuildingPdfThumbnailFileList.Clear();
+            _unsavedBuildingPdfFileList.Clear();
 
             // Jjust in case.
             _building.PropertyStatus = EnumPropertyStatus.Saved;
@@ -2042,7 +1950,6 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
                 room.ListingStatus = EnumListingStatus.Saved;
             }
 
-            //WeakReferenceMessenger.Default.Send(new Models.Messenger.PropertyStatusUpdatedMessage(Models.Base.EnumPropertyStatus.Saved));
             WeakReferenceMessenger.Default.Send(new Models.Messenger.PropertyUpdatedMessage(_building as Models.Base.PropertyBase));
         }
     }
@@ -2057,7 +1964,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
     #endregion
 
-    #region == Pictures and Pdf related commands ==
+    #region == Pictures and Pdfs related commands ==
 
     [RelayCommand(CanExecute = nameof(CanAddNewBuildingPictures))]
     private async Task AddNewBuildingPictures(List<string> filePathList)
@@ -2116,8 +2023,13 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             _unsavedBuildingPictureFileList.Add(destFilePath);
         }
     }
-    private static bool CanAddNewBuildingPictures()
+    private static bool CanAddNewBuildingPictures(List<string> filePathList)
     {
+        if (filePathList.Count < 1)
+        {
+            return false;
+        }
+
         return true;
     }
 
@@ -2140,6 +2052,110 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
     private static bool CanDeleteBuildingPicture(Models.Rent.Residentials.Bldg.Picture picBldg)
     {
         return picBldg is not null;
+    }
+
+    [RelayCommand(CanExecute = nameof(CanAddNewBuildingPdfs))]
+    private async Task AddNewBuildingPdfs(List<string> filePathList)
+    {
+        if (filePathList is null) return;
+        if (filePathList.Count == 0) return;
+
+        Debug.WriteLine($"destDirectory={_propertyDataDirectoryPath}  @AddNewBuildingPdfs()");
+
+        if (!Directory.Exists(_propertyDataDirectoryPath))
+        {
+            Directory.CreateDirectory(_propertyDataDirectoryPath);
+        }
+
+        //List<string> list = [];
+
+        foreach (var filePath in filePathList)
+        {
+            if (string.IsNullOrEmpty(filePath.Trim()))
+            {
+                continue;
+            }
+
+            // TODO: check file ext for valid image type.
+            // TODO: set max file size?
+
+
+            string extension = Path.GetExtension(System.IO.Path.GetFileName(filePath));
+            if (!extension.Equals(".pdf")) // TODO: check case.
+            {
+                continue;
+            }
+
+            //using var sourceStream = File.Open(file, FileMode.Open);
+
+            StorageFile sfile = await StorageFile.GetFileFromPathAsync(filePath);
+            PdfDocument pdfDocument = await PdfDocument.LoadFromFileAsync(sfile);
+
+            if (pdfDocument.PageCount > 0)
+            {
+                using PdfPage pdfPage = pdfDocument.GetPage(0);
+                using var stream = new InMemoryRandomAccessStream();
+
+                // Set screen standard DPI
+                //float targetDpi = 96f;
+                //float scaleFactor = targetDpi / 72f; 
+                //uint calculatedWidth = (uint)Math.Round(pdfPage.Size.Width * scaleFactor);
+
+                var options = new PdfPageRenderOptions
+                {
+                    // Set the desired target width in pixels (e.g., 1024px)
+                    // Aspect ratio is locked; height scales automatically.
+                    DestinationWidth = 512//calculatedWidth//1024
+                };
+
+                await pdfPage.RenderToStreamAsync(stream, options);
+
+                //var bitmapImage = new BitmapImage();
+                //await bitmapImage.SetSourceAsync(stream);
+
+                string newId = Guid.CreateVersion7().ToString("N");
+                var thumbnailDestFilePath = Path.Combine(_propertyDataDirectoryPath, newId + ".bmp");
+
+                using var destinationStream = File.Create(thumbnailDestFilePath);
+                using var managedSourceStream = stream.AsStreamForRead();
+                await managedSourceStream.CopyToAsync(destinationStream);
+
+                // Keep track of unsaved files to delete them when discarding.
+                _unsavedBuildingPdfThumbnailFileList.Add(thumbnailDestFilePath);
+
+                var pdfDestFilePath = Path.Combine(_propertyDataDirectoryPath, newId + extension);
+                File.Copy(filePath, pdfDestFilePath);
+
+                // Keep track of unsaved files to delete them when discarding.
+                _unsavedBuildingPdfFileList.Add(pdfDestFilePath);
+
+                var pdf = new Models.Rent.Residentials.Bldg.Pdf(newId, pdfDestFilePath, thumbnailDestFilePath)
+                {
+                    IsNew = true,
+                    ParentViewModel = this
+                };
+
+                BuildingPdfs.Add(pdf);
+
+                OpenBuildingBlobDirectoryCommand.NotifyCanExecuteChanged();
+                DeleteBuildingPdfCommand.NotifyCanExecuteChanged();
+
+                IsDirty = true;
+            }
+            else
+            {
+                Debug.WriteLine("0 page.");
+            }
+        }
+    }
+    private static bool CanAddNewBuildingPdfs(List<string> filePathList)
+    {
+        if (filePathList.Count < 1)
+        {
+            return false;
+        }
+
+        return true;
     }
 
     [RelayCommand(CanExecute = nameof(CanDeleteBuildingPdf))]
@@ -2195,7 +2211,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
     // Add New Modal window command
     [RelayCommand]
-    private void AddNewUnit() 
+    private void AddNewRoom() 
     {
         var newId = Guid.CreateVersion7().ToString("N");
         var editorShell = _shellFactory.Create(new Models.Rent.Residentials.Room.Listing(newId, _building.Id, _building.PropertyStatus, Name));
@@ -2226,8 +2242,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         editorShell.Window.AppWindow.MoveInZOrderAtTop();
     }
 
-    [RelayCommand(CanExecute = nameof(EditSelectedUnitCanExecute))]
-    private void EditSelectedUnit(Models.Rent.Residentials.Room.Listing room)
+    [RelayCommand(CanExecute = nameof(EditSelectedRoomCanExecute))]
+    private void EditSelectedRoom(Models.Rent.Residentials.Room.Listing room)
     {
         if (room is null) return;
 
@@ -2272,8 +2288,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             catch (COMException)
             {
                 // 既に閉じられたウィンドウをリストから除去
-                mainVM.RoomEditorList.Remove(editWin);
-                ChildEditorList.Remove(editWin);
+                //mainVM.RoomEditorList.Remove(editWin);
+                //ChildEditorList.Remove(editWin);
             }
         }
 
@@ -2312,32 +2328,69 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         editorWindow.AppWindow.MoveInZOrderAtTop();
 
     }
-    public static bool EditSelectedUnitCanExecute(Models.Rent.Residentials.Room.Listing room)
+    public static bool EditSelectedRoomCanExecute(Models.Rent.Residentials.Room.Listing room)
     {
         if (room is null) return false;
         return true;
     }
 
-    [RelayCommand(CanExecute = nameof(DupeSelectedUnitCanExecute))]
-    private void DupeSelectedUnit(Models.Rent.Residentials.Room.Listing room)
+    [RelayCommand(CanExecute = nameof(DupeSelectedRoomCanExecute))]
+    private void DupeSelectedRoom(Models.Rent.Residentials.Room.Listing room)
     {
         if (room is null) return;
 
         //
     }
-    public static bool DupeSelectedUnitCanExecute(Models.Rent.Residentials.Room.Listing room)
+    public static bool DupeSelectedRoomCanExecute(Models.Rent.Residentials.Room.Listing room)
     {
         if (room is null) return false;
         return true;
     }
 
-    [RelayCommand(CanExecute = nameof(DeleteSelectedUnitCanExecute))]
-    private void DeleteSelectedUnit(Models.Rent.Residentials.Room.Listing room)
+    [RelayCommand(CanExecute = nameof(DeleteSelectedRoomCanExecute))]
+    private void DeleteSelectedRoom(Models.Rent.Residentials.Room.Listing room)
     {
         if (room is null)
         {
             return;
         }
+
+        // 
+        var mainVM = App.GetService<ViewModels.MainViewModel>();
+
+        // Check if the selected item is already being edited in another window.
+        foreach (var editWin in mainVM.RoomEditorList.ToList())
+        {
+            if (editWin.Id != room.Id)
+            {
+                continue;
+            }
+
+            //Debug.WriteLine($"Editor window for {unitId} is already open. Activating it.");
+
+            try
+            {
+                editWin.Activate();
+
+                if (editWin.Content is Views.Rent.Residentials.Room.ShellPage editShell)
+                {
+                    editShell.Window?.AppWindow.MoveInZOrderBelow(editWin.AppWindow.Id);
+                }
+
+                editWin.AppWindow.MoveInZOrderAtTop();
+
+                //isFound = true;
+
+                return;
+            }
+            catch (COMException)
+            {
+                // 既に閉じられたウィンドウをリストから除去
+                //mainVM.RoomEditorList.Remove(editWin);
+                //ChildEditorList.Remove(editWin);
+            }
+        }
+
 
         // TODO: show dialog to comfirm.
 
@@ -2348,11 +2401,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             _building.RoomsToBeDeleted.Add(room);
             IsDirty = true;
         }
-
-        // Make sure to set it to null.
-        //SelectedRoom = null;
     }
-    public static bool DeleteSelectedUnitCanExecute(Models.Rent.Residentials.Room.Listing room)
+    public static bool DeleteSelectedRoomCanExecute(Models.Rent.Residentials.Room.Listing room)
     {
         if (room is null) return false;
         return true;

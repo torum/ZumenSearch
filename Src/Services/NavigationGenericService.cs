@@ -25,7 +25,7 @@ public class NavigationGenericService : INavigationGenericService
         return _frame;
     }
 
-    public bool NavigateTo(object? selectedPage, object? _param, SlideNavigationTransitionEffect effect)
+    public bool NavigateTo(object? selectedPage, object? _param)
     {
         if (_frame is null)
         {
@@ -68,6 +68,52 @@ public class NavigationGenericService : INavigationGenericService
         else
         {
             Debug.WriteLine("NavigationGenericService.NavigateTo: No valid page found for " + tag);
+            return false;
+        }
+    }
+
+    public bool IsCurrentPageSameAs(object? selectedPage)
+    {
+        if (_frame is null)
+        {
+            Debug.WriteLine("NavigationGenericService: _frame is null. Not initialized.");
+            return false;
+        }
+        if (_pages is null)
+        {
+            Debug.WriteLine("NavigationGenericService: _pages is null. Not initialized.");
+            return false;
+        }
+
+        string? tag = null;
+        if (selectedPage is NavigationViewItem navItem)
+        {
+            tag = navItem.Tag as string;
+        }
+        else if (selectedPage is string str)
+        {
+            tag = str;
+        }
+
+        if (string.IsNullOrEmpty(tag))
+        {
+            return false;
+        }
+
+        var item = _pages.FirstOrDefault(p => p.Tag.Equals(tag));
+
+        if (item.Page is null)
+        {
+            Debug.WriteLine("NavigationGenericService.IsCurrentPage: Page is null for tag " + tag);
+            return false;
+        }
+        
+        if (item.Page == _frame.CurrentSourcePageType)
+        {
+            return true;
+        }
+        else
+        {
             return false;
         }
     }

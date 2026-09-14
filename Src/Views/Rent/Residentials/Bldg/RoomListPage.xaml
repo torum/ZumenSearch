@@ -17,14 +17,14 @@
 
         <Grid Grid.Row="0">
             <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Margin="0,0,0,0" HorizontalAlignment="Right">
-                <AppBarButton Icon="Add" Label="追加" Command="{x:Bind ViewModel.AddNewUnitCommand, Mode=OneWay}"/>
+                <AppBarButton Icon="Add" Label="追加" Command="{x:Bind ViewModel.AddNewRoomCommand, Mode=OneWay}"/>
                 <AppBarButton Icon="More" Label="その他">
                     <AppBarButton.Flyout>
                         <MenuFlyout Placement="Bottom">
-                            <MenuFlyoutItem Text="編集" Icon="Edit" Command="{x:Bind ViewModel.EditSelectedUnitCommand, Mode=OneWay}" CommandParameter="{x:Bind RoomsListView.SelectedItem, Mode=OneWay}"></MenuFlyoutItem>
-                            <MenuFlyoutItem Text="複製" Icon="Copy" Command="{x:Bind ViewModel.DupeSelectedUnitCommand, Mode=OneWay}" CommandParameter="{x:Bind RoomsListView.SelectedItem, Mode=OneWay}"></MenuFlyoutItem>
+                            <MenuFlyoutItem Text="編集" Icon="Edit" Command="{x:Bind ViewModel.EditSelectedRoomCommand, Mode=OneWay}" CommandParameter="{x:Bind RoomsListView.SelectedItem, Mode=OneWay}"></MenuFlyoutItem>
+                            <MenuFlyoutItem Text="複製" Icon="Copy" Command="{x:Bind ViewModel.DupeSelectedRoomCommand, Mode=OneWay}" CommandParameter="{x:Bind RoomsListView.SelectedItem, Mode=OneWay}"></MenuFlyoutItem>
                             <MenuFlyoutSeparator/>
-                            <MenuFlyoutItem Text="削除" Icon="Delete" Command="{x:Bind ViewModel.DeleteSelectedUnitCommand, Mode=OneWay}" CommandParameter="{x:Bind RoomsListView.SelectedItem, Mode=OneWay}"></MenuFlyoutItem>
+                            <MenuFlyoutItem Text="削除" Icon="Delete" Command="{x:Bind ViewModel.DeleteSelectedRoomCommand, Mode=OneWay}" CommandParameter="{x:Bind RoomsListView.SelectedItem, Mode=OneWay}"></MenuFlyoutItem>
                         </MenuFlyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>
@@ -36,14 +36,14 @@
                 <ItemsView x:Name="RoomsListView" Margin="0,0,0,0" ItemsSource="{x:Bind ViewModel.Rooms, Mode=OneWay}" SelectionMode="Single" AllowFocusOnInteraction="False" IsItemInvokedEnabled="False">
                     <ItemsView.ContextFlyout>
                         <MenuFlyout>
-                            <MenuFlyoutItem Text="編集" Icon="Edit" Command="{x:Bind ViewModel.EditSelectedUnitCommand}" CommandParameter="{x:Bind RoomsListView.SelectedItem, Mode=OneWay}">
+                            <MenuFlyoutItem Text="編集" Icon="Edit" Command="{x:Bind ViewModel.EditSelectedRoomCommand}" CommandParameter="{x:Bind RoomsListView.SelectedItem, Mode=OneWay}">
                                 <MenuFlyoutItem.KeyboardAccelerators>
                                     <KeyboardAccelerator Key="Enter" />
                                 </MenuFlyoutItem.KeyboardAccelerators>
                             </MenuFlyoutItem>
-                            <MenuFlyoutItem Text="複製" Icon="Copy" Command="{x:Bind ViewModel.DupeSelectedUnitCommand, Mode=OneWay}" CommandParameter="{x:Bind RoomsListView.SelectedItem, Mode=OneWay}"></MenuFlyoutItem>
+                            <MenuFlyoutItem Text="複製" Icon="Copy" Command="{x:Bind ViewModel.DupeSelectedRoomCommand, Mode=OneWay}" CommandParameter="{x:Bind RoomsListView.SelectedItem, Mode=OneWay}"></MenuFlyoutItem>
                             <MenuFlyoutSeparator/>
-                            <MenuFlyoutItem Text="削除" Icon="Delete" Command="{x:Bind ViewModel.DeleteSelectedUnitCommand, Mode=OneWay}" CommandParameter="{x:Bind RoomsListView.SelectedItem, Mode=OneWay}"></MenuFlyoutItem>
+                            <MenuFlyoutItem Text="削除" Icon="Delete" Command="{x:Bind ViewModel.DeleteSelectedRoomCommand, Mode=OneWay}" CommandParameter="{x:Bind RoomsListView.SelectedItem, Mode=OneWay}"></MenuFlyoutItem>
                         </MenuFlyout>
                     </ItemsView.ContextFlyout>
                     <ItemsView.ItemTemplate>

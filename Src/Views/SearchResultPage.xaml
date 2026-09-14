@@ -44,7 +44,21 @@
                 <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,0,3,0">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                         <AppBarButton Icon="Back" Label="戻る" Command="{x:Bind ViewModel.GoBackCommand}"/>
+                        <!--
                         <AppBarButton Icon="Add" Label="新規" Command="{x:Bind ViewModel.AddNewRentResidentialBldgCommand}"/>
+                        -->
+                        <AppBarButton Icon="Add" Label="新規">
+                            <AppBarButton.Flyout>
+                                <MenuFlyout Placement="Bottom">
+                                    <MenuFlyoutItem Text="賃貸：住居用" Command="{x:Bind ViewModel.AddNewRentResidentialBldgCommand}"/>
+                                    <MenuFlyoutItem Text="賃貸：事業用"/>
+                                    <MenuFlyoutItem Text="賃貸：駐車場"/>
+                                    <MenuFlyoutSeparator/>
+                                    <MenuFlyoutItem Text="貸主"/>
+                                    <MenuFlyoutItem Text="宅建業者"/>
+                                </MenuFlyout>
+                            </AppBarButton.Flyout>
+                        </AppBarButton>
                     </StackPanel>
                 </StackPanel>
 

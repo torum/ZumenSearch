@@ -30,7 +30,7 @@ public sealed partial class Property : PropertyBase
     public ObservableCollection<Models.Rent.Residentials.Room.Listing> RoomsToBeDeleted = [];
 
     // 物件写真（建物）リスト
-    public ObservableCollection<Picture> BuildingPictures
+    public ObservableCollection<Picture> Pictures
     {
         get;
         set
@@ -46,7 +46,7 @@ public sealed partial class Property : PropertyBase
     public ObservableCollection<Picture> BuildingPicturesToBeDeleted = [];
 
     // 図面（建物）リスト
-    public ObservableCollection<Pdf> BuildingPdfs
+    public ObservableCollection<Pdf> Pdfs
     {
         get;
         set

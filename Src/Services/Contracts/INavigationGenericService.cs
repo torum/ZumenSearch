@@ -10,5 +10,7 @@ public interface INavigationGenericService
 
     Frame? GetFrame();
 
-    bool NavigateTo(object? selectedPage, object? param, SlideNavigationTransitionEffect effect);
+    bool NavigateTo(object? selectedPage, object? param);
+
+    bool IsCurrentPageSameAs(object? selectedPage);
 }

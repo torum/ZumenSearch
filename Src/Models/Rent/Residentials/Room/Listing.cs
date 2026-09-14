@@ -39,8 +39,24 @@ public sealed partial class Listing : ListingBase
         }
     } = [];
 
+    // 部屋図面リスト
+    public ObservableCollection<Pdf> Pdfs
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;//?
+            }
+        }
+    } = [];
+
     // DBへの更新時にDBから削除されるべき部屋写真のIDリスト
     public ObservableCollection<Picture> PicturesToBeDeleted = [];
+
+    // DBへの更新時にDBから削除されるべき図面のIDリスト
+    public ObservableCollection<Pdf> PdfsToBeDeleted = [];
 
     // 賃料（円）
     public decimal Chinryou

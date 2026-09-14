@@ -1,24 +1,25 @@
-﻿using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using System.Diagnostics;
 
-namespace ZumenSearch.Views.Rent.Residentials.Bldg;
+namespace ZumenSearch.Views.Rent.Residentials.Room;
 
 public sealed partial class ZumenListPage : Page
 {
-    public ViewModels.Rent.Residentials.Bldg.PropertyViewModel? ViewModel { get; private set; }
+    public ViewModels.Rent.Residentials.Room.ListingViewModel? ViewModel { get; private set; }
 
     public ZumenListPage()
     {
-        //ViewModel = new ZumenListViewModel();//App.GetService<RentLivingEditZumenViewModel>();
+        //ViewModel = new ViewModels.Rent.Residentials.Editor.Modal.ZumenViewModel();
         InitializeComponent();
     }
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
-        if ((e.Parameter is ViewModels.Rent.Residentials.Bldg.PropertyViewModel) && (e.Parameter != null))
+        if ((e.Parameter is ViewModels.Rent.Residentials.Room.ListingViewModel) && (e.Parameter != null))
         {
-            ViewModel = e.Parameter as ViewModels.Rent.Residentials.Bldg.PropertyViewModel;
+            //_editorShell = e.Parameter as Views.Rent.Residentials.Editor.EditorShell;
+            ViewModel = e.Parameter as ViewModels.Rent.Residentials.Room.ListingViewModel;
         }
 
         base.OnNavigatedTo(e);
@@ -51,10 +52,10 @@ public sealed partial class ZumenListPage : Page
                     list.Add(file.Path);
                 }
 
-                if (ViewModel.AddNewBuildingPdfsCommand.CanExecute(list))
+                if (ViewModel.AddNewRoomPdfsCommand.CanExecute(list))
                 {
-                    await ViewModel.AddNewBuildingPdfsCommand.ExecuteAsync(list);
-                    //await ViewModel.SetNewBuildingPdfsAsync(list);
+                    await ViewModel.AddNewRoomPdfsCommand.ExecuteAsync(list);
+                    //await ViewModel.SetNewUnitPicturesAsync(list);
                 }
             }
             else
@@ -63,8 +64,6 @@ public sealed partial class ZumenListPage : Page
             }
 
             button.IsEnabled = true;
-
         }
-
     }
 }

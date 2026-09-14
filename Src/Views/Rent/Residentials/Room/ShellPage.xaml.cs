@@ -35,7 +35,7 @@ public sealed partial class ShellPage : Page
         ("ZumenSearch.Views.Rent.Residentials.Room.TransactionPage", "取引条件", typeof(Views.Rent.Residentials.Room.TransactionPage)),
         ("ZumenSearch.Views.Rent.Residentials.Room.AppliancesPage", "設備", typeof(Views.Rent.Residentials.Room.AppliancesPage)),
         ("ZumenSearch.Views.Rent.Residentials.Room.PictureListPage", "写真", typeof(Views.Rent.Residentials.Room.PictureListPage)),
-        ("ZumenSearch.Views.Rent.Residentials.Room.ZumenPage", "図面", typeof(Views.Rent.Residentials.Room.ZumenPage)),
+        ("ZumenSearch.Views.Rent.Residentials.Room.ZumenListPage", "図面", typeof(Views.Rent.Residentials.Room.ZumenListPage)),
         ("ZumenSearch.Views.Rent.Residentials.Room.KasinusiPage", "貸主", typeof(Views.Rent.Residentials.Room.KasinusiPage)),
         ("ZumenSearch.Views.Rent.Residentials.Room.GyousyaPage", "宅建業者", typeof(Views.Rent.Residentials.Room.GyousyaPage)),
     ];

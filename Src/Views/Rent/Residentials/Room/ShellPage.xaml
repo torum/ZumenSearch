@@ -104,7 +104,7 @@
                     <NavigationViewItem Content="取引条件" Tag="ZumenSearch.Views.Rent.Residentials.Room.TransactionPage"/>
                     <NavigationViewItem Content="設備" Tag="ZumenSearch.Views.Rent.Residentials.Room.AppliancesPage" />
                     <NavigationViewItem Content="写真" Tag="ZumenSearch.Views.Rent.Residentials.Room.PictureListPage" />
-                    <NavigationViewItem Content="図面" Tag="ZumenSearch.Views.Rent.Residentials.Room.ZumenPage" Visibility="{x:Bind ViewModel.IsUnitOwnershipVisible, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"/>
+                    <NavigationViewItem Content="図面" Tag="ZumenSearch.Views.Rent.Residentials.Room.ZumenListPage" Visibility="{x:Bind ViewModel.IsUnitOwnershipVisible, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"/>
                     <NavigationViewItem Content="貸主" Tag="ZumenSearch.Views.Rent.Residentials.Room.KasinusiPage" Visibility="{x:Bind ViewModel.IsUnitOwnershipVisible, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"/>
                     <NavigationViewItem Content="宅建業者" Tag="ZumenSearch.Views.Rent.Residentials.Room.GyousyaPage" Visibility="{x:Bind ViewModel.IsUnitOwnershipVisible, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"/>
                 </NavigationView.MenuItems>

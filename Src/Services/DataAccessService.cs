@@ -119,8 +119,8 @@ public sealed class DataAccessService : IDataAccessService
                     "pdf_id TEXT NOT NULL PRIMARY KEY," +
                     "property_id TEXT NOT NULL," +
                     "file_path TEXT NOT NULL," +
-                    "type TEXT NOT NULL," + 
                     "thumbnail_path TEXT NOT NULL," +
+                    "type TEXT NOT NULL," +
                     "description TEXT NOT NULL," +
                     "is_main INTEGER  NOT NULL," +
                     "created_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc'))," +
@@ -150,6 +150,23 @@ public sealed class DataAccessService : IDataAccessService
                     "type TEXT NOT NULL," + 
                     "description TEXT NOT NULL," +
                     "is_main INTEGER  NOT NULL," +
+                    "FOREIGN KEY (room_id) REFERENCES rent_residential_rooms(room_id) ON DELETE CASCADE," +
+                    "FOREIGN KEY (property_id) REFERENCES rent_residentials(property_id) ON DELETE CASCADE," + //?
+                    "FOREIGN KEY (property_id) REFERENCES property(property_id) ON DELETE CASCADE" +
+                    " )";
+                tableCmd.ExecuteNonQuery();
+
+                tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS rent_residential_room_pdfs (" +
+                    "pdf_id TEXT NOT NULL PRIMARY KEY," +
+                    "room_id TEXT NOT NULL," +
+                    "property_id TEXT NOT NULL," +
+                    "file_path TEXT NOT NULL," +
+                    "thumbnail_path TEXT NOT NULL," +
+                    "type TEXT NOT NULL," +
+                    "description TEXT NOT NULL," +
+                    "is_main INTEGER  NOT NULL," +
+                    "created_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc'))," +
+                    "updated_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc'))," +
                     "FOREIGN KEY (room_id) REFERENCES rent_residential_rooms(room_id) ON DELETE CASCADE," +
                     "FOREIGN KEY (property_id) REFERENCES rent_residentials(property_id) ON DELETE CASCADE," + //?
                     "FOREIGN KEY (property_id) REFERENCES property(property_id) ON DELETE CASCADE" +
@@ -264,12 +281,13 @@ public sealed class DataAccessService : IDataAccessService
 
     private static void AddColumnsIfNotExist(SqliteConnection conn)
     {
-        var cmd = conn.CreateCommand();
+        //var cmd = conn.CreateCommand();
+        //bool exists = false;
 
         #region == add to property ==
-
+        /*
         cmd.CommandText = "PRAGMA table_info(property);";
-        bool exists = false;
+        
         using (var reader = cmd.ExecuteReader())
         {
             // created_at
@@ -326,7 +344,7 @@ public sealed class DataAccessService : IDataAccessService
             }
             reader.Close();
         }
-
+        */
         #endregion
 
         #region == add to rent_residentials ==
@@ -363,7 +381,7 @@ public sealed class DataAccessService : IDataAccessService
         #endregion
 
         #region == add to rent_residential_rooms ==
-
+        /*
         cmd.CommandText = "PRAGMA table_info(rent_residential_rooms);";
         
         using (var reader = cmd.ExecuteReader())
@@ -454,11 +472,11 @@ public sealed class DataAccessService : IDataAccessService
 
             reader.Close();
         }
-
+        */
         #endregion
 
         #region == add to rent_residential_pdfs ==
-
+        /*
         cmd.CommandText = "PRAGMA table_info(rent_residential_pdfs);";
         using (var reader = cmd.ExecuteReader())
         {
@@ -550,11 +568,11 @@ public sealed class DataAccessService : IDataAccessService
 
             reader.Close();
         }
-
+        */
         #endregion
 
         #region == add to rent_residential_room_pictures ==
-
+        /*
         cmd.CommandText = "PRAGMA table_info(rent_residential_room_pictures);";
         exists = false;
         using (var reader = cmd.ExecuteReader())
@@ -584,7 +602,7 @@ public sealed class DataAccessService : IDataAccessService
             }
             reader.Close();
         }
-
+        */
         #endregion
     }
 
@@ -660,9 +678,9 @@ public sealed class DataAccessService : IDataAccessService
                 cmd.ExecuteNonQuery();
 
                 // Picture (building) table
-                if (building.BuildingPictures.Count > 0)
+                if (building.Pictures.Count > 0)
                 {
-                    foreach (var pic in building.BuildingPictures)
+                    foreach (var pic in building.Pictures)
                     {
                         // Insertなので全てIsNewのはず・・・
                         //if (pic.IsNew)
@@ -724,9 +742,9 @@ public sealed class DataAccessService : IDataAccessService
                 }
 
                 // PDF (building) table
-                if (building.BuildingPdfs.Count > 0)
+                if (building.Pdfs.Count > 0)
                 {
-                    foreach (var pic in building.BuildingPdfs)
+                    foreach (var pic in building.Pdfs)
                     {
                         // Insertなので全てIsNewのはず・・・
                         //if (pic.IsNew)
@@ -858,6 +876,55 @@ public sealed class DataAccessService : IDataAccessService
                                 }
                             }
                         }
+
+                        // Room PDF
+                        if (unit.Pdfs.Count > 0)
+                        {
+                            foreach (var pdf in unit.Pdfs)
+                            {
+                                // Upsert
+                                var sqlUpsertRoom = "INSERT INTO rent_residential_room_pdfs (pdf_id, room_id, property_id, file_path, thumbnail_path, type, description, is_main) VALUES (@PdfId, @roomId, @RentId, @Path, @Thumb, @type, @Desc, @Main) ";
+                                sqlUpsertRoom += "ON CONFLICT(pdf_id) ";
+                                sqlUpsertRoom += "DO UPDATE SET file_path = @Path, type = @type, description = @Desc, is_main = @Main";
+                                var exec = true;
+
+                                cmd.CommandText = sqlUpsertRoom;
+
+                                if (exec)
+                                {
+                                    // ループなので、前のパラメーターをクリアする。
+                                    cmd.Parameters.Clear();
+
+                                    cmd.Parameters.AddWithValue("@PdfId", pdf.Id);
+                                    cmd.Parameters.AddWithValue("@roomId", unit.Id);
+                                    cmd.Parameters.AddWithValue("@RentId", building.Id);
+                                    cmd.Parameters.AddWithValue("@Path", pdf.PdfLocation);
+                                    cmd.Parameters.AddWithValue("@Thumb", pdf.ThumbnailLocation);
+                                    cmd.Parameters.AddWithValue("@type", pdf.PdfType.Key.ToString());
+                                    cmd.Parameters.AddWithValue("@Desc", pdf.Description);
+                                    var paramIsMain = new SqliteParameter("@Main", System.Data.DbType.Int32);
+                                    if (pdf.IsMain)
+                                    {
+                                        paramIsMain.Value = 1;
+                                    }
+                                    else
+                                    {
+                                        paramIsMain.Value = 0;
+                                    }
+                                    cmd.Parameters.Add(paramIsMain);
+
+                                    var result = cmd.ExecuteNonQuery();
+                                    if (result > 0)
+                                    {
+                                        pdf.IsNew = false;
+                                        pdf.IsModified = false;
+                                    }
+                                }
+                            }
+                        }
+
+
+
                     }
                 }
 
@@ -1030,9 +1097,9 @@ public sealed class DataAccessService : IDataAccessService
                 cmd.Parameters.Clear();
 
                 // 写真（建物）Residentials pictures table - Insert or Update
-                if (building.BuildingPictures.Count > 0)
+                if (building.Pictures.Count > 0)
                 {
-                    foreach (var pic in building.BuildingPictures)
+                    foreach (var pic in building.Pictures)
                     {
                         var exec = false;
 
@@ -1117,9 +1184,9 @@ public sealed class DataAccessService : IDataAccessService
                 cmd.Parameters.Clear();
 
                 // PDF（建物）Residentials pdfs table - Insert or Update
-                if (building.BuildingPdfs.Count > 0)
+                if (building.Pdfs.Count > 0)
                 {
-                    foreach (var pdf in building.BuildingPdfs)
+                    foreach (var pdf in building.Pdfs)
                     {
                         var exec = false;
 
@@ -1296,6 +1363,56 @@ public sealed class DataAccessService : IDataAccessService
                                 }
                             }
                         }
+
+                        // TODO:削除リスト
+
+                        // room pdf
+                        if (room.Pdfs.Count > 0)
+                        {
+                            foreach (var pdf in room.Pdfs)
+                            {
+                                // Upsert
+                                var sqlUpsertRoom = "INSERT INTO rent_residential_room_pdfs (pdf_id, room_id, property_id, file_path, thumbnail_path, type, description, is_main) VALUES (@PdfId, @roomId, @RentId, @Path, @Thumb, @type, @Desc, @Main) ";
+                                sqlUpsertRoom += "ON CONFLICT(pdf_id) ";
+                                sqlUpsertRoom += "DO UPDATE SET file_path = @Path, type = @type, description = @Desc, is_main = @Main";
+                                exec = true;
+
+                                cmd.CommandText = sqlUpsertRoom;
+
+                                if (exec)
+                                {
+                                    // ループなので、前のパラメーターをクリアする。
+                                    cmd.Parameters.Clear();
+
+                                    cmd.Parameters.AddWithValue("@PdfId", pdf.Id);
+                                    cmd.Parameters.AddWithValue("@roomId", room.Id);
+                                    cmd.Parameters.AddWithValue("@RentId", building.Id);
+                                    cmd.Parameters.AddWithValue("@Path", pdf.PdfLocation);
+                                    cmd.Parameters.AddWithValue("@Thumb", pdf.ThumbnailLocation);
+                                    cmd.Parameters.AddWithValue("@type", pdf.PdfType.Key.ToString());
+                                    cmd.Parameters.AddWithValue("@Desc", pdf.Description);
+                                    var paramIsMain = new SqliteParameter("@Main", System.Data.DbType.Int32);
+                                    if (pdf.IsMain)
+                                    {
+                                        paramIsMain.Value = 1;
+                                    }
+                                    else
+                                    {
+                                        paramIsMain.Value = 0;
+                                    }
+                                    cmd.Parameters.Add(paramIsMain);
+
+                                    var result = cmd.ExecuteNonQuery();
+                                    if (result > 0)
+                                    {
+                                        pdf.IsNew = false;
+                                        pdf.IsModified = false;
+                                    }
+                                }
+                            }
+                        }
+
+                        // TODO:削除リスト
                     }
                 }
 
@@ -1314,10 +1431,11 @@ public sealed class DataAccessService : IDataAccessService
                         if (DelRentLivingRoomResult > 0)
                         {
                             // TODO:
-                            Debug.WriteLine("Room deleted");
+                            Debug.WriteLine("Room deleted @UpdateRentResidential in DataAccessService");
                         }
                     }
-                    building.RoomsToBeDeleted.Clear();
+                    // Let's not
+                    //building.RoomsToBeDeleted.Clear();
                 }
 
                 // Commit
@@ -1913,7 +2031,7 @@ public sealed class DataAccessService : IDataAccessService
                             rlpic.IsMain = false;
                         }
 
-                        entry.BuildingPictures.Add(rlpic);
+                        entry.Pictures.Add(rlpic);
                     }
                     else
                     {
@@ -1956,7 +2074,7 @@ public sealed class DataAccessService : IDataAccessService
                             rlpdf.IsMain = false;
                         }
 
-                        entry.BuildingPdfs.Add(rlpdf);
+                        entry.Pdfs.Add(rlpdf);
                     }
                     else
                     {
@@ -1989,46 +2107,93 @@ public sealed class DataAccessService : IDataAccessService
 
             foreach (var room in entry.Rooms)
             {
-                // 物件写真（部屋）
+                // 部屋写真
                 cmd.CommandText = string.Format("SELECT * FROM rent_residential_room_pictures WHERE room_id = '{0}'", room.Id);
-                using var reader = cmd.ExecuteReader();
-                while (reader.Read())
+                using (var reader = cmd.ExecuteReader())
                 {
-                    var picid = Convert.ToString(reader["picture_id"]) ?? string.Empty;
-                    var picpath = Convert.ToString(reader["file_path"]) ?? string.Empty;
-                    if (!string.IsNullOrEmpty(picid) && !string.IsNullOrEmpty(picpath))
+                    while (reader.Read())
                     {
-                        var rlpic = new Models.Rent.Residentials.Room.Picture(picid, picpath)
+                        var picid = Convert.ToString(reader["picture_id"]) ?? string.Empty;
+                        var picpath = Convert.ToString(reader["file_path"]) ?? string.Empty;
+                        if (!string.IsNullOrEmpty(picid) && !string.IsNullOrEmpty(picpath))
                         {
-                            Description = Convert.ToString(reader["description"]) ?? string.Empty,
+                            var rlpic = new Models.Rent.Residentials.Room.Picture(picid, picpath)
+                            {
+                                Description = Convert.ToString(reader["description"]) ?? string.Empty,
 
-                            IsNew = false,
-                            IsModified = false
-                        };
+                                IsNew = false,
+                                IsModified = false
+                            };
 
-                        var strType = Convert.ToString(reader["type"]);
-                        if (!string.IsNullOrEmpty(strType))
-                        {
-                            rlpic.SetLabelFromString(strType);
-                        }
+                            var strType = Convert.ToString(reader["type"]);
+                            if (!string.IsNullOrEmpty(strType))
+                            {
+                                rlpic.SetLabelFromString(strType);
+                            }
 
-                        var bln = Convert.ToInt32(reader["is_main"]);
-                        if (bln > 0)
-                        {
-                            rlpic.IsMain = true;
+                            var bln = Convert.ToInt32(reader["is_main"]);
+                            if (bln > 0)
+                            {
+                                rlpic.IsMain = true;
+                            }
+                            else
+                            {
+                                rlpic.IsMain = false;
+                            }
+
+                            room.Pictures.Add(rlpic);
                         }
                         else
                         {
-                            rlpic.IsMain = false;
+                            Debug.WriteLine("picture_id or file_path is null/empty.");
                         }
-
-                        room.Pictures.Add(rlpic);
-                    }
-                    else
-                    {
-                        Debug.WriteLine("picture_id or file_path is null/empty.");
                     }
                 }
+
+                // 部屋PDF
+                cmd.CommandText = string.Format("SELECT * FROM rent_residential_room_pdfs WHERE room_id = '{0}'", room.Id);
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        var pdfid = Convert.ToString(reader["pdf_id"]) ?? string.Empty;
+                        var pdfpath = Convert.ToString(reader["file_path"]) ?? string.Empty;
+                        var thumbpath = Convert.ToString(reader["thumbnail_path"]) ?? string.Empty;
+                        if (!string.IsNullOrEmpty(pdfid) && !string.IsNullOrEmpty(pdfpath) && !string.IsNullOrEmpty(thumbpath))
+                        {
+                            var rlpdf = new Models.Rent.Residentials.Room.Pdf(pdfid, pdfpath, thumbpath)
+                            {
+                                Description = Convert.ToString(reader["description"]) ?? string.Empty,
+                                IsNew = false,
+                                IsModified = false
+                            };
+
+                            var strType = Convert.ToString(reader["type"]);
+                            if (!string.IsNullOrEmpty(strType))
+                            {
+                                rlpdf.SetTypeFromString(strType);
+                            }
+
+                            var bln = Convert.ToInt32(reader["is_main"]);
+                            if (bln > 0)
+                            {
+                                rlpdf.IsMain = true;
+                            }
+                            else
+                            {
+                                rlpdf.IsMain = false;
+                            }
+
+                            room.Pdfs.Add(rlpdf);
+                        }
+                        else
+                        {
+                            Debug.WriteLine("pdf_id or file_path or thumbnail_path is null/empty.");
+                        }
+                    }
+                }
+
+
             }
 
             // Reset entry Isdirty flag.
@@ -2166,7 +2331,7 @@ public sealed class DataAccessService : IDataAccessService
 
                 cmd.Parameters.Clear();
 
-                // 写真（部屋）rent_residential_room_pictures table - Insert or Update
+                // 部屋写真 rent_residential_room_pictures table - Insert or Update
                 if (room.Pictures.Count > 0)
                 {
                     foreach (var pic in room.Pictures)
@@ -2238,7 +2403,7 @@ public sealed class DataAccessService : IDataAccessService
                     }
                 }
 
-                // 写真（部屋）の削除リストを処理
+                // 部屋写真の削除リストを処理
                 if (room.PicturesToBeDeleted.Count > 0)
                 {
                     foreach (var delr in room.PicturesToBeDeleted)
@@ -2257,6 +2422,74 @@ public sealed class DataAccessService : IDataAccessService
                     // let's not do this.
                     //room.UnitPicturesToBeDeleted.Clear();
                 }
+
+                // 部屋図面 rent_residential_room_pdfs table - Insert or Update
+                if (room.Pdfs.Count > 0)
+                {
+                    foreach (var pdf in room.Pdfs)
+                    {
+                        // Upsert
+                        var sqlUpsertRoom = "INSERT INTO rent_residential_room_pdfs (pdf_id, room_id, property_id, file_path, thumbnail_path, type, description, is_main) VALUES (@PdfId, @roomId, @RentId, @Path, @Thumb, @type, @Desc, @Main) ";
+                        sqlUpsertRoom += "ON CONFLICT(pdf_id) ";
+                        sqlUpsertRoom += "DO UPDATE SET file_path = @Path, type = @type, description = @Desc, is_main = @Main";
+                        var exec = true;
+
+                        cmd.CommandText = sqlUpsertRoom;
+
+                        if (exec)
+                        {
+                            // ループなので、前のパラメーターをクリアする。
+                            cmd.Parameters.Clear();
+
+                            cmd.Parameters.AddWithValue("@PdfId", pdf.Id);
+                            cmd.Parameters.AddWithValue("@roomId", room.Id);
+                            cmd.Parameters.AddWithValue("@RentId", rentId);
+                            cmd.Parameters.AddWithValue("@Path", pdf.PdfLocation);
+                            cmd.Parameters.AddWithValue("@Thumb", pdf.ThumbnailLocation);
+                            cmd.Parameters.AddWithValue("@type", pdf.PdfType.Key.ToString());
+                            cmd.Parameters.AddWithValue("@Desc", pdf.Description);
+                            var paramIsMain = new SqliteParameter("@Main", System.Data.DbType.Int32);
+                            if (pdf.IsMain)
+                            {
+                                paramIsMain.Value = 1;
+                            }
+                            else
+                            {
+                                paramIsMain.Value = 0;
+                            }
+                            cmd.Parameters.Add(paramIsMain);
+
+                            result = cmd.ExecuteNonQuery();
+                            if (result > 0)
+                            {
+                                pdf.IsNew = false;
+                                pdf.IsModified = false;
+                            }
+                        }
+
+                    }
+                }
+
+                // 部屋図面の削除リストを処理
+                if (room.PdfsToBeDeleted.Count > 0)
+                {
+                    foreach (var delr in room.PdfsToBeDeleted)
+                    {
+                        // 削除
+                        var sqlDeleteRentLivingRoom = string.Format("DELETE FROM rent_residential_room_pdfs WHERE pdf_id = '{0}'", delr.Id);
+
+                        cmd.CommandText = sqlDeleteRentLivingRoom;
+                        var DelRentLivingRoomResult = cmd.ExecuteNonQuery();
+                        if (DelRentLivingRoomResult > 0)
+                        {
+                            // TODO:
+                            Debug.WriteLine("Room Pdf deleted @UpdateRentResidential in DataAccessService");
+                        }
+                    }
+                    // let's not do this.
+                    //room.UnitPicturesToBeDeleted.Clear();
+                }
+
 
                 // Commit
                 cmd.Transaction.Commit();
@@ -2490,6 +2723,15 @@ public sealed class DataAccessService : IDataAccessService
                     };
 
                     //Debug.WriteLine($"Room ID: {room.Id}, Room Name: {room.RoomName}");
+
+                    // TODO:
+
+                    // pics? 
+
+                    // pdfs?
+
+
+
                     res.Room = room;
                     // break;
                 }

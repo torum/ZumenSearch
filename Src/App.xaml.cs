@@ -22,7 +22,7 @@ public partial class App : Application
     public static string AppDataFolder { get; private set; } = System.IO.Path.Combine(System.IO.Path.Combine(EnvDataFolder, AppDeveloper), AppName);
 
     // "BlobData" includes building/unit pictures, PDF and its thumbnail image files.
-    public static string AppDataPictureFolder { get; private set; } = System.IO.Path.Combine(AppDataFolder, "Blob");
+    public static string PropertyBlobDataFolder { get; private set; } = System.IO.Path.Combine(AppDataFolder, "BlobData");
 
     // Config file path
     public static string AppConfigFilePath { get; private set; } = System.IO.Path.Combine(AppDataFolder, AppName + ".config");
@@ -64,7 +64,7 @@ public partial class App : Application
             var envDataFolder = Windows.Storage.ApplicationData.Current.LocalFolder.Path;
             AppDataFolder = System.IO.Path.Combine(System.IO.Path.Combine(envDataFolder, AppDeveloper), AppName);
             AppConfigFilePath = System.IO.Path.Combine(AppDataFolder, AppName + ".config");
-            AppDataPictureFolder = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(AppDataFolder, AppDeveloper), AppName), "Pictures");
+            PropertyBlobDataFolder = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(AppDataFolder, AppDeveloper), AppName), "BlobData");
         }
 
         try
@@ -73,9 +73,9 @@ public partial class App : Application
             {
                 System.IO.Directory.CreateDirectory(App.AppDataFolder);
             }
-            if (!System.IO.Directory.Exists(App.AppDataPictureFolder))
+            if (!System.IO.Directory.Exists(App.PropertyBlobDataFolder))
             {
-                System.IO.Directory.CreateDirectory(App.AppDataPictureFolder);
+                System.IO.Directory.CreateDirectory(App.PropertyBlobDataFolder);
             }
         }
         catch (Exception ex)
