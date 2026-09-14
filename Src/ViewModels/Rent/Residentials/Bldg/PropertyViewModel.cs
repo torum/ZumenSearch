@@ -1,7 +1,10 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.UI;
 using Microsoft.UI.Windowing;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
 using System.Collections;
 using System.Collections.ObjectModel;
@@ -9,6 +12,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using Windows.Data.Pdf;
 using Windows.Storage;
 using Windows.Storage.Streams;
@@ -18,6 +22,7 @@ using ZumenSearch.Models.Common;
 using ZumenSearch.Models.Messenger;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.Services.Extensions.AbstractFactory;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace ZumenSearch.ViewModels.Rent.Residentials.Bldg;
 
@@ -208,24 +213,51 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
                 return;
             }
 
-            var text = Helpers.Common.ReplaceZenkakuNumber(value.Trim());
-
+            var text = value.Trim();
             if (string.IsNullOrEmpty(text))
             {
                 field = string.Empty;
                 IsDirty = true;
+                OnPropertyChanged();
+                return;
             }
-            else if (Helpers.Common.CanConvertToPositiveNumber(text))
+
+            /*
+            text = Helpers.Common.ReplaceZenkakuNumbers(text);
+
+            if (string.IsNullOrEmpty(text))
+            {
+                // Do nothing.
+                return;
+            }
+            */
+
+            //var regex = new Regex(@"^\d{0,4}$"); // 4 digit or less. (Alow zenkaku Full-Width)
+            var regex =  new Regex(@"^(?:\d{0,4})?$");
+            if (regex.IsMatch(text))
             {
                 field = text;
                 IsDirty = true;
+                OnPropertyChanged();
             }
             else
             {
-                // TODO: show error
+                Debug.WriteLine($"AboveGroundFloorCount: not * digits");
+                // TODO: show err?
             }
-
-            OnPropertyChanged();
+            /*
+            if (Helpers.Common.CanConvertToPositiveNumber(text))
+            {
+                field = text;
+                IsDirty = true;
+                OnPropertyChanged();
+            }
+            else
+            {
+                // Do nothing.
+                return;
+            }
+            */
         }
     }
 
@@ -245,24 +277,28 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
                 return;
             }
 
-            var text = Helpers.Common.ReplaceZenkakuNumber(value.Trim());
-
+            var text = value.Trim();
             if (string.IsNullOrEmpty(text))
             {
                 field = string.Empty;
                 IsDirty = true;
+                OnPropertyChanged();
+                return;
             }
-            else if (Helpers.Common.CanConvertToPositiveNumber(text))
+
+            //var regex = new Regex(@"^\d{0,4}$"); // 4 digit or less. (Alow zenkaku Full-Width)
+            var regex = new Regex(@"^(?:\d{0,4})?$");
+            if (regex.IsMatch(text))
             {
                 field = text;
                 IsDirty = true;
+                OnPropertyChanged();
             }
             else
             {
-                // TODO: show error
+                Debug.WriteLine($"BasementFloorCount: not * digits");
+                // TODO: show err?
             }
-
-            OnPropertyChanged();
         }
     }
 
@@ -282,24 +318,28 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
                 return;
             }
 
-            var text = Helpers.Common.ReplaceZenkakuNumber(value.Trim());
-
+            var text = value.Trim();
             if (string.IsNullOrEmpty(text))
             {
                 field = string.Empty;
                 IsDirty = true;
+                OnPropertyChanged();
+                return;
             }
-            else if (Helpers.Common.CanConvertToPositiveNumber(text))
+
+            //var regex = new Regex(@"^\d{0,5}$"); // 5 digit or less. (Alow zenkaku Full-Width)
+            var regex = new Regex(@"^(?:\d{0,5})?$");
+            if (regex.IsMatch(text))
             {
                 field = text;
                 IsDirty = true;
+                OnPropertyChanged();
             }
             else
             {
-                // TODO: show error
+                Debug.WriteLine($"TotalUnitCount: not * digits");
+                // TODO: show err?
             }
-
-            OnPropertyChanged();
         }
     }
 
@@ -346,10 +386,51 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         {
             // TODO: check 13桁.
 
-            if (SetProperty(ref field, value.Trim()))
+            if (field == value)
             {
-                IsDirty = true;
+                return;
             }
+
+            if (value is null)
+            {
+                return;
+            }
+
+            var text = value.Trim();
+            if (string.IsNullOrEmpty(text))
+            {
+                field = string.Empty;
+                IsDirty = true;
+                OnPropertyChanged();
+                return;
+            }
+
+            var regex = new Regex(@"^(?:\d{13})?$");
+            if (regex.IsMatch(text))
+            {
+                field = text;
+                IsDirty = true;
+                OnPropertyChanged();
+            }
+            else
+            {
+                //Debug.WriteLine($"FudousanId: not 13 digits");
+                // TODO: show err?
+            }
+
+            /*
+            if (Helpers.Common.CanConvertToPositiveNumber(text))
+            {
+                field = text;
+                IsDirty = true;
+                OnPropertyChanged();
+            }
+            else
+            {
+                // Do nothing.
+                return;
+            }
+            */
         }
     }
 
@@ -361,10 +442,50 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         {
             // TODO: check （４桁）
 
-            if (SetProperty(ref field, value.Trim()))
+            if (field == value)
             {
-                IsDirty = true;
+                return;
             }
+
+            if (value is null)
+            {
+                return;
+            }
+
+            var text = value.Trim();
+            if (string.IsNullOrEmpty(text))
+            {
+                field = string.Empty;
+                IsDirty = true;
+                OnPropertyChanged();
+                return;
+            }
+
+            var regex = new Regex(@"^(?:\d{4})?$");
+            if (regex.IsMatch(text))
+            {
+                field = text;
+                IsDirty = true;
+                OnPropertyChanged();
+            }
+            else
+            {
+                //Debug.WriteLine($"FudousanIdAdditionalCode: not 4 digits");
+                // TODO: show err?
+            }
+            /*
+            if (Helpers.Common.CanConvertToPositiveNumber(text))
+            {
+                field = text;
+                IsDirty = true;
+                OnPropertyChanged();
+            }
+            else
+            {
+                // Do nothing.
+                return;
+            }
+            */
         }
     } = "0000";
 
@@ -724,22 +845,28 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             {
                 return;
             }
+            var text = value.Trim();
+            if (string.IsNullOrEmpty(text))
+            {
+                field = string.Empty;
+                IsDirty = true;
+                OnPropertyChanged();
+                return;
+            }
 
-            var text = Helpers.Common.ReplaceZenkakuNumber(value.Trim());
-
-            if (Helpers.Common.CanConvertToPositiveNumber(text))
+            //var regex = new Regex(@"^\d{0,4}$"); // 4 digit or less. (Alow zenkaku Full-Width)
+            var regex = new Regex(@"^(?:\d{0,4})?$");
+            if (regex.IsMatch(text))
             {
                 field = text;
                 IsDirty = true;
+                OnPropertyChanged();
             }
             else
             {
-                // TODO: show error
-                field = string.Empty;
-                //IsDirty = true;
+                //Debug.WriteLine($"EkiToho1: not * digits");
+                // TODO: show err?
             }
-
-            OnPropertyChanged(nameof(EkiToho1));
         }
     } = string.Empty;
 
@@ -770,21 +897,28 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
                 return;
             }
 
-            var text = Helpers.Common.ReplaceZenkakuNumber(value.Trim());
+            var text = value.Trim();
+            if (string.IsNullOrEmpty(text))
+            {
+                field = string.Empty;
+                IsDirty = true;
+                OnPropertyChanged();
+                return;
+            }
 
-            if (Helpers.Common.CanConvertToPositiveNumber(text))
+            //var regex = new Regex(@"^\d{0,4}$"); // 4 digit or less. (Alow zenkaku Full-Width)
+            var regex = new Regex(@"^(?:\d{0,4})?$");
+            if (regex.IsMatch(text))
             {
                 field = text;
                 IsDirty = true;
+                OnPropertyChanged();
             }
             else
             {
-                // TODO: show error
-                field = string.Empty;
-                //IsDirty = true;
+                //Debug.WriteLine($"BusJyousya1: not * digits");
+                // TODO: show err?
             }
-
-            OnPropertyChanged(nameof(BusJyousya1));
         }
     } = string.Empty;
 
@@ -803,21 +937,28 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
                 return;
             }
 
-            var text = Helpers.Common.ReplaceZenkakuNumber(value.Trim());
+            var text = value.Trim();
+            if (string.IsNullOrEmpty(text))
+            {
+                field = string.Empty;
+                IsDirty = true;
+                OnPropertyChanged();
+                return;
+            }
 
-            if (Helpers.Common.CanConvertToPositiveNumber(text))
+            //var regex = new Regex(@"^\d{0,4}$"); // 4 digit or less. (Alow zenkaku Full-Width)
+            var regex = new Regex(@"^(?:\d{0,4})?$");
+            if (regex.IsMatch(text))
             {
                 field = text;
                 IsDirty = true;
+                OnPropertyChanged();
             }
             else
             {
-                // TODO: show error
-                field = string.Empty;
-                //IsDirty = true;
+                //Debug.WriteLine($"BusJyousya1: not * digits");
+                // TODO: show err?
             }
-
-            OnPropertyChanged(nameof(BusStopToho1));
         }
     } = string.Empty;
 
@@ -1230,7 +1371,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
     private readonly IDataAccessService _dataAccessService;
     private readonly IDataAccessLocationService _dataAccessLocationService;
     private readonly IDispatcherService _dispatcherService;
-    private readonly IModalDialogService _dialogService;
+    private readonly IDialogGenericService _dialogService;
     private readonly INavigationGenericService _navigationService;
 
     #endregion
@@ -1238,7 +1379,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
     public PropertyViewModel(
         Models.Rent.Residentials.Bldg.Property building, 
         INavigationGenericService navigationService,
-        IModalDialogService dialogService,
+        IDialogGenericService dialogService,
         IAbstractFactory<Models.Rent.Residentials.Room.Listing, Views.Rent.Residentials.Room.ShellPage> shellFactory, 
         IDispatcherService dispatcherService, 
         IDataAccessService dataAccessService, 
@@ -1651,28 +1792,28 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         if (string.IsNullOrWhiteSpace(value))
         {
             InfoBarErrorMessage = "物件名（必須項目）が入力されていません。保存出来ませんでした。";
-            //NameErrorMessage = "物件名（必須項目）を入力してください。";
+
             IsNameHasError = true;
 
             //HasErrors = true;
 
-            return true;
+            return false;
         }
 
         var realLength = new StringInfo(value).LengthInTextElements;
         if (realLength > 100)
         {
             InfoBarErrorMessage = "物件名は100文字以内で入力してください。保存出来ませんでした。";
-            //NameErrorMessage = "物件名は100文字以内で入力してください";
+
             IsNameHasError = true;
 
             //HasErrors = true;
 
-            return true;
+            return false;
         }
 
         IsNameHasError = false;
-        return false;
+        return true;
     }
 
     private void SetValuesToEntry()
@@ -1688,12 +1829,12 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         _building.BuildingKind = SelectedKind;
         _building.IsUnitOwnership = IsUnitOwnership;
         _building.BuildingStructure = SelectedStructure;
-        _building.AboveGroundFloorCount = int.TryParse(AboveGroundFloorCount, out var aboveGroundFloorCount) ? aboveGroundFloorCount : 0; //Convert.ToInt32(AboveGroundFloorCount)
-        _building.BasementFloorCount = int.TryParse(BasementFloorCount, out var basementFloorCount) ? basementFloorCount : 0;
-        _building.TotalUnitCount = int.TryParse(TotalUnitCount, out var totalUnitCount) ? totalUnitCount : 0;
+        _building.AboveGroundFloorCount = int.TryParse(Helpers.Common.ReplaceZenkakuNumbers(AboveGroundFloorCount), out var aboveGroundFloorCount) ? aboveGroundFloorCount : 0; //Convert.ToInt32(AboveGroundFloorCount)
+        _building.BasementFloorCount = int.TryParse(Helpers.Common.ReplaceZenkakuNumbers(BasementFloorCount), out var basementFloorCount) ? basementFloorCount : 0;
+        _building.TotalUnitCount = int.TryParse(Helpers.Common.ReplaceZenkakuNumbers(TotalUnitCount), out var totalUnitCount) ? totalUnitCount : 0;
         _building.BuiltYearAndMonth = BuiltYearAndMonth ?? new DateTimeOffset(1900, 1, 1, 0, 0, 0, TimeSpan.Zero);
-        _building.FudousanId = FudousanId;
-        _building.FudousanIdAdditionalCode = FudousanIdAdditionalCode;
+        _building.FudousanId = Helpers.Common.ReplaceZenkakuNumbers(FudousanId);
+        _building.FudousanIdAdditionalCode = Helpers.Common.ReplaceZenkakuNumbers(FudousanIdAdditionalCode);
         _building.Remarks = Remarks;
         // TODO: Set other properties
 
@@ -1852,10 +1993,16 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         }
 
         // Validate input.
-        if (ValidateName(Name))
+        if (!ValidateName(Name))
         {
             //InfoBarErrorMessage = "入力項目に誤りがあります。保存出来ませんでした。";
             IsInfoBarErrorOpen = true;
+
+            if (!_navigationService.IsCurrentPageSameAs("ZumenSearch.Views.Rent.Residentials.Bldg.BasicPage"))
+            {
+                _navigationService.NavigateTo("ZumenSearch.Views.Rent.Residentials.Bldg.BasicPage", this);
+            }
+
             return;
         }
 

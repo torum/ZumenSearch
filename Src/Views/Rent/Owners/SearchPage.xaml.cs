@@ -2,9 +2,9 @@
 
 namespace ZumenSearch.Views.Rent.Owners;
 
-public sealed partial class OwnersPage : Page
+public sealed partial class SearchPage : Page
 {
-    public OwnersPage()
+    public SearchPage()
     {
         InitializeComponent();
     }

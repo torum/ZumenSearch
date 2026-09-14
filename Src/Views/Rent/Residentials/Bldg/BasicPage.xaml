@@ -37,7 +37,7 @@
                                     </StackPanel>
                                 </Border>
                                 -->
-                                <TextBox x:Name="TextBoxName" TabIndex="0" MinWidth="200" Header="物件名" PlaceholderText="必須" MaxLength="200" 
+                                <TextBox x:Name="TextBox_Name" TabIndex="0" MinWidth="200" Header="物件名" PlaceholderText="必須" MaxLength="100" Paste="TextBox_MaxLength_Paste"
                                          Text="{x:Bind ViewModel.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                                          BorderBrush="{x:Bind ViewModel.IsNameHasError, Converter={StaticResource ValidationToBrushConverter}, Mode=OneWay}"
                                          HorizontalAlignment="Stretch" VerticalAlignment="Bottom"/>
@@ -87,9 +87,9 @@
                         <!-- 地上・地下・総戸数 -->
                         <Grid Grid.Row="0" Grid.Column="1" Margin="12,0,0,0">
                             <StackPanel Orientation="Horizontal">
-                                <TextBox MinWidth="87" Header="地上（階建て）" PlaceholderText="半角英数" InputScope="Number" MaxLength="10" Text="{x:Bind ViewModel.AboveGroundFloorCount, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,0"/>
-                                <TextBox MinWidth="87" Header="地下（階建て）" PlaceholderText="半角英数" InputScope="Number" MaxLength="10" Text="{x:Bind ViewModel.BasementFloorCount, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="12,0,0,0"/>
-                                <TextBox MinWidth="87" Header="総戸数（戸）" PlaceholderText="半角英数" InputScope="Number" MaxLength="10" Text="{x:Bind ViewModel.TotalUnitCount,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="12,0,0,0"/>
+                                <TextBox MinWidth="87" Header="地上（階建て）" PlaceholderText="半角英数" InputScope="Number" MaxLength="4" Text="{x:Bind ViewModel.AboveGroundFloorCount, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Paste="TextBoxCleanNonDigitMax4_Paste" TextChanging="TextBox4DigitOrLess_TextChanging" Margin="0,0,0,0"/>
+                                <TextBox MinWidth="87" Header="地下（階建て）" PlaceholderText="半角英数" InputScope="Number" MaxLength="4" Text="{x:Bind ViewModel.BasementFloorCount, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Paste="TextBoxCleanNonDigitMax4_Paste" TextChanging="TextBox4DigitOrLess_TextChanging" Margin="12,0,0,0"/>
+                                <TextBox MinWidth="87" Header="総戸数（戸）" PlaceholderText="半角英数" InputScope="Number" MaxLength="5" Text="{x:Bind ViewModel.TotalUnitCount,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Paste="TextBoxCleanNonDigitMax5_Paste" TextChanging="TextBox5DigitOrLess_TextChanging" Margin="12,0,0,0"/>
                             </StackPanel>
                         </Grid>
                     </Grid>
@@ -119,10 +119,10 @@
                             <ColumnDefinition Width="1*" MinWidth="320"></ColumnDefinition>
                         </Grid.ColumnDefinitions>
                         <Grid Grid.Row="0" Grid.Column="0">
-                            <TextBox Header="不動産ID" PlaceholderText="13桁の半角英数字" MaxLength="13" InputScope="Number" Text="{x:Bind ViewModel.FudousanId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
+                            <TextBox Header="不動産ID" PlaceholderText="13桁の半角英数字" MaxLength="13" InputScope="Number" Text="{x:Bind ViewModel.FudousanId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Paste="TextBoxCleanNonDigitExact13_Paste" TextChanging="TextBox13DigitOnly_TextChanging"></TextBox>
                         </Grid>
                         <Grid Grid.Row="0" Grid.Column="1" Margin="12,0,0,0">
-                            <TextBox Header="特定コード" PlaceholderText="4桁の半角英数字" MaxLength="4" InputScope="Number" Text="{x:Bind ViewModel.FudousanIdAdditionalCode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
+                            <TextBox Header="特定コード" PlaceholderText="4桁の半角英数字" MaxLength="4" InputScope="Number" Text="{x:Bind ViewModel.FudousanIdAdditionalCode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Paste="TextBoxCleanNonDigitExact4_Paste" TextChanging="TextBox4DigitOnly_TextChanging"></TextBox>
                         </Grid>
                     </Grid>
                 </Border>

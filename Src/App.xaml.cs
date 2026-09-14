@@ -4,6 +4,8 @@ using Microsoft.UI.Xaml;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using WinRT.Interop;
 using ZumenSearch.Helpers;
 using ZumenSearch.Services;
 using ZumenSearch.Services.Contracts;
@@ -97,10 +99,10 @@ public partial class App : Application
             {
                 // Services
                 services.AddSingleton<IDispatcherService>(new DispatcherService(CurrentDispatcherQueue));
-                services.AddSingleton<INavigationService, NavigationService>();
                 services.AddSingleton<IDataAccessService, DataAccessService>();
+                services.AddSingleton<INavigationService, NavigationService>();
                 services.AddTransient<INavigationGenericService, NavigationGenericService>();
-                services.AddTransient<IModalDialogService, ModalDialogService>();
+                services.AddTransient<IDialogGenericService, DialogGenericService>();
                 services.AddTransient<IDataAccessLocationService, DataAccessLocationService>();
                 services.AddTransient<IDataAccessTransportationService, DataAccessTransportationService>();
 
@@ -117,9 +119,9 @@ public partial class App : Application
                 services.AddTransient<Views.Rent.Residentials.Room.EditorWindow>();
                 services.AddTransient<Views.Rent.Residentials.Room.ShellPage>();
 
-                services.AddGenericFactory<ViewModels.Rent.Residentials.Bldg.PropertyViewModel, Models.Rent.Residentials.Bldg.Property, Services.Contracts.INavigationGenericService, Services.Contracts.IModalDialogService> ();
+                services.AddGenericFactory<ViewModels.Rent.Residentials.Bldg.PropertyViewModel, Models.Rent.Residentials.Bldg.Property, INavigationGenericService, IDialogGenericService> ();
                 services.AddGenericFactory<Views.Rent.Residentials.Bldg.ShellPage, Models.Rent.Residentials.Bldg.Property>();
-                services.AddGenericFactory<ViewModels.Rent.Residentials.Room.ListingViewModel, Models.Rent.Residentials.Room.Listing, Services.Contracts.INavigationGenericService, Services.Contracts.IModalDialogService> ();
+                services.AddGenericFactory<ViewModels.Rent.Residentials.Room.ListingViewModel, Models.Rent.Residentials.Room.Listing, INavigationGenericService, IDialogGenericService> ();
                 services.AddGenericFactory<Views.Rent.Residentials.Room.ShellPage, Models.Rent.Residentials.Room.Listing>();
                 // Instead of AddEditorFactory for each, typeof.. <,> registers all.
                 //services.AddSingleton(typeof(IAbstractFactory<,>), typeof(AbstractFactory<,>)); 
@@ -170,6 +172,7 @@ public partial class App : Application
 
         shell.CallMeAfterMainWindowIsCreated(main);
 
+        main.AppWindow.Show();
         main.Activate();
     }
 
@@ -183,8 +186,30 @@ public partial class App : Application
             // Due to the bag of the Winui3, the window may not be activated.
             // see https://github.com/microsoft/microsoft-ui-xaml/issues/7595
             main?.Activate();
+
+            IntPtr hWnd = WindowNative.GetWindowHandle(main);
+            NativeMethods.ShowWindow(hWnd, NativeMethods.SW_RESTORE); // Ensure it's not minimized
+            NativeMethods.SetForegroundWindow(hWnd); // Attempt to set it as the foreground window
         });
     }
+
+    #region == BringToFront ==
+
+    private static partial class NativeMethods
+    {
+        internal const int SW_RESTORE = 9; // Restores a minimized window and brings it to the foreground.
+
+        [LibraryImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static partial bool SetForegroundWindow(IntPtr hWnd);
+
+        [LibraryImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static partial bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+    }
+
+    #endregion
 
     #region == UnhandledException ==
 

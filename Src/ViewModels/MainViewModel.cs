@@ -770,6 +770,10 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
             }
 
             Debug.WriteLine($"DeleteRentResidentialCommand executed for {selected.Id}");
+
+            // TODO: clean up pics and pdfs.
+
+
         }
     }
     private static bool DeleteRentResidentialBldgCanExecute(Models.Rent.Residentials.PropertySearchResultItem? selected)
@@ -847,23 +851,27 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
             }
 
             Debug.WriteLine($"DeleteRentResidentialRoomCommand executed for {selected.Id}");
+
+            // Check if the selected item is already being edited in another window.
+            BldgEditorList.ForEach(editorWindow =>
+            {
+                Debug.WriteLine($"Checking editor window with Id: {editorWindow.Id} for selected item with Id: {selected.PropertyId}");
+                if (editorWindow.Id == selected.PropertyId)
+                {
+                    // If the editor window for this item is already open, remove the room.
+                    //Debug.WriteLine($"Editor window for {selected.PropertyId} is already open. Removing room.");
+
+                    // remove room from the editor window's ViewModel if it exists.
+                    WeakReferenceMessenger.Default.Send(new Models.Messenger.ListingDeletedMessage(selected.Id));
+
+                    return;
+                }
+            });
+
+
+            // TODO: clean up pics and pdfs.
         }
 
-        // Check if the selected item is already being edited in another window.
-        BldgEditorList.ForEach(editorWindow =>
-        {
-            Debug.WriteLine($"Checking editor window with Id: {editorWindow.Id} for selected item with Id: {selected.PropertyId}");
-            if (editorWindow.Id == selected.PropertyId)
-            {
-                // If the editor window for this item is already open, remove the room.
-                //Debug.WriteLine($"Editor window for {selected.PropertyId} is already open. Removing room.");
-
-                // remove room from the editor window's ViewModel if it exists.
-                WeakReferenceMessenger.Default.Send(new Models.Messenger.ListingDeletedMessage(selected.Id));
-
-                return;
-            }
-        });
     }
     private static bool DeleteRentResidentialRoomCanExecute(Models.Rent.Residentials.ListingSearchResultItem? selected)
     {

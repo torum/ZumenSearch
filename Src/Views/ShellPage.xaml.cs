@@ -13,9 +13,11 @@ namespace ZumenSearch.Views;
 public sealed partial class ShellPage : Page
 {
     public ViewModels.MainViewModel ViewModel { get; }
+
     public Frame NavigationFrame => this.ContentFrame;
 
     private MainWindow? _mainWindow;
+
     private readonly INavigationService _navigationService;
 
     public ShellPage(ViewModels.MainViewModel viewModel, INavigationService navigationService)

@@ -1,8 +1,10 @@
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Xml;
 using System.Xml.Linq;
+using WinRT.Interop;
 using ZumenSearch.Services.Contracts;
 
 namespace ZumenSearch.Views;
@@ -256,6 +258,11 @@ public sealed partial class MainWindow : Window
                 {
                     args.Cancel = true;
                     isCancel = true;
+
+                    IntPtr hWnd = WindowNative.GetWindowHandle(editor);
+                    NativeMethods.ShowWindow(hWnd, NativeMethods.SW_RESTORE); // Ensure it's not minimized
+                    NativeMethods.SetForegroundWindow(hWnd); // Attempt to set it as the foreground window
+
                     editor.Activate();
                     editor.AppWindow.MoveInZOrderAtTop();
 
@@ -274,6 +281,11 @@ public sealed partial class MainWindow : Window
                 foreach (var editor in _viewModel.RoomEditorList.ToList()) // Create snapshot of the list to avoid collection modification issues during iteration
                 {
                     editor.IsAutoClose = true;
+
+                    //IntPtr hWnd = WindowNative.GetWindowHandle(editor);
+                    //NativeMethods.ShowWindow(hWnd, NativeMethods.SW_RESTORE); // Ensure it's not minimized
+                    
+                    //editor.Activate();
 
                     editor.Close();
                 }
@@ -298,6 +310,11 @@ public sealed partial class MainWindow : Window
                 {
                     args.Cancel = true;
                     isCancel = true;
+
+                    IntPtr hWnd = WindowNative.GetWindowHandle(editor);
+                    NativeMethods.ShowWindow(hWnd, NativeMethods.SW_RESTORE); // Ensure it's not minimized
+                    NativeMethods.SetForegroundWindow(hWnd); // Attempt to set it as the foreground window
+
                     editor.Activate();
                     editor.AppWindow.MoveInZOrderAtTop();
 
@@ -316,6 +333,11 @@ public sealed partial class MainWindow : Window
                 foreach (var editor in _viewModel.BldgEditorList.ToList()) // Create snapshot of the list to avoid collection modification issues during iteration
                 {
                     editor.IsAutoClose = true;
+
+                    //IntPtr hWnd = WindowNative.GetWindowHandle(editor);
+                    //NativeMethods.ShowWindow(hWnd, NativeMethods.SW_RESTORE); // Ensure it's not minimized
+
+                    //editor.Activate();
 
                     editor.Close();
                 }
@@ -548,4 +570,23 @@ public sealed partial class MainWindow : Window
             }
         }
     }
+
+
+    #region == BringToFront ==
+
+    private static partial class NativeMethods
+    {
+        internal const int SW_RESTORE = 9; // Restores a minimized window and brings it to the foreground.
+
+        [LibraryImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static partial bool SetForegroundWindow(IntPtr hWnd);
+
+        [LibraryImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static partial bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+    }
+
+    #endregion
 }

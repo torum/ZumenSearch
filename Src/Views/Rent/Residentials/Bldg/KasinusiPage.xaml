@@ -6,11 +6,32 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     NavigationCacheMode="Required">
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled" Padding="36,0,36,24">
-        <Grid x:Name="ContentArea">
-            <StackPanel Spacing="12" Margin="0,24,0,0">
 
-            </StackPanel>
+    <Grid x:Name="ContentArea" Padding="36,0,36,24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0">
+            <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Margin="0,0,0,0" HorizontalAlignment="Right">
+                <AppBarButton Name="AppBarButtonSelectOwner" Icon="Add" Label="選択"/>
+                <AppBarButton Icon="More" Label="その他">
+                    <AppBarButton.Flyout>
+                        <MenuFlyout Placement="Bottom">
+                            <MenuFlyoutItem Text="クリア" Icon="Delete"></MenuFlyoutItem>
+                        </MenuFlyout>
+                    </AppBarButton.Flyout>
+                </AppBarButton>
+            </CommandBar>
         </Grid>
-    </ScrollViewer>
+
+        <Grid Grid.Row="1">
+            <ScrollViewer HorizontalScrollMode="Disabled">
+
+                
+                
+            </ScrollViewer>
+        </Grid>
+    </Grid>
 </Page>

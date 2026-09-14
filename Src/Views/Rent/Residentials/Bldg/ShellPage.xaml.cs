@@ -8,6 +8,8 @@ using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
+using WinRT.Interop;
 using ZumenSearch.Models.Common;
 using ZumenSearch.Services;
 using ZumenSearch.Services.Contracts;
@@ -43,15 +45,15 @@ public sealed partial class ShellPage : Page
 
     private readonly INavigationGenericService _navigationService;
     private readonly IDispatcherService _dispatcherService;
-    private readonly IModalDialogService _dialogService;
+    private readonly IDialogGenericService _dialogService;
 
     public ShellPage(
         Models.Rent.Residentials.Bldg.Property building,
-        IAbstractFactory<Models.Rent.Residentials.Bldg.Property, INavigationGenericService, IModalDialogService, ViewModels.Rent.Residentials.Bldg.PropertyViewModel> vmFactory,
+        IAbstractFactory<Models.Rent.Residentials.Bldg.Property, INavigationGenericService, IDialogGenericService, ViewModels.Rent.Residentials.Bldg.PropertyViewModel> vmFactory,
         Views.Rent.Residentials.Bldg.EditorWindow window,
         INavigationGenericService navigationService, 
-        IDispatcherService dispatcherService, 
-        IModalDialogService dialogService)
+        IDispatcherService dispatcherService,
+        IDialogGenericService dialogService)
     {
         //Debug.WriteLine($"ShellPage {building.Id}");
 
@@ -112,6 +114,10 @@ public sealed partial class ShellPage : Page
             args.Cancel = true;
             if (_closingWindow is not null)
             {
+                IntPtr hWnd = WindowNative.GetWindowHandle(_closingWindow);
+                NativeMethods.ShowWindow(hWnd, NativeMethods.SW_RESTORE); // Ensure it's not minimized
+                NativeMethods.SetForegroundWindow(hWnd); // Attempt to set it as the foreground window
+
                 // Activate the child editor window that is currently being closed.
                 _closingWindow.Activate();
                 _closingWindow.AppWindow.MoveInZOrderAtTop();
@@ -146,6 +152,10 @@ public sealed partial class ShellPage : Page
                     {
                         args.Cancel = true;
                         isCanceled = true;
+
+                        IntPtr hWnd = WindowNative.GetWindowHandle(editor);
+                        NativeMethods.ShowWindow(hWnd, NativeMethods.SW_RESTORE); // Ensure it's not minimized
+                        NativeMethods.SetForegroundWindow(hWnd); // Attempt to set it as the foreground window
 
                         editor.Activate();
                         editor.AppWindow.MoveInZOrderAtTop();
@@ -450,4 +460,21 @@ public sealed partial class ShellPage : Page
         }
     }
 
+    #region == BringToFront ==
+
+    private static partial class NativeMethods
+    {
+        internal const int SW_RESTORE = 9; // Restores a minimized window and brings it to the foreground.
+
+        [LibraryImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static partial bool SetForegroundWindow(IntPtr hWnd);
+
+        [LibraryImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static partial bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+    }
+
+    #endregion
 }

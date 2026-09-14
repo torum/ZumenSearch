@@ -106,7 +106,7 @@
                                 </NavigationViewItem.Icon>
                             </NavigationViewItem>
 
-                            <NavigationViewItem Tag="ZumenSearch.Views.Rent.Owners.OwnersPage" Content="貸主" ToolTipService.ToolTip="貸主">
+                            <NavigationViewItem Tag="ZumenSearch.Views.Rent.Owners.SearchPage" Content="貸主" ToolTipService.ToolTip="貸主">
                                 <NavigationViewItem.Icon>
                                     <FontIcon Glyph="&#xe7c3;"/>
                                 </NavigationViewItem.Icon>

@@ -189,6 +189,27 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
                 return;
             }
 
+            var text = value.Trim();
+            if (string.IsNullOrEmpty(text))
+            {
+                field = string.Empty;
+                IsDirty = true;
+                OnPropertyChanged();
+                return;
+            }
+
+            text = Helpers.Common.ReplaceZenkakuNumbers(text);
+            if (Helpers.Common.CanConvertToPositiveNumber(text))
+            {
+                field = text;
+                IsDirty = true;
+                OnPropertyChanged();
+            }
+            else
+            {
+                OnPropertyChanged();
+            }
+            /*
             var text = Helpers.Common.ReplaceZenkakuNumber(value.Trim());
 
             if (Helpers.Common.CanConvertToPositiveNumber(text))
@@ -203,6 +224,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
             }
 
             OnPropertyChanged();
+            */
         }
     }
 
@@ -261,7 +283,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
 
     private readonly IDataAccessService _dataAccessService;
     private readonly IDispatcherService _dispatcherService;
-    private readonly IModalDialogService? _dialogService;
+    private readonly IDialogGenericService? _dialogService;
     private readonly INavigationGenericService _navigationService;
 
     #endregion
@@ -269,7 +291,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
     public ListingViewModel(
         Models.Rent.Residentials.Room.Listing room, 
         INavigationGenericService navigationService,
-        IModalDialogService dialogService,
+        IDialogGenericService dialogService,
         IDispatcherService dispatcherService, 
         IDataAccessService dataAccessService)
     {
@@ -377,11 +399,11 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
             InfoBarErrorMessage = "部屋名（必須項目）が入力されていません。保存出来ませんでした。";
             IsNameHasError = true;
 
-            return true;
+            return false;
         }
 
         IsNameHasError = false;
-        return false;
+        return true;
     }
 
     private void SetValues()
@@ -712,10 +734,16 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         }
 
         // Validate input.
-        if (ValidateName(Name)) 
+        if (!ValidateName(Name)) 
         {
             //InfoBarErrorMessage = "入力項目に誤りがあります。保存出来ませんでした。";
             IsInfoBarErrorOpen = true;
+
+            if (!_navigationService.IsCurrentPageSameAs("ZumenSearch.Views.Rent.Residentials.Room.BasicPage"))
+            {
+                _navigationService.NavigateTo("ZumenSearch.Views.Rent.Residentials.Room.BasicPage", this);
+            }
+
             return;
         }
 

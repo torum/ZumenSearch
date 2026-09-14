@@ -7,16 +7,18 @@ using ZumenSearch.Views.Dialogs;
 
 namespace ZumenSearch.Services;
 
-public class ModalDialogService : IModalDialogService
+public class DialogGenericService : IDialogGenericService
 {
     private XamlRoot? _xamlRoot;
-    private bool _isDialogOpened;
-    private readonly List<Window> _ownerWindowList; // I made the service transient, so this won't be needed. But needs to be checked lator.
 
-    public ModalDialogService()
+    private bool _isDialogOpened;
+
+    //private readonly List<Window> _ownerWindowList; // I made the service transient, so this won't be needed. But needs to be checked lator.
+
+    public DialogGenericService()
     {
         _isDialogOpened = false;
-        _ownerWindowList = new List<Window>();
+        //_ownerWindowList = new List<Window>();
     }
 
     public void Initialize(XamlRoot xamlRoot)
@@ -28,7 +30,7 @@ public class ModalDialogService : IModalDialogService
     {
         if (_isDialogOpened)// && (_ownerWindowList.IndexOf(win) > -1)
         {
-            Debug.WriteLine("ModalDialogService: _isDialogOpened");
+            Debug.WriteLine("DialogGenericService: _isDialogOpened @ShowEditorCloseConfirmationDialog");
             // Prevents COM exepction causing by attempt to show multiple dialogs. (Window's close button is enabled even tho dialog is shown)
             return ContentDialogResult.None;
         }
@@ -67,27 +69,10 @@ public class ModalDialogService : IModalDialogService
     {
         if (_isDialogOpened)
         {
-            System.Diagnostics.Debug.WriteLine("_isDialogOpened");
+            Debug.WriteLine("DialogGenericService: _isDialogOpened @ShowLeaveUnitDirtyConfirmationDialog");
             // Prevents COM exepction causing by attempt to show multiple dialogs. (Window's close button is enabled even tho dialog is shown)
             return ContentDialogResult.None;
         }
-        /*
-        if (_isDialogOpened && (_ownerWindowList.IndexOf(win) > -1))
-        {
-            // Prevents COM exepction causing by attempt to show multiple dialogs. (Window's close button is enabled even tho dialog is shown)
-            return ContentDialogResult.None;
-        }
-
-        if (win is null)
-        {
-            return ContentDialogResult.None;
-        }
-
-        if (win.Content is null)
-        {
-            return ContentDialogResult.None;
-        }
-        */
 
         if (_xamlRoot is null)
         {
@@ -122,7 +107,7 @@ public class ModalDialogService : IModalDialogService
         if (_isDialogOpened)// && (_ownerWindowList.IndexOf(win) > -1)
         {
             // Prevents COM exepction causing by attempt to show multiple dialogs. (Window's close button is enabled even tho dialog is shown)
-            System.Diagnostics.Debug.WriteLine("_isDialogOpened @ShowRailLineSelectDialog");
+            Debug.WriteLine("DialogGenericService: _isDialogOpened @ShowRailLineSelectDialog");
             return null;
         }
 

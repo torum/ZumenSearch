@@ -1749,20 +1749,20 @@ public sealed class DataAccessService : IDataAccessService
             using var cmd = connection.CreateCommand();
             if (keyword == "*")
             {
-                cmd.CommandText = "SELECT property.name as propertyName, property.property_kind as propertyKind, rent_residentials.remarks as entryTitle, property.property_id as entryId FROM rent_residentials INNER JOIN property USING (property_id)";
+                cmd.CommandText = "SELECT property.name as propertyName, property.property_kind as propertyKind, rent_residentials.remarks as remarks, property.property_id as propertyId FROM rent_residentials INNER JOIN property USING (property_id)";
             }
             else
             {
-                cmd.CommandText = string.Format("SELECT property.name as propertyName, property.property_kind as propertyKind, rent_residentials.remarks as entryTitle, property.property_id as entryId FROM rent_residentials INNER JOIN property USING (property_id) WHERE property.name LIKE '%{0}%'", keyword);
+                cmd.CommandText = string.Format("SELECT property.name as propertyName, property.property_kind as propertyKind, rent_residentials.remarks as remarks, property.property_id as propertyId FROM rent_residentials INNER JOIN property USING (property_id) WHERE property.name LIKE '%{0}%'", keyword);
             }
 
             using var reader = cmd.ExecuteReader();
             while (reader.Read())
             {
-                var s = Convert.ToString(reader["entryId"]);
+                var s = Convert.ToString(reader["propertyId"]);
                 if (string.IsNullOrEmpty(s))
                 {
-                    Debug.WriteLine("DataAccess::SelectRentResidentialsByNameKeyword: entryId is null or empty for a rent residential entry.");
+                    Debug.WriteLine("DataAccess::SelectRentResidentialsByNameKeyword: propertyId is null or empty for a rent residential.");
                     continue;
                 }
 
@@ -1783,7 +1783,7 @@ public sealed class DataAccessService : IDataAccessService
 
                 //Debug.WriteLine($"Found rent residential entry: {entry.Name} @SelectRentResidentialsByNameKeyword() in DataAccessService");
 
-                s = Convert.ToString(reader["entryTitle"]);
+                s = Convert.ToString(reader["remarks"]);
                 if (!string.IsNullOrEmpty(s))
                 {
                     //
@@ -2584,17 +2584,16 @@ public sealed class DataAccessService : IDataAccessService
 
             using var cmd = connection.CreateCommand();
 
-            cmd.CommandText = "SELECT property.name as entryName, rent_residential_rooms.name as unitName, rent_residential_rooms.room_id as roomId, property.property_id as entryId FROM rent_residential_rooms INNER JOIN property USING (property_id) INNER JOIN rent_residentials USING (property_id)";
-            //cmd.CommandText = string.Format("SELECT property.name as feedName, rent_residentials.comment as entryTitle, property.property_id as entryId FROM rent_residentials INNER JOIN property USING (property_id) WHERE property.name LIKE '{0}'", keyword);
+            cmd.CommandText = "SELECT property.name as propertyName, rent_residential_rooms.name as roomName, rent_residential_rooms.room_id as roomId, property.property_id as propertyId FROM rent_residential_rooms INNER JOIN property USING (property_id) INNER JOIN rent_residentials USING (property_id)";
 
             using var reader = cmd.ExecuteReader();
 
             while (reader.Read())
             {
-                var eid = Convert.ToString(reader["entryId"]);
+                var eid = Convert.ToString(reader["propertyId"]);
                 if (string.IsNullOrEmpty(eid))
                 {
-                    Debug.WriteLine("DataAccess::SelectRentResidentialsByNameKeyword: entryId is null or empty for a rent residential entry.");
+                    Debug.WriteLine("DataAccess::SelectRentResidentialsByNameKeyword: propertyId is null or empty for a rent residential.");
                     continue;
                 }
 
@@ -2607,12 +2606,12 @@ public sealed class DataAccessService : IDataAccessService
 
                 var unit = new Models.Rent.Residentials.ListingSearchResultItem(rid, eid);
 
-                var s = Convert.ToString(reader["unitName"]) ?? "";
+                var s = Convert.ToString(reader["roomName"]) ?? "";
                 unit.Name = s;
 
                 //Debug.WriteLine($"Found rent residential entry: {entry.Name} @SelectRentResidentialsByNameKeyword() in DataAccessService");
 
-                s = Convert.ToString(reader["entryName"]);
+                s = Convert.ToString(reader["propertyName"]);
                 if (!string.IsNullOrEmpty(s))
                 {
                     unit.PropertyName = s;

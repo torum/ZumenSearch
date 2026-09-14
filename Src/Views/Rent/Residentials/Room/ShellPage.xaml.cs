@@ -19,7 +19,7 @@ namespace ZumenSearch.Views.Rent.Residentials.Room;
 public sealed partial class ShellPage : Page
 {
     public ViewModels.Rent.Residentials.Room.ListingViewModel ViewModel { get; private set; }
-    //public ViewModels.Rent.Residentials.Bldg.MainViewModel? ParentViewModel { get; private set; } // Holding a reference to the parent ViewModel (Bldg.MainViewModel) (only IF opened by it) to allow communication between the Room ShellPage and its parent Bldg ShellPage.
+
     public Views.Rent.Residentials.Room.EditorWindow Window { get; private set; }
 
     public Frame NavigationFrame => ContentFrame;
@@ -42,15 +42,15 @@ public sealed partial class ShellPage : Page
 
     private readonly INavigationGenericService _navigationlService;
     private readonly IDispatcherService _dispatcherService;
-    private readonly IModalDialogService _dialogService;
+    private readonly IDialogGenericService _dialogService;
 
     public ShellPage(
         Models.Rent.Residentials.Room.Listing room, 
-        IAbstractFactory<Models.Rent.Residentials.Room.Listing, Services.Contracts.INavigationGenericService, IModalDialogService, ViewModels.Rent.Residentials.Room.ListingViewModel> vmFactory,
+        IAbstractFactory<Models.Rent.Residentials.Room.Listing, Services.Contracts.INavigationGenericService, IDialogGenericService, ViewModels.Rent.Residentials.Room.ListingViewModel> vmFactory,
         Views.Rent.Residentials.Room.EditorWindow window,
         INavigationGenericService navigationlService, 
-        IDispatcherService dispatcherService, 
-        IModalDialogService dialogService)
+        IDispatcherService dispatcherService,
+        IDialogGenericService dialogService)
     {
         //Debug.WriteLine($"ShellPage {entry.Id}");
 

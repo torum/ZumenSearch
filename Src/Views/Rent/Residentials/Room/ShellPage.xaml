@@ -23,22 +23,13 @@
         <Grid Grid.Row="0" x:Name="AppTitleBar" Margin="0,0,0,0" Canvas.ZIndex="1" IsHitTestVisible="False" VerticalAlignment="Center" HorizontalAlignment="Stretch">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="150" />
             </Grid.ColumnDefinitions>
 
-            <Grid Grid.Row="0" Grid.Column="0" Width="0">
-                <!-- Dummy for toggle button -->
-            </Grid>
-
-            <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
-
-                <Image x:Name="AppTitleBarIcon" Source="/Assets/App.ico" HorizontalAlignment="Left" Width="18" Height="18" Margin="12,0,0,0" VerticalAlignment="Center"/>
-                <TextBlock x:Name="AppTitleBarText" Text="{x:Bind ViewModel.WindowTitle, Mode=OneWay}" TextWrapping="NoWrap"  Margin="12,0,0,0" VerticalAlignment="Center"/>
-
-            </StackPanel>
-
-            <Grid Grid.Row="0" Grid.Column="2"></Grid>
+            <Image x:Name="AppTitleBarIcon" Grid.Row="0" Grid.Column="0" Source="/Assets/App.ico" HorizontalAlignment="Left" Width="18" Height="18" Margin="12,0,0,0" VerticalAlignment="Center"/>
+            
+            <TextBlock x:Name="AppTitleBarText" Grid.Row="0" Grid.Column="1" Text="{x:Bind ViewModel.WindowTitle, Mode=OneWay}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" Margin="12,0,0,0" VerticalAlignment="Center"/>
 
         </Grid>
 

@@ -4,7 +4,7 @@ using ZumenSearch.Models.Common;
 
 namespace ZumenSearch.Services.Contracts;
 
-public interface IModalDialogService
+public interface IDialogGenericService
 {
     void Initialize(XamlRoot xamlRoot);
 

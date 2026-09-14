@@ -70,7 +70,7 @@
                                     </Grid>
                                 </Grid>
                                 <Grid>
-                                    <TextBox Header="駅から徒歩（分）" PlaceholderText="半角英数" Text="{x:Bind ViewModel.EkiToho1, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MinWidth="90" Margin="0" HorizontalAlignment="Left"></TextBox>
+                                    <TextBox Header="駅から徒歩（分）" PlaceholderText="半角英数" Text="{x:Bind ViewModel.EkiToho1, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" Paste="TextBoxCleanNonDigit_Paste" TextChanging="TextBoxHalfWidthDigitOnly_TextChanging" MinWidth="90" Margin="0" HorizontalAlignment="Left"></TextBox>
                                 </Grid>
 
                                 <Grid>
@@ -87,8 +87,8 @@
                                     </Grid>
                                     <Grid Grid.Row="1" Grid.Column="0">
                                         <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,12,0,0">
-                                            <TextBox Header="バス乗車時間（分）" PlaceholderText="半角英数" Text="{x:Bind ViewModel.BusJyousya1, Mode=TwoWay}" MinWidth="90" Margin="0" HorizontalAlignment="Left"></TextBox>
-                                            <TextBox Header="バス停から徒歩（分）" PlaceholderText="半角英数" Text="{x:Bind ViewModel.BusStopToho1, Mode=TwoWay}" MinWidth="90" Margin="12,0,0,0" HorizontalAlignment="Left"></TextBox>
+                                            <TextBox Header="バス乗車時間（分）" PlaceholderText="半角英数" Text="{x:Bind ViewModel.BusJyousya1, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" Paste="TextBoxCleanNonDigit_Paste" TextChanging="TextBoxHalfWidthDigitOnly_TextChanging" MinWidth="90" Margin="0" HorizontalAlignment="Left"></TextBox>
+                                            <TextBox Header="バス停から徒歩（分）" PlaceholderText="半角英数" Text="{x:Bind ViewModel.BusStopToho1, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" Paste="TextBoxCleanNonDigit_Paste" TextChanging="TextBoxHalfWidthDigitOnly_TextChanging" MinWidth="90" Margin="12,0,0,0" HorizontalAlignment="Left"></TextBox>
                                         </StackPanel>
                                     </Grid>
                                 </Grid>
