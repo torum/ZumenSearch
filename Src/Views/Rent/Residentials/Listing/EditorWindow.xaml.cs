@@ -10,29 +10,17 @@ public sealed partial class EditorWindow : Window
 
     public ViewModels.Rent.Residentials.Listing.ListingViewModel? ViewModel { get; private set; }
 
-    public EditorWindow()
+    public EditorWindow(string id, ViewModels.Rent.Residentials.Listing.ListingViewModel vm)
     {
+        Id = id;
+        ViewModel = vm;
+
         InitializeComponent();
 
         ExtendsContentIntoTitleBar = true;
 
         //this.AppWindow.SetIcon(Path.Combine(AppContext.BaseDirectory, "Assets\\App.ico"));
         this.AppWindow.SetIcon("Assets/App.ico");
-    }
-
-    public void SetListingIdToWindow(string id)
-    {
-        if (string.IsNullOrEmpty(id))
-        {
-            throw new ArgumentNullException(nameof(id));
-        }
-
-        Id = id;
-    }
-
-    public void SetViewModelToWindow(ViewModels.Rent.Residentials.Listing.ListingViewModel vm)
-    {
-        ViewModel = vm;
     }
 
 }

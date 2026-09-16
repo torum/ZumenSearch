@@ -19,8 +19,8 @@ namespace ZumenSearch.Views.Rent.Residentials;
 
 public sealed partial class ShellPage : Page
 {
-    public ViewModels.Rent.Residentials.PropertyViewModel ViewModel { get; private set; }
-    public Views.Rent.Residentials.EditorWindow Window { get; private set; }
+    public ViewModels.Rent.Residentials.PropertyViewModel ViewModel { get; }
+    public Views.Rent.Residentials.EditorWindow Window { get; }
     public Frame NavigationFrame => ContentFrame;
 
     // List of ValueTuple holding the Navigation Tag and the relative Navigation Page
@@ -50,7 +50,6 @@ public sealed partial class ShellPage : Page
     public ShellPage(
         Models.Rent.Residentials.Property building,
         IAbstractFactory<Models.Rent.Residentials.Property, INavigationGenericService, IDialogGenericService, ViewModels.Rent.Residentials.PropertyViewModel> vmFactory,
-        Views.Rent.Residentials.EditorWindow window,
         INavigationGenericService navigationService, 
         IDispatcherService dispatcherService,
         IDialogGenericService dialogService)
@@ -63,10 +62,10 @@ public sealed partial class ShellPage : Page
 
         ViewModel = vmFactory.Create(building, _navigationService, _dialogService);
 
-        Window = window;
-        Window.Content = this;
-        Window.SetPropertyIdToWindow(building.Id);
-        Window.SetViewModelToWindow(ViewModel);
+        Window = new Views.Rent.Residentials.EditorWindow(building.Id, ViewModel)
+        {
+            Content = this
+        };
 
         InitializeComponent();
 

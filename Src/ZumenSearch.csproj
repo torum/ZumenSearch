@@ -80,11 +80,6 @@
     <Folder Include="ViewModels\Sale\" />
     <Folder Include="Views\Sale\" />
   </ItemGroup>
-  <ItemGroup>
-    <Page Update="Views\Dialogs\LessorSelectPage.xaml">
-      <SubType>Designer</SubType>
-    </Page>
-  </ItemGroup>
 
   <!--
     Defining the "HasPackageAndPublishMenuAddedByProject" property here allows the Solution

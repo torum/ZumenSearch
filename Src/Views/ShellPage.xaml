@@ -133,7 +133,7 @@
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <Button x:Name="BackButton" Grid.Column="0" Height="36" Width="40" Margin="6,6,0,0" ToolTipService.ToolTip="Alt+Left" Style="{ThemeResource TitleBarBackButtonStyle}" IsEnabled="{x:Bind NavigationFrame.CanGoBack, Mode=OneWay}" Click="BackButton_Click" VerticalAlignment="Top"/>
+                        <Button x:Name="BackButton" Grid.Column="0" Height="36" Width="40" Margin="6,6,0,0" ToolTipService.ToolTip="Alt+Left" Style="{ThemeResource TitleBarBackButtonStyle}" IsEnabled="{x:Bind ContentFrame.CanGoBack, Mode=OneWay}" Click="BackButton_Click" VerticalAlignment="Top"/>
                     </Grid>
 
                     <!-- NavigationView content frame -->

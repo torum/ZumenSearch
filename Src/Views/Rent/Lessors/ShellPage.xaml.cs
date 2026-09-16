@@ -20,8 +20,8 @@ namespace ZumenSearch.Views.Rent.Lessors;
 
 public sealed partial class ShellPage : Page
 {
-    public ViewModels.Rent.Lessors.LessorViewModel ViewModel { get; private set; }
-    public Views.Rent.Lessors.EditorWindow Window { get; private set; }
+    public ViewModels.Rent.Lessors.LessorViewModel ViewModel { get;}
+    public Views.Rent.Lessors.EditorWindow Window { get;}
     
     public Frame NavigationFrame => ContentFrame;
 
@@ -53,7 +53,6 @@ public sealed partial class ShellPage : Page
     public ShellPage(
         Models.Rent.Lessors.Person person,
         IAbstractFactory<Models.Rent.Lessors.Person, INavigationGenericService, IDialogGenericService, ViewModels.Rent.Lessors.LessorViewModel> vmFactory,
-        Views.Rent.Lessors.EditorWindow window,
         INavigationGenericService navigationService,
         IDispatcherService dispatcherService,
         IDialogGenericService dialogService)
@@ -66,11 +65,10 @@ public sealed partial class ShellPage : Page
 
         ViewModel = vmFactory.Create(person, _navigationService, _dialogService);
 
-        Window = window;
-        Window.Content = this;
-        
-        Window.SetPersonIdToWindow(person.Id);
-        Window.SetViewModelToWindow(ViewModel);
+        Window = new Views.Rent.Lessors.EditorWindow(person.Id, ViewModel)
+        {
+            Content = this
+        };
 
         InitializeComponent();
 

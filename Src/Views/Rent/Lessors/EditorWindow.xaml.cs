@@ -11,29 +11,17 @@ public sealed partial class EditorWindow : Window
 
     public ViewModels.Rent.Lessors.LessorViewModel? ViewModel { get; private set; }
 
-    public EditorWindow()
+    public EditorWindow(string id, ViewModels.Rent.Lessors.LessorViewModel vm)
     {
+        Id = id;
+        ViewModel = vm;
+
         InitializeComponent();
 
         ExtendsContentIntoTitleBar = true;
 
         //this.AppWindow.SetIcon(Path.Combine(AppContext.BaseDirectory, "Assets\\App.ico"));
         this.AppWindow.SetIcon("Assets/App.ico");
-    }
-
-    public void SetPersonIdToWindow(string id)
-    {
-        if (string.IsNullOrEmpty(id))
-        {
-            throw new ArgumentNullException(nameof(id));
-        }
-
-        Id = id;
-    }
-
-    public void SetViewModelToWindow(ViewModels.Rent.Lessors.LessorViewModel vm)
-    {
-        ViewModel = vm;
     }
 
 }

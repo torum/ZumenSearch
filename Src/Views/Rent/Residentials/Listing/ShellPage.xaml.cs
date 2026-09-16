@@ -17,9 +17,9 @@ namespace ZumenSearch.Views.Rent.Residentials.Listing;
 
 public sealed partial class ShellPage : Page
 {
-    public ViewModels.Rent.Residentials.Listing.ListingViewModel ViewModel { get; private set; }
+    public ViewModels.Rent.Residentials.Listing.ListingViewModel ViewModel { get; }
 
-    public Views.Rent.Residentials.Listing.EditorWindow Window { get; private set; }
+    public Views.Rent.Residentials.Listing.EditorWindow Window { get; }
 
     public Frame NavigationFrame => ContentFrame;
 
@@ -46,7 +46,6 @@ public sealed partial class ShellPage : Page
     public ShellPage(
         Models.Rent.Residentials.Listing.Listing room, 
         IAbstractFactory<Models.Rent.Residentials.Listing.Listing, Services.Contracts.INavigationGenericService, IDialogGenericService, ViewModels.Rent.Residentials.Listing.ListingViewModel> vmFactory,
-        Views.Rent.Residentials.Listing.EditorWindow window,
         INavigationGenericService navigationlService, 
         IDispatcherService dispatcherService,
         IDialogGenericService dialogService)
@@ -59,10 +58,10 @@ public sealed partial class ShellPage : Page
 
         ViewModel = vmFactory.Create(room, _navigationlService, _dialogService);
 
-        Window = window;
-        Window.Content = this;
-        Window.SetListingIdToWindow(room.Id);
-        Window.SetViewModelToWindow(ViewModel);
+        Window = new Views.Rent.Residentials.Listing.EditorWindow(room.Id, ViewModel)
+        {
+            Content = this
+        };
 
         InitializeComponent();
 

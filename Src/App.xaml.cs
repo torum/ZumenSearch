@@ -10,6 +10,7 @@ using ZumenSearch.Helpers;
 using ZumenSearch.Services;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.Services.Extensions;
+using ZumenSearch.Views;
 
 namespace ZumenSearch;
 
@@ -112,15 +113,12 @@ public partial class App : Application
                 services.AddSingleton<Views.ShellPage>();
 
                 services.AddTransient<ViewModels.Rent.Residentials.PropertyViewModel>();
-                services.AddTransient<Views.Rent.Residentials.EditorWindow>();
                 services.AddTransient<Views.Rent.Residentials.ShellPage>();
 
                 services.AddTransient<ViewModels.Rent.Residentials.Listing.ListingViewModel>();
-                services.AddTransient<Views.Rent.Residentials.Listing.EditorWindow>();
                 services.AddTransient<Views.Rent.Residentials.Listing.ShellPage>();
 
                 services.AddTransient<ViewModels.Rent.Lessors.LessorViewModel>();
-                services.AddTransient<Views.Rent.Lessors.EditorWindow>();
                 services.AddTransient<Views.Rent.Lessors.ShellPage>();
 
                 services.AddGenericFactory<ViewModels.Rent.Residentials.PropertyViewModel, Models.Rent.Residentials.Property, INavigationGenericService, IDialogGenericService> ();
@@ -169,18 +167,11 @@ public partial class App : Application
             Microsoft.Windows.AppLifecycle.AppInstance.GetCurrent().Activated += App_Activated;
         }
 
-        // Create the window and load settings and apply size and position etc.
-        var main = GetService<Views.MainWindow>();
         var shell = GetService<Views.ShellPage>();
-        main.Content = shell;
 
-        var navigationService = GetService<INavigationService>();
-        navigationService.Initialize(shell.NavigationFrame);
-
-        shell.CallMeAfterMainWindowIsCreated(main);
-
-        main.AppWindow.Show();
-        main.Activate();
+        //main.AppWindow.Show();
+        //main.Activate();
+        shell.MainWindow.AppWindow.Show(true);
     }
 
     // Activated from other instance.
@@ -190,9 +181,8 @@ public partial class App : Application
         {
             var main = App.GetService<Views.MainWindow>();
 
-            // Due to the bag of the Winui3, the window may not be activated.
-            // see https://github.com/microsoft/microsoft-ui-xaml/issues/7595
-            main?.Activate();
+            //main?.Activate();
+            main?.AppWindow.Show(true);
 
             IntPtr hWnd = WindowNative.GetWindowHandle(main);
             NativeMethods.ShowWindow(hWnd, NativeMethods.SW_RESTORE); // Ensure it's not minimized

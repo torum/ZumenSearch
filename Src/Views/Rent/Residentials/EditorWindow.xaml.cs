@@ -11,17 +11,9 @@ public sealed partial class EditorWindow : Window
 
     public ViewModels.Rent.Residentials.PropertyViewModel? ViewModel { get; private set; }
 
-    public EditorWindow()
-    {
-        InitializeComponent();
+    //public EditorWindow(){  }
 
-        ExtendsContentIntoTitleBar = true;
-
-        //this.AppWindow.SetIcon(Path.Combine(AppContext.BaseDirectory, "Assets\\App.ico"));
-        this.AppWindow.SetIcon("Assets/App.ico");
-    }
-
-    public void SetPropertyIdToWindow(string id)
+    public EditorWindow(string id, ViewModels.Rent.Residentials.PropertyViewModel vm) 
     {
         if (string.IsNullOrEmpty(id))
         {
@@ -29,11 +21,14 @@ public sealed partial class EditorWindow : Window
         }
 
         Id = id;
-    }
-
-    public void SetViewModelToWindow(ViewModels.Rent.Residentials.PropertyViewModel vm)
-    {
         ViewModel = vm;
+
+        InitializeComponent();
+
+        ExtendsContentIntoTitleBar = true;
+
+        //this.AppWindow.SetIcon(Path.Combine(AppContext.BaseDirectory, "Assets\\App.ico"));
+        this.AppWindow.SetIcon("Assets/App.ico");
     }
 
 }

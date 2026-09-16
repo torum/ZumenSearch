@@ -15,7 +15,12 @@ using ZumenSearch.Services.Extensions.AbstractFactory;
 
 namespace ZumenSearch.ViewModels;
 
-public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpdatedMessage>, IRecipient<ListingUpdatedMessage>, IRecipient<ListingWindowClosedMessage>, IRecipient<PropertyWindowClosedMessage>
+public partial class MainViewModel : ObservableRecipient, 
+    IRecipient<PropertyUpdatedMessage>, 
+    IRecipient<ListingUpdatedMessage>, 
+    IRecipient<ListingWindowClosedMessage>, 
+    IRecipient<PropertyWindowClosedMessage>, 
+    IRecipient<LessorWindowClosedMessage>
 {
     #region == Public Properties ==
 
@@ -263,6 +268,18 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         }
 
         this.BldgEditorList.Remove(ewin);
+    }
+
+    public void Receive(LessorWindowClosedMessage window)
+    {
+        var ewin = window.Value;
+
+        if (ewin is null)
+        {
+            return;
+        }
+
+        this.LessorEditorList.Remove(ewin);
     }
 
     #endregion
@@ -980,7 +997,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
     }
 
     [RelayCommand(CanExecute = nameof(EditRentLessorCanExecute))]
-    public async Task EditRentLessor(Models.Common.PersonSearchResultItem? selected)
+    public async Task EditRentLessor(Models.Base.PersonBase selected) //Models.Common.PersonSearchResultItem
     {
         var lessorId = selected?.Id;
 
@@ -993,7 +1010,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         var isFound = false;
 
         // Check if the selected item is already being edited in another window.
-        BldgEditorList.ForEach(editorWindow =>
+        LessorEditorList.ForEach(editorWindow =>
         {
             //Debug.WriteLine($"Checking editor window with Id: {editorWindow.Id} for selected item with Id: {rentId}");
             if (editorWindow.Id == lessorId)
@@ -1068,7 +1085,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
 
         editorWindow.AppWindow.MoveInZOrderAtTop();
     }
-    public static bool EditRentLessorCanExecute(Models.Common.PersonSearchResultItem? selected)
+    public static bool EditRentLessorCanExecute(Models.Base.PersonBase? selected)
     {
         if (selected is null)
         //if (string.IsNullOrEmpty(rentId))

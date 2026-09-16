@@ -14,30 +14,28 @@ public sealed partial class ShellPage : Page
 {
     public ViewModels.MainViewModel ViewModel { get; }
 
-    public Frame NavigationFrame => this.ContentFrame;
+    //public Frame NavigationFrame => this.ContentFrame;
 
-    private MainWindow? _mainWindow;
+    public MainWindow MainWindow { get; }
 
     private readonly INavigationService _navigationService;
 
     public ShellPage(ViewModels.MainViewModel viewModel, INavigationService navigationService)
     {
+        MainWindow = App.GetService<Views.MainWindow>();
+        MainWindow.Content = this;
+
         ViewModel = viewModel;
         _navigationService = navigationService;
 
         InitializeComponent();
 
+        _navigationService.Initialize(ContentFrame);
+
+        MainWindow.SetTitleBar(this.AppTitleBar);
+        MainWindow.Activated += MainWindow_Activated;
+
         this.Loaded += Page_Loaded;
-    }
-
-    public void CallMeAfterMainWindowIsCreated(MainWindow wnd)
-    {
-        _mainWindow = wnd;
-
-        // Set the title bar to content in the custom title bar grid.
-        wnd.SetTitleBar(this.AppTitleBar);
-
-        wnd.Activated += MainWindow_Activated;
     }
 
     private void Page_Loaded(object sender, RoutedEventArgs e)
@@ -216,7 +214,7 @@ public sealed partial class ShellPage : Page
 
     private void SetRegionsForCustomTitleBar(string str)
     {
-        if (_mainWindow is null)
+        if (MainWindow is null)
         {
             Debug.WriteLine($"{str} MainWindow is null. Cannot set regions for custom title bar.");
             return;
@@ -267,7 +265,7 @@ public sealed partial class ShellPage : Page
 
         var rectArray = new Windows.Graphics.RectInt32[] { BackButtonRect };//SearchBoxRect, SettingsButton
 
-        InputNonClientPointerSource nonClientInputSrc = InputNonClientPointerSource.GetForWindowId(_mainWindow.AppWindow.Id);
+        InputNonClientPointerSource nonClientInputSrc = InputNonClientPointerSource.GetForWindowId(MainWindow.AppWindow.Id);
         nonClientInputSrc.SetRegionRects(NonClientRegionKind.Passthrough, rectArray);
 
         //Debug.WriteLine($"{str} SetRegionsForCustomTitleBar called.");

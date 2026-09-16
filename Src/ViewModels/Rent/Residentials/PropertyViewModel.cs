@@ -2703,10 +2703,29 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
     }
 
+    [RelayCommand(CanExecute = nameof(CanEditLessor))]
+    private void EditLessor(PersonWrapperForPropertyViewModel lessor)
+    {
+        if (lessor.Person is not null)
+        {
+            var mainVm = App.GetService<MainViewModel>();
+            if (mainVm.EditRentLessorCommand.CanExecute(lessor.Person as Models.Base.PersonBase))
+            {
+                mainVm.EditRentLessorCommand.Execute(lessor.Person as Models.Base.PersonBase);
+            }
+        }
+    }
+    private static bool CanEditLessor(PersonWrapperForPropertyViewModel lessor)
+    {
+        return lessor is not null;
+    }
+
     [RelayCommand(CanExecute = nameof(CanDeleteLessor))]
     public async Task DeleteLessor(PersonWrapperForPropertyViewModel lessor)
     {
         Debug.WriteLine($"DeleteLessorCommand {lessor.Person.Name}");
+
+        // TODO:
 
         Lessors.Remove(lessor);
     }
@@ -2716,6 +2735,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
     }
 
     #endregion
+
 
     #endregion
 
