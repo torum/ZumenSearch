@@ -1,17 +1,17 @@
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
-using ZumenSearch.ViewModels.Transportation;
+using ZumenSearch.ViewModels.Railway;
 
 namespace ZumenSearch.Views.Dialogs;
 
 public sealed partial class RailLineSelectPage : Page
 {
-    public RailLineSelectViewModel ViewModel
+    public RailLineViewModel ViewModel
     {
         get;
     }
 
-    public RailLineSelectPage(RailLineSelectViewModel vm)
+    public RailLineSelectPage(RailLineViewModel vm)
     {
         ViewModel = vm;
         InitializeComponent();

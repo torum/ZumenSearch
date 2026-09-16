@@ -88,7 +88,7 @@
 
                         <NavigationViewItem.MenuItems>
 
-                            <NavigationViewItem Tag="ZumenSearch.Views.Rent.Residentials.SearchPage" Content="住居用" ToolTipService.ToolTip="賃貸住居用">
+                            <NavigationViewItem Tag="ZumenSearch.Views.Rent.ResidentialSearchPage" Content="住居用" ToolTipService.ToolTip="賃貸住居用">
                                 <NavigationViewItem.Icon>
                                     <FontIcon Glyph="&#xe7c3;"/>
                                 </NavigationViewItem.Icon>
@@ -106,7 +106,7 @@
                                 </NavigationViewItem.Icon>
                             </NavigationViewItem>
 
-                            <NavigationViewItem Tag="ZumenSearch.Views.Rent.Owners.SearchPage" Content="貸主" ToolTipService.ToolTip="貸主">
+                            <NavigationViewItem Tag="ZumenSearch.Views.Rent.LessorSearchPage" Content="貸主" ToolTipService.ToolTip="貸主">
                                 <NavigationViewItem.Icon>
                                     <FontIcon Glyph="&#xe7c3;"/>
                                 </NavigationViewItem.Icon>

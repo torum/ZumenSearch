@@ -1,30 +1,37 @@
-﻿using ZumenSearch.Models.Common;
+﻿using ZumenSearch.Models;
 
 namespace ZumenSearch.Services.Contracts;
 
 public interface IDataAccessService
 {
-    SqliteDataAccessResultWrapper InitializeDatabase(string dataBaseFilePath);
+    ResultWrapper InitializeDatabase(string dataBaseFilePath);
 
-    SqliteDataAccessResultWrapper InsertRentResidential(Models.Rent.Residentials.Bldg.Property building);
+    ResultWrapper InsertRentResidential(Models.Rent.Residentials.Property building);
 
-    SqliteDataAccessResultWrapper UpdateRentResidential(Models.Rent.Residentials.Bldg.Property building);
+    ResultWrapper UpdateRentResidential(Models.Rent.Residentials.Property building);
 
-    SqliteDataAccessResultWrapper DeleteRentResidential(string rentId);
+    ResultWrapper DeleteRentResidential(string rentId);
 
-    SqliteDataAccessSelectRecentPropertiesResultWrapper SelectRecentProperties();
+    SelectPropertiesResultWrapper SelectRecentProperties();
 
-    SqliteDataAccessSelectRentResidentialBuildingsResultWrapper SelectRentResidentialsByNameKeyword(string keyword);
+    SelectPropertiesResultWrapper SelectRentResidentialsByNameKeyword(string keyword);
 
-    SqliteDataAccessSelectRentResidentialBuildingSingleResultWrapper SelectRentResidentialById(string id);
+    SelectRentResidentialBuildingSingleResultWrapper SelectRentResidentialById(string id);
 
-    SqliteDataAccessResultWrapper UpsertRentResidentialListing(string rentId, Models.Rent.Residentials.Room.Listing room);
+    ResultWrapper UpsertRentResidentialListing(string rentId, Models.Rent.Residentials.Listing.Listing room);
 
-    SqliteDataAccessSelectRentResidentialRoomsResultWrapper SelectRentResidentialListings();
+    SelectListingResultWrapper SelectRentResidentialListings();
 
-    SqliteDataAccessSelectRentResidentialRoomSingleResultWrapper SelectRentResidentialListingById(string rentId, string roomId);
+    SelectRentResidentialRoomSingleResultWrapper SelectRentResidentialListingById(string rentId, string roomId);
 
-    SqliteDataAccessResultWrapper DeleteRentResidentialListing(string roomId);
+    ResultWrapper DeleteRentResidentialListing(string roomId);
+
+    ResultWrapper UpsertRentLessor(Models.Rent.Lessors.Person lessor);
+
+    SelectPersonsResultWrapper SelectRentLessorByKeyword(string keyword);
+
+    SelectRentLessorSingleResultWrapper SelectRentLessorById(string id);
+
 }
 
 

@@ -13,9 +13,9 @@ public class PropertyUpdatedMessage : ValueChangedMessage<Models.Base.PropertyBa
     }
 }
 
-public class ListingUpdatedMessage : ValueChangedMessage<Models.Rent.Residentials.Room.Listing>
+public class ListingUpdatedMessage : ValueChangedMessage<Models.Rent.Residentials.Listing.Listing>
 {
-    public ListingUpdatedMessage(Models.Rent.Residentials.Room.Listing value) : base(value)
+    public ListingUpdatedMessage(Models.Rent.Residentials.Listing.Listing value) : base(value)
     {
 
     }
@@ -29,17 +29,25 @@ public class ListingDeletedMessage : ValueChangedMessage<string>
     }
 }
 
-public class ListingWindowClosedMessage : ValueChangedMessage<Views.Rent.Residentials.Room.EditorWindow> 
+public class ListingWindowClosedMessage : ValueChangedMessage<Views.Rent.Residentials.Listing.EditorWindow> 
 {
-    public ListingWindowClosedMessage(Views.Rent.Residentials.Room.EditorWindow value) : base(value)
+    public ListingWindowClosedMessage(Views.Rent.Residentials.Listing.EditorWindow value) : base(value)
     {
 
     }
 }
 
-public class PropertyWindowClosedMessage : ValueChangedMessage<Views.Rent.Residentials.Bldg.EditorWindow>
+public class PropertyWindowClosedMessage : ValueChangedMessage<Views.Rent.Residentials.EditorWindow>
 {
-    public PropertyWindowClosedMessage(Views.Rent.Residentials.Bldg.EditorWindow value) : base(value)
+    public PropertyWindowClosedMessage(Views.Rent.Residentials.EditorWindow value) : base(value)
+    {
+
+    }
+}
+
+public class LessorWindowClosedMessage : ValueChangedMessage<Views.Rent.Lessors.EditorWindow>
+{
+    public LessorWindowClosedMessage(Views.Rent.Lessors.EditorWindow value) : base(value)
     {
 
     }

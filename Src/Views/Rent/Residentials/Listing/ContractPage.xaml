@@ -1,0 +1,165 @@
+﻿<Page
+    x:Class="ZumenSearch.Views.Rent.Residentials.Listing.ContractPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:controls="using:CommunityToolkit.WinUI.Controls"
+    mc:Ignorable="d"
+    NavigationCacheMode="Required">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled" Padding="36,0,36,24">
+        <Grid x:Name="ContentArea">
+            <StackPanel Spacing="12" Margin="0,24,0,0">
+
+                <Border Style="{StaticResource RoundCardBorderStyle}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*" MinWidth="320"></ColumnDefinition>
+                            <ColumnDefinition Width="1*" MinWidth="320"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <Grid Grid.Row="0" Grid.Column="0">
+                            <TextBox Header="賃料（円）" Text="{x:Bind ViewModel.Chinryou, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MinWidth="200" HorizontalAlignment="Stretch"/>
+                        </Grid>
+                        <Grid Grid.Row="0" Grid.Column="1" Margin="12,0,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                <ColumnDefinition Width="*"></ColumnDefinition>
+                            </Grid.ColumnDefinitions>
+                            <Grid Grid.Row="0" Grid.Column="0">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBox MinWidth="200" Header="共益費・管理費（円）" HorizontalAlignment="Stretch"/>
+                                </StackPanel>
+                            </Grid>
+                            <Grid Grid.Row="0" Grid.Column="1" Margin="12,0,0,0">
+                                <StackPanel Orientation="Horizontal">
+
+                                </StackPanel>
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource RoundCardBorderStyle}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*" MinWidth="320"></ColumnDefinition>
+                            <ColumnDefinition Width="1*" MinWidth="320"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <Grid Grid.Row="0" Grid.Column="0">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBox MinWidth="200" Header="敷金" HorizontalAlignment="Stretch"/>
+                                <ComboBox SelectedIndex="0" Margin="6,0,0,0" VerticalAlignment="Bottom">
+                                    <ComboBoxItem>ヵ月</ComboBoxItem>
+                                    <ComboBoxItem>円</ComboBoxItem>
+                                </ComboBox>
+                            </StackPanel>
+                        </Grid>
+                        <Grid Grid.Row="0" Grid.Column="1" Margin="12,0,0,0">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBox MinWidth="200" Header="礼金" HorizontalAlignment="Stretch"/>
+                                <ComboBox SelectedIndex="0" Margin="6,0,0,0" VerticalAlignment="Bottom">
+                                    <ComboBoxItem>ヵ月</ComboBoxItem>
+                                    <ComboBoxItem>円</ComboBoxItem>
+                                </ComboBox>
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource RoundCardBorderStyle}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*" MinWidth="320"></ColumnDefinition>
+                            <ColumnDefinition Width="1*" MinWidth="320"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <Grid Grid.Row="0" Grid.Column="0">
+                            <StackPanel Orientation="Horizontal">
+                                <ComboBox Header="契約種別" SelectedIndex="-1" Width="200" Margin="0,0,0,0" VerticalAlignment="Bottom">
+                                    <ComboBoxItem>普通借家契約</ComboBoxItem>
+                                    <ComboBoxItem>定期借家契約</ComboBoxItem>
+                                </ComboBox>
+                                <TextBox Header="契約期間（年）" Width="100" Margin="12,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Bottom" />
+
+                            </StackPanel>
+                        </Grid>
+                        <Grid Grid.Row="0" Grid.Column="1" Margin="12,0,0,0">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBox Header="更新料" Width="200" Margin="0,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Bottom" />
+                                    <ComboBox SelectedIndex="0" Margin="6,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Bottom">
+                                        <ComboBoxItem>ヵ月</ComboBoxItem>
+                                        <ComboBoxItem>円</ComboBoxItem>
+                                    </ComboBox>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBox Header="再契約手数料" Width="200" Margin="0,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Bottom" />
+                                    <ComboBox SelectedIndex="1" Margin="6,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Bottom">
+                                        <ComboBoxItem>ヵ月</ComboBoxItem>
+                                        <ComboBoxItem>円</ComboBoxItem>
+                                    </ComboBox>
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource RoundCardBorderStyle}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*" MinWidth="320"></ColumnDefinition>
+                            <ColumnDefinition Width="1*" MinWidth="320"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <Grid Grid.Row="0" Grid.Column="0">
+                            <TextBox Header="保証会社" Margin="0" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
+                        </Grid>
+                        <Grid Grid.Row="0" Grid.Column="1" Margin="12,0,0,0">
+                            <TextBox Header="住宅保険" Margin="0" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
+                        </Grid>
+                        <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,12,0,0">
+                            <TextBox Header="その他" Margin="0" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
+                        </Grid>
+                    </Grid>
+                </Border>
+
+                <Expander Header="その他条件" Margin="0" Padding="24" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" IsExpanded="True">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                        </Grid.RowDefinitions>
+                        
+                        <controls:WrapPanel Grid.Row="0" VerticalSpacing="12" HorizontalSpacing="6">
+                            <CheckBox Content="ペット相談" />
+                            <CheckBox Content="2人入居可" />
+                            <CheckBox Content="保証人不要" />
+                            <CheckBox Content="事務所使用相談" />
+                        </controls:WrapPanel>
+
+                        <Grid Grid.Row="1" Margin="0,12,0,0">
+                            <TextBox Header="その他" Margin="0" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
+                        </Grid>
+                    </Grid>
+                </Expander>
+
+                <Border Style="{StaticResource RoundCardBorderStyle}">
+                    <TextBox Header="備考" MinHeight="100" HorizontalAlignment="Stretch" VerticalAlignment="Top" AcceptsReturn="True" ScrollViewer.VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" />
+                </Border>
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
+    
+</Page>

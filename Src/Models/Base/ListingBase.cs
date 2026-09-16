@@ -5,21 +5,24 @@ namespace ZumenSearch.Models.Base;
 #pragma warning disable IDE0079 // Remove unnecessary suppression
 #pragma warning disable IDE0290 // Use primary constructor
 
+/*
 public enum EnumListingStatus
 {
     Saved,
     New,
 }
+*/
 
-public abstract class ListingBase : ObservableObject // TODO: Remove ObservableObject?
+public abstract class ListingBase : EntryBase
 {
-    public EnumPropertyStatus PropertyStatus { get; set; } = EnumPropertyStatus.New;
-    public EnumListingStatus ListingStatus { get; set; } = EnumListingStatus.New;
+    public EnumEntryStatus PropertyStatus { get; set; } = EnumEntryStatus.New;
+    //public EnumEntryStatus ListingStatus { get; set; } = EnumEntryStatus.New;
 
-    public bool IsModified { get; set; } = false;
+    //public bool IsModified { get; set; } = false;
 
-    public string Id { get; }
+    //public string Id { get; }
 
+    /*
     public string Name
     {
         get => field ?? string.Empty;
@@ -31,9 +34,11 @@ public abstract class ListingBase : ObservableObject // TODO: Remove ObservableO
             }
         }
     }
+    */
 
-    protected ListingBase(string id)
+    protected ListingBase(string id, EnumEntryStatus status) : base(id)
     {
-        Id = id;
+        //Id = id;
+        Status = status;
     }
 };

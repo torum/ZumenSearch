@@ -8,12 +8,13 @@ namespace ZumenSearch.Models.Base;
 #pragma warning disable IDE0290 // Use primary constructor
 #pragma warning disable IDE0079 // Remove unnecessary suppression
 
+/*
 public enum EnumPropertyStatus
 {
     Saved,
     New,
 }
-
+*/
 public enum EnumPropertyKind
 {
     RentResidential,
@@ -25,17 +26,19 @@ public enum EnumPropertyKind
     Unknown
 }
 
-public abstract partial class PropertyBase : ObservableObject
+public abstract partial class PropertyBase : EntryBase
 {
-    public EnumPropertyStatus PropertyStatus { get; set; } = EnumPropertyStatus.New;
+    //public EnumEntryStatus PropertyStatus { get; set; } = EnumEntryStatus.New;
 
     public EnumPropertyKind PropertyKind { get; init; } = EnumPropertyKind.Unknown;
-
+    /*
     public bool IsModified { get; set; } = false;
 
     protected private string _id;
     public string Id => _id;
+    */
 
+    /*
     public string Name
     {
         get => field ?? string.Empty; // Ensure a non-null value is returned
@@ -47,6 +50,7 @@ public abstract partial class PropertyBase : ObservableObject
             }
         }
     }
+    */
 
     public ImageSource? ThumbImage 
     {
@@ -153,28 +157,11 @@ public abstract partial class PropertyBase : ObservableObject
 
     #endregion
 
-    protected PropertyBase(string id, EnumPropertyKind kind)
+    protected PropertyBase(string id, EnumEntryStatus status, EnumPropertyKind kind): base(id)
     {
-        _id = id;
+        //_id = id;
+        Status = status;
         PropertyKind = kind;
     }
 
-    #region == Public Methods ==
-
-    public void ClearId()
-    {
-        _id = string.Empty;
-    }
-
-    public void SetId(string id)
-    {
-        if (string.IsNullOrEmpty(id))
-        {
-            throw new ArgumentException("Id cannot be null or empty.", nameof(id));
-        }
-
-        _id = id;
-    }
-
-    #endregion
 }

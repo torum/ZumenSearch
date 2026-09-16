@@ -5,10 +5,8 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:mod="using:ZumenSearch.Models.Common"
-    xmlns:rent="using:ZumenSearch.Models.Rent.Residentials"
     mc:Ignorable="d"
-    NavigationCacheMode="Required"
-    Loaded="Page_Loaded">
+    NavigationCacheMode="Required">
 
     <Grid x:Name="ContentArea" Margin="0,0,0,0">
         <Grid.RowDefinitions>
@@ -106,7 +104,7 @@
                         </MenuFlyout>
                     </ItemsView.ContextFlyout>
                     <ItemsView.ItemTemplate>
-                        <DataTemplate x:DataType="rent:PropertySearchResultItem">
+                        <DataTemplate x:DataType="mod:PropertySearchResultItem">
                             <ItemContainer DataContext="{x:Bind}" IsDoubleTapEnabled="True" DoubleTapped="SearchResult_DoubleTapped" PointerPressed="ItemContainer_PointerPressed" PointerReleased="ItemContainer_PointerReleased" RightTapped="ItemContainer_RightTapped">
                                 <ItemContainer.KeyboardAccelerators>
                                     <KeyboardAccelerator Key="Enter" Modifiers="None" Invoked="ItemsViewKeyboardAccelerator_Invoked" />

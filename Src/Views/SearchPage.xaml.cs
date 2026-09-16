@@ -47,7 +47,7 @@ public sealed partial class SearchPage : Page
 
     private void BasicGridView_ItemClick(object sender, ItemClickEventArgs e)
     {
-        if (e.ClickedItem is not Models.PropertySearchResultItem item)
+        if (e.ClickedItem is not Models.Common.PropertySearchResultItem item)
         {
             return;
         }

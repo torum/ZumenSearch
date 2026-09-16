@@ -13,12 +13,12 @@ public class NavigationService : INavigationService
         {
             { "ZumenSearch.Views.SearchPage", typeof(Views.SearchPage) },
             { "ZumenSearch.Views.SearchResultPage", typeof(Views.SearchResultPage) },
-            { "ZumenSearch.Views.Rent.Residentials.SearchPage", typeof(Views.Rent.Residentials.SearchPage) },
-            { "ZumenSearch.Views.Rent.Residentials.SearchResultPage", typeof(Views.Rent.Residentials.SearchResultPage) },
+            { "ZumenSearch.Views.Rent.ResidentialSearchPage", typeof(Views.Rent.ResidentialSearchPage) },
+            { "ZumenSearch.Views.Rent.ResidentialSearchResultPage", typeof(Views.Rent.ResidentialSearchResultPage) },
             { "ZumenSearch.Views.Rent.Commercials.CommercialsPage", typeof(Views.Rent.Commercials.CommercialsPage) },
             { "ZumenSearch.Views.Rent.Parkings.ParkingsPage", typeof(Views.Rent.Parkings.ParkingsPage) },
-            { "ZumenSearch.Views.Rent.Owners.SearchPage", typeof(Views.Rent.Owners.SearchPage) },
-            { "ZumenSearch.Views.Rent.Owners.SearchResultPage", typeof(Views.Rent.Owners.SearchResultPage) },
+            { "ZumenSearch.Views.Rent.LessorSearchPage", typeof(Views.Rent.LessorSearchPage) },
+            { "ZumenSearch.Views.Rent.LessorSearchResultPage", typeof(Views.Rent.LessorSearchResultPage) },
             { "ZumenSearch.Views.Brokers.BrokersPage", typeof(Views.Brokers.BrokersPage) },
             { "ZumenSearch.Views.SettingsPage", typeof(Views.SettingsPage) }
         };
