@@ -8,13 +8,6 @@ namespace ZumenSearch.Models.Base;
 #pragma warning disable IDE0290 // Use primary constructor
 #pragma warning disable IDE0079 // Remove unnecessary suppression
 
-/*
-public enum EnumPropertyStatus
-{
-    Saved,
-    New,
-}
-*/
 public enum EnumPropertyKind
 {
     RentResidential,
@@ -28,29 +21,7 @@ public enum EnumPropertyKind
 
 public abstract partial class PropertyBase : EntryBase
 {
-    //public EnumEntryStatus PropertyStatus { get; set; } = EnumEntryStatus.New;
-
     public EnumPropertyKind PropertyKind { get; init; } = EnumPropertyKind.Unknown;
-    /*
-    public bool IsModified { get; set; } = false;
-
-    protected private string _id;
-    public string Id => _id;
-    */
-
-    /*
-    public string Name
-    {
-        get => field ?? string.Empty; // Ensure a non-null value is returned
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
-        }
-    }
-    */
 
     public ImageSource? ThumbImage 
     {
@@ -157,10 +128,8 @@ public abstract partial class PropertyBase : EntryBase
 
     #endregion
 
-    protected PropertyBase(string id, EnumEntryStatus status, EnumPropertyKind kind): base(id)
+    protected PropertyBase(string id, EnumEntryStatus status, EnumPropertyKind kind): base(id, status)
     {
-        //_id = id;
-        Status = status;
         PropertyKind = kind;
     }
 

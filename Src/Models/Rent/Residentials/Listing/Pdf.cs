@@ -5,6 +5,9 @@ namespace ZumenSearch.Models.Rent.Residentials.Listing;
 
 // TODO: This is same as ZumenSearch.Models.Rent.Residentials.Pdf.
 // Consider removable.
+// No... We need ParentViewModel(ViewModels.Rent.Residentials.Listing.ListingViewModel)
+// Then, consider creating a wrapper just like Lessor wrapper?
+// Consider if we can reuse this for Sales 
 
 public enum EnumRoomPdfType
 {

@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 using ZumenSearch.Models.Common;
 using ZumenSearch.Services.Contracts;
 
-namespace ZumenSearch.ViewModels.Railway;
+namespace ZumenSearch.ViewModels.Transportation;
 
 public partial class RailLineViewModel : ObservableObject
 {

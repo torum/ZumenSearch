@@ -8,8 +8,6 @@ namespace ZumenSearch.Models.Rent.Lessors;
 
 public sealed partial class Person : PersonBase
 {
-    //public ViewModels.Rent.Residentials.PropertyViewModel? ParentViewModel { get; set; }
-
     // Do not use SetProperty.
     public string Remarks
     {
@@ -37,7 +35,21 @@ public sealed partial class Person : PersonBase
 
     public Person(string id, EnumEntryStatus status) : base(id, status)
     {
-        IsModified = false;
+        //IsModified = false;
     }
 
 };
+
+// WinUI3 workaround. (to access viewmodel inside itemrepeater's DataTemplate)
+public sealed partial class PersonWrapperForPropertyViewModel
+{
+    public ViewModels.Rent.Residentials.PropertyViewModel ParentViewModel { get;  }
+
+    public Models.Rent.Lessors.Person Person { get; }
+
+    public PersonWrapperForPropertyViewModel(Person person, ViewModels.Rent.Residentials.PropertyViewModel parentPropertyViewModel)
+    {
+        Person = person;
+        ParentViewModel = parentPropertyViewModel;
+    }
+}

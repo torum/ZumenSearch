@@ -1,17 +1,17 @@
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
-using ZumenSearch.ViewModels.Transportation;
+using ZumenSearch.ViewModels.Rent.Lessors;
 
 namespace ZumenSearch.Views.Dialogs;
 
-public sealed partial class RailStationSelectPage : Page
+public sealed partial class LessorSelectPage : Page
 {
-    public RailStationViewModel ViewModel
+    public LessorSelectViewModel ViewModel
     {
         get;
     }
 
-    public RailStationSelectPage(RailStationViewModel vm)
+    public LessorSelectPage(LessorSelectViewModel vm)
     {
         ViewModel = vm;
         InitializeComponent();
@@ -19,12 +19,12 @@ public sealed partial class RailStationSelectPage : Page
 
     private void KeyboardAccelerator_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
     {
-        var query = TextBoxStation.Text;
+        var query = TextBoxName.Text;
         if (!string.IsNullOrEmpty(query))
         {
-            if (ViewModel.SearchRailStationCommand.CanExecute(query))
+            if (ViewModel.SearchCommand.CanExecute(query))
             {
-                ViewModel.SearchRailStationCommand.Execute(query);
+                ViewModel.SearchCommand.Execute(query);
             }
         }
     }

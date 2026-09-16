@@ -20,6 +20,7 @@ using Windows.System;
 using ZumenSearch.Models.Base;
 using ZumenSearch.Models.Common;
 using ZumenSearch.Models.Messenger;
+using ZumenSearch.Models.Rent.Lessors;
 using ZumenSearch.Models.Rent.Residentials;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.Services.Extensions.AbstractFactory;
@@ -1309,6 +1310,22 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
                 IsDirty = true;//?
 
                 OpenBuildingBlobDirectoryCommand.NotifyCanExecuteChanged();
+            }
+        }
+    } = [];
+
+    #endregion
+
+    #region == 貸主プロパティ ==
+
+    public ObservableCollection<Models.Rent.Lessors.PersonWrapperForPropertyViewModel> Lessors
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;//?
             }
         }
     } = [];
@@ -2634,6 +2651,68 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         }
 
         return true;
+    }
+
+    #endregion
+
+    #region == Lessor related commands ==
+
+    [RelayCommand]
+    public async Task AddLessor()
+    {
+        if (_dialogService is null)
+        {
+            Debug.WriteLine("_dlgService is null");
+            return;
+        }
+
+        var lessor = await _dialogService.ShowLessorSelectDialog(new ViewModels.Rent.Lessors.LessorSelectViewModel(_dataAccessService));
+
+        if (lessor is not null)
+        {
+            var lessorId = lessor.Id;
+
+            Debug.WriteLine($"lessor {lessor.Name} returned.");
+
+            // TODO:
+            //var res = await Task.Run(() => _dataAccessService.SelectRentLessorById(lessorId), _cts.Token);
+            var res = _dataAccessService.SelectRentLessorById(lessorId);
+            if (res.IsError)
+            {
+                Debug.WriteLine(res.Error.ErrText + Environment.NewLine + res.Error.ErrDescription + Environment.NewLine + res.Error.ErrPlace + Environment.NewLine + res.Error.ErrPlaceParent);
+
+                //ErrorMain = res.Error;
+                //IsMainErrorInfoBarVisible = true;
+
+                // TODO: Show error message to user
+                return;
+            }
+
+            if (res.Lessor is null)
+            {
+                Debug.WriteLine($"{lessorId} is null. Cannot open editor.");
+                return;
+            }
+
+            var asdf = new PersonWrapperForPropertyViewModel(res.Lessor, this);
+
+            Lessors.Add(asdf);
+
+            IsDirty = true;
+        }
+
+    }
+
+    [RelayCommand(CanExecute = nameof(CanDeleteLessor))]
+    public async Task DeleteLessor(PersonWrapperForPropertyViewModel lessor)
+    {
+        Debug.WriteLine($"DeleteLessorCommand {lessor.Person.Name}");
+
+        Lessors.Remove(lessor);
+    }
+    private static bool CanDeleteLessor(PersonWrapperForPropertyViewModel lessor)
+    {
+        return lessor is not null;
     }
 
     #endregion

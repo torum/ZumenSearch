@@ -3,6 +3,9 @@ using ZumenSearch.Models.Base;
 
 namespace ZumenSearch.Models.Rent.Residentials;
 
+// TODO: Consider creating a wrapper just like Lessor wrapper?
+// Almost dupe with Models.Rent.Residentials.Listing.Pdf
+
 public enum EnumPdfType
 {
     Unspecified,

@@ -74,9 +74,16 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Models\Brokers\" />
     <Folder Include="Models\Sale\" />
+    <Folder Include="ViewModels\Brokers\" />
     <Folder Include="ViewModels\Sale\" />
     <Folder Include="Views\Sale\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\Dialogs\LessorSelectPage.xaml">
+      <SubType>Designer</SubType>
+    </Page>
   </ItemGroup>
 
   <!--

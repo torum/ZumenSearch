@@ -36,8 +36,8 @@ public abstract class PersonBase : EntryBase
         }
     }
 
-    protected PersonBase(string id, EnumEntryStatus status) : base(id)
+    protected PersonBase(string id, EnumEntryStatus status) : base(id, status)
     {
-        Status = status;
+        //
     }
 };

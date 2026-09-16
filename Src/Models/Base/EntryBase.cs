@@ -34,9 +34,10 @@ public abstract class EntryBase : ObservableObject
         }
     }
 
-    protected EntryBase(string id)
+    protected EntryBase(string id, EnumEntryStatus staus)
     {
         Id = id;
+        Status = staus;
     }
 
     #region == Public Methods ==

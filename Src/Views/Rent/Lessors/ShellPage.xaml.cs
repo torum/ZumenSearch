@@ -91,7 +91,7 @@ public sealed partial class ShellPage : Page
     private void ShellPage_Loaded(object sender, RoutedEventArgs e)
     {
         // XamlRoot is no longer null.
-        _dialogService.Initialize(this.XamlRoot);
+        _dialogService.Initialize(this.XamlRoot, Window);
         /*
         if (ContentFrame.Navigate(typeof(ZumenSearch.Views.Rent.Residentials.BasicPage), ViewModel, new EntranceNavigationTransitionInfo()))
         {

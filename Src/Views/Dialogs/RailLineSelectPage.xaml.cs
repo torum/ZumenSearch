@@ -1,6 +1,6 @@
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
-using ZumenSearch.ViewModels.Railway;
+using ZumenSearch.ViewModels.Transportation;
 
 namespace ZumenSearch.Views.Dialogs;
 

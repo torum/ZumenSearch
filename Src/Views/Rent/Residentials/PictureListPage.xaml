@@ -6,7 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:mod="using:ZumenSearch.Models.Common"
     xmlns:modresi="using:ZumenSearch.Models.Rent.Residentials"
-    xmlns:local="using:ZumenSearch.Views.Rent.Residentials.Bldg"
+    xmlns:local="using:ZumenSearch.Views.Rent.Residentials"
     mc:Ignorable="d"
     NavigationCacheMode="Required">
 
@@ -50,55 +50,55 @@
             <ScrollViewer HorizontalScrollMode="Disabled">
                 <!-- TODO: chnage this to listview -->
                 <ItemsRepeater x:Name="ItemsView" ItemsSource="{x:Bind ViewModel.BuildingPictures, Mode=TwoWay}" MinWidth="300" MinHeight="225" ScrollViewer.HorizontalScrollMode="Disabled" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-                <!--  SelectionChanged="ItemsView_SelectionChanged" SelectionMode="Single" IsItemInvokedEnabled="False"  -->
-                <ItemsRepeater.ItemTemplate>
-                    <DataTemplate x:DataType="modresi:Picture">
-                        <Border Style="{StaticResource RoundCardBorderStyle}">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Grid Grid.Row="0" Grid.Column="0">
+                    <!--  SelectionChanged="ItemsView_SelectionChanged" SelectionMode="Single" IsItemInvokedEnabled="False"  -->
+                    <ItemsRepeater.ItemTemplate>
+                        <DataTemplate x:DataType="modresi:Picture">
+                            <Border Style="{StaticResource RoundCardBorderStyle}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid Grid.Row="0" Grid.Column="0">
                                         <Image Source="{x:Bind ThumbImage, Mode=OneWay}" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="280" MaxWidth="280" MaxHeight="190" MinHeight="190"/>
-                                    <StackPanel Orientation="Vertical" Height="60" VerticalAlignment="Bottom" Padding="12" Background="{ThemeResource SystemControlBackgroundBaseMediumBrush}" Opacity=".75">
-                                        <TextBlock Text="{x:Bind PictureType.Label, Mode=OneWay}" Style="{StaticResource BodyStrongTextBlockStyle}" Foreground="{ThemeResource SystemControlForegroundAltHighBrush}"/>
-                                        <StackPanel Orientation="Horizontal">
-                                            <TextBlock Text="{x:Bind Description, Mode=OneWay}" Style="{ThemeResource CaptionTextBlockStyle}" Foreground="{ThemeResource SystemControlForegroundAltHighBrush}"/>
+                                        <StackPanel Orientation="Vertical" Height="60" VerticalAlignment="Bottom" Padding="12" Background="{ThemeResource SystemControlBackgroundBaseMediumBrush}" Opacity=".75">
+                                            <TextBlock Text="{x:Bind PictureType.Label, Mode=OneWay}" Style="{StaticResource BodyStrongTextBlockStyle}" Foreground="{ThemeResource SystemControlForegroundAltHighBrush}"/>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{x:Bind Description, Mode=OneWay}" Style="{ThemeResource CaptionTextBlockStyle}" Foreground="{ThemeResource SystemControlForegroundAltHighBrush}"/>
+                                            </StackPanel>
                                         </StackPanel>
-                                    </StackPanel>
-                                </Grid>
-                                <Grid Grid.Row="0" Grid.Column="1">
-                                    <StackPanel Spacing="12" Margin="24,0,6,6" MinWidth="260">
-                                        <StackPanel Orientation="Horizontal">
-                                            <ComboBox x:Name="ComboBoxKinds" Header="タイプ" PlaceholderText="選択" Width="200" ItemsSource="{x:Bind BuildingPictureTypes, Mode=OneWay}" SelectedItem="{x:Bind PictureType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                                                <ComboBox.ItemTemplate>
-                                                    <DataTemplate x:DataType="modresi:BuildingPictureType">
-                                                        <StackPanel Orientation="Horizontal">
-                                                            <TextBlock Text="{x:Bind Label}" Margin="0,0,5,0"/>
-                                                        </StackPanel>
-                                                    </DataTemplate>
-                                                </ComboBox.ItemTemplate>
-                                            </ComboBox>
-                                            <CheckBox Content="メインの写真" Margin="12,0,0,0" VerticalAlignment="Bottom" IsChecked="{x:Bind IsMain, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
-                                        </StackPanel>
-                                        <TextBox Header="説明" Margin="0,0,0,0" Text="{x:Bind Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
-                                        <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Margin="0,0,0,0" HorizontalAlignment="Right">
+                                    </Grid>
+                                    <Grid Grid.Row="0" Grid.Column="1">
+                                        <StackPanel Spacing="12" Margin="24,0,6,6" MinWidth="260">
+                                            <StackPanel Orientation="Horizontal">
+                                                <ComboBox x:Name="ComboBoxKinds" Header="タイプ" PlaceholderText="選択" Width="200" ItemsSource="{x:Bind BuildingPictureTypes, Mode=OneWay}" SelectedItem="{x:Bind PictureType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                                    <ComboBox.ItemTemplate>
+                                                        <DataTemplate x:DataType="modresi:BuildingPictureType">
+                                                            <StackPanel Orientation="Horizontal">
+                                                                <TextBlock Text="{x:Bind Label}" Margin="0,0,5,0"/>
+                                                            </StackPanel>
+                                                        </DataTemplate>
+                                                    </ComboBox.ItemTemplate>
+                                                </ComboBox>
+                                                <CheckBox Content="メインの写真" Margin="12,0,0,0" VerticalAlignment="Bottom" IsChecked="{x:Bind IsMain, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
+                                            </StackPanel>
+                                            <TextBox Header="説明" Margin="0,0,0,0" Text="{x:Bind Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
+                                            <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Margin="0,0,0,0" HorizontalAlignment="Right">
                                                 <AppBarButton Icon="Delete" Label="削除" ToolTipService.ToolTip="写真を削除" Command="{x:Bind ParentViewModel.DeleteBuildingPictureCommand, Mode=OneWay}" CommandParameter="{x:Bind}"/>
-                                        </CommandBar>
-                                    </StackPanel>
+                                            </CommandBar>
+                                        </StackPanel>
+                                    </Grid>
                                 </Grid>
-                            </Grid>
-                        </Border>
-                    </DataTemplate>
-                </ItemsRepeater.ItemTemplate>
-                <ItemsRepeater.Layout>
-                    <StackLayout Orientation="Vertical" Spacing="12" />
-                    <!--
+                            </Border>
+                        </DataTemplate>
+                    </ItemsRepeater.ItemTemplate>
+                    <ItemsRepeater.Layout>
+                        <StackLayout Orientation="Vertical" Spacing="12" />
+                        <!--
                     <UniformGridLayout MinRowSpacing="18" MinColumnSpacing="18" ItemsJustification="SpaceEvenly"/>
                     -->
-                </ItemsRepeater.Layout>
-            </ItemsRepeater>
+                    </ItemsRepeater.Layout>
+                </ItemsRepeater>
             </ScrollViewer>
         </Grid>
     </Grid>

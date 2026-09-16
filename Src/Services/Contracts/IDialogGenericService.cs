@@ -6,11 +6,11 @@ namespace ZumenSearch.Services.Contracts;
 
 public interface IDialogGenericService
 {
-    void Initialize(XamlRoot xamlRoot);
+    void Initialize(XamlRoot xamlRoot, Window window);
 
     Task<ContentDialogResult> ShowEditorCloseConfirmationDialog();
 
-    Task<ContentDialogResult> ShowLeaveUnitDirtyConfirmationDialog();
+    Task<Models.Common.PersonSearchResultItem?> ShowLessorSelectDialog(ViewModels.Rent.Lessors.LessorSelectViewModel viewModel);
 
     Task<RailLine?> ShowRailLineSelectDialog();
 

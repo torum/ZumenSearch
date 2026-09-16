@@ -382,7 +382,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
     }
 
     [RelayCommand(CanExecute = nameof(EditRentResidentialBldgCanExecute))]
-    public void EditRentResidentialBldg(Models.Common.PropertySearchResultItem? selected) 
+    public async Task EditRentResidentialBldg(Models.Common.PropertySearchResultItem? selected) 
     {
         var rentId = selected?.Id;
 
@@ -425,6 +425,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
 
         // Access Database to get the full entry data.
         var res = _dataAccessService.SelectRentResidentialById(rentId);// Go back to UI thred. Let's not do > .ConfigureAwait(false);
+        //var res = await Task.Run(() => _dataAccessService.SelectRentResidentialById(rentId), _cts.Token);
         if (res.IsError)
         {
             Debug.WriteLine(res.Error.ErrText + Environment.NewLine + res.Error.ErrDescription + Environment.NewLine + res.Error.ErrPlace + Environment.NewLine + res.Error.ErrPlaceParent);
@@ -481,7 +482,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
     }
 
     [RelayCommand(CanExecute = nameof(EditRentResidentialRoomCanExecute))]
-    public void EditRentResidentialRoom(Models.Common.ListingSearchResultItem? selected)
+    public async Task EditRentResidentialRoom(Models.Common.ListingSearchResultItem? selected)
     {
         if (selected is null)
         {
@@ -531,6 +532,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         
         // Access Database to get the full entry data.
         var res = _dataAccessService.SelectRentResidentialListingById(buildingId, roomId);// Go back to UI thred. Let's not do > .ConfigureAwait(false);
+        //var res = await Task.Run(() => _dataAccessService.SelectRentResidentialListingById(buildingId, roomId), _cts.Token);
         if (res.IsError)
         {
             Debug.WriteLine(res.Error.ErrText + Environment.NewLine + res.Error.ErrDescription + Environment.NewLine + res.Error.ErrPlace + Environment.NewLine + res.Error.ErrPlaceParent);
@@ -978,7 +980,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
     }
 
     [RelayCommand(CanExecute = nameof(EditRentLessorCanExecute))]
-    public void EditRentLessor(Models.Common.PersonSearchResultItem? selected)
+    public async Task EditRentLessor(Models.Common.PersonSearchResultItem? selected)
     {
         var lessorId = selected?.Id;
 
@@ -1019,8 +1021,9 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
             return;
         }
 
-        // Access Database to get the full entry data.
-        var res = _dataAccessService.SelectRentLessorById(lessorId);// Go back to UI thred. Let's not do > .ConfigureAwait(false);
+        // 
+        //var res = _dataAccessService.SelectRentLessorById(lessorId);// Go back to UI thred. Let's not do > .ConfigureAwait(false);
+        var res = await Task.Run(() => _dataAccessService.SelectRentLessorById(lessorId), _cts.Token);
         if (res.IsError)
         {
             Debug.WriteLine(res.Error.ErrText + Environment.NewLine + res.Error.ErrDescription + Environment.NewLine + res.Error.ErrPlace + Environment.NewLine + res.Error.ErrPlaceParent);

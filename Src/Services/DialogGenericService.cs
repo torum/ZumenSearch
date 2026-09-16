@@ -4,12 +4,15 @@ using System.Diagnostics;
 using ZumenSearch.Models.Common;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.Views.Dialogs;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ZumenSearch.Services;
 
 public class DialogGenericService : IDialogGenericService
 {
     private XamlRoot? _xamlRoot;
+
+    private Window? _window;
 
     private bool _isDialogOpened;
 
@@ -21,9 +24,10 @@ public class DialogGenericService : IDialogGenericService
         //_ownerWindowList = new List<Window>();
     }
 
-    public void Initialize(XamlRoot xamlRoot)
+    public void Initialize(XamlRoot xamlRoot, Window window)
     {
         _xamlRoot = xamlRoot;
+        _window = window;
     }
 
     public async Task<ContentDialogResult> ShowEditorCloseConfirmationDialog()
@@ -64,47 +68,63 @@ public class DialogGenericService : IDialogGenericService
         return result;
     }
 
-
-    public async Task<ContentDialogResult> ShowLeaveUnitDirtyConfirmationDialog()
+    public async Task<Models.Common.PersonSearchResultItem?> ShowLessorSelectDialog(ViewModels.Rent.Lessors.LessorSelectViewModel viewModel)
     {
         if (_isDialogOpened)
         {
-            Debug.WriteLine("DialogGenericService: _isDialogOpened @ShowLeaveUnitDirtyConfirmationDialog");
             // Prevents COM exepction causing by attempt to show multiple dialogs. (Window's close button is enabled even tho dialog is shown)
-            return ContentDialogResult.None;
+            Debug.WriteLine("DialogGenericService: _isDialogOpened @ShowLessorSelectDialog");
+            return null;
         }
 
         if (_xamlRoot is null)
         {
-            return ContentDialogResult.None;
+            System.Diagnostics.Debug.WriteLine("_xamlRoot is null @ShowRailLineSelectDialog");
+            return null;
         }
 
         var dialog = new ContentDialog
         {
             XamlRoot = _xamlRoot,
-            Title = "保存の確認（部屋）",
-            IsPrimaryButtonEnabled = true,
-            PrimaryButtonText = "保存して移動する",
+            Title = "貸主の選択",
+            IsPrimaryButtonEnabled = false,
+            PrimaryButtonText = "確定",
             DefaultButton = ContentDialogButton.Primary,
-            IsSecondaryButtonEnabled = true,
-            SecondaryButtonText = "変更を破棄して移動する",
+            IsSecondaryButtonEnabled = false,
             CloseButtonText = "キャンセル",
-            Content = "部屋の変更内容が保存されていません。"
+            Content = new Views.Dialogs.LessorSelectPage(viewModel)
         };
 
-        //Debug.WriteLine("await dialog.ShowAsync()");
+        if (dialog.Content is not LessorSelectPage dialogContent)
+        {
+            return null;
+        }
+
+        dialogContent.ViewModel.SelectionChanged += (sender, e) =>
+        {
+            if ((e is not null) && (e is Models.Common.PersonSearchResultItem rl))
+            {
+                //dialogContent.ViewModel.SelectedRailLine
+                dialog.IsPrimaryButtonEnabled = true;
+            }
+        };
 
         _isDialogOpened = true;
         //_ownerWindowList.Add(win);
         var result = await dialog.ShowAsync();
         _isDialogOpened = false;
         //_ownerWindowList.Remove(win);
-        return result;
+        if (result == ContentDialogResult.Primary)
+        {
+            return dialogContent.ViewModel.SelectedLessor;
+        }
+
+        return null;
     }
 
     public async Task<RailLine?> ShowRailLineSelectDialog()
     {
-        if (_isDialogOpened)// && (_ownerWindowList.IndexOf(win) > -1)
+        if (_isDialogOpened)
         {
             // Prevents COM exepction causing by attempt to show multiple dialogs. (Window's close button is enabled even tho dialog is shown)
             Debug.WriteLine("DialogGenericService: _isDialogOpened @ShowRailLineSelectDialog");
@@ -126,7 +146,7 @@ public class DialogGenericService : IDialogGenericService
             DefaultButton = ContentDialogButton.Primary,
             IsSecondaryButtonEnabled = false,
             CloseButtonText = "キャンセル",
-            Content = new Views.Dialogs.RailLineSelectPage(new ViewModels.Railway.RailLineViewModel(new DataAccessTransportationService()))
+            Content = new Views.Dialogs.RailLineSelectPage(new ViewModels.Transportation.RailLineViewModel(new DataAccessTransportationService()))
         };
 
         if (dialog.Content is not RailLineSelectPage dialogContent)
@@ -187,7 +207,7 @@ public class DialogGenericService : IDialogGenericService
             DefaultButton = ContentDialogButton.Primary,
             IsSecondaryButtonEnabled = false,
             CloseButtonText = "キャンセル",
-            Content = new Views.Dialogs.RailStationSelectPage(new ViewModels.Railway.RailStationViewModel(new DataAccessTransportationService(), railLineCode))
+            Content = new Views.Dialogs.RailStationSelectPage(new ViewModels.Transportation.RailStationViewModel(new DataAccessTransportationService(), railLineCode))
         };
 
         if (dialog.Content is not RailStationSelectPage dialogContent)
