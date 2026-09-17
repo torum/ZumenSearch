@@ -63,7 +63,12 @@ public partial class LessorSelectViewModel : ObservableObject
         _dataAccessService = dataAccessService;
 
         // TODO: try catch
-        //SuggestedRailLines = _dataAccessTransportationService.GetRailLinesBy(string.Empty);
+        //var res = await Task.Run(() => _dataAccessService.SelectRentLessorByKeyword("*"), _cts.Token);
+        var res = _dataAccessService.SelectRentLessorByKeyword("*");
+        if (res is not null)
+        {
+            SuggestedLessors = new(res.PersonSearchResult);
+        }
 
     }
     [RelayCommand(CanExecute = nameof(CanSearch))]
@@ -76,7 +81,7 @@ public partial class LessorSelectViewModel : ObservableObject
         }
 
         // TODO: try catch
-
+        //var res = await Task.Run(() => _dataAccessService.SelectRentLessorByKeyword(Query), _cts.Token);
         var res = _dataAccessService.SelectRentLessorByKeyword(Query);
         if (res is not null)
         {

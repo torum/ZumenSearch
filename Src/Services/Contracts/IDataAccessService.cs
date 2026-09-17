@@ -32,6 +32,8 @@ public interface IDataAccessService
 
     SelectRentLessorSingleResultWrapper SelectRentLessorById(string id);
 
+    ResultWrapper DeleteRentLessor(string id);
+
 }
 
 

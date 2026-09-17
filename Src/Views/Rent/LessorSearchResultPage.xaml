@@ -41,8 +41,8 @@
 
                 <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,0,3,0">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                        <AppBarButton Icon="Back" Label="戻る" Command="{x:Bind ViewModel.GoBackCommand}"/>
-                        <AppBarButton Icon="Add" Label="新規" Command="{x:Bind ViewModel.AddNewRentLessorCommand}"/>
+                        <AppBarButton Icon="Back" Label="戻る" Command="{x:Bind ViewModel.GoBackCommand, Mode=OneWay}"/>
+                        <AppBarButton Icon="Add" Label="新規" Command="{x:Bind ViewModel.AddNewRentLessorCommand, Mode=OneWay}"/>
                     </StackPanel>
                 </StackPanel>
 
@@ -58,8 +58,7 @@
             <StackPanel Grid.Row="0" Padding="{StaticResource ContentPadding}">
 
                 <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Margin="0,0,24,0" HorizontalAlignment="Right">
-                    <AppBarButton Icon="Delete" Label="削除"/>
-                    <!--  Command="{x:Bind ViewModel.DeleteRentResidentialRoomCommand}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}" -->
+                    <AppBarButton Icon="Delete" Label="削除" Command="{x:Bind ViewModel.DeleteRentLessorCommand, Mode=OneWay}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}"/>
                     <AppBarButton Icon="Sort" IsCompact="True" ToolTipService.ToolTip="Sort" Label="並べ替え" AutomationProperties.Name="Sort" IsEnabled="False">
                         <AppBarButton.Flyout>
                             <MenuFlyout>
@@ -70,8 +69,7 @@
                         </AppBarButton.Flyout>
                     </AppBarButton>
                     <AppBarButton Icon="Copy" Label="複製" IsEnabled="False"/>
-                    <AppBarButton Icon="Edit" Label="編集"/>
-                    <!--  Command="{x:Bind ViewModel.EditRentResidentialRoomCommand}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}" -->
+                    <AppBarButton Icon="Edit" Label="編集" Command="{x:Bind ViewModel.EditRentLessorCommand}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}"/>
                 </CommandBar>
 
                 <Border BorderThickness="0,1,0,0" BorderBrush="{ThemeResource NavigationViewItemSeparatorForeground}"></Border>
@@ -83,16 +81,14 @@
                 <ItemsView x:Name="SearchResultListView" Margin="0,12,0,0" ItemsSource="{x:Bind ViewModel.RentLessorSearchResult, Mode=OneWay}" AllowFocusOnInteraction="False" SelectionMode="Single">
                     <ItemsView.ContextFlyout>
                         <MenuFlyout>
-                            <MenuFlyoutItem Text="編集" Icon="Edit" Command="{x:Bind ViewModel.EditRentLessorCommand}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}">
-                                <!--  -->
+                            <MenuFlyoutItem Text="編集" Icon="Edit" Command="{x:Bind ViewModel.EditRentLessorCommand, Mode=OneWay}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}">
                                 <MenuFlyoutItem.KeyboardAccelerators>
                                     <KeyboardAccelerator Key="Enter" />
                                 </MenuFlyoutItem.KeyboardAccelerators>
                             </MenuFlyoutItem>
                             <MenuFlyoutItem Text="複製" Icon="Copy"></MenuFlyoutItem>
                             <MenuFlyoutSeparator/>
-                            <MenuFlyoutItem Text="削除" Icon="Delete"></MenuFlyoutItem>
-                            <!--  Command="{x:Bind ViewModel.DeleteRentResidentialRoomCommand, Mode=OneWay}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}" -->
+                            <MenuFlyoutItem Text="削除" Icon="Delete" Command="{x:Bind ViewModel.DeleteRentLessorCommand, Mode=OneWay}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}"></MenuFlyoutItem>
                         </MenuFlyout>
                     </ItemsView.ContextFlyout>
                     <ItemsView.ItemTemplate>

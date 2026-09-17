@@ -1096,6 +1096,99 @@ public partial class MainViewModel : ObservableRecipient,
         return true;
     }
 
+    [RelayCommand(CanExecute = nameof(DeleteRentLessorCanExecute))]
+    public async Task DeleteRentLessor(Models.Base.PersonBase selected) //Models.Common.PersonSearchResultItem
+    {
+        if (selected is null)
+        {
+            return;
+        }
+
+        var lessorId = selected?.Id;
+
+        if (string.IsNullOrEmpty(lessorId))
+        {
+            Debug.WriteLine("DeleteRentLessorCommand executed but no item is selected.");
+            return;
+        }
+
+        var isFound = false;
+
+        // Check if the selected item is already being edited in another window.
+        LessorEditorList.ForEach(editorWindow =>
+        {
+            //Debug.WriteLine($"Checking editor window with Id: {editorWindow.Id} for selected item with Id: {rentId}");
+            if (editorWindow.Id == lessorId)
+            {
+                // If the editor window for this item is already open, activate it.
+                //Debug.WriteLine($"Editor window for {rentId} is already open. Activating it.");
+                isFound = true;
+
+                editorWindow.Activate();
+
+                // Do I need this anymore?
+                //var mainWindow = App.GetService<MainWindow>();
+                //mainWindow?.AppWindow.MoveInZOrderBelow(editorWindow.AppWindow.Id);
+                editorWindow.AppWindow.MoveInZOrderAtTop();
+
+                return;
+            }
+        });
+
+        //Debug.WriteLine($"EditRentLessorCommand executed for {selected.Id}");
+
+        if (isFound)
+        {
+            // If the editor window for this item is already open, no need to create a new one.
+            return;
+        }
+
+        // 
+        //var res = _dataAccessService.SelectRentLessorById(lessorId);// Go back to UI thred. Let's not do > .ConfigureAwait(false);
+        var res = await Task.Run(() => _dataAccessService.DeleteRentLessor(lessorId), _cts.Token);
+        if (res.IsError)
+        {
+            Debug.WriteLine(res.Error.ErrText + Environment.NewLine + res.Error.ErrDescription + Environment.NewLine + res.Error.ErrPlace + Environment.NewLine + res.Error.ErrPlaceParent);
+
+            //ErrorMain = res.Error;
+            //IsMainErrorInfoBarVisible = true;
+
+            // TODO: Show error message to user
+            return;
+        }
+        else
+        {
+            var match = RentLessorSearchResult.FirstOrDefault(x => x.Id.Equals(lessorId));
+            if (match is not null)
+            {
+                if (RentLessorSearchResult.Remove(match))
+                {
+                    // Successfully removed the selected item from the search result.
+                }
+                else
+                {
+                    Debug.WriteLine($"Selected item {lessorId} not found in the search result or could not remove.");
+                }
+            }
+
+            Debug.WriteLine($"DeleteRentLessorCommand executed for {lessorId}");
+
+            // remove lessor from the open editor window's ViewModel if it exists.
+            WeakReferenceMessenger.Default.Send(new Models.Messenger.LessorDeletedMessage(lessorId));
+        }
+
+    }
+    public static bool DeleteRentLessorCanExecute(Models.Base.PersonBase? selected)
+    {
+        if (selected is null)
+        //if (string.IsNullOrEmpty(rentId))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
     #endregion
 
     #region == ナビゲーション == 

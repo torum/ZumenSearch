@@ -29,6 +29,14 @@ public class ListingDeletedMessage : ValueChangedMessage<string>
     }
 }
 
+public class LessorDeletedMessage : ValueChangedMessage<string>
+{
+    public LessorDeletedMessage(string value) : base(value)
+    {
+
+    }
+}
+
 public class ListingWindowClosedMessage : ValueChangedMessage<Views.Rent.Residentials.Listing.EditorWindow> 
 {
     public ListingWindowClosedMessage(Views.Rent.Residentials.Listing.EditorWindow value) : base(value)

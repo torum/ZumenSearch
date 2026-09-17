@@ -33,7 +33,7 @@
             <ScrollViewer HorizontalScrollMode="Disabled">
 
                 <!-- TODO: chnage this to listview -->
-                <ItemsRepeater x:Name="ItemsView" ItemsSource="{x:Bind ViewModel.Lessors, Mode=TwoWay}" MinWidth="300" MinHeight="225" ScrollViewer.HorizontalScrollMode="Disabled" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <ItemsRepeater x:Name="ItemsView" ItemsSource="{x:Bind ViewModel.BuildingLessors, Mode=TwoWay}" MinWidth="300" MinHeight="225" ScrollViewer.HorizontalScrollMode="Disabled" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <!--  SelectionChanged="ItemsView_SelectionChanged" SelectionMode="Single" IsItemInvokedEnabled="False"  -->
                     <ItemsRepeater.ItemTemplate>
                         <DataTemplate x:DataType="modlessor:PersonWrapperForPropertyViewModel">

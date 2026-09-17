@@ -45,7 +45,7 @@ public sealed partial class Property : PropertyBase
     } = [];
 
     // DBへの更新時にDBから削除されるべき物件写真（建物）のIDリスト
-    public ObservableCollection<Picture> BuildingPicturesToBeDeleted = [];
+    public ObservableCollection<Picture> PicturesToBeDeleted = [];
 
     // 図面（建物）リスト
     public ObservableCollection<Pdf> Pdfs
@@ -61,7 +61,23 @@ public sealed partial class Property : PropertyBase
     } = [];
 
     // DBへの更新時にDBから削除されるべき図面のIDリスト
-    public ObservableCollection<Pdf> BuildingPdfsToBeDeleted = [];
+    public ObservableCollection<Pdf> PdfsToBeDeleted = [];
+
+    // 貸主のリスト
+    public ObservableCollection<Models.Rent.Lessors.Person> Lessors
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;
+            }
+        }
+    } = [];
+
+    // DBへの更新時にDBから削除されるべき貸主のIDリスト
+    public ObservableCollection<Models.Rent.Lessors.Person> LessorsToBeDeleted = [];
 
     #endregion
 

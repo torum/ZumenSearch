@@ -39,6 +39,9 @@ public sealed partial class Listing : ListingBase
         }
     } = [];
 
+    // DBへの更新時にDBから削除されるべき部屋写真のIDリスト
+    public ObservableCollection<Picture> PicturesToBeDeleted = [];
+
     // 部屋図面リスト
     public ObservableCollection<Pdf> Pdfs
     {
@@ -52,11 +55,25 @@ public sealed partial class Listing : ListingBase
         }
     } = [];
 
-    // DBへの更新時にDBから削除されるべき部屋写真のIDリスト
-    public ObservableCollection<Picture> PicturesToBeDeleted = [];
-
     // DBへの更新時にDBから削除されるべき図面のIDリスト
     public ObservableCollection<Pdf> PdfsToBeDeleted = [];
+
+    // 貸主のリスト
+    public ObservableCollection<Models.Rent.Lessors.Person> Lessors
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;
+            }
+        }
+    } = [];
+
+    // DBへの更新時にDBから削除されるべき貸主のIDリスト
+    public ObservableCollection<Models.Rent.Lessors.Person> LessorsToBeDeleted = [];
+
 
     // 賃料（円）
     public decimal Chinryou

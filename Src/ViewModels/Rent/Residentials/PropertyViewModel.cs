@@ -1,12 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
-using Microsoft.UI;
 using Microsoft.UI.Windowing;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Media.Animation;
-using System.Collections;
+using Microsoft.UI.Xaml.Data;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -24,11 +20,14 @@ using ZumenSearch.Models.Rent.Lessors;
 using ZumenSearch.Models.Rent.Residentials;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.Services.Extensions.AbstractFactory;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace ZumenSearch.ViewModels.Rent.Residentials;
 
-public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<ListingUpdatedMessage>, IRecipient<ListingWindowClosedMessage>, IRecipient<ListingDeletedMessage>
+public sealed partial class PropertyViewModel : ObservableRecipient, 
+    IRecipient<ListingUpdatedMessage>, 
+    IRecipient<ListingWindowClosedMessage>, 
+    IRecipient<ListingDeletedMessage>,
+    IRecipient<LessorDeletedMessage>
 {
     #region == Public Properties ==
 
@@ -1318,7 +1317,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
     #region == 貸主プロパティ ==
 
-    public ObservableCollection<Models.Rent.Lessors.PersonWrapperForPropertyViewModel> Lessors
+    public ObservableCollection<Models.Rent.Lessors.PersonWrapperForPropertyViewModel> BuildingLessors
     {
         get;
         set
@@ -1454,7 +1453,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             return;
         }
 
-        var existingRoom = this.Rooms.FirstOrDefault(r => r.Id == room.Id);
+        var existingRoom = this.Rooms.FirstOrDefault(r => r.Id.Equals(room.Id));
         if (existingRoom is not null)
         {
             // Update existing room
@@ -1482,9 +1481,22 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             return;
         }
 
-        var room = Rooms.FirstOrDefault(r => r.Id == id);
+        var room = Rooms.FirstOrDefault(r => r.Id.Equals(id));
         if (room is null) return;
         Rooms.Remove(room);
+    }
+
+    public void Receive(LessorDeletedMessage lessorId)
+    {
+        var id = lessorId.Value;
+        if (string.IsNullOrEmpty(id))
+        {
+            return;
+        }
+
+        var psn = BuildingLessors.FirstOrDefault(r => r.Person.Id.Equals(id));
+        if (psn is null) return;
+        BuildingLessors.Remove(psn);
     }
 
     public void Receive(ListingWindowClosedMessage window)
@@ -1663,6 +1675,13 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
                 }
             }
         };
+
+        // Lessors
+        BuildingLessors = new ObservableCollection<Models.Rent.Lessors.PersonWrapperForPropertyViewModel>();
+        foreach (var item in _building.Lessors)
+        {
+            BuildingLessors.Add(new Models.Rent.Lessors.PersonWrapperForPropertyViewModel(item,this));
+        }
 
         // Rooms
         Rooms = new ObservableCollection<Models.Rent.Residentials.Listing.Listing>(_building.Rooms); // create a copy.
@@ -1899,6 +1918,13 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         // 部屋
         _building.Rooms = Rooms;
 
+        // 貸主
+        _building.Lessors.Clear();
+        foreach (var item in this.BuildingLessors)
+        {
+            _building.Lessors.Add(item.Person);
+        }
+
     }
 
     private bool SaveAsNew()
@@ -2054,24 +2080,30 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             IsInfoBarErrorOpen = false;
 
             // Clean up deleted picture file.
-            if (_building.BuildingPicturesToBeDeleted.Count > 0)
+            if (_building.PicturesToBeDeleted.Count > 0)
             {
-                foreach (var file in _building.BuildingPicturesToBeDeleted)
+                foreach (var file in _building.PicturesToBeDeleted)
                 {
                     File.Delete(file.ImageLocation);
                 }
-                _building.BuildingPicturesToBeDeleted.Clear();
+                _building.PicturesToBeDeleted.Clear();
             }
 
             // Clean up deleted PDF and thumb file.
-            if (_building.BuildingPdfsToBeDeleted.Count > 0)
+            if (_building.PdfsToBeDeleted.Count > 0)
             {
-                foreach (var file in _building.BuildingPdfsToBeDeleted)
+                foreach (var file in _building.PdfsToBeDeleted)
                 {
                     File.Delete(file.PdfLocation);
                     File.Delete(file.ThumbnailLocation);
                 }
-                _building.BuildingPdfsToBeDeleted.Clear();
+                _building.PdfsToBeDeleted.Clear();
+            }
+
+            // Just in case clear LessorsToBeDeleted
+            if (_building.LessorsToBeDeleted.Count > 0)
+            {
+                _building.LessorsToBeDeleted.Clear();
             }
 
             // Clear rooms pic and pdfs
@@ -2211,7 +2243,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
         if (BuildingPictures.Remove(picBldg))
         {
-            _building.BuildingPicturesToBeDeleted.Add(picBldg);
+            _building.PicturesToBeDeleted.Add(picBldg);
             IsDirty = true;
         }
     }
@@ -2336,7 +2368,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
         if (BuildingPdfs.Remove(pdfBldg))
         {
-            _building.BuildingPdfsToBeDeleted.Add(pdfBldg);
+            _building.PdfsToBeDeleted.Add(pdfBldg);
             IsDirty = true;
         }
     }
@@ -2674,6 +2706,14 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
             Debug.WriteLine($"lessor {lessor.Name} returned.");
 
+            // Check if already exists
+            var match = BuildingLessors.FirstOrDefault(x => x.Person.Id.Equals(lessorId));
+            if (match is not null)
+            {
+                Debug.WriteLine($"lessor {lessor.Name} already in the list.");
+                return;
+            }
+
             // TODO:
             //var res = await Task.Run(() => _dataAccessService.SelectRentLessorById(lessorId), _cts.Token);
             var res = _dataAccessService.SelectRentLessorById(lessorId);
@@ -2694,9 +2734,10 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
                 return;
             }
 
+
             var asdf = new PersonWrapperForPropertyViewModel(res.Lessor, this);
 
-            Lessors.Add(asdf);
+            BuildingLessors.Add(asdf);
 
             IsDirty = true;
         }
@@ -2725,9 +2766,22 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
     {
         Debug.WriteLine($"DeleteLessorCommand {lessor.Person.Name}");
 
-        // TODO:
+        if (lessor is null)
+        {
+            return;
+        }
 
-        Lessors.Remove(lessor);
+        if (lessor.Person is null)
+        {
+            return;
+        }
+
+        if (BuildingLessors.Remove(lessor))
+        {
+            IsDirty = true;
+
+            _building.LessorsToBeDeleted.Add(lessor.Person);
+        }
     }
     private static bool CanDeleteLessor(PersonWrapperForPropertyViewModel lessor)
     {
