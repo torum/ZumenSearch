@@ -843,7 +843,7 @@ public sealed partial class Property : PropertyBase
     // TODO: More.
 
 
-    public Property(string id, EnumEntryStatus status, EnumPropertyKind kind) : base(id, status, kind)
+    public Property(string id, EnumEntryStatus status) : base(id, status, EnumPropertyKind.RentResidential)
     {
         //
     }
@@ -852,6 +852,7 @@ public sealed partial class Property : PropertyBase
     {
         if (string.IsNullOrEmpty(Str))
         {
+            // TODO:
             BuildingKind = new Kind(EnumResidentialKinds.Unspecified);
             return;
         }

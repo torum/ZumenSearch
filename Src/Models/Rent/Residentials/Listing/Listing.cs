@@ -10,8 +10,9 @@ namespace ZumenSearch.Models.Rent.Residentials.Listing;
 // 部屋（編集用）
 public sealed partial class Listing : ListingBase
 {
-    // 物件（建物のIDを保持）
-    public string PropertyId { get; private set; }
+
+    // 部屋が属する建物が区分所有化どうかをここでも保持（部屋を直接開いた際に必要）
+    public bool IsPropertyUnitOwnership { get; set; }
 
     // 物件（建物の名前を保持 - タイトル等に表示）
     public string PropertyName
@@ -25,6 +26,7 @@ public sealed partial class Listing : ListingBase
             }
         }
     }
+
 
     // 部屋写真リスト
     public ObservableCollection<Picture> Pictures
@@ -164,10 +166,11 @@ public sealed partial class Listing : ListingBase
     [ObservableProperty]
     public partial string Remarks { get; set; } = string.Empty;
 
-    public Listing(string id, string propertyId, EnumEntryStatus status, EnumEntryStatus propertyStatus, string propertyName) : base(id, status)
+    public Listing(string id, EnumEntryStatus status, string propertyId, EnumEntryStatus propertyStatus, bool isPropertyUnitOwnership, string propertyName) : base(id, status, propertyId, propertyStatus, EnumPropertyKind.RentResidential)
     {
-        PropertyId = propertyId;
+        //PropertyId = propertyId;
+        IsPropertyUnitOwnership = isPropertyUnitOwnership;
         PropertyName = propertyName;
-        PropertyStatus = propertyStatus;
+        //PropertyStatus = propertyStatus;
     }
 }

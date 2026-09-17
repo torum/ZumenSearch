@@ -21,6 +21,14 @@ public class ListingUpdatedMessage : ValueChangedMessage<Models.Rent.Residential
     }
 }
 
+public class LessorUpdatedMessage : ValueChangedMessage<Models.Rent.Lessors.Person>
+{
+    public LessorUpdatedMessage(Models.Rent.Lessors.Person value) : base(value)
+    {
+
+    }
+}
+
 public class ListingDeletedMessage : ValueChangedMessage<string>
 {
     public ListingDeletedMessage(string value) : base(value)

@@ -5,7 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:mod="using:ZumenSearch.Models.Common"
-    xmlns:modresi="using:ZumenSearch.Models.Rent.Residentials.Listing"
+    xmlns:modlisting="using:ZumenSearch.Models.Rent.Residentials.Listing"
     xmlns:local="using:ZumenSearch.Views.Rent.Residentials.Listing"
     mc:Ignorable="d"
     NavigationCacheMode="Required">
@@ -37,7 +37,7 @@
                 <ItemsRepeater x:Name="ItemsView" ItemsSource="{x:Bind ViewModel.Pdfs, Mode=TwoWay}" MinWidth="300" MinHeight="225" ScrollViewer.HorizontalScrollMode="Disabled" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <!--  SelectionChanged="ItemsView_SelectionChanged" SelectionMode="Single" IsItemInvokedEnabled="False"  -->
                     <ItemsRepeater.ItemTemplate>
-                        <DataTemplate x:DataType="modresi:Pdf">
+                        <DataTemplate x:DataType="modlisting:Pdf">
                             <Border Style="{StaticResource RoundCardBorderStyle}">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
@@ -58,7 +58,7 @@
                                             <StackPanel Orientation="Horizontal">
                                                 <ComboBox x:Name="ComboBoxKinds" Header="タイプ" PlaceholderText="選択" Width="200" ItemsSource="{x:Bind RoomPdfTypes, Mode=OneWay}" SelectedItem="{x:Bind PdfType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                                                     <ComboBox.ItemTemplate>
-                                                        <DataTemplate x:DataType="modresi:RoomPdfType">
+                                                        <DataTemplate x:DataType="modlisting:RoomPdfType">
                                                             <StackPanel Orientation="Horizontal">
                                                                 <TextBlock Text="{x:Bind Label}" Margin="0,0,5,0"/>
                                                             </StackPanel>

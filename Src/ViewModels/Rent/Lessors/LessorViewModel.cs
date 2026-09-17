@@ -350,7 +350,7 @@ public sealed partial class LessorViewModel : ObservableRecipient
             // Clear error infobar.
             IsInfoBarErrorOpen = false;
 
-            //WeakReferenceMessenger.Default.Send(new Models.Messenger.PropertyUpdatedMessage(_building as Models.Base.PropertyBase));
+            WeakReferenceMessenger.Default.Send(new Models.Messenger.LessorUpdatedMessage(_lessor));
         }
 
     }

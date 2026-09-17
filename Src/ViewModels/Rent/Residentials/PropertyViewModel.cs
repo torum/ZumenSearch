@@ -27,6 +27,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     IRecipient<ListingUpdatedMessage>, 
     IRecipient<ListingWindowClosedMessage>, 
     IRecipient<ListingDeletedMessage>,
+    IRecipient<LessorUpdatedMessage>,
     IRecipient<LessorDeletedMessage>
 {
     #region == Public Properties ==
@@ -1281,7 +1282,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     #region == 写真プロパティ ==
 
-    public ObservableCollection<Models.Rent.Residentials.Picture> BuildingPictures
+    public ObservableCollection<Models.Rent.Residentials.Picture> Pictures
     {
         get;
         set
@@ -1299,7 +1300,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     #region == PDFプロパティ ==
 
-    public ObservableCollection<Models.Rent.Residentials.Pdf> BuildingPdfs
+    public ObservableCollection<Models.Rent.Residentials.Pdf> Pdfs
     {
         get;
         set
@@ -1317,7 +1318,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     #region == 貸主プロパティ ==
 
-    public ObservableCollection<Models.Rent.Lessors.PersonWrapperForPropertyViewModel> BuildingLessors
+    public ObservableCollection<Models.Rent.Lessors.PersonWrapperForPropertyViewModel> LessorsWrapper
     {
         get;
         set
@@ -1377,6 +1378,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     private readonly List<string> _unsavedBuildingPictureFileList = [];
     private readonly List<string> _unsavedBuildingPdfFileList = [];
     private readonly List<string> _unsavedBuildingPdfThumbnailFileList = [];
+
+    private readonly CancellationTokenSource _cts = new();
 
     #endregion
 
@@ -1473,6 +1476,20 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         }
     }
 
+    public void Receive(LessorUpdatedMessage person)
+    {
+        var lessor = person.Value;
+        if (lessor is null)
+        {
+            return;
+        }
+
+        var psn = LessorsWrapper.FirstOrDefault(r => r.Person.Id.Equals(lessor.Id));
+        if (psn is null) return;
+
+        psn.Person = lessor; //= new PersonWrapperForPropertyViewModel(lessor, this);
+    }
+
     public void Receive(ListingDeletedMessage listingId)
     {
         var id = listingId.Value;
@@ -1494,9 +1511,11 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             return;
         }
 
-        var psn = BuildingLessors.FirstOrDefault(r => r.Person.Id.Equals(id));
+        var psn = LessorsWrapper.FirstOrDefault(r => r.Person.Id.Equals(id));
         if (psn is null) return;
-        BuildingLessors.Remove(psn);
+        LessorsWrapper.Remove(psn);
+
+        // should be auto deleted from the table due to "cascade"
     }
 
     public void Receive(ListingWindowClosedMessage window)
@@ -1520,6 +1539,17 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         DiscardUnsavedFiles();
 
         IsDirty = false;
+    }
+
+    public void CleanUp()
+    {
+        // Unsubscribe
+        //WeakReferenceMessenger.Default.UnregisterAll(this);
+        //or
+        this.IsActive = false;
+
+        _cts.Cancel();
+        _cts.Dispose();
     }
 
     #endregion
@@ -1603,23 +1633,23 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
 
         // Pictures:
-        BuildingPictures = new ObservableCollection<Models.Rent.Residentials.Picture>(_building.Pictures); // create a copy.
+        Pictures = new ObservableCollection<Models.Rent.Residentials.Picture>(_building.Pictures); // create a copy.
 
-        foreach (var item in BuildingPictures)
+        foreach (var item in Pictures)
         {
             item.ParentViewModel = this;
             item.IsModified = false; // Needed this.
             item.PropertyChanged += OnBuildingPicturePropertyChanged;
         }
 
-        BuildingPictures.CollectionChanged += (s, e) =>
+        Pictures.CollectionChanged += (s, e) =>
         {
             // Unsubscribe from removed items
             if (e.OldItems != null)
             {
                 foreach (Models.Rent.Residentials.Picture item in e.OldItems)
                 {
-                    Debug.WriteLine($"Item {item.Id} Removed from BuildingPictures. @CollectionChanged in PopulateEntryValues of Bldg.MainViewModel");
+                    Debug.WriteLine($"Item {item.Id} Removed from Pictures. @CollectionChanged in PopulateEntryValues of Bldg.MainViewModel");
                     IsDirty = true;
 
                     item.PropertyChanged -= OnBuildingPicturePropertyChanged;
@@ -1631,7 +1661,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             {
                 foreach (Models.Rent.Residentials.Picture item in e.NewItems)
                 {
-                    Debug.WriteLine($"Item {item.Id} Added to BuildingPictures. @CollectionChanged in PopulateEntryValues of Bldg.MainViewModel");
+                    Debug.WriteLine($"Item {item.Id} Added to Pictures. @CollectionChanged in PopulateEntryValues of Bldg.MainViewModel");
                     IsDirty = true;
 
                     item.PropertyChanged += OnBuildingPicturePropertyChanged;
@@ -1640,23 +1670,23 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         };
 
         // PDFs
-        BuildingPdfs = new ObservableCollection<Models.Rent.Residentials.Pdf>(_building.Pdfs); // create a copy.
+        Pdfs = new ObservableCollection<Models.Rent.Residentials.Pdf>(_building.Pdfs); // create a copy.
 
-        foreach (var item in BuildingPdfs)
+        foreach (var item in Pdfs)
         {
             item.ParentViewModel = this;
             item.IsModified = false; // Needed this.
             item.PropertyChanged += OnBuildingPdfPropertyChanged;
         }
 
-        BuildingPdfs.CollectionChanged += (s, e) =>
+        Pdfs.CollectionChanged += (s, e) =>
         {
             // Unsubscribe from removed items
             if (e.OldItems != null)
             {
                 foreach (Models.Rent.Residentials.Pdf item in e.OldItems)
                 {
-                    Debug.WriteLine($"Item {item.Id} Removed from BuildingPdfs, @CollectionChanged in PopulateEntryValues of Bldg.MainViewModel");
+                    Debug.WriteLine($"Item {item.Id} Removed from Pdfs, @CollectionChanged in PopulateEntryValues of Bldg.MainViewModel");
                     IsDirty = true;
 
                     item.PropertyChanged -= OnBuildingPdfPropertyChanged;
@@ -1668,7 +1698,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             {
                 foreach (Models.Rent.Residentials.Pdf item in e.NewItems)
                 {
-                    Debug.WriteLine($"Item {item.Id} Added to BuildingPdfs. @CollectionChanged in PopulateEntryValues of Bldg.MainViewModel");
+                    Debug.WriteLine($"Item {item.Id} Added to Pdfs. @CollectionChanged in PopulateEntryValues of Bldg.MainViewModel");
                     IsDirty = true;
 
                     item.PropertyChanged += OnBuildingPdfPropertyChanged;
@@ -1677,10 +1707,10 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         };
 
         // Lessors
-        BuildingLessors = new ObservableCollection<Models.Rent.Lessors.PersonWrapperForPropertyViewModel>();
+        LessorsWrapper = new ObservableCollection<Models.Rent.Lessors.PersonWrapperForPropertyViewModel>();
         foreach (var item in _building.Lessors)
         {
-            BuildingLessors.Add(new Models.Rent.Lessors.PersonWrapperForPropertyViewModel(item,this));
+            LessorsWrapper.Add(new Models.Rent.Lessors.PersonWrapperForPropertyViewModel(item,this));
         }
 
         // Rooms
@@ -1743,7 +1773,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                 if (picBldg.IsMain)
                 {
                     // Clear all other pics
-                    foreach (var item in BuildingPictures)
+                    foreach (var item in Pictures)
                     {
                         if (item != picBldg)
                         {
@@ -1775,7 +1805,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                 if (pdfBldg.IsMain)
                 {
                     // Clear all other pdfs
-                    foreach (var item in BuildingPdfs)
+                    foreach (var item in Pdfs)
                     {
                         if (item != pdfBldg)
                         {
@@ -1809,7 +1839,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                 if (picBldg.IsMain)
                 {
                     // Clear all other pics
-                    foreach (var item in BuildingPictures)
+                    foreach (var item in Pictures)
                     {
                         if (item != picBldg)
                         {
@@ -1863,6 +1893,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
         _building.BuildingKind = SelectedKind;
         _building.IsUnitOwnership = IsUnitOwnership;
+        
         _building.BuildingStructure = SelectedStructure;
         _building.AboveGroundFloorCount = int.TryParse(Helpers.Common.ReplaceZenkakuNumbers(AboveGroundFloorCount), out var aboveGroundFloorCount) ? aboveGroundFloorCount : 0; //Convert.ToInt32(AboveGroundFloorCount)
         _building.BasementFloorCount = int.TryParse(Helpers.Common.ReplaceZenkakuNumbers(BasementFloorCount), out var basementFloorCount) ? basementFloorCount : 0;
@@ -1897,33 +1928,64 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         _building.ThumbnailImageFilePath = string.Empty;
 
         // 写真
-        _building.Pictures = BuildingPictures;
-        var thumbImg = BuildingPictures.FirstOrDefault(i => i.IsMain == true);
+        _building.Pictures = Pictures;
+        var thumbImg = Pictures.FirstOrDefault(i => i.IsMain == true);
         if (thumbImg is not null)
         {
+            // 物件写真サムネイルに指定
             _building.ThumbnailImageFilePath = thumbImg.ImageLocation;
         }
 
         // 図面
-        _building.Pdfs = BuildingPdfs;
+        _building.Pdfs = Pdfs;
         if (string.IsNullOrWhiteSpace(_building.ThumbnailImageFilePath))
         {
-            var thumbPdf = BuildingPdfs.FirstOrDefault(i => i.IsMain == true);
+            var thumbPdf = Pdfs.FirstOrDefault(i => i.IsMain == true);
             if (thumbPdf is not null)
             {
+                // 物件写真サムネイルに指定
                 _building.ThumbnailImageFilePath = thumbPdf.ThumbnailLocation;
             }
         }
 
-        // 部屋
-        _building.Rooms = Rooms;
-
         // 貸主
         _building.Lessors.Clear();
-        foreach (var item in this.BuildingLessors)
+        if (IsUnitOwnership)
         {
-            _building.Lessors.Add(item.Person);
+            // もし「区分所有」で「建物」に貸主がくっついていたら削除へ
+            // if (BuildingLessors.Count > 0)
+            foreach (var psn in LessorsWrapper)
+            {
+                _building.LessorsToBeDeleted.Add(psn.Person);
+            }
+            LessorsWrapper.Clear();
         }
+        else
+        {
+            // Wraperから「建物」の貸主を取り出して追加
+            foreach (var item in this.LessorsWrapper)
+            {
+                _building.Lessors.Add(item.Person);
+            }
+
+            // もし区分所有で「ない」建物の「部屋」に貸主がくっついていたら削除へ
+            foreach (var room in Rooms)
+            {
+                foreach(var psn in room.Lessors)
+                {
+                    room.LessorsToBeDeleted.Add(psn);
+                }
+                room.Lessors.Clear();
+            }
+        }
+
+        foreach (var rm in Rooms)
+        {
+            rm.IsPropertyUnitOwnership = IsUnitOwnership;
+        }
+
+        // 部屋
+        _building.Rooms = Rooms;
 
     }
 
@@ -2210,7 +2272,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                 ParentViewModel = this
             };
 
-            BuildingPictures.Add(pic);
+            Pictures.Add(pic);
 
             OpenBuildingBlobDirectoryCommand.NotifyCanExecuteChanged();
             DeleteBuildingPictureCommand.NotifyCanExecuteChanged();
@@ -2241,7 +2303,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
         // TODO: show dialog to comfirm.
 
-        if (BuildingPictures.Remove(picBldg))
+        if (Pictures.Remove(picBldg))
         {
             _building.PicturesToBeDeleted.Add(picBldg);
             IsDirty = true;
@@ -2333,7 +2395,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                     ParentViewModel = this
                 };
 
-                BuildingPdfs.Add(pdf);
+                Pdfs.Add(pdf);
 
                 OpenBuildingBlobDirectoryCommand.NotifyCanExecuteChanged();
                 DeleteBuildingPdfCommand.NotifyCanExecuteChanged();
@@ -2366,7 +2428,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
         // TODO: show dialog to comfirm.
 
-        if (BuildingPdfs.Remove(pdfBldg))
+        if (Pdfs.Remove(pdfBldg))
         {
             _building.PdfsToBeDeleted.Add(pdfBldg);
             IsDirty = true;
@@ -2412,8 +2474,10 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     private void AddNewRoom() 
     {
         var newId = Guid.CreateVersion7().ToString("N");
-        var editorShell = _shellFactory.Create(new Models.Rent.Residentials.Listing.Listing(newId, _building.Id, EnumEntryStatus.New, _building.Status, Name));
-        editorShell.ViewModel.IsUnitOwnershipVisible = this.IsUnitOwnership;
+        var editorShell = _shellFactory.Create(new Models.Rent.Residentials.Listing.Listing(newId, EnumEntryStatus.New, _building.Id, _building.Status, _building.IsUnitOwnership, Name));
+        
+        // TODO: do I need this anymore?
+        editorShell.ViewModel.IsPropertyUnitOwnership = this.IsUnitOwnership;
 
         var mainVM = App.GetService<ViewModels.MainViewModel>();
         mainVM.RoomEditorList.Add(editorShell.Window);
@@ -2492,7 +2556,9 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         }
 
         var editorShell = _shellFactory.Create(room);
-        editorShell.ViewModel.IsUnitOwnershipVisible = this.IsUnitOwnership;
+
+        // TODO: do I need this anymore?
+        editorShell.ViewModel.IsPropertyUnitOwnership = this.IsUnitOwnership;
 
         var editorWindow = editorShell.Window;
         if (editorWindow == null)
@@ -2698,7 +2764,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             return;
         }
 
-        var lessor = await _dialogService.ShowLessorSelectDialog(new ViewModels.Rent.Lessors.LessorSelectViewModel(_dataAccessService));
+        var lessor = await _dialogService.ShowLessorSelectDialog(new ViewModels.Rent.Lessors.LessorSelectViewModel(_dataAccessService, _cts));
 
         if (lessor is not null)
         {
@@ -2707,7 +2773,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             Debug.WriteLine($"lessor {lessor.Name} returned.");
 
             // Check if already exists
-            var match = BuildingLessors.FirstOrDefault(x => x.Person.Id.Equals(lessorId));
+            var match = LessorsWrapper.FirstOrDefault(x => x.Person.Id.Equals(lessorId));
             if (match is not null)
             {
                 Debug.WriteLine($"lessor {lessor.Name} already in the list.");
@@ -2737,7 +2803,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
             var asdf = new PersonWrapperForPropertyViewModel(res.Lessor, this);
 
-            BuildingLessors.Add(asdf);
+            LessorsWrapper.Add(asdf);
 
             IsDirty = true;
         }
@@ -2776,7 +2842,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             return;
         }
 
-        if (BuildingLessors.Remove(lessor))
+        if (LessorsWrapper.Remove(lessor))
         {
             IsDirty = true;
 

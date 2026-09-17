@@ -4,24 +4,70 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:mod="using:ZumenSearch.Models.Common"
+    xmlns:modlessor="using:ZumenSearch.Models.Rent.Lessors"
     mc:Ignorable="d"
     NavigationCacheMode="Required">
-    <Grid x:Name="ContentArea">
-        <ScrollViewer>
+    
+    <Grid x:Name="ContentArea" Padding="36,0,36,24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
-            <Grid Margin="24">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
+        <Grid Grid.Row="0">
+            <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Margin="0,0,0,0" HorizontalAlignment="Right">
+                <AppBarButton Name="AppBarButtonSelectLessor" Icon="AddFriend"  Label="追加" Command="{x:Bind ViewModel.AddLessorCommand, Mode=OneWay}" />
+                <!-- Contact -->
+                <AppBarButton Icon="More" Label="その他">
+                    <AppBarButton.Flyout>
+                        <MenuFlyout Placement="Bottom">
+                            <MenuFlyoutItem Text="すべて削除" Icon="Delete"></MenuFlyoutItem>
+                        </MenuFlyout>
+                    </AppBarButton.Flyout>
+                </AppBarButton>
+            </CommandBar>
+        </Grid>
 
-                <StackPanel HorizontalAlignment="Stretch">
+        <Grid Grid.Row="1">
+            <ScrollViewer HorizontalScrollMode="Disabled">
 
+                <!-- TODO: chnage this to listview -->
+                <ItemsRepeater x:Name="ItemsView" ItemsSource="{x:Bind ViewModel.LessorsWrapper, Mode=TwoWay}" MinWidth="300" MinHeight="225" ScrollViewer.HorizontalScrollMode="Disabled" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                    <!--  SelectionChanged="ItemsView_SelectionChanged" SelectionMode="Single" IsItemInvokedEnabled="False"  -->
+                    <ItemsRepeater.ItemTemplate>
+                        <DataTemplate x:DataType="modlessor:PersonWrapperForListingViewModel">
+                            <Border Style="{StaticResource RoundCardBorderStyle}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid Grid.Row="0" Grid.Column="0">
+                                        <TextBox Header="名前" IsReadOnly="True" Margin="0,0,0,0" Text="{x:Bind Person.Name, Mode=OneWay}"></TextBox>
 
-                </StackPanel>
+                                    </Grid>
+                                    <Grid Grid.Row="0" Grid.Column="1">
+                                        <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Margin="0,0,0,0" HorizontalAlignment="Right">
+                                            <AppBarButton Icon="Edit" Label="編集" ToolTipService.ToolTip="貸主を編集" Command="{x:Bind ParentViewModel.EditLessorCommand, Mode=OneWay}" CommandParameter="{x:Bind}"/>
+                                            <AppBarButton Icon="Delete" Label="削除" ToolTipService.ToolTip="貸主を削除" Command="{x:Bind ParentViewModel.DeleteLessorCommand, Mode=OneWay}" CommandParameter="{x:Bind}"/>
+                                            <!--  -->
+                                        </CommandBar>
+                                    </Grid>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsRepeater.ItemTemplate>
+                    <ItemsRepeater.Layout>
+                        <StackLayout Orientation="Vertical" Spacing="12" />
+                        <!--
+                    <UniformGridLayout MinRowSpacing="18" MinColumnSpacing="18" ItemsJustification="SpaceEvenly"/>
+                    -->
+                    </ItemsRepeater.Layout>
+                </ItemsRepeater>
 
-            </Grid>
-
-        </ScrollViewer>
+            </ScrollViewer>
+        </Grid>
     </Grid>
 </Page>
 

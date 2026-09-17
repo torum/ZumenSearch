@@ -334,6 +334,16 @@ public partial class MainViewModel : ObservableRecipient,
 
     #endregion
 
+    #region == Public Methods ==
+
+    public void CleanUp()
+    {
+        _cts.Cancel();
+        _cts.Dispose();
+    }
+
+    #endregion
+
     #region == Commands ==
 
     #region == 総合検索 ==
@@ -374,7 +384,7 @@ public partial class MainViewModel : ObservableRecipient,
     private void AddNewRentResidentialBldg()
     {
         var newId = Guid.CreateVersion7().ToString("N");
-        var shell = _shellRentResidentialPropertyFactory.Create(new Models.Rent.Residentials.Property(newId, Models.Base.EnumEntryStatus.New, Models.Base.EnumPropertyKind.RentResidential));
+        var shell = _shellRentResidentialPropertyFactory.Create(new Models.Rent.Residentials.Property(newId, Models.Base.EnumEntryStatus.New));
 
         BldgEditorList.Add(shell.Window);
 

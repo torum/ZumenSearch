@@ -10,11 +10,16 @@ using Windows.Storage.Streams;
 using ZumenSearch.Models.Base;
 using ZumenSearch.Models.Common;
 using ZumenSearch.Models.Messenger;
+using ZumenSearch.Models.Rent.Lessors;
 using ZumenSearch.Services.Contracts;
 
 namespace ZumenSearch.ViewModels.Rent.Residentials.Listing;
 
-public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<PropertyUpdatedMessage>, IRecipient<PropertyIsUnitOwnershipChangedMessage>
+public sealed partial class ListingViewModel : ObservableRecipient, 
+    IRecipient<PropertyUpdatedMessage>, 
+    IRecipient<PropertyIsUnitOwnershipChangedMessage>,
+    IRecipient<LessorUpdatedMessage>,
+    IRecipient<LessorDeletedMessage>
 {
     #region == Public Properties ==
 
@@ -37,6 +42,18 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         }
     }
     */
+
+    public bool IsPropertyUnitOwnership
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+
+            }
+        }
+    }
 
     #region == 画面表示関連 ==
 
@@ -109,18 +126,6 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         new() { Name = "部屋", Page = typeof(Views.Rent.Residentials.Listing.BasicPage).FullName! },
         new() { Name = "基本", Page = typeof(Views.Rent.Residentials.Listing.BasicPage).FullName! }
     ];
-
-    public bool IsUnitOwnershipVisible
-    {
-        get;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-
-            }
-        }
-    }
 
     #endregion
 
@@ -279,6 +284,22 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
 
     #endregion
 
+    #region == 貸主プロパティ ==
+
+    public ObservableCollection<Models.Rent.Lessors.PersonWrapperForListingViewModel> LessorsWrapper
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;//?
+            }
+        }
+    } = [];
+
+    #endregion
+
     #endregion
 
     #region == Private variables ==
@@ -293,6 +314,8 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
     private readonly List<string> _unsavedRoomPictureFileList = [];
     private readonly List<string> _unsavedRoomPdfFileList = [];
     private readonly List<string> _unsavedRoomPdfThumbnailFileList = [];
+
+    private readonly CancellationTokenSource _cts = new();
 
     #endregion
 
@@ -354,11 +377,25 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         }
     }
 
+    public void Receive(LessorUpdatedMessage person)
+    {
+        var lessor = person.Value;
+        if (lessor is null)
+        {
+            return;
+        }
+
+        var psn = LessorsWrapper.FirstOrDefault(r => r.Person.Id.Equals(lessor.Id));
+        if (psn is null) return;
+
+        psn.Person = lessor;
+    }
+
     public void Receive(PropertyIsUnitOwnershipChangedMessage isUnitOwnership)
     {
-        IsUnitOwnershipVisible = isUnitOwnership.Value;
+        IsPropertyUnitOwnership = isUnitOwnership.Value;
 
-        if (IsUnitOwnershipVisible)
+        if (IsPropertyUnitOwnership)
         {
             return;
         }
@@ -377,6 +414,18 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         }
     }
 
+    public void Receive(LessorDeletedMessage lessorId)
+    {
+        var id = lessorId.Value;
+        if (string.IsNullOrEmpty(id))
+        {
+            return;
+        }
+
+        var psn = LessorsWrapper.FirstOrDefault(r => r.Person.Id.Equals(id));
+        if (psn is null) return;
+        LessorsWrapper.Remove(psn);
+    }
 
     #endregion
 
@@ -384,11 +433,13 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
 
     public void CleanUp()
     {
+        // TODO: ?
         foreach (var item in Pictures)
         {
             item.PropertyChanged -= OnPicturePropertyChanged;
         }
 
+        // TODO: ?
         Pictures.Clear();
 
         // Unsubscribe
@@ -492,6 +543,14 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
             }
         }
 
+        // 貸主
+        // 一旦クリアして、Wraperから「建物」の貸主を取り出して追加
+        _room.Lessors.Clear();
+        foreach (var item in this.LessorsWrapper)
+        {
+            _room.Lessors.Add(item.Person);
+        }
+
     }
 
     private bool SaveToNew()
@@ -540,6 +599,8 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         {
             return;
         }
+
+        IsPropertyUnitOwnership = _room.IsPropertyUnitOwnership;
 
         Name = _room.Name; // Set the value to trigger the setter logic if needed.
 
@@ -620,6 +681,14 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
                 }
             }
         };
+
+        // Lessors
+        LessorsWrapper = new ObservableCollection<Models.Rent.Lessors.PersonWrapperForListingViewModel>();
+        foreach (var item in _room.Lessors)
+        {
+            LessorsWrapper.Add(new Models.Rent.Lessors.PersonWrapperForListingViewModel(item, this));
+        }
+
 
         _room.IsModified = false;
         IsDirty = false;
@@ -736,6 +805,8 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
 
     #region == Commands ==
 
+    #region == Save ==
+
     [RelayCommand(CanExecute = nameof(CanSave))]
     public void Save()
     {
@@ -832,6 +903,10 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         }
         return false;
     }
+
+    #endregion
+
+    #region == Pics and Pdfs ==
 
     [RelayCommand(CanExecute = nameof(CanAddNewRoomPictures))]
     public async Task AddNewRoomPictures(List<string> filePathList)
@@ -1072,6 +1147,112 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
 
         return false;
     }
+
+    #endregion
+
+    #region == Lessor ==
+
+    [RelayCommand]
+    public async Task AddLessor()
+    {
+        if (_dialogService is null)
+        {
+            Debug.WriteLine("_dlgService is null");
+            return;
+        }
+
+        var lessor = await _dialogService.ShowLessorSelectDialog(new ViewModels.Rent.Lessors.LessorSelectViewModel(_dataAccessService, _cts));
+
+        if (lessor is not null)
+        {
+            var lessorId = lessor.Id;
+
+            Debug.WriteLine($"lessor {lessor.Name} returned.");
+
+            // Check if already exists
+            var match = LessorsWrapper.FirstOrDefault(x => x.Person.Id.Equals(lessorId));
+            if (match is not null)
+            {
+                Debug.WriteLine($"lessor {lessor.Name} already in the list.");
+                return;
+            }
+
+            // TODO:
+            //var res = await Task.Run(() => _dataAccessService.SelectRentLessorById(lessorId), _cts.Token);
+            var res = _dataAccessService.SelectRentLessorById(lessorId);
+            if (res.IsError)
+            {
+                Debug.WriteLine(res.Error.ErrText + Environment.NewLine + res.Error.ErrDescription + Environment.NewLine + res.Error.ErrPlace + Environment.NewLine + res.Error.ErrPlaceParent);
+
+                //ErrorMain = res.Error;
+                //IsMainErrorInfoBarVisible = true;
+
+                // TODO: Show error message to user
+                return;
+            }
+
+            if (res.Lessor is null)
+            {
+                Debug.WriteLine($"{lessorId} is null. Cannot open editor.");
+                return;
+            }
+
+
+            var asdf = new PersonWrapperForListingViewModel(res.Lessor, this);
+
+            LessorsWrapper.Add(asdf);
+
+            IsDirty = true;
+        }
+
+    }
+
+    [RelayCommand(CanExecute = nameof(CanEditLessor))]
+    private void EditLessor(PersonWrapperForListingViewModel lessor)
+    {
+        if (lessor.Person is not null)
+        {
+            var mainVm = App.GetService<MainViewModel>();
+            if (mainVm.EditRentLessorCommand.CanExecute(lessor.Person as Models.Base.PersonBase))
+            {
+                mainVm.EditRentLessorCommand.Execute(lessor.Person as Models.Base.PersonBase);
+            }
+        }
+    }
+    private static bool CanEditLessor(PersonWrapperForListingViewModel lessor)
+    {
+        return lessor is not null;
+    }
+
+    [RelayCommand(CanExecute = nameof(CanDeleteLessor))]
+    public async Task DeleteLessor(PersonWrapperForListingViewModel lessor)
+    {
+        Debug.WriteLine($"DeleteLessorCommand {lessor.Person.Name}");
+
+        if (lessor is null)
+        {
+            return;
+        }
+
+        if (lessor.Person is null)
+        {
+            return;
+        }
+
+        if (LessorsWrapper.Remove(lessor))
+        {
+            IsDirty = true;
+
+            _room.LessorsToBeDeleted.Add(lessor.Person);
+        }
+    }
+    private static bool CanDeleteLessor(PersonWrapperForListingViewModel lessor)
+    {
+        return lessor is not null;
+    }
+
+
+    #endregion
 
     #endregion
 

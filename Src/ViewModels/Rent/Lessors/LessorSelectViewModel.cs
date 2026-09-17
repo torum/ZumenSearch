@@ -8,6 +8,8 @@ using ZumenSearch.Services.Contracts;
 
 namespace ZumenSearch.ViewModels.Rent.Lessors;
 
+// TODO: pass _cts as a parameter and make cancelable.
+
 public partial class LessorSelectViewModel : ObservableObject
 {
     public string Query
@@ -58,21 +60,28 @@ public partial class LessorSelectViewModel : ObservableObject
 
     private readonly IDataAccessService _dataAccessService;
 
-    public LessorSelectViewModel(IDataAccessService dataAccessService)
+    private readonly CancellationTokenSource _cts;
+
+    public LessorSelectViewModel(IDataAccessService dataAccessService, CancellationTokenSource cts)
     {
         _dataAccessService = dataAccessService;
+        _cts = cts;
 
-        // TODO: try catch
-        //var res = await Task.Run(() => _dataAccessService.SelectRentLessorByKeyword("*"), _cts.Token);
-        var res = _dataAccessService.SelectRentLessorByKeyword("*");
+        InitLoad();
+    }
+
+    private async void InitLoad()
+    {
+        var res = await Task.Run(() => _dataAccessService.SelectRentLessorByKeyword("*"), _cts.Token);
+        //var res = _dataAccessService.SelectRentLessorByKeyword("*");
         if (res is not null)
         {
             SuggestedLessors = new(res.PersonSearchResult);
         }
-
     }
+
     [RelayCommand(CanExecute = nameof(CanSearch))]
-    public void Search()
+    public async Task Search()
     {
         if (string.IsNullOrEmpty(Query))
         {
@@ -80,14 +89,12 @@ public partial class LessorSelectViewModel : ObservableObject
             return;
         }
 
-        // TODO: try catch
-        //var res = await Task.Run(() => _dataAccessService.SelectRentLessorByKeyword(Query), _cts.Token);
-        var res = _dataAccessService.SelectRentLessorByKeyword(Query);
+        var res = await Task.Run(() => _dataAccessService.SelectRentLessorByKeyword(Query), _cts.Token);
+        //var res = _dataAccessService.SelectRentLessorByKeyword(Query);
         if (res is not null)
         {
             SuggestedLessors = new(res.PersonSearchResult);
         }
-
     }
     private bool CanSearch()
     {
@@ -99,6 +106,5 @@ public partial class LessorSelectViewModel : ObservableObject
     {
         var mainVm = App.GetService<MainViewModel>();
         mainVm.AddNewRentLessorCommand.Execute(null);
-
     }
 }

@@ -25,7 +25,7 @@ public sealed partial class PropertySearchResultItem : PropertyBase
 // 部屋検索結果一覧表示用（
 public sealed partial class ListingSearchResultItem : ListingBase
 {
-    public string PropertyId { get; init; }
+    //public string PropertyId { get; init; }
 
     public string PropertyName
     {
@@ -39,9 +39,9 @@ public sealed partial class ListingSearchResultItem : ListingBase
         }
     }
 
-    public ListingSearchResultItem(string id, string propertyId) : base(id, EnumEntryStatus.Saved)
+    public ListingSearchResultItem(string id, string propertyId, EnumPropertyKind propertyKind) : base(id, EnumEntryStatus.Saved, propertyId, EnumEntryStatus.Saved, propertyKind)
     {
-        PropertyId = propertyId;
+        //PropertyId = propertyId;
     }
 }
 

@@ -95,9 +95,9 @@
                     <NavigationViewItem Content="取引条件" Tag="ZumenSearch.Views.Rent.Residentials.Listing.TransactionPage"/>
                     <NavigationViewItem Content="設備" Tag="ZumenSearch.Views.Rent.Residentials.Listing.AppliancesPage" />
                     <NavigationViewItem Content="写真" Tag="ZumenSearch.Views.Rent.Residentials.Listing.PictureListPage" />
-                    <NavigationViewItem Content="図面" Tag="ZumenSearch.Views.Rent.Residentials.Listing.ZumenListPage" Visibility="{x:Bind ViewModel.IsUnitOwnershipVisible, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"/>
-                    <NavigationViewItem Content="貸主" Tag="ZumenSearch.Views.Rent.Residentials.Listing.LessorListPage" Visibility="{x:Bind ViewModel.IsUnitOwnershipVisible, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"/>
-                    <NavigationViewItem Content="宅建業者" Tag="ZumenSearch.Views.Rent.Residentials.Listing.BrokerListPage" Visibility="{x:Bind ViewModel.IsUnitOwnershipVisible, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"/>
+                    <NavigationViewItem Content="図面" Tag="ZumenSearch.Views.Rent.Residentials.Listing.ZumenListPage" Visibility="{x:Bind ViewModel.IsPropertyUnitOwnership, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"/>
+                    <NavigationViewItem Content="貸主" Tag="ZumenSearch.Views.Rent.Residentials.Listing.LessorListPage" Visibility="{x:Bind ViewModel.IsPropertyUnitOwnership, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"/>
+                    <NavigationViewItem Content="宅建業者" Tag="ZumenSearch.Views.Rent.Residentials.Listing.BrokerListPage" Visibility="{x:Bind ViewModel.IsPropertyUnitOwnership, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"/>
                 </NavigationView.MenuItems>
 
                 <NavigationView.FooterMenuItems>

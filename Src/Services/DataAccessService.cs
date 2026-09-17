@@ -1,7 +1,9 @@
 ﻿using Microsoft.Data.Sqlite;
+using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml.Data;
 using System.Data;
 using System.Diagnostics;
+using System.Reflection.PortableExecutable;
 using System.Xml.Linq;
 using Windows.Data.Pdf;
 using ZumenSearch.Helpers;
@@ -134,6 +136,7 @@ public sealed class DataAccessService : IDataAccessService
                 tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS rent_residential_rooms (" +
                     "listing_id TEXT NOT NULL PRIMARY KEY," +
                     "property_id TEXT NOT NULL," +
+                    "is_property_unit_ownership INTEGER NOT NULL," +
                     "name TEXT NOT NULL," +
                     "chinryou INTEGER NOT NULL DEFAULT 0," +
                     "created_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc'))," +
@@ -214,44 +217,8 @@ public sealed class DataAccessService : IDataAccessService
                 tableCmd.ExecuteNonQuery();
                 */
 
-
-
-                /*
-                // ADD COLUMN listing_id.
-                try
-                {
-                    tableCmd.CommandText = "ALTER TABLE rent_residential_room_pictures ADD COLUMN listing_id TEXT NOT NULL DEFAULT '';";
-                    tableCmd.ExecuteNonQuery();
-                }
-                catch (SqliteException ex)
-                {
-                    // SQLite does not support "IF NOT EXISTS" for ADD COLUMN.
-                    // need to catch "duplicate column name" errors.
-                    Debug.WriteLine("SqliteException on ADD COLUMN listing_id @InitializeDatabase: " + ex.Message);
-                }
-                */
                 AddColumnsIfNotExist(connection);
 
-                //
-                //tableCmd.CommandText = "drop trigger if exists trigger_delete_old_entries";
-                //tableCmd.ExecuteNonQuery();
-                /*
-                tableCmd.CommandText = "CREATE TRIGGER IF NOT EXISTS trigger_delete_old_entries AFTER INSERT ON entries";
-                tableCmd.CommandText += " BEGIN";
-                tableCmd.CommandText += " delete from entries where";
-                tableCmd.CommandText += " entry_id = (select min(entry_id) from entries)";
-                tableCmd.CommandText += " and (select count(*) from entries) > 1000;";
-                tableCmd.CommandText += " END;";
-                tableCmd.ExecuteNonQuery();
-                */
-                /*
-                tableCmd.CommandText = "CREATE TRIGGER IF NOT EXISTS trigger_delete_old_entries AFTER INSERT ON entries";
-                tableCmd.CommandText += " WHEN (SELECT COUNT(*) FROM entries) > 1000";
-                tableCmd.CommandText += " BEGIN";
-                tableCmd.CommandText += " DELETE FROM entries WHERE entry_id NOT IN (SELECT entry_id FROM entries ORDER BY published DESC LIMIT 1000);";
-                tableCmd.CommandText += " END;";
-                tableCmd.ExecuteNonQuery();
-                */
                 tableCmd.Transaction.Commit();
             }
             catch (Exception e)
@@ -649,6 +616,7 @@ public sealed class DataAccessService : IDataAccessService
         #endregion
     }
 
+    // TODO: use upsert on conflict
     public ResultWrapper InsertRentResidential(Models.Rent.Residentials.Property building)
     {
         var res = new ResultWrapper();
@@ -876,7 +844,7 @@ public sealed class DataAccessService : IDataAccessService
                 {
                     foreach (var unit in building.Rooms)
                     {
-                        var sqlInsertIntoRentLivingRoom = "INSERT INTO rent_residential_rooms (listing_id, property_id, name, chinryou) VALUES (@RoomId, @RentId, @Name, @Chinryou)";
+                        var sqlInsertIntoRentLivingRoom = "INSERT INTO rent_residential_rooms (listing_id, property_id, is_property_unit_ownership, name, chinryou) VALUES (@RoomId, @RentId, @isPropertyUnitOwnership, @Name, @Chinryou)";
 
                         cmd.CommandText = sqlInsertIntoRentLivingRoom;
 
@@ -885,6 +853,7 @@ public sealed class DataAccessService : IDataAccessService
 
                         cmd.Parameters.AddWithValue("@RoomId", unit.Id);
                         cmd.Parameters.AddWithValue("@RentId", building.Id);
+                        cmd.Parameters.AddWithValue("@isPropertyUnitOwnership", building.IsUnitOwnership ? 1 : 0); // bool to int
                         cmd.Parameters.AddWithValue("@Name", unit.Name);
                         cmd.Parameters.AddWithValue("@Chinryou", unit.Chinryou);
 
@@ -1076,6 +1045,7 @@ public sealed class DataAccessService : IDataAccessService
         return res;
     }
 
+    // TODO: use upsert on conflict
     public ResultWrapper UpdateRentResidential(Models.Rent.Residentials.Property building)
     {
         var res = new ResultWrapper();
@@ -1394,7 +1364,7 @@ public sealed class DataAccessService : IDataAccessService
 
                         if (room.PropertyStatus == EnumEntryStatus.New)
                         {
-                            var sqlInsertIntoRentLivingRoom = "INSERT INTO rent_residential_rooms (listing_id, property_id, name, chinryou) VALUES (@roomId, @RentId, @Nam, @Chinryou)";
+                            var sqlInsertIntoRentLivingRoom = "INSERT INTO rent_residential_rooms (listing_id, property_id, is_property_unit_ownership, name, chinryou) VALUES (@roomId, @RentId, @isPropertyUnitOwnership, @Nam, @Chinryou)";
 
                             // 追加
                             cmd.CommandText = sqlInsertIntoRentLivingRoom;
@@ -1403,7 +1373,7 @@ public sealed class DataAccessService : IDataAccessService
                         else if (room.IsModified || room.PropertyStatus == EnumEntryStatus.Saved)
                         {
                             //var sqlUpdateRentLivingRoom = string.Format("UPDATE rent_residential_rooms SET name = @Nam WHERE listing_id = '{0}'", room.Id);
-                            var sqlUpdateRentLivingRoom = "UPDATE rent_residential_rooms SET name = @Nam, chinryou = @Chinryou, updated_at = @Updated WHERE listing_id = @roomId";
+                            var sqlUpdateRentLivingRoom = "UPDATE rent_residential_rooms SET is_property_unit_ownership = @isPropertyUnitOwnership, name = @Nam, chinryou = @Chinryou, updated_at = @Updated WHERE listing_id = @roomId";
                             // 更新
                             cmd.CommandText = sqlUpdateRentLivingRoom;
 
@@ -1416,6 +1386,7 @@ public sealed class DataAccessService : IDataAccessService
                             cmd.Parameters.Clear();
 
                             cmd.Parameters.AddWithValue("@roomId", room.Id);
+                            cmd.Parameters.AddWithValue("@isPropertyUnitOwnership", building.IsUnitOwnership ? 1 : 0); // bool to int
                             //cmd.Parameters.AddWithValue("@RentResidentialId", entry.Id + "_1");
                             cmd.Parameters.AddWithValue("@RentId", building.Id);
                             cmd.Parameters.AddWithValue("@Nam", room.Name);
@@ -1963,11 +1934,12 @@ public sealed class DataAccessService : IDataAccessService
         return res;
     }
 
+    // TODO: reuse (room values)
     public SelectRentResidentialBuildingSingleResultWrapper SelectRentResidentialById(string id)
     {
         var res = new SelectRentResidentialBuildingSingleResultWrapper();
 
-        var entry = new Models.Rent.Residentials.Property(id, EnumEntryStatus.Saved, EnumPropertyKind.RentResidential);
+        var entry = new Models.Rent.Residentials.Property(id, EnumEntryStatus.Saved);
 
         if (string.IsNullOrEmpty(id))
         {
@@ -2013,18 +1985,23 @@ public sealed class DataAccessService : IDataAccessService
                 "properties.property_id as propertyId " +
                 "FROM rent_residentials INNER JOIN properties USING (property_id) WHERE properties.property_id = '{0}'", id);
 
+            bool isFound = false;
+
             using (var reader = cmd.ExecuteReader())
             {
                 while (reader.Read())
                 {
-                    var s = Convert.ToString(reader["propertyId"]);
-                    if (string.IsNullOrEmpty(s))
+                    var pId = Convert.ToString(reader["propertyId"]);
+                    if (!id.Equals(pId))//if (string.IsNullOrEmpty(s))
                     {
                         Debug.WriteLine("DataAccess::SelectRentResidentialsById: propertyId is null or empty for a rent residential entry.");
                         continue;
                     }
 
+                    isFound = true;
+
                     /*
+                    // already passed as a param in the entry constructor. 
                     var enumKind = EnumPropertyKind.Unknown;
                     var kind = reader.GetString(reader.GetOrdinal("propertyKind")) ?? string.Empty;
                     if (!string.IsNullOrEmpty(kind))
@@ -2036,6 +2013,7 @@ public sealed class DataAccessService : IDataAccessService
                     }
                     */
 
+                    string s;
                     s = Convert.ToString(reader["propertyName"]) ?? "";
                     entry.Name = s;
 
@@ -2108,6 +2086,12 @@ public sealed class DataAccessService : IDataAccessService
 
                     //break; // Assuming we only want the first match
                 }
+            }
+
+            if (!isFound)
+            {
+                // TODO: IsError?
+                return res;
             }
 
             // 物件写真（建物）
@@ -2196,7 +2180,7 @@ public sealed class DataAccessService : IDataAccessService
                 }
             }
 
-            // 貸主
+            // 貸主（建物）
             var lessorIdList = new List<string>();
             cmd.CommandText = string.Format("SELECT * FROM rent_lessors_properties_listings WHERE property_id = '{0}'", id);
             using (var reader = cmd.ExecuteReader())
@@ -2256,19 +2240,24 @@ public sealed class DataAccessService : IDataAccessService
             }
 
             // 部屋
+            // TODO: Is there any way to reuse following code?
             cmd.CommandText = string.Format("SELECT * FROM rent_residential_rooms WHERE property_id = '{0}'", id);
             using (var reader = cmd.ExecuteReader())
             {
                 while (reader.Read())
                 {
                     var roomId = Convert.ToString(reader["listing_id"]) ?? string.Empty;
-                    var room = new Models.Rent.Residentials.Listing.Listing(roomId, entry.Id, EnumEntryStatus.Saved, EnumEntryStatus.Saved, entry.Name)
+                    var room = new Models.Rent.Residentials.Listing.Listing(roomId, EnumEntryStatus.Saved, entry.Id, EnumEntryStatus.Saved, entry.IsUnitOwnership, entry.Name)
                     {
+                        // TODO: Is there any way to reuse following code?
+
                         Name = Convert.ToString(reader["name"]) ?? string.Empty,
                         Chinryou = Convert.ToInt32(reader["chinryou"]),
-                        Status = EnumEntryStatus.Saved,
+                        //Status = EnumEntryStatus.Saved,
                         //IsNew = false,
                         IsModified = false
+
+                        // TODO: more
                     };
 
                     //Debug.WriteLine($"Room ID: {room.Id}, Room Name: {room.RoomName}");
@@ -2279,92 +2268,8 @@ public sealed class DataAccessService : IDataAccessService
 
             foreach (var room in entry.Rooms)
             {
-                // 部屋写真
-                cmd.CommandText = string.Format("SELECT * FROM rent_residential_room_pictures WHERE listing_id = '{0}'", room.Id);
-                using (var reader = cmd.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        var picid = Convert.ToString(reader["picture_id"]) ?? string.Empty;
-                        var picpath = Convert.ToString(reader["file_path"]) ?? string.Empty;
-                        if (!string.IsNullOrEmpty(picid) && !string.IsNullOrEmpty(picpath))
-                        {
-                            var rlpic = new Models.Rent.Residentials.Listing.Picture(picid, picpath)
-                            {
-                                Description = Convert.ToString(reader["description"]) ?? string.Empty,
-
-                                IsNew = false,
-                                IsModified = false
-                            };
-
-                            var strType = Convert.ToString(reader["type"]);
-                            if (!string.IsNullOrEmpty(strType))
-                            {
-                                rlpic.SetLabelFromString(strType);
-                            }
-
-                            var bln = Convert.ToInt32(reader["is_main"]);
-                            if (bln > 0)
-                            {
-                                rlpic.IsMain = true;
-                            }
-                            else
-                            {
-                                rlpic.IsMain = false;
-                            }
-
-                            room.Pictures.Add(rlpic);
-                        }
-                        else
-                        {
-                            Debug.WriteLine("picture_id or file_path is null/empty.");
-                        }
-                    }
-                }
-
-                // 部屋PDF
-                cmd.CommandText = string.Format("SELECT * FROM rent_residential_room_pdfs WHERE listing_id = '{0}'", room.Id);
-                using (var reader = cmd.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        var pdfid = Convert.ToString(reader["pdf_id"]) ?? string.Empty;
-                        var pdfpath = Convert.ToString(reader["file_path"]) ?? string.Empty;
-                        var thumbpath = Convert.ToString(reader["thumbnail_path"]) ?? string.Empty;
-                        if (!string.IsNullOrEmpty(pdfid) && !string.IsNullOrEmpty(pdfpath) && !string.IsNullOrEmpty(thumbpath))
-                        {
-                            var rlpdf = new Models.Rent.Residentials.Listing.Pdf(pdfid, pdfpath, thumbpath)
-                            {
-                                Description = Convert.ToString(reader["description"]) ?? string.Empty,
-                                IsNew = false,
-                                IsModified = false
-                            };
-
-                            var strType = Convert.ToString(reader["type"]);
-                            if (!string.IsNullOrEmpty(strType))
-                            {
-                                rlpdf.SetTypeFromString(strType);
-                            }
-
-                            var bln = Convert.ToInt32(reader["is_main"]);
-                            if (bln > 0)
-                            {
-                                rlpdf.IsMain = true;
-                            }
-                            else
-                            {
-                                rlpdf.IsMain = false;
-                            }
-
-                            room.Pdfs.Add(rlpdf);
-                        }
-                        else
-                        {
-                            Debug.WriteLine("pdf_id or file_path or thumbnail_path is null/empty.");
-                        }
-                    }
-                }
-
+                // reuse with other
+                SetRentResidentialListingChildValues(cmd,room);
 
             }
 
@@ -2427,6 +2332,172 @@ public sealed class DataAccessService : IDataAccessService
         return res;
     }
 
+    // TODO:
+    /*
+    private Models.Rent.Residentials.Listing.Listing GetRentResidentialListing(SqliteCommand cmd)
+    {
+        var result = new Models.Rent.Residentials.Listing.Listing(roomId, EnumEntryStatus.Saved, rentId, EnumEntryStatus.Saved, isUnitOwnership, reader.GetString(reader.GetOrdinal("buildingName")) ?? string.Empty)
+        {
+            Name = reader.GetString(reader.GetOrdinal("roomName")) ?? string.Empty,
+            Chinryou = reader.GetInt32(reader.GetOrdinal("chinryou")),
+            //Status = EnumEntryStatus.Saved,
+            //IsNew = false,
+            IsModified = false
+            // TODO: more
+        };
+
+        return result;
+    }
+    */
+
+    private static void SetRentResidentialListingChildValues(SqliteCommand cmd, Models.Rent.Residentials.Listing.Listing room)
+    {
+        // 部屋写真
+        cmd.CommandText = string.Format("SELECT * FROM rent_residential_room_pictures WHERE listing_id = '{0}'", room.Id);
+        using (var reader = cmd.ExecuteReader())
+        {
+            while (reader.Read())
+            {
+                var picid = Convert.ToString(reader["picture_id"]) ?? string.Empty;
+                var picpath = Convert.ToString(reader["file_path"]) ?? string.Empty;
+                if (!string.IsNullOrEmpty(picid) && !string.IsNullOrEmpty(picpath))
+                {
+                    var rlpic = new Models.Rent.Residentials.Listing.Picture(picid, picpath)
+                    {
+                        Description = Convert.ToString(reader["description"]) ?? string.Empty,
+
+                        IsNew = false,
+                        IsModified = false
+                    };
+
+                    var strType = Convert.ToString(reader["type"]);
+                    if (!string.IsNullOrEmpty(strType))
+                    {
+                        rlpic.SetLabelFromString(strType);
+                    }
+
+                    var bln = Convert.ToInt32(reader["is_main"]);
+                    if (bln > 0)
+                    {
+                        rlpic.IsMain = true;
+                    }
+                    else
+                    {
+                        rlpic.IsMain = false;
+                    }
+
+                    room.Pictures.Add(rlpic);
+                }
+                else
+                {
+                    Debug.WriteLine("picture_id or file_path is null/empty.");
+                }
+            }
+        }
+
+        // 部屋PDF
+        cmd.CommandText = string.Format("SELECT * FROM rent_residential_room_pdfs WHERE listing_id = '{0}'", room.Id);
+        using (var reader = cmd.ExecuteReader())
+        {
+            while (reader.Read())
+            {
+                var pdfid = Convert.ToString(reader["pdf_id"]) ?? string.Empty;
+                var pdfpath = Convert.ToString(reader["file_path"]) ?? string.Empty;
+                var thumbpath = Convert.ToString(reader["thumbnail_path"]) ?? string.Empty;
+                if (!string.IsNullOrEmpty(pdfid) && !string.IsNullOrEmpty(pdfpath) && !string.IsNullOrEmpty(thumbpath))
+                {
+                    var rlpdf = new Models.Rent.Residentials.Listing.Pdf(pdfid, pdfpath, thumbpath)
+                    {
+                        Description = Convert.ToString(reader["description"]) ?? string.Empty,
+                        IsNew = false,
+                        IsModified = false
+                    };
+
+                    var strType = Convert.ToString(reader["type"]);
+                    if (!string.IsNullOrEmpty(strType))
+                    {
+                        rlpdf.SetTypeFromString(strType);
+                    }
+
+                    var bln = Convert.ToInt32(reader["is_main"]);
+                    if (bln > 0)
+                    {
+                        rlpdf.IsMain = true;
+                    }
+                    else
+                    {
+                        rlpdf.IsMain = false;
+                    }
+
+                    room.Pdfs.Add(rlpdf);
+                }
+                else
+                {
+                    Debug.WriteLine("pdf_id or file_path or thumbnail_path is null/empty.");
+                }
+            }
+        }
+
+        // 部屋貸主
+        var lessorIds = new List<string>();
+        cmd.CommandText = string.Format("SELECT * FROM rent_lessors_properties_listings WHERE listing_id = '{0}'", room.Id);
+        using (var reader = cmd.ExecuteReader())
+        {
+            while (reader.Read())
+            {
+                var lessorId = Convert.ToString(reader["lessor_id"]) ?? string.Empty;
+                if (!string.IsNullOrEmpty(lessorId))
+                {
+                    lessorIds.Add(lessorId);
+                }
+                else
+                {
+                    Debug.WriteLine("lessor_id is null/empty.");
+                }
+            }
+        }
+        if (lessorIds.Count > 0)
+        {
+            foreach (var lessId in lessorIds)
+            {
+                // Get actuall lessors
+                cmd.CommandText = $"SELECT lessor_id, name, name_last, name_first, remarks FROM rent_lessors WHERE lessor_id = '{lessId}'";
+                using (var reader2 = cmd.ExecuteReader())
+                {
+                    while (reader2.Read())
+                    {
+                        var s = Convert.ToString(reader2["lessor_id"]);
+                        if (string.IsNullOrEmpty(s))
+                        {
+                            Debug.WriteLine("DataAccess::SelectRentResidentialById: lessor_id is null or empty.");
+                            continue;
+                        }
+
+                        var lessor = new Models.Rent.Lessors.Person(lessId, EnumEntryStatus.Saved);
+
+                        s = Convert.ToString(reader2["name"]) ?? "";
+                        lessor.Name = s;
+
+                        s = Convert.ToString(reader2["name_last"]) ?? "";
+                        lessor.NameLast = s;
+
+                        s = Convert.ToString(reader2["name_first"]) ?? "";
+                        lessor.NameFirst = s;
+
+                        s = Convert.ToString(reader2["remarks"]) ?? "";
+                        lessor.Remarks = s;
+
+                        // TODO: more.
+
+                        room.Lessors.Add(lessor);
+
+                        //break; // Assuming we only want the first match
+                    }
+                }
+            }
+        }
+    }
+
     public ResultWrapper UpsertRentResidentialListing(string rentId, Models.Rent.Residentials.Listing.Listing room)
     {
         var res = new ResultWrapper();
@@ -2461,10 +2532,10 @@ public sealed class DataAccessService : IDataAccessService
                 cmd.Parameters.Clear();
 
                 // Upsert into rent_residential_rooms
-                var sqlInsertIntoRentLivingRoom = "INSERT INTO rent_residential_rooms (listing_id, property_id, name, chinryou) VALUES (@roomId, @RentId, @Nam, @Chinryou) ";
+                var sqlInsertIntoRentLivingRoom = "INSERT INTO rent_residential_rooms (listing_id, property_id, is_property_unit_ownership, name, chinryou) VALUES (@roomId, @RentId, @isPropertyUnitOwnership, @Nam, @Chinryou) ";
                 sqlInsertIntoRentLivingRoom += "ON CONFLICT(listing_id) ";
                 //sqlInsertIntoRentLivingRoom += string.Format("DO UPDATE SET name = '{0}'", EscapeSingleQuote(room.RoomName));
-                sqlInsertIntoRentLivingRoom += "DO UPDATE SET name = @Nam, chinryou = @Chinryou"; //, updated_at = @Updated
+                sqlInsertIntoRentLivingRoom += "DO UPDATE SET is_property_unit_ownership = @isPropertyUnitOwnership, name = @Nam, chinryou = @Chinryou"; //, updated_at = @Updated
 
                 cmd.CommandText = sqlInsertIntoRentLivingRoom;
 
@@ -2487,6 +2558,7 @@ public sealed class DataAccessService : IDataAccessService
                 */
                 cmd.Parameters.AddWithValue("@roomId", room.Id);
                 cmd.Parameters.AddWithValue("@RentId", rentId);
+                cmd.Parameters.AddWithValue("@isPropertyUnitOwnership", room.IsPropertyUnitOwnership ? 1 : 0); // bool to int
                 cmd.Parameters.AddWithValue("@Nam", room.Name);
                 cmd.Parameters.AddWithValue("@Chinryou", room.Chinryou);
                 //cmd.Parameters.AddWithValue("@Updated", DateTimeOffset.UtcNow.ToString("s"));
@@ -2662,6 +2734,52 @@ public sealed class DataAccessService : IDataAccessService
                     //room.UnitPicturesToBeDeleted.Clear();
                 }
 
+                // 部屋貸主 rent_lessors_properties_listings - Insert or Update
+                if (room.Lessors.Count > 0)
+                {
+                    foreach (var psn in room.Lessors)
+                    {
+                        //var sqlInsertInto = "INSERT INTO rent_lessors_properties_listings (lessor_id, property_id, property_kind, listing_id) " +
+                        //                "VALUES (@lessor_id, @property_id, @property_kind, @listing_id)";
+
+                        // Upsert 
+                        var sqlUpsert = "INSERT INTO rent_lessors_properties_listings (lessor_id, property_id, property_kind, listing_id) VALUES (@lessor_id, @property_id, @property_kind, @listing_id) ";
+                        sqlUpsert += "ON CONFLICT(lessor_id, property_id, listing_id) ";
+                        sqlUpsert += "DO NOTHING";//"DO UPDATE SET lessor_id = @lessor_id, property_id = @property_id, property_kind = @property_kind, listing_id = @listing_id";
+
+                        cmd.CommandText = sqlUpsert;
+
+                        // ループなので、前のパラメーターをクリアする。
+                        cmd.Parameters.Clear();
+
+                        cmd.Parameters.AddWithValue("@lessor_id", psn.Id);
+                        cmd.Parameters.AddWithValue("@property_id", room.PropertyId);
+                        cmd.Parameters.AddWithValue("@property_kind", room.PropertyKind.ToString());
+                        cmd.Parameters.AddWithValue("@listing_id", room.Id);
+
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+
+                // 部屋貸主の削除リストを処理
+                if (room.LessorsToBeDeleted.Count > 0)
+                {
+                    foreach (var psn in room.LessorsToBeDeleted)
+                    {
+                        // 削除
+                        var sqlDelete = ($"DELETE FROM rent_lessors_properties_listings WHERE lessor_id = '{psn.Id}' AND property_id = '{room.PropertyId}' AND listing_id = '{room.Id}'");
+
+                        cmd.CommandText = sqlDelete;
+                        var sqlResult = cmd.ExecuteNonQuery();
+                        if (sqlResult > 0)
+                        {
+                            // TODO:
+                            Debug.WriteLine("Lessor deleted");
+                        }
+                    }
+                    // TODO: should I?
+                    room.LessorsToBeDeleted.Clear();
+                }
 
                 // Commit
                 cmd.Transaction.Commit();
@@ -2776,7 +2894,7 @@ public sealed class DataAccessService : IDataAccessService
                     continue;
                 }
 
-                var unit = new Models.Common.ListingSearchResultItem(rid, eid);
+                var unit = new Models.Common.ListingSearchResultItem(rid, eid, EnumPropertyKind.RentResidential);
 
                 var s = Convert.ToString(reader["roomName"]) ?? "";
                 unit.Name = s;
@@ -2850,6 +2968,7 @@ public sealed class DataAccessService : IDataAccessService
         return res;
     }
 
+    // TODO: reuse (room values)
     public SelectRentResidentialRoomSingleResultWrapper SelectRentResidentialListingById(string rentId, string roomId)
     {
         var res = new SelectRentResidentialRoomSingleResultWrapper();
@@ -2875,39 +2994,61 @@ public sealed class DataAccessService : IDataAccessService
             connection.Open();
 
             using var cmd = connection.CreateCommand();
-            cmd.CommandText = "SELECT properties.property_id as buildingId, properties.name as buildingName, rent_residential_rooms.listing_id as roomId, rent_residential_rooms.name as roomName, rent_residential_rooms.chinryou as chinryou FROM rent_residential_rooms INNER JOIN properties USING (property_id)";//INNER JOIN rent_residentials USING (property_id)
 
-            using var reader = cmd.ExecuteReader();
-            while (reader.Read())
+            Models.Rent.Residentials.Listing.Listing? room = null;
+            bool isFound = false;
+
+            // TODO: Is there any way to reuse following code?
+            // Give up "INNER JOIN properties" and use "SELECT *" and reuse code from SelectRentResidentialById().
+
+            cmd.CommandText = "SELECT properties.property_id as buildingId, properties.name as buildingName, rent_residential_rooms.listing_id as roomId, rent_residential_rooms.name as roomName, rent_residential_rooms.is_property_unit_ownership as isPropertyUnitOwnership, rent_residential_rooms.chinryou as chinryou FROM rent_residential_rooms INNER JOIN properties USING (property_id)";//INNER JOIN rent_residentials USING (property_id)
+
+            using (var reader = cmd.ExecuteReader()) 
             {
-                //var Id = Convert.ToString(reader["roomId"]) ?? string.Empty;
-                var Id = reader.GetString(reader.GetOrdinal("roomId")) ?? string.Empty;
-                if (Id.Equals(roomId))
+                while (reader.Read())
                 {
-                    var room = new Models.Rent.Residentials.Listing.Listing(roomId, rentId, EnumEntryStatus.Saved, EnumEntryStatus.Saved, reader.GetString(reader.GetOrdinal("buildingName")) ?? string.Empty)
+                    //var Id = Convert.ToString(reader["roomId"]) ?? string.Empty;
+                    var rId = reader.GetString(reader.GetOrdinal("roomId")) ?? string.Empty;
+
+                    if (!roomId.Equals(rId))
+                    {
+                        Debug.WriteLine("DataAccess::SelectRentResidentialListingById: roomId is null or empty.");
+                        continue;
+                    }
+
+                    isFound = true;
+
+                    var isUnitOwnership = Convert.ToInt32(reader["isPropertyUnitOwnership"]) != 0;
+
+                    room = new Models.Rent.Residentials.Listing.Listing(roomId, EnumEntryStatus.Saved, rentId, EnumEntryStatus.Saved, isUnitOwnership, reader.GetString(reader.GetOrdinal("buildingName")) ?? string.Empty)
                     {
                         Name = reader.GetString(reader.GetOrdinal("roomName")) ?? string.Empty,
                         Chinryou = reader.GetInt32(reader.GetOrdinal("chinryou")),
-                        Status = EnumEntryStatus.Saved,
+                        //Status = EnumEntryStatus.Saved,
                         //IsNew = false,
                         IsModified = false
+                        // TODO: more
                     };
 
                     //Debug.WriteLine($"Room ID: {room.Id}, Room Name: {room.RoomName}");
 
-                    // TODO:
 
-                    // pics? 
-
-                    // pdfs?
-
-
-
-                    res.Room = room;
+                    //res.Room = room;
                     // break;
                 }
             }
 
+            if (room is not null && isFound)
+            {
+                // gets pics, pdfs, lessors
+                SetRentResidentialListingChildValues(cmd, room);
+
+                res.Room = room;
+            }
+            else
+            {
+                return res;
+            }
         }
         catch (System.Reflection.TargetInvocationException ex)
         {
