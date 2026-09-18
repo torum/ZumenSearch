@@ -1,11 +1,6 @@
 ﻿using Microsoft.Data.Sqlite;
-using Microsoft.Extensions.Logging;
-using Microsoft.UI.Xaml.Data;
 using System.Data;
 using System.Diagnostics;
-using System.Reflection.PortableExecutable;
-using System.Xml.Linq;
-using Windows.Data.Pdf;
 using ZumenSearch.Helpers;
 using ZumenSearch.Models;
 using ZumenSearch.Models.Base;
@@ -616,7 +611,7 @@ public sealed class DataAccessService : IDataAccessService
         #endregion
     }
 
-    // TODO: use upsert on conflict
+    // TODO: use upsert on conflict, reuse code.
     public ResultWrapper InsertRentResidential(Models.Rent.Residentials.Property building)
     {
         var res = new ResultWrapper();
@@ -644,7 +639,12 @@ public sealed class DataAccessService : IDataAccessService
                 // Main rent table
                 cmd.CommandType = CommandType.Text;
                 cmd.CommandText = "INSERT INTO properties (property_id, name, property_kind, thumbnail_path, loc_pref_id, loc_prefecture, loc_machiaza_id, loc_county, loc_city, loc_ward, loc_oaza_cho, loc_choume, loc_edaban, loc_location_full, updated_at) " +
-                    "VALUES (@RentId, @Name, @PropertyKind, @Thumb, @LocPrefId, @LocPrefecture, @LocMachiazaId, @LocCounty, @LocCity, @LocWard, @LocOazaCho, @LocChoume, @LocEdaban, @LocLocationFull, @updated_at)";
+                                                  "VALUES (@RentId, @Name, @PropertyKind, @Thumb, @LocPrefId, @LocPrefecture, @LocMachiazaId, @LocCounty, @LocCity, @LocWard, @LocOazaCho, @LocChoume, @LocEdaban, @LocLocationFull, @updated_at)";
+                /* Upsert TODO:
+                var sqlInsertIntoRentLivingRoom = "INSERT INTO rent_lessors (lessor_id, name, name_last, name_first, remarks) VALUES (@lessor_id, @name, @name_last, @name_first, @remarks) ";
+                sqlInsertIntoRentLivingRoom += "ON CONFLICT(lessor_id) ";
+                sqlInsertIntoRentLivingRoom += "DO UPDATE SET name = @name, name_last = @name_last, name_first = @name_first, remarks = @remarks, updated_at = @updated_at";
+                */
 
                 cmd.Parameters.AddWithValue("@RentId", building.Id);
                 cmd.Parameters.AddWithValue("@Name", building.Name);
@@ -693,20 +693,6 @@ public sealed class DataAccessService : IDataAccessService
                 {
                     foreach (var pic in building.Pictures)
                     {
-                        // Insertなので全てIsNewのはず・・・
-                        //if (pic.IsNew)
-                        /*
-                        string sqlInsertIntoRentLivingPicture = String.Format(
-                                        "INSERT INTO rent_residential_pictures (picture_id, property_id, picture_filepath, picture_data) " +
-                                        "VALUES ('{0}', '{1}', '{2}', @0)",
-                                        pic.Id, building.Id, pic.ImageLocation);
-                        */
-                        /*
-                        string sqlInsertIntoRentLivingPicture = String.Format(
-                            "INSERT INTO rent_residential_pictures (picture_id, property_id, picture_filepath) " +
-                            "VALUES ('{0}', '{1}', '{2}')",
-                            pic.Id, building.Id, pic.ImageLocation);
-                        */
                         var sqlInsertIntoRentLivingPicture = "INSERT INTO rent_residential_pictures (picture_id, property_id, file_path, type, description, is_main) " +
                             "VALUES (@PicId, @RentId, @Path, @Type, @Desc, @Main)";
 
@@ -735,14 +721,6 @@ public sealed class DataAccessService : IDataAccessService
                         }
                         cmd.Parameters.Add(paramIsMain);
 
-                        /*
-                        var parameter1 = new SqliteParameter("@0", System.Data.DbType.Binary)
-                        {
-                            Value = pic.PictureData;
-                        };
-                        cmd.Parameters.Add(parameter1);
-                        */
-
                         var r = cmd.ExecuteNonQuery();
                         if (r > 0)
                         {
@@ -757,20 +735,6 @@ public sealed class DataAccessService : IDataAccessService
                 {
                     foreach (var pic in building.Pdfs)
                     {
-                        // Insertなので全てIsNewのはず・・・
-                        //if (pic.IsNew)
-                        /*
-                        string sqlInsertIntoRentLivingPicture = String.Format(
-                                        "INSERT INTO rent_residential_pictures (picture_id, property_id, picture_filepath, picture_data) " +
-                                        "VALUES ('{0}', '{1}', '{2}', @0)",
-                                        pic.Id, building.Id, pic.ImageLocation);
-                        */
-                        /*
-                        string sqlInsertIntoRentLivingPicture = String.Format(
-                            "INSERT INTO rent_residential_pictures (picture_id, property_id, picture_filepath) " +
-                            "VALUES ('{0}', '{1}', '{2}')",
-                            pic.Id, building.Id, pic.ImageLocation);
-                        */
                         var sqlInsertIntoRentLivingPicture = "INSERT INTO rent_residential_pdfs (pdf_id, property_id, file_path, thumbnail_path, type, description, is_main) " +
                             "VALUES (@PdfId, @RentId, @Path, @Thumb, @Type, @Desc, @Main)";
 
@@ -799,14 +763,6 @@ public sealed class DataAccessService : IDataAccessService
                             paramIsMain.Value = 0;
                         }
                         cmd.Parameters.Add(paramIsMain);
-
-                        /*
-                        var parameter1 = new SqliteParameter("@0", System.Data.DbType.Binary)
-                        {
-                            Value = pic.PictureData;
-                        };
-                        cmd.Parameters.Add(parameter1);
-                        */
 
                         var r = cmd.ExecuteNonQuery();
                         if (r > 0)
@@ -839,7 +795,8 @@ public sealed class DataAccessService : IDataAccessService
                     }
                 }
 
-                // Room table
+                // Room table 
+                // TODO: reuse code with other method.
                 if (building.Rooms.Count > 0)
                 {
                     foreach (var unit in building.Rooms)
@@ -961,7 +918,6 @@ public sealed class DataAccessService : IDataAccessService
 
                     }
                 }
-
 
                 // commit
                 cmd.Transaction.Commit();
@@ -1706,9 +1662,9 @@ public sealed class DataAccessService : IDataAccessService
         return res;
     }
 
-    public SelectPropertiesResultWrapper SelectRecentProperties()
+    public PropertiesResultWrapper SelectRecentProperties()
     {
-        var res = new SelectPropertiesResultWrapper();
+        var res = new PropertiesResultWrapper();
 
         _readerWriterLock.EnterReadLock();
         try
@@ -1813,9 +1769,9 @@ public sealed class DataAccessService : IDataAccessService
         return res;
     }
 
-    public SelectPropertiesResultWrapper SelectRentResidentialsByNameKeyword(string keyword)
+    public PropertiesResultWrapper SelectRentResidentialsByNameKeyword(string keyword)
     {
-        var res = new SelectPropertiesResultWrapper();
+        var res = new PropertiesResultWrapper();
 
         if (string.IsNullOrEmpty(keyword))
         {
@@ -1934,10 +1890,9 @@ public sealed class DataAccessService : IDataAccessService
         return res;
     }
 
-    // TODO: reuse (room values)
-    public SelectRentResidentialBuildingSingleResultWrapper SelectRentResidentialById(string id)
+    public RentResidentialBuildingSingleResultWrapper SelectRentResidentialById(string id)
     {
-        var res = new SelectRentResidentialBuildingSingleResultWrapper();
+        var res = new RentResidentialBuildingSingleResultWrapper();
 
         var entry = new Models.Rent.Residentials.Property(id, EnumEntryStatus.Saved);
 
@@ -1992,7 +1947,8 @@ public sealed class DataAccessService : IDataAccessService
                 while (reader.Read())
                 {
                     var pId = Convert.ToString(reader["propertyId"]);
-                    if (!id.Equals(pId))//if (string.IsNullOrEmpty(s))
+
+                    if (!id.Equals(pId))
                     {
                         Debug.WriteLine("DataAccess::SelectRentResidentialsById: propertyId is null or empty for a rent residential entry.");
                         continue;
@@ -2000,56 +1956,22 @@ public sealed class DataAccessService : IDataAccessService
 
                     isFound = true;
 
-                    /*
-                    // already passed as a param in the entry constructor. 
-                    var enumKind = EnumPropertyKind.Unknown;
-                    var kind = reader.GetString(reader.GetOrdinal("propertyKind")) ?? string.Empty;
-                    if (!string.IsNullOrEmpty(kind))
-                    {
-                        if (Enum.TryParse<Models.Base.EnumPropertyKind>(kind, out var parsedKind))
-                        {
-                            enumKind = parsedKind;
-                        }
-                    }
-                    */
-
-                    string s;
-                    s = Convert.ToString(reader["propertyName"]) ?? "";
-                    entry.Name = s;
-
-                    s = Convert.ToString(reader["locPrefId"]) ?? "";
-                    entry.LocPrefId = s;
-
-                    s = Convert.ToString(reader["locPrefecture"]) ?? "";
-                    entry.LocPrefecture = s;
-
-                    s = Convert.ToString(reader["locMachiazaId"]) ?? "";
-                    entry.LocMachiazaId = s;
-
-                    s = Convert.ToString(reader["locCounty"]) ?? "";
-                    entry.LocCounty = s;
-
-                    s = Convert.ToString(reader["locCity"]) ?? "";
-                    entry.LocCity = s;
-
-                    s = Convert.ToString(reader["locWard"]) ?? "";
-                    entry.LocWard = s;
-
-                    s = Convert.ToString(reader["locOazaCho"]) ?? "";
-                    entry.LocOazaCho = s;
-
-                    s = Convert.ToString(reader["locChoume"]) ?? "";
-                    entry.LocChoume = s;
-
-                    s = Convert.ToString(reader["locEdaban"]) ?? "";
-                    entry.LocEdaban = s;
-
-                    s = Convert.ToString(reader["locLocationFull"]) ?? "";
-                    entry.LocLocationFull = s;
+                    entry.Name = Convert.ToString(reader["propertyName"]) ?? "";
+                    entry.LocPrefId = Convert.ToString(reader["locPrefId"]) ?? "";
+                    entry.LocPrefecture = Convert.ToString(reader["locPrefecture"]) ?? "";
+                    entry.LocMachiazaId = Convert.ToString(reader["locMachiazaId"]) ?? "";
+                    entry.LocCounty = Convert.ToString(reader["locCounty"]) ?? "";
+                    entry.LocCity = Convert.ToString(reader["locCity"]) ?? "";
+                    entry.LocWard = Convert.ToString(reader["locWard"]) ?? "";
+                    entry.LocOazaCho = Convert.ToString(reader["locOazaCho"]) ?? "";
+                    entry.LocChoume = Convert.ToString(reader["locChoume"]) ?? "";
+                    entry.LocEdaban = Convert.ToString(reader["locEdaban"]) ?? "";
+                    entry.LocLocationFull = Convert.ToString(reader["locLocationFull"]) ?? "";
 
                     // TODO: more.
 
 
+                    string s;
                     s = Convert.ToString(reader["resiBuildingKind"]) ?? "";
                     entry.SetKindTypeFromString(s);
 
@@ -2071,14 +1993,11 @@ public sealed class DataAccessService : IDataAccessService
                     s = Convert.ToString(reader["resiBuiltYearMonth"]) ?? "";
                     entry.SetBuildYearMonthFromString(s);
 
-                    s = Convert.ToString(reader["resiFudousanId"]) ?? "";
-                    entry.FudousanId = s;
+                    entry.FudousanId = Convert.ToString(reader["resiFudousanId"]) ?? "";
 
-                    s = Convert.ToString(reader["resiFudousanIdAdditionalCode"]) ?? "";
-                    entry.FudousanIdAdditionalCode = s;
+                    entry.FudousanIdAdditionalCode = Convert.ToString(reader["resiFudousanIdAdditionalCode"]) ?? "";
 
-                    s = Convert.ToString(reader["resiRemarks"]) ?? "";
-                    entry.Remarks = s;
+                    entry.Remarks = Convert.ToString(reader["resiRemarks"]) ?? "";
 
                     // TODO: more.
 
@@ -2246,31 +2165,17 @@ public sealed class DataAccessService : IDataAccessService
             {
                 while (reader.Read())
                 {
-                    var roomId = Convert.ToString(reader["listing_id"]) ?? string.Empty;
-                    var room = new Models.Rent.Residentials.Listing.Listing(roomId, EnumEntryStatus.Saved, entry.Id, EnumEntryStatus.Saved, entry.IsUnitOwnership, entry.Name)
+                    var resRoom = GetRentResidentialListing(reader, id, entry.Name);
+                    if (resRoom is not null)
                     {
-                        // TODO: Is there any way to reuse following code?
-
-                        Name = Convert.ToString(reader["name"]) ?? string.Empty,
-                        Chinryou = Convert.ToInt32(reader["chinryou"]),
-                        //Status = EnumEntryStatus.Saved,
-                        //IsNew = false,
-                        IsModified = false
-
-                        // TODO: more
-                    };
-
-                    //Debug.WriteLine($"Room ID: {room.Id}, Room Name: {room.RoomName}");
-                    
-                    entry.Rooms.Add(room);
+                        entry.Rooms.Add(resRoom);
+                    }
                 }
             }
 
             foreach (var room in entry.Rooms)
             {
-                // reuse with other
-                SetRentResidentialListingChildValues(cmd,room);
-
+                SetRentResidentialListingChildValues(cmd, room);
             }
 
             // Reset entry Isdirty flag.
@@ -2332,23 +2237,42 @@ public sealed class DataAccessService : IDataAccessService
         return res;
     }
 
-    // TODO:
-    /*
-    private Models.Rent.Residentials.Listing.Listing GetRentResidentialListing(SqliteCommand cmd)
+    private static Models.Rent.Residentials.Listing.Listing? GetRentResidentialListing(SqliteDataReader reader, string propertyId, string propertyName)
     {
-        var result = new Models.Rent.Residentials.Listing.Listing(roomId, EnumEntryStatus.Saved, rentId, EnumEntryStatus.Saved, isUnitOwnership, reader.GetString(reader.GetOrdinal("buildingName")) ?? string.Empty)
+        var listingId = reader.GetString(reader.GetOrdinal("listing_id")) ?? string.Empty;
+        if (string.IsNullOrEmpty(listingId))
         {
-            Name = reader.GetString(reader.GetOrdinal("roomName")) ?? string.Empty,
+            Debug.WriteLine("DataAccess::GetRentResidentialListing: listing_id is null or empty.");
+            return null;
+        }
+
+        var pId = reader.GetString(reader.GetOrdinal("property_id")) ?? string.Empty;
+        if (!propertyId.Equals(pId))
+        {
+            Debug.WriteLine("DataAccess::GetRentResidentialListing: property_id is not Equals to given param.");
+            return null;
+        }
+
+        var isUnitOwnership = Convert.ToInt32(reader["is_property_unit_ownership"]) != 0;
+
+        var room = new Models.Rent.Residentials.Listing.Listing(listingId, EnumEntryStatus.Saved, propertyId, EnumEntryStatus.Saved, isUnitOwnership, propertyName)
+        {
+            Name = reader.GetString(reader.GetOrdinal("name")) ?? string.Empty,
             Chinryou = reader.GetInt32(reader.GetOrdinal("chinryou")),
-            //Status = EnumEntryStatus.Saved,
-            //IsNew = false,
-            IsModified = false
             // TODO: more
+
+
+
+
+
+
+            IsModified = false
         };
 
-        return result;
+        //Debug.WriteLine($"Room ID: {room.Id}, Room Name: {room.RoomName}");
+
+        return room;
     }
-    */
 
     private static void SetRentResidentialListingChildValues(SqliteCommand cmd, Models.Rent.Residentials.Listing.Listing room)
     {
@@ -2498,6 +2422,7 @@ public sealed class DataAccessService : IDataAccessService
         }
     }
 
+    // TODO: reuse code with other method.
     public ResultWrapper UpsertRentResidentialListing(string rentId, Models.Rent.Residentials.Listing.Listing room)
     {
         var res = new ResultWrapper();
@@ -2539,23 +2464,6 @@ public sealed class DataAccessService : IDataAccessService
 
                 cmd.CommandText = sqlInsertIntoRentLivingRoom;
 
-                /*
-                if (room.IsNew)
-                {
-                    var sqlInsertIntoRentLivingRoom = "INSERT INTO rent_residential_rooms (listing_id, property_id, name) VALUES (@roomId, @RentId, @Nam)";
-
-                    // 追加
-                    cmd.CommandText = sqlInsertIntoRentLivingRoom;
-
-                }
-                else if (room.IsModified)
-                {
-                    var sqlUpdateRentLivingRoom = string.Format("UPDATE rent_residential_rooms SET name = @Nam WHERE listing_id = '{0}'", room.Id);
-                    // 更新
-                    cmd.CommandText = sqlUpdateRentLivingRoom;
-
-                }
-                */
                 cmd.Parameters.AddWithValue("@roomId", room.Id);
                 cmd.Parameters.AddWithValue("@RentId", rentId);
                 cmd.Parameters.AddWithValue("@isPropertyUnitOwnership", room.IsPropertyUnitOwnership ? 1 : 0); // bool to int
@@ -2580,32 +2488,6 @@ public sealed class DataAccessService : IDataAccessService
                 {
                     foreach (var pic in room.Pictures)
                     {
-                        /*
-                        var exec = false;
-
-                        if (pic.IsNew)
-                        {
-                            var sqlInsertIntoRentLivingPicture = "INSERT INTO rent_residential_room_pictures (picture_id, property_id, file_path, label, description, is_main) " +
-                                "VALUES (@PicId, @RentId, @Path, @Tit, @Desc, @Main)";
-
-                            // 物件画像の追加
-                            cmd.CommandText = sqlInsertIntoRentLivingPicture;
-
-                            exec = true;
-                        }
-                        else if (pic.IsModified)
-                        {
-                            var sqlUpdateRentLivingPicture = string.Format(
-                                "UPDATE rent_residential_room_pictures SET file_path = @Path, label = @Tit, description = @Desc, is_main = @Main " +
-                                "WHERE picture_id = '{0}'", pic.Id);
-
-                            // 物件画像の更新
-                            cmd.CommandText = sqlUpdateRentLivingPicture;
-
-                            exec = true;
-                        }
-                        */
-
                         // Upsert
                         var sqlUpsertRoom = "INSERT INTO rent_residential_room_pictures (picture_id, listing_id, property_id, file_path, type, description, is_main) VALUES (@PicId, @roomId, @RentId, @Path, @type, @Desc, @Main) ";
                         sqlUpsertRoom += "ON CONFLICT(picture_id) ";
@@ -2862,9 +2744,9 @@ public sealed class DataAccessService : IDataAccessService
         return res;
     }
 
-    public SelectListingResultWrapper SelectRentResidentialListings()
+    public ListingsResultWrapper SelectRentResidentialListings()
     {
-        var res = new SelectListingResultWrapper();
+        var res = new ListingsResultWrapper();
 
         _readerWriterLock.EnterReadLock();
         try
@@ -2968,10 +2850,9 @@ public sealed class DataAccessService : IDataAccessService
         return res;
     }
 
-    // TODO: reuse (room values)
-    public SelectRentResidentialRoomSingleResultWrapper SelectRentResidentialListingById(string rentId, string roomId)
+    public RentResidentialRoomSingleResultWrapper SelectRentResidentialListingById(string rentId, string roomId)
     {
-        var res = new SelectRentResidentialRoomSingleResultWrapper();
+        var res = new RentResidentialRoomSingleResultWrapper();
 
         if (string.IsNullOrEmpty(roomId))
         {
@@ -2995,59 +2876,37 @@ public sealed class DataAccessService : IDataAccessService
 
             using var cmd = connection.CreateCommand();
 
-            Models.Rent.Residentials.Listing.Listing? room = null;
-            bool isFound = false;
+            var buildingName = string.Empty;
+            var isFound = false;
 
-            // TODO: Is there any way to reuse following code?
-            // Give up "INNER JOIN properties" and use "SELECT *" and reuse code from SelectRentResidentialById().
-
-            cmd.CommandText = "SELECT properties.property_id as buildingId, properties.name as buildingName, rent_residential_rooms.listing_id as roomId, rent_residential_rooms.name as roomName, rent_residential_rooms.is_property_unit_ownership as isPropertyUnitOwnership, rent_residential_rooms.chinryou as chinryou FROM rent_residential_rooms INNER JOIN properties USING (property_id)";//INNER JOIN rent_residentials USING (property_id)
-
-            using (var reader = cmd.ExecuteReader()) 
+            cmd.CommandText = string.Format("SELECT name FROM properties WHERE property_id = '{0}'", rentId);
+            using (var reader = cmd.ExecuteReader())
             {
                 while (reader.Read())
                 {
-                    //var Id = Convert.ToString(reader["roomId"]) ?? string.Empty;
-                    var rId = reader.GetString(reader.GetOrdinal("roomId")) ?? string.Empty;
-
-                    if (!roomId.Equals(rId))
+                    buildingName = reader.GetString(reader.GetOrdinal("name")) ?? string.Empty;
+                    if (!string.IsNullOrEmpty(buildingName))
                     {
-                        Debug.WriteLine("DataAccess::SelectRentResidentialListingById: roomId is null or empty.");
-                        continue;
+                        isFound = true;
                     }
-
-                    isFound = true;
-
-                    var isUnitOwnership = Convert.ToInt32(reader["isPropertyUnitOwnership"]) != 0;
-
-                    room = new Models.Rent.Residentials.Listing.Listing(roomId, EnumEntryStatus.Saved, rentId, EnumEntryStatus.Saved, isUnitOwnership, reader.GetString(reader.GetOrdinal("buildingName")) ?? string.Empty)
-                    {
-                        Name = reader.GetString(reader.GetOrdinal("roomName")) ?? string.Empty,
-                        Chinryou = reader.GetInt32(reader.GetOrdinal("chinryou")),
-                        //Status = EnumEntryStatus.Saved,
-                        //IsNew = false,
-                        IsModified = false
-                        // TODO: more
-                    };
-
-                    //Debug.WriteLine($"Room ID: {room.Id}, Room Name: {room.RoomName}");
-
-
-                    //res.Room = room;
-                    // break;
                 }
             }
 
-            if (room is not null && isFound)
+            if (isFound)
             {
-                // gets pics, pdfs, lessors
-                SetRentResidentialListingChildValues(cmd, room);
+                cmd.CommandText = string.Format("SELECT * FROM rent_residential_rooms WHERE listing_id = '{0}'", roomId);
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        res.Room = GetRentResidentialListing(reader, rentId, buildingName);
+                    }
+                }
 
-                res.Room = room;
-            }
-            else
-            {
-                return res;
+                if (res.Room is not null)
+                {
+                    SetRentResidentialListingChildValues(cmd, res.Room);
+                }
             }
         }
         catch (System.Reflection.TargetInvocationException ex)
@@ -3334,9 +3193,9 @@ public sealed class DataAccessService : IDataAccessService
         return res;
     }
 
-    public SelectPersonsResultWrapper SelectRentLessorByKeyword(string keyword)
+    public PersonsResultWrapper SelectRentLessorByKeyword(string keyword)
     {
-        var res = new SelectPersonsResultWrapper();
+        var res = new PersonsResultWrapper();
 
         if (string.IsNullOrEmpty(keyword))
         {
@@ -3445,9 +3304,9 @@ public sealed class DataAccessService : IDataAccessService
         return res;
     }
 
-    public SelectRentLessorSingleResultWrapper SelectRentLessorById(string id)
+    public RentLessorSingleResultWrapper SelectRentLessorById(string id)
     {
-        var res = new SelectRentLessorSingleResultWrapper();
+        var res = new RentLessorSingleResultWrapper();
 
         var entry = new Models.Rent.Lessors.Person(id, EnumEntryStatus.Saved);
 

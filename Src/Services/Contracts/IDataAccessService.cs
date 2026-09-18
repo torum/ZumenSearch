@@ -12,25 +12,25 @@ public interface IDataAccessService
 
     ResultWrapper DeleteRentResidential(string rentId);
 
-    SelectPropertiesResultWrapper SelectRecentProperties();
+    PropertiesResultWrapper SelectRecentProperties();
 
-    SelectPropertiesResultWrapper SelectRentResidentialsByNameKeyword(string keyword);
+    PropertiesResultWrapper SelectRentResidentialsByNameKeyword(string keyword);
 
-    SelectRentResidentialBuildingSingleResultWrapper SelectRentResidentialById(string id);
+    RentResidentialBuildingSingleResultWrapper SelectRentResidentialById(string id);
 
     ResultWrapper UpsertRentResidentialListing(string rentId, Models.Rent.Residentials.Listing.Listing room);
 
-    SelectListingResultWrapper SelectRentResidentialListings();
+    ListingsResultWrapper SelectRentResidentialListings();
 
-    SelectRentResidentialRoomSingleResultWrapper SelectRentResidentialListingById(string rentId, string roomId);
+    RentResidentialRoomSingleResultWrapper SelectRentResidentialListingById(string rentId, string roomId);
 
     ResultWrapper DeleteRentResidentialListing(string roomId);
 
     ResultWrapper UpsertRentLessor(Models.Rent.Lessors.Person lessor);
 
-    SelectPersonsResultWrapper SelectRentLessorByKeyword(string keyword);
+    PersonsResultWrapper SelectRentLessorByKeyword(string keyword);
 
-    SelectRentLessorSingleResultWrapper SelectRentLessorById(string id);
+    RentLessorSingleResultWrapper SelectRentLessorById(string id);
 
     ResultWrapper DeleteRentLessor(string id);
 

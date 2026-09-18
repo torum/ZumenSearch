@@ -68,6 +68,8 @@ public sealed partial class ShellPage : Page
         {
             this.AppTitleBarIcon.Opacity = 1;
         }
+
+        NavigationViewControl.Opacity = args.WindowActivationState == WindowActivationState.Deactivated ? 0.5 : 1;
     }
 
     private void AppTitleBar_SizeChanged(object sender, SizeChangedEventArgs e)

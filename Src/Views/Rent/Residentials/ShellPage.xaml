@@ -51,7 +51,8 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <BreadcrumbBar x:Name="BreadcrumbBar1" Grid.Row="0" Grid.Column="0" ItemsSource="{x:Bind ViewModel.BreadcrumbItems, Mode=OneWay}" VerticalAlignment="Center">
+                <BreadcrumbBar x:Name="BreadcrumbBar1" Grid.Row="0" Grid.Column="0" ItemsSource="{x:Bind ViewModel.BreadcrumbItems, Mode=OneWay}" 
+                               IsHitTestVisible="False" AllowFocusOnInteraction="False" IsTabStop="False" VerticalAlignment="Center">
                     <BreadcrumbBar.ItemTemplate>
                         <DataTemplate x:DataType="mod:Breadcrumb">
                             <BreadcrumbBarItem>
@@ -104,6 +105,7 @@
                 <NavigationView.FooterMenuItems>
                     <NavigationViewItem Content="部屋一覧" Tag="ZumenSearch.Views.Rent.Residentials.RoomListPage"/>
                 </NavigationView.FooterMenuItems>
+                
             </NavigationView>
 
             <Frame x:Name="ContentFrame" Grid.Row="1" NavigationFailed="ContentFrame_NavigationFailed" Navigated="ContentFrame_Navigated"/>

@@ -36,11 +36,11 @@ public sealed partial class LessorViewModel : ObservableRecipient
 
             if (_lessor.Status == EnumEntryStatus.New)
             {
-                str = $"{str}：(新規)";
+                str = $"{str}：新規";
             }
             else
             {
-                str = $"{str}：(編集)";
+                str = $"{str}：編集";
             }
 
             return str;

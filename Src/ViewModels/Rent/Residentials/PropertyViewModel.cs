@@ -54,11 +54,11 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
             if (_building.Status == EnumEntryStatus.New)
             {
-                str = $"{str}：(新規)";
+                str = $"{str}：新規";
             }
             else
             {
-                str = $"{str}：(編集)";
+                str = $"{str}：編集";
             }
 
             return str;
@@ -2476,8 +2476,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         var newId = Guid.CreateVersion7().ToString("N");
         var editorShell = _shellFactory.Create(new Models.Rent.Residentials.Listing.Listing(newId, EnumEntryStatus.New, _building.Id, _building.Status, _building.IsUnitOwnership, Name));
         
-        // TODO: do I need this anymore?
-        editorShell.ViewModel.IsPropertyUnitOwnership = this.IsUnitOwnership;
+        //editorShell.ViewModel.IsPropertyUnitOwnership = this.IsUnitOwnership;
 
         var mainVM = App.GetService<ViewModels.MainViewModel>();
         mainVM.RoomEditorList.Add(editorShell.Window);
@@ -2557,8 +2556,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
         var editorShell = _shellFactory.Create(room);
 
-        // TODO: do I need this anymore?
-        editorShell.ViewModel.IsPropertyUnitOwnership = this.IsUnitOwnership;
+        ///editorShell.ViewModel.IsPropertyUnitOwnership = this.IsUnitOwnership;
 
         var editorWindow = editorShell.Window;
         if (editorWindow == null)

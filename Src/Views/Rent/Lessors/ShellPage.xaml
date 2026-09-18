@@ -50,7 +50,8 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 
-                <BreadcrumbBar x:Name="BreadcrumbBar1" Grid.Row="0" Grid.Column="0" ItemsSource="{x:Bind ViewModel.BreadcrumbItems, Mode=OneWay}" VerticalAlignment="Center">
+                <BreadcrumbBar x:Name="BreadcrumbBar1" Grid.Row="0" Grid.Column="0" ItemsSource="{x:Bind ViewModel.BreadcrumbItems, Mode=OneWay}"
+                               IsHitTestVisible="False" AllowFocusOnInteraction="False" IsTabStop="False" VerticalAlignment="Center">
                     <BreadcrumbBar.ItemTemplate>
                         <DataTemplate x:DataType="mod:Breadcrumb">
                             <BreadcrumbBarItem>

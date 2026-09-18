@@ -70,11 +70,11 @@ public sealed partial class ListingViewModel : ObservableRecipient,
 
             if (_room.Status == EnumEntryStatus.New)
             {
-                str = $"{str}：(新規)";
+                str = $"{str}：新規";
             }
             else
             {
-                str = $"{str}：(編集)";
+                str = $"{str}：編集";
             }
             /*
             if (string.IsNullOrEmpty(_room.PropertyName))
