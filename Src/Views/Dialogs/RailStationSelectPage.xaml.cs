@@ -1,17 +1,16 @@
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
-using ZumenSearch.ViewModels.Transportation;
 
 namespace ZumenSearch.Views.Dialogs;
 
 public sealed partial class RailStationSelectPage : Page
 {
-    public RailStationViewModel ViewModel
+    public ViewModels.Dialogs.RailStationViewModel ViewModel
     {
         get;
     }
 
-    public RailStationSelectPage(RailStationViewModel vm)
+    public RailStationSelectPage(ViewModels.Dialogs.RailStationViewModel vm)
     {
         ViewModel = vm;
         InitializeComponent();

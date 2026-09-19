@@ -23,6 +23,8 @@ public abstract partial class PropertyBase : EntryBase
 {
     public EnumPropertyKind PropertyKind { get; init; } = EnumPropertyKind.Unknown;
 
+    public string BasePath { get; set; } = string.Empty;
+
     public ImageSource? ThumbImage 
     {
         get => field ?? CreateThumb();
@@ -31,15 +33,23 @@ public abstract partial class PropertyBase : EntryBase
 
     private BitmapImage? CreateThumb()
     {
-        if (string.IsNullOrEmpty(ThumbnailImageFilePath))
+        if (string.IsNullOrEmpty(ThumbnailFilename))
         {
             //Debug.WriteLine("ThumbnailImageFilePath is empty. (PropertyBase)");
             return null;
         }
 
-        if (!Path.Exists(ThumbnailImageFilePath))
+        if (string.IsNullOrEmpty(BasePath))
         {
-            Debug.WriteLine($"File ThumbnailImageFilePath does not exists. (PropertyBase) {ThumbnailImageFilePath}");
+            Debug.WriteLine("BasePath is empty. (PropertyBase)");
+            return null;
+        }
+
+        var thumbFilemame = System.IO.Path.Combine(BasePath, ThumbnailFilename);
+
+        if (!Path.Exists(thumbFilemame))
+        {
+            Debug.WriteLine($"File ThumbnailImageFilePath does not exists. (PropertyBase) {thumbFilemame}");
             return null;
         }
 
@@ -47,12 +57,12 @@ public abstract partial class PropertyBase : EntryBase
         {
             DecodePixelWidth = 280
         };
-        Uri uri = new(ThumbnailImageFilePath);
+        Uri uri = new(thumbFilemame);
         bitmapImage.UriSource = uri;
         return bitmapImage;
     }
 
-    public string ThumbnailImageFilePath
+    public string ThumbnailFilename
     {
         get => field ?? string.Empty; // Ensure a non-null value is returned
         set

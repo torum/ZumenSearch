@@ -87,8 +87,8 @@
                         <!-- 地上・地下・総戸数 -->
                         <Grid Grid.Row="0" Grid.Column="1" Margin="12,0,0,0">
                             <StackPanel Orientation="Horizontal">
-                                <TextBox MinWidth="87" Header="地上（階建て）" PlaceholderText="半角英数" InputScope="Number" MaxLength="4" Text="{x:Bind ViewModel.AboveGroundFloorCount, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Paste="TextBoxCleanNonDigitMax4_Paste" TextChanging="TextBox4DigitOrLess_TextChanging" Margin="0,0,0,0"/>
-                                <TextBox MinWidth="87" Header="地下（階建て）" PlaceholderText="半角英数" InputScope="Number" MaxLength="4" Text="{x:Bind ViewModel.BasementFloorCount, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Paste="TextBoxCleanNonDigitMax4_Paste" TextChanging="TextBox4DigitOrLess_TextChanging" Margin="12,0,0,0"/>
+                                <TextBox MinWidth="87" Header="地上（階建て）" PlaceholderText="半角英数" InputScope="Number" MaxLength="4" Text="{x:Bind ViewModel.FloorCountAboveGround, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Paste="TextBoxCleanNonDigitMax4_Paste" TextChanging="TextBox4DigitOrLess_TextChanging" Margin="0,0,0,0"/>
+                                <TextBox MinWidth="87" Header="地下（階建て）" PlaceholderText="半角英数" InputScope="Number" MaxLength="4" Text="{x:Bind ViewModel.FloorCountBasement, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Paste="TextBoxCleanNonDigitMax4_Paste" TextChanging="TextBox4DigitOrLess_TextChanging" Margin="12,0,0,0"/>
                                 <TextBox MinWidth="87" Header="総戸数（戸）" PlaceholderText="半角英数" InputScope="Number" MaxLength="5" Text="{x:Bind ViewModel.TotalUnitCount,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Paste="TextBoxCleanNonDigitMax5_Paste" TextChanging="TextBox5DigitOrLess_TextChanging" Margin="12,0,0,0"/>
                             </StackPanel>
                         </Grid>

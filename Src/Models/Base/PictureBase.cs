@@ -10,7 +10,7 @@ namespace ZumenSearch.Models.Base;
 
 public abstract class PictureBase : ObservableObject
 {
-    public string ImageLocation
+    public string ImageFilename
     {
         get;
         set
@@ -22,6 +22,8 @@ public abstract class PictureBase : ObservableObject
         }
     } = string.Empty;
 
+    public string BasePath { get; set; } = string.Empty;
+
     public ImageSource? ThumbImage
     {
         get => field ?? CreateThumb();
@@ -30,15 +32,23 @@ public abstract class PictureBase : ObservableObject
 
     private BitmapImage? CreateThumb()
     {
-        if (string.IsNullOrEmpty(ImageLocation))
+        if (string.IsNullOrEmpty(ImageFilename))
         {
-            Debug.WriteLine("ImageLocation is empty. (PictureBase)");
+            Debug.WriteLine("ImageFilename is empty. (PictureBase)");
             return null;
         }
 
-        if (!Path.Exists(ImageLocation))
+        if (string.IsNullOrEmpty(BasePath))
         {
-            Debug.WriteLine($"File ImageLocation does not exists. (PictureBase) {ImageLocation}");
+            Debug.WriteLine("BasePath is empty. (PictureBase)");
+            return null;
+        }
+
+        var imageFilePath = System.IO.Path.Combine(BasePath, ImageFilename);
+
+        if (!Path.Exists(imageFilePath))
+        {
+            Debug.WriteLine($"File ImageFilename does not exists. (PictureBase) {imageFilePath}");
             return null;
         }
 
@@ -46,7 +56,7 @@ public abstract class PictureBase : ObservableObject
         {
             DecodePixelWidth = 280
         };
-        Uri uri = new(ImageLocation);
+        Uri uri = new(imageFilePath);
         bitmapImage.UriSource = uri;
         return bitmapImage;
     }

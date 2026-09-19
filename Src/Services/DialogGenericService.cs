@@ -68,7 +68,7 @@ public class DialogGenericService : IDialogGenericService
         return result;
     }
 
-    public async Task<Models.Common.PersonSearchResultItem?> ShowLessorSelectDialog(ViewModels.Rent.Lessors.LessorSelectViewModel viewModel)
+    public async Task<Models.Common.PersonSearchResultItem?> ShowLessorSelectDialog(ViewModels.Dialogs.LessorSelectViewModel viewModel)
     {
         if (_isDialogOpened)
         {
@@ -146,7 +146,7 @@ public class DialogGenericService : IDialogGenericService
             DefaultButton = ContentDialogButton.Primary,
             IsSecondaryButtonEnabled = false,
             CloseButtonText = "キャンセル",
-            Content = new Views.Dialogs.RailLineSelectPage(new ViewModels.Transportation.RailLineViewModel(new DataAccessTransportationService()))
+            Content = new Views.Dialogs.RailLineSelectPage(new ViewModels.Dialogs.RailLineViewModel(new DataAccessTransportationService()))
         };
 
         if (dialog.Content is not RailLineSelectPage dialogContent)
@@ -207,7 +207,7 @@ public class DialogGenericService : IDialogGenericService
             DefaultButton = ContentDialogButton.Primary,
             IsSecondaryButtonEnabled = false,
             CloseButtonText = "キャンセル",
-            Content = new Views.Dialogs.RailStationSelectPage(new ViewModels.Transportation.RailStationViewModel(new DataAccessTransportationService(), railLineCode))
+            Content = new Views.Dialogs.RailStationSelectPage(new ViewModels.Dialogs.RailStationViewModel(new DataAccessTransportationService(), railLineCode))
         };
 
         if (dialog.Content is not RailStationSelectPage dialogContent)

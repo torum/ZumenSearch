@@ -9,27 +9,13 @@ using ZumenSearch.Services.Contracts;
 
 namespace ZumenSearch.Services;
 
-/*
- * DataAccessService.cs
- * 
- * This class provides data access services for the application, specifically for managing properties and listings and related data.
- * It handles database initialization, insertion, and updating of  properties, rooms, pictures, and PDFs.
- * The service uses SQLite as the underlying database and ensures thread safety with a ReaderWriterLockSlim.
- * 
- * Key functionalities include:
- * - Initializing the database and creating necessary tables if they do not exist.
- * - Inserting new properties and listings along with their associated pictures and PDFs.
- * - Updating existing properties and listings and their related data.
- * 
- * Note: The service is designed to work with the application's models and view models, facilitating seamless data management.
- */
-
 // <summary>
 // DataAccessService provides data access functionalities for managing properties and listings and related data in the application.
 // </summary>
 
 // TODO:
-// * Consider implementing IDisposable to properly dispose of the ReaderWriterLockSlim and any other disposable resources used by this service.
+// Consider implementing IDisposable to properly dispose of the ReaderWriterLockSlim and any other disposable resources used by this service.
+// Reuse code with other method.
 
 public sealed class DataAccessService : IDataAccessService
 {
@@ -63,7 +49,7 @@ public sealed class DataAccessService : IDataAccessService
                     "property_id TEXT NOT NULL PRIMARY KEY," +
                     "property_kind TEXT NOT NULL," +
                     "name TEXT NOT NULL," +
-                    "thumbnail_path TEXT," +
+                    "thumbnail_filename TEXT," +
                     "loc_pref_id TEXT," +
                     "loc_prefecture TEXT," +
                     "loc_machiaza_id TEXT," +
@@ -87,8 +73,8 @@ public sealed class DataAccessService : IDataAccessService
                     "building_kind TEXT NOT NULL," +
                     "is_unit_ownership INTEGER  NOT NULL," +
                     "building_structure TEXT NOT NULL," +
-                    "aboveground_floor_count INTEGER NOT NULL," +
-                    "basement_floor_count INTEGER NOT NULL," +
+                    "floor_count_above_ground INTEGER NOT NULL," +
+                    "floor_count_basement INTEGER NOT NULL," +
                     "total_unit_count INTEGER NOT NULL," +
                     "built_year_month TEXT NOT NULL," +
                     "fudousan_id TEXT NOT NULL," +
@@ -104,7 +90,7 @@ public sealed class DataAccessService : IDataAccessService
                 tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS rent_residential_pictures (" +
                     "picture_id TEXT NOT NULL PRIMARY KEY," +
                     "property_id TEXT NOT NULL," +
-                    "file_path TEXT NOT NULL," +
+                    "filename TEXT NOT NULL," +
                     "type TEXT NOT NULL," + 
                     "description TEXT NOT NULL," +
                     "is_main INTEGER NOT NULL," +
@@ -116,8 +102,8 @@ public sealed class DataAccessService : IDataAccessService
                 tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS rent_residential_pdfs (" +
                     "pdf_id TEXT NOT NULL PRIMARY KEY," +
                     "property_id TEXT NOT NULL," +
-                    "file_path TEXT NOT NULL," +
-                    "thumbnail_path TEXT NOT NULL," +
+                    "filename TEXT NOT NULL," +
+                    "thumbnail_filename TEXT NOT NULL," +
                     "type TEXT NOT NULL," +
                     "description TEXT NOT NULL," +
                     "is_main INTEGER  NOT NULL," +
@@ -145,7 +131,7 @@ public sealed class DataAccessService : IDataAccessService
                     "picture_id TEXT NOT NULL PRIMARY KEY," +
                     "listing_id TEXT NOT NULL," +
                     "property_id TEXT NOT NULL," +
-                    "file_path TEXT NOT NULL," +
+                    "filename TEXT NOT NULL," +
                     "type TEXT NOT NULL," + 
                     "description TEXT NOT NULL," +
                     "is_main INTEGER  NOT NULL," +
@@ -159,8 +145,8 @@ public sealed class DataAccessService : IDataAccessService
                     "pdf_id TEXT NOT NULL PRIMARY KEY," +
                     "listing_id TEXT NOT NULL," +
                     "property_id TEXT NOT NULL," +
-                    "file_path TEXT NOT NULL," +
-                    "thumbnail_path TEXT NOT NULL," +
+                    "filename TEXT NOT NULL," +
+                    "thumbnail_filename TEXT NOT NULL," +
                     "type TEXT NOT NULL," +
                     "description TEXT NOT NULL," +
                     "is_main INTEGER  NOT NULL," +
@@ -611,8 +597,7 @@ public sealed class DataAccessService : IDataAccessService
         #endregion
     }
 
-    // TODO: use upsert on conflict, reuse code.
-    public ResultWrapper InsertRentResidential(Models.Rent.Residentials.Property building)
+    public ResultWrapper UpsertRentResidential(Models.Rent.Residentials.Property building)
     {
         var res = new ResultWrapper();
 
@@ -636,516 +621,108 @@ public sealed class DataAccessService : IDataAccessService
             cmd.Transaction = connection.BeginTransaction();
             try
             {
-                // Main rent table
+                // Main property table
                 cmd.CommandType = CommandType.Text;
-                cmd.CommandText = "INSERT INTO properties (property_id, name, property_kind, thumbnail_path, loc_pref_id, loc_prefecture, loc_machiaza_id, loc_county, loc_city, loc_ward, loc_oaza_cho, loc_choume, loc_edaban, loc_location_full, updated_at) " +
-                                                  "VALUES (@RentId, @Name, @PropertyKind, @Thumb, @LocPrefId, @LocPrefecture, @LocMachiazaId, @LocCounty, @LocCity, @LocWard, @LocOazaCho, @LocChoume, @LocEdaban, @LocLocationFull, @updated_at)";
-                /* Upsert TODO:
-                var sqlInsertIntoRentLivingRoom = "INSERT INTO rent_lessors (lessor_id, name, name_last, name_first, remarks) VALUES (@lessor_id, @name, @name_last, @name_first, @remarks) ";
-                sqlInsertIntoRentLivingRoom += "ON CONFLICT(lessor_id) ";
-                sqlInsertIntoRentLivingRoom += "DO UPDATE SET name = @name, name_last = @name_last, name_first = @name_first, remarks = @remarks, updated_at = @updated_at";
-                */
+                cmd.Parameters.Clear();
+                // Insert
+                //cmd.CommandText = "INSERT INTO properties (property_id, name, property_kind, thumbnail_filename, loc_pref_id, loc_prefecture, loc_machiaza_id, loc_county, loc_city, loc_ward, loc_oaza_cho, loc_choume, loc_edaban, loc_location_full, updated_at) " +
+                //  "VALUES (@RentId, @Name, @PropertyKind, @Thumb, @LocPrefId, @LocPrefecture, @LocMachiazaId, @LocCounty, @LocCity, @LocWard, @LocOazaCho, @LocChoume, @LocEdaban, @LocLocationFull, @updated_at)";
+                // Upsert
+                var sqlUpsert = "INSERT INTO properties (property_id, name, property_kind, thumbnail_filename, loc_pref_id, loc_prefecture, loc_machiaza_id, loc_county, loc_city, loc_ward, loc_oaza_cho, loc_choume, loc_edaban, loc_location_full, updated_at) ";
+                sqlUpsert += "VALUES (@propertyId, @name, @propertyKind, @thumbnailPath, @locPrefId, @locPrefecture, @locMachiazaId, @locCounty, @locCity, @locWard, @locOazaCho, @locChoume, @locEdaban, @locLocationFull, @updated_at) ";
+                sqlUpsert += "ON CONFLICT (property_id) ";
+                sqlUpsert += "DO UPDATE SET property_id = @propertyId, name = @name, property_kind = @propertyKind, thumbnail_filename = @thumbnailPath, loc_pref_id = @locPrefId, loc_prefecture = @locPrefecture, loc_machiaza_id = @locMachiazaId, loc_county = @locCounty, loc_city = @locCity, loc_ward = @locWard, loc_oaza_cho = @locOazaCho, loc_choume = @locChoume, loc_edaban = @locEdaban, loc_location_full = @locLocationFull, updated_at = @updated_at";
 
-                cmd.Parameters.AddWithValue("@RentId", building.Id);
-                cmd.Parameters.AddWithValue("@Name", building.Name);
-                cmd.Parameters.AddWithValue("@PropertyKind", building.PropertyKind.ToString());
-                cmd.Parameters.AddWithValue("@Thumb", building.ThumbnailImageFilePath);
-                cmd.Parameters.AddWithValue("@LocPrefId", building.LocPrefId);
-                cmd.Parameters.AddWithValue("@LocPrefecture", building.LocPrefecture);
-                cmd.Parameters.AddWithValue("@LocMachiazaId", building.LocMachiazaId);
-                cmd.Parameters.AddWithValue("@LocCounty", building.LocCounty);
-                cmd.Parameters.AddWithValue("@LocCity", building.LocCity);
-                cmd.Parameters.AddWithValue("@LocWard", building.LocWard);
-                cmd.Parameters.AddWithValue("@LocOazaCho", building.LocOazaCho);
-                cmd.Parameters.AddWithValue("@LocChoume", building.LocChoume);
-                cmd.Parameters.AddWithValue("@LocEdaban", building.LocEdaban);
-                cmd.Parameters.AddWithValue("@LocLocationFull", building.LocLocationFull);
+                cmd.CommandText = sqlUpsert;
+              
+                cmd.Parameters.AddWithValue("@propertyId", building.Id);
+                cmd.Parameters.AddWithValue("@name", building.Name);
+                cmd.Parameters.AddWithValue("@propertyKind", building.PropertyKind.ToString());
+                cmd.Parameters.AddWithValue("@thumbnailPath", building.ThumbnailFilename);
+                cmd.Parameters.AddWithValue("@locPrefId", building.LocPrefId);
+                cmd.Parameters.AddWithValue("@locPrefecture", building.LocPrefecture);
+                cmd.Parameters.AddWithValue("@locMachiazaId", building.LocMachiazaId);
+                cmd.Parameters.AddWithValue("@locCounty", building.LocCounty);
+                cmd.Parameters.AddWithValue("@locCity", building.LocCity);
+                cmd.Parameters.AddWithValue("@locWard", building.LocWard);
+                cmd.Parameters.AddWithValue("@locOazaCho", building.LocOazaCho);
+                cmd.Parameters.AddWithValue("@locChoume", building.LocChoume);
+                cmd.Parameters.AddWithValue("@locEdaban", building.LocEdaban);
+                cmd.Parameters.AddWithValue("@locLocationFull", building.LocLocationFull);
                 // TODO: more
 
                 cmd.Parameters.AddWithValue("@updated_at", DateTimeOffset.UtcNow.ToString("s"));
                 res.AffectedCount = cmd.ExecuteNonQuery();
 
+                // rent_residentials
                 cmd.Parameters.Clear();
-
-                // Residentials table
-                cmd.CommandType = CommandType.Text;
-                cmd.CommandText = "INSERT INTO rent_residentials (property_id, building_kind, is_unit_ownership, building_structure, aboveground_floor_count, basement_floor_count, total_unit_count, built_year_month, fudousan_id, fudousan_id_additional_code, remarks) " +
-                    "VALUES (@RentId, @BuildingKind, @IsUnitOwnership, @BuildingStructure, @AboveGroundFloorCount, @BasementFloorCount, @TotalUnitCount, @BuiltYearMonth, @FudousanId, @FudousanIdAdditionalCode, @Remarks)";
-
-                cmd.Parameters.AddWithValue("@RentId", building.Id);
-
-                cmd.Parameters.AddWithValue("@BuildingKind", building.BuildingKind.Key.ToString());
-                cmd.Parameters.AddWithValue("@IsUnitOwnership", building.IsUnitOwnership ? 1 : 0); // bool to int
-                cmd.Parameters.AddWithValue("@BuildingStructure", building.BuildingStructure.Key.ToString());
-                cmd.Parameters.AddWithValue("@AboveGroundFloorCount", building.AboveGroundFloorCount);// int
-                cmd.Parameters.AddWithValue("@BasementFloorCount", building.BasementFloorCount);// int
-                cmd.Parameters.AddWithValue("@TotalUnitCount", building.TotalUnitCount);// int
-                cmd.Parameters.AddWithValue("@BuiltYearMonth", building.BuiltYearAndMonth.ToString("s"));
-                cmd.Parameters.AddWithValue("@FudousanId", building.FudousanId);
-                cmd.Parameters.AddWithValue("@FudousanIdAdditionalCode", building.FudousanIdAdditionalCode);
-                cmd.Parameters.AddWithValue("@Remarks", building.Remarks);
-                // TODO: more
-
-                cmd.ExecuteNonQuery();
-
-                // Picture (building) table
-                if (building.Pictures.Count > 0)
-                {
-                    foreach (var pic in building.Pictures)
-                    {
-                        var sqlInsertIntoRentLivingPicture = "INSERT INTO rent_residential_pictures (picture_id, property_id, file_path, type, description, is_main) " +
-                            "VALUES (@PicId, @RentId, @Path, @Type, @Desc, @Main)";
-
-                        cmd.CommandText = sqlInsertIntoRentLivingPicture;
-
-                        // ループなので、前のパラメーターをクリアする。
-                        cmd.Parameters.Clear();
-
-                        cmd.Parameters.AddWithValue("@PicId", pic.Id);
-                        //cmd.Parameters.AddWithValue("@RentResidentialId", building.Id + "_1");
-                        cmd.Parameters.AddWithValue("@RentId", building.Id);
-                        cmd.Parameters.AddWithValue("@Path", pic.ImageLocation);
-                        cmd.Parameters.AddWithValue("@Type", pic.PictureType.Key.ToString());
-                        cmd.Parameters.AddWithValue("@Desc", pic.Description);
-
-                        //Debug.WriteLine($"Inserting picture: {pic.ImageLocation}, {pic.Id}, isMain: {pic.IsMain} @DataAccess::InsertRentResidential");
-
-                        var paramIsMain = new SqliteParameter("@Main", System.Data.DbType.Int32);
-                        if (pic.IsMain)
-                        {
-                            paramIsMain.Value = 1;
-                        }
-                        else
-                        {
-                            paramIsMain.Value = 0;
-                        }
-                        cmd.Parameters.Add(paramIsMain);
-
-                        var r = cmd.ExecuteNonQuery();
-                        if (r > 0)
-                        {
-                            pic.IsNew = false;
-                            pic.IsModified = false;
-                        }
-                    }
-                }
-
-                // PDF (building) table
-                if (building.Pdfs.Count > 0)
-                {
-                    foreach (var pic in building.Pdfs)
-                    {
-                        var sqlInsertIntoRentLivingPicture = "INSERT INTO rent_residential_pdfs (pdf_id, property_id, file_path, thumbnail_path, type, description, is_main) " +
-                            "VALUES (@PdfId, @RentId, @Path, @Thumb, @Type, @Desc, @Main)";
-
-                        cmd.CommandText = sqlInsertIntoRentLivingPicture;
-
-                        // ループなので、前のパラメーターをクリアする。
-                        cmd.Parameters.Clear();
-
-                        cmd.Parameters.AddWithValue("@PdfId", pic.Id);
-                        //cmd.Parameters.AddWithValue("@RentResidentialId", building.Id + "_1");
-                        cmd.Parameters.AddWithValue("@RentId", building.Id);
-                        cmd.Parameters.AddWithValue("@Path", pic.PdfLocation);
-                        cmd.Parameters.AddWithValue("@Thumb", pic.ThumbnailLocation);
-                        cmd.Parameters.AddWithValue("@Type", pic.PdfType.Key.ToString());
-                        cmd.Parameters.AddWithValue("@Desc", pic.Description);
-
-                        //Debug.WriteLine($"Inserting picture: {pic.ImageLocation}, {pic.Id}, isMain: {pic.IsMain} @DataAccess::InsertRentResidential");
-
-                        var paramIsMain = new SqliteParameter("@Main", System.Data.DbType.Int32);
-                        if (pic.IsMain)
-                        {
-                            paramIsMain.Value = 1;
-                        }
-                        else
-                        {
-                            paramIsMain.Value = 0;
-                        }
-                        cmd.Parameters.Add(paramIsMain);
-
-                        var r = cmd.ExecuteNonQuery();
-                        if (r > 0)
-                        {
-                            pic.IsNew = false;
-                            pic.IsModified = false;
-                        }
-                    }
-                }
-
-                // Lessor (building) table
-                if (building.Lessors.Count > 0)
-                {
-                    foreach (var psn in building.Lessors)
-                    {
-                        var sqlInsertInto = "INSERT INTO rent_lessors_properties_listings (lessor_id, property_id, property_kind, listing_id) " +
-                                        "VALUES (@lessor_id, @property_id, @property_kind, @listing_id)";
-
-                        cmd.CommandText = sqlInsertInto;
-
-                        // ループなので、前のパラメーターをクリアする。
-                        cmd.Parameters.Clear();
-
-                        cmd.Parameters.AddWithValue("@lessor_id", psn.Id);
-                        cmd.Parameters.AddWithValue("@property_id", building.Id);
-                        cmd.Parameters.AddWithValue("@property_kind", building.PropertyKind.ToString()); 
-                        cmd.Parameters.AddWithValue("@listing_id", string.Empty);// since this is building.
-
-                        cmd.ExecuteNonQuery();
-                    }
-                }
-
-                // Room table 
-                // TODO: reuse code with other method.
-                if (building.Rooms.Count > 0)
-                {
-                    foreach (var unit in building.Rooms)
-                    {
-                        var sqlInsertIntoRentLivingRoom = "INSERT INTO rent_residential_rooms (listing_id, property_id, is_property_unit_ownership, name, chinryou) VALUES (@RoomId, @RentId, @isPropertyUnitOwnership, @Name, @Chinryou)";
-
-                        cmd.CommandText = sqlInsertIntoRentLivingRoom;
-
-                        // ループなので、前のパラメーターをクリアする。
-                        cmd.Parameters.Clear();
-
-                        cmd.Parameters.AddWithValue("@RoomId", unit.Id);
-                        cmd.Parameters.AddWithValue("@RentId", building.Id);
-                        cmd.Parameters.AddWithValue("@isPropertyUnitOwnership", building.IsUnitOwnership ? 1 : 0); // bool to int
-                        cmd.Parameters.AddWithValue("@Name", unit.Name);
-                        cmd.Parameters.AddWithValue("@Chinryou", unit.Chinryou);
-
-                        var r = cmd.ExecuteNonQuery();
-                        if (r > 0)
-                        {
-                            unit.PropertyStatus = EnumEntryStatus.Saved;
-                            unit.Status = EnumEntryStatus.Saved;
-                            //unit.IsNew = false;
-                            unit.IsModified = false;
-                        }
-
-                        // Room Pics
-                        if (unit.Pictures.Count > 0)
-                        {
-                            foreach (var pic in unit.Pictures)
-                            {
-                                // Upsert
-                                var sqlUpsertRoom = "INSERT INTO rent_residential_room_pictures (picture_id, listing_id, property_id, file_path, type, description, is_main) VALUES (@PicId, @roomId, @RentId, @Path, @type, @Desc, @Main) ";
-                                sqlUpsertRoom += "ON CONFLICT(picture_id) ";
-                                sqlUpsertRoom += "DO UPDATE SET file_path = @Path, type = @type, description = @Desc, is_main = @Main";
-                                var exec = true;
-
-                                cmd.CommandText = sqlUpsertRoom;
-
-                                if (exec)
-                                {
-                                    // ループなので、前のパラメーターをクリアする。
-                                    cmd.Parameters.Clear();
-
-                                    cmd.Parameters.AddWithValue("@PicId", pic.Id);
-                                    cmd.Parameters.AddWithValue("@roomId", unit.Id);
-                                    cmd.Parameters.AddWithValue("@RentId", building.Id);
-                                    cmd.Parameters.AddWithValue("@Path", pic.ImageLocation);
-                                    cmd.Parameters.AddWithValue("@type", pic.PictureType.Key.ToString());
-                                    cmd.Parameters.AddWithValue("@Desc", pic.Description);
-                                    var paramIsMain = new SqliteParameter("@Main", System.Data.DbType.Int32);
-                                    if (pic.IsMain)
-                                    {
-                                        paramIsMain.Value = 1;
-                                    }
-                                    else
-                                    {
-                                        paramIsMain.Value = 0;
-                                    }
-                                    cmd.Parameters.Add(paramIsMain);
-
-                                    var result = cmd.ExecuteNonQuery();
-                                    if (result > 0)
-                                    {
-                                        pic.IsNew = false;
-                                        pic.IsModified = false;
-                                    }
-                                }
-                            }
-                        }
-
-                        // Room PDF
-                        if (unit.Pdfs.Count > 0)
-                        {
-                            foreach (var pdf in unit.Pdfs)
-                            {
-                                // Upsert
-                                var sqlUpsertRoom = "INSERT INTO rent_residential_room_pdfs (pdf_id, listing_id, property_id, file_path, thumbnail_path, type, description, is_main) VALUES (@PdfId, @roomId, @RentId, @Path, @Thumb, @type, @Desc, @Main) ";
-                                sqlUpsertRoom += "ON CONFLICT(pdf_id) ";
-                                sqlUpsertRoom += "DO UPDATE SET file_path = @Path, type = @type, description = @Desc, is_main = @Main";
-                                var exec = true;
-
-                                cmd.CommandText = sqlUpsertRoom;
-
-                                if (exec)
-                                {
-                                    // ループなので、前のパラメーターをクリアする。
-                                    cmd.Parameters.Clear();
-
-                                    cmd.Parameters.AddWithValue("@PdfId", pdf.Id);
-                                    cmd.Parameters.AddWithValue("@roomId", unit.Id);
-                                    cmd.Parameters.AddWithValue("@RentId", building.Id);
-                                    cmd.Parameters.AddWithValue("@Path", pdf.PdfLocation);
-                                    cmd.Parameters.AddWithValue("@Thumb", pdf.ThumbnailLocation);
-                                    cmd.Parameters.AddWithValue("@type", pdf.PdfType.Key.ToString());
-                                    cmd.Parameters.AddWithValue("@Desc", pdf.Description);
-                                    var paramIsMain = new SqliteParameter("@Main", System.Data.DbType.Int32);
-                                    if (pdf.IsMain)
-                                    {
-                                        paramIsMain.Value = 1;
-                                    }
-                                    else
-                                    {
-                                        paramIsMain.Value = 0;
-                                    }
-                                    cmd.Parameters.Add(paramIsMain);
-
-                                    var result = cmd.ExecuteNonQuery();
-                                    if (result > 0)
-                                    {
-                                        pdf.IsNew = false;
-                                        pdf.IsModified = false;
-                                    }
-                                }
-                            }
-                        }
-
-
-
-                    }
-                }
-
-                // commit
-                cmd.Transaction.Commit();
-            }
-            catch (Exception e)
-            {
-                cmd.Transaction.Rollback();
-
-                res.IsError = true;
-                res.Error.ErrType = ErrorObject.ErrTypes.DB;
-                res.Error.ErrCode = "";
-                res.Error.ErrText = e.Message;
-                res.Error.ErrDescription = "Exception";
-                res.Error.ErrDatetime = DateTime.Now;
-                res.Error.ErrPlace = "connection.Open(),Transaction.Commit";
-                res.Error.ErrPlaceParent = "DataAccess::InsertRentResidential";
-
-                return res;
-            }
-        }
-        catch (System.Reflection.TargetInvocationException ex)
-        {
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-            res.Error.ErrText = ex.Message;
-            res.Error.ErrDescription = "TargetInvocationException";
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
-            res.Error.ErrPlaceParent = "DataAccess::InsertRentResidential";
-
-            return res;
-        }
-        catch (System.InvalidOperationException ex)
-        {
-            Debug.WriteLine("Opps. InvalidOperationException@DataAccess::InsertRentResidential");
-
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-            res.Error.ErrText = ex.Message;
-            res.Error.ErrDescription = "InvalidOperationException";
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
-            res.Error.ErrPlaceParent = "DataAccess::InsertRentResidential";
-
-            return res;
-        }
-        catch (Exception e)
-        {
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-
-            if (e.InnerException != null)
-            {
-                res.Error.ErrText = e.InnerException.Message;
-                res.Error.ErrDescription = "InnerException";
-            }
-            else
-            {
-                res.Error.ErrText = e.Message;
-                res.Error.ErrDescription = "Exception";
-            }
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open(),BeginTransaction()";
-            res.Error.ErrPlaceParent = "DataAccess::InsertRentResidential";
-
-            return res;
-        }
-        finally
-        {
-            _readerWriterLock.ExitWriteLock();
-        }
-
-        //Debug.WriteLine(string.Format("{0} Entries Inserted to DB", res.AffectedCount.ToString()));
-
-        building.IsModified = false;
-        building.Status = EnumEntryStatus.Saved;
-
-        return res;
-    }
-
-    // TODO: use upsert on conflict
-    public ResultWrapper UpdateRentResidential(Models.Rent.Residentials.Property building)
-    {
-        var res = new ResultWrapper();
-
-        if (string.IsNullOrEmpty(building.Id))
-        {
-            res.IsError = true;
-            // TODO:
-            return res;
-        }
-
-        _readerWriterLock.EnterWriteLock();
-        try
-        {
-            using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
-            connection.Open();
-
-            using var cmd = connection.CreateCommand();
-            cmd.Transaction = connection.BeginTransaction();
-            try
-            {
-                cmd.CommandType = CommandType.Text;
-
-                // properties table
-                var sql = "UPDATE properties SET ";
-                sql += string.Format("name = '{0}', ", EscapeSingleQuote(building.Name));
-                sql += string.Format("property_kind = '{0}', ", EscapeSingleQuote(building.PropertyKind.ToString()));
-                sql += string.Format("thumbnail_path = '{0}', ", EscapeSingleQuote(building.ThumbnailImageFilePath));
-                sql += string.Format("loc_pref_id = '{0}', ", EscapeSingleQuote(building.LocPrefId));
-                sql += string.Format("loc_prefecture = '{0}', ", EscapeSingleQuote(building.LocPrefecture));
-                sql += string.Format("loc_machiaza_id = '{0}', ", EscapeSingleQuote(building.LocMachiazaId));
-                sql += string.Format("loc_county = '{0}', ", EscapeSingleQuote(building.LocCounty));
-                sql += string.Format("loc_city = '{0}', ", EscapeSingleQuote(building.LocCity));
-                sql += string.Format("loc_ward = '{0}', ", EscapeSingleQuote(building.LocWard));
-                sql += string.Format("loc_oaza_cho = '{0}', ", EscapeSingleQuote(building.LocOazaCho));
-                sql += string.Format("loc_choume = '{0}', ", EscapeSingleQuote(building.LocChoume));
-                sql += string.Format("loc_edaban = '{0}', ", EscapeSingleQuote(building.LocEdaban));
-                sql += string.Format("loc_location_full = '{0}', ", EscapeSingleQuote(building.LocLocationFull));
-                // TODO: more
-
-                sql += String.Format("updated_at = '{0}' ", DateTimeOffset.UtcNow.ToString("s")); // 最後カンマ無し 注意
-                sql += string.Format(" WHERE property_id = '{0}'; ", building.Id);
-
-                cmd.CommandText = sql;
-                res.AffectedCount = cmd.ExecuteNonQuery();
-
-                cmd.Parameters.Clear();
-
-                // Residentials table
-                /*
-                sql = "UPDATE rent_residentials SET ";
-                sql += string.Format("remarks = '{0}', ", EscapeSingleQuote(entry.Remarks));
-                //sql += String.Format("title = '{0}', ", EscapeSingleQuote(feedTitle));
-                //sql += String.Format("description = '{0}', ", EscapeSingleQuote(feedDescription));
-                sql += String.Format("updated_at = '{0}' ", DateTimeOffset.UtcNow.ToString("s"));//ToString("yyyy-MM-dd HH:mm:ss"));
-
-                sql += string.Format(" WHERE property_id = '{0}'; ", entry.Id);
-                */
-                sql = "UPDATE rent_residentials SET " +
-                    "building_kind = @building_kind, is_unit_ownership = @is_unit_ownership, building_structure = @building_structure, aboveground_floor_count = @aboveground_floor_count, basement_floor_count = @basement_floor_count, total_unit_count = @total_unit_count, built_year_month = @built_year_month, fudousan_id = @fudousan_id, fudousan_id_additional_code = @fudousan_id_additional_code, remarks = @remarks " + // 最後カンマ無し 注意
-                    //"updated_at = @updated_at " + // 最後カンマ無し 注意
-                    "WHERE property_id = @property_id;";
-
-                cmd.CommandText = sql;
-
-                cmd.Parameters.AddWithValue("@property_id", building.Id);
-
-                cmd.Parameters.AddWithValue("@building_kind", building.BuildingKind.Key.ToString());
-                cmd.Parameters.AddWithValue("@is_unit_ownership", building.IsUnitOwnership ? 1 : 0);// bool to int
-                cmd.Parameters.AddWithValue("@building_structure", building.BuildingStructure.Key.ToString());
-                cmd.Parameters.AddWithValue("@aboveground_floor_count", building.AboveGroundFloorCount);// int
-                cmd.Parameters.AddWithValue("@basement_floor_count", building.BasementFloorCount);// int
-                cmd.Parameters.AddWithValue("@total_unit_count", building.TotalUnitCount);// int
-                cmd.Parameters.AddWithValue("@built_year_month", building.BuiltYearAndMonth.ToString("s"));
-                cmd.Parameters.AddWithValue("@fudousan_id", building.FudousanId);
-                cmd.Parameters.AddWithValue("@fudousan_id_additional_code", building.FudousanIdAdditionalCode);
+                // Insert
+                //cmd.CommandText = "INSERT INTO rent_residentials (property_id, building_kind, is_unit_ownership, building_structure, floor_count_above_ground, floor_count_basement, total_unit_count, built_year_month, fudousan_id, fudousan_id_additional_code, remarks) " +
+                //    "VALUES (@RentId, @BuildingKind, @IsUnitOwnership, @BuildingStructure, @FloorCountAboveGround, @FloorCountBasement, @TotalUnitCount, @BuiltYearMonth, @FudousanId, @FudousanIdAdditionalCode, @Remarks)";
+                // Upsert
+                sqlUpsert = "INSERT INTO rent_residentials (property_id, building_kind, is_unit_ownership, building_structure, floor_count_above_ground, floor_count_basement, total_unit_count, built_year_month, fudousan_id, fudousan_id_additional_code, remarks) ";
+                sqlUpsert += "VALUES (@propertyId, @buildingKind, @isUnitOwnership, @buildingStructure, @floorCountAboveGround, @floorCountBasement, @totalUnitCount, @builtYearMonth, @fudousanId, @fudousanIdAdditionalCode, @remarks)";
+                sqlUpsert += "ON CONFLICT(property_id) ";
+                sqlUpsert += "DO UPDATE SET building_kind = @buildingKind, is_unit_ownership = @isUnitOwnership, building_structure = @buildingStructure, floor_count_above_ground = @floorCountAboveGround, floor_count_basement = @floorCountBasement, total_unit_count = @totalUnitCount, built_year_month = @builtYearMonth, fudousan_id = @fudousanId, fudousan_id_additional_code = @fudousanIdAdditionalCode, remarks = @remarks";
+
+                cmd.CommandText = sqlUpsert;
+
+                cmd.Parameters.AddWithValue("@propertyId", building.Id);
+                cmd.Parameters.AddWithValue("@buildingKind", building.BuildingKind.Key.ToString());
+                cmd.Parameters.AddWithValue("@isUnitOwnership", building.IsUnitOwnership ? 1 : 0); // bool to int
+                cmd.Parameters.AddWithValue("@buildingStructure", building.BuildingStructure.Key.ToString());
+                cmd.Parameters.AddWithValue("@floorCountAboveGround", building.FloorCountAboveGround);// int
+                cmd.Parameters.AddWithValue("@floorCountBasement", building.FloorCountBasement);// int
+                cmd.Parameters.AddWithValue("@totalUnitCount", building.TotalUnitCount);// int
+                cmd.Parameters.AddWithValue("@builtYearMonth", building.BuiltYearAndMonth.ToString("s"));
+                cmd.Parameters.AddWithValue("@fudousanId", building.FudousanId);
+                cmd.Parameters.AddWithValue("@fudousanIdAdditionalCode", building.FudousanIdAdditionalCode);
                 cmd.Parameters.AddWithValue("@remarks", building.Remarks);
-                // more
-
-                //cmd.Parameters.AddWithValue("@updated_at", DateTimeOffset.UtcNow.ToString("s"));
+                // TODO: more
 
                 cmd.ExecuteNonQuery();
-
+                
                 cmd.Parameters.Clear();
 
-                // 写真（建物）Residentials pictures table - Insert or Update
+                // 写真（建物）rent_residential_pictures
                 if (building.Pictures.Count > 0)
                 {
                     foreach (var pic in building.Pictures)
                     {
-                        var exec = false;
+                        //var sqlInsertIntoRentLivingPicture = "INSERT INTO rent_residential_pictures (picture_id, property_id, filename, type, description, is_main) " +
+                        //    "VALUES (@PicId, @RentId, @Path, @Type, @Desc, @Main)";
 
-                        if (pic.IsNew)
+                        var sqlUpsertPicture = "INSERT INTO rent_residential_pictures (picture_id, property_id, filename, type, description, is_main) ";
+                        sqlUpsertPicture += "VALUES (@pictureId, @propertyId, @filePath, @type, @description, @isMain) ";
+                        sqlUpsertPicture += "ON CONFLICT (picture_id) ";
+                        sqlUpsertPicture += "DO UPDATE SET filename = @filePath, type = @type, description = @description, is_main = @isMain";
+
+                        cmd.CommandText = sqlUpsertPicture;
+
+                        // ループなので、前のパラメーターをクリアする。
+                        cmd.Parameters.Clear();
+
+                        cmd.Parameters.AddWithValue("@pictureId", pic.Id);
+                        //cmd.Parameters.AddWithValue("@RentResidentialId", building.Id + "_1");
+                        cmd.Parameters.AddWithValue("@propertyId", building.Id);
+                        cmd.Parameters.AddWithValue("@filePath", pic.ImageFilename);
+                        cmd.Parameters.AddWithValue("@type", pic.PictureType.Key.ToString());
+                        cmd.Parameters.AddWithValue("@description", pic.Description);
+
+                        //Debug.WriteLine($"Inserting picture: {pic.ImageLocation}, {pic.Id}, isMain: {pic.IsMain} @DataAccess::InsertRentResidential");
+
+                        var paramIsMain = new SqliteParameter("@isMain", System.Data.DbType.Int32)
                         {
-                            var sqlInsertIntoRentLivingPicture = "INSERT INTO rent_residential_pictures (picture_id, property_id, file_path, type, description, is_main) " +
-                                "VALUES (@PicId, @RentId, @Path, @Type, @Desc, @Main)";
+                            Value = pic.IsMain ? 1 : 0
+                        };
+                        cmd.Parameters.Add(paramIsMain);
 
-                            // 物件画像の追加
-                            cmd.CommandText = sqlInsertIntoRentLivingPicture;
-
-                            exec = true;
-                        }
-                        else if (pic.IsModified)
+                        var r = cmd.ExecuteNonQuery();
+                        if (r > 0)
                         {
-                            var sqlUpdateRentLivingPicture = string.Format(
-                                "UPDATE rent_residential_pictures SET file_path = @Path, type = @Type, description = @Desc, is_main = @Main " +
-                                "WHERE picture_id = '{0}'", pic.Id);
-
-                            // 物件画像の更新
-                            cmd.CommandText = sqlUpdateRentLivingPicture;
-
-                            exec = true;
+                            pic.IsNew = false;
+                            pic.IsModified = false;
                         }
-
-                        if (exec)
-                        {
-                            // ループなので、前のパラメーターをクリアする。
-                            cmd.Parameters.Clear();
-
-                            cmd.Parameters.AddWithValue("@PicId", pic.Id);
-                            //cmd.Parameters.AddWithValue("@RentResidentialId", building.Id + "_1");
-                            cmd.Parameters.AddWithValue("@RentId", building.Id);
-                            cmd.Parameters.AddWithValue("@Path", pic.ImageLocation);
-                            cmd.Parameters.AddWithValue("@Type", pic.PictureType.Key.ToString());
-                            cmd.Parameters.AddWithValue("@Desc", pic.Description);
-                            var paramIsMain = new SqliteParameter("@Main", System.Data.DbType.Int32);
-                            if (pic.IsMain)
-                            {
-                                paramIsMain.Value = 1;
-                            }
-                            else
-                            {
-                                paramIsMain.Value = 0;
-                            }
-                            cmd.Parameters.Add(paramIsMain);
-
-                            var result = cmd.ExecuteNonQuery();
-                            if (result > 0)
-                            {
-                                pic.IsNew = false;
-                                pic.IsModified = false;
-                            }
-                        }
-
                     }
                 }
 
@@ -1174,66 +751,44 @@ public sealed class DataAccessService : IDataAccessService
 
                 cmd.Parameters.Clear();
 
-                // PDF（建物）Residentials pdfs table - Insert or Update
+                // PDF（建物）rent_residential_pdfs
                 if (building.Pdfs.Count > 0)
                 {
-                    foreach (var pdf in building.Pdfs)
+                    foreach (var pic in building.Pdfs)
                     {
-                        var exec = false;
+                        //var sqlInsertIntoRentLivingPicture = "INSERT INTO rent_residential_pdfs (pdf_id, property_id, filename, thumbnail_filename, type, description, is_main) " +
+                        //    "VALUES (@PdfId, @RentId, @Path, @Thumb, @Type, @Desc, @Main)";
+                        var sqlUpsertPdf = "INSERT INTO rent_residential_pdfs (pdf_id, property_id, filename, thumbnail_filename, type, description, is_main) ";
+                        sqlUpsertPdf += "VALUES (@pdfId, @propertyId, @filePath, @thumbnailPath, @type, @description, @isMain) ";
+                        sqlUpsertPdf += "ON CONFLICT (pdf_id) ";
+                        sqlUpsertPdf += "DO UPDATE SET filename = @filePath, thumbnail_filename = @thumbnailPath, type = @type, description = @description, is_main = @isMain";
 
-                        if (pdf.IsNew)
+                        cmd.CommandText = sqlUpsertPdf;
+
+                        // ループなので、前のパラメーターをクリアする。
+                        cmd.Parameters.Clear();
+
+                        cmd.Parameters.AddWithValue("@pdfId", pic.Id);
+                        cmd.Parameters.AddWithValue("@propertyId", building.Id);
+                        cmd.Parameters.AddWithValue("@filePath", pic.PdfFilename);
+                        cmd.Parameters.AddWithValue("@thumbnailPath", pic.ThumbnailFilename);
+                        cmd.Parameters.AddWithValue("@type", pic.PdfType.Key.ToString());
+                        cmd.Parameters.AddWithValue("@description", pic.Description);
+
+                        //Debug.WriteLine($"Inserting picture: {pic.ImageLocation}, {pic.Id}, isMain: {pic.IsMain} @DataAccess::InsertRentResidential");
+
+                        var paramIsMain = new SqliteParameter("@isMain", System.Data.DbType.Int32)
                         {
-                            var sqlInsertIntoRentLivingPdf = "INSERT INTO rent_residential_pdfs (pdf_id, property_id, file_path, thumbnail_path, type, description, is_main) " +
-                                "VALUES (@PdfId, @RentId, @Path, @Thumb, @Type, @Desc, @Main)";
+                            Value = pic.IsMain ? 1 : 0
+                        };
+                        cmd.Parameters.Add(paramIsMain);
 
-                            // PDFの追加
-                            cmd.CommandText = sqlInsertIntoRentLivingPdf;
-
-                            exec = true;
-                        }
-                        else if (pdf.IsModified)
+                        var r = cmd.ExecuteNonQuery();
+                        if (r > 0)
                         {
-                            var sqlUpdateRentLivingPdf = string.Format(
-                                "UPDATE rent_residential_pdfs SET file_path = @Path, thumbnail_path = @Thumb, type = @Type, description = @Desc, is_main = @Main, updated_at = @Updated " +
-                                "WHERE pdf_id = '{0}'", pdf.Id);
-
-                            // PDFの更新
-                            cmd.CommandText = sqlUpdateRentLivingPdf;
-
-                            exec = true;
+                            pic.IsNew = false;
+                            pic.IsModified = false;
                         }
-
-                        if (exec)
-                        {
-                            // ループなので、前のパラメーターをクリアする。
-                            cmd.Parameters.Clear();
-
-                            cmd.Parameters.AddWithValue("@PdfId", pdf.Id);
-                            cmd.Parameters.AddWithValue("@RentId", building.Id);
-                            cmd.Parameters.AddWithValue("@Path", pdf.PdfLocation);
-                            cmd.Parameters.AddWithValue("@Type", pdf.PdfType.Key.ToString());
-                            cmd.Parameters.AddWithValue("@Thumb", pdf.ThumbnailLocation);
-                            cmd.Parameters.AddWithValue("@Desc", pdf.Description);
-                            cmd.Parameters.AddWithValue("@Updated", DateTimeOffset.UtcNow.ToString("s"));
-                            var paramIsMain = new SqliteParameter("@Main", System.Data.DbType.Int32);
-                            if (pdf.IsMain)
-                            {
-                                paramIsMain.Value = 1;
-                            }
-                            else
-                            {
-                                paramIsMain.Value = 0;
-                            }
-                            cmd.Parameters.Add(paramIsMain);
-
-                            var result = cmd.ExecuteNonQuery();
-                            if (result > 0)
-                            {
-                                pdf.IsNew = false;
-                                pdf.IsModified = false;
-                            }
-                        }
-
                     }
                 }
 
@@ -1262,24 +817,26 @@ public sealed class DataAccessService : IDataAccessService
 
                 cmd.Parameters.Clear();
 
-                // 貸主（建物）Upsert.
+                // 貸主（建物）rent_lessors_properties_listings
                 if (building.Lessors.Count > 0)
                 {
                     foreach (var psn in building.Lessors)
                     {
-                        // Upsert 
-                        var sqlUpsert = "INSERT INTO rent_lessors_properties_listings (lessor_id, property_id, property_kind, listing_id) VALUES (@lessor_id, @property_id, @property_kind, @listing_id) ";
-                        sqlUpsert += "ON CONFLICT(lessor_id, property_id, listing_id) ";
-                        sqlUpsert += "DO NOTHING";//"DO UPDATE SET lessor_id = @lessor_id, property_id = @property_id, property_kind = @property_kind, listing_id = @listing_id";
+                        //var sqlInsertInto = "INSERT INTO rent_lessors_properties_listings (lessor_id, property_id, property_kind, listing_id) " +
+                        //                "VALUES (@lessor_id, @property_id, @property_kind, @listing_id)";
+                        var sqlUpsertLessor = "INSERT INTO rent_lessors_properties_listings (lessor_id, property_id, property_kind, listing_id) ";
+                        sqlUpsertLessor += "VALUES (@lessor_id, @property_id, @property_kind, @listing_id) ";
+                        sqlUpsertLessor += "ON CONFLICT (lessor_id, property_id, listing_id) ";
+                        sqlUpsertLessor += "DO NOTHING";
 
-                        cmd.CommandText = sqlUpsert;
+                        cmd.CommandText = sqlUpsertLessor;
 
                         // ループなので、前のパラメーターをクリアする。
                         cmd.Parameters.Clear();
 
                         cmd.Parameters.AddWithValue("@lessor_id", psn.Id);
                         cmd.Parameters.AddWithValue("@property_id", building.Id);
-                        cmd.Parameters.AddWithValue("@property_kind", building.PropertyKind.ToString());
+                        cmd.Parameters.AddWithValue("@property_kind", building.PropertyKind.ToString()); 
                         cmd.Parameters.AddWithValue("@listing_id", string.Empty);// since this is building.
 
                         cmd.ExecuteNonQuery();
@@ -1310,149 +867,200 @@ public sealed class DataAccessService : IDataAccessService
 
                 cmd.Parameters.Clear();
 
-                // This currently may no be called since rooms are independently updated.(insert is a different story.)
-                // 部屋 Rooms table - Insert, Update, Delete
+                // 部屋 rent_residential_rooms
                 if (building.Rooms.Count > 0)
                 {
-                    foreach (var room in building.Rooms)
+                    foreach (var unit in building.Rooms)
                     {
-                        var exec = false;
+                        // Insert
+                        //var sqlInsertIntoRentLivingRoom = "INSERT INTO rent_residential_rooms (listing_id, property_id, is_property_unit_ownership, name, chinryou) VALUES (@RoomId, @RentId, @isPropertyUnitOwnership, @Name, @Chinryou)";
+                        // Upsert
+                        var sqlUpsertRoom = "INSERT INTO rent_residential_rooms (listing_id, property_id, is_property_unit_ownership, name, chinryou) ";
+                        sqlUpsertRoom += "VALUES (@listing_id, @propertyId, @isPropertyUnitOwnership, @name, @chinryou) ";
+                        sqlUpsertRoom += "ON CONFLICT (listing_id) ";
+                        sqlUpsertRoom += "DO UPDATE SET is_property_unit_ownership = @isPropertyUnitOwnership, name = @name, chinryou = @chinryou";
 
-                        if (room.PropertyStatus == EnumEntryStatus.New)
+                        cmd.CommandText = sqlUpsertRoom;
+
+                        // ループなので、前のパラメーターをクリアする。
+                        cmd.Parameters.Clear();
+
+                        cmd.Parameters.AddWithValue("@listing_id", unit.Id);
+                        cmd.Parameters.AddWithValue("@propertyId", building.Id);
+                        cmd.Parameters.AddWithValue("@isPropertyUnitOwnership", building.IsUnitOwnership ? 1 : 0); // bool to int
+                        cmd.Parameters.AddWithValue("@name", unit.Name);
+                        cmd.Parameters.AddWithValue("@chinryou", unit.Chinryou);
+
+                        var r = cmd.ExecuteNonQuery();
+                        if (r > 0)
                         {
-                            var sqlInsertIntoRentLivingRoom = "INSERT INTO rent_residential_rooms (listing_id, property_id, is_property_unit_ownership, name, chinryou) VALUES (@roomId, @RentId, @isPropertyUnitOwnership, @Nam, @Chinryou)";
-
-                            // 追加
-                            cmd.CommandText = sqlInsertIntoRentLivingRoom;
-                            exec = true;
-                        }
-                        else if (room.IsModified || room.PropertyStatus == EnumEntryStatus.Saved)
-                        {
-                            //var sqlUpdateRentLivingRoom = string.Format("UPDATE rent_residential_rooms SET name = @Nam WHERE listing_id = '{0}'", room.Id);
-                            var sqlUpdateRentLivingRoom = "UPDATE rent_residential_rooms SET is_property_unit_ownership = @isPropertyUnitOwnership, name = @Nam, chinryou = @Chinryou, updated_at = @Updated WHERE listing_id = @roomId";
-                            // 更新
-                            cmd.CommandText = sqlUpdateRentLivingRoom;
-
-                            exec = true;
-                        }
-
-                        if (exec)
-                        {
-                            // ループなので、前のパラメーターをクリアする。
-                            cmd.Parameters.Clear();
-
-                            cmd.Parameters.AddWithValue("@roomId", room.Id);
-                            cmd.Parameters.AddWithValue("@isPropertyUnitOwnership", building.IsUnitOwnership ? 1 : 0); // bool to int
-                            //cmd.Parameters.AddWithValue("@RentResidentialId", entry.Id + "_1");
-                            cmd.Parameters.AddWithValue("@RentId", building.Id);
-                            cmd.Parameters.AddWithValue("@Nam", room.Name);
-                            cmd.Parameters.AddWithValue("@Chinryou", room.Chinryou);
-                            cmd.Parameters.AddWithValue("@Updated", DateTimeOffset.UtcNow.ToString("s"));
-
-                            var result = cmd.ExecuteNonQuery();
-                            if (result > 0)
-                            {
-                                room.PropertyStatus = EnumEntryStatus.Saved;
-                                room.Status = EnumEntryStatus.Saved;
-                                //room.IsNew = false;
-                                room.IsModified = false;
-                            }
+                            unit.PropertyStatus = EnumEntryStatus.Saved;
+                            unit.Status = EnumEntryStatus.Saved;
+                            //unit.IsNew = false;
+                            unit.IsModified = false;
                         }
 
-                        // room Pic
-                        if (room.Pictures.Count > 0)
+                        // Room Pics
+                        if (unit.Pictures.Count > 0)
                         {
-                            foreach (var pic in room.Pictures)
+                            foreach (var pic in unit.Pictures)
                             {
                                 // Upsert
-                                var sqlUpsertRoom = "INSERT INTO rent_residential_room_pictures (picture_id, listing_id, property_id, file_path, type, description, is_main) VALUES (@PicId, @roomId, @RentId, @Path, @type, @Desc, @Main) ";
-                                sqlUpsertRoom += "ON CONFLICT(picture_id) ";
-                                sqlUpsertRoom += "DO UPDATE SET file_path = @Path, type = @type, description = @Desc, is_main = @Main";
-                                exec = true;
+                                var sqlUpsertRoomPicture = "INSERT INTO rent_residential_room_pictures (picture_id, listing_id, property_id, filename, type, description, is_main) VALUES (@PicId, @roomId, @RentId, @Path, @type, @Desc, @Main) ";
+                                sqlUpsertRoomPicture += "ON CONFLICT(picture_id) ";
+                                sqlUpsertRoomPicture += "DO UPDATE SET filename = @Path, type = @type, description = @Desc, is_main = @Main";
 
-                                cmd.CommandText = sqlUpsertRoom;
+                                cmd.CommandText = sqlUpsertRoomPicture;
 
-                                if (exec)
+                                // ループなので、前のパラメーターをクリアする。
+                                cmd.Parameters.Clear();
+
+                                cmd.Parameters.AddWithValue("@PicId", pic.Id);
+                                cmd.Parameters.AddWithValue("@roomId", unit.Id);
+                                cmd.Parameters.AddWithValue("@RentId", building.Id);
+                                cmd.Parameters.AddWithValue("@Path", pic.ImageFilename);
+                                cmd.Parameters.AddWithValue("@type", pic.PictureType.Key.ToString());
+                                cmd.Parameters.AddWithValue("@Desc", pic.Description);
+                                var paramIsMain = new SqliteParameter("@Main", System.Data.DbType.Int32)
                                 {
-                                    // ループなので、前のパラメーターをクリアする。
-                                    cmd.Parameters.Clear();
+                                    Value = pic.IsMain ? 1 : 0
+                                };
+                                cmd.Parameters.Add(paramIsMain);
 
-                                    cmd.Parameters.AddWithValue("@PicId", pic.Id);
-                                    cmd.Parameters.AddWithValue("@roomId", room.Id);
-                                    cmd.Parameters.AddWithValue("@RentId", building.Id);
-                                    cmd.Parameters.AddWithValue("@Path", pic.ImageLocation);
-                                    cmd.Parameters.AddWithValue("@type", pic.PictureType.Key.ToString());
-                                    cmd.Parameters.AddWithValue("@Desc", pic.Description);
-                                    var paramIsMain = new SqliteParameter("@Main", System.Data.DbType.Int32);
-                                    if (pic.IsMain)
-                                    {
-                                        paramIsMain.Value = 1;
-                                    }
-                                    else
-                                    {
-                                        paramIsMain.Value = 0;
-                                    }
-                                    cmd.Parameters.Add(paramIsMain);
-
-                                    var result = cmd.ExecuteNonQuery();
-                                    if (result > 0)
-                                    {
-                                        pic.IsNew = false;
-                                        pic.IsModified = false;
-                                    }
+                                var result = cmd.ExecuteNonQuery();
+                                if (result > 0)
+                                {
+                                    pic.IsNew = false;
+                                    pic.IsModified = false;
                                 }
                             }
                         }
 
-                        // TODO:削除リスト
-
-                        // room pdf
-                        if (room.Pdfs.Count > 0)
+                        // Room Pics 削除リスト
+                        if (unit.PicturesToBeDeleted.Count > 0)
                         {
-                            foreach (var pdf in room.Pdfs)
+                            foreach (var delp in unit.PicturesToBeDeleted)
+                            {
+                                // 削除
+                                var sqlDeleteRentLivingPicture = string.Format("DELETE FROM rent_residential_room_pictures WHERE picture_id = '{0}'", delp.Id);
+
+                                cmd.CommandText = sqlDeleteRentLivingPicture;
+                                var DelRentLivingPicResult = cmd.ExecuteNonQuery();
+                                if (DelRentLivingPicResult > 0)
+                                {
+                                    // TODO:
+                                    Debug.WriteLine("Picture deleted");
+                                }
+                            }
+
+                            // let's not. Needs this to clean up the file.
+                            //entry.BuildingPicturesToBeDeleted.Clear();
+                        }
+
+                        // Room PDF
+                        if (unit.Pdfs.Count > 0)
+                        {
+                            foreach (var pdf in unit.Pdfs)
                             {
                                 // Upsert
-                                var sqlUpsertRoom = "INSERT INTO rent_residential_room_pdfs (pdf_id, listing_id, property_id, file_path, thumbnail_path, type, description, is_main) VALUES (@PdfId, @roomId, @RentId, @Path, @Thumb, @type, @Desc, @Main) ";
-                                sqlUpsertRoom += "ON CONFLICT(pdf_id) ";
-                                sqlUpsertRoom += "DO UPDATE SET file_path = @Path, type = @type, description = @Desc, is_main = @Main";
-                                exec = true;
+                                var sqlUpsertRoomPdf = "INSERT INTO rent_residential_room_pdfs (pdf_id, listing_id, property_id, filename, thumbnail_filename, type, description, is_main) VALUES (@PdfId, @roomId, @RentId, @Path, @Thumb, @type, @Desc, @Main) ";
+                                sqlUpsertRoomPdf += "ON CONFLICT(pdf_id) ";
+                                sqlUpsertRoomPdf += "DO UPDATE SET filename = @Path, thumbnail_filename = @Thumb, type = @type, description = @Desc, is_main = @Main";
 
-                                cmd.CommandText = sqlUpsertRoom;
+                                cmd.CommandText = sqlUpsertRoomPdf;
 
-                                if (exec)
+                                // ループなので、前のパラメーターをクリアする。
+                                cmd.Parameters.Clear();
+
+                                cmd.Parameters.AddWithValue("@PdfId", pdf.Id);
+                                cmd.Parameters.AddWithValue("@roomId", unit.Id);
+                                cmd.Parameters.AddWithValue("@RentId", building.Id);
+                                cmd.Parameters.AddWithValue("@Path", pdf.PdfFilename);
+                                cmd.Parameters.AddWithValue("@Thumb", pdf.ThumbnailFilename);
+                                cmd.Parameters.AddWithValue("@type", pdf.PdfType.Key.ToString());
+                                cmd.Parameters.AddWithValue("@Desc", pdf.Description);
+                                var paramIsMain = new SqliteParameter("@Main", System.Data.DbType.Int32)
                                 {
-                                    // ループなので、前のパラメーターをクリアする。
-                                    cmd.Parameters.Clear();
+                                    Value = pdf.IsMain ? 1 : 0
+                                };
+                                cmd.Parameters.Add(paramIsMain);
 
-                                    cmd.Parameters.AddWithValue("@PdfId", pdf.Id);
-                                    cmd.Parameters.AddWithValue("@roomId", room.Id);
-                                    cmd.Parameters.AddWithValue("@RentId", building.Id);
-                                    cmd.Parameters.AddWithValue("@Path", pdf.PdfLocation);
-                                    cmd.Parameters.AddWithValue("@Thumb", pdf.ThumbnailLocation);
-                                    cmd.Parameters.AddWithValue("@type", pdf.PdfType.Key.ToString());
-                                    cmd.Parameters.AddWithValue("@Desc", pdf.Description);
-                                    var paramIsMain = new SqliteParameter("@Main", System.Data.DbType.Int32);
-                                    if (pdf.IsMain)
-                                    {
-                                        paramIsMain.Value = 1;
-                                    }
-                                    else
-                                    {
-                                        paramIsMain.Value = 0;
-                                    }
-                                    cmd.Parameters.Add(paramIsMain);
-
-                                    var result = cmd.ExecuteNonQuery();
-                                    if (result > 0)
-                                    {
-                                        pdf.IsNew = false;
-                                        pdf.IsModified = false;
-                                    }
+                                var result = cmd.ExecuteNonQuery();
+                                if (result > 0)
+                                {
+                                    pdf.IsNew = false;
+                                    pdf.IsModified = false;
                                 }
                             }
                         }
 
-                        // TODO:削除リスト
+                        // Room Pdfs 削除リスト
+                        if (unit.PdfsToBeDeleted.Count > 0)
+                        {
+                            foreach (var delp in unit.PdfsToBeDeleted)
+                            {
+                                // 削除
+                                var sqlDeleteRentLivingPdf = string.Format("DELETE FROM rent_residential_room_pdfs WHERE pdf_id = '{0}'", delp.Id);
+
+                                cmd.CommandText = sqlDeleteRentLivingPdf;
+                                var DelRentLivingPdfResult = cmd.ExecuteNonQuery();
+                                if (DelRentLivingPdfResult > 0)
+                                {
+                                    // TODO:
+                                    Debug.WriteLine("Pdf deleted");
+                                }
+                            }
+
+                            // let's not. Needs this to clean up the file.
+                            //entry.BuildingPicturesToBeDeleted.Clear();
+                        }
+
+                        // Room Lessor
+                        if (unit.Lessors.Count > 0)
+                        {
+                            foreach (var psn in unit.Lessors)
+                            {
+                                //var sqlInsertInto = "INSERT INTO rent_lessors_properties_listings (lessor_id, property_id, property_kind, listing_id) " +
+                                //                "VALUES (@lessor_id, @property_id, @property_kind, @listing_id)";
+                                var sqlUpsertLessor = "INSERT INTO rent_lessors_properties_listings (lessor_id, property_id, property_kind, listing_id) ";
+                                sqlUpsertLessor += "VALUES (@lessor_id, @property_id, @property_kind, @listing_id) ";
+                                sqlUpsertLessor += "ON CONFLICT (lessor_id, property_id, listing_id) ";
+                                sqlUpsertLessor += "DO NOTHING";
+
+                                cmd.CommandText = sqlUpsertLessor;
+
+                                // ループなので、前のパラメーターをクリアする。
+                                cmd.Parameters.Clear();
+
+                                cmd.Parameters.AddWithValue("@lessor_id", psn.Id);
+                                cmd.Parameters.AddWithValue("@property_id", building.Id);
+                                cmd.Parameters.AddWithValue("@property_kind", building.PropertyKind.ToString());
+                                cmd.Parameters.AddWithValue("@listing_id", unit.Id);
+
+                                cmd.ExecuteNonQuery();
+                            }
+                        }
+
+                        // Room Lessor 削除リスト
+                        if (unit.LessorsToBeDeleted.Count > 0)
+                        {
+                            foreach (var psn in unit.LessorsToBeDeleted)
+                            {
+                                // 削除
+                                var sqlDelete = ($"DELETE FROM rent_lessors_properties_listings WHERE lessor_id = '{psn.Id}' AND property_id = '{building.Id}' AND listing_id = '{unit.Id}'");
+
+                                cmd.CommandText = sqlDelete;
+                                var sqlResult = cmd.ExecuteNonQuery();
+                                if (sqlResult > 0)
+                                {
+                                    // TODO:
+                                    Debug.WriteLine("Lessor deleted");
+                                }
+                            }
+                            // TODO: should I?
+                            unit.LessorsToBeDeleted.Clear();
+                        }
+
                     }
                 }
 
@@ -1478,7 +1086,7 @@ public sealed class DataAccessService : IDataAccessService
                     //building.RoomsToBeDeleted.Clear();
                 }
 
-                // Commit
+                // commit
                 cmd.Transaction.Commit();
             }
             catch (Exception e)
@@ -1492,7 +1100,7 @@ public sealed class DataAccessService : IDataAccessService
                 res.Error.ErrDescription = "Exception";
                 res.Error.ErrDatetime = DateTime.Now;
                 res.Error.ErrPlace = "connection.Open(),Transaction.Commit";
-                res.Error.ErrPlaceParent = "DataAccess::UpdateRentResidential";
+                res.Error.ErrPlaceParent = "DataAccess::UpsertRentResidential";
 
                 return res;
             }
@@ -1506,13 +1114,13 @@ public sealed class DataAccessService : IDataAccessService
             res.Error.ErrDescription = "TargetInvocationException";
             res.Error.ErrDatetime = DateTime.Now;
             res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
-            res.Error.ErrPlaceParent = "DataAccess::UpdateRentResidential";
+            res.Error.ErrPlaceParent = "DataAccess::UpsertRentResidential";
 
             return res;
         }
         catch (System.InvalidOperationException ex)
         {
-            Debug.WriteLine("Opps. InvalidOperationException@DataAccess::UpdateRentResidential");
+            Debug.WriteLine("Opps. InvalidOperationException@DataAccess::UpsertRentResidential");
 
             res.IsError = true;
             res.Error.ErrType = ErrorObject.ErrTypes.DB;
@@ -1521,7 +1129,7 @@ public sealed class DataAccessService : IDataAccessService
             res.Error.ErrDescription = "InvalidOperationException";
             res.Error.ErrDatetime = DateTime.Now;
             res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
-            res.Error.ErrPlaceParent = "DataAccess::UpdateRentResidential";
+            res.Error.ErrPlaceParent = "DataAccess::UpsertRentResidential";
 
             return res;
         }
@@ -1543,7 +1151,7 @@ public sealed class DataAccessService : IDataAccessService
             }
             res.Error.ErrDatetime = DateTime.Now;
             res.Error.ErrPlace = "connection.Open(),BeginTransaction()";
-            res.Error.ErrPlaceParent = "DataAccess::UpdateRentResidential";
+            res.Error.ErrPlaceParent = "DataAccess::UpsertRentResidential";
 
             return res;
         }
@@ -1553,6 +1161,9 @@ public sealed class DataAccessService : IDataAccessService
         }
 
         //Debug.WriteLine(string.Format("{0} Entries Inserted to DB", res.AffectedCount.ToString()));
+
+        building.IsModified = false;
+        building.Status = EnumEntryStatus.Saved;
 
         return res;
     }
@@ -1703,8 +1314,8 @@ public sealed class DataAccessService : IDataAccessService
                 var name = reader.GetString(reader.GetOrdinal("name")) ?? string.Empty;//Convert.ToString(reader["name"]) ?? "";
                 entry.Name = name;
 
-                var thumb = reader.GetString(reader.GetOrdinal("thumbnail_path")) ?? string.Empty;
-                entry.ThumbnailImageFilePath = thumb;
+                var thumb = reader.GetString(reader.GetOrdinal("thumbnail_filename")) ?? string.Empty;
+                entry.ThumbnailFilename = thumb;
 
                 var createdAt = reader.GetString(reader.GetOrdinal("created_at")) ?? string.Empty;//Convert.ToString(reader["created_at"]) ?? string.Empty;
                 entry.CreatedAt = createdAt;
@@ -1927,8 +1538,8 @@ public sealed class DataAccessService : IDataAccessService
                 "rent_residentials.building_kind as resiBuildingKind, " +
                 "rent_residentials.is_unit_ownership as resiUnitOwnership, " +
                 "rent_residentials.building_structure as resiBuildingStructure, " +
-                "rent_residentials.aboveground_floor_count as resiAboveGroundFloorCount, " +
-                "rent_residentials.basement_floor_count as resiBasementFloorCount, " +
+                "rent_residentials.floor_count_above_ground as resiAboveGroundFloorCount, " +
+                "rent_residentials.floor_count_basement as resiBasementFloorCount, " +
                 "rent_residentials.total_unit_count as resiTotalUnitCount, " +
                 "rent_residentials.built_year_month as resiBuiltYearMonth, " +
                 "rent_residentials.fudousan_id as resiFudousanId, " +
@@ -1982,10 +1593,10 @@ public sealed class DataAccessService : IDataAccessService
                     entry.SetStructureTypeFromString(s);
 
                     int intValue = Convert.ToInt32(reader["resiAboveGroundFloorCount"]);
-                    entry.AboveGroundFloorCount = intValue;
+                    entry.FloorCountAboveGround = intValue;
 
                     intValue = Convert.ToInt32(reader["resiBasementFloorCount"]);
-                    entry.BasementFloorCount = intValue;
+                    entry.FloorCountBasement = intValue;
 
                     intValue = Convert.ToInt32(reader["resiTotalUnitCount"]);
                     entry.TotalUnitCount = intValue;
@@ -2020,7 +1631,7 @@ public sealed class DataAccessService : IDataAccessService
                 while (reader.Read())
                 {
                     var picid = Convert.ToString(reader["picture_id"]) ?? string.Empty;
-                    var picpath = Convert.ToString(reader["file_path"]) ?? string.Empty;
+                    var picpath = Convert.ToString(reader["filename"]) ?? string.Empty;
                     if (!string.IsNullOrEmpty(picid) && !string.IsNullOrEmpty(picpath))
                     {
                         var rlpic = new Models.Rent.Residentials.Picture(picid, picpath)
@@ -2051,7 +1662,7 @@ public sealed class DataAccessService : IDataAccessService
                     }
                     else
                     {
-                        Debug.WriteLine("picture_id or file_path is null/empty.");
+                        Debug.WriteLine("picture_id or filename is null/empty.");
                     }
                 }
             }
@@ -2063,8 +1674,8 @@ public sealed class DataAccessService : IDataAccessService
                 while (reader.Read())
                 {
                     var pdfid = Convert.ToString(reader["pdf_id"]) ?? string.Empty;
-                    var pdfpath = Convert.ToString(reader["file_path"]) ?? string.Empty;
-                    var thumbpath = Convert.ToString(reader["thumbnail_path"]) ?? string.Empty;
+                    var pdfpath = Convert.ToString(reader["filename"]) ?? string.Empty;
+                    var thumbpath = Convert.ToString(reader["thumbnail_filename"]) ?? string.Empty;
                     if (!string.IsNullOrEmpty(pdfid) && !string.IsNullOrEmpty(pdfpath) && !string.IsNullOrEmpty(thumbpath))
                     {
                         var rlpdf = new Models.Rent.Residentials.Pdf(pdfid, pdfpath, thumbpath)
@@ -2094,7 +1705,7 @@ public sealed class DataAccessService : IDataAccessService
                     }
                     else
                     {
-                        Debug.WriteLine("pdf_id or file_path or thumbnail_path is null/empty.");
+                        Debug.WriteLine("pdf_id or filename or thumbnail_filename is null/empty.");
                     }
                 }
             }
@@ -2283,7 +1894,7 @@ public sealed class DataAccessService : IDataAccessService
             while (reader.Read())
             {
                 var picid = Convert.ToString(reader["picture_id"]) ?? string.Empty;
-                var picpath = Convert.ToString(reader["file_path"]) ?? string.Empty;
+                var picpath = Convert.ToString(reader["filename"]) ?? string.Empty;
                 if (!string.IsNullOrEmpty(picid) && !string.IsNullOrEmpty(picpath))
                 {
                     var rlpic = new Models.Rent.Residentials.Listing.Picture(picid, picpath)
@@ -2314,7 +1925,7 @@ public sealed class DataAccessService : IDataAccessService
                 }
                 else
                 {
-                    Debug.WriteLine("picture_id or file_path is null/empty.");
+                    Debug.WriteLine("picture_id or filename is null/empty.");
                 }
             }
         }
@@ -2326,8 +1937,8 @@ public sealed class DataAccessService : IDataAccessService
             while (reader.Read())
             {
                 var pdfid = Convert.ToString(reader["pdf_id"]) ?? string.Empty;
-                var pdfpath = Convert.ToString(reader["file_path"]) ?? string.Empty;
-                var thumbpath = Convert.ToString(reader["thumbnail_path"]) ?? string.Empty;
+                var pdfpath = Convert.ToString(reader["filename"]) ?? string.Empty;
+                var thumbpath = Convert.ToString(reader["thumbnail_filename"]) ?? string.Empty;
                 if (!string.IsNullOrEmpty(pdfid) && !string.IsNullOrEmpty(pdfpath) && !string.IsNullOrEmpty(thumbpath))
                 {
                     var rlpdf = new Models.Rent.Residentials.Listing.Pdf(pdfid, pdfpath, thumbpath)
@@ -2357,7 +1968,7 @@ public sealed class DataAccessService : IDataAccessService
                 }
                 else
                 {
-                    Debug.WriteLine("pdf_id or file_path or thumbnail_path is null/empty.");
+                    Debug.WriteLine("pdf_id or filename or thumbnail_filename is null/empty.");
                 }
             }
         }
@@ -2422,7 +2033,6 @@ public sealed class DataAccessService : IDataAccessService
         }
     }
 
-    // TODO: reuse code with other method.
     public ResultWrapper UpsertRentResidentialListing(string rentId, Models.Rent.Residentials.Listing.Listing room)
     {
         var res = new ResultWrapper();
@@ -2489,9 +2099,9 @@ public sealed class DataAccessService : IDataAccessService
                     foreach (var pic in room.Pictures)
                     {
                         // Upsert
-                        var sqlUpsertRoom = "INSERT INTO rent_residential_room_pictures (picture_id, listing_id, property_id, file_path, type, description, is_main) VALUES (@PicId, @roomId, @RentId, @Path, @type, @Desc, @Main) ";
+                        var sqlUpsertRoom = "INSERT INTO rent_residential_room_pictures (picture_id, listing_id, property_id, filename, type, description, is_main) VALUES (@PicId, @roomId, @RentId, @Path, @type, @Desc, @Main) ";
                         sqlUpsertRoom += "ON CONFLICT(picture_id) ";
-                        sqlUpsertRoom += "DO UPDATE SET file_path = @Path, type = @type, description = @Desc, is_main = @Main";
+                        sqlUpsertRoom += "DO UPDATE SET filename = @Path, type = @type, description = @Desc, is_main = @Main";
                         var exec = true;
 
                         cmd.CommandText = sqlUpsertRoom;
@@ -2504,7 +2114,7 @@ public sealed class DataAccessService : IDataAccessService
                             cmd.Parameters.AddWithValue("@PicId", pic.Id);
                             cmd.Parameters.AddWithValue("@roomId", room.Id);
                             cmd.Parameters.AddWithValue("@RentId", rentId);
-                            cmd.Parameters.AddWithValue("@Path", pic.ImageLocation);
+                            cmd.Parameters.AddWithValue("@Path", pic.ImageFilename);
                             cmd.Parameters.AddWithValue("@type", pic.PictureType.Key.ToString());
                             cmd.Parameters.AddWithValue("@Desc", pic.Description);
                             var paramIsMain = new SqliteParameter("@Main", System.Data.DbType.Int32);
@@ -2555,9 +2165,9 @@ public sealed class DataAccessService : IDataAccessService
                     foreach (var pdf in room.Pdfs)
                     {
                         // Upsert
-                        var sqlUpsertRoom = "INSERT INTO rent_residential_room_pdfs (pdf_id, listing_id, property_id, file_path, thumbnail_path, type, description, is_main) VALUES (@PdfId, @roomId, @RentId, @Path, @Thumb, @type, @Desc, @Main) ";
+                        var sqlUpsertRoom = "INSERT INTO rent_residential_room_pdfs (pdf_id, listing_id, property_id, filename, thumbnail_filename, type, description, is_main) VALUES (@PdfId, @roomId, @RentId, @Path, @Thumb, @type, @Desc, @Main) ";
                         sqlUpsertRoom += "ON CONFLICT(pdf_id) ";
-                        sqlUpsertRoom += "DO UPDATE SET file_path = @Path, type = @type, description = @Desc, is_main = @Main";
+                        sqlUpsertRoom += "DO UPDATE SET filename = @Path, type = @type, description = @Desc, is_main = @Main";
                         var exec = true;
 
                         cmd.CommandText = sqlUpsertRoom;
@@ -2570,8 +2180,8 @@ public sealed class DataAccessService : IDataAccessService
                             cmd.Parameters.AddWithValue("@PdfId", pdf.Id);
                             cmd.Parameters.AddWithValue("@roomId", room.Id);
                             cmd.Parameters.AddWithValue("@RentId", rentId);
-                            cmd.Parameters.AddWithValue("@Path", pdf.PdfLocation);
-                            cmd.Parameters.AddWithValue("@Thumb", pdf.ThumbnailLocation);
+                            cmd.Parameters.AddWithValue("@Path", pdf.PdfFilename);
+                            cmd.Parameters.AddWithValue("@Thumb", pdf.ThumbnailFilename);
                             cmd.Parameters.AddWithValue("@type", pdf.PdfType.Key.ToString());
                             cmd.Parameters.AddWithValue("@Desc", pdf.Description);
                             var paramIsMain = new SqliteParameter("@Main", System.Data.DbType.Int32);

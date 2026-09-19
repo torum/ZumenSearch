@@ -308,7 +308,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
 
     private readonly Models.Rent.Residentials.Listing.Listing _room;
 
-    private readonly string _propertyDataDirectoryPath = string.Empty;
+    private readonly string _listingDataDirectoryPath = string.Empty;
 
     // Tmp file list to hold unsaved picture files. (if entry is not saved, delete on close)
     private readonly List<string> _unsavedRoomPictureFileList = [];
@@ -344,8 +344,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
         _dispatcherService = dispatcherService;
         _dataAccessService = dataAccessService;
 
-        // TODO:
-        _propertyDataDirectoryPath = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(App.PropertyBlobDataFolder, "Rent"), "Residential"), _room.PropertyId);
+        _listingDataDirectoryPath = System.IO.Path.Combine(System.IO.Path.Combine(App.PropertyBlobDataFolder, _room.PropertyId), _room.Id);
 
         PopulateValues();
 
@@ -614,6 +613,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
         Pictures = new ObservableCollection<Models.Rent.Residentials.Listing.Picture>(_room.Pictures); // create a copy.
         foreach (var item in Pictures)
         {
+            item.BasePath = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(App.PropertyBlobDataFolder, _room.PropertyId), _room.Id));
             item.ParentViewModel = this;
             item.IsModified = false; // Needed this.
             item.PropertyChanged += OnPicturePropertyChanged;
@@ -650,6 +650,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
         Pdfs = new ObservableCollection<Models.Rent.Residentials.Listing.Pdf>(_room.Pdfs); // create a copy.
         foreach (var item in Pdfs)
         {
+            item.BasePath = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(App.PropertyBlobDataFolder, _room.PropertyId), _room.Id));
             item.ParentViewModel = this;
             item.IsModified = false; // Needed this.
             item.PropertyChanged += OnPdfPropertyChanged;
@@ -799,6 +800,15 @@ public sealed partial class ListingViewModel : ObservableRecipient,
 
             _unsavedRoomPdfThumbnailFileList.Clear();
         }
+
+        if (_room.Status == EnumEntryStatus.New)
+        {
+            if (Directory.Exists(_listingDataDirectoryPath))
+            {
+                Debug.WriteLine($"Deleting folder: {_listingDataDirectoryPath}");
+                Directory.Delete(_listingDataDirectoryPath, true);
+            }
+        }
     }
 
     #endregion
@@ -866,10 +876,13 @@ public sealed partial class ListingViewModel : ObservableRecipient,
             {
                 foreach (var file in _room.PicturesToBeDeleted)
                 {
+                    /*
                     if (_room.Pictures.Remove(file))
                     {
-                        File.Delete(file.ImageLocation);
                     }
+                    */
+                    var delFilePath = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(App.PropertyBlobDataFolder, _room.PropertyId), _room.Id), file.ImageFilename);
+                    File.Delete(delFilePath);
                 }
 
                 _room.PicturesToBeDeleted.Clear();
@@ -880,11 +893,15 @@ public sealed partial class ListingViewModel : ObservableRecipient,
             {
                 foreach (var file in _room.PdfsToBeDeleted)
                 {
+                    /*
                     if (_room.Pdfs.Remove(file))
                     {
-                        File.Delete(file.PdfLocation);
-                        File.Delete(file.ThumbnailLocation);
                     }
+                    */
+                    var delFilePath = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(App.PropertyBlobDataFolder, _room.PropertyId), _room.Id), file.PdfFilename);
+                    File.Delete(delFilePath);
+                    delFilePath = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(App.PropertyBlobDataFolder, _room.PropertyId), _room.Id), file.PdfFilename);
+                    File.Delete(delFilePath);
                 }
 
                 _room.PdfsToBeDeleted.Clear();
@@ -914,11 +931,11 @@ public sealed partial class ListingViewModel : ObservableRecipient,
         if (filePathList is null) return;
         if (filePathList.Count == 0) return;
 
-        Debug.WriteLine($"destDirectory={_propertyDataDirectoryPath}  @AddNewRoomPictures()");
+        Debug.WriteLine($"destDirectory={_listingDataDirectoryPath}  @AddNewRoomPictures()");
         
-        if (!Directory.Exists(_propertyDataDirectoryPath))
+        if (!Directory.Exists(_listingDataDirectoryPath))
         {
-            Directory.CreateDirectory(_propertyDataDirectoryPath);
+            Directory.CreateDirectory(_listingDataDirectoryPath);
         }
 
         //List<string> list = [];
@@ -940,14 +957,16 @@ public sealed partial class ListingViewModel : ObservableRecipient,
 
             string newId = Guid.CreateVersion7().ToString("N");
             string extension = Path.GetExtension(System.IO.Path.GetFileName(filePath));
-            var destFilePath = Path.Combine(_propertyDataDirectoryPath, newId + extension);
+            string newFilename = newId + extension;
+            var destFilePath = Path.Combine(_listingDataDirectoryPath, newFilename);
             //Debug.WriteLine($"{file} to {destFilePath}  @SetNewBuildingPicturesAsync()");
 
             using var destinationStream = File.Create(destFilePath);
             await sourceStream.CopyToAsync(destinationStream);
 
-            var pic = new Models.Rent.Residentials.Listing.Picture(newId, destFilePath)
+            var pic = new Models.Rent.Residentials.Listing.Picture(newId, newFilename)
             {
+                BasePath = _listingDataDirectoryPath,
                 IsNew = true,
                 ParentViewModel = this
             };
@@ -1007,11 +1026,11 @@ public sealed partial class ListingViewModel : ObservableRecipient,
         if (filePathList is null) return;
         if (filePathList.Count == 0) return;
 
-        Debug.WriteLine($"destDirectory={_propertyDataDirectoryPath}  @AddNewRoomPdfs()");
+        Debug.WriteLine($"destDirectory={_listingDataDirectoryPath}  @AddNewRoomPdfs()");
 
-        if (!Directory.Exists(_propertyDataDirectoryPath))
+        if (!Directory.Exists(_listingDataDirectoryPath))
         {
-            Directory.CreateDirectory(_propertyDataDirectoryPath);
+            Directory.CreateDirectory(_listingDataDirectoryPath);
         }
 
         //List<string> list = [];
@@ -1024,8 +1043,6 @@ public sealed partial class ListingViewModel : ObservableRecipient,
             }
 
 
-
-            // TODO: check file ext for valid image type.
             // TODO: set max file size?
 
             string extension = Path.GetExtension(System.IO.Path.GetFileName(filePath));
@@ -1062,7 +1079,8 @@ public sealed partial class ListingViewModel : ObservableRecipient,
                 //await bitmapImage.SetSourceAsync(stream);
 
                 string newId = Guid.CreateVersion7().ToString("N");
-                var thumbnailDestFilePath = Path.Combine(_propertyDataDirectoryPath, newId + ".bmp");
+                string newThumbnailFilename = newId + ".bmp";
+                var thumbnailDestFilePath = Path.Combine(_listingDataDirectoryPath, newThumbnailFilename);
 
                 using var destinationStream = File.Create(thumbnailDestFilePath);
                 using var managedSourceStream = stream.AsStreamForRead();
@@ -1071,14 +1089,17 @@ public sealed partial class ListingViewModel : ObservableRecipient,
                 // Keep track of unsaved files to delete them when discarding.
                 _unsavedRoomPdfThumbnailFileList.Add(thumbnailDestFilePath);
 
-                var pdfDestFilePath = Path.Combine(_propertyDataDirectoryPath, newId + extension);
+                string newFilename = newId + extension;
+
+                var pdfDestFilePath = Path.Combine(_listingDataDirectoryPath, newFilename);
                 File.Copy(filePath, pdfDestFilePath);
 
                 // Keep track of unsaved files to delete them when discarding.
                 _unsavedRoomPdfFileList.Add(pdfDestFilePath);
 
-                var pdf = new Models.Rent.Residentials.Listing.Pdf(newId, pdfDestFilePath, thumbnailDestFilePath)
+                var pdf = new Models.Rent.Residentials.Listing.Pdf(newId, newFilename, newThumbnailFilename)
                 {
+                    BasePath = _listingDataDirectoryPath,
                     IsNew = true,
                     ParentViewModel = this
                 };
@@ -1125,11 +1146,11 @@ public sealed partial class ListingViewModel : ObservableRecipient,
     [RelayCommand(CanExecute = nameof(CanOpenBlobDirectory))]
     public void OpenBlobDirectory()
     {
-        if (Directory.Exists(_propertyDataDirectoryPath))
+        if (Directory.Exists(_listingDataDirectoryPath))
         {
             try
             {
-                Process.Start("explorer.exe", _propertyDataDirectoryPath);
+                Process.Start("explorer.exe", _listingDataDirectoryPath);
             }
             catch (Exception ex)
             {
@@ -1140,7 +1161,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
     }
     private bool CanOpenBlobDirectory()
     {
-        if (Directory.Exists(_propertyDataDirectoryPath))
+        if (Directory.Exists(_listingDataDirectoryPath))
         {
             return true;
         }
@@ -1161,7 +1182,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
             return;
         }
 
-        var lessor = await _dialogService.ShowLessorSelectDialog(new ViewModels.Rent.Lessors.LessorSelectViewModel(_dataAccessService, _cts));
+        var lessor = await _dialogService.ShowLessorSelectDialog(new ViewModels.Dialogs.LessorSelectViewModel(_dataAccessService, _cts));
 
         if (lessor is not null)
         {

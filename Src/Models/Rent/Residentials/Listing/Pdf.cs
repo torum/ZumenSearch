@@ -117,8 +117,8 @@ public sealed partial class Pdf : PdfBase
 
     public Pdf(string id, string pdfLocation, string thumbnailLocation) : base(id)
     {
-        PdfLocation = pdfLocation;
-        ThumbnailLocation = thumbnailLocation;
+        PdfFilename = pdfLocation;
+        ThumbnailFilename = thumbnailLocation;
 
         IsModified = false;
     }

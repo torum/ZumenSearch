@@ -125,7 +125,7 @@ public sealed partial class Property : PropertyBase
     }
 
     // 地上階
-    public int AboveGroundFloorCount
+    public int FloorCountAboveGround
     {
         get;
         set
@@ -159,7 +159,7 @@ public sealed partial class Property : PropertyBase
     }
 
     // 地下階
-    public int BasementFloorCount
+    public int FloorCountBasement
     {
         get;
         set

@@ -4,10 +4,12 @@ using System.Collections.ObjectModel;
 using ZumenSearch.Models.Common;
 using ZumenSearch.Services.Contracts;
 
-namespace ZumenSearch.ViewModels.Transportation;
+namespace ZumenSearch.ViewModels.Dialogs;
 
-public partial class RailLineViewModel : ObservableObject
+public partial class RailStationViewModel : ObservableObject
 {
+    private readonly string _railLineCode = string.Empty;
+
     public string Query
     {
         get;
@@ -17,15 +19,15 @@ public partial class RailLineViewModel : ObservableObject
             {
                 if (string.IsNullOrEmpty(field))
                 {
-                    SuggestedRailLines?.Clear();
+                    SuggestedRailStations?.Clear();
                 }
             }
 
-            SearchRailLineCommand.NotifyCanExecuteChanged();
+            SearchRailStationCommand.NotifyCanExecuteChanged();
         }
     } = string.Empty;
 
-    public ObservableCollection<RailLine>? SuggestedRailLines
+    public ObservableCollection<RailStation>? SuggestedRailStations
     {
         get;
         set
@@ -37,7 +39,7 @@ public partial class RailLineViewModel : ObservableObject
         }
     } = [];
 
-    public RailLine? SelectedRailLine
+    public RailStation? SelectedRailStation
     {
         get;
         set
@@ -52,34 +54,35 @@ public partial class RailLineViewModel : ObservableObject
         }
     }
 
-    public event EventHandler<RailLine>? SelectionChanged;
+    public event EventHandler<RailStation>? SelectionChanged;
 
     private readonly IDataAccessTransportationService _dataAccessTransportationService;
 
-    public RailLineViewModel(IDataAccessTransportationService dataAccessTransportationService)
+    public RailStationViewModel(IDataAccessTransportationService dataAccessTransportationService, string railLineCode)
     {
         _dataAccessTransportationService = dataAccessTransportationService;
+        _railLineCode = railLineCode;
 
         // TODO: try catch
-        SuggestedRailLines = _dataAccessTransportationService.GetRailLinesBy(string.Empty);
-
+        SuggestedRailStations = _dataAccessTransportationService.GetRailStationsBy(_railLineCode, Query);
     }
 
-    [RelayCommand(CanExecute = nameof(CanSearchRailLine))]
-    public void SearchRailLine()
+    [RelayCommand(CanExecute = nameof(CanSearchRailStation))]
+    public void SearchRailStation()
     {
         if (string.IsNullOrEmpty(Query))
         {
-            SuggestedRailLines?.Clear();
+            SuggestedRailStations?.Clear();
             return;
         }
 
         // TODO: try catch
-        SuggestedRailLines = _dataAccessTransportationService.GetRailLinesBy(Query);
+        SuggestedRailStations = _dataAccessTransportationService.GetRailStationsBy(_railLineCode, Query);
 
     }
-    private bool CanSearchRailLine()
+    private bool CanSearchRailStation()
     {
         return !string.IsNullOrEmpty(Query);
     }
+
 }

@@ -10,7 +10,7 @@ namespace ZumenSearch.Models.Base;
 
 public abstract class PdfBase : ObservableObject
 {
-    public string PdfLocation
+    public string PdfFilename
     {
         get;
         set
@@ -22,7 +22,9 @@ public abstract class PdfBase : ObservableObject
         }
     } = string.Empty;
 
-    public string ThumbnailLocation
+    public string BasePath { get; set; } = string.Empty;
+
+    public string ThumbnailFilename
     {
         get;
         set
@@ -42,15 +44,23 @@ public abstract class PdfBase : ObservableObject
 
     private BitmapImage? CreateThumb()
     {
-        if (string.IsNullOrEmpty(ThumbnailLocation))
+        if (string.IsNullOrEmpty(ThumbnailFilename))
         {
             Debug.WriteLine("ThumbnailLocation is empty. (PdfBase)");
             return null;
         }
 
-        if (!Path.Exists(ThumbnailLocation))
+        if (string.IsNullOrEmpty(BasePath))
         {
-            Debug.WriteLine($"File ThumbnailLocation does not exists. (PdfBase) {ThumbnailLocation}");
+            Debug.WriteLine("BasePath is empty. (PdfBase)");
+            return null;
+        }
+
+        var pdfFilePath = System.IO.Path.Combine(BasePath, ThumbnailFilename);
+
+        if (!Path.Exists(pdfFilePath))
+        {
+            Debug.WriteLine($"File ThumbnailLocation does not exists. (PdfBase) {pdfFilePath}");
             return null;
         }
 
@@ -58,7 +68,7 @@ public abstract class PdfBase : ObservableObject
         {
             DecodePixelWidth = 280
         };
-        Uri uri = new(ThumbnailLocation);
+        Uri uri = new(pdfFilePath);
         bitmapImage.UriSource = uri;
         return bitmapImage;
     }

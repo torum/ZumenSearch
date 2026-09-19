@@ -1,17 +1,16 @@
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
-using ZumenSearch.ViewModels.Rent.Lessors;
 
 namespace ZumenSearch.Views.Dialogs;
 
 public sealed partial class LessorSelectPage : Page
 {
-    public LessorSelectViewModel ViewModel
+    public ViewModels.Dialogs.LessorSelectViewModel ViewModel
     {
         get;
     }
 
-    public LessorSelectPage(LessorSelectViewModel vm)
+    public LessorSelectPage(ViewModels.Dialogs.LessorSelectViewModel vm)
     {
         ViewModel = vm;
         InitializeComponent();

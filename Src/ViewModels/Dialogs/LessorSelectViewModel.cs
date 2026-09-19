@@ -6,7 +6,7 @@ using ZumenSearch.Models.Common;
 using ZumenSearch.Services;
 using ZumenSearch.Services.Contracts;
 
-namespace ZumenSearch.ViewModels.Rent.Lessors;
+namespace ZumenSearch.ViewModels.Dialogs;
 
 // TODO: pass _cts as a parameter and make cancelable.
 

@@ -221,7 +221,7 @@ public partial class MainViewModel : ObservableRecipient,
             }
 
             item.Name = building.Name;
-            item.ThumbnailImageFilePath = building.ThumbnailImageFilePath;
+            item.ThumbnailFilename = building.ThumbnailFilename;
         }
 
         GetRecentPropertiesCommand.Execute(null);
@@ -372,6 +372,11 @@ public partial class MainViewModel : ObservableRecipient,
         }
         else
         {
+            foreach (var item in res.PropertySearchResult)
+            {
+                item.BasePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, item.Id);
+            }
+
             RecentProperties = new(res.PropertySearchResult);
         }
     }
@@ -723,6 +728,11 @@ public partial class MainViewModel : ObservableRecipient,
         }
         else
         {
+            foreach (var item in res.PropertySearchResult)
+            {
+                item.BasePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, item.Id);
+            }
+
             RentResidentialBldgSearchResult = new(res.PropertySearchResult);
 
             _navigationService.NavigateTo("ZumenSearch.Views.SearchResultPage", SlideNavigationTransitionEffect.FromLeft);//Navigate(typeof(Views.Rent.Residentials.SearchResultPage), null, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });
@@ -776,13 +786,21 @@ public partial class MainViewModel : ObservableRecipient,
             return;
         }
 
+        if (string.IsNullOrEmpty(selected.Id))
+        {
+            Debug.WriteLine("DeleteRentResidential executed but id is emptyu.");
+            return;
+        }
+
+        var selectedId = selected.Id;
+
         var isFound = false;
 
         // Check if the selected item is already being edited in editor window.
         foreach (var editorWindow in BldgEditorList.ToList())
         {
             //Debug.WriteLine($"Checking editor window with Id: {editorWindow.Id} for selected item with Id: {selected.Id}");
-            if (editorWindow.Id == selected.Id)
+            if (editorWindow.Id == selectedId)
             {
                 // If the editor window for this item is already open, activate it.
                 //Debug.WriteLine($"Editor window for {selected.Id} is already open. Closing if not IsDirty otherwise activating it.");
@@ -808,7 +826,7 @@ public partial class MainViewModel : ObservableRecipient,
             return;
         }
 
-        var res = _dataAccessService.DeleteRentResidential(selected.Id);
+        var res = _dataAccessService.DeleteRentResidential(selectedId);
         if (res.IsError)
         {
             Debug.WriteLine(res.Error.ErrText + Environment.NewLine + res.Error.ErrDescription + Environment.NewLine + res.Error.ErrPlace + Environment.NewLine + res.Error.ErrPlaceParent);
@@ -826,14 +844,18 @@ public partial class MainViewModel : ObservableRecipient,
             }
             else
             {
-                Debug.WriteLine($"Selected item {selected.Id} not found in the search result or could not remove.");
+                Debug.WriteLine($"Selected item {selectedId} not found in the search result or could not remove.");
             }
 
-            Debug.WriteLine($"DeleteRentResidentialCommand executed for {selected.Id}");
+            Debug.WriteLine($"DeleteRentResidentialCommand executed for {selectedId}");
 
-            // TODO: clean up pics and pdfs.
-
-
+            // clean up pics and pdfs.
+            var propertyDataDirectoryPath = System.IO.Path.Combine(App.PropertyBlobDataFolder, selectedId);
+            if (Directory.Exists(propertyDataDirectoryPath))
+            {
+                Debug.WriteLine($"Deleting folder: {propertyDataDirectoryPath}");
+                Directory.Delete(propertyDataDirectoryPath, true);
+            }
         }
     }
     private static bool DeleteRentResidentialBldgCanExecute(Models.Common.PropertySearchResultItem? selected)
@@ -856,6 +878,15 @@ public partial class MainViewModel : ObservableRecipient,
             return;
         }
 
+        if (string.IsNullOrEmpty(selected.Id))
+        {
+            Debug.WriteLine("DeleteRentResidentialRoom executed but id is empty.");
+            return;
+        }
+        
+        var selectedId = selected.Id;
+        var selectedPropertyId = selected.PropertyId;
+
         //Debug.WriteLine($"TODO: DeleteRentResidentialRoom executed for {selected.Id} (PropertyId = {selected.PropertyId})");
 
         var isFound = false;
@@ -864,7 +895,7 @@ public partial class MainViewModel : ObservableRecipient,
         foreach (var editorWindow in RoomEditorList.ToList())
         {
             //Debug.WriteLine($"Checking editor window with Id: {editorWindow.Id} for selected item with Id: {selected.Id}");
-            if (editorWindow.Id == selected.Id)
+            if (editorWindow.Id == selectedId)
             {
                 // If the editor window for this item is already open, activate it.
                 //Debug.WriteLine($"Editor window for {selected.Id} is already open. Closing if not IsDirty otherwise activating it.");
@@ -889,7 +920,7 @@ public partial class MainViewModel : ObservableRecipient,
             return;
         }
 
-        var res = _dataAccessService.DeleteRentResidentialListing(selected.Id);
+        var res = _dataAccessService.DeleteRentResidentialListing(selectedId);
         if (res.IsError)
         {
             Debug.WriteLine(res.Error.ErrText + Environment.NewLine + res.Error.ErrDescription + Environment.NewLine + res.Error.ErrPlace + Environment.NewLine + res.Error.ErrPlaceParent);
@@ -907,29 +938,36 @@ public partial class MainViewModel : ObservableRecipient,
             }
             else
             {
-                Debug.WriteLine($"Selected item {selected.Id} not found in the search result or could not remove.");
+                Debug.WriteLine($"Selected item {selectedId} not found in the search result or could not remove.");
             }
 
-            Debug.WriteLine($"DeleteRentResidentialRoomCommand executed for {selected.Id}");
+            Debug.WriteLine($"DeleteRentResidentialRoomCommand executed for {selectedId}");
 
             // Check if the selected item is already being edited in another window.
             BldgEditorList.ForEach(editorWindow =>
             {
-                Debug.WriteLine($"Checking editor window with Id: {editorWindow.Id} for selected item with Id: {selected.PropertyId}");
-                if (editorWindow.Id == selected.PropertyId)
+                Debug.WriteLine($"Checking editor window with Id: {editorWindow.Id} for selected item with Id: {selectedPropertyId}");
+                if (editorWindow.Id == selectedPropertyId)
                 {
                     // If the editor window for this item is already open, remove the room.
                     //Debug.WriteLine($"Editor window for {selected.PropertyId} is already open. Removing room.");
 
                     // remove room from the editor window's ViewModel if it exists.
-                    WeakReferenceMessenger.Default.Send(new Models.Messenger.ListingDeletedMessage(selected.Id));
+                    WeakReferenceMessenger.Default.Send(new Models.Messenger.ListingDeletedMessage(selectedId));
 
                     return;
                 }
             });
 
 
-            // TODO: clean up pics and pdfs.
+            // clean up pics and pdfs.
+            var listingDataDirectoryPath = System.IO.Path.Combine(System.IO.Path.Combine(App.PropertyBlobDataFolder, selectedPropertyId), selectedId);
+            if (Directory.Exists(listingDataDirectoryPath))
+            {
+                Debug.WriteLine($"Deleting folder: {listingDataDirectoryPath}");
+                Directory.Delete(listingDataDirectoryPath, true);
+            }
+
         }
 
     }

@@ -198,7 +198,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     }
 
     // 地上階
-    public string AboveGroundFloorCount
+    public string FloorCountAboveGround
     {
         get => field ?? string.Empty;
         set
@@ -242,7 +242,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             }
             else
             {
-                Debug.WriteLine($"AboveGroundFloorCount: not * digits");
+                Debug.WriteLine($"FloorCountAboveGround: not * digits");
                 // TODO: show err?
             }
             /*
@@ -262,7 +262,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     }
 
     // 地下階
-    public string BasementFloorCount
+    public string FloorCountBasement
     {
         get => field ?? string.Empty;
         set
@@ -296,7 +296,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             }
             else
             {
-                Debug.WriteLine($"BasementFloorCount: not * digits");
+                Debug.WriteLine($"FloorCountBasement: not * digits");
                 // TODO: show err?
             }
         }
@@ -1415,8 +1415,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         _dataAccessService = dataAccessService;
         _dataAccessLocationService = dataAccessLocationService;
 
-        // TODO:
-        _propertyDataDirectoryPath = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(App.PropertyBlobDataFolder, "Rent"), "Residential"), _id);
+        _propertyDataDirectoryPath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _id);
 
         // Update title with dummy value.
         WindowTitle = string.Empty;
@@ -1574,8 +1573,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         var Structurekey = Structures.FirstOrDefault(k => k.Key == _building.BuildingStructure.Key);
         SelectedStructure = Structurekey is null ? new(EnumStructures.Unspecified) : Structurekey;
 
-        AboveGroundFloorCount = _building.AboveGroundFloorCount == 0 ? string.Empty : _building.AboveGroundFloorCount.ToString();
-        BasementFloorCount = _building.BasementFloorCount == 0 ? string.Empty : _building.BasementFloorCount.ToString();
+        FloorCountAboveGround = _building.FloorCountAboveGround == 0 ? string.Empty : _building.FloorCountAboveGround.ToString();
+        FloorCountBasement = _building.FloorCountBasement == 0 ? string.Empty : _building.FloorCountBasement.ToString();
         TotalUnitCount = _building.TotalUnitCount == 0 ? string.Empty : _building.TotalUnitCount.ToString();
         BuiltYearAndMonth = _building.BuiltYearAndMonth.Year != 1900 ? _building.BuiltYearAndMonth : null;
         FudousanId = _building.FudousanId;
@@ -1637,6 +1636,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
         foreach (var item in Pictures)
         {
+            // Filename to actuall path.
+            item.BasePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id);
             item.ParentViewModel = this;
             item.IsModified = false; // Needed this.
             item.PropertyChanged += OnBuildingPicturePropertyChanged;
@@ -1674,6 +1675,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
         foreach (var item in Pdfs)
         {
+            // Filename to actuall path.
+            item.BasePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id);
             item.ParentViewModel = this;
             item.IsModified = false; // Needed this.
             item.PropertyChanged += OnBuildingPdfPropertyChanged;
@@ -1895,8 +1898,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         _building.IsUnitOwnership = IsUnitOwnership;
         
         _building.BuildingStructure = SelectedStructure;
-        _building.AboveGroundFloorCount = int.TryParse(Helpers.Common.ReplaceZenkakuNumbers(AboveGroundFloorCount), out var aboveGroundFloorCount) ? aboveGroundFloorCount : 0; //Convert.ToInt32(AboveGroundFloorCount)
-        _building.BasementFloorCount = int.TryParse(Helpers.Common.ReplaceZenkakuNumbers(BasementFloorCount), out var basementFloorCount) ? basementFloorCount : 0;
+        _building.FloorCountAboveGround = int.TryParse(Helpers.Common.ReplaceZenkakuNumbers(FloorCountAboveGround), out var floorCountAboveGround) ? floorCountAboveGround : 0; //Convert.ToInt32(FloorCountAboveGround)
+        _building.FloorCountBasement = int.TryParse(Helpers.Common.ReplaceZenkakuNumbers(FloorCountBasement), out var floorCountBasement) ? floorCountBasement : 0;
         _building.TotalUnitCount = int.TryParse(Helpers.Common.ReplaceZenkakuNumbers(TotalUnitCount), out var totalUnitCount) ? totalUnitCount : 0;
         _building.BuiltYearAndMonth = BuiltYearAndMonth ?? new DateTimeOffset(1900, 1, 1, 0, 0, 0, TimeSpan.Zero);
         _building.FudousanId = Helpers.Common.ReplaceZenkakuNumbers(FudousanId);
@@ -1925,7 +1928,9 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
 
         // Reset main ThumbnailImageFilePath here.
-        _building.ThumbnailImageFilePath = string.Empty;
+        _building.ThumbnailFilename = string.Empty;
+        // Base dir for the thumbnail
+        _building.BasePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id);
 
         // 写真
         _building.Pictures = Pictures;
@@ -1933,18 +1938,18 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         if (thumbImg is not null)
         {
             // 物件写真サムネイルに指定
-            _building.ThumbnailImageFilePath = thumbImg.ImageLocation;
+            _building.ThumbnailFilename = thumbImg.ImageFilename;
         }
 
         // 図面
         _building.Pdfs = Pdfs;
-        if (string.IsNullOrWhiteSpace(_building.ThumbnailImageFilePath))
+        if (string.IsNullOrWhiteSpace(_building.ThumbnailFilename))
         {
             var thumbPdf = Pdfs.FirstOrDefault(i => i.IsMain == true);
             if (thumbPdf is not null)
             {
                 // 物件写真サムネイルに指定
-                _building.ThumbnailImageFilePath = thumbPdf.ThumbnailLocation;
+                _building.ThumbnailFilename = thumbPdf.ThumbnailFilename;
             }
         }
 
@@ -1987,51 +1992,6 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         // 部屋
         _building.Rooms = Rooms;
 
-    }
-
-    private bool SaveAsNew()
-    {
-        var resInsert = _dataAccessService.InsertRentResidential(_building);
-        if (resInsert.IsError)
-        {
-            Debug.WriteLine("Error on insert. @SaveAsNew in Residentials PropertyViewModel");
-
-            Debug.WriteLine(resInsert.Error.ErrText + Environment.NewLine + resInsert.Error.ErrDescription + Environment.NewLine + resInsert.Error.ErrPlace + Environment.NewLine + resInsert.Error.ErrPlaceParent);
-
-            // TODO: fix format.
-            var errText = resInsert.Error.ErrText + Environment.NewLine + resInsert.Error.ErrDescription + Environment.NewLine + resInsert.Error.ErrPlace + Environment.NewLine + resInsert.Error.ErrPlaceParent;
-            InfoBarErrorMessage = errText;
-            IsInfoBarErrorOpen = true;
-
-            return false;
-        }
-        else
-        {
-            Debug.WriteLine("No errors on insert.");
-            return true;
-        }
-    }
-
-    private bool SaveAsUpdate()
-    {
-        var resInsert = _dataAccessService.UpdateRentResidential(_building);
-        if (resInsert.IsError)
-        {
-            Debug.WriteLine("Error on update. @SaveAsUpdate in ResidentialsViewModel");
-            Debug.WriteLine(resInsert.Error.ErrText + Environment.NewLine + resInsert.Error.ErrDescription + Environment.NewLine + resInsert.Error.ErrPlace + Environment.NewLine + resInsert.Error.ErrPlaceParent);
-
-            // TODO: fix format.
-            var errText = resInsert.Error.ErrText + Environment.NewLine + resInsert.Error.ErrDescription + Environment.NewLine + resInsert.Error.ErrPlace + Environment.NewLine + resInsert.Error.ErrPlaceParent;
-            InfoBarErrorMessage = errText;
-            IsInfoBarErrorOpen = true;
-
-            return false;
-        }
-        else
-        {
-            Debug.WriteLine("No errors on update.");
-            return true;
-        }
     }
 
     private void DiscardUnsavedFiles()
@@ -2119,13 +2079,23 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
         bool saveResult;
 
-        if (_building.Status == EnumEntryStatus.New)
+        var resInsert = _dataAccessService.UpsertRentResidential(_building);
+        if (resInsert.IsError)
         {
-            saveResult = SaveAsNew();
+            Debug.WriteLine("Error on insert/update. @Save() in ResidentialsViewModel");
+            Debug.WriteLine(resInsert.Error.ErrText + Environment.NewLine + resInsert.Error.ErrDescription + Environment.NewLine + resInsert.Error.ErrPlace + Environment.NewLine + resInsert.Error.ErrPlaceParent);
+
+            // TODO: fix format.
+            var errText = resInsert.Error.ErrText + Environment.NewLine + resInsert.Error.ErrDescription + Environment.NewLine + resInsert.Error.ErrPlace + Environment.NewLine + resInsert.Error.ErrPlaceParent;
+            InfoBarErrorMessage = errText;
+            IsInfoBarErrorOpen = true;
+
+            saveResult = false;
         }
         else
         {
-            saveResult = SaveAsUpdate();
+            Debug.WriteLine("No errors on update.");
+            saveResult = true;
         }
 
         if (saveResult)
@@ -2146,7 +2116,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             {
                 foreach (var file in _building.PicturesToBeDeleted)
                 {
-                    File.Delete(file.ImageLocation);
+                    var delFilePath = System.IO.Path.Combine(System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id), file.ImageFilename);
+                    File.Delete(delFilePath);
                 }
                 _building.PicturesToBeDeleted.Clear();
             }
@@ -2156,8 +2127,10 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             {
                 foreach (var file in _building.PdfsToBeDeleted)
                 {
-                    File.Delete(file.PdfLocation);
-                    File.Delete(file.ThumbnailLocation);
+                    var delFilePath = System.IO.Path.Combine(System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id), file.PdfFilename);
+                    File.Delete(delFilePath);
+                    delFilePath = System.IO.Path.Combine(System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id), file.ThumbnailFilename);
+                    File.Delete(delFilePath);
                 }
                 _building.PdfsToBeDeleted.Clear();
             }
@@ -2168,21 +2141,27 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                 _building.LessorsToBeDeleted.Clear();
             }
 
-            // Clear rooms pic and pdfs
+            // Clear rooms pic and pdfs and lessors
             if (_building.RoomsToBeDeleted.Count > 0)
             {
                 foreach (var room in _building.RoomsToBeDeleted)
                 {
                     foreach (var roomPic in room.Pictures)
                     {
-                        File.Delete(roomPic.ImageLocation);
+                        var delFilePath = System.IO.Path.Combine(System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id), roomPic.ImageFilename);
+                        File.Delete(delFilePath);
                     }
 
                     foreach (var roomPdf in room.Pdfs)
                     {
-                        File.Delete(roomPdf.PdfLocation);
-                        File.Delete(roomPdf.ThumbnailLocation);
+                        var delFilePath = System.IO.Path.Combine(System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id), roomPdf.PdfFilename);
+                        File.Delete(delFilePath);
+                        delFilePath = System.IO.Path.Combine(System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id), roomPdf.ThumbnailFilename);
+                        File.Delete(delFilePath);
                     }
+
+                    // Just in case clear LessorsToBeDeleted
+                    room.LessorsToBeDeleted.Clear();
                 }
                 _building.RoomsToBeDeleted.Clear();
             }
@@ -2260,14 +2239,16 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
             string newId = Guid.CreateVersion7().ToString("N");
             string extension = Path.GetExtension(System.IO.Path.GetFileName(filePath));
-            var destFilePath = Path.Combine(_propertyDataDirectoryPath, newId + extension);
+            string newFilename = newId + extension;
+            var destFilePath = Path.Combine(_propertyDataDirectoryPath, newFilename);
             //Debug.WriteLine($"{file} to {destFilePath}  @SetNewBuildingPicturesAsync()");
 
             using var destinationStream = File.Create(destFilePath);
             await sourceStream.CopyToAsync(destinationStream);
 
-            var pic = new Models.Rent.Residentials.Picture(newId, destFilePath)
+            var pic = new Models.Rent.Residentials.Picture(newId, newFilename)
             {
+                BasePath = _propertyDataDirectoryPath,//System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id),
                 IsNew = true,
                 ParentViewModel = this
             };
@@ -2374,7 +2355,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                 //await bitmapImage.SetSourceAsync(stream);
 
                 string newId = Guid.CreateVersion7().ToString("N");
-                var thumbnailDestFilePath = Path.Combine(_propertyDataDirectoryPath, newId + ".bmp");
+                string newThumbnailFilename = newId + ".bmp";
+                var thumbnailDestFilePath = Path.Combine(_propertyDataDirectoryPath, newThumbnailFilename);
 
                 using var destinationStream = File.Create(thumbnailDestFilePath);
                 using var managedSourceStream = stream.AsStreamForRead();
@@ -2383,14 +2365,16 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                 // Keep track of unsaved files to delete them when discarding.
                 _unsavedBuildingPdfThumbnailFileList.Add(thumbnailDestFilePath);
 
-                var pdfDestFilePath = Path.Combine(_propertyDataDirectoryPath, newId + extension);
+                string newFilename = newId + extension;
+                var pdfDestFilePath = Path.Combine(_propertyDataDirectoryPath, newFilename);
                 File.Copy(filePath, pdfDestFilePath);
 
                 // Keep track of unsaved files to delete them when discarding.
                 _unsavedBuildingPdfFileList.Add(pdfDestFilePath);
 
-                var pdf = new Models.Rent.Residentials.Pdf(newId, pdfDestFilePath, thumbnailDestFilePath)
+                var pdf = new Models.Rent.Residentials.Pdf(newId, newFilename, newThumbnailFilename)
                 {
+                    BasePath = _propertyDataDirectoryPath,//System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id),
                     IsNew = true,
                     ParentViewModel = this
                 };
@@ -2762,7 +2746,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             return;
         }
 
-        var lessor = await _dialogService.ShowLessorSelectDialog(new ViewModels.Rent.Lessors.LessorSelectViewModel(_dataAccessService, _cts));
+        var lessor = await _dialogService.ShowLessorSelectDialog(new ViewModels.Dialogs.LessorSelectViewModel(_dataAccessService, _cts));
 
         if (lessor is not null)
         {

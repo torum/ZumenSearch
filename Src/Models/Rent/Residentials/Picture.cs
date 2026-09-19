@@ -139,7 +139,7 @@ public sealed partial class Picture : PictureBase
 
     public Picture(string id, string imageLocation) : base(id)
     {
-        ImageLocation = imageLocation;
+        ImageFilename = imageLocation;
 
         IsModified = false;
     }

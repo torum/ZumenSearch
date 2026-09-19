@@ -6,9 +6,9 @@ public interface IDataAccessService
 {
     ResultWrapper InitializeDatabase(string dataBaseFilePath);
 
-    ResultWrapper InsertRentResidential(Models.Rent.Residentials.Property building);
+    ResultWrapper UpsertRentResidential(Models.Rent.Residentials.Property building);
 
-    ResultWrapper UpdateRentResidential(Models.Rent.Residentials.Property building);
+    //ResultWrapper UpdateRentResidential(Models.Rent.Residentials.Property building);
 
     ResultWrapper DeleteRentResidential(string rentId);
 
