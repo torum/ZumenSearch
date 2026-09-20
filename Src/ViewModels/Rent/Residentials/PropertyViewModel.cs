@@ -16,7 +16,6 @@ using Windows.System;
 using ZumenSearch.Models.Base;
 using ZumenSearch.Models.Common;
 using ZumenSearch.Models.Messenger;
-using ZumenSearch.Models.Rent.Lessors;
 using ZumenSearch.Models.Rent.Residentials;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.Services.Extensions.AbstractFactory;
@@ -28,7 +27,9 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     IRecipient<ListingWindowClosedMessage>, 
     IRecipient<ListingDeletedMessage>,
     IRecipient<LessorUpdatedMessage>,
-    IRecipient<LessorDeletedMessage>
+    IRecipient<BrokerUpdatedMessage>,
+    IRecipient<LessorDeletedMessage>,
+    IRecipient<BrokerDeletedMessage>
 {
     #region == Public Properties ==
 
@@ -1332,6 +1333,22 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     #endregion
 
+    #region == 宅建業者プロパティ ==
+
+    public ObservableCollection<Models.Brokers.PersonWrapperForPropertyViewModel> BrokersWrapper
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;//?
+            }
+        }
+    } = [];
+
+    #endregion
+
     #region == 部屋プロパティ ==
 
     public ObservableCollection<Models.Rent.Residentials.Listing.Listing> Rooms
@@ -1489,6 +1506,20 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         psn.Person = lessor; //= new PersonWrapperForPropertyViewModel(lessor, this);
     }
 
+    public void Receive(BrokerUpdatedMessage corp)
+    {
+        var broker = corp.Value;
+        if (broker is null)
+        {
+            return;
+        }
+
+        var psn = BrokersWrapper.FirstOrDefault(r => r.Person.Id.Equals(broker.Id));
+        if (psn is null) return;
+
+        psn.Person = broker; //= new PersonWrapperForPropertyViewModel(lessor, this);
+    }
+
     public void Receive(ListingDeletedMessage listingId)
     {
         var id = listingId.Value;
@@ -1513,6 +1544,21 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         var psn = LessorsWrapper.FirstOrDefault(r => r.Person.Id.Equals(id));
         if (psn is null) return;
         LessorsWrapper.Remove(psn);
+
+        // should be auto deleted from the table due to "cascade"
+    }
+
+    public void Receive(BrokerDeletedMessage lessorId)
+    {
+        var id = lessorId.Value;
+        if (string.IsNullOrEmpty(id))
+        {
+            return;
+        }
+
+        var psn = BrokersWrapper.FirstOrDefault(r => r.Person.Id.Equals(id));
+        if (psn is null) return;
+        BrokersWrapper.Remove(psn);
 
         // should be auto deleted from the table due to "cascade"
     }
@@ -2459,8 +2505,9 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     {
         var newId = Guid.CreateVersion7().ToString("N");
         var editorShell = _shellFactory.Create(new Models.Rent.Residentials.Listing.Listing(newId, EnumEntryStatus.New, _building.Id, _building.Status, _building.IsUnitOwnership, Name));
-        
-        //editorShell.ViewModel.IsPropertyUnitOwnership = this.IsUnitOwnership;
+
+        // Apply the current IsUnitOwnership state because it may not be saved to the _room.
+        editorShell.ViewModel.IsPropertyUnitOwnership = this.IsUnitOwnership;
 
         var mainVM = App.GetService<ViewModels.MainViewModel>();
         mainVM.RoomEditorList.Add(editorShell.Window);
@@ -2540,7 +2587,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
         var editorShell = _shellFactory.Create(room);
 
-        ///editorShell.ViewModel.IsPropertyUnitOwnership = this.IsUnitOwnership;
+        // Apply the current IsUnitOwnership state because it may not be saved to the _room.
+        editorShell.ViewModel.IsPropertyUnitOwnership = this.IsUnitOwnership;
 
         var editorWindow = editorShell.Window;
         if (editorWindow == null)
@@ -2776,14 +2824,14 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                 return;
             }
 
-            if (res.Lessor is null)
+            if (res.Person is null)
             {
                 Debug.WriteLine($"{lessorId} is null. Cannot open editor.");
                 return;
             }
 
 
-            var asdf = new PersonWrapperForPropertyViewModel(res.Lessor, this);
+            var asdf = new Models.Rent.Lessors.PersonWrapperForPropertyViewModel(res.Person, this);
 
             LessorsWrapper.Add(asdf);
 
@@ -2793,7 +2841,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     }
 
     [RelayCommand(CanExecute = nameof(CanEditLessor))]
-    private void EditLessor(PersonWrapperForPropertyViewModel lessor)
+    private void EditLessor(Models.Rent.Lessors.PersonWrapperForPropertyViewModel lessor)
     {
         if (lessor.Person is not null)
         {
@@ -2804,13 +2852,13 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             }
         }
     }
-    private static bool CanEditLessor(PersonWrapperForPropertyViewModel lessor)
+    private static bool CanEditLessor(Models.Rent.Lessors.PersonWrapperForPropertyViewModel lessor)
     {
         return lessor is not null;
     }
 
     [RelayCommand(CanExecute = nameof(CanDeleteLessor))]
-    public async Task DeleteLessor(PersonWrapperForPropertyViewModel lessor)
+    public async Task DeleteLessor(Models.Rent.Lessors.PersonWrapperForPropertyViewModel lessor)
     {
         Debug.WriteLine($"DeleteLessorCommand {lessor.Person.Name}");
 
@@ -2831,7 +2879,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             _building.LessorsToBeDeleted.Add(lessor.Person);
         }
     }
-    private static bool CanDeleteLessor(PersonWrapperForPropertyViewModel lessor)
+    private static bool CanDeleteLessor(Models.Rent.Lessors.PersonWrapperForPropertyViewModel lessor)
     {
         return lessor is not null;
     }

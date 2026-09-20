@@ -285,6 +285,51 @@ public sealed partial class MainWindow : Window
                     _viewModel.LessorEditorWinLeft = 0;
                 }
 
+                // BrokerEditorWindow element
+                editWindow = xdoc.Root.Element("BrokerEditorWindow");
+                if (editWindow != null)
+                {
+                    var hoge = editWindow.Attribute("top");
+                    if (hoge != null)
+                    {
+                        _viewModel.BrokerEditorWinTop = int.Parse(hoge.Value);
+                    }
+
+                    hoge = editWindow.Attribute("left");
+                    if (hoge != null)
+                    {
+                        _viewModel.BrokerEditorWinLeft = int.Parse(hoge.Value);
+                    }
+
+                    hoge = editWindow.Attribute("height");
+                    if (hoge != null)
+                    {
+                        _viewModel.BrokerEditorWinHeight = int.Parse(hoge.Value);
+                    }
+
+                    hoge = editWindow.Attribute("width");
+                    if (hoge != null)
+                    {
+                        _viewModel.BrokerEditorWinWidth = int.Parse(hoge.Value);
+                    }
+                }
+
+                if (_viewModel.BrokerEditorWinWidth < 500)
+                {
+                    _viewModel.BrokerEditorWinWidth = 500;
+                }
+                if (_viewModel.BrokerEditorWinHeight < 500)
+                {
+                    _viewModel.BrokerEditorWinHeight = 500;
+                }
+                if (_viewModel.BrokerEditorWinTop < 0)
+                {
+                    _viewModel.BrokerEditorWinTop = 0;
+                }
+                if (_viewModel.BrokerEditorWinLeft < 0)
+                {
+                    _viewModel.BrokerEditorWinLeft = 0;
+                }
 
             }
         }
@@ -444,6 +489,64 @@ public sealed partial class MainWindow : Window
                 }
             }
         }
+
+        if (isCancel)
+        {
+            return;
+        }
+
+        if (_viewModel.BrokerEditorList.Count > 0)
+        {
+            foreach (var editor in _viewModel.BrokerEditorList)
+            {
+                if (editor.ViewModel is null)
+                {
+                    Debug.WriteLine("AppWindow_Closing: editor.ViewModel is null");
+                    continue;
+                }
+                if (editor.ViewModel.IsDirty)
+                {
+                    args.Cancel = true;
+                    isCancel = true;
+
+                    IntPtr hWnd = WindowNative.GetWindowHandle(editor);
+                    NativeMethods.ShowWindow(hWnd, NativeMethods.SW_RESTORE); // Ensure it's not minimized
+                    NativeMethods.SetForegroundWindow(hWnd); // Attempt to set it as the foreground window
+
+                    editor.Activate();
+                    editor.AppWindow.MoveInZOrderAtTop();
+
+                    // Show comfirmation dialog to user to save changes or not.
+                    if (editor.Content is Views.Brokers.ShellPage shell)
+                    {
+                        await shell.ShowEditorCloseConfirmationDialog();
+                    }
+
+                    break;
+                }
+            }
+
+            if (!isCancel)
+            {
+                foreach (var editor in _viewModel.BrokerEditorList.ToList()) // Create snapshot of the list to avoid collection modification issues during iteration
+                {
+                    editor.IsAutoClose = true;
+
+                    //IntPtr hWnd = WindowNative.GetWindowHandle(editor);
+                    //NativeMethods.ShowWindow(hWnd, NativeMethods.SW_RESTORE); // Ensure it's not minimized
+
+                    //editor.Activate();
+
+                    editor.Close();
+                }
+            }
+        }
+
+        if (isCancel)
+        {
+            return;
+        }
+
     }
 
     private void Window_Closed(object sender, WindowEventArgs args)
@@ -640,6 +743,30 @@ public sealed partial class MainWindow : Window
 
         attrs = doc.CreateAttribute("left");
         attrs.Value = _viewModel.LessorEditorWinLeft.ToString();
+        editWindow.SetAttributeNode(attrs);
+
+        // Set editor window element to root.
+        root.AppendChild(editWindow);
+
+
+        // Editor window Broker
+        editWindow = doc.CreateElement(string.Empty, "BrokerEditorWindow", string.Empty);
+
+        // Editor window attributes
+        attrs = doc.CreateAttribute("width");
+        attrs.Value = _viewModel.BrokerEditorWinWidth.ToString();
+        editWindow.SetAttributeNode(attrs);
+
+        attrs = doc.CreateAttribute("height");
+        attrs.Value = _viewModel.BrokerEditorWinHeight.ToString();
+        editWindow.SetAttributeNode(attrs);
+
+        attrs = doc.CreateAttribute("top");
+        attrs.Value = _viewModel.BrokerEditorWinTop.ToString();
+        editWindow.SetAttributeNode(attrs);
+
+        attrs = doc.CreateAttribute("left");
+        attrs.Value = _viewModel.BrokerEditorWinLeft.ToString();
         editWindow.SetAttributeNode(attrs);
 
         // Set editor window element to root.

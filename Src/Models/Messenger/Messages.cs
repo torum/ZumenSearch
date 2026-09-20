@@ -21,9 +21,17 @@ public class ListingUpdatedMessage : ValueChangedMessage<Models.Rent.Residential
     }
 }
 
-public class LessorUpdatedMessage : ValueChangedMessage<Models.Rent.Lessors.Person>
+public class LessorUpdatedMessage : ValueChangedMessage<Models.Base.PersonBase>
 {
-    public LessorUpdatedMessage(Models.Rent.Lessors.Person value) : base(value)
+    public LessorUpdatedMessage(Models.Base.PersonBase value) : base(value)
+    {
+
+    }
+}
+
+public class BrokerUpdatedMessage : ValueChangedMessage<Models.Base.PersonBase>
+{
+    public BrokerUpdatedMessage(Models.Base.PersonBase value) : base(value)
     {
 
     }
@@ -40,6 +48,14 @@ public class ListingDeletedMessage : ValueChangedMessage<string>
 public class LessorDeletedMessage : ValueChangedMessage<string>
 {
     public LessorDeletedMessage(string value) : base(value)
+    {
+
+    }
+}
+
+public class BrokerDeletedMessage : ValueChangedMessage<string>
+{
+    public BrokerDeletedMessage(string value) : base(value)
     {
 
     }
@@ -64,6 +80,14 @@ public class PropertyWindowClosedMessage : ValueChangedMessage<Views.Rent.Reside
 public class LessorWindowClosedMessage : ValueChangedMessage<Views.Rent.Lessors.EditorWindow>
 {
     public LessorWindowClosedMessage(Views.Rent.Lessors.EditorWindow value) : base(value)
+    {
+
+    }
+}
+
+public class BrokerWindowClosedMessage : ValueChangedMessage<Views.Brokers.EditorWindow>
+{
+    public BrokerWindowClosedMessage(Views.Brokers.EditorWindow value) : base(value)
     {
 
     }

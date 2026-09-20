@@ -81,7 +81,7 @@
                         </NavigationViewItem.Icon>
                     </NavigationViewItem>
 
-                    <NavigationViewItem Tag="Rent" Content="賃貸" ToolTipService.ToolTip="賃貸" IsExpanded="True">
+                    <NavigationViewItem Tag="Rent" Content="賃貸物件" ToolTipService.ToolTip="賃貸物件" IsExpanded="True">
                         <NavigationViewItem.Icon>
                             <FontIcon Glyph="&#xe838;"/>
                         </NavigationViewItem.Icon>
@@ -115,7 +115,18 @@
                         </NavigationViewItem.MenuItems>
                     </NavigationViewItem>
 
-                    <NavigationViewItem Tag="ZumenSearch.Views.Brokers.BrokersPage" Content="宅建業者" ToolTipService.ToolTip="宅建業者">
+                    <NavigationViewItem Tag="Sale" Content="売買物件" ToolTipService.ToolTip="売買物件" IsExpanded="True">
+                        <NavigationViewItem.Icon>
+                            <FontIcon Glyph="&#xe838;"/>
+                        </NavigationViewItem.Icon>
+<!--
+                        <NavigationViewItem.MenuItems>
+
+                        </NavigationViewItem.MenuItems>
+                        -->
+                    </NavigationViewItem>
+
+                    <NavigationViewItem Tag="ZumenSearch.Views.BrokerSearchPage" Content="宅建業者" ToolTipService.ToolTip="宅建業者">
                         <NavigationViewItem.Icon>
                             <FontIcon Glyph="&#xe7c3;"/>
                         </NavigationViewItem.Icon>

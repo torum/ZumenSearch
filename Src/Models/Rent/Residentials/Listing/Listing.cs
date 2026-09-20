@@ -61,7 +61,7 @@ public sealed partial class Listing : ListingBase
     public ObservableCollection<Pdf> PdfsToBeDeleted = [];
 
     // 貸主のリスト
-    public ObservableCollection<Models.Rent.Lessors.Person> Lessors
+    public ObservableCollection<Models.Base.PersonBase> Lessors
     {
         get;
         set
@@ -74,7 +74,7 @@ public sealed partial class Listing : ListingBase
     } = [];
 
     // DBへの更新時にDBから削除されるべき貸主のIDリスト
-    public ObservableCollection<Models.Rent.Lessors.Person> LessorsToBeDeleted = [];
+    public ObservableCollection<Models.Base.PersonBase> LessorsToBeDeleted = [];
 
 
     // 賃料（円）

@@ -23,6 +23,8 @@ public sealed class DataAccessService : IDataAccessService
 
     private readonly ReaderWriterLockSlim _readerWriterLock = new();
 
+    #region == Initialization ==
+
     public ResultWrapper InitializeDatabase(string dataBaseFilePath)
     {
         var res = new ResultWrapper();
@@ -162,8 +164,12 @@ public sealed class DataAccessService : IDataAccessService
                 tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS rent_lessors (" +
                     "lessor_id TEXT NOT NULL PRIMARY KEY," +
                     "name TEXT NOT NULL," +
+                    "person_kind TEXT NOT NULL," +
                     "name_last TEXT NOT NULL," +
                     "name_first TEXT NOT NULL," +
+
+                    // Phone numbers
+                    // Address
                     "remarks TEXT," +
 
                     "updated_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc'))," +
@@ -596,6 +602,121 @@ public sealed class DataAccessService : IDataAccessService
         */
         #endregion
     }
+
+    #endregion
+
+    #region == Properties ==
+
+    public PropertiesResultWrapper SelectRecentProperties()
+    {
+        var res = new PropertiesResultWrapper();
+
+        _readerWriterLock.EnterReadLock();
+        try
+        {
+            using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
+            connection.Open();
+            using var cmd = connection.CreateCommand();
+            cmd.CommandText = "SELECT * FROM properties ORDER BY updated_at DESC LIMIT 10"; // limit 10 for now.
+
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                var id = reader.GetString(reader.GetOrdinal("property_id")) ?? string.Empty; //Convert.ToString(reader["property_id"]);
+                if (string.IsNullOrEmpty(id))
+                {
+                    Debug.WriteLine("DataAccess::SelectRecentProperties: property_id is null or empty .");
+                    continue;
+                }
+
+                var enumKind = EnumPropertyKind.Unknown;
+                var kind = reader.GetString(reader.GetOrdinal("property_kind")) ?? string.Empty;
+                if (!string.IsNullOrEmpty(kind))
+                {
+                    if (Enum.TryParse<Models.Base.EnumPropertyKind>(kind, out var parsedKind))
+                    {
+                        enumKind = parsedKind;
+                    }
+                    else
+                    {
+                        Debug.WriteLine($"property_kind ({kind}) parse failed. @SelectRecentProperties()");
+                    }
+                }
+
+                var entry = new Models.Common.PropertySearchResultItem(id, enumKind);
+
+                var name = reader.GetString(reader.GetOrdinal("name")) ?? string.Empty;//Convert.ToString(reader["name"]) ?? "";
+                entry.Name = name;
+
+                var thumb = reader.GetString(reader.GetOrdinal("thumbnail_filename")) ?? string.Empty;
+                entry.ThumbnailFilename = thumb;
+
+                var createdAt = reader.GetString(reader.GetOrdinal("created_at")) ?? string.Empty;//Convert.ToString(reader["created_at"]) ?? string.Empty;
+                entry.CreatedAt = createdAt;
+                var updatedAt = reader.GetString(reader.GetOrdinal("updated_at")) ?? string.Empty;//Convert.ToString(reader["updated_at"]) ?? string.Empty;
+                entry.UpdatedAt = updatedAt;
+
+                //res.AffectedCount++;
+
+                res.PropertySearchResult.Add(entry);
+            }
+        }
+        catch (System.Reflection.TargetInvocationException ex)
+        {
+            res.IsError = true;
+            res.Error.ErrType = ErrorObject.ErrTypes.DB;
+            res.Error.ErrCode = "";
+            res.Error.ErrDescription = "TargetInvocationException";
+            res.Error.ErrText = ex.Message;
+            res.Error.ErrDatetime = DateTime.Now;
+            res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
+            res.Error.ErrPlaceParent = "DataAccess::SelectRecentProperties";
+        }
+        catch (System.InvalidOperationException ex)
+        {
+            Debug.WriteLine("Opps. InvalidOperationException@DataAccess::SelectRecentProperties");
+
+            res.IsError = true;
+            res.Error.ErrType = ErrorObject.ErrTypes.DB;
+            res.Error.ErrCode = "";
+            res.Error.ErrDescription = "InvalidOperationException";
+            res.Error.ErrText = ex.Message;
+            res.Error.ErrDatetime = DateTime.Now;
+            res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
+            res.Error.ErrPlaceParent = "DataAccess::SelectRecentProperties";
+        }
+        catch (Exception e)
+        {
+            res.IsError = true;
+            res.Error.ErrType = ErrorObject.ErrTypes.DB;
+            res.Error.ErrCode = "";
+            if (e.InnerException != null)
+            {
+                Debug.WriteLine(e.InnerException.Message + " @DataAccess::SelectRecentProperties");
+                res.Error.ErrDescription = "InnerException";
+                res.Error.ErrText = e.InnerException.Message;
+            }
+            else
+            {
+                Debug.WriteLine(e.Message + " @DataAccess::SelectRecentProperties");
+                res.Error.ErrDescription = "Exception";
+                res.Error.ErrText = e.Message;
+            }
+            res.Error.ErrDatetime = DateTime.Now;
+            res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
+            res.Error.ErrPlaceParent = "DataAccess::SelectRecentProperties";
+        }
+        finally
+        {
+            _readerWriterLock.ExitReadLock();
+        }
+
+        return res;
+    }
+
+    #endregion
+
+    #region == Rent Residential ==
 
     public ResultWrapper UpsertRentResidential(Models.Rent.Residentials.Property building)
     {
@@ -1168,218 +1289,6 @@ public sealed class DataAccessService : IDataAccessService
         return res;
     }
 
-    public ResultWrapper DeleteRentResidential(string rentId)
-    {
-        var res = new ResultWrapper();
-
-        if (string.IsNullOrEmpty(rentId))
-        {
-            res.IsError = true;
-            // TODO:
-            return res;
-        }
-
-        _readerWriterLock.EnterWriteLock();
-        try
-        {
-            // System.Data.SQLite
-            //using var connection = new SQLiteConnection(connectionStringBuilder.ConnectionString);
-            // Microsoft.Data.Sqlite
-            using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
-            connection.Open();
-
-            using var cmd = connection.CreateCommand();
-
-            cmd.Transaction = connection.BeginTransaction();
-            try
-            {
-                cmd.CommandText = string.Format("DELETE FROM properties WHERE property_id = '{0}';", rentId);
-                res.AffectedCount = cmd.ExecuteNonQuery();
-
-                cmd.Transaction.Commit();
-            }
-            catch (Exception e)
-            {
-                cmd.Transaction.Rollback();
-
-                res.IsError = true;
-                res.Error.ErrType = ErrorObject.ErrTypes.DB;
-                res.Error.ErrCode = "";
-                res.Error.ErrText = e.Message;
-                res.Error.ErrDescription = "Exception";
-                res.Error.ErrDatetime = DateTime.Now;
-                res.Error.ErrPlace = "cmd.ExecuteNonQuery(),Transaction.Commit()";
-                res.Error.ErrPlaceParent = "DataAccess::DeleteRentResidential";
-
-                return res;
-            }
-        }
-        catch (System.Reflection.TargetInvocationException ex)
-        {
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-            res.Error.ErrText = ex.Message;
-            res.Error.ErrDescription = "TargetInvocationException";
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open(),cmd.ExecuteNonQuery()";
-            res.Error.ErrPlaceParent = "DataAccess::DeleteRentResidential";
-
-            return res;
-        }
-        catch (System.InvalidOperationException ex)
-        {
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-            res.Error.ErrText = ex.Message;
-            res.Error.ErrDescription = "InvalidOperationException";
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open(),cmd.ExecuteNonQuery()";
-            res.Error.ErrPlaceParent = "DataAccess::DeleteRentResidential";
-
-            return res;
-        }
-        catch (Exception e)
-        {
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-            if (e.InnerException != null)
-            {
-                res.Error.ErrDescription = "InnerException";
-                res.Error.ErrText = e.Message + " " + e.InnerException.Message;
-                Debug.WriteLine(e.InnerException.Message + " @DataAccess::DeleteRentResidential");
-            }
-            else
-            {
-                res.Error.ErrDescription = "Exception";
-                res.Error.ErrText = e.Message;
-                Debug.WriteLine(e.Message + " @DataAccess::DeleteRentResidential");
-            }
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open(),cmd.ExecuteNonQuery()";
-            res.Error.ErrPlaceParent = "DataAccess::DeleteRentResidential";
-
-            return res;
-        }
-        finally
-        {
-            _readerWriterLock.ExitWriteLock();
-        }
-
-        //Debug.WriteLine(string.Format("{0} feed Deleted from DB", res.AffectedCount));
-
-        return res;
-    }
-
-    public PropertiesResultWrapper SelectRecentProperties()
-    {
-        var res = new PropertiesResultWrapper();
-
-        _readerWriterLock.EnterReadLock();
-        try
-        {
-            using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
-            connection.Open();
-            using var cmd = connection.CreateCommand();
-            cmd.CommandText = "SELECT * FROM properties ORDER BY updated_at DESC LIMIT 10"; // limit 10 for now.
-
-            using var reader = cmd.ExecuteReader();
-            while (reader.Read())
-            {
-                var id = reader.GetString(reader.GetOrdinal("property_id")) ?? string.Empty; //Convert.ToString(reader["property_id"]);
-                if (string.IsNullOrEmpty(id))
-                {
-                    Debug.WriteLine("DataAccess::SelectRecentProperties: property_id is null or empty .");
-                    continue;
-                }
-
-                var enumKind = EnumPropertyKind.Unknown;
-                var kind = reader.GetString(reader.GetOrdinal("property_kind")) ?? string.Empty;
-                if (!string.IsNullOrEmpty(kind))
-                {
-                    if (Enum.TryParse<Models.Base.EnumPropertyKind>(kind, out var parsedKind))
-                    {
-                        enumKind = parsedKind;
-                    }
-                    else
-                    {
-                        Debug.WriteLine($"property_kind ({kind}) parse failed. @SelectRecentProperties()");
-                    }
-                }
-
-                var entry = new Models.Common.PropertySearchResultItem(id, enumKind);
-
-                var name = reader.GetString(reader.GetOrdinal("name")) ?? string.Empty;//Convert.ToString(reader["name"]) ?? "";
-                entry.Name = name;
-
-                var thumb = reader.GetString(reader.GetOrdinal("thumbnail_filename")) ?? string.Empty;
-                entry.ThumbnailFilename = thumb;
-
-                var createdAt = reader.GetString(reader.GetOrdinal("created_at")) ?? string.Empty;//Convert.ToString(reader["created_at"]) ?? string.Empty;
-                entry.CreatedAt = createdAt;
-                var updatedAt = reader.GetString(reader.GetOrdinal("updated_at")) ?? string.Empty;//Convert.ToString(reader["updated_at"]) ?? string.Empty;
-                entry.UpdatedAt = updatedAt;
-
-                //res.AffectedCount++;
-
-                res.PropertySearchResult.Add(entry);
-            }
-        }
-        catch (System.Reflection.TargetInvocationException ex)
-        {
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-            res.Error.ErrDescription = "TargetInvocationException";
-            res.Error.ErrText = ex.Message;
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
-            res.Error.ErrPlaceParent = "DataAccess::SelectRecentProperties";
-        }
-        catch (System.InvalidOperationException ex)
-        {
-            Debug.WriteLine("Opps. InvalidOperationException@DataAccess::SelectRecentProperties");
-
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-            res.Error.ErrDescription = "InvalidOperationException";
-            res.Error.ErrText = ex.Message;
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
-            res.Error.ErrPlaceParent = "DataAccess::SelectRecentProperties";
-        }
-        catch (Exception e)
-        {
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-            if (e.InnerException != null)
-            {
-                Debug.WriteLine(e.InnerException.Message + " @DataAccess::SelectRecentProperties");
-                res.Error.ErrDescription = "InnerException";
-                res.Error.ErrText = e.InnerException.Message;
-            }
-            else
-            {
-                Debug.WriteLine(e.Message + " @DataAccess::SelectRecentProperties");
-                res.Error.ErrDescription = "Exception";
-                res.Error.ErrText = e.Message;
-            }
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
-            res.Error.ErrPlaceParent = "DataAccess::SelectRecentProperties";
-        }
-        finally
-        {
-            _readerWriterLock.ExitReadLock();
-        }
-
-        return res;
-    }
-
     public PropertiesResultWrapper SelectRentResidentialsByNameKeyword(string keyword)
     {
         var res = new PropertiesResultWrapper();
@@ -1500,7 +1409,7 @@ public sealed class DataAccessService : IDataAccessService
 
         return res;
     }
-
+    
     public RentResidentialBuildingSingleResultWrapper SelectRentResidentialById(string id)
     {
         var res = new RentResidentialBuildingSingleResultWrapper();
@@ -1745,8 +1654,11 @@ public sealed class DataAccessService : IDataAccessService
                                 continue;
                             }
 
+                            // TODO: If person_kind natural
+                            var lessor = new Models.PersonNatural(lessId, EnumEntryStatus.Saved);
+                            /*
                             var lessor = new Models.Rent.Lessors.Person(lessId, EnumEntryStatus.Saved);
-
+                            */
                             s = Convert.ToString(reader2["name"]) ?? "";
                             lessor.Name = s;
 
@@ -1757,7 +1669,7 @@ public sealed class DataAccessService : IDataAccessService
                             lessor.NameFirst = s;
 
                             s = Convert.ToString(reader2["remarks"]) ?? "";
-                            lessor.Remarks = s;
+                            //lessor.Remarks = s;
 
                             // TODO: more.
 
@@ -2008,7 +1920,9 @@ public sealed class DataAccessService : IDataAccessService
                             continue;
                         }
 
-                        var lessor = new Models.Rent.Lessors.Person(lessId, EnumEntryStatus.Saved);
+                        // TODO: IF natural
+                        //var lessor = new Models.Rent.Lessors.Person(lessId, EnumEntryStatus.Saved);
+                        var lessor = new Models.PersonNatural(lessId, EnumEntryStatus.Saved);
 
                         s = Convert.ToString(reader2["name"]) ?? "";
                         lessor.Name = s;
@@ -2020,7 +1934,7 @@ public sealed class DataAccessService : IDataAccessService
                         lessor.NameFirst = s;
 
                         s = Convert.ToString(reader2["remarks"]) ?? "";
-                        lessor.Remarks = s;
+                        //lessor.Remarks = s;
 
                         // TODO: more.
 
@@ -2032,6 +1946,115 @@ public sealed class DataAccessService : IDataAccessService
             }
         }
     }
+
+    public ResultWrapper DeleteRentResidential(string rentId)
+    {
+        var res = new ResultWrapper();
+
+        if (string.IsNullOrEmpty(rentId))
+        {
+            res.IsError = true;
+            // TODO:
+            return res;
+        }
+
+        _readerWriterLock.EnterWriteLock();
+        try
+        {
+            // System.Data.SQLite
+            //using var connection = new SQLiteConnection(connectionStringBuilder.ConnectionString);
+            // Microsoft.Data.Sqlite
+            using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
+            connection.Open();
+
+            using var cmd = connection.CreateCommand();
+
+            cmd.Transaction = connection.BeginTransaction();
+            try
+            {
+                cmd.CommandText = string.Format("DELETE FROM properties WHERE property_id = '{0}';", rentId);
+                res.AffectedCount = cmd.ExecuteNonQuery();
+
+                cmd.Transaction.Commit();
+            }
+            catch (Exception e)
+            {
+                cmd.Transaction.Rollback();
+
+                res.IsError = true;
+                res.Error.ErrType = ErrorObject.ErrTypes.DB;
+                res.Error.ErrCode = "";
+                res.Error.ErrText = e.Message;
+                res.Error.ErrDescription = "Exception";
+                res.Error.ErrDatetime = DateTime.Now;
+                res.Error.ErrPlace = "cmd.ExecuteNonQuery(),Transaction.Commit()";
+                res.Error.ErrPlaceParent = "DataAccess::DeleteRentResidential";
+
+                return res;
+            }
+        }
+        catch (System.Reflection.TargetInvocationException ex)
+        {
+            res.IsError = true;
+            res.Error.ErrType = ErrorObject.ErrTypes.DB;
+            res.Error.ErrCode = "";
+            res.Error.ErrText = ex.Message;
+            res.Error.ErrDescription = "TargetInvocationException";
+            res.Error.ErrDatetime = DateTime.Now;
+            res.Error.ErrPlace = "connection.Open(),cmd.ExecuteNonQuery()";
+            res.Error.ErrPlaceParent = "DataAccess::DeleteRentResidential";
+
+            return res;
+        }
+        catch (System.InvalidOperationException ex)
+        {
+            res.IsError = true;
+            res.Error.ErrType = ErrorObject.ErrTypes.DB;
+            res.Error.ErrCode = "";
+            res.Error.ErrText = ex.Message;
+            res.Error.ErrDescription = "InvalidOperationException";
+            res.Error.ErrDatetime = DateTime.Now;
+            res.Error.ErrPlace = "connection.Open(),cmd.ExecuteNonQuery()";
+            res.Error.ErrPlaceParent = "DataAccess::DeleteRentResidential";
+
+            return res;
+        }
+        catch (Exception e)
+        {
+            res.IsError = true;
+            res.Error.ErrType = ErrorObject.ErrTypes.DB;
+            res.Error.ErrCode = "";
+            if (e.InnerException != null)
+            {
+                res.Error.ErrDescription = "InnerException";
+                res.Error.ErrText = e.Message + " " + e.InnerException.Message;
+                Debug.WriteLine(e.InnerException.Message + " @DataAccess::DeleteRentResidential");
+            }
+            else
+            {
+                res.Error.ErrDescription = "Exception";
+                res.Error.ErrText = e.Message;
+                Debug.WriteLine(e.Message + " @DataAccess::DeleteRentResidential");
+            }
+            res.Error.ErrDatetime = DateTime.Now;
+            res.Error.ErrPlace = "connection.Open(),cmd.ExecuteNonQuery()";
+            res.Error.ErrPlaceParent = "DataAccess::DeleteRentResidential";
+
+            return res;
+        }
+        finally
+        {
+            _readerWriterLock.ExitWriteLock();
+        }
+
+        //Debug.WriteLine(string.Format("{0} feed Deleted from DB", res.AffectedCount));
+
+        return res;
+    }
+
+    #endregion
+
+    #region == Rent Residential Room ==
 
     public ResultWrapper UpsertRentResidentialListing(string rentId, Models.Rent.Residentials.Listing.Listing room)
     {
@@ -2354,6 +2377,7 @@ public sealed class DataAccessService : IDataAccessService
         return res;
     }
 
+    // TODO:
     public ListingsResultWrapper SelectRentResidentialListings()
     {
         var res = new ListingsResultWrapper();
@@ -2677,7 +2701,12 @@ public sealed class DataAccessService : IDataAccessService
         return res;
     }
 
-    public ResultWrapper UpsertRentLessor(Models.Rent.Lessors.Person lessor)
+    #endregion
+
+    // TODO
+    #region == Rent Lessor ==
+
+    public ResultWrapper UpsertRentLessor(Models.Base.PersonBase lessor)
     {
         var res = new ResultWrapper();
 
@@ -2701,16 +2730,25 @@ public sealed class DataAccessService : IDataAccessService
                 cmd.CommandType = CommandType.Text;
 
                 // Upsert into rent_lessor
-                var sqlInsertIntoRentLivingRoom = "INSERT INTO rent_lessors (lessor_id, name, name_last, name_first, remarks) VALUES (@lessor_id, @name, @name_last, @name_first, @remarks) ";
+                var sqlInsertIntoRentLivingRoom = "INSERT INTO rent_lessors (lessor_id, name, person_kind, name_last, name_first, remarks) VALUES (@lessor_id, @name, @personKind, @name_last, @name_first, @remarks) ";
                 sqlInsertIntoRentLivingRoom += "ON CONFLICT(lessor_id) ";
-                sqlInsertIntoRentLivingRoom += "DO UPDATE SET name = @name, name_last = @name_last, name_first = @name_first, remarks = @remarks, updated_at = @updated_at";
+                sqlInsertIntoRentLivingRoom += "DO UPDATE SET name = @name, person_kind = @personKind, name_last = @name_last, name_first = @name_first, remarks = @remarks, updated_at = @updated_at";
 
                 cmd.CommandText = sqlInsertIntoRentLivingRoom;
 
                 cmd.Parameters.AddWithValue("@lessor_id", lessor.Id);
                 cmd.Parameters.AddWithValue("@name", lessor.Name);
-                cmd.Parameters.AddWithValue("@name_last", lessor.NameLast);
-                cmd.Parameters.AddWithValue("@name_first", lessor.NameFirst);
+                cmd.Parameters.AddWithValue("@personKind", lessor.PersonKind.ToString());
+                // TODO:
+                if (lessor is PersonNatural naturalPerson)
+                {
+                    cmd.Parameters.AddWithValue("@name_last", naturalPerson.NameLast);
+                    cmd.Parameters.AddWithValue("@name_first", naturalPerson.NameFirst);
+                }
+                else if (lessor is PersonLegal legalPerson)
+                {
+                    //
+                }
                 cmd.Parameters.AddWithValue("@remarks", lessor.Remarks);
                 cmd.Parameters.AddWithValue("@updated_at", DateTimeOffset.UtcNow.ToString("s"));
 
@@ -2803,7 +2841,7 @@ public sealed class DataAccessService : IDataAccessService
         return res;
     }
 
-    public PersonsResultWrapper SelectRentLessorByKeyword(string keyword)
+    public PersonsResultWrapper SelectRentLessorsByKeyword(string keyword)
     {
         var res = new PersonsResultWrapper();
 
@@ -2823,11 +2861,11 @@ public sealed class DataAccessService : IDataAccessService
             using var cmd = connection.CreateCommand();
             if (keyword == "*")
             {
-                cmd.CommandText = "SELECT lessor_id, name, remarks FROM rent_lessors";
+                cmd.CommandText = "SELECT lessor_id, name, person_kind, remarks FROM rent_lessors";
             }
             else
             {
-                cmd.CommandText = string.Format("SELECT lessor_id, name, remarks FROM rent_lessors WHERE REPLACE(REPLACE(name, ' ', ''), '　', '') LIKE '%{0}%'", keyword);
+                cmd.CommandText = string.Format("SELECT lessor_id, name, person_kind, remarks FROM rent_lessors WHERE REPLACE(REPLACE(name, ' ', ''), '　', '') LIKE '%{0}%'", keyword);
             }
 
             using var reader = cmd.ExecuteReader();
@@ -2840,18 +2878,43 @@ public sealed class DataAccessService : IDataAccessService
                     continue;
                 }
 
-                var entry = new Models.Common.PersonSearchResultItem(s);
+                Models.Base.EnumPersonKind? enumKind = null;
+                var kind = reader.GetString(reader.GetOrdinal("person_kind")) ?? string.Empty;
+                if (!string.IsNullOrEmpty(kind))
+                {
+                    if (Enum.TryParse<Models.Base.EnumPersonKind>(kind, out var parsedKind))
+                    {
+                        enumKind = parsedKind;
+                    }
+                }
+
+                if (enumKind is null)
+                {
+                    Debug.WriteLine("DataAccess::SelectRentLessorByKeyword: EnumPersonKind is null.");
+                    continue;
+                }
+
+                Models.Common.PersonSearchResultItem entry;
+                if (enumKind == Models.Base.EnumPersonKind.Natural)
+                {
+                    entry = new Models.Common.PersonSearchResultItem(s, Models.Base.EnumPersonKind.Natural);
+                }
+                else if (enumKind == Models.Base.EnumPersonKind.Legal)
+                {
+                    entry = new Models.Common.PersonSearchResultItem(s, Models.Base.EnumPersonKind.Legal);
+                }
+                else
+                {
+                    continue;
+                }
 
                 s = Convert.ToString(reader["name"]) ?? "";
                 entry.Name = s;
 
                 //Debug.WriteLine($"Found rent residential entry: {entry.Name} @SelectRentResidentialsByNameKeyword() in DataAccessService");
 
-                s = Convert.ToString(reader["remarks"]);
-                if (!string.IsNullOrEmpty(s))
-                {
-                    //
-                }
+                s = Convert.ToString(reader["remarks"]) ?? "";
+                entry.Remarks = s;
 
                 // Reset entry Isdirty flag.
                 entry.IsModified = false;
@@ -2914,11 +2977,11 @@ public sealed class DataAccessService : IDataAccessService
         return res;
     }
 
-    public RentLessorSingleResultWrapper SelectRentLessorById(string id)
+    public PersonSingleResultWrapper SelectRentLessorById(string id)
     {
-        var res = new RentLessorSingleResultWrapper();
+        var res = new PersonSingleResultWrapper();
 
-        var entry = new Models.Rent.Lessors.Person(id, EnumEntryStatus.Saved);
+        Models.Base.PersonBase? entry = null; //new Models.Base.PersonBase(id, EnumEntryStatus.Saved);
 
         if (string.IsNullOrEmpty(id))
         {
@@ -2935,7 +2998,7 @@ public sealed class DataAccessService : IDataAccessService
 
             using var cmd = connection.CreateCommand();
 
-            cmd.CommandText = $"SELECT lessor_id, name, name_last, name_first, remarks FROM rent_lessors WHERE lessor_id = '{id}'";
+            cmd.CommandText = $"SELECT lessor_id, name, person_kind, name_last, name_first, remarks FROM rent_lessors WHERE lessor_id = '{id}'";
 
             using (var reader = cmd.ExecuteReader())
             {
@@ -2948,19 +3011,58 @@ public sealed class DataAccessService : IDataAccessService
                         continue;
                     }
 
+                    Models.Base.EnumPersonKind? enumKind = null;
+                    var kind = reader.GetString(reader.GetOrdinal("person_kind")) ?? string.Empty;
+                    if (!string.IsNullOrEmpty(kind))
+                    {
+                        if (Enum.TryParse<Models.Base.EnumPersonKind>(kind, out var parsedKind))
+                        {
+                            enumKind = parsedKind;
+                        }
+                    }
+
+                    if (enumKind is null)
+                    {
+                        Debug.WriteLine("DataAccess::SelectRentLessorByKeyword: EnumPersonKind is null.");
+                        continue;
+                    }
+                    
+                    if (enumKind == Models.Base.EnumPersonKind.Natural)
+                    {
+                        entry = new Models.PersonNatural(id, EnumEntryStatus.Saved);
+                    }
+                    else if (enumKind == Models.Base.EnumPersonKind.Legal)
+                    {
+                        entry = new Models.PersonLegal(id, EnumEntryStatus.Saved);
+                    }
+                    else
+                    {
+                        continue;
+                    }
+
+                    if (entry is null)
+                    {
+                        continue;
+                    }
+
                     s = Convert.ToString(reader["name"]) ?? "";
                     entry.Name = s;
 
-                    s = Convert.ToString(reader["name_last"]) ?? "";
-                    entry.NameLast = s;
+                    if (entry is PersonNatural naturalPerson)
+                    {
+                        s = Convert.ToString(reader["name_last"]) ?? "";
+                        naturalPerson.NameLast = s;
 
-                    s = Convert.ToString(reader["name_first"]) ?? "";
-                    entry.NameFirst = s;
-
+                        s = Convert.ToString(reader["name_first"]) ?? "";
+                        naturalPerson.NameFirst = s;
+                    }
+                    else if (entry is PersonLegal legalPerson)
+                    {
+                        //
+                    }
 
                     s = Convert.ToString(reader["remarks"]) ?? "";
                     entry.Remarks = s;
-
 
                     // TODO: more.
 
@@ -2970,11 +3072,14 @@ public sealed class DataAccessService : IDataAccessService
                 }
             }
 
-            // Reset entry Isdirty flag.
-            entry.Status = EnumEntryStatus.Saved;
-            entry.IsModified = false;
+            if (entry is not null)
+            {
+                // Reset entry Isdirty flag.
+                entry.Status = EnumEntryStatus.Saved;
+                entry.IsModified = false;
+            }
 
-            res.Lessor = entry;
+            res.Person = entry;
         }
         catch (System.Reflection.TargetInvocationException ex)
         {
@@ -3134,7 +3239,44 @@ public sealed class DataAccessService : IDataAccessService
         return res;
     }
 
-    // ColumnExists check
+    #endregion
+
+    // TODO
+    #region == Broker ==
+
+    public ResultWrapper UpsertBroker(Models.Base.PersonBase broker)
+    {
+        var res = new ResultWrapper();
+
+        return res;
+    }
+
+    public PersonsResultWrapper SelectBrokersByKeyword(string keyword)
+    {
+        var res = new PersonsResultWrapper();
+
+        return res;
+    }
+
+    public PersonSingleResultWrapper SelectBrokerById(string id)
+    {
+        var res = new PersonSingleResultWrapper();
+
+        return res;
+    }
+
+    public ResultWrapper DeleteBroker(string id)
+    {
+        var res = new ResultWrapper();
+
+        return res;
+    }
+
+    #endregion
+
+    // Unused for now
+    #region == ColumnExists check ==
+
     private static bool ColumnExists(IDataRecord dr, string columnName)
     {
         for (var i = 0; i < dr.FieldCount; i++)
@@ -3156,4 +3298,7 @@ public sealed class DataAccessService : IDataAccessService
     {
         return s is null ? string.Empty : s.Replace("''", "'");
     }
+
+    #endregion
+
 }

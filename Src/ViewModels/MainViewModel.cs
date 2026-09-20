@@ -20,7 +20,8 @@ public partial class MainViewModel : ObservableRecipient,
     IRecipient<ListingUpdatedMessage>, 
     IRecipient<ListingWindowClosedMessage>, 
     IRecipient<PropertyWindowClosedMessage>, 
-    IRecipient<LessorWindowClosedMessage>
+    IRecipient<LessorWindowClosedMessage>,
+    IRecipient<BrokerWindowClosedMessage>
 {
     #region == Public Properties ==
 
@@ -46,6 +47,12 @@ public partial class MainViewModel : ObservableRecipient,
     public int LessorEditorWinHeight = 768;
     public int LessorEditorWinLeft = 130;
     public int LessorEditorWinTop = 130;
+
+    public readonly List<Views.Brokers.EditorWindow> BrokerEditorList = [];
+    public int BrokerEditorWinWidth = 1366;
+    public int BrokerEditorWinHeight = 768;
+    public int BrokerEditorWinLeft = 130;
+    public int BrokerEditorWinTop = 130;
 
 
     #endregion
@@ -82,10 +89,15 @@ public partial class MainViewModel : ObservableRecipient,
         new() { Name = "検索結果", Page = typeof(Views.Rent.LessorSearchResultPage).FullName! },
     ];
 
-    #endregion
-
-    #region == Database ==
-
+    public ObservableCollection<Models.Common.Breadcrumb> BreadcrumbItemsBroker { get; set; } =
+    [
+        new() { Name = "宅建業者", Page = typeof(Views.BrokerSearchPage).FullName! }
+    ];
+    public ObservableCollection<Models.Common.Breadcrumb> BreadcrumbItemsBrokerSearchResult { get; set; } =
+    [
+        new() { Name = "宅建業者", Page = typeof(Views.BrokerSearchPage).FullName! },
+        new() { Name = "検索結果", Page = typeof(Views.BrokerSearchResultPage).FullName! },
+    ];
 
     #endregion
 
@@ -121,6 +133,17 @@ public partial class MainViewModel : ObservableRecipient,
     } = [];
 
     public ObservableCollection<Models.Common.PersonSearchResultItem> RentLessorSearchResult
+    {
+        get; set
+        {
+            if (SetProperty(ref field, value))
+            {
+                //
+            }
+        }
+    } = [];
+
+    public ObservableCollection<Models.Common.PersonSearchResultItem> BrokerSearchResult
     {
         get; set
         {
@@ -171,7 +194,9 @@ public partial class MainViewModel : ObservableRecipient,
 
     private readonly IAbstractFactory<Models.Rent.Residentials.Property, Views.Rent.Residentials.ShellPage> _shellRentResidentialPropertyFactory;
     private readonly IAbstractFactory<Models.Rent.Residentials.Listing.Listing, Views.Rent.Residentials.Listing.ShellPage> _shellRentResidentialListingFactory;
-    private readonly IAbstractFactory<Models.Rent.Lessors.Person, Views.Rent.Lessors.ShellPage> _shellRentLessorFactory;
+    private readonly IAbstractFactory<Models.Base.PersonBase, Views.Rent.Lessors.ShellPage> _shellRentLessorFactory;
+    private readonly IAbstractFactory<Models.Base.PersonBase, Views.Brokers.ShellPage> _shellBrokerFactory;
+
     private readonly IDataAccessService _dataAccessService;
     private readonly INavigationService _navigationService;
     private readonly IDispatcherService _dispatcherService;
@@ -181,7 +206,8 @@ public partial class MainViewModel : ObservableRecipient,
     public MainViewModel(
         IAbstractFactory<Models.Rent.Residentials.Property, Views.Rent.Residentials.ShellPage> shellRentResidentialPropertyFactory, 
         IAbstractFactory<Models.Rent.Residentials.Listing.Listing, Views.Rent.Residentials.Listing.ShellPage> shellRentResidentialListingFactory,
-        IAbstractFactory<Models.Rent.Lessors.Person, Views.Rent.Lessors.ShellPage> shellRentLessorFactory,
+        IAbstractFactory<Models.Base.PersonBase, Views.Rent.Lessors.ShellPage> shellRentLessorFactory,
+        IAbstractFactory<Models.Base.PersonBase, Views.Brokers.ShellPage> shellBrokerFactory,
         INavigationService navigationService, 
         IDataAccessService dataAccessService, 
         IDispatcherService dispatcherService)
@@ -189,6 +215,7 @@ public partial class MainViewModel : ObservableRecipient,
         _shellRentResidentialPropertyFactory = shellRentResidentialPropertyFactory;
         _shellRentResidentialListingFactory = shellRentResidentialListingFactory;
         _shellRentLessorFactory = shellRentLessorFactory;
+        _shellBrokerFactory = shellBrokerFactory;
         _navigationService = navigationService;
         _dataAccessService = dataAccessService;
         _dispatcherService = dispatcherService;
@@ -280,6 +307,18 @@ public partial class MainViewModel : ObservableRecipient,
         }
 
         this.LessorEditorList.Remove(ewin);
+    }
+
+    public void Receive(BrokerWindowClosedMessage window)
+    {
+        var ewin = window.Value;
+
+        if (ewin is null)
+        {
+            return;
+        }
+
+        this.BrokerEditorList.Remove(ewin);
     }
 
     #endregion
@@ -385,6 +424,7 @@ public partial class MainViewModel : ObservableRecipient,
 
     #region == 賃貸住居用 ==
 
+    // 建物新規追加
     [RelayCommand]
     private void AddNewRentResidentialBldg()
     {
@@ -413,18 +453,39 @@ public partial class MainViewModel : ObservableRecipient,
         shell.Window.AppWindow.MoveInZOrderAtTop();
     }
 
+    // 建物編集
     [RelayCommand(CanExecute = nameof(EditRentResidentialBldgCanExecute))]
     public async Task EditRentResidentialBldg(Models.Common.PropertySearchResultItem? selected) 
     {
-        var rentId = selected?.Id;
+        var propertyId = selected?.Id;
 
-        if (string.IsNullOrEmpty(rentId))
+        if (string.IsNullOrEmpty(propertyId))
         {
             Debug.WriteLine("EditRentResidentialCommand executed but no item is selected.");
             return;
         }
 
-        //Debug.WriteLine($"EditRentResidentialCommand executed for {selected.Id}");
+        await EditRentResidentialBldgFromId(propertyId);
+    }
+    public static bool EditRentResidentialBldgCanExecute(Models.Common.PropertySearchResultItem? selected)
+    {
+        if (selected is null)
+        //if (string.IsNullOrEmpty(rentId))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    [RelayCommand(CanExecute = nameof(EditRentResidentialBldgByIdCanExecute))]
+    public async Task EditRentResidentialBldgFromId(string propertyId)
+    {
+        if (string.IsNullOrEmpty(propertyId))
+        {
+            Debug.WriteLine("EditRentResidentialBldgFromId executed but no item is selected.");
+            return;
+        }
 
         var isFound = false;
 
@@ -432,14 +493,14 @@ public partial class MainViewModel : ObservableRecipient,
         BldgEditorList.ForEach(editorWindow =>
         {
             //Debug.WriteLine($"Checking editor window with Id: {editorWindow.Id} for selected item with Id: {rentId}");
-            if (editorWindow.Id == rentId)
+            if (editorWindow.Id == propertyId)
             {
                 // If the editor window for this item is already open, activate it.
                 //Debug.WriteLine($"Editor window for {rentId} is already open. Activating it.");
                 isFound = true;
 
                 editorWindow.Activate();
-                
+
                 // Do I need this anymore?
                 //var mainWindow = App.GetService<MainWindow>();
                 //mainWindow?.AppWindow.MoveInZOrderBelow(editorWindow.AppWindow.Id);
@@ -456,7 +517,7 @@ public partial class MainViewModel : ObservableRecipient,
         }
 
         // Access Database to get the full entry data.
-        var res = _dataAccessService.SelectRentResidentialById(rentId);// Go back to UI thred. Let's not do > .ConfigureAwait(false);
+        var res = _dataAccessService.SelectRentResidentialById(propertyId);// Go back to UI thred. Let's not do > .ConfigureAwait(false);
         //var res = await Task.Run(() => _dataAccessService.SelectRentResidentialById(rentId), _cts.Token);
         if (res.IsError)
         {
@@ -471,7 +532,7 @@ public partial class MainViewModel : ObservableRecipient,
 
         if (res.Building is null)
         {
-            Debug.WriteLine($"Building for {rentId} is null. Cannot open editor.");
+            Debug.WriteLine($"Building for {propertyId} is null. Cannot open editor.");
             return;
         }
 
@@ -502,10 +563,9 @@ public partial class MainViewModel : ObservableRecipient,
 
         editorWindow.AppWindow.MoveInZOrderAtTop();
     }
-    public static bool EditRentResidentialBldgCanExecute(Models.Common.PropertySearchResultItem? selected)
+    public static bool EditRentResidentialBldgByIdCanExecute(string propertyId)
     {
-        if (selected is null)
-        //if (string.IsNullOrEmpty(rentId))
+        if (string.IsNullOrEmpty(propertyId))
         {
             return false;
         }
@@ -513,6 +573,7 @@ public partial class MainViewModel : ObservableRecipient,
         return true;
     }
 
+    // 部屋編集
     [RelayCommand(CanExecute = nameof(EditRentResidentialRoomCanExecute))]
     public async Task EditRentResidentialRoom(Models.Common.ListingSearchResultItem? selected)
     {
@@ -751,7 +812,7 @@ public partial class MainViewModel : ObservableRecipient,
         return true;
     }
 
-    // 部屋検索
+    // 部屋検索（TODO）
     [RelayCommand]
     private async Task SearchRentResidentialRoom()
     {
@@ -989,7 +1050,7 @@ public partial class MainViewModel : ObservableRecipient,
     private void AddNewRentLessor()
     {
         var newId = Guid.CreateVersion7().ToString("N");
-        var shell = _shellRentLessorFactory.Create(new Models.Rent.Lessors.Person(newId, Models.Base.EnumEntryStatus.New));
+        var shell = _shellRentLessorFactory.Create(new Models.PersonNatural(newId, Models.Base.EnumEntryStatus.New));
         
         LessorEditorList.Add(shell.Window);
 
@@ -1016,7 +1077,7 @@ public partial class MainViewModel : ObservableRecipient,
     [RelayCommand]
     private async Task SearchRentLessor(string? queryText)
     {
-        Debug.WriteLine($"SearchRentLessor queryText: {queryText}");
+        //Debug.WriteLine($"SearchRentLessor queryText: {queryText}");
 
         if (string.IsNullOrWhiteSpace(queryText))
         {
@@ -1025,7 +1086,7 @@ public partial class MainViewModel : ObservableRecipient,
 
         RentLessorSearchResult.Clear();
 
-        var res = await Task.Run(() => _dataAccessService.SelectRentLessorByKeyword(queryText), _cts.Token);
+        var res = await Task.Run(() => _dataAccessService.SelectRentLessorsByKeyword(queryText), _cts.Token);
 
         if (res.IsError)
         {
@@ -1100,13 +1161,13 @@ public partial class MainViewModel : ObservableRecipient,
             return;
         }
 
-        if (res.Lessor is null)
+        if (res.Person is null)
         {
             Debug.WriteLine($"{lessorId} is null. Cannot open editor.");
             return;
         }
 
-        var editorShell = _shellRentLessorFactory.Create(res.Lessor);//_editorFactory.Create();
+        var editorShell = _shellRentLessorFactory.Create(res.Person);//_editorFactory.Create();
 
         var editorWindow = editorShell.Window;
         if (editorWindow == null)
@@ -1239,6 +1300,262 @@ public partial class MainViewModel : ObservableRecipient,
 
     #endregion
 
+    #region == 宅建業者 == 
+
+    [RelayCommand]
+    private void AddNewBroker()
+    {
+        var newId = Guid.CreateVersion7().ToString("N");
+        var shell = _shellBrokerFactory.Create(new Models.PersonLegal(newId, Models.Base.EnumEntryStatus.New));
+
+        BrokerEditorList.Add(shell.Window);
+
+        if (shell.Window.AppWindow.Presenter is OverlappedPresenter presenter)
+        {
+            presenter.IsResizable = true;
+            presenter.IsModal = false;
+            presenter.IsAlwaysOnTop = false;
+            presenter.PreferredMinimumWidth = 1274;
+            presenter.PreferredMinimumHeight = 794;
+        }
+
+        //var dpi = Windows.Win32.PInvoke.GetDpiForWindow(new Windows.Win32.Foundation.HWND(WinRT.Interop.WindowNative.GetWindowHandle(this)));
+        //var scalingFactor = (float)dpi / 96;
+        //AppWindow.Resize(new Windows.Graphics.SizeInt32((int)(400.0f * scalingFactor), (int)(300.0f * scalingFactor)));
+
+        shell.Window.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(BrokerEditorWinLeft, BrokerEditorWinTop, BrokerEditorWinWidth, BrokerEditorWinHeight));
+
+        //editorWindow.AppWindow.Show();
+        shell.Window.Activate();
+        shell.Window.AppWindow.MoveInZOrderAtTop();
+    }
+
+    [RelayCommand]
+    private async Task SearchBroker(string? queryText)
+    {
+        //Debug.WriteLine($"SearchBroker queryText: {queryText}");
+
+        if (string.IsNullOrWhiteSpace(queryText))
+        {
+            queryText = "*";
+        }
+
+        BrokerSearchResult.Clear();
+
+        var res = await Task.Run(() => _dataAccessService.SelectBrokersByKeyword(queryText), _cts.Token);
+
+        if (res.IsError)
+        {
+            Debug.WriteLine(res.Error.ErrText + Environment.NewLine + res.Error.ErrDescription + Environment.NewLine + res.Error.ErrPlace + Environment.NewLine + res.Error.ErrPlaceParent);
+
+            //ErrorMain = res.Error;
+            //IsMainErrorInfoBarVisible = true;
+
+            // TODO: Show error message to user
+        }
+        else
+        {
+            BrokerSearchResult = new(res.PersonSearchResult);
+
+            _navigationService.NavigateTo("ZumenSearch.Views.BrokerSearchResultPage", SlideNavigationTransitionEffect.FromLeft);
+        }
+    }
+
+    [RelayCommand(CanExecute = nameof(EditBrokerCanExecute))]
+    public async Task EditBroker(Models.Base.PersonBase selected) //Models.Common.PersonSearchResultItem
+    {
+        var lessorId = selected?.Id;
+
+        if (string.IsNullOrEmpty(lessorId))
+        {
+            Debug.WriteLine("EditBrokerCommand executed but no item is selected.");
+            return;
+        }
+
+        var isFound = false;
+
+        // Check if the selected item is already being edited in another window.
+        BrokerEditorList.ForEach(editorWindow =>
+        {
+            //Debug.WriteLine($"Checking editor window with Id: {editorWindow.Id} for selected item with Id: {rentId}");
+            if (editorWindow.Id == lessorId)
+            {
+                // If the editor window for this item is already open, activate it.
+                //Debug.WriteLine($"Editor window for {rentId} is already open. Activating it.");
+                isFound = true;
+
+                editorWindow.Activate();
+
+                // Do I need this anymore?
+                //var mainWindow = App.GetService<MainWindow>();
+                //mainWindow?.AppWindow.MoveInZOrderBelow(editorWindow.AppWindow.Id);
+                editorWindow.AppWindow.MoveInZOrderAtTop();
+
+                return;
+            }
+        });
+
+        //Debug.WriteLine($"EditRentLessorCommand executed for {selected.Id}");
+
+        if (isFound)
+        {
+            // If the editor window for this item is already open, no need to create a new one.
+            return;
+        }
+
+        // 
+        //var res = _dataAccessService.SelectRentLessorById(lessorId);// Go back to UI thred. Let's not do > .ConfigureAwait(false);
+        var res = await Task.Run(() => _dataAccessService.SelectBrokerById(lessorId), _cts.Token);
+        if (res.IsError)
+        {
+            Debug.WriteLine(res.Error.ErrText + Environment.NewLine + res.Error.ErrDescription + Environment.NewLine + res.Error.ErrPlace + Environment.NewLine + res.Error.ErrPlaceParent);
+
+            //ErrorMain = res.Error;
+            //IsMainErrorInfoBarVisible = true;
+
+            // TODO: Show error message to user
+            return;
+        }
+
+        if (res.Person is null)
+        {
+            Debug.WriteLine($"{lessorId} is null. Cannot open editor.");
+            return;
+        }
+
+        var editorShell = _shellBrokerFactory.Create(res.Person);//_editorFactory.Create();
+
+        var editorWindow = editorShell.Window;
+        if (editorWindow == null)
+        {
+            // EditorWin should be initialized in the EditorShell constructor.
+            Debug.WriteLine("EditorWin must be initialized in the EditorShell constructor");
+            return;
+        }
+
+        BrokerEditorList.Add(editorWindow);
+
+        editorWindow.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(BrokerEditorWinLeft, BrokerEditorWinTop, BrokerEditorWinWidth, BrokerEditorWinHeight));
+        if (editorWindow.AppWindow.Presenter is OverlappedPresenter presenter)
+        {
+            presenter.IsResizable = true;
+            presenter.IsModal = false;
+            presenter.IsAlwaysOnTop = false;
+            presenter.PreferredMinimumWidth = 1274;
+            presenter.PreferredMinimumHeight = 794;
+        }
+
+        editorWindow.AppWindow.Show();
+        editorWindow.Activate();
+
+        editorWindow.AppWindow.MoveInZOrderAtTop();
+    }
+    public static bool EditBrokerCanExecute(Models.Base.PersonBase? selected)
+    {
+        if (selected is null)
+        //if (string.IsNullOrEmpty(rentId))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    [RelayCommand(CanExecute = nameof(DeleteBrokerCanExecute))]
+    public async Task DeleteBroker(Models.Base.PersonBase selected) //Models.Common.PersonSearchResultItem
+    {
+        if (selected is null)
+        {
+            return;
+        }
+
+        var lessorId = selected?.Id;
+
+        if (string.IsNullOrEmpty(lessorId))
+        {
+            Debug.WriteLine("DeleteBrokerCommand executed but no item is selected.");
+            return;
+        }
+
+        var isFound = false;
+
+        // Check if the selected item is already being edited in another window.
+        BrokerEditorList.ForEach(editorWindow =>
+        {
+            //Debug.WriteLine($"Checking editor window with Id: {editorWindow.Id} for selected item with Id: {rentId}");
+            if (editorWindow.Id == lessorId)
+            {
+                // If the editor window for this item is already open, activate it.
+                //Debug.WriteLine($"Editor window for {rentId} is already open. Activating it.");
+                isFound = true;
+
+                editorWindow.Activate();
+
+                // Do I need this anymore?
+                //var mainWindow = App.GetService<MainWindow>();
+                //mainWindow?.AppWindow.MoveInZOrderBelow(editorWindow.AppWindow.Id);
+                editorWindow.AppWindow.MoveInZOrderAtTop();
+
+                return;
+            }
+        });
+
+        //Debug.WriteLine($"EditRentLessorCommand executed for {selected.Id}");
+
+        if (isFound)
+        {
+            // If the editor window for this item is already open, no need to create a new one.
+            return;
+        }
+
+        // 
+        //var res = _dataAccessService.SelectRentLessorById(lessorId);// Go back to UI thred. Let's not do > .ConfigureAwait(false);
+        var res = await Task.Run(() => _dataAccessService.DeleteBroker(lessorId), _cts.Token);
+        if (res.IsError)
+        {
+            Debug.WriteLine(res.Error.ErrText + Environment.NewLine + res.Error.ErrDescription + Environment.NewLine + res.Error.ErrPlace + Environment.NewLine + res.Error.ErrPlaceParent);
+
+            //ErrorMain = res.Error;
+            //IsMainErrorInfoBarVisible = true;
+
+            // TODO: Show error message to user
+            return;
+        }
+        else
+        {
+            var match = BrokerSearchResult.FirstOrDefault(x => x.Id.Equals(lessorId));
+            if (match is not null)
+            {
+                if (BrokerSearchResult.Remove(match))
+                {
+                    // Successfully removed the selected item from the search result.
+                }
+                else
+                {
+                    Debug.WriteLine($"Selected item {lessorId} not found in the search result or could not remove.");
+                }
+            }
+
+            Debug.WriteLine($"DeleteBrokerCommand executed for {lessorId}");
+
+            // remove lessor from the open editor window's ViewModel if it exists.
+            WeakReferenceMessenger.Default.Send(new Models.Messenger.BrokerDeletedMessage(lessorId));
+        }
+
+    }
+    public static bool DeleteBrokerCanExecute(Models.Base.PersonBase? selected)
+    {
+        if (selected is null)
+        //if (string.IsNullOrEmpty(rentId))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    #endregion
+
     #region == ナビゲーション == 
 
     // GoBac
@@ -1255,4 +1572,5 @@ public partial class MainViewModel : ObservableRecipient,
     #endregion
 
     #endregion
+
 }

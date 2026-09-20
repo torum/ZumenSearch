@@ -6,6 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     xmlns:controls="using:CommunityToolkit.WinUI.Controls"
+    xmlns:framework="using:Microsoft.UI.Xaml"
     xmlns:ui="using:CommunityToolkit.WinUI"
     xmlns:mod="using:ZumenSearch.Models.Common"
     xmlns:modlessor="using:ZumenSearch.Models.Rent.Lessors"
@@ -15,32 +16,49 @@
         <Grid x:Name="ContentArea">
             <StackPanel Spacing="12" Margin="0,24,0,0">
 
+                <controls:Segmented x:Name="SegmentedControl" HorizontalAlignment="Center" SelectedIndex="{x:Bind ViewModel.PersonKindIndex, Mode=TwoWay}" Visibility="Collapsed">
+                    <controls:SegmentedItem Content="個人" Tag="one" />
+                    <controls:SegmentedItem Content="法人" Tag="two" />
+                </controls:Segmented>
+
+                <RadioButtons x:Name="PersonKindRadioButton" MaxColumns="2" SelectedIndex="{x:Bind ViewModel.PersonKindIndex, Mode=TwoWay}" HorizontalAlignment="Center" Margin="120,0,0,0">
+                    <RadioButton Content="個人" Tag="one" Margin="0,0,24,0" />
+                    <RadioButton Content="法人" Tag="two"/>
+                </RadioButtons>
+
                 <Border Style="{StaticResource RoundCardBorderStyle}">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"></RowDefinition>
-                            <RowDefinition Height="Auto"></RowDefinition>
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="1*" MinWidth="320"></ColumnDefinition>
-                            <ColumnDefinition Width="1*" MinWidth="320"></ColumnDefinition>
-                        </Grid.ColumnDefinitions>
-                        <Grid Grid.Row="0" Grid.Column="0">
-                            <!-- 性 -->
-                            <TextBox x:Name="TextBox_NameLast" TabIndex="0" MinWidth="200" Header="姓" PlaceholderText="必須" MaxLength="100" Paste="TextBox_MaxLength_Paste"
+                    <controls:SwitchPresenter Value="{x:Bind ((framework:FrameworkElement)PersonKindRadioButton.SelectedItem).Tag, Mode=OneWay}">
+                        <controls:Case Value="one">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"></RowDefinition>
+                                    <RowDefinition Height="Auto"></RowDefinition>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="1*" MinWidth="320"></ColumnDefinition>
+                                    <ColumnDefinition Width="1*" MinWidth="320"></ColumnDefinition>
+                                </Grid.ColumnDefinitions>
+                                <Grid Grid.Row="0" Grid.Column="0">
+                                    <!-- 性 -->
+                                    <TextBox x:Name="TextBox_NameLast" TabIndex="0" MinWidth="200" Header="姓" PlaceholderText="必須" MaxLength="100" Paste="TextBox_MaxLength_Paste"
                                          Text="{x:Bind ViewModel.NameLast, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                                          BorderBrush="{x:Bind ViewModel.IsNameLastHasError, Converter={StaticResource ValidationToBrushConverter}, Mode=OneWay}"
                                          HorizontalAlignment="Stretch" VerticalAlignment="Bottom"/>
-                        </Grid>
+                                </Grid>
 
-                        <Grid Grid.Row="0" Grid.Column="1" Margin="12,0,0,0">
-                            <!-- 名 -->
-                            <TextBox x:Name="TextBox_NameFist" TabIndex="0" MinWidth="200" Header="名" PlaceholderText="必須" MaxLength="100" Paste="TextBox_MaxLength_Paste"
+                                <Grid Grid.Row="0" Grid.Column="1" Margin="12,0,0,0">
+                                    <!-- 名 -->
+                                    <TextBox x:Name="TextBox_NameFist" TabIndex="0" MinWidth="200" Header="名" PlaceholderText="必須" MaxLength="100" Paste="TextBox_MaxLength_Paste"
                                          Text="{x:Bind ViewModel.NameFirst, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                                          BorderBrush="{x:Bind ViewModel.IsNameFirstHasError, Converter={StaticResource ValidationToBrushConverter}, Mode=OneWay}"
                                          HorizontalAlignment="Stretch" VerticalAlignment="Bottom"/>
-                        </Grid>
-                    </Grid>
+                                </Grid>
+                            </Grid>
+                        </controls:Case>
+                        <controls:Case Value="two">
+
+                        </controls:Case>
+                    </controls:SwitchPresenter>
                 </Border>
 
                 <Border Style="{StaticResource RoundCardBorderStyle}">
@@ -51,45 +69,19 @@
                         </Grid.ColumnDefinitions>
 
                         <Grid Grid.Row="0" Grid.Column="0">
-                            <!--  -->
+                            <!-- 電話番号 -->
 
                         </Grid>
-                        <!--  -->
+                        <!-- 携帯電話番号　（法人なら隠す） -->
                         <Grid Grid.Row="0" Grid.Column="1" Margin="12,0,0,0">
 
                         </Grid>
                     </Grid>
                 </Border>
 
-                <Border Style="{StaticResource RoundCardBorderStyle}">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="1*" MinWidth="320"></ColumnDefinition>
-                            <ColumnDefinition Width="1*" MinWidth="320"></ColumnDefinition>
-                        </Grid.ColumnDefinitions>
-                        <Grid Grid.Row="0" Grid.Column="0">
-                            <!--  -->
-                        </Grid>
-                        <Grid Grid.Row="0" Grid.Column="1" Margin="12,0,0,0">
-                            <!--  -->
-                        </Grid>
-                    </Grid>
-                </Border>
 
-                <Border Style="{StaticResource RoundCardBorderStyle}">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="1*" MinWidth="320"></ColumnDefinition>
-                            <ColumnDefinition Width="1*" MinWidth="320"></ColumnDefinition>
-                        </Grid.ColumnDefinitions>
-                        <Grid Grid.Row="0" Grid.Column="0">
-                            
-                        </Grid>
-                        <Grid Grid.Row="0" Grid.Column="1" Margin="12,0,0,0">
-                            
-                        </Grid>
-                    </Grid>
-                </Border>
+
+
 
                 <Border Style="{StaticResource RoundCardBorderStyle}">
                     <Grid>

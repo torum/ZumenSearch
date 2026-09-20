@@ -1,5 +1,5 @@
 ﻿<Page
-    x:Class="ZumenSearch.Views.Rent.Residentials.Listing.ShellPage"
+    x:Class="ZumenSearch.Views.Brokers.ShellPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -10,7 +10,7 @@
     KeyboardAcceleratorPlacementMode="Hidden"
     mc:Ignorable="d">
     <Page.KeyboardAccelerators>
-        <KeyboardAccelerator Key="Left" Modifiers="Menu" Invoked="KeyboardAccelerator_Invoked" />
+        <KeyboardAccelerator Key="Left" Modifiers="Menu" Invoked="KeyboardAccelerator_Invoked"/>
     </Page.KeyboardAccelerators>
     <Grid>
         <Grid.RowDefinitions>
@@ -28,7 +28,6 @@
             </Grid.ColumnDefinitions>
 
             <Image x:Name="AppTitleBarIcon" Grid.Row="0" Grid.Column="0" Source="/Assets/App.ico" HorizontalAlignment="Left" Width="18" Height="18" Margin="12,0,0,0" VerticalAlignment="Center"/>
-            
             <TextBlock x:Name="AppTitleBarText" Grid.Row="0" Grid.Column="1" Text="{x:Bind ViewModel.WindowTitle, Mode=OneWay}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" Margin="12,0,0,0" VerticalAlignment="Center"/>
 
         </Grid>
@@ -50,8 +49,8 @@
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-
-                <BreadcrumbBar x:Name="BreadcrumbBar1" Grid.Row="0" Grid.Column="0" ItemsSource="{x:Bind ViewModel.BreadcrumbItems, Mode=OneWay}" 
+                
+                <BreadcrumbBar x:Name="BreadcrumbBar1" Grid.Row="0" Grid.Column="0" ItemsSource="{x:Bind ViewModel.BreadcrumbItems, Mode=OneWay}"
                                IsHitTestVisible="False" AllowFocusOnInteraction="False" IsTabStop="False" VerticalAlignment="Center">
                     <BreadcrumbBar.ItemTemplate>
                         <DataTemplate x:DataType="mod:Breadcrumb">
@@ -68,12 +67,6 @@
 
                 <StackPanel Grid.Row="0" Grid.Column="1">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                        <AppBarButton Icon="Go"  Label="建物" ToolTipService.ToolTip="建物画面を開く（Ctrl+T）" Command="{x:Bind ViewModel.OpenPropertyEditorWindowCommand}">
-                            <!-- GoToStart -->
-                            <AppBarButton.KeyboardAccelerators>
-                                <KeyboardAccelerator Key="S" Modifiers="Control"/>
-                            </AppBarButton.KeyboardAccelerators>
-                        </AppBarButton>
                         <AppBarButton Icon="Save" Label="保存" ToolTipService.ToolTip="保存（Ctrl+S）" Command="{x:Bind ViewModel.SaveCommand}">
                             <AppBarButton.KeyboardAccelerators>
                                 <KeyboardAccelerator Key="S" Modifiers="Control"/>
@@ -92,22 +85,20 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <NavigationView x:Name="NavView" Grid.Row="0" Margin="36,3,36,0" PaneDisplayMode="Top" Canvas.ZIndex="0" IsTitleBarAutoPaddingEnabled="True" SelectionFollowsFocus="Disabled" IsPaneToggleButtonVisible="False" IsSettingsVisible="False" IsBackButtonVisible="Collapsed" Loaded="NavView_Loaded" ItemInvoked="NavView_ItemInvoked" BackRequested="NavView_BackRequested">
+            <NavigationView x:Name="NavView" Grid.Row="0" Margin="36,3,36,0" PaneDisplayMode="Top" Canvas.ZIndex="0" IsTitleBarAutoPaddingEnabled="True" SelectionFollowsFocus="Disabled" IsPaneToggleButtonVisible="False" IsSettingsVisible="False" IsBackButtonVisible="Collapsed"
+                             Loaded="NavView_Loaded" ItemInvoked="NavView_ItemInvoked" BackRequested="NavView_BackRequested">
                 <NavigationView.KeyboardAccelerators>
-                    <KeyboardAccelerator Key="Left" Modifiers="Menu" Invoked="KeyboardAccelerator_Invoked" />
+                    <KeyboardAccelerator Key="Left" Modifiers="Menu" Invoked="KeyboardAccelerator_Invoked"/>
                 </NavigationView.KeyboardAccelerators>
                 <NavigationView.MenuItems>
-                    <NavigationViewItem Content="基本"  Tag="ZumenSearch.Views.Rent.Residentials.Listing.BasicPage"/>
-                    <NavigationViewItem Content="契約条件" Tag="ZumenSearch.Views.Rent.Residentials.Listing.ContractPage"/>
-                    <NavigationViewItem Content="取引条件" Tag="ZumenSearch.Views.Rent.Residentials.Listing.TransactionPage"/>
-                    <NavigationViewItem Content="設備" Tag="ZumenSearch.Views.Rent.Residentials.Listing.AppliancesPage" />
-                    <NavigationViewItem Content="写真" Tag="ZumenSearch.Views.Rent.Residentials.Listing.PictureListPage" />
-                    <NavigationViewItem Content="図面" Tag="ZumenSearch.Views.Rent.Residentials.Listing.ZumenListPage" Visibility="{x:Bind ViewModel.IsPropertyUnitOwnership, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"/>
-                    <NavigationViewItem Content="貸主" Tag="ZumenSearch.Views.Rent.Residentials.Listing.LessorListPage" Visibility="{x:Bind ViewModel.IsPropertyUnitOwnership, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"/>
-                    <NavigationViewItem Content="宅建業者" Tag="ZumenSearch.Views.Rent.Residentials.Listing.BrokerListPage" Visibility="{x:Bind ViewModel.IsPropertyUnitOwnership, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"/>
+                    <NavigationViewItem Content="基本" Tag="ZumenSearch.Views.Brokers.BasicPage" />
+
                 </NavigationView.MenuItems>
 
                 <NavigationView.FooterMenuItems>
+                    <!--
+                    <NavigationViewItem Content="部屋一覧" Tag="ZumenSearch.Views.Rent.Residentials.RoomListPage"/>
+                    -->
                 </NavigationView.FooterMenuItems>
             </NavigationView>
 

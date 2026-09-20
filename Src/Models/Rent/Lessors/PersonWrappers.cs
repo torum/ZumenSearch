@@ -8,6 +8,8 @@ namespace ZumenSearch.Models.Rent.Lessors;
 #pragma warning disable IDE0079 // Remove unnecessary suppression
 #pragma warning disable IDE0290 // Use primary constructor
 
+// TODO:
+/*
 public sealed partial class Person : PersonBase
 {
     // Do not use SetProperty.
@@ -35,19 +37,20 @@ public sealed partial class Person : PersonBase
         }
     } = string.Empty;
 
-    public Person(string id, EnumEntryStatus status) : base(id, status)
+    public Person(string id, EnumEntryStatus status) : base(id, status, EnumPersonKind.Undetermined)
     {
         //IsModified = false;
     }
 
 };
+*/
 
-// WinUI3 workaround. (to access viewmodel inside itemrepeater's DataTemplate)
+// WinUI3 workaround. (to access viewmodel from inside itemrepeater's DataTemplate)
 public sealed partial class PersonWrapperForPropertyViewModel : ObservableObject // needs to be Observable in order to update Person value.
 {
     public ViewModels.Rent.Residentials.PropertyViewModel ParentViewModel { get;  }
 
-    public Models.Rent.Lessors.Person Person
+    public Models.Base.PersonBase Person
     {
         get;
         set
@@ -59,19 +62,19 @@ public sealed partial class PersonWrapperForPropertyViewModel : ObservableObject
         }
     }
 
-    public PersonWrapperForPropertyViewModel(Person person, ViewModels.Rent.Residentials.PropertyViewModel parentPropertyViewModel)
+    public PersonWrapperForPropertyViewModel(Models.Base.PersonBase person, ViewModels.Rent.Residentials.PropertyViewModel parentPropertyViewModel)
     {
         Person = person;
         ParentViewModel = parentPropertyViewModel;
     }
 }
 
-// WinUI3 workaround. (to access viewmodel inside itemrepeater's DataTemplate)
+// WinUI3 workaround. (to access viewmodel from inside itemrepeater's DataTemplate)
 public sealed partial class PersonWrapperForListingViewModel : ObservableObject // needs to be Observable in order to update Person value.
 {
     public ViewModels.Rent.Residentials.Listing.ListingViewModel ParentViewModel { get; }
 
-    public Models.Rent.Lessors.Person Person
+    public Models.Base.PersonBase Person
     {
         get;
         set
@@ -83,7 +86,7 @@ public sealed partial class PersonWrapperForListingViewModel : ObservableObject 
         }
     }
 
-    public PersonWrapperForListingViewModel(Person person, ViewModels.Rent.Residentials.Listing.ListingViewModel parentListingViewModel)
+    public PersonWrapperForListingViewModel(Models.Base.PersonBase person, ViewModels.Rent.Residentials.Listing.ListingViewModel parentListingViewModel)
     {
         Person = person;
         ParentViewModel = parentListingViewModel;

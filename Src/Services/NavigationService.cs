@@ -19,7 +19,8 @@ public class NavigationService : INavigationService
             { "ZumenSearch.Views.Rent.Parkings.ParkingsPage", typeof(Views.Rent.Parkings.ParkingsPage) },
             { "ZumenSearch.Views.Rent.LessorSearchPage", typeof(Views.Rent.LessorSearchPage) },
             { "ZumenSearch.Views.Rent.LessorSearchResultPage", typeof(Views.Rent.LessorSearchResultPage) },
-            { "ZumenSearch.Views.Brokers.BrokersPage", typeof(Views.Brokers.BrokersPage) },
+            { "ZumenSearch.Views.BrokerSearchPage", typeof(Views.BrokerSearchPage) },
+            { "ZumenSearch.Views.BrokerSearchResultPage", typeof(Views.BrokerSearchResultPage) },
             { "ZumenSearch.Views.SettingsPage", typeof(Views.SettingsPage) }
         };
 

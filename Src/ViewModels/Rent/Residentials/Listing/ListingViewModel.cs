@@ -19,7 +19,9 @@ public sealed partial class ListingViewModel : ObservableRecipient,
     IRecipient<PropertyUpdatedMessage>, 
     IRecipient<PropertyIsUnitOwnershipChangedMessage>,
     IRecipient<LessorUpdatedMessage>,
-    IRecipient<LessorDeletedMessage>
+    IRecipient<BrokerUpdatedMessage>,
+    IRecipient<LessorDeletedMessage>,
+    IRecipient<BrokerDeletedMessage>
 {
     #region == Public Properties ==
 
@@ -300,6 +302,22 @@ public sealed partial class ListingViewModel : ObservableRecipient,
 
     #endregion
 
+    #region == 宅建業者プロパティ ==
+
+    public ObservableCollection<Models.Brokers.PersonWrapperForPropertyViewModel> BrokersWrapper
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;//?
+            }
+        }
+    } = [];
+
+    #endregion
+
     #endregion
 
     #region == Private variables ==
@@ -390,6 +408,20 @@ public sealed partial class ListingViewModel : ObservableRecipient,
         psn.Person = lessor;
     }
 
+    public void Receive(BrokerUpdatedMessage corp)
+    {
+        var broker = corp.Value;
+        if (broker is null)
+        {
+            return;
+        }
+
+        var psn = BrokersWrapper.FirstOrDefault(r => r.Person.Id.Equals(broker.Id));
+        if (psn is null) return;
+
+        psn.Person = broker; //= new PersonWrapperForPropertyViewModel(lessor, this);
+    }
+
     public void Receive(PropertyIsUnitOwnershipChangedMessage isUnitOwnership)
     {
         IsPropertyUnitOwnership = isUnitOwnership.Value;
@@ -424,6 +456,19 @@ public sealed partial class ListingViewModel : ObservableRecipient,
         var psn = LessorsWrapper.FirstOrDefault(r => r.Person.Id.Equals(id));
         if (psn is null) return;
         LessorsWrapper.Remove(psn);
+    }
+
+    public void Receive(BrokerDeletedMessage lessorId)
+    {
+        var id = lessorId.Value;
+        if (string.IsNullOrEmpty(id))
+        {
+            return;
+        }
+
+        var psn = BrokersWrapper.FirstOrDefault(r => r.Person.Id.Equals(id));
+        if (psn is null) return;
+        BrokersWrapper.Remove(psn);
     }
 
     #endregion
@@ -554,9 +599,10 @@ public sealed partial class ListingViewModel : ObservableRecipient,
 
     private bool SaveToNew()
     {
-        Debug.WriteLine("(_room.PropertyStatus == EnumPropertyStatus.New) @ListingViewModel on Save");
-        Debug.WriteLine($"_room.Status = {_room.Status}");
-        // Building window is open and unsaved state. So, update it and done (don't save room here because we don't save save room without building).
+        Debug.WriteLine("(_room.PropertyStatus == EnumPropertyStatus.New) @ListingViewModel on Save. Sending it to Property editor window");
+        // Building is unsaved state. So, update it and done (don't save room to DB here because we don't save room without building).
+
+        // TODO: make sure property editor window is exists (opened).
 
         // Update the selected search result's values such as name if it exists. Also, update building window's rooms list.
         WeakReferenceMessenger.Default.Send(new Models.Messenger.ListingUpdatedMessage(_room));
@@ -816,11 +862,10 @@ public sealed partial class ListingViewModel : ObservableRecipient,
     #region == Commands ==
 
     [RelayCommand]
-    public void OpenPropertyWindow()
+    public async Task OpenPropertyEditorWindow()
     {
-        // TODO:
-
-        Debug.WriteLine("OpenPropertyWindow");
+        var vm = App.GetService<ViewModels.MainViewModel>();
+        await vm.EditRentResidentialBldgFromId(_room.PropertyId);
     }
 
     #region == Save ==
@@ -1220,14 +1265,14 @@ public sealed partial class ListingViewModel : ObservableRecipient,
                 return;
             }
 
-            if (res.Lessor is null)
+            if (res.Person is null)
             {
                 Debug.WriteLine($"{lessorId} is null. Cannot open editor.");
                 return;
             }
 
 
-            var asdf = new PersonWrapperForListingViewModel(res.Lessor, this);
+            var asdf = new PersonWrapperForListingViewModel(res.Person, this);
 
             LessorsWrapper.Add(asdf);
 

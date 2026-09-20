@@ -2,7 +2,6 @@
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
@@ -10,41 +9,27 @@ using Microsoft.UI.Xaml.Navigation;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using WinRT.Interop;
 using ZumenSearch.Models.Common;
-using ZumenSearch.Services;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.Services.Extensions.AbstractFactory;
 
-namespace ZumenSearch.Views.Rent.Lessors;
+namespace ZumenSearch.Views.Brokers;
 
 public sealed partial class ShellPage : Page
 {
-    public ViewModels.Rent.Lessors.LessorViewModel ViewModel { get;}
-    public Views.Rent.Lessors.EditorWindow Window { get;}
+    public ViewModels.Brokers.BrokerViewModel ViewModel { get;}
+    public Views.Brokers.EditorWindow Window { get;}
     
     public Frame NavigationFrame => ContentFrame;
 
     // List of ValueTuple holding the Navigation Tag and the relative Navigation Page
     private readonly List<(string Tag, string Label, Type? Page)> _pages =
     [
-        ("lessor", "貸主", null),
-        ("ZumenSearch.Views.Rent.Lessors.BasicPage", "基本", typeof(Views.Rent.Lessors.BasicPage)),
-        /*
-        ("ZumenSearch.Views.Rent.Residentials.LocationPage", "所在地", typeof(Views.Rent.Residentials.LocationPage)),
-        ("ZumenSearch.Views.Rent.Residentials.TransportationPage", "交通", typeof(Views.Rent.Residentials.TransportationPage)),
-        ("ZumenSearch.Views.Rent.Residentials.FacilitiesPage", "設備", typeof(Views.Rent.Residentials.FacilitiesPage)),
-        ("ZumenSearch.Views.Rent.Residentials.KanriPage", "管理", typeof(Views.Rent.Residentials.KanriPage)),
-        ("ZumenSearch.Views.Rent.Residentials.PictureListPage", "写真", typeof(Views.Rent.Residentials.PictureListPage)),
-        ("ZumenSearch.Views.Rent.Residentials.RoomListPage", "部屋", typeof(Views.Rent.Residentials.RoomListPage)),
-        ("ZumenSearch.Views.Rent.Residentials.ZumenListPage", "図面", typeof(Views.Rent.Residentials.ZumenListPage)),
-        ("ZumenSearch.Views.Rent.Residentials.LessorListPage", "貸主", typeof(Views.Rent.Residentials.LessorListPage)),
-        ("ZumenSearch.Views.Rent.Residentials.BrokerListPage", "宅建業者", typeof(Views.Rent.Residentials.BrokerListPage))
-        */
+        ("broker", "宅建業者", null),
+        ("ZumenSearch.Views.Brokers.BasicPage", "基本", typeof(Views.Brokers.BasicPage)),
     ];
 
     private bool _nvigated;
-
 
     private readonly INavigationGenericService _navigationService;
     private readonly IDispatcherService _dispatcherService;
@@ -52,7 +37,7 @@ public sealed partial class ShellPage : Page
 
     public ShellPage(
         Models.Base.PersonBase person,
-        IAbstractFactory<Models.Base.PersonBase, INavigationGenericService, IDialogGenericService, ViewModels.Rent.Lessors.LessorViewModel> vmFactory,
+        IAbstractFactory<Models.Base.PersonBase, INavigationGenericService, IDialogGenericService, ViewModels.Brokers.BrokerViewModel> vmFactory,
         INavigationGenericService navigationService,
         IDispatcherService dispatcherService,
         IDialogGenericService dialogService)
@@ -65,7 +50,7 @@ public sealed partial class ShellPage : Page
 
         ViewModel = vmFactory.Create(person, _navigationService, _dialogService);
 
-        Window = new Views.Rent.Lessors.EditorWindow(person.Id, ViewModel)
+        Window = new Views.Brokers.EditorWindow(person.Id, ViewModel)
         {
             Content = this
         };
@@ -79,7 +64,7 @@ public sealed partial class ShellPage : Page
         this.Unloaded += ShellPage_Unloaded;
         this.BreadcrumbBar1.ItemClicked += BreadcrumbBar_ItemClicked;
 
-        Window.Title = "貸主";
+        Window.Title = "宅建業者";
         Window.ExtendsContentIntoTitleBar = true;
         Window.Activated += Window_Activated;
         Window.Closed += Window_Closed;
@@ -184,16 +169,16 @@ public sealed partial class ShellPage : Page
         {
             if (appWindow.Presenter is OverlappedPresenter)
             {
-                mainVM.LessorEditorWinHeight = (int)appWindow.Size.Height;
-                mainVM.LessorEditorWinWidth = (int)appWindow.Size.Width;
-                mainVM.LessorEditorWinTop = (int)appWindow.Position.Y;
-                mainVM.LessorEditorWinLeft = (int)appWindow.Position.X;
+                mainVM.BrokerEditorWinHeight = (int)appWindow.Size.Height;
+                mainVM.BrokerEditorWinWidth = (int)appWindow.Size.Width;
+                mainVM.BrokerEditorWinTop = (int)appWindow.Position.Y;
+                mainVM.BrokerEditorWinLeft = (int)appWindow.Position.X;
             }
         }
 
         //mainVM.BldgEditorList.Remove(ewin);
         // Update the selected search result's values such as name if it exists. Also, update building window's rooms list.
-        WeakReferenceMessenger.Default.Send(new Models.Messenger.LessorWindowClosedMessage(ewin));
+        WeakReferenceMessenger.Default.Send(new Models.Messenger.BrokerWindowClosedMessage(ewin));
     }
 
     private void BreadcrumbBar_ItemClicked(BreadcrumbBar sender, BreadcrumbBarItemClickedEventArgs args)
@@ -214,7 +199,7 @@ public sealed partial class ShellPage : Page
         }
 
         //Debug.WriteLine("NavView_Loaded: Navigating to BasicPage with ViewModel. ViewModel is " + (ViewModel != null ? "set" : "null"));
-        if (ContentFrame.Navigate(typeof(ZumenSearch.Views.Rent.Lessors.BasicPage), ViewModel, new EntranceNavigationTransitionInfo()))
+        if (ContentFrame.Navigate(typeof(ZumenSearch.Views.Brokers.BasicPage), ViewModel, new EntranceNavigationTransitionInfo()))
         {
             _nvigated = true;
 
@@ -222,7 +207,7 @@ public sealed partial class ShellPage : Page
             {
                 if (crumbs.Count > 1)
                 {
-                    var item = _pages.FirstOrDefault(p => p.Tag.Equals("ZumenSearch.Views.Rent.Lessors.BasicPage"));
+                    var item = _pages.FirstOrDefault(p => p.Tag.Equals("ZumenSearch.Views.Brokers.BasicPage"));
                     if (item.Page is not null)
                     {
                         crumbs.RemoveAt(crumbs.Count - 1); // Remove the last breadcrumb if exists to avoid duplication.
@@ -231,7 +216,7 @@ public sealed partial class ShellPage : Page
                 }
             }
 
-            NavView.SelectedItem = NavView.MenuItems.OfType<NavigationViewItem>().Where(n => n.Tag.Equals("ZumenSearch.Views.Rent.Lessors.BasicPage")).First();
+            NavView.SelectedItem = NavView.MenuItems.OfType<NavigationViewItem>().Where(n => n.Tag.Equals("ZumenSearch.Views.Brokers.BasicPage")).First();
         }
     }
 
@@ -250,7 +235,7 @@ public sealed partial class ShellPage : Page
         {
             if (args.InvokedItemContainer.Tag is not string tag || string.IsNullOrWhiteSpace(tag))
             {
-                Debug.WriteLine("BldgShellPage: NavView_ItemInvoked: Invalid tag or null.");
+                Debug.WriteLine("ShellPage: NavView_ItemInvoked: Invalid tag or null.");
                 return;
             }
 
@@ -258,7 +243,7 @@ public sealed partial class ShellPage : Page
 
             if (item.Page is null)
             {
-                Debug.WriteLine("BldgShellPage: NavView_ItemInvoked: Page is null for tag " + tag);
+                Debug.WriteLine("ShellPage: NavView_ItemInvoked: Page is null for tag " + tag);
                 return;
             }
 

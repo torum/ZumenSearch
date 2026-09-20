@@ -41,8 +41,20 @@ public sealed class PersonsResultWrapper : ResultWrapperBase
     public ObservableCollection<Models.Common.PersonSearchResultItem> PersonSearchResult = [];
 }
 
+/*
 public sealed class RentLessorSingleResultWrapper : ResultWrapperBase
 {
-    public Models.Rent.Lessors.Person? Lessor;
+    public Models.Base.PersonBase? Lessor;
+}
+
+public sealed class BrokerSingleResultWrapper : ResultWrapperBase
+{
+    public Models.Brokers.PersonWrappers? Broker;
+}
+*/
+
+public sealed class PersonSingleResultWrapper : ResultWrapperBase
+{
+    public Models.Base.PersonBase? Person;
 }
 

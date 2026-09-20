@@ -7,32 +7,25 @@ public interface IDataAccessService
     ResultWrapper InitializeDatabase(string dataBaseFilePath);
 
     ResultWrapper UpsertRentResidential(Models.Rent.Residentials.Property building);
-
-    //ResultWrapper UpdateRentResidential(Models.Rent.Residentials.Property building);
-
+    PropertiesResultWrapper SelectRentResidentialsByNameKeyword(string keyword);
+    RentResidentialBuildingSingleResultWrapper SelectRentResidentialById(string id);
     ResultWrapper DeleteRentResidential(string rentId);
-
     PropertiesResultWrapper SelectRecentProperties();
 
-    PropertiesResultWrapper SelectRentResidentialsByNameKeyword(string keyword);
-
-    RentResidentialBuildingSingleResultWrapper SelectRentResidentialById(string id);
-
     ResultWrapper UpsertRentResidentialListing(string rentId, Models.Rent.Residentials.Listing.Listing room);
-
     ListingsResultWrapper SelectRentResidentialListings();
-
     RentResidentialRoomSingleResultWrapper SelectRentResidentialListingById(string rentId, string roomId);
-
     ResultWrapper DeleteRentResidentialListing(string roomId);
 
-    ResultWrapper UpsertRentLessor(Models.Rent.Lessors.Person lessor);
-
-    PersonsResultWrapper SelectRentLessorByKeyword(string keyword);
-
-    RentLessorSingleResultWrapper SelectRentLessorById(string id);
-
+    ResultWrapper UpsertRentLessor(Models.Base.PersonBase lessor);
+    PersonsResultWrapper SelectRentLessorsByKeyword(string keyword);
+    PersonSingleResultWrapper SelectRentLessorById(string id);
     ResultWrapper DeleteRentLessor(string id);
+
+    ResultWrapper UpsertBroker(Models.Base.PersonBase broker);
+    PersonsResultWrapper SelectBrokersByKeyword(string keyword);
+    PersonSingleResultWrapper SelectBrokerById(string id);
+    ResultWrapper DeleteBroker(string id);
 
 }
 

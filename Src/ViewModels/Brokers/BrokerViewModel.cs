@@ -4,14 +4,13 @@ using CommunityToolkit.Mvvm.Messaging;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
-using ZumenSearch.Models;
 using ZumenSearch.Models.Base;
 using ZumenSearch.Models.Common;
 using ZumenSearch.Services.Contracts;
 
-namespace ZumenSearch.ViewModels.Rent.Lessors;
+namespace ZumenSearch.ViewModels.Brokers;
 
-public sealed partial class LessorViewModel : ObservableRecipient
+public sealed partial class BrokerViewModel : ObservableRecipient
 {
     #region == Public Properties ==
 
@@ -35,7 +34,7 @@ public sealed partial class LessorViewModel : ObservableRecipient
                 str = $"{str}：{Name}";
             }
 
-            if (_lessorBase.Status == EnumEntryStatus.New)
+            if (_broker.Status == EnumEntryStatus.New)
             {
                 str = $"{str}：新規";
             }
@@ -50,12 +49,12 @@ public sealed partial class LessorViewModel : ObservableRecipient
         {
             OnPropertyChanged();
         }
-    } = "貸主";
+    } = "宅建業者";
 
     public ObservableCollection<Breadcrumb> BreadcrumbItems { get; set; } =
     [
-        new() { Name = "貸主", Page = typeof(Views.Rent.Lessors.BasicPage).FullName! },
-        new() { Name = "基本", Page = typeof(Views.Rent.Lessors.BasicPage).FullName! }
+        new() { Name = "宅建業者", Page = typeof(Views.Brokers.BasicPage).FullName! },
+        new() { Name = "基本", Page = typeof(Views.Brokers.BasicPage).FullName! }
     ];
 
     #endregion
@@ -76,24 +75,10 @@ public sealed partial class LessorViewModel : ObservableRecipient
     public partial string InfoBarErrorMessage { get; set; } = string.Empty;
 
     [ObservableProperty]
-    public partial bool IsNameLastHasError { get; private set; }
-    [ObservableProperty]
-    public partial bool IsNameFirstHasError { get; private set; }
+    public partial bool IsNameHasError { get; private set; }
 
     #endregion
 
-    // Natural 0 or Legal 1
-    public int PersonKindIndex { get;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-                IsDirty = true;
-            }
-        }
-    } = 0;
-
-    // Nameは直接編集バインドしない。あとで性と名をくっつける。
     public string Name
     {
         get => field ?? string.Empty; // Ensure a non-null value is returned
@@ -107,32 +92,6 @@ public sealed partial class LessorViewModel : ObservableRecipient
 
                 // Update title with dummy value.
                 WindowTitle = string.Empty;
-            }
-        }
-    }
-
-    public string NameFirst
-    {
-        get => field ?? string.Empty;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-                Name = $"{NameLast} {NameFirst}";
-                IsDirty = true;
-            }
-        }
-    }
-
-    public string NameLast
-    {
-        get => field ?? string.Empty;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-                Name = $"{NameLast} {NameFirst}";
-                IsDirty = true;
             }
         }
     }
@@ -159,7 +118,8 @@ public sealed partial class LessorViewModel : ObservableRecipient
     // The Entry property holds the COPY of current RentResidential entry being edited.
     // Do not use it directly in the UI. Apply changes to this object in SaveAsync() to save the changes.
     // MainViewModel creates a new instance of this class and call EditorShell.SetEntry(EntryResidentialFull) and sets this property.
-    private Models.Base.PersonBase _lessorBase;
+    private readonly Models.Base.PersonBase _broker;
+
 
     #endregion
 
@@ -173,15 +133,15 @@ public sealed partial class LessorViewModel : ObservableRecipient
 
     #endregion
 
-    public LessorViewModel(Models.Base.PersonBase lessorBase,
+    public BrokerViewModel(Models.Base.PersonBase broker,
         INavigationGenericService navigationService,
         IDialogGenericService dialogService,
         IDispatcherService dispatcherService,
         IDataAccessService dataAccessService,
         IDataAccessLocationService dataAccessLocationService)
     {
-        _lessorBase = lessorBase;
-        _id = lessorBase.Id;
+        _broker = broker;
+        _id = broker.Id;
 
         _navigationService = navigationService; 
         _dialogService = dialogService;
@@ -192,29 +152,19 @@ public sealed partial class LessorViewModel : ObservableRecipient
         // Update title with dummy value.
         WindowTitle = string.Empty;
 
-        if (_lessorBase.PersonKind == EnumPersonKind.Natural)
-        {
-            PersonKindIndex = 0;
-        }
-        else if (_lessorBase.PersonKind == EnumPersonKind.Legal)
-        {
-            PersonKindIndex = 1;
-        }
-
         try
         {
             PopulateValues();
 
             // Reset errors
-            IsNameLastHasError = false;
-            IsNameFirstHasError = false;
+            IsNameHasError = false;
             // TODO: more.
 
             //HasErrors = false;
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"LessorViewModel: {ex}");
+            Debug.WriteLine($"BrokerViewModel: {ex}");
         }
         finally
         {
@@ -240,64 +190,24 @@ public sealed partial class LessorViewModel : ObservableRecipient
 
     private void PopulateValues()
     {
-        Name = _lessorBase.Name;
+        Name = _broker.Name;
 
-        if (_lessorBase is PersonNatural naturalPerson)
-        {
-            if (_lessorBase.PersonKind != EnumPersonKind.Natural)
-            {
-                // Something is wrong.
-            }
-
-            PersonKindIndex = 0;
-
-            NameFirst = naturalPerson.NameFirst;
-            NameLast = naturalPerson.NameLast;
-        }
-        else if (_lessorBase is PersonLegal legalPerson)
-        {
-            if (_lessorBase.PersonKind != EnumPersonKind.Legal)
-            {
-                // Something is wrong.
-            }
-
-            PersonKindIndex = 1;
-
-            // TODO:
-        }
-        else
-        {
-            // TODO: Raise Error
-            return;
-        }
-
-
-        //Remarks = _lessorBase.Remarks;
+        //Remarks = _broker.Remarks;
     }
 
     private bool ValidateName()
     {
-        if (string.IsNullOrWhiteSpace(NameLast))
+        if (string.IsNullOrWhiteSpace(Name))
         {
-            InfoBarErrorMessage = "性（必須項目）が入力されていません。保存出来ませんでした。";
+            InfoBarErrorMessage = "会社名（必須項目）が入力されていません。保存出来ませんでした。";
 
-            IsNameLastHasError = true;
+            IsNameHasError = true;
 
             //HasErrors = true;
 
             return false;
         }
 
-        if (string.IsNullOrWhiteSpace(NameFirst))
-        {
-            InfoBarErrorMessage = "名（必須項目）が入力されていません。保存出来ませんでした。";
-
-            IsNameFirstHasError = true;
-
-            //HasErrors = true;
-
-            return false;
-        }
 
         /*
 
@@ -314,8 +224,7 @@ public sealed partial class LessorViewModel : ObservableRecipient
             return false;
         }
         */
-        IsNameLastHasError = false;
-        IsNameFirstHasError = false;
+        IsNameHasError = false;
 
         return true;
     }
@@ -327,45 +236,13 @@ public sealed partial class LessorViewModel : ObservableRecipient
             return;
         }
 
-        Models.Base.PersonBase newLessor;
+        _broker.Name = Name;
 
-        //if (_personKind == EnumPersonKind.Natural)
-        if (PersonKindIndex == 0)
-        {
-            newLessor = new Models.PersonNatural(_lessorBase.Id, _lessorBase.Status);
-        }
-        //else if (_personKind == EnumPersonKind.Legal)
-        else if (PersonKindIndex == 1)
-        {
-            newLessor = new Models.PersonLegal(_lessorBase.Id, _lessorBase.Status);
-        }
-        else
-        {
-            // TODO: Raise Error
-            return;
-        }
-
-        //_lessorBase.Name = Name;
-
-        if (newLessor is Models.PersonNatural naturalPerson)
-        {
-             naturalPerson.NameFirst = NameFirst;
-             naturalPerson.NameLast = NameLast;
-        }
-        else if (newLessor is Models.PersonLegal legalPerson)
-        {
-            // TODO:
-            //legalPerson.Name = 
-        }
-
-
-        //_lessor.Remarks = Remarks;
+        //_broker.Remarks = Remarks;
 
         // TODO: Set other properties
         // TODO: Don't forget to check if Helpers.Common.ReplaceZenkakuNumbers is needed.
 
-
-        _lessorBase = newLessor;
     }
 
     #endregion
@@ -384,19 +261,19 @@ public sealed partial class LessorViewModel : ObservableRecipient
         if (!ValidateName())
         {
             IsInfoBarErrorOpen = true;
-            if (!_navigationService.IsCurrentPageSameAs("ZumenSearch.Views.Rent.Lessors.BasicPage"))
+            if (!_navigationService.IsCurrentPageSameAs("ZumenSearch.Views.Brokers.BasicPage"))
             {
-                _navigationService.NavigateTo("ZumenSearch.Views.Rent.Lessors.BasicPage", this);
+                _navigationService.NavigateTo("ZumenSearch.Views.Brokers.BasicPage", this);
             }
             return;
         }
 
         SetValues();
 
-        var resInsert = _dataAccessService.UpsertRentLessor(_lessorBase);
+        var resInsert = _dataAccessService.UpsertBroker(_broker);
         if (resInsert.IsError)
         {
-            Debug.WriteLine("Error on update. @Save in LessorViewModel");
+            Debug.WriteLine("Error on update. @Save in BrokerViewModel");
             Debug.WriteLine(resInsert.Error.ErrText + Environment.NewLine + resInsert.Error.ErrDescription + Environment.NewLine + resInsert.Error.ErrPlace + Environment.NewLine + resInsert.Error.ErrPlaceParent);
 
             // TODO: fix format.
@@ -411,8 +288,8 @@ public sealed partial class LessorViewModel : ObservableRecipient
 
             IsDirty = false;
 
-            _lessorBase.IsModified = false;
-            _lessorBase.Status = EnumEntryStatus.Saved;
+            _broker.IsModified = false;
+            _broker.Status = EnumEntryStatus.Saved;
 
             // Update title with dummy value.
             WindowTitle = string.Empty;
@@ -420,7 +297,7 @@ public sealed partial class LessorViewModel : ObservableRecipient
             // Clear error infobar.
             IsInfoBarErrorOpen = false;
 
-            WeakReferenceMessenger.Default.Send(new Models.Messenger.LessorUpdatedMessage(_lessorBase));
+            WeakReferenceMessenger.Default.Send(new Models.Messenger.BrokerUpdatedMessage(_broker));
         }
 
     }

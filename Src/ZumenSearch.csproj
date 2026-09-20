@@ -76,11 +76,20 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Models\Brokers\" />
     <Folder Include="Models\Sale\" />
-    <Folder Include="ViewModels\Brokers\" />
     <Folder Include="ViewModels\Sale\" />
     <Folder Include="Views\Sale\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\Brokers\BasicPage.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\Brokers\EditorWindow.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\Brokers\ShellPage.xaml">
+      <SubType>Designer</SubType>
+    </Page>
   </ItemGroup>
 
   <!--

@@ -121,12 +121,17 @@ public partial class App : Application
                 services.AddTransient<ViewModels.Rent.Lessors.LessorViewModel>();
                 services.AddTransient<Views.Rent.Lessors.ShellPage>();
 
+                services.AddTransient<ViewModels.Brokers.BrokerViewModel>();
+                services.AddTransient<Views.Brokers.ShellPage>();
+
                 services.AddGenericFactory<ViewModels.Rent.Residentials.PropertyViewModel, Models.Rent.Residentials.Property, INavigationGenericService, IDialogGenericService> ();
                 services.AddGenericFactory<Views.Rent.Residentials.ShellPage, Models.Rent.Residentials.Property>();
                 services.AddGenericFactory<ViewModels.Rent.Residentials.Listing.ListingViewModel, Models.Rent.Residentials.Listing.Listing, INavigationGenericService, IDialogGenericService> ();
                 services.AddGenericFactory<Views.Rent.Residentials.Listing.ShellPage, Models.Rent.Residentials.Listing.Listing>();
-                services.AddGenericFactory<ViewModels.Rent.Lessors.LessorViewModel, Models.Rent.Lessors.Person, INavigationGenericService, IDialogGenericService>();
-                services.AddGenericFactory<Views.Rent.Lessors.ShellPage, Models.Rent.Lessors.Person>();
+                services.AddGenericFactory<ViewModels.Rent.Lessors.LessorViewModel, Models.Base.PersonBase, INavigationGenericService, IDialogGenericService>();
+                services.AddGenericFactory<Views.Rent.Lessors.ShellPage, Models.Base.PersonBase>();
+                services.AddGenericFactory<ViewModels.Brokers.BrokerViewModel, Models.Base.PersonBase, INavigationGenericService, IDialogGenericService>();
+                services.AddGenericFactory<Views.Brokers.ShellPage, Models.Base.PersonBase>();
 
                 // Instead of AddEditorFactory for each, typeof.. <,> registers all.
                 //services.AddSingleton(typeof(IAbstractFactory<,>), typeof(AbstractFactory<,>)); 

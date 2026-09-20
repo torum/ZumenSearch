@@ -8,36 +8,44 @@ namespace ZumenSearch.Models.Base;
 #pragma warning disable IDE0079 // Remove unnecessary suppression
 #pragma warning disable IDE0290 // Use primary constructor
 
+public enum EnumPersonKind
+{
+    Natural,
+    Legal,
+    Undetermined
+}
+
 public abstract class PersonBase : EntryBase
 {
-    public string NameFirst
+    public EnumPersonKind PersonKind { get; set; }
+
+    // Do not use SetProperty.
+    public string Remarks
     {
-        get => field ?? string.Empty;
+        get;
         set
         {
-            if (SetProperty(ref field, value))
-            {
-                Name = $"{NameLast} {NameFirst}";
-                IsModified = true;
-            }
-        }
-    }
+            if (field == value) return;
 
-    public string NameLast
-    {
-        get => field ?? string.Empty;
-        set
-        {
-            if (SetProperty(ref field, value))
+            if (value is not null)
             {
-                Name = $"{NameLast} {NameFirst}";
+                // Set this before raize PropertyChanged.
                 IsModified = true;
-            }
-        }
-    }
 
-    protected PersonBase(string id, EnumEntryStatus status) : base(id, status)
+                // Raize PropertyChanged event here.
+                field = value;
+            }
+            else
+            {
+                field = string.Empty;
+            }
+
+            OnPropertyChanged();
+        }
+    } = string.Empty;
+
+    protected PersonBase(string id, EnumEntryStatus status, EnumPersonKind personKind) : base(id, status)
     {
-        //
+        PersonKind = personKind;
     }
 };

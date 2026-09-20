@@ -53,7 +53,7 @@ public sealed partial class PersonSearchResultItem : PersonBase
     public string CreatedAt = string.Empty;
     public string UpdatedAt = string.Empty;
 
-    public PersonSearchResultItem(string id) : base(id, EnumEntryStatus.Saved)
+    public PersonSearchResultItem(string id, EnumPersonKind personKind) : base(id, EnumEntryStatus.Saved, personKind)
     {
         //
     }

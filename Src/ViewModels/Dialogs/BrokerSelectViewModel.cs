@@ -1,16 +1,13 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.UI.Windowing;
 using System.Collections.ObjectModel;
-using ZumenSearch.Models.Common;
-using ZumenSearch.Services;
 using ZumenSearch.Services.Contracts;
 
 namespace ZumenSearch.ViewModels.Dialogs;
 
 // TODO: pass _cts as a parameter and make cancelable.
 
-public partial class LessorSelectViewModel : ObservableObject
+public partial class BrokerSelectViewModel : ObservableObject
 {
     public string Query
     {
@@ -21,7 +18,7 @@ public partial class LessorSelectViewModel : ObservableObject
             {
                 if (string.IsNullOrEmpty(field))
                 {
-                    SuggestedLessors?.Clear();
+                    SuggestedBrokers?.Clear();
                 }
             }
 
@@ -29,7 +26,7 @@ public partial class LessorSelectViewModel : ObservableObject
         }
     } = string.Empty;
 
-    public ObservableCollection<Models.Common.PersonSearchResultItem>? SuggestedLessors
+    public ObservableCollection<Models.Common.PersonSearchResultItem>? SuggestedBrokers
     {
         get;
         set
@@ -41,7 +38,7 @@ public partial class LessorSelectViewModel : ObservableObject
         }
     } = [];
 
-    public Models.Common.PersonSearchResultItem? SelectedLessor
+    public Models.Common.PersonSearchResultItem? SelectedBroker
     {
         get;
         set
@@ -62,7 +59,7 @@ public partial class LessorSelectViewModel : ObservableObject
 
     private readonly CancellationTokenSource _cts;
 
-    public LessorSelectViewModel(IDataAccessService dataAccessService, CancellationTokenSource cts)
+    public BrokerSelectViewModel(IDataAccessService dataAccessService, CancellationTokenSource cts)
     {
         _dataAccessService = dataAccessService;
         _cts = cts;
@@ -72,11 +69,11 @@ public partial class LessorSelectViewModel : ObservableObject
 
     private async void InitLoad()
     {
-        var res = await Task.Run(() => _dataAccessService.SelectRentLessorsByKeyword("*"), _cts.Token);
-        //var res = _dataAccessService.SelectRentLessorByKeyword("*");
+        var res = await Task.Run(() => _dataAccessService.SelectBrokersByKeyword("*"), _cts.Token);
+        //var res = _dataAccessService.SelectLessorByKeyword("*");
         if (res is not null)
         {
-            SuggestedLessors = new(res.PersonSearchResult);
+            SuggestedBrokers = new(res.PersonSearchResult);
         }
     }
 
@@ -86,7 +83,7 @@ public partial class LessorSelectViewModel : ObservableObject
         var searchText = string.Empty;
         if (string.IsNullOrEmpty(Query))
         {
-            SuggestedLessors?.Clear();
+            SuggestedBrokers?.Clear();
 
             // Allow empty (treat as "*")
             searchText = "*";
@@ -97,11 +94,11 @@ public partial class LessorSelectViewModel : ObservableObject
             searchText = Query;
         }
 
-        var res = await Task.Run(() => _dataAccessService.SelectRentLessorsByKeyword(searchText), _cts.Token);
+        var res = await Task.Run(() => _dataAccessService.SelectBrokersByKeyword(searchText), _cts.Token);
         //var res = _dataAccessService.SelectRentLessorByKeyword(Query);
         if (res is not null)
         {
-            SuggestedLessors = new(res.PersonSearchResult);
+            SuggestedBrokers = new(res.PersonSearchResult);
         }
     }
     private bool CanSearch()
@@ -112,9 +109,9 @@ public partial class LessorSelectViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void AddNewRentLessor()
+    private void AddNewBroker()
     {
         var mainVm = App.GetService<MainViewModel>();
-        mainVm.AddNewRentLessorCommand.Execute(null);
+        mainVm.AddNewBrokerCommand.Execute(null);
     }
 }
