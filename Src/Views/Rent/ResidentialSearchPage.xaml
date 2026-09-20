@@ -59,8 +59,8 @@
                     </VariableSizedWrapGrid>
 
                     <VariableSizedWrapGrid Orientation="Horizontal" Margin="0">
-                        <TextBox MaxWidth="500" MinWidth="350" Header="沿線名" PlaceholderText="Type your text here" Margin="0,24,24,0"/>
                         <TextBox MaxWidth="500" MinWidth="350" Header="最寄り駅" PlaceholderText="Type your text here" Margin="0,24,24,0"/>
+                        <TextBox MaxWidth="500" MinWidth="350" Header="沿線名" PlaceholderText="Type your text here" Margin="0,24,24,0"/>
                     </VariableSizedWrapGrid>
 
                     <VariableSizedWrapGrid Orientation="Horizontal" Margin="0">

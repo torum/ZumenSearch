@@ -15,6 +15,7 @@
             <RowDefinition Height="*"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
+        
         <Grid Grid.Row="0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"></ColumnDefinition>
@@ -31,6 +32,7 @@
                 <Button Content="検索" VerticalAlignment="Bottom" Command="{x:Bind ViewModel.SearchCommand}"></Button>
             </Grid>
         </Grid>
+        
         <Grid Grid.Row="1" Margin="0,6,0,0">
             <Border Style="{StaticResource RoundCardBorderStyle}" Padding="0">
                 <ListView x:Name="SelectionListView" ItemsSource="{x:Bind ViewModel.SuggestedLessors, Mode=OneWay}" SelectionMode="Single" SelectedItem="{x:Bind ViewModel.SelectedLessor,Mode=TwoWay}" Margin="0,6,0,6" Height="150" Width="260">
@@ -42,6 +44,7 @@
                 </ListView>
             </Border>
         </Grid>
+        
         <Grid Grid.Row="2" Margin="0,6,0,0">
             <Button Content="新規に追加" Command="{x:Bind ViewModel.AddNewRentLessorCommand}" HorizontalAlignment="Right"></Button>
         </Grid>

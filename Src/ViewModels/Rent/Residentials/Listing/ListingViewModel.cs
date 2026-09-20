@@ -815,6 +815,14 @@ public sealed partial class ListingViewModel : ObservableRecipient,
 
     #region == Commands ==
 
+    [RelayCommand]
+    public void OpenPropertyWindow()
+    {
+        // TODO:
+
+        Debug.WriteLine("OpenPropertyWindow");
+    }
+
     #region == Save ==
 
     [RelayCommand(CanExecute = nameof(CanSave))]

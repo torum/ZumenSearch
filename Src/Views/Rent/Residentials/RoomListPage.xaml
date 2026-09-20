@@ -33,7 +33,7 @@
 
         <Grid Grid.Row="1">
             <Border Style="{StaticResource RoundCardBorderStyle}">
-                <ItemsView x:Name="RoomsListView" Margin="0,0,0,0" ItemsSource="{x:Bind ViewModel.Rooms, Mode=OneWay}" SelectionMode="Single" AllowFocusOnInteraction="False" IsItemInvokedEnabled="False">
+                <ItemsView x:Name="RoomsListView" Margin="0,0,0,0" ItemsSource="{x:Bind ViewModel.Rooms, Mode=OneWay}" SelectionMode="Single" AllowFocusOnInteraction="True" IsItemInvokedEnabled="False">
                     <ItemsView.ContextFlyout>
                         <MenuFlyout>
                             <MenuFlyoutItem Text="編集" Icon="Edit" Command="{x:Bind ViewModel.EditSelectedRoomCommand}" CommandParameter="{x:Bind RoomsListView.SelectedItem, Mode=OneWay}">
@@ -48,7 +48,7 @@
                     </ItemsView.ContextFlyout>
                     <ItemsView.ItemTemplate>
                         <DataTemplate x:DataType="modlisting:Listing">
-                            <ItemContainer DataContext="{x:Bind}" IsDoubleTapEnabled="True" DoubleTapped="ItemContainer_DoubleTapped" PointerPressed="ItemContainer_PointerPressed" PointerReleased="ItemContainer_PointerReleased" RightTapped="ItemContainer_RightTapped">
+                            <ItemContainer DataContext="{x:Bind}" IsDoubleTapEnabled="True" AllowFocusOnInteraction="False" DoubleTapped="ItemContainer_DoubleTapped" PointerPressed="ItemContainer_PointerPressed" PointerReleased="ItemContainer_PointerReleased" RightTapped="ItemContainer_RightTapped">
                                 <!-- If ItemInvoked is enabled and used, this won't be necessary. But if ItemInvoked is not used, this is necessary to handle Enter key. -->
                                 <ItemContainer.KeyboardAccelerators>
                                     <KeyboardAccelerator Key="Enter" Modifiers="None" Invoked="ItemContainerKeyboardAccelerator_Invoked" />

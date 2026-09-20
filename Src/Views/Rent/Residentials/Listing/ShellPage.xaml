@@ -68,6 +68,12 @@
 
                 <StackPanel Grid.Row="0" Grid.Column="1">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                        <AppBarButton Icon="Go"  Label="建物" ToolTipService.ToolTip="建物画面を開く（Ctrl+T）" Command="{x:Bind ViewModel.OpenPropertyWindowCommand}">
+                            <!-- GoToStart -->
+                            <AppBarButton.KeyboardAccelerators>
+                                <KeyboardAccelerator Key="S" Modifiers="Control"/>
+                            </AppBarButton.KeyboardAccelerators>
+                        </AppBarButton>
                         <AppBarButton Icon="Save" Label="保存" ToolTipService.ToolTip="保存（Ctrl+S）" Command="{x:Bind ViewModel.SaveCommand}">
                             <AppBarButton.KeyboardAccelerators>
                                 <KeyboardAccelerator Key="S" Modifiers="Control"/>

@@ -64,11 +64,11 @@ public partial class MainViewModel : ObservableRecipient,
 
     public ObservableCollection<Models.Common.Breadcrumb> BreadcrumbItemsResidential { get; set; } =
     [
-        new() { Name = "住居用", Page = typeof(Views.Rent.ResidentialSearchPage).FullName! }
+        new() { Name = "賃貸住居用", Page = typeof(Views.Rent.ResidentialSearchPage).FullName! }
     ];
     public ObservableCollection<Models.Common.Breadcrumb> BreadcrumbItemsResidentialSearchResult { get; set; } =
     [
-        new() { Name = "住居用", Page = typeof(Views.Rent.ResidentialSearchPage).FullName! },
+        new() { Name = "賃貸住居用", Page = typeof(Views.Rent.ResidentialSearchPage).FullName! },
         new() { Name = "検索結果", Page = typeof(Views.Rent.ResidentialSearchResultPage).FullName! },
     ];
 

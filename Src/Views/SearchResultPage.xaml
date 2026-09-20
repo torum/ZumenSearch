@@ -91,7 +91,7 @@
             </StackPanel>
 
             <ScrollViewer Grid.Row="1" Padding="{StaticResource ContentPadding}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                <ItemsView x:Name="SearchResultListView" Margin="0,12,0,0" ItemsSource="{x:Bind ViewModel.RentResidentialBldgSearchResult, Mode=OneWay}" AllowFocusOnInteraction="False" SelectionMode="Single">
+                <ItemsView x:Name="SearchResultListView" Margin="0,12,0,0" ItemsSource="{x:Bind ViewModel.RentResidentialBldgSearchResult, Mode=OneWay}" AllowFocusOnInteraction="True" SelectionMode="Single">
                     <ItemsView.ContextFlyout>
                         <MenuFlyout>
                             <MenuFlyoutItem Text="編集" Icon="Edit" Command="{x:Bind ViewModel.EditRentResidentialBldgCommand}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}">
@@ -105,7 +105,7 @@
                     </ItemsView.ContextFlyout>
                     <ItemsView.ItemTemplate>
                         <DataTemplate x:DataType="mod:PropertySearchResultItem">
-                            <ItemContainer DataContext="{x:Bind}" IsDoubleTapEnabled="True" DoubleTapped="SearchResult_DoubleTapped" PointerPressed="ItemContainer_PointerPressed" PointerReleased="ItemContainer_PointerReleased" RightTapped="ItemContainer_RightTapped">
+                            <ItemContainer DataContext="{x:Bind}" IsDoubleTapEnabled="True" AllowFocusOnInteraction="False" DoubleTapped="SearchResult_DoubleTapped" PointerPressed="ItemContainer_PointerPressed" PointerReleased="ItemContainer_PointerReleased" RightTapped="ItemContainer_RightTapped">
                                 <ItemContainer.KeyboardAccelerators>
                                     <KeyboardAccelerator Key="Enter" Modifiers="None" Invoked="ItemsViewKeyboardAccelerator_Invoked" />
                                 </ItemContainer.KeyboardAccelerators>

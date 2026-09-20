@@ -83,13 +83,21 @@ public partial class LessorSelectViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanSearch))]
     public async Task Search()
     {
+        var searchText = string.Empty;
         if (string.IsNullOrEmpty(Query))
         {
             SuggestedLessors?.Clear();
-            return;
+
+            // Allow empty (treat as "*")
+            searchText = "*";
+            //return;
+        }
+        else
+        {
+            searchText = Query;
         }
 
-        var res = await Task.Run(() => _dataAccessService.SelectRentLessorByKeyword(Query), _cts.Token);
+        var res = await Task.Run(() => _dataAccessService.SelectRentLessorByKeyword(searchText), _cts.Token);
         //var res = _dataAccessService.SelectRentLessorByKeyword(Query);
         if (res is not null)
         {
@@ -98,7 +106,9 @@ public partial class LessorSelectViewModel : ObservableObject
     }
     private bool CanSearch()
     {
-        return !string.IsNullOrEmpty(Query);
+        //return !string.IsNullOrEmpty(Query);
+        // Allow empty (treat as "*")
+        return true;
     }
 
     [RelayCommand]

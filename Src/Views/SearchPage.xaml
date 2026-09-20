@@ -12,16 +12,12 @@
     mc:Ignorable="d"
     NavigationCacheMode="Required">
 
-    <Page.Resources>
-        <CollectionViewSource x:Name="cvsProjects" IsSourceGrouped="True" ItemsPath="Activities"/>
-    </Page.Resources>
-
     <Grid x:Name="ContentArea">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        
+
         <Grid x:Name="HeaderGrid" Grid.Row="0" Padding="{StaticResource ContentPadding}">
             <Grid BorderThickness="0,0,0,1" BorderBrush="{ThemeResource NavigationViewItemSeparatorForeground}">
                 <Grid.RowDefinitions>
@@ -49,7 +45,6 @@
 
                 <StackPanel Grid.Row="0" Grid.Column="1">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,3,0">
-
                         <AppBarButton Icon="Find" Label="検索" Command="{x:Bind ViewModel.SearchRentResidentialBldgCommand}" CommandParameter="{x:Bind ViewModel.SearchQuery, Mode=OneWay}"/>
                         <!--
                         <AppBarButton Icon="Add" Label="新規" Command="{x:Bind ViewModel.AddNewRentResidentialCommand}"/>
@@ -68,12 +63,12 @@
                         </AppBarButton>
                     </StackPanel>
                 </StackPanel>
-
             </Grid>
         </Grid>
-        
+
         <Grid Grid.Row="1" Padding="{StaticResource ContentPadding}">
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
@@ -92,8 +87,8 @@
                         <VariableSizedWrapGrid x:Name="RentSearchTarget" Orientation="Horizontal" HorizontalAlignment="Center" MaximumRowsOrColumns="4">
                             <RadioButton Content="物件名" GroupName="RentMainSearchText" IsChecked="True" Margin="0,0,12,6"/>
                             <RadioButton Content="所在地" GroupName="RentMainSearchText"/>
-                            <RadioButton Content="沿線名" GroupName="RentMainSearchText"/>
                             <RadioButton Content="最寄り駅" GroupName="RentMainSearchText"/>
+                            <RadioButton Content="沿線名" GroupName="RentMainSearchText"/>
                             <RadioButton Content="不動産ID" GroupName="RentMainSearchText"/>
                             <RadioButton Content="宅建業者名" GroupName="RentMainSearchText"/>
                             <RadioButton Content="貸主名" GroupName="RentMainSearchText"/>
@@ -103,40 +98,45 @@
                         <VariableSizedWrapGrid x:Name="BuySellSearchTarget" Orientation="Horizontal" HorizontalAlignment="Center" MaximumRowsOrColumns="4">
                             <RadioButton Content="物件名" GroupName="BuySellMainSearchText" IsChecked="True" Margin="0,0,12,6"/>
                             <RadioButton Content="所在地" GroupName="BuySellMainSearchText"/>
-                            <RadioButton Content="沿線名" GroupName="BuySellMainSearchText"/>
                             <RadioButton Content="最寄り駅" GroupName="BuySellMainSearchText"/>
+                            <RadioButton Content="沿線名" GroupName="BuySellMainSearchText"/>
                             <RadioButton Content="不動産ID" GroupName="BuySellMainSearchText"/>
                             <RadioButton Content="宅建業者名" GroupName="RentMainSearchText"/>
                         </VariableSizedWrapGrid>
                     </controls:Case>
                 </controls:SwitchPresenter>
 
-                <Border BorderThickness="0,1,0,0" BorderBrush="{ThemeResource NavigationViewItemSeparatorForeground}"></Border>
+<!--                    <Border BorderThickness="0,1,0,0" BorderBrush="{ThemeResource NavigationViewItemSeparatorForeground}"></Border> -->
 
             </StackPanel>
 
-            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                <!--
-                <VisualStateManager.VisualStateGroups>
-                    <VisualStateGroup>
-                        <VisualState>
-                            <VisualState.StateTriggers>
-                                <AdaptiveTrigger MinWindowWidth="1024" />
-                            </VisualState.StateTriggers>
+            <Grid Grid.Row="1" Visibility="Collapsed">
+                <StackPanel Margin="0,48,0,0">
+                    <TextBlock Text="最近更新された物件" FontWeight="SemiBold"/>
+                    <Border Margin="0,12,0,0" BorderThickness="0,1,0,0" BorderBrush="{ThemeResource NavigationViewItemSeparatorForeground}"></Border>
+                </StackPanel>
+            </Grid>
 
-                            <VisualState.Setters>
-                                <Setter Target="SearchTarget.MaximumRowsOrColumns" Value="6"/>
-                            </VisualState.Setters>
-                        </VisualState>
-                    </VisualStateGroup>
-                </VisualStateManager.VisualStateGroups>
--->
-
-                <Grid Margin="0,24,0,0">
-                    <GridView x:Name="BasicGridView" ItemsSource="{x:Bind ViewModel.RecentProperties, Mode=OneWay}" SelectionMode="Single" IsItemClickEnabled="True" ItemClick="BasicGridView_ItemClick" HorizontalAlignment="Center" HorizontalContentAlignment="Center">
-                    <GridView.ItemTemplate>
-                            <DataTemplate x:DataType="mod:PropertySearchResultItem">
-                                <Grid Width="200" Height="150" CornerRadius="4" Background="Transparent">
+            <ScrollViewer Grid.Row="2" Margin="0,48,0,0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <ItemsView x:Name="RecentItemsView" Margin="12,24,12,24" ItemsSource="{x:Bind ViewModel.RecentProperties, Mode=OneWay}" AllowFocusOnInteraction="True" SelectionMode="Single" HorizontalAlignment="Center">
+                    <ItemsView.ContextFlyout>
+                        <MenuFlyout>
+                            <MenuFlyoutItem Text="編集" Icon="Edit" Command="{x:Bind ViewModel.EditRentResidentialBldgCommand}" CommandParameter="{x:Bind RecentItemsView.SelectedItem, Mode=OneWay}">
+                                <MenuFlyoutItem.KeyboardAccelerators>
+                                    <KeyboardAccelerator Key="Enter" />
+                                </MenuFlyoutItem.KeyboardAccelerators>
+                            </MenuFlyoutItem>
+                            <MenuFlyoutSeparator/>
+                            <MenuFlyoutItem Text="削除" Icon="Delete" Command="{x:Bind ViewModel.DeleteRentResidentialBldgCommand}" CommandParameter="{x:Bind RecentItemsView.SelectedItem, Mode=OneWay}"></MenuFlyoutItem>
+                        </MenuFlyout>
+                    </ItemsView.ContextFlyout>
+                    <ItemsView.ItemTemplate>
+                        <DataTemplate x:DataType="mod:PropertySearchResultItem">
+                            <ItemContainer DataContext="{x:Bind}" IsDoubleTapEnabled="True" AllowFocusOnInteraction="False" DoubleTapped="ItemContainer_DoubleTapped"  PointerPressed="ItemContainer_PointerPressed" PointerReleased="ItemContainer_PointerReleased" RightTapped="ItemContainer_RightTapped">
+                                <ItemContainer.KeyboardAccelerators>
+                                    <KeyboardAccelerator Key="Enter" Modifiers="None" Invoked="ItemsViewKeyboardAccelerator_Invoked" />
+                                </ItemContainer.KeyboardAccelerators>
+                                <Grid Width="200" Height="150" CornerRadius="4">
                                     <Image Source="{x:Bind ThumbImage, TargetNullValue={x:Null}, Mode=OneWay}" ImageFailed="Image_ImageFailed"  Stretch="UniformToFill"/>
 
                                     <StackPanel Orientation="Vertical" Height="40" VerticalAlignment="Bottom" Padding="5,1,5,1" Background="LightGray" Opacity=".75">
@@ -144,38 +144,23 @@
                                         <StackPanel Orientation="Horizontal">
                                             <TextBlock Text="Updated: " Style="{ThemeResource CaptionTextBlockStyle}" Foreground="{ThemeResource SystemControlPageTextBaseMediumBrush}"/>
                                             <TextBlock Text="{x:Bind UpdatedAt, Mode=OneWay}" Style="{ThemeResource CaptionTextBlockStyle}" Foreground="{ThemeResource SystemControlPageTextBaseMediumBrush}"/>
+                                        </StackPanel>
                                     </StackPanel>
-                                </StackPanel>
-                            </Grid>
+                                </Grid>
+                            </ItemContainer>
                         </DataTemplate>
-                    </GridView.ItemTemplate>
-                    <GridView.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <ItemsWrapGrid x:Name="MaxItemsWrapGrid" MaximumRowsOrColumns="10" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,12,0,0"/>
-                        </ItemsPanelTemplate>
-                    </GridView.ItemsPanel>
-                    <GridView.ItemContainerStyle>
-                        <Style TargetType="GridViewItem">
-                            <Setter Property="Margin" Value="0, 5, 12, 5"/>
-                        </Style>
-                    </GridView.ItemContainerStyle>
+                    </ItemsView.ItemTemplate>
 
-<!--
-                    <GridView.GroupStyle>
-                        <GroupStyle HidesIfEmpty="True">
-                            <GroupStyle.HeaderTemplate>
-                                <DataTemplate>
-                                    <Grid Background="LightGray" Margin="0">
-                                        <TextBlock Text='{Binding Name}' Foreground="Black" Margin="12" Style="{StaticResource HeaderTextBlockStyle}"/>
-                                    </Grid>
-                                </DataTemplate>
-                            </GroupStyle.HeaderTemplate>
-                        </GroupStyle>
-                    </GridView.GroupStyle>
-                    -->
-                </GridView>
-            </Grid>
-
+                    <ItemsView.Layout>
+                        <UniformGridLayout MaximumRowsOrColumns="10"
+                           MinRowSpacing="24" 
+                           MinColumnSpacing="24"/>
+                        <!--
+                        <LinedFlowLayout MinItemSpacing="24" LineSpacing="24"/>
+                        -->
+                        <!-- StackLayout -->
+                    </ItemsView.Layout>
+                </ItemsView>
 
             </ScrollViewer>
 
