@@ -2800,8 +2800,6 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         {
             var lessorId = lessor.Id;
 
-            Debug.WriteLine($"lessor {lessor.Name} returned.");
-
             // Check if already exists
             var match = LessorsWrapper.FirstOrDefault(x => x.Person.Id.Equals(lessorId));
             if (match is not null)

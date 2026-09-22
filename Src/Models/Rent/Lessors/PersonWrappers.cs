@@ -8,6 +8,8 @@ namespace ZumenSearch.Models.Rent.Lessors;
 #pragma warning disable IDE0079 // Remove unnecessary suppression
 #pragma warning disable IDE0290 // Use primary constructor
 
+// TODO: See if reuse this with broker
+
 // TODO:
 /*
 public sealed partial class Person : PersonBase

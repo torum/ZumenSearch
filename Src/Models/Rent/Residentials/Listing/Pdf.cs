@@ -14,6 +14,8 @@ public enum EnumRoomPdfType
     Unspecified,
     Maisoku,
     Architectural,
+    Toukibo,
+    Kouzu,
     Other
 }
 public sealed class RoomPdfType(EnumRoomPdfType key)
@@ -26,6 +28,8 @@ public sealed class RoomPdfType(EnumRoomPdfType key)
                 {EnumRoomPdfType.Unspecified, "未指定"},
                 {EnumRoomPdfType.Maisoku, "募集図面"},
                 {EnumRoomPdfType.Architectural, "建築図面"},
+                {EnumRoomPdfType.Toukibo, "登記簿謄本"},
+                {EnumRoomPdfType.Kouzu, "公図・地図"},
                 {EnumRoomPdfType.Other, "その他"},
     };
 
@@ -43,6 +47,8 @@ public sealed partial class Pdf : PdfBase
         //new BuildingPictureType(EnumBuildingPictureType.Unspecified, "未指定"),
         new RoomPdfType(Models.Rent.Residentials.Listing.EnumRoomPdfType.Maisoku),
         new RoomPdfType(Models.Rent.Residentials.Listing.EnumRoomPdfType.Architectural),
+        new RoomPdfType(Models.Rent.Residentials.Listing.EnumRoomPdfType.Toukibo),
+        new RoomPdfType(Models.Rent.Residentials.Listing.EnumRoomPdfType.Kouzu),
         new RoomPdfType(Models.Rent.Residentials.Listing.EnumRoomPdfType.Other)
         ];
 

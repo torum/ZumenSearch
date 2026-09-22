@@ -2,27 +2,24 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.UI.Xaml;
 using System.Diagnostics;
-using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using WinRT.Interop;
 using ZumenSearch.Helpers;
 using ZumenSearch.Services;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.Services.Extensions;
-using ZumenSearch.Views;
 
 namespace ZumenSearch;
 
 public partial class App : Application
 {
     // App basic info
-    public static readonly string AppName = "ZumenSearch";
-    private static readonly string AppDeveloper = "torum";
+    public const string AppName = "ZumenSearch";
+    private const string AppDeveloper = "torum";
 
     // Data folder path
-    private static readonly string EnvDataFolder = System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);//ApplicationData 
-    public static string AppDataFolder { get; private set; } = System.IO.Path.Combine(System.IO.Path.Combine(EnvDataFolder, AppDeveloper), AppName);
+    private static readonly string _envDataFolder = System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);//ApplicationData 
+    public static string AppDataFolder { get; private set; } = System.IO.Path.Combine(System.IO.Path.Combine(_envDataFolder, AppDeveloper), AppName);
 
     // "BlobData" includes building/unit pictures, PDF and its thumbnail image files.
     public static string PropertyBlobDataFolder { get; private set; } = System.IO.Path.Combine(AppDataFolder, "BlobData");

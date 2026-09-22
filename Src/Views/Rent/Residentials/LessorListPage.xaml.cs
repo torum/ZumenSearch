@@ -6,16 +6,53 @@ using Microsoft.UI.Xaml.Navigation;
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using Windows.ApplicationModel.Chat;
 using Windows.Graphics;
 using WinRT.Interop;
 using ZumenSearch.Views.Dialogs;
 
-
 namespace ZumenSearch.Views.Rent.Residentials;
+
+public partial class PersonTemplateSelector : DataTemplateSelector
+{
+    public DataTemplate? NaturalTemplate { get; set; }
+    public DataTemplate? LegalTemplate { get; set; }
+
+    protected override DataTemplate? SelectTemplateCore(object item)
+    {
+        if (item is Models.Rent.Lessors.PersonWrapperForPropertyViewModel lessor)
+        {
+            if (lessor.Person is Models.PersonNatural)
+            {
+                return NaturalTemplate;
+            }
+            else if (lessor.Person is Models.PersonLegal)
+            {
+                return LegalTemplate;
+            }
+        }
+        else if (item is Models.PersonNatural)
+        {
+            return NaturalTemplate;
+        }
+        else if (item is Models.PersonLegal)
+        {
+            return LegalTemplate;
+        }
+
+        return base.SelectTemplateCore(item);
+    }
+
+    protected override DataTemplate? SelectTemplateCore(object item, DependencyObject container)
+    {
+        return SelectTemplateCore(item);
+    }
+}
 
 public sealed partial class LessorListPage : Page
 {
     public ViewModels.Rent.Residentials.PropertyViewModel? ViewModel { get; private set; }
+
 
     public LessorListPage()
     {

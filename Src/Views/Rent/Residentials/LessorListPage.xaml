@@ -4,10 +4,69 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:mod="using:ZumenSearch.Models.Common"
+    xmlns:mod="using:ZumenSearch.Models"
     xmlns:modlessor="using:ZumenSearch.Models.Rent.Lessors"
+    xmlns:local="using:ZumenSearch.Views.Rent.Residentials"
     mc:Ignorable="d"
     NavigationCacheMode="Required">
+    <Page.Resources>
+        <!-- DataTemplate for NaturalPerson -->
+        <DataTemplate x:Key="NaturalPersonTemplate" x:DataType="modlessor:PersonWrapperForPropertyViewModel">
+            <Border Style="{StaticResource RoundCardBorderStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid Grid.Row="0" Grid.Column="0">
+                        <StackPanel>
+                            <TextBox Header="名前" IsReadOnly="True" Margin="0,0,0,0" Text="{x:Bind Person.Name, Mode=OneWay}"></TextBox>
+                        </StackPanel>
+
+                    </Grid>
+                    <Grid Grid.Row="0" Grid.Column="1">
+                        <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Margin="0,0,0,0" HorizontalAlignment="Right">
+                            <AppBarButton Icon="Edit" Label="編集" ToolTipService.ToolTip="貸主を編集" Command="{x:Bind ParentViewModel.EditLessorCommand, Mode=OneWay}" CommandParameter="{x:Bind}"/>
+                            <AppBarButton Icon="Delete" Label="削除" ToolTipService.ToolTip="貸主を削除" Command="{x:Bind ParentViewModel.DeleteLessorCommand, Mode=OneWay}" CommandParameter="{x:Bind}"/>
+                            <!--  -->
+                        </CommandBar>
+                    </Grid>
+                </Grid>
+            </Border>
+        </DataTemplate>
+
+        <!-- DataTemplate for LegalPerson -->
+        <DataTemplate x:Key="LegalPersonTemplate" x:DataType="modlessor:PersonWrapperForPropertyViewModel">
+            <Border Style="{StaticResource RoundCardBorderStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid Grid.Row="0" Grid.Column="0">
+                        <StackPanel>
+                            <TextBox Header="会社名" IsReadOnly="True" Margin="0,0,0,0" Text="{x:Bind Person.Name, Mode=OneWay}"></TextBox>
+                            <!-- cast -->
+                            <TextBox Header="会社" IsReadOnly="True" Margin="0,0,0,0" Text="{x:Bind ((mod:PersonLegal)Person).NameCompany, Mode=OneWay}"></TextBox>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Grid.Row="0" Grid.Column="1">
+                        <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Margin="0,0,0,0" HorizontalAlignment="Right">
+                            <AppBarButton Icon="Edit" Label="編集" ToolTipService.ToolTip="貸主を編集" Command="{x:Bind ParentViewModel.EditLessorCommand, Mode=OneWay}" CommandParameter="{x:Bind}"/>
+                            <AppBarButton Icon="Delete" Label="削除" ToolTipService.ToolTip="貸主を削除" Command="{x:Bind ParentViewModel.DeleteLessorCommand, Mode=OneWay}" CommandParameter="{x:Bind}"/>
+                            <!--  -->
+                        </CommandBar>
+                    </Grid>
+                </Grid>
+            </Border>
+        </DataTemplate>
+
+        <!-- Instantiate the Selector and reference our DataTemplates -->
+        <local:PersonTemplateSelector x:Key="PersonTypeSelector"
+            NaturalTemplate="{StaticResource NaturalPersonTemplate}"
+            LegalTemplate="{StaticResource LegalPersonTemplate}"/>
+        
+    </Page.Resources>
 
     <Grid x:Name="ContentArea" Padding="36,0,36,24">
         <Grid.RowDefinitions>
@@ -17,7 +76,7 @@
 
         <Grid Grid.Row="0">
             <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Margin="0,0,0,0" HorizontalAlignment="Right">
-                <AppBarButton Name="AppBarButtonSelectLessor" Icon="AddFriend"  Label="追加" Command="{x:Bind ViewModel.AddLessorCommand, Mode=OneWay}" />
+                <AppBarButton Name="AppBarButtonSelectLessor" Icon="AddFriend" Label="追加" Command="{x:Bind ViewModel.AddLessorCommand, Mode=OneWay}" />
                 <!-- Contact -->
                 <AppBarButton Icon="More" Label="その他">
                     <AppBarButton.Flyout>
@@ -33,31 +92,10 @@
             <ScrollViewer HorizontalScrollMode="Disabled">
 
                 <!-- TODO: chnage this to listview -->
-                <ItemsRepeater x:Name="ItemsView" ItemsSource="{x:Bind ViewModel.LessorsWrapper, Mode=TwoWay}" MinWidth="300" MinHeight="225" ScrollViewer.HorizontalScrollMode="Disabled" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <!-- ItemTemplateSelector="{StaticResource PersonTypeSelector}"  -->
+                <ItemsRepeater x:Name="ItemsView" ItemsSource="{x:Bind ViewModel.LessorsWrapper, Mode=TwoWay}" ItemTemplate="{StaticResource PersonTypeSelector}" MinWidth="300" MinHeight="225" ScrollViewer.HorizontalScrollMode="Disabled" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <!--  SelectionChanged="ItemsView_SelectionChanged" SelectionMode="Single" IsItemInvokedEnabled="False"  -->
-                    <ItemsRepeater.ItemTemplate>
-                        <DataTemplate x:DataType="modlessor:PersonWrapperForPropertyViewModel">
-                            <Border Style="{StaticResource RoundCardBorderStyle}">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Grid Grid.Row="0" Grid.Column="0">
-                                        <TextBox Header="名前" IsReadOnly="True" Margin="0,0,0,0" Text="{x:Bind Person.Name, Mode=OneWay}"></TextBox>
 
-                                    </Grid>
-                                    <Grid Grid.Row="0" Grid.Column="1">
-                                        <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Margin="0,0,0,0" HorizontalAlignment="Right">
-                                            <AppBarButton Icon="Edit" Label="編集" ToolTipService.ToolTip="貸主を編集" Command="{x:Bind ParentViewModel.EditLessorCommand, Mode=OneWay}" CommandParameter="{x:Bind}"/>
-                                            <AppBarButton Icon="Delete" Label="削除" ToolTipService.ToolTip="貸主を削除" Command="{x:Bind ParentViewModel.DeleteLessorCommand, Mode=OneWay}" CommandParameter="{x:Bind}"/>
-                                            <!--  -->
-                                        </CommandBar>
-                                    </Grid>
-                                </Grid>
-                            </Border>
-                        </DataTemplate>
-                    </ItemsRepeater.ItemTemplate>
                     <ItemsRepeater.Layout>
                         <StackLayout Orientation="Vertical" Spacing="12" />
                         <!--

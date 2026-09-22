@@ -75,23 +75,7 @@ public sealed partial class LessorViewModel : ObservableRecipient
     [ObservableProperty]
     public partial string InfoBarErrorMessage { get; set; } = string.Empty;
 
-    [ObservableProperty]
-    public partial bool IsNameLastHasError { get; private set; }
-    [ObservableProperty]
-    public partial bool IsNameFirstHasError { get; private set; }
-
     #endregion
-
-    // Natural 0 or Legal 1
-    public int PersonKindIndex { get;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-                IsDirty = true;
-            }
-        }
-    } = 0;
 
     // Nameは直接編集バインドしない。あとで性と名をくっつける。
     public string Name
@@ -110,6 +94,17 @@ public sealed partial class LessorViewModel : ObservableRecipient
             }
         }
     }
+
+    // Natural 0 or Legal 1
+    public int PersonKindIndex { get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+            }
+        }
+    } = 0;
 
     public string NameFirst
     {
@@ -136,6 +131,74 @@ public sealed partial class LessorViewModel : ObservableRecipient
             }
         }
     }
+
+    [ObservableProperty]
+    public partial bool IsNameLastHasError { get; private set; }
+
+    public string NameCompany
+    {
+        get => field ?? string.Empty;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                if (NameCompanyTypePosition == 0)
+                {
+                    Name = $"{NameCompanyType}{NameCompany}";
+                }
+                else
+                {
+                    Name = $"{NameCompany}{NameCompanyType}";
+                }
+                IsDirty = true;
+            }
+        }
+    }
+
+    [ObservableProperty]
+    public partial bool IsNameCompanyHasError { get; private set; }
+
+    public string NameCompanyType
+    {
+        get => field ?? string.Empty;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                if (NameCompanyTypePosition == 0)
+                {
+                    Name = $"{NameCompanyType}{NameCompany}";
+                }
+                else
+                {
+                    Name = $"{NameCompany}{NameCompanyType}";
+                }
+                IsDirty = true;
+            }
+        }
+    }
+
+    // 0 前付け、1 後付け
+    public int NameCompanyTypePosition
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                if (value == 0)
+                {
+                    Name = $"{NameCompanyType}{NameCompany}";
+                }
+                else
+                {
+                    Name = $"{NameCompany}{NameCompanyType}";
+                }
+                IsDirty = true;
+            }
+        }
+    }
+
 
     // 備考
     public string Remarks
@@ -207,7 +270,9 @@ public sealed partial class LessorViewModel : ObservableRecipient
 
             // Reset errors
             IsNameLastHasError = false;
-            IsNameFirstHasError = false;
+            //IsNameFirstHasError = false;
+            IsNameCompanyHasError = false;
+
             // TODO: more.
 
             //HasErrors = false;
@@ -263,7 +328,9 @@ public sealed partial class LessorViewModel : ObservableRecipient
 
             PersonKindIndex = 1;
 
-            // TODO:
+            NameCompany = legalPerson.NameCompany;
+            NameCompanyType = legalPerson.NameCompanyType;
+            NameCompanyTypePosition = legalPerson.NameCompanyTypePosition;
         }
         else
         {
@@ -272,33 +339,38 @@ public sealed partial class LessorViewModel : ObservableRecipient
         }
 
 
-        //Remarks = _lessorBase.Remarks;
+        Remarks = _lessorBase.Remarks;
     }
 
     private bool ValidateName()
     {
-        if (string.IsNullOrWhiteSpace(NameLast))
+        if (PersonKindIndex == 0)
         {
-            InfoBarErrorMessage = "性（必須項目）が入力されていません。保存出来ませんでした。";
+            if (string.IsNullOrWhiteSpace(NameLast))
+            {
+                InfoBarErrorMessage = "性（必須項目）が入力されていません。保存出来ませんでした。";
 
-            IsNameLastHasError = true;
+                IsNameLastHasError = true;
 
-            //HasErrors = true;
+                //HasErrors = true;
 
-            return false;
+                return false;
+            }
         }
 
-        if (string.IsNullOrWhiteSpace(NameFirst))
-        {
-            InfoBarErrorMessage = "名（必須項目）が入力されていません。保存出来ませんでした。";
+        if (PersonKindIndex == 1) 
+        { 
+            if (string.IsNullOrWhiteSpace(NameCompany))
+            {
+                InfoBarErrorMessage = "会社名（必須項目）が入力されていません。保存出来ませんでした。";
 
-            IsNameFirstHasError = true;
+                IsNameCompanyHasError = true;
 
-            //HasErrors = true;
+                //HasErrors = true;
 
-            return false;
+                return false;
+            }
         }
-
         /*
 
 
@@ -315,7 +387,7 @@ public sealed partial class LessorViewModel : ObservableRecipient
         }
         */
         IsNameLastHasError = false;
-        IsNameFirstHasError = false;
+        IsNameCompanyHasError = false;
 
         return true;
     }
@@ -354,12 +426,13 @@ public sealed partial class LessorViewModel : ObservableRecipient
         }
         else if (newLessor is Models.PersonLegal legalPerson)
         {
-            // TODO:
-            //legalPerson.Name = 
+            legalPerson.NameCompany = NameCompany;
+            legalPerson.NameCompanyType = NameCompanyType;
+            legalPerson.NameCompanyTypePosition = NameCompanyTypePosition;
         }
 
 
-        //_lessor.Remarks = Remarks;
+        newLessor.Remarks = Remarks;
 
         // TODO: Set other properties
         // TODO: Don't forget to check if Helpers.Common.ReplaceZenkakuNumbers is needed.

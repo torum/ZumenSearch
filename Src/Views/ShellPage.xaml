@@ -115,7 +115,7 @@
                         </NavigationViewItem.MenuItems>
                     </NavigationViewItem>
 
-                    <NavigationViewItem Tag="Sale" Content="売買物件" ToolTipService.ToolTip="売買物件" IsExpanded="True">
+                    <NavigationViewItem Tag="Sale" Content="売買物件" ToolTipService.ToolTip="売買物件" IsExpanded="True" Visibility="Collapsed">
                         <NavigationViewItem.Icon>
                             <FontIcon Glyph="&#xe838;"/>
                         </NavigationViewItem.Icon>

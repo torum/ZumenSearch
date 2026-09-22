@@ -1,6 +1,7 @@
 ﻿using Microsoft.Data.Sqlite;
 using System.Data;
 using System.Diagnostics;
+using System.Reflection.PortableExecutable;
 using ZumenSearch.Helpers;
 using ZumenSearch.Models;
 using ZumenSearch.Models.Base;
@@ -73,7 +74,7 @@ public sealed class DataAccessService : IDataAccessService
                     "property_id TEXT NOT NULL PRIMARY KEY," +
                     //"residential_id TEXT NOT NULL," +
                     "building_kind TEXT NOT NULL," +
-                    "is_unit_ownership INTEGER  NOT NULL," +
+                    "is_unit_ownership INTEGER NOT NULL DEFAULT 0," +
                     "building_structure TEXT NOT NULL," +
                     "floor_count_above_ground INTEGER NOT NULL," +
                     "floor_count_basement INTEGER NOT NULL," +
@@ -95,7 +96,7 @@ public sealed class DataAccessService : IDataAccessService
                     "filename TEXT NOT NULL," +
                     "type TEXT NOT NULL," + 
                     "description TEXT NOT NULL," +
-                    "is_main INTEGER NOT NULL," +
+                    "is_main INTEGER NOT NULL DEFAULT 0," +
                     "FOREIGN KEY (property_id) REFERENCES rent_residentials(property_id) ON DELETE CASCADE," + //?
                     "FOREIGN KEY (property_id) REFERENCES properties(property_id) ON DELETE CASCADE" +
                     " )";
@@ -108,7 +109,7 @@ public sealed class DataAccessService : IDataAccessService
                     "thumbnail_filename TEXT NOT NULL," +
                     "type TEXT NOT NULL," +
                     "description TEXT NOT NULL," +
-                    "is_main INTEGER  NOT NULL," +
+                    "is_main INTEGER  NOT NULL DEFAULT 0," +
                     "created_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc'))," +
                     "updated_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc'))," +
                     "FOREIGN KEY (property_id) REFERENCES rent_residentials(property_id) ON DELETE CASCADE," + //?
@@ -119,7 +120,7 @@ public sealed class DataAccessService : IDataAccessService
                 tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS rent_residential_rooms (" +
                     "listing_id TEXT NOT NULL PRIMARY KEY," +
                     "property_id TEXT NOT NULL," +
-                    "is_property_unit_ownership INTEGER NOT NULL," +
+                    "is_property_unit_ownership INTEGER NOT NULL DEFAULT 0," +
                     "name TEXT NOT NULL," +
                     "chinryou INTEGER NOT NULL DEFAULT 0," +
                     "created_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc'))," +
@@ -167,6 +168,9 @@ public sealed class DataAccessService : IDataAccessService
                     "person_kind TEXT NOT NULL," +
                     "name_last TEXT NOT NULL," +
                     "name_first TEXT NOT NULL," +
+                    "name_company TEXT NOT NULL," +
+                    "name_company_type TEXT NOT NULL," +
+                    "name_company_type_position INTEGER NOT NULL DEFAULT 0," +
 
                     // Phone numbers
                     // Address
@@ -1654,26 +1658,12 @@ public sealed class DataAccessService : IDataAccessService
                                 continue;
                             }
 
-                            // TODO: If person_kind natural
-                            var lessor = new Models.PersonNatural(lessId, EnumEntryStatus.Saved);
-                            /*
-                            var lessor = new Models.Rent.Lessors.Person(lessId, EnumEntryStatus.Saved);
-                            */
-                            s = Convert.ToString(reader2["name"]) ?? "";
-                            lessor.Name = s;
+                            var lessor = GetPerson(reader2, lessId);
 
-                            s = Convert.ToString(reader2["name_last"]) ?? "";
-                            lessor.NameLast = s;
-
-                            s = Convert.ToString(reader2["name_first"]) ?? "";
-                            lessor.NameFirst = s;
-
-                            s = Convert.ToString(reader2["remarks"]) ?? "";
-                            //lessor.Remarks = s;
-
-                            // TODO: more.
-
-                            entry.Lessors.Add(lessor);
+                            if (lessor is not null)
+                            {
+                                entry.Lessors.Add(lessor);
+                            }
 
                             //break; // Assuming we only want the first match
                         }
@@ -1922,19 +1912,13 @@ public sealed class DataAccessService : IDataAccessService
 
                         // TODO: IF natural
                         //var lessor = new Models.Rent.Lessors.Person(lessId, EnumEntryStatus.Saved);
-                        var lessor = new Models.PersonNatural(lessId, EnumEntryStatus.Saved);
-
-                        s = Convert.ToString(reader2["name"]) ?? "";
-                        lessor.Name = s;
-
-                        s = Convert.ToString(reader2["name_last"]) ?? "";
-                        lessor.NameLast = s;
-
-                        s = Convert.ToString(reader2["name_first"]) ?? "";
-                        lessor.NameFirst = s;
-
-                        s = Convert.ToString(reader2["remarks"]) ?? "";
-                        //lessor.Remarks = s;
+                        var lessor = new Models.PersonNatural(lessId, EnumEntryStatus.Saved)
+                        {
+                            Name = Convert.ToString(reader2["name"]) ?? "",
+                            NameLast = Convert.ToString(reader2["name_last"]) ?? "",
+                            NameFirst = Convert.ToString(reader2["name_first"]) ?? "",
+                            Remarks = Convert.ToString(reader2["remarks"]) ?? ""
+                        };
 
                         // TODO: more.
 
@@ -2730,24 +2714,36 @@ public sealed class DataAccessService : IDataAccessService
                 cmd.CommandType = CommandType.Text;
 
                 // Upsert into rent_lessor
-                var sqlInsertIntoRentLivingRoom = "INSERT INTO rent_lessors (lessor_id, name, person_kind, name_last, name_first, remarks) VALUES (@lessor_id, @name, @personKind, @name_last, @name_first, @remarks) ";
+                var sqlInsertIntoRentLivingRoom = "INSERT INTO rent_lessors (lessor_id, name, person_kind, name_last, name_first, name_company, name_company_type, name_company_type_position, remarks) VALUES (@lessor_id, @name, @personKind, @name_last, @name_first, @name_company, @name_company_type, @name_company_type_position, @remarks) ";
                 sqlInsertIntoRentLivingRoom += "ON CONFLICT(lessor_id) ";
-                sqlInsertIntoRentLivingRoom += "DO UPDATE SET name = @name, person_kind = @personKind, name_last = @name_last, name_first = @name_first, remarks = @remarks, updated_at = @updated_at";
+                sqlInsertIntoRentLivingRoom += "DO UPDATE SET name = @name, person_kind = @personKind, name_last = @name_last, name_first = @name_first, name_company = @name_company, name_company_type = @name_company_type, name_company_type_position = @name_company_type_position, remarks = @remarks, updated_at = @updated_at";
 
                 cmd.CommandText = sqlInsertIntoRentLivingRoom;
 
                 cmd.Parameters.AddWithValue("@lessor_id", lessor.Id);
                 cmd.Parameters.AddWithValue("@name", lessor.Name);
                 cmd.Parameters.AddWithValue("@personKind", lessor.PersonKind.ToString());
-                // TODO:
+
                 if (lessor is PersonNatural naturalPerson)
                 {
                     cmd.Parameters.AddWithValue("@name_last", naturalPerson.NameLast);
                     cmd.Parameters.AddWithValue("@name_first", naturalPerson.NameFirst);
+                    // Clear legalPerson values
+                    cmd.Parameters.AddWithValue("@name_company", string.Empty);
+                    cmd.Parameters.AddWithValue("@name_company_type", string.Empty);
+                    // TODO: check if int is ok
+                    cmd.Parameters.AddWithValue("@name_company_type_position", 0);
                 }
                 else if (lessor is PersonLegal legalPerson)
                 {
-                    //
+                    // Clear naturalPerson values
+                    cmd.Parameters.AddWithValue("@name_last", string.Empty);
+                    cmd.Parameters.AddWithValue("@name_first", string.Empty);
+
+                    cmd.Parameters.AddWithValue("@name_company", legalPerson.NameCompany);
+                    cmd.Parameters.AddWithValue("@name_company_type", legalPerson.NameCompanyType);
+                    // TODO: check if int is ok
+                    cmd.Parameters.AddWithValue("@name_company_type_position", legalPerson.NameCompanyTypePosition);
                 }
                 cmd.Parameters.AddWithValue("@remarks", lessor.Remarks);
                 cmd.Parameters.AddWithValue("@updated_at", DateTimeOffset.UtcNow.ToString("s"));
@@ -2998,7 +2994,7 @@ public sealed class DataAccessService : IDataAccessService
 
             using var cmd = connection.CreateCommand();
 
-            cmd.CommandText = $"SELECT lessor_id, name, person_kind, name_last, name_first, remarks FROM rent_lessors WHERE lessor_id = '{id}'";
+            cmd.CommandText = $"SELECT lessor_id, name, person_kind, name_last, name_first, name_company, name_company_type, name_company_type_position, remarks FROM rent_lessors WHERE lessor_id = '{id}'";
 
             using (var reader = cmd.ExecuteReader())
             {
@@ -3011,60 +3007,7 @@ public sealed class DataAccessService : IDataAccessService
                         continue;
                     }
 
-                    Models.Base.EnumPersonKind? enumKind = null;
-                    var kind = reader.GetString(reader.GetOrdinal("person_kind")) ?? string.Empty;
-                    if (!string.IsNullOrEmpty(kind))
-                    {
-                        if (Enum.TryParse<Models.Base.EnumPersonKind>(kind, out var parsedKind))
-                        {
-                            enumKind = parsedKind;
-                        }
-                    }
-
-                    if (enumKind is null)
-                    {
-                        Debug.WriteLine("DataAccess::SelectRentLessorByKeyword: EnumPersonKind is null.");
-                        continue;
-                    }
-                    
-                    if (enumKind == Models.Base.EnumPersonKind.Natural)
-                    {
-                        entry = new Models.PersonNatural(id, EnumEntryStatus.Saved);
-                    }
-                    else if (enumKind == Models.Base.EnumPersonKind.Legal)
-                    {
-                        entry = new Models.PersonLegal(id, EnumEntryStatus.Saved);
-                    }
-                    else
-                    {
-                        continue;
-                    }
-
-                    if (entry is null)
-                    {
-                        continue;
-                    }
-
-                    s = Convert.ToString(reader["name"]) ?? "";
-                    entry.Name = s;
-
-                    if (entry is PersonNatural naturalPerson)
-                    {
-                        s = Convert.ToString(reader["name_last"]) ?? "";
-                        naturalPerson.NameLast = s;
-
-                        s = Convert.ToString(reader["name_first"]) ?? "";
-                        naturalPerson.NameFirst = s;
-                    }
-                    else if (entry is PersonLegal legalPerson)
-                    {
-                        //
-                    }
-
-                    s = Convert.ToString(reader["remarks"]) ?? "";
-                    entry.Remarks = s;
-
-                    // TODO: more.
+                    entry = GetPerson(reader,id);
 
                     //res.AffectedCount++;
 
@@ -3132,6 +3075,65 @@ public sealed class DataAccessService : IDataAccessService
         }
 
         return res;
+    }
+
+    private static Models.Base.PersonBase? GetPerson(SqliteDataReader reader, string personId)
+    {
+        Models.Base.PersonBase? entry = null;
+
+        Models.Base.EnumPersonKind? enumKind = null;
+        var kind = reader.GetString(reader.GetOrdinal("person_kind")) ?? string.Empty;
+        if (!string.IsNullOrEmpty(kind))
+        {
+            if (Enum.TryParse<Models.Base.EnumPersonKind>(kind, out var parsedKind))
+            {
+                enumKind = parsedKind;
+            }
+        }
+
+        if (enumKind is null)
+        {
+            Debug.WriteLine("DataAccess::GetPerson: EnumPersonKind is null.");
+            return null;
+        }
+
+        if (enumKind == Models.Base.EnumPersonKind.Natural)
+        {
+            entry = new Models.PersonNatural(personId, EnumEntryStatus.Saved);
+        }
+        else if (enumKind == Models.Base.EnumPersonKind.Legal)
+        {
+            entry = new Models.PersonLegal(personId, EnumEntryStatus.Saved);
+        }
+
+        if (entry is null)
+        {
+            return null;
+        }
+
+        //s = Convert.ToString(reader["name"]) ?? "";
+        entry.Name = reader.GetString(reader.GetOrdinal("name")) ?? string.Empty;
+
+        if (entry is PersonNatural naturalPerson)
+        {
+            naturalPerson.NameLast = Convert.ToString(reader["name_last"]) ?? "";
+            naturalPerson.NameFirst = Convert.ToString(reader["name_first"]) ?? "";
+
+        }
+        else if (entry is PersonLegal legalPerson)
+        {
+            legalPerson.NameCompany = Convert.ToString(reader["name_company"]) ?? "";
+            legalPerson.NameCompanyType = Convert.ToString(reader["name_company_type"]) ?? "";
+            legalPerson.NameCompanyTypePosition = Convert.ToInt32(reader["name_company_type_position"]);//
+
+        }
+
+
+        entry.Remarks = Convert.ToString(reader["remarks"]) ?? "";
+
+        // TODO: more.
+
+        return entry;
     }
 
     public ResultWrapper DeleteRentLessor(string id)
