@@ -90,6 +90,12 @@
     <Page Update="Views\Brokers\ShellPage.xaml">
       <SubType>Designer</SubType>
     </Page>
+    <Page Update="Views\Rent\ParkingSearchPage.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\Rent\ParkingSearchResultPage.xaml">
+      <SubType>Designer</SubType>
+    </Page>
   </ItemGroup>
 
   <!--

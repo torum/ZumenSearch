@@ -1,5 +1,5 @@
 ﻿<Page
-    x:Class="ZumenSearch.Views.Rent.LessorSearchPage"
+    x:Class="ZumenSearch.Views.Rent.CommercialSearchPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -25,7 +25,7 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <BreadcrumbBar x:Name="BreadcrumbBar1" Grid.Row="0" Grid.Column="0" ItemsSource="{x:Bind ViewModel.BreadcrumbItemsLessor, Mode=OneWay}" VerticalAlignment="Center">
+                <BreadcrumbBar x:Name="BreadcrumbBar1" Grid.Row="0" Grid.Column="0" ItemsSource="{x:Bind ViewModel.BreadcrumbItemsCommercial, Mode=OneWay}" VerticalAlignment="Center">
                     <BreadcrumbBar.ItemTemplate>
                         <DataTemplate x:DataType="modcommon:Breadcrumb">
                             <BreadcrumbBarItem>
@@ -41,8 +41,8 @@
 
                 <StackPanel Grid.Row="0" Grid.Column="1">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,3,0">
-                        <AppBarButton Icon="Find" Label="検索" Command="{x:Bind ViewModel.SearchRentLessorCommand}" CommandParameter="{x:Bind TextBoxName.Text, Mode=OneWay}"/>
-                        <AppBarButton Icon="Add" Label="新規" Command="{x:Bind ViewModel.AddNewRentLessorCommand}"/>
+                        <AppBarButton Icon="Find" Label="検索" Command="{x:Bind ViewModel.SearchRentCommercialCommand}" CommandParameter="{x:Bind TextBoxName.Text, Mode=OneWay}"/>
+                        <AppBarButton Icon="Add" Label="新規" Command="{x:Bind ViewModel.AddNewRentCommercialCommand}"/>
                     </StackPanel>
                 </StackPanel>
 

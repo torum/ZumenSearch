@@ -8,7 +8,7 @@
     xmlns:controls="using:CommunityToolkit.WinUI.Controls"
     xmlns:animations="using:CommunityToolkit.WinUI.Animations"
     mc:Ignorable="d"
-    xmlns:mod="using:ZumenSearch.Models.Common" 
+    xmlns:modcommon="using:ZumenSearch.Models.Common" 
     xmlns:framework="using:Microsoft.UI.Xaml"
     NavigationCacheMode="Required">
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled" Padding="36,0,36,24">
@@ -26,7 +26,7 @@
                             <Grid Grid.Column="0">
                                 <ComboBox x:Name="ComboBoxPref" Header="都道府県" PlaceholderText="選択" SelectionChanged="ComboBoxPref_SelectionChanged" SelectedIndex="-1" ItemsSource="{x:Bind ViewModel.Prefectures, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.SelectedPef, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch">
                                     <ComboBox.ItemTemplate>
-                                        <DataTemplate x:DataType="mod:Prefecture">
+                                        <DataTemplate x:DataType="modcommon:Prefecture">
                                             <StackPanel Orientation="Horizontal">
                                                 <TextBlock Text="{x:Bind Name}" Margin="0,0,5,0"/>
                                             </StackPanel>
@@ -37,7 +37,7 @@
                             <Grid Grid.Column="1" Margin="12,0,0,0">
                                 <ComboBox x:Name="ComboBoxCountyAndCity" Header="郡+市区町村" PlaceholderText="選択" SelectionChanged="ComboBoxCountyAndCity_SelectionChanged" IsEnabled="False" SelectedIndex="-1" ItemsSource="{x:Bind ViewModel.Cities, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.SelectedCity, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch">
                                     <ComboBox.ItemTemplate>
-                                        <DataTemplate x:DataType="mod:CountyAndCity">
+                                        <DataTemplate x:DataType="modcommon:CountyAndCity">
                                             <StackPanel Orientation="Horizontal">
                                                 <TextBlock Text="{x:Bind Combined}" Margin="0,0,5,0"/>
                                             </StackPanel>
@@ -55,7 +55,7 @@
                             <Grid Grid.Column="0" Margin="0,12,0,0">
                                 <ComboBox x:Name="ComboBoxWardAndOaza" Header="政令市区+大字・町名" PlaceholderText="選択" SelectionChanged="ComboBoxWardAndOaza_SelectionChanged" IsEnabled="False" SelectedIndex="-1" ItemsSource="{x:Bind ViewModel.Towns, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.SelectedTown, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch">
                                     <ComboBox.ItemTemplate>
-                                        <DataTemplate x:DataType="mod:WardAndOaza">
+                                        <DataTemplate x:DataType="modcommon:WardAndOaza">
                                             <StackPanel Orientation="Horizontal">
                                                 <TextBlock Text="{x:Bind Combined}" Margin="0,0,5,0"/>
                                             </StackPanel>
@@ -66,7 +66,7 @@
                             <Grid Grid.Column="1" Margin="12,12,0,0">
                                 <ComboBox x:Name="ComboBoxChoume" Header="丁目" PlaceholderText="選択" IsEnabled="False" SelectedIndex="-1" ItemsSource="{x:Bind ViewModel.Chous, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.SelectedChou, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch">
                                     <ComboBox.ItemTemplate>
-                                        <DataTemplate x:DataType="mod:Choume">
+                                        <DataTemplate x:DataType="modcommon:Choume">
                                             <StackPanel Orientation="Horizontal">
                                                 <TextBlock Text="{x:Bind Chou}" Margin="0,0,5,0"/>
                                             </StackPanel>

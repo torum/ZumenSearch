@@ -80,6 +80,26 @@ public partial class MainViewModel : ObservableRecipient,
         new() { Name = "検索結果", Page = typeof(Views.Rent.ResidentialSearchResultPage).FullName! },
     ];
 
+    public ObservableCollection<Models.Common.Breadcrumb> BreadcrumbItemsCommercial { get; set; } =
+[
+    new() { Name = "賃貸事業用", Page = typeof(Views.Rent.CommercialSearchPage).FullName! }
+];
+    public ObservableCollection<Models.Common.Breadcrumb> BreadcrumbItemsCommercialSearchResult { get; set; } =
+    [
+        new() { Name = "賃貸事業用", Page = typeof(Views.Rent.CommercialSearchPage).FullName! },
+        new() { Name = "検索結果", Page = typeof(Views.Rent.CommercialSearchResultPage).FullName! },
+    ];
+
+    public ObservableCollection<Models.Common.Breadcrumb> BreadcrumbItemsParking { get; set; } =
+[
+new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).FullName! }
+];
+    public ObservableCollection<Models.Common.Breadcrumb> BreadcrumbItemsParkingSearchResult { get; set; } =
+    [
+        new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).FullName! },
+        new() { Name = "検索結果", Page = typeof(Views.Rent.ParkingSearchResultPage).FullName! },
+    ];
+
     public ObservableCollection<Models.Common.Breadcrumb> BreadcrumbItemsLessor { get; set; } =
     [
     new() { Name = "貸主", Page = typeof(Views.Rent.LessorSearchPage).FullName! }
@@ -1064,35 +1084,94 @@ public partial class MainViewModel : ObservableRecipient,
 
     #endregion
 
-    #region == 貸主 == 
+    #region == 賃貸事業用 ==
 
     [RelayCommand]
-    private void AddNewRentLessor()
+    private async Task SearchRentCommercial(string? queryText)
     {
-        var newId = Guid.CreateVersion7().ToString("N");
-        var shell = _shellRentLessorFactory.Create(new Models.PersonNatural(newId, Models.Base.EnumEntryStatus.New));
-        
-        LessorEditorList.Add(shell.Window);
-
-        if (shell.Window.AppWindow.Presenter is OverlappedPresenter presenter)
+        /*
+        if (string.IsNullOrWhiteSpace(queryText))
         {
-            presenter.IsResizable = true;
-            presenter.IsModal = false;
-            presenter.IsAlwaysOnTop = false;
-            presenter.PreferredMinimumWidth = 1274;
-            presenter.PreferredMinimumHeight = 794;
+            queryText = "*";
         }
 
-        //var dpi = Windows.Win32.PInvoke.GetDpiForWindow(new Windows.Win32.Foundation.HWND(WinRT.Interop.WindowNative.GetWindowHandle(this)));
-        //var scalingFactor = (float)dpi / 96;
-        //AppWindow.Resize(new Windows.Graphics.SizeInt32((int)(400.0f * scalingFactor), (int)(300.0f * scalingFactor)));
+        RentLessorSearchResult.Clear();
 
-        shell.Window.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(LessorEditorWinLeft, LessorEditorWinTop, LessorEditorWinWidth, LessorEditorWinHeight));
+        var res = await Task.Run(() => _dataAccessService.SelectRentLessorsByKeyword(queryText), _cts.Token);
 
-        //editorWindow.AppWindow.Show();
-        shell.Window.Activate();
-        shell.Window.AppWindow.MoveInZOrderAtTop();
+        if (res.IsError)
+        {
+            Debug.WriteLine(res.Error.ErrText + Environment.NewLine + res.Error.ErrDescription + Environment.NewLine + res.Error.ErrPlace + Environment.NewLine + res.Error.ErrPlaceParent);
+
+            //ErrorMain = res.Error;
+            //IsMainErrorInfoBarVisible = true;
+
+            // TODO: Show error message to user
+        }
+        else
+        {
+            RentLessorSearchResult = new(res.PersonSearchResult);
+
+            _navigationService.NavigateTo("ZumenSearch.Views.Rent.LessorSearchResultPage", SlideNavigationTransitionEffect.FromLeft);
+        }
+        */
+
+        _navigationService.NavigateTo("ZumenSearch.Views.Rent.CommercialSearchResultPage", SlideNavigationTransitionEffect.FromLeft);
     }
+
+    #endregion
+
+    #region == 賃貸駐車場 ==
+
+    [RelayCommand]
+    private void AddNewRentCommercial()
+    {
+        //
+    }
+
+    [RelayCommand]
+    private async Task SearchRentParking(string? queryText)
+    {
+        /*
+        if (string.IsNullOrWhiteSpace(queryText))
+        {
+            queryText = "*";
+        }
+
+        RentLessorSearchResult.Clear();
+
+        var res = await Task.Run(() => _dataAccessService.SelectRentLessorsByKeyword(queryText), _cts.Token);
+
+        if (res.IsError)
+        {
+            Debug.WriteLine(res.Error.ErrText + Environment.NewLine + res.Error.ErrDescription + Environment.NewLine + res.Error.ErrPlace + Environment.NewLine + res.Error.ErrPlaceParent);
+
+            //ErrorMain = res.Error;
+            //IsMainErrorInfoBarVisible = true;
+
+            // TODO: Show error message to user
+        }
+        else
+        {
+            RentLessorSearchResult = new(res.PersonSearchResult);
+
+            _navigationService.NavigateTo("ZumenSearch.Views.Rent.LessorSearchResultPage", SlideNavigationTransitionEffect.FromLeft);
+        }
+        */
+
+        _navigationService.NavigateTo("ZumenSearch.Views.Rent.ParkingSearchResultPage", SlideNavigationTransitionEffect.FromLeft);
+    }
+
+
+    [RelayCommand]
+    private void AddNewRentParking()
+    {
+        //
+    }
+
+    #endregion
+
+    #region == 貸主 == 
 
     [RelayCommand]
     private async Task SearchRentLessor(string? queryText)
@@ -1123,6 +1202,34 @@ public partial class MainViewModel : ObservableRecipient,
 
             _navigationService.NavigateTo("ZumenSearch.Views.Rent.LessorSearchResultPage", SlideNavigationTransitionEffect.FromLeft);
         }
+    }
+
+    [RelayCommand]
+    private void AddNewRentLessor()
+    {
+        var newId = Guid.CreateVersion7().ToString("N");
+        var shell = _shellRentLessorFactory.Create(new Models.PersonNatural(newId, Models.Base.EnumEntryStatus.New));
+        
+        LessorEditorList.Add(shell.Window);
+
+        if (shell.Window.AppWindow.Presenter is OverlappedPresenter presenter)
+        {
+            presenter.IsResizable = true;
+            presenter.IsModal = false;
+            presenter.IsAlwaysOnTop = false;
+            presenter.PreferredMinimumWidth = 1274;
+            presenter.PreferredMinimumHeight = 794;
+        }
+
+        //var dpi = Windows.Win32.PInvoke.GetDpiForWindow(new Windows.Win32.Foundation.HWND(WinRT.Interop.WindowNative.GetWindowHandle(this)));
+        //var scalingFactor = (float)dpi / 96;
+        //AppWindow.Resize(new Windows.Graphics.SizeInt32((int)(400.0f * scalingFactor), (int)(300.0f * scalingFactor)));
+
+        shell.Window.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(LessorEditorWinLeft, LessorEditorWinTop, LessorEditorWinWidth, LessorEditorWinHeight));
+
+        //editorWindow.AppWindow.Show();
+        shell.Window.Activate();
+        shell.Window.AppWindow.MoveInZOrderAtTop();
     }
 
     [RelayCommand(CanExecute = nameof(EditRentLessorCanExecute))]

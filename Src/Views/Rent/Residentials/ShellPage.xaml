@@ -6,7 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     NavigationCacheMode="Required"
     xmlns:helpers="using:ZumenSearch.Helpers"
-    xmlns:mod="using:ZumenSearch.Models.Common"
+    xmlns:modcommon="using:ZumenSearch.Models.Common"
     KeyboardAcceleratorPlacementMode="Hidden"
     mc:Ignorable="d">
     <Page.KeyboardAccelerators>
@@ -54,10 +54,10 @@
                 <BreadcrumbBar x:Name="BreadcrumbBar1" Grid.Row="0" Grid.Column="0" ItemsSource="{x:Bind ViewModel.BreadcrumbItems, Mode=OneWay}" 
                                IsHitTestVisible="False" AllowFocusOnInteraction="False" IsTabStop="False" VerticalAlignment="Center">
                     <BreadcrumbBar.ItemTemplate>
-                        <DataTemplate x:DataType="mod:Breadcrumb">
+                        <DataTemplate x:DataType="modcommon:Breadcrumb">
                             <BreadcrumbBarItem>
                                 <BreadcrumbBarItem.ContentTemplate>
-                                    <DataTemplate x:DataType="mod:Breadcrumb">
+                                    <DataTemplate x:DataType="modcommon:Breadcrumb">
                                         <TextBlock Text="{x:Bind Name}" FontSize="28" FontWeight="SemiBold"/>
                                     </DataTemplate>
                                 </BreadcrumbBarItem.ContentTemplate>

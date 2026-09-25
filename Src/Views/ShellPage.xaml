@@ -94,13 +94,13 @@
                                 </NavigationViewItem.Icon>
                             </NavigationViewItem>
 
-                            <NavigationViewItem Tag="ZumenSearch.Views.Rent.Commercials.CommercialsPage" Content="事業用" ToolTipService.ToolTip="賃貸事業用">
+                            <NavigationViewItem Tag="ZumenSearch.Views.Rent.CommercialSearchPage" Content="事業用" ToolTipService.ToolTip="賃貸事業用">
                                 <NavigationViewItem.Icon>
                                     <FontIcon Glyph="&#xe7c3;"/>
                                 </NavigationViewItem.Icon>
                             </NavigationViewItem>
 
-                            <NavigationViewItem Tag="ZumenSearch.Views.Rent.Parkings.ParkingsPage" Content="駐車場" ToolTipService.ToolTip="賃貸駐車場">
+                            <NavigationViewItem Tag="ZumenSearch.Views.Rent.ParkingSearchPage" Content="駐車場" ToolTipService.ToolTip="賃貸駐車場">
                                 <NavigationViewItem.Icon>
                                     <FontIcon Glyph="&#xe7c3;"/>
                                 </NavigationViewItem.Icon>
@@ -115,15 +115,34 @@
                         </NavigationViewItem.MenuItems>
                     </NavigationViewItem>
 
-                    <NavigationViewItem Tag="Sale" Content="売買物件" ToolTipService.ToolTip="売買物件" IsExpanded="True" Visibility="Collapsed">
+                    <NavigationViewItem Tag="Sale" Content="売買物件" ToolTipService.ToolTip="売買物件" IsExpanded="True">
                         <NavigationViewItem.Icon>
                             <FontIcon Glyph="&#xe838;"/>
                         </NavigationViewItem.Icon>
-<!--
-                        <NavigationViewItem.MenuItems>
 
+                        <NavigationViewItem.MenuItems>
+                            <NavigationViewItem Tag="ZumenSearch.Views.Sale.ResidentialSearchPage" Content="住居用" ToolTipService.ToolTip="売買住居用（マンション・戸建て）">
+                                <NavigationViewItem.Icon>
+                                    <FontIcon Glyph="&#xe7c3;"/>
+                                </NavigationViewItem.Icon>
+                            </NavigationViewItem>
+                            <NavigationViewItem Tag="ZumenSearch.Views.Sale.CommercialSearchPage" Content="事業用" ToolTipService.ToolTip="売買事業用">
+                                <NavigationViewItem.Icon>
+                                    <FontIcon Glyph="&#xe7c3;"/>
+                                </NavigationViewItem.Icon>
+                            </NavigationViewItem>
+                            <NavigationViewItem Tag="ZumenSearch.Views.Sale.InvestmentSearchPage" Content="収益・投資用" ToolTipService.ToolTip="売買収益・投資用">
+                                <NavigationViewItem.Icon>
+                                    <FontIcon Glyph="&#xe7c3;"/>
+                                </NavigationViewItem.Icon>
+                            </NavigationViewItem>
+                            <NavigationViewItem Tag="ZumenSearch.Views.Sale.LandSearchPage" Content="土地" ToolTipService.ToolTip="売買土地">
+                                <NavigationViewItem.Icon>
+                                    <FontIcon Glyph="&#xe7c3;"/>
+                                </NavigationViewItem.Icon>
+                            </NavigationViewItem>
                         </NavigationViewItem.MenuItems>
-                        -->
+
                     </NavigationViewItem>
 
                     <NavigationViewItem Tag="ZumenSearch.Views.BrokerSearchPage" Content="宅建業者" ToolTipService.ToolTip="宅建業者">

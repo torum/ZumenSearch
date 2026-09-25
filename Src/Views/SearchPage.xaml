@@ -6,7 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:local="using:ZumenSearch.Views"
-    xmlns:mod="using:ZumenSearch.Models.Common"
+    xmlns:modcommon="using:ZumenSearch.Models.Common"
     xmlns:controls="using:CommunityToolkit.WinUI.Controls"
     xmlns:framework="using:Microsoft.UI.Xaml"
     mc:Ignorable="d"
@@ -31,10 +31,10 @@
 
                 <BreadcrumbBar x:Name="BreadcrumbBar1" Grid.Row="0" Grid.Column="0" ItemsSource="{x:Bind ViewModel.BreadcrumbItemsRent, Mode=OneWay}" VerticalAlignment="Center">
                     <BreadcrumbBar.ItemTemplate>
-                        <DataTemplate x:DataType="mod:Breadcrumb">
+                        <DataTemplate x:DataType="modcommon:Breadcrumb">
                             <BreadcrumbBarItem>
                                 <BreadcrumbBarItem.ContentTemplate>
-                                    <DataTemplate x:DataType="mod:Breadcrumb">
+                                    <DataTemplate x:DataType="modcommon:Breadcrumb">
                                         <TextBlock Text="{x:Bind Name}" FontSize="28" FontWeight="SemiBold"/>
                                     </DataTemplate>
                                 </BreadcrumbBarItem.ContentTemplate>
@@ -131,7 +131,7 @@
                         </MenuFlyout>
                     </ItemsView.ContextFlyout>
                     <ItemsView.ItemTemplate>
-                        <DataTemplate x:DataType="mod:PropertySearchResultItem">
+                        <DataTemplate x:DataType="modcommon:PropertySearchResultItem">
                             <ItemContainer DataContext="{x:Bind}" IsDoubleTapEnabled="True" AllowFocusOnInteraction="False" DoubleTapped="ItemContainer_DoubleTapped"  PointerPressed="ItemContainer_PointerPressed" PointerReleased="ItemContainer_PointerReleased" RightTapped="ItemContainer_RightTapped">
                                 <ItemContainer.KeyboardAccelerators>
                                     <KeyboardAccelerator Key="Enter" Modifiers="None" Invoked="ItemsViewKeyboardAccelerator_Invoked" />
