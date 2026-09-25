@@ -125,7 +125,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
 
     public ObservableCollection<Breadcrumb> BreadcrumbItems { get; set; } =
     [
-        new() { Name = "部屋", Page = typeof(Views.Rent.Residentials.Listing.BasicPage).FullName! },
+        new() { Name = "募集物件", Page = typeof(Views.Rent.Residentials.Listing.BasicPage).FullName! },
         new() { Name = "基本", Page = typeof(Views.Rent.Residentials.Listing.BasicPage).FullName! }
     ];
 

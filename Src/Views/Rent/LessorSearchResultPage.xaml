@@ -4,9 +4,70 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:mod="using:ZumenSearch.Models.Common"
+    xmlns:mod="using:ZumenSearch.Models"
+    xmlns:modcommon="using:ZumenSearch.Models.Common"
+    xmlns:modlessor="using:ZumenSearch.Models.Rent.Lessors"
+    xmlns:local="using:ZumenSearch.Views.Rent"
     mc:Ignorable="d"
     NavigationCacheMode="Required">
+    <Page.Resources>
+        <!-- DataTemplate for NaturalPerson -->
+        <DataTemplate x:Key="NaturalPersonTemplate" x:DataType="modcommon:PersonSearchResultItem">
+            <ItemContainer DataContext="{x:Bind}" IsDoubleTapEnabled="True" DoubleTapped="SearchResult_DoubleTapped" PointerPressed="ItemContainer_PointerPressed" PointerReleased="ItemContainer_PointerReleased" RightTapped="ItemContainer_RightTapped">
+                <ItemContainer.KeyboardAccelerators>
+                    <KeyboardAccelerator Key="Enter" Modifiers="None" Invoked="ItemsViewKeyboardAccelerator_Invoked" />
+                </ItemContainer.KeyboardAccelerators>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Ellipse x:Name="Ellipse" Grid.RowSpan="2" Width ="32" Height="32" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center" Fill="{ThemeResource SystemControlBackgroundBaseMediumBrush}"/>
+
+                    <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Margin="12,6,0,0">
+                        <TextBlock Text="{x:Bind Name, Mode=OneWay}" Style="{ThemeResource BaseTextBlockStyle}"/>
+                    </StackPanel>
+                    <TextBlock Grid.Row="1" Grid.Column="1" Text="個人" Style="{ThemeResource BodyTextBlockStyle}" Margin="12,0,0,6"/>
+                </Grid>
+            </ItemContainer>
+        </DataTemplate>
+
+        <!-- DataTemplate for LegalPerson -->
+        <DataTemplate x:Key="LegalPersonTemplate" x:DataType="modcommon:PersonSearchResultItem">
+            <ItemContainer DataContext="{x:Bind}" IsDoubleTapEnabled="True" DoubleTapped="SearchResult_DoubleTapped" PointerPressed="ItemContainer_PointerPressed" PointerReleased="ItemContainer_PointerReleased" RightTapped="ItemContainer_RightTapped">
+                <ItemContainer.KeyboardAccelerators>
+                    <KeyboardAccelerator Key="Enter" Modifiers="None" Invoked="ItemsViewKeyboardAccelerator_Invoked" />
+                </ItemContainer.KeyboardAccelerators>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Ellipse x:Name="Ellipse" Grid.RowSpan="2" Width ="32" Height="32" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center" Fill="{ThemeResource SystemControlBackgroundBaseMediumBrush}"/>
+
+                    <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Margin="12,6,0,0">
+                        <TextBlock Text="{x:Bind Name, Mode=OneWay}" Style="{ThemeResource BaseTextBlockStyle}"/>
+                    </StackPanel>
+                    <TextBlock Grid.Row="1" Grid.Column="1" Text="法人" Style="{ThemeResource BodyTextBlockStyle}" Margin="12,0,0,6"/>
+
+                </Grid>
+            </ItemContainer>
+        </DataTemplate>
+
+        <!-- Instantiate the Selector and reference our DataTemplates -->
+        <local:PersonTemplateSelector x:Key="PersonTypeSelector"
+            NaturalTemplate="{StaticResource NaturalPersonTemplate}"
+            LegalTemplate="{StaticResource LegalPersonTemplate}"/>
+
+    </Page.Resources>
 
     <Grid x:Name="ContentArea" Margin="0,0,0,0">
         <Grid.RowDefinitions>
@@ -27,10 +88,10 @@
 
                 <BreadcrumbBar x:Name="BreadcrumbBar1" Grid.Row="0" Grid.Column="0" ItemsSource="{x:Bind ViewModel.BreadcrumbItemsLessorSearchResult, Mode=OneWay}" VerticalAlignment="Center">
                     <BreadcrumbBar.ItemTemplate>
-                        <DataTemplate x:DataType="mod:Breadcrumb">
+                        <DataTemplate x:DataType="modcommon:Breadcrumb">
                             <BreadcrumbBarItem>
                                 <BreadcrumbBarItem.ContentTemplate>
-                                    <DataTemplate x:DataType="mod:Breadcrumb">
+                                    <DataTemplate x:DataType="modcommon:Breadcrumb">
                                         <TextBlock Text="{x:Bind Name}" FontSize="28" FontWeight="SemiBold"/>
                                     </DataTemplate>
                                 </BreadcrumbBarItem.ContentTemplate>
@@ -78,7 +139,7 @@
 
             <ScrollViewer Grid.Row="1" Padding="{StaticResource ContentPadding}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
 
-                <ItemsView x:Name="SearchResultListView" Margin="0,12,0,0" ItemsSource="{x:Bind ViewModel.RentLessorSearchResult, Mode=OneWay}" AllowFocusOnInteraction="False" SelectionMode="Single">
+                <ItemsView x:Name="SearchResultListView" ItemTemplate="{StaticResource PersonTypeSelector}" Margin="0,12,0,0" ItemsSource="{x:Bind ViewModel.RentLessorSearchResult, Mode=OneWay}" AllowFocusOnInteraction="False" SelectionMode="Single">
                     <ItemsView.ContextFlyout>
                         <MenuFlyout>
                             <MenuFlyoutItem Text="編集" Icon="Edit" Command="{x:Bind ViewModel.EditRentLessorCommand, Mode=OneWay}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}">
@@ -91,33 +152,6 @@
                             <MenuFlyoutItem Text="削除" Icon="Delete" Command="{x:Bind ViewModel.DeleteRentLessorCommand, Mode=OneWay}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}"></MenuFlyoutItem>
                         </MenuFlyout>
                     </ItemsView.ContextFlyout>
-                    <ItemsView.ItemTemplate>
-                        <DataTemplate x:DataType="mod:PersonSearchResultItem">
-                            <ItemContainer DataContext="{x:Bind}" IsDoubleTapEnabled="True" DoubleTapped="SearchResult_DoubleTapped" PointerPressed="ItemContainer_PointerPressed" PointerReleased="ItemContainer_PointerReleased" RightTapped="ItemContainer_RightTapped">
-                                <ItemContainer.KeyboardAccelerators>
-                                    <KeyboardAccelerator Key="Enter" Modifiers="None" Invoked="ItemsViewKeyboardAccelerator_Invoked" />
-                                </ItemContainer.KeyboardAccelerators>
-                                <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="*"/>
-                                        <RowDefinition Height="*"/>
-                                    </Grid.RowDefinitions>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Ellipse x:Name="Ellipse" Grid.RowSpan="2" Width ="32" Height="32" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center" Fill="{ThemeResource SystemControlBackgroundBaseMediumBrush}"/>
-
-                                    <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Margin="12,6,0,0">
-                                        <TextBlock Text="{x:Bind Name, Mode=OneWay}" Style="{ThemeResource BaseTextBlockStyle}"/>
-                                    </StackPanel>
-                                    <!--
-                                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{x:Bind Id, Mode=OneTime}" x:Phase="2" Style="{ThemeResource BodyTextBlockStyle}" Margin="12,0,0,6"/>
-                                    -->
-                                </Grid>
-                            </ItemContainer>
-                        </DataTemplate>
-                    </ItemsView.ItemTemplate>
                 </ItemsView>
 
             </ScrollViewer>

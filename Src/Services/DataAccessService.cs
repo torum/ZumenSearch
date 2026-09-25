@@ -1498,29 +1498,16 @@ public sealed class DataAccessService : IDataAccessService
                     string s;
                     s = Convert.ToString(reader["resiBuildingKind"]) ?? "";
                     entry.SetKindTypeFromString(s);
-
-                    var bln = Convert.ToInt32(reader["resiUnitOwnership"]);
-                    entry.IsUnitOwnership = bln != 0;
-
+                    entry.IsUnitOwnership = Convert.ToInt32(reader["resiUnitOwnership"]) != 0; // int to bool
                     s = Convert.ToString(reader["resiBuildingStructure"]) ?? "";
                     entry.SetStructureTypeFromString(s);
-
-                    int intValue = Convert.ToInt32(reader["resiAboveGroundFloorCount"]);
-                    entry.FloorCountAboveGround = intValue;
-
-                    intValue = Convert.ToInt32(reader["resiBasementFloorCount"]);
-                    entry.FloorCountBasement = intValue;
-
-                    intValue = Convert.ToInt32(reader["resiTotalUnitCount"]);
-                    entry.TotalUnitCount = intValue;
-
+                    entry.FloorCountAboveGround = Convert.ToInt32(reader["resiAboveGroundFloorCount"]);
+                    entry.FloorCountBasement = Convert.ToInt32(reader["resiBasementFloorCount"]);
+                    entry.TotalUnitCount = Convert.ToInt32(reader["resiTotalUnitCount"]);
                     s = Convert.ToString(reader["resiBuiltYearMonth"]) ?? "";
                     entry.SetBuildYearMonthFromString(s);
-
                     entry.FudousanId = Convert.ToString(reader["resiFudousanId"]) ?? "";
-
                     entry.FudousanIdAdditionalCode = Convert.ToString(reader["resiFudousanIdAdditionalCode"]) ?? "";
-
                     entry.Remarks = Convert.ToString(reader["resiRemarks"]) ?? "";
 
                     // TODO: more.
@@ -1555,21 +1542,10 @@ public sealed class DataAccessService : IDataAccessService
                             IsModified = false
                         };
 
-                        var strType = Convert.ToString(reader["type"]);
-                        if (!string.IsNullOrEmpty(strType))
-                        {
-                            rlpic.SetLabelFromString(strType);
-                        }
+                        var strType = Convert.ToString(reader["type"]) ?? string.Empty;
+                        rlpic.SetLabelFromString(strType);
 
-                        var bln = Convert.ToInt32(reader["is_main"]);
-                        if (bln > 0)
-                        {
-                            rlpic.IsMain = true;
-                        }
-                        else
-                        {
-                            rlpic.IsMain = false;
-                        }
+                        rlpic.IsMain = Convert.ToInt32(reader["resiUnitOwnership"]) != 0; // int to bool
 
                         entry.Pictures.Add(rlpic);
                     }
@@ -1598,21 +1574,10 @@ public sealed class DataAccessService : IDataAccessService
                             IsModified = false
                         };
 
-                        var strType = Convert.ToString(reader["type"]);
-                        if (!string.IsNullOrEmpty(strType))
-                        {
-                            rlpdf.SetTypeFromString(strType);
-                        }
+                        var strType = Convert.ToString(reader["type"]) ?? string.Empty;
+                        rlpdf.SetTypeFromString(strType);
 
-                        var bln = Convert.ToInt32(reader["is_main"]);
-                        if (bln > 0)
-                        {
-                            rlpdf.IsMain = true;
-                        }
-                        else
-                        {
-                            rlpdf.IsMain = false;
-                        }
+                        rlpdf.IsMain = Convert.ToInt32(reader["is_main"]) != 0; // int to bool
 
                         entry.Pdfs.Add(rlpdf);
                     }
@@ -1807,21 +1772,10 @@ public sealed class DataAccessService : IDataAccessService
                         IsModified = false
                     };
 
-                    var strType = Convert.ToString(reader["type"]);
-                    if (!string.IsNullOrEmpty(strType))
-                    {
-                        rlpic.SetLabelFromString(strType);
-                    }
+                    var strType = Convert.ToString(reader["type"]) ?? string.Empty;
+                    rlpic.SetLabelFromString(strType);
 
-                    var bln = Convert.ToInt32(reader["is_main"]);
-                    if (bln > 0)
-                    {
-                        rlpic.IsMain = true;
-                    }
-                    else
-                    {
-                        rlpic.IsMain = false;
-                    }
+                    rlpic.IsMain = Convert.ToInt32(reader["is_main"]) != 0; // int to bool
 
                     room.Pictures.Add(rlpic);
                 }
@@ -1850,21 +1804,10 @@ public sealed class DataAccessService : IDataAccessService
                         IsModified = false
                     };
 
-                    var strType = Convert.ToString(reader["type"]);
-                    if (!string.IsNullOrEmpty(strType))
-                    {
-                        rlpdf.SetTypeFromString(strType);
-                    }
+                    var strType = Convert.ToString(reader["type"]) ?? string.Empty;
+                    rlpdf.SetTypeFromString(strType);
 
-                    var bln = Convert.ToInt32(reader["is_main"]);
-                    if (bln > 0)
-                    {
-                        rlpdf.IsMain = true;
-                    }
-                    else
-                    {
-                        rlpdf.IsMain = false;
-                    }
+                    rlpdf.IsMain = Convert.ToInt32(reader["is_main"]) != 0; // int to bool
 
                     room.Pdfs.Add(rlpdf);
                 }
@@ -2074,18 +2017,18 @@ public sealed class DataAccessService : IDataAccessService
                 cmd.Parameters.Clear();
 
                 // Upsert into rent_residential_rooms
-                var sqlInsertIntoRentLivingRoom = "INSERT INTO rent_residential_rooms (listing_id, property_id, is_property_unit_ownership, name, chinryou) VALUES (@roomId, @RentId, @isPropertyUnitOwnership, @Nam, @Chinryou) ";
+                var sqlInsertIntoRentLivingRoom = "INSERT INTO rent_residential_rooms (listing_id, property_id, is_property_unit_ownership, name, chinryou) VALUES (@listing_id, @property_id, @is_property_unit_ownership, @name, @chinryou) ";
                 sqlInsertIntoRentLivingRoom += "ON CONFLICT(listing_id) ";
                 //sqlInsertIntoRentLivingRoom += string.Format("DO UPDATE SET name = '{0}'", EscapeSingleQuote(room.RoomName));
-                sqlInsertIntoRentLivingRoom += "DO UPDATE SET is_property_unit_ownership = @isPropertyUnitOwnership, name = @Nam, chinryou = @Chinryou"; //, updated_at = @Updated
+                sqlInsertIntoRentLivingRoom += "DO UPDATE SET is_property_unit_ownership = @is_property_unit_ownership, name = @name chinryou = @chinryou"; //, updated_at = @Updated
 
                 cmd.CommandText = sqlInsertIntoRentLivingRoom;
 
-                cmd.Parameters.AddWithValue("@roomId", room.Id);
-                cmd.Parameters.AddWithValue("@RentId", rentId);
-                cmd.Parameters.AddWithValue("@isPropertyUnitOwnership", room.IsPropertyUnitOwnership ? 1 : 0); // bool to int
-                cmd.Parameters.AddWithValue("@Nam", room.Name);
-                cmd.Parameters.AddWithValue("@Chinryou", room.Chinryou);
+                cmd.Parameters.AddWithValue("@listing_id", room.Id);
+                cmd.Parameters.AddWithValue("@property_id", rentId);
+                cmd.Parameters.AddWithValue("@is_property_unit_ownership", room.IsPropertyUnitOwnership ? 1 : 0); // bool to int
+                cmd.Parameters.AddWithValue("@name", room.Name);
+                cmd.Parameters.AddWithValue("@chinryou", room.Chinryou);
                 //cmd.Parameters.AddWithValue("@Updated", DateTimeOffset.UtcNow.ToString("s"));
 
                 var result = cmd.ExecuteNonQuery();
@@ -2106,9 +2049,9 @@ public sealed class DataAccessService : IDataAccessService
                     foreach (var pic in room.Pictures)
                     {
                         // Upsert
-                        var sqlUpsertRoom = "INSERT INTO rent_residential_room_pictures (picture_id, listing_id, property_id, filename, type, description, is_main) VALUES (@PicId, @roomId, @RentId, @Path, @type, @Desc, @Main) ";
+                        var sqlUpsertRoom = "INSERT INTO rent_residential_room_pictures (picture_id, listing_id, property_id, filename, type, description, is_main) VALUES (@picture_id, @listing_id, @property_id, @filename, @type, @description, @is_main) ";
                         sqlUpsertRoom += "ON CONFLICT(picture_id) ";
-                        sqlUpsertRoom += "DO UPDATE SET filename = @Path, type = @type, description = @Desc, is_main = @Main";
+                        sqlUpsertRoom += "DO UPDATE SET filename = @filename, type = @type, description = @description, is_main = @is_main";
                         var exec = true;
 
                         cmd.CommandText = sqlUpsertRoom;
@@ -2118,13 +2061,14 @@ public sealed class DataAccessService : IDataAccessService
                             // ループなので、前のパラメーターをクリアする。
                             cmd.Parameters.Clear();
 
-                            cmd.Parameters.AddWithValue("@PicId", pic.Id);
-                            cmd.Parameters.AddWithValue("@roomId", room.Id);
-                            cmd.Parameters.AddWithValue("@RentId", rentId);
-                            cmd.Parameters.AddWithValue("@Path", pic.ImageFilename);
+                            cmd.Parameters.AddWithValue("@picture_id", pic.Id);
+                            cmd.Parameters.AddWithValue("@listing_id", room.Id);
+                            cmd.Parameters.AddWithValue("@property_id", rentId);
+                            cmd.Parameters.AddWithValue("@filename", pic.ImageFilename);
                             cmd.Parameters.AddWithValue("@type", pic.PictureType.Key.ToString());
-                            cmd.Parameters.AddWithValue("@Desc", pic.Description);
-                            var paramIsMain = new SqliteParameter("@Main", System.Data.DbType.Int32);
+                            cmd.Parameters.AddWithValue("@description", pic.Description);
+                            /*
+                            var paramIsMain = new SqliteParameter("@is_main", System.Data.DbType.Int32);
                             if (pic.IsMain)
                             {
                                 paramIsMain.Value = 1;
@@ -2134,6 +2078,8 @@ public sealed class DataAccessService : IDataAccessService
                                 paramIsMain.Value = 0;
                             }
                             cmd.Parameters.Add(paramIsMain);
+                            */
+                            cmd.Parameters.AddWithValue("@is_main", pic.IsMain ? 1 : 0); // bool to int
 
                             result = cmd.ExecuteNonQuery();
                             if (result > 0)
@@ -2172,9 +2118,9 @@ public sealed class DataAccessService : IDataAccessService
                     foreach (var pdf in room.Pdfs)
                     {
                         // Upsert
-                        var sqlUpsertRoom = "INSERT INTO rent_residential_room_pdfs (pdf_id, listing_id, property_id, filename, thumbnail_filename, type, description, is_main) VALUES (@PdfId, @roomId, @RentId, @Path, @Thumb, @type, @Desc, @Main) ";
+                        var sqlUpsertRoom = "INSERT INTO rent_residential_room_pdfs (pdf_id, listing_id, property_id, filename, thumbnail_filename, type, description, is_main) VALUES (@pdf_id, @listing_id, @property_id, @filename, @thumbnail_filename, @type, @description, @is_main) ";
                         sqlUpsertRoom += "ON CONFLICT(pdf_id) ";
-                        sqlUpsertRoom += "DO UPDATE SET filename = @Path, type = @type, description = @Desc, is_main = @Main";
+                        sqlUpsertRoom += "DO UPDATE SET filename = @filename, thumbnail_filename = @thumbnail_filename, type = @type, description = @description, is_main = @is_main";
                         var exec = true;
 
                         cmd.CommandText = sqlUpsertRoom;
@@ -2184,14 +2130,14 @@ public sealed class DataAccessService : IDataAccessService
                             // ループなので、前のパラメーターをクリアする。
                             cmd.Parameters.Clear();
 
-                            cmd.Parameters.AddWithValue("@PdfId", pdf.Id);
-                            cmd.Parameters.AddWithValue("@roomId", room.Id);
-                            cmd.Parameters.AddWithValue("@RentId", rentId);
-                            cmd.Parameters.AddWithValue("@Path", pdf.PdfFilename);
-                            cmd.Parameters.AddWithValue("@Thumb", pdf.ThumbnailFilename);
+                            cmd.Parameters.AddWithValue("@pdf_id", pdf.Id);
+                            cmd.Parameters.AddWithValue("@listing_id", room.Id);
+                            cmd.Parameters.AddWithValue("@property_id", rentId);
+                            cmd.Parameters.AddWithValue("@filename", pdf.PdfFilename);
+                            cmd.Parameters.AddWithValue("@thumbnail_filename", pdf.ThumbnailFilename);
                             cmd.Parameters.AddWithValue("@type", pdf.PdfType.Key.ToString());
-                            cmd.Parameters.AddWithValue("@Desc", pdf.Description);
-                            var paramIsMain = new SqliteParameter("@Main", System.Data.DbType.Int32);
+                            cmd.Parameters.AddWithValue("@description", pdf.Description);
+                            var paramIsMain = new SqliteParameter("@is_main", System.Data.DbType.Int32);
                             if (pdf.IsMain)
                             {
                                 paramIsMain.Value = 1;
@@ -3124,7 +3070,7 @@ public sealed class DataAccessService : IDataAccessService
         {
             legalPerson.NameCompany = Convert.ToString(reader["name_company"]) ?? "";
             legalPerson.NameCompanyType = Convert.ToString(reader["name_company_type"]) ?? "";
-            legalPerson.NameCompanyTypePosition = Convert.ToInt32(reader["name_company_type_position"]);//
+            legalPerson.NameCompanyTypePosition = Convert.ToInt32(reader["name_company_type_position"]);// int
 
         }
 

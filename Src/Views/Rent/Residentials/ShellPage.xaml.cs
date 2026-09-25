@@ -33,10 +33,10 @@ public sealed partial class ShellPage : Page
         ("ZumenSearch.Views.Rent.Residentials.FacilitiesPage", "設備", typeof(Views.Rent.Residentials.FacilitiesPage)),
         ("ZumenSearch.Views.Rent.Residentials.KanriPage", "管理", typeof(Views.Rent.Residentials.KanriPage)),
         ("ZumenSearch.Views.Rent.Residentials.PictureListPage", "写真", typeof(Views.Rent.Residentials.PictureListPage)),
-        ("ZumenSearch.Views.Rent.Residentials.RoomListPage", "部屋", typeof(Views.Rent.Residentials.RoomListPage)),
         ("ZumenSearch.Views.Rent.Residentials.ZumenListPage", "図面", typeof(Views.Rent.Residentials.ZumenListPage)),
         ("ZumenSearch.Views.Rent.Residentials.LessorListPage", "貸主", typeof(Views.Rent.Residentials.LessorListPage)),
-        ("ZumenSearch.Views.Rent.Residentials.BrokerListPage", "宅建業者", typeof(Views.Rent.Residentials.BrokerListPage))
+        ("ZumenSearch.Views.Rent.Residentials.BrokerListPage", "宅建業者", typeof(Views.Rent.Residentials.BrokerListPage)),
+        ("ZumenSearch.Views.Rent.Residentials.RoomListPage", "募集物件", typeof(Views.Rent.Residentials.RoomListPage))
     ];
 
     private bool _isClosing;

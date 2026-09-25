@@ -10,6 +10,53 @@ using ZumenSearch.ViewModels;
 
 namespace ZumenSearch.Views.Rent;
 
+public partial class PersonTemplateSelector : DataTemplateSelector
+{
+    public DataTemplate? NaturalTemplate { get; set; }
+    public DataTemplate? LegalTemplate { get; set; }
+
+    protected override DataTemplate? SelectTemplateCore(object item)
+    {
+        if (item is Models.Rent.Lessors.PersonWrapperForPropertyViewModel lessor)
+        {
+            if (lessor.Person is Models.PersonNatural)
+            {
+                return NaturalTemplate;
+            }
+            else if (lessor.Person is Models.PersonLegal)
+            {
+                return LegalTemplate;
+            }
+        }
+        else if (item is Models.Common.PersonSearchResultItem searchResultItem)
+        {
+            if (searchResultItem.PersonKind == Models.Base.EnumPersonKind.Natural)
+            {
+                return NaturalTemplate;
+            }
+            else if (searchResultItem.PersonKind == Models.Base.EnumPersonKind.Legal)
+            {
+                return LegalTemplate;
+            }
+        }
+        else if (item is Models.PersonNatural)
+        {
+            return NaturalTemplate;
+        }
+        else if (item is Models.PersonLegal)
+        {
+            return LegalTemplate;
+        }
+
+        return base.SelectTemplateCore(item);
+    }
+
+    protected override DataTemplate? SelectTemplateCore(object item, DependencyObject container)
+    {
+        return SelectTemplateCore(item);
+    }
+}
+
 public sealed partial class LessorSearchResultPage : Page
 {
     public MainViewModel ViewModel

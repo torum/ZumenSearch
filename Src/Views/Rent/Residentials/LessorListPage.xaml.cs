@@ -3,13 +3,8 @@ using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
-using System;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
-using Windows.ApplicationModel.Chat;
 using Windows.Graphics;
-using WinRT.Interop;
-using ZumenSearch.Views.Dialogs;
 
 namespace ZumenSearch.Views.Rent.Residentials;
 

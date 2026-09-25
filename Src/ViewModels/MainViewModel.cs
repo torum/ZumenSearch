@@ -17,7 +17,8 @@ namespace ZumenSearch.ViewModels;
 
 public partial class MainViewModel : ObservableRecipient, 
     IRecipient<PropertyUpdatedMessage>, 
-    IRecipient<ListingUpdatedMessage>, 
+    IRecipient<ListingUpdatedMessage>,
+    IRecipient<LessorUpdatedMessage>,
     IRecipient<ListingWindowClosedMessage>, 
     IRecipient<PropertyWindowClosedMessage>, 
     IRecipient<LessorWindowClosedMessage>,
@@ -270,6 +271,25 @@ public partial class MainViewModel : ObservableRecipient,
             }
 
             item.Name = room.Name;
+        }
+    }
+
+    public void Receive(LessorUpdatedMessage lessor)
+    {
+        var person = lessor.Value;
+        if (person is null)
+        {
+            return;
+        }
+
+        foreach (var item in RentLessorSearchResult)
+        {
+            if (!item.Id.Equals(person.Id))
+            {
+                continue;
+            }
+
+            item.Name = person.Name;
         }
     }
 

@@ -103,7 +103,7 @@
                 </NavigationView.MenuItems>
 
                 <NavigationView.FooterMenuItems>
-                    <NavigationViewItem Content="部屋一覧" Tag="ZumenSearch.Views.Rent.Residentials.RoomListPage"/>
+                    <NavigationViewItem Content="募集物件" Tag="ZumenSearch.Views.Rent.Residentials.RoomListPage"/>
                 </NavigationView.FooterMenuItems>
                 
             </NavigationView>
