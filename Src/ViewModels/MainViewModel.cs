@@ -122,6 +122,21 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
 
     #endregion
 
+    #region == RecentProperties ==
+
+    public ObservableCollection<Models.Common.PropertySearchResultItem> RecentProperties
+    {
+        get; set
+        {
+            if (SetProperty(ref field, value))
+            {
+                //
+            }
+        }
+    } = [];
+
+    #endregion
+
     #region == Search ==
 
     // Rent or BuySell
@@ -175,13 +190,26 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
         }
     } = [];
 
-    public ObservableCollection<Models.Common.PropertySearchResultItem> RecentProperties
+    public ObservableCollection<Models.Common.PropertySearchResultItem> SaleResidentialBldgSearchResult
     {
-        get; set
+        get;
+        private set
         {
             if (SetProperty(ref field, value))
             {
-                //
+            }
+        }
+    } = [];
+
+    public ObservableCollection<
+    Models.Common.PropertySearchResultItem>
+    RentCommercialBldgSearchResult
+    {
+        get;
+        private set
+        {
+            if (SetProperty(ref field, value))
+            {
             }
         }
     } = [];
@@ -217,6 +245,8 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
     private readonly IAbstractFactory<Models.Rent.Residentials.Listing.Listing, Views.Rent.Residentials.Listing.ShellPage> _shellRentResidentialListingFactory;
     private readonly IAbstractFactory<Models.Base.PersonBase, Views.Rent.Lessors.ShellPage> _shellRentLessorFactory;
     private readonly IAbstractFactory<Models.Base.PersonBase, Views.Brokers.ShellPage> _shellBrokerFactory;
+    private readonly IAbstractFactory<Models.Sale.Residentials.Property, Views.Sale.Residentials.ShellPage> _shellSaleResidentialPropertyFactory;
+    private readonly IAbstractFactory<Models.Rent.Commercials.Property, Views.Rent.Commercials.ShellPage> _shellRentCommercialPropertyFactory;
 
     private readonly IDataAccessService _dataAccessService;
     private readonly INavigationService _navigationService;
@@ -227,7 +257,9 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
     public MainViewModel(
         IAbstractFactory<Models.Rent.Residentials.Property, Views.Rent.Residentials.ShellPage> shellRentResidentialPropertyFactory, 
         IAbstractFactory<Models.Rent.Residentials.Listing.Listing, Views.Rent.Residentials.Listing.ShellPage> shellRentResidentialListingFactory,
+        IAbstractFactory<Models.Rent.Commercials.Property, Views.Rent.Commercials.ShellPage> shellRentCommercialPropertyFactory,
         IAbstractFactory<Models.Base.PersonBase, Views.Rent.Lessors.ShellPage> shellRentLessorFactory,
+        IAbstractFactory<Models.Sale.Residentials.Property, Views.Sale.Residentials.ShellPage> shellSaleResidentialPropertyFactory,
         IAbstractFactory<Models.Base.PersonBase, Views.Brokers.ShellPage> shellBrokerFactory,
         INavigationService navigationService, 
         IDataAccessService dataAccessService, 
@@ -235,7 +267,9 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
     {
         _shellRentResidentialPropertyFactory = shellRentResidentialPropertyFactory;
         _shellRentResidentialListingFactory = shellRentResidentialListingFactory;
+        _shellRentCommercialPropertyFactory = shellRentCommercialPropertyFactory;
         _shellRentLessorFactory = shellRentLessorFactory;
+        _shellSaleResidentialPropertyFactory =shellSaleResidentialPropertyFactory;
         _shellBrokerFactory = shellBrokerFactory;
         _navigationService = navigationService;
         _dataAccessService = dataAccessService;
@@ -1089,34 +1123,157 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
     [RelayCommand]
     private async Task SearchRentCommercial(string? queryText)
     {
-        /*
-        if (string.IsNullOrWhiteSpace(queryText))
+        var query = string.IsNullOrWhiteSpace(queryText)
+            ? "*"
+            : queryText.Trim();
+
+        var result = await Task.Run(
+            () => _dataAccessService
+                .SelectRentCommercialsByNameKeyword(query),
+            _cts.Token);
+
+        if (result.IsError)
         {
-            queryText = "*";
+            Debug.WriteLine(
+                $"{result.Error.ErrText}{Environment.NewLine}" +
+                $"{result.Error.ErrDescription}{Environment.NewLine}" +
+                $"{result.Error.ErrPlace}");
+
+            return;
         }
 
-        RentLessorSearchResult.Clear();
-
-        var res = await Task.Run(() => _dataAccessService.SelectRentLessorsByKeyword(queryText), _cts.Token);
-
-        if (res.IsError)
+        foreach (var item in result.PropertySearchResult)
         {
-            Debug.WriteLine(res.Error.ErrText + Environment.NewLine + res.Error.ErrDescription + Environment.NewLine + res.Error.ErrPlace + Environment.NewLine + res.Error.ErrPlaceParent);
-
-            //ErrorMain = res.Error;
-            //IsMainErrorInfoBarVisible = true;
-
-            // TODO: Show error message to user
+            item.BasePath = Path.Combine(
+                App.PropertyBlobDataFolder,
+                item.Id);
         }
-        else
+
+        RentCommercialBldgSearchResult =
+            new(result.PropertySearchResult);
+
+        _navigationService.NavigateTo(
+            "ZumenSearch.Views.Rent.CommercialSearchResultPage",
+            SlideNavigationTransitionEffect.FromLeft);
+    }
+
+    [RelayCommand]
+    private void AddNewRentCommercial()
+    {
+        var property = new Models.Rent.Commercials.Property(
+            Guid.CreateVersion7().ToString("N"),
+            Models.Base.EnumEntryStatus.New);
+
+        var shell =
+            _shellRentCommercialPropertyFactory.Create(property);
+
+        if (shell.Window.AppWindow.Presenter
+            is Microsoft.UI.Windowing.OverlappedPresenter presenter)
         {
-            RentLessorSearchResult = new(res.PersonSearchResult);
-
-            _navigationService.NavigateTo("ZumenSearch.Views.Rent.LessorSearchResultPage", SlideNavigationTransitionEffect.FromLeft);
+            presenter.IsResizable = true;
+            presenter.IsModal = false;
+            presenter.IsAlwaysOnTop = false;
+            presenter.PreferredMinimumWidth = 1274;
+            presenter.PreferredMinimumHeight = 794;
         }
-        */
 
-        _navigationService.NavigateTo("ZumenSearch.Views.Rent.CommercialSearchResultPage", SlideNavigationTransitionEffect.FromLeft);
+        shell.Window.AppWindow.MoveAndResize(
+            new Windows.Graphics.RectInt32(
+                130,
+                130,
+                1366,
+                768));
+
+        shell.Window.Activate();
+        shell.Window.AppWindow.MoveInZOrderAtTop();
+
+    }
+
+    [RelayCommand(CanExecute = nameof(EditRentCommercialCanExecute))]
+    private async Task EditRentCommercial(Models.Common.PropertySearchResultItem? selected)
+    {
+        if (selected is null ||
+            string.IsNullOrWhiteSpace(selected.Id))
+        {
+            return;
+        }
+
+        var result = await Task.Run(
+            () => _dataAccessService
+                .SelectRentCommercialById(selected.Id),
+            _cts.Token);
+
+        if (result.IsError || result.Building is null)
+        {
+            Debug.WriteLine(
+                $"{result.Error.ErrText}{Environment.NewLine}" +
+                $"{result.Error.ErrDescription}{Environment.NewLine}" +
+                $"{result.Error.ErrPlace}");
+
+            return;
+        }
+
+        var shell =
+            _shellRentCommercialPropertyFactory.Create(
+                result.Building);
+
+        if (shell.Window.AppWindow.Presenter
+            is Microsoft.UI.Windowing.OverlappedPresenter presenter)
+        {
+            presenter.IsResizable = true;
+            presenter.IsModal = false;
+            presenter.IsAlwaysOnTop = false;
+            presenter.PreferredMinimumWidth = 1274;
+            presenter.PreferredMinimumHeight = 794;
+        }
+
+        shell.Window.AppWindow.MoveAndResize(
+            new Windows.Graphics.RectInt32(
+                130,
+                130,
+                1366,
+                768));
+
+        shell.Window.Activate();
+        shell.Window.AppWindow.MoveInZOrderAtTop();
+    }
+
+    private static bool EditRentCommercialCanExecute(
+        Models.Common.PropertySearchResultItem? selected)
+    {
+        return selected is not null &&
+               !string.IsNullOrWhiteSpace(selected.Id);
+    }
+
+    [RelayCommand(CanExecute = nameof(DeleteRentCommercialCanExecute))]
+    private void DeleteRentCommercial(Models.Common.PropertySearchResultItem? selected)
+    {
+        if (selected is null ||
+            string.IsNullOrWhiteSpace(selected.Id))
+        {
+            return;
+        }
+
+        var result =
+            _dataAccessService.DeleteRentCommercial(selected.Id);
+
+        if (result.IsError)
+        {
+            Debug.WriteLine(
+                $"{result.Error.ErrText}{Environment.NewLine}" +
+                $"{result.Error.ErrDescription}{Environment.NewLine}" +
+                $"{result.Error.ErrPlace}");
+
+            return;
+        }
+
+        RentCommercialBldgSearchResult.Remove(selected);
+    }
+
+    private static bool DeleteRentCommercialCanExecute(Models.Common.PropertySearchResultItem? selected)
+    {
+        return selected is not null &&
+               !string.IsNullOrWhiteSpace(selected.Id);
     }
 
     #endregion
@@ -1124,7 +1281,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
     #region == 賃貸駐車場 ==
 
     [RelayCommand]
-    private void AddNewRentCommercial()
+    private void AddNewRentParking()
     {
         //
     }
@@ -1160,13 +1317,6 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
         */
 
         _navigationService.NavigateTo("ZumenSearch.Views.Rent.ParkingSearchResultPage", SlideNavigationTransitionEffect.FromLeft);
-    }
-
-
-    [RelayCommand]
-    private void AddNewRentParking()
-    {
-        //
     }
 
     #endregion
@@ -1426,6 +1576,165 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
     }
 
     #endregion
+
+    #region == 売買住居用 ==
+
+    [RelayCommand]
+    private void AddNewSaleResidentialBldg()
+    {
+        var property = new Models.Sale.Residentials.Property(
+            Guid.CreateVersion7().ToString("N"),
+            Models.Base.EnumEntryStatus.New);
+
+        var shell =
+            _shellSaleResidentialPropertyFactory.Create(property);
+
+        if (shell.Window.AppWindow.Presenter
+            is Microsoft.UI.Windowing.OverlappedPresenter presenter)
+        {
+            presenter.IsResizable = true;
+            presenter.IsModal = false;
+            presenter.IsAlwaysOnTop = false;
+            presenter.PreferredMinimumWidth = 1274;
+            presenter.PreferredMinimumHeight = 794;
+        }
+
+        shell.Window.AppWindow.MoveAndResize(
+            new Windows.Graphics.RectInt32(
+                130,
+                130,
+                1366,
+                768));
+
+        shell.Window.Activate();
+        shell.Window.AppWindow.MoveInZOrderAtTop();
+    }
+
+    [RelayCommand]
+    private async Task SearchSaleResidentialBldg(string? queryText)
+    {
+        var query = string.IsNullOrWhiteSpace(queryText)
+            ? "*"
+            : queryText.Trim();
+
+        var result = await Task.Run(
+            () => _dataAccessService
+                .SelectSaleResidentialsByNameKeyword(query),
+            _cts.Token);
+
+        if (result.IsError)
+        {
+            Debug.WriteLine(
+                $"{result.Error.ErrText}{Environment.NewLine}" +
+                $"{result.Error.ErrDescription}{Environment.NewLine}" +
+                $"{result.Error.ErrPlace}");
+
+            return;
+        }
+
+        foreach (var item in result.PropertySearchResult)
+        {
+            item.BasePath = Path.Combine(
+                App.PropertyBlobDataFolder,
+                item.Id);
+        }
+
+        SaleResidentialBldgSearchResult =
+            new(result.PropertySearchResult);
+
+        _navigationService.NavigateTo(
+            "ZumenSearch.Views.Sale.ResidentialSearchResultPage",
+            SlideNavigationTransitionEffect.FromLeft);
+    }
+
+    [RelayCommand(CanExecute = nameof(EditSaleResidentialBldgCanExecute))]
+    private async Task EditSaleResidentialBldg(
+    Models.Common.PropertySearchResultItem? selected)
+    {
+        if (selected is null || string.IsNullOrWhiteSpace(selected.Id))
+        {
+            return;
+        }
+
+        var result = await Task.Run(
+            () => _dataAccessService.SelectSaleResidentialById(selected.Id),
+            _cts.Token);
+
+        if (result.IsError || result.Building is null)
+        {
+            Debug.WriteLine(
+                $"{result.Error.ErrText}{Environment.NewLine}" +
+                $"{result.Error.ErrDescription}{Environment.NewLine}" +
+                $"{result.Error.ErrPlace}");
+
+            return;
+        }
+
+        var shell =
+            _shellSaleResidentialPropertyFactory.Create(result.Building);
+
+        if (shell.Window.AppWindow.Presenter
+            is Microsoft.UI.Windowing.OverlappedPresenter presenter)
+        {
+            presenter.IsResizable = true;
+            presenter.IsModal = false;
+            presenter.IsAlwaysOnTop = false;
+            presenter.PreferredMinimumWidth = 1274;
+            presenter.PreferredMinimumHeight = 794;
+        }
+
+        shell.Window.AppWindow.MoveAndResize(
+            new Windows.Graphics.RectInt32(
+                130,
+                130,
+                1366,
+                768));
+
+        shell.Window.Activate();
+        shell.Window.AppWindow.MoveInZOrderAtTop();
+    }
+    private static bool EditSaleResidentialBldgCanExecute(
+        Models.Common.PropertySearchResultItem? selected)
+    {
+        return selected is not null &&
+               !string.IsNullOrWhiteSpace(selected.Id);
+    }
+
+    [RelayCommand(CanExecute = nameof(DeleteSaleResidentialBldgCanExecute))]
+    private void DeleteSaleResidentialBldg(
+    Models.Common.PropertySearchResultItem? selected)
+    {
+        if (selected is null || string.IsNullOrWhiteSpace(selected.Id))
+        {
+            return;
+        }
+
+        var result =
+            _dataAccessService.DeleteSaleResidential(selected.Id);
+
+        if (result.IsError)
+        {
+            Debug.WriteLine(
+                $"{result.Error.ErrText}{Environment.NewLine}" +
+                $"{result.Error.ErrDescription}{Environment.NewLine}" +
+                $"{result.Error.ErrPlace}");
+
+            return;
+        }
+
+        SaleResidentialBldgSearchResult.Remove(selected);
+    }
+
+    private static bool DeleteSaleResidentialBldgCanExecute(
+        Models.Common.PropertySearchResultItem? selected)
+    {
+        return selected is not null &&
+               !string.IsNullOrWhiteSpace(selected.Id);
+    }
+
+
+    #endregion
+
 
     #region == 宅建業者 == 
 

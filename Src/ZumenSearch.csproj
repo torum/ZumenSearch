@@ -76,11 +76,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Models\Sale\" />
-    <Folder Include="ViewModels\Sale\" />
-    <Folder Include="Views\Sale\" />
-  </ItemGroup>
-  <ItemGroup>
     <Page Update="Views\Brokers\BasicPage.xaml">
       <SubType>Designer</SubType>
     </Page>

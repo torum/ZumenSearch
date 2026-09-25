@@ -79,6 +79,7 @@ public sealed partial class BrokerViewModel : ObservableRecipient
 
     #endregion
 
+    // Nameは直接編集バインドしない。あとで会社名と法人格をくっつける。
     public string Name
     {
         get => field ?? string.Empty; // Ensure a non-null value is returned
@@ -95,6 +96,74 @@ public sealed partial class BrokerViewModel : ObservableRecipient
             }
         }
     }
+
+    [ObservableProperty]
+    public partial bool IsNameLastHasError { get; private set; }
+
+    public string NameCompany
+    {
+        get => field ?? string.Empty;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                if (NameCompanyTypePosition == 0)
+                {
+                    Name = $"{NameCompanyType}{NameCompany}";
+                }
+                else
+                {
+                    Name = $"{NameCompany}{NameCompanyType}";
+                }
+                IsDirty = true;
+            }
+        }
+    }
+
+    [ObservableProperty]
+    public partial bool IsNameCompanyHasError { get; private set; }
+
+    public string NameCompanyType
+    {
+        get => field ?? string.Empty;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                if (NameCompanyTypePosition == 0)
+                {
+                    Name = $"{NameCompanyType}{NameCompany}";
+                }
+                else
+                {
+                    Name = $"{NameCompany}{NameCompanyType}";
+                }
+                IsDirty = true;
+            }
+        }
+    }
+
+    // 0 前付け、1 後付け
+    public int NameCompanyTypePosition
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                if (value == 0)
+                {
+                    Name = $"{NameCompanyType}{NameCompany}";
+                }
+                else
+                {
+                    Name = $"{NameCompany}{NameCompanyType}";
+                }
+                IsDirty = true;
+            }
+        }
+    }
+
 
     // 備考
     public string Remarks
@@ -236,7 +305,12 @@ public sealed partial class BrokerViewModel : ObservableRecipient
             return;
         }
 
+        // TODO: Create PersonLegal and set it.
+
         _broker.Name = Name;
+
+        _broker.PersonKind = EnumPersonKind.Legal;
+
 
         //_broker.Remarks = Remarks;
 

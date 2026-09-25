@@ -111,24 +111,34 @@ public partial class App : Application
 
                 services.AddTransient<ViewModels.Rent.Residentials.PropertyViewModel>();
                 services.AddTransient<Views.Rent.Residentials.ShellPage>();
+                services.AddGenericFactory<Models.Rent.Residentials.Property, INavigationGenericService, IDialogGenericService, ViewModels.Rent.Residentials.PropertyViewModel>();
+                services.AddGenericFactory<Models.Rent.Residentials.Property, Views.Rent.Residentials.ShellPage>();
 
                 services.AddTransient<ViewModels.Rent.Residentials.Listing.ListingViewModel>();
                 services.AddTransient<Views.Rent.Residentials.Listing.ShellPage>();
+                services.AddGenericFactory<Models.Rent.Residentials.Listing.Listing, INavigationGenericService, IDialogGenericService, ViewModels.Rent.Residentials.Listing.ListingViewModel>();
+                services.AddGenericFactory<Models.Rent.Residentials.Listing.Listing, Views.Rent.Residentials.Listing.ShellPage>();
 
                 services.AddTransient<ViewModels.Rent.Lessors.LessorViewModel>();
                 services.AddTransient<Views.Rent.Lessors.ShellPage>();
+                services.AddGenericFactory<Models.Base.PersonBase, INavigationGenericService, IDialogGenericService, ViewModels.Rent.Lessors.LessorViewModel>();
+                services.AddGenericFactory<Models.Base.PersonBase, Views.Rent.Lessors.ShellPage>();
 
                 services.AddTransient<ViewModels.Brokers.BrokerViewModel>();
                 services.AddTransient<Views.Brokers.ShellPage>();
+                services.AddGenericFactory<Models.Base.PersonBase, INavigationGenericService, IDialogGenericService, ViewModels.Brokers.BrokerViewModel>();
+                services.AddGenericFactory<Models.Base.PersonBase, Views.Brokers.ShellPage>();
 
-                services.AddGenericFactory<ViewModels.Rent.Residentials.PropertyViewModel, Models.Rent.Residentials.Property, INavigationGenericService, IDialogGenericService> ();
-                services.AddGenericFactory<Views.Rent.Residentials.ShellPage, Models.Rent.Residentials.Property>();
-                services.AddGenericFactory<ViewModels.Rent.Residentials.Listing.ListingViewModel, Models.Rent.Residentials.Listing.Listing, INavigationGenericService, IDialogGenericService> ();
-                services.AddGenericFactory<Views.Rent.Residentials.Listing.ShellPage, Models.Rent.Residentials.Listing.Listing>();
-                services.AddGenericFactory<ViewModels.Rent.Lessors.LessorViewModel, Models.Base.PersonBase, INavigationGenericService, IDialogGenericService>();
-                services.AddGenericFactory<Views.Rent.Lessors.ShellPage, Models.Base.PersonBase>();
-                services.AddGenericFactory<ViewModels.Brokers.BrokerViewModel, Models.Base.PersonBase, INavigationGenericService, IDialogGenericService>();
-                services.AddGenericFactory<Views.Brokers.ShellPage, Models.Base.PersonBase>();
+                services.AddTransient<ViewModels.Sale.Residentials.PropertyViewModel>();
+                services.AddTransient<Views.Sale.Residentials.ShellPage>();
+                services.AddGenericFactory<Models.Sale.Residentials.Property, INavigationGenericService, IDialogGenericService, ViewModels.Sale.Residentials.PropertyViewModel>();
+                services.AddGenericFactory<Models.Sale.Residentials.Property, Views.Sale.Residentials.ShellPage>();
+
+                services.AddTransient<ViewModels.Rent.Commercials.PropertyViewModel>();
+                services.AddTransient<Views.Rent.Commercials.ShellPage>();
+                services.AddGenericFactory<Models.Rent.Commercials.Property, INavigationGenericService, IDialogGenericService, ViewModels.Rent.Commercials.PropertyViewModel>();
+                services.AddGenericFactory<Models.Rent.Commercials.Property, Views.Rent.Commercials.ShellPage>();
+
 
                 // Instead of AddEditorFactory for each, typeof.. <,> registers all.
                 //services.AddSingleton(typeof(IAbstractFactory<,>), typeof(AbstractFactory<,>)); 

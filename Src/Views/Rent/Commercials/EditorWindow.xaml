@@ -1,0 +1,10 @@
+﻿<Window
+    x:Class="ZumenSearch.Views.Rent.Commercials.EditorWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="賃貸事業用">
+
+    <Window.SystemBackdrop>
+        <MicaBackdrop />
+    </Window.SystemBackdrop>
+</Window>

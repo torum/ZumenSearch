@@ -27,14 +27,25 @@
                         </Grid.ColumnDefinitions>
                         <Grid Grid.Row="0" Grid.Column="0">
                             <!-- 会社名 -->
-                            <TextBox x:Name="TextBox_Name" TabIndex="0" MinWidth="200" Header="会社名" PlaceholderText="必須" MaxLength="100" Paste="TextBox_MaxLength_Paste"
-                                         Text="{x:Bind ViewModel.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-                                         BorderBrush="{x:Bind ViewModel.IsNameHasError, Converter={StaticResource ValidationToBrushConverter}, Mode=OneWay}"
+                            <TextBox x:Name="TextBox_NameCompany" TabIndex="0" MinWidth="200" Header="会社名" PlaceholderText="必須" MaxLength="100" Paste="TextBox_MaxLength_Paste"
+                                         Text="{x:Bind ViewModel.NameCompany, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                         BorderBrush="{x:Bind ViewModel.IsNameCompanyHasError, Converter={StaticResource ValidationToBrushConverter}, Mode=OneWay}"
                                          HorizontalAlignment="Stretch" VerticalAlignment="Bottom"/>
                         </Grid>
 
                         <Grid Grid.Row="0" Grid.Column="1" Margin="12,0,0,0">
-                            <!--  -->
+                            <!-- 法人格 -->
+                            <StackPanel Orientation="Horizontal">
+                                <TextBox x:Name="TextBox_NameCompanyType" TabIndex="0" MinWidth="150" Header="法人格" PlaceholderText="株式会社等" MaxLength="100" Paste="TextBox_MaxLength_Paste"
+                                         Text="{x:Bind ViewModel.NameCompanyType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                         HorizontalAlignment="Stretch" VerticalAlignment="Bottom"/>
+
+                                <ComboBox x:Name="ComboBoxCompanyTypes" Header="法人格の位置" PlaceholderText="選択" Width="120" Margin="6,0,0,0" SelectedIndex="{x:Bind ViewModel.NameCompanyTypePosition, Mode=TwoWay}" VerticalAlignment="Bottom">
+                                    <x:String>前付け</x:String>
+                                    <x:String>後付け</x:String>
+                                </ComboBox>
+                            </StackPanel>
+
                         </Grid>
                     </Grid>
                 </Border>

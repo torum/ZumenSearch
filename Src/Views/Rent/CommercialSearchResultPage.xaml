@@ -60,7 +60,7 @@
             <StackPanel Grid.Row="0" Padding="{StaticResource ContentPadding}">
 
                 <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Margin="0,0,24,0" HorizontalAlignment="Right">
-                    <AppBarButton Icon="Delete" Label="削除" Command="{x:Bind ViewModel.DeleteRentLessorCommand, Mode=OneWay}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}"/>
+                    <AppBarButton Icon="Delete" Label="削除" Command="{x:Bind ViewModel.DeleteRentCommercialCommand, Mode=OneWay}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}"/>
                     <AppBarButton Icon="Sort" IsCompact="True" ToolTipService.ToolTip="Sort" Label="並べ替え" AutomationProperties.Name="Sort" IsEnabled="False">
                         <AppBarButton.Flyout>
                             <MenuFlyout>
@@ -71,7 +71,7 @@
                         </AppBarButton.Flyout>
                     </AppBarButton>
                     <AppBarButton Icon="Copy" Label="複製" IsEnabled="False"/>
-                    <AppBarButton Icon="Edit" Label="編集" Command="{x:Bind ViewModel.EditRentLessorCommand}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}"/>
+                    <AppBarButton Icon="Edit" Label="編集" Command="{x:Bind ViewModel.EditRentCommercialCommand}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}"/>
                 </CommandBar>
 
                 <Border BorderThickness="0,1,0,0" BorderBrush="{ThemeResource NavigationViewItemSeparatorForeground}"></Border>
@@ -80,22 +80,49 @@
 
             <ScrollViewer Grid.Row="1" Padding="{StaticResource ContentPadding}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
 
-                <ItemsView x:Name="SearchResultListView" Margin="0,12,0,0" AllowFocusOnInteraction="False" SelectionMode="Single">
-                    <!-- 
-                     ItemsSource="{x:Bind ViewModel.RentLessorSearchResult, Mode=OneWay}"
-                    -->
+                <ItemsView x:Name="SearchResultListView" ItemsSource="{x:Bind ViewModel.RentCommercialBldgSearchResult, Mode=OneWay}" Margin="0,12,0,0" AllowFocusOnInteraction="False" SelectionMode="Single">
                     <ItemsView.ContextFlyout>
                         <MenuFlyout>
-                            <MenuFlyoutItem Text="編集" Icon="Edit" Command="{x:Bind ViewModel.EditRentLessorCommand, Mode=OneWay}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}">
+                            <MenuFlyoutItem Text="編集" Icon="Edit" Command="{x:Bind ViewModel.EditRentCommercialCommand, Mode=OneWay}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}">
                                 <MenuFlyoutItem.KeyboardAccelerators>
                                     <KeyboardAccelerator Key="Enter" />
                                 </MenuFlyoutItem.KeyboardAccelerators>
                             </MenuFlyoutItem>
                             <MenuFlyoutItem Text="複製" Icon="Copy"></MenuFlyoutItem>
                             <MenuFlyoutSeparator/>
-                            <MenuFlyoutItem Text="削除" Icon="Delete" Command="{x:Bind ViewModel.DeleteRentLessorCommand, Mode=OneWay}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}"></MenuFlyoutItem>
+                            <MenuFlyoutItem Text="削除" Icon="Delete" Command="{x:Bind ViewModel.DeleteRentCommercialCommand, Mode=OneWay}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}"></MenuFlyoutItem>
                         </MenuFlyout>
                     </ItemsView.ContextFlyout>
+                    <!--
+                    <ItemsView.ItemTemplate>
+                        <DataTemplate x:DataType="modcommon:ListingSearchResultItem">
+                            <ItemContainer DataContext="{x:Bind}" IsDoubleTapEnabled="True" DoubleTapped="SearchResult_DoubleTapped" PointerPressed="ItemContainer_PointerPressed" PointerReleased="ItemContainer_PointerReleased" RightTapped="ItemContainer_RightTapped">
+                                <ItemContainer.KeyboardAccelerators>
+                                    <KeyboardAccelerator Key="Enter" Modifiers="None" Invoked="ItemsViewKeyboardAccelerator_Invoked" />
+                                </ItemContainer.KeyboardAccelerators>
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Ellipse x:Name="Ellipse" Grid.RowSpan="2" Width ="32" Height="32" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center" Fill="{ThemeResource SystemControlBackgroundBaseMediumBrush}"/>
+
+                                    <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Margin="12,6,0,0">
+                                        <TextBlock Text="{x:Bind PropertyName, Mode=OneWay}" Style="{ThemeResource BaseTextBlockStyle}"/>
+                                        <TextBlock Style="{ThemeResource BaseTextBlockStyle}">
+                                            <Run Text="（"></Run><Run Text="{x:Bind Name, Mode=OneWay}"></Run><Run Text="）"></Run>
+                                        </TextBlock>
+                                    </StackPanel>
+                                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{x:Bind Id, Mode=OneTime}" x:Phase="2" Style="{ThemeResource BodyTextBlockStyle}" Margin="12,0,0,6"/>
+                                </Grid>
+                            </ItemContainer>
+                        </DataTemplate>
+                    </ItemsView.ItemTemplate>
+                    -->
                 </ItemsView>
 
             </ScrollViewer>

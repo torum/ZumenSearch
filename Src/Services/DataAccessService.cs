@@ -70,6 +70,8 @@ public sealed class DataAccessService : IDataAccessService
                     ")";
                 tableCmd.ExecuteNonQuery();
 
+                #region == Rent Residential ==
+
                 tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS rent_residentials (" +
                     "property_id TEXT NOT NULL PRIMARY KEY," +
                     //"residential_id TEXT NOT NULL," +
@@ -161,6 +163,68 @@ public sealed class DataAccessService : IDataAccessService
                     " )";
                 tableCmd.ExecuteNonQuery();
 
+                #endregion
+
+                #region == Rent Commercial ==
+
+                tableCmd.CommandText = """
+    CREATE TABLE IF NOT EXISTS rent_commercials (
+        property_id TEXT NOT NULL PRIMARY KEY,
+        commercial_kind TEXT NOT NULL,
+        is_unit_ownership INTEGER NOT NULL DEFAULT 0,
+        building_structure TEXT NOT NULL,
+        floor_count_above_ground INTEGER NOT NULL DEFAULT 0,
+        floor_count_basement INTEGER NOT NULL DEFAULT 0,
+        total_floor_area NUMERIC NOT NULL DEFAULT 0,
+        built_year_month TEXT NOT NULL,
+        fudousan_id TEXT NOT NULL,
+        fudousan_id_additional_code TEXT NOT NULL,
+        remarks TEXT NOT NULL,
+        created_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc')),
+        updated_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc')),
+        FOREIGN KEY (property_id)
+            REFERENCES properties(property_id)
+            ON DELETE CASCADE
+    );
+
+    CREATE TABLE IF NOT EXISTS rent_commercial_units (
+        listing_id TEXT NOT NULL PRIMARY KEY,
+        property_id TEXT NOT NULL,
+        is_property_unit_ownership INTEGER NOT NULL DEFAULT 0,
+        name TEXT NOT NULL,
+        chinryou NUMERIC NOT NULL DEFAULT 0,
+        kyoueki_fee NUMERIC NOT NULL DEFAULT 0,
+        shikikin NUMERIC NOT NULL DEFAULT 0,
+        shikikin_unit TEXT NOT NULL,
+        reikin NUMERIC NOT NULL DEFAULT 0,
+        reikin_unit TEXT NOT NULL,
+        renewal_fee NUMERIC NOT NULL DEFAULT 0,
+        renewal_fee_unit TEXT NOT NULL,
+        recontract_fee NUMERIC NOT NULL DEFAULT 0,
+        recontract_fee_unit TEXT NOT NULL,
+        floor_area NUMERIC NOT NULL DEFAULT 0,
+        usage TEXT NOT NULL,
+        business_hours TEXT NOT NULL,
+        parking_available INTEGER NOT NULL DEFAULT 0,
+        other_conditions TEXT NOT NULL,
+        remarks TEXT NOT NULL,
+        created_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc')),
+        updated_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc')),
+        FOREIGN KEY (property_id)
+            REFERENCES rent_commercials(property_id)
+            ON DELETE CASCADE
+    );
+
+    CREATE INDEX IF NOT EXISTS
+        ix_rent_commercial_units_property_id
+        ON rent_commercial_units(property_id);
+    """;
+
+                tableCmd.ExecuteNonQuery();
+
+                #endregion
+
+                #region == Rent Lessor ==
 
                 tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS rent_lessors (" +
                     "lessor_id TEXT NOT NULL PRIMARY KEY," +
@@ -208,6 +272,133 @@ public sealed class DataAccessService : IDataAccessService
                 tableCmd.ExecuteNonQuery();
                 */
 
+                #endregion
+
+                #region == Sale Residentials ==
+
+                // Sale tables
+                tableCmd.CommandText = """
+    CREATE TABLE IF NOT EXISTS sale_residentials (
+        property_id TEXT NOT NULL PRIMARY KEY,
+        building_kind TEXT NOT NULL,
+        is_unit_ownership INTEGER NOT NULL DEFAULT 0,
+        building_structure TEXT NOT NULL,
+        floor_count_above_ground INTEGER NOT NULL DEFAULT 0,
+        floor_count_basement INTEGER NOT NULL DEFAULT 0,
+        total_unit_count INTEGER NOT NULL DEFAULT 0,
+        built_year_month TEXT NOT NULL,
+        fudousan_id TEXT NOT NULL,
+        fudousan_id_additional_code TEXT NOT NULL,
+        remarks TEXT NOT NULL,
+        created_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc')),
+        updated_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc')),
+        FOREIGN KEY (property_id)
+            REFERENCES properties(property_id)
+            ON DELETE CASCADE
+    );
+
+    CREATE TABLE IF NOT EXISTS sale_residential_pictures (
+        picture_id TEXT NOT NULL PRIMARY KEY,
+        property_id TEXT NOT NULL,
+        filename TEXT NOT NULL,
+        type TEXT NOT NULL,
+        description TEXT NOT NULL,
+        is_main INTEGER NOT NULL DEFAULT 0,
+        created_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc')),
+        updated_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc')),
+        FOREIGN KEY (property_id)
+            REFERENCES sale_residentials(property_id)
+            ON DELETE CASCADE
+    );
+
+    CREATE TABLE IF NOT EXISTS sale_residential_pdfs (
+        pdf_id TEXT NOT NULL PRIMARY KEY,
+        property_id TEXT NOT NULL,
+        filename TEXT NOT NULL,
+        thumbnail_filename TEXT NOT NULL,
+        type TEXT NOT NULL,
+        description TEXT NOT NULL,
+        is_main INTEGER NOT NULL DEFAULT 0,
+        created_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc')),
+        updated_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc')),
+        FOREIGN KEY (property_id)
+            REFERENCES sale_residentials(property_id)
+            ON DELETE CASCADE
+    );
+
+    CREATE TABLE IF NOT EXISTS sale_residential_units (
+        listing_id TEXT NOT NULL PRIMARY KEY,
+        property_id TEXT NOT NULL,
+        is_property_unit_ownership INTEGER NOT NULL DEFAULT 0,
+        name TEXT NOT NULL,
+        sale_price NUMERIC NOT NULL DEFAULT 0,
+        management_fee NUMERIC NOT NULL DEFAULT 0,
+        repair_reserve_fund NUMERIC NOT NULL DEFAULT 0,
+        ownership_type TEXT NOT NULL,
+        occupancy_status TEXT NOT NULL,
+        delivery_timing TEXT NOT NULL,
+        remarks TEXT NOT NULL,
+        created_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc')),
+        updated_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc')),
+        FOREIGN KEY (property_id)
+            REFERENCES sale_residentials(property_id)
+            ON DELETE CASCADE
+    );
+
+    CREATE TABLE IF NOT EXISTS sale_residential_unit_pictures (
+        picture_id TEXT NOT NULL PRIMARY KEY,
+        listing_id TEXT NOT NULL,
+        property_id TEXT NOT NULL,
+        filename TEXT NOT NULL,
+        type TEXT NOT NULL,
+        description TEXT NOT NULL,
+        is_main INTEGER NOT NULL DEFAULT 0,
+        created_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc')),
+        updated_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc')),
+        FOREIGN KEY (listing_id)
+            REFERENCES sale_residential_units(listing_id)
+            ON DELETE CASCADE,
+        FOREIGN KEY (property_id)
+            REFERENCES sale_residentials(property_id)
+            ON DELETE CASCADE
+    );
+
+    CREATE TABLE IF NOT EXISTS sale_residential_unit_pdfs (
+        pdf_id TEXT NOT NULL PRIMARY KEY,
+        listing_id TEXT NOT NULL,
+        property_id TEXT NOT NULL,
+        filename TEXT NOT NULL,
+        thumbnail_filename TEXT NOT NULL,
+        type TEXT NOT NULL,
+        description TEXT NOT NULL,
+        is_main INTEGER NOT NULL DEFAULT 0,
+        created_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc')),
+        updated_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc')),
+        FOREIGN KEY (listing_id)
+            REFERENCES sale_residential_units(listing_id)
+            ON DELETE CASCADE,
+        FOREIGN KEY (property_id)
+            REFERENCES sale_residentials(property_id)
+            ON DELETE CASCADE
+    );
+
+    CREATE INDEX IF NOT EXISTS ix_sale_residential_units_property_id
+        ON sale_residential_units(property_id);
+
+    CREATE INDEX IF NOT EXISTS ix_sale_residential_pictures_property_id
+        ON sale_residential_pictures(property_id);
+
+    CREATE INDEX IF NOT EXISTS ix_sale_residential_pdfs_property_id
+        ON sale_residential_pdfs(property_id);
+    """;
+
+                tableCmd.ExecuteNonQuery();
+
+                #endregion
+
+
+
+                // 
                 AddColumnsIfNotExist(connection);
 
                 tableCmd.Transaction.Commit();
@@ -2633,7 +2824,989 @@ public sealed class DataAccessService : IDataAccessService
 
     #endregion
 
-    // TODO
+    #region == Rent Commercial ==
+
+    public ResultWrapper UpsertRentCommercial(Models.Rent.Commercials.Property building)
+    {
+        var result = new ResultWrapper();
+
+        if (string.IsNullOrWhiteSpace(building.Id))
+        {
+            result.IsError = true;
+            result.Error.ErrText = "Commercial property ID is empty.";
+            return result;
+        }
+
+        _readerWriterLock.EnterWriteLock();
+
+        try
+        {
+            using var connection =
+                new SqliteConnection(connectionStringBuilder.ConnectionString);
+
+            connection.Open();
+
+            using var transaction = connection.BeginTransaction();
+            using var command = connection.CreateCommand();
+
+            command.Transaction = transaction;
+
+            command.CommandText = """
+            INSERT INTO properties (
+                property_id,
+                name,
+                property_kind,
+                thumbnail_filename,
+                loc_pref_id,
+                loc_prefecture,
+                loc_machiaza_id,
+                loc_county,
+                loc_city,
+                loc_ward,
+                loc_oaza_cho,
+                loc_choume,
+                loc_edaban,
+                loc_location_full,
+                updated_at
+            )
+            VALUES (
+                @propertyId,
+                @name,
+                @propertyKind,
+                @thumbnailFilename,
+                @locPrefId,
+                @locPrefecture,
+                @locMachiazaId,
+                @locCounty,
+                @locCity,
+                @locWard,
+                @locOazaCho,
+                @locChoume,
+                @locEdaban,
+                @locLocationFull,
+                @updatedAt
+            )
+            ON CONFLICT(property_id) DO UPDATE SET
+                name = excluded.name,
+                property_kind = excluded.property_kind,
+                thumbnail_filename = excluded.thumbnail_filename,
+                loc_pref_id = excluded.loc_pref_id,
+                loc_prefecture = excluded.loc_prefecture,
+                loc_machiaza_id = excluded.loc_machiaza_id,
+                loc_county = excluded.loc_county,
+                loc_city = excluded.loc_city,
+                loc_ward = excluded.loc_ward,
+                loc_oaza_cho = excluded.loc_oaza_cho,
+                loc_choume = excluded.loc_choume,
+                loc_edaban = excluded.loc_edaban,
+                loc_location_full = excluded.loc_location_full,
+                updated_at = excluded.updated_at;
+            """;
+
+            command.Parameters.AddWithValue("@propertyId", building.Id);
+            command.Parameters.AddWithValue("@name", building.Name);
+            command.Parameters.AddWithValue(
+                "@propertyKind",
+                EnumPropertyKind.RentCommercial.ToString());
+            command.Parameters.AddWithValue(
+                "@thumbnailFilename",
+                building.ThumbnailFilename);
+            command.Parameters.AddWithValue("@locPrefId", building.LocPrefId);
+            command.Parameters.AddWithValue(
+                "@locPrefecture",
+                building.LocPrefecture);
+            command.Parameters.AddWithValue(
+                "@locMachiazaId",
+                building.LocMachiazaId);
+            command.Parameters.AddWithValue("@locCounty", building.LocCounty);
+            command.Parameters.AddWithValue("@locCity", building.LocCity);
+            command.Parameters.AddWithValue("@locWard", building.LocWard);
+            command.Parameters.AddWithValue("@locOazaCho", building.LocOazaCho);
+            command.Parameters.AddWithValue("@locChoume", building.LocChoume);
+            command.Parameters.AddWithValue("@locEdaban", building.LocEdaban);
+            command.Parameters.AddWithValue(
+                "@locLocationFull",
+                building.LocLocationFull);
+            command.Parameters.AddWithValue(
+                "@updatedAt",
+                DateTimeOffset.UtcNow.ToString("s"));
+
+            command.ExecuteNonQuery();
+
+            command.Parameters.Clear();
+
+            command.CommandText = """
+            INSERT INTO rent_commercials (
+                property_id,
+                commercial_kind,
+                is_unit_ownership,
+                building_structure,
+                floor_count_above_ground,
+                floor_count_basement,
+                total_floor_area,
+                built_year_month,
+                fudousan_id,
+                fudousan_id_additional_code,
+                remarks,
+                updated_at
+            )
+            VALUES (
+                @propertyId,
+                @commercialKind,
+                @isUnitOwnership,
+                @buildingStructure,
+                @floorCountAboveGround,
+                @floorCountBasement,
+                @totalFloorArea,
+                @builtYearMonth,
+                @fudousanId,
+                @fudousanIdAdditionalCode,
+                @remarks,
+                @updatedAt
+            )
+            ON CONFLICT(property_id) DO UPDATE SET
+                commercial_kind = excluded.commercial_kind,
+                is_unit_ownership = excluded.is_unit_ownership,
+                building_structure = excluded.building_structure,
+                floor_count_above_ground =
+                    excluded.floor_count_above_ground,
+                floor_count_basement =
+                    excluded.floor_count_basement,
+                total_floor_area = excluded.total_floor_area,
+                built_year_month = excluded.built_year_month,
+                fudousan_id = excluded.fudousan_id,
+                fudousan_id_additional_code =
+                    excluded.fudousan_id_additional_code,
+                remarks = excluded.remarks,
+                updated_at = excluded.updated_at;
+            """;
+
+            command.Parameters.AddWithValue("@propertyId", building.Id);
+            command.Parameters.AddWithValue(
+                "@commercialKind",
+                building.CommercialKind.Key.ToString());
+            command.Parameters.AddWithValue(
+                "@isUnitOwnership",
+                building.IsUnitOwnership ? 1 : 0);
+            command.Parameters.AddWithValue(
+                "@buildingStructure",
+                building.BuildingStructure.Key.ToString());
+            command.Parameters.AddWithValue(
+                "@floorCountAboveGround",
+                building.FloorCountAboveGround);
+            command.Parameters.AddWithValue(
+                "@floorCountBasement",
+                building.FloorCountBasement);
+            command.Parameters.AddWithValue(
+                "@totalFloorArea",
+                building.TotalFloorArea);
+            command.Parameters.AddWithValue(
+                "@builtYearMonth",
+                building.BuiltYearAndMonth.ToString("s"));
+            command.Parameters.AddWithValue(
+                "@fudousanId",
+                building.FudousanId);
+            command.Parameters.AddWithValue(
+                "@fudousanIdAdditionalCode",
+                building.FudousanIdAdditionalCode);
+            command.Parameters.AddWithValue("@remarks", building.Remarks);
+            command.Parameters.AddWithValue(
+                "@updatedAt",
+                DateTimeOffset.UtcNow.ToString("s"));
+
+            result.AffectedCount = command.ExecuteNonQuery();
+
+            transaction.Commit();
+
+            building.Status = EnumEntryStatus.Saved;
+            building.IsModified = false;
+        }
+        catch (Exception ex)
+        {
+            result.IsError = true;
+            result.Error.ErrType = ErrorObject.ErrTypes.DB;
+            result.Error.ErrDescription = "Exception";
+            result.Error.ErrText = ex.Message;
+            result.Error.ErrDatetime = DateTime.Now;
+            result.Error.ErrPlace = "UpsertRentCommercial";
+            result.Error.ErrPlaceParent = "DataAccessService";
+        }
+        finally
+        {
+            _readerWriterLock.ExitWriteLock();
+        }
+
+        return result;
+    }
+
+    public PropertiesResultWrapper SelectRentCommercialsByNameKeyword(string keyword)
+    {
+        var result = new PropertiesResultWrapper();
+
+        _readerWriterLock.EnterReadLock();
+
+        try
+        {
+            using var connection =
+                new SqliteConnection(connectionStringBuilder.ConnectionString);
+
+            connection.Open();
+
+            using var command = connection.CreateCommand();
+
+            var searchAll = string.IsNullOrWhiteSpace(keyword) ||
+                            keyword.Trim() == "*";
+
+            command.CommandText = searchAll
+                ? """
+              SELECT
+                  p.property_id,
+                  p.name,
+                  p.property_kind
+              FROM rent_commercials AS c
+              INNER JOIN properties AS p
+                  ON p.property_id = c.property_id
+              WHERE p.property_kind = @propertyKind
+              ORDER BY p.name;
+              """
+                : """
+              SELECT
+                  p.property_id,
+                  p.name,
+                  p.property_kind
+              FROM rent_commercials AS c
+              INNER JOIN properties AS p
+                  ON p.property_id = c.property_id
+              WHERE p.property_kind = @propertyKind
+                AND p.name LIKE @keyword
+              ORDER BY p.name;
+              """;
+
+            command.Parameters.AddWithValue(
+                "@propertyKind",
+                EnumPropertyKind.RentCommercial.ToString());
+
+            if (!searchAll)
+            {
+                command.Parameters.AddWithValue(
+                    "@keyword",
+                    $"%{keyword.Trim()}%");
+            }
+
+            using var reader = command.ExecuteReader();
+
+            while (reader.Read())
+            {
+                var propertyId =
+                    Convert.ToString(reader["property_id"]);
+
+                if (string.IsNullOrWhiteSpace(propertyId))
+                {
+                    continue;
+                }
+
+                var item = new Models.Common.PropertySearchResultItem(
+                    propertyId,
+                    EnumPropertyKind.RentCommercial)
+                {
+                    Name = Convert.ToString(reader["name"])
+                        ?? string.Empty,
+                    IsModified = false
+                };
+
+                result.PropertySearchResult.Add(item);
+            }
+        }
+        catch (Exception ex)
+        {
+            SetDatabaseError(
+                result,
+                ex,
+                "SelectRentCommercialsByNameKeyword");
+        }
+        finally
+        {
+            _readerWriterLock.ExitReadLock();
+        }
+
+        return result;
+    }
+
+    public RentCommercialBuildingSingleResultWrapper SelectRentCommercialById(string id)
+    {
+        var result = new RentCommercialBuildingSingleResultWrapper();
+
+        if (string.IsNullOrWhiteSpace(id))
+        {
+            result.IsError = true;
+            result.Error.ErrText = "Commercial property ID is empty.";
+            return result;
+        }
+
+        _readerWriterLock.EnterReadLock();
+
+        try
+        {
+            using var connection =
+                new SqliteConnection(connectionStringBuilder.ConnectionString);
+
+            connection.Open();
+
+            using var command = connection.CreateCommand();
+
+            command.CommandText = """
+            SELECT
+                p.property_id,
+                p.name,
+                p.thumbnail_filename,
+                p.loc_pref_id,
+                p.loc_prefecture,
+                p.loc_machiaza_id,
+                p.loc_county,
+                p.loc_city,
+                p.loc_ward,
+                p.loc_oaza_cho,
+                p.loc_choume,
+                p.loc_edaban,
+                p.loc_location_full,
+                c.commercial_kind,
+                c.is_unit_ownership,
+                c.building_structure,
+                c.floor_count_above_ground,
+                c.floor_count_basement,
+                c.total_floor_area,
+                c.built_year_month,
+                c.fudousan_id,
+                c.fudousan_id_additional_code,
+                c.remarks
+            FROM rent_commercials AS c
+            INNER JOIN properties AS p
+                ON p.property_id = c.property_id
+            WHERE c.property_id = @propertyId
+              AND p.property_kind = @propertyKind;
+            """;
+
+            command.Parameters.AddWithValue("@propertyId", id);
+            command.Parameters.AddWithValue(
+                "@propertyKind",
+                EnumPropertyKind.RentCommercial.ToString());
+
+            using var reader = command.ExecuteReader();
+
+            if (!reader.Read())
+            {
+                return result;
+            }
+
+            var building =
+                new Models.Rent.Commercials.Property(
+                    Convert.ToString(reader["property_id"])!,
+                    EnumEntryStatus.Saved)
+                {
+                    Name = Convert.ToString(reader["name"]) ?? string.Empty,
+                    ThumbnailFilename =
+                        Convert.ToString(reader["thumbnail_filename"])
+                        ?? string.Empty,
+                    LocPrefId =
+                        Convert.ToString(reader["loc_pref_id"])
+                        ?? string.Empty,
+                    LocPrefecture =
+                        Convert.ToString(reader["loc_prefecture"])
+                        ?? string.Empty,
+                    LocMachiazaId =
+                        Convert.ToString(reader["loc_machiaza_id"])
+                        ?? string.Empty,
+                    LocCounty =
+                        Convert.ToString(reader["loc_county"])
+                        ?? string.Empty,
+                    LocCity =
+                        Convert.ToString(reader["loc_city"])
+                        ?? string.Empty,
+                    LocWard =
+                        Convert.ToString(reader["loc_ward"])
+                        ?? string.Empty,
+                    LocOazaCho =
+                        Convert.ToString(reader["loc_oaza_cho"])
+                        ?? string.Empty,
+                    LocChoume =
+                        Convert.ToString(reader["loc_choume"])
+                        ?? string.Empty,
+                    LocEdaban =
+                        Convert.ToString(reader["loc_edaban"])
+                        ?? string.Empty,
+                    LocLocationFull =
+                        Convert.ToString(reader["loc_location_full"])
+                        ?? string.Empty,
+                    IsUnitOwnership =
+                        Convert.ToInt32(reader["is_unit_ownership"]) != 0,
+                    FloorCountAboveGround =
+                        Convert.ToInt32(reader["floor_count_above_ground"]),
+                    FloorCountBasement =
+                        Convert.ToInt32(reader["floor_count_basement"]),
+                    TotalFloorArea =
+                        Convert.ToDecimal(reader["total_floor_area"]),
+                    FudousanId =
+                        Convert.ToString(reader["fudousan_id"])
+                        ?? string.Empty,
+                    FudousanIdAdditionalCode =
+                        Convert.ToString(reader["fudousan_id_additional_code"])
+                        ?? string.Empty,
+                    Remarks =
+                        Convert.ToString(reader["remarks"])
+                        ?? string.Empty
+                };
+
+            building.SetCommercialKindFromString(
+                Convert.ToString(reader["commercial_kind"])
+                ?? string.Empty);
+
+            building.SetStructureTypeFromString(
+                Convert.ToString(reader["building_structure"])
+                ?? string.Empty);
+
+            building.SetBuildYearMonthFromString(
+                Convert.ToString(reader["built_year_month"])
+                ?? string.Empty);
+
+            result.Building = building;
+        }
+        catch (Exception ex)
+        {
+            result.IsError = true;
+            result.Error.ErrType = ErrorObject.ErrTypes.DB;
+            result.Error.ErrDescription = "Exception";
+            result.Error.ErrText = ex.Message;
+            result.Error.ErrDatetime = DateTime.Now;
+            result.Error.ErrPlace = "SelectRentCommercialById";
+            result.Error.ErrPlaceParent = "DataAccessService";
+        }
+        finally
+        {
+            _readerWriterLock.ExitReadLock();
+        }
+
+        return result;
+    }
+
+    public ResultWrapper DeleteRentCommercial(string commercialId)
+    {
+        var result = new ResultWrapper();
+
+        if (string.IsNullOrWhiteSpace(commercialId))
+        {
+            result.IsError = true;
+            result.Error.ErrText = "Commercial property ID is empty.";
+            return result;
+        }
+
+        _readerWriterLock.EnterWriteLock();
+
+        try
+        {
+            using var connection =
+                new SqliteConnection(connectionStringBuilder.ConnectionString);
+
+            connection.Open();
+
+            using var transaction = connection.BeginTransaction();
+            using var command = connection.CreateCommand();
+
+            command.Transaction = transaction;
+            command.CommandText = """
+            DELETE FROM properties
+            WHERE property_id = @propertyId
+              AND property_kind = @propertyKind;
+            """;
+
+            command.Parameters.AddWithValue("@propertyId", commercialId);
+            command.Parameters.AddWithValue(
+                "@propertyKind",
+                EnumPropertyKind.RentCommercial.ToString());
+
+            result.AffectedCount = command.ExecuteNonQuery();
+
+            transaction.Commit();
+        }
+        catch (Exception ex)
+        {
+            SetDatabaseError(
+                result,
+                ex,
+                "DeleteRentCommercial");
+        }
+        finally
+        {
+            _readerWriterLock.ExitWriteLock();
+        }
+
+        return result;
+    }
+
+    public ResultWrapper UpsertRentCommercialListing(string commercialId,Models.Rent.Commercials.Listing.Listing room)
+    {
+        var result = new ResultWrapper();
+
+        if (string.IsNullOrWhiteSpace(commercialId) ||
+            string.IsNullOrWhiteSpace(room.Id))
+        {
+            result.IsError = true;
+            result.Error.ErrText =
+                "Commercial property or unit ID is empty.";
+            return result;
+        }
+
+        _readerWriterLock.EnterWriteLock();
+
+        try
+        {
+            using var connection =
+                new SqliteConnection(connectionStringBuilder.ConnectionString);
+
+            connection.Open();
+
+            using var transaction = connection.BeginTransaction();
+            using var command = connection.CreateCommand();
+
+            command.Transaction = transaction;
+
+            command.CommandText = """
+            UPDATE properties
+            SET updated_at = @updatedAt
+            WHERE property_id = @propertyId
+              AND property_kind = @propertyKind;
+
+            INSERT INTO rent_commercial_units (
+                listing_id,
+                property_id,
+                is_property_unit_ownership,
+                name,
+                chinryou,
+                kyoueki_fee,
+                shikikin,
+                shikikin_unit,
+                reikin,
+                reikin_unit,
+                renewal_fee,
+                renewal_fee_unit,
+                recontract_fee,
+                recontract_fee_unit,
+                floor_area,
+                usage,
+                business_hours,
+                parking_available,
+                other_conditions,
+                remarks,
+                updated_at
+            )
+            VALUES (
+                @listingId,
+                @propertyId,
+                @isUnitOwnership,
+                @name,
+                @chinryou,
+                @kyouekiFee,
+                @shikikin,
+                @shikikinUnit,
+                @reikin,
+                @reikinUnit,
+                @renewalFee,
+                @renewalFeeUnit,
+                @recontractFee,
+                @recontractFeeUnit,
+                @floorArea,
+                @usage,
+                @businessHours,
+                @parkingAvailable,
+                @otherConditions,
+                @remarks,
+                @updatedAt
+            )
+            ON CONFLICT(listing_id) DO UPDATE SET
+                property_id = excluded.property_id,
+                is_property_unit_ownership =
+                    excluded.is_property_unit_ownership,
+                name = excluded.name,
+                chinryou = excluded.chinryou,
+                kyoueki_fee = excluded.kyoueki_fee,
+                shikikin = excluded.shikikin,
+                shikikin_unit = excluded.shikikin_unit,
+                reikin = excluded.reikin,
+                reikin_unit = excluded.reikin_unit,
+                renewal_fee = excluded.renewal_fee,
+                renewal_fee_unit = excluded.renewal_fee_unit,
+                recontract_fee = excluded.recontract_fee,
+                recontract_fee_unit = excluded.recontract_fee_unit,
+                floor_area = excluded.floor_area,
+                usage = excluded.usage,
+                business_hours = excluded.business_hours,
+                parking_available = excluded.parking_available,
+                other_conditions = excluded.other_conditions,
+                remarks = excluded.remarks,
+                updated_at = excluded.updated_at;
+            """;
+
+            command.Parameters.AddWithValue("@propertyId", commercialId);
+            command.Parameters.AddWithValue(
+                "@propertyKind",
+                EnumPropertyKind.RentCommercial.ToString());
+            command.Parameters.AddWithValue(
+                "@updatedAt",
+                DateTimeOffset.UtcNow.ToString("s"));
+            command.Parameters.AddWithValue("@listingId", room.Id);
+            command.Parameters.AddWithValue(
+                "@isUnitOwnership",
+                room.IsPropertyUnitOwnership ? 1 : 0);
+            command.Parameters.AddWithValue("@name", room.Name);
+            command.Parameters.AddWithValue("@chinryou", room.Chinryou);
+            command.Parameters.AddWithValue(
+                "@kyouekiFee",
+                room.KyouekiFee);
+            command.Parameters.AddWithValue("@shikikin", room.Shikikin);
+            command.Parameters.AddWithValue(
+                "@shikikinUnit",
+                room.ShikikinUnit);
+            command.Parameters.AddWithValue("@reikin", room.Reikin);
+            command.Parameters.AddWithValue(
+                "@reikinUnit",
+                room.ReikinUnit);
+            command.Parameters.AddWithValue(
+                "@renewalFee",
+                room.RenewalFee);
+            command.Parameters.AddWithValue(
+                "@renewalFeeUnit",
+                room.RenewalFeeUnit);
+            command.Parameters.AddWithValue(
+                "@recontractFee",
+                room.RecontractFee);
+            command.Parameters.AddWithValue(
+                "@recontractFeeUnit",
+                room.RecontractFeeUnit);
+            command.Parameters.AddWithValue(
+                "@floorArea",
+                room.FloorArea);
+            command.Parameters.AddWithValue("@usage", room.Usage);
+            command.Parameters.AddWithValue(
+                "@businessHours",
+                room.BusinessHours);
+            command.Parameters.AddWithValue(
+                "@parkingAvailable",
+                room.ParkingAvailable ? 1 : 0);
+            command.Parameters.AddWithValue(
+                "@otherConditions",
+                room.OtherConditions);
+            command.Parameters.AddWithValue("@remarks", room.Remarks);
+
+            result.AffectedCount = command.ExecuteNonQuery();
+
+            transaction.Commit();
+
+            room.Status = EnumEntryStatus.Saved;
+            room.PropertyStatus = EnumEntryStatus.Saved;
+            room.IsModified = false;
+        }
+        catch (Exception ex)
+        {
+            SetDatabaseError(
+                result,
+                ex,
+                "UpsertRentCommercialListing");
+        }
+        finally
+        {
+            _readerWriterLock.ExitWriteLock();
+        }
+
+        return result;
+    }
+
+    public ListingsResultWrapper SelectRentCommercialListings()
+    {
+        var result = new ListingsResultWrapper();
+
+        _readerWriterLock.EnterReadLock();
+
+        try
+        {
+            using var connection =
+                new SqliteConnection(connectionStringBuilder.ConnectionString);
+
+            connection.Open();
+
+            using var command = connection.CreateCommand();
+
+            command.CommandText = """
+            SELECT
+                p.property_id,
+                p.name AS property_name,
+                u.listing_id,
+                u.name AS unit_name
+            FROM rent_commercial_units AS u
+            INNER JOIN rent_commercials AS c
+                ON c.property_id = u.property_id
+            INNER JOIN properties AS p
+                ON p.property_id = u.property_id
+            WHERE p.property_kind = @propertyKind
+            ORDER BY p.name, u.name;
+            """;
+
+            command.Parameters.AddWithValue(
+                "@propertyKind",
+                EnumPropertyKind.RentCommercial.ToString());
+
+            using var reader = command.ExecuteReader();
+
+            while (reader.Read())
+            {
+                var propertyId =
+                    Convert.ToString(reader["property_id"]);
+
+                var listingId =
+                    Convert.ToString(reader["listing_id"]);
+
+                if (string.IsNullOrWhiteSpace(propertyId) ||
+                    string.IsNullOrWhiteSpace(listingId))
+                {
+                    continue;
+                }
+
+                var item = new Models.Common.ListingSearchResultItem(
+                    listingId,
+                    propertyId,
+                    EnumPropertyKind.RentCommercial)
+                {
+                    Name = Convert.ToString(reader["unit_name"])
+                        ?? string.Empty,
+                    PropertyName =
+                        Convert.ToString(reader["property_name"])
+                        ?? string.Empty,
+                    IsModified = false
+                };
+
+                result.ListingSearchResult.Add(item);
+            }
+        }
+        catch (Exception ex)
+        {
+            SetDatabaseError(
+                result,
+                ex,
+                "SelectRentCommercialListings");
+        }
+        finally
+        {
+            _readerWriterLock.ExitReadLock();
+        }
+
+        return result;
+    }
+
+    public RentCommercialRoomSingleResultWrapper SelectRentCommercialListingById(string commercialId,string roomId)
+    {
+        var result = new RentCommercialRoomSingleResultWrapper();
+
+        if (string.IsNullOrWhiteSpace(commercialId) ||
+            string.IsNullOrWhiteSpace(roomId))
+        {
+            result.IsError = true;
+            result.Error.ErrText =
+                "Commercial property or unit ID is empty.";
+            return result;
+        }
+
+        _readerWriterLock.EnterReadLock();
+
+        try
+        {
+            using var connection =
+                new SqliteConnection(connectionStringBuilder.ConnectionString);
+
+            connection.Open();
+
+            using var command = connection.CreateCommand();
+
+            command.CommandText = """
+            SELECT
+                p.property_id,
+                p.name AS property_name,
+                u.listing_id,
+                u.is_property_unit_ownership,
+                u.name AS unit_name,
+                u.chinryou,
+                u.kyoueki_fee,
+                u.shikikin,
+                u.shikikin_unit,
+                u.reikin,
+                u.reikin_unit,
+                u.renewal_fee,
+                u.renewal_fee_unit,
+                u.recontract_fee,
+                u.recontract_fee_unit,
+                u.floor_area,
+                u.usage,
+                u.business_hours,
+                u.parking_available,
+                u.other_conditions,
+                u.remarks
+            FROM rent_commercial_units AS u
+            INNER JOIN rent_commercials AS c
+                ON c.property_id = u.property_id
+            INNER JOIN properties AS p
+                ON p.property_id = u.property_id
+            WHERE u.property_id = @propertyId
+              AND u.listing_id = @listingId
+              AND p.property_kind = @propertyKind;
+            """;
+
+            command.Parameters.AddWithValue(
+                "@propertyId",
+                commercialId);
+            command.Parameters.AddWithValue(
+                "@listingId",
+                roomId);
+            command.Parameters.AddWithValue(
+                "@propertyKind",
+                EnumPropertyKind.RentCommercial.ToString());
+
+            using var reader = command.ExecuteReader();
+
+            if (!reader.Read())
+            {
+                return result;
+            }
+
+            var propertyId =
+                Convert.ToString(reader["property_id"])
+                ?? string.Empty;
+
+            var listingId =
+                Convert.ToString(reader["listing_id"])
+                ?? string.Empty;
+
+            var propertyName =
+                Convert.ToString(reader["property_name"])
+                ?? string.Empty;
+
+            var room = new Models.Rent.Commercials.Listing.Listing(
+                listingId,
+                EnumEntryStatus.Saved,
+                propertyId,
+                EnumEntryStatus.Saved,
+                Convert.ToInt32(
+                    reader["is_property_unit_ownership"]) != 0,
+                propertyName)
+            {
+                Name = Convert.ToString(reader["unit_name"])
+                    ?? string.Empty,
+                Chinryou = Convert.ToDecimal(reader["chinryou"]),
+                KyouekiFee =
+                    Convert.ToDecimal(reader["kyoueki_fee"]),
+                Shikikin =
+                    Convert.ToDecimal(reader["shikikin"]),
+                ShikikinUnit =
+                    Convert.ToString(reader["shikikin_unit"])
+                    ?? "ヵ月",
+                Reikin =
+                    Convert.ToDecimal(reader["reikin"]),
+                ReikinUnit =
+                    Convert.ToString(reader["reikin_unit"])
+                    ?? "ヵ月",
+                RenewalFee =
+                    Convert.ToDecimal(reader["renewal_fee"]),
+                RenewalFeeUnit =
+                    Convert.ToString(reader["renewal_fee_unit"])
+                    ?? "ヵ月",
+                RecontractFee =
+                    Convert.ToDecimal(reader["recontract_fee"]),
+                RecontractFeeUnit =
+                    Convert.ToString(reader["recontract_fee_unit"])
+                    ?? "円",
+                FloorArea =
+                    Convert.ToDecimal(reader["floor_area"]),
+                Usage =
+                    Convert.ToString(reader["usage"])
+                    ?? "未指定",
+                BusinessHours =
+                    Convert.ToString(reader["business_hours"])
+                    ?? string.Empty,
+                ParkingAvailable =
+                    Convert.ToInt32(reader["parking_available"]) != 0,
+                OtherConditions =
+                    Convert.ToString(reader["other_conditions"])
+                    ?? string.Empty,
+                Remarks =
+                    Convert.ToString(reader["remarks"])
+                    ?? string.Empty,
+                IsModified = false
+            };
+
+            result.BuildingName = propertyName;
+            result.Room = room;
+        }
+        catch (Exception ex)
+        {
+            SetDatabaseError(
+                result,
+                ex,
+                "SelectRentCommercialListingById");
+        }
+        finally
+        {
+            _readerWriterLock.ExitReadLock();
+        }
+
+        return result;
+    }
+
+    public ResultWrapper DeleteRentCommercialListing(string roomId)
+    {
+        var result = new ResultWrapper();
+
+        if (string.IsNullOrWhiteSpace(roomId))
+        {
+            result.IsError = true;
+            result.Error.ErrText = "Commercial unit ID is empty.";
+            return result;
+        }
+
+        _readerWriterLock.EnterWriteLock();
+
+        try
+        {
+            using var connection =
+                new SqliteConnection(connectionStringBuilder.ConnectionString);
+
+            connection.Open();
+
+            using var command = connection.CreateCommand();
+
+            command.CommandText = """
+            DELETE FROM rent_commercial_units
+            WHERE listing_id = @listingId;
+            """;
+
+            command.Parameters.AddWithValue(
+                "@listingId",
+                roomId);
+
+            result.AffectedCount = command.ExecuteNonQuery();
+        }
+        catch (Exception ex)
+        {
+            SetDatabaseError(
+                result,
+                ex,
+                "DeleteRentCommercialListing");
+        }
+        finally
+        {
+            _readerWriterLock.ExitWriteLock();
+        }
+
+        return result;
+    }
+
+    #endregion
+
     #region == Rent Lessor ==
 
     public ResultWrapper UpsertRentLessor(Models.Base.PersonBase lessor)
@@ -3189,7 +4362,904 @@ public sealed class DataAccessService : IDataAccessService
 
     #endregion
 
-    // TODO
+    #region == Sale Residential ==
+
+    public ResultWrapper UpsertSaleResidential(Models.Sale.Residentials.Property building)
+    {
+        var res = new ResultWrapper();
+
+        if (string.IsNullOrWhiteSpace(building.Id))
+        {
+            res.IsError = true;
+            res.Error.ErrText = "Sale residential ID is empty.";
+            return res;
+        }
+
+        _readerWriterLock.EnterWriteLock();
+
+        try
+        {
+            using var connection =
+                new SqliteConnection(connectionStringBuilder.ConnectionString);
+
+            connection.Open();
+
+            using var transaction = connection.BeginTransaction();
+            using var command = connection.CreateCommand();
+
+            command.Transaction = transaction;
+
+            command.CommandText = """
+            INSERT INTO properties (
+                property_id,
+                name,
+                property_kind,
+                thumbnail_filename,
+                loc_pref_id,
+                loc_prefecture,
+                loc_machiaza_id,
+                loc_county,
+                loc_city,
+                loc_ward,
+                loc_oaza_cho,
+                loc_choume,
+                loc_edaban,
+                loc_location_full,
+                updated_at
+            )
+            VALUES (
+                @propertyId,
+                @name,
+                @propertyKind,
+                @thumbnailFilename,
+                @locPrefId,
+                @locPrefecture,
+                @locMachiazaId,
+                @locCounty,
+                @locCity,
+                @locWard,
+                @locOazaCho,
+                @locChoume,
+                @locEdaban,
+                @locLocationFull,
+                @updatedAt
+            )
+            ON CONFLICT(property_id) DO UPDATE SET
+                name = excluded.name,
+                property_kind = excluded.property_kind,
+                thumbnail_filename = excluded.thumbnail_filename,
+                loc_pref_id = excluded.loc_pref_id,
+                loc_prefecture = excluded.loc_prefecture,
+                loc_machiaza_id = excluded.loc_machiaza_id,
+                loc_county = excluded.loc_county,
+                loc_city = excluded.loc_city,
+                loc_ward = excluded.loc_ward,
+                loc_oaza_cho = excluded.loc_oaza_cho,
+                loc_choume = excluded.loc_choume,
+                loc_edaban = excluded.loc_edaban,
+                loc_location_full = excluded.loc_location_full,
+                updated_at = excluded.updated_at;
+            """;
+
+            command.Parameters.AddWithValue("@propertyId", building.Id);
+            command.Parameters.AddWithValue("@name", building.Name);
+            command.Parameters.AddWithValue(
+                "@propertyKind",
+                building.PropertyKind.ToString());
+            command.Parameters.AddWithValue(
+                "@thumbnailFilename",
+                building.ThumbnailFilename);
+            command.Parameters.AddWithValue("@locPrefId", building.LocPrefId);
+            command.Parameters.AddWithValue(
+                "@locPrefecture",
+                building.LocPrefecture);
+            command.Parameters.AddWithValue(
+                "@locMachiazaId",
+                building.LocMachiazaId);
+            command.Parameters.AddWithValue("@locCounty", building.LocCounty);
+            command.Parameters.AddWithValue("@locCity", building.LocCity);
+            command.Parameters.AddWithValue("@locWard", building.LocWard);
+            command.Parameters.AddWithValue("@locOazaCho", building.LocOazaCho);
+            command.Parameters.AddWithValue("@locChoume", building.LocChoume);
+            command.Parameters.AddWithValue("@locEdaban", building.LocEdaban);
+            command.Parameters.AddWithValue(
+                "@locLocationFull",
+                building.LocLocationFull);
+            command.Parameters.AddWithValue(
+                "@updatedAt",
+                DateTimeOffset.UtcNow.ToString("s"));
+
+            command.ExecuteNonQuery();
+
+            command.Parameters.Clear();
+
+            command.CommandText = """
+            INSERT INTO sale_residentials (
+                property_id,
+                building_kind,
+                is_unit_ownership,
+                building_structure,
+                floor_count_above_ground,
+                floor_count_basement,
+                total_unit_count,
+                built_year_month,
+                fudousan_id,
+                fudousan_id_additional_code,
+                remarks,
+                updated_at
+            )
+            VALUES (
+                @propertyId,
+                @buildingKind,
+                @isUnitOwnership,
+                @buildingStructure,
+                @floorCountAboveGround,
+                @floorCountBasement,
+                @totalUnitCount,
+                @builtYearMonth,
+                @fudousanId,
+                @fudousanIdAdditionalCode,
+                @remarks,
+                @updatedAt
+            )
+            ON CONFLICT(property_id) DO UPDATE SET
+                building_kind = excluded.building_kind,
+                is_unit_ownership = excluded.is_unit_ownership,
+                building_structure = excluded.building_structure,
+                floor_count_above_ground = excluded.floor_count_above_ground,
+                floor_count_basement = excluded.floor_count_basement,
+                total_unit_count = excluded.total_unit_count,
+                built_year_month = excluded.built_year_month,
+                fudousan_id = excluded.fudousan_id,
+                fudousan_id_additional_code =
+                    excluded.fudousan_id_additional_code,
+                remarks = excluded.remarks,
+                updated_at = excluded.updated_at;
+            """;
+
+            command.Parameters.AddWithValue("@propertyId", building.Id);
+            command.Parameters.AddWithValue(
+                "@buildingKind",
+                building.BuildingKind.Key.ToString());
+            command.Parameters.AddWithValue(
+                "@isUnitOwnership",
+                building.IsUnitOwnership ? 1 : 0);
+            command.Parameters.AddWithValue(
+                "@buildingStructure",
+                building.BuildingStructure.Key.ToString());
+            command.Parameters.AddWithValue(
+                "@floorCountAboveGround",
+                building.FloorCountAboveGround);
+            command.Parameters.AddWithValue(
+                "@floorCountBasement",
+                building.FloorCountBasement);
+            command.Parameters.AddWithValue(
+                "@totalUnitCount",
+                building.TotalUnitCount);
+            command.Parameters.AddWithValue(
+                "@builtYearMonth",
+                building.BuiltYearAndMonth.ToString("s"));
+            command.Parameters.AddWithValue(
+                "@fudousanId",
+                building.FudousanId);
+            command.Parameters.AddWithValue(
+                "@fudousanIdAdditionalCode",
+                building.FudousanIdAdditionalCode);
+            command.Parameters.AddWithValue("@remarks", building.Remarks);
+            command.Parameters.AddWithValue(
+                "@updatedAt",
+                DateTimeOffset.UtcNow.ToString("s"));
+
+            res.AffectedCount = command.ExecuteNonQuery();
+
+            transaction.Commit();
+
+            building.Status = EnumEntryStatus.Saved;
+            building.IsModified = false;
+        }
+        catch (Exception ex)
+        {
+            res.IsError = true;
+            res.Error.ErrType = ErrorObject.ErrTypes.DB;
+            res.Error.ErrDescription = "Exception";
+            res.Error.ErrText = ex.Message;
+            res.Error.ErrDatetime = DateTime.Now;
+            res.Error.ErrPlace = "UpsertSaleResidential";
+            res.Error.ErrPlaceParent = "DataAccessService";
+        }
+        finally
+        {
+            _readerWriterLock.ExitWriteLock();
+        }
+
+        return res;
+    }
+
+    public PropertiesResultWrapper SelectSaleResidentialsByNameKeyword(string keyword)
+    {
+        var result = new PropertiesResultWrapper();
+
+        _readerWriterLock.EnterReadLock();
+
+        try
+        {
+            using var connection =
+                new SqliteConnection(connectionStringBuilder.ConnectionString);
+
+            connection.Open();
+
+            using var command = connection.CreateCommand();
+
+            var searchAll = string.IsNullOrWhiteSpace(keyword) ||
+                            keyword.Trim() == "*";
+
+            command.CommandText = searchAll
+                ? """
+              SELECT
+                  p.property_id,
+                  p.name,
+                  p.property_kind
+              FROM sale_residentials AS s
+              INNER JOIN properties AS p
+                  ON p.property_id = s.property_id
+              WHERE p.property_kind = @propertyKind
+              ORDER BY p.name;
+              """
+                : """
+              SELECT
+                  p.property_id,
+                  p.name,
+                  p.property_kind
+              FROM sale_residentials AS s
+              INNER JOIN properties AS p
+                  ON p.property_id = s.property_id
+              WHERE p.property_kind = @propertyKind
+                AND p.name LIKE @keyword
+              ORDER BY p.name;
+              """;
+
+            command.Parameters.AddWithValue(
+                "@propertyKind",
+                EnumPropertyKind.SaleResidential.ToString());
+
+            if (!searchAll)
+            {
+                command.Parameters.AddWithValue(
+                    "@keyword",
+                    $"%{keyword.Trim()}%");
+            }
+
+            using var reader = command.ExecuteReader();
+
+            while (reader.Read())
+            {
+                var propertyId =
+                    Convert.ToString(reader["property_id"]);
+
+                if (string.IsNullOrWhiteSpace(propertyId))
+                {
+                    continue;
+                }
+
+                var item = new Models.Common.PropertySearchResultItem(
+                    propertyId,
+                    EnumPropertyKind.SaleResidential)
+                {
+                    Name = Convert.ToString(reader["name"]) ?? string.Empty,
+                    IsModified = false
+                };
+
+                result.PropertySearchResult.Add(item);
+            }
+        }
+        catch (Exception ex)
+        {
+            result.IsError = true;
+            result.Error.ErrType = ErrorObject.ErrTypes.DB;
+            result.Error.ErrDescription = "Exception";
+            result.Error.ErrText = ex.Message;
+            result.Error.ErrDatetime = DateTime.Now;
+            result.Error.ErrPlace =
+                "SelectSaleResidentialsByNameKeyword";
+            result.Error.ErrPlaceParent = "DataAccessService";
+        }
+        finally
+        {
+            _readerWriterLock.ExitReadLock();
+        }
+
+        return result;
+    }
+
+    public SaleResidentialBuildingSingleResultWrapper SelectSaleResidentialById(string id)
+    {
+        var res = new SaleResidentialBuildingSingleResultWrapper();
+
+        if (string.IsNullOrWhiteSpace(id))
+        {
+            res.IsError = true;
+            res.Error.ErrText = "Sale residential ID is empty.";
+            return res;
+        }
+
+        _readerWriterLock.EnterReadLock();
+
+        try
+        {
+            using var connection =
+                new SqliteConnection(connectionStringBuilder.ConnectionString);
+
+            connection.Open();
+
+            using var command = connection.CreateCommand();
+
+            command.CommandText = """
+            SELECT
+                p.property_id,
+                p.name,
+                p.thumbnail_filename,
+                p.loc_pref_id,
+                p.loc_prefecture,
+                p.loc_machiaza_id,
+                p.loc_county,
+                p.loc_city,
+                p.loc_ward,
+                p.loc_oaza_cho,
+                p.loc_choume,
+                p.loc_edaban,
+                p.loc_location_full,
+                s.building_kind,
+                s.is_unit_ownership,
+                s.building_structure,
+                s.floor_count_above_ground,
+                s.floor_count_basement,
+                s.total_unit_count,
+                s.built_year_month,
+                s.fudousan_id,
+                s.fudousan_id_additional_code,
+                s.remarks
+            FROM sale_residentials AS s
+            INNER JOIN properties AS p
+                ON p.property_id = s.property_id
+            WHERE s.property_id = @propertyId;
+            """;
+
+            command.Parameters.AddWithValue("@propertyId", id);
+
+            using var reader = command.ExecuteReader();
+
+            if (!reader.Read())
+            {
+                return res;
+            }
+
+            var building =
+                new Models.Sale.Residentials.Property(
+                    Convert.ToString(reader["property_id"])!,
+                    EnumEntryStatus.Saved)
+                {
+                    Name = Convert.ToString(reader["name"]) ?? string.Empty,
+                    ThumbnailFilename =
+                        Convert.ToString(reader["thumbnail_filename"])
+                        ?? string.Empty,
+                    LocPrefId =
+                        Convert.ToString(reader["loc_pref_id"])
+                        ?? string.Empty,
+                    LocPrefecture =
+                        Convert.ToString(reader["loc_prefecture"])
+                        ?? string.Empty,
+                    LocMachiazaId =
+                        Convert.ToString(reader["loc_machiaza_id"])
+                        ?? string.Empty,
+                    LocCounty =
+                        Convert.ToString(reader["loc_county"])
+                        ?? string.Empty,
+                    LocCity =
+                        Convert.ToString(reader["loc_city"])
+                        ?? string.Empty,
+                    LocWard =
+                        Convert.ToString(reader["loc_ward"])
+                        ?? string.Empty,
+                    LocOazaCho =
+                        Convert.ToString(reader["loc_oaza_cho"])
+                        ?? string.Empty,
+                    LocChoume =
+                        Convert.ToString(reader["loc_choume"])
+                        ?? string.Empty,
+                    LocEdaban =
+                        Convert.ToString(reader["loc_edaban"])
+                        ?? string.Empty,
+                    LocLocationFull =
+                        Convert.ToString(reader["loc_location_full"])
+                        ?? string.Empty,
+                    IsUnitOwnership =
+                        Convert.ToInt32(reader["is_unit_ownership"]) != 0,
+                    FloorCountAboveGround =
+                        Convert.ToInt32(reader["floor_count_above_ground"]),
+                    FloorCountBasement =
+                        Convert.ToInt32(reader["floor_count_basement"]),
+                    TotalUnitCount =
+                        Convert.ToInt32(reader["total_unit_count"]),
+                    FudousanId =
+                        Convert.ToString(reader["fudousan_id"])
+                        ?? string.Empty,
+                    FudousanIdAdditionalCode =
+                        Convert.ToString(reader["fudousan_id_additional_code"])
+                        ?? string.Empty,
+                    Remarks =
+                        Convert.ToString(reader["remarks"])
+                        ?? string.Empty
+                };
+
+            building.SetKindTypeFromString(
+                Convert.ToString(reader["building_kind"]) ?? string.Empty);
+
+            building.SetStructureTypeFromString(
+                Convert.ToString(reader["building_structure"]) ?? string.Empty);
+
+            building.SetBuildYearMonthFromString(
+                Convert.ToString(reader["built_year_month"]) ?? string.Empty);
+
+            res.Building = building;
+        }
+        catch (Exception ex)
+        {
+            res.IsError = true;
+            res.Error.ErrType = ErrorObject.ErrTypes.DB;
+            res.Error.ErrDescription = "Exception";
+            res.Error.ErrText = ex.Message;
+            res.Error.ErrDatetime = DateTime.Now;
+            res.Error.ErrPlace = "SelectSaleResidentialById";
+            res.Error.ErrPlaceParent = "DataAccessService";
+        }
+        finally
+        {
+            _readerWriterLock.ExitReadLock();
+        }
+
+        return res;
+    }
+
+    public ResultWrapper DeleteSaleResidential(string saleId)
+    {
+        var res = new ResultWrapper();
+
+        if (string.IsNullOrWhiteSpace(saleId))
+        {
+            res.IsError = true;
+            res.Error.ErrText = "Sale residential ID is empty.";
+            return res;
+        }
+
+        _readerWriterLock.EnterWriteLock();
+
+        try
+        {
+            using var connection =
+                new SqliteConnection(connectionStringBuilder.ConnectionString);
+
+            connection.Open();
+
+            using var transaction = connection.BeginTransaction();
+            using var command = connection.CreateCommand();
+
+            command.Transaction = transaction;
+            command.CommandText = """
+            DELETE FROM properties
+            WHERE property_id = @propertyId
+              AND property_kind = @propertyKind;
+            """;
+
+            command.Parameters.AddWithValue("@propertyId", saleId);
+            command.Parameters.AddWithValue(
+                "@propertyKind",
+                EnumPropertyKind.SaleResidential.ToString());
+
+            res.AffectedCount = command.ExecuteNonQuery();
+
+            transaction.Commit();
+        }
+        catch (Exception ex)
+        {
+            res.IsError = true;
+            res.Error.ErrType = ErrorObject.ErrTypes.DB;
+            res.Error.ErrDescription = "Exception";
+            res.Error.ErrText = ex.Message;
+            res.Error.ErrDatetime = DateTime.Now;
+            res.Error.ErrPlace = "DeleteSaleResidential";
+            res.Error.ErrPlaceParent = "DataAccessService";
+        }
+        finally
+        {
+            _readerWriterLock.ExitWriteLock();
+        }
+
+        return res;
+    }
+
+    public ResultWrapper UpsertSaleResidentialListing(string saleId,Models.Sale.Residentials.Listing.Listing room)
+    {
+        var res = new ResultWrapper();
+
+        if (string.IsNullOrWhiteSpace(saleId) ||
+            string.IsNullOrWhiteSpace(room.Id))
+        {
+            res.IsError = true;
+            res.Error.ErrText = "Sale residential or unit ID is empty.";
+            return res;
+        }
+
+        _readerWriterLock.EnterWriteLock();
+
+        try
+        {
+            using var connection =
+                new SqliteConnection(connectionStringBuilder.ConnectionString);
+
+            connection.Open();
+
+            using var transaction = connection.BeginTransaction();
+            using var command = connection.CreateCommand();
+
+            command.Transaction = transaction;
+
+            command.CommandText = """
+            UPDATE properties
+            SET updated_at = @updatedAt
+            WHERE property_id = @propertyId
+              AND property_kind = @propertyKind;
+
+            INSERT INTO sale_residential_units (
+                listing_id,
+                property_id,
+                is_property_unit_ownership,
+                name,
+                sale_price,
+                management_fee,
+                repair_reserve_fund,
+                ownership_type,
+                occupancy_status,
+                delivery_timing,
+                remarks,
+                updated_at
+            )
+            VALUES (
+                @listingId,
+                @propertyId,
+                @isUnitOwnership,
+                @name,
+                @salePrice,
+                @managementFee,
+                @repairReserveFund,
+                @ownershipType,
+                @occupancyStatus,
+                @deliveryTiming,
+                @remarks,
+                @updatedAt
+            )
+            ON CONFLICT(listing_id) DO UPDATE SET
+                property_id = excluded.property_id,
+                is_property_unit_ownership =
+                    excluded.is_property_unit_ownership,
+                name = excluded.name,
+                sale_price = excluded.sale_price,
+                management_fee = excluded.management_fee,
+                repair_reserve_fund = excluded.repair_reserve_fund,
+                ownership_type = excluded.ownership_type,
+                occupancy_status = excluded.occupancy_status,
+                delivery_timing = excluded.delivery_timing,
+                remarks = excluded.remarks,
+                updated_at = excluded.updated_at;
+            """;
+
+            command.Parameters.AddWithValue("@propertyId", saleId);
+            command.Parameters.AddWithValue(
+                "@propertyKind",
+                EnumPropertyKind.SaleResidential.ToString());
+            command.Parameters.AddWithValue(
+                "@updatedAt",
+                DateTimeOffset.UtcNow.ToString("s"));
+            command.Parameters.AddWithValue("@listingId", room.Id);
+            command.Parameters.AddWithValue(
+                "@isUnitOwnership",
+                room.IsPropertyUnitOwnership ? 1 : 0);
+            command.Parameters.AddWithValue("@name", room.Name);
+            command.Parameters.AddWithValue("@salePrice", room.SalePrice);
+            command.Parameters.AddWithValue(
+                "@managementFee",
+                room.ManagementFee);
+            command.Parameters.AddWithValue(
+                "@repairReserveFund",
+                room.RepairReserveFund);
+            command.Parameters.AddWithValue(
+                "@ownershipType",
+                room.OwnershipType);
+            command.Parameters.AddWithValue(
+                "@occupancyStatus",
+                room.OccupancyStatus);
+            command.Parameters.AddWithValue(
+                "@deliveryTiming",
+                room.DeliveryTiming);
+            command.Parameters.AddWithValue("@remarks", room.Remarks);
+
+            res.AffectedCount = command.ExecuteNonQuery();
+
+            transaction.Commit();
+
+            room.Status = EnumEntryStatus.Saved;
+            room.PropertyStatus = EnumEntryStatus.Saved;
+            room.IsModified = false;
+        }
+        catch (Exception ex)
+        {
+            res.IsError = true;
+            res.Error.ErrType = ErrorObject.ErrTypes.DB;
+            res.Error.ErrDescription = "Exception";
+            res.Error.ErrText = ex.Message;
+            res.Error.ErrDatetime = DateTime.Now;
+            res.Error.ErrPlace = "UpsertSaleResidentialListing";
+            res.Error.ErrPlaceParent = "DataAccessService";
+        }
+        finally
+        {
+            _readerWriterLock.ExitWriteLock();
+        }
+
+        return res;
+    }
+
+    public ListingsResultWrapper SelectSaleResidentialListings()
+    {
+        var res = new ListingsResultWrapper();
+
+        _readerWriterLock.EnterReadLock();
+
+        try
+        {
+            using var connection =
+                new SqliteConnection(connectionStringBuilder.ConnectionString);
+
+            connection.Open();
+
+            using var command = connection.CreateCommand();
+
+            command.CommandText = """
+            SELECT
+                p.property_id,
+                p.name AS property_name,
+                u.listing_id,
+                u.name AS unit_name
+            FROM sale_residential_units AS u
+            INNER JOIN properties AS p
+                ON p.property_id = u.property_id
+            WHERE p.property_kind = @propertyKind
+            ORDER BY p.name, u.name;
+            """;
+
+            command.Parameters.AddWithValue(
+                "@propertyKind",
+                EnumPropertyKind.SaleResidential.ToString());
+
+            using var reader = command.ExecuteReader();
+
+            while (reader.Read())
+            {
+                var propertyId =
+                    Convert.ToString(reader["property_id"]);
+
+                var listingId =
+                    Convert.ToString(reader["listing_id"]);
+
+                if (string.IsNullOrWhiteSpace(propertyId) ||
+                    string.IsNullOrWhiteSpace(listingId))
+                {
+                    continue;
+                }
+
+                var item = new Models.Common.ListingSearchResultItem(
+                    listingId,
+                    propertyId,
+                    EnumPropertyKind.SaleResidential)
+                {
+                    Name = Convert.ToString(reader["unit_name"])
+                        ?? string.Empty,
+                    PropertyName = Convert.ToString(reader["property_name"])
+                        ?? string.Empty,
+                    IsModified = false
+                };
+
+                res.ListingSearchResult.Add(item);
+            }
+        }
+        catch (Exception ex)
+        {
+            res.IsError = true;
+            res.Error.ErrType = ErrorObject.ErrTypes.DB;
+            res.Error.ErrDescription = "Exception";
+            res.Error.ErrText = ex.Message;
+            res.Error.ErrDatetime = DateTime.Now;
+            res.Error.ErrPlace = "SelectSaleResidentialListings";
+            res.Error.ErrPlaceParent = "DataAccessService";
+        }
+        finally
+        {
+            _readerWriterLock.ExitReadLock();
+        }
+
+        return res;
+    }
+
+    public ResultWrapper DeleteSaleResidentialListing(string roomId)
+    {
+        var res = new ResultWrapper();
+
+        if (string.IsNullOrWhiteSpace(roomId))
+        {
+            res.IsError = true;
+            res.Error.ErrText = "Sale residential unit ID is empty.";
+            return res;
+        }
+
+        _readerWriterLock.EnterWriteLock();
+
+        try
+        {
+            using var connection =
+                new SqliteConnection(connectionStringBuilder.ConnectionString);
+
+            connection.Open();
+
+            using var command = connection.CreateCommand();
+
+            command.CommandText = """
+            DELETE FROM sale_residential_units
+            WHERE listing_id = @listingId;
+            """;
+
+            command.Parameters.AddWithValue("@listingId", roomId);
+
+            res.AffectedCount = command.ExecuteNonQuery();
+        }
+        catch (Exception ex)
+        {
+            res.IsError = true;
+            res.Error.ErrType = ErrorObject.ErrTypes.DB;
+            res.Error.ErrDescription = "Exception";
+            res.Error.ErrText = ex.Message;
+            res.Error.ErrDatetime = DateTime.Now;
+            res.Error.ErrPlace = "DeleteSaleResidentialListing";
+            res.Error.ErrPlaceParent = "DataAccessService";
+        }
+        finally
+        {
+            _readerWriterLock.ExitWriteLock();
+        }
+
+        return res;
+    }
+
+    public SaleResidentialRoomSingleResultWrapper SelectSaleResidentialListingById(string saleId,string roomId)
+    {
+        var res = new SaleResidentialRoomSingleResultWrapper();
+
+        if (string.IsNullOrWhiteSpace(saleId) ||
+            string.IsNullOrWhiteSpace(roomId))
+        {
+            res.IsError = true;
+            res.Error.ErrText = "Sale residential or unit ID is empty.";
+            return res;
+        }
+
+        _readerWriterLock.EnterReadLock();
+
+        try
+        {
+            using var connection =
+                new SqliteConnection(connectionStringBuilder.ConnectionString);
+
+            connection.Open();
+
+            using var command = connection.CreateCommand();
+
+            command.CommandText = """
+            SELECT
+                p.property_id,
+                p.name AS property_name,
+                u.listing_id,
+                u.is_property_unit_ownership,
+                u.name AS unit_name,
+                u.sale_price,
+                u.management_fee,
+                u.repair_reserve_fund,
+                u.ownership_type,
+                u.occupancy_status,
+                u.delivery_timing,
+                u.remarks
+            FROM sale_residential_units AS u
+            INNER JOIN sale_residentials AS s
+                ON s.property_id = u.property_id
+            INNER JOIN properties AS p
+                ON p.property_id = u.property_id
+            WHERE u.property_id = @propertyId
+              AND u.listing_id = @listingId
+              AND p.property_kind = @propertyKind;
+            """;
+
+            command.Parameters.AddWithValue("@propertyId", saleId);
+            command.Parameters.AddWithValue("@listingId", roomId);
+            command.Parameters.AddWithValue(
+                "@propertyKind",
+                EnumPropertyKind.SaleResidential.ToString());
+
+            using var reader = command.ExecuteReader();
+
+            if (!reader.Read())
+            {
+                return res;
+            }
+
+            var propertyId =
+                Convert.ToString(reader["property_id"]) ?? string.Empty;
+
+            var listingId =
+                Convert.ToString(reader["listing_id"]) ?? string.Empty;
+
+            var propertyName =
+                Convert.ToString(reader["property_name"]) ?? string.Empty;
+
+            var room = new Models.Sale.Residentials.Listing.Listing(
+                listingId,
+                EnumEntryStatus.Saved,
+                propertyId,
+                EnumEntryStatus.Saved,
+                Convert.ToInt32(
+                    reader["is_property_unit_ownership"]) != 0,
+                propertyName)
+            {
+                Name = Convert.ToString(reader["unit_name"]) ?? string.Empty,
+                SalePrice = Convert.ToDecimal(reader["sale_price"]),
+                ManagementFee =
+                    Convert.ToDecimal(reader["management_fee"]),
+                RepairReserveFund =
+                    Convert.ToDecimal(reader["repair_reserve_fund"]),
+                OwnershipType =
+                    Convert.ToString(reader["ownership_type"])
+                    ?? "所有権",
+                OccupancyStatus =
+                    Convert.ToString(reader["occupancy_status"])
+                    ?? "空室",
+                DeliveryTiming =
+                    Convert.ToString(reader["delivery_timing"])
+                    ?? "相談",
+                Remarks =
+                    Convert.ToString(reader["remarks"])
+                    ?? string.Empty,
+                IsModified = false
+            };
+
+            res.BuildingName = propertyName;
+            res.Room = room;
+        }
+        catch (Exception ex)
+        {
+            res.IsError = true;
+            res.Error.ErrType = ErrorObject.ErrTypes.DB;
+            res.Error.ErrDescription = "Exception";
+            res.Error.ErrText = ex.Message;
+            res.Error.ErrDatetime = DateTime.Now;
+            res.Error.ErrPlace = "SelectSaleResidentialListingById";
+            res.Error.ErrPlaceParent = "DataAccessService";
+        }
+        finally
+        {
+            _readerWriterLock.ExitReadLock();
+        }
+
+        return res;
+    }
+
+    #endregion
+
     #region == Broker ==
 
     public ResultWrapper UpsertBroker(Models.Base.PersonBase broker)
@@ -3221,6 +5291,37 @@ public sealed class DataAccessService : IDataAccessService
     }
 
     #endregion
+
+    private static void SetDatabaseError(
+    ResultWrapperBase result,
+    Exception exception,
+    string operation)
+    {
+        result.IsError = true;
+        result.Error.ErrType = ErrorObject.ErrTypes.DB;
+        result.Error.ErrCode = "";
+        //result.Error.ErrDescription = "Exception";
+        //result.Error.ErrText = exception.Message;
+        if (exception.InnerException != null)
+        {
+            Debug.WriteLine($"{exception.InnerException.Message} {operation}");
+            result.Error.ErrDescription = "InnerException";
+            result.Error.ErrText = exception.InnerException.Message;
+        }
+        else
+        {
+            Debug.WriteLine($"{exception.Message} {operation}");
+            result.Error.ErrDescription = "Exception";
+            result.Error.ErrText = exception.Message;
+        }
+        result.Error.ErrDatetime = DateTime.Now;
+        result.Error.ErrPlace = operation;
+        result.Error.ErrPlaceParent = nameof(DataAccessService);
+
+
+
+
+    }
 
     // Unused for now
     #region == ColumnExists check ==

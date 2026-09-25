@@ -69,7 +69,8 @@ public sealed partial class CommercialSearchResultPage : Page
             return;
         }
 
-        if (container.DataContext is not Models.Common.PersonSearchResultItem searchresult)
+        // TODO:::
+        if (container.DataContext is not Models.Common.PropertySearchResultItem searchresult)
         {
             Debug.WriteLine($"Not LessorSearchResultItem. {container.DataContext?.GetType().FullName} @SearchResult_DoubleTapped");
             return;
@@ -80,9 +81,9 @@ public sealed partial class CommercialSearchResultPage : Page
             return;
         }
 
-        if (ViewModel.EditRentLessorCommand.CanExecute(searchresult))
+        if (ViewModel.EditRentCommercialCommand.CanExecute(searchresult))
         {
-            ViewModel.EditRentLessorCommand.Execute(searchresult);
+            ViewModel.EditRentCommercialCommand.Execute(searchresult);
         }
     }
 

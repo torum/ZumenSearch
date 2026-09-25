@@ -1,0 +1,78 @@
+﻿<Page
+    x:Class="ZumenSearch.Views.Sale.Residentials.ShellPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    NavigationCacheMode="Required"
+    xmlns:helpers="using:ZumenSearch.Helpers"
+    xmlns:modcommon="using:ZumenSearch.Models.Common"
+    KeyboardAcceleratorPlacementMode="Hidden"
+    mc:Ignorable="d">
+    <!--
+    <Page.KeyboardAccelerators>
+        <KeyboardAccelerator Key="Left" Modifiers="Menu" Invoked="KeyboardAccelerator_Invoked" />
+    </Page.KeyboardAccelerators>
+    -->
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0">
+            <TextBlock
+            Text="{x:Bind ViewModel.WindowTitle, Mode=OneWay}"
+            Margin="12,0"
+            VerticalAlignment="Center"
+            TextTrimming="CharacterEllipsis" />
+        </Grid>
+
+        <InfoBar
+        Grid.Row="1"
+        IsOpen="{x:Bind ViewModel.IsInfoBarErrorOpen, Mode=TwoWay}"
+        Message="{x:Bind ViewModel.InfoBarErrorMessage, Mode=OneWay}"
+        Severity="Error" />
+
+        <Grid Grid.Row="2" Margin="36,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <BreadcrumbBar
+            Grid.Column="0"
+            ItemsSource="{x:Bind ViewModel.BreadcrumbItems, Mode=OneWay}"
+            IsHitTestVisible="False">
+                <BreadcrumbBar.ItemTemplate>
+                    <DataTemplate x:DataType="modcommon:Breadcrumb">
+                        <BreadcrumbBarItem>
+                            <BreadcrumbBarItem.ContentTemplate>
+                                <DataTemplate
+                                x:DataType="modcommon:Breadcrumb">
+                                    <TextBlock
+                                    Text="{x:Bind Name}"
+                                    FontSize="28"
+                                    FontWeight="SemiBold" />
+                                </DataTemplate>
+                            </BreadcrumbBarItem.ContentTemplate>
+                        </BreadcrumbBarItem>
+                    </DataTemplate>
+                </BreadcrumbBar.ItemTemplate>
+            </BreadcrumbBar>
+
+            <Button
+            Grid.Column="1"
+            Content="保存"
+            Command="{x:Bind ViewModel.SaveCommand}"
+            Padding="24,8" />
+        </Grid>
+
+        <Frame
+        x:Name="ContentFrame"
+        Grid.Row="3"
+        Margin="0,8,0,0" />
+    </Grid>
+</Page>

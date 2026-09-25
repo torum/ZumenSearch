@@ -7,7 +7,7 @@ namespace ZumenSearch.Services.Extensions;
 public static class ServiceExtensions
 {
     // One param.
-    public static void AddGenericFactory<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TEditor, TParam>(this IServiceCollection services)
+    public static void AddGenericFactory<TParam, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TEditor>(this IServiceCollection services)
     where TEditor : class
     {
         // Just register the factory. It will handle the ActivatorUtilities internally.
@@ -15,7 +15,7 @@ public static class ServiceExtensions
     }
 
     // Two params.
-    public static void AddGenericFactory<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TEditor, TParam1, TParam2>(this IServiceCollection services)
+    public static void AddGenericFactory<TParam1, TParam2, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TEditor>(this IServiceCollection services)
     where TEditor : class
     {
         // Just register the factory. It will handle the ActivatorUtilities internally.
@@ -23,7 +23,7 @@ public static class ServiceExtensions
     }
 
     // Three params
-    public static void AddGenericFactory<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TEditor, TParam1, TParam2, TParam3>(this IServiceCollection services)
+    public static void AddGenericFactory<TParam1, TParam2, TParam3, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TEditor>(this IServiceCollection services)
     where TEditor : class
     {
         // Just register the factory. It will handle the ActivatorUtilities internally.

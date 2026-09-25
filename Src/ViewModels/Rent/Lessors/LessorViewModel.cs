@@ -77,7 +77,7 @@ public sealed partial class LessorViewModel : ObservableRecipient
 
     #endregion
 
-    // Nameは直接編集バインドしない。あとで性と名をくっつける。
+    // Nameは直接編集バインドしない。あとで性と名（または法人格）をくっつける。
     public string Name
     {
         get => field ?? string.Empty; // Ensure a non-null value is returned
