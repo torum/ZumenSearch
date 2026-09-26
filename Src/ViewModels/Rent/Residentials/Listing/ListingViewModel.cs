@@ -615,12 +615,21 @@ public sealed partial class ListingViewModel : ObservableRecipient,
         var resInsert = _dataAccessService.UpsertRentResidentialListing(_room.PropertyId, _room);
         if (resInsert.IsError)
         {
-            Debug.WriteLine("Error on UpsertRentResidentialUnit. @Save() in Residentials.MainViewModel");
-            Debug.WriteLine(resInsert.Error.ErrText + Environment.NewLine + resInsert.Error.ErrDescription + Environment.NewLine + resInsert.Error.ErrPlace + Environment.NewLine + resInsert.Error.ErrPlaceParent);
+            Debug.WriteLine(
+                resInsert.Error.Title + Environment.NewLine +
+                resInsert.Error.Message + Environment.NewLine +
+                resInsert.Error.Description + Environment.NewLine +
+                resInsert.Error.Operation + Environment.NewLine +
+                resInsert.Error.MethodName + Environment.NewLine +
+                resInsert.Error.FullDump);
+            
+            InfoBarErrorMessage =
+                resInsert.Error.Title + Environment.NewLine +
+                resInsert.Error.Message + Environment.NewLine +
+                resInsert.Error.Description + Environment.NewLine +
+                resInsert.Error.Operation + Environment.NewLine +
+                resInsert.Error.MethodName;
 
-            // TODO: fix format.
-            var errText = resInsert.Error.ErrText + Environment.NewLine + resInsert.Error.ErrDescription + Environment.NewLine + resInsert.Error.ErrPlace + Environment.NewLine + resInsert.Error.ErrPlaceParent;
-            InfoBarErrorMessage = errText;
             IsInfoBarErrorOpen = true;
 
             return false;
@@ -1254,8 +1263,13 @@ public sealed partial class ListingViewModel : ObservableRecipient,
             var res = _dataAccessService.SelectRentLessorById(lessorId);
             if (res.IsError)
             {
-                Debug.WriteLine(res.Error.ErrText + Environment.NewLine + res.Error.ErrDescription + Environment.NewLine + res.Error.ErrPlace + Environment.NewLine + res.Error.ErrPlaceParent);
-
+                Debug.WriteLine(
+                    res.Error.Title + Environment.NewLine +
+                    res.Error.Message + Environment.NewLine +
+                    res.Error.Description + Environment.NewLine +
+                    res.Error.Operation + Environment.NewLine +
+                    res.Error.MethodName + Environment.NewLine +
+                    res.Error.FullDump);
                 //ErrorMain = res.Error;
                 //IsMainErrorInfoBarVisible = true;
 

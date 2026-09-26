@@ -347,12 +347,21 @@ public sealed partial class BrokerViewModel : ObservableRecipient
         var resInsert = _dataAccessService.UpsertBroker(_broker);
         if (resInsert.IsError)
         {
-            Debug.WriteLine("Error on update. @Save in BrokerViewModel");
-            Debug.WriteLine(resInsert.Error.ErrText + Environment.NewLine + resInsert.Error.ErrDescription + Environment.NewLine + resInsert.Error.ErrPlace + Environment.NewLine + resInsert.Error.ErrPlaceParent);
+            Debug.WriteLine(
+                resInsert.Error.Title + Environment.NewLine +
+                resInsert.Error.Message + Environment.NewLine +
+                resInsert.Error.Description + Environment.NewLine +
+                resInsert.Error.Operation + Environment.NewLine +
+                resInsert.Error.MethodName + Environment.NewLine +
+                resInsert.Error.FullDump);
 
-            // TODO: fix format.
-            var errText = resInsert.Error.ErrText + Environment.NewLine + resInsert.Error.ErrDescription + Environment.NewLine + resInsert.Error.ErrPlace + Environment.NewLine + resInsert.Error.ErrPlaceParent;
-            InfoBarErrorMessage = errText;
+            InfoBarErrorMessage =
+                resInsert.Error.Title + Environment.NewLine +
+                resInsert.Error.Message + Environment.NewLine +
+                resInsert.Error.Description + Environment.NewLine +
+                resInsert.Error.Operation + Environment.NewLine +
+                resInsert.Error.MethodName;
+
             IsInfoBarErrorOpen = true;
 
         }

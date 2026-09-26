@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Globalization;
 using ZumenSearch.Models.Base;
 using ZumenSearch.Models.Common;
@@ -415,10 +416,20 @@ public sealed partial class PropertyViewModel : ObservableRecipient
 
         if (result.IsError)
         {
+            Debug.WriteLine(
+                result.Error.Title + Environment.NewLine +
+                result.Error.Message + Environment.NewLine +
+                result.Error.Description + Environment.NewLine +
+                result.Error.Operation + Environment.NewLine +
+                result.Error.MethodName + Environment.NewLine +
+                result.Error.FullDump);
+
             InfoBarErrorMessage =
-                $"{result.Error.ErrText}{Environment.NewLine}" +
-                $"{result.Error.ErrDescription}{Environment.NewLine}" +
-                $"{result.Error.ErrPlace}";
+                result.Error.Title + Environment.NewLine +
+                result.Error.Message + Environment.NewLine +
+                result.Error.Description + Environment.NewLine +
+                result.Error.Operation + Environment.NewLine +
+                result.Error.MethodName;
 
             IsInfoBarErrorOpen = true;
             return;

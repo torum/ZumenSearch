@@ -395,9 +395,15 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
             var res = _dataAccessService.InitializeDatabase(filePath);
             if (res.IsError)
             {
-                Debug.WriteLine("InitializeDatabase @InitializeDatabase in MainViewModel");
+                //Debug.WriteLine("InitializeDatabase @InitializeDatabase in MainViewModel");
 
-                Debug.WriteLine(res.Error.ErrText + Environment.NewLine + res.Error.ErrDescription + Environment.NewLine + res.Error.ErrPlace + Environment.NewLine + res.Error.ErrPlaceParent);
+                Debug.WriteLine(
+                    res.Error.Title + Environment.NewLine +
+                    res.Error.Message + Environment.NewLine +
+                    res.Error.Description + Environment.NewLine + 
+                    res.Error.Operation + Environment.NewLine +
+                    res.Error.MethodName + Environment.NewLine +
+                    res.Error.FullDump);
 
                 //ErrorMain = res.Error;
                 //IsMainErrorInfoBarVisible = true;
@@ -463,7 +469,14 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
 
         if (res.IsError)
         {
-            Debug.WriteLine(res.Error.ErrText + Environment.NewLine + res.Error.ErrDescription + Environment.NewLine + res.Error.ErrPlace + Environment.NewLine + res.Error.ErrPlaceParent);
+            Debug.WriteLine(
+                res.Error.Title + Environment.NewLine +
+                res.Error.Message + Environment.NewLine +
+                res.Error.Description + Environment.NewLine +
+                res.Error.Operation + Environment.NewLine +
+                res.Error.MethodName + Environment.NewLine +
+                res.Error.FullDump);
+
 
             //ErrorMain = res.Error;
             //IsMainErrorInfoBarVisible = true;
@@ -582,7 +595,13 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
         //var res = await Task.Run(() => _dataAccessService.SelectRentResidentialById(rentId), _cts.Token);
         if (res.IsError)
         {
-            Debug.WriteLine(res.Error.ErrText + Environment.NewLine + res.Error.ErrDescription + Environment.NewLine + res.Error.ErrPlace + Environment.NewLine + res.Error.ErrPlaceParent);
+            Debug.WriteLine(
+                res.Error.Title + Environment.NewLine +
+                res.Error.Message + Environment.NewLine +
+                res.Error.Description + Environment.NewLine +
+                res.Error.Operation + Environment.NewLine +
+                res.Error.MethodName + Environment.NewLine +
+                res.Error.FullDump);
 
             //ErrorMain = res.Error;
             //IsMainErrorInfoBarVisible = true;
@@ -689,7 +708,13 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
         //var res = await Task.Run(() => _dataAccessService.SelectRentResidentialListingById(buildingId, roomId), _cts.Token);
         if (res.IsError)
         {
-            Debug.WriteLine(res.Error.ErrText + Environment.NewLine + res.Error.ErrDescription + Environment.NewLine + res.Error.ErrPlace + Environment.NewLine + res.Error.ErrPlaceParent);
+            Debug.WriteLine(
+                res.Error.Title + Environment.NewLine +
+                res.Error.Message + Environment.NewLine +
+                res.Error.Description + Environment.NewLine +
+                res.Error.Operation + Environment.NewLine +
+                res.Error.MethodName + Environment.NewLine +
+                res.Error.FullDump);
 
             //ErrorMain = res.Error;
             //IsMainErrorInfoBarVisible = true;
@@ -766,7 +791,13 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
 
         if (res.IsError)
         {
-            Debug.WriteLine(res.Error.ErrText + Environment.NewLine + res.Error.ErrDescription + Environment.NewLine + res.Error.ErrPlace + Environment.NewLine + res.Error.ErrPlaceParent);
+            Debug.WriteLine(
+                res.Error.Title + Environment.NewLine +
+                res.Error.Message + Environment.NewLine +
+                res.Error.Description + Environment.NewLine +
+                res.Error.Operation + Environment.NewLine +
+                res.Error.MethodName + Environment.NewLine +
+                res.Error.FullDump);
 
             //ErrorMain = res.Error;
             //IsMainErrorInfoBarVisible = true;
@@ -841,7 +872,13 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
 
         if (res.IsError)
         {
-            Debug.WriteLine(res.Error.ErrText + Environment.NewLine + res.Error.ErrDescription + Environment.NewLine + res.Error.ErrPlace + Environment.NewLine + res.Error.ErrPlaceParent);
+            Debug.WriteLine(
+                res.Error.Title + Environment.NewLine +
+                res.Error.Message + Environment.NewLine +
+                res.Error.Description + Environment.NewLine +
+                res.Error.Operation + Environment.NewLine +
+                res.Error.MethodName + Environment.NewLine +
+                res.Error.FullDump);
 
             //ErrorMain = res.Error;
             //IsMainErrorInfoBarVisible = true;
@@ -883,7 +920,13 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
 
         if (res.IsError)
         {
-            Debug.WriteLine(res.Error.ErrText + Environment.NewLine + res.Error.ErrDescription + Environment.NewLine + res.Error.ErrPlace + Environment.NewLine + res.Error.ErrPlaceParent);
+            Debug.WriteLine(
+                res.Error.Title + Environment.NewLine +
+                res.Error.Message + Environment.NewLine +
+                res.Error.Description + Environment.NewLine +
+                res.Error.Operation + Environment.NewLine +
+                res.Error.MethodName + Environment.NewLine +
+                res.Error.FullDump);
 
             //ErrorMain = res.Error;
             //IsMainErrorInfoBarVisible = true;
@@ -949,7 +992,13 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
         var res = _dataAccessService.DeleteRentResidential(selectedId);
         if (res.IsError)
         {
-            Debug.WriteLine(res.Error.ErrText + Environment.NewLine + res.Error.ErrDescription + Environment.NewLine + res.Error.ErrPlace + Environment.NewLine + res.Error.ErrPlaceParent);
+            Debug.WriteLine(
+                res.Error.Title + Environment.NewLine +
+                res.Error.Message + Environment.NewLine +
+                res.Error.Description + Environment.NewLine +
+                res.Error.Operation + Environment.NewLine +
+                res.Error.MethodName + Environment.NewLine +
+                res.Error.FullDump);
 
             //ErrorMain = res.Error;
             //IsMainErrorInfoBarVisible = true;
@@ -1041,7 +1090,13 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
         var res = _dataAccessService.DeleteRentResidentialListing(selectedId);
         if (res.IsError)
         {
-            Debug.WriteLine(res.Error.ErrText + Environment.NewLine + res.Error.ErrDescription + Environment.NewLine + res.Error.ErrPlace + Environment.NewLine + res.Error.ErrPlaceParent);
+            Debug.WriteLine(
+                res.Error.Title + Environment.NewLine +
+                res.Error.Message + Environment.NewLine +
+                res.Error.Description + Environment.NewLine +
+                res.Error.Operation + Environment.NewLine +
+                res.Error.MethodName + Environment.NewLine +
+                res.Error.FullDump);
 
             //ErrorMain = res.Error;
             //IsMainErrorInfoBarVisible = true;
@@ -1118,9 +1173,12 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
         if (result.IsError)
         {
             Debug.WriteLine(
-                $"{result.Error.ErrText}{Environment.NewLine}" +
-                $"{result.Error.ErrDescription}{Environment.NewLine}" +
-                $"{result.Error.ErrPlace}");
+                result.Error.Title + Environment.NewLine +
+                result.Error.Message + Environment.NewLine +
+                result.Error.Description + Environment.NewLine +
+                result.Error.Operation + Environment.NewLine +
+                result.Error.MethodName + Environment.NewLine +
+                result.Error.FullDump);
 
             return;
         }
@@ -1185,9 +1243,12 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
         if (result.IsError || result.Building is null)
         {
             Debug.WriteLine(
-                $"{result.Error.ErrText}{Environment.NewLine}" +
-                $"{result.Error.ErrDescription}{Environment.NewLine}" +
-                $"{result.Error.ErrPlace}");
+                result.Error.Title + Environment.NewLine +
+                result.Error.Message + Environment.NewLine +
+                result.Error.Description + Environment.NewLine +
+                result.Error.Operation + Environment.NewLine +
+                result.Error.MethodName+ Environment.NewLine +
+                result.Error.FullDump);
 
             return;
         }
@@ -1239,9 +1300,12 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
         if (result.IsError)
         {
             Debug.WriteLine(
-                $"{result.Error.ErrText}{Environment.NewLine}" +
-                $"{result.Error.ErrDescription}{Environment.NewLine}" +
-                $"{result.Error.ErrPlace}");
+                result.Error.Title + Environment.NewLine +
+                result.Error.Message + Environment.NewLine +
+                result.Error.Description + Environment.NewLine +
+                result.Error.Operation + Environment.NewLine +
+                result.Error.MethodName + Environment.NewLine +
+                result.Error.FullDump);
 
             return;
         }
@@ -1318,8 +1382,13 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
 
         if (res.IsError)
         {
-            Debug.WriteLine(res.Error.ErrText + Environment.NewLine + res.Error.ErrDescription + Environment.NewLine + res.Error.ErrPlace + Environment.NewLine + res.Error.ErrPlaceParent);
-
+            Debug.WriteLine(
+                res.Error.Title + Environment.NewLine +
+                res.Error.Message + Environment.NewLine +
+                res.Error.Description + Environment.NewLine +
+                res.Error.Operation + Environment.NewLine +
+                res.Error.MethodName + Environment.NewLine +
+                res.Error.FullDump);
             //ErrorMain = res.Error;
             //IsMainErrorInfoBarVisible = true;
 
@@ -1408,8 +1477,13 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
         var res = await Task.Run(() => _dataAccessService.SelectRentLessorById(lessorId), _cts.Token);
         if (res.IsError)
         {
-            Debug.WriteLine(res.Error.ErrText + Environment.NewLine + res.Error.ErrDescription + Environment.NewLine + res.Error.ErrPlace + Environment.NewLine + res.Error.ErrPlaceParent);
-
+            Debug.WriteLine(
+                res.Error.Title + Environment.NewLine +
+                res.Error.Message + Environment.NewLine +
+                res.Error.Description + Environment.NewLine +
+                res.Error.Operation + Environment.NewLine +
+                res.Error.MethodName + Environment.NewLine +
+                res.Error.FullDump);
             //ErrorMain = res.Error;
             //IsMainErrorInfoBarVisible = true;
 
@@ -1513,8 +1587,13 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
         var res = await Task.Run(() => _dataAccessService.DeleteRentLessor(lessorId), _cts.Token);
         if (res.IsError)
         {
-            Debug.WriteLine(res.Error.ErrText + Environment.NewLine + res.Error.ErrDescription + Environment.NewLine + res.Error.ErrPlace + Environment.NewLine + res.Error.ErrPlaceParent);
-
+            Debug.WriteLine(
+                res.Error.Title + Environment.NewLine +
+                res.Error.Message + Environment.NewLine +
+                res.Error.Description + Environment.NewLine +
+                res.Error.Operation + Environment.NewLine +
+                res.Error.MethodName + Environment.NewLine +
+                res.Error.FullDump);
             //ErrorMain = res.Error;
             //IsMainErrorInfoBarVisible = true;
 
@@ -1604,9 +1683,12 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
         if (result.IsError)
         {
             Debug.WriteLine(
-                $"{result.Error.ErrText}{Environment.NewLine}" +
-                $"{result.Error.ErrDescription}{Environment.NewLine}" +
-                $"{result.Error.ErrPlace}");
+                result.Error.Title + Environment.NewLine +
+                result.Error.Message + Environment.NewLine +
+                result.Error.Description + Environment.NewLine +
+                result.Error.Operation + Environment.NewLine +
+                result.Error.MethodName + Environment.NewLine +
+                result.Error.FullDump);
 
             return;
         }
@@ -1642,9 +1724,12 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
         if (result.IsError || result.Building is null)
         {
             Debug.WriteLine(
-                $"{result.Error.ErrText}{Environment.NewLine}" +
-                $"{result.Error.ErrDescription}{Environment.NewLine}" +
-                $"{result.Error.ErrPlace}");
+                result.Error.Title + Environment.NewLine +
+                result.Error.Message + Environment.NewLine +
+                result.Error.Description + Environment.NewLine +
+                result.Error.Operation + Environment.NewLine +
+                result.Error.MethodName + Environment.NewLine +
+                result.Error.FullDump);
 
             return;
         }
@@ -1694,9 +1779,12 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
         if (result.IsError)
         {
             Debug.WriteLine(
-                $"{result.Error.ErrText}{Environment.NewLine}" +
-                $"{result.Error.ErrDescription}{Environment.NewLine}" +
-                $"{result.Error.ErrPlace}");
+                result.Error.Title + Environment.NewLine +
+                result.Error.Message + Environment.NewLine +
+                result.Error.Description + Environment.NewLine +
+                result.Error.Operation + Environment.NewLine +
+                result.Error.MethodName + Environment.NewLine +
+                result.Error.FullDump);
 
             return;
         }
@@ -1760,8 +1848,13 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
 
         if (res.IsError)
         {
-            Debug.WriteLine(res.Error.ErrText + Environment.NewLine + res.Error.ErrDescription + Environment.NewLine + res.Error.ErrPlace + Environment.NewLine + res.Error.ErrPlaceParent);
-
+            Debug.WriteLine(
+                res.Error.Title + Environment.NewLine +
+                res.Error.Message + Environment.NewLine +
+                res.Error.Description + Environment.NewLine +
+                res.Error.Operation + Environment.NewLine +
+                res.Error.MethodName + Environment.NewLine +
+                res.Error.FullDump);
             //ErrorMain = res.Error;
             //IsMainErrorInfoBarVisible = true;
 
@@ -1822,8 +1915,13 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
         var res = await Task.Run(() => _dataAccessService.SelectBrokerById(lessorId), _cts.Token);
         if (res.IsError)
         {
-            Debug.WriteLine(res.Error.ErrText + Environment.NewLine + res.Error.ErrDescription + Environment.NewLine + res.Error.ErrPlace + Environment.NewLine + res.Error.ErrPlaceParent);
-
+            Debug.WriteLine(
+                res.Error.Title + Environment.NewLine +
+                res.Error.Message + Environment.NewLine +
+                res.Error.Description + Environment.NewLine +
+                res.Error.Operation + Environment.NewLine +
+                res.Error.MethodName + Environment.NewLine +
+                res.Error.FullDump);
             //ErrorMain = res.Error;
             //IsMainErrorInfoBarVisible = true;
 
@@ -1927,9 +2025,21 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
         var res = await Task.Run(() => _dataAccessService.DeleteBroker(lessorId), _cts.Token);
         if (res.IsError)
         {
-            Debug.WriteLine(res.Error.ErrText + Environment.NewLine + res.Error.ErrDescription + Environment.NewLine + res.Error.ErrPlace + Environment.NewLine + res.Error.ErrPlaceParent);
-
-            //ErrorMain = res.Error;
+            Debug.WriteLine(
+                res.Error.Title + Environment.NewLine +
+                res.Error.Message + Environment.NewLine +
+                res.Error.Description + Environment.NewLine +
+                res.Error.Operation + Environment.NewLine +
+                res.Error.MethodName + Environment.NewLine +
+                res.Error.FullDump);
+            /*
+            InfoBarErrorMessage =
+                result.Error.Title + Environment.NewLine +
+                result.Error.Message + Environment.NewLine +
+                result.Error.Description + Environment.NewLine +
+                result.Error.Operation + Environment.NewLine +
+                result.Error.MethodName;
+            */
             //IsMainErrorInfoBarVisible = true;
 
             // TODO: Show error message to user

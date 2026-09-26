@@ -2,6 +2,7 @@
 using System.Data;
 using System.Diagnostics;
 using System.Reflection.PortableExecutable;
+using System.Transactions;
 using ZumenSearch.Helpers;
 using ZumenSearch.Models;
 using ZumenSearch.Models.Base;
@@ -15,8 +16,10 @@ namespace ZumenSearch.Services;
 // </summary>
 
 // TODO:
-// Consider implementing IDisposable to properly dispose of the ReaderWriterLockSlim and any other disposable resources used by this service.
-// Reuse code with other method.
+// * Consider implementing IDisposable to properly dispose of the ReaderWriterLockSlim and any other disposable resources used by this service.
+// * Reuse code with other method.
+// * Simplify Error handling.
+// * Create INDEX for the rest of tables.
 
 public sealed class DataAccessService : IDataAccessService
 {
@@ -403,69 +406,16 @@ public sealed class DataAccessService : IDataAccessService
 
                 tableCmd.Transaction.Commit();
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
                 tableCmd.Transaction.Rollback();
 
-                res.IsError = true;
-                res.Error.ErrType = ErrorObject.ErrTypes.DB;
-                res.Error.ErrCode = "";
-                res.Error.ErrText = e.Message;
-                res.Error.ErrDescription = "Exception while executing SQL queries";
-                res.Error.ErrDatetime = DateTime.Now;
-                res.Error.ErrPlace = "Transaction.Commit";
-                res.Error.ErrPlaceParent = "DataAccess::InitializeDatabase";
-
-                return res;
+                SetDatabaseError(res, ex, "transaction.Commit", "Failed to initialize database tables. Transaction.Rollback()", nameof(InitializeDatabase));
             }
         }
-        catch (System.Reflection.TargetInvocationException ex)
+        catch (Exception ex)
         {
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-            res.Error.ErrText = ex.Message;
-            res.Error.ErrDescription = "TargetInvocationException while connecting to a SQL database file";
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open";
-            res.Error.ErrPlaceParent = "DataAccess::InitializeDatabase";
-
-            return res;
-        }
-        catch (System.InvalidOperationException ex)
-        {
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-            res.Error.ErrText = ex.Message;
-            res.Error.ErrDescription = "InvalidOperationException while connecting to a SQL database file";
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open";
-            res.Error.ErrPlaceParent = "DataAccess::InitializeDatabase";
-
-            return res;
-        }
-        catch (Exception e)
-        {
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-
-            if (e.InnerException != null)
-            {
-                res.Error.ErrDescription = "InnerException while connecting to a SQL database file";
-                res.Error.ErrText = e.InnerException.Message;
-            }
-            else
-            {
-                res.Error.ErrDescription = "Exception while connecting to a SQL database file";
-                res.Error.ErrText = e.Message;
-            }
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open";
-            res.Error.ErrPlaceParent = "DataAccess::InitializeDatabase";
-
-            return res;
+            SetDatabaseError(res, ex, "connection.Open", "Failed to Connect to a SQLite database file", nameof(InitializeDatabase));
         }
 
         return res;
@@ -856,50 +806,9 @@ public sealed class DataAccessService : IDataAccessService
                 res.PropertySearchResult.Add(entry);
             }
         }
-        catch (System.Reflection.TargetInvocationException ex)
+        catch (Exception ex)
         {
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-            res.Error.ErrDescription = "TargetInvocationException";
-            res.Error.ErrText = ex.Message;
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
-            res.Error.ErrPlaceParent = "DataAccess::SelectRecentProperties";
-        }
-        catch (System.InvalidOperationException ex)
-        {
-            Debug.WriteLine("Opps. InvalidOperationException@DataAccess::SelectRecentProperties");
-
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-            res.Error.ErrDescription = "InvalidOperationException";
-            res.Error.ErrText = ex.Message;
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
-            res.Error.ErrPlaceParent = "DataAccess::SelectRecentProperties";
-        }
-        catch (Exception e)
-        {
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-            if (e.InnerException != null)
-            {
-                Debug.WriteLine(e.InnerException.Message + " @DataAccess::SelectRecentProperties");
-                res.Error.ErrDescription = "InnerException";
-                res.Error.ErrText = e.InnerException.Message;
-            }
-            else
-            {
-                Debug.WriteLine(e.Message + " @DataAccess::SelectRecentProperties");
-                res.Error.ErrDescription = "Exception";
-                res.Error.ErrText = e.Message;
-            }
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
-            res.Error.ErrPlaceParent = "DataAccess::SelectRecentProperties";
+            SetDatabaseError(res, ex, "connection.Open(), reader.Read()", "Failed to connect to / read a SQLite database file", nameof(SelectRecentProperties));
         }
         finally
         {
@@ -944,7 +853,7 @@ public sealed class DataAccessService : IDataAccessService
                 //cmd.CommandText = "INSERT INTO properties (property_id, name, property_kind, thumbnail_filename, loc_pref_id, loc_prefecture, loc_machiaza_id, loc_county, loc_city, loc_ward, loc_oaza_cho, loc_choume, loc_edaban, loc_location_full, updated_at) " +
                 //  "VALUES (@RentId, @Name, @PropertyKind, @Thumb, @LocPrefId, @LocPrefecture, @LocMachiazaId, @LocCounty, @LocCity, @LocWard, @LocOazaCho, @LocChoume, @LocEdaban, @LocLocationFull, @updated_at)";
                 // Upsert
-                var sqlUpsert = "INSERT INTO properties (property_id, name, property_kind, thumbnail_filename, loc_pref_id, loc_prefecture, loc_machiaza_id, loc_county, loc_city, loc_ward, loc_oaza_cho, loc_choume, loc_edaban, loc_location_full, updated_at) ";
+                var sqlUpsert = "asdf INSERT INTO properties (property_id, name, property_kind, thumbnail_filename, loc_pref_id, loc_prefecture, loc_machiaza_id, loc_county, loc_city, loc_ward, loc_oaza_cho, loc_choume, loc_edaban, loc_location_full, updated_at) ";
                 sqlUpsert += "VALUES (@propertyId, @name, @propertyKind, @thumbnailPath, @locPrefId, @locPrefecture, @locMachiazaId, @locCounty, @locCity, @locWard, @locOazaCho, @locChoume, @locEdaban, @locLocationFull, @updated_at) ";
                 sqlUpsert += "ON CONFLICT (property_id) ";
                 sqlUpsert += "DO UPDATE SET property_id = @propertyId, name = @name, property_kind = @propertyKind, thumbnail_filename = @thumbnailPath, loc_pref_id = @locPrefId, loc_prefecture = @locPrefecture, loc_machiaza_id = @locMachiazaId, loc_county = @locCounty, loc_city = @locCity, loc_ward = @locWard, loc_oaza_cho = @locOazaCho, loc_choume = @locChoume, loc_edaban = @locEdaban, loc_location_full = @locLocationFull, updated_at = @updated_at";
@@ -1405,71 +1314,17 @@ public sealed class DataAccessService : IDataAccessService
                 // commit
                 cmd.Transaction.Commit();
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
                 cmd.Transaction.Rollback();
 
-                res.IsError = true;
-                res.Error.ErrType = ErrorObject.ErrTypes.DB;
-                res.Error.ErrCode = "";
-                res.Error.ErrText = e.Message;
-                res.Error.ErrDescription = "Exception";
-                res.Error.ErrDatetime = DateTime.Now;
-                res.Error.ErrPlace = "connection.Open(),Transaction.Commit";
-                res.Error.ErrPlaceParent = "DataAccess::UpsertRentResidential";
-
+                SetDatabaseError(res, ex, "cmd.ExecuteNonQuery(), cmd.Transaction.Commit", "Failed to update database tables. Transaction.Rollback()", nameof(UpsertRentResidential));
                 return res;
             }
         }
-        catch (System.Reflection.TargetInvocationException ex)
+        catch (Exception ex)
         {
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-            res.Error.ErrText = ex.Message;
-            res.Error.ErrDescription = "TargetInvocationException";
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
-            res.Error.ErrPlaceParent = "DataAccess::UpsertRentResidential";
-
-            return res;
-        }
-        catch (System.InvalidOperationException ex)
-        {
-            Debug.WriteLine("Opps. InvalidOperationException@DataAccess::UpsertRentResidential");
-
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-            res.Error.ErrText = ex.Message;
-            res.Error.ErrDescription = "InvalidOperationException";
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
-            res.Error.ErrPlaceParent = "DataAccess::UpsertRentResidential";
-
-            return res;
-        }
-        catch (Exception e)
-        {
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-
-            if (e.InnerException != null)
-            {
-                res.Error.ErrText = e.InnerException.Message;
-                res.Error.ErrDescription = "InnerException";
-            }
-            else
-            {
-                res.Error.ErrText = e.Message;
-                res.Error.ErrDescription = "Exception";
-            }
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open(),BeginTransaction()";
-            res.Error.ErrPlaceParent = "DataAccess::UpsertRentResidential";
-
-            return res;
+            SetDatabaseError(res, ex, "connection.Open()", "Failed to connect to a SQLite database file", nameof(UpsertRentResidential));
         }
         finally
         {
@@ -1552,50 +1407,9 @@ public sealed class DataAccessService : IDataAccessService
                 res.PropertySearchResult.Add(entry);
             }
         }
-        catch (System.Reflection.TargetInvocationException ex)
+        catch (Exception ex)
         {
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-            res.Error.ErrDescription = "TargetInvocationException";
-            res.Error.ErrText = ex.Message;
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
-            res.Error.ErrPlaceParent = "DataAccess::SelectRentResidentialsByNameKeyword";
-        }
-        catch (System.InvalidOperationException ex)
-        {
-            Debug.WriteLine("Opps. InvalidOperationException@DataAccess::SelectRentResidentialsByNameKeyword");
-
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-            res.Error.ErrDescription = "InvalidOperationException";
-            res.Error.ErrText = ex.Message;
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
-            res.Error.ErrPlaceParent = "DataAccess::SelectRentResidentialsByNameKeyword";
-        }
-        catch (Exception e)
-        {
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-            if (e.InnerException != null)
-            {
-                Debug.WriteLine(e.InnerException.Message + " @DataAccess::SelectRentResidentialsByNameKeyword");
-                res.Error.ErrDescription = "InnerException";
-                res.Error.ErrText = e.InnerException.Message;
-            }
-            else
-            {
-                Debug.WriteLine(e.Message + " @DataAccess::SelectRentResidentialsByNameKeyword");
-                res.Error.ErrDescription = "Exception";
-                res.Error.ErrText = e.Message;
-            }
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
-            res.Error.ErrPlaceParent = "DataAccess::SelectRentResidentialsByNameKeyword";
+            SetDatabaseError(res, ex, "connection.Open(), reader.Read()", "Failed to connect to / read a SQLite database file", nameof(SelectRentResidentialsByNameKeyword));
         }
         finally
         {
@@ -1853,50 +1667,9 @@ public sealed class DataAccessService : IDataAccessService
 
             res.Building = entry;
         }
-        catch (System.Reflection.TargetInvocationException ex)
+        catch (Exception ex)
         {
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-            res.Error.ErrDescription = "TargetInvocationException";
-            res.Error.ErrText = ex.Message;
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
-            res.Error.ErrPlaceParent = "DataAccess::SelectRentResidentialById";
-        }
-        catch (System.InvalidOperationException ex)
-        {
-            Debug.WriteLine("Opps. InvalidOperationException@DataAccess::SelectRentResidentialById");
-
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-            res.Error.ErrDescription = "InvalidOperationException";
-            res.Error.ErrText = ex.Message;
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
-            res.Error.ErrPlaceParent = "DataAccess::SelectRentResidentialById";
-        }
-        catch (Exception e)
-        {
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-            if (e.InnerException != null)
-            {
-                Debug.WriteLine(e.InnerException.Message + " @DataAccess::SelectRentResidentialById");
-                res.Error.ErrDescription = "InnerException";
-                res.Error.ErrText = e.InnerException.Message;
-            }
-            else
-            {
-                Debug.WriteLine(e.Message + " @DataAccess::SelectRentResidentialById");
-                res.Error.ErrDescription = "Exception";
-                res.Error.ErrText = e.Message;
-            }
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
-            res.Error.ErrPlaceParent = "DataAccess::SelectRentResidentialById";
+            SetDatabaseError(res, ex, "connection.Open(), reader.Read()", "Failed to connect to / read a SQLite database file", nameof(SelectRentResidentialById));
         }
         finally
         {
@@ -2095,68 +1868,17 @@ public sealed class DataAccessService : IDataAccessService
 
                 cmd.Transaction.Commit();
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
                 cmd.Transaction.Rollback();
 
-                res.IsError = true;
-                res.Error.ErrType = ErrorObject.ErrTypes.DB;
-                res.Error.ErrCode = "";
-                res.Error.ErrText = e.Message;
-                res.Error.ErrDescription = "Exception";
-                res.Error.ErrDatetime = DateTime.Now;
-                res.Error.ErrPlace = "cmd.ExecuteNonQuery(),Transaction.Commit()";
-                res.Error.ErrPlaceParent = "DataAccess::DeleteRentResidential";
-
+                SetDatabaseError(res, ex, "cmd.ExecuteNonQuery(), cmd.Transaction.Commit", "Failed to delete database recode. Transaction.Rollback()", nameof(DeleteRentResidential));
                 return res;
             }
         }
-        catch (System.Reflection.TargetInvocationException ex)
+        catch (Exception ex)
         {
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-            res.Error.ErrText = ex.Message;
-            res.Error.ErrDescription = "TargetInvocationException";
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open(),cmd.ExecuteNonQuery()";
-            res.Error.ErrPlaceParent = "DataAccess::DeleteRentResidential";
-
-            return res;
-        }
-        catch (System.InvalidOperationException ex)
-        {
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-            res.Error.ErrText = ex.Message;
-            res.Error.ErrDescription = "InvalidOperationException";
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open(),cmd.ExecuteNonQuery()";
-            res.Error.ErrPlaceParent = "DataAccess::DeleteRentResidential";
-
-            return res;
-        }
-        catch (Exception e)
-        {
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-            if (e.InnerException != null)
-            {
-                res.Error.ErrDescription = "InnerException";
-                res.Error.ErrText = e.Message + " " + e.InnerException.Message;
-                Debug.WriteLine(e.InnerException.Message + " @DataAccess::DeleteRentResidential");
-            }
-            else
-            {
-                res.Error.ErrDescription = "Exception";
-                res.Error.ErrText = e.Message;
-                Debug.WriteLine(e.Message + " @DataAccess::DeleteRentResidential");
-            }
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open(),cmd.ExecuteNonQuery()";
-            res.Error.ErrPlaceParent = "DataAccess::DeleteRentResidential";
+            SetDatabaseError(res, ex, "Connection.Open", "Failed to Connect to a SQLite database file", nameof(DeleteRentResidential));
 
             return res;
         }
@@ -2172,7 +1894,7 @@ public sealed class DataAccessService : IDataAccessService
 
     #endregion
 
-    #region == Rent Residential Room ==
+    #region == Rent Residential Listing ==
 
     public ResultWrapper UpsertRentResidentialListing(string rentId, Models.Rent.Residentials.Listing.Listing room)
     {
@@ -2420,72 +2142,18 @@ public sealed class DataAccessService : IDataAccessService
                 // Commit
                 cmd.Transaction.Commit();
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
                 cmd.Transaction.Rollback();
 
-                Debug.WriteLine($"Exception@UpsertRentResidentialListing {e}");
-
-                res.IsError = true;
-                res.Error.ErrType = ErrorObject.ErrTypes.DB;
-                res.Error.ErrCode = "";
-                res.Error.ErrText = e.Message;
-                res.Error.ErrDescription = "Exception";
-                res.Error.ErrDatetime = DateTime.Now;
-                res.Error.ErrPlace = "connection.Open(),Transaction.Commit";
-                res.Error.ErrPlaceParent = "DataAccess::UpsertRentResidentialRoom";
+                SetDatabaseError(res, ex, "cmd.ExecuteNonQuery(), cmd.Transaction.Commit", "Failed to update database tables. Transaction.Rollback()", nameof(UpsertRentResidentialListing));
 
                 return res;
             }
         }
-        catch (System.Reflection.TargetInvocationException ex)
+        catch (Exception ex)
         {
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-            res.Error.ErrText = ex.Message;
-            res.Error.ErrDescription = "TargetInvocationException";
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
-            res.Error.ErrPlaceParent = "DataAccess::UpsertRentResidentialRoom";
-
-            return res;
-        }
-        catch (System.InvalidOperationException ex)
-        {
-            Debug.WriteLine("Opps. InvalidOperationException@DataAccess::UpsertRentResidentialRoom");
-
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-            res.Error.ErrText = ex.Message;
-            res.Error.ErrDescription = "InvalidOperationException";
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
-            res.Error.ErrPlaceParent = "DataAccess::UpsertRentResidentialRoom";
-
-            return res;
-        }
-        catch (Exception e)
-        {
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-
-            if (e.InnerException != null)
-            {
-                res.Error.ErrText = e.InnerException.Message;
-                res.Error.ErrDescription = "InnerException";
-            }
-            else
-            {
-                res.Error.ErrText = e.Message;
-                res.Error.ErrDescription = "Exception";
-            }
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open(),BeginTransaction()";
-            res.Error.ErrPlaceParent = "DataAccess::UpsertRentResidentialRoom";
-
+            SetDatabaseError(res, ex, "connection.Open", "Failed to Connect to a SQLite database file", nameof(UpsertRentResidentialListing));
             return res;
         }
         finally
@@ -2552,50 +2220,9 @@ public sealed class DataAccessService : IDataAccessService
                 res.ListingSearchResult.Add(unit);
             }
         }
-        catch (System.Reflection.TargetInvocationException ex)
+        catch (Exception ex)
         {
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-            res.Error.ErrDescription = "TargetInvocationException";
-            res.Error.ErrText = ex.Message;
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
-            res.Error.ErrPlaceParent = "DataAccess::SelectRentResidentialsByNameKeyword";
-        }
-        catch (System.InvalidOperationException ex)
-        {
-            Debug.WriteLine("Opps. InvalidOperationException@DataAccess::SelectRentResidentialsByNameKeyword");
-
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-            res.Error.ErrDescription = "InvalidOperationException";
-            res.Error.ErrText = ex.Message;
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
-            res.Error.ErrPlaceParent = "DataAccess::SelectRentResidentialsByNameKeyword";
-        }
-        catch (Exception e)
-        {
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-            if (e.InnerException != null)
-            {
-                Debug.WriteLine(e.InnerException.Message + " @DataAccess::SelectRentResidentialsByNameKeyword");
-                res.Error.ErrDescription = "InnerException";
-                res.Error.ErrText = e.InnerException.Message;
-            }
-            else
-            {
-                Debug.WriteLine(e.Message + " @DataAccess::SelectRentResidentialsByNameKeyword");
-                res.Error.ErrDescription = "Exception";
-                res.Error.ErrText = e.Message;
-            }
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
-            res.Error.ErrPlaceParent = "DataAccess::SelectRentResidentialsByNameKeyword";
+            SetDatabaseError(res, ex, "connection.Open(), reader.Read()", "Failed to connect to / read a SQLite database file", nameof(SelectRentResidentialListings));
         }
         finally
         {
@@ -2664,50 +2291,9 @@ public sealed class DataAccessService : IDataAccessService
                 }
             }
         }
-        catch (System.Reflection.TargetInvocationException ex)
+        catch (Exception ex)
         {
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-            res.Error.ErrDescription = "TargetInvocationException";
-            res.Error.ErrText = ex.Message;
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
-            res.Error.ErrPlaceParent = "DataAccess::SelectRentResidentialRoomById";
-        }
-        catch (System.InvalidOperationException ex)
-        {
-            Debug.WriteLine("Opps. InvalidOperationException@DataAccess::SelectRentResidentialRoomById");
-
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-            res.Error.ErrDescription = "InvalidOperationException";
-            res.Error.ErrText = ex.Message;
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
-            res.Error.ErrPlaceParent = "DataAccess::SelectRentResidentialRoomById";
-        }
-        catch (Exception e)
-        {
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-            if (e.InnerException != null)
-            {
-                Debug.WriteLine(e.InnerException.Message + " @DataAccess::SelectRentResidentialRoomById");
-                res.Error.ErrDescription = "InnerException";
-                res.Error.ErrText = e.InnerException.Message;
-            }
-            else
-            {
-                Debug.WriteLine(e.Message + " @DataAccess::SelectRentResidentialRoomById");
-                res.Error.ErrDescription = "Exception";
-                res.Error.ErrText = e.Message;
-            }
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
-            res.Error.ErrPlaceParent = "DataAccess::SelectRentResidentialRoomById";
+            SetDatabaseError(res, ex, "connection.Open(), reader.Read()", "Failed to connect to / read a SQLite database file", nameof(SelectRentResidentialListingById));
         }
         finally
         {
@@ -2747,69 +2333,17 @@ public sealed class DataAccessService : IDataAccessService
 
                 cmd.Transaction.Commit();
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
                 cmd.Transaction.Rollback();
 
-                res.IsError = true;
-                res.Error.ErrType = ErrorObject.ErrTypes.DB;
-                res.Error.ErrCode = "";
-                res.Error.ErrText = e.Message;
-                res.Error.ErrDescription = "Exception";
-                res.Error.ErrDatetime = DateTime.Now;
-                res.Error.ErrPlace = "cmd.ExecuteNonQuery(),Transaction.Commit()";
-                res.Error.ErrPlaceParent = "DataAccess::DeleteRentResidentialListing";
-
+                SetDatabaseError(res, ex, "cmd.ExecuteNonQuery(), cmd.Transaction.Commit", "Failed to delete database record. Transaction.Rollback()", nameof(DeleteRentResidentialListing));
                 return res;
             }
         }
-        catch (System.Reflection.TargetInvocationException ex)
+        catch (Exception ex)
         {
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-            res.Error.ErrText = ex.Message;
-            res.Error.ErrDescription = "TargetInvocationException";
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open(),cmd.ExecuteNonQuery()";
-            res.Error.ErrPlaceParent = "DataAccess::DeleteRentResidentialListing";
-
-            return res;
-        }
-        catch (System.InvalidOperationException ex)
-        {
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-            res.Error.ErrText = ex.Message;
-            res.Error.ErrDescription = "InvalidOperationException";
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open(),cmd.ExecuteNonQuery()";
-            res.Error.ErrPlaceParent = "DataAccess::DeleteRentResidentialListing";
-
-            return res;
-        }
-        catch (Exception e)
-        {
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-            if (e.InnerException != null)
-            {
-                res.Error.ErrDescription = "InnerException";
-                res.Error.ErrText = e.Message + " " + e.InnerException.Message;
-                Debug.WriteLine(e.InnerException.Message + " @DataAccess::DeleteRentResidentialListing");
-            }
-            else
-            {
-                res.Error.ErrDescription = "Exception";
-                res.Error.ErrText = e.Message;
-                Debug.WriteLine(e.Message + " @DataAccess::DeleteRentResidentialListing");
-            }
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open(),cmd.ExecuteNonQuery()";
-            res.Error.ErrPlaceParent = "DataAccess::DeleteRentResidentialListing";
-
+            SetDatabaseError(res, ex, "connection.Open(), reader.Read()", "Failed to connect to a SQLite database file", nameof(DeleteRentResidentialListing));
             return res;
         }
         finally
@@ -2833,7 +2367,8 @@ public sealed class DataAccessService : IDataAccessService
         if (string.IsNullOrWhiteSpace(building.Id))
         {
             result.IsError = true;
-            result.Error.ErrText = "Commercial property ID is empty.";
+            result.Error.Description = "Commercial property ID is empty.";
+            // TODO:
             return result;
         }
 
@@ -2845,6 +2380,8 @@ public sealed class DataAccessService : IDataAccessService
                 new SqliteConnection(connectionStringBuilder.ConnectionString);
 
             connection.Open();
+
+            // TODO: try catch Transaction.Rollback()
 
             using var transaction = connection.BeginTransaction();
             using var command = connection.CreateCommand();
@@ -3020,16 +2557,11 @@ public sealed class DataAccessService : IDataAccessService
 
             building.Status = EnumEntryStatus.Saved;
             building.IsModified = false;
+
         }
         catch (Exception ex)
         {
-            result.IsError = true;
-            result.Error.ErrType = ErrorObject.ErrTypes.DB;
-            result.Error.ErrDescription = "Exception";
-            result.Error.ErrText = ex.Message;
-            result.Error.ErrDatetime = DateTime.Now;
-            result.Error.ErrPlace = "UpsertRentCommercial";
-            result.Error.ErrPlaceParent = "DataAccessService";
+            SetDatabaseError(result, ex, "connection.Open(), cmd.ExecuteNonQuery(), cmd.Transaction.Commit", "Failed to update database tables. Transaction.Rollback()", nameof(UpsertRentCommercial));
         }
         finally
         {
@@ -3119,10 +2651,7 @@ public sealed class DataAccessService : IDataAccessService
         }
         catch (Exception ex)
         {
-            SetDatabaseError(
-                result,
-                ex,
-                "SelectRentCommercialsByNameKeyword");
+            SetDatabaseError(result, ex, "connection.Open(), reader.Read()", "Failed to connect to / read a SQLite database file", nameof(SelectRentCommercialsByNameKeyword));
         }
         finally
         {
@@ -3139,7 +2668,7 @@ public sealed class DataAccessService : IDataAccessService
         if (string.IsNullOrWhiteSpace(id))
         {
             result.IsError = true;
-            result.Error.ErrText = "Commercial property ID is empty.";
+            result.Error.Description = "Commercial property ID is empty.";
             return result;
         }
 
@@ -3272,13 +2801,7 @@ public sealed class DataAccessService : IDataAccessService
         }
         catch (Exception ex)
         {
-            result.IsError = true;
-            result.Error.ErrType = ErrorObject.ErrTypes.DB;
-            result.Error.ErrDescription = "Exception";
-            result.Error.ErrText = ex.Message;
-            result.Error.ErrDatetime = DateTime.Now;
-            result.Error.ErrPlace = "SelectRentCommercialById";
-            result.Error.ErrPlaceParent = "DataAccessService";
+            SetDatabaseError(result, ex, "connection.Open(), reader.Read()", "Failed to connect to / read a SQLite database file", nameof(SelectRentCommercialById));
         }
         finally
         {
@@ -3295,7 +2818,7 @@ public sealed class DataAccessService : IDataAccessService
         if (string.IsNullOrWhiteSpace(commercialId))
         {
             result.IsError = true;
-            result.Error.ErrText = "Commercial property ID is empty.";
+            result.Error.Description = "Commercial property ID is empty.";
             return result;
         }
 
@@ -3307,6 +2830,8 @@ public sealed class DataAccessService : IDataAccessService
                 new SqliteConnection(connectionStringBuilder.ConnectionString);
 
             connection.Open();
+
+            // try catch rollback
 
             using var transaction = connection.BeginTransaction();
             using var command = connection.CreateCommand();
@@ -3329,10 +2854,7 @@ public sealed class DataAccessService : IDataAccessService
         }
         catch (Exception ex)
         {
-            SetDatabaseError(
-                result,
-                ex,
-                "DeleteRentCommercial");
+            SetDatabaseError(result, ex, "cmd.ExecuteNonQuery(), cmd.Transaction.Commit", "Failed to delete database record. Transaction.Rollback()", nameof(DeleteRentCommercial));
         }
         finally
         {
@@ -3350,7 +2872,7 @@ public sealed class DataAccessService : IDataAccessService
             string.IsNullOrWhiteSpace(room.Id))
         {
             result.IsError = true;
-            result.Error.ErrText =
+            result.Error.Description =
                 "Commercial property or unit ID is empty.";
             return result;
         }
@@ -3363,6 +2885,8 @@ public sealed class DataAccessService : IDataAccessService
                 new SqliteConnection(connectionStringBuilder.ConnectionString);
 
             connection.Open();
+
+            // TODO: try catch rollback
 
             using var transaction = connection.BeginTransaction();
             using var command = connection.CreateCommand();
@@ -3506,10 +3030,7 @@ public sealed class DataAccessService : IDataAccessService
         }
         catch (Exception ex)
         {
-            SetDatabaseError(
-                result,
-                ex,
-                "UpsertRentCommercialListing");
+            SetDatabaseError(result, ex, "cmd.ExecuteNonQuery(), cmd.Transaction.Commit", "Failed to update database tables. Transaction.Rollback()", nameof(UpsertRentCommercialListing));
         }
         finally
         {
@@ -3587,10 +3108,7 @@ public sealed class DataAccessService : IDataAccessService
         }
         catch (Exception ex)
         {
-            SetDatabaseError(
-                result,
-                ex,
-                "SelectRentCommercialListings");
+            SetDatabaseError(result, ex, "connection.Open(), reader.Read()", "Failed to connect to / read a SQLite database file", nameof(SelectRentCommercialListings));
         }
         finally
         {
@@ -3608,7 +3126,7 @@ public sealed class DataAccessService : IDataAccessService
             string.IsNullOrWhiteSpace(roomId))
         {
             result.IsError = true;
-            result.Error.ErrText =
+            result.Error.Description =
                 "Commercial property or unit ID is empty.";
             return result;
         }
@@ -3744,10 +3262,7 @@ public sealed class DataAccessService : IDataAccessService
         }
         catch (Exception ex)
         {
-            SetDatabaseError(
-                result,
-                ex,
-                "SelectRentCommercialListingById");
+            SetDatabaseError(result, ex, "connection.Open(), reader.Read()", "Failed to connect to / read a SQLite database file", nameof(SelectRentCommercialListingById));
         }
         finally
         {
@@ -3764,7 +3279,7 @@ public sealed class DataAccessService : IDataAccessService
         if (string.IsNullOrWhiteSpace(roomId))
         {
             result.IsError = true;
-            result.Error.ErrText = "Commercial unit ID is empty.";
+            result.Error.Description = "Commercial unit ID is empty.";
             return result;
         }
 
@@ -3776,6 +3291,8 @@ public sealed class DataAccessService : IDataAccessService
                 new SqliteConnection(connectionStringBuilder.ConnectionString);
 
             connection.Open();
+
+            // TODO: try catch rollback
 
             using var command = connection.CreateCommand();
 
@@ -3792,10 +3309,7 @@ public sealed class DataAccessService : IDataAccessService
         }
         catch (Exception ex)
         {
-            SetDatabaseError(
-                result,
-                ex,
-                "DeleteRentCommercialListing");
+            SetDatabaseError(result, ex, "cmd.ExecuteNonQuery(), cmd.Transaction.Commit", "Failed to update database tables. Transaction.Rollback()", nameof(DeleteRentCommercialListing));
         }
         finally
         {
@@ -3878,71 +3392,18 @@ public sealed class DataAccessService : IDataAccessService
                 // Commit
                 cmd.Transaction.Commit();
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
                 cmd.Transaction.Rollback();
 
-                Debug.WriteLine($"Exception@UpsertRentLessor {e}");
-
-                res.IsError = true;
-                res.Error.ErrType = ErrorObject.ErrTypes.DB;
-                res.Error.ErrCode = "";
-                res.Error.ErrText = e.Message;
-                res.Error.ErrDescription = "Exception";
-                res.Error.ErrDatetime = DateTime.Now;
-                res.Error.ErrPlace = "connection.Open(),Transaction.Commit";
-                res.Error.ErrPlaceParent = "DataAccess::UpsertRentLessor";
+                SetDatabaseError(res, ex, "cmd.ExecuteNonQuery(), cmd.Transaction.Commit", "Failed to update database tables. Transaction.Rollback()", nameof(UpsertRentLessor));
 
                 return res;
             }
         }
-        catch (System.Reflection.TargetInvocationException ex)
+        catch (Exception ex)
         {
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-            res.Error.ErrText = ex.Message;
-            res.Error.ErrDescription = "TargetInvocationException";
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
-            res.Error.ErrPlaceParent = "DataAccess::UpsertRentLessor";
-
-            return res;
-        }
-        catch (System.InvalidOperationException ex)
-        {
-            Debug.WriteLine("Opps. InvalidOperationException@DataAccess::UpsertRentLessor");
-
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-            res.Error.ErrText = ex.Message;
-            res.Error.ErrDescription = "InvalidOperationException";
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
-            res.Error.ErrPlaceParent = "DataAccess::UpsertRentLessor";
-
-            return res;
-        }
-        catch (Exception e)
-        {
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-
-            if (e.InnerException != null)
-            {
-                res.Error.ErrText = e.InnerException.Message;
-                res.Error.ErrDescription = "InnerException";
-            }
-            else
-            {
-                res.Error.ErrText = e.Message;
-                res.Error.ErrDescription = "Exception";
-            }
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open(),BeginTransaction()";
-            res.Error.ErrPlaceParent = "DataAccess::UpsertRentLessor";
+            SetDatabaseError(res, ex, "connection.Open", "Failed to Connect to a SQLite database file", nameof(UpsertRentLessor));
 
             return res;
         }
@@ -4039,50 +3500,9 @@ public sealed class DataAccessService : IDataAccessService
                 res.PersonSearchResult.Add(entry);
             }
         }
-        catch (System.Reflection.TargetInvocationException ex)
+        catch (Exception ex)
         {
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-            res.Error.ErrDescription = "TargetInvocationException";
-            res.Error.ErrText = ex.Message;
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
-            res.Error.ErrPlaceParent = "DataAccess::SelectRentLessorByKeyword";
-        }
-        catch (System.InvalidOperationException ex)
-        {
-            Debug.WriteLine("Opps. InvalidOperationException@DataAccess::SelectRentLessorByKeyword");
-
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-            res.Error.ErrDescription = "InvalidOperationException";
-            res.Error.ErrText = ex.Message;
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
-            res.Error.ErrPlaceParent = "DataAccess::SelectRentLessorByKeyword";
-        }
-        catch (Exception e)
-        {
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-            if (e.InnerException != null)
-            {
-                Debug.WriteLine(e.InnerException.Message + " @DataAccess::SelectRentLessorByKeyword");
-                res.Error.ErrDescription = "InnerException";
-                res.Error.ErrText = e.InnerException.Message;
-            }
-            else
-            {
-                Debug.WriteLine(e.Message + " @DataAccess::SelectRentLessorByKeyword");
-                res.Error.ErrDescription = "Exception";
-                res.Error.ErrText = e.Message;
-            }
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
-            res.Error.ErrPlaceParent = "DataAccess::SelectRentLessorByKeyword";
+            SetDatabaseError(res, ex, "connection.Open(), reader.Read()", "Failed to connect to / read a SQLite database file", nameof(SelectRentLessorsByKeyword));
         }
         finally
         {
@@ -4143,50 +3563,9 @@ public sealed class DataAccessService : IDataAccessService
 
             res.Person = entry;
         }
-        catch (System.Reflection.TargetInvocationException ex)
+        catch (Exception ex)
         {
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-            res.Error.ErrDescription = "TargetInvocationException";
-            res.Error.ErrText = ex.Message;
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
-            res.Error.ErrPlaceParent = "DataAccess::SelectRentLessorById";
-        }
-        catch (System.InvalidOperationException ex)
-        {
-            Debug.WriteLine("Opps. InvalidOperationException@DataAccess::SelectRentLessorById");
-
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-            res.Error.ErrDescription = "InvalidOperationException";
-            res.Error.ErrText = ex.Message;
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
-            res.Error.ErrPlaceParent = "DataAccess::SelectRentLessorById";
-        }
-        catch (Exception e)
-        {
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-            if (e.InnerException != null)
-            {
-                Debug.WriteLine(e.InnerException.Message + " @DataAccess::SelectRentLessorById");
-                res.Error.ErrDescription = "InnerException";
-                res.Error.ErrText = e.InnerException.Message;
-            }
-            else
-            {
-                Debug.WriteLine(e.Message + " @DataAccess::SelectRentLessorById");
-                res.Error.ErrDescription = "Exception";
-                res.Error.ErrText = e.Message;
-            }
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open(),ExecuteReader()";
-            res.Error.ErrPlaceParent = "DataAccess::SelectRentLessorById";
+            SetDatabaseError(res, ex, "connection.Open(), reader.Read()", "Failed to connect to / read a SQLite database file", nameof(SelectRentLessorById));
         }
         finally
         {
@@ -4285,68 +3664,18 @@ public sealed class DataAccessService : IDataAccessService
 
                 cmd.Transaction.Commit();
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
                 cmd.Transaction.Rollback();
 
-                res.IsError = true;
-                res.Error.ErrType = ErrorObject.ErrTypes.DB;
-                res.Error.ErrCode = "";
-                res.Error.ErrText = e.Message;
-                res.Error.ErrDescription = "Exception";
-                res.Error.ErrDatetime = DateTime.Now;
-                res.Error.ErrPlace = "cmd.ExecuteNonQuery(),Transaction.Commit()";
-                res.Error.ErrPlaceParent = "DataAccess::DeleteRentLessor";
+                SetDatabaseError(res, ex, "cmd.ExecuteNonQuery(), cmd.Transaction.Commit", "Failed to delete database record. Transaction.Rollback()", nameof(DeleteRentLessor));
 
                 return res;
             }
         }
-        catch (System.Reflection.TargetInvocationException ex)
+        catch (Exception ex)
         {
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-            res.Error.ErrText = ex.Message;
-            res.Error.ErrDescription = "TargetInvocationException";
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open(),cmd.ExecuteNonQuery()";
-            res.Error.ErrPlaceParent = "DataAccess::DeleteRentLessor";
-
-            return res;
-        }
-        catch (System.InvalidOperationException ex)
-        {
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-            res.Error.ErrText = ex.Message;
-            res.Error.ErrDescription = "InvalidOperationException";
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open(),cmd.ExecuteNonQuery()";
-            res.Error.ErrPlaceParent = "DataAccess::DeleteRentLessor";
-
-            return res;
-        }
-        catch (Exception e)
-        {
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrCode = "";
-            if (e.InnerException != null)
-            {
-                res.Error.ErrDescription = "InnerException";
-                res.Error.ErrText = e.Message + " " + e.InnerException.Message;
-                Debug.WriteLine(e.InnerException.Message + " @DataAccess::DeleteRentLessor");
-            }
-            else
-            {
-                res.Error.ErrDescription = "Exception";
-                res.Error.ErrText = e.Message;
-                Debug.WriteLine(e.Message + " @DataAccess::DeleteRentLessor");
-            }
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "connection.Open(),cmd.ExecuteNonQuery()";
-            res.Error.ErrPlaceParent = "DataAccess::DeleteRentLessor";
+            SetDatabaseError(res, ex, "connection.Open(), reader.Read()", "Failed to connect to a SQLite database file", nameof(DeleteRentLessor));
 
             return res;
         }
@@ -4371,7 +3700,7 @@ public sealed class DataAccessService : IDataAccessService
         if (string.IsNullOrWhiteSpace(building.Id))
         {
             res.IsError = true;
-            res.Error.ErrText = "Sale residential ID is empty.";
+            res.Error.Description = "Sale residential ID is empty.";
             return res;
         }
 
@@ -4383,6 +3712,8 @@ public sealed class DataAccessService : IDataAccessService
                 new SqliteConnection(connectionStringBuilder.ConnectionString);
 
             connection.Open();
+
+            // TODO: try catch rollback
 
             using var transaction = connection.BeginTransaction();
             using var command = connection.CreateCommand();
@@ -4559,13 +3890,7 @@ public sealed class DataAccessService : IDataAccessService
         }
         catch (Exception ex)
         {
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrDescription = "Exception";
-            res.Error.ErrText = ex.Message;
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "UpsertSaleResidential";
-            res.Error.ErrPlaceParent = "DataAccessService";
+            SetDatabaseError(res, ex, "cmd.ExecuteNonQuery(), cmd.Transaction.Commit", "Failed to update database tables. Transaction.Rollback()", nameof(UpsertSaleResidential));
         }
         finally
         {
@@ -4654,14 +3979,7 @@ public sealed class DataAccessService : IDataAccessService
         }
         catch (Exception ex)
         {
-            result.IsError = true;
-            result.Error.ErrType = ErrorObject.ErrTypes.DB;
-            result.Error.ErrDescription = "Exception";
-            result.Error.ErrText = ex.Message;
-            result.Error.ErrDatetime = DateTime.Now;
-            result.Error.ErrPlace =
-                "SelectSaleResidentialsByNameKeyword";
-            result.Error.ErrPlaceParent = "DataAccessService";
+            SetDatabaseError(result, ex, "connection.Open(), reader.Read()", "Failed to connect to / read a SQLite database file", nameof(SelectSaleResidentialsByNameKeyword));
         }
         finally
         {
@@ -4678,7 +3996,7 @@ public sealed class DataAccessService : IDataAccessService
         if (string.IsNullOrWhiteSpace(id))
         {
             res.IsError = true;
-            res.Error.ErrText = "Sale residential ID is empty.";
+            res.Error.Description = "Sale residential ID is empty.";
             return res;
         }
 
@@ -4804,13 +4122,7 @@ public sealed class DataAccessService : IDataAccessService
         }
         catch (Exception ex)
         {
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrDescription = "Exception";
-            res.Error.ErrText = ex.Message;
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "SelectSaleResidentialById";
-            res.Error.ErrPlaceParent = "DataAccessService";
+            SetDatabaseError(res, ex, "connection.Open(), reader.Read()", "Failed to connect to / read a SQLite database file", nameof(SelectSaleResidentialById));
         }
         finally
         {
@@ -4827,7 +4139,7 @@ public sealed class DataAccessService : IDataAccessService
         if (string.IsNullOrWhiteSpace(saleId))
         {
             res.IsError = true;
-            res.Error.ErrText = "Sale residential ID is empty.";
+            res.Error.Description = "Sale residential ID is empty.";
             return res;
         }
 
@@ -4839,6 +4151,8 @@ public sealed class DataAccessService : IDataAccessService
                 new SqliteConnection(connectionStringBuilder.ConnectionString);
 
             connection.Open();
+
+            // try catch rollback
 
             using var transaction = connection.BeginTransaction();
             using var command = connection.CreateCommand();
@@ -4861,13 +4175,8 @@ public sealed class DataAccessService : IDataAccessService
         }
         catch (Exception ex)
         {
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrDescription = "Exception";
-            res.Error.ErrText = ex.Message;
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "DeleteSaleResidential";
-            res.Error.ErrPlaceParent = "DataAccessService";
+            // TODO:
+            SetDatabaseError(res, ex, "cmd.ExecuteNonQuery(), cmd.Transaction.Commit", "Failed to delete database record. Transaction.Rollback()", nameof(DeleteSaleResidential));
         }
         finally
         {
@@ -4885,7 +4194,7 @@ public sealed class DataAccessService : IDataAccessService
             string.IsNullOrWhiteSpace(room.Id))
         {
             res.IsError = true;
-            res.Error.ErrText = "Sale residential or unit ID is empty.";
+            res.Error.Description = "Sale residential or unit ID is empty.";
             return res;
         }
 
@@ -4897,6 +4206,8 @@ public sealed class DataAccessService : IDataAccessService
                 new SqliteConnection(connectionStringBuilder.ConnectionString);
 
             connection.Open();
+
+            // TODO: try catch rollback
 
             using var transaction = connection.BeginTransaction();
             using var command = connection.CreateCommand();
@@ -4992,13 +4303,8 @@ public sealed class DataAccessService : IDataAccessService
         }
         catch (Exception ex)
         {
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrDescription = "Exception";
-            res.Error.ErrText = ex.Message;
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "UpsertSaleResidentialListing";
-            res.Error.ErrPlaceParent = "DataAccessService";
+            // TODO:
+            SetDatabaseError(res, ex, "cmd.ExecuteNonQuery(), cmd.Transaction.Commit", "Failed to update database tables. Transaction.Rollback()", nameof(UpsertSaleResidentialListing));
         }
         finally
         {
@@ -5073,13 +4379,7 @@ public sealed class DataAccessService : IDataAccessService
         }
         catch (Exception ex)
         {
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrDescription = "Exception";
-            res.Error.ErrText = ex.Message;
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "SelectSaleResidentialListings";
-            res.Error.ErrPlaceParent = "DataAccessService";
+            SetDatabaseError(res, ex, "connection.Open(), reader.Read()", "Failed to connect to / read a SQLite database file", nameof(SelectSaleResidentialListings));
         }
         finally
         {
@@ -5096,7 +4396,7 @@ public sealed class DataAccessService : IDataAccessService
         if (string.IsNullOrWhiteSpace(roomId))
         {
             res.IsError = true;
-            res.Error.ErrText = "Sale residential unit ID is empty.";
+            res.Error.Description = "Sale residential unit ID is empty.";
             return res;
         }
 
@@ -5122,13 +4422,8 @@ public sealed class DataAccessService : IDataAccessService
         }
         catch (Exception ex)
         {
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrDescription = "Exception";
-            res.Error.ErrText = ex.Message;
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "DeleteSaleResidentialListing";
-            res.Error.ErrPlaceParent = "DataAccessService";
+            // TODO:
+            SetDatabaseError(res, ex, "cmd.ExecuteNonQuery(), cmd.Transaction.Commit", "Failed to delete database record. Transaction.Rollback()", nameof(DeleteSaleResidentialListing));
         }
         finally
         {
@@ -5146,7 +4441,7 @@ public sealed class DataAccessService : IDataAccessService
             string.IsNullOrWhiteSpace(roomId))
         {
             res.IsError = true;
-            res.Error.ErrText = "Sale residential or unit ID is empty.";
+            res.Error.Description = "Sale residential or unit ID is empty.";
             return res;
         }
 
@@ -5242,13 +4537,7 @@ public sealed class DataAccessService : IDataAccessService
         }
         catch (Exception ex)
         {
-            res.IsError = true;
-            res.Error.ErrType = ErrorObject.ErrTypes.DB;
-            res.Error.ErrDescription = "Exception";
-            res.Error.ErrText = ex.Message;
-            res.Error.ErrDatetime = DateTime.Now;
-            res.Error.ErrPlace = "SelectSaleResidentialListingById";
-            res.Error.ErrPlaceParent = "DataAccessService";
+            SetDatabaseError(res, ex, "connection.Open(), reader.Read()", "Failed to connect to / read a SQLite database file", nameof(SelectSaleResidentialListingById));
         }
         finally
         {
@@ -5292,34 +4581,28 @@ public sealed class DataAccessService : IDataAccessService
 
     #endregion
 
-    private static void SetDatabaseError(
-    ResultWrapperBase result,
-    Exception exception,
-    string operation)
+    private static void SetDatabaseError(ResultWrapperBase result, Exception exception, string operation, string description, string method)
     {
         result.IsError = true;
-        result.Error.ErrType = ErrorObject.ErrTypes.DB;
-        result.Error.ErrCode = "";
-        //result.Error.ErrDescription = "Exception";
-        //result.Error.ErrText = exception.Message;
+        result.Error.Type = ErrorObject.ErrTypes.DB;
+        result.Error.Code = "";
+
+        result.Error.Title = $"Error: {exception.GetType().FullName}";
+
         if (exception.InnerException != null)
         {
-            Debug.WriteLine($"{exception.InnerException.Message} {operation}");
-            result.Error.ErrDescription = "InnerException";
-            result.Error.ErrText = exception.InnerException.Message;
+            result.Error.Message = exception.InnerException.Message;
         }
         else
         {
-            Debug.WriteLine($"{exception.Message} {operation}");
-            result.Error.ErrDescription = "Exception";
-            result.Error.ErrText = exception.Message;
+            result.Error.Message = exception.Message;
         }
-        result.Error.ErrDatetime = DateTime.Now;
-        result.Error.ErrPlace = operation;
-        result.Error.ErrPlaceParent = nameof(DataAccessService);
+        result.Error.Description = description;
+        result.Error.FullDump = exception.ToString();
 
-
-
+        result.Error.OccuredAt = DateTime.Now;
+        result.Error.Operation = operation;
+        result.Error.MethodName = $"{nameof(DataAccessService)}.{method}";//$"{nameof(DataAccessService)}{exception.TargetSite?.Name}";
 
     }
 
