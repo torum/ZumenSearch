@@ -19,10 +19,7 @@ public partial class MainViewModel : ObservableRecipient,
     IRecipient<PropertyUpdatedMessage>, 
     IRecipient<ListingUpdatedMessage>,
     IRecipient<LessorUpdatedMessage>,
-    IRecipient<ListingWindowClosedMessage>, 
-    IRecipient<PropertyWindowClosedMessage>, 
-    IRecipient<LessorWindowClosedMessage>,
-    IRecipient<BrokerWindowClosedMessage>
+    IRecipient<WindowClosedMessage>
 {
     #region == Public Properties ==
 
@@ -31,17 +28,23 @@ public partial class MainViewModel : ObservableRecipient,
 
     #region == Window management ==
 
-    public readonly List<Views.Rent.Residentials.EditorWindow> BldgEditorList = [];
-    public int BldgEditorWinWidth = 1366;
-    public int BldgEditorWinHeight = 768;
-    public int BldgEditorWinLeft = 130;
-    public int BldgEditorWinTop = 130;
+    public readonly List<Views.Rent.Residentials.EditorWindow> RentResidentialEditorList = [];
+    public int RentResidentialEditorWinWidth = 1366;
+    public int RentResidentialEditorWinHeight = 768;
+    public int RentResidentialEditorWinLeft = 130;
+    public int RentResidentialEditorWinTop = 130;
 
-    public readonly List<Views.Rent.Residentials.Listing.EditorWindow> RoomEditorList = [];
-    public int RoomEditorWinWidth = 1366;
-    public int RoomEditorWinHeight = 768;
-    public int RoomEditorWinLeft = 130;
-    public int RoomEditorWinTop = 130;
+    public readonly List<Views.Rent.Residentials.Listing.EditorWindow> RentResidentialListingEditorList = [];
+    public int RentResidentialListingEditorWinWidth = 1366;
+    public int RentResidentialListingEditorWinHeight = 768;
+    public int RentResidentialListingEditorWinLeft = 130;
+    public int RentResidentialListingEditorWinTop = 130;
+
+    public readonly List<Views.Rent.Commercials.EditorWindow> RentCommercEditorList = [];
+    public int RentCommercEditorWinWidth = 1366;
+    public int RentCommercEditorWinHeight = 768;
+    public int RentCommercEditorWinLeft = 130;
+    public int RentCommercEditorWinTop = 130;
 
     public readonly List<Views.Rent.Lessors.EditorWindow> LessorEditorList = [];
     public int LessorEditorWinWidth = 1366;
@@ -347,52 +350,36 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
         }
     }
 
-    public void Receive(ListingWindowClosedMessage window)
+    public void Receive(WindowClosedMessage window)
     {
-        var ewin = window.Value;
+        var win = window.Value;
 
-        if (ewin is null)
-        {
-            return;
-        }
-        
-        this.RoomEditorList.Remove(ewin);
-    }
-
-    public void Receive(PropertyWindowClosedMessage window)
-    {
-        var ewin = window.Value;
-
-        if (ewin is null)
+        if (win is null)
         {
             return;
         }
 
-        this.BldgEditorList.Remove(ewin);
-    }
-
-    public void Receive(LessorWindowClosedMessage window)
-    {
-        var ewin = window.Value;
-
-        if (ewin is null)
+        if (win is Views.Rent.Residentials.EditorWindow rwin)
         {
-            return;
+            this.RentResidentialEditorList.Remove(rwin);
+        }
+        else if (win is Views.Rent.Residentials.Listing.EditorWindow rlwin)
+        {
+            this.RentResidentialListingEditorList.Remove(rlwin);
+        }
+        else if (win is Views.Rent.Commercials.EditorWindow cwin)
+        {
+            this.RentCommercEditorList.Remove(cwin);
+        }
+        else if (win is Views.Rent.Lessors.EditorWindow lewin)
+        {
+            this.LessorEditorList.Remove(lewin);
+        }
+        else if (win is Views.Brokers.EditorWindow bwin)
+        {
+            this.BrokerEditorList.Remove(bwin);
         }
 
-        this.LessorEditorList.Remove(ewin);
-    }
-
-    public void Receive(BrokerWindowClosedMessage window)
-    {
-        var ewin = window.Value;
-
-        if (ewin is null)
-        {
-            return;
-        }
-
-        this.BrokerEditorList.Remove(ewin);
     }
 
     #endregion
@@ -505,7 +492,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
         var newId = Guid.CreateVersion7().ToString("N");
         var shell = _shellRentResidentialPropertyFactory.Create(new Models.Rent.Residentials.Property(newId, Models.Base.EnumEntryStatus.New));
 
-        BldgEditorList.Add(shell.Window);
+        RentResidentialEditorList.Add(shell.Window);
 
         if (shell.Window.AppWindow.Presenter is OverlappedPresenter presenter)
         {
@@ -520,7 +507,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
         //var scalingFactor = (float)dpi / 96;
         //AppWindow.Resize(new Windows.Graphics.SizeInt32((int)(400.0f * scalingFactor), (int)(300.0f * scalingFactor)));
 
-        shell.Window.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(BldgEditorWinLeft, BldgEditorWinTop, BldgEditorWinWidth, BldgEditorWinHeight));
+        shell.Window.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(RentResidentialEditorWinLeft, RentResidentialEditorWinTop, RentResidentialEditorWinWidth, RentResidentialEditorWinHeight));
 
         //editorWindow.AppWindow.Show();
         shell.Window.Activate();
@@ -564,7 +551,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
         var isFound = false;
 
         // Check if the selected item is already being edited in another window.
-        BldgEditorList.ForEach(editorWindow =>
+        RentResidentialEditorList.ForEach(editorWindow =>
         {
             //Debug.WriteLine($"Checking editor window with Id: {editorWindow.Id} for selected item with Id: {rentId}");
             if (editorWindow.Id == propertyId)
@@ -620,9 +607,9 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
             return;
         }
 
-        BldgEditorList.Add(editorWindow);
+        RentResidentialEditorList.Add(editorWindow);
 
-        editorWindow.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(BldgEditorWinLeft, BldgEditorWinTop, BldgEditorWinWidth, BldgEditorWinHeight));
+        editorWindow.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(RentResidentialEditorWinLeft, RentResidentialEditorWinTop, RentResidentialEditorWinWidth, RentResidentialEditorWinHeight));
         if (editorWindow.AppWindow.Presenter is OverlappedPresenter presenter)
         {
             presenter.IsResizable = true;
@@ -671,7 +658,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
         var isFound = false;
 
         // Check if the selected item is already being edited in another window.
-        RoomEditorList.ForEach(editorWindow =>
+        RentResidentialListingEditorList.ForEach(editorWindow =>
         {
             //Debug.WriteLine($"Checking editor window with Id: {editorWindow.Id} for selected item with Id: {roomId}");
             if (editorWindow.Id == roomId)
@@ -726,9 +713,9 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
             return;
         }
 
-        RoomEditorList.Add(editorWindow);
+        RentResidentialListingEditorList.Add(editorWindow);
 
-        editorWindow.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(RoomEditorWinLeft, RoomEditorWinTop, RoomEditorWinWidth, RoomEditorWinHeight));
+        editorWindow.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(RentResidentialListingEditorWinLeft, RentResidentialListingEditorWinTop, RentResidentialListingEditorWinWidth, RentResidentialListingEditorWinHeight));
         if (editorWindow.AppWindow.Presenter is OverlappedPresenter presenter)
         {
             presenter.IsResizable = true;
@@ -932,7 +919,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
         var isFound = false;
 
         // Check if the selected item is already being edited in editor window.
-        foreach (var editorWindow in BldgEditorList.ToList())
+        foreach (var editorWindow in RentResidentialEditorList.ToList())
         {
             //Debug.WriteLine($"Checking editor window with Id: {editorWindow.Id} for selected item with Id: {selected.Id}");
             if (editorWindow.Id == selectedId)
@@ -942,8 +929,6 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
                 
                 if (editorWindow.ViewModel?.IsDirty == false)
                 {
-                    editorWindow.IsAutoClose = true;
-
                     editorWindow.Close();
                 }
                 else
@@ -1027,7 +1012,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
         var isFound = false;
 
         // Check if the selected item is already being edited in editor window.
-        foreach (var editorWindow in RoomEditorList.ToList())
+        foreach (var editorWindow in RentResidentialListingEditorList.ToList())
         {
             //Debug.WriteLine($"Checking editor window with Id: {editorWindow.Id} for selected item with Id: {selected.Id}");
             if (editorWindow.Id == selectedId)
@@ -1037,8 +1022,6 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
                 
                 if (editorWindow.ViewModel?.IsDirty == false)
                 {
-                    editorWindow.IsAutoClose = true;
-
                     editorWindow.Close();
                 }
                 else
@@ -1079,7 +1062,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
             Debug.WriteLine($"DeleteRentResidentialRoomCommand executed for {selectedId}");
 
             // Check if the selected item is already being edited in another window.
-            BldgEditorList.ForEach(editorWindow =>
+            RentResidentialEditorList.ForEach(editorWindow =>
             {
                 Debug.WriteLine($"Checking editor window with Id: {editorWindow.Id} for selected item with Id: {selectedPropertyId}");
                 if (editorWindow.Id == selectedPropertyId)
@@ -1164,8 +1147,9 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
             Guid.CreateVersion7().ToString("N"),
             Models.Base.EnumEntryStatus.New);
 
-        var shell =
-            _shellRentCommercialPropertyFactory.Create(property);
+        var shell = _shellRentCommercialPropertyFactory.Create(property);
+
+        RentCommercEditorList.Add(shell.Window);
 
         if (shell.Window.AppWindow.Presenter
             is Microsoft.UI.Windowing.OverlappedPresenter presenter)
@@ -1177,16 +1161,11 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
             presenter.PreferredMinimumHeight = 794;
         }
 
-        shell.Window.AppWindow.MoveAndResize(
-            new Windows.Graphics.RectInt32(
-                130,
-                130,
-                1366,
-                768));
+        shell.Window.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(RentCommercEditorWinLeft, RentCommercEditorWinTop, RentCommercEditorWinWidth, RentCommercEditorWinHeight));
 
+        //editorWindow.AppWindow.Show();
         shell.Window.Activate();
         shell.Window.AppWindow.MoveInZOrderAtTop();
-
     }
 
     [RelayCommand(CanExecute = nameof(EditRentCommercialCanExecute))]
@@ -1217,6 +1196,8 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
             _shellRentCommercialPropertyFactory.Create(
                 result.Building);
 
+        RentCommercEditorList.Add(shell.Window);
+
         if (shell.Window.AppWindow.Presenter
             is Microsoft.UI.Windowing.OverlappedPresenter presenter)
         {
@@ -1238,8 +1219,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
         shell.Window.AppWindow.MoveInZOrderAtTop();
     }
 
-    private static bool EditRentCommercialCanExecute(
-        Models.Common.PropertySearchResultItem? selected)
+    private static bool EditRentCommercialCanExecute(Models.Common.PropertySearchResultItem? selected)
     {
         return selected is not null &&
                !string.IsNullOrWhiteSpace(selected.Id);
@@ -1254,8 +1234,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
             return;
         }
 
-        var result =
-            _dataAccessService.DeleteRentCommercial(selected.Id);
+        var result = _dataAccessService.DeleteRentCommercial(selected.Id);
 
         if (result.IsError)
         {
@@ -1734,7 +1713,6 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
 
 
     #endregion
-
 
     #region == 宅建業者 == 
 

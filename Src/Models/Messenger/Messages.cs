@@ -61,33 +61,9 @@ public class BrokerDeletedMessage : ValueChangedMessage<string>
     }
 }
 
-public class ListingWindowClosedMessage : ValueChangedMessage<Views.Rent.Residentials.Listing.EditorWindow> 
+public class WindowClosedMessage : ValueChangedMessage<Microsoft.UI.Xaml.Window>
 {
-    public ListingWindowClosedMessage(Views.Rent.Residentials.Listing.EditorWindow value) : base(value)
-    {
-
-    }
-}
-
-public class PropertyWindowClosedMessage : ValueChangedMessage<Views.Rent.Residentials.EditorWindow>
-{
-    public PropertyWindowClosedMessage(Views.Rent.Residentials.EditorWindow value) : base(value)
-    {
-
-    }
-}
-
-public class LessorWindowClosedMessage : ValueChangedMessage<Views.Rent.Lessors.EditorWindow>
-{
-    public LessorWindowClosedMessage(Views.Rent.Lessors.EditorWindow value) : base(value)
-    {
-
-    }
-}
-
-public class BrokerWindowClosedMessage : ValueChangedMessage<Views.Brokers.EditorWindow>
-{
-    public BrokerWindowClosedMessage(Views.Brokers.EditorWindow value) : base(value)
+    public WindowClosedMessage(Microsoft.UI.Xaml.Window value) : base(value)
     {
 
     }

@@ -24,13 +24,15 @@ namespace ZumenSearch.ViewModels.Rent.Residentials;
 
 public sealed partial class PropertyViewModel : ObservableRecipient, 
     IRecipient<ListingUpdatedMessage>, 
-    IRecipient<ListingWindowClosedMessage>, 
+    IRecipient<WindowClosedMessage>, 
     IRecipient<ListingDeletedMessage>,
     IRecipient<LessorUpdatedMessage>,
     IRecipient<BrokerUpdatedMessage>,
     IRecipient<LessorDeletedMessage>,
     IRecipient<BrokerDeletedMessage>
 {
+    private const string BasicPageName = "ZumenSearch.Views.Rent.Residentials.BasicPage";
+
     #region == Public Properties ==
 
     // TODO: Do I need this?
@@ -1449,7 +1451,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"BldgViewModel: {ex}");
+            Debug.WriteLine($"PropertyViewModel: {ex}");
         }
         finally
         {
@@ -1563,7 +1565,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         // should be auto deleted from the table due to "cascade"
     }
 
-    public void Receive(ListingWindowClosedMessage window)
+    public void Receive(WindowClosedMessage window)
     {
         var ewin = window.Value;
 
@@ -1572,7 +1574,10 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             return;
         }
 
-        this.ChildEditorList.Remove(ewin);
+        if (ewin is Views.Rent.Residentials.Listing.EditorWindow rlwin)
+        {
+            this.ChildEditorList.Remove(rlwin);
+        }
     }
 
     #endregion
@@ -2111,9 +2116,9 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             //InfoBarErrorMessage = "入力項目に誤りがあります。保存出来ませんでした。";
             IsInfoBarErrorOpen = true;
 
-            if (!_navigationService.IsCurrentPageSameAs("ZumenSearch.Views.Rent.Residentials.BasicPage"))
+            if (!_navigationService.IsCurrentPageSameAs(BasicPageName))
             {
-                _navigationService.NavigateTo("ZumenSearch.Views.Rent.Residentials.BasicPage", this);
+                _navigationService.NavigateTo(BasicPageName, this);
             }
 
             return;
@@ -2510,7 +2515,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         editorShell.ViewModel.IsPropertyUnitOwnership = this.IsUnitOwnership;
 
         var mainVM = App.GetService<ViewModels.MainViewModel>();
-        mainVM.RoomEditorList.Add(editorShell.Window);
+        mainVM.RentResidentialListingEditorList.Add(editorShell.Window);
 
         this.ChildEditorList.Add(editorShell.Window);
 
@@ -2527,7 +2532,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         //var scalingFactor = (float)dpi / 96;
         //AppWindow.Resize(new Windows.Graphics.SizeInt32((int)(400.0f * scalingFactor), (int)(300.0f * scalingFactor)));
 
-        editorShell.Window.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(mainVM.RoomEditorWinLeft, mainVM.RoomEditorWinTop, mainVM.RoomEditorWinWidth, mainVM.RoomEditorWinHeight));
+        editorShell.Window.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(mainVM.RentResidentialListingEditorWinLeft, mainVM.RentResidentialListingEditorWinTop, mainVM.RentResidentialListingEditorWinWidth, mainVM.RentResidentialListingEditorWinHeight));
 
         //editorWindow.AppWindow.Show();
         editorShell.Window.Activate();
@@ -2553,7 +2558,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         var mainVM = App.GetService<ViewModels.MainViewModel>();
 
         // Check if the selected item is already being edited in another window.
-        foreach (var editWin in mainVM.RoomEditorList.ToList())
+        foreach (var editWin in mainVM.RentResidentialListingEditorList.ToList())
         {
             if (editWin.Id != unitId)
             {
@@ -2598,11 +2603,11 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             return;
         }
 
-        mainVM.RoomEditorList.Add(editorWindow);
+        mainVM.RentResidentialListingEditorList.Add(editorWindow);
 
         this.ChildEditorList.Add(editorWindow);
 
-        editorWindow.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(mainVM.RoomEditorWinLeft, mainVM.RoomEditorWinTop, mainVM.RoomEditorWinWidth, mainVM.RoomEditorWinHeight));
+        editorWindow.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(mainVM.RentResidentialListingEditorWinLeft, mainVM.RentResidentialListingEditorWinTop, mainVM.RentResidentialListingEditorWinWidth, mainVM.RentResidentialListingEditorWinHeight));
         if (editorWindow.AppWindow.Presenter is OverlappedPresenter presenter)
         {
             presenter.IsResizable = true;
@@ -2653,7 +2658,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         var mainVM = App.GetService<ViewModels.MainViewModel>();
 
         // Check if the selected item is already being edited in another window.
-        foreach (var editWin in mainVM.RoomEditorList.ToList())
+        foreach (var editWin in mainVM.RentResidentialListingEditorList.ToList())
         {
             if (editWin.Id != room.Id)
             {

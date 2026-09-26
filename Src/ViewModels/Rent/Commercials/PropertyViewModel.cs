@@ -10,8 +10,7 @@ namespace ZumenSearch.ViewModels.Rent.Commercials;
 
 public sealed partial class PropertyViewModel : ObservableRecipient
 {
-    private const string BasicPageName =
-        "ZumenSearch.Views.Rent.Commercials.BasicPage";
+    private const string BasicPageName = "ZumenSearch.Views.Rent.Commercials.BasicPage";
 
     private readonly Models.Rent.Commercials.Property _building;
     private readonly INavigationGenericService _navigationService;

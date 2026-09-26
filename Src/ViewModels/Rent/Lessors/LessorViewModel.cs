@@ -13,6 +13,8 @@ namespace ZumenSearch.ViewModels.Rent.Lessors;
 
 public sealed partial class LessorViewModel : ObservableRecipient
 {
+    private const string BasicPageName = "ZumenSearch.Views.Rent.Lessors.BasicPage";
+
     #region == Public Properties ==
 
     // TODO: Do I need this?
@@ -457,9 +459,9 @@ public sealed partial class LessorViewModel : ObservableRecipient
         if (!ValidateName())
         {
             IsInfoBarErrorOpen = true;
-            if (!_navigationService.IsCurrentPageSameAs("ZumenSearch.Views.Rent.Lessors.BasicPage"))
+            if (!_navigationService.IsCurrentPageSameAs(BasicPageName))
             {
-                _navigationService.NavigateTo("ZumenSearch.Views.Rent.Lessors.BasicPage", this);
+                _navigationService.NavigateTo(BasicPageName, this);
             }
             return;
         }

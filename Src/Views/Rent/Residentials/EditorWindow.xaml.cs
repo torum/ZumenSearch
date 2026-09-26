@@ -6,9 +6,6 @@ public sealed partial class EditorWindow : Window
 {
     public string? Id { get; private set; } = string.Empty;
 
-    // TODO: do I need this?
-    public bool IsAutoClose { get; set; }
-
     public ViewModels.Rent.Residentials.PropertyViewModel? ViewModel { get; private set; }
 
     //public EditorWindow(){  }

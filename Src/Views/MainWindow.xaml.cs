@@ -2,6 +2,7 @@ using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Runtime.Intrinsics.Arm;
 using System.Xml;
 using System.Xml.Linq;
 using WinRT.Interop;
@@ -145,99 +146,143 @@ public sealed partial class MainWindow : Window
                     _winRestoreLeft = 0;
                 }
 
-                // BldgEditorWindow element
-                var editWindow = xdoc.Root.Element("BldgEditorWindow");
+                // RentResidentialEditorWindow element
+                var editWindow = xdoc.Root.Element("RentResidentialEditorWindow");
                 if (editWindow != null)
                 {
                     var hoge = editWindow.Attribute("top");
                     if (hoge != null)
                     {
-                        _viewModel.BldgEditorWinTop = int.Parse(hoge.Value);
+                        _viewModel.RentResidentialEditorWinTop = int.Parse(hoge.Value);
                     }
 
                     hoge = editWindow.Attribute("left");
                     if (hoge != null)
                     {
-                        _viewModel.BldgEditorWinLeft = int.Parse(hoge.Value);
+                        _viewModel.RentResidentialEditorWinLeft = int.Parse(hoge.Value);
                     }
 
                     hoge = editWindow.Attribute("height");
                     if (hoge != null)
                     {
-                        _viewModel.BldgEditorWinHeight = int.Parse(hoge.Value);
+                        _viewModel.RentResidentialEditorWinHeight = int.Parse(hoge.Value);
                     }
 
                     hoge = editWindow.Attribute("width");
                     if (hoge != null)
                     {
-                        _viewModel.BldgEditorWinWidth = int.Parse(hoge.Value);
+                        _viewModel.RentResidentialEditorWinWidth = int.Parse(hoge.Value);
                     }
                 }
 
-                if (_viewModel.BldgEditorWinWidth < 500)
+                if (_viewModel.RentResidentialEditorWinWidth < 500)
                 {
-                    _viewModel.BldgEditorWinWidth = 500;
+                    _viewModel.RentResidentialEditorWinWidth = 500;
                 }
-                if (_viewModel.BldgEditorWinHeight < 500)
+                if (_viewModel.RentResidentialEditorWinHeight < 500)
                 {
-                    _viewModel.BldgEditorWinHeight = 500;
+                    _viewModel.RentResidentialEditorWinHeight = 500;
                 }
-                if (_viewModel.BldgEditorWinTop < 0)
+                if (_viewModel.RentResidentialEditorWinTop < 0)
                 {
-                    _viewModel.BldgEditorWinTop = 0;
+                    _viewModel.RentResidentialEditorWinTop = 0;
                 }
-                if (_viewModel.BldgEditorWinLeft < 0)
+                if (_viewModel.RentResidentialEditorWinLeft < 0)
                 {
-                    _viewModel.BldgEditorWinLeft = 0;
+                    _viewModel.RentResidentialEditorWinLeft = 0;
                 }
 
-
-                // RoomEditorWindow element
-                editWindow = xdoc.Root.Element("RoomEditorWindow");
+                // RentResidentialListingEditorWindow element
+                editWindow = xdoc.Root.Element("RentResidentialListingEditorWindow");
                 if (editWindow != null)
                 {
                     var hoge = editWindow.Attribute("top");
                     if (hoge != null)
                     {
-                        _viewModel.RoomEditorWinTop = int.Parse(hoge.Value);
+                        _viewModel.RentResidentialListingEditorWinTop = int.Parse(hoge.Value);
                     }
 
                     hoge = editWindow.Attribute("left");
                     if (hoge != null)
                     {
-                        _viewModel.RoomEditorWinLeft = int.Parse(hoge.Value);
+                        _viewModel.RentResidentialListingEditorWinLeft = int.Parse(hoge.Value);
                     }
 
                     hoge = editWindow.Attribute("height");
                     if (hoge != null)
                     {
-                        _viewModel.RoomEditorWinHeight = int.Parse(hoge.Value);
+                        _viewModel.RentResidentialListingEditorWinHeight = int.Parse(hoge.Value);
                     }
 
                     hoge = editWindow.Attribute("width");
                     if (hoge != null)
                     {
-                        _viewModel.RoomEditorWinWidth = int.Parse(hoge.Value);
+                        _viewModel.RentResidentialListingEditorWinWidth = int.Parse(hoge.Value);
                     }
                 }
 
-                if (_viewModel.RoomEditorWinWidth < 500)
+                if (_viewModel.RentResidentialListingEditorWinWidth < 500)
                 {
-                    _viewModel.RoomEditorWinWidth = 500;
+                    _viewModel.RentResidentialListingEditorWinWidth = 500;
                 }
-                if (_viewModel.RoomEditorWinHeight < 500)
+                if (_viewModel.RentResidentialListingEditorWinHeight < 500)
                 {
-                    _viewModel.RoomEditorWinHeight = 500;
+                    _viewModel.RentResidentialListingEditorWinHeight = 500;
                 }
-                if (_viewModel.RoomEditorWinTop < 0)
+                if (_viewModel.RentResidentialListingEditorWinTop < 0)
                 {
-                    _viewModel.RoomEditorWinTop = 0;
+                    _viewModel.RentResidentialListingEditorWinTop = 0;
                 }
-                if (_viewModel.RoomEditorWinLeft < 0)
+                if (_viewModel.RentResidentialListingEditorWinLeft < 0)
                 {
-                    _viewModel.RoomEditorWinLeft = 0;
+                    _viewModel.RentResidentialListingEditorWinLeft = 0;
                 }
 
+                // RentCommercialEditorWindow element
+                editWindow = xdoc.Root.Element("RentCommercialEditorWindow");
+                if (editWindow != null)
+                {
+                    var hoge = editWindow.Attribute("top");
+                    if (hoge != null)
+                    {
+                        _viewModel.RentCommercEditorWinTop = int.Parse(hoge.Value);
+                    }
+
+                    hoge = editWindow.Attribute("left");
+                    if (hoge != null)
+                    {
+                        _viewModel.RentCommercEditorWinLeft = int.Parse(hoge.Value);
+                    }
+
+                    hoge = editWindow.Attribute("height");
+                    if (hoge != null)
+                    {
+                        _viewModel.RentCommercEditorWinHeight = int.Parse(hoge.Value);
+                    }
+
+                    hoge = editWindow.Attribute("width");
+                    if (hoge != null)
+                    {
+                        _viewModel.RentCommercEditorWinWidth = int.Parse(hoge.Value);
+                    }
+                }
+
+                if (_viewModel.RentCommercEditorWinWidth < 500)
+                {
+                    _viewModel.RentCommercEditorWinWidth = 500;
+                }
+                if (_viewModel.RentCommercEditorWinHeight < 500)
+                {
+                    _viewModel.RentCommercEditorWinHeight = 500;
+                }
+                if (_viewModel.RentCommercEditorWinTop < 0)
+                {
+                    _viewModel.RentCommercEditorWinTop = 0;
+                }
+                if (_viewModel.RentCommercEditorWinLeft < 0)
+                {
+                    _viewModel.RentCommercEditorWinLeft = 0;
+                }
 
                 // LessorEditorWindow element
                 editWindow = xdoc.Root.Element("LessorEditorWindow");
@@ -339,9 +384,9 @@ public sealed partial class MainWindow : Window
     {
         var isCancel = false;
 
-        if (_viewModel.RoomEditorList.Count > 0)
+        if (_viewModel.RentResidentialListingEditorList.Count > 0)
         {
-            foreach (var editor in _viewModel.RoomEditorList)
+            foreach (var editor in _viewModel.RentResidentialListingEditorList)
             {
                 if (editor.ViewModel is null)
                 {
@@ -372,10 +417,8 @@ public sealed partial class MainWindow : Window
 
             if (!isCancel)
             {
-                foreach (var editor in _viewModel.RoomEditorList.ToList()) // Create snapshot of the list to avoid collection modification issues during iteration
+                foreach (var editor in _viewModel.RentResidentialListingEditorList.ToList()) // Create snapshot of the list to avoid collection modification issues during iteration
                 {
-                    editor.IsAutoClose = true;
-
                     //IntPtr hWnd = WindowNative.GetWindowHandle(editor);
                     //NativeMethods.ShowWindow(hWnd, NativeMethods.SW_RESTORE); // Ensure it's not minimized
                     
@@ -391,9 +434,9 @@ public sealed partial class MainWindow : Window
             return;
         }
 
-        if (_viewModel.BldgEditorList.Count > 0)
+        if (_viewModel.RentResidentialEditorList.Count > 0)
         {
-            foreach (var editor in _viewModel.BldgEditorList)
+            foreach (var editor in _viewModel.RentResidentialEditorList)
             {
                 if (editor.ViewModel is null)
                 {
@@ -424,9 +467,60 @@ public sealed partial class MainWindow : Window
 
             if (!isCancel)
             {
-                foreach (var editor in _viewModel.BldgEditorList.ToList()) // Create snapshot of the list to avoid collection modification issues during iteration
+                foreach (var editor in _viewModel.RentResidentialEditorList.ToList()) // Create snapshot of the list to avoid collection modification issues during iteration
                 {
-                    editor.IsAutoClose = true;
+                    //IntPtr hWnd = WindowNative.GetWindowHandle(editor);
+                    //NativeMethods.ShowWindow(hWnd, NativeMethods.SW_RESTORE); // Ensure it's not minimized
+
+                    //editor.Activate();
+
+                    editor.Close();
+                }
+            }
+        }
+
+        if (isCancel)
+        {
+            return;
+        }
+
+
+        if (_viewModel.RentCommercEditorList.Count > 0)
+        {
+            foreach (var editor in _viewModel.RentCommercEditorList)
+            {
+                if (editor.ViewModel is null)
+                {
+                    Debug.WriteLine("AppWindow_Closing: editor.ViewModel is null");
+                    continue;
+                }
+                if (editor.ViewModel.IsDirty)
+                {
+                    args.Cancel = true;
+                    isCancel = true;
+
+                    IntPtr hWnd = WindowNative.GetWindowHandle(editor);
+                    NativeMethods.ShowWindow(hWnd, NativeMethods.SW_RESTORE); // Ensure it's not minimized
+                    NativeMethods.SetForegroundWindow(hWnd); // Attempt to set it as the foreground window
+
+                    editor.Activate();
+                    editor.AppWindow.MoveInZOrderAtTop();
+
+                    // Show comfirmation dialog to user to save changes or not.
+                    if (editor.Content is Views.Rent.Commercials.ShellPage shell)
+                    {
+                        await shell.ShowEditorCloseConfirmationDialog();
+                    }
+
+                    break;
+                }
+            }
+
+            if (!isCancel)
+            {
+                foreach (var editor in _viewModel.RentCommercEditorList.ToList()) // Create snapshot of the list to avoid collection modification issues during iteration
+                {
+                    //editor.IsAutoClose = true;
 
                     //IntPtr hWnd = WindowNative.GetWindowHandle(editor);
                     //NativeMethods.ShowWindow(hWnd, NativeMethods.SW_RESTORE); // Ensure it's not minimized
@@ -442,6 +536,9 @@ public sealed partial class MainWindow : Window
         {
             return;
         }
+
+
+
 
         if (_viewModel.LessorEditorList.Count > 0)
         {
@@ -478,8 +575,6 @@ public sealed partial class MainWindow : Window
             {
                 foreach (var editor in _viewModel.LessorEditorList.ToList()) // Create snapshot of the list to avoid collection modification issues during iteration
                 {
-                    editor.IsAutoClose = true;
-
                     //IntPtr hWnd = WindowNative.GetWindowHandle(editor);
                     //NativeMethods.ShowWindow(hWnd, NativeMethods.SW_RESTORE); // Ensure it's not minimized
 
@@ -679,51 +774,73 @@ public sealed partial class MainWindow : Window
         }
 
         // Editor window Bldg
-        var editWindow = doc.CreateElement(string.Empty, "BldgEditorWindow", string.Empty);
+        var editWindow = doc.CreateElement(string.Empty, "RentResidentialEditorWindow", string.Empty);
 
         // Editor window attributes
         attrs = doc.CreateAttribute("width");
-        attrs.Value = _viewModel.BldgEditorWinWidth.ToString();
+        attrs.Value = _viewModel.RentResidentialEditorWinWidth.ToString();
         editWindow.SetAttributeNode(attrs);
 
         attrs = doc.CreateAttribute("height");
-        attrs.Value = _viewModel.BldgEditorWinHeight.ToString();
+        attrs.Value = _viewModel.RentResidentialEditorWinHeight.ToString();
         editWindow.SetAttributeNode(attrs);
 
         attrs = doc.CreateAttribute("top");
-        attrs.Value = _viewModel.BldgEditorWinTop.ToString();
+        attrs.Value = _viewModel.RentResidentialEditorWinTop.ToString();
         editWindow.SetAttributeNode(attrs);
 
         attrs = doc.CreateAttribute("left");
-        attrs.Value = _viewModel.BldgEditorWinLeft.ToString();
+        attrs.Value = _viewModel.RentResidentialEditorWinLeft.ToString();
         editWindow.SetAttributeNode(attrs);
 
         // Set editor window element to root.
         root.AppendChild(editWindow);
 
-        // Editor window Rom
-        editWindow = doc.CreateElement(string.Empty, "RoomEditorWindow", string.Empty);
+        // Editor window Room
+        editWindow = doc.CreateElement(string.Empty, "RentResidentialListingEditorWindow", string.Empty);
 
         // Editor window attributes
         attrs = doc.CreateAttribute("width");
-        attrs.Value = _viewModel.RoomEditorWinWidth.ToString();
+        attrs.Value = _viewModel.RentResidentialListingEditorWinWidth.ToString();
         editWindow.SetAttributeNode(attrs);
 
         attrs = doc.CreateAttribute("height");
-        attrs.Value = _viewModel.RoomEditorWinHeight.ToString();
+        attrs.Value = _viewModel.RentResidentialListingEditorWinHeight.ToString();
         editWindow.SetAttributeNode(attrs);
 
         attrs = doc.CreateAttribute("top");
-        attrs.Value = _viewModel.RoomEditorWinTop.ToString();
+        attrs.Value = _viewModel.RentResidentialListingEditorWinTop.ToString();
         editWindow.SetAttributeNode(attrs);
 
         attrs = doc.CreateAttribute("left");
-        attrs.Value = _viewModel.RoomEditorWinLeft.ToString();
+        attrs.Value = _viewModel.RentResidentialListingEditorWinLeft.ToString();
         editWindow.SetAttributeNode(attrs);
 
         // Set editor window element to root.
         root.AppendChild(editWindow);
 
+        // Editor window Rent Commercial
+        editWindow = doc.CreateElement(string.Empty, "RentCommercialEditorWindow", string.Empty);
+
+        // Editor window attributes
+        attrs = doc.CreateAttribute("width");
+        attrs.Value = _viewModel.RentCommercEditorWinWidth.ToString();
+        editWindow.SetAttributeNode(attrs);
+
+        attrs = doc.CreateAttribute("height");
+        attrs.Value = _viewModel.RentCommercEditorWinHeight.ToString();
+        editWindow.SetAttributeNode(attrs);
+
+        attrs = doc.CreateAttribute("top");
+        attrs.Value = _viewModel.RentCommercEditorWinTop.ToString();
+        editWindow.SetAttributeNode(attrs);
+
+        attrs = doc.CreateAttribute("left");
+        attrs.Value = _viewModel.RentCommercEditorWinLeft.ToString();
+        editWindow.SetAttributeNode(attrs);
+
+        // Set editor window element to root.
+        root.AppendChild(editWindow);
 
         // Editor window Lessor
         editWindow = doc.CreateElement(string.Empty, "LessorEditorWindow", string.Empty);

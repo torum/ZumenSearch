@@ -178,17 +178,17 @@ public sealed partial class ShellPage : Page
         {
             if (appWindow.Presenter is OverlappedPresenter)
             {
-                mainVM.RoomEditorWinHeight = (int)appWindow.Size.Height;
-                mainVM.RoomEditorWinWidth = (int)appWindow.Size.Width;
-                mainVM.RoomEditorWinTop = (int)appWindow.Position.Y;
-                mainVM.RoomEditorWinLeft = (int)appWindow.Position.X;
+                mainVM.RentResidentialListingEditorWinHeight = (int)appWindow.Size.Height;
+                mainVM.RentResidentialListingEditorWinWidth = (int)appWindow.Size.Width;
+                mainVM.RentResidentialListingEditorWinTop = (int)appWindow.Position.Y;
+                mainVM.RentResidentialListingEditorWinLeft = (int)appWindow.Position.X;
             }
         }
 
         //mainVM.RoomEditorList.Remove(ewin);
 
         // Update the selected search result's values such as name if it exists. Also, update building window's rooms list.
-        WeakReferenceMessenger.Default.Send(new Models.Messenger.ListingWindowClosedMessage(ewin));
+        WeakReferenceMessenger.Default.Send(new Models.Messenger.WindowClosedMessage(ewin));
     }
 
     private void BreadcrumbBar_ItemClicked(BreadcrumbBar sender, BreadcrumbBarItemClickedEventArgs args)
