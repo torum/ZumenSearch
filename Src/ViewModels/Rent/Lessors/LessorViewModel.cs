@@ -35,6 +35,7 @@ public sealed partial class LessorViewModel : ObservableRecipient
             if (!string.IsNullOrEmpty(Name))
             {
                 str = $"{str}：{Name}";
+                Debug.WriteLine(Name);
             }
 
             if (_lessorBase.Status == EnumEntryStatus.New)
@@ -113,9 +114,16 @@ public sealed partial class LessorViewModel : ObservableRecipient
         get => field ?? string.Empty;
         set
         {
-            if (SetProperty(ref field, value))
+            if (SetProperty(ref field, value.Trim()))
             {
-                Name = $"{NameLast} {NameFirst}";
+                if (!string.IsNullOrWhiteSpace(NameLast) && !string.IsNullOrWhiteSpace(NameFirst))
+                {
+                    Name = $"{NameLast} {NameFirst}";
+                }
+                else
+                {
+                    Name = $"{NameLast}{NameFirst}"; // prints either name without space.
+                }
                 IsDirty = true;
             }
         }
@@ -128,7 +136,14 @@ public sealed partial class LessorViewModel : ObservableRecipient
         {
             if (SetProperty(ref field, value))
             {
-                Name = $"{NameLast} {NameFirst}";
+                if (!string.IsNullOrWhiteSpace(NameLast) && !string.IsNullOrWhiteSpace(NameFirst))
+                {
+                    Name = $"{NameLast} {NameFirst}";
+                }
+                else
+                {
+                    Name = $"{NameLast}{NameFirst}"; // prints either name without space.
+                }
                 IsDirty = true;
             }
         }

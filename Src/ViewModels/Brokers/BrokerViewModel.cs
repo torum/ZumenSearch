@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
+using ZumenSearch.Models;
 using ZumenSearch.Models.Base;
 using ZumenSearch.Models.Common;
 using ZumenSearch.Services.Contracts;
@@ -105,7 +106,7 @@ public sealed partial class BrokerViewModel : ObservableRecipient
         get => field ?? string.Empty;
         set
         {
-            if (SetProperty(ref field, value))
+            if (SetProperty(ref field, value.Trim()))
             {
                 if (NameCompanyTypePosition == 0)
                 {
@@ -128,7 +129,7 @@ public sealed partial class BrokerViewModel : ObservableRecipient
         get => field ?? string.Empty;
         set
         {
-            if (SetProperty(ref field, value))
+            if (SetProperty(ref field, value.Trim()))
             {
                 if (NameCompanyTypePosition == 0)
                 {
@@ -187,7 +188,7 @@ public sealed partial class BrokerViewModel : ObservableRecipient
     // The Entry property holds the COPY of current RentResidential entry being edited.
     // Do not use it directly in the UI. Apply changes to this object in SaveAsync() to save the changes.
     // MainViewModel creates a new instance of this class and call EditorShell.SetEntry(EntryResidentialFull) and sets this property.
-    private readonly Models.Base.PersonBase _broker;
+    private Models.Base.PersonBase _broker;
 
 
     #endregion
@@ -261,7 +262,24 @@ public sealed partial class BrokerViewModel : ObservableRecipient
     {
         Name = _broker.Name;
 
-        //Remarks = _broker.Remarks;
+        if (_broker is PersonLegal legalPerson)
+        {
+            if (_broker.PersonKind != EnumPersonKind.Legal)
+            {
+                // Something is wrong.
+            }
+
+            NameCompany = legalPerson.NameCompany;
+            NameCompanyType = legalPerson.NameCompanyType;
+            NameCompanyTypePosition = legalPerson.NameCompanyTypePosition;
+        }
+        else
+        {
+            // TODO: Raise Error
+            return;
+        }
+
+        Remarks = _broker.Remarks;
     }
 
     private bool ValidateName()
@@ -307,16 +325,21 @@ public sealed partial class BrokerViewModel : ObservableRecipient
 
         // TODO: Create PersonLegal and set it.
 
-        _broker.Name = Name;
+        var newBroker = new Models.PersonLegal(_broker.Id, _broker.Status);
 
-        _broker.PersonKind = EnumPersonKind.Legal;
+        newBroker.Name = Name;
 
+        newBroker.PersonKind = EnumPersonKind.Legal;
 
-        //_broker.Remarks = Remarks;
-
+        newBroker.NameCompany = NameCompany;
+        newBroker.NameCompanyType = NameCompanyType;
+        newBroker.NameCompanyTypePosition = NameCompanyTypePosition;
+        newBroker.Remarks = Remarks;
         // TODO: Set other properties
         // TODO: Don't forget to check if Helpers.Common.ReplaceZenkakuNumbers is needed.
 
+
+        _broker = newBroker;
     }
 
     #endregion

@@ -108,7 +108,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         get => field ?? string.Empty; // Ensure a non-null value is returned
         set
         {
-            if (SetProperty(ref field, value))
+            if (SetProperty(ref field, value.Trim()))
             {
                 IsDirty = true;
 

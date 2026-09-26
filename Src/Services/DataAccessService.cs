@@ -399,6 +399,26 @@ public sealed class DataAccessService : IDataAccessService
 
                 #endregion
 
+                #region == Broker ==
+
+                tableCmd.CommandText = """
+                    CREATE TABLE IF NOT EXISTS brokers (
+                        broker_id TEXT NOT NULL PRIMARY KEY,
+                        name TEXT NOT NULL,
+                        person_kind TEXT NOT NULL,
+                        name_last TEXT NOT NULL,
+                        name_first TEXT NOT NULL,
+                        name_company TEXT NOT NULL,
+                        name_company_type TEXT NOT NULL,
+                        name_company_type_position INTEGER NOT NULL DEFAULT 0,
+                        remarks TEXT,
+                        updated_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc')),
+                        created_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc'))
+                    );
+                    """;
+                tableCmd.ExecuteNonQuery();
+
+                #endregion
 
 
                 // 
@@ -853,7 +873,7 @@ public sealed class DataAccessService : IDataAccessService
                 //cmd.CommandText = "INSERT INTO properties (property_id, name, property_kind, thumbnail_filename, loc_pref_id, loc_prefecture, loc_machiaza_id, loc_county, loc_city, loc_ward, loc_oaza_cho, loc_choume, loc_edaban, loc_location_full, updated_at) " +
                 //  "VALUES (@RentId, @Name, @PropertyKind, @Thumb, @LocPrefId, @LocPrefecture, @LocMachiazaId, @LocCounty, @LocCity, @LocWard, @LocOazaCho, @LocChoume, @LocEdaban, @LocLocationFull, @updated_at)";
                 // Upsert
-                var sqlUpsert = "asdf INSERT INTO properties (property_id, name, property_kind, thumbnail_filename, loc_pref_id, loc_prefecture, loc_machiaza_id, loc_county, loc_city, loc_ward, loc_oaza_cho, loc_choume, loc_edaban, loc_location_full, updated_at) ";
+                var sqlUpsert = "INSERT INTO properties (property_id, name, property_kind, thumbnail_filename, loc_pref_id, loc_prefecture, loc_machiaza_id, loc_county, loc_city, loc_ward, loc_oaza_cho, loc_choume, loc_edaban, loc_location_full, updated_at) ";
                 sqlUpsert += "VALUES (@propertyId, @name, @propertyKind, @thumbnailPath, @locPrefId, @locPrefecture, @locMachiazaId, @locCounty, @locCity, @locWard, @locOazaCho, @locChoume, @locEdaban, @locLocationFull, @updated_at) ";
                 sqlUpsert += "ON CONFLICT (property_id) ";
                 sqlUpsert += "DO UPDATE SET property_id = @propertyId, name = @name, property_kind = @propertyKind, thumbnail_filename = @thumbnailPath, loc_pref_id = @locPrefId, loc_prefecture = @locPrefecture, loc_machiaza_id = @locMachiazaId, loc_county = @locCounty, loc_city = @locCity, loc_ward = @locWard, loc_oaza_cho = @locOazaCho, loc_choume = @locChoume, loc_edaban = @locEdaban, loc_location_full = @locLocationFull, updated_at = @updated_at";
@@ -4555,12 +4575,204 @@ public sealed class DataAccessService : IDataAccessService
     {
         var res = new ResultWrapper();
 
+        if (broker is null || string.IsNullOrWhiteSpace(broker.Id))
+        {
+            res.IsError = true;
+            res.Error.Description = "Broker ID is empty.";
+            return res;
+        }
+
+        _readerWriterLock.EnterWriteLock();
+
+        try
+        {
+            using var connection =
+                new SqliteConnection(connectionStringBuilder.ConnectionString);
+
+            connection.Open();
+
+            using var command = connection.CreateCommand();
+            using var transaction = connection.BeginTransaction();
+
+            command.Transaction = transaction;
+            command.CommandText = """
+                INSERT INTO brokers (
+                    broker_id,
+                    name,
+                    person_kind,
+                    name_last,
+                    name_first,
+                    name_company,
+                    name_company_type,
+                    name_company_type_position,
+                    remarks,
+                    updated_at
+                )
+                VALUES (
+                    @brokerId,
+                    @name,
+                    @personKind,
+                    @nameLast,
+                    @nameFirst,
+                    @nameCompany,
+                    @nameCompanyType,
+                    @nameCompanyTypePosition,
+                    @remarks,
+                    @updatedAt
+                )
+                ON CONFLICT (broker_id) DO UPDATE SET
+                    name = excluded.name,
+                    person_kind = excluded.person_kind,
+                    name_last = excluded.name_last,
+                    name_first = excluded.name_first,
+                    name_company = excluded.name_company,
+                    name_company_type = excluded.name_company_type,
+                    name_company_type_position = excluded.name_company_type_position,
+                    remarks = excluded.remarks,
+                    updated_at = excluded.updated_at;
+                """;
+
+            command.Parameters.AddWithValue("@brokerId", broker.Id);
+            command.Parameters.AddWithValue("@name", broker.Name);
+            command.Parameters.AddWithValue("@personKind", broker.PersonKind.ToString());
+            command.Parameters.AddWithValue("@remarks", broker.Remarks);
+            command.Parameters.AddWithValue("@updatedAt", DateTimeOffset.UtcNow.ToString("s"));
+
+            if (broker is Models.PersonNatural natural)
+            {
+                command.Parameters.AddWithValue("@nameLast", natural.NameLast);
+                command.Parameters.AddWithValue("@nameFirst", natural.NameFirst);
+                command.Parameters.AddWithValue("@nameCompany", string.Empty);
+                command.Parameters.AddWithValue("@nameCompanyType", string.Empty);
+                command.Parameters.AddWithValue("@nameCompanyTypePosition", 0);
+            }
+            else if (broker is Models.PersonLegal legal)
+            {
+                command.Parameters.AddWithValue("@nameLast", string.Empty);
+                command.Parameters.AddWithValue("@nameFirst", string.Empty);
+                command.Parameters.AddWithValue("@nameCompany", legal.NameCompany);
+                command.Parameters.AddWithValue("@nameCompanyType", legal.NameCompanyType);
+                command.Parameters.AddWithValue(
+                    "@nameCompanyTypePosition",
+                    legal.NameCompanyTypePosition);
+            }
+            else
+            {
+                command.Parameters.AddWithValue("@nameLast", string.Empty);
+                command.Parameters.AddWithValue("@nameFirst", string.Empty);
+                command.Parameters.AddWithValue("@nameCompany", string.Empty);
+                command.Parameters.AddWithValue("@nameCompanyType", string.Empty);
+                command.Parameters.AddWithValue("@nameCompanyTypePosition", 0);
+            }
+
+            res.AffectedCount = command.ExecuteNonQuery();
+            transaction.Commit();
+
+            broker.Status = EnumEntryStatus.Saved;
+            broker.IsModified = false;
+        }
+        catch (Exception ex)
+        {
+            SetDatabaseError(
+                res,
+                ex,
+                "command.ExecuteNonQuery(), transaction.Commit()",
+                "Failed to upsert broker.",
+                nameof(UpsertBroker));
+        }
+        finally
+        {
+            _readerWriterLock.ExitWriteLock();
+        }
+
         return res;
     }
 
     public PersonsResultWrapper SelectBrokersByKeyword(string keyword)
     {
         var res = new PersonsResultWrapper();
+        var searchAll = string.IsNullOrWhiteSpace(keyword) ||
+                        keyword.Trim() == "*";
+
+        _readerWriterLock.EnterReadLock();
+
+        try
+        {
+            using var connection =
+                new SqliteConnection(connectionStringBuilder.ConnectionString);
+
+            connection.Open();
+
+            using var command = connection.CreateCommand();
+
+            command.CommandText = searchAll
+                ? """
+              SELECT broker_id, name, person_kind, remarks
+              FROM brokers
+              ORDER BY name;
+              """
+                : """
+              SELECT broker_id, name, person_kind, remarks
+              FROM brokers
+              WHERE REPLACE(REPLACE(name, ' ', ''), '　', '')
+                    LIKE @keyword
+              ORDER BY name;
+              """;
+
+            if (!searchAll)
+            {
+                command.Parameters.AddWithValue(
+                    "@keyword",
+                    $"%{keyword.Trim()}%");
+            }
+
+            using var reader = command.ExecuteReader();
+
+            while (reader.Read())
+            {
+                var brokerId = Convert.ToString(reader["broker_id"]);
+
+                if (string.IsNullOrWhiteSpace(brokerId))
+                {
+                    continue;
+                }
+
+                var personKindText =
+                    Convert.ToString(reader["person_kind"]) ?? string.Empty;
+
+                if (!Enum.TryParse<Models.Base.EnumPersonKind>(
+                        personKindText,
+                        out var personKind) ||
+                    personKind == Models.Base.EnumPersonKind.Undetermined)
+                {
+                    continue;
+                }
+
+                var entry = new Models.Common.PersonSearchResultItem(
+                    brokerId,
+                    personKind)
+                {
+                    Name = Convert.ToString(reader["name"]) ?? string.Empty,
+                    Remarks = Convert.ToString(reader["remarks"]) ?? string.Empty,
+                    IsModified = false
+                };
+
+                res.PersonSearchResult.Add(entry);
+            }
+        }
+        catch (Exception ex)
+        {
+            SetDatabaseError(
+                res,
+                ex,
+                "connection.Open(), reader.Read()",
+                "Failed to read brokers.",
+                nameof(SelectBrokersByKeyword));
+        }
+        finally
+        {
+            _readerWriterLock.ExitReadLock();
+        }
 
         return res;
     }
@@ -4569,12 +4781,114 @@ public sealed class DataAccessService : IDataAccessService
     {
         var res = new PersonSingleResultWrapper();
 
+        if (string.IsNullOrWhiteSpace(id))
+        {
+            res.IsError = true;
+            res.Error.Description = "Broker ID is empty.";
+            return res;
+        }
+
+        _readerWriterLock.EnterReadLock();
+
+        try
+        {
+            using var connection =
+                new SqliteConnection(connectionStringBuilder.ConnectionString);
+
+            connection.Open();
+
+            using var command = connection.CreateCommand();
+
+            command.CommandText = """
+        SELECT
+            broker_id,
+            name,
+            person_kind,
+            name_last,
+            name_first,
+            name_company,
+            name_company_type,
+            name_company_type_position,
+            remarks
+        FROM brokers
+        WHERE broker_id = @brokerId;
+        """;
+
+            command.Parameters.AddWithValue("@brokerId", id);
+
+            using var reader = command.ExecuteReader();
+
+            if (reader.Read())
+            {
+                res.Person = GetPerson(reader, id);
+
+                if (res.Person is not null)
+                {
+                    res.Person.Status = EnumEntryStatus.Saved;
+                    res.Person.IsModified = false;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            SetDatabaseError(
+                res,
+                ex,
+                "connection.Open(), reader.Read()",
+                "Failed to read broker.",
+                nameof(SelectBrokerById));
+        }
+        finally
+        {
+            _readerWriterLock.ExitReadLock();
+        }
+
         return res;
     }
 
     public ResultWrapper DeleteBroker(string id)
     {
         var res = new ResultWrapper();
+
+        if (string.IsNullOrWhiteSpace(id))
+        {
+            res.IsError = true;
+            res.Error.Description = "Broker ID is empty.";
+            return res;
+        }
+
+        _readerWriterLock.EnterWriteLock();
+
+        try
+        {
+            using var connection =
+                new SqliteConnection(connectionStringBuilder.ConnectionString);
+
+            connection.Open();
+
+            using var command = connection.CreateCommand();
+            command.CommandText = """
+        DELETE FROM brokers
+        WHERE broker_id = @brokerId;
+        """;
+
+            command.Parameters.AddWithValue("@brokerId", id);
+
+            res.AffectedCount = command.ExecuteNonQuery();
+        }
+        catch (Exception ex)
+        {
+            SetDatabaseError(
+                res,
+                ex,
+                "command.ExecuteNonQuery()",
+                "Failed to delete broker.",
+                nameof(DeleteBroker));
+        }
+        finally
+        {
+            _readerWriterLock.ExitWriteLock();
+        }
 
         return res;
     }

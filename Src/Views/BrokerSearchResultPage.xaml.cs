@@ -71,7 +71,7 @@ public sealed partial class BrokerSearchResultPage : Page
 
         if (container.DataContext is not Models.Common.PersonSearchResultItem searchresult)
         {
-            Debug.WriteLine($"Not LessorSearchResultItem. {container.DataContext?.GetType().FullName} @SearchResult_DoubleTapped");
+            Debug.WriteLine($"Not PersonSearchResultItem. {container.DataContext?.GetType().FullName} @SearchResult_DoubleTapped");
             return;
         }
 
@@ -80,9 +80,9 @@ public sealed partial class BrokerSearchResultPage : Page
             return;
         }
 
-        if (ViewModel.EditRentLessorCommand.CanExecute(searchresult))
+        if (ViewModel.EditBrokerCommand.CanExecute(searchresult))
         {
-            ViewModel.EditRentLessorCommand.Execute(searchresult);
+            ViewModel.EditBrokerCommand.Execute(searchresult);
         }
     }
 

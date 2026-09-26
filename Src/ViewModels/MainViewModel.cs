@@ -19,6 +19,7 @@ public partial class MainViewModel : ObservableRecipient,
     IRecipient<PropertyUpdatedMessage>, 
     IRecipient<ListingUpdatedMessage>,
     IRecipient<LessorUpdatedMessage>,
+    IRecipient<BrokerUpdatedMessage>,
     IRecipient<WindowClosedMessage>
 {
     #region == Public Properties ==
@@ -340,6 +341,25 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
         }
 
         foreach (var item in RentLessorSearchResult)
+        {
+            if (!item.Id.Equals(person.Id))
+            {
+                continue;
+            }
+
+            item.Name = person.Name;
+        }
+    }
+
+    public void Receive(BrokerUpdatedMessage broker)
+    {
+        var person = broker.Value;
+        if (person is null)
+        {
+            return;
+        }
+
+        foreach (var item in BrokerSearchResult)
         {
             if (!item.Id.Equals(person.Id))
             {
