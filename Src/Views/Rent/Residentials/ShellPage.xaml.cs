@@ -17,9 +17,6 @@ namespace ZumenSearch.Views.Rent.Residentials;
 
 public sealed partial class ShellPage : Page
 {
-    public ViewModels.Rent.Residentials.PropertyViewModel ViewModel { get; }
-    public Views.Rent.Residentials.EditorWindow Window { get; }
-    public Frame NavigationFrame => ContentFrame;
 
     // List of ValueTuple holding the Navigation Tag and the relative Navigation Page
     private readonly List<(string Tag, string Label, Type? Page)> _pages =
@@ -81,6 +78,48 @@ public sealed partial class ShellPage : Page
         Window.AppWindow.Closing += AppWindow_Closing;
     }
 
+    public ViewModels.Rent.Residentials.PropertyViewModel ViewModel { get; }
+    public Views.Rent.Residentials.EditorWindow Window { get; }
+    public Frame NavigationFrame => ContentFrame;
+
+    public async Task ShowEditorCloseConfirmationDialog()
+    {
+        if (ViewModel == null)
+        {
+            return;
+        }
+
+        if (ViewModel.IsDirty)
+        {
+            // show ConfirmationDialog
+            var result = await _dialogService.ShowEditorCloseConfirmationDialog();
+
+            if (result == ContentDialogResult.Primary)
+            {
+                if (ViewModel.IsDirty)
+                {
+                    ViewModel.Save();
+                }
+
+                if (ViewModel.IsDirty == false)
+                {
+                    Window.Close();
+                }
+            }
+            else if (result == ContentDialogResult.Secondary)
+            {
+                // Discard change and close.
+                ViewModel.DiscardChanges();
+
+                Window.Close();
+            }
+            else if (result == ContentDialogResult.None)
+            {
+                // Cancel.
+            }
+        }
+    }
+
     private void ShellPage_Loaded(object sender, RoutedEventArgs e)
     {
         // XamlRoot is no longer null.
@@ -98,7 +137,7 @@ public sealed partial class ShellPage : Page
         //
     }
 
-    public void Window_Activated(object sender, Microsoft.UI.Xaml.WindowActivatedEventArgs args)
+    private void Window_Activated(object sender, Microsoft.UI.Xaml.WindowActivatedEventArgs args)
     {
         var resource = args.WindowActivationState == WindowActivationState.Deactivated ? "WindowCaptionForegroundDisabled" : "WindowCaptionForeground";
         AppTitleBarText.Foreground = (SolidColorBrush)App.Current.Resources[resource];
@@ -205,45 +244,7 @@ public sealed partial class ShellPage : Page
         }
     }
 
-    public async Task ShowEditorCloseConfirmationDialog()
-    {
-        if (ViewModel == null)
-        {
-            return;
-        }
-
-        if (ViewModel.IsDirty)
-        {
-            // show ConfirmationDialog
-            var result = await _dialogService.ShowEditorCloseConfirmationDialog();
-
-            if (result == ContentDialogResult.Primary)
-            {
-                if (ViewModel.IsDirty)
-                {
-                    ViewModel.Save();
-                }
-
-                if (ViewModel.IsDirty == false)
-                {
-                    Window.Close();
-                }
-            }
-            else if (result == ContentDialogResult.Secondary)
-            {
-                // Discard change and close.
-                ViewModel.DiscardChanges();
-
-                Window.Close();
-            }
-            else if (result == ContentDialogResult.None)
-            {
-                // Cancel.
-            }
-        }
-    }
-
-    public void Window_Closed(object sender, WindowEventArgs args)
+    private void Window_Closed(object sender, WindowEventArgs args)
     {
         if (sender is not EditorWindow ewin)
         {

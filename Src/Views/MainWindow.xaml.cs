@@ -27,6 +27,8 @@ public sealed partial class MainWindow : Window
         _viewModel = viewModel;
         _dispatcherService = dispatcherService;
 
+        LoadSetting();
+
         InitializeComponent();
 
         ExtendsContentIntoTitleBar = true;
@@ -38,8 +40,6 @@ public sealed partial class MainWindow : Window
         this.AppWindow.Closing += AppWindow_Closing;
         this.Closed += Window_Closed;
         this.SizeChanged += Window_SizeChanged;
-
-        LoadSetting();
 
         if (this.AppWindow.Presenter is OverlappedPresenter presenter)
         {

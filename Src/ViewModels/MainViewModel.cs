@@ -20,6 +20,59 @@ public partial class MainViewModel : ObservableRecipient,
     IRecipient<BrokerUpdatedMessage>,
     IRecipient<WindowClosedMessage>
 {
+
+    #region == Private Variables ==
+
+    private readonly CancellationTokenSource _cts = new();
+
+    #endregion
+
+    #region == Services ==
+
+    private readonly IAbstractFactory<Models.Rent.Residentials.Property, Views.Rent.Residentials.ShellPage> _shellRentResidentialPropertyFactory;
+    private readonly IAbstractFactory<Models.Rent.Residentials.Listing.Listing, Views.Rent.Residentials.Listing.ShellPage> _shellRentResidentialListingFactory;
+    private readonly IAbstractFactory<Models.Base.PersonBase, Views.Rent.Lessors.ShellPage> _shellRentLessorFactory;
+    private readonly IAbstractFactory<Models.Base.PersonBase, Views.Brokers.ShellPage> _shellBrokerFactory;
+    private readonly IAbstractFactory<Models.Sale.Residentials.Property, Views.Sale.Residentials.ShellPage> _shellSaleResidentialPropertyFactory;
+    private readonly IAbstractFactory<Models.Rent.Commercials.Property, Views.Rent.Commercials.ShellPage> _shellRentCommercialPropertyFactory;
+
+    private readonly IDataAccessService _dataAccessService;
+    private readonly INavigationService _navigationService;
+    private readonly IDispatcherService _dispatcherService;
+
+    #endregion
+
+    public MainViewModel(
+        IAbstractFactory<Models.Rent.Residentials.Property, Views.Rent.Residentials.ShellPage> shellRentResidentialPropertyFactory, 
+        IAbstractFactory<Models.Rent.Residentials.Listing.Listing, Views.Rent.Residentials.Listing.ShellPage> shellRentResidentialListingFactory,
+        IAbstractFactory<Models.Rent.Commercials.Property, Views.Rent.Commercials.ShellPage> shellRentCommercialPropertyFactory,
+        IAbstractFactory<Models.Base.PersonBase, Views.Rent.Lessors.ShellPage> shellRentLessorFactory,
+        IAbstractFactory<Models.Sale.Residentials.Property, Views.Sale.Residentials.ShellPage> shellSaleResidentialPropertyFactory,
+        IAbstractFactory<Models.Base.PersonBase, Views.Brokers.ShellPage> shellBrokerFactory,
+        INavigationService navigationService, 
+        IDataAccessService dataAccessService, 
+        IDispatcherService dispatcherService)
+    {
+        _shellRentResidentialPropertyFactory = shellRentResidentialPropertyFactory;
+        _shellRentResidentialListingFactory = shellRentResidentialListingFactory;
+        _shellRentCommercialPropertyFactory = shellRentCommercialPropertyFactory;
+        _shellRentLessorFactory = shellRentLessorFactory;
+        _shellSaleResidentialPropertyFactory =shellSaleResidentialPropertyFactory;
+        _shellBrokerFactory = shellBrokerFactory;
+        _navigationService = navigationService;
+        _dataAccessService = dataAccessService;
+        _dispatcherService = dispatcherService;
+
+        VersionDescription = GetVersionDescription();
+
+        InitializeDatabase();
+
+        GetRecentPropertiesCommand.Execute(null); //GetRecentProperties();
+
+        // Ready to receive messages.
+        this.IsActive = true;
+    }
+
     #region == Public Properties ==
 
     [ObservableProperty]
@@ -235,57 +288,15 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
 
     #endregion
 
-    #region == Private Variables ==
+    #region == Public Methods ==
 
-    private readonly CancellationTokenSource _cts = new();
-
-    #endregion
-
-    #region == Services ==
-
-    private readonly IAbstractFactory<Models.Rent.Residentials.Property, Views.Rent.Residentials.ShellPage> _shellRentResidentialPropertyFactory;
-    private readonly IAbstractFactory<Models.Rent.Residentials.Listing.Listing, Views.Rent.Residentials.Listing.ShellPage> _shellRentResidentialListingFactory;
-    private readonly IAbstractFactory<Models.Base.PersonBase, Views.Rent.Lessors.ShellPage> _shellRentLessorFactory;
-    private readonly IAbstractFactory<Models.Base.PersonBase, Views.Brokers.ShellPage> _shellBrokerFactory;
-    private readonly IAbstractFactory<Models.Sale.Residentials.Property, Views.Sale.Residentials.ShellPage> _shellSaleResidentialPropertyFactory;
-    private readonly IAbstractFactory<Models.Rent.Commercials.Property, Views.Rent.Commercials.ShellPage> _shellRentCommercialPropertyFactory;
-
-    private readonly IDataAccessService _dataAccessService;
-    private readonly INavigationService _navigationService;
-    private readonly IDispatcherService _dispatcherService;
-
-    #endregion
-
-    public MainViewModel(
-        IAbstractFactory<Models.Rent.Residentials.Property, Views.Rent.Residentials.ShellPage> shellRentResidentialPropertyFactory, 
-        IAbstractFactory<Models.Rent.Residentials.Listing.Listing, Views.Rent.Residentials.Listing.ShellPage> shellRentResidentialListingFactory,
-        IAbstractFactory<Models.Rent.Commercials.Property, Views.Rent.Commercials.ShellPage> shellRentCommercialPropertyFactory,
-        IAbstractFactory<Models.Base.PersonBase, Views.Rent.Lessors.ShellPage> shellRentLessorFactory,
-        IAbstractFactory<Models.Sale.Residentials.Property, Views.Sale.Residentials.ShellPage> shellSaleResidentialPropertyFactory,
-        IAbstractFactory<Models.Base.PersonBase, Views.Brokers.ShellPage> shellBrokerFactory,
-        INavigationService navigationService, 
-        IDataAccessService dataAccessService, 
-        IDispatcherService dispatcherService)
+    public void CleanUp()
     {
-        _shellRentResidentialPropertyFactory = shellRentResidentialPropertyFactory;
-        _shellRentResidentialListingFactory = shellRentResidentialListingFactory;
-        _shellRentCommercialPropertyFactory = shellRentCommercialPropertyFactory;
-        _shellRentLessorFactory = shellRentLessorFactory;
-        _shellSaleResidentialPropertyFactory =shellSaleResidentialPropertyFactory;
-        _shellBrokerFactory = shellBrokerFactory;
-        _navigationService = navigationService;
-        _dataAccessService = dataAccessService;
-        _dispatcherService = dispatcherService;
-
-        VersionDescription = GetVersionDescription();
-
-        InitializeDatabase();
-
-        GetRecentPropertiesCommand.Execute(null); //GetRecentProperties();
-
-        // Ready to receive messages.
-        this.IsActive = true;
+        _cts.Cancel();
+        _cts.Dispose();
     }
+
+    #endregion
 
     #region == Messages ==
 
@@ -458,16 +469,6 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
 
     #endregion
 
-    #region == Public Methods ==
-
-    public void CleanUp()
-    {
-        _cts.Cancel();
-        _cts.Dispose();
-    }
-
-    #endregion
-
     #region == Commands ==
 
     #region == 総合検索 ==
@@ -547,7 +548,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
 
     // 建物編集
     [RelayCommand(CanExecute = nameof(EditRentResidentialBldgCanExecute))]
-    public async Task EditRentResidentialBldg(Models.Common.PropertySearchResultItem? selected) 
+    private async Task EditRentResidentialBldg(Models.Common.PropertySearchResultItem? selected) 
     {
         var propertyId = selected?.Id;
 
@@ -559,7 +560,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
 
         await EditRentResidentialBldgFromId(propertyId);
     }
-    public static bool EditRentResidentialBldgCanExecute(Models.Common.PropertySearchResultItem? selected)
+    private static bool EditRentResidentialBldgCanExecute(Models.Common.PropertySearchResultItem? selected)
     {
         if (selected is null)
         //if (string.IsNullOrEmpty(rentId))
@@ -571,7 +572,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
     }
 
     [RelayCommand(CanExecute = nameof(EditRentResidentialBldgByIdCanExecute))]
-    public async Task EditRentResidentialBldgFromId(string propertyId)
+    private async Task EditRentResidentialBldgFromId(string propertyId)
     {
         if (string.IsNullOrEmpty(propertyId))
         {
@@ -661,7 +662,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
 
         editorWindow.AppWindow.MoveInZOrderAtTop();
     }
-    public static bool EditRentResidentialBldgByIdCanExecute(string propertyId)
+    private static bool EditRentResidentialBldgByIdCanExecute(string propertyId)
     {
         if (string.IsNullOrEmpty(propertyId))
         {
@@ -673,7 +674,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
 
     // 部屋編集
     [RelayCommand(CanExecute = nameof(EditRentResidentialRoomCanExecute))]
-    public async Task EditRentResidentialRoom(Models.Common.ListingSearchResultItem? selected)
+    private async Task EditRentResidentialRoom(Models.Common.ListingSearchResultItem? selected)
     {
         if (selected is null)
         {
@@ -777,7 +778,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
 
         editorWindow.AppWindow.MoveInZOrderAtTop();
     }
-    public static bool EditRentResidentialRoomCanExecute(Models.Common.ListingSearchResultItem? selected)
+    private static bool EditRentResidentialRoomCanExecute(Models.Common.ListingSearchResultItem? selected)
     {
         if (selected is null)
         {
@@ -849,7 +850,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
             }
         }
     }
-    public static bool SearchRentForAutoSuggestCanExecute(string? queryText)
+    private static bool SearchRentForAutoSuggestCanExecute(string? queryText)
     {
         if (string.IsNullOrEmpty(queryText))
         {
@@ -917,7 +918,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
             //_navigationService.NavigateTo("ZumenSearch.Views.Rent.Residentials.BldgShellPage", SlideNavigationTransitionEffect.FromLeft);//Navigate(typeof(Views.Rent.Residentials.SearchResultPage), null, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });
         }
     }
-    public static bool SearchRentResidentialBldgCanExecute(string? queryText)
+    private static bool SearchRentResidentialBldgCanExecute(string? queryText)
     {
         /*
         if (string.IsNullOrEmpty(queryText))

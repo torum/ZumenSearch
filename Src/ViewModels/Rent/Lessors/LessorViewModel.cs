@@ -11,9 +11,84 @@ namespace ZumenSearch.ViewModels.Rent.Lessors;
 
 public sealed partial class LessorViewModel : ObservableRecipient
 {
+    #region == Private variables and const ==
+
     private const string BasicPageName = "ZumenSearch.Views.Rent.Lessors.BasicPage";
 
-    #region == Public Properties ==
+    private readonly string _id = string.Empty;
+
+    // The Entry property holds the COPY of current RentResidential entry being edited.
+    // Do not use it directly in the UI. Apply changes to this object in SaveAsync() to save the changes.
+    // MainViewModel creates a new instance of this class and call EditorShell.SetEntry(EntryResidentialFull) and sets this property.
+    private Models.Base.PersonBase _lessorBase;
+
+    #endregion
+
+    #region == Services ==
+
+    private readonly IDataAccessService _dataAccessService;
+    private readonly IDataAccessLocationService _dataAccessLocationService;
+    private readonly IDispatcherService _dispatcherService;
+    private readonly IDialogGenericService _dialogService;
+    private readonly INavigationGenericService _navigationService;
+
+    #endregion
+
+    public LessorViewModel(Models.Base.PersonBase lessorBase,
+        INavigationGenericService navigationService,
+        IDialogGenericService dialogService,
+        IDispatcherService dispatcherService,
+        IDataAccessService dataAccessService,
+        IDataAccessLocationService dataAccessLocationService)
+    {
+        _lessorBase = lessorBase;
+        _id = lessorBase.Id;
+
+        _navigationService = navigationService; 
+        _dialogService = dialogService;
+        _dispatcherService = dispatcherService;
+        _dataAccessService = dataAccessService;
+        _dataAccessLocationService = dataAccessLocationService;
+
+        // Update title with dummy value.
+        WindowTitle = string.Empty;
+
+        if (_lessorBase.PersonKind == EnumPersonKind.Natural)
+        {
+            PersonKindIndex = 0;
+        }
+        else if (_lessorBase.PersonKind == EnumPersonKind.Legal)
+        {
+            PersonKindIndex = 1;
+        }
+
+        try
+        {
+            PopulateValues();
+
+            // Reset errors
+            IsNameLastHasError = false;
+            //IsNameFirstHasError = false;
+            IsNameCompanyHasError = false;
+
+            // TODO: more.
+
+            //HasErrors = false;
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"LessorViewModel: {ex}");
+        }
+        finally
+        {
+            IsDirty = false;
+        }
+
+        // Ready to receive messages.
+        this.IsActive = true;
+    }
+
+    #region == Properties ==
 
     // TODO: Do I need this?
     //public string Id => _id;
@@ -97,7 +172,9 @@ public sealed partial class LessorViewModel : ObservableRecipient
     }
 
     // Natural 0 or Legal 1
-    public int PersonKindIndex { get;
+    public int PersonKindIndex
+    {
+        get;
         set
         {
             if (SetProperty(ref field, value))
@@ -229,81 +306,6 @@ public sealed partial class LessorViewModel : ObservableRecipient
     } = string.Empty;
 
     #endregion
-
-    #region == Private Variables ==
-
-    private readonly string _id = string.Empty;
-
-    // The Entry property holds the COPY of current RentResidential entry being edited.
-    // Do not use it directly in the UI. Apply changes to this object in SaveAsync() to save the changes.
-    // MainViewModel creates a new instance of this class and call EditorShell.SetEntry(EntryResidentialFull) and sets this property.
-    private Models.Base.PersonBase _lessorBase;
-
-    #endregion
-
-    #region == Services ==
-
-    private readonly IDataAccessService _dataAccessService;
-    private readonly IDataAccessLocationService _dataAccessLocationService;
-    private readonly IDispatcherService _dispatcherService;
-    private readonly IDialogGenericService _dialogService;
-    private readonly INavigationGenericService _navigationService;
-
-    #endregion
-
-    public LessorViewModel(Models.Base.PersonBase lessorBase,
-        INavigationGenericService navigationService,
-        IDialogGenericService dialogService,
-        IDispatcherService dispatcherService,
-        IDataAccessService dataAccessService,
-        IDataAccessLocationService dataAccessLocationService)
-    {
-        _lessorBase = lessorBase;
-        _id = lessorBase.Id;
-
-        _navigationService = navigationService; 
-        _dialogService = dialogService;
-        _dispatcherService = dispatcherService;
-        _dataAccessService = dataAccessService;
-        _dataAccessLocationService = dataAccessLocationService;
-
-        // Update title with dummy value.
-        WindowTitle = string.Empty;
-
-        if (_lessorBase.PersonKind == EnumPersonKind.Natural)
-        {
-            PersonKindIndex = 0;
-        }
-        else if (_lessorBase.PersonKind == EnumPersonKind.Legal)
-        {
-            PersonKindIndex = 1;
-        }
-
-        try
-        {
-            PopulateValues();
-
-            // Reset errors
-            IsNameLastHasError = false;
-            //IsNameFirstHasError = false;
-            IsNameCompanyHasError = false;
-
-            // TODO: more.
-
-            //HasErrors = false;
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"LessorViewModel: {ex}");
-        }
-        finally
-        {
-            IsDirty = false;
-        }
-
-        // Ready to receive messages.
-        this.IsActive = true;
-    }
 
     #region == Public Methods ==
 

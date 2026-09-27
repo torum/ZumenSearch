@@ -12,12 +12,6 @@ namespace ZumenSearch.Views;
 
 public sealed partial class ShellPage : Page
 {
-    public ViewModels.MainViewModel ViewModel { get; }
-
-    //public Frame NavigationFrame => this.ContentFrame;
-
-    public MainWindow MainWindow { get; }
-
     private readonly Dictionary<string, Type> _pageMap = new()
         {
             { "ZumenSearch.Views.SearchPage", typeof(Views.SearchPage) },
@@ -37,12 +31,11 @@ public sealed partial class ShellPage : Page
             { "ZumenSearch.Views.SettingsPage", typeof(Views.SettingsPage) }
         };
 
-
     private readonly INavigationService _navigationService;
 
-    public ShellPage(ViewModels.MainViewModel viewModel, INavigationService navigationService)
+    public ShellPage(Views.MainWindow win, ViewModels.MainViewModel viewModel, INavigationService navigationService)
     {
-        MainWindow = App.GetService<Views.MainWindow>();
+        MainWindow = win;// App.GetService<Views.MainWindow>();
         MainWindow.Content = this;
 
         ViewModel = viewModel;
@@ -57,6 +50,12 @@ public sealed partial class ShellPage : Page
 
         this.Loaded += Page_Loaded;
     }
+
+    public ViewModels.MainViewModel ViewModel { get; }
+
+    //public Frame NavigationFrame => this.ContentFrame;
+
+    public MainWindow MainWindow { get; }
 
     private void Page_Loaded(object sender, RoutedEventArgs e)
     {

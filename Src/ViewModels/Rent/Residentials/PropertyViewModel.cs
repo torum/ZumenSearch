@@ -29,9 +29,93 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     IRecipient<LessorDeletedMessage>,
     IRecipient<BrokerDeletedMessage>
 {
+    #region == Private variables and const ==
+
     private const string BasicPageName = "ZumenSearch.Views.Rent.Residentials.BasicPage";
 
-    #region == Public Properties ==
+    private readonly string _id = string.Empty;
+
+    // The Entry property holds the COPY of current RentResidential entry being edited.
+    // Do not use it directly in the UI. Apply changes to this object in SaveAsync() to save the changes.
+    // MainViewModel creates a new instance of this class and call EditorShell.SetEntry(EntryResidentialFull) and sets this property.
+    private readonly Models.Rent.Residentials.Property _building;
+
+    private readonly string _propertyDataDirectoryPath = string.Empty;
+
+    // Child windows.
+    public readonly List<Views.Rent.Residentials.Listing.EditorWindow> ChildEditorList = [];
+
+    // Tmp file list to hold unsaved picture files. (if entry is not saved, delete on close)
+    private readonly List<string> _unsavedBuildingPictureFileList = [];
+    private readonly List<string> _unsavedBuildingPdfFileList = [];
+    private readonly List<string> _unsavedBuildingPdfThumbnailFileList = [];
+
+    private readonly CancellationTokenSource _cts = new();
+
+    #endregion
+
+    #region == Services ==
+
+    private readonly IAbstractFactory<Models.Rent.Residentials.Listing.Listing, Views.Rent.Residentials.Listing.ShellPage> _shellFactory;
+    private readonly IDataAccessService _dataAccessService;
+    private readonly IDataAccessLocationService _dataAccessLocationService;
+    private readonly IDispatcherService _dispatcherService;
+    private readonly IDialogGenericService _dialogService;
+    private readonly INavigationGenericService _navigationService;
+
+    #endregion
+
+    public PropertyViewModel(
+        Models.Rent.Residentials.Property building, 
+        INavigationGenericService navigationService,
+        IDialogGenericService dialogService,
+        IAbstractFactory<Models.Rent.Residentials.Listing.Listing, Views.Rent.Residentials.Listing.ShellPage> shellFactory, 
+        IDispatcherService dispatcherService, 
+        IDataAccessService dataAccessService, 
+        IDataAccessLocationService dataAccessLocationService)
+    {
+        _building = building;
+        _id = building.Id;
+
+        _navigationService = navigationService; // _navigationService.NavigateTo("ZumenSearch.Views.Rent.Residentials.RoomListPage", this, new DrillInNavigationTransitionInfo());
+        _dialogService = dialogService;
+
+        _shellFactory = shellFactory;
+
+        _dispatcherService = dispatcherService;
+        _dataAccessService = dataAccessService;
+        _dataAccessLocationService = dataAccessLocationService;
+
+        _propertyDataDirectoryPath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _id);
+
+        // Update title with dummy value.
+        WindowTitle = string.Empty;
+
+        try
+        {
+            PopulateValues();
+
+            // Reset errors
+            IsNameHasError = false;
+            // TODO: more.
+
+            //HasErrors = false;
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"PropertyViewModel: {ex}");
+        }
+        finally
+        {
+            IsDirty = false;
+        }
+
+        // Ready to receive messages.
+        this.IsActive = true;
+    }
+
+
+    #region == Properties ==
 
     // TODO: Do I need this?
     //public string Id => _id;
@@ -234,7 +318,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             */
 
             //var regex = new Regex(@"^\d{0,4}$"); // 4 digit or less. (Alow zenkaku Full-Width)
-            var regex =  new Regex(@"^(?:\d{0,4})?$");
+            var regex = new Regex(@"^(?:\d{0,4})?$");
             if (regex.IsMatch(text))
             {
                 field = text;
@@ -1372,93 +1456,6 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     #endregion
 
     #endregion
-
-    #region == Events
-
-    #endregion
-
-    #region == Private Variables ==
-
-    private readonly string _id = string.Empty;
-
-    // The Entry property holds the COPY of current RentResidential entry being edited.
-    // Do not use it directly in the UI. Apply changes to this object in SaveAsync() to save the changes.
-    // MainViewModel creates a new instance of this class and call EditorShell.SetEntry(EntryResidentialFull) and sets this property.
-    private readonly Models.Rent.Residentials.Property _building;
-
-    private readonly string _propertyDataDirectoryPath = string.Empty;
-
-    // Child windows.
-    public readonly List<Views.Rent.Residentials.Listing.EditorWindow> ChildEditorList = [];
-
-    // Tmp file list to hold unsaved picture files. (if entry is not saved, delete on close)
-    private readonly List<string> _unsavedBuildingPictureFileList = [];
-    private readonly List<string> _unsavedBuildingPdfFileList = [];
-    private readonly List<string> _unsavedBuildingPdfThumbnailFileList = [];
-
-    private readonly CancellationTokenSource _cts = new();
-
-    #endregion
-
-    #region == Services ==
-
-    private readonly IAbstractFactory<Models.Rent.Residentials.Listing.Listing, Views.Rent.Residentials.Listing.ShellPage> _shellFactory;
-    private readonly IDataAccessService _dataAccessService;
-    private readonly IDataAccessLocationService _dataAccessLocationService;
-    private readonly IDispatcherService _dispatcherService;
-    private readonly IDialogGenericService _dialogService;
-    private readonly INavigationGenericService _navigationService;
-
-    #endregion
-
-    public PropertyViewModel(
-        Models.Rent.Residentials.Property building, 
-        INavigationGenericService navigationService,
-        IDialogGenericService dialogService,
-        IAbstractFactory<Models.Rent.Residentials.Listing.Listing, Views.Rent.Residentials.Listing.ShellPage> shellFactory, 
-        IDispatcherService dispatcherService, 
-        IDataAccessService dataAccessService, 
-        IDataAccessLocationService dataAccessLocationService)
-    {
-        _building = building;
-        _id = building.Id;
-
-        _navigationService = navigationService; // _navigationService.NavigateTo("ZumenSearch.Views.Rent.Residentials.RoomListPage", this, new DrillInNavigationTransitionInfo());
-        _dialogService = dialogService;
-
-        _shellFactory = shellFactory;
-
-        _dispatcherService = dispatcherService;
-        _dataAccessService = dataAccessService;
-        _dataAccessLocationService = dataAccessLocationService;
-
-        _propertyDataDirectoryPath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _id);
-
-        // Update title with dummy value.
-        WindowTitle = string.Empty;
-
-        try
-        {
-            PopulateValues();
-
-            // Reset errors
-            IsNameHasError = false;
-            // TODO: more.
-
-            //HasErrors = false;
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"PropertyViewModel: {ex}");
-        }
-        finally
-        {
-            IsDirty = false;
-        }
-
-        // Ready to receive messages.
-        this.IsActive = true;
-    }
 
     #region == Messages ==
 

@@ -22,7 +22,66 @@ public sealed partial class ListingViewModel : ObservableRecipient,
     IRecipient<LessorDeletedMessage>,
     IRecipient<BrokerDeletedMessage>
 {
-    #region == Public Properties ==
+    #region == Private variables ==
+
+    private readonly string _id = string.Empty;
+
+    private readonly Models.Rent.Residentials.Listing.Listing _room;
+
+    private readonly string _listingDataDirectoryPath = string.Empty;
+
+    // Tmp file list to hold unsaved picture files. (if entry is not saved, delete on close)
+    private readonly List<string> _unsavedRoomPictureFileList = [];
+    private readonly List<string> _unsavedRoomPdfFileList = [];
+    private readonly List<string> _unsavedRoomPdfThumbnailFileList = [];
+
+    private readonly CancellationTokenSource _cts = new();
+
+    #endregion
+
+    #region == Services ==
+
+    private readonly IDataAccessService _dataAccessService;
+    private readonly IDispatcherService _dispatcherService;
+    private readonly IDialogGenericService? _dialogService;
+    private readonly INavigationGenericService _navigationService;
+
+    #endregion
+
+    public ListingViewModel(
+        Models.Rent.Residentials.Listing.Listing room, 
+        INavigationGenericService navigationService,
+        IDialogGenericService dialogService,
+        IDispatcherService dispatcherService, 
+        IDataAccessService dataAccessService)
+    {
+        _room = room;
+        _id = room.Id;
+
+        _navigationService = navigationService; // _navigationService.NavigateTo("ZumenSearch.Views.Rent.Residentials.RoomListPage", this, new DrillInNavigationTransitionInfo());
+        _dialogService = dialogService;
+
+        _dispatcherService = dispatcherService;
+        _dataAccessService = dataAccessService;
+
+        _listingDataDirectoryPath = System.IO.Path.Combine(System.IO.Path.Combine(App.PropertyBlobDataFolder, _room.PropertyId), _room.Id);
+
+        PopulateValues();
+
+        // Reset errors
+        IsNameHasError = false;
+        // TODO: more.
+
+        //HasErrors = false;
+
+        _room.IsModified = false;
+        IsDirty = false;
+
+        // Ready to receive messages.
+        this.IsActive = true;
+    }
+
+    #region == Properties ==
 
     //public string Id => _id;
 
@@ -318,65 +377,6 @@ public sealed partial class ListingViewModel : ObservableRecipient,
     #endregion
 
     #endregion
-
-    #region == Private variables ==
-
-    private readonly string _id = string.Empty;
-
-    private readonly Models.Rent.Residentials.Listing.Listing _room;
-
-    private readonly string _listingDataDirectoryPath = string.Empty;
-
-    // Tmp file list to hold unsaved picture files. (if entry is not saved, delete on close)
-    private readonly List<string> _unsavedRoomPictureFileList = [];
-    private readonly List<string> _unsavedRoomPdfFileList = [];
-    private readonly List<string> _unsavedRoomPdfThumbnailFileList = [];
-
-    private readonly CancellationTokenSource _cts = new();
-
-    #endregion
-
-    #region == Services ==
-
-    private readonly IDataAccessService _dataAccessService;
-    private readonly IDispatcherService _dispatcherService;
-    private readonly IDialogGenericService? _dialogService;
-    private readonly INavigationGenericService _navigationService;
-
-    #endregion
-
-    public ListingViewModel(
-        Models.Rent.Residentials.Listing.Listing room, 
-        INavigationGenericService navigationService,
-        IDialogGenericService dialogService,
-        IDispatcherService dispatcherService, 
-        IDataAccessService dataAccessService)
-    {
-        _room = room;
-        _id = room.Id;
-
-        _navigationService = navigationService; // _navigationService.NavigateTo("ZumenSearch.Views.Rent.Residentials.RoomListPage", this, new DrillInNavigationTransitionInfo());
-        _dialogService = dialogService;
-
-        _dispatcherService = dispatcherService;
-        _dataAccessService = dataAccessService;
-
-        _listingDataDirectoryPath = System.IO.Path.Combine(System.IO.Path.Combine(App.PropertyBlobDataFolder, _room.PropertyId), _room.Id);
-
-        PopulateValues();
-
-        // Reset errors
-        IsNameHasError = false;
-        // TODO: more.
-
-        //HasErrors = false;
-
-        _room.IsModified = false;
-        IsDirty = false;
-
-        // Ready to receive messages.
-        this.IsActive = true;
-    }
 
     #region == Messages ==
 
@@ -870,16 +870,21 @@ public sealed partial class ListingViewModel : ObservableRecipient,
     #region == Commands ==
 
     [RelayCommand]
-    public async Task OpenPropertyEditorWindow()
+    private void OpenPropertyEditorWindow()
     {
         var vm = App.GetService<ViewModels.MainViewModel>();
-        await vm.EditRentResidentialBldgFromId(_room.PropertyId);
+
+        if (vm.EditRentResidentialBldgFromIdCommand.CanExecute(_room.PropertyId))
+        {
+            //await vm.EditRentResidentialBldgFromIdCommand(_room.PropertyId);
+            vm.EditRentResidentialBldgFromIdCommand.Execute(_room.PropertyId);
+        }
     }
 
     #region == Save ==
 
     [RelayCommand(CanExecute = nameof(CanSave))]
-    public void Save()
+    private void Save()
     {
         if (!IsDirty)
         {

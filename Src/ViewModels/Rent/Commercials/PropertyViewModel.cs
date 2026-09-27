@@ -18,6 +18,28 @@ public sealed partial class PropertyViewModel : ObservableRecipient
     private readonly IDispatcherService _dispatcherService;
     private readonly IDataAccessService _dataAccessService;
 
+    public PropertyViewModel(
+        Models.Rent.Commercials.Property building,
+        INavigationGenericService navigationService,
+        IDialogGenericService dialogService,
+        IDispatcherService dispatcherService,
+        IDataAccessService dataAccessService)
+    {
+        _building = building;
+        _navigationService = navigationService;
+        _dialogService = dialogService;
+        _dispatcherService = dispatcherService;
+        _dataAccessService = dataAccessService;
+
+        PopulateValues();
+
+        IsDirty = false;
+        IsActive = true;
+    }
+
+    #region == Properties ==
+
+
     public string WindowTitle
     {
         get
@@ -232,24 +254,9 @@ public sealed partial class PropertyViewModel : ObservableRecipient
         }
     }
 
-    public PropertyViewModel(
-        Models.Rent.Commercials.Property building,
-        INavigationGenericService navigationService,
-        IDialogGenericService dialogService,
-        IDispatcherService dispatcherService,
-        IDataAccessService dataAccessService)
-    {
-        _building = building;
-        _navigationService = navigationService;
-        _dialogService = dialogService;
-        _dispatcherService = dispatcherService;
-        _dataAccessService = dataAccessService;
+    #endregion
 
-        PopulateValues();
-
-        IsDirty = false;
-        IsActive = true;
-    }
+    #region == Public Methods ==
 
     public void DiscardChanges()
     {
@@ -257,6 +264,10 @@ public sealed partial class PropertyViewModel : ObservableRecipient
         IsDirty = false;
         IsInfoBarErrorOpen = false;
     }
+
+    #endregion
+
+    #region == Private Methods ==
 
     private void PopulateValues()
     {
@@ -394,6 +405,10 @@ public sealed partial class PropertyViewModel : ObservableRecipient
         return true;
     }
 
+    #endregion
+
+    #region == Commands ==
+
     [RelayCommand]
     private void AddNewUnit()
     {
@@ -480,4 +495,6 @@ public sealed partial class PropertyViewModel : ObservableRecipient
     {
         return IsDirty;
     }
+
+    #endregion
 }
