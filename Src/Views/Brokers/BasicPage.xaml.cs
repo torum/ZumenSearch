@@ -38,13 +38,13 @@ public sealed partial class BasicPage : Page
         if ((e.Parameter is ViewModels.Brokers.BrokerViewModel) && (e.Parameter != null))
         {
             ViewModel = e.Parameter as ViewModels.Brokers.BrokerViewModel;
-
+            Bindings.Update();
             if (!_initialized)
             {
                 //Init();
             }
         }
-
+        
         base.OnNavigatedTo(e);
     }
 

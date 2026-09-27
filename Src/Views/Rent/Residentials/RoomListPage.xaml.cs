@@ -20,6 +20,7 @@ public sealed partial class RoomListPage : Page
         if ((e.Parameter is ViewModels.Rent.Residentials.PropertyViewModel) && (e.Parameter != null))
         {
             ViewModel = e.Parameter as ViewModels.Rent.Residentials.PropertyViewModel;
+            Bindings.Update();
         }
         else
         {

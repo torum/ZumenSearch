@@ -19,6 +19,7 @@ public sealed partial class LocationPage : Page
         if (e.Parameter is ViewModels.Rent.Residentials.PropertyViewModel vm)
         {
             ViewModel = vm;
+            Bindings.Update();
         }
 
         base.OnNavigatedTo(e);

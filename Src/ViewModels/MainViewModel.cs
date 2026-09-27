@@ -4,12 +4,10 @@ using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml.Media.Animation;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Reflection;
 using Windows.ApplicationModel;
 using ZumenSearch.Helpers;
 using ZumenSearch.Models.Messenger;
-using ZumenSearch.Services;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.Services.Extensions.AbstractFactory;
 

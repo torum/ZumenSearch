@@ -18,6 +18,26 @@ public sealed partial class ShellPage : Page
 
     public MainWindow MainWindow { get; }
 
+    private readonly Dictionary<string, Type> _pageMap = new()
+        {
+            { "ZumenSearch.Views.SearchPage", typeof(Views.SearchPage) },
+            { "ZumenSearch.Views.SearchResultPage", typeof(Views.SearchResultPage) },
+            { "ZumenSearch.Views.Rent.ResidentialSearchPage", typeof(Views.Rent.ResidentialSearchPage) },
+            { "ZumenSearch.Views.Rent.ResidentialSearchResultPage", typeof(Views.Rent.ResidentialSearchResultPage) },
+            { "ZumenSearch.Views.Rent.CommercialSearchPage", typeof(Views.Rent.CommercialSearchPage) },
+            { "ZumenSearch.Views.Rent.CommercialSearchResultPage", typeof(Views.Rent.CommercialSearchResultPage) },
+            { "ZumenSearch.Views.Rent.ParkingSearchPage", typeof(Views.Rent.ParkingSearchPage) },
+            { "ZumenSearch.Views.Rent.ParkingSearchResultPage", typeof(Views.Rent.ParkingSearchResultPage) },
+            { "ZumenSearch.Views.Rent.LessorSearchPage", typeof(Views.Rent.LessorSearchPage) },
+            { "ZumenSearch.Views.Rent.LessorSearchResultPage", typeof(Views.Rent.LessorSearchResultPage) },
+            { "ZumenSearch.Views.Sale.ResidentialSearchPage", typeof(Views.Sale.ResidentialSearchPage) },
+            { "ZumenSearch.Views.Sale.ResidentialSearchResultPage", typeof(Views.Sale.ResidentialSearchResultPage) },
+            { "ZumenSearch.Views.BrokerSearchPage", typeof(Views.BrokerSearchPage) },
+            { "ZumenSearch.Views.BrokerSearchResultPage", typeof(Views.BrokerSearchResultPage) },
+            { "ZumenSearch.Views.SettingsPage", typeof(Views.SettingsPage) }
+        };
+
+
     private readonly INavigationService _navigationService;
 
     public ShellPage(ViewModels.MainViewModel viewModel, INavigationService navigationService)
@@ -30,7 +50,7 @@ public sealed partial class ShellPage : Page
 
         InitializeComponent();
 
-        _navigationService.Initialize(ContentFrame);
+        _navigationService.Initialize(ContentFrame, _pageMap);
 
         MainWindow.SetTitleBar(this.AppTitleBar);
         MainWindow.Activated += MainWindow_Activated;

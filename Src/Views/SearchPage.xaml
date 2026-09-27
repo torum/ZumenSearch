@@ -53,11 +53,11 @@
                             <AppBarButton.Flyout>
                                 <MenuFlyout Placement="Bottom">
                                     <MenuFlyoutItem Text="賃貸：住居用" Command="{x:Bind ViewModel.AddNewRentResidentialBldgCommand}"/>
-                                    <MenuFlyoutItem Text="賃貸：事業用"/>
+                                    <MenuFlyoutItem Text="賃貸：事業用" Command="{x:Bind ViewModel.AddNewRentCommercialCommand}"/>
                                     <MenuFlyoutItem Text="賃貸：駐車場"/>
-                                    <MenuFlyoutItem Text="貸主"/>
+                                    <MenuFlyoutItem Text="貸主" Command="{x:Bind ViewModel.AddNewRentLessorCommand}"/>
                                     <MenuFlyoutSeparator/>
-                                    <MenuFlyoutItem Text="宅建業者"/>
+                                    <MenuFlyoutItem Text="宅建業者" Command="{x:Bind ViewModel.AddNewBrokerCommand}"/>
                                 </MenuFlyout>
                             </AppBarButton.Flyout>
                         </AppBarButton>

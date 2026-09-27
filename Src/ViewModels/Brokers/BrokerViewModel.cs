@@ -2,8 +2,6 @@
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.Globalization;
 using ZumenSearch.Models;
 using ZumenSearch.Models.Base;
 using ZumenSearch.Models.Common;

@@ -36,7 +36,7 @@ public sealed partial class BasicPage : Page
         if ((e.Parameter is ViewModels.Rent.Residentials.PropertyViewModel) && (e.Parameter != null))
         {
             ViewModel = e.Parameter as ViewModels.Rent.Residentials.PropertyViewModel;
-
+            Bindings.Update();
             if (!_initialized)
             {
                 //Init();

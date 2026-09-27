@@ -19,6 +19,7 @@ public sealed partial class ContractPage : Page
         {
             //_editorShell = e.Parameter as Views.Rent.Residentials.Editor.EditorShell;
             ViewModel = e.Parameter as ViewModels.Rent.Residentials.Listing.ListingViewModel;
+            Bindings.Update();
         }
 
         base.OnNavigatedTo(e);

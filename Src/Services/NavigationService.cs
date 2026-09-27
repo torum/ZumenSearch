@@ -1,6 +1,5 @@
 ﻿using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Animation;
-using System.Diagnostics;
 using ZumenSearch.Services.Contracts;
 
 namespace ZumenSearch.Services;
@@ -9,33 +8,19 @@ public class NavigationService : INavigationService
 {
     private Frame? _frame;
 
-    private readonly Dictionary<string, Type> _pageMap = new()
-        {
-            { "ZumenSearch.Views.SearchPage", typeof(Views.SearchPage) },
-            { "ZumenSearch.Views.SearchResultPage", typeof(Views.SearchResultPage) },
-            { "ZumenSearch.Views.Rent.ResidentialSearchPage", typeof(Views.Rent.ResidentialSearchPage) },
-            { "ZumenSearch.Views.Rent.ResidentialSearchResultPage", typeof(Views.Rent.ResidentialSearchResultPage) },
-            { "ZumenSearch.Views.Rent.CommercialSearchPage", typeof(Views.Rent.CommercialSearchPage) },
-            { "ZumenSearch.Views.Rent.CommercialSearchResultPage", typeof(Views.Rent.CommercialSearchResultPage) },
-            { "ZumenSearch.Views.Rent.ParkingSearchPage", typeof(Views.Rent.ParkingSearchPage) },
-            { "ZumenSearch.Views.Rent.ParkingSearchResultPage", typeof(Views.Rent.ParkingSearchResultPage) },
-            { "ZumenSearch.Views.Rent.LessorSearchPage", typeof(Views.Rent.LessorSearchPage) },
-            { "ZumenSearch.Views.Rent.LessorSearchResultPage", typeof(Views.Rent.LessorSearchResultPage) },
-            { "ZumenSearch.Views.Sale.ResidentialSearchPage", typeof(Views.Sale.ResidentialSearchPage) },
-            { "ZumenSearch.Views.Sale.ResidentialSearchResultPage", typeof(Views.Sale.ResidentialSearchResultPage) },
-            { "ZumenSearch.Views.BrokerSearchPage", typeof(Views.BrokerSearchPage) },
-            { "ZumenSearch.Views.BrokerSearchResultPage", typeof(Views.BrokerSearchResultPage) },
-            { "ZumenSearch.Views.SettingsPage", typeof(Views.SettingsPage) }
-        };
 
-    public void Initialize(Frame frame)
+    public void Initialize(Frame frame, Dictionary<string, Type> _pages)
     {
         _frame = frame;
+        _pageMap = _pages;
     }
+
+    private Dictionary<string, Type>? _pageMap;
 
     public bool NavigateTo(object? selectedPage, SlideNavigationTransitionEffect effect)
     {
         if (_frame is null) return false;
+        if (_pageMap is null) return false;
 
         string? tag = null;
         if (selectedPage is NavigationViewItem navItem)
@@ -58,10 +43,6 @@ public class NavigationService : INavigationService
         }
     }
 
-    public void NavigateToMainSearch()
-    {
-        _frame?.Navigate(typeof(Views.SearchPage), _frame, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom });
-    }
 
     public void GoBack()
     {

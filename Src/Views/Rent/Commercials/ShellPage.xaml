@@ -18,37 +18,39 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="40" />
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" MaxHeight="120"/>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <TextBlock
-            Grid.Row="0"
-            Text="{x:Bind ViewModel.WindowTitle, Mode=OneWay}"
-            Margin="12,0"
-            VerticalAlignment="Center"
-            TextTrimming="CharacterEllipsis" />
+        <Grid Grid.Row="0" x:Name="AppTitleBar" Margin="0,0,0,0" Canvas.ZIndex="1" IsHitTestVisible="False" VerticalAlignment="Center" HorizontalAlignment="Stretch">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="150" />
+            </Grid.ColumnDefinitions>
 
-        <InfoBar
-            Grid.Row="1"
+            <Image x:Name="AppTitleBarIcon" Grid.Row="0" Grid.Column="0" Source="/Assets/App.ico" HorizontalAlignment="Left" Width="18" Height="18" Margin="12,0,0,0" VerticalAlignment="Center"/>
+
+            <TextBlock x:Name="AppTitleBarText" Grid.Row="0" Grid.Column="1" Text="{x:Bind ViewModel.WindowTitle, Mode=OneWay}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" Margin="12,0,0,0" VerticalAlignment="Center"/>
+
+        </Grid>
+
+        <InfoBar Grid.Row="1"
             IsOpen="{x:Bind ViewModel.IsInfoBarErrorOpen, Mode=TwoWay}"
             Message="{x:Bind ViewModel.InfoBarErrorMessage, Mode=OneWay}"
             Severity="Error" />
 
-        <Grid
-            Grid.Row="2"
-            Margin="36,0">
-
+        <Grid Grid.Row="2" Margin="36,0" BorderThickness="0,0,0,1" BorderBrush="{ThemeResource NavigationViewItemSeparatorForeground}">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
             <BreadcrumbBar
                 Grid.Column="0"
                 ItemsSource="{x:Bind ViewModel.BreadcrumbItems, Mode=OneWay}"
-                IsHitTestVisible="False">
+                IsHitTestVisible="False" AllowFocusOnInteraction="False" IsTabStop="False" VerticalAlignment="Center">
 
                 <BreadcrumbBar.ItemTemplate>
                     <DataTemplate x:DataType="modcommon:Breadcrumb">
@@ -66,17 +68,54 @@
                 </BreadcrumbBar.ItemTemplate>
             </BreadcrumbBar>
 
-            <Button
-                Grid.Column="1"
-                Content="保存"
-                Command="{x:Bind ViewModel.SaveCommand}"
-                Padding="24,8" />
+            <AppBarButton
+                Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center"
+                Icon="Save"
+                Label="保存"
+                ToolTipService.ToolTip="保存（Ctrl+S）"
+                Command="{x:Bind ViewModel.SaveCommand}">
+                <AppBarButton.KeyboardAccelerators>
+                    <KeyboardAccelerator Key="S" Modifiers="Control" />
+                </AppBarButton.KeyboardAccelerators>
+            </AppBarButton>
         </Grid>
 
-        <Frame
-            x:Name="ContentFrame"
-            Grid.Row="3"
-            Margin="0,8,0,0" />
+        <Grid Grid.Row="3">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <NavigationView
+                x:Name="NavView"
+                Grid.Row="0"
+                Margin="36,3,36,0"
+                PaneDisplayMode="Top"
+                IsTitleBarAutoPaddingEnabled="True"
+                SelectionFollowsFocus="Disabled"
+                IsPaneToggleButtonVisible="False"
+                IsSettingsVisible="False"
+                IsBackButtonVisible="Collapsed"
+                Loaded="NavView_Loaded"
+                ItemInvoked="NavView_ItemInvoked"
+                BackRequested="NavView_BackRequested">
+                <NavigationView.MenuItems>
+                    <NavigationViewItem
+                        Content="基本"
+                        Tag="ZumenSearch.Views.Rent.Commercials.BasicPage" />
+
+                </NavigationView.MenuItems>
+                <NavigationView.FooterMenuItems>
+                    <NavigationViewItem Content="募集区画" Tag="ZumenSearch.Views.Rent.Commercials.UnitListPage" />
+                </NavigationView.FooterMenuItems>
+            </NavigationView>
+
+            <Frame
+                x:Name="ContentFrame"
+                Grid.Row="1"
+                NavigationFailed="ContentFrame_NavigationFailed"
+                Navigated="ContentFrame_Navigated" />
+        </Grid>
     </Grid>
 
 </Page>

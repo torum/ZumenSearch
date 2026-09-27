@@ -3,7 +3,6 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Diagnostics;
 using Windows.Data.Pdf;
 using Windows.Storage;
 using Windows.Storage.Streams;

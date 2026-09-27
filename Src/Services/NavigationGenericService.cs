@@ -1,9 +1,5 @@
-﻿using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
+﻿using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Animation;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
-using ZumenSearch.Models.Common;
 using ZumenSearch.Services.Contracts;
 
 namespace ZumenSearch.Services;

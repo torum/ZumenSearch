@@ -20,6 +20,7 @@ public sealed partial class FacilitiesPage : Page
         {
             //_editorShell = e.Parameter as Views.Rent.Residentials.EditorShell;
             ViewModel = e.Parameter as ViewModels.Rent.Residentials.PropertyViewModel;
+            Bindings.Update();
         }
 
         base.OnNavigatedTo(e);

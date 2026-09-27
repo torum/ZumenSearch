@@ -1,10 +1,8 @@
 ﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using System.Diagnostics;
 using ZumenSearch.Models.Common;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.Views.Dialogs;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ZumenSearch.Services;
 

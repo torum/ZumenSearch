@@ -31,7 +31,7 @@ public sealed partial class BasicPage : Page
         {
             //_editorShell = e.Parameter as Views.Rent.Residentials.Editor.EditorShell;
             ViewModel = e.Parameter as ViewModels.Rent.Residentials.Listing.ListingViewModel;
-
+            Bindings.Update();
             if (!_initialized)
             {
                 //Init();

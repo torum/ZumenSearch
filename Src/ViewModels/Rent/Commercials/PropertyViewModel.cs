@@ -1,7 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Globalization;
 using ZumenSearch.Models.Base;
 using ZumenSearch.Models.Common;
@@ -43,7 +42,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient
     [
         new()
         {
-            Name = "賃貸事業用",
+            Name = "建物",
             Page = BasicPageName
         },
         new()
@@ -52,6 +51,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient
             Page = BasicPageName
         }
     ];
+
+    public ObservableCollection<Models.Rent.Commercials.Listing.Listing> Units { get; } = [];
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SaveCommand))]
@@ -391,6 +392,39 @@ public sealed partial class PropertyViewModel : ObservableRecipient
 
         IsNameHasError = false;
         return true;
+    }
+
+    [RelayCommand]
+    private void AddNewUnit()
+    {
+        var unit = new Models.Rent.Commercials.Listing.Listing(
+            Guid.CreateVersion7().ToString("N"),
+            EnumEntryStatus.New,
+            _building.Id,
+            _building.Status,
+            IsUnitOwnership,
+            Name);
+
+        var shellFactory = App.GetService<
+            Services.Extensions.AbstractFactory.IAbstractFactory<
+                Models.Rent.Commercials.Listing.Listing,
+                Views.Rent.Commercials.Listing.ShellPage>>();
+
+        var shell = shellFactory.Create(unit);
+        Units.Add(unit);
+        IsDirty = true;
+
+        if (shell.Window.AppWindow.Presenter is Microsoft.UI.Windowing.OverlappedPresenter presenter)
+        {
+            presenter.IsResizable = true;
+            presenter.IsModal = false;
+            presenter.IsAlwaysOnTop = false;
+            presenter.PreferredMinimumWidth = 1000;
+            presenter.PreferredMinimumHeight = 700;
+        }
+
+        shell.Window.Activate();
+        shell.Window.AppWindow.MoveInZOrderAtTop();
     }
 
     [RelayCommand(CanExecute = nameof(CanSave))]

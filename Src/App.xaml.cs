@@ -119,26 +119,30 @@ public partial class App : Application
                 services.AddGenericFactory<Models.Rent.Residentials.Listing.Listing, INavigationGenericService, IDialogGenericService, ViewModels.Rent.Residentials.Listing.ListingViewModel>();
                 services.AddGenericFactory<Models.Rent.Residentials.Listing.Listing, Views.Rent.Residentials.Listing.ShellPage>();
 
+                services.AddTransient<ViewModels.Rent.Commercials.PropertyViewModel>();
+                services.AddTransient<Views.Rent.Commercials.ShellPage>();
+                services.AddGenericFactory<Models.Rent.Commercials.Property, INavigationGenericService, IDialogGenericService, ViewModels.Rent.Commercials.PropertyViewModel>();
+                services.AddGenericFactory<Models.Rent.Commercials.Property, Views.Rent.Commercials.ShellPage>();
+
+                services.AddTransient<ViewModels.Rent.Commercials.Listing.ListingViewModel>();
+                services.AddTransient<Views.Rent.Commercials.Listing.ShellPage>(); 
+                services.AddGenericFactory<Models.Rent.Residentials.Listing.Listing, INavigationGenericService, IDialogGenericService, ViewModels.Rent.Commercials.Listing.ListingViewModel>();
+                services.AddGenericFactory<Models.Rent.Commercials.Listing.Listing, Views.Rent.Commercials.Listing.ShellPage>();
+
                 services.AddTransient<ViewModels.Rent.Lessors.LessorViewModel>();
                 services.AddTransient<Views.Rent.Lessors.ShellPage>();
                 services.AddGenericFactory<Models.Base.PersonBase, INavigationGenericService, IDialogGenericService, ViewModels.Rent.Lessors.LessorViewModel>();
                 services.AddGenericFactory<Models.Base.PersonBase, Views.Rent.Lessors.ShellPage>();
-
-                services.AddTransient<ViewModels.Brokers.BrokerViewModel>();
-                services.AddTransient<Views.Brokers.ShellPage>();
-                services.AddGenericFactory<Models.Base.PersonBase, INavigationGenericService, IDialogGenericService, ViewModels.Brokers.BrokerViewModel>();
-                services.AddGenericFactory<Models.Base.PersonBase, Views.Brokers.ShellPage>();
 
                 services.AddTransient<ViewModels.Sale.Residentials.PropertyViewModel>();
                 services.AddTransient<Views.Sale.Residentials.ShellPage>();
                 services.AddGenericFactory<Models.Sale.Residentials.Property, INavigationGenericService, IDialogGenericService, ViewModels.Sale.Residentials.PropertyViewModel>();
                 services.AddGenericFactory<Models.Sale.Residentials.Property, Views.Sale.Residentials.ShellPage>();
 
-                services.AddTransient<ViewModels.Rent.Commercials.PropertyViewModel>();
-                services.AddTransient<Views.Rent.Commercials.ShellPage>();
-                services.AddGenericFactory<Models.Rent.Commercials.Property, INavigationGenericService, IDialogGenericService, ViewModels.Rent.Commercials.PropertyViewModel>();
-                services.AddGenericFactory<Models.Rent.Commercials.Property, Views.Rent.Commercials.ShellPage>();
-
+                services.AddTransient<ViewModels.Brokers.BrokerViewModel>();
+                services.AddTransient<Views.Brokers.ShellPage>();
+                services.AddGenericFactory<Models.Base.PersonBase, INavigationGenericService, IDialogGenericService, ViewModels.Brokers.BrokerViewModel>();
+                services.AddGenericFactory<Models.Base.PersonBase, Views.Brokers.ShellPage>();
 
                 // Instead of AddEditorFactory for each, typeof.. <,> registers all.
                 //services.AddSingleton(typeof(IAbstractFactory<,>), typeof(AbstractFactory<,>)); 

@@ -1,8 +1,5 @@
 ﻿using Microsoft.Data.Sqlite;
 using System.Data;
-using System.Diagnostics;
-using System.Reflection.PortableExecutable;
-using System.Transactions;
 using ZumenSearch.Helpers;
 using ZumenSearch.Models;
 using ZumenSearch.Models.Base;
@@ -17,8 +14,7 @@ namespace ZumenSearch.Services;
 
 // TODO:
 // * Consider implementing IDisposable to properly dispose of the ReaderWriterLockSlim and any other disposable resources used by this service.
-// * Reuse code with other method.
-// * Simplify Error handling.
+// * Reuse common code with other method.
 // * Create INDEX for the rest of tables.
 
 public sealed class DataAccessService : IDataAccessService
@@ -166,6 +162,31 @@ public sealed class DataAccessService : IDataAccessService
                     " )";
                 tableCmd.ExecuteNonQuery();
 
+                tableCmd.CommandText = """
+                    CREATE INDEX IF NOT EXISTS ix_properties_updated_at
+                        ON properties(updated_at);
+
+                    CREATE INDEX IF NOT EXISTS ix_properties_kind_name
+                        ON properties(property_kind, name);
+
+                    CREATE INDEX IF NOT EXISTS ix_rent_residential_pictures_property_id
+                        ON rent_residential_pictures(property_id);
+
+                    CREATE INDEX IF NOT EXISTS ix_rent_residential_pdfs_property_id
+                        ON rent_residential_pdfs(property_id);
+                    
+                    CREATE INDEX IF NOT EXISTS ix_rent_residential_rooms_property_id
+                        ON rent_residential_rooms(property_id);
+
+                    CREATE INDEX IF NOT EXISTS ix_rent_residential_room_pictures_listing_id
+                        ON rent_residential_room_pictures(listing_id);
+
+                    CREATE INDEX IF NOT EXISTS ix_rent_residential_room_pdfs_listing_id
+                        ON rent_residential_room_pdfs(listing_id);
+                    """;
+                // TODO: more?
+                tableCmd.ExecuteNonQuery();
+
                 #endregion
 
                 #region == Rent Commercial ==
@@ -274,6 +295,15 @@ public sealed class DataAccessService : IDataAccessService
                     ")";
                 tableCmd.ExecuteNonQuery();
                 */
+
+                tableCmd.CommandText = """
+                    CREATE INDEX IF NOT EXISTS ix_rent_lessors_properties_property_id
+                        ON rent_lessors_properties_listings(property_id);
+
+                    CREATE INDEX IF NOT EXISTS ix_rent_lessors_properties_lessor_id
+                        ON rent_lessors_properties_listings(lessor_id);
+                    """;
+                tableCmd.ExecuteNonQuery();
 
                 #endregion
 

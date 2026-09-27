@@ -62,6 +62,7 @@ public sealed partial class LessorListPage : Page
             //_editorShell = e.Parameter as Views.Rent.Residentials.Editor.EditorShell;
             //ViewModel = _editorShell?.ViewModel as ViewModels.Rent.Residentials.Editor.EditorViewModel;
             ViewModel = e.Parameter as ViewModels.Rent.Residentials.PropertyViewModel;
+            Bindings.Update();
         }
 
         base.OnNavigatedTo(e);

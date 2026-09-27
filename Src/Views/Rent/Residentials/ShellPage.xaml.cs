@@ -7,11 +7,9 @@ using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 using WinRT.Interop;
 using ZumenSearch.Models.Common;
-using ZumenSearch.Services;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.Services.Extensions.AbstractFactory;
 
