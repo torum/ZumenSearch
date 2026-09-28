@@ -10,12 +10,68 @@ namespace ZumenSearch.ViewModels.Rent.Commercials.Listing;
 
 public sealed partial class ListingViewModel : ObservableRecipient
 {
-    private const string BasicPageName =
-        "ZumenSearch.Views.Rent.Commercials.Listing.BasicPage";
+    private const string BasicPageName = "ZumenSearch.Views.Rent.Commercials.Listing.BasicPage";
 
     private readonly Models.Rent.Commercials.Listing.Listing _unit;
     private readonly IDataAccessService _dataAccessService;
     private readonly INavigationGenericService _navigationService;
+
+    public ListingViewModel(
+        Models.Rent.Commercials.Listing.Listing unit,
+        INavigationGenericService navigationService,
+        IDataAccessService dataAccessService)
+    {
+        _unit = unit ?? throw new ArgumentNullException(nameof(unit));
+        _navigationService = navigationService;
+        _dataAccessService = dataAccessService;
+
+        PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName is not nameof(IsDirty)
+                and not nameof(IsInfoBarErrorOpen)
+                and not nameof(InfoBarErrorMessage)
+                and not nameof(IsNameHasError)
+                and not nameof(WindowTitle))
+            {
+                IsDirty = true;
+            }
+        };
+
+        PopulateValues();
+        IsDirty = false;
+        IsActive = true;
+    }
+
+    #region == Properties ==
+
+    public string WindowTitle
+    {
+        get
+        {
+            var title = $"{field}：{_unit.PropertyName}";
+            if (!string.IsNullOrWhiteSpace(Name))
+            {
+                title += $"：{Name}";
+            }
+
+            return $"{title}：{(_unit.Status == EnumEntryStatus.New ? "新規" : "編集")}";
+        }
+        set => OnPropertyChanged();
+    } = "賃貸事業用";
+
+    public ObservableCollection<Breadcrumb> BreadcrumbItems { get; } =
+    [
+        new()
+        {
+            Name = "募集物件",
+            Page = BasicPageName
+        },
+        new()
+        {
+            Name = "基本",
+            Page = BasicPageName
+        }
+    ];
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SaveCommand))]
@@ -63,68 +119,41 @@ public sealed partial class ListingViewModel : ObservableRecipient
     [ObservableProperty] public partial string OtherConditions { get; set; } = string.Empty;
     [ObservableProperty] public partial string Remarks { get; set; } = string.Empty;
 
-    public string WindowTitle
+    #endregion
+
+    #region == Public Methods ==
+
+    public void CleanUp()
     {
-        get
+        /*
+        // TODO: ?
+        foreach (var item in Pictures)
         {
-            var title = $"{field}：{_unit.PropertyName}";
-            if (!string.IsNullOrWhiteSpace(Name))
-            {
-                title += $"：{Name}";
-            }
-
-            return $"{title}：{(_unit.Status == EnumEntryStatus.New ? "新規" : "編集")}";
+            item.PropertyChanged -= OnPicturePropertyChanged;
         }
-        set => OnPropertyChanged();
-    } = "賃貸事業用";
 
-    public ObservableCollection<Breadcrumb> BreadcrumbItems { get; } =
-    [
-        new()
-        {
-            Name = "募集物件",
-            Page = BasicPageName
-        },
-        new()
-        {
-            Name = "基本",
-            Page = BasicPageName
-        }
-    ];
+        // TODO: ?
+        Pictures.Clear();
+        */
 
-    public ListingViewModel(
-        Models.Rent.Commercials.Listing.Listing unit,
-        INavigationGenericService navigationService,
-        IDataAccessService dataAccessService)
-    {
-        _unit = unit ?? throw new ArgumentNullException(nameof(unit));
-        _navigationService = navigationService;
-        _dataAccessService = dataAccessService;
-
-        PropertyChanged += (_, args) =>
-        {
-            if (args.PropertyName is not nameof(IsDirty)
-                and not nameof(IsInfoBarErrorOpen)
-                and not nameof(InfoBarErrorMessage)
-                and not nameof(IsNameHasError)
-                and not nameof(WindowTitle))
-            {
-                IsDirty = true;
-            }
-        };
-
-        PopulateValues();
-        IsDirty = false;
-        IsActive = true;
+        // Unsubscribe
+        //WeakReferenceMessenger.Default.UnregisterAll(this);
+        //or
+        this.IsActive = false;
     }
 
     public void DiscardChanges()
     {
-        PopulateValues();
+        // lator
+        //DiscardUnsavedFiles();
+
+        //_room = null;
         IsDirty = false;
-        IsInfoBarErrorOpen = false;
-        IsNameHasError = false;
     }
+
+    #endregion
+
+    #region == Private Methods ==
 
     private void PopulateValues()
     {
@@ -189,8 +218,30 @@ public sealed partial class ListingViewModel : ObservableRecipient
         return true;
     }
 
+    private static string Format(decimal value) =>
+        value == 0
+            ? string.Empty
+            : value.ToString(CultureInfo.CurrentCulture);
+
+    private static decimal ParseDecimal(string? value)
+    {
+        var normalized = Helpers.Common.ReplaceZenkakuNumbers(value ?? string.Empty);
+
+        return decimal.TryParse(
+            normalized,
+            NumberStyles.Number,
+            CultureInfo.CurrentCulture,
+            out var result) && result >= 0
+            ? result
+            : 0;
+    }
+
+    #endregion
+
+    #region == Commands ==
+
     [RelayCommand(CanExecute = nameof(CanSave))]
-    public void Save()
+    private void Save()
     {
         if (!IsDirty)
         {
@@ -244,21 +295,6 @@ public sealed partial class ListingViewModel : ObservableRecipient
 
     private bool CanSave() => IsDirty;
 
-    private static string Format(decimal value) =>
-        value == 0
-            ? string.Empty
-            : value.ToString(CultureInfo.CurrentCulture);
+    #endregion
 
-    private static decimal ParseDecimal(string? value)
-    {
-        var normalized = Helpers.Common.ReplaceZenkakuNumbers(value ?? string.Empty);
-
-        return decimal.TryParse(
-            normalized,
-            NumberStyles.Number,
-            CultureInfo.CurrentCulture,
-            out var result) && result >= 0
-            ? result
-            : 0;
-    }
 }

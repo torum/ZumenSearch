@@ -22,9 +22,9 @@
             HorizontalAlignment="Right">
             <AppBarButton
                 Icon="Add"
-                Label="区画追加"
+                Label="新規"
                 Command="{x:Bind ViewModel.AddNewUnitCommand}"
-                ToolTipService.ToolTip="区画を追加" />
+                ToolTipService.ToolTip="追加" />
         </CommandBar>
 
         <Border

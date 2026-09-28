@@ -64,7 +64,7 @@ public sealed partial class ShellPage : Page
         this.Unloaded += ShellPage_Unloaded;
         this.BreadcrumbBar1.ItemClicked += BreadcrumbBar_ItemClicked;
 
-        Window.Title = "賃貸住居用：部屋";
+        Window.Title = "賃貸住居用：募集物件";
         Window.ExtendsContentIntoTitleBar = true;
         Window.Activated += Window_Activated;
         Window.Closed += Window_Closed;

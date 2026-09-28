@@ -21,7 +21,15 @@ public partial class MainViewModel : ObservableRecipient,
     IRecipient<WindowClosedMessage>
 {
 
-    #region == Private Variables ==
+    #region == Private Variables and Const ==
+
+    private const string SearchResultPagePath = "ZumenSearch.Views.SearchResultPage";
+    private const string RentResidentialSearchResultPagePath = "ZumenSearch.Views.Rent.ResidentialSearchResultPage";
+    private const string RentCommercialSearchResultPagePath = "ZumenSearch.Views.Rent.CommercialSearchResultPage";
+    private const string RentParkingSearchResultPagePath = "ZumenSearch.Views.Rent.ParkingSearchResultPage";
+    private const string RentLessorSearchResultPagePath = "ZumenSearch.Views.Rent.LessorSearchResultPage";
+    private const string SaleResidentialSearchResultPagePath = "ZumenSearch.Views.Sale.ResidentialSearchResultPage";
+    private const string BrokerSearchResultPagePath = "ZumenSearch.Views.BrokerSearchResultPage";
 
     private readonly CancellationTokenSource _cts = new();
 
@@ -73,7 +81,7 @@ public partial class MainViewModel : ObservableRecipient,
         this.IsActive = true;
     }
 
-    #region == Public Properties ==
+    #region == Properties ==
 
     [ObservableProperty]
     public partial string VersionDescription { get; set; }
@@ -92,11 +100,17 @@ public partial class MainViewModel : ObservableRecipient,
     public int RentResidentialListingEditorWinLeft = 130;
     public int RentResidentialListingEditorWinTop = 130;
 
-    public readonly List<Views.Rent.Commercials.EditorWindow> RentCommercEditorList = [];
-    public int RentCommercEditorWinWidth = 1366;
-    public int RentCommercEditorWinHeight = 768;
-    public int RentCommercEditorWinLeft = 130;
-    public int RentCommercEditorWinTop = 130;
+    public readonly List<Views.Rent.Commercials.EditorWindow> RentCommercialEditorList = [];
+    public int RentCommercialEditorWinWidth = 1366;
+    public int RentCommercialEditorWinHeight = 768;
+    public int RentCommercialEditorWinLeft = 130;
+    public int RentCommercialEditorWinTop = 130;
+
+    public readonly List<Views.Rent.Commercials.Listing.EditorWindow> RentCommercialListingEditorList = [];
+    public int RentCommercialListingEditorWinWidth = 1366;
+    public int RentCommercialListingEditorWinHeight = 768;
+    public int RentCommercialListingEditorWinLeft = 130;
+    public int RentCommercialListingEditorWinTop = 130;
 
     public readonly List<Views.Rent.Lessors.EditorWindow> LessorEditorList = [];
     public int LessorEditorWinWidth = 1366;
@@ -398,7 +412,11 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
         }
         else if (win is Views.Rent.Commercials.EditorWindow cwin)
         {
-            this.RentCommercEditorList.Remove(cwin);
+            this.RentCommercialEditorList.Remove(cwin);
+        }
+        else if (win is Views.Rent.Commercials.Listing.EditorWindow clwin)
+        {
+            this.RentCommercialListingEditorList.Remove(clwin);
         }
         else if (win is Views.Rent.Lessors.EditorWindow lewin)
         {
@@ -913,7 +931,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
 
             RentResidentialBldgSearchResult = new(res.PropertySearchResult);
 
-            _navigationService.NavigateTo("ZumenSearch.Views.SearchResultPage", SlideNavigationTransitionEffect.FromLeft);//Navigate(typeof(Views.Rent.Residentials.SearchResultPage), null, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });
+            _navigationService.NavigateTo(SearchResultPagePath, SlideNavigationTransitionEffect.FromLeft);//Navigate(typeof(Views.Rent.Residentials.SearchResultPage), null, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });
 
             //_navigationService.NavigateTo("ZumenSearch.Views.Rent.Residentials.BldgShellPage", SlideNavigationTransitionEffect.FromLeft);//Navigate(typeof(Views.Rent.Residentials.SearchResultPage), null, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });
         }
@@ -956,7 +974,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
         {
             RentResidentialRoomSearchResult = new(res.ListingSearchResult);
 
-            _navigationService.NavigateTo("ZumenSearch.Views.Rent.ResidentialSearchResultPage", SlideNavigationTransitionEffect.FromLeft);//Navigate(typeof(Views.Rent.Residentials.SearchResultPage), null, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });
+            _navigationService.NavigateTo(RentResidentialSearchResultPagePath, SlideNavigationTransitionEffect.FromLeft);//Navigate(typeof(Views.Rent.Residentials.SearchResultPage), null, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });
         }
     }
 
@@ -1180,14 +1198,9 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
     [RelayCommand]
     private async Task SearchRentCommercial(string? queryText)
     {
-        var query = string.IsNullOrWhiteSpace(queryText)
-            ? "*"
-            : queryText.Trim();
+        var query = string.IsNullOrWhiteSpace(queryText) ? "*" : queryText.Trim();
 
-        var result = await Task.Run(
-            () => _dataAccessService
-                .SelectRentCommercialsByNameKeyword(query),
-            _cts.Token);
+        var result = await Task.Run(() => _dataAccessService.SelectRentCommercialsByNameKeyword(query),_cts.Token);
 
         if (result.IsError)
         {
@@ -1199,22 +1212,19 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
                 result.Error.MethodName + Environment.NewLine +
                 result.Error.FullDump);
 
+            // TODO: show infobar
+
             return;
         }
 
         foreach (var item in result.PropertySearchResult)
         {
-            item.BasePath = Path.Combine(
-                App.PropertyBlobDataFolder,
-                item.Id);
+            item.BasePath = Path.Combine( App.PropertyBlobDataFolder, item.Id);
         }
 
-        RentCommercialBldgSearchResult =
-            new(result.PropertySearchResult);
+        RentCommercialBldgSearchResult = new(result.PropertySearchResult);
 
-        _navigationService.NavigateTo(
-            "ZumenSearch.Views.Rent.CommercialSearchResultPage",
-            SlideNavigationTransitionEffect.FromLeft);
+        _navigationService.NavigateTo(RentCommercialSearchResultPagePath, SlideNavigationTransitionEffect.FromLeft);
     }
 
     [RelayCommand]
@@ -1226,7 +1236,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
 
         var shell = _shellRentCommercialPropertyFactory.Create(property);
 
-        RentCommercEditorList.Add(shell.Window);
+        RentCommercialEditorList.Add(shell.Window);
 
         if (shell.Window.AppWindow.Presenter
             is Microsoft.UI.Windowing.OverlappedPresenter presenter)
@@ -1238,7 +1248,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
             presenter.PreferredMinimumHeight = 794;
         }
 
-        shell.Window.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(RentCommercEditorWinLeft, RentCommercEditorWinTop, RentCommercEditorWinWidth, RentCommercEditorWinHeight));
+        shell.Window.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(RentCommercialEditorWinLeft, RentCommercialEditorWinTop, RentCommercialEditorWinWidth, RentCommercialEditorWinHeight));
 
         //editorWindow.AppWindow.Show();
         shell.Window.Activate();
@@ -1276,7 +1286,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
             _shellRentCommercialPropertyFactory.Create(
                 result.Building);
 
-        RentCommercEditorList.Add(shell.Window);
+        RentCommercialEditorList.Add(shell.Window);
 
         if (shell.Window.AppWindow.Presenter
             is Microsoft.UI.Windowing.OverlappedPresenter presenter)
@@ -1378,7 +1388,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
         }
         */
 
-        _navigationService.NavigateTo("ZumenSearch.Views.Rent.ParkingSearchResultPage", SlideNavigationTransitionEffect.FromLeft);
+        _navigationService.NavigateTo(RentParkingSearchResultPagePath, SlideNavigationTransitionEffect.FromLeft);
     }
 
     #endregion
@@ -1417,7 +1427,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
         {
             RentLessorSearchResult = new(res.PersonSearchResult);
 
-            _navigationService.NavigateTo("ZumenSearch.Views.Rent.LessorSearchResultPage", SlideNavigationTransitionEffect.FromLeft);
+            _navigationService.NavigateTo(RentLessorSearchResultPagePath, SlideNavigationTransitionEffect.FromLeft);
         }
     }
 
@@ -1722,8 +1732,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
         SaleResidentialBldgSearchResult =
             new(result.PropertySearchResult);
 
-        _navigationService.NavigateTo(
-            "ZumenSearch.Views.Sale.ResidentialSearchResultPage",
+        _navigationService.NavigateTo(SaleResidentialSearchResultPagePath,
             SlideNavigationTransitionEffect.FromLeft);
     }
 
@@ -1883,7 +1892,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
         {
             BrokerSearchResult = new(res.PersonSearchResult);
 
-            _navigationService.NavigateTo("ZumenSearch.Views.BrokerSearchResultPage", SlideNavigationTransitionEffect.FromLeft);
+            _navigationService.NavigateTo(BrokerSearchResultPagePath, SlideNavigationTransitionEffect.FromLeft);
         }
     }
 

@@ -153,19 +153,30 @@ public sealed partial class ShellPage : Page
         if (_isClosing)
         {
             // Prevent re-entrancy if already in the process of closing.
-            args.Cancel = true;
-            if (_closingWindow is not null)
+            try
             {
-                IntPtr hWnd = WindowNative.GetWindowHandle(_closingWindow);
-                NativeMethods.ShowWindow(hWnd, NativeMethods.SW_RESTORE); // Ensure it's not minimized
-                NativeMethods.SetForegroundWindow(hWnd); // Attempt to set it as the foreground window
+                if (_closingWindow is not null)
+                {
+                    IntPtr hWnd = WindowNative.GetWindowHandle(_closingWindow);
+                    NativeMethods.ShowWindow(hWnd, NativeMethods.SW_RESTORE); // Ensure it's not minimized
+                    NativeMethods.SetForegroundWindow(hWnd); // Attempt to set it as the foreground window
 
-                // Activate the child editor window that is currently being closed.
-                _closingWindow.Activate();
-                _closingWindow.AppWindow.MoveInZOrderAtTop();
+                    // Activate the child editor window that is currently being closed.
+                    _closingWindow.Activate();
+                    _closingWindow.AppWindow.MoveInZOrderAtTop();
+
+                    args.Cancel = true;
+
+                    return;
+                }
             }
-
-            return;
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"@AppWindow_Closing: {ex}");
+                _closingWindow = null;
+                args.Cancel = false;
+                _isClosing = false;
+            }
         }
 
         _isClosing = true;
@@ -195,20 +206,34 @@ public sealed partial class ShellPage : Page
                         args.Cancel = true;
                         isCanceled = true;
 
-                        IntPtr hWnd = WindowNative.GetWindowHandle(editor);
-                        NativeMethods.ShowWindow(hWnd, NativeMethods.SW_RESTORE); // Ensure it's not minimized
-                        NativeMethods.SetForegroundWindow(hWnd); // Attempt to set it as the foreground window
-
-                        editor.Activate();
-                        editor.AppWindow.MoveInZOrderAtTop();
-
-                        _closingWindow = editor;
-                        if (editor.Content is Views.Rent.Residentials.Listing.ShellPage shell)
+                        try
                         {
-                            // Show confirmation dialog to user to save changes or not.
-                            await shell.ShowEditorCloseConfirmationDialog();
+                            IntPtr hWnd = WindowNative.GetWindowHandle(editor);
+                            NativeMethods.ShowWindow(hWnd, NativeMethods.SW_RESTORE); // Ensure it's not minimized
+                            NativeMethods.SetForegroundWindow(hWnd); // Attempt to set it as the foreground window
+
+                            editor.Activate();
+                            editor.AppWindow.MoveInZOrderAtTop();
+
+                            _closingWindow = editor;
+                            if (editor.Content is Views.Rent.Residentials.Listing.ShellPage shell)
+                            {
+                                // Show confirmation dialog to user to save changes or not.
+                                await shell.ShowEditorCloseConfirmationDialog();
+                            }
                         }
-                        _closingWindow = null;
+                        catch(Exception ex)
+                        {
+                            Debug.WriteLine($"@AppWindow_Closing: {ex}");
+                            args.Cancel = false;
+                            isCanceled = false;
+
+                            continue;
+                        }
+                        finally
+                        {
+                            _closingWindow = null;
+                        }
 
                         break;
                     }

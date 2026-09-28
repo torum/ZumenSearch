@@ -27,12 +27,9 @@ public sealed partial class MainWindow : Window
         _viewModel = viewModel;
         _dispatcherService = dispatcherService;
 
-        LoadSetting();
-
         InitializeComponent();
 
         ExtendsContentIntoTitleBar = true;
-        //SetTitleBar(AppTitleBar);
 
         //this.AppWindow.SetIcon(Path.Combine(AppContext.BaseDirectory, "Assets\\App.ico"));
         this.AppWindow.SetIcon("Assets/App.ico");
@@ -40,6 +37,8 @@ public sealed partial class MainWindow : Window
         this.AppWindow.Closing += AppWindow_Closing;
         this.Closed += Window_Closed;
         this.SizeChanged += Window_SizeChanged;
+
+        LoadSetting();
 
         if (this.AppWindow.Presenter is OverlappedPresenter presenter)
         {
@@ -245,43 +244,89 @@ public sealed partial class MainWindow : Window
                     var hoge = editWindow.Attribute("top");
                     if (hoge != null)
                     {
-                        _viewModel.RentCommercEditorWinTop = int.Parse(hoge.Value);
+                        _viewModel.RentCommercialEditorWinTop = int.Parse(hoge.Value);
                     }
 
                     hoge = editWindow.Attribute("left");
                     if (hoge != null)
                     {
-                        _viewModel.RentCommercEditorWinLeft = int.Parse(hoge.Value);
+                        _viewModel.RentCommercialEditorWinLeft = int.Parse(hoge.Value);
                     }
 
                     hoge = editWindow.Attribute("height");
                     if (hoge != null)
                     {
-                        _viewModel.RentCommercEditorWinHeight = int.Parse(hoge.Value);
+                        _viewModel.RentCommercialEditorWinHeight = int.Parse(hoge.Value);
                     }
 
                     hoge = editWindow.Attribute("width");
                     if (hoge != null)
                     {
-                        _viewModel.RentCommercEditorWinWidth = int.Parse(hoge.Value);
+                        _viewModel.RentCommercialEditorWinWidth = int.Parse(hoge.Value);
                     }
                 }
 
-                if (_viewModel.RentCommercEditorWinWidth < 500)
+                if (_viewModel.RentCommercialEditorWinWidth < 500)
                 {
-                    _viewModel.RentCommercEditorWinWidth = 500;
+                    _viewModel.RentCommercialEditorWinWidth = 500;
                 }
-                if (_viewModel.RentCommercEditorWinHeight < 500)
+                if (_viewModel.RentCommercialEditorWinHeight < 500)
                 {
-                    _viewModel.RentCommercEditorWinHeight = 500;
+                    _viewModel.RentCommercialEditorWinHeight = 500;
                 }
-                if (_viewModel.RentCommercEditorWinTop < 0)
+                if (_viewModel.RentCommercialEditorWinTop < 0)
                 {
-                    _viewModel.RentCommercEditorWinTop = 0;
+                    _viewModel.RentCommercialEditorWinTop = 0;
                 }
-                if (_viewModel.RentCommercEditorWinLeft < 0)
+                if (_viewModel.RentCommercialEditorWinLeft < 0)
                 {
-                    _viewModel.RentCommercEditorWinLeft = 0;
+                    _viewModel.RentCommercialEditorWinLeft = 0;
+                }
+
+                // RentCommercialListingEditorWindow element
+                editWindow = xdoc.Root.Element("RentCommercialListingEditorWindow");
+                if (editWindow != null)
+                {
+                    var hoge = editWindow.Attribute("top");
+                    if (hoge != null)
+                    {
+                        _viewModel.RentCommercialListingEditorWinTop = int.Parse(hoge.Value);
+                    }
+
+                    hoge = editWindow.Attribute("left");
+                    if (hoge != null)
+                    {
+                        _viewModel.RentCommercialListingEditorWinLeft = int.Parse(hoge.Value);
+                    }
+
+                    hoge = editWindow.Attribute("height");
+                    if (hoge != null)
+                    {
+                        _viewModel.RentCommercialListingEditorWinHeight = int.Parse(hoge.Value);
+                    }
+
+                    hoge = editWindow.Attribute("width");
+                    if (hoge != null)
+                    {
+                        _viewModel.RentCommercialListingEditorWinWidth = int.Parse(hoge.Value);
+                    }
+                }
+
+                if (_viewModel.RentCommercialListingEditorWinWidth < 500)
+                {
+                    _viewModel.RentCommercialListingEditorWinWidth = 500;
+                }
+                if (_viewModel.RentCommercialListingEditorWinHeight < 500)
+                {
+                    _viewModel.RentCommercialListingEditorWinHeight = 500;
+                }
+                if (_viewModel.RentCommercialListingEditorWinTop < 0)
+                {
+                    _viewModel.RentCommercialListingEditorWinTop = 0;
+                }
+                if (_viewModel.RentCommercialListingEditorWinLeft < 0)
+                {
+                    _viewModel.RentCommercialListingEditorWinLeft = 0;
                 }
 
                 // LessorEditorWindow element
@@ -398,17 +443,31 @@ public sealed partial class MainWindow : Window
                     args.Cancel = true;
                     isCancel = true;
 
-                    IntPtr hWnd = WindowNative.GetWindowHandle(editor);
-                    NativeMethods.ShowWindow(hWnd, NativeMethods.SW_RESTORE); // Ensure it's not minimized
-                    NativeMethods.SetForegroundWindow(hWnd); // Attempt to set it as the foreground window
-
-                    editor.Activate();
-                    editor.AppWindow.MoveInZOrderAtTop();
-
-                    // Show comfirmation dialog to user to save changes or not.
-                    if (editor.Content is Views.Rent.Residentials.Listing.ShellPage shell)
+                    try
                     {
-                        await shell.ShowEditorCloseConfirmationDialog();
+                        IntPtr hWnd = WindowNative.GetWindowHandle(editor);
+                        NativeMethods.ShowWindow(hWnd, NativeMethods.SW_RESTORE); // Ensure it's not minimized
+                        NativeMethods.SetForegroundWindow(hWnd); // Attempt to set it as the foreground window
+
+                        editor.Activate();
+                        editor.AppWindow.MoveInZOrderAtTop();
+
+                        // Show comfirmation dialog to user to save changes or not.
+                        if (editor.Content is Views.Rent.Residentials.Listing.ShellPage shell)
+                        {
+                            await shell.ShowEditorCloseConfirmationDialog();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"@AppWindow_Closing: {ex}");
+                        args.Cancel = true;
+                        isCancel = true;
+                        continue;
+                    }
+                    finally
+                    {
+
                     }
 
                     break;
@@ -448,17 +507,27 @@ public sealed partial class MainWindow : Window
                     args.Cancel = true;
                     isCancel = true;
 
-                    IntPtr hWnd = WindowNative.GetWindowHandle(editor);
-                    NativeMethods.ShowWindow(hWnd, NativeMethods.SW_RESTORE); // Ensure it's not minimized
-                    NativeMethods.SetForegroundWindow(hWnd); // Attempt to set it as the foreground window
-
-                    editor.Activate();
-                    editor.AppWindow.MoveInZOrderAtTop();
-
-                    // Show comfirmation dialog to user to save changes or not.
-                    if (editor.Content is Views.Rent.Residentials.ShellPage shell)
+                    try
                     {
-                        await shell.ShowEditorCloseConfirmationDialog();
+                        IntPtr hWnd = WindowNative.GetWindowHandle(editor);
+                        NativeMethods.ShowWindow(hWnd, NativeMethods.SW_RESTORE); // Ensure it's not minimized
+                        NativeMethods.SetForegroundWindow(hWnd); // Attempt to set it as the foreground window
+
+                        editor.Activate();
+                        editor.AppWindow.MoveInZOrderAtTop();
+
+                        // Show comfirmation dialog to user to save changes or not.
+                        if (editor.Content is Views.Rent.Residentials.ShellPage shell)
+                        {
+                            await shell.ShowEditorCloseConfirmationDialog();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"@AppWindow_Closing: {ex}");
+                        args.Cancel = true;
+                        isCancel = true;
+                        continue;
                     }
 
                     break;
@@ -484,10 +553,9 @@ public sealed partial class MainWindow : Window
             return;
         }
 
-
-        if (_viewModel.RentCommercEditorList.Count > 0)
+        if (_viewModel.RentCommercialListingEditorList.Count > 0)
         {
-            foreach (var editor in _viewModel.RentCommercEditorList)
+            foreach (var editor in _viewModel.RentCommercialListingEditorList)
             {
                 if (editor.ViewModel is null)
                 {
@@ -499,17 +567,27 @@ public sealed partial class MainWindow : Window
                     args.Cancel = true;
                     isCancel = true;
 
-                    IntPtr hWnd = WindowNative.GetWindowHandle(editor);
-                    NativeMethods.ShowWindow(hWnd, NativeMethods.SW_RESTORE); // Ensure it's not minimized
-                    NativeMethods.SetForegroundWindow(hWnd); // Attempt to set it as the foreground window
-
-                    editor.Activate();
-                    editor.AppWindow.MoveInZOrderAtTop();
-
-                    // Show comfirmation dialog to user to save changes or not.
-                    if (editor.Content is Views.Rent.Commercials.ShellPage shell)
+                    try
                     {
-                        await shell.ShowEditorCloseConfirmationDialog();
+                        IntPtr hWnd = WindowNative.GetWindowHandle(editor);
+                        NativeMethods.ShowWindow(hWnd, NativeMethods.SW_RESTORE); // Ensure it's not minimized
+                        NativeMethods.SetForegroundWindow(hWnd); // Attempt to set it as the foreground window
+
+                        editor.Activate();
+                        editor.AppWindow.MoveInZOrderAtTop();
+
+                        // Show comfirmation dialog to user to save changes or not.
+                        if (editor.Content is Views.Rent.Commercials.Listing.ShellPage shell)
+                        {
+                            await shell.ShowEditorCloseConfirmationDialog();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"@AppWindow_Closing: {ex}");
+                        args.Cancel = true;
+                        isCancel = true;
+                        continue;
                     }
 
                     break;
@@ -518,7 +596,7 @@ public sealed partial class MainWindow : Window
 
             if (!isCancel)
             {
-                foreach (var editor in _viewModel.RentCommercEditorList.ToList()) // Create snapshot of the list to avoid collection modification issues during iteration
+                foreach (var editor in _viewModel.RentCommercialListingEditorList.ToList()) // Create snapshot of the list to avoid collection modification issues during iteration
                 {
                     //editor.IsAutoClose = true;
 
@@ -537,8 +615,67 @@ public sealed partial class MainWindow : Window
             return;
         }
 
+        if (_viewModel.RentCommercialEditorList.Count > 0)
+        {
+            foreach (var editor in _viewModel.RentCommercialEditorList)
+            {
+                if (editor.ViewModel is null)
+                {
+                    Debug.WriteLine("AppWindow_Closing: editor.ViewModel is null");
+                    continue;
+                }
+                if (editor.ViewModel.IsDirty)
+                {
+                    args.Cancel = true;
+                    isCancel = true;
 
+                    try
+                    {
+                        IntPtr hWnd = WindowNative.GetWindowHandle(editor);
+                        NativeMethods.ShowWindow(hWnd, NativeMethods.SW_RESTORE); // Ensure it's not minimized
+                        NativeMethods.SetForegroundWindow(hWnd); // Attempt to set it as the foreground window
 
+                        editor.Activate();
+                        editor.AppWindow.MoveInZOrderAtTop();
+
+                        // Show comfirmation dialog to user to save changes or not.
+                        if (editor.Content is Views.Rent.Commercials.ShellPage shell)
+                        {
+                            await shell.ShowEditorCloseConfirmationDialog();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"@AppWindow_Closing: {ex}");
+                        args.Cancel = true;
+                        isCancel = true;
+                        continue;
+                    }
+
+                    break;
+                }
+            }
+
+            if (!isCancel)
+            {
+                foreach (var editor in _viewModel.RentCommercialEditorList.ToList()) // Create snapshot of the list to avoid collection modification issues during iteration
+                {
+                    //editor.IsAutoClose = true;
+
+                    //IntPtr hWnd = WindowNative.GetWindowHandle(editor);
+                    //NativeMethods.ShowWindow(hWnd, NativeMethods.SW_RESTORE); // Ensure it's not minimized
+
+                    //editor.Activate();
+
+                    editor.Close();
+                }
+            }
+        }
+
+        if (isCancel)
+        {
+            return;
+        }
 
         if (_viewModel.LessorEditorList.Count > 0)
         {
@@ -554,17 +691,27 @@ public sealed partial class MainWindow : Window
                     args.Cancel = true;
                     isCancel = true;
 
-                    IntPtr hWnd = WindowNative.GetWindowHandle(editor);
-                    NativeMethods.ShowWindow(hWnd, NativeMethods.SW_RESTORE); // Ensure it's not minimized
-                    NativeMethods.SetForegroundWindow(hWnd); // Attempt to set it as the foreground window
-
-                    editor.Activate();
-                    editor.AppWindow.MoveInZOrderAtTop();
-
-                    // Show comfirmation dialog to user to save changes or not.
-                    if (editor.Content is Views.Rent.Lessors.ShellPage shell)
+                    try
                     {
-                        await shell.ShowEditorCloseConfirmationDialog();
+                        IntPtr hWnd = WindowNative.GetWindowHandle(editor);
+                        NativeMethods.ShowWindow(hWnd, NativeMethods.SW_RESTORE); // Ensure it's not minimized
+                        NativeMethods.SetForegroundWindow(hWnd); // Attempt to set it as the foreground window
+
+                        editor.Activate();
+                        editor.AppWindow.MoveInZOrderAtTop();
+
+                        // Show comfirmation dialog to user to save changes or not.
+                        if (editor.Content is Views.Rent.Lessors.ShellPage shell)
+                        {
+                            await shell.ShowEditorCloseConfirmationDialog();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"@AppWindow_Closing: {ex}");
+                        args.Cancel = true;
+                        isCancel = true;
+                        continue;
                     }
 
                     break;
@@ -604,17 +751,27 @@ public sealed partial class MainWindow : Window
                     args.Cancel = true;
                     isCancel = true;
 
-                    IntPtr hWnd = WindowNative.GetWindowHandle(editor);
-                    NativeMethods.ShowWindow(hWnd, NativeMethods.SW_RESTORE); // Ensure it's not minimized
-                    NativeMethods.SetForegroundWindow(hWnd); // Attempt to set it as the foreground window
-
-                    editor.Activate();
-                    editor.AppWindow.MoveInZOrderAtTop();
-
-                    // Show comfirmation dialog to user to save changes or not.
-                    if (editor.Content is Views.Brokers.ShellPage shell)
+                    try
                     {
-                        await shell.ShowEditorCloseConfirmationDialog();
+                        IntPtr hWnd = WindowNative.GetWindowHandle(editor);
+                        NativeMethods.ShowWindow(hWnd, NativeMethods.SW_RESTORE); // Ensure it's not minimized
+                        NativeMethods.SetForegroundWindow(hWnd); // Attempt to set it as the foreground window
+
+                        editor.Activate();
+                        editor.AppWindow.MoveInZOrderAtTop();
+
+                        // Show comfirmation dialog to user to save changes or not.
+                        if (editor.Content is Views.Brokers.ShellPage shell)
+                        {
+                            await shell.ShowEditorCloseConfirmationDialog();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"@AppWindow_Closing: {ex}");
+                        args.Cancel = true;
+                        isCancel = true;
+                        continue;
                     }
 
                     break;
@@ -824,19 +981,42 @@ public sealed partial class MainWindow : Window
 
         // Editor window attributes
         attrs = doc.CreateAttribute("width");
-        attrs.Value = _viewModel.RentCommercEditorWinWidth.ToString();
+        attrs.Value = _viewModel.RentCommercialEditorWinWidth.ToString();
         editWindow.SetAttributeNode(attrs);
 
         attrs = doc.CreateAttribute("height");
-        attrs.Value = _viewModel.RentCommercEditorWinHeight.ToString();
+        attrs.Value = _viewModel.RentCommercialEditorWinHeight.ToString();
         editWindow.SetAttributeNode(attrs);
 
         attrs = doc.CreateAttribute("top");
-        attrs.Value = _viewModel.RentCommercEditorWinTop.ToString();
+        attrs.Value = _viewModel.RentCommercialEditorWinTop.ToString();
         editWindow.SetAttributeNode(attrs);
 
         attrs = doc.CreateAttribute("left");
-        attrs.Value = _viewModel.RentCommercEditorWinLeft.ToString();
+        attrs.Value = _viewModel.RentCommercialEditorWinLeft.ToString();
+        editWindow.SetAttributeNode(attrs);
+
+        // Set editor window element to root.
+        root.AppendChild(editWindow);
+
+        // Editor window Rent Commercial Listing
+        editWindow = doc.CreateElement(string.Empty, "RentCommercialListingEditorWindow", string.Empty);
+
+        // Editor window attributes
+        attrs = doc.CreateAttribute("width");
+        attrs.Value = _viewModel.RentCommercialListingEditorWinWidth.ToString();
+        editWindow.SetAttributeNode(attrs);
+
+        attrs = doc.CreateAttribute("height");
+        attrs.Value = _viewModel.RentCommercialListingEditorWinHeight.ToString();
+        editWindow.SetAttributeNode(attrs);
+
+        attrs = doc.CreateAttribute("top");
+        attrs.Value = _viewModel.RentCommercialListingEditorWinTop.ToString();
+        editWindow.SetAttributeNode(attrs);
+
+        attrs = doc.CreateAttribute("left");
+        attrs.Value = _viewModel.RentCommercialListingEditorWinLeft.ToString();
         editWindow.SetAttributeNode(attrs);
 
         // Set editor window element to root.

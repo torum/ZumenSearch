@@ -1,18 +1,24 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using ZumenSearch.Models.Base;
 using ZumenSearch.Models.Common;
+using ZumenSearch.Models.Messenger;
 using ZumenSearch.Services.Contracts;
 
 namespace ZumenSearch.ViewModels.Rent.Commercials;
 
-public sealed partial class PropertyViewModel : ObservableRecipient
+public sealed partial class PropertyViewModel : ObservableRecipient, 
+    IRecipient<WindowClosedMessage>
 {
     private const string BasicPageName = "ZumenSearch.Views.Rent.Commercials.BasicPage";
 
+    public readonly List<Views.Rent.Commercials.Listing.EditorWindow> ChildEditorList = [];
+
     private readonly Models.Rent.Commercials.Property _building;
+
     private readonly INavigationGenericService _navigationService;
     private readonly IDialogGenericService _dialogService;
     private readonly IDispatcherService _dispatcherService;
@@ -129,9 +135,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient
         }
     }
 
-    public ObservableCollection<
-        Models.Rent.Commercials.Structure> Structures
-    { get; } =
+    public ObservableCollection<Models.Rent.Commercials.Structure> Structures { get; } =
     [
         new(Models.Rent.Commercials.EnumStructures.Wood),
         new(Models.Rent.Commercials.EnumStructures.Block),
@@ -251,6 +255,25 @@ public sealed partial class PropertyViewModel : ObservableRecipient
             {
                 IsDirty = true;
             }
+        }
+    }
+
+    #endregion
+
+    #region == Messages ==
+
+    public void Receive(WindowClosedMessage window)
+    {
+        var ewin = window.Value;
+
+        if (ewin is null)
+        {
+            return;
+        }
+
+        if (ewin is Views.Rent.Commercials.Listing.EditorWindow rcwin)
+        {
+            this.ChildEditorList.Remove(rcwin);
         }
     }
 
@@ -426,8 +449,14 @@ public sealed partial class PropertyViewModel : ObservableRecipient
                 Views.Rent.Commercials.Listing.ShellPage>>();
 
         var shell = shellFactory.Create(unit);
-        Units.Add(unit);
-        IsDirty = true;
+
+        var mainVM = App.GetService<ViewModels.MainViewModel>();
+        mainVM.RentCommercialListingEditorList.Add(shell.Window);
+
+        this.ChildEditorList.Add(shell.Window);
+
+        //Units.Add(unit);
+        //IsDirty = true;
 
         if (shell.Window.AppWindow.Presenter is Microsoft.UI.Windowing.OverlappedPresenter presenter)
         {
@@ -438,6 +467,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient
             presenter.PreferredMinimumHeight = 700;
         }
 
+        shell.Window.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(mainVM.RentCommercialListingEditorWinLeft, mainVM.RentCommercialListingEditorWinTop, mainVM.RentCommercialListingEditorWinWidth, mainVM.RentCommercialListingEditorWinHeight));
+
         shell.Window.Activate();
         shell.Window.AppWindow.MoveInZOrderAtTop();
     }
@@ -445,14 +476,17 @@ public sealed partial class PropertyViewModel : ObservableRecipient
     [RelayCommand(CanExecute = nameof(CanSave))]
     public void Save()
     {
-        if (!IsDirty || !ValidateName())
+        if (!IsDirty)
         {
-            if (IsDirty && IsNameHasError)
+            return;
+        }
+
+        if (!ValidateName())
+        {
+            if (IsNameHasError)
             {
                 IsInfoBarErrorOpen = true;
-                _navigationService.NavigateTo(
-                    BasicPageName,
-                    this);
+                _navigationService.NavigateTo(BasicPageName,this);
             }
 
             return;
@@ -460,8 +494,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient
 
         SetValues();
 
-        var result =
-            _dataAccessService.UpsertRentCommercial(_building);
+        var result = _dataAccessService.UpsertRentCommercial(_building);
 
         if (result.IsError)
         {

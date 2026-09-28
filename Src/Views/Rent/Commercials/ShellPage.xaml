@@ -106,7 +106,7 @@
 
                 </NavigationView.MenuItems>
                 <NavigationView.FooterMenuItems>
-                    <NavigationViewItem Content="募集区画" Tag="ZumenSearch.Views.Rent.Commercials.UnitListPage" />
+                    <NavigationViewItem Content="募集物件" Tag="ZumenSearch.Views.Rent.Commercials.UnitListPage" />
                 </NavigationView.FooterMenuItems>
             </NavigationView>
 

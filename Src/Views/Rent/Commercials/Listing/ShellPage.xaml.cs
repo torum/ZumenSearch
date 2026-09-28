@@ -2,6 +2,8 @@
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using ZumenSearch.Services.Contracts;
+using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.UI.Windowing;
 
 namespace ZumenSearch.Views.Rent.Commercials.Listing;
 
@@ -45,7 +47,53 @@ public sealed partial class ShellPage : Page
         _navigationService.Initialize(ContentFrame, _pages);
 
         Loaded += ShellPage_Loaded;
+        Window.Activated += Window_Activated;
+        Window.Closed += Window_Closed;
         Window.AppWindow.Closing += AppWindow_Closing;
+    }
+
+    public async Task ShowEditorCloseConfirmationDialog()
+    {
+        if (ViewModel == null)
+        {
+            return;
+        }
+
+        if (!ViewModel.IsDirty)
+        {
+            return;
+        }
+
+        // show ConfirmationDialog
+        var result = await _dialogService.ShowEditorCloseConfirmationDialog();
+
+        if (result == ContentDialogResult.Primary)
+        {
+            if (ViewModel.IsDirty)
+            {
+                //ViewModel.Save();
+                if (ViewModel.SaveCommand.CanExecute(null))
+                {
+                    ViewModel.SaveCommand.Execute(null);
+                }
+            }
+
+            if (ViewModel.IsDirty == false)
+            {
+                Window.Close();
+            }
+        }
+        else if (result == ContentDialogResult.Secondary)
+        {
+            // Discard change and close.
+            ViewModel.DiscardChanges();
+
+            Window.Close();
+        }
+        else if (result == ContentDialogResult.None)
+        {
+            // Cancel.
+        }
     }
 
     private void ShellPage_Loaded(object sender, RoutedEventArgs e)
@@ -84,12 +132,56 @@ public sealed partial class ShellPage : Page
             $"Failed to load page '{e.SourcePageType.FullName}'.");
     }
 
-    private bool _allowClose;
-
-    private async void AppWindow_Closing(
-        Microsoft.UI.Windowing.AppWindow sender,
-        Microsoft.UI.Windowing.AppWindowClosingEventArgs args)
+    private void Window_Activated(object sender, Microsoft.UI.Xaml.WindowActivatedEventArgs args)
     {
+        /*
+        var resource = args.WindowActivationState == WindowActivationState.Deactivated ? "WindowCaptionForegroundDisabled" : "WindowCaptionForeground";
+        AppTitleBarText.Foreground = (SolidColorBrush)App.Current.Resources[resource];
+
+        BreadcrumbBar1.Opacity = args.WindowActivationState == WindowActivationState.Deactivated ? 0.5 : 1;
+        NavView.Opacity = args.WindowActivationState == WindowActivationState.Deactivated ? 0.7 : 1;
+        //ContentFrame.Opacity = args.WindowActivationState == WindowActivationState.Deactivated ? 0.7 : 1;
+        */
+    }
+
+    private void Window_Closed(object sender, WindowEventArgs args)
+    {
+        if (sender is not EditorWindow ewin)
+        {
+            return;
+        }
+
+        ewin.Activated -= Window_Activated;
+        ewin.Closed -= Window_Closed;
+        ewin.AppWindow.Closing -= AppWindow_Closing;
+
+        ViewModel.CleanUp();
+
+        var mainVM = App.GetService<ViewModels.MainViewModel>();
+        // Save window size and position.
+        var appWindow = ewin.AppWindow;
+        if (appWindow != null)
+        {
+            if (appWindow.Presenter is OverlappedPresenter)
+            {
+                mainVM.RentCommercialListingEditorWinHeight = (int)appWindow.Size.Height;
+                mainVM.RentCommercialListingEditorWinWidth = (int)appWindow.Size.Width;
+                mainVM.RentCommercialListingEditorWinTop = (int)appWindow.Position.Y;
+                mainVM.RentCommercialListingEditorWinLeft = (int)appWindow.Position.X;
+            }
+        }
+
+        //mainVM.RoomEditorList.Remove(ewin);
+
+        // Update the selected search result's values such as name if it exists. Also, update building window's rooms list.
+        WeakReferenceMessenger.Default.Send(new Models.Messenger.WindowClosedMessage(ewin));
+    }
+
+    //private bool _allowClose;
+
+    private async void AppWindow_Closing(Microsoft.UI.Windowing.AppWindow sender, Microsoft.UI.Windowing.AppWindowClosingEventArgs args)
+    {
+        /*
         if (_allowClose || !ViewModel.IsDirty)
         {
             return;
@@ -113,5 +205,20 @@ public sealed partial class ShellPage : Page
             _allowClose = true;
             Window.Close();
         }
+        */
+
+        if (ViewModel == null)
+        {
+            return;
+        }
+
+        if (ViewModel.IsDirty)
+        {
+            args.Cancel = true; // needs Cancel = true here in order to show dialog.
+
+            await ShowEditorCloseConfirmationDialog();
+        }
     }
+
+
 }
