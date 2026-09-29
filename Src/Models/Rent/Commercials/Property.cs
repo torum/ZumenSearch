@@ -1,10 +1,28 @@
-﻿using System.Globalization;
+﻿using System.Collections.ObjectModel;
+using System.Globalization;
 using ZumenSearch.Models.Base;
 
 namespace ZumenSearch.Models.Rent.Commercials;
 
 public sealed partial class Property : PropertyBase
 {
+    // 物件に属する部屋のリスト
+    public ObservableCollection<Models.Rent.Commercials.Listing.Listing> Units
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;
+            }
+        }
+    } = [];
+
+    // DBへの更新時にDBから削除されるべき部屋のIDリスト
+
+    public ObservableCollection<Models.Rent.Commercials.Listing.Listing> UnitsToBeDeleted = [];
+
     public Kind CommercialKind
     {
         get => field ?? new(EnumCommercialKinds.Unspecified);

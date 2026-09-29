@@ -23,7 +23,7 @@
             x:Name="ResultList"
             Grid.Row="1"
             Margin="0,24,0,0"
-            ItemsSource="{x:Bind ViewModel.SaleResidentialBldgSearchResult, Mode=OneWay}"
+            ItemsSource="{x:Bind ViewModel.SaleResidentialSearchResult, Mode=OneWay}"
             SelectionMode="Single"
             DoubleTapped="ResultList_DoubleTapped">
 
@@ -47,12 +47,12 @@
 
             <Button
                 Content="編集"
-                Command="{x:Bind ViewModel.EditSaleResidentialBldgCommand}"
+                Command="{x:Bind ViewModel.EditSaleResidentialCommand}"
                 CommandParameter="{x:Bind ResultList.SelectedItem, Mode=OneWay}" />
 
             <Button
                 Content="削除"
-                Command="{x:Bind ViewModel.DeleteSaleResidentialBldgCommand}"
+                Command="{x:Bind ViewModel.DeleteSaleResidentialCommand}"
                 CommandParameter="{x:Bind ResultList.SelectedItem, Mode=OneWay}" />
         </StackPanel>
     </Grid>

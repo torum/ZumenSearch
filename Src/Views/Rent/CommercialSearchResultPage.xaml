@@ -60,7 +60,7 @@
             <StackPanel Grid.Row="0" Padding="{StaticResource ContentPadding}">
 
                 <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Margin="0,0,24,0" HorizontalAlignment="Right">
-                    <AppBarButton Icon="Delete" Label="削除" Command="{x:Bind ViewModel.DeleteRentCommercialCommand, Mode=OneWay}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}"/>
+                    <AppBarButton Icon="Delete" Label="削除" Command="{x:Bind ViewModel.DeleteRentCommercialListingCommand, Mode=OneWay}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}"/>
                     <AppBarButton Icon="Sort" IsCompact="True" ToolTipService.ToolTip="Sort" Label="並べ替え" AutomationProperties.Name="Sort" IsEnabled="False">
                         <AppBarButton.Flyout>
                             <MenuFlyout>
@@ -71,7 +71,7 @@
                         </AppBarButton.Flyout>
                     </AppBarButton>
                     <AppBarButton Icon="Copy" Label="複製" IsEnabled="False"/>
-                    <AppBarButton Icon="Edit" Label="編集" Command="{x:Bind ViewModel.EditRentCommercialCommand}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}"/>
+                    <AppBarButton Icon="Edit" Label="編集" Command="{x:Bind ViewModel.EditRentCommercialListingCommand}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}"/>
                 </CommandBar>
 
                 <Border BorderThickness="0,1,0,0" BorderBrush="{ThemeResource NavigationViewItemSeparatorForeground}"></Border>
@@ -80,20 +80,20 @@
 
             <ScrollViewer Grid.Row="1" Padding="{StaticResource ContentPadding}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
 
-                <ItemsView x:Name="SearchResultListView" ItemsSource="{x:Bind ViewModel.RentCommercialBldgSearchResult, Mode=OneWay}" Margin="0,12,0,0" AllowFocusOnInteraction="False" SelectionMode="Single">
+                <ItemsView x:Name="SearchResultListView" ItemsSource="{x:Bind ViewModel.RentCommercialListingSearchResult, Mode=OneWay}" Margin="0,12,0,0" AllowFocusOnInteraction="False" SelectionMode="Single">
                     <ItemsView.ContextFlyout>
                         <MenuFlyout>
-                            <MenuFlyoutItem Text="編集" Icon="Edit" Command="{x:Bind ViewModel.EditRentCommercialCommand, Mode=OneWay}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}">
+                            <MenuFlyoutItem Text="編集" Icon="Edit" Command="{x:Bind ViewModel.EditRentCommercialListingCommand, Mode=OneWay}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}">
                                 <MenuFlyoutItem.KeyboardAccelerators>
                                     <KeyboardAccelerator Key="Enter" />
                                 </MenuFlyoutItem.KeyboardAccelerators>
                             </MenuFlyoutItem>
                             <MenuFlyoutItem Text="複製" Icon="Copy"></MenuFlyoutItem>
                             <MenuFlyoutSeparator/>
-                            <MenuFlyoutItem Text="削除" Icon="Delete" Command="{x:Bind ViewModel.DeleteRentCommercialCommand, Mode=OneWay}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}"></MenuFlyoutItem>
+                            <MenuFlyoutItem Text="削除" Icon="Delete" Command="{x:Bind ViewModel.DeleteRentCommercialListingCommand, Mode=OneWay}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}"></MenuFlyoutItem>
                         </MenuFlyout>
                     </ItemsView.ContextFlyout>
-                    <!--
+
                     <ItemsView.ItemTemplate>
                         <DataTemplate x:DataType="modcommon:ListingSearchResultItem">
                             <ItemContainer DataContext="{x:Bind}" IsDoubleTapEnabled="True" DoubleTapped="SearchResult_DoubleTapped" PointerPressed="ItemContainer_PointerPressed" PointerReleased="ItemContainer_PointerReleased" RightTapped="ItemContainer_RightTapped">
@@ -122,7 +122,7 @@
                             </ItemContainer>
                         </DataTemplate>
                     </ItemsView.ItemTemplate>
-                    -->
+                    
                 </ItemsView>
 
             </ScrollViewer>

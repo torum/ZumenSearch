@@ -874,10 +874,10 @@ public sealed partial class ListingViewModel : ObservableRecipient,
     {
         var vm = App.GetService<ViewModels.MainViewModel>();
 
-        if (vm.EditRentResidentialBldgFromIdCommand.CanExecute(_room.PropertyId))
+        if (vm.EditRentResidentialFromIdCommand.CanExecute(_room.PropertyId))
         {
-            //await vm.EditRentResidentialBldgFromIdCommand(_room.PropertyId);
-            vm.EditRentResidentialBldgFromIdCommand.Execute(_room.PropertyId);
+            //await vm.EditRentResidentialFromIdCommand(_room.PropertyId);
+            vm.EditRentResidentialFromIdCommand.Execute(_room.PropertyId);
         }
     }
 

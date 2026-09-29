@@ -868,6 +868,79 @@ public sealed class DataAccessService : IDataAccessService
         return res;
     }
 
+    public PropertiesResultWrapper SelectPropertiesByKeyword(string keyword) // TODO: add what type of keyword eg. name/adderss/lessor.
+    {
+        var res = new PropertiesResultWrapper();
+
+        if (string.IsNullOrEmpty(keyword))
+        {
+            keyword = "*";
+        }
+
+        _readerWriterLock.EnterReadLock();
+        try
+        {
+            using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
+            connection.Open();
+
+            using var cmd = connection.CreateCommand();
+            if (keyword == "*")
+            {
+                //cmd.CommandText = "SELECT properties.name as propertyName, properties.property_kind as propertyKind, rent_residentials.remarks as remarks, properties.property_id as propertyId FROM rent_residentials INNER JOIN properties USING (property_id)";
+                cmd.CommandText = "SELECT * FROM properties ORDER BY updated_at DESC";
+            }
+            else
+            {
+                //cmd.CommandText = string.Format("SELECT properties.name as propertyName, properties.property_kind as propertyKind, rent_residentials.remarks as remarks, properties.property_id as propertyId FROM rent_residentials INNER JOIN properties USING (property_id) WHERE properties.name LIKE '%{0}%'", keyword);
+                cmd.CommandText = $"SELECT * FROM properties WHERE name LIKE '%{keyword}%' ORDER BY updated_at DESC";
+            }
+
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                var s = Convert.ToString(reader["property_id"]);
+                if (string.IsNullOrEmpty(s))
+                {
+                    Debug.WriteLine("DataAccess::SelectPropertiesByKeyword: propertyId is null or empty for a rent residential.");
+                    continue;
+                }
+
+                var enumKind = EnumPropertyKind.Unknown;
+                var kind = reader.GetString(reader.GetOrdinal("property_kind")) ?? string.Empty;
+                if (!string.IsNullOrEmpty(kind))
+                {
+                    if (Enum.TryParse<Models.Base.EnumPropertyKind>(kind, out var parsedKind))
+                    {
+                        enumKind = parsedKind;
+                    }
+                }
+
+                var entry = new Models.Common.PropertySearchResultItem(s, enumKind);
+
+                entry.Name = reader.GetString(reader.GetOrdinal("name")) ?? string.Empty; ;
+
+                //Debug.WriteLine($"Found entry: {entry.Name} @SelectPropertiesByKeyword() in DataAccessService");
+
+                // Reset entry Isdirty flag.
+                entry.IsModified = false;
+
+                //res.AffectedCount++;
+
+                res.PropertySearchResult.Add(entry);
+            }
+        }
+        catch (Exception ex)
+        {
+            SetDatabaseError(res, ex, "connection.Open(), reader.Read()", "Failed to connect to / read a SQLite database file", nameof(SelectPropertiesByKeyword));
+        }
+        finally
+        {
+            _readerWriterLock.ExitReadLock();
+        }
+
+        return res;
+    }
+
     #endregion
 
     #region == Rent Residential ==
@@ -1389,86 +1462,6 @@ public sealed class DataAccessService : IDataAccessService
         return res;
     }
 
-    public PropertiesResultWrapper SelectRentResidentialsByNameKeyword(string keyword)
-    {
-        var res = new PropertiesResultWrapper();
-
-        if (string.IsNullOrEmpty(keyword))
-        {
-            keyword = "*";
-        }
-
-        //Debug.WriteLine($"keyword is {keyword} @SelectRentResidentialsByNameKeyword() in DataAccessService");
-
-        _readerWriterLock.EnterReadLock();
-        try
-        {
-            using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
-            connection.Open();
-
-            using var cmd = connection.CreateCommand();
-            if (keyword == "*")
-            {
-                cmd.CommandText = "SELECT properties.name as propertyName, properties.property_kind as propertyKind, rent_residentials.remarks as remarks, properties.property_id as propertyId FROM rent_residentials INNER JOIN properties USING (property_id)";
-            }
-            else
-            {
-                cmd.CommandText = string.Format("SELECT properties.name as propertyName, properties.property_kind as propertyKind, rent_residentials.remarks as remarks, properties.property_id as propertyId FROM rent_residentials INNER JOIN properties USING (property_id) WHERE properties.name LIKE '%{0}%'", keyword);
-            }
-
-            using var reader = cmd.ExecuteReader();
-            while (reader.Read())
-            {
-                var s = Convert.ToString(reader["propertyId"]);
-                if (string.IsNullOrEmpty(s))
-                {
-                    Debug.WriteLine("DataAccess::SelectRentResidentialsByNameKeyword: propertyId is null or empty for a rent residential.");
-                    continue;
-                }
-
-                var enumKind = EnumPropertyKind.Unknown;
-                var kind = reader.GetString(reader.GetOrdinal("propertyKind")) ?? string.Empty;
-                if (!string.IsNullOrEmpty(kind))
-                {
-                    if (Enum.TryParse<Models.Base.EnumPropertyKind>(kind, out var parsedKind))
-                    {
-                        enumKind = parsedKind;
-                    }
-                }
-
-                var entry = new Models.Common.PropertySearchResultItem(s, enumKind);
-
-                s = Convert.ToString(reader["propertyName"]) ?? "";
-                entry.Name = s;
-
-                //Debug.WriteLine($"Found rent residential entry: {entry.Name} @SelectRentResidentialsByNameKeyword() in DataAccessService");
-
-                s = Convert.ToString(reader["remarks"]);
-                if (!string.IsNullOrEmpty(s))
-                {
-                    //
-                }
-
-                // Reset entry Isdirty flag.
-                entry.IsModified = false;
-
-                //res.AffectedCount++;
-
-                res.PropertySearchResult.Add(entry);
-            }
-        }
-        catch (Exception ex)
-        {
-            SetDatabaseError(res, ex, "connection.Open(), reader.Read()", "Failed to connect to / read a SQLite database file", nameof(SelectRentResidentialsByNameKeyword));
-        }
-        finally
-        {
-            _readerWriterLock.ExitReadLock();
-        }
-
-        return res;
-    }
-    
     public RentResidentialBuildingSingleResultWrapper SelectRentResidentialById(string id)
     {
         var res = new RentResidentialBuildingSingleResultWrapper();
@@ -1983,7 +1976,7 @@ public sealed class DataAccessService : IDataAccessService
                 var sqlInsertIntoRentLivingRoom = "INSERT INTO rent_residential_rooms (listing_id, property_id, is_property_unit_ownership, name, chinryou) VALUES (@listing_id, @property_id, @is_property_unit_ownership, @name, @chinryou) ";
                 sqlInsertIntoRentLivingRoom += "ON CONFLICT(listing_id) ";
                 //sqlInsertIntoRentLivingRoom += string.Format("DO UPDATE SET name = '{0}'", EscapeSingleQuote(room.RoomName));
-                sqlInsertIntoRentLivingRoom += "DO UPDATE SET is_property_unit_ownership = @is_property_unit_ownership, name = @name chinryou = @chinryou"; //, updated_at = @Updated
+                sqlInsertIntoRentLivingRoom += "DO UPDATE SET is_property_unit_ownership = @is_property_unit_ownership, name = @name, chinryou = @chinryou, updated_at = @updated_at";
 
                 cmd.CommandText = sqlInsertIntoRentLivingRoom;
 
@@ -1992,7 +1985,7 @@ public sealed class DataAccessService : IDataAccessService
                 cmd.Parameters.AddWithValue("@is_property_unit_ownership", room.IsPropertyUnitOwnership ? 1 : 0); // bool to int
                 cmd.Parameters.AddWithValue("@name", room.Name);
                 cmd.Parameters.AddWithValue("@chinryou", room.Chinryou);
-                //cmd.Parameters.AddWithValue("@Updated", DateTimeOffset.UtcNow.ToString("s"));
+                cmd.Parameters.AddWithValue("@updated_at", DateTimeOffset.UtcNow.ToString("s"));
 
                 var result = cmd.ExecuteNonQuery();
                 if (result > 0)
@@ -2216,7 +2209,6 @@ public sealed class DataAccessService : IDataAccessService
         return res;
     }
 
-    // TODO:
     public ListingsResultWrapper SelectRentResidentialListings()
     {
         var res = new ListingsResultWrapper();
@@ -2620,7 +2612,7 @@ public sealed class DataAccessService : IDataAccessService
 
         return result;
     }
-
+    /*
     public PropertiesResultWrapper SelectRentCommercialsByNameKeyword(string keyword)
     {
         var result = new PropertiesResultWrapper();
@@ -2710,7 +2702,7 @@ public sealed class DataAccessService : IDataAccessService
 
         return result;
     }
-
+    */
     public RentCommercialBuildingSingleResultWrapper SelectRentCommercialById(string id)
     {
         var result = new RentCommercialBuildingSingleResultWrapper();
@@ -3168,9 +3160,9 @@ public sealed class DataAccessService : IDataAccessService
         return result;
     }
 
-    public RentCommercialRoomSingleResultWrapper SelectRentCommercialListingById(string commercialId,string roomId)
+    public RentCommercialUnitSingleResultWrapper SelectRentCommercialListingById(string commercialId,string roomId)
     {
-        var result = new RentCommercialRoomSingleResultWrapper();
+        var result = new RentCommercialUnitSingleResultWrapper();
 
         if (string.IsNullOrWhiteSpace(commercialId) ||
             string.IsNullOrWhiteSpace(roomId))
@@ -3308,7 +3300,7 @@ public sealed class DataAccessService : IDataAccessService
             };
 
             result.BuildingName = propertyName;
-            result.Room = room;
+            result.Unit = room;
         }
         catch (Exception ex)
         {

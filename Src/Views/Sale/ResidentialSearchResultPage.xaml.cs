@@ -34,9 +34,9 @@ public sealed partial class ResidentialSearchResultPage : Page
     {
         if (ResultList.SelectedItem
             is Models.Common.PropertySearchResultItem selected &&
-            ViewModel.EditSaleResidentialBldgCommand.CanExecute(selected))
+            ViewModel.EditSaleResidentialCommand.CanExecute(selected))
         {
-            ViewModel.EditSaleResidentialBldgCommand.Execute(selected);
+            ViewModel.EditSaleResidentialCommand.Execute(selected);
         }
     }
 

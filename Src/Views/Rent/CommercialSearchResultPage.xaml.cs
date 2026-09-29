@@ -70,9 +70,9 @@ public sealed partial class CommercialSearchResultPage : Page
         }
 
         // TODO:::
-        if (container.DataContext is not Models.Common.PropertySearchResultItem searchresult)
+        if (container.DataContext is not Models.Common.ListingSearchResultItem searchresult)
         {
-            Debug.WriteLine($"Not LessorSearchResultItem. {container.DataContext?.GetType().FullName} @SearchResult_DoubleTapped");
+            Debug.WriteLine($"Not ListingSearchResultItem. {container.DataContext?.GetType().FullName} @SearchResult_DoubleTapped");
             return;
         }
 
@@ -81,9 +81,9 @@ public sealed partial class CommercialSearchResultPage : Page
             return;
         }
 
-        if (ViewModel.EditRentCommercialCommand.CanExecute(searchresult))
+        if (ViewModel.EditRentCommercialListingCommand.CanExecute(searchresult))
         {
-            ViewModel.EditRentCommercialCommand.Execute(searchresult);
+            ViewModel.EditRentCommercialListingCommand.Execute(searchresult);
         }
     }
 
@@ -156,9 +156,9 @@ public sealed partial class CommercialSearchResultPage : Page
             return;
         }
 
-        if (element.DataContext is not Models.Common.PersonSearchResultItem searchresult)
+        if (element.DataContext is not Models.Common.ListingSearchResultItem searchresult)
         {
-            Debug.WriteLine($"Not LessorSearchResultItem. {element.DataContext?.GetType().FullName} @ItemContainerKeyboardAccelerator_Invoked");
+            Debug.WriteLine($"Not ListingSearchResultItem. {element.DataContext?.GetType().FullName} @ItemContainerKeyboardAccelerator_Invoked");
             return;
         }
 
@@ -167,9 +167,9 @@ public sealed partial class CommercialSearchResultPage : Page
             return;
         }
 
-        if (ViewModel.EditRentLessorCommand.CanExecute(searchresult))
+        if (ViewModel.EditRentCommercialListingCommand.CanExecute(searchresult))
         {
-            ViewModel.EditRentLessorCommand.Execute(searchresult);
+            ViewModel.EditRentCommercialListingCommand.Execute(searchresult);
         }
     }
 

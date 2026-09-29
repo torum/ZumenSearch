@@ -41,7 +41,7 @@
 
                 <StackPanel Grid.Row="0" Grid.Column="1">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,3,0">
-                        <AppBarButton Icon="Find" Label="検索" Command="{x:Bind ViewModel.SearchRentCommercialCommand}" CommandParameter="{x:Bind TextBoxName.Text, Mode=OneWay}"/>
+                        <AppBarButton Icon="Find" Label="検索" Command="{x:Bind ViewModel.SearchRentCommercialListingsCommand}" CommandParameter="{x:Bind TextBoxName.Text, Mode=OneWay}"/>
                         <AppBarButton Icon="Add" Label="新規" Command="{x:Bind ViewModel.AddNewRentCommercialCommand}"/>
                     </StackPanel>
                 </StackPanel>

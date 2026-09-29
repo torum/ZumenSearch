@@ -25,18 +25,6 @@ public sealed partial class ListingViewModel : ObservableRecipient
         _navigationService = navigationService;
         _dataAccessService = dataAccessService;
 
-        PropertyChanged += (_, args) =>
-        {
-            if (args.PropertyName is not nameof(IsDirty)
-                and not nameof(IsInfoBarErrorOpen)
-                and not nameof(InfoBarErrorMessage)
-                and not nameof(IsNameHasError)
-                and not nameof(WindowTitle))
-            {
-                IsDirty = true;
-            }
-        };
-
         PopulateValues();
         IsDirty = false;
         IsActive = true;
@@ -98,6 +86,7 @@ public sealed partial class ListingViewModel : ObservableRecipient
             {
                 IsNameHasError = false;
                 WindowTitle = string.Empty;
+                IsDirty = true;
             }
         }
     }
@@ -294,6 +283,18 @@ public sealed partial class ListingViewModel : ObservableRecipient
     }
 
     private bool CanSave() => IsDirty;
+
+    [RelayCommand]
+    private void OpenPropertyEditorWindow()
+    {
+        var vm = App.GetService<ViewModels.MainViewModel>();
+
+        if (vm.EditRentCommercialFromIdCommand.CanExecute(_unit.PropertyId))
+        {
+            //await vm.EditRentCommercialFromIdCommand(_unit.PropertyId);
+            vm.EditRentCommercialFromIdCommand.Execute(_unit.PropertyId);
+        }
+    }
 
     #endregion
 

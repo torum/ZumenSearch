@@ -45,7 +45,7 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <Grid  BorderThickness="0,0,0,1" BorderBrush="{ThemeResource NavigationViewItemSeparatorForeground}">
+            <Grid BorderThickness="0,0,0,1" BorderBrush="{ThemeResource NavigationViewItemSeparatorForeground}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
@@ -71,7 +71,7 @@
                         <AppBarButton Icon="Go"  Label="建物" ToolTipService.ToolTip="建物画面を開く（Ctrl+T）" Command="{x:Bind ViewModel.OpenPropertyEditorWindowCommand}">
                             <!-- GoToStart -->
                             <AppBarButton.KeyboardAccelerators>
-                                <KeyboardAccelerator Key="S" Modifiers="Control"/>
+                                <KeyboardAccelerator Key="T" Modifiers="Control"/>
                             </AppBarButton.KeyboardAccelerators>
                         </AppBarButton>
                         <AppBarButton Icon="Save" Label="保存" ToolTipService.ToolTip="保存（Ctrl+S）" Command="{x:Bind ViewModel.SaveCommand}">

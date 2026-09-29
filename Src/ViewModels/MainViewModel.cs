@@ -39,10 +39,13 @@ public partial class MainViewModel : ObservableRecipient,
 
     private readonly IAbstractFactory<Models.Rent.Residentials.Property, Views.Rent.Residentials.ShellPage> _shellRentResidentialPropertyFactory;
     private readonly IAbstractFactory<Models.Rent.Residentials.Listing.Listing, Views.Rent.Residentials.Listing.ShellPage> _shellRentResidentialListingFactory;
+
+    private readonly IAbstractFactory<Models.Rent.Commercials.Property, Views.Rent.Commercials.ShellPage> _shellRentCommercialPropertyFactory;
+    private readonly IAbstractFactory<Models.Rent.Commercials.Listing.Listing, Views.Rent.Commercials.Listing.ShellPage> _shellRentCommercialListingFactory;
+    
     private readonly IAbstractFactory<Models.Base.PersonBase, Views.Rent.Lessors.ShellPage> _shellRentLessorFactory;
     private readonly IAbstractFactory<Models.Base.PersonBase, Views.Brokers.ShellPage> _shellBrokerFactory;
     private readonly IAbstractFactory<Models.Sale.Residentials.Property, Views.Sale.Residentials.ShellPage> _shellSaleResidentialPropertyFactory;
-    private readonly IAbstractFactory<Models.Rent.Commercials.Property, Views.Rent.Commercials.ShellPage> _shellRentCommercialPropertyFactory;
 
     private readonly IDataAccessService _dataAccessService;
     private readonly INavigationService _navigationService;
@@ -54,6 +57,7 @@ public partial class MainViewModel : ObservableRecipient,
         IAbstractFactory<Models.Rent.Residentials.Property, Views.Rent.Residentials.ShellPage> shellRentResidentialPropertyFactory, 
         IAbstractFactory<Models.Rent.Residentials.Listing.Listing, Views.Rent.Residentials.Listing.ShellPage> shellRentResidentialListingFactory,
         IAbstractFactory<Models.Rent.Commercials.Property, Views.Rent.Commercials.ShellPage> shellRentCommercialPropertyFactory,
+        IAbstractFactory<Models.Rent.Commercials.Listing.Listing, Views.Rent.Commercials.Listing.ShellPage> shellRentCommercialListingFactory,
         IAbstractFactory<Models.Base.PersonBase, Views.Rent.Lessors.ShellPage> shellRentLessorFactory,
         IAbstractFactory<Models.Sale.Residentials.Property, Views.Sale.Residentials.ShellPage> shellSaleResidentialPropertyFactory,
         IAbstractFactory<Models.Base.PersonBase, Views.Brokers.ShellPage> shellBrokerFactory,
@@ -64,6 +68,7 @@ public partial class MainViewModel : ObservableRecipient,
         _shellRentResidentialPropertyFactory = shellRentResidentialPropertyFactory;
         _shellRentResidentialListingFactory = shellRentResidentialListingFactory;
         _shellRentCommercialPropertyFactory = shellRentCommercialPropertyFactory;
+        _shellRentCommercialListingFactory = shellRentCommercialListingFactory;
         _shellRentLessorFactory = shellRentLessorFactory;
         _shellSaleResidentialPropertyFactory =shellSaleResidentialPropertyFactory;
         _shellBrokerFactory = shellBrokerFactory;
@@ -215,7 +220,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
     [ObservableProperty]
     public partial string SearchQuery { get; set; } = string.Empty;
 
-    public ObservableCollection<Models.Common.PropertySearchResultItem> RentResidentialBldgSearchResult
+    public ObservableCollection<Models.Common.PropertySearchResultItem> PropertySearchResult
     {
         get; set
         {
@@ -226,7 +231,18 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
         }
     } = [];
 
-    public ObservableCollection<Models.Common.ListingSearchResultItem> RentResidentialRoomSearchResult
+    public ObservableCollection<Models.Common.ListingSearchResultItem> RentResidentialListingSearchResult
+    {
+        get; set
+        {
+            if (SetProperty(ref field, value))
+            {
+                //
+            }
+        }
+    } = [];
+
+    public ObservableCollection<Models.Common.ListingSearchResultItem> RentCommercialListingSearchResult
     {
         get; set
         {
@@ -259,7 +275,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
         }
     } = [];
 
-    public ObservableCollection<Models.Common.PropertySearchResultItem> SaleResidentialBldgSearchResult
+    public ObservableCollection<Models.Common.PropertySearchResultItem> SaleResidentialSearchResult
     {
         get;
         private set
@@ -270,18 +286,6 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
         }
     } = [];
 
-    public ObservableCollection<
-    Models.Common.PropertySearchResultItem>
-    RentCommercialBldgSearchResult
-    {
-        get;
-        private set
-        {
-            if (SetProperty(ref field, value))
-            {
-            }
-        }
-    } = [];
 
     #endregion
 
@@ -322,7 +326,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
             return;
         }
 
-        foreach (var item in RentResidentialBldgSearchResult)
+        foreach (var item in PropertySearchResult)
         {
             if (!item.Id.Equals(building.Id))
             {
@@ -344,7 +348,9 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
             return;
         }
 
-        foreach (var item in RentResidentialRoomSearchResult)
+        var isFound = false;
+
+        foreach (var item in RentResidentialListingSearchResult)
         {
             if (!item.Id.Equals(room.Id))
             {
@@ -352,7 +358,34 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
             }
 
             item.Name = room.Name;
+            isFound = true;
+            break;
         }
+
+        if (isFound)
+        {
+            return;
+        }
+
+        foreach (var item in RentCommercialListingSearchResult)
+        {
+            if (!item.Id.Equals(room.Id))
+            {
+                continue;
+            }
+
+            item.Name = room.Name;
+            isFound = true;
+            break;
+        }
+
+
+        if (isFound)
+        {
+            return;
+        }
+
+        // more
     }
 
     public void Receive(LessorUpdatedMessage lessor)
@@ -531,13 +564,190 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
         }
     }
 
+    // 物件検索
+    [RelayCommand(CanExecute = nameof(SearchPropertiesCanExecute))]
+    private async Task SearchProperties(string? queryText)
+    {
+        var query = string.Empty;
+
+        if (string.IsNullOrWhiteSpace(queryText))
+        {
+            if (string.IsNullOrWhiteSpace(SearchQuery))
+            {
+                query = "*";
+            }
+            else
+            {
+                query = SearchQuery.Trim();
+            }
+        }
+        else
+        {
+            query = queryText.Trim();
+        }
+
+        PropertySearchResult.Clear();
+
+        var res = await Task.Run(() => _dataAccessService.SelectPropertiesByKeyword(query), _cts.Token);
+
+        if (res.IsError)
+        {
+            Debug.WriteLine(
+                res.Error.Title + Environment.NewLine +
+                res.Error.Message + Environment.NewLine +
+                res.Error.Description + Environment.NewLine +
+                res.Error.Operation + Environment.NewLine +
+                res.Error.MethodName + Environment.NewLine +
+                res.Error.FullDump);
+
+            //ErrorMain = res.Error;
+            //IsMainErrorInfoBarVisible = true;
+
+            // TODO: Show error message to user
+        }
+        else
+        {
+            foreach (var item in res.PropertySearchResult)
+            {
+                item.BasePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, item.Id);
+            }
+
+            PropertySearchResult = new(res.PropertySearchResult);
+
+            _navigationService.NavigateTo(SearchResultPagePath, SlideNavigationTransitionEffect.FromLeft);//Navigate(typeof(Views.Rent.Residentials.SearchResultPage), null, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });
+        }
+    }
+    private static bool SearchPropertiesCanExecute(string? queryText)
+    {
+        /*
+        if (string.IsNullOrEmpty(queryText))
+        {
+            return false;
+        }
+        */
+        return true;
+    }
+
+    // 物件編集
+    [RelayCommand(CanExecute = nameof(EditPropertyCanExecute))]
+    private async Task EditProperty(Models.Common.PropertySearchResultItem? selected)
+    {
+        if (selected is null)
+        {
+            return;
+        }
+
+        var propertyId = selected.Id;
+
+        if (string.IsNullOrEmpty(propertyId))
+        {
+            Debug.WriteLine("EditPropertiesCommand executed but no item is selected.");
+            return;
+        }
+
+        if (selected.PropertyKind == Models.Base.EnumPropertyKind.RentResidential)
+        {
+            await EditRentResidentialFromId(propertyId);
+        }
+        else if (selected.PropertyKind == Models.Base.EnumPropertyKind.RentCommercial)
+        {
+            await EditRentCommercialFromId(propertyId);
+        }
+        else if (selected.PropertyKind == Models.Base.EnumPropertyKind.RentParking)
+        {
+            Debug.WriteLine("EditPropertiesCommand not yet implemented.");
+        }
+        else if (selected.PropertyKind == Models.Base.EnumPropertyKind.SaleResidential)
+        {
+            Debug.WriteLine("EditPropertiesCommand not yet implemented.");
+        }
+        else if (selected.PropertyKind == Models.Base.EnumPropertyKind.SaleCommercial)
+        {
+            Debug.WriteLine("EditPropertiesCommand not yet implemented.");
+        }
+        else if (selected.PropertyKind == Models.Base.EnumPropertyKind.SaleLand)
+        {
+            Debug.WriteLine("EditPropertiesCommand not yet implemented.");
+        }
+
+        // TODO lessor and broker
+    }
+    private static bool EditPropertyCanExecute(Models.Common.PropertySearchResultItem? selected)
+    {
+        if (selected is null)
+        //if (string.IsNullOrEmpty(rentId))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    // 物件削除
+    [RelayCommand(CanExecute = nameof(DeletePropertyCanExecute))]
+    private async Task DeleteProperty(Models.Common.PropertySearchResultItem? selected)
+    {
+        if (selected is null)
+        {
+            Debug.WriteLine("DeletePropertyCommand executed but no item is selected(null).");
+            return;
+        }
+
+        var propertyId = selected.Id;
+
+        if (string.IsNullOrEmpty(propertyId))
+        {
+            Debug.WriteLine("DeletePropertyCommand executed but no item is selected.");
+            return;
+        }
+
+        if (selected.PropertyKind == Models.Base.EnumPropertyKind.RentResidential)
+        {
+            DeleteRentResidential(selected);
+        }
+        else if (selected.PropertyKind == Models.Base.EnumPropertyKind.RentCommercial)
+        {
+            DeleteRentCommercial(selected);
+        }
+        else if (selected.PropertyKind == Models.Base.EnumPropertyKind.RentParking)
+        {
+            Debug.WriteLine("DeletePropertyCommand not yet implemented.");
+        }
+        else if (selected.PropertyKind == Models.Base.EnumPropertyKind.SaleResidential)
+        {
+            Debug.WriteLine("DeletePropertyCommand not yet implemented.");
+        }
+        else if (selected.PropertyKind == Models.Base.EnumPropertyKind.SaleCommercial)
+        {
+            Debug.WriteLine("DeletePropertyCommand not yet implemented.");
+        }
+        else if (selected.PropertyKind == Models.Base.EnumPropertyKind.SaleLand)
+        {
+            Debug.WriteLine("DeletePropertyCommand not yet implemented.");
+        }
+
+        // TODO lessor and broker
+    }
+    private static bool DeletePropertyCanExecute(Models.Common.PropertySearchResultItem? selected)
+    {
+        if (selected is null)
+        //if (string.IsNullOrEmpty(rentId))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+
+
     #endregion
 
     #region == 賃貸住居用 ==
 
     // 建物新規追加
     [RelayCommand]
-    private void AddNewRentResidentialBldg()
+    private void AddNewRentResidential()
     {
         var newId = Guid.CreateVersion7().ToString("N");
         var shell = _shellRentResidentialPropertyFactory.Create(new Models.Rent.Residentials.Property(newId, Models.Base.EnumEntryStatus.New));
@@ -564,9 +774,9 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
         shell.Window.AppWindow.MoveInZOrderAtTop();
     }
 
-    // 建物編集
-    [RelayCommand(CanExecute = nameof(EditRentResidentialBldgCanExecute))]
-    private async Task EditRentResidentialBldg(Models.Common.PropertySearchResultItem? selected) 
+    // 建物編集（検索結果から）
+    [RelayCommand(CanExecute = nameof(EditRentResidentialCanExecute))]
+    private async Task EditRentResidential(Models.Common.PropertySearchResultItem? selected) 
     {
         var propertyId = selected?.Id;
 
@@ -576,9 +786,9 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
             return;
         }
 
-        await EditRentResidentialBldgFromId(propertyId);
+        await EditRentResidentialFromId(propertyId);
     }
-    private static bool EditRentResidentialBldgCanExecute(Models.Common.PropertySearchResultItem? selected)
+    private static bool EditRentResidentialCanExecute(Models.Common.PropertySearchResultItem? selected)
     {
         if (selected is null)
         //if (string.IsNullOrEmpty(rentId))
@@ -589,8 +799,9 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
         return true;
     }
 
-    [RelayCommand(CanExecute = nameof(EditRentResidentialBldgByIdCanExecute))]
-    private async Task EditRentResidentialBldgFromId(string propertyId)
+    // 建物編集（IDから）
+    [RelayCommand(CanExecute = nameof(EditRentResidentialByIdCanExecute))]
+    private async Task EditRentResidentialFromId(string propertyId)
     {
         if (string.IsNullOrEmpty(propertyId))
         {
@@ -680,7 +891,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
 
         editorWindow.AppWindow.MoveInZOrderAtTop();
     }
-    private static bool EditRentResidentialBldgByIdCanExecute(string propertyId)
+    private static bool EditRentResidentialByIdCanExecute(string propertyId)
     {
         if (string.IsNullOrEmpty(propertyId))
         {
@@ -688,6 +899,205 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
         }
 
         return true;
+    }
+
+    // クイック検索Box（建物）TODO:
+    [RelayCommand(CanExecute = nameof(SearchRentForAutoSuggestCanExecute))]
+    private async Task SearchRentForAutoSuggest(string? queryText)
+    {
+        if (string.IsNullOrWhiteSpace(queryText))
+        {
+            AutoSuggestList.Clear();
+            return;
+        }
+
+        // TODO: Residentials only for now.
+        Debug.WriteLine($"SearchRentForAutoSuggest {queryText}");
+
+        AutoSuggestList.Clear();
+
+        queryText = queryText.Trim();
+
+        var res = await Task.Run(() => _dataAccessService.SelectPropertiesByKeyword(queryText), _cts.Token);
+        //var res = _dataAccessService.SelectRentResidentialsByNameKeyword("*");
+
+        if (res.IsError)
+        {
+            Debug.WriteLine(
+                res.Error.Title + Environment.NewLine +
+                res.Error.Message + Environment.NewLine +
+                res.Error.Description + Environment.NewLine +
+                res.Error.Operation + Environment.NewLine +
+                res.Error.MethodName + Environment.NewLine +
+                res.Error.FullDump);
+
+            //ErrorMain = res.Error;
+            //IsMainErrorInfoBarVisible = true;
+
+            // TODO: Show error message to user
+        }
+        else
+        {
+            if (res.PropertySearchResult.Count > 0)
+            {
+                foreach (var item in res.PropertySearchResult)
+                {
+                    var autoSuggest = new Models.Common.AutoSuggestItem
+                    {
+                        Name = item.Name,
+                        Id = item.Id
+                    };
+                    AutoSuggestList.Add(autoSuggest);
+                }
+            }
+            else
+            {
+                // TODO:
+                //Debug.WriteLine("result 0");
+                var autoSuggest = new Models.Common.AutoSuggestItem
+                {
+                    Name = "Result 0",
+                    Id = ""
+                };
+                AutoSuggestList.Add(autoSuggest);
+            }
+        }
+    }
+    private static bool SearchRentForAutoSuggestCanExecute(string? queryText)
+    {
+        if (string.IsNullOrEmpty(queryText))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    // 物件削除
+    [RelayCommand(CanExecute = nameof(DeleteRentResidentialCanExecute))]
+    private void DeleteRentResidential(Models.Common.PropertySearchResultItem? selected)
+    {
+        if (selected is null)
+        {
+            Debug.WriteLine("DeleteRentResidential executed but no item is selected(null).");
+            return;
+        }
+
+        if (string.IsNullOrEmpty(selected.Id))
+        {
+            Debug.WriteLine("DeleteRentResidential executed but id is emptyu.");
+            return;
+        }
+
+        var selectedId = selected.Id;
+
+        var isFound = false;
+
+        // Check if the selected item is already being edited in editor window.
+        foreach (var editorWindow in RentResidentialEditorList.ToList())
+        {
+            //Debug.WriteLine($"Checking editor window with Id: {editorWindow.Id} for selected item with Id: {selected.Id}");
+            if (editorWindow.Id == selectedId)
+            {
+                // If the editor window for this item is already open, activate it.
+                //Debug.WriteLine($"Editor window for {selected.Id} is already open. Closing if not IsDirty otherwise activating it.");
+                
+                if (editorWindow.ViewModel?.IsDirty == false)
+                {
+                    editorWindow.Close();
+                }
+                else
+                {
+                    isFound = true;
+                    editorWindow.Activate();
+                }
+                break;
+            }
+        }
+
+        if (isFound)
+        {
+            // If the editor window for this item is already open, just return.
+            return;
+        }
+
+        var res = _dataAccessService.DeleteRentResidential(selectedId);
+        if (res.IsError)
+        {
+            Debug.WriteLine(
+                res.Error.Title + Environment.NewLine +
+                res.Error.Message + Environment.NewLine +
+                res.Error.Description + Environment.NewLine +
+                res.Error.Operation + Environment.NewLine +
+                res.Error.MethodName + Environment.NewLine +
+                res.Error.FullDump);
+
+            //ErrorMain = res.Error;
+            //IsMainErrorInfoBarVisible = true;
+
+            // TODO: Show error message to user
+        }
+        else
+        {
+            if (PropertySearchResult.Remove(selected))
+            {
+                // Successfully removed the selected item from the search result.
+            }
+            else
+            {
+                Debug.WriteLine($"Selected item {selectedId} not found in the search result or could not remove.");
+            }
+
+            Debug.WriteLine($"DeleteRentResidentialCommand executed for {selectedId}");
+
+            // clean up pics and pdfs.
+            var propertyDataDirectoryPath = System.IO.Path.Combine(App.PropertyBlobDataFolder, selectedId);
+            if (Directory.Exists(propertyDataDirectoryPath))
+            {
+                Debug.WriteLine($"Deleting folder: {propertyDataDirectoryPath}");
+                Directory.Delete(propertyDataDirectoryPath, true);
+            }
+        }
+    }
+    private static bool DeleteRentResidentialCanExecute(Models.Common.PropertySearchResultItem? selected)
+    {
+        if (selected is null)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    // 部屋検索（TODO）
+    [RelayCommand]
+    private async Task SearchRentResidentialListing(string? queryText)
+    {
+        var query = string.IsNullOrWhiteSpace(queryText) ? "*" : queryText.Trim();
+
+        RentResidentialListingSearchResult.Clear();
+
+        var res = await Task.Run(() => _dataAccessService.SelectRentResidentialListings(), _cts.Token);
+
+        if (res.IsError)
+        {
+            Debug.WriteLine(
+                res.Error.Title + Environment.NewLine +
+                res.Error.Message + Environment.NewLine +
+                res.Error.Description + Environment.NewLine +
+                res.Error.Operation + Environment.NewLine +
+                res.Error.MethodName + Environment.NewLine +
+                res.Error.FullDump);
+
+            // TODO: Show error message to user
+            //IsMainErrorInfoBarVisible = true;
+        }
+        else
+        {
+            RentResidentialListingSearchResult = new(res.ListingSearchResult);
+
+            _navigationService.NavigateTo(RentResidentialSearchResultPagePath, SlideNavigationTransitionEffect.FromLeft);//Navigate(typeof(Views.Rent.Residentials.SearchResultPage), null, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });
+        }
     }
 
     // 部屋編集
@@ -739,7 +1149,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
             // If the editor window for this item is already open, no need to create a new one.
             return;
         }
-        
+
         // Access Database to get the full entry data.
         var res = _dataAccessService.SelectRentResidentialListingById(buildingId, roomId);// Go back to UI thred. Let's not do > .ConfigureAwait(false);
         //var res = await Task.Run(() => _dataAccessService.SelectRentResidentialListingById(buildingId, roomId), _cts.Token);
@@ -806,274 +1216,6 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
         return true;
     }
 
-    // クイック検索Box（建物）TODO:
-    [RelayCommand(CanExecute = nameof(SearchRentForAutoSuggestCanExecute))]
-    private async Task SearchRentForAutoSuggest(string? queryText)
-    {
-        if (string.IsNullOrWhiteSpace(queryText))
-        {
-            AutoSuggestList.Clear();
-            return;
-        }
-
-        // TODO: Residentials only for now.
-        Debug.WriteLine($"SearchRentForAutoSuggest {queryText}");
-
-        AutoSuggestList.Clear();
-
-        queryText = queryText.Trim();
-
-        var res = await Task.Run(() => _dataAccessService.SelectRentResidentialsByNameKeyword(queryText), _cts.Token);
-        //var res = _dataAccessService.SelectRentResidentialsByNameKeyword("*");
-
-        if (res.IsError)
-        {
-            Debug.WriteLine(
-                res.Error.Title + Environment.NewLine +
-                res.Error.Message + Environment.NewLine +
-                res.Error.Description + Environment.NewLine +
-                res.Error.Operation + Environment.NewLine +
-                res.Error.MethodName + Environment.NewLine +
-                res.Error.FullDump);
-
-            //ErrorMain = res.Error;
-            //IsMainErrorInfoBarVisible = true;
-
-            // TODO: Show error message to user
-        }
-        else
-        {
-            if (res.PropertySearchResult.Count > 0)
-            {
-                foreach (var item in res.PropertySearchResult)
-                {
-                    var autoSuggest = new Models.Common.AutoSuggestItem
-                    {
-                        Name = item.Name,
-                        Id = item.Id
-                    };
-                    AutoSuggestList.Add(autoSuggest);
-                }
-            }
-            else
-            {
-                // TODO:
-                //Debug.WriteLine("result 0");
-                var autoSuggest = new Models.Common.AutoSuggestItem
-                {
-                    Name = "Result 0",
-                    Id = ""
-                };
-                AutoSuggestList.Add(autoSuggest);
-            }
-        }
-    }
-    private static bool SearchRentForAutoSuggestCanExecute(string? queryText)
-    {
-        if (string.IsNullOrEmpty(queryText))
-        {
-            return false;
-        }
-
-        return true;
-    }
-
-    // 物件検索
-    [RelayCommand(CanExecute = nameof(SearchRentResidentialBldgCanExecute))]
-    private async Task SearchRentResidentialBldg(string? queryText)
-    {
-        var query = string.Empty;
-
-        if (string.IsNullOrWhiteSpace(queryText))
-        {
-            if (string.IsNullOrWhiteSpace(SearchQuery))
-            {
-                query = "*";
-            }
-            else
-            {
-                query = SearchQuery.Trim();
-            }
-        }
-        else
-        {
-            query = queryText.Trim();
-        }
-
-        //Debug.WriteLine($"queryText is {queryText}");
-
-        RentResidentialBldgSearchResult.Clear();
-
-        var res = await Task.Run(() => _dataAccessService.SelectRentResidentialsByNameKeyword(query), _cts.Token);
-        //var res = _dataAccessService.SelectRentResidentialsByNameKeyword("*");
-
-        if (res.IsError)
-        {
-            Debug.WriteLine(
-                res.Error.Title + Environment.NewLine +
-                res.Error.Message + Environment.NewLine +
-                res.Error.Description + Environment.NewLine +
-                res.Error.Operation + Environment.NewLine +
-                res.Error.MethodName + Environment.NewLine +
-                res.Error.FullDump);
-
-            //ErrorMain = res.Error;
-            //IsMainErrorInfoBarVisible = true;
-
-            // TODO: Show error message to user
-        }
-        else
-        {
-            foreach (var item in res.PropertySearchResult)
-            {
-                item.BasePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, item.Id);
-            }
-
-            RentResidentialBldgSearchResult = new(res.PropertySearchResult);
-
-            _navigationService.NavigateTo(SearchResultPagePath, SlideNavigationTransitionEffect.FromLeft);//Navigate(typeof(Views.Rent.Residentials.SearchResultPage), null, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });
-
-            //_navigationService.NavigateTo("ZumenSearch.Views.Rent.Residentials.BldgShellPage", SlideNavigationTransitionEffect.FromLeft);//Navigate(typeof(Views.Rent.Residentials.SearchResultPage), null, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });
-        }
-    }
-    private static bool SearchRentResidentialBldgCanExecute(string? queryText)
-    {
-        /*
-        if (string.IsNullOrEmpty(queryText))
-        {
-            return false;
-        }
-        */
-        return true;
-    }
-
-    // 部屋検索（TODO）
-    [RelayCommand]
-    private async Task SearchRentResidentialRoom()
-    {
-        RentResidentialRoomSearchResult.Clear();
-
-        var res = await Task.Run(() => _dataAccessService.SelectRentResidentialListings(), _cts.Token);
-
-        if (res.IsError)
-        {
-            Debug.WriteLine(
-                res.Error.Title + Environment.NewLine +
-                res.Error.Message + Environment.NewLine +
-                res.Error.Description + Environment.NewLine +
-                res.Error.Operation + Environment.NewLine +
-                res.Error.MethodName + Environment.NewLine +
-                res.Error.FullDump);
-
-            //ErrorMain = res.Error;
-            //IsMainErrorInfoBarVisible = true;
-
-            // TODO: Show error message to user
-        }
-        else
-        {
-            RentResidentialRoomSearchResult = new(res.ListingSearchResult);
-
-            _navigationService.NavigateTo(RentResidentialSearchResultPagePath, SlideNavigationTransitionEffect.FromLeft);//Navigate(typeof(Views.Rent.Residentials.SearchResultPage), null, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });
-        }
-    }
-
-    // 物件削除
-    [RelayCommand(CanExecute = nameof(DeleteRentResidentialBldgCanExecute))]
-    private void DeleteRentResidentialBldg(Models.Common.PropertySearchResultItem? selected)
-    {
-        if (selected == null)
-        {
-            Debug.WriteLine("DeleteRentResidential executed but no item is selected.");
-            return;
-        }
-
-        if (string.IsNullOrEmpty(selected.Id))
-        {
-            Debug.WriteLine("DeleteRentResidential executed but id is emptyu.");
-            return;
-        }
-
-        var selectedId = selected.Id;
-
-        var isFound = false;
-
-        // Check if the selected item is already being edited in editor window.
-        foreach (var editorWindow in RentResidentialEditorList.ToList())
-        {
-            //Debug.WriteLine($"Checking editor window with Id: {editorWindow.Id} for selected item with Id: {selected.Id}");
-            if (editorWindow.Id == selectedId)
-            {
-                // If the editor window for this item is already open, activate it.
-                //Debug.WriteLine($"Editor window for {selected.Id} is already open. Closing if not IsDirty otherwise activating it.");
-                
-                if (editorWindow.ViewModel?.IsDirty == false)
-                {
-                    editorWindow.Close();
-                }
-                else
-                {
-                    isFound = true;
-                    editorWindow.Activate();
-                }
-                break;
-            }
-        }
-
-        if (isFound)
-        {
-            // If the editor window for this item is already open, just return.
-            return;
-        }
-
-        var res = _dataAccessService.DeleteRentResidential(selectedId);
-        if (res.IsError)
-        {
-            Debug.WriteLine(
-                res.Error.Title + Environment.NewLine +
-                res.Error.Message + Environment.NewLine +
-                res.Error.Description + Environment.NewLine +
-                res.Error.Operation + Environment.NewLine +
-                res.Error.MethodName + Environment.NewLine +
-                res.Error.FullDump);
-
-            //ErrorMain = res.Error;
-            //IsMainErrorInfoBarVisible = true;
-
-            // TODO: Show error message to user
-        }
-        else
-        {
-            if (RentResidentialBldgSearchResult.Remove(selected))
-            {
-                // Successfully removed the selected item from the search result.
-            }
-            else
-            {
-                Debug.WriteLine($"Selected item {selectedId} not found in the search result or could not remove.");
-            }
-
-            Debug.WriteLine($"DeleteRentResidentialCommand executed for {selectedId}");
-
-            // clean up pics and pdfs.
-            var propertyDataDirectoryPath = System.IO.Path.Combine(App.PropertyBlobDataFolder, selectedId);
-            if (Directory.Exists(propertyDataDirectoryPath))
-            {
-                Debug.WriteLine($"Deleting folder: {propertyDataDirectoryPath}");
-                Directory.Delete(propertyDataDirectoryPath, true);
-            }
-        }
-    }
-    private static bool DeleteRentResidentialBldgCanExecute(Models.Common.PropertySearchResultItem? selected)
-    {
-        if (selected is null)
-        {
-            return false;
-        }
-
-        return true;
-    }
-
     // 部屋削除
     [RelayCommand(CanExecute = nameof(DeleteRentResidentialRoomCanExecute))]
     private void DeleteRentResidentialRoom(Models.Common.ListingSearchResultItem? selected)
@@ -1089,7 +1231,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
             Debug.WriteLine("DeleteRentResidentialRoom executed but id is empty.");
             return;
         }
-        
+
         var selectedId = selected.Id;
         var selectedPropertyId = selected.PropertyId;
 
@@ -1105,7 +1247,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
             {
                 // If the editor window for this item is already open, activate it.
                 //Debug.WriteLine($"Editor window for {selected.Id} is already open. Closing if not IsDirty otherwise activating it.");
-                
+
                 if (editorWindow.ViewModel?.IsDirty == false)
                 {
                     editorWindow.Close();
@@ -1142,7 +1284,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
         }
         else
         {
-            if (RentResidentialRoomSearchResult.Remove(selected))
+            if (RentResidentialListingSearchResult.Remove(selected))
             {
                 // Successfully removed the selected item from the search result.
             }
@@ -1169,7 +1311,6 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
                 }
             });
 
-
             // clean up pics and pdfs.
             var listingDataDirectoryPath = System.IO.Path.Combine(System.IO.Path.Combine(App.PropertyBlobDataFolder, selectedPropertyId), selectedId);
             if (Directory.Exists(listingDataDirectoryPath))
@@ -1177,9 +1318,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
                 Debug.WriteLine($"Deleting folder: {listingDataDirectoryPath}");
                 Directory.Delete(listingDataDirectoryPath, true);
             }
-
         }
-
     }
     private static bool DeleteRentResidentialRoomCanExecute(Models.Common.ListingSearchResultItem? selected)
     {
@@ -1195,38 +1334,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
 
     #region == 賃貸事業用 ==
 
-    [RelayCommand]
-    private async Task SearchRentCommercial(string? queryText)
-    {
-        var query = string.IsNullOrWhiteSpace(queryText) ? "*" : queryText.Trim();
-
-        var result = await Task.Run(() => _dataAccessService.SelectRentCommercialsByNameKeyword(query),_cts.Token);
-
-        if (result.IsError)
-        {
-            Debug.WriteLine(
-                result.Error.Title + Environment.NewLine +
-                result.Error.Message + Environment.NewLine +
-                result.Error.Description + Environment.NewLine +
-                result.Error.Operation + Environment.NewLine +
-                result.Error.MethodName + Environment.NewLine +
-                result.Error.FullDump);
-
-            // TODO: show infobar
-
-            return;
-        }
-
-        foreach (var item in result.PropertySearchResult)
-        {
-            item.BasePath = Path.Combine( App.PropertyBlobDataFolder, item.Id);
-        }
-
-        RentCommercialBldgSearchResult = new(result.PropertySearchResult);
-
-        _navigationService.NavigateTo(RentCommercialSearchResultPagePath, SlideNavigationTransitionEffect.FromLeft);
-    }
-
+    // 建物新規追加
     [RelayCommand]
     private void AddNewRentCommercial()
     {
@@ -1255,41 +1363,105 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
         shell.Window.AppWindow.MoveInZOrderAtTop();
     }
 
+    // 建物編集（検索結果から）
     [RelayCommand(CanExecute = nameof(EditRentCommercialCanExecute))]
-    private async Task EditRentCommercial(Models.Common.PropertySearchResultItem? selected)
+    private async Task EditRentCommercial(Models.Common.ListingSearchResultItem? selected)
     {
-        if (selected is null ||
-            string.IsNullOrWhiteSpace(selected.Id))
+        var propertyId = selected?.Id;
+
+        if (string.IsNullOrEmpty(propertyId))
         {
+            Debug.WriteLine("EditRentCommercialCommand executed but no item is selected.");
             return;
         }
 
-        var result = await Task.Run(
-            () => _dataAccessService
-                .SelectRentCommercialById(selected.Id),
-            _cts.Token);
+        await EditRentCommercialFromId(propertyId);
+    }
+    private static bool EditRentCommercialCanExecute(Models.Common.ListingSearchResultItem? selected)
+    {
+        return selected is not null &&
+               !string.IsNullOrWhiteSpace(selected.Id);
+    }
 
-        if (result.IsError || result.Building is null)
+    // 建物編集（IDから）
+    [RelayCommand(CanExecute = nameof(EditRentCommercialByIdCanExecute))]
+    private async Task EditRentCommercialFromId(string propertyId)
+    {
+        if (string.IsNullOrEmpty(propertyId))
+        {
+            Debug.WriteLine("EditRentCommercialFromId executed but no item is selected.");
+            return;
+        }
+
+        var isFound = false;
+
+        // Check if the selected item is already being edited in another window.
+        RentCommercialEditorList.ForEach(editorWindow =>
+        {
+            //Debug.WriteLine($"Checking editor window with Id: {editorWindow.Id} for selected item with Id: {rentId}");
+            if (editorWindow.Id == propertyId)
+            {
+                // If the editor window for this item is already open, activate it.
+                //Debug.WriteLine($"Editor window for {rentId} is already open. Activating it.");
+                isFound = true;
+
+                editorWindow.Activate();
+
+                // Do I need this anymore?
+                //var mainWindow = App.GetService<MainWindow>();
+                //mainWindow?.AppWindow.MoveInZOrderBelow(editorWindow.AppWindow.Id);
+                editorWindow.AppWindow.MoveInZOrderAtTop();
+
+                return;
+            }
+        });
+
+        if (isFound)
+        {
+            // If the editor window for this item is already open, no need to create a new one.
+            return;
+        }
+
+        // Access Database to get the full entry data.
+        var res = _dataAccessService.SelectRentCommercialById(propertyId);// Go back to UI thred. Let's not do > .ConfigureAwait(false);
+        //var res = await Task.Run(() => _dataAccessService.SelectRentResidentialById(rentId), _cts.Token);
+        if (res.IsError)
         {
             Debug.WriteLine(
-                result.Error.Title + Environment.NewLine +
-                result.Error.Message + Environment.NewLine +
-                result.Error.Description + Environment.NewLine +
-                result.Error.Operation + Environment.NewLine +
-                result.Error.MethodName+ Environment.NewLine +
-                result.Error.FullDump);
+                res.Error.Title + Environment.NewLine +
+                res.Error.Message + Environment.NewLine +
+                res.Error.Description + Environment.NewLine +
+                res.Error.Operation + Environment.NewLine +
+                res.Error.MethodName + Environment.NewLine +
+                res.Error.FullDump);
 
+            //ErrorMain = res.Error;
+            //IsMainErrorInfoBarVisible = true;
+
+            // TODO: Show error message to user
             return;
         }
 
-        var shell =
-            _shellRentCommercialPropertyFactory.Create(
-                result.Building);
+        if (res.Building is null)
+        {
+            Debug.WriteLine($"Building for {propertyId} is null. Cannot open editor.");
+            return;
+        }
 
-        RentCommercialEditorList.Add(shell.Window);
+        var editorShell = _shellRentCommercialPropertyFactory.Create(res.Building);//_editorFactory.Create();
 
-        if (shell.Window.AppWindow.Presenter
-            is Microsoft.UI.Windowing.OverlappedPresenter presenter)
+        var editorWindow = editorShell.Window;
+        if (editorWindow == null)
+        {
+            // EditorWin should be initialized in the EditorShell constructor.
+            Debug.WriteLine("EditorWin must be initialized in the EditorShell constructor");
+            return;
+        }
+
+        RentCommercialEditorList.Add(editorWindow);
+
+        editorWindow.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(RentCommercialEditorWinLeft, RentCommercialEditorWinTop, RentCommercialEditorWinWidth, RentCommercialEditorWinHeight));
+        if (editorWindow.AppWindow.Presenter is OverlappedPresenter presenter)
         {
             presenter.IsResizable = true;
             presenter.IsModal = false;
@@ -1298,23 +1470,22 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
             presenter.PreferredMinimumHeight = 794;
         }
 
-        shell.Window.AppWindow.MoveAndResize(
-            new Windows.Graphics.RectInt32(
-                130,
-                130,
-                1366,
-                768));
+        editorWindow.AppWindow.Show();
+        editorWindow.Activate();
 
-        shell.Window.Activate();
-        shell.Window.AppWindow.MoveInZOrderAtTop();
+        editorWindow.AppWindow.MoveInZOrderAtTop();
     }
-
-    private static bool EditRentCommercialCanExecute(Models.Common.PropertySearchResultItem? selected)
+    private static bool EditRentCommercialByIdCanExecute(string propertyId)
     {
-        return selected is not null &&
-               !string.IsNullOrWhiteSpace(selected.Id);
+        if (string.IsNullOrEmpty(propertyId))
+        {
+            return false;
+        }
+
+        return true;
     }
 
+    // 建物削除
     [RelayCommand(CanExecute = nameof(DeleteRentCommercialCanExecute))]
     private void DeleteRentCommercial(Models.Common.PropertySearchResultItem? selected)
     {
@@ -1339,10 +1510,189 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
             return;
         }
 
-        RentCommercialBldgSearchResult.Remove(selected);
+        PropertySearchResult.Remove(selected);
+    }
+    private static bool DeleteRentCommercialCanExecute(Models.Common.PropertySearchResultItem? selected)
+    {
+        return selected is not null &&
+               !string.IsNullOrWhiteSpace(selected.Id);
     }
 
-    private static bool DeleteRentCommercialCanExecute(Models.Common.PropertySearchResultItem? selected)
+    // 区画検索（TODO）
+    [RelayCommand]
+    private async Task SearchRentCommercialListings(string? queryText)
+    {
+        var query = string.IsNullOrWhiteSpace(queryText) ? "*" : queryText.Trim();
+
+        RentCommercialListingSearchResult.Clear();
+
+        var result = await Task.Run(() => _dataAccessService.SelectRentCommercialListings(), _cts.Token);
+
+        if (result.IsError)
+        {
+            Debug.WriteLine(
+                result.Error.Title + Environment.NewLine +
+                result.Error.Message + Environment.NewLine +
+                result.Error.Description + Environment.NewLine +
+                result.Error.Operation + Environment.NewLine +
+                result.Error.MethodName + Environment.NewLine +
+                result.Error.FullDump);
+
+            // TODO: Show error message to user
+            //IsMainErrorInfoBarVisible = true;
+            return;
+        }
+
+        RentCommercialListingSearchResult = new(result.ListingSearchResult);
+
+        _navigationService.NavigateTo(RentCommercialSearchResultPagePath, SlideNavigationTransitionEffect.FromLeft);
+    }
+
+    // 区画編集
+    [RelayCommand(CanExecute = nameof(EditRentCommercialListingCanExecute))]
+    private async Task EditRentCommercialListing(Models.Common.ListingSearchResultItem? selected)
+    {
+        if (selected is null)
+        {
+            Debug.WriteLine("EditRentCommercialUnitCommand executed but no item is selected.");
+            return;
+        }
+
+        var roomId = selected.Id;
+        var buildingId = selected.PropertyId;
+
+        if (string.IsNullOrEmpty(roomId))
+        {
+            Debug.WriteLine("EditRentCommercialUnitCommand executed but room id is null or empty.");
+            return;
+        }
+
+        //Debug.WriteLine($"EditRentCommercialUnitCommand executed for {selected.Id}");
+
+        var isFound = false;
+
+        // Check if the selected item is already being edited in another window.
+        RentCommercialListingEditorList.ForEach(editorWindow =>
+        {
+            //Debug.WriteLine($"Checking editor window with Id: {editorWindow.Id} for selected item with Id: {roomId}");
+            if (editorWindow.Id == roomId)
+            {
+                // If the editor window for this item is already open, activate it.
+                //Debug.WriteLine($"Editor window for {roomId} is already open. Activating it.");
+                isFound = true;
+
+                editorWindow.Activate();
+
+                // Do I need this anymore?
+                //var mainWindow = App.GetService<MainWindow>();
+                //mainWindow?.AppWindow.MoveInZOrderBelow(editorWindow.AppWindow.Id);
+                editorWindow.AppWindow.MoveInZOrderAtTop();
+
+                return;
+            }
+        });
+
+        if (isFound)
+        {
+            // If the editor window for this item is already open, no need to create a new one.
+            return;
+        }
+
+        // Access Database to get the full entry data.
+        var res = _dataAccessService.SelectRentCommercialListingById(buildingId, roomId);// Go back to UI thred. Let's not do > .ConfigureAwait(false);
+        //var res = await Task.Run(() => _dataAccessService.SelectRentResidentialListingById(buildingId, roomId), _cts.Token);
+        if (res.IsError)
+        {
+            Debug.WriteLine(
+                res.Error.Title + Environment.NewLine +
+                res.Error.Message + Environment.NewLine +
+                res.Error.Description + Environment.NewLine +
+                res.Error.Operation + Environment.NewLine +
+                res.Error.MethodName + Environment.NewLine +
+                res.Error.FullDump);
+
+            //ErrorMain = res.Error;
+            //IsMainErrorInfoBarVisible = true;
+
+            // TODO: Show error message to user
+            return;
+        }
+
+        if (res.Unit is null)
+        {
+            Debug.WriteLine($"Room for {roomId} is null. Cannot open editor.");
+            return;
+        }
+
+        var editorShell = _shellRentCommercialListingFactory.Create(res.Unit);
+        var editorWindow = editorShell.Window;
+        if (editorWindow == null)
+        {
+            // EditorWin should be initialized in the EditorShell constructor.
+            Debug.WriteLine("EditorWin must be initialized in the EditorShell constructor");
+            return;
+        }
+
+        RentCommercialListingEditorList.Add(editorWindow);
+
+        editorWindow.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(RentCommercialListingEditorWinLeft, RentCommercialListingEditorWinTop, RentCommercialListingEditorWinWidth, RentCommercialListingEditorWinHeight));
+        if (editorWindow.AppWindow.Presenter is OverlappedPresenter presenter)
+        {
+            presenter.IsResizable = true;
+            presenter.IsModal = false;
+            presenter.IsAlwaysOnTop = false;
+            presenter.PreferredMinimumWidth = 1274;
+            presenter.PreferredMinimumHeight = 794;
+        }
+
+        editorWindow.AppWindow.Show();
+        editorWindow.Activate();
+
+        // Do I need this anymore?
+        //var mainWindow = App.GetService<MainWindow>();
+        //mainWindow?.AppWindow.MoveInZOrderBelow(editorWindow.AppWindow.Id);
+
+        editorWindow.AppWindow.MoveInZOrderAtTop();
+    }
+    private static bool EditRentCommercialListingCanExecute(Models.Common.ListingSearchResultItem? selected)
+    {
+        if (selected is null)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    // 区画削除
+    [RelayCommand(CanExecute = nameof(DeleteRentCommercialListingCanExecute))]
+    private void DeleteRentCommercialListing(Models.Common.ListingSearchResultItem? selected)
+    {
+        if (selected is null ||
+            string.IsNullOrWhiteSpace(selected.Id))
+        {
+            return;
+        }
+
+        var result = _dataAccessService.DeleteRentCommercialListing(selected.Id);
+
+        if (result.IsError)
+        {
+            Debug.WriteLine(
+                result.Error.Title + Environment.NewLine +
+                result.Error.Message + Environment.NewLine +
+                result.Error.Description + Environment.NewLine +
+                result.Error.Operation + Environment.NewLine +
+                result.Error.MethodName + Environment.NewLine +
+                result.Error.FullDump);
+
+            return;
+        }
+
+        RentCommercialListingSearchResult.Remove(selected);
+    }
+
+    private static bool DeleteRentCommercialListingCanExecute(Models.Common.ListingSearchResultItem? selected)
     {
         return selected is not null &&
                !string.IsNullOrWhiteSpace(selected.Id);
@@ -1729,15 +2079,15 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
                 item.Id);
         }
 
-        SaleResidentialBldgSearchResult =
+        SaleResidentialSearchResult =
             new(result.PropertySearchResult);
 
         _navigationService.NavigateTo(SaleResidentialSearchResultPagePath,
             SlideNavigationTransitionEffect.FromLeft);
     }
 
-    [RelayCommand(CanExecute = nameof(EditSaleResidentialBldgCanExecute))]
-    private async Task EditSaleResidentialBldg(
+    [RelayCommand(CanExecute = nameof(EditSaleResidentialCanExecute))]
+    private async Task EditSaleResidential(
     Models.Common.PropertySearchResultItem? selected)
     {
         if (selected is null || string.IsNullOrWhiteSpace(selected.Id))
@@ -1785,15 +2135,15 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
         shell.Window.Activate();
         shell.Window.AppWindow.MoveInZOrderAtTop();
     }
-    private static bool EditSaleResidentialBldgCanExecute(
+    private static bool EditSaleResidentialCanExecute(
         Models.Common.PropertySearchResultItem? selected)
     {
         return selected is not null &&
                !string.IsNullOrWhiteSpace(selected.Id);
     }
 
-    [RelayCommand(CanExecute = nameof(DeleteSaleResidentialBldgCanExecute))]
-    private void DeleteSaleResidentialBldg(
+    [RelayCommand(CanExecute = nameof(DeleteSaleResidentialCanExecute))]
+    private void DeleteSaleResidential(
     Models.Common.PropertySearchResultItem? selected)
     {
         if (selected is null || string.IsNullOrWhiteSpace(selected.Id))
@@ -1817,10 +2167,10 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
             return;
         }
 
-        SaleResidentialBldgSearchResult.Remove(selected);
+        SaleResidentialSearchResult.Remove(selected);
     }
 
-    private static bool DeleteSaleResidentialBldgCanExecute(
+    private static bool DeleteSaleResidentialCanExecute(
         Models.Common.PropertySearchResultItem? selected)
     {
         return selected is not null &&

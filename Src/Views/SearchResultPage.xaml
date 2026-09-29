@@ -43,12 +43,12 @@
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                         <AppBarButton Icon="Back" Label="戻る" Command="{x:Bind ViewModel.GoBackCommand}"/>
                         <!--
-                        <AppBarButton Icon="Add" Label="新規" Command="{x:Bind ViewModel.AddNewRentResidentialBldgCommand}"/>
+                        <AppBarButton Icon="Add" Label="新規" Command="{x:Bind ViewModel.AddNewRentResidentialCommand}"/>
                         -->
                         <AppBarButton Icon="Add" Label="新規">
                             <AppBarButton.Flyout>
                                 <MenuFlyout Placement="Bottom">
-                                    <MenuFlyoutItem Text="賃貸：住居用" Command="{x:Bind ViewModel.AddNewRentResidentialBldgCommand}"/>
+                                    <MenuFlyoutItem Text="賃貸：住居用" Command="{x:Bind ViewModel.AddNewRentResidentialCommand}"/>
                                     <MenuFlyoutItem Text="賃貸：事業用" Command="{x:Bind ViewModel.AddNewRentCommercialCommand}"/>
                                     <MenuFlyoutItem Text="賃貸：駐車場"/>
                                     <MenuFlyoutItem Text="貸主" Command="{x:Bind ViewModel.AddNewRentLessorCommand}"/>
@@ -72,7 +72,7 @@
             <StackPanel Grid.Row="0" Padding="{StaticResource ContentPadding}">
 
                 <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Margin="0,0,24,0" HorizontalAlignment="Right">
-                    <AppBarButton Icon="Delete" Label="削除" Command="{x:Bind ViewModel.DeleteRentResidentialBldgCommand}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}"/>
+                    <AppBarButton Icon="Delete" Label="削除" Command="{x:Bind ViewModel.DeletePropertyCommand}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}"/>
                     <AppBarButton Icon="Sort" IsCompact="True" ToolTipService.ToolTip="Sort" Label="並べ替え" IsEnabled="False">
                         <AppBarButton.Flyout>
                             <MenuFlyout>
@@ -83,7 +83,7 @@
                         </AppBarButton.Flyout>
                     </AppBarButton>
                     <AppBarButton Icon="Copy" Label="複製" IsEnabled="False"/>
-                    <AppBarButton Icon="Edit" Label="編集" Command="{x:Bind ViewModel.EditRentResidentialBldgCommand}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}"/>
+                    <AppBarButton Icon="Edit" Label="編集" Command="{x:Bind ViewModel.EditPropertyCommand}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}"/>
                 </CommandBar>
 
                 <Border BorderThickness="0,1,0,0" BorderBrush="{ThemeResource NavigationViewItemSeparatorForeground}"></Border>
@@ -91,16 +91,16 @@
             </StackPanel>
 
             <ScrollViewer Grid.Row="1" Padding="{StaticResource ContentPadding}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                <ItemsView x:Name="SearchResultListView" Margin="0,12,0,0" ItemsSource="{x:Bind ViewModel.RentResidentialBldgSearchResult, Mode=OneWay}" AllowFocusOnInteraction="True" SelectionMode="Single">
+                <ItemsView x:Name="SearchResultListView" Margin="0,12,0,0" ItemsSource="{x:Bind ViewModel.PropertySearchResult, Mode=OneWay}" AllowFocusOnInteraction="True" SelectionMode="Single">
                     <ItemsView.ContextFlyout>
                         <MenuFlyout>
-                            <MenuFlyoutItem Text="編集" Icon="Edit" Command="{x:Bind ViewModel.EditRentResidentialBldgCommand}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}">
+                            <MenuFlyoutItem Text="編集" Icon="Edit" Command="{x:Bind ViewModel.EditPropertyCommand}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}">
                                 <MenuFlyoutItem.KeyboardAccelerators>
                                     <KeyboardAccelerator Key="Enter" />
                                 </MenuFlyoutItem.KeyboardAccelerators>
                             </MenuFlyoutItem>
                             <MenuFlyoutSeparator/>
-                            <MenuFlyoutItem Text="削除" Icon="Delete" Command="{x:Bind ViewModel.DeleteRentResidentialBldgCommand}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}"></MenuFlyoutItem>
+                            <MenuFlyoutItem Text="削除" Icon="Delete" Command="{x:Bind ViewModel.DeletePropertyCommand}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}"></MenuFlyoutItem>
                         </MenuFlyout>
                     </ItemsView.ContextFlyout>
                     <ItemsView.ItemTemplate>

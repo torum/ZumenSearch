@@ -6,60 +6,85 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:modcommon="using:ZumenSearch.Models.Common"
     NavigationCacheMode="Required"
+    KeyboardAcceleratorPlacementMode="Hidden"
     mc:Ignorable="d">
-
+    <Page.KeyboardAccelerators>
+        <KeyboardAccelerator Key="Left" Modifiers="Menu" Invoked="KeyboardAccelerator_Invoked" />
+    </Page.KeyboardAccelerators>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="40" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="Auto" MaxHeight="120"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <TextBlock
-            Grid.Row="0"
-            Text="{x:Bind ViewModel.WindowTitle, Mode=OneWay}"
-            Margin="12,0"
-            VerticalAlignment="Center"
-            TextTrimming="CharacterEllipsis" />
-
-        <InfoBar
-            Grid.Row="1"
-            Severity="Error"
-            IsOpen="{x:Bind ViewModel.IsInfoBarErrorOpen, Mode=TwoWay}"
-            Message="{x:Bind ViewModel.InfoBarErrorMessage, Mode=OneWay}" />
-
-        <Grid Grid.Row="2" Margin="36,0">
+        <Grid Grid.Row="0" x:Name="AppTitleBar" Margin="0,0,0,0" Canvas.ZIndex="1" IsHitTestVisible="False" VerticalAlignment="Center" HorizontalAlignment="Stretch">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="150" />
             </Grid.ColumnDefinitions>
 
-            <BreadcrumbBar
-                Grid.Column="0"
-                ItemsSource="{x:Bind ViewModel.BreadcrumbItems, Mode=OneWay}"
-                IsHitTestVisible="False">
-                <BreadcrumbBar.ItemTemplate>
-                    <DataTemplate x:DataType="modcommon:Breadcrumb">
-                        <BreadcrumbBarItem>
-                            <BreadcrumbBarItem.ContentTemplate>
-                                <DataTemplate x:DataType="modcommon:Breadcrumb">
-                                    <TextBlock
-                                        Text="{x:Bind Name}"
-                                        FontSize="28"
-                                        FontWeight="SemiBold" />
-                                </DataTemplate>
-                            </BreadcrumbBarItem.ContentTemplate>
-                        </BreadcrumbBarItem>
-                    </DataTemplate>
-                </BreadcrumbBar.ItemTemplate>
-            </BreadcrumbBar>
+            <Image x:Name="AppTitleBarIcon" Grid.Row="0" Grid.Column="0" Source="/Assets/App.ico" HorizontalAlignment="Left" Width="18" Height="18" Margin="12,0,0,0" VerticalAlignment="Center"/>
 
-            <AppBarButton
-                Grid.Column="1"
-                Icon="Save"
-                Label="保存"
-                Command="{x:Bind ViewModel.SaveCommand}" />
+            <TextBlock x:Name="AppTitleBarText" Grid.Row="0" Grid.Column="1" Text="{x:Bind ViewModel.WindowTitle, Mode=OneWay}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" Margin="12,0,0,0" VerticalAlignment="Center"/>
+
+        </Grid>
+
+        <Border Grid.Row="1">
+            <InfoBar Severity="Error" 
+             IsOpen="{x:Bind ViewModel.IsInfoBarErrorOpen, Mode=TwoWay}" 
+             Message="{x:Bind ViewModel.InfoBarErrorMessage, Mode=OneWay}" />
+        </Border>
+
+
+        <Grid Grid.Row="2" Margin="36,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+
+            <Grid BorderThickness="0,0,0,1" BorderBrush="{ThemeResource NavigationViewItemSeparatorForeground}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                
+                <BreadcrumbBar x:Name="BreadcrumbBar1" Grid.Row="0" Grid.Column="0" ItemsSource="{x:Bind ViewModel.BreadcrumbItems, Mode=OneWay}" 
+                               IsHitTestVisible="False" AllowFocusOnInteraction="False" IsTabStop="False" VerticalAlignment="Center">
+                    <BreadcrumbBar.ItemTemplate>
+                        <DataTemplate x:DataType="modcommon:Breadcrumb">
+                            <BreadcrumbBarItem>
+                                <BreadcrumbBarItem.ContentTemplate>
+                                    <DataTemplate x:DataType="modcommon:Breadcrumb">
+                                        <TextBlock Text="{x:Bind Name}" FontSize="28" FontWeight="SemiBold"/>
+                                    </DataTemplate>
+                                </BreadcrumbBarItem.ContentTemplate>
+                            </BreadcrumbBarItem>
+                        </DataTemplate>
+                    </BreadcrumbBar.ItemTemplate>
+                </BreadcrumbBar>
+
+                <StackPanel Grid.Row="0" Grid.Column="1">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                        <AppBarButton Icon="Go"  Label="建物" ToolTipService.ToolTip="建物画面を開く（Ctrl+T）" Command="{x:Bind ViewModel.OpenPropertyEditorWindowCommand}">
+                            <!-- GoToStart -->
+                            <AppBarButton.KeyboardAccelerators>
+                                <KeyboardAccelerator Key="T" Modifiers="Control"/>
+                            </AppBarButton.KeyboardAccelerators>
+                        </AppBarButton>
+                        <AppBarButton Icon="Save" Label="保存" ToolTipService.ToolTip="保存（Ctrl+S）" Command="{x:Bind ViewModel.SaveCommand}">
+                            <AppBarButton.KeyboardAccelerators>
+                                <KeyboardAccelerator Key="S" Modifiers="Control"/>
+                            </AppBarButton.KeyboardAccelerators>
+                        </AppBarButton>
+                    </StackPanel>
+                </StackPanel>
+
+            </Grid>
+
         </Grid>
 
         <Grid Grid.Row="3">
@@ -79,16 +104,14 @@
                 Loaded="NavView_Loaded"
                 ItemInvoked="NavView_ItemInvoked">
                 <NavigationView.MenuItems>
-                    <NavigationViewItem
-                        Content="基本"
-                        Tag="ZumenSearch.Views.Rent.Commercials.Listing.BasicPage" />
+                    <NavigationViewItem Content="基本" Tag="ZumenSearch.Views.Rent.Commercials.Listing.BasicPage" />
                 </NavigationView.MenuItems>
             </NavigationView>
 
             <Frame
                 x:Name="ContentFrame"
                 Grid.Row="1"
-                NavigationFailed="ContentFrame_NavigationFailed" />
+                NavigationFailed="ContentFrame_NavigationFailed" Navigated="ContentFrame_Navigated"/>
         </Grid>
     </Grid>
 </Page>

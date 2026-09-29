@@ -5,11 +5,13 @@ namespace ZumenSearch.Services.Contracts;
 public interface IDataAccessService
 {
     ResultWrapper InitializeDatabase(string dataBaseFilePath);
+
+    // Properties
     PropertiesResultWrapper SelectRecentProperties();
+    PropertiesResultWrapper SelectPropertiesByKeyword(string keyword);
 
     // Rent Residential
     ResultWrapper UpsertRentResidential(Models.Rent.Residentials.Property building);
-    PropertiesResultWrapper SelectRentResidentialsByNameKeyword(string keyword);
     RentResidentialBuildingSingleResultWrapper SelectRentResidentialById(string id);
     ResultWrapper DeleteRentResidential(string rentId);
     ResultWrapper UpsertRentResidentialListing(string rentId, Models.Rent.Residentials.Listing.Listing room);
@@ -19,12 +21,12 @@ public interface IDataAccessService
 
     // Rent Commercial
     ResultWrapper UpsertRentCommercial(Models.Rent.Commercials.Property building);
-    PropertiesResultWrapper SelectRentCommercialsByNameKeyword(string keyword);
+    //PropertiesResultWrapper SelectRentCommercialsByNameKeyword(string keyword);
     RentCommercialBuildingSingleResultWrapper SelectRentCommercialById(string id);
     ResultWrapper DeleteRentCommercial(string commercialId);
     ResultWrapper UpsertRentCommercialListing(string commercialId,Models.Rent.Commercials.Listing.Listing room);
     ListingsResultWrapper SelectRentCommercialListings();
-    RentCommercialRoomSingleResultWrapper SelectRentCommercialListingById(string commercialId,string roomId);
+    RentCommercialUnitSingleResultWrapper SelectRentCommercialListingById(string commercialId,string roomId);
     ResultWrapper DeleteRentCommercialListing(string roomId);
 
     // Person

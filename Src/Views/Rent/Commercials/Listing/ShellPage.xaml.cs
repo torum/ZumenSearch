@@ -1,27 +1,25 @@
-﻿using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Navigation;
-using ZumenSearch.Services.Contracts;
-using CommunityToolkit.Mvvm.Messaging;
+﻿using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI.Windowing;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Media.Animation;
+using Microsoft.UI.Xaml.Navigation;
+using System.Collections.ObjectModel;
+using ZumenSearch.Models.Common;
+using ZumenSearch.Services.Contracts;
 
 namespace ZumenSearch.Views.Rent.Commercials.Listing;
 
 public sealed partial class ShellPage : Page
 {
-    public ViewModels.Rent.Commercials.Listing.ListingViewModel ViewModel { get; }
-    public EditorWindow Window { get; }
-
     private readonly INavigationGenericService _navigationService;
     private readonly IDialogGenericService _dialogService;
 
     private readonly List<(string Tag, string Label, Type? Page)> _pages =
     [
-        (
-            "ZumenSearch.Views.Rent.Commercials.Listing.BasicPage",
-            "基本",
-            typeof(BasicPage)
-        )
+        ("ZumenSearch.Views.Rent.Commercials.Listing.BasicPage", "基本", typeof(BasicPage))
     ];
 
     public ShellPage(
@@ -51,6 +49,9 @@ public sealed partial class ShellPage : Page
         Window.Closed += Window_Closed;
         Window.AppWindow.Closing += AppWindow_Closing;
     }
+
+    public ViewModels.Rent.Commercials.Listing.ListingViewModel ViewModel { get; }
+    public EditorWindow Window { get; }
 
     public async Task ShowEditorCloseConfirmationDialog()
     {
@@ -99,11 +100,6 @@ public sealed partial class ShellPage : Page
     private void ShellPage_Loaded(object sender, RoutedEventArgs e)
     {
         _dialogService.Initialize(XamlRoot, Window);
-
-        if (ContentFrame.Content is null)
-        {
-            ContentFrame.Navigate(typeof(BasicPage), ViewModel);
-        }
     }
 
     private void NavView_Loaded(object sender, RoutedEventArgs e)
@@ -114,34 +110,121 @@ public sealed partial class ShellPage : Page
         }
     }
 
-    private void NavView_ItemInvoked(
-        NavigationView sender,
-        NavigationViewItemInvokedEventArgs args)
-    {
-        if (args.InvokedItemContainer?.Tag is string tag)
-        {
-            _navigationService.NavigateTo(tag, ViewModel);
-        }
-    }
-
-    private void ContentFrame_NavigationFailed(
-        object sender,
-        NavigationFailedEventArgs e)
-    {
-        throw new InvalidOperationException(
-            $"Failed to load page '{e.SourcePageType.FullName}'.");
-    }
-
     private void Window_Activated(object sender, Microsoft.UI.Xaml.WindowActivatedEventArgs args)
     {
-        /*
         var resource = args.WindowActivationState == WindowActivationState.Deactivated ? "WindowCaptionForegroundDisabled" : "WindowCaptionForeground";
         AppTitleBarText.Foreground = (SolidColorBrush)App.Current.Resources[resource];
 
         BreadcrumbBar1.Opacity = args.WindowActivationState == WindowActivationState.Deactivated ? 0.5 : 1;
         NavView.Opacity = args.WindowActivationState == WindowActivationState.Deactivated ? 0.7 : 1;
         //ContentFrame.Opacity = args.WindowActivationState == WindowActivationState.Deactivated ? 0.7 : 1;
+    }
+
+    private void NavView_ItemInvoked(NavigationView sender,NavigationViewItemInvokedEventArgs args)
+    {
+        /*
+        if (args.InvokedItemContainer?.Tag is string tag)
+        {
+            _navigationService.NavigateTo(tag, ViewModel);
+        }
         */
+        if (_pages is null)
+        {
+            return;
+        }
+
+        if (args.IsSettingsInvoked == true)
+        {
+            // Do nothing. 
+        }
+        else if (args.InvokedItemContainer != null && (args.InvokedItemContainer.Tag != null))
+        {
+            if (args.InvokedItemContainer.Tag is not string tag || string.IsNullOrWhiteSpace(tag))
+            {
+                Debug.WriteLine("ShellPage: NavView_ItemInvoked: Invalid tag or null.");
+                return;
+            }
+
+            var item = _pages.FirstOrDefault(p => p.Tag.Equals(args.InvokedItemContainer.Tag.ToString()));
+
+            if (item.Page is null)
+            {
+                Debug.WriteLine("ShellPage: NavView_ItemInvoked: Page is null for tag " + tag);
+                return;
+            }
+
+            if (ContentFrame.Navigate(item.Page, ViewModel, new DrillInNavigationTransitionInfo())) //new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom })SuppressNavigationTransitionInfo
+            {
+                if (BreadcrumbBar1.ItemsSource is ObservableCollection<Breadcrumb> crumbs)
+                {
+                    if (crumbs.Count > 1)
+                    {
+                        crumbs.RemoveAt(crumbs.Count - 1); // Remove the last breadcrumb if exists to avoid duplication.
+                        crumbs.Add(new Breadcrumb { Name = item.Label, Page = item.Page.FullName! });
+                    }
+                }
+            }
+            //, args.RecommendedNavigationTransitionInfo
+        }
+    }
+
+    private void ContentFrame_Navigated(object sender, NavigationEventArgs e)
+    {
+        this.NavView.IsBackEnabled = this.ContentFrame.CanGoBack;
+
+        if (this.ContentFrame.SourcePageType != null)
+        {
+            var selectedItem = FindNavigationViewItemWithTag(this.ContentFrame.SourcePageType.FullName!);
+            if (selectedItem != null)
+            {
+                this.NavView.SelectedItem = selectedItem;
+                //NavigationViewControl.Header = ((NavigationViewItem)NavigationViewControl.SelectedItem)?.Content?.ToString();
+            }
+            else
+            {
+                Debug.WriteLine($"No menu item with tag matching the current page found in NavView. Current page: {ContentFrame.SourcePageType.FullName}");
+            }
+        }
+    }
+
+    private NavigationViewItem? FindNavigationViewItemWithTag(string tag)
+    {
+        foreach (var item in this.NavView.MenuItems.OfType<NavigationViewItem>())
+        {
+            if (item.Tag.Equals(tag))
+            {
+                this.NavView.SelectedItem = item;
+                return item;
+            }
+
+            if (item.MenuItems.Count > 0)
+            {
+                foreach (var subItem in item.MenuItems.OfType<NavigationViewItem>())
+                {
+                    if (subItem.Tag.Equals(tag))
+                    {
+                        this.NavView.SelectedItem = subItem;
+                        return subItem;
+                    }
+                }
+            }
+        }
+
+        foreach (var item in this.NavView.FooterMenuItems.OfType<NavigationViewItem>())
+        {
+            if (item.Tag.Equals(tag))
+            {
+                this.NavView.SelectedItem = item;
+                return item;
+            }
+        }
+
+        return null;
+    }
+
+    private void ContentFrame_NavigationFailed(object sender,NavigationFailedEventArgs e)
+    {
+        throw new InvalidOperationException($"Failed to load page '{e.SourcePageType.FullName}'.");
     }
 
     private void Window_Closed(object sender, WindowEventArgs args)
@@ -220,5 +303,53 @@ public sealed partial class ShellPage : Page
         }
     }
 
+    private void KeyboardAccelerator_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+    {
+        // set this first.
+        args.Handled = true;
+
+        if (args.KeyboardAccelerator.Key == Windows.System.VirtualKey.F1)
+        {
+            // TODO:
+
+            return;
+        }
+
+        if (args.KeyboardAccelerator.Modifiers == Windows.System.VirtualKeyModifiers.Menu)
+        {
+            if (args.KeyboardAccelerator.Key == Windows.System.VirtualKey.Left)
+            {
+                if (this.ContentFrame != null && this.ContentFrame.CanGoBack)
+                {
+                    this.ContentFrame.GoBack();
+                }
+
+                return;
+            }
+        }
+
+        if (args.KeyboardAccelerator.Modifiers == Windows.System.VirtualKeyModifiers.Control)
+        {
+            if (args.KeyboardAccelerator.Key == Windows.System.VirtualKey.S)
+            {
+                if (ViewModel.SaveCommand.CanExecute(null))
+                {
+                    ViewModel.SaveCommand.Execute(null);
+                }
+
+                return;
+            }
+
+            if (args.KeyboardAccelerator.Key == Windows.System.VirtualKey.T)
+            {
+                if (ViewModel.OpenPropertyEditorWindowCommand.CanExecute(null))
+                {
+                    ViewModel.OpenPropertyEditorWindowCommand.Execute(null);
+                }
+
+                return;
+            }
+        }
+    }
 
 }

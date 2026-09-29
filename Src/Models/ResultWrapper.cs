@@ -15,11 +15,17 @@ public class ResultWrapper : ResultWrapperBase
     public int AffectedCount = 0;
 }
 
-// Properties
+// Common Properties result.
 
 public sealed class PropertiesResultWrapper : ResultWrapperBase
 {
     public ObservableCollection<Models.Common.PropertySearchResultItem> PropertySearchResult = [];
+}
+
+// TODO:
+public sealed class ListingsResultWrapper : ResultWrapperBase
+{
+    public ObservableCollection<Models.Common.ListingSearchResultItem> ListingSearchResult = [];
 }
 
 // Rent Residential
@@ -29,12 +35,7 @@ public sealed class RentResidentialBuildingSingleResultWrapper : ResultWrapperBa
     public Models.Rent.Residentials.Property? Building;
 }
 
-// TODO:
-public sealed class ListingsResultWrapper : ResultWrapperBase
-{
-    public ObservableCollection<Models.Common.ListingSearchResultItem> ListingSearchResult = [];
-}
-
+// Rent Residential listing
 public sealed class RentResidentialRoomSingleResultWrapper : ResultWrapperBase
 {
     public string BuildingName = string.Empty;
@@ -48,11 +49,12 @@ public sealed class RentCommercialBuildingSingleResultWrapper : ResultWrapperBas
     public Models.Rent.Commercials.Property? Building;
 }
 
-public sealed class RentCommercialRoomSingleResultWrapper: ResultWrapperBase
+// Rent Commercial listing
+public sealed class RentCommercialUnitSingleResultWrapper: ResultWrapperBase
 {
     public string BuildingName = string.Empty;
 
-    public Models.Rent.Commercials.Listing.Listing? Room;
+    public Models.Rent.Commercials.Listing.Listing? Unit;
 }
 
 

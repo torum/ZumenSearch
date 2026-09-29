@@ -80,9 +80,9 @@ public sealed partial class SearchResultPage : Page
             return;
         }
 
-        if (ViewModel.EditRentResidentialBldgCommand.CanExecute(searchresult))
+        if (ViewModel.EditPropertyCommand.CanExecute(searchresult))
         {
-            ViewModel.EditRentResidentialBldgCommand.Execute(searchresult);
+            ViewModel.EditPropertyCommand.Execute(searchresult);
         }
     }
 
@@ -167,9 +167,9 @@ public sealed partial class SearchResultPage : Page
             return;
         }
 
-        if (ViewModel.EditRentResidentialBldgCommand.CanExecute(searchresult))
+        if (ViewModel.EditPropertyCommand.CanExecute(searchresult))
         {
-            ViewModel.EditRentResidentialBldgCommand.Execute(searchresult);
+            ViewModel.EditPropertyCommand.Execute(searchresult);
         }
     }
 

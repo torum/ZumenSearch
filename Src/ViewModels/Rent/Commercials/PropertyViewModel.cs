@@ -1,8 +1,10 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.UI.Windowing;
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Runtime.InteropServices;
 using ZumenSearch.Models.Base;
 using ZumenSearch.Models.Common;
 using ZumenSearch.Models.Messenger;
@@ -527,6 +529,176 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     private bool CanSave()
     {
         return IsDirty;
+    }
+
+    [RelayCommand(CanExecute = nameof(EditSelectedUnitCanExecute))]
+    private void EditSelectedUnit(Models.Rent.Commercials.Listing.Listing unit)
+    {
+        if (unit is null) return;
+
+        var rentId = unit.PropertyId;
+        var unitId = unit.Id;
+
+        if (string.IsNullOrEmpty(rentId))//if (selected == null)
+        {
+            Debug.WriteLine("EditSelectedUnitCommand executed but no rentId.");
+            return;
+        }
+
+        //Debug.WriteLine($"EditRentResidentialCommand executed for {selected.Id}");
+
+        var mainVM = App.GetService<ViewModels.MainViewModel>();
+
+        // Check if the selected item is already being edited in another window.
+        foreach (var editWin in mainVM.RentCommercialListingEditorList.ToList())
+        {
+            if (editWin.Id != unitId)
+            {
+                continue;
+            }
+
+            //Debug.WriteLine($"Editor window for {unitId} is already open. Activating it.");
+
+            try
+            {
+                editWin.Activate();
+
+                if (editWin.Content is Views.Rent.Commercials.Listing.ShellPage editShell)
+                {
+                    editShell.Window?.AppWindow.MoveInZOrderBelow(editWin.AppWindow.Id);
+                }
+
+                editWin.AppWindow.MoveInZOrderAtTop();
+
+                //isFound = true;
+
+                return;
+            }
+            catch (COMException)
+            {
+                // 既に閉じられたウィンドウをリストから除去
+                //mainVM.RoomEditorList.Remove(editWin);
+                //ChildEditorList.Remove(editWin);
+            }
+        }
+
+        //var editorShell = _shellFactory.Create(unit);
+        var shellFactory = App.GetService<Services.Extensions.AbstractFactory.IAbstractFactory<Models.Rent.Commercials.Listing.Listing, Views.Rent.Commercials.Listing.ShellPage>>();
+        var editorShell = shellFactory.Create(unit);
+
+        // Apply the current IsUnitOwnership state because it may not be saved to the _room.
+        //editorShell.ViewModel.IsPropertyUnitOwnership = this.IsUnitOwnership;
+
+        var editorWindow = editorShell.Window;
+        if (editorWindow == null)
+        {
+            // EditorWin should be initialized in the EditorShell constructor.
+            Debug.WriteLine("EditorWin must be initialized in the EditorShell constructor");
+            return;
+        }
+
+        mainVM.RentCommercialListingEditorList.Add(editorWindow);
+
+        this.ChildEditorList.Add(editorWindow);
+
+        editorWindow.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(mainVM.RentCommercialListingEditorWinLeft, mainVM.RentCommercialListingEditorWinTop, mainVM.RentCommercialListingEditorWinWidth, mainVM.RentCommercialListingEditorWinHeight));
+        if (editorWindow.AppWindow.Presenter is OverlappedPresenter presenter)
+        {
+            presenter.IsResizable = true;
+            presenter.IsModal = false;
+            presenter.IsAlwaysOnTop = false;
+            presenter.PreferredMinimumWidth = 1274;
+            presenter.PreferredMinimumHeight = 794;
+        }
+
+        editorWindow.AppWindow.Show();
+        editorWindow.Activate();
+
+        if (editorWindow.Content is Views.Rent.Commercials.Listing.ShellPage shell)
+        {
+            shell.Window?.AppWindow.MoveInZOrderBelow(editorWindow.AppWindow.Id);
+        }
+        editorWindow.AppWindow.MoveInZOrderAtTop();
+
+    }
+    public static bool EditSelectedUnitCanExecute(Models.Rent.Commercials.Listing.Listing unit)
+    {
+        if (unit is null) return false;
+        return true;
+    }
+
+    [RelayCommand(CanExecute = nameof(DupeSelectedUnitCanExecute))]
+    private void DupeSelectedUnit(Models.Rent.Commercials.Listing.Listing room)
+    {
+        if (room is null) return;
+
+        //
+    }
+    public static bool DupeSelectedUnitCanExecute(Models.Rent.Commercials.Listing.Listing Unit)
+    {
+        if (Unit is null) return false;
+        return true;
+    }
+
+    [RelayCommand(CanExecute = nameof(DeleteSelectedUnitCanExecute))]
+    private void DeleteSelectedUnit(Models.Rent.Commercials.Listing.Listing unit)
+    {
+        if (unit is null)
+        {
+            return;
+        }
+
+        // 
+        var mainVM = App.GetService<ViewModels.MainViewModel>();
+
+        // Check if the selected item is already being edited in another window.
+        foreach (var editWin in mainVM.RentCommercialListingEditorList.ToList())
+        {
+            if (editWin.Id != unit.Id)
+            {
+                continue;
+            }
+
+            //Debug.WriteLine($"Editor window for {unitId} is already open. Activating it.");
+
+            try
+            {
+                editWin.Activate();
+
+                if (editWin.Content is Views.Rent.Commercials.Listing.ShellPage editShell)
+                {
+                    editShell.Window?.AppWindow.MoveInZOrderBelow(editWin.AppWindow.Id);
+                }
+
+                editWin.AppWindow.MoveInZOrderAtTop();
+
+                //isFound = true;
+
+                return;
+            }
+            catch (COMException)
+            {
+                // 既に閉じられたウィンドウをリストから除去
+                //mainVM.RoomEditorList.Remove(editWin);
+                //ChildEditorList.Remove(editWin);
+            }
+        }
+
+
+        // TODO: show dialog to comfirm.
+
+        if (Units.Remove(unit))
+        {
+            // No. Don't
+            //if (_building.Rooms.Remove(room)) { }
+            _building.UnitsToBeDeleted.Add(unit);
+            IsDirty = true;
+        }
+    }
+    public static bool DeleteSelectedUnitCanExecute(Models.Rent.Commercials.Listing.Listing unit)
+    {
+        if (unit is null) return false;
+        return true;
     }
 
     #endregion

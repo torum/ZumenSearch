@@ -123,12 +123,6 @@ public sealed partial class ShellPage : Page
     {
         // XamlRoot is no longer null.
         _dialogService.Initialize(this.XamlRoot, Window);
-        /*
-        if (ContentFrame.Navigate(typeof(ZumenSearch.Views.Rent.Residentials.Listing.BasicPage), ViewModel, new EntranceNavigationTransitionInfo()))
-        {
-
-        }
-        */
     }
 
     private void ShellPage_Unloaded(object sender, RoutedEventArgs e)
@@ -372,6 +366,16 @@ public sealed partial class ShellPage : Page
                 if (ViewModel.SaveCommand.CanExecute(null))
                 {
                     ViewModel.SaveCommand.Execute(null);
+                }
+
+                return;
+            }
+
+            if (args.KeyboardAccelerator.Key == Windows.System.VirtualKey.T)
+            {
+                if (ViewModel.OpenPropertyEditorWindowCommand.CanExecute(null))
+                {
+                    ViewModel.OpenPropertyEditorWindowCommand.Execute(null);
                 }
 
                 return;

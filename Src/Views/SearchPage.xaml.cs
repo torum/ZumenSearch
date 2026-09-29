@@ -41,9 +41,9 @@ public sealed partial class SearchPage : Page
 
     private void AutoSuggestBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
     {
-        if (ViewModel.SearchRentResidentialBldgCommand.CanExecute(args.QueryText))
+        if (ViewModel.SearchPropertiesCommand.CanExecute(args.QueryText))
         {
-            ViewModel.SearchRentResidentialBldgCommand.Execute(args.QueryText);
+            ViewModel.SearchPropertiesCommand.Execute(args.QueryText);
         }
     }
 
@@ -106,23 +106,11 @@ public sealed partial class SearchPage : Page
             return;
         }
 
-        if (ViewModel.EditRentResidentialBldgCommand.CanExecute(searchresult))
+        if (ViewModel.EditPropertyCommand.CanExecute(searchresult))
         {
-            ViewModel.EditRentResidentialBldgCommand.Execute(searchresult);
+            ViewModel.EditPropertyCommand.Execute(searchresult);
         }
 
-        // TODO: RentResidentialBldg only for now.
-        if (searchresult.PropertyKind == Models.Base.EnumPropertyKind.RentResidential)
-        {
-            if (ViewModel.EditRentResidentialBldgCommand.CanExecute(searchresult))
-            {
-                ViewModel.EditRentResidentialBldgCommand.Execute(searchresult);
-            }
-        }
-        else
-        {
-            Debug.WriteLine($"EnumPropertyKind is not RentResidential @ItemContainer_DoubleTapped {searchresult.PropertyKind}");
-        }
     }
 
     private void ItemContainer_PointerPressed(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)

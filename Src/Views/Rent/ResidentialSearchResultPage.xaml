@@ -42,7 +42,7 @@
                 <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,0,3,0">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                         <AppBarButton Icon="Back" Label="戻る" Command="{x:Bind ViewModel.GoBackCommand}"/>
-                        <AppBarButton Icon="Add" Label="新規" Command="{x:Bind ViewModel.AddNewRentResidentialBldgCommand}"/>
+                        <AppBarButton Icon="Add" Label="新規" Command="{x:Bind ViewModel.AddNewRentResidentialCommand}"/>
                     </StackPanel>
                 </StackPanel>
 
@@ -78,7 +78,7 @@
 
             <ScrollViewer Grid.Row="1" Padding="{StaticResource ContentPadding}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
 
-                <ItemsView x:Name="SearchResultListView" Margin="0,12,0,0" ItemsSource="{x:Bind ViewModel.RentResidentialRoomSearchResult, Mode=OneWay}" AllowFocusOnInteraction="False" SelectionMode="Single">
+                <ItemsView x:Name="SearchResultListView" Margin="0,12,0,0" ItemsSource="{x:Bind ViewModel.RentResidentialListingSearchResult, Mode=OneWay}" AllowFocusOnInteraction="False" SelectionMode="Single">
                     <ItemsView.ContextFlyout>
                         <MenuFlyout>
                             <MenuFlyoutItem Text="編集" Icon="Edit" Command="{x:Bind ViewModel.EditRentResidentialRoomCommand}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}">
