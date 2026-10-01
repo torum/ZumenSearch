@@ -136,6 +136,29 @@ public abstract partial class PropertyBase : EntryBase
         set => SetProperty(ref field, value);
     }
 
+    public string LocationLatitude
+    {
+        get => field ?? string.Empty;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;
+            }
+        }
+    } = string.Empty;
+
+    public string LocationLongitude
+    {
+        get => field ?? string.Empty;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;
+            }
+        }
+    } = string.Empty;
     #endregion
 
     protected PropertyBase(string id, EnumEntryStatus status, EnumPropertyKind kind): base(id, status)

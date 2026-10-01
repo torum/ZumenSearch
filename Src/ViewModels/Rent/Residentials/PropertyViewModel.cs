@@ -1694,6 +1694,9 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
         Edaban = _building.LocEdaban;
 
+        LocationLatitude = _building.LocationLatitude;
+        LocationLongitude = _building.LocationLongitude;
+
         //TODO: Set other properties
 
 
@@ -1986,10 +1989,11 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         _building.LocChoume = (SelectedChou is not null) ? SelectedChou.Chou : string.Empty;
         _building.LocEdaban = (!string.IsNullOrEmpty(Edaban)) ? Edaban : string.Empty;
         _building.LocLocationFull = AddressPreview;
-
+        _building.LocationLatitude = LocationLatitude;
+        _building.LocationLongitude = LocationLongitude;
         // TODO: Set other properties
         // TODO: Don't forget to check if Helpers.Common.ReplaceZenkakuNumbers is needed.
-        
+
 
 
 

@@ -397,32 +397,6 @@ public sealed partial class Property : PropertyBase
         }
     } = string.Empty;
 
-    // 緯度（Lat）
-    public string LocationLatitude
-    {
-        get;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
-        }
-    } = string.Empty;
-
-    // 経度（Lon）
-    public string LocationLongitude
-    {
-        get;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
-        }
-    } = string.Empty;
-
     public string GeoUri
     {
         get

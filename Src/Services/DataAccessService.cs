@@ -62,6 +62,8 @@ public sealed class DataAccessService : IDataAccessService
                     "loc_choume TEXT," +
                     "loc_edaban TEXT," +
                     "loc_location_full TEXT," +
+                    "location_latitude TEXT NOT NULL DEFAULT ''," +
+                    "location_longitude TEXT NOT NULL DEFAULT ''," +
 
 
                     "updated_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc'))," +
@@ -242,6 +244,36 @@ public sealed class DataAccessService : IDataAccessService
     CREATE INDEX IF NOT EXISTS
         ix_rent_commercial_units_property_id
         ON rent_commercial_units(property_id);
+
+
+    CREATE TABLE IF NOT EXISTS rent_commercial_pictures (
+        picture_id TEXT NOT NULL PRIMARY KEY,
+        property_id TEXT NOT NULL,
+        filename TEXT NOT NULL,
+        type TEXT NOT NULL,
+        description TEXT NOT NULL,
+        is_main INTEGER NOT NULL DEFAULT 0,
+        FOREIGN KEY (property_id) REFERENCES rent_commercials(property_id) ON DELETE CASCADE
+    );
+
+    CREATE TABLE IF NOT EXISTS rent_commercial_pdfs (
+        pdf_id TEXT NOT NULL PRIMARY KEY,
+        property_id TEXT NOT NULL,
+        filename TEXT NOT NULL,
+        thumbnail_filename TEXT NOT NULL,
+        type TEXT NOT NULL,
+        description TEXT NOT NULL,
+        is_main INTEGER NOT NULL DEFAULT 0,
+        created_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc')),
+        updated_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc')),
+        FOREIGN KEY (property_id) REFERENCES rent_commercials(property_id) ON DELETE CASCADE
+    );
+
+    CREATE INDEX IF NOT EXISTS ix_rent_commercial_pictures_property_id
+        ON rent_commercial_pictures(property_id);
+
+    CREATE INDEX IF NOT EXISTS ix_rent_commercial_pdfs_property_id
+        ON rent_commercial_pdfs(property_id);
     """;
 
                 tableCmd.ExecuteNonQuery();
@@ -995,10 +1027,10 @@ public sealed class DataAccessService : IDataAccessService
                 //cmd.CommandText = "INSERT INTO properties (property_id, name, property_kind, thumbnail_filename, loc_pref_id, loc_prefecture, loc_machiaza_id, loc_county, loc_city, loc_ward, loc_oaza_cho, loc_choume, loc_edaban, loc_location_full, updated_at) " +
                 //  "VALUES (@RentId, @Name, @PropertyKind, @Thumb, @LocPrefId, @LocPrefecture, @LocMachiazaId, @LocCounty, @LocCity, @LocWard, @LocOazaCho, @LocChoume, @LocEdaban, @LocLocationFull, @updated_at)";
                 // Upsert
-                var sqlUpsert = "INSERT INTO properties (property_id, name, property_kind, thumbnail_filename, loc_pref_id, loc_prefecture, loc_machiaza_id, loc_county, loc_city, loc_ward, loc_oaza_cho, loc_choume, loc_edaban, loc_location_full, updated_at) ";
-                sqlUpsert += "VALUES (@propertyId, @name, @propertyKind, @thumbnailPath, @locPrefId, @locPrefecture, @locMachiazaId, @locCounty, @locCity, @locWard, @locOazaCho, @locChoume, @locEdaban, @locLocationFull, @updated_at) ";
+                var sqlUpsert = "INSERT INTO properties (property_id, name, property_kind, thumbnail_filename, loc_pref_id, loc_prefecture, loc_machiaza_id, loc_county, loc_city, loc_ward, loc_oaza_cho, loc_choume, loc_edaban, loc_location_full, location_latitude, location_longitude, updated_at) ";
+                sqlUpsert += "VALUES (@propertyId, @name, @propertyKind, @thumbnailPath, @locPrefId, @locPrefecture, @locMachiazaId, @locCounty, @locCity, @locWard, @locOazaCho, @locChoume, @locEdaban, @locLocationFull, @locationLatitude, @locationLongitude, @updated_at) ";
                 sqlUpsert += "ON CONFLICT (property_id) ";
-                sqlUpsert += "DO UPDATE SET property_id = @propertyId, name = @name, property_kind = @propertyKind, thumbnail_filename = @thumbnailPath, loc_pref_id = @locPrefId, loc_prefecture = @locPrefecture, loc_machiaza_id = @locMachiazaId, loc_county = @locCounty, loc_city = @locCity, loc_ward = @locWard, loc_oaza_cho = @locOazaCho, loc_choume = @locChoume, loc_edaban = @locEdaban, loc_location_full = @locLocationFull, updated_at = @updated_at";
+                sqlUpsert += "DO UPDATE SET property_id = @propertyId, name = @name, property_kind = @propertyKind, thumbnail_filename = @thumbnailPath, loc_pref_id = @locPrefId, loc_prefecture = @locPrefecture, loc_machiaza_id = @locMachiazaId, loc_county = @locCounty, loc_city = @locCity, loc_ward = @locWard, loc_oaza_cho = @locOazaCho, loc_choume = @locChoume, loc_edaban = @locEdaban, loc_location_full = @locLocationFull, location_latitude = @locationLatitude, location_longitude = @locationLongitude, updated_at = @updated_at";
 
                 cmd.CommandText = sqlUpsert;
               
@@ -1016,6 +1048,8 @@ public sealed class DataAccessService : IDataAccessService
                 cmd.Parameters.AddWithValue("@locChoume", building.LocChoume);
                 cmd.Parameters.AddWithValue("@locEdaban", building.LocEdaban);
                 cmd.Parameters.AddWithValue("@locLocationFull", building.LocLocationFull);
+                cmd.Parameters.AddWithValue("@locationLatitude", building.LocationLatitude);
+                cmd.Parameters.AddWithValue("@locationLongitude", building.LocationLongitude);
                 // TODO: more
 
                 cmd.Parameters.AddWithValue("@updated_at", DateTimeOffset.UtcNow.ToString("s"));
@@ -1513,6 +1547,8 @@ public sealed class DataAccessService : IDataAccessService
                 "properties.loc_choume as locChoume, " +
                 "properties.loc_edaban as locEdaban, " +
                 "properties.loc_location_full as locLocationFull, " +
+                "properties.location_latitude as locationLatitude, " +
+                "properties.location_longitude as locationLongitude, " +
                 "properties.updated_at as UpdatedAt, " +
 
                 "rent_residentials.building_kind as resiBuildingKind, " +
@@ -1558,7 +1594,8 @@ public sealed class DataAccessService : IDataAccessService
                     entry.LocChoume = Convert.ToString(reader["locChoume"]) ?? "";
                     entry.LocEdaban = Convert.ToString(reader["locEdaban"]) ?? "";
                     entry.LocLocationFull = Convert.ToString(reader["locLocationFull"]) ?? "";
-
+                    entry.LocationLatitude = Convert.ToString(reader["locationLatitude"]) ?? string.Empty;
+                    entry.LocationLongitude = Convert.ToString(reader["locationLongitude"]) ?? string.Empty;
                     // TODO: more.
 
 
@@ -2465,6 +2502,8 @@ public sealed class DataAccessService : IDataAccessService
                 loc_choume,
                 loc_edaban,
                 loc_location_full,
+                location_latitude,
+                location_longitude,
                 updated_at
             )
             VALUES (
@@ -2482,6 +2521,8 @@ public sealed class DataAccessService : IDataAccessService
                 @locChoume,
                 @locEdaban,
                 @locLocationFull,
+                @locationLatitude,
+                @locationLongitude,
                 @updatedAt
             )
             ON CONFLICT(property_id) DO UPDATE SET
@@ -2498,6 +2539,8 @@ public sealed class DataAccessService : IDataAccessService
                 loc_choume = excluded.loc_choume,
                 loc_edaban = excluded.loc_edaban,
                 loc_location_full = excluded.loc_location_full,
+                location_latitude = excluded.location_latitude,
+                location_longitude = excluded.location_longitude,
                 updated_at = excluded.updated_at;
             """;
 
@@ -2525,6 +2568,8 @@ public sealed class DataAccessService : IDataAccessService
             command.Parameters.AddWithValue(
                 "@locLocationFull",
                 building.LocLocationFull);
+            command.Parameters.AddWithValue("@locationLatitude", building.LocationLatitude);
+            command.Parameters.AddWithValue("@locationLongitude", building.LocationLongitude);
             command.Parameters.AddWithValue(
                 "@updatedAt",
                 DateTimeOffset.UtcNow.ToString("s"));
@@ -2614,6 +2659,8 @@ public sealed class DataAccessService : IDataAccessService
 
             result.AffectedCount = command.ExecuteNonQuery();
 
+            SaveRentCommercialMedia(command, building);
+
             // lessor
             command.Parameters.Clear();
 
@@ -2660,7 +2707,6 @@ public sealed class DataAccessService : IDataAccessService
                 command.ExecuteNonQuery();
             }
 
-            building.LessorsToBeDeleted.Clear();
 
             //
             command.Parameters.Clear();
@@ -2708,13 +2754,30 @@ public sealed class DataAccessService : IDataAccessService
                 command.ExecuteNonQuery();
             }
 
-            building.BrokersToBeDeleted.Clear();
 
 
 
-
-            //
+            // Commit transaction
             transaction.Commit();
+
+            // TODO: Check if this is necessary or already done in Save() in viewmodel.
+            foreach (var picture in building.Pictures)
+            {
+                picture.IsNew = false;
+                picture.IsModified = false;
+            }
+
+            foreach (var pdf in building.Pdfs)
+            {
+                pdf.IsNew = false;
+                pdf.IsModified = false;
+            }
+
+            //clean up
+            building.PicturesToBeDeleted.Clear();
+            building.PdfsToBeDeleted.Clear();
+            building.BrokersToBeDeleted.Clear();
+            building.LessorsToBeDeleted.Clear();
 
             building.Status = EnumEntryStatus.Saved;
             building.IsModified = false;
@@ -2731,6 +2794,105 @@ public sealed class DataAccessService : IDataAccessService
 
         return result;
     }
+
+    private static void SaveRentCommercialMedia(SqliteCommand command, Models.Rent.Commercials.Property building)
+    {
+        foreach (var picture in building.Pictures)
+        {
+            command.CommandText = """
+            INSERT INTO rent_commercial_pictures
+                (picture_id, property_id, filename, type, description, is_main)
+            VALUES
+                (@id, @propertyId, @filename, @type, @description, @isMain)
+            ON CONFLICT(picture_id) DO UPDATE SET
+                property_id = excluded.property_id,
+                filename = excluded.filename,
+                type = excluded.type,
+                description = excluded.description,
+                is_main = excluded.is_main;
+            """;
+
+            command.Parameters.Clear();
+            command.Parameters.AddWithValue("@id", picture.Id);
+            command.Parameters.AddWithValue("@propertyId", building.Id);
+            command.Parameters.AddWithValue("@filename", picture.ImageFilename);
+            command.Parameters.AddWithValue(
+                "@type",
+                picture.PictureType.Key.ToString());
+            command.Parameters.AddWithValue(
+                "@description",
+                picture.Description);
+            command.Parameters.AddWithValue(
+                "@isMain",
+                picture.IsMain ? 1 : 0);
+            command.ExecuteNonQuery();
+        }
+
+        foreach (var pdf in building.Pdfs)
+        {
+            command.CommandText = """
+            INSERT INTO rent_commercial_pdfs
+                (pdf_id, property_id, filename, thumbnail_filename,
+                 type, description, is_main)
+            VALUES
+                (@id, @propertyId, @filename, @thumbnailFilename,
+                 @type, @description, @isMain)
+            ON CONFLICT(pdf_id) DO UPDATE SET
+                property_id = excluded.property_id,
+                filename = excluded.filename,
+                thumbnail_filename = excluded.thumbnail_filename,
+                type = excluded.type,
+                description = excluded.description,
+                is_main = excluded.is_main,
+                updated_at = DATETIME('now', 'utc');
+            """;
+
+            command.Parameters.Clear();
+            command.Parameters.AddWithValue("@id", pdf.Id);
+            command.Parameters.AddWithValue("@propertyId", building.Id);
+            command.Parameters.AddWithValue("@filename", pdf.PdfFilename);
+            command.Parameters.AddWithValue(
+                "@thumbnailFilename",
+                pdf.ThumbnailFilename);
+            command.Parameters.AddWithValue(
+                "@type",
+                pdf.PdfType.Key.ToString());
+            command.Parameters.AddWithValue("@description", pdf.Description);
+            command.Parameters.AddWithValue("@isMain", pdf.IsMain ? 1 : 0);
+            command.ExecuteNonQuery();
+        }
+
+        foreach (var picture in building.PicturesToBeDeleted)
+        {
+            command.CommandText = """
+            DELETE FROM rent_commercial_pictures
+            WHERE picture_id = @id
+              AND property_id = @propertyId;
+            """;
+
+            command.Parameters.Clear();
+            command.Parameters.AddWithValue("@id", picture.Id);
+            command.Parameters.AddWithValue("@propertyId", building.Id);
+            command.ExecuteNonQuery();
+        }
+
+        foreach (var pdf in building.PdfsToBeDeleted)
+        {
+            command.CommandText = """
+            DELETE FROM rent_commercial_pdfs
+            WHERE pdf_id = @id
+              AND property_id = @propertyId;
+            """;
+
+            command.Parameters.Clear();
+            command.Parameters.AddWithValue("@id", pdf.Id);
+            command.Parameters.AddWithValue("@propertyId", building.Id);
+            command.ExecuteNonQuery();
+        }
+
+        command.Parameters.Clear();
+    }
+
     /*
     public PropertiesResultWrapper SelectRentCommercialsByNameKeyword(string keyword)
     {
@@ -2859,6 +3021,8 @@ public sealed class DataAccessService : IDataAccessService
                 p.loc_choume,
                 p.loc_edaban,
                 p.loc_location_full,
+                p.location_latitude,
+                p.location_longitude,
                 c.commercial_kind,
                 c.is_unit_ownership,
                 c.building_structure,
@@ -2927,6 +3091,8 @@ public sealed class DataAccessService : IDataAccessService
                     LocLocationFull =
                         Convert.ToString(reader["loc_location_full"])
                         ?? string.Empty,
+                    LocationLatitude = Convert.ToString(reader["location_latitude"]) ?? string.Empty,
+                    LocationLongitude = Convert.ToString(reader["location_longitude"]) ?? string.Empty,
                     IsUnitOwnership =
                         Convert.ToInt32(reader["is_unit_ownership"]) != 0,
                     FloorCountAboveGround =
@@ -2959,9 +3125,12 @@ public sealed class DataAccessService : IDataAccessService
                 ?? string.Empty);
 
 
-            // lessors
             reader.Close();
 
+            //
+            LoadRentCommercialMedia(command, building);
+
+            // lessors
             command.Parameters.Clear();
             command.CommandText = """
     SELECT
@@ -3007,6 +3176,8 @@ public sealed class DataAccessService : IDataAccessService
                     building.Lessors.Add(person);
                 }
             }
+
+            lessorReader.Close();
 
             // brokers
             command.Parameters.Clear();
@@ -3056,6 +3227,7 @@ public sealed class DataAccessService : IDataAccessService
                 }
             }
 
+            brokerReader.Close();
 
 
             // set result
@@ -3071,6 +3243,95 @@ public sealed class DataAccessService : IDataAccessService
         }
 
         return result;
+    }
+
+    private static void LoadRentCommercialMedia(SqliteCommand command, Models.Rent.Commercials.Property building)
+    {
+        command.Parameters.Clear();
+        command.CommandText = """
+        SELECT picture_id, filename, type, description, is_main
+        FROM rent_commercial_pictures
+        WHERE property_id = @propertyId
+        ORDER BY picture_id;
+        """;
+        command.Parameters.AddWithValue("@propertyId", building.Id);
+
+        using (var reader = command.ExecuteReader())
+        {
+            while (reader.Read())
+            {
+                var id = Convert.ToString(reader["picture_id"]) ?? string.Empty;
+                var filename = Convert.ToString(reader["filename"]) ?? string.Empty;
+
+                if (string.IsNullOrWhiteSpace(id) ||
+                    string.IsNullOrWhiteSpace(filename))
+                {
+                    continue;
+                }
+
+                var picture = new Models.Rent.Commercials.Picture(id, filename)
+                {
+                    Description =
+                        Convert.ToString(reader["description"]) ?? string.Empty,
+                    IsMain = Convert.ToInt32(reader["is_main"]) != 0,
+                    IsNew = false
+                };
+
+                picture.SetLabelFromString(
+                    Convert.ToString(reader["type"]) ?? string.Empty);
+                picture.IsModified = false;
+
+                building.Pictures.Add(picture);
+            }
+        }
+
+        command.Parameters.Clear();
+        command.CommandText = """
+        SELECT pdf_id, filename, thumbnail_filename, type, description,
+               is_main
+        FROM rent_commercial_pdfs
+        WHERE property_id = @propertyId
+        ORDER BY pdf_id;
+        """;
+        command.Parameters.AddWithValue("@propertyId", building.Id);
+
+        using (var reader = command.ExecuteReader())
+        {
+            while (reader.Read())
+            {
+                var id = Convert.ToString(reader["pdf_id"]) ?? string.Empty;
+                var filename = Convert.ToString(reader["filename"]) ?? string.Empty;
+                var thumbnailFilename =
+                    Convert.ToString(reader["thumbnail_filename"])
+                    ?? string.Empty;
+
+                if (string.IsNullOrWhiteSpace(id) ||
+                    string.IsNullOrWhiteSpace(filename) ||
+                    string.IsNullOrWhiteSpace(thumbnailFilename))
+                {
+                    continue;
+                }
+
+                var pdf = new Models.Rent.Commercials.Pdf(
+                    id,
+                    filename,
+                    thumbnailFilename)
+                {
+                    Description =
+                        Convert.ToString(reader["description"]) ?? string.Empty,
+                    IsMain = Convert.ToInt32(reader["is_main"]) != 0,
+                    IsNew = false
+                };
+
+                pdf.SetTypeFromString(
+                    Convert.ToString(reader["type"]) ?? string.Empty);
+                pdf.IsModified = false;
+
+                building.Pdfs.Add(pdf);
+            }
+        }
+
+        command.Parameters.Clear();
     }
 
     public ResultWrapper DeleteRentCommercial(string commercialId)
@@ -4288,6 +4549,8 @@ public sealed class DataAccessService : IDataAccessService
                 p.loc_choume,
                 p.loc_edaban,
                 p.loc_location_full,
+                p.location_latitude,
+                p.location_longitude,
                 s.building_kind,
                 s.is_unit_ownership,
                 s.building_structure,
@@ -4352,6 +4615,10 @@ public sealed class DataAccessService : IDataAccessService
                     LocLocationFull =
                         Convert.ToString(reader["loc_location_full"])
                         ?? string.Empty,
+                    LocationLatitude =
+    Convert.ToString(reader["location_latitude"]) ?? string.Empty,
+                    LocationLongitude =
+    Convert.ToString(reader["location_longitude"]) ?? string.Empty,
                     IsUnitOwnership =
                         Convert.ToInt32(reader["is_unit_ownership"]) != 0,
                     FloorCountAboveGround =

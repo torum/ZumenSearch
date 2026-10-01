@@ -30,14 +30,14 @@ public sealed partial class ShellPage : Page
     private readonly List<(string Tag, string Label, Type? Page)> _pages =
     [
         ("ZumenSearch.Views.Rent.Commercials.BasicPage", "基本", typeof(BasicPage)),
-        //("ZumenSearch.Views.Rent.Commercials.LocationPage", "所在地", typeof(LocationPage)),
+        ("ZumenSearch.Views.Rent.Commercials.LocationPage", "所在地", typeof(LocationPage)),
         ("ZumenSearch.Views.Rent.Commercials.TransportationPage", "交通", typeof(TransportationPage)),
         ("ZumenSearch.Views.Rent.Commercials.FacilitiesPage", "設備", typeof(FacilitiesPage)),
         ("ZumenSearch.Views.Rent.Commercials.KanriPage", "管理", typeof(KanriPage)),
         ("ZumenSearch.Views.Rent.Commercials.PictureListPage", "写真", typeof(PictureListPage)),
         ("ZumenSearch.Views.Rent.Commercials.ZumenListPage", "図面", typeof(ZumenListPage)),
-        //("ZumenSearch.Views.Rent.Commercials.LessorListPage", "貸主", typeof(LessorListPage)),
-        //("ZumenSearch.Views.Rent.Commercials.BrokerListPage", "宅建業者", typeof(BrokerListPage)),
+        ("ZumenSearch.Views.Rent.Commercials.LessorListPage", "貸主", typeof(LessorListPage)),
+        ("ZumenSearch.Views.Rent.Commercials.BrokerListPage", "宅建業者", typeof(BrokerListPage)),
         ("ZumenSearch.Views.Rent.Commercials.UnitListPage", "募集物件", typeof(UnitListPage))
     ];
 

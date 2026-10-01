@@ -104,6 +104,9 @@
                         Content="基本"
                         Tag="ZumenSearch.Views.Rent.Commercials.BasicPage" />
                     <NavigationViewItem
+    Content="所在地"
+    Tag="ZumenSearch.Views.Rent.Commercials.LocationPage" />
+                    <NavigationViewItem
     Content="交通"
     Tag="ZumenSearch.Views.Rent.Commercials.TransportationPage" />
                     <NavigationViewItem

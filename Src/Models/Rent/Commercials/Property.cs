@@ -138,9 +138,97 @@ public sealed partial class Property : PropertyBase
         }
     }
 
+    #endregion
 
+    #region == Location ==
 
+    public string MachiazaId = string.Empty;
 
+    public Prefecture? Pref
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;
+            }
+        }
+    }
+
+    public CountyAndCity? City
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;
+            }
+        }
+    }
+
+    public WardAndOaza? Town
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;
+            }
+        }
+    }
+
+    public Choume? Chou
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;
+            }
+        }
+    }
+
+    public string Edaban
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;
+            }
+        }
+    } = string.Empty;
+
+    // TODO:
+    public string PostalCode
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;
+            }
+        }
+    } = string.Empty;
+
+    public string GeoUri
+    {
+        get
+        {
+            if (string.IsNullOrEmpty(LocationLatitude) || string.IsNullOrEmpty(LocationLongitude))
+            {
+                return "https://maps.google.co.jp/";
+            }
+
+            return $"https://maps.google.co.jp/?q={LocationLatitude},{LocationLongitude}";
+        }
+    }
 
     #endregion
 

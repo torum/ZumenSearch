@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI.Windowing;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using Windows.Data.Pdf;
@@ -437,6 +438,58 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             : $"{SelectedPef.Name}{SelectedCity?.Combined}" +
               $"{SelectedTown?.Combined}{SelectedChou?.Chou}" +
               (string.IsNullOrWhiteSpace(Edaban) ? string.Empty : $"-{Edaban}");
+
+    // 緯度（Lat）
+    public string LocationLatitude
+    {
+        get;
+        set
+        {
+            if (field == value)
+            {
+                return;
+            }
+
+            field = value;
+            IsDirty = true;
+            OnPropertyChanged(nameof(LocationLatitude));
+            OnPropertyChanged(nameof(GeoUri));
+            ShowGoogleMapsCommand.NotifyCanExecuteChanged();
+        }
+    } = string.Empty;
+
+    // 経度（Lon）
+    public string LocationLongitude
+    {
+        get;
+        set
+        {
+            if (field == value)
+            {
+                return;
+            }
+
+            field = value;
+            IsDirty = true;
+            OnPropertyChanged(nameof(LocationLongitude));
+            OnPropertyChanged(nameof(GeoUri));
+            ShowGoogleMapsCommand.NotifyCanExecuteChanged();
+        }
+    } = string.Empty;
+
+    public string GeoUri
+    {
+        get
+        {
+            if (string.IsNullOrEmpty(LocationLatitude) ||
+                string.IsNullOrEmpty(LocationLongitude))
+            {
+                return "https://maps.google.co.jp/";
+            }
+
+            return $"https://maps.google.co.jp/?q={LocationLatitude},{LocationLongitude}";
+        }
+    }
 
     #endregion
 
@@ -1005,6 +1058,17 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     public void DiscardChanges()
     {
+        DeleteFilesSafely(_unsavedBuildingPictureFileList);
+        DeleteFilesSafely(_unsavedBuildingPdfFileList);
+        DeleteFilesSafely(_unsavedBuildingPdfThumbnailFileList);
+
+        _unsavedBuildingPictureFileList.Clear();
+        _unsavedBuildingPdfFileList.Clear();
+        _unsavedBuildingPdfThumbnailFileList.Clear();
+
+        _building.PicturesToBeDeleted.Clear();
+        _building.PdfsToBeDeleted.Clear();
+
         PopulateValues();
         IsDirty = false;
         IsInfoBarErrorOpen = false;
@@ -1059,7 +1123,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             _building.FudousanIdAdditionalCode;
         Remarks = _building.Remarks;
 
-
+        PopulateLocationValues();
 
         SelectedRailLine1 = _building.RailLine1;
         SelectedRailStation1 = _building.RailStation1;
@@ -1074,8 +1138,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         HasSecurityCamera = _building.HasSecurityCamera;
         HasParcelLocker = _building.HasParcelLocker;
 
-        /*
         // Pictures:
+        /*
         Pictures = new ObservableCollection<Models.Rent.Residentials.Picture>(_building.Pictures); // create a copy.
 
         foreach (var item in Pictures)
@@ -1087,7 +1151,21 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             item.PropertyChanged += OnBuildingPicturePropertyChanged;
         }
         */
+        Pictures = new ObservableCollection<Models.Rent.Commercials.Picture>(_building.Pictures);
 
+        foreach (var picture in Pictures)
+        {
+            TrackBuildingPicture(picture);
+        }
+
+        Pdfs = new ObservableCollection<Models.Rent.Commercials.Pdf>(_building.Pdfs);
+
+        foreach (var pdf in Pdfs)
+        {
+            TrackBuildingPdf(pdf);
+        }
+
+        // Lessors:
         LessorsWrapper.Clear();
 
         foreach (var person in _building.Lessors)
@@ -1107,6 +1185,90 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                     person,
                     this));
         }
+    }
+
+    private void PopulateLocationValues()
+    {
+        SelectedChou = null;
+        SelectedTown = null;
+        SelectedCity = null;
+        SelectedPef = null;
+
+        Cities = [];
+        Towns = [];
+        Chous = [];
+
+        var prefecture = Prefectures.FirstOrDefault(item =>
+            item.MunicipalityCode == _building.LocPrefId ||
+            item.Name == _building.LocPrefecture);
+
+        if (prefecture is not null)
+        {
+            SelectedPef = prefecture;
+        }
+
+        var city = Cities.FirstOrDefault(item =>
+            item.County == _building.LocCounty &&
+            item.City == _building.LocCity);
+
+        if (city is not null)
+        {
+            SelectedCity = city;
+        }
+
+        var town = Towns.FirstOrDefault(item =>
+            item.Ward == _building.LocWard &&
+            item.Oaza == _building.LocOazaCho);
+
+        if (town is not null)
+        {
+            SelectedTown = town;
+        }
+
+        var choume = Chous.FirstOrDefault(item =>
+            item.Chou == _building.LocChoume);
+
+        if (choume is not null)
+        {
+            SelectedChou = choume;
+        }
+
+        Edaban = _building.LocEdaban;
+
+        LocationLatitude = _building.LocationLatitude;
+        LocationLongitude = _building.LocationLongitude;
+    }
+
+    private void TrackBuildingPicture(Models.Rent.Commercials.Picture picture)
+    {
+        picture.BasePath = _propertyDataDirectoryPath;
+        picture.ParentViewModel = this;
+        picture.PropertyChanged -= OnBuildingMediaPropertyChanged;
+        picture.PropertyChanged += OnBuildingMediaPropertyChanged;
+        picture.IsModified = false;
+    }
+
+    private void TrackBuildingPdf(Models.Rent.Commercials.Pdf pdf)
+    {
+        pdf.BasePath = _propertyDataDirectoryPath;
+        pdf.ParentViewModel = this;
+        pdf.PropertyChanged -= OnBuildingMediaPropertyChanged;
+        pdf.PropertyChanged += OnBuildingMediaPropertyChanged;
+        pdf.IsModified = false;
+    }
+
+    private void OnBuildingMediaPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (sender is Models.Rent.Commercials.Picture picture)
+        {
+            picture.IsModified = true;
+        }
+        else if (sender is Models.Rent.Commercials.Pdf pdf)
+        {
+            pdf.IsModified = true;
+        }
+
+        IsDirty = true;
     }
 
     private void SetValues()
@@ -1145,7 +1307,25 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
         _building.Remarks = Remarks;
 
+        // location
+        _building.LocPrefId = SelectedPef?.MunicipalityCode ?? string.Empty;
+        _building.LocPrefecture = SelectedPef?.Name ?? string.Empty;
+        _building.LocMachiazaId =
+            SelectedChou?.MachiazaId
+            ?? SelectedTown?.MachiazaId
+            ?? SelectedCity?.MachiazaId
+            ?? string.Empty;
+        _building.LocCounty = SelectedCity?.County ?? string.Empty;
+        _building.LocCity = SelectedCity?.City ?? string.Empty;
+        _building.LocWard = SelectedTown?.Ward ?? string.Empty;
+        _building.LocOazaCho = SelectedTown?.Oaza ?? string.Empty;
+        _building.LocChoume = SelectedChou?.Chou ?? string.Empty;
+        _building.LocEdaban = Edaban;
+        _building.LocLocationFull = AddressPreview;
+        _building.LocationLatitude = LocationLatitude;
+        _building.LocationLongitude = LocationLongitude;
 
+        // transportation
         _building.RailLine1 = SelectedRailLine1;
         _building.RailStation1 = SelectedRailStation1;
         _building.EkiToho1 = EkiToho1;
@@ -1153,7 +1333,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         _building.BusJyousya1 = BusJyousya1;
         _building.BusStopToho1 = BusStopToho1;
 
-
+        // facilities
         _building.HasElevator = HasElevator;
         _building.HasAutolock = HasAutolock;
         _building.HasSecurityCamera = HasSecurityCamera;
@@ -1173,11 +1353,44 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             _building.ThumbnailFilename = thumbImg.ImageFilename;
         }
 
+        _building.Pdfs = Pdfs;
+        if (string.IsNullOrWhiteSpace(_building.ThumbnailFilename))
+        {
+            var thumbPdf = Pdfs.FirstOrDefault(i => i.IsMain == true);
+            if (thumbPdf is not null)
+            {
+                // 物件写真サムネイルに指定
+                _building.ThumbnailFilename = thumbPdf.ThumbnailFilename;
+            }
+        }
 
         _building.Lessors = [.. LessorsWrapper.Select(wrapper => wrapper.Person)];
 
         _building.Brokers = [.. BrokersWrapper.Select(wrapper => wrapper.Person)];
 
+    }
+
+    private static void DeleteFilesSafely(IEnumerable<string> filePaths)
+    {
+        foreach (var filePath in filePaths)
+        {
+            if (string.IsNullOrWhiteSpace(filePath))
+            {
+                continue;
+            }
+
+            try
+            {
+                if (File.Exists(filePath))
+                {
+                    File.Delete(filePath);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Failed to delete media file '{filePath}': {ex}");
+            }
+        }
     }
 
     private static int ParseInteger(string value)
@@ -1257,6 +1470,22 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             return;
         }
 
+        // TODO: check
+        var filesToDelete = _building.PicturesToBeDeleted
+            .Select(picture =>
+                Path.Combine(_propertyDataDirectoryPath, picture.ImageFilename))
+            .Concat(
+                _building.PdfsToBeDeleted.SelectMany(pdf =>
+                    new[]
+                    {
+                    Path.Combine(_propertyDataDirectoryPath, pdf.PdfFilename),
+                    Path.Combine(
+                        _propertyDataDirectoryPath,
+                        pdf.ThumbnailFilename)
+                    }))
+            .ToArray();
+
+
         SetValues();
 
         var result = _dataAccessService.UpsertRentCommercial(_building);
@@ -1281,6 +1510,12 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             IsInfoBarErrorOpen = true;
             return;
         }
+
+        DeleteFilesSafely(filesToDelete);
+
+        _unsavedBuildingPictureFileList.Clear();
+        _unsavedBuildingPdfFileList.Clear();
+        _unsavedBuildingPdfThumbnailFileList.Clear();
 
         IsDirty = false;
         _building.IsModified = false;
@@ -1511,6 +1746,31 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     #endregion
 
+    #region == Location commands ==
+
+    [RelayCommand(CanExecute = nameof(CanShowGoogleMaps))]
+    public async Task ShowGoogleMaps()
+    {
+        if (string.IsNullOrEmpty(LocationLatitude) ||
+            string.IsNullOrEmpty(LocationLongitude))
+        {
+            return;
+        }
+
+        var uriGoogleMaps = new Uri(
+            $"https://maps.google.co.jp/?q={LocationLatitude},{LocationLongitude}");
+
+        await Windows.System.Launcher.LaunchUriAsync(uriGoogleMaps);
+    }
+
+    private bool CanShowGoogleMaps()
+    {
+        return !string.IsNullOrEmpty(LocationLatitude) &&
+               !string.IsNullOrEmpty(LocationLongitude);
+    }
+
+    #endregion
+
     #region == Transportation commands ==
 
     [RelayCommand]
@@ -1576,12 +1836,24 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             await using var target = File.Create(destination);
             await source.CopyToAsync(target);
 
+            /*
             Pictures.Add(new Models.Rent.Commercials.Picture(id, filename)
             {
                 BasePath = _propertyDataDirectoryPath,
                 IsNew = true,
                 ParentViewModel = this
             });
+            */
+            var picture = new Models.Rent.Commercials.Picture(id, filename)
+            {
+                BasePath = _propertyDataDirectoryPath,
+                IsNew = true,
+                ParentViewModel = this
+            };
+
+            TrackBuildingPicture(picture);
+            Pictures.Add(picture);
+
 
             OpenBuildingBlobDirectoryCommand.NotifyCanExecuteChanged();
             DeleteBuildingPictureCommand.NotifyCanExecuteChanged();
@@ -1695,6 +1967,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                     ParentViewModel = this
                 };
 
+                TrackBuildingPdf(pdf);
                 Pdfs.Add(pdf);
 
                 OpenBuildingBlobDirectoryCommand.NotifyCanExecuteChanged();
