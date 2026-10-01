@@ -9,7 +9,6 @@
     xmlns:framework="using:Microsoft.UI.Xaml"
     xmlns:ui="using:CommunityToolkit.WinUI"
     xmlns:modcommon="using:ZumenSearch.Models.Common"
-    xmlns:modlessor="using:ZumenSearch.Models.Rent.Lessors"
     NavigationCacheMode="Required">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled" Padding="36,0,36,24">

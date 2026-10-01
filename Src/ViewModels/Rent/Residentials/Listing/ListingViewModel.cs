@@ -9,7 +9,6 @@ using Windows.Storage.Streams;
 using ZumenSearch.Models.Base;
 using ZumenSearch.Models.Common;
 using ZumenSearch.Models.Messenger;
-using ZumenSearch.Models.Rent.Lessors;
 using ZumenSearch.Services.Contracts;
 
 namespace ZumenSearch.ViewModels.Rent.Residentials.Listing;
@@ -346,7 +345,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
 
     #region == 貸主プロパティ ==
 
-    public ObservableCollection<Models.Rent.Lessors.PersonWrapperForListingViewModel> LessorsWrapper
+    public ObservableCollection<Models.Rent.Residentials.PersonWrapperForListingViewModel> LessorsWrapper
     {
         get;
         set
@@ -738,10 +737,10 @@ public sealed partial class ListingViewModel : ObservableRecipient,
         };
 
         // Lessors
-        LessorsWrapper = new ObservableCollection<Models.Rent.Lessors.PersonWrapperForListingViewModel>();
+        LessorsWrapper = new ObservableCollection<Models.Rent.Residentials.PersonWrapperForListingViewModel>();
         foreach (var item in _room.Lessors)
         {
-            LessorsWrapper.Add(new Models.Rent.Lessors.PersonWrapperForListingViewModel(item, this));
+            LessorsWrapper.Add(new Models.Rent.Residentials.PersonWrapperForListingViewModel(item, this));
         }
 
 
@@ -1288,7 +1287,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
             }
 
 
-            var asdf = new PersonWrapperForListingViewModel(res.Person, this);
+            var asdf = new Models.Rent.Residentials.PersonWrapperForListingViewModel(res.Person, this);
 
             LessorsWrapper.Add(asdf);
 
@@ -1298,7 +1297,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
     }
 
     [RelayCommand(CanExecute = nameof(CanEditLessor))]
-    private void EditLessor(PersonWrapperForListingViewModel lessor)
+    private void EditLessor(Models.Rent.Residentials.PersonWrapperForListingViewModel lessor)
     {
         if (lessor.Person is not null)
         {
@@ -1309,13 +1308,13 @@ public sealed partial class ListingViewModel : ObservableRecipient,
             }
         }
     }
-    private static bool CanEditLessor(PersonWrapperForListingViewModel lessor)
+    private static bool CanEditLessor(Models.Rent.Residentials.PersonWrapperForListingViewModel lessor)
     {
         return lessor is not null;
     }
 
     [RelayCommand(CanExecute = nameof(CanDeleteLessor))]
-    public async Task DeleteLessor(PersonWrapperForListingViewModel lessor)
+    public async Task DeleteLessor(Models.Rent.Residentials.PersonWrapperForListingViewModel lessor)
     {
         Debug.WriteLine($"DeleteLessorCommand {lessor.Person.Name}");
 
@@ -1336,7 +1335,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
             _room.LessorsToBeDeleted.Add(lessor.Person);
         }
     }
-    private static bool CanDeleteLessor(PersonWrapperForListingViewModel lessor)
+    private static bool CanDeleteLessor(Models.Rent.Residentials.PersonWrapperForListingViewModel lessor)
     {
         return lessor is not null;
     }

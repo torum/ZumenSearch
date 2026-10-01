@@ -95,7 +95,7 @@
                     </ItemsView.ContextFlyout>
 
                     <ItemsView.ItemTemplate>
-                        <DataTemplate x:DataType="modcommon:ListingSearchResultItem">
+                        <DataTemplate x:DataType="mod:ListingSearchResultItem">
                             <ItemContainer DataContext="{x:Bind}" IsDoubleTapEnabled="True" DoubleTapped="SearchResult_DoubleTapped" PointerPressed="ItemContainer_PointerPressed" PointerReleased="ItemContainer_PointerReleased" RightTapped="ItemContainer_RightTapped">
                                 <ItemContainer.KeyboardAccelerators>
                                     <KeyboardAccelerator Key="Enter" Modifiers="None" Invoked="ItemsViewKeyboardAccelerator_Invoked" />

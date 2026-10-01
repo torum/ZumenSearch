@@ -2,6 +2,8 @@
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Media.Animation;
 using System.Collections.ObjectModel;
 using System.Runtime.InteropServices;
 using WinRT.Interop;
@@ -17,16 +19,26 @@ public sealed partial class ShellPage : Page
     public EditorWindow Window { get; }
 
     private bool _isClosing;
+    private bool _nvigated;
     private Views.Rent.Commercials.Listing.EditorWindow? _closingWindow;
 
     private readonly INavigationGenericService _navigationService;
     private readonly IDispatcherService _dispatcherService;
     private readonly IDialogGenericService _dialogService;
+    private readonly IDataAccessLocationService _dataAccessLocationService;
 
     private readonly List<(string Tag, string Label, Type? Page)> _pages =
     [
-        ("ZumenSearch.Views.Rent.Commercials.BasicPage","基本",typeof(BasicPage)),
-        ("ZumenSearch.Views.Rent.Commercials.UnitListPage","募集物件",typeof(UnitListPage))
+        ("ZumenSearch.Views.Rent.Commercials.BasicPage", "基本", typeof(BasicPage)),
+        //("ZumenSearch.Views.Rent.Commercials.LocationPage", "所在地", typeof(LocationPage)),
+        ("ZumenSearch.Views.Rent.Commercials.TransportationPage", "交通", typeof(TransportationPage)),
+        ("ZumenSearch.Views.Rent.Commercials.FacilitiesPage", "設備", typeof(FacilitiesPage)),
+        ("ZumenSearch.Views.Rent.Commercials.KanriPage", "管理", typeof(KanriPage)),
+        ("ZumenSearch.Views.Rent.Commercials.PictureListPage", "写真", typeof(PictureListPage)),
+        ("ZumenSearch.Views.Rent.Commercials.ZumenListPage", "図面", typeof(ZumenListPage)),
+        //("ZumenSearch.Views.Rent.Commercials.LessorListPage", "貸主", typeof(LessorListPage)),
+        //("ZumenSearch.Views.Rent.Commercials.BrokerListPage", "宅建業者", typeof(BrokerListPage)),
+        ("ZumenSearch.Views.Rent.Commercials.UnitListPage", "募集物件", typeof(UnitListPage))
     ];
 
     public ShellPage(
@@ -34,11 +46,12 @@ public sealed partial class ShellPage : Page
         INavigationGenericService navigationService,
         IDialogGenericService dialogService,
         IDispatcherService dispatcherService,
-        IDataAccessService dataAccessService)
+        IDataAccessService dataAccessService, IDataAccessLocationService dataAccessLocationService)
     {
         _navigationService = navigationService;
         _dispatcherService = dispatcherService;
         _dialogService = dialogService;
+        _dataAccessLocationService = dataAccessLocationService;
 
         ViewModel =
             new ViewModels.Rent.Commercials.PropertyViewModel(
@@ -46,7 +59,7 @@ public sealed partial class ShellPage : Page
                 navigationService,
                 dialogService,
                 dispatcherService,
-                dataAccessService);
+                dataAccessService, dataAccessLocationService);
 
         Window = new EditorWindow(building.Id, ViewModel)
         {
@@ -63,7 +76,7 @@ public sealed partial class ShellPage : Page
 
         Window.Title = "賃貸事業用：建物";
         Window.ExtendsContentIntoTitleBar = true;
-        //Window.Activated += Window_Activated;
+        Window.Activated += Window_Activated;
         Window.Closed += Window_Closed;
         Window.AppWindow.Closing += AppWindow_Closing;
     }
@@ -108,6 +121,31 @@ public sealed partial class ShellPage : Page
         }
     }
 
+    private void Window_Activated(object sender, Microsoft.UI.Xaml.WindowActivatedEventArgs args)
+    {
+        var resource = args.WindowActivationState == WindowActivationState.Deactivated ? "WindowCaptionForegroundDisabled" : "WindowCaptionForeground";
+        AppTitleBarText.Foreground = (SolidColorBrush)App.Current.Resources[resource];
+
+        BreadcrumbBar1.Opacity = args.WindowActivationState == WindowActivationState.Deactivated ? 0.5 : 1;
+
+        //NavView.Opacity = args.WindowActivationState == WindowActivationState.Deactivated ? 0.7 : 1;
+        var compositor = Microsoft.UI.Xaml.Media.CompositionTarget.GetCompositorForCurrentThread();
+        var visual = Microsoft.UI.Xaml.Hosting.ElementCompositionPreview.GetElementVisual(NavView);
+
+        var animation = compositor.CreateScalarKeyFrameAnimation();
+        if (args.WindowActivationState != WindowActivationState.CodeActivated)
+        {
+            animation.InsertKeyFrame(0f, 1f); // Start opacity
+            animation.InsertKeyFrame(1f, 0.7f); // End opacity
+        }
+        else
+        {
+            animation.InsertKeyFrame(0f, 0.7f); // Start opacity
+            animation.InsertKeyFrame(1f, 1f); // End opacity
+        }
+        animation.Duration = TimeSpan.FromMilliseconds(150);
+        visual.StartAnimation("Opacity", animation);
+    }
 
     private void ShellPage_Loaded(object sender, RoutedEventArgs e)
     {
@@ -121,17 +159,86 @@ public sealed partial class ShellPage : Page
 
     private void NavView_Loaded(object sender, RoutedEventArgs e)
     {
+        if (_nvigated)
+        {
+            return;
+        }
+
+        //Debug.WriteLine("NavView_Loaded: Navigating to BasicPage with ViewModel. ViewModel is " + (ViewModel != null ? "set" : "null"));
+
+        if (ContentFrame.Navigate(typeof(ZumenSearch.Views.Rent.Commercials.BasicPage), ViewModel, new EntranceNavigationTransitionInfo()))//new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom }
+        {
+            _nvigated = true;
+
+            if (BreadcrumbBar1.ItemsSource is ObservableCollection<Breadcrumb> crumbs)
+            {
+                if (crumbs.Count > 1)
+                {
+                    var item = _pages.FirstOrDefault(p => p.Tag.Equals("ZumenSearch.Views.Rent.Commercials.BasicPage"));
+                    if (item.Page is not null)
+                    {
+                        crumbs.RemoveAt(crumbs.Count - 1); // Remove the last breadcrumb if exists to avoid duplication.
+                        crumbs.Add(new Breadcrumb { Name = item.Label, Page = item.Page.FullName! });
+                    }
+                }
+            }
+
+            NavView.SelectedItem = NavView.MenuItems.OfType<NavigationViewItem>().Where(n => n.Tag.Equals("ZumenSearch.Views.Rent.Commercials.BasicPage")).First();
+        }
+        /*
         if (ContentFrame.Content is null)
         {
             ContentFrame.Navigate(typeof(BasicPage), ViewModel);
-        }
+        }*/
     }
 
     private void NavView_ItemInvoked(NavigationView sender,NavigationViewItemInvokedEventArgs args)
     {
+        /*
         if (args.InvokedItemContainer?.Tag is string tag)
         {
             NavigateToPage(tag);
+        }
+        */
+
+
+        if (_pages is null)
+        {
+            return;
+        }
+
+        if (args.IsSettingsInvoked == true)
+        {
+            // Do nothing. 
+        }
+        else if (args.InvokedItemContainer != null && (args.InvokedItemContainer.Tag != null))
+        {
+            if (args.InvokedItemContainer.Tag is not string tag || string.IsNullOrWhiteSpace(tag))
+            {
+                Debug.WriteLine("BldgShellPage: NavView_ItemInvoked: Invalid tag or null.");
+                return;
+            }
+
+            var item = _pages.FirstOrDefault(p => p.Tag.Equals(args.InvokedItemContainer.Tag.ToString()));
+
+            if (item.Page is null)
+            {
+                Debug.WriteLine("BldgShellPage: NavView_ItemInvoked: Page is null for tag " + tag);
+                return;
+            }
+
+            if (ContentFrame.Navigate(item.Page, ViewModel, new DrillInNavigationTransitionInfo())) //new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom })SuppressNavigationTransitionInfo
+            {
+                if (BreadcrumbBar1.ItemsSource is ObservableCollection<Breadcrumb> crumbs)
+                {
+                    if (crumbs.Count > 1)
+                    {
+                        crumbs.RemoveAt(crumbs.Count - 1); // Remove the last breadcrumb if exists to avoid duplication.
+                        crumbs.Add(new Breadcrumb { Name = item.Label, Page = item.Page.FullName! });
+                    }
+                }
+            }
+            //, args.RecommendedNavigationTransitionInfo
         }
     }
 

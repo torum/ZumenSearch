@@ -68,7 +68,6 @@ public sealed partial class ShellPage : Page
         _navigationService.Initialize(this.ContentFrame, _pages);
 
         this.Loaded += ShellPage_Loaded;
-        this.Unloaded += ShellPage_Unloaded;
         this.BreadcrumbBar1.ItemClicked += BreadcrumbBar_ItemClicked;
 
         Window.Title = "賃貸住居用：建物";
@@ -132,11 +131,6 @@ public sealed partial class ShellPage : Page
         */
     }
 
-    private void ShellPage_Unloaded(object sender, RoutedEventArgs e)
-    {
-        //
-    }
-
     private void Window_Activated(object sender, Microsoft.UI.Xaml.WindowActivatedEventArgs args)
     {
         var resource = args.WindowActivationState == WindowActivationState.Deactivated ? "WindowCaptionForegroundDisabled" : "WindowCaptionForeground";
@@ -144,8 +138,23 @@ public sealed partial class ShellPage : Page
 
         BreadcrumbBar1.Opacity = args.WindowActivationState == WindowActivationState.Deactivated ? 0.5 : 1;
 
-        NavView.Opacity = args.WindowActivationState == WindowActivationState.Deactivated ? 0.7 : 1;
-        //ContentFrame.Opacity = args.WindowActivationState == WindowActivationState.Deactivated ? 0.7 : 1;
+        //NavView.Opacity = args.WindowActivationState == WindowActivationState.Deactivated ? 0.7 : 1;
+        var compositor = Microsoft.UI.Xaml.Media.CompositionTarget.GetCompositorForCurrentThread();
+        var visual = Microsoft.UI.Xaml.Hosting.ElementCompositionPreview.GetElementVisual(NavView);
+
+        var animation = compositor.CreateScalarKeyFrameAnimation();
+        if (args.WindowActivationState != WindowActivationState.CodeActivated)
+        {
+            animation.InsertKeyFrame(0f, 1f); // Start opacity
+            animation.InsertKeyFrame(1f, 0.7f); // End opacity
+        }
+        else
+        {
+            animation.InsertKeyFrame(0f, 0.7f); // Start opacity
+            animation.InsertKeyFrame(1f, 1f); // End opacity
+        }
+        animation.Duration = TimeSpan.FromMilliseconds(150);
+        visual.StartAnimation("Opacity", animation);
     }
 
     private async void AppWindow_Closing(Microsoft.UI.Windowing.AppWindow sender, Microsoft.UI.Windowing.AppWindowClosingEventArgs args)

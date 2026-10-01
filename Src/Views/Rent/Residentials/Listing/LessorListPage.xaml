@@ -5,7 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:modcommon="using:ZumenSearch.Models.Common"
-    xmlns:modlessor="using:ZumenSearch.Models.Rent.Lessors"
+    xmlns:modresidencial="using:ZumenSearch.Models.Rent.Residentials"
     mc:Ignorable="d"
     NavigationCacheMode="Required">
     
@@ -36,7 +36,7 @@
                 <ItemsRepeater x:Name="ItemsView" ItemsSource="{x:Bind ViewModel.LessorsWrapper, Mode=TwoWay}" MinWidth="300" MinHeight="225" ScrollViewer.HorizontalScrollMode="Disabled" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <!--  SelectionChanged="ItemsView_SelectionChanged" SelectionMode="Single" IsItemInvokedEnabled="False"  -->
                     <ItemsRepeater.ItemTemplate>
-                        <DataTemplate x:DataType="modlessor:PersonWrapperForListingViewModel">
+                        <DataTemplate x:DataType="modresidencial:PersonWrapperForListingViewModel">
                             <Border Style="{StaticResource RoundCardBorderStyle}">
                                 <Grid>
                                     <Grid.ColumnDefinitions>

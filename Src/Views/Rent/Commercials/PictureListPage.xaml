@@ -1,12 +1,12 @@
 ﻿<Page
-    x:Class="ZumenSearch.Views.Rent.Residentials.PictureListPage"
+    x:Class="ZumenSearch.Views.Rent.Commercials.PictureListPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:modcommon="using:ZumenSearch.Models.Common"
-    xmlns:modresidencial="using:ZumenSearch.Models.Rent.Residentials"
-    xmlns:local="using:ZumenSearch.Views.Rent.Residentials"
+    xmlns:modcommercial="using:ZumenSearch.Models.Rent.Commercials"
+    xmlns:local="using:ZumenSearch.Views.Rent.Commercials"
     mc:Ignorable="d"
     NavigationCacheMode="Required">
 
@@ -52,7 +52,7 @@
                 <ItemsRepeater x:Name="ItemsView" ItemsSource="{x:Bind ViewModel.Pictures, Mode=TwoWay}" MinWidth="300" MinHeight="225" ScrollViewer.HorizontalScrollMode="Disabled" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <!--  SelectionChanged="ItemsView_SelectionChanged" SelectionMode="Single" IsItemInvokedEnabled="False"  -->
                     <ItemsRepeater.ItemTemplate>
-                        <DataTemplate x:DataType="modresidencial:Picture">
+                        <DataTemplate x:DataType="modcommercial:Picture">
                             <Border Style="{StaticResource RoundCardBorderStyle}">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
@@ -71,9 +71,9 @@
                                     <Grid Grid.Row="0" Grid.Column="1">
                                         <StackPanel Spacing="12" Margin="24,0,6,6" MinWidth="260">
                                             <StackPanel Orientation="Horizontal">
-                                                <ComboBox x:Name="ComboBoxKinds" Header="タイプ" PlaceholderText="選択" Width="200" ItemsSource="{x:Bind ResidentialPictureTypes, Mode=OneWay}" SelectedItem="{x:Bind PictureType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                                <ComboBox x:Name="ComboBoxKinds" Header="タイプ" PlaceholderText="選択" Width="200" ItemsSource="{x:Bind CommercialPictureTypes, Mode=OneWay}" SelectedItem="{x:Bind PictureType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                                                     <ComboBox.ItemTemplate>
-                                                        <DataTemplate x:DataType="modresidencial:ResidentialPictureType">
+                                                        <DataTemplate x:DataType="modcommercial:CommercialPictureType">
                                                             <StackPanel Orientation="Horizontal">
                                                                 <TextBlock Text="{x:Bind Label}" Margin="0,0,5,0"/>
                                                             </StackPanel>

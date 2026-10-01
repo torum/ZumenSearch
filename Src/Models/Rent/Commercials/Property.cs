@@ -1,27 +1,22 @@
 ﻿using System.Collections.ObjectModel;
 using System.Globalization;
 using ZumenSearch.Models.Base;
+using ZumenSearch.Models.Common;
 
 namespace ZumenSearch.Models.Rent.Commercials;
 
+#pragma warning disable IDE0079 // Remove unnecessary suppression
+#pragma warning disable IDE0290 // Use primary constructor
+
 public sealed partial class Property : PropertyBase
 {
-    // 物件に属する部屋のリスト
-    public ObservableCollection<Models.Rent.Commercials.Listing.Listing> Units
+    public Property(string id, EnumEntryStatus status) : base(id, status, EnumPropertyKind.RentCommercial)
     {
-        get;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
-        }
-    } = [];
+    }
 
-    // DBへの更新時にDBから削除されるべき部屋のIDリスト
+    #region == Property ==
 
-    public ObservableCollection<Models.Rent.Commercials.Listing.Listing> UnitsToBeDeleted = [];
+    #region == 基本 ==
 
     public Kind CommercialKind
     {
@@ -143,10 +138,349 @@ public sealed partial class Property : PropertyBase
         }
     }
 
-    public Property(string id, EnumEntryStatus status)
-        : base(id, status, EnumPropertyKind.RentCommercial)
+
+
+
+
+    #endregion
+
+    #region == Transportation ==
+
+    public RailLine? RailLine1
     {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;
+            }
+        }
     }
+
+    public RailStation? RailStation1
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;
+            }
+        }
+    }
+
+    public string EkiToho1
+    {
+        get => field ?? string.Empty;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;
+            }
+        }
+    }
+
+    public string BusStop1
+    {
+        get => field ?? string.Empty;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;
+            }
+        }
+    }
+
+    public string BusJyousya1
+    {
+        get => field ?? string.Empty;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;
+            }
+        }
+    }
+
+    public string BusStopToho1
+    {
+        get => field ?? string.Empty;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;
+            }
+        }
+    }
+
+    #endregion
+
+    #region == Facilities ==
+
+    #region == 一般 ==
+
+    public bool HasAutolock
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;
+            }
+        }
+    }
+
+    public bool HasElevator
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;
+            }
+        }
+    }
+
+    public bool HasSecurityCamera
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;
+            }
+        }
+    }
+
+    public bool HasParcelLocker
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;
+            }
+        }
+    }
+
+    #endregion
+
+    #region == 電気 ==
+
+    public enum EnumElectricKind
+    {
+        Unspecified, AllElectric,
+    }
+
+    public bool HasElectric
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;
+            }
+        }
+    } = false;
+
+    public EnumElectricKind ElectricKind
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;
+            }
+        }
+    } = EnumElectricKind.Unspecified;
+
+    public string ElectricDetail
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;
+            }
+        }
+    } = string.Empty;
+
+    #endregion
+
+    #region == ガス ==
+
+    /*
+    public bool Ap_HasGas
+    {
+        get => _hasGas;
+        set => SetProperty(ref _hasGas, value);
+    }
+
+    public string Kind
+    {
+        get => _kind;
+        set => SetProperty(ref _kind, value);
+    }
+
+    public string Detail
+    {
+        get => _detail;
+        set => SetProperty(ref _detail, value);
+    }
+    */
+
+    #endregion
+
+    #region == 水道 ==
+
+    /*
+    public string TapWaterKind
+    {
+        get => _tapWaterKind;
+        set => SetProperty(ref _tapWaterKind, value);
+    }
+
+    public string SewerageKind
+    {
+        get => _sewerageKind;
+        set => SetProperty(ref _sewerageKind, value);
+    }
+
+    public string TapWaterDetail
+    {
+        get => _tapWaterDetail;
+        set => SetProperty(ref _tapWaterDetail, value);
+    }
+
+    public string SewerageDetail
+    {
+        get => _sewerageDetail;
+        set => SetProperty(ref _sewerageDetail, value);
+    }
+    */
+
+    #endregion
+
+    #endregion
+
+    #region == 管理 ==
+
+    // KanriShutai：建物管理主体
+    public enum EnumKanriShutai
+    {
+        Unspecified, Jisya, Tasya, Kashinushi
+    }
+
+    // TODO: more.
+
+    #endregion
+
+    #region == 写真 & 図面 ==
+
+    public ObservableCollection<Picture> Pictures
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;
+            }
+        }
+    } = [];
+
+    public ObservableCollection<Picture> PicturesToBeDeleted = [];
+
+
+    // 図面（建物）リスト
+    public ObservableCollection<Pdf> Pdfs
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;
+            }
+        }
+    } = [];
+
+    // DBへの更新時にDBから削除されるべき図面のIDリスト
+    public ObservableCollection<Pdf> PdfsToBeDeleted = [];
+    #endregion
+
+    #region == Lessors ==
+
+    public ObservableCollection<PersonBase> Lessors
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;
+            }
+        }
+    } = [];
+
+    public ObservableCollection<PersonBase> LessorsToBeDeleted = [];
+
+    #endregion
+
+    #region == Brokers ==
+
+    public ObservableCollection<PersonBase> Brokers
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;
+            }
+        }
+    } = [];
+
+    public ObservableCollection<PersonBase> BrokersToBeDeleted = [];
+
+    #endregion
+
+    #region == Units ==
+
+    // 物件に属する区画のリスト
+    public ObservableCollection<Models.Rent.Commercials.Listing.Listing> Units
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;
+            }
+        }
+    } = [];
+
+    // DBへの更新時にDBから削除されるべき区画のIDリスト
+
+    public ObservableCollection<Models.Rent.Commercials.Listing.Listing> UnitsToBeDeleted = [];
+
+    #endregion
+
+    #endregion
+
+    #region == Methods ==
 
     public void SetCommercialKindFromString(string value)
     {
@@ -181,4 +515,7 @@ public sealed partial class Property : PropertyBase
                 value,
                 CultureInfo.InvariantCulture);
     }
+
+    #endregion
+
 }

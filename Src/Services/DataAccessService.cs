@@ -448,6 +448,25 @@ public sealed class DataAccessService : IDataAccessService
                     """;
                 tableCmd.ExecuteNonQuery();
 
+                tableCmd.CommandText = """
+                    CREATE TABLE IF NOT EXISTS brokers_properties_listings (
+                        broker_id TEXT NOT NULL,
+                        property_id TEXT NOT NULL,
+                        property_kind TEXT NOT NULL,
+                        listing_id TEXT NOT NULL,
+                        PRIMARY KEY (broker_id, property_id, listing_id),
+                        FOREIGN KEY (broker_id)
+                            REFERENCES brokers(broker_id)
+                            ON DELETE CASCADE
+                    );
+
+                    CREATE INDEX IF NOT EXISTS
+                        ix_brokers_properties_listings_property_id
+                        ON brokers_properties_listings(property_id);
+                    """;
+
+                tableCmd.ExecuteNonQuery();
+
                 #endregion
 
 
@@ -838,7 +857,7 @@ public sealed class DataAccessService : IDataAccessService
                     }
                 }
 
-                var entry = new Models.Common.PropertySearchResultItem(id, enumKind);
+                var entry = new Models.PropertySearchResultItem(id, enumKind);
 
                 var name = reader.GetString(reader.GetOrdinal("name")) ?? string.Empty;//Convert.ToString(reader["name"]) ?? "";
                 entry.Name = name;
@@ -915,7 +934,7 @@ public sealed class DataAccessService : IDataAccessService
                     }
                 }
 
-                var entry = new Models.Common.PropertySearchResultItem(s, enumKind);
+                var entry = new Models.PropertySearchResultItem(s, enumKind);
 
                 entry.Name = reader.GetString(reader.GetOrdinal("name")) ?? string.Empty; ;
 
@@ -1659,7 +1678,7 @@ public sealed class DataAccessService : IDataAccessService
                 foreach (var lessId in lessorIdList)
                 {
                     // Get actuall lessors
-                    cmd.CommandText = $"SELECT lessor_id, name, name_last, name_first, remarks FROM rent_lessors WHERE lessor_id = '{lessId}'";
+                    cmd.CommandText = $"SELECT lessor_id, name, person_kind, name_last, name_first, name_company, name_company_type, name_company_type_position, remarks FROM rent_lessors WHERE lessor_id = '{lessId}'";
                     using (var reader2 = cmd.ExecuteReader())
                     {
                         while (reader2.Read())
@@ -1862,7 +1881,7 @@ public sealed class DataAccessService : IDataAccessService
 
                         // TODO: IF natural
                         //var lessor = new Models.Rent.Lessors.Person(lessId, EnumEntryStatus.Saved);
-                        var lessor = new Models.PersonNatural(lessId, EnumEntryStatus.Saved)
+                        var lessor = new Models.Person.PersonNatural(lessId, EnumEntryStatus.Saved)
                         {
                             Name = Convert.ToString(reader2["name"]) ?? "",
                             NameLast = Convert.ToString(reader2["name_last"]) ?? "",
@@ -2241,7 +2260,7 @@ public sealed class DataAccessService : IDataAccessService
                     continue;
                 }
 
-                var unit = new Models.Common.ListingSearchResultItem(rid, eid, EnumPropertyKind.RentResidential);
+                var unit = new Models.ListingSearchResultItem(rid, eid, EnumPropertyKind.RentResidential);
 
                 var s = Convert.ToString(reader["roomName"]) ?? "";
                 unit.Name = s;
@@ -2595,6 +2614,106 @@ public sealed class DataAccessService : IDataAccessService
 
             result.AffectedCount = command.ExecuteNonQuery();
 
+            // lessor
+            command.Parameters.Clear();
+
+            foreach (var person in building.Lessors)
+            {
+                command.CommandText = """
+        INSERT INTO rent_lessors_properties_listings
+            (lessor_id, property_id, property_kind, listing_id)
+        VALUES
+            (@lessorId, @propertyId, @propertyKind, @listingId)
+        ON CONFLICT (lessor_id, property_id, listing_id)
+        DO NOTHING;
+        """;
+
+                command.Parameters.Clear();
+                command.Parameters.AddWithValue("@lessorId", person.Id);
+                command.Parameters.AddWithValue("@propertyId", building.Id);
+                command.Parameters.AddWithValue(
+                    "@propertyKind",
+                    EnumPropertyKind.RentCommercial.ToString());
+                command.Parameters.AddWithValue("@listingId", string.Empty);
+
+                command.ExecuteNonQuery();
+            }
+
+            foreach (var person in building.LessorsToBeDeleted)
+            {
+                command.CommandText = """
+        DELETE FROM rent_lessors_properties_listings
+        WHERE lessor_id = @lessorId
+          AND property_id = @propertyId
+          AND property_kind = @propertyKind
+          AND listing_id = @listingId;
+        """;
+
+                command.Parameters.Clear();
+                command.Parameters.AddWithValue("@lessorId", person.Id);
+                command.Parameters.AddWithValue("@propertyId", building.Id);
+                command.Parameters.AddWithValue(
+                    "@propertyKind",
+                    EnumPropertyKind.RentCommercial.ToString());
+                command.Parameters.AddWithValue("@listingId", string.Empty);
+
+                command.ExecuteNonQuery();
+            }
+
+            building.LessorsToBeDeleted.Clear();
+
+            //
+            command.Parameters.Clear();
+
+            foreach (var person in building.Brokers)
+            {
+                command.CommandText = """
+        INSERT INTO brokers_properties_listings
+            (broker_id, property_id, property_kind, listing_id)
+        VALUES
+            (@brokerId, @propertyId, @propertyKind, @listingId)
+        ON CONFLICT (broker_id, property_id, listing_id)
+        DO NOTHING;
+        """;
+
+                command.Parameters.Clear();
+                command.Parameters.AddWithValue("@brokerId", person.Id);
+                command.Parameters.AddWithValue("@propertyId", building.Id);
+                command.Parameters.AddWithValue(
+                    "@propertyKind",
+                    EnumPropertyKind.RentCommercial.ToString());
+                command.Parameters.AddWithValue("@listingId", string.Empty);
+
+                command.ExecuteNonQuery();
+            }
+
+            foreach (var person in building.BrokersToBeDeleted)
+            {
+                command.CommandText = """
+        DELETE FROM brokers_properties_listings
+        WHERE broker_id = @brokerId
+          AND property_id = @propertyId
+          AND property_kind = @propertyKind
+          AND listing_id = @listingId;
+        """;
+
+                command.Parameters.Clear();
+                command.Parameters.AddWithValue("@brokerId", person.Id);
+                command.Parameters.AddWithValue("@propertyId", building.Id);
+                command.Parameters.AddWithValue(
+                    "@propertyKind",
+                    EnumPropertyKind.RentCommercial.ToString());
+                command.Parameters.AddWithValue("@listingId", string.Empty);
+
+                command.ExecuteNonQuery();
+            }
+
+            building.BrokersToBeDeleted.Clear();
+
+
+
+
+            //
             transaction.Commit();
 
             building.Status = EnumEntryStatus.Saved;
@@ -2679,7 +2798,7 @@ public sealed class DataAccessService : IDataAccessService
                     continue;
                 }
 
-                var item = new Models.Common.PropertySearchResultItem(
+                var item = new Models.PropertySearchResultItem(
                     propertyId,
                     EnumPropertyKind.RentCommercial)
                 {
@@ -2839,6 +2958,107 @@ public sealed class DataAccessService : IDataAccessService
                 Convert.ToString(reader["built_year_month"])
                 ?? string.Empty);
 
+
+            // lessors
+            reader.Close();
+
+            command.Parameters.Clear();
+            command.CommandText = """
+    SELECT
+        l.lessor_id,
+        l.name,
+        l.person_kind,
+        l.name_last,
+        l.name_first,
+        l.name_company,
+        l.name_company_type,
+        l.name_company_type_position,
+        l.remarks
+    FROM rent_lessors_properties_listings AS r
+    INNER JOIN rent_lessors AS l
+        ON l.lessor_id = r.lessor_id
+    WHERE r.property_id = @propertyId
+      AND r.property_kind = @propertyKind
+      AND r.listing_id = @listingId;
+    """;
+
+            command.Parameters.AddWithValue("@propertyId", building.Id);
+            command.Parameters.AddWithValue(
+                "@propertyKind",
+                EnumPropertyKind.RentCommercial.ToString());
+            command.Parameters.AddWithValue("@listingId", string.Empty);
+
+            using var lessorReader = command.ExecuteReader();
+
+            while (lessorReader.Read())
+            {
+                var personId =
+                    Convert.ToString(lessorReader["lessor_id"]);
+
+                if (string.IsNullOrWhiteSpace(personId))
+                {
+                    continue;
+                }
+
+                var person = GetPerson(lessorReader, personId);
+
+                if (person is not null)
+                {
+                    building.Lessors.Add(person);
+                }
+            }
+
+            // brokers
+            command.Parameters.Clear();
+
+            command.CommandText = """
+    SELECT
+        b.broker_id AS broker_id,
+        b.name,
+        b.person_kind,
+        b.name_last,
+        b.name_first,
+        b.name_company,
+        b.name_company_type,
+        b.name_company_type_position,
+        b.remarks
+    FROM brokers_properties_listings AS r
+    INNER JOIN brokers AS b
+        ON b.broker_id = r.broker_id
+    WHERE r.property_id = @propertyId
+      AND r.property_kind = @propertyKind
+      AND r.listing_id = @listingId;
+    """;
+
+            command.Parameters.AddWithValue("@propertyId", building.Id);
+            command.Parameters.AddWithValue(
+                "@propertyKind",
+                EnumPropertyKind.RentCommercial.ToString());
+            command.Parameters.AddWithValue("@listingId", string.Empty);
+
+            using var brokerReader = command.ExecuteReader();
+
+            while (brokerReader.Read())
+            {
+                var brokerId =
+                    Convert.ToString(brokerReader["broker_id"]);
+
+                if (string.IsNullOrWhiteSpace(brokerId))
+                {
+                    continue;
+                }
+
+                var broker = GetPerson(brokerReader, brokerId);
+
+                if (broker is not null)
+                {
+                    building.Brokers.Add(broker);
+                }
+            }
+
+
+
+            // set result
             result.Building = building;
         }
         catch (Exception ex)
@@ -3132,7 +3352,7 @@ public sealed class DataAccessService : IDataAccessService
                     continue;
                 }
 
-                var item = new Models.Common.ListingSearchResultItem(
+                var item = new Models.ListingSearchResultItem(
                     listingId,
                     propertyId,
                     EnumPropertyKind.RentCommercial)
@@ -3399,7 +3619,7 @@ public sealed class DataAccessService : IDataAccessService
                 cmd.Parameters.AddWithValue("@name", lessor.Name);
                 cmd.Parameters.AddWithValue("@personKind", lessor.PersonKind.ToString());
 
-                if (lessor is PersonNatural naturalPerson)
+                if (lessor is Models.Person.PersonNatural naturalPerson)
                 {
                     cmd.Parameters.AddWithValue("@name_last", naturalPerson.NameLast);
                     cmd.Parameters.AddWithValue("@name_first", naturalPerson.NameFirst);
@@ -3409,7 +3629,7 @@ public sealed class DataAccessService : IDataAccessService
                     // TODO: check if int is ok
                     cmd.Parameters.AddWithValue("@name_company_type_position", 0);
                 }
-                else if (lessor is PersonLegal legalPerson)
+                else if (lessor is Models.Person.PersonLegal legalPerson)
                 {
                     // Clear naturalPerson values
                     cmd.Parameters.AddWithValue("@name_last", string.Empty);
@@ -3512,14 +3732,14 @@ public sealed class DataAccessService : IDataAccessService
                     continue;
                 }
 
-                Models.Common.PersonSearchResultItem entry;
+                Models.PersonSearchResultItem entry;
                 if (enumKind == Models.Base.EnumPersonKind.Natural)
                 {
-                    entry = new Models.Common.PersonSearchResultItem(s, Models.Base.EnumPersonKind.Natural);
+                    entry = new Models.PersonSearchResultItem(s, Models.Base.EnumPersonKind.Natural);
                 }
                 else if (enumKind == Models.Base.EnumPersonKind.Legal)
                 {
-                    entry = new Models.Common.PersonSearchResultItem(s, Models.Base.EnumPersonKind.Legal);
+                    entry = new Models.PersonSearchResultItem(s, Models.Base.EnumPersonKind.Legal);
                 }
                 else
                 {
@@ -3639,11 +3859,11 @@ public sealed class DataAccessService : IDataAccessService
 
         if (enumKind == Models.Base.EnumPersonKind.Natural)
         {
-            entry = new Models.PersonNatural(personId, EnumEntryStatus.Saved);
+            entry = new Models.Person.PersonNatural(personId, EnumEntryStatus.Saved);
         }
         else if (enumKind == Models.Base.EnumPersonKind.Legal)
         {
-            entry = new Models.PersonLegal(personId, EnumEntryStatus.Saved);
+            entry = new Models.Person.PersonLegal(personId, EnumEntryStatus.Saved);
         }
 
         if (entry is null)
@@ -3654,13 +3874,13 @@ public sealed class DataAccessService : IDataAccessService
         //s = Convert.ToString(reader["name"]) ?? "";
         entry.Name = reader.GetString(reader.GetOrdinal("name")) ?? string.Empty;
 
-        if (entry is PersonNatural naturalPerson)
+        if (entry is Models.Person.PersonNatural naturalPerson)
         {
             naturalPerson.NameLast = Convert.ToString(reader["name_last"]) ?? "";
             naturalPerson.NameFirst = Convert.ToString(reader["name_first"]) ?? "";
 
         }
-        else if (entry is PersonLegal legalPerson)
+        else if (entry is Models.Person.PersonLegal legalPerson)
         {
             legalPerson.NameCompany = Convert.ToString(reader["name_company"]) ?? "";
             legalPerson.NameCompanyType = Convert.ToString(reader["name_company_type"]) ?? "";
@@ -4008,7 +4228,7 @@ public sealed class DataAccessService : IDataAccessService
                     continue;
                 }
 
-                var item = new Models.Common.PropertySearchResultItem(
+                var item = new Models.PropertySearchResultItem(
                     propertyId,
                     EnumPropertyKind.SaleResidential)
                 {
@@ -4404,7 +4624,7 @@ public sealed class DataAccessService : IDataAccessService
                     continue;
                 }
 
-                var item = new Models.Common.ListingSearchResultItem(
+                var item = new Models.ListingSearchResultItem(
                     listingId,
                     propertyId,
                     EnumPropertyKind.SaleResidential)
@@ -4660,7 +4880,7 @@ public sealed class DataAccessService : IDataAccessService
             command.Parameters.AddWithValue("@remarks", broker.Remarks);
             command.Parameters.AddWithValue("@updatedAt", DateTimeOffset.UtcNow.ToString("s"));
 
-            if (broker is Models.PersonNatural natural)
+            if (broker is Models.Person.PersonNatural natural)
             {
                 command.Parameters.AddWithValue("@nameLast", natural.NameLast);
                 command.Parameters.AddWithValue("@nameFirst", natural.NameFirst);
@@ -4668,7 +4888,7 @@ public sealed class DataAccessService : IDataAccessService
                 command.Parameters.AddWithValue("@nameCompanyType", string.Empty);
                 command.Parameters.AddWithValue("@nameCompanyTypePosition", 0);
             }
-            else if (broker is Models.PersonLegal legal)
+            else if (broker is Models.Person.PersonLegal legal)
             {
                 command.Parameters.AddWithValue("@nameLast", string.Empty);
                 command.Parameters.AddWithValue("@nameFirst", string.Empty);
@@ -4770,7 +4990,7 @@ public sealed class DataAccessService : IDataAccessService
                     continue;
                 }
 
-                var entry = new Models.Common.PersonSearchResultItem(
+                var entry = new Models.PersonSearchResultItem(
                     brokerId,
                     personKind)
                 {
@@ -4917,6 +5137,8 @@ public sealed class DataAccessService : IDataAccessService
 
     #endregion
 
+    #region == Errors ==
+
     private static void SetDatabaseError(ResultWrapperBase result, Exception exception, string operation, string description, string method)
     {
         result.IsError = true;
@@ -4941,6 +5163,8 @@ public sealed class DataAccessService : IDataAccessService
         result.Error.MethodName = $"{nameof(DataAccessService)}.{method}";//$"{nameof(DataAccessService)}{exception.TargetSite?.Name}";
 
     }
+
+    #endregion
 
     // Unused for now
     #region == ColumnExists check ==

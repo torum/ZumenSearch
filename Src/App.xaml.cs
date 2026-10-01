@@ -80,7 +80,7 @@ public partial class App : Application
         }
         catch (Exception ex)
         {
-            Debug.WriteLine("CreateDirectory@App(): " + ex.Message);
+            Debug.WriteLine("CreateDirectory @App(): " + ex.Message);
 
             // Log the exception for debugging
             //AppendErrorLog("Failed to create folders on startup.", ex.ToString());

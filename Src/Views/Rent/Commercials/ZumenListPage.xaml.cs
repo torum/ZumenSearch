@@ -2,11 +2,11 @@
 using Microsoft.UI.Xaml.Navigation;
 using System.Diagnostics;
 
-namespace ZumenSearch.Views.Rent.Residentials;
+namespace ZumenSearch.Views.Rent.Commercials;
 
 public sealed partial class ZumenListPage : Page
 {
-    public ViewModels.Rent.Residentials.PropertyViewModel? ViewModel { get; private set; }
+    public ViewModels.Rent.Commercials.PropertyViewModel? ViewModel { get; private set; }
 
     public ZumenListPage()
     {
@@ -16,9 +16,9 @@ public sealed partial class ZumenListPage : Page
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
-        if ((e.Parameter is ViewModels.Rent.Residentials.PropertyViewModel) && (e.Parameter != null))
+        if ((e.Parameter is ViewModels.Rent.Commercials.PropertyViewModel) && (e.Parameter != null))
         {
-            ViewModel = e.Parameter as ViewModels.Rent.Residentials.PropertyViewModel;
+            ViewModel = e.Parameter as ViewModels.Rent.Commercials.PropertyViewModel;
             Bindings.Update();
         }
 

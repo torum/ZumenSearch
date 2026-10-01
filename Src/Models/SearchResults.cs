@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using ZumenSearch.Models.Base;
+﻿using ZumenSearch.Models.Base;
 
-namespace ZumenSearch.Models.Common;
+namespace ZumenSearch.Models;
 
 #pragma warning disable IDE0079 // Remove unnecessary suppression
 #pragma warning disable IDE0290 // Use primary constructor

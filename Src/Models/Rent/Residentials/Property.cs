@@ -8,11 +8,16 @@ namespace ZumenSearch.Models.Rent.Residentials;
 #pragma warning disable IDE0079 // Remove unnecessary suppression
 #pragma warning disable IDE0290 // Use primary constructor
 
-// TODO: rename Property to Building.
-
 // 編集用（建物）
 public sealed partial class Property : PropertyBase
 {
+    public Property(string id, EnumEntryStatus status) : base(id, status, EnumPropertyKind.RentResidential)
+    {
+        //
+    }
+
+    #region == Properties ==
+
     #region == 物件に属するリスト == 
 
     // 物件に属する部屋のリスト
@@ -134,7 +139,7 @@ public sealed partial class Property : PropertyBase
             {
                 return;
             }
-            
+
             field = value;
             IsModified = true;
 
@@ -843,10 +848,9 @@ public sealed partial class Property : PropertyBase
     // TODO: More.
 
 
-    public Property(string id, EnumEntryStatus status) : base(id, status, EnumPropertyKind.RentResidential)
-    {
-        //
-    }
+    #endregion
+
+    #region == Methods ==
 
     public void SetKindTypeFromString(string Str)
     {
@@ -887,4 +891,6 @@ public sealed partial class Property : PropertyBase
         
         BuiltYearAndMonth = DateTimeOffset.Parse(str, CultureInfo.InvariantCulture);
     }
+
+    #endregion
 }

@@ -33,7 +33,7 @@ public sealed partial class ResidentialSearchResultPage : Page
     DoubleTappedRoutedEventArgs e)
     {
         if (ResultList.SelectedItem
-            is Models.Common.PropertySearchResultItem selected &&
+            is Models.PropertySearchResultItem selected &&
             ViewModel.EditSaleResidentialCommand.CanExecute(selected))
         {
             ViewModel.EditSaleResidentialCommand.Execute(selected);

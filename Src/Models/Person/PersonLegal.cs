@@ -1,10 +1,6 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Media.Imaging;
-using System.Diagnostics;
-using ZumenSearch.Models.Base;
+﻿using ZumenSearch.Models.Base;
 
-namespace ZumenSearch.Models;
+namespace ZumenSearch.Models.Person;
 
 #pragma warning disable IDE0079 // Remove unnecessary suppression
 #pragma warning disable IDE0290 // Use primary constructor

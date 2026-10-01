@@ -14,7 +14,6 @@ using Windows.System;
 using ZumenSearch.Models.Base;
 using ZumenSearch.Models.Common;
 using ZumenSearch.Models.Messenger;
-using ZumenSearch.Models.Rent.Residentials;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.Services.Extensions.AbstractFactory;
 
@@ -79,9 +78,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
         _navigationService = navigationService; // _navigationService.NavigateTo("ZumenSearch.Views.Rent.Residentials.RoomListPage", this, new DrillInNavigationTransitionInfo());
         _dialogService = dialogService;
-
         _shellFactory = shellFactory;
-
         _dispatcherService = dispatcherService;
         _dataAccessService = dataAccessService;
         _dataAccessLocationService = dataAccessLocationService;
@@ -116,9 +113,6 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
 
     #region == Properties ==
-
-    // TODO: Do I need this?
-    //public string Id => _id;
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SaveCommand))]
@@ -206,27 +200,40 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     }
 
     // 物件種別
-    public ObservableCollection<Kind> Kinds =
+    public ObservableCollection<Models.Rent.Residentials.Kind> Kinds =
     [
         //new Kind(EnumKinds.Unspecified.ToString(), "未指定"),
-        new Models.Rent.Residentials.Kind(EnumResidentialKinds.Apartment),
-        new Models.Rent.Residentials.Kind(EnumResidentialKinds.Mansion),
-        new Models.Rent.Residentials.Kind(EnumResidentialKinds.House),
-        new Models.Rent.Residentials.Kind(EnumResidentialKinds.TerraceHouse),
-        new Models.Rent.Residentials.Kind(EnumResidentialKinds.TownHouse),
-        new Models.Rent.Residentials.Kind(EnumResidentialKinds.ShareHouse),
-        new Models.Rent.Residentials.Kind(EnumResidentialKinds.Dormitory)
+        new Models.Rent.Residentials.Kind(Models.Rent.Residentials.EnumResidentialKinds.Apartment),
+        new Models.Rent.Residentials.Kind(Models.Rent.Residentials.EnumResidentialKinds.Mansion),
+        new Models.Rent.Residentials.Kind(Models.Rent.Residentials.EnumResidentialKinds.House),
+        new Models.Rent.Residentials.Kind(Models.Rent.Residentials.EnumResidentialKinds.TerraceHouse),
+        new Models.Rent.Residentials.Kind(Models.Rent.Residentials.EnumResidentialKinds.TownHouse),
+        new Models.Rent.Residentials.Kind(Models.Rent.Residentials.EnumResidentialKinds.ShareHouse),
+        new Models.Rent.Residentials.Kind(Models.Rent.Residentials.EnumResidentialKinds.Dormitory)
     ];
 
-    public Kind SelectedKind
+    public Models.Rent.Residentials.Kind SelectedKind
     {
-        get => field ?? new(EnumResidentialKinds.Unspecified);
+        get => field ?? new(Models.Rent.Residentials.EnumResidentialKinds.Unspecified);
         set
         {
+            if (value is null || field?.Key == value.Key)
+            {
+                return;
+            }
+
+            field = value;
+            OnPropertyChanged();
+            IsDirty = true;
+            /*
+             * DO not use SetProperty. Kind and Structure are reference types without value equality. 
+             * During Bindings.Update(), the ComboBox can write null or a different instance with the same key back to the view model. 
+             * SetProperty sees a reference change and sets IsDirty = true.
             if (SetProperty(ref field, value))
             {
                 IsDirty = true;
             }
+            */
         }
     }
 
@@ -253,32 +260,45 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     public partial bool IsUnitOwnershipVisible { get; private set; } = true;
 
     // 建物構造
-    public ObservableCollection<Structure> Structures =
+    public ObservableCollection<Models.Rent.Residentials.Structure> Structures =
     [
         //new Structure(EnumStructures.Unspecified.ToString(), "未指定"),
-        new Models.Rent.Residentials.Structure(EnumStructures.Wood),
-        new Models.Rent.Residentials.Structure(EnumStructures.Block),
-        new Models.Rent.Residentials.Structure(EnumStructures.LightSteel),
-        new Models.Rent.Residentials.Structure(EnumStructures.Steel),
-        new Models.Rent.Residentials.Structure(EnumStructures.RC),
-        new Models.Rent.Residentials.Structure(EnumStructures.SRC),
-        new Models.Rent.Residentials.Structure(EnumStructures.ALC),
-        new Models.Rent.Residentials.Structure(EnumStructures.PC),
-        new Models.Rent.Residentials.Structure(EnumStructures.HPC),
-        new Models.Rent.Residentials.Structure(EnumStructures.RB),
-        new Models.Rent.Residentials.Structure(EnumStructures.CFT),
-        new Models.Rent.Residentials.Structure(EnumStructures.Other)
+        new Models.Rent.Residentials.Structure(Models.Rent.Residentials.EnumStructures.Wood),
+        new Models.Rent.Residentials.Structure(Models.Rent.Residentials.EnumStructures.Block),
+        new Models.Rent.Residentials.Structure(Models.Rent.Residentials.EnumStructures.LightSteel),
+        new Models.Rent.Residentials.Structure(Models.Rent.Residentials.EnumStructures.Steel),
+        new Models.Rent.Residentials.Structure(Models.Rent.Residentials.EnumStructures.RC),
+        new Models.Rent.Residentials.Structure(Models.Rent.Residentials.EnumStructures.SRC),
+        new Models.Rent.Residentials.Structure(Models.Rent.Residentials.EnumStructures.ALC),
+        new Models.Rent.Residentials.Structure(Models.Rent.Residentials.EnumStructures.PC),
+        new Models.Rent.Residentials.Structure(Models.Rent.Residentials.EnumStructures.HPC),
+        new Models.Rent.Residentials.Structure(Models.Rent.Residentials.EnumStructures.RB),
+        new Models.Rent.Residentials.Structure(Models.Rent.Residentials.EnumStructures.CFT),
+        new Models.Rent.Residentials.Structure(Models.Rent.Residentials.EnumStructures.Other)
     ];
 
-    public Structure SelectedStructure
+    public Models.Rent.Residentials.Structure SelectedStructure
     {
-        get => field ?? new(EnumStructures.Unspecified);
+        get => field ?? new(Models.Rent.Residentials.EnumStructures.Unspecified);
         set
         {
+            if (value is null || field?.Key == value.Key)
+            {
+                return;
+            }
+
+            field = value;
+            OnPropertyChanged();
+            IsDirty = true;
+            /*
+             * DO not use SetProperty. Kind and Structure are reference types without value equality. 
+             * During Bindings.Update(), the ComboBox can write null or a different instance with the same key back to the view model. 
+             * SetProperty sees a reference change and sets IsDirty = true.
             if (SetProperty(ref field, value))
             {
                 IsDirty = true;
             }
+            */
         }
     }
 
@@ -1163,13 +1183,13 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         }
     } = false;
 
-    public ObservableCollection<ElectricKind> ElectricKinds =
+    public ObservableCollection<Models.Rent.Residentials.ElectricKind> ElectricKinds =
     [
         new Models.Rent.Residentials.ElectricKind(Models.Rent.Residentials.Property.EnumElectricKind.AllElectric, "オール電化"),
         new Models.Rent.Residentials.ElectricKind(Models.Rent.Residentials.Property.EnumElectricKind.Unspecified, "未指定")
     ];
 
-    public ElectricKind SelectedElectricKind
+    public Models.Rent.Residentials.ElectricKind SelectedElectricKind
     {
         get;
         set
@@ -1201,7 +1221,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     #region == 管理プロパティ ==
 
-    public ObservableCollection<KanriShutai> KanriShutais =
+    public ObservableCollection<Models.Rent.Residentials.KanriShutai> KanriShutais =
     [
         new Models.Rent.Residentials.KanriShutai(Models.Rent.Residentials.Property.EnumKanriShutai.Unspecified, "未指定"),
         new Models.Rent.Residentials.KanriShutai(Models.Rent.Residentials.Property.EnumKanriShutai.Jisya, "自社管理"),
@@ -1209,7 +1229,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         new Models.Rent.Residentials.KanriShutai(Models.Rent.Residentials.Property.EnumKanriShutai.Kashinushi, "貸主管理")
     ];
 
-    public KanriShutai? SelectedKanriShutai
+    public Models.Rent.Residentials.KanriShutai? SelectedKanriShutai
     {
         get;
         set
@@ -1403,7 +1423,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     #region == 貸主プロパティ ==
 
-    public ObservableCollection<Models.Rent.Lessors.PersonWrapperForPropertyViewModel> LessorsWrapper
+    public ObservableCollection<Models.Rent.Residentials.PersonWrapperForPropertyViewModel> LessorsWrapper
     {
         get;
         set
@@ -1609,7 +1629,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
         //SelectedKind = _building.BuildingKind;
         var kindkey = Kinds.FirstOrDefault(k => k.Key == _building.BuildingKind.Key);
-        SelectedKind = kindkey is null ? new(EnumResidentialKinds.Unspecified) : kindkey;
+        SelectedKind = kindkey is null ? new(Models.Rent.Residentials.EnumResidentialKinds.Unspecified) : kindkey;
 
         IsUnitOwnership = _building.IsUnitOwnership;
 
@@ -1617,7 +1637,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
         //SelectedStructure = _building.BuildingStructure;
         var Structurekey = Structures.FirstOrDefault(k => k.Key == _building.BuildingStructure.Key);
-        SelectedStructure = Structurekey is null ? new(EnumStructures.Unspecified) : Structurekey;
+        SelectedStructure = Structurekey is null ? new(Models.Rent.Residentials.EnumStructures.Unspecified) : Structurekey;
 
         FloorCountAboveGround = _building.FloorCountAboveGround == 0 ? string.Empty : _building.FloorCountAboveGround.ToString();
         FloorCountBasement = _building.FloorCountBasement == 0 ? string.Empty : _building.FloorCountBasement.ToString();
@@ -1756,10 +1776,10 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         };
 
         // Lessors
-        LessorsWrapper = new ObservableCollection<Models.Rent.Lessors.PersonWrapperForPropertyViewModel>();
+        LessorsWrapper = new ObservableCollection<Models.Rent.Residentials.PersonWrapperForPropertyViewModel>();
         foreach (var item in _building.Lessors)
         {
-            LessorsWrapper.Add(new Models.Rent.Lessors.PersonWrapperForPropertyViewModel(item,this));
+            LessorsWrapper.Add(new Models.Rent.Residentials.PersonWrapperForPropertyViewModel(item,this));
         }
 
         // Rooms
@@ -2843,7 +2863,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             }
 
 
-            var asdf = new Models.Rent.Lessors.PersonWrapperForPropertyViewModel(res.Person, this);
+            var asdf = new Models.Rent.Residentials.PersonWrapperForPropertyViewModel(res.Person, this);
 
             LessorsWrapper.Add(asdf);
 
@@ -2853,7 +2873,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     }
 
     [RelayCommand(CanExecute = nameof(CanEditLessor))]
-    private void EditLessor(Models.Rent.Lessors.PersonWrapperForPropertyViewModel lessor)
+    private void EditLessor(Models.Rent.Residentials.PersonWrapperForPropertyViewModel lessor)
     {
         if (lessor.Person is not null)
         {
@@ -2864,13 +2884,13 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             }
         }
     }
-    private static bool CanEditLessor(Models.Rent.Lessors.PersonWrapperForPropertyViewModel lessor)
+    private static bool CanEditLessor(Models.Rent.Residentials.PersonWrapperForPropertyViewModel lessor)
     {
         return lessor is not null;
     }
 
     [RelayCommand(CanExecute = nameof(CanDeleteLessor))]
-    public async Task DeleteLessor(Models.Rent.Lessors.PersonWrapperForPropertyViewModel lessor)
+    public async Task DeleteLessor(Models.Rent.Residentials.PersonWrapperForPropertyViewModel lessor)
     {
         Debug.WriteLine($"DeleteLessorCommand {lessor.Person.Name}");
 
@@ -2891,7 +2911,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             _building.LessorsToBeDeleted.Add(lessor.Person);
         }
     }
-    private static bool CanDeleteLessor(Models.Rent.Lessors.PersonWrapperForPropertyViewModel lessor)
+    private static bool CanDeleteLessor(Models.Rent.Residentials.PersonWrapperForPropertyViewModel lessor)
     {
         return lessor is not null;
     }

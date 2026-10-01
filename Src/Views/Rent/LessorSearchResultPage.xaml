@@ -12,7 +12,7 @@
     NavigationCacheMode="Required">
     <Page.Resources>
         <!-- DataTemplate for NaturalPerson -->
-        <DataTemplate x:Key="NaturalPersonTemplate" x:DataType="modcommon:PersonSearchResultItem">
+        <DataTemplate x:Key="NaturalPersonTemplate" x:DataType="mod:PersonSearchResultItem">
             <ItemContainer DataContext="{x:Bind}" IsDoubleTapEnabled="True" DoubleTapped="SearchResult_DoubleTapped" PointerPressed="ItemContainer_PointerPressed" PointerReleased="ItemContainer_PointerReleased" RightTapped="ItemContainer_RightTapped">
                 <ItemContainer.KeyboardAccelerators>
                     <KeyboardAccelerator Key="Enter" Modifiers="None" Invoked="ItemsViewKeyboardAccelerator_Invoked" />
@@ -37,7 +37,7 @@
         </DataTemplate>
 
         <!-- DataTemplate for LegalPerson -->
-        <DataTemplate x:Key="LegalPersonTemplate" x:DataType="modcommon:PersonSearchResultItem">
+        <DataTemplate x:Key="LegalPersonTemplate" x:DataType="mod:PersonSearchResultItem">
             <ItemContainer DataContext="{x:Bind}" IsDoubleTapEnabled="True" DoubleTapped="SearchResult_DoubleTapped" PointerPressed="ItemContainer_PointerPressed" PointerReleased="ItemContainer_PointerReleased" RightTapped="ItemContainer_RightTapped">
                 <ItemContainer.KeyboardAccelerators>
                     <KeyboardAccelerator Key="Enter" Modifiers="None" Invoked="ItemsViewKeyboardAccelerator_Invoked" />

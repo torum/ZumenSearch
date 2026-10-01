@@ -198,7 +198,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
 
     #region == RecentProperties ==
 
-    public ObservableCollection<Models.Common.PropertySearchResultItem> RecentProperties
+    public ObservableCollection<Models.PropertySearchResultItem> RecentProperties
     {
         get; set
         {
@@ -220,7 +220,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
     [ObservableProperty]
     public partial string SearchQuery { get; set; } = string.Empty;
 
-    public ObservableCollection<Models.Common.PropertySearchResultItem> PropertySearchResult
+    public ObservableCollection<Models.PropertySearchResultItem> PropertySearchResult
     {
         get; set
         {
@@ -231,7 +231,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
         }
     } = [];
 
-    public ObservableCollection<Models.Common.ListingSearchResultItem> RentResidentialListingSearchResult
+    public ObservableCollection<Models.ListingSearchResultItem> RentResidentialListingSearchResult
     {
         get; set
         {
@@ -242,7 +242,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
         }
     } = [];
 
-    public ObservableCollection<Models.Common.ListingSearchResultItem> RentCommercialListingSearchResult
+    public ObservableCollection<Models.ListingSearchResultItem> RentCommercialListingSearchResult
     {
         get; set
         {
@@ -253,7 +253,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
         }
     } = [];
 
-    public ObservableCollection<Models.Common.PersonSearchResultItem> RentLessorSearchResult
+    public ObservableCollection<Models.PersonSearchResultItem> RentLessorSearchResult
     {
         get; set
         {
@@ -264,7 +264,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
         }
     } = [];
 
-    public ObservableCollection<Models.Common.PersonSearchResultItem> BrokerSearchResult
+    public ObservableCollection<Models.PersonSearchResultItem> BrokerSearchResult
     {
         get; set
         {
@@ -275,7 +275,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
         }
     } = [];
 
-    public ObservableCollection<Models.Common.PropertySearchResultItem> SaleResidentialSearchResult
+    public ObservableCollection<Models.PropertySearchResultItem> SaleResidentialSearchResult
     {
         get;
         private set
@@ -630,7 +630,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
 
     // 物件編集
     [RelayCommand(CanExecute = nameof(EditPropertyCanExecute))]
-    private async Task EditProperty(Models.Common.PropertySearchResultItem? selected)
+    private async Task EditProperty(Models.PropertySearchResultItem? selected)
     {
         if (selected is null)
         {
@@ -672,7 +672,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
 
         // TODO lessor and broker
     }
-    private static bool EditPropertyCanExecute(Models.Common.PropertySearchResultItem? selected)
+    private static bool EditPropertyCanExecute(Models.PropertySearchResultItem? selected)
     {
         if (selected is null)
         //if (string.IsNullOrEmpty(rentId))
@@ -685,7 +685,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
 
     // 物件削除
     [RelayCommand(CanExecute = nameof(DeletePropertyCanExecute))]
-    private async Task DeleteProperty(Models.Common.PropertySearchResultItem? selected)
+    private async Task DeleteProperty(Models.PropertySearchResultItem? selected)
     {
         if (selected is null)
         {
@@ -728,7 +728,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
 
         // TODO lessor and broker
     }
-    private static bool DeletePropertyCanExecute(Models.Common.PropertySearchResultItem? selected)
+    private static bool DeletePropertyCanExecute(Models.PropertySearchResultItem? selected)
     {
         if (selected is null)
         //if (string.IsNullOrEmpty(rentId))
@@ -776,7 +776,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
 
     // 建物編集（検索結果から）
     [RelayCommand(CanExecute = nameof(EditRentResidentialCanExecute))]
-    private async Task EditRentResidential(Models.Common.PropertySearchResultItem? selected) 
+    private async Task EditRentResidential(Models.PropertySearchResultItem? selected) 
     {
         var propertyId = selected?.Id;
 
@@ -788,7 +788,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
 
         await EditRentResidentialFromId(propertyId);
     }
-    private static bool EditRentResidentialCanExecute(Models.Common.PropertySearchResultItem? selected)
+    private static bool EditRentResidentialCanExecute(Models.PropertySearchResultItem? selected)
     {
         if (selected is null)
         //if (string.IsNullOrEmpty(rentId))
@@ -975,7 +975,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
 
     // 物件削除
     [RelayCommand(CanExecute = nameof(DeleteRentResidentialCanExecute))]
-    private void DeleteRentResidential(Models.Common.PropertySearchResultItem? selected)
+    private void DeleteRentResidential(Models.PropertySearchResultItem? selected)
     {
         if (selected is null)
         {
@@ -1059,7 +1059,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
             }
         }
     }
-    private static bool DeleteRentResidentialCanExecute(Models.Common.PropertySearchResultItem? selected)
+    private static bool DeleteRentResidentialCanExecute(Models.PropertySearchResultItem? selected)
     {
         if (selected is null)
         {
@@ -1102,7 +1102,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
 
     // 部屋編集
     [RelayCommand(CanExecute = nameof(EditRentResidentialRoomCanExecute))]
-    private async Task EditRentResidentialRoom(Models.Common.ListingSearchResultItem? selected)
+    private async Task EditRentResidentialRoom(Models.ListingSearchResultItem? selected)
     {
         if (selected is null)
         {
@@ -1206,7 +1206,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
 
         editorWindow.AppWindow.MoveInZOrderAtTop();
     }
-    private static bool EditRentResidentialRoomCanExecute(Models.Common.ListingSearchResultItem? selected)
+    private static bool EditRentResidentialRoomCanExecute(Models.ListingSearchResultItem? selected)
     {
         if (selected is null)
         {
@@ -1218,7 +1218,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
 
     // 部屋削除
     [RelayCommand(CanExecute = nameof(DeleteRentResidentialRoomCanExecute))]
-    private void DeleteRentResidentialRoom(Models.Common.ListingSearchResultItem? selected)
+    private void DeleteRentResidentialRoom(Models.ListingSearchResultItem? selected)
     {
         if (selected is null)
         {
@@ -1320,7 +1320,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
             }
         }
     }
-    private static bool DeleteRentResidentialRoomCanExecute(Models.Common.ListingSearchResultItem? selected)
+    private static bool DeleteRentResidentialRoomCanExecute(Models.ListingSearchResultItem? selected)
     {
         if (selected is null)
         {
@@ -1365,7 +1365,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
 
     // 建物編集（検索結果から）
     [RelayCommand(CanExecute = nameof(EditRentCommercialCanExecute))]
-    private async Task EditRentCommercial(Models.Common.ListingSearchResultItem? selected)
+    private async Task EditRentCommercial(Models.ListingSearchResultItem? selected)
     {
         var propertyId = selected?.Id;
 
@@ -1377,7 +1377,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
 
         await EditRentCommercialFromId(propertyId);
     }
-    private static bool EditRentCommercialCanExecute(Models.Common.ListingSearchResultItem? selected)
+    private static bool EditRentCommercialCanExecute(Models.ListingSearchResultItem? selected)
     {
         return selected is not null &&
                !string.IsNullOrWhiteSpace(selected.Id);
@@ -1487,7 +1487,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
 
     // 建物削除
     [RelayCommand(CanExecute = nameof(DeleteRentCommercialCanExecute))]
-    private void DeleteRentCommercial(Models.Common.PropertySearchResultItem? selected)
+    private void DeleteRentCommercial(Models.PropertySearchResultItem? selected)
     {
         if (selected is null ||
             string.IsNullOrWhiteSpace(selected.Id))
@@ -1512,7 +1512,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
 
         PropertySearchResult.Remove(selected);
     }
-    private static bool DeleteRentCommercialCanExecute(Models.Common.PropertySearchResultItem? selected)
+    private static bool DeleteRentCommercialCanExecute(Models.PropertySearchResultItem? selected)
     {
         return selected is not null &&
                !string.IsNullOrWhiteSpace(selected.Id);
@@ -1550,7 +1550,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
 
     // 区画編集
     [RelayCommand(CanExecute = nameof(EditRentCommercialListingCanExecute))]
-    private async Task EditRentCommercialListing(Models.Common.ListingSearchResultItem? selected)
+    private async Task EditRentCommercialListing(Models.ListingSearchResultItem? selected)
     {
         if (selected is null)
         {
@@ -1654,7 +1654,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
 
         editorWindow.AppWindow.MoveInZOrderAtTop();
     }
-    private static bool EditRentCommercialListingCanExecute(Models.Common.ListingSearchResultItem? selected)
+    private static bool EditRentCommercialListingCanExecute(Models.ListingSearchResultItem? selected)
     {
         if (selected is null)
         {
@@ -1666,7 +1666,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
 
     // 区画削除
     [RelayCommand(CanExecute = nameof(DeleteRentCommercialListingCanExecute))]
-    private void DeleteRentCommercialListing(Models.Common.ListingSearchResultItem? selected)
+    private void DeleteRentCommercialListing(Models.ListingSearchResultItem? selected)
     {
         if (selected is null ||
             string.IsNullOrWhiteSpace(selected.Id))
@@ -1692,7 +1692,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
         RentCommercialListingSearchResult.Remove(selected);
     }
 
-    private static bool DeleteRentCommercialListingCanExecute(Models.Common.ListingSearchResultItem? selected)
+    private static bool DeleteRentCommercialListingCanExecute(Models.ListingSearchResultItem? selected)
     {
         return selected is not null &&
                !string.IsNullOrWhiteSpace(selected.Id);
@@ -1785,7 +1785,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
     private void AddNewRentLessor()
     {
         var newId = Guid.CreateVersion7().ToString("N");
-        var shell = _shellRentLessorFactory.Create(new Models.PersonNatural(newId, Models.Base.EnumEntryStatus.New));
+        var shell = _shellRentLessorFactory.Create(new Models.Person.PersonNatural(newId, Models.Base.EnumEntryStatus.New));
         
         LessorEditorList.Add(shell.Window);
 
@@ -1810,7 +1810,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
     }
 
     [RelayCommand(CanExecute = nameof(EditRentLessorCanExecute))]
-    public async Task EditRentLessor(Models.Base.PersonBase selected) //Models.Common.PersonSearchResultItem
+    public async Task EditRentLessor(Models.Base.PersonBase selected) //Models.PersonSearchResultItem
     {
         var lessorId = selected?.Id;
 
@@ -1915,7 +1915,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
     }
 
     [RelayCommand(CanExecute = nameof(DeleteRentLessorCanExecute))]
-    public async Task DeleteRentLessor(Models.Base.PersonBase selected) //Models.Common.PersonSearchResultItem
+    public async Task DeleteRentLessor(Models.Base.PersonBase selected) //Models.PersonSearchResultItem
     {
         if (selected is null)
         {
@@ -2088,7 +2088,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
 
     [RelayCommand(CanExecute = nameof(EditSaleResidentialCanExecute))]
     private async Task EditSaleResidential(
-    Models.Common.PropertySearchResultItem? selected)
+    Models.PropertySearchResultItem? selected)
     {
         if (selected is null || string.IsNullOrWhiteSpace(selected.Id))
         {
@@ -2136,7 +2136,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
         shell.Window.AppWindow.MoveInZOrderAtTop();
     }
     private static bool EditSaleResidentialCanExecute(
-        Models.Common.PropertySearchResultItem? selected)
+        Models.PropertySearchResultItem? selected)
     {
         return selected is not null &&
                !string.IsNullOrWhiteSpace(selected.Id);
@@ -2144,7 +2144,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
 
     [RelayCommand(CanExecute = nameof(DeleteSaleResidentialCanExecute))]
     private void DeleteSaleResidential(
-    Models.Common.PropertySearchResultItem? selected)
+    Models.PropertySearchResultItem? selected)
     {
         if (selected is null || string.IsNullOrWhiteSpace(selected.Id))
         {
@@ -2171,7 +2171,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
     }
 
     private static bool DeleteSaleResidentialCanExecute(
-        Models.Common.PropertySearchResultItem? selected)
+        Models.PropertySearchResultItem? selected)
     {
         return selected is not null &&
                !string.IsNullOrWhiteSpace(selected.Id);
@@ -2186,7 +2186,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
     private void AddNewBroker()
     {
         var newId = Guid.CreateVersion7().ToString("N");
-        var shell = _shellBrokerFactory.Create(new Models.PersonLegal(newId, Models.Base.EnumEntryStatus.New));
+        var shell = _shellBrokerFactory.Create(new Models.Person.PersonLegal(newId, Models.Base.EnumEntryStatus.New));
 
         BrokerEditorList.Add(shell.Window);
 
@@ -2247,7 +2247,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
     }
 
     [RelayCommand(CanExecute = nameof(EditBrokerCanExecute))]
-    public async Task EditBroker(Models.Base.PersonBase selected) //Models.Common.PersonSearchResultItem
+    public async Task EditBroker(Models.Base.PersonBase selected) //Models.PersonSearchResultItem
     {
         var lessorId = selected?.Id;
 
@@ -2352,7 +2352,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
     }
 
     [RelayCommand(CanExecute = nameof(DeleteBrokerCanExecute))]
-    public async Task DeleteBroker(Models.Base.PersonBase selected) //Models.Common.PersonSearchResultItem
+    public async Task DeleteBroker(Models.Base.PersonBase selected) //Models.PersonSearchResultItem
     {
         if (selected is null)
         {

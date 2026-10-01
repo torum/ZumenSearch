@@ -1,5 +1,5 @@
 ﻿<Page
-    x:Class="ZumenSearch.Views.Rent.Residentials.FacilitiesPage"
+    x:Class="ZumenSearch.Views.Rent.Commercials.FacilitiesPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -7,7 +7,7 @@
     xmlns:controls="using:CommunityToolkit.WinUI.Controls"
     mc:Ignorable="d"
     xmlns:modcommon="using:ZumenSearch.Models.Common"
-    xmlns:modresidencial="using:ZumenSearch.Models.Rent.Residentials"
+    xmlns:modcommercial="using:ZumenSearch.Models.Rent.Commercials"
     NavigationCacheMode="Required">
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled" Padding="36,0,36,24">
         <Grid x:Name="ContentArea">
@@ -29,7 +29,7 @@
                         </StackPanel>
                         <RadioButtons Header="種類" MaxColumns="3" Margin="0,0,0,0" ItemsSource="{x:Bind ViewModel.ElectricKinds}" SelectedItem="{x:Bind ViewModel.SelectedElectricKind, Mode=TwoWay}" >
                             <RadioButtons.ItemTemplate>
-                                <DataTemplate x:DataType="modresidencial:ElectricKind">
+                                <DataTemplate x:DataType="modcommercial:ElectricKind">
                                     <TextBlock Text="{x:Bind Label, Mode=OneTime}" VerticalAlignment="Center"/>
                                 </DataTemplate>
                             </RadioButtons.ItemTemplate>

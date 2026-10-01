@@ -10,7 +10,7 @@ public interface IDialogGenericService
 
     Task<ContentDialogResult> ShowEditorCloseConfirmationDialog();
 
-    Task<Models.Common.PersonSearchResultItem?> ShowLessorSelectDialog(ViewModels.Dialogs.LessorSelectViewModel viewModel);
+    Task<Models.PersonSearchResultItem?> ShowLessorSelectDialog(ViewModels.Dialogs.LessorSelectViewModel viewModel);
 
     Task<RailLine?> ShowRailLineSelectDialog();
 

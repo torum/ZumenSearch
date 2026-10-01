@@ -324,7 +324,7 @@ public sealed partial class LessorViewModel : ObservableRecipient
     {
         Name = _lessorBase.Name;
 
-        if (_lessorBase is PersonNatural naturalPerson)
+        if (_lessorBase is Models.Person.PersonNatural naturalPerson)
         {
             if (_lessorBase.PersonKind != EnumPersonKind.Natural)
             {
@@ -336,7 +336,7 @@ public sealed partial class LessorViewModel : ObservableRecipient
             NameFirst = naturalPerson.NameFirst;
             NameLast = naturalPerson.NameLast;
         }
-        else if (_lessorBase is PersonLegal legalPerson)
+        else if (_lessorBase is Models.Person.PersonLegal legalPerson)
         {
             if (_lessorBase.PersonKind != EnumPersonKind.Legal)
             {
@@ -421,12 +421,12 @@ public sealed partial class LessorViewModel : ObservableRecipient
         //if (_personKind == EnumPersonKind.Natural)
         if (PersonKindIndex == 0)
         {
-            newLessor = new Models.PersonNatural(_lessorBase.Id, _lessorBase.Status);
+            newLessor = new Models.Person.PersonNatural(_lessorBase.Id, _lessorBase.Status);
         }
         //else if (_personKind == EnumPersonKind.Legal)
         else if (PersonKindIndex == 1)
         {
-            newLessor = new Models.PersonLegal(_lessorBase.Id, _lessorBase.Status);
+            newLessor = new Models.Person.PersonLegal(_lessorBase.Id, _lessorBase.Status);
         }
         else
         {
@@ -436,12 +436,12 @@ public sealed partial class LessorViewModel : ObservableRecipient
 
         //_lessorBase.Name = Name;
 
-        if (newLessor is Models.PersonNatural naturalPerson)
+        if (newLessor is Models.Person.PersonNatural naturalPerson)
         {
              naturalPerson.NameFirst = NameFirst;
              naturalPerson.NameLast = NameLast;
         }
-        else if (newLessor is Models.PersonLegal legalPerson)
+        else if (newLessor is Models.Person.PersonLegal legalPerson)
         {
             legalPerson.NameCompany = NameCompany;
             legalPerson.NameCompanyType = NameCompanyType;

@@ -3,7 +3,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using ZumenSearch.Models.Base;
 
-namespace ZumenSearch.Models.Rent.Lessors;
+namespace ZumenSearch.Models.Rent.Residentials;
 
 #pragma warning disable IDE0079 // Remove unnecessary suppression
 #pragma warning disable IDE0290 // Use primary constructor

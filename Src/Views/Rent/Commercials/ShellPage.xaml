@@ -48,7 +48,7 @@
             </Grid.ColumnDefinitions>
 
             <BreadcrumbBar
-                Grid.Column="0"
+                Grid.Column="0" x:Name="BreadcrumbBar1"
                 ItemsSource="{x:Bind ViewModel.BreadcrumbItems, Mode=OneWay}"
                 IsHitTestVisible="False" AllowFocusOnInteraction="False" IsTabStop="False" VerticalAlignment="Center">
 
@@ -103,6 +103,28 @@
                     <NavigationViewItem
                         Content="基本"
                         Tag="ZumenSearch.Views.Rent.Commercials.BasicPage" />
+                    <NavigationViewItem
+    Content="交通"
+    Tag="ZumenSearch.Views.Rent.Commercials.TransportationPage" />
+                    <NavigationViewItem
+    Content="設備"
+    Tag="ZumenSearch.Views.Rent.Commercials.FacilitiesPage" />
+                    <NavigationViewItem
+    Content="管理"
+    Tag="ZumenSearch.Views.Rent.Commercials.KanriPage" />
+                    <NavigationViewItem
+    Content="写真"
+    Tag="ZumenSearch.Views.Rent.Commercials.PictureListPage" />
+                    <NavigationViewItem
+    Content="図面"
+    Tag="ZumenSearch.Views.Rent.Commercials.ZumenListPage" />
+
+                    <NavigationViewItem
+    Content="貸主"
+    Tag="ZumenSearch.Views.Rent.Commercials.LessorListPage" />
+                    <NavigationViewItem
+    Content="宅建業者"
+    Tag="ZumenSearch.Views.Rent.Commercials.BrokerListPage" />
 
                 </NavigationView.MenuItems>
                 <NavigationView.FooterMenuItems>

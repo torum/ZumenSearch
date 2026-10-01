@@ -8,7 +8,7 @@
     xmlns:controls="using:CommunityToolkit.WinUI.Controls"
     xmlns:ui="using:CommunityToolkit.WinUI"
     xmlns:modcommon="using:ZumenSearch.Models.Common"
-    xmlns:modresi="using:ZumenSearch.Models.Rent.Residentials"
+    xmlns:modresidencial="using:ZumenSearch.Models.Rent.Residentials"
     NavigationCacheMode="Required">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled" Padding="36,0,36,24">
@@ -26,7 +26,7 @@
         ItemsSource="{x:Bind ViewModel.Kinds, Mode=OneWay}"
         SelectedItem="{x:Bind ViewModel.SelectedKind, Mode=TwoWay}">
                     <ComboBox.ItemTemplate>
-                        <DataTemplate x:DataType="modresi:Kind">
+                        <DataTemplate x:DataType="modresidencial:Kind">
                             <TextBlock Text="{x:Bind Label}" />
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
@@ -41,7 +41,7 @@
         ItemsSource="{x:Bind ViewModel.Structures, Mode=OneWay}"
         SelectedItem="{x:Bind ViewModel.SelectedStructure, Mode=TwoWay}">
                     <ComboBox.ItemTemplate>
-                        <DataTemplate x:DataType="modresi:Structure">
+                        <DataTemplate x:DataType="modresidencial:Structure">
                             <TextBlock Text="{x:Bind Label}" />
                         </DataTemplate>
                     </ComboBox.ItemTemplate>

@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:mod="using:ZumenSearch.Models"
     xmlns:modcommon="using:ZumenSearch.Models.Common"
     mc:Ignorable="d"
     NavigationCacheMode="Required">
@@ -28,7 +29,7 @@
             DoubleTapped="ResultList_DoubleTapped">
 
             <ListView.ItemTemplate>
-                <DataTemplate x:DataType="modcommon:PropertySearchResultItem">
+                <DataTemplate x:DataType="mod:PropertySearchResultItem">
                     <Grid Padding="12">
                         <TextBlock
                             Text="{x:Bind Name}"

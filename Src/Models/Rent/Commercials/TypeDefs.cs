@@ -83,3 +83,25 @@ public sealed class Structure(EnumStructures key)
 
     public string Label => Labels[Key];
 }
+
+
+public sealed class ElectricKind
+{
+    public string Label { get; set; }
+
+    public Property.EnumElectricKind Key { get; set; }
+
+    public ElectricKind(Property.EnumElectricKind key, string label)
+    {
+        Key = key;
+        Label = label;
+    }
+};
+
+public class KanriShutai(Property.EnumKanriShutai key, string label)
+{
+    public string Label => label;
+
+    public Property.EnumKanriShutai Key => key;
+};
+

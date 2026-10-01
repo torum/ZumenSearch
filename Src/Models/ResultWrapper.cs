@@ -15,21 +15,19 @@ public class ResultWrapper : ResultWrapperBase
     public int AffectedCount = 0;
 }
 
-// Common Properties result.
-
+// Common Properties SearchResult
 public sealed class PropertiesResultWrapper : ResultWrapperBase
 {
-    public ObservableCollection<Models.Common.PropertySearchResultItem> PropertySearchResult = [];
+    public ObservableCollection<Models.PropertySearchResultItem> PropertySearchResult = [];
 }
 
-// TODO:
+// Common Listings SearchResult
 public sealed class ListingsResultWrapper : ResultWrapperBase
 {
-    public ObservableCollection<Models.Common.ListingSearchResultItem> ListingSearchResult = [];
+    public ObservableCollection<Models.ListingSearchResultItem> ListingSearchResult = [];
 }
 
 // Rent Residential
-
 public sealed class RentResidentialBuildingSingleResultWrapper : ResultWrapperBase
 {
     public Models.Rent.Residentials.Property? Building;
@@ -43,7 +41,6 @@ public sealed class RentResidentialRoomSingleResultWrapper : ResultWrapperBase
 }
 
 // Rent Commercial
-
 public sealed class RentCommercialBuildingSingleResultWrapper : ResultWrapperBase
 {
     public Models.Rent.Commercials.Property? Building;
@@ -57,26 +54,25 @@ public sealed class RentCommercialUnitSingleResultWrapper: ResultWrapperBase
     public Models.Rent.Commercials.Listing.Listing? Unit;
 }
 
-
-// Person
-
+// Person SearchResult
 public sealed class PersonsResultWrapper : ResultWrapperBase
 {
-    public ObservableCollection<Models.Common.PersonSearchResultItem> PersonSearchResult = [];
+    public ObservableCollection<Models.PersonSearchResultItem> PersonSearchResult = [];
 }
 
+// Person
 public sealed class PersonSingleResultWrapper : ResultWrapperBase
 {
     public Models.Base.PersonBase? Person;
 }
 
-
-// Sales
+// Sales Residential
 public sealed class SaleResidentialBuildingSingleResultWrapper : ResultWrapperBase
 {
     public Models.Sale.Residentials.Property? Building;
 }
 
+// Sales Residential listing
 public sealed class SaleResidentialRoomSingleResultWrapper : ResultWrapperBase
 {
     public string BuildingName = string.Empty;

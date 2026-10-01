@@ -17,18 +17,18 @@ public partial class PersonTemplateSelector : DataTemplateSelector
 
     protected override DataTemplate? SelectTemplateCore(object item)
     {
-        if (item is Models.Rent.Lessors.PersonWrapperForPropertyViewModel lessor)
+        if (item is Models.Rent.Residentials.PersonWrapperForPropertyViewModel lessor)
         {
-            if (lessor.Person is Models.PersonNatural)
+            if (lessor.Person is Models.Person.PersonNatural)
             {
                 return NaturalTemplate;
             }
-            else if (lessor.Person is Models.PersonLegal)
+            else if (lessor.Person is Models.Person.PersonLegal)
             {
                 return LegalTemplate;
             }
         }
-        else if (item is Models.Common.PersonSearchResultItem searchResultItem)
+        else if (item is Models.PersonSearchResultItem searchResultItem)
         {
             if (searchResultItem.PersonKind == Models.Base.EnumPersonKind.Natural)
             {
@@ -39,22 +39,23 @@ public partial class PersonTemplateSelector : DataTemplateSelector
                 return LegalTemplate;
             }
         }
-        else if (item is Models.PersonNatural)
+        else if (item is Models.Person.PersonNatural)
         {
             return NaturalTemplate;
         }
-        else if (item is Models.PersonLegal)
+        else if (item is Models.Person.PersonLegal)
         {
             return LegalTemplate;
         }
 
         return base.SelectTemplateCore(item);
     }
-
+    /*
     protected override DataTemplate? SelectTemplateCore(object item, DependencyObject container)
     {
         return SelectTemplateCore(item);
     }
+    */
 }
 
 public sealed partial class LessorSearchResultPage : Page
@@ -116,7 +117,7 @@ public sealed partial class LessorSearchResultPage : Page
             return;
         }
 
-        if (container.DataContext is not Models.Common.PersonSearchResultItem searchresult)
+        if (container.DataContext is not Models.PersonSearchResultItem searchresult)
         {
             Debug.WriteLine($"Not LessorSearchResultItem. {container.DataContext?.GetType().FullName} @SearchResult_DoubleTapped");
             return;
@@ -178,7 +179,7 @@ public sealed partial class LessorSearchResultPage : Page
             return;
         }
 
-        if (container.DataContext is not Models.Common.ListingSearchResultItem)
+        if (container.DataContext is not Models.ListingSearchResultItem)
         {
             Debug.WriteLine($"Not ListingSearchResultItem. {container.DataContext?.GetType().FullName} @ItemContainer_RightTapped");
             return;
@@ -202,7 +203,7 @@ public sealed partial class LessorSearchResultPage : Page
             return;
         }
 
-        if (element.DataContext is not Models.Common.PersonSearchResultItem searchresult)
+        if (element.DataContext is not Models.PersonSearchResultItem searchresult)
         {
             Debug.WriteLine($"Not LessorSearchResultItem. {element.DataContext?.GetType().FullName} @ItemContainerKeyboardAccelerator_Invoked");
             return;

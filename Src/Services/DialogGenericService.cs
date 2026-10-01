@@ -66,7 +66,7 @@ public class DialogGenericService : IDialogGenericService
         return result;
     }
 
-    public async Task<Models.Common.PersonSearchResultItem?> ShowLessorSelectDialog(ViewModels.Dialogs.LessorSelectViewModel viewModel)
+    public async Task<Models.PersonSearchResultItem?> ShowLessorSelectDialog(ViewModels.Dialogs.LessorSelectViewModel viewModel)
     {
         if (_isDialogOpened)
         {
@@ -100,7 +100,7 @@ public class DialogGenericService : IDialogGenericService
 
         dialogContent.ViewModel.SelectionChanged += (sender, e) =>
         {
-            if ((e is not null) && (e is Models.Common.PersonSearchResultItem rl))
+            if ((e is not null) && (e is Models.PersonSearchResultItem rl))
             {
                 //dialogContent.ViewModel.SelectedRailLine
                 dialog.IsPrimaryButtonEnabled = true;

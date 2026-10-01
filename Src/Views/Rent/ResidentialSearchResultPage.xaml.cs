@@ -69,7 +69,7 @@ public sealed partial class ResidentialSearchResultPage : Page
             return;
         }
 
-        if (container.DataContext is not Models.Common.ListingSearchResultItem searchresult)
+        if (container.DataContext is not Models.ListingSearchResultItem searchresult)
         {
             Debug.WriteLine($"Not ListingSearchResultItem. {container.DataContext?.GetType().FullName} @SearchResult_DoubleTapped");
             return;
@@ -131,7 +131,7 @@ public sealed partial class ResidentialSearchResultPage : Page
             return;
         }
 
-        if (container.DataContext is not Models.Common.ListingSearchResultItem)
+        if (container.DataContext is not Models.ListingSearchResultItem)
         {
             Debug.WriteLine($"Not ListingSearchResultItem. {container.DataContext?.GetType().FullName} @ItemContainer_RightTapped");
             return;
@@ -155,7 +155,7 @@ public sealed partial class ResidentialSearchResultPage : Page
             return;
         }
 
-        if (element.DataContext is not Models.Common.ListingSearchResultItem searchresult)
+        if (element.DataContext is not Models.ListingSearchResultItem searchresult)
         {
             Debug.WriteLine($"Not ListingSearchResultItem. {element.DataContext?.GetType().FullName} @ItemContainerKeyboardAccelerator_Invoked");
             return;

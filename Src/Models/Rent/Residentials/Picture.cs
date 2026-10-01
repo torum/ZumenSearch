@@ -6,70 +6,70 @@ namespace ZumenSearch.Models.Rent.Residentials;
 #pragma warning disable IDE0079 // Remove unnecessary suppression
 #pragma warning disable IDE0290 // Use primary constructor
 
-public enum EnumBuildingPictureType
+public enum EnumResidentialPictureType
 {
     //Unspecified, Madori, Gaikan, Situnai, LivingDining, Bedroom, Kitchen, Bathroom, Restroom, Washroom, StorageSpace, Appliance, FrontDoor, Balcony, Entrance, Neighborhood, Other
     Unspecified, Gaikan, Entrance, Neighborhood, Other
 }
 
-public sealed class BuildingPictureType(EnumBuildingPictureType key)
+public sealed class ResidentialPictureType(EnumResidentialPictureType key)
 {
-    private Dictionary<EnumBuildingPictureType, string> BuildingPictureTypeDictionary
+    private Dictionary<EnumResidentialPictureType, string> ResidentialPictureTypeDictionary
     {
         get;
-    } = new Dictionary<EnumBuildingPictureType, string>()
+    } = new Dictionary<EnumResidentialPictureType, string>()
     {
-                {EnumBuildingPictureType.Unspecified, "未指定"},
-                //{EnumBuildingPictureType.Madori, "間取り図"},
-                {EnumBuildingPictureType.Gaikan, "外観"},
-                //{EnumBuildingPictureType.Situnai, "室内"},
-                //{EnumBuildingPictureType.LivingDining, "リビング・ダイニング"},
-                //{EnumBuildingPictureType.Bedroom, "寝室"},
-                //{EnumBuildingPictureType.Kitchen, "キッチン"},
-                //{EnumBuildingPictureType.Bathroom, "浴室"},
-                //{EnumBuildingPictureType.Restroom, "トイレ"},
-                //{EnumBuildingPictureType.Washroom, "洗面"},
-                //{EnumBuildingPictureType.StorageSpace, "収納"},
-                //{EnumBuildingPictureType.Appliance, "設備"},
-                //{EnumBuildingPictureType.Balcony, "バルコニー"},
-                //{EnumBuildingPictureType.FrontDoor, "玄関"},
-                {EnumBuildingPictureType.Entrance, "エントランス"},
-                {EnumBuildingPictureType.Neighborhood, "周辺"},
-                {EnumBuildingPictureType.Other, "その他"},
+                {EnumResidentialPictureType.Unspecified, "未指定"},
+                //{EnumResidentialPictureType.Madori, "間取り図"},
+                {EnumResidentialPictureType.Gaikan, "外観"},
+                //{EnumResidentialPictureType.Situnai, "室内"},
+                //{EnumResidentialPictureType.LivingDining, "リビング・ダイニング"},
+                //{EnumResidentialPictureType.Bedroom, "寝室"},
+                //{EnumResidentialPictureType.Kitchen, "キッチン"},
+                //{EnumResidentialPictureType.Bathroom, "浴室"},
+                //{EnumResidentialPictureType.Restroom, "トイレ"},
+                //{EnumResidentialPictureType.Washroom, "洗面"},
+                //{EnumResidentialPictureType.StorageSpace, "収納"},
+                //{EnumResidentialPictureType.Appliance, "設備"},
+                //{EnumResidentialPictureType.Balcony, "バルコニー"},
+                //{EnumResidentialPictureType.FrontDoor, "玄関"},
+                {EnumResidentialPictureType.Entrance, "エントランス"},
+                {EnumResidentialPictureType.Neighborhood, "周辺"},
+                {EnumResidentialPictureType.Other, "その他"},
             };
 
-    public string Label => BuildingPictureTypeDictionary[Key];
+    public string Label => ResidentialPictureTypeDictionary[Key];
 
-    public EnumBuildingPictureType Key => key;
+    public EnumResidentialPictureType Key => key;
 };
 
 public sealed partial class Picture : PictureBase
 {
     public ViewModels.Rent.Residentials.PropertyViewModel? ParentViewModel { get; set; }
 
-    public readonly ObservableCollection<BuildingPictureType> BuildingPictureTypes =
+    public readonly ObservableCollection<ResidentialPictureType> ResidentialPictureTypes =
     [
-        //new BuildingPictureType(EnumBuildingPictureType.Unspecified, "未指定"),
-        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Madori),
-        new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Gaikan),
-        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Situnai),
-        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.LivingDining),
-        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Bedroom),
-        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Kitchen),
-        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Bathroom),
-        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Restroom),
-        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Washroom),
-        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.StorageSpace),
-        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Appliance),
-        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.FrontDoor),
-        //new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Balcony),
-        new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Entrance),
-        new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Neighborhood),
-        new BuildingPictureType(Models.Rent.Residentials.EnumBuildingPictureType.Other)
+        //new ResidentialPictureType(EnumResidentialPictureType.Unspecified, "未指定"),
+        //new ResidentialPictureType(Models.Rent.Residentials.EnumResidentialPictureType.Madori),
+        new ResidentialPictureType(Models.Rent.Residentials.EnumResidentialPictureType.Gaikan),
+        //new ResidentialPictureType(Models.Rent.Residentials.EnumResidentialPictureType.Situnai),
+        //new ResidentialPictureType(Models.Rent.Residentials.EnumResidentialPictureType.LivingDining),
+        //new ResidentialPictureType(Models.Rent.Residentials.EnumResidentialPictureType.Bedroom),
+        //new ResidentialPictureType(Models.Rent.Residentials.EnumResidentialPictureType.Kitchen),
+        //new ResidentialPictureType(Models.Rent.Residentials.EnumResidentialPictureType.Bathroom),
+        //new ResidentialPictureType(Models.Rent.Residentials.EnumResidentialPictureType.Restroom),
+        //new ResidentialPictureType(Models.Rent.Residentials.EnumResidentialPictureType.Washroom),
+        //new ResidentialPictureType(Models.Rent.Residentials.EnumResidentialPictureType.StorageSpace),
+        //new ResidentialPictureType(Models.Rent.Residentials.EnumResidentialPictureType.Appliance),
+        //new ResidentialPictureType(Models.Rent.Residentials.EnumResidentialPictureType.FrontDoor),
+        //new ResidentialPictureType(Models.Rent.Residentials.EnumResidentialPictureType.Balcony),
+        new ResidentialPictureType(Models.Rent.Residentials.EnumResidentialPictureType.Entrance),
+        new ResidentialPictureType(Models.Rent.Residentials.EnumResidentialPictureType.Neighborhood),
+        new ResidentialPictureType(Models.Rent.Residentials.EnumResidentialPictureType.Other)
     ];
 
     // Do not use SetProperty. PropertyChanged is being subscribed.
-    public BuildingPictureType PictureType
+    public ResidentialPictureType PictureType
     {
         get;
         set
@@ -92,7 +92,7 @@ public sealed partial class Picture : PictureBase
 
             OnPropertyChanged();
         }
-    } = new(EnumBuildingPictureType.Unspecified);
+    } = new(EnumResidentialPictureType.Unspecified);
 
     // Do not use SetProperty.
     public string Description
@@ -144,21 +144,21 @@ public sealed partial class Picture : PictureBase
         IsModified = false;
     }
 
-    public EnumBuildingPictureType? SetLabelFromString(string titleStr)
+    public EnumResidentialPictureType? SetLabelFromString(string titleStr)
     {
-        if (Enum.TryParse<EnumBuildingPictureType>(titleStr, out var result))
+        if (Enum.TryParse<EnumResidentialPictureType>(titleStr, out var result))
         {
-            //PictureType = new(result); // Not good for assigning to combobox. So select from BuildingPictureTypes.
-            PictureType = BuildingPictureTypes.FirstOrDefault<BuildingPictureType>(x => x.Key == result) ?? new(EnumBuildingPictureType.Unspecified);
+            //PictureType = new(result); // Not good for assigning to combobox. So select from ResidentialPictureTypes.
+            PictureType = ResidentialPictureTypes.FirstOrDefault<ResidentialPictureType>(x => x.Key == result) ?? new(EnumResidentialPictureType.Unspecified);
 
             //Debug.WriteLine($"SetLabelFromString: {titleStr} -> {PictureType.Label}");
             return result;
         }
         else
         {
-            PictureType = new(EnumBuildingPictureType.Unspecified);
+            PictureType = new(EnumResidentialPictureType.Unspecified);
 
-            return EnumBuildingPictureType.Unspecified;
+            return EnumResidentialPictureType.Unspecified;
         }
     }
 };

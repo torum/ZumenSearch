@@ -1,56 +1,53 @@
 ﻿using System.Collections.ObjectModel;
 using ZumenSearch.Models.Base;
 
-namespace ZumenSearch.Models.Rent.Residentials;
+namespace ZumenSearch.Models.Rent.Commercials;
 
 // TODO: Consider creating a wrapper just like Lessor wrapper?
 // Almost dupe with Models.Rent.Residentials.Listing.Pdf
 
-public enum EnumResidentialPdfType
+public enum EnumCommercialPdfType
 {
     Unspecified,
-    Maisoku,
+    Listing,
     Architectural,
-    Toukibo,
-    Kouzu,
+    Registry,
+    Map,
     Other
 }
-public sealed class ResidentialPdfType(EnumResidentialPdfType key)
+public sealed class CommercialBuildingPdfType(EnumCommercialPdfType key)
 {
-    private Dictionary<EnumResidentialPdfType, string> BuildingPdfTypeDictionary
-    {
-        get;
-    } = new Dictionary<EnumResidentialPdfType, string>()
-    {
-                {EnumResidentialPdfType.Unspecified, "未指定"},
-                {EnumResidentialPdfType.Maisoku, "募集図面"},
-                {EnumResidentialPdfType.Architectural, "建築図面"},
-                {EnumResidentialPdfType.Toukibo, "登記簿謄本"},
-                {EnumResidentialPdfType.Kouzu, "公図・地図"},
-                {EnumResidentialPdfType.Other, "その他"},
-    };
+    private static readonly IReadOnlyDictionary<EnumCommercialPdfType, string> Labels =
+        new Dictionary<EnumCommercialPdfType, string>
+        {
+            [EnumCommercialPdfType.Unspecified] = "未指定",
+            [EnumCommercialPdfType.Listing] = "募集図面",
+            [EnumCommercialPdfType.Architectural] = "建築図面",
+            [EnumCommercialPdfType.Registry] = "登記簿謄本",
+            [EnumCommercialPdfType.Map] = "公図・地図",
+            [EnumCommercialPdfType.Other] = "その他"
+        };
 
-    public string Label => BuildingPdfTypeDictionary[Key];
+    public EnumCommercialPdfType Key => key;
 
-    public EnumResidentialPdfType Key => key;
-};
+    public string Label => Labels[key];
+}
 
 public sealed partial class Pdf : PdfBase
 {
-    public ViewModels.Rent.Residentials.PropertyViewModel? ParentViewModel { get; set; }
+    public ViewModels.Rent.Commercials.PropertyViewModel? ParentViewModel { get; set; }
 
-    public readonly ObservableCollection<ResidentialPdfType> BuildingPdfTypes =
-        [
-        //new BuildingPictureType(EnumBuildingPictureType.Unspecified, "未指定"),
-        new ResidentialPdfType(Models.Rent.Residentials.EnumResidentialPdfType.Maisoku),
-        new ResidentialPdfType(Models.Rent.Residentials.EnumResidentialPdfType.Architectural),
-        new ResidentialPdfType(Models.Rent.Residentials.EnumResidentialPdfType.Toukibo),
-        new ResidentialPdfType(Models.Rent.Residentials.EnumResidentialPdfType.Kouzu),
-        new ResidentialPdfType(Models.Rent.Residentials.EnumResidentialPdfType.Other)
-        ];
+    public ObservableCollection<CommercialBuildingPdfType> BuildingPdfTypes { get; } =
+    [
+        new(EnumCommercialPdfType.Listing),
+        new(EnumCommercialPdfType.Architectural),
+        new(EnumCommercialPdfType.Registry),
+        new(EnumCommercialPdfType.Map),
+        new(EnumCommercialPdfType.Other)
+    ];
 
     // Do not use SetProperty. PropertyChanged is being subscribed.
-    public ResidentialPdfType PdfType
+    public CommercialBuildingPdfType PdfType
     {
         get;
         set
@@ -73,7 +70,7 @@ public sealed partial class Pdf : PdfBase
 
             OnPropertyChanged();
         }
-    } = new(EnumResidentialPdfType.Unspecified);
+    } = new(EnumCommercialPdfType.Unspecified);
 
     // Do not use SetProperty. PropertyChanged is being subscribed.
     public string Description
@@ -126,19 +123,19 @@ public sealed partial class Pdf : PdfBase
         IsModified = false;
     }
 
-    public EnumResidentialPdfType? SetTypeFromString(string Str)
+    public EnumCommercialPdfType? SetTypeFromString(string Str)
     {
-        if (Enum.TryParse<EnumResidentialPdfType>(Str, out var result))
+        if (Enum.TryParse<EnumCommercialPdfType>(Str, out var result))
         {
-            PdfType = BuildingPdfTypes.FirstOrDefault<ResidentialPdfType>(x => x.Key == result) ?? new(EnumResidentialPdfType.Unspecified);
+            PdfType = BuildingPdfTypes.FirstOrDefault<CommercialBuildingPdfType>(x => x.Key == result) ?? new(EnumCommercialPdfType.Unspecified);
 
             return result;
         }
         else
         {
-            PdfType = new(EnumResidentialPdfType.Unspecified);
+            PdfType = new(EnumCommercialPdfType.Unspecified);
 
-            return EnumResidentialPdfType.Unspecified;
+            return EnumCommercialPdfType.Unspecified;
         }
     }
 };

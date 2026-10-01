@@ -88,7 +88,24 @@ public sealed partial class ShellPage : Page
             this.AppTitleBarIcon.Opacity = 1;
         }
 
-        NavigationViewControl.Opacity = args.WindowActivationState == WindowActivationState.Deactivated ? 0.5 : 1;
+        //NavigationViewControl.Opacity = args.WindowActivationState == WindowActivationState.Deactivated ? 0.5 : 1;
+        var compositor = Microsoft.UI.Xaml.Media.CompositionTarget.GetCompositorForCurrentThread();
+        var visual = Microsoft.UI.Xaml.Hosting.ElementCompositionPreview.GetElementVisual(NavigationViewControl);
+
+        var animation = compositor.CreateScalarKeyFrameAnimation();
+        if (args.WindowActivationState != WindowActivationState.CodeActivated)
+        {
+            animation.InsertKeyFrame(0f, 1f); // Start opacity
+            animation.InsertKeyFrame(1f, 0.7f); // End opacity
+        }
+        else
+        {
+            animation.InsertKeyFrame(0f, 0.7f); // Start opacity
+            animation.InsertKeyFrame(1f, 1f); // End opacity
+        }
+        animation.Duration = TimeSpan.FromMilliseconds(150);
+        visual.StartAnimation("Opacity", animation);
+
     }
 
     private void AppTitleBar_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -142,7 +159,7 @@ public sealed partial class ShellPage : Page
         }
     }
 
-    private void NavigationViewControl_Navigated(object sender, Microsoft.UI.Xaml.Navigation.NavigationEventArgs e)
+    private async void NavigationViewControl_Navigated(object sender, Microsoft.UI.Xaml.Navigation.NavigationEventArgs e)
     {
         this.NavigationViewControl.IsBackEnabled = this.ContentFrame.CanGoBack;
 
@@ -173,6 +190,20 @@ public sealed partial class ShellPage : Page
                 // Hide SearchBox
                 //SearchBox.Visibility = Visibility.Collapsed;
                 //SetRegionsForCustomTitleBar("NavigationViewControl_Navigated");
+
+
+            }
+            else if (ContentFrame.SourcePageType == typeof(Views.SearchResultPage))
+            {
+                /*
+                var options = new FindNextElementOptions
+                {
+                    SearchRoot = ContentFrame
+                };
+
+                // Safely shift focus to the first focusable element inside the page
+                await FocusManager.TryMoveFocusAsync(FocusNavigationDirection.Down, options);
+                */
             }
             else
             {
@@ -180,6 +211,7 @@ public sealed partial class ShellPage : Page
                 //SetRegionsForCustomTitleBar("NavigationViewControl_Navigated");
             }
         }
+
     }
 
     private NavigationViewItem? FindNavigationViewItemWithTag(string tag)
