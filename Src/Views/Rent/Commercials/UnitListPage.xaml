@@ -34,33 +34,73 @@
         <Border
             Grid.Row="1"
             Style="{StaticResource RoundCardBorderStyle}">
-            <ItemsView x:Name="UnitsListView"
-                ItemsSource="{x:Bind ViewModel.Units, Mode=OneWay}"
-                SelectionMode="None">
+            <ItemsView
+    x:Name="UnitsListView"
+    ItemsSource="{x:Bind ViewModel.Units, Mode=OneWay}"
+    SelectionMode="Single"
+    AllowFocusOnInteraction="True"
+    IsItemInvokedEnabled="False">
+                <ItemsView.ContextFlyout>
+                    <MenuFlyout>
+                        <MenuFlyoutItem
+                Text="編集"
+                Icon="Edit"
+                Command="{x:Bind ViewModel.EditSelectedUnitCommand, Mode=OneWay}"
+                CommandParameter="{x:Bind UnitsListView.SelectedItem, Mode=OneWay}">
+                            <MenuFlyoutItem.KeyboardAccelerators>
+                                <KeyboardAccelerator Key="Enter" />
+                            </MenuFlyoutItem.KeyboardAccelerators>
+                        </MenuFlyoutItem>
+                        <MenuFlyoutItem
+                Text="複製"
+                Icon="Copy"
+                Command="{x:Bind ViewModel.DupeSelectedUnitCommand, Mode=OneWay}"
+                CommandParameter="{x:Bind UnitsListView.SelectedItem, Mode=OneWay}" />
+                        <MenuFlyoutSeparator />
+                        <MenuFlyoutItem
+                Text="削除"
+                Icon="Delete"
+                Command="{x:Bind ViewModel.DeleteSelectedUnitCommand, Mode=OneWay}"
+                CommandParameter="{x:Bind UnitsListView.SelectedItem, Mode=OneWay}" />
+                    </MenuFlyout>
+                </ItemsView.ContextFlyout>
+
                 <ItemsView.ItemTemplate>
                     <DataTemplate x:DataType="modlisting:Listing">
-                        <ItemContainer DataContext="{x:Bind}">
+                        <ItemContainer
+                DataContext="{x:Bind}"
+                IsDoubleTapEnabled="True"
+                AllowFocusOnInteraction="False"
+                DoubleTapped="ItemContainer_DoubleTapped"
+                PointerPressed="ItemContainer_PointerPressed"
+                PointerReleased="ItemContainer_PointerReleased"
+                RightTapped="ItemContainer_RightTapped">
+                            <ItemContainer.KeyboardAccelerators>
+                                <KeyboardAccelerator
+                        Key="Enter"
+                        Modifiers="None"
+                        Invoked="ItemContainerKeyboardAccelerator_Invoked" />
+                            </ItemContainer.KeyboardAccelerators>
                             <Grid Padding="12,8">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-
                                 <TextBlock
-                    Text="{x:Bind Name, Mode=OneWay}"
-                    Style="{ThemeResource BodyTextBlockStyle}"
-                    VerticalAlignment="Center" />
-
+                        Text="{x:Bind Name, Mode=OneWay}"
+                        Style="{ThemeResource BodyTextBlockStyle}"
+                        VerticalAlignment="Center" />
                                 <TextBlock
-                    Grid.Column="1"
-                    Text="{x:Bind FloorArea, Mode=OneWay}"
-                    Style="{ThemeResource CaptionTextBlockStyle}"
-                    VerticalAlignment="Center"
-                    Margin="12,0,0,0" />
+                        Grid.Column="1"
+                        Text="{x:Bind FloorArea, Mode=OneWay}"
+                        Style="{ThemeResource CaptionTextBlockStyle}"
+                        VerticalAlignment="Center"
+                        Margin="12,0,0,0" />
                             </Grid>
                         </ItemContainer>
                     </DataTemplate>
                 </ItemsView.ItemTemplate>
+
                 <ItemsView.Layout>
                     <StackLayout Spacing="8" />
                 </ItemsView.Layout>

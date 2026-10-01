@@ -993,6 +993,32 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
 
         var isFound = false;
 
+        if (RentCommercialListingEditorList.Count > 0)
+        {
+            foreach (var unitEditor in RentCommercialListingEditorList.ToList())
+            {
+                if (unitEditor.PropertyId != selectedId)
+                {
+                    continue;
+                }
+
+                if (unitEditor.ViewModel.IsDirty)
+                {
+                    unitEditor.Activate();
+                    isFound = true;
+                    return;
+                }
+
+                unitEditor.Close();
+            }
+        }
+
+        if (isFound)
+        {
+            // If the editor window for this item is already open, just return.
+            return;
+        }
+
         // Check if the selected item is already being edited in editor window.
         foreach (var editorWindow in RentResidentialEditorList.ToList())
         {
@@ -1489,10 +1515,50 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
     [RelayCommand(CanExecute = nameof(DeleteRentCommercialCanExecute))]
     private void DeleteRentCommercial(Models.PropertySearchResultItem? selected)
     {
-        if (selected is null ||
-            string.IsNullOrWhiteSpace(selected.Id))
+        if (selected is null || string.IsNullOrWhiteSpace(selected.Id))
         {
             return;
+        }
+
+        var selectedId = selected.Id;
+
+        if (RentCommercialListingEditorList.Count > 0)
+        {
+            foreach (var unitEditor in RentCommercialListingEditorList.ToList())
+            {
+                if (unitEditor.PropertyId != selectedId)
+                {
+                    continue;
+                }
+
+                if (unitEditor.ViewModel.IsDirty)
+                {
+                    unitEditor.Activate();
+                    return;
+                }
+
+                unitEditor.Close();
+            }
+        }
+
+        foreach (var editorWindow in RentCommercialEditorList.ToList())
+        {
+            if (editorWindow.Id != selectedId)
+            {
+                continue;
+            }
+
+            if (editorWindow.ViewModel?.IsDirty == false)
+            {
+                editorWindow.Close();
+            }
+            else
+            {
+                editorWindow.Activate();
+                return;
+            }
+
+            break;
         }
 
         var result = _dataAccessService.DeleteRentCommercial(selected.Id);
@@ -1510,7 +1576,25 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
             return;
         }
 
-        PropertySearchResult.Remove(selected);
+        //PropertySearchResult.Remove(selected);
+        var searchItem = PropertySearchResult.FirstOrDefault(item => item.Id == selectedId);
+        if (searchItem is not null)
+        {
+            PropertySearchResult.Remove(searchItem);
+        }
+
+        var recentItem = RecentProperties.FirstOrDefault(item => item.Id == selectedId);
+        if (recentItem is not null)
+        {
+            RecentProperties.Remove(recentItem);
+        }
+
+        var propertyDataDirectoryPath = Path.Combine(App.PropertyBlobDataFolder, selectedId);
+        if (Directory.Exists(propertyDataDirectoryPath))
+        {
+            Directory.Delete(propertyDataDirectoryPath, true);
+        }
+
     }
     private static bool DeleteRentCommercialCanExecute(Models.PropertySearchResultItem? selected)
     {
@@ -1668,14 +1752,41 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
     [RelayCommand(CanExecute = nameof(DeleteRentCommercialListingCanExecute))]
     private void DeleteRentCommercialListing(Models.ListingSearchResultItem? selected)
     {
-        if (selected is null ||
-            string.IsNullOrWhiteSpace(selected.Id))
+        if (selected is null || string.IsNullOrWhiteSpace(selected.Id))
         {
             return;
         }
 
-        var result = _dataAccessService.DeleteRentCommercialListing(selected.Id);
+        var selectedId = selected.Id;
+        var selectedPropertyId = selected.PropertyId;
+        var isFound = false;
 
+        foreach (var editorWindow in RentCommercialListingEditorList.ToList())
+        {
+            if (editorWindow.Id != selectedId)
+            {
+                continue;
+            }
+
+            if (editorWindow.ViewModel?.IsDirty == false)
+            {
+                editorWindow.Close();
+            }
+            else
+            {
+                isFound = true;
+                editorWindow.Activate();
+            }
+
+            break;
+        }
+
+        if (isFound)
+        {
+            return;
+        }
+
+        var result = _dataAccessService.DeleteRentCommercialListing(selectedId);
         if (result.IsError)
         {
             Debug.WriteLine(
@@ -1690,6 +1801,29 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
         }
 
         RentCommercialListingSearchResult.Remove(selected);
+
+        foreach (var editorWindow in RentCommercialEditorList.ToList())
+        {
+            if (editorWindow.Id != selectedPropertyId)
+            {
+                continue;
+            }
+
+            WeakReferenceMessenger.Default.Send(
+                new Models.Messenger.ListingDeletedMessage(selectedId));
+            break;
+        }
+
+        // Clean up pictures and PDFs.
+        var listingDataDirectoryPath = Path.Combine(
+            App.PropertyBlobDataFolder,
+            selectedPropertyId,
+            selectedId);
+
+        if (Directory.Exists(listingDataDirectoryPath))
+        {
+            Directory.Delete(listingDataDirectoryPath, true);
+        }
     }
 
     private static bool DeleteRentCommercialListingCanExecute(Models.ListingSearchResultItem? selected)

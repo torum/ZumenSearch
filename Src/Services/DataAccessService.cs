@@ -1649,7 +1649,7 @@ public sealed class DataAccessService : IDataAccessService
                         var strType = Convert.ToString(reader["type"]) ?? string.Empty;
                         rlpic.SetLabelFromString(strType);
 
-                        rlpic.IsMain = Convert.ToInt32(reader["resiUnitOwnership"]) != 0; // int to bool
+                        rlpic.IsMain = Convert.ToInt32(reader["is_main"]) != 0; // int to bool
 
                         entry.Pictures.Add(rlpic);
                     }
@@ -2754,7 +2754,119 @@ public sealed class DataAccessService : IDataAccessService
                 command.ExecuteNonQuery();
             }
 
+            // Units
+            foreach (var unit in building.Units)
+            {
+                command.CommandText = """
+        INSERT INTO rent_commercial_units (
+            listing_id,
+            property_id,
+            is_property_unit_ownership,
+            name,
+            chinryou,
+            kyoueki_fee,
+            shikikin,
+            shikikin_unit,
+            reikin,
+            reikin_unit,
+            renewal_fee,
+            renewal_fee_unit,
+            recontract_fee,
+            recontract_fee_unit,
+            floor_area,
+            usage,
+            business_hours,
+            parking_available,
+            other_conditions,
+            remarks,
+            updated_at
+        )
+        VALUES (
+            @listingId,
+            @propertyId,
+            @isUnitOwnership,
+            @name,
+            @chinryou,
+            @kyouekiFee,
+            @shikikin,
+            @shikikinUnit,
+            @reikin,
+            @reikinUnit,
+            @renewalFee,
+            @renewalFeeUnit,
+            @recontractFee,
+            @recontractFeeUnit,
+            @floorArea,
+            @usage,
+            @businessHours,
+            @parkingAvailable,
+            @otherConditions,
+            @remarks,
+            @updatedAt
+        )
+        ON CONFLICT(listing_id) DO UPDATE SET
+            property_id = excluded.property_id,
+            is_property_unit_ownership = excluded.is_property_unit_ownership,
+            name = excluded.name,
+            chinryou = excluded.chinryou,
+            kyoueki_fee = excluded.kyoueki_fee,
+            shikikin = excluded.shikikin,
+            shikikin_unit = excluded.shikikin_unit,
+            reikin = excluded.reikin,
+            reikin_unit = excluded.reikin_unit,
+            renewal_fee = excluded.renewal_fee,
+            renewal_fee_unit = excluded.renewal_fee_unit,
+            recontract_fee = excluded.recontract_fee,
+            recontract_fee_unit = excluded.recontract_fee_unit,
+            floor_area = excluded.floor_area,
+            usage = excluded.usage,
+            business_hours = excluded.business_hours,
+            parking_available = excluded.parking_available,
+            other_conditions = excluded.other_conditions,
+            remarks = excluded.remarks,
+            updated_at = excluded.updated_at;
+        """;
 
+                command.Parameters.Clear();
+                command.Parameters.AddWithValue("@listingId", unit.Id);
+                command.Parameters.AddWithValue("@propertyId", building.Id);
+                command.Parameters.AddWithValue("@isUnitOwnership", unit.IsPropertyUnitOwnership ? 1 : 0);
+                command.Parameters.AddWithValue("@name", unit.Name);
+                command.Parameters.AddWithValue("@chinryou", unit.Chinryou);
+                command.Parameters.AddWithValue("@kyouekiFee", unit.KyouekiFee);
+                command.Parameters.AddWithValue("@shikikin", unit.Shikikin);
+                command.Parameters.AddWithValue("@shikikinUnit", unit.ShikikinUnit);
+                command.Parameters.AddWithValue("@reikin", unit.Reikin);
+                command.Parameters.AddWithValue("@reikinUnit", unit.ReikinUnit);
+                command.Parameters.AddWithValue("@renewalFee", unit.RenewalFee);
+                command.Parameters.AddWithValue("@renewalFeeUnit", unit.RenewalFeeUnit);
+                command.Parameters.AddWithValue("@recontractFee", unit.RecontractFee);
+                command.Parameters.AddWithValue("@recontractFeeUnit", unit.RecontractFeeUnit);
+                command.Parameters.AddWithValue("@floorArea", unit.FloorArea);
+                command.Parameters.AddWithValue("@usage", unit.Usage);
+                command.Parameters.AddWithValue("@businessHours", unit.BusinessHours);
+                command.Parameters.AddWithValue("@parkingAvailable", unit.ParkingAvailable ? 1 : 0);
+                command.Parameters.AddWithValue("@otherConditions", unit.OtherConditions);
+                command.Parameters.AddWithValue("@remarks", unit.Remarks);
+                command.Parameters.AddWithValue(
+                    "@updatedAt",
+                    DateTimeOffset.UtcNow.ToString("s"));
+
+                command.ExecuteNonQuery();
+            }
+
+            // process queued unit deletions
+            foreach (var unit in building.UnitsToBeDeleted)
+            {
+                command.CommandText = """
+        DELETE FROM rent_commercial_units
+        WHERE property_id = @propertyId AND listing_id = @listingId;
+        """;
+                command.Parameters.Clear();
+                command.Parameters.AddWithValue("@propertyId", building.Id);
+                command.Parameters.AddWithValue("@listingId", unit.Id);
+                command.ExecuteNonQuery();
+            }
 
 
             // Commit transaction
@@ -2773,11 +2885,6 @@ public sealed class DataAccessService : IDataAccessService
                 pdf.IsModified = false;
             }
 
-            //clean up
-            building.PicturesToBeDeleted.Clear();
-            building.PdfsToBeDeleted.Clear();
-            building.BrokersToBeDeleted.Clear();
-            building.LessorsToBeDeleted.Clear();
 
             building.Status = EnumEntryStatus.Saved;
             building.IsModified = false;
@@ -3228,6 +3335,62 @@ public sealed class DataAccessService : IDataAccessService
             }
 
             brokerReader.Close();
+
+            // Units
+            command.Parameters.Clear();
+            command.CommandText = """
+    SELECT listing_id, is_property_unit_ownership, name, chinryou, kyoueki_fee,
+           shikikin, shikikin_unit, reikin, reikin_unit, renewal_fee,
+           renewal_fee_unit, recontract_fee, recontract_fee_unit, floor_area,
+           usage, business_hours, parking_available, other_conditions, remarks
+    FROM rent_commercial_units
+    WHERE property_id = @propertyId
+    ORDER BY name;
+    """;
+            command.Parameters.AddWithValue("@propertyId", building.Id);
+
+            using (var unitReader = command.ExecuteReader())
+            {
+                while (unitReader.Read())
+                {
+                    var listingId = Convert.ToString(unitReader["listing_id"]) ?? string.Empty;
+                    if (string.IsNullOrWhiteSpace(listingId))
+                    {
+                        continue;
+                    }
+
+                    var unit = new Models.Rent.Commercials.Listing.Listing(
+                        listingId,
+                        EnumEntryStatus.Saved,
+                        building.Id,
+                        EnumEntryStatus.Saved,
+                        Convert.ToInt32(unitReader["is_property_unit_ownership"]) != 0,
+                        building.Name)
+                    {
+                        Name = Convert.ToString(unitReader["name"]) ?? string.Empty,
+                        Chinryou = Convert.ToDecimal(unitReader["chinryou"]),
+                        KyouekiFee = Convert.ToDecimal(unitReader["kyoueki_fee"]),
+                        Shikikin = Convert.ToDecimal(unitReader["shikikin"]),
+                        ShikikinUnit = Convert.ToString(unitReader["shikikin_unit"]) ?? "ヵ月",
+                        Reikin = Convert.ToDecimal(unitReader["reikin"]),
+                        ReikinUnit = Convert.ToString(unitReader["reikin_unit"]) ?? "ヵ月",
+                        RenewalFee = Convert.ToDecimal(unitReader["renewal_fee"]),
+                        RenewalFeeUnit = Convert.ToString(unitReader["renewal_fee_unit"]) ?? "ヵ月",
+                        RecontractFee = Convert.ToDecimal(unitReader["recontract_fee"]),
+                        RecontractFeeUnit = Convert.ToString(unitReader["recontract_fee_unit"]) ?? "円",
+                        FloorArea = Convert.ToDecimal(unitReader["floor_area"]),
+                        Usage = Convert.ToString(unitReader["usage"]) ?? "未指定",
+                        BusinessHours = Convert.ToString(unitReader["business_hours"]) ?? string.Empty,
+                        ParkingAvailable = Convert.ToInt32(unitReader["parking_available"]) != 0,
+                        OtherConditions = Convert.ToString(unitReader["other_conditions"]) ?? string.Empty,
+                        Remarks = Convert.ToString(unitReader["remarks"]) ?? string.Empty,
+                        IsModified = false
+                    };
+
+                    building.Units.Add(unit);
+                }
+            }
+
 
 
             // set result

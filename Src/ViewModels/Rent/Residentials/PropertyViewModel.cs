@@ -1481,10 +1481,13 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     public void Receive(ListingUpdatedMessage listing)
     {
-        //Debug.WriteLine("Received ListingUpdatedMessage @PropertyViewModel");
+        var something = listing.Value;
+        if (something is null)
+        {
+            return;
+        }
 
-        var room = listing.Value;
-        if (room is null)
+        if (something is not Models.Rent.Residentials.Listing.Listing room)
         {
             return;
         }

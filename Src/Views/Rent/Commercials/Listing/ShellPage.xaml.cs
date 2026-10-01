@@ -36,7 +36,7 @@ public sealed partial class ShellPage : Page
             navigationService,
             dataAccessService);
 
-        Window = new EditorWindow(unit.Id, ViewModel)
+        Window = new EditorWindow(unit.Id, unit.PropertyId, ViewModel)
         {
             Content = this
         };

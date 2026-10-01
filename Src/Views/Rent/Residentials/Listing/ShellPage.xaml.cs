@@ -51,7 +51,7 @@ public sealed partial class ShellPage : Page
 
         ViewModel = vmFactory.Create(room, _navigationlService, _dialogService);
 
-        Window = new Views.Rent.Residentials.Listing.EditorWindow(room.Id, ViewModel)
+        Window = new Views.Rent.Residentials.Listing.EditorWindow(room.Id, room.PropertyId, ViewModel)
         {
             Content = this
         };

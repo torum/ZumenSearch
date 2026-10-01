@@ -13,9 +13,9 @@ public class PropertyUpdatedMessage : ValueChangedMessage<Models.Base.PropertyBa
     }
 }
 
-public class ListingUpdatedMessage : ValueChangedMessage<Models.Rent.Residentials.Listing.Listing>
+public class ListingUpdatedMessage : ValueChangedMessage<Models.Base.ListingBase>
 {
-    public ListingUpdatedMessage(Models.Rent.Residentials.Listing.Listing value) : base(value)
+    public ListingUpdatedMessage(Models.Base.ListingBase value) : base(value)
     {
 
     }

@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI.Windowing;
+using Microsoft.UI.Xaml.Data;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
@@ -21,7 +22,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     IRecipient<LessorUpdatedMessage>,
     IRecipient<LessorDeletedMessage>,
     IRecipient<BrokerUpdatedMessage>,
-    IRecipient<BrokerDeletedMessage>
+    IRecipient<BrokerDeletedMessage>,
+    IRecipient<ListingUpdatedMessage>
 {
     private const string BasicPageName = "ZumenSearch.Views.Rent.Commercials.BasicPage";
 
@@ -887,8 +889,17 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     #region == Units ==
 
-    public ObservableCollection<Models.Rent.Commercials.Listing.Listing> Units { get; } = [];
-
+    public ObservableCollection<Models.Rent.Commercials.Listing.Listing> Units
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+            }
+        }
+    } = [];
 
     #endregion
 
@@ -972,6 +983,39 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         if (ewin is Views.Rent.Commercials.Listing.EditorWindow rcwin)
         {
             this.ChildEditorList.Remove(rcwin);
+        }
+    }
+
+    public void Receive(ListingUpdatedMessage listing)
+    {
+        var something = listing.Value;
+        if (something is null)
+        {
+            return;
+        }
+
+        if (something is not Models.Rent.Commercials.Listing.Listing unit)
+        {
+            return;
+        }
+
+        var existingUnit = this.Units.FirstOrDefault(r => r.Id.Equals(unit.Id));
+        if (existingUnit is not null)
+        {
+            // Update existing unit
+            var index = this.Units.IndexOf(existingUnit);
+            this.Units[index] = unit;
+        }
+        else
+        {
+            // Add new unit
+            this.Units.Add(unit);
+        }
+
+        if (unit.Status == EnumEntryStatus.New)
+        {
+            //Debug.WriteLine("(unit.ListingStatus == EnumListingStatus.New) @PropertyViewModel");
+            IsDirty = true;
         }
     }
 
@@ -1185,6 +1229,15 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                     person,
                     this));
         }
+
+        Units = new ObservableCollection<Models.Rent.Commercials.Listing.Listing>(_building.Units); // create a copy.
+
+        foreach (var item in Units)
+        {
+            //
+            item.IsModified = false; // Needed this.
+            //item.PropertyChanged += OnRoomPropertyChanged;
+        }
     }
 
     private void PopulateLocationValues()
@@ -1368,6 +1421,14 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
         _building.Brokers = [.. BrokersWrapper.Select(wrapper => wrapper.Person)];
 
+        foreach (var unit in Units)
+        {
+            // TODO: check if this is needed.Commercial property units should have the same ownership type as the building.
+            unit.IsPropertyUnitOwnership = IsUnitOwnership;
+        }
+
+        _building.Units = Units;
+
     }
 
     private static void DeleteFilesSafely(IEnumerable<string> filePaths)
@@ -1470,7 +1531,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             return;
         }
 
-        // TODO: check
+        // TODO: check below.
         var filesToDelete = _building.PicturesToBeDeleted
             .Select(picture =>
                 Path.Combine(_propertyDataDirectoryPath, picture.ImageFilename))
@@ -1511,17 +1572,49 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             return;
         }
 
-        DeleteFilesSafely(filesToDelete);
 
+        // TODO: fix this by merging with other delete logic.
+        DeleteFilesSafely(filesToDelete);
+        // TODO: 
+        _building.PicturesToBeDeleted.Clear();
+        _building.PdfsToBeDeleted.Clear();
+        _building.BrokersToBeDeleted.Clear();
+        _building.LessorsToBeDeleted.Clear();
+        _building.UnitsToBeDeleted.Clear();
+
+
+        // Clear the unsaved file lists after saving.
         _unsavedBuildingPictureFileList.Clear();
         _unsavedBuildingPdfFileList.Clear();
         _unsavedBuildingPdfThumbnailFileList.Clear();
+
+
+        // Jjust in case.
+        _building.Status = EnumEntryStatus.Saved;
+        _building.IsModified = false;
+
+        foreach (var room in Units)
+        {
+            room.PropertyName = Name;
+            room.PropertyStatus = EnumEntryStatus.Saved;
+            room.Status = EnumEntryStatus.Saved;
+        }
+
+        // Just in case.
+        foreach (var room in _building.Units)
+        {
+            room.PropertyName = Name;
+            room.PropertyStatus = EnumEntryStatus.Saved;
+            room.Status = EnumEntryStatus.Saved;
+        }
 
         IsDirty = false;
         _building.IsModified = false;
         _building.Status = EnumEntryStatus.Saved;
         IsInfoBarErrorOpen = false;
         WindowTitle = string.Empty;
+
+        WeakReferenceMessenger.Default.Send(new PropertyUpdatedMessage(_building));
     }
 
     private bool CanSave()
@@ -2167,4 +2260,5 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     #endregion
 
     #endregion
+
 }

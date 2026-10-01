@@ -5,6 +5,7 @@ using System.Globalization;
 using ZumenSearch.Models.Base;
 using ZumenSearch.Models.Common;
 using ZumenSearch.Services.Contracts;
+using CommunityToolkit.Mvvm.Messaging;
 
 namespace ZumenSearch.ViewModels.Rent.Commercials.Listing;
 
@@ -207,6 +208,47 @@ public sealed partial class ListingViewModel : ObservableRecipient
         return true;
     }
 
+    private bool SaveToNew()
+    {
+        WeakReferenceMessenger.Default.Send(
+            new Models.Messenger.ListingUpdatedMessage(_unit));
+
+        return true;
+    }
+
+    private bool SaveAsUpdate()
+    {
+        var result = _dataAccessService.UpsertRentCommercialListing(
+            _unit.PropertyId,
+            _unit);
+
+        if (result.IsError)
+        {
+            InfoBarErrorMessage = string.Join(
+                Environment.NewLine,
+                new[]
+                {
+                result.Error.Title,
+                result.Error.Message,
+                result.Error.Description,
+                result.Error.Operation,
+                result.Error.MethodName
+                }.Where(message => !string.IsNullOrWhiteSpace(message)));
+
+            IsInfoBarErrorOpen = true;
+            return false;
+        }
+
+        _unit.Status = EnumEntryStatus.Saved;
+        _unit.PropertyStatus = EnumEntryStatus.Saved;
+        _unit.IsModified = false;
+
+        WeakReferenceMessenger.Default.Send(
+            new Models.Messenger.ListingUpdatedMessage(_unit));
+
+        return true;
+    }
+
     private static string Format(decimal value) =>
         value == 0
             ? string.Empty
@@ -244,15 +286,29 @@ public sealed partial class ListingViewModel : ObservableRecipient
             return;
         }
 
+        SetValues();
+
+        bool saveResult;
+
         if (_unit.PropertyStatus == EnumEntryStatus.New)
         {
-            InfoBarErrorMessage = "先に親物件を保存してから区画を保存してください。";
-            IsInfoBarErrorOpen = true;
+            saveResult = SaveToNew();
+        }
+        else
+        {
+            saveResult = SaveAsUpdate();
+        }
+
+        if (!saveResult)
+        {
             return;
         }
 
-        SetValues();
+        IsDirty = false;
+        IsInfoBarErrorOpen = false;
+        WindowTitle = string.Empty;
 
+        /*
         var result = _dataAccessService.UpsertRentCommercialListing(
             _unit.PropertyId,
             _unit);
@@ -280,6 +336,7 @@ public sealed partial class ListingViewModel : ObservableRecipient
         IsDirty = false;
         IsInfoBarErrorOpen = false;
         WindowTitle = string.Empty;
+        */
     }
 
     private bool CanSave() => IsDirty;
