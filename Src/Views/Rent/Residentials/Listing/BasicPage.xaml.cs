@@ -27,10 +27,10 @@ public sealed partial class BasicPage : Page
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
-        if ((e.Parameter is ViewModels.Rent.Residentials.Listing.ListingViewModel) && (e.Parameter != null))
+        if (e.Parameter is ViewModels.Rent.Residentials.Listing.ListingViewModel vm)
         {
             //_editorShell = e.Parameter as Views.Rent.Residentials.Editor.EditorShell;
-            ViewModel = e.Parameter as ViewModels.Rent.Residentials.Listing.ListingViewModel;
+            ViewModel = vm;
             Bindings.Update();
             if (!_initialized)
             {

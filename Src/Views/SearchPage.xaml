@@ -177,14 +177,14 @@
 
             </StackPanel>
 
-            <Grid Grid.Row="1" Visibility="Collapsed">
-                <StackPanel Margin="0,48,0,0">
-                    <TextBlock Text="最近更新された物件" FontWeight="SemiBold"/>
+            <Grid Grid.Row="1">
+                <StackPanel Margin="0,24,0,0">
+                    <TextBlock Text="最近更新された物件" FontWeight="SemiBold" FontSize="16"/>
                     <Border Margin="0,12,0,0" BorderThickness="0,1,0,0" BorderBrush="{ThemeResource NavigationViewItemSeparatorForeground}"></Border>
                 </StackPanel>
             </Grid>
 
-            <ScrollViewer Grid.Row="2" Margin="0,48,0,0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <ScrollViewer Grid.Row="2" Margin="0,16,0,0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                 <ItemsView x:Name="RecentItemsView" Margin="12,24,12,24" ItemTemplate="{StaticResource RecentPropertyTypeTemplateSelector}" ItemsSource="{x:Bind ViewModel.RecentProperties, Mode=OneWay}" AllowFocusOnInteraction="True" SelectionMode="Single" HorizontalAlignment="Stretch">
                     <ItemsView.ContextFlyout>
                         <MenuFlyout>
@@ -198,7 +198,7 @@
                         </MenuFlyout>
                     </ItemsView.ContextFlyout>
                     <ItemsView.Layout>
-                        <UniformGridLayout ItemsJustification="Center" MaximumRowsOrColumns="10" MinRowSpacing="24" MinColumnSpacing="24"/>
+                        <UniformGridLayout ItemsJustification="Start" MaximumRowsOrColumns="10" MinRowSpacing="24" MinColumnSpacing="24"/>
                         <!--
                         <LinedFlowLayout MinItemSpacing="24" LineSpacing="24"/>
                         -->

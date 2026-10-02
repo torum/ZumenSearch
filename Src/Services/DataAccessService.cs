@@ -64,6 +64,9 @@ public sealed class DataAccessService : IDataAccessService
                     "loc_location_full TEXT," +
                     "location_latitude TEXT NOT NULL DEFAULT ''," +
                     "location_longitude TEXT NOT NULL DEFAULT ''," +
+                    // TODO: change loc_ columns to align with location_*** and set appropriate defaults ( TEXT NOT NULL DEFAULT '').
+
+                    // TODO: add more columns for location, address, etc.
 
 
                     "updated_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc'))," +
@@ -97,7 +100,7 @@ public sealed class DataAccessService : IDataAccessService
                     "picture_id TEXT NOT NULL PRIMARY KEY," +
                     "property_id TEXT NOT NULL," +
                     "filename TEXT NOT NULL," +
-                    "type TEXT NOT NULL," + 
+                    "type TEXT NOT NULL," +
                     "description TEXT NOT NULL," +
                     "is_main INTEGER NOT NULL DEFAULT 0," +
                     "FOREIGN KEY (property_id) REFERENCES rent_residentials(property_id) ON DELETE CASCADE," + //?
@@ -138,7 +141,7 @@ public sealed class DataAccessService : IDataAccessService
                     "listing_id TEXT NOT NULL," +
                     "property_id TEXT NOT NULL," +
                     "filename TEXT NOT NULL," +
-                    "type TEXT NOT NULL," + 
+                    "type TEXT NOT NULL," +
                     "description TEXT NOT NULL," +
                     "is_main INTEGER  NOT NULL," +
                     "FOREIGN KEY (listing_id) REFERENCES rent_residential_rooms(listing_id) ON DELETE CASCADE," +
@@ -1033,7 +1036,7 @@ public sealed class DataAccessService : IDataAccessService
                 sqlUpsert += "DO UPDATE SET property_id = @propertyId, name = @name, property_kind = @propertyKind, thumbnail_filename = @thumbnailPath, loc_pref_id = @locPrefId, loc_prefecture = @locPrefecture, loc_machiaza_id = @locMachiazaId, loc_county = @locCounty, loc_city = @locCity, loc_ward = @locWard, loc_oaza_cho = @locOazaCho, loc_choume = @locChoume, loc_edaban = @locEdaban, loc_location_full = @locLocationFull, location_latitude = @locationLatitude, location_longitude = @locationLongitude, updated_at = @updated_at";
 
                 cmd.CommandText = sqlUpsert;
-              
+
                 cmd.Parameters.AddWithValue("@propertyId", building.Id);
                 cmd.Parameters.AddWithValue("@name", building.Name);
                 cmd.Parameters.AddWithValue("@propertyKind", building.PropertyKind.ToString());
@@ -1082,7 +1085,7 @@ public sealed class DataAccessService : IDataAccessService
                 // TODO: more
 
                 cmd.ExecuteNonQuery();
-                
+
                 cmd.Parameters.Clear();
 
                 // 写真（建物）rent_residential_pictures
@@ -1237,7 +1240,7 @@ public sealed class DataAccessService : IDataAccessService
 
                         cmd.Parameters.AddWithValue("@lessor_id", psn.Id);
                         cmd.Parameters.AddWithValue("@property_id", building.Id);
-                        cmd.Parameters.AddWithValue("@property_kind", building.PropertyKind.ToString()); 
+                        cmd.Parameters.AddWithValue("@property_kind", building.PropertyKind.ToString());
                         cmd.Parameters.AddWithValue("@listing_id", string.Empty);// since this is building.
 
                         cmd.ExecuteNonQuery();
@@ -1264,6 +1267,54 @@ public sealed class DataAccessService : IDataAccessService
                     }
                     // TODO: should I?
                     building.LessorsToBeDeleted.Clear();
+                }
+
+                cmd.Parameters.Clear();
+
+                // 宅建業者（建物）brokers_properties_listings
+                if (building.Brokers.Count > 0)
+                {
+                    foreach (var psn in building.Brokers)
+                    {
+                        var sqlUpsertBroker = "INSERT INTO brokers_properties_listings (broker_id, property_id, property_kind, listing_id) ";
+                        sqlUpsertBroker += "VALUES (@broker_id, @property_id, @property_kind, @listing_id) ";
+                        sqlUpsertBroker += "ON CONFLICT (broker_id, property_id, listing_id) ";
+                        sqlUpsertBroker += "DO NOTHING";
+
+                        cmd.CommandText = sqlUpsertBroker;
+
+                        // ループなので、前のパラメーターをクリアする。
+                        cmd.Parameters.Clear();
+
+                        cmd.Parameters.AddWithValue("@broker_id", psn.Id);
+                        cmd.Parameters.AddWithValue("@property_id", building.Id);
+                        cmd.Parameters.AddWithValue("@property_kind", building.PropertyKind.ToString());
+                        cmd.Parameters.AddWithValue("@listing_id", string.Empty);// since this is building.
+
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+
+                cmd.Parameters.Clear();
+
+                // 宅建業者（建物）の削除リストを処理
+                if (building.BrokersToBeDeleted.Count > 0)
+                {
+                    foreach (var psn in building.BrokersToBeDeleted)
+                    {
+                        // 削除
+                        var sqlDelete = ($"DELETE FROM brokers_properties_listings WHERE broker_id = '{psn.Id}' AND property_id = '{building.Id}' AND listing_id = '{string.Empty}'");
+
+                        cmd.CommandText = sqlDelete;
+                        var sqlResult = cmd.ExecuteNonQuery();
+                        if (sqlResult > 0)
+                        {
+                            // TODO:
+                            Debug.WriteLine("Broker deleted");
+                        }
+                    }
+                    // TODO: should I?
+                    building.BrokersToBeDeleted.Clear();
                 }
 
                 cmd.Parameters.Clear();
@@ -1694,7 +1745,7 @@ public sealed class DataAccessService : IDataAccessService
 
             // 貸主（建物）
             var lessorIdList = new List<string>();
-            cmd.CommandText = string.Format("SELECT * FROM rent_lessors_properties_listings WHERE property_id = '{0}'", id);
+            cmd.CommandText = string.Format("SELECT * FROM rent_lessors_properties_listings WHERE property_id = '{0}' AND listing_id = ''", id);
             using (var reader = cmd.ExecuteReader())
             {
                 while (reader.Read())
@@ -1740,8 +1791,55 @@ public sealed class DataAccessService : IDataAccessService
                 }
             }
 
+            // 宅建業者（建物）
+            var brokerIdList = new List<string>();
+            cmd.CommandText = string.Format("SELECT * FROM brokers_properties_listings WHERE property_id = '{0}' AND listing_id = ''", id);
+            using (var reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    var brokerId = Convert.ToString(reader["broker_id"]) ?? string.Empty;
+                    if (!string.IsNullOrEmpty(brokerId))
+                    {
+                        brokerIdList.Add(brokerId);
+                    }
+                    else
+                    {
+                        Debug.WriteLine("broker_id is null/empty.");
+                    }
+                }
+            }
+            if (brokerIdList.Count > 0)
+            {
+                foreach (var brokerId in brokerIdList)
+                {
+                    // Get actuall brokers
+                    cmd.CommandText = $"SELECT broker_id, name, person_kind, name_last, name_first, name_company, name_company_type, name_company_type_position, remarks FROM brokers WHERE broker_id = '{brokerId}'";
+                    using (var reader2 = cmd.ExecuteReader())
+                    {
+                        while (reader2.Read())
+                        {
+                            var s = Convert.ToString(reader2["broker_id"]);
+                            if (string.IsNullOrEmpty(s))
+                            {
+                                Debug.WriteLine("DataAccess::SelectRentResidentialById: broker_id is null or empty.");
+                                continue;
+                            }
+
+                            var broker = GetPerson(reader2, brokerId);
+
+                            if (broker is not null)
+                            {
+                                entry.Brokers.Add(broker);
+                            }
+
+                            //break; // Assuming we only want the first match
+                        }
+                    }
+                }
+            }
+
             // 部屋
-            // TODO: Is there any way to reuse following code?
             cmd.CommandText = string.Format("SELECT * FROM rent_residential_rooms WHERE property_id = '{0}'", id);
             using (var reader = cmd.ExecuteReader())
             {
@@ -3550,7 +3648,7 @@ public sealed class DataAccessService : IDataAccessService
         return result;
     }
 
-    public ResultWrapper UpsertRentCommercialListing(string commercialId,Models.Rent.Commercials.Listing.Listing room)
+    public ResultWrapper UpsertRentCommercialListing(string commercialId, Models.Rent.Commercials.Listing.Listing room)
     {
         var result = new ResultWrapper();
 
@@ -3804,7 +3902,7 @@ public sealed class DataAccessService : IDataAccessService
         return result;
     }
 
-    public RentCommercialUnitSingleResultWrapper SelectRentCommercialListingById(string commercialId,string roomId)
+    public RentCommercialUnitSingleResultWrapper SelectRentCommercialListingById(string commercialId, string roomId)
     {
         var result = new RentCommercialUnitSingleResultWrapper();
 
@@ -4232,7 +4330,7 @@ public sealed class DataAccessService : IDataAccessService
                         continue;
                     }
 
-                    entry = GetPerson(reader,id);
+                    entry = GetPerson(reader, id);
 
                     //res.AffectedCount++;
 
@@ -4263,6 +4361,8 @@ public sealed class DataAccessService : IDataAccessService
 
     private static Models.Base.PersonBase? GetPerson(SqliteDataReader reader, string personId)
     {
+        // Do not try to access reader["person_id"] here because it may not be present in the SELECT query. Use the provided personId parameter instead.
+
         Models.Base.PersonBase? entry = null;
 
         Models.Base.EnumPersonKind? enumKind = null;
@@ -4878,7 +4978,7 @@ public sealed class DataAccessService : IDataAccessService
         return res;
     }
 
-    public ResultWrapper UpsertSaleResidentialListing(string saleId,Models.Sale.Residentials.Listing.Listing room)
+    public ResultWrapper UpsertSaleResidentialListing(string saleId, Models.Sale.Residentials.Listing.Listing room)
     {
         var res = new ResultWrapper();
 
@@ -5125,7 +5225,7 @@ public sealed class DataAccessService : IDataAccessService
         return res;
     }
 
-    public SaleResidentialRoomSingleResultWrapper SelectSaleResidentialListingById(string saleId,string roomId)
+    public SaleResidentialRoomSingleResultWrapper SelectSaleResidentialListingById(string saleId, string roomId)
     {
         var res = new SaleResidentialRoomSingleResultWrapper();
 

@@ -1102,20 +1102,64 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     public void DiscardChanges()
     {
-        DeleteFilesSafely(_unsavedBuildingPictureFileList);
-        DeleteFilesSafely(_unsavedBuildingPdfFileList);
-        DeleteFilesSafely(_unsavedBuildingPdfThumbnailFileList);
-
-        _unsavedBuildingPictureFileList.Clear();
-        _unsavedBuildingPdfFileList.Clear();
-        _unsavedBuildingPdfThumbnailFileList.Clear();
+        DiscardUnsavedFiles();
 
         _building.PicturesToBeDeleted.Clear();
         _building.PdfsToBeDeleted.Clear();
 
-        PopulateValues();
         IsDirty = false;
         IsInfoBarErrorOpen = false;
+    }
+
+    private void DiscardUnsavedFiles()
+    {
+        if (_unsavedBuildingPictureFileList.Count > 0)
+        {
+            foreach (var file in _unsavedBuildingPictureFileList)
+            {
+                if (File.Exists(file))
+                {
+                    Debug.WriteLine($"Deleting unsaved picture file: {file}");
+                    File.Delete(file);
+                }
+            }
+            _unsavedBuildingPictureFileList.Clear();
+        }
+
+        if (_unsavedBuildingPdfThumbnailFileList.Count > 0)
+        {
+            foreach (var file in _unsavedBuildingPdfThumbnailFileList)
+            {
+                if (File.Exists(file))
+                {
+                    Debug.WriteLine($"Deleting unsaved PDF Thumbnail file: {file}");
+                    File.Delete(file);
+                }
+            }
+            _unsavedBuildingPdfThumbnailFileList.Clear();
+        }
+
+        if (_unsavedBuildingPdfFileList.Count > 0)
+        {
+            foreach (var file in _unsavedBuildingPdfFileList)
+            {
+                if (File.Exists(file))
+                {
+                    Debug.WriteLine($"Deleting unsaved PDF file: {file}");
+                    File.Delete(file);
+                }
+            }
+            _unsavedBuildingPdfFileList.Clear();
+        }
+
+        if (_building.Status == EnumEntryStatus.New)
+        {
+            if (Directory.Exists(_propertyDataDirectoryPath))
+            {
+                Debug.WriteLine($"Deleting folder: {_propertyDataDirectoryPath}");
+                Directory.Delete(_propertyDataDirectoryPath, true);
+            }
+        }
     }
 
     #endregion
@@ -1417,16 +1461,29 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             }
         }
 
-        _building.Lessors = [.. LessorsWrapper.Select(wrapper => wrapper.Person)];
 
-        _building.Brokers = [.. BrokersWrapper.Select(wrapper => wrapper.Person)];
+        // Lessors
+        //_building.Lessors = [.. LessorsWrapper.Select(wrapper => wrapper.Person)];
+        _building.Lessors.Clear();
+        foreach (var item in this.LessorsWrapper)
+        {
+            _building.Lessors.Add(item.Person);
+        }
 
+        // Brokers
+        //_building.Brokers = [.. BrokersWrapper.Select(wrapper => wrapper.Person)];
+        _building.Brokers.Clear();
+        foreach (var item in this.BrokersWrapper)
+        {
+            _building.Brokers.Add(item.Person);
+        }
+
+        //
         foreach (var unit in Units)
         {
             // TODO: check if this is needed.Commercial property units should have the same ownership type as the building.
             unit.IsPropertyUnitOwnership = IsUnitOwnership;
         }
-
         _building.Units = Units;
 
     }
@@ -1520,103 +1577,110 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             return;
         }
 
+        // Validate input.
         if (!ValidateName())
         {
-            if (IsNameHasError)
+            IsInfoBarErrorOpen = true;
+
+            if (!_navigationService.IsCurrentPageSameAs(BasicPageName))
             {
-                IsInfoBarErrorOpen = true;
                 _navigationService.NavigateTo(BasicPageName, this);
             }
 
             return;
         }
 
-        // TODO: check below.
-        var filesToDelete = _building.PicturesToBeDeleted
-            .Select(picture =>
-                Path.Combine(_propertyDataDirectoryPath, picture.ImageFilename))
-            .Concat(
-                _building.PdfsToBeDeleted.SelectMany(pdf =>
-                    new[]
-                    {
-                    Path.Combine(_propertyDataDirectoryPath, pdf.PdfFilename),
-                    Path.Combine(
-                        _propertyDataDirectoryPath,
-                        pdf.ThumbnailFilename)
-                    }))
-            .ToArray();
-
-
         SetValues();
 
-        var result = _dataAccessService.UpsertRentCommercial(_building);
+        bool saveResult;
 
-        if (result.IsError)
+        var resInsert = _dataAccessService.UpsertRentCommercial(_building);
+        if (resInsert.IsError)
         {
             Debug.WriteLine(
-                result.Error.Title + Environment.NewLine +
-                result.Error.Message + Environment.NewLine +
-                result.Error.Description + Environment.NewLine +
-                result.Error.Operation + Environment.NewLine +
-                result.Error.MethodName + Environment.NewLine +
-                result.Error.FullDump);
+                resInsert.Error.Title + Environment.NewLine +
+                resInsert.Error.Message + Environment.NewLine +
+                resInsert.Error.Description + Environment.NewLine +
+                resInsert.Error.Operation + Environment.NewLine +
+                resInsert.Error.MethodName + Environment.NewLine +
+                resInsert.Error.FullDump);
 
             InfoBarErrorMessage =
-                result.Error.Title + Environment.NewLine +
-                result.Error.Message + Environment.NewLine +
-                result.Error.Description + Environment.NewLine +
-                result.Error.Operation + Environment.NewLine +
-                result.Error.MethodName;
+                resInsert.Error.Title + Environment.NewLine +
+                resInsert.Error.Message + Environment.NewLine +
+                resInsert.Error.Description + Environment.NewLine +
+                resInsert.Error.Operation + Environment.NewLine +
+                resInsert.Error.MethodName;
 
             IsInfoBarErrorOpen = true;
-            return;
+
+            saveResult = false;
         }
-
-
-        // TODO: fix this by merging with other delete logic.
-        DeleteFilesSafely(filesToDelete);
-        // TODO: 
-        _building.PicturesToBeDeleted.Clear();
-        _building.PdfsToBeDeleted.Clear();
-        _building.BrokersToBeDeleted.Clear();
-        _building.LessorsToBeDeleted.Clear();
-        _building.UnitsToBeDeleted.Clear();
-
-
-        // Clear the unsaved file lists after saving.
-        _unsavedBuildingPictureFileList.Clear();
-        _unsavedBuildingPdfFileList.Clear();
-        _unsavedBuildingPdfThumbnailFileList.Clear();
-
-
-        // Jjust in case.
-        _building.Status = EnumEntryStatus.Saved;
-        _building.IsModified = false;
-
-        foreach (var room in Units)
+        else
         {
-            room.PropertyName = Name;
-            room.PropertyStatus = EnumEntryStatus.Saved;
-            room.Status = EnumEntryStatus.Saved;
+            Debug.WriteLine("No errors on update.");
+            saveResult = true;
         }
 
-        // Just in case.
-        foreach (var room in _building.Units)
+        if (saveResult)
         {
-            room.PropertyName = Name;
-            room.PropertyStatus = EnumEntryStatus.Saved;
-            room.Status = EnumEntryStatus.Saved;
+            IsDirty = false;
+
+            _building.IsModified = false;
+            _building.Status = EnumEntryStatus.Saved;
+
+            // Update title with dummy value.
+            WindowTitle = string.Empty;
+
+            // Clear error infobar.
+            IsInfoBarErrorOpen = false;
+
+            var filesToDelete = _building.PicturesToBeDeleted
+                .Select(picture =>
+                    Path.Combine(_propertyDataDirectoryPath, picture.ImageFilename))
+                .Concat(
+                    _building.PdfsToBeDeleted.SelectMany(pdf =>
+                        new[]
+                        {
+                            Path.Combine(_propertyDataDirectoryPath, pdf.PdfFilename),
+                            Path.Combine(_propertyDataDirectoryPath, pdf.ThumbnailFilename)
+                        }))
+                .ToArray();
+
+            DeleteFilesSafely(filesToDelete);
+
+            _building.PicturesToBeDeleted.Clear();
+            _building.PdfsToBeDeleted.Clear();
+            _building.BrokersToBeDeleted.Clear();
+            _building.LessorsToBeDeleted.Clear();
+            _building.UnitsToBeDeleted.Clear();
+
+            _unsavedBuildingPictureFileList.Clear();
+            _unsavedBuildingPdfThumbnailFileList.Clear();
+            _unsavedBuildingPdfFileList.Clear();
+
+            // Just in case.
+            _building.Status = EnumEntryStatus.Saved;
+            _building.IsModified = false;
+
+            foreach (var room in Units)
+            {
+                room.PropertyName = Name;
+                room.PropertyStatus = EnumEntryStatus.Saved;
+                room.Status = EnumEntryStatus.Saved;
+            }
+
+            // Just in case.
+            foreach (var room in _building.Units)
+            {
+                room.PropertyName = Name;
+                room.PropertyStatus = EnumEntryStatus.Saved;
+                room.Status = EnumEntryStatus.Saved;
+            }
+
+            WeakReferenceMessenger.Default.Send(new PropertyUpdatedMessage(_building));
         }
-
-        IsDirty = false;
-        _building.IsModified = false;
-        _building.Status = EnumEntryStatus.Saved;
-        IsInfoBarErrorOpen = false;
-        WindowTitle = string.Empty;
-
-        WeakReferenceMessenger.Default.Send(new PropertyUpdatedMessage(_building));
     }
-
     private bool CanSave()
     {
         return IsDirty;
@@ -2208,6 +2272,36 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     #endregion
 
     #region == Broker commands ==
+
+    [RelayCommand]
+    private async Task AddBroker()
+    {
+        using var cts = new CancellationTokenSource();
+
+        var result = await _dialogService.ShowBrokerSelectDialog(
+            new ViewModels.Dialogs.BrokerSelectViewModel(
+                _dataAccessService,
+                cts));
+
+        if (result is null)
+        {
+            return;
+        }
+
+        if (BrokersWrapper.Any(item => item.Person.Id == result.Id))
+        {
+            return;
+        }
+
+        BrokersWrapper.Add(
+            new Models.Rent.Commercials.PersonWrapperForPropertyViewModel(
+                result,
+                this));
+
+        _building.Brokers.Add(result);
+        IsDirty = true;
+    }
+
     [RelayCommand(CanExecute = nameof(CanEditBroker))]
     private async Task EditBroker(
     Models.Rent.Commercials.PersonWrapperForPropertyViewModel wrapper)
@@ -2230,23 +2324,17 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     }
 
     [RelayCommand(CanExecute = nameof(CanDeleteBroker))]
-    private async Task DeleteBroker(
-        Models.Rent.Commercials.PersonWrapperForPropertyViewModel wrapper)
+    private async Task DeleteBroker(Models.Rent.Commercials.PersonWrapperForPropertyViewModel wrapper)
     {
-        if (wrapper?.Person is null)
+        if (wrapper?.Person is not { } person)
         {
             return;
         }
 
-        var mainViewModel = App.GetService<ViewModels.MainViewModel>();
-
-        await mainViewModel.DeleteBrokerCommand
-            .ExecuteAsync(wrapper.Person);
-
         if (BrokersWrapper.Remove(wrapper))
         {
-            _building.Brokers.Remove(wrapper.Person);
-            _building.BrokersToBeDeleted.Add(wrapper.Person);
+            _building.Brokers.Remove(person);
+            _building.BrokersToBeDeleted.Add(person);
             IsDirty = true;
         }
     }

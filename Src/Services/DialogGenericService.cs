@@ -120,6 +120,57 @@ public class DialogGenericService : IDialogGenericService
         return null;
     }
 
+    public async Task<Models.PersonSearchResultItem?> ShowBrokerSelectDialog(ViewModels.Dialogs.BrokerSelectViewModel viewModel)
+    {
+        if (_isDialogOpened)
+        {
+            Debug.WriteLine("DialogGenericService: _isDialogOpened @ShowBrokerSelectDialog");
+            return null;
+        }
+
+        if (_xamlRoot is null)
+        {
+            System.Diagnostics.Debug.WriteLine("_xamlRoot is null @ShowBrokerSelectDialog");
+            return null;
+        }
+
+        var dialog = new ContentDialog
+        {
+            XamlRoot = _xamlRoot,
+            Title = "宅建業者の選択",
+            IsPrimaryButtonEnabled = false,
+            PrimaryButtonText = "確定",
+            DefaultButton = ContentDialogButton.Primary,
+            IsSecondaryButtonEnabled = false,
+            CloseButtonText = "キャンセル",
+            Content = new Views.Dialogs.BrokerSelectPage(viewModel)
+        };
+
+        if (dialog.Content is not BrokerSelectPage dialogContent)
+        {
+            return null;
+        }
+
+        dialogContent.ViewModel.SelectionChanged += (sender, e) =>
+        {
+            if ((e is not null) && (e is Models.PersonSearchResultItem))
+            {
+                dialog.IsPrimaryButtonEnabled = true;
+            }
+        };
+
+        _isDialogOpened = true;
+        var result = await dialog.ShowAsync();
+        _isDialogOpened = false;
+
+        if (result == ContentDialogResult.Primary)
+        {
+            return dialogContent.ViewModel.SelectedBroker;
+        }
+
+        return null;
+    }
+
     public async Task<RailLine?> ShowRailLineSelectDialog()
     {
         if (_isDialogOpened)

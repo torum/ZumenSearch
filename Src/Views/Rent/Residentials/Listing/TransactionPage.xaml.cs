@@ -15,9 +15,9 @@ public sealed partial class TransactionPage : Page
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
-        if ((e.Parameter is ViewModels.Rent.Residentials.Listing.ListingViewModel) && (e.Parameter != null))
+        if (e.Parameter is ViewModels.Rent.Residentials.Listing.ListingViewModel vm)
         {
-            ViewModel = e.Parameter as ViewModels.Rent.Residentials.Listing.ListingViewModel;
+            ViewModel = vm;
             // comment out when x:Bind expressions is added.
             //Bindings.Update();
         }

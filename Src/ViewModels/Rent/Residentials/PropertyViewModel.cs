@@ -1439,7 +1439,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     #region == 宅建業者プロパティ ==
 
-    public ObservableCollection<Models.Brokers.PersonWrapperForPropertyViewModel> BrokersWrapper
+    public ObservableCollection<Models.Rent.Residentials.PersonWrapperForPropertyViewModel> BrokersWrapper
     {
         get;
         set
@@ -1788,6 +1788,13 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             LessorsWrapper.Add(new Models.Rent.Residentials.PersonWrapperForPropertyViewModel(item,this));
         }
 
+        // Brokers
+        BrokersWrapper = new ObservableCollection<Models.Rent.Residentials.PersonWrapperForPropertyViewModel>();
+        foreach (var item in _building.Brokers)
+        {
+            BrokersWrapper.Add(new Models.Rent.Residentials.PersonWrapperForPropertyViewModel(item, this));
+        }
+
         // Rooms
         Rooms = new ObservableCollection<Models.Rent.Residentials.Listing.Listing>(_building.Rooms); // create a copy.
 
@@ -2057,12 +2064,20 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             }
         }
 
+        // 宅建業者
+        _building.Brokers.Clear();
+        foreach (var item in this.BrokersWrapper)
+        {
+            _building.Brokers.Add(item.Person);
+        }
+
+        // 部屋
         foreach (var rm in Rooms)
         {
             rm.IsPropertyUnitOwnership = IsUnitOwnership;
         }
 
-        // 部屋
+        // 部屋set
         _building.Rooms = Rooms;
 
     }
@@ -2217,11 +2232,9 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                 _building.PdfsToBeDeleted.Clear();
             }
 
-            // Just in case clear LessorsToBeDeleted
-            if (_building.LessorsToBeDeleted.Count > 0)
-            {
-                _building.LessorsToBeDeleted.Clear();
-            }
+            // Just in case clear LessorsToBeDeleted, BrokersToBeDeleted
+            _building.LessorsToBeDeleted.Clear();
+            _building.BrokersToBeDeleted.Clear();
 
             // Clear rooms pic and pdfs and lessors
             if (_building.RoomsToBeDeleted.Count > 0)
@@ -2925,6 +2938,105 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     #endregion
 
+    #region == Broker related commands ==
+
+    [RelayCommand]
+    public async Task AddBroker()
+    {
+        if (_dialogService is null)
+        {
+            Debug.WriteLine("_dlgService is null");
+            return;
+        }
+
+        var broker = await _dialogService.ShowBrokerSelectDialog(new ViewModels.Dialogs.BrokerSelectViewModel(_dataAccessService, _cts));
+
+        if (broker is not null)
+        {
+            var brokerId = broker.Id;
+
+            // Check if already exists
+            var match = BrokersWrapper.FirstOrDefault(x => x.Person.Id.Equals(brokerId));
+            if (match is not null)
+            {
+                Debug.WriteLine($"broker {broker.Name} already in the list.");
+                return;
+            }
+
+            var res = _dataAccessService.SelectBrokerById(brokerId);
+            if (res.IsError)
+            {
+                Debug.WriteLine(
+                    res.Error.Title + Environment.NewLine +
+                    res.Error.Message + Environment.NewLine +
+                    res.Error.Description + Environment.NewLine +
+                    res.Error.Operation + Environment.NewLine +
+                    res.Error.MethodName + Environment.NewLine +
+                    res.Error.FullDump);
+
+                // TODO: Show error message to user
+                return;
+            }
+
+            if (res.Person is null)
+            {
+                Debug.WriteLine($"{brokerId} is null. Cannot open editor.");
+                return;
+            }
+
+            var wrapper = new Models.Rent.Residentials.PersonWrapperForPropertyViewModel(res.Person, this);
+
+            BrokersWrapper.Add(wrapper);
+
+            IsDirty = true;
+        }
+    }
+
+    [RelayCommand(CanExecute = nameof(CanEditBroker))]
+    private void EditBroker(Models.Rent.Residentials.PersonWrapperForPropertyViewModel broker)
+    {
+        if (broker.Person is not null)
+        {
+            var mainVm = App.GetService<MainViewModel>();
+            if (mainVm.EditBrokerCommand.CanExecute(broker.Person as Models.Base.PersonBase))
+            {
+                mainVm.EditBrokerCommand.Execute(broker.Person as Models.Base.PersonBase);
+            }
+        }
+    }
+    private static bool CanEditBroker(Models.Rent.Residentials.PersonWrapperForPropertyViewModel broker)
+    {
+        return broker is not null;
+    }
+
+    [RelayCommand(CanExecute = nameof(CanDeleteBroker))]
+    public async Task DeleteBroker(Models.Rent.Residentials.PersonWrapperForPropertyViewModel broker)
+    {
+        if (broker is null)
+        {
+            return;
+        }
+
+        if (broker.Person is null)
+        {
+            return;
+        }
+
+        Debug.WriteLine($"DeleteBrokerCommand {broker.Person.Name}");
+
+        if (BrokersWrapper.Remove(broker))
+        {
+            IsDirty = true;
+
+            _building.BrokersToBeDeleted.Add(broker.Person);
+        }
+    }
+    private static bool CanDeleteBroker(Models.Rent.Residentials.PersonWrapperForPropertyViewModel broker)
+    {
+        return broker is not null;
+    }
+
+    #endregion
 
     #endregion
 

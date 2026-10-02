@@ -84,6 +84,22 @@ public sealed partial class Property : PropertyBase
     // DBへの更新時にDBから削除されるべき貸主のIDリスト
     public ObservableCollection<Models.Base.PersonBase> LessorsToBeDeleted = [];
 
+
+    // 宅建業者のリスト
+    public ObservableCollection<Models.Base.PersonBase> Brokers
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;
+            }
+        }
+    } = [];
+
+    public ObservableCollection<Models.Base.PersonBase> BrokersToBeDeleted = [];
+
     #endregion
 
     #region == 基本 ==

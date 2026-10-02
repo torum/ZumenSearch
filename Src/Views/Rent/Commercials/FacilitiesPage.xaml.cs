@@ -16,10 +16,10 @@ public sealed partial class FacilitiesPage : Page
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
-        if ((e.Parameter is ViewModels.Rent.Commercials.PropertyViewModel) && (e.Parameter != null))
+        if (e.Parameter is ViewModels.Rent.Commercials.PropertyViewModel vm)
         {
             //_editorShell = e.Parameter as Views.Rent.Commercials.EditorShell;
-            ViewModel = e.Parameter as ViewModels.Rent.Commercials.PropertyViewModel;
+            ViewModel = vm;
             Bindings.Update();
         }
 

@@ -15,8 +15,11 @@ public sealed partial class BasicPage : Page
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
-        ViewModel = e.Parameter as ViewModels.Rent.Commercials.Listing.ListingViewModel;
-        Bindings.Update();
+        if (e.Parameter is ViewModels.Rent.Commercials.Listing.ListingViewModel vm)
+        {
+            ViewModel = vm;
+            Bindings.Update();
+        }
         base.OnNavigatedTo(e);
     }
 }

@@ -35,9 +35,9 @@ public sealed partial class BasicPage : Page
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
-        if ((e.Parameter is ViewModels.Rent.Lessors.LessorViewModel) && (e.Parameter != null))
+        if (e.Parameter is ViewModels.Rent.Lessors.LessorViewModel vm)
         {
-            ViewModel = e.Parameter as ViewModels.Rent.Lessors.LessorViewModel;
+            ViewModel = vm;
             Bindings.Update();
             if (!_initialized)
             {

@@ -35,9 +35,9 @@ public sealed partial class BasicPage : Page
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
-        if ((e.Parameter is ViewModels.Brokers.BrokerViewModel) && (e.Parameter != null))
+        if ((e.Parameter is ViewModels.Brokers.BrokerViewModel vm) && (e.Parameter != null))
         {
-            ViewModel = e.Parameter as ViewModels.Brokers.BrokerViewModel;
+            ViewModel = vm;
             Bindings.Update();
             if (!_initialized)
             {

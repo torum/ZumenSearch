@@ -16,9 +16,9 @@ public sealed partial class BrokerListPage : Page
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
-        if ((e.Parameter is ViewModels.Rent.Commercials.PropertyViewModel) && (e.Parameter != null))
+        if (e.Parameter is ViewModels.Rent.Commercials.PropertyViewModel vm)
         {
-            ViewModel = e.Parameter as ViewModels.Rent.Commercials.PropertyViewModel;
+            ViewModel = vm;
 
             // comment out when x:Bind expressions is added.
             //Bindings.Update();

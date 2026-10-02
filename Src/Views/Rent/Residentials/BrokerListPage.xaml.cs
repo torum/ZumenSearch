@@ -16,12 +16,10 @@ public sealed partial class BrokerListPage : Page
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
-        if ((e.Parameter is ViewModels.Rent.Residentials.PropertyViewModel) && (e.Parameter != null))
+        if (e.Parameter is ViewModels.Rent.Residentials.PropertyViewModel vm)
         {
-            ViewModel = e.Parameter as ViewModels.Rent.Residentials.PropertyViewModel;
-
-            // comment out when x:Bind expressions is added.
-            //Bindings.Update();
+            ViewModel = vm;
+            Bindings.Update();
         }
 
         base.OnNavigatedTo(e);

@@ -11,6 +11,71 @@ namespace ZumenSearch.ViewModels.Brokers;
 
 public sealed partial class BrokerViewModel : ObservableRecipient
 {
+    #region == Private Variables ==
+
+    private readonly string _id = string.Empty;
+
+    // The Entry property holds the COPY of current RentResidential entry being edited.
+    // Do not use it directly in the UI. Apply changes to this object in SaveAsync() to save the changes.
+    // MainViewModel creates a new instance of this class and call EditorShell.SetEntry(EntryResidentialFull) and sets this property.
+    private Models.Base.PersonBase _broker;
+
+
+    #endregion
+
+    #region == Services ==
+
+    private readonly IDataAccessService _dataAccessService;
+    private readonly IDataAccessLocationService _dataAccessLocationService;
+    private readonly IDispatcherService _dispatcherService;
+    private readonly IDialogGenericService _dialogService;
+    private readonly INavigationGenericService _navigationService;
+
+    #endregion
+
+    public BrokerViewModel(Models.Base.PersonBase broker,
+        INavigationGenericService navigationService,
+        IDialogGenericService dialogService,
+        IDispatcherService dispatcherService,
+        IDataAccessService dataAccessService,
+        IDataAccessLocationService dataAccessLocationService)
+    {
+        _broker = broker;
+        _id = broker.Id;
+
+        _navigationService = navigationService; 
+        _dialogService = dialogService;
+        _dispatcherService = dispatcherService;
+        _dataAccessService = dataAccessService;
+        _dataAccessLocationService = dataAccessLocationService;
+
+        // Update title with dummy value.
+        WindowTitle = string.Empty;
+
+        try
+        {
+            PopulateValues();
+
+            // Reset errors
+            IsNameHasError = false;
+            // TODO: more.
+
+            //HasErrors = false;
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"BrokerViewModel: {ex}");
+        }
+        finally
+        {
+            IsDirty = false;
+        }
+
+        // Ready to receive messages.
+        this.IsActive = true;
+    }
+
+
     #region == Public Properties ==
 
     // TODO: Do I need this?
@@ -178,70 +243,6 @@ public sealed partial class BrokerViewModel : ObservableRecipient
     } = string.Empty;
 
     #endregion
-
-    #region == Private Variables ==
-
-    private readonly string _id = string.Empty;
-
-    // The Entry property holds the COPY of current RentResidential entry being edited.
-    // Do not use it directly in the UI. Apply changes to this object in SaveAsync() to save the changes.
-    // MainViewModel creates a new instance of this class and call EditorShell.SetEntry(EntryResidentialFull) and sets this property.
-    private Models.Base.PersonBase _broker;
-
-
-    #endregion
-
-    #region == Services ==
-
-    private readonly IDataAccessService _dataAccessService;
-    private readonly IDataAccessLocationService _dataAccessLocationService;
-    private readonly IDispatcherService _dispatcherService;
-    private readonly IDialogGenericService _dialogService;
-    private readonly INavigationGenericService _navigationService;
-
-    #endregion
-
-    public BrokerViewModel(Models.Base.PersonBase broker,
-        INavigationGenericService navigationService,
-        IDialogGenericService dialogService,
-        IDispatcherService dispatcherService,
-        IDataAccessService dataAccessService,
-        IDataAccessLocationService dataAccessLocationService)
-    {
-        _broker = broker;
-        _id = broker.Id;
-
-        _navigationService = navigationService; 
-        _dialogService = dialogService;
-        _dispatcherService = dispatcherService;
-        _dataAccessService = dataAccessService;
-        _dataAccessLocationService = dataAccessLocationService;
-
-        // Update title with dummy value.
-        WindowTitle = string.Empty;
-
-        try
-        {
-            PopulateValues();
-
-            // Reset errors
-            IsNameHasError = false;
-            // TODO: more.
-
-            //HasErrors = false;
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"BrokerViewModel: {ex}");
-        }
-        finally
-        {
-            IsDirty = false;
-        }
-
-        // Ready to receive messages.
-        this.IsActive = true;
-    }
 
     #region == Public Methods ==
 

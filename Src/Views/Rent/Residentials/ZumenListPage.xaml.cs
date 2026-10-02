@@ -16,9 +16,9 @@ public sealed partial class ZumenListPage : Page
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
-        if ((e.Parameter is ViewModels.Rent.Residentials.PropertyViewModel) && (e.Parameter != null))
+        if (e.Parameter is ViewModels.Rent.Residentials.PropertyViewModel vm)
         {
-            ViewModel = e.Parameter as ViewModels.Rent.Residentials.PropertyViewModel;
+            ViewModel = vm;
             Bindings.Update();
         }
 
