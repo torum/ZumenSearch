@@ -30,7 +30,6 @@
                 <!-- Application TitleBar: SetTitleBar in code behinde -->
             </Grid>
         </Grid>
-
         <Grid Grid.Row="0" Grid.Column="0" Grid.RowSpan="2">
             <NavigationView x:Name="NavigationViewControl" 
                             AlwaysShowHeader="False"
@@ -156,6 +155,7 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="48"/>
                         <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
                     <Grid Grid.Row="0" SizeChanged="AppTitleBar_SizeChanged" Loaded="AppTitleBarGrid_Loaded">
@@ -165,9 +165,13 @@
                         </Grid.ColumnDefinitions>
                         <Button x:Name="BackButton" Grid.Column="0" Height="36" Width="40" Margin="6,6,0,0" ToolTipService.ToolTip="Alt+Left" Style="{ThemeResource TitleBarBackButtonStyle}" IsEnabled="{x:Bind ContentFrame.CanGoBack, Mode=OneWay}" Click="BackButton_Click" VerticalAlignment="Top"/>
                     </Grid>
-
-                    <!-- NavigationView content frame -->
+                    
                     <Frame x:Name="ContentFrame" Grid.Row="1" Navigated="NavigationViewControl_Navigated" Padding="0"></Frame>
+
+                    <Border Grid.Row="2" Height="Auto">
+                        <InfoBar Severity="Error" IsOpen="{x:Bind ViewModel.IsInfoBarErrorOpen, Mode=TwoWay}" Message="{x:Bind ViewModel.InfoBarErrorMessage, Mode=OneWay}" />
+                    </Border>
+
                 </Grid>
             </NavigationView>
         </Grid>

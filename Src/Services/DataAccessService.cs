@@ -31,7 +31,9 @@ public sealed class DataAccessService : IDataAccessService
 
         try
         {
-            connectionStringBuilder = new SqliteConnectionStringBuilder("Data Source=" + dataBaseFilePath);//+ ";Pooling=false"
+            connectionStringBuilder = new SqliteConnectionStringBuilder("Data Source=" + dataBaseFilePath);//+ ";Pooling=false" 
+            // Don't think WAL mode is needed for this application. It is single-user, single-process, single-threading app with ReaderWriterLock.
+            // WAL mode is more suitable for multi-threaded or multi-process scenarios where concurrent reads and writes are expected.
 
             using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
 

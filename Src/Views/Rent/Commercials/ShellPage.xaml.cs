@@ -100,7 +100,7 @@ public sealed partial class ShellPage : Page
         {
             if (ViewModel.IsDirty)
             {
-                ViewModel.Save();
+                await ViewModel.Save();
             }
 
             if (ViewModel.IsDirty == false)

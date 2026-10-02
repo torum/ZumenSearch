@@ -2140,7 +2140,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     #region == Save related commands ==
 
     [RelayCommand(CanExecute = nameof(CanSave))]
-    public void Save()
+    public async Task Save()
     {
         if (!IsDirty)
         {
@@ -2167,7 +2167,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
         bool saveResult;
 
-        var resInsert = _dataAccessService.UpsertRentResidential(_building);
+        var resInsert = await Task.Run(() => _dataAccessService.UpsertRentResidential(_building), _cts.Token);
         if (resInsert.IsError)
         {
             Debug.WriteLine(
@@ -2857,9 +2857,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                 return;
             }
 
-            // TODO:
-            //var res = await Task.Run(() => _dataAccessService.SelectRentLessorById(lessorId), _cts.Token);
-            var res = _dataAccessService.SelectRentLessorById(lessorId);
+            var res = await Task.Run(() => _dataAccessService.SelectRentLessorById(lessorId), _cts.Token);
             if (res.IsError)
             {
                 Debug.WriteLine(
@@ -2963,7 +2961,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                 return;
             }
 
-            var res = _dataAccessService.SelectBrokerById(brokerId);
+            var res = await Task.Run(() => _dataAccessService.SelectBrokerById(brokerId), _cts.Token);
             if (res.IsError)
             {
                 Debug.WriteLine(

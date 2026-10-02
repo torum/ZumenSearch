@@ -11,14 +11,13 @@ namespace ZumenSearch.ViewModels.Sale.Residentials;
 
 public sealed partial class PropertyViewModel : ObservableRecipient
 {
-    private const string BasicPageName =
-        "ZumenSearch.Views.Sale.Residentials.BasicPage";
-
+    private const string BasicPageName = "ZumenSearch.Views.Sale.Residentials.BasicPage";
     private readonly Models.Sale.Residentials.Property _building;
     private readonly INavigationGenericService _navigationService;
     private readonly IDialogGenericService _dialogService;
     private readonly IDispatcherService _dispatcherService;
     private readonly IDataAccessService _dataAccessService;
+    private readonly CancellationTokenSource _cts = new();
 
     public string WindowTitle
     {
@@ -374,7 +373,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient
     }
 
     [RelayCommand(CanExecute = nameof(CanSave))]
-    public void Save()
+    public async Task Save()
     {
         if (!IsDirty || !ValidateName())
         {
@@ -389,7 +388,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient
 
         SetValues();
 
-        var result = _dataAccessService.UpsertSaleResidential(_building);
+        var result = await Task.Run(() => _dataAccessService.UpsertSaleResidential(_building), _cts.Token);
 
         if (result.IsError)
         {

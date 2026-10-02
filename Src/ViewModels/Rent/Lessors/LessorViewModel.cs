@@ -14,8 +14,8 @@ public sealed partial class LessorViewModel : ObservableRecipient
     #region == Private variables and const ==
 
     private const string BasicPageName = "ZumenSearch.Views.Rent.Lessors.BasicPage";
-
     private readonly string _id = string.Empty;
+    private readonly CancellationTokenSource _cts = new();
 
     // The Entry property holds the COPY of current RentResidential entry being edited.
     // Do not use it directly in the UI. Apply changes to this object in SaveAsync() to save the changes.
@@ -463,7 +463,7 @@ public sealed partial class LessorViewModel : ObservableRecipient
     #region == Commands ==
 
     [RelayCommand(CanExecute = nameof(CanSave))]
-    public void Save()
+    public async Task Save()
     {
         if (!IsDirty)
         {
@@ -483,7 +483,7 @@ public sealed partial class LessorViewModel : ObservableRecipient
 
         SetValues();
 
-        var resInsert = _dataAccessService.UpsertRentLessor(_lessorBase);
+        var resInsert = await Task.Run(() => _dataAccessService.UpsertRentLessor(_lessorBase), _cts.Token);
         if (resInsert.IsError)
         {
             Debug.WriteLine(

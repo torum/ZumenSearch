@@ -14,6 +14,7 @@ public sealed partial class BrokerViewModel : ObservableRecipient
     #region == Private Variables ==
 
     private readonly string _id = string.Empty;
+    private readonly CancellationTokenSource _cts = new();
 
     // The Entry property holds the COPY of current RentResidential entry being edited.
     // Do not use it directly in the UI. Apply changes to this object in SaveAsync() to save the changes.
@@ -346,7 +347,7 @@ public sealed partial class BrokerViewModel : ObservableRecipient
     #region == Commands ==
 
     [RelayCommand(CanExecute = nameof(CanSave))]
-    public void Save()
+    public async Task Save()
     {
         if (!IsDirty)
         {
@@ -366,7 +367,7 @@ public sealed partial class BrokerViewModel : ObservableRecipient
 
         SetValues();
 
-        var resInsert = _dataAccessService.UpsertBroker(_broker);
+        var resInsert = await Task.Run(() => _dataAccessService.UpsertBroker(_broker), _cts.Token);
         if (resInsert.IsError)
         {
             Debug.WriteLine(

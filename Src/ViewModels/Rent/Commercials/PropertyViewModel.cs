@@ -26,7 +26,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     IRecipient<ListingUpdatedMessage>
 {
     private const string BasicPageName = "ZumenSearch.Views.Rent.Commercials.BasicPage";
-
+    private readonly CancellationTokenSource _cts = new();
     public readonly List<Views.Rent.Commercials.Listing.EditorWindow> ChildEditorList = [];
 
     private readonly Models.Rent.Commercials.Property _building;
@@ -1570,7 +1570,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     #region == Save ==
 
     [RelayCommand(CanExecute = nameof(CanSave))]
-    public void Save()
+    public async Task Save()
     {
         if (!IsDirty)
         {
@@ -1594,7 +1594,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
         bool saveResult;
 
-        var resInsert = _dataAccessService.UpsertRentCommercial(_building);
+        var resInsert = await Task.Run(() => _dataAccessService.UpsertRentCommercial(_building), _cts.Token);
         if (resInsert.IsError)
         {
             Debug.WriteLine(

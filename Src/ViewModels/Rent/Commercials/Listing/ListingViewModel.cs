@@ -16,6 +16,7 @@ public sealed partial class ListingViewModel : ObservableRecipient
     private readonly Models.Rent.Commercials.Listing.Listing _unit;
     private readonly IDataAccessService _dataAccessService;
     private readonly INavigationGenericService _navigationService;
+    private readonly CancellationTokenSource _cts = new();
 
     public ListingViewModel(
         Models.Rent.Commercials.Listing.Listing unit,
@@ -216,11 +217,11 @@ public sealed partial class ListingViewModel : ObservableRecipient
         return true;
     }
 
-    private bool SaveAsUpdate()
+    private async Task<bool> SaveAsUpdate()
     {
-        var result = _dataAccessService.UpsertRentCommercialListing(
+        var result = await Task.Run(() => _dataAccessService.UpsertRentCommercialListing(
             _unit.PropertyId,
-            _unit);
+            _unit), _cts.Token);
 
         if (result.IsError)
         {
@@ -272,7 +273,7 @@ public sealed partial class ListingViewModel : ObservableRecipient
     #region == Commands ==
 
     [RelayCommand(CanExecute = nameof(CanSave))]
-    private void Save()
+    private async Task Save()
     {
         if (!IsDirty)
         {
@@ -296,7 +297,7 @@ public sealed partial class ListingViewModel : ObservableRecipient
         }
         else
         {
-            saveResult = SaveAsUpdate();
+            saveResult = await SaveAsUpdate();
         }
 
         if (!saveResult)
@@ -309,9 +310,9 @@ public sealed partial class ListingViewModel : ObservableRecipient
         WindowTitle = string.Empty;
 
         /*
-        var result = _dataAccessService.UpsertRentCommercialListing(
+        var result = await Task.Run(() => _dataAccessService.UpsertRentCommercialListing(
             _unit.PropertyId,
-            _unit);
+            _unit), _cts.Token);
 
         if (result.IsError)
         {

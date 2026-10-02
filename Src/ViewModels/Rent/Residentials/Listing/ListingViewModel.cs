@@ -23,6 +23,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
 {
     #region == Private variables ==
 
+    private const string BasicPageName = "ZumenSearch.Views.Rent.Residentials.Listing.BasicPage";
     private readonly string _id = string.Empty;
 
     private readonly Models.Rent.Residentials.Listing.Listing _room;
@@ -615,9 +616,9 @@ public sealed partial class ListingViewModel : ObservableRecipient,
         return true;
     }
 
-    private bool SaveAsUpdate()
+    private async Task<bool> SaveAsUpdate()
     {
-        var resInsert = _dataAccessService.UpsertRentResidentialListing(_room.PropertyId, _room);
+        var resInsert = await Task.Run(() => _dataAccessService.UpsertRentResidentialListing(_room.PropertyId, _room), _cts.Token);
         if (resInsert.IsError)
         {
             Debug.WriteLine(
@@ -897,7 +898,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
     #region == Save ==
 
     [RelayCommand(CanExecute = nameof(CanSave))]
-    private void Save()
+    private async Task Save()
     {
         if (!IsDirty)
         {
@@ -916,9 +917,9 @@ public sealed partial class ListingViewModel : ObservableRecipient,
             //InfoBarErrorMessage = "入力項目に誤りがあります。保存出来ませんでした。";
             IsInfoBarErrorOpen = true;
 
-            if (!_navigationService.IsCurrentPageSameAs("ZumenSearch.Views.Rent.Residentials.Listing.BasicPage"))
+            if (!_navigationService.IsCurrentPageSameAs(BasicPageName))
             {
-                _navigationService.NavigateTo("ZumenSearch.Views.Rent.Residentials.Listing.BasicPage", this);
+                _navigationService.NavigateTo(BasicPageName, this);
             }
 
             return;
@@ -935,7 +936,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
         }
         else
         {
-            saveResult = SaveAsUpdate();
+            saveResult = await Task.Run(() => SaveAsUpdate(), _cts.Token);
         }
 
         if (saveResult)
@@ -1275,9 +1276,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
                 return;
             }
 
-            // TODO:
-            //var res = await Task.Run(() => _dataAccessService.SelectRentLessorById(lessorId), _cts.Token);
-            var res = _dataAccessService.SelectRentLessorById(lessorId);
+            var res = await Task.Run(() => _dataAccessService.SelectRentLessorById(lessorId), _cts.Token);
             if (res.IsError)
             {
                 Debug.WriteLine(
@@ -1377,7 +1376,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
             return;
         }
 
-        var result = _dataAccessService.SelectBrokerById(selectedBroker.Id);
+        var result = await Task.Run(() => _dataAccessService.SelectBrokerById(selectedBroker.Id), _cts.Token);
         if (result.IsError || result.Person is null)
         {
             Debug.WriteLine($"Could not load broker '{selectedBroker.Id}'.");
