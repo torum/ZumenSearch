@@ -28,7 +28,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     private const string BasicPageName = "ZumenSearch.Views.Rent.Commercials.BasicPage";
     private readonly CancellationTokenSource _cts = new();
     public readonly List<Views.Rent.Commercials.Listing.EditorWindow> ChildEditorList = [];
-
+    // This property holds the COPY of current entity being edited.
+    // Do not use it directly in the UI. Apply changes to this object in Save() to save the changes.
     private readonly Models.Rent.Commercials.Property _building;
     private readonly string _propertyDataDirectoryPath;
 
@@ -98,7 +99,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                 title = $"{title}：{Name}";
             }
 
-            title = _building.Status == EnumEntryStatus.New
+            title = _building.Status == EnumEntityStatus.New
                 ? $"{title}：新規"
                 : $"{title}：編集";
 
@@ -1012,7 +1013,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             this.Units.Add(unit);
         }
 
-        if (unit.Status == EnumEntryStatus.New)
+        if (unit.Status == EnumEntityStatus.New)
         {
             //Debug.WriteLine("(unit.ListingStatus == EnumListingStatus.New) @PropertyViewModel");
             IsDirty = true;
@@ -1152,7 +1153,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             _unsavedBuildingPdfFileList.Clear();
         }
 
-        if (_building.Status == EnumEntryStatus.New)
+        if (_building.Status == EnumEntityStatus.New)
         {
             if (Directory.Exists(_propertyDataDirectoryPath))
             {
@@ -1627,7 +1628,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             IsDirty = false;
 
             _building.IsModified = false;
-            _building.Status = EnumEntryStatus.Saved;
+            _building.Status = EnumEntityStatus.Saved;
 
             // Update title with dummy value.
             WindowTitle = string.Empty;
@@ -1660,22 +1661,22 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             _unsavedBuildingPdfFileList.Clear();
 
             // Just in case.
-            _building.Status = EnumEntryStatus.Saved;
+            _building.Status = EnumEntityStatus.Saved;
             _building.IsModified = false;
 
             foreach (var room in Units)
             {
                 room.PropertyName = Name;
-                room.PropertyStatus = EnumEntryStatus.Saved;
-                room.Status = EnumEntryStatus.Saved;
+                room.PropertyStatus = EnumEntityStatus.Saved;
+                room.Status = EnumEntityStatus.Saved;
             }
 
             // Just in case.
             foreach (var room in _building.Units)
             {
                 room.PropertyName = Name;
-                room.PropertyStatus = EnumEntryStatus.Saved;
-                room.Status = EnumEntryStatus.Saved;
+                room.PropertyStatus = EnumEntityStatus.Saved;
+                room.Status = EnumEntityStatus.Saved;
             }
 
             WeakReferenceMessenger.Default.Send(new PropertyUpdatedMessage(_building));
@@ -1695,7 +1696,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     {
         var unit = new Models.Rent.Commercials.Listing.Listing(
             Guid.CreateVersion7().ToString("N"),
-            EnumEntryStatus.New,
+            EnumEntityStatus.New,
             _building.Id,
             _building.Status,
             IsUnitOwnership,

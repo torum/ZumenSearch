@@ -30,7 +30,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient
                 title = $"{title}：{Name}";
             }
 
-            title = _building.Status == EnumEntryStatus.New
+            title = _building.Status == EnumEntityStatus.New
                 ? $"{title}：新規"
                 : $"{title}：編集";
 
@@ -413,7 +413,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient
 
         IsDirty = false;
         _building.IsModified = false;
-        _building.Status = EnumEntryStatus.Saved;
+        _building.Status = EnumEntityStatus.Saved;
         IsInfoBarErrorOpen = false;
         WindowTitle = string.Empty;
     }

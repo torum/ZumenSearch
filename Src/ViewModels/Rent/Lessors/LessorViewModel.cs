@@ -17,9 +17,8 @@ public sealed partial class LessorViewModel : ObservableRecipient
     private readonly string _id = string.Empty;
     private readonly CancellationTokenSource _cts = new();
 
-    // The Entry property holds the COPY of current RentResidential entry being edited.
-    // Do not use it directly in the UI. Apply changes to this object in SaveAsync() to save the changes.
-    // MainViewModel creates a new instance of this class and call EditorShell.SetEntry(EntryResidentialFull) and sets this property.
+    // This property holds the COPY of current entity being edited.
+    // Do not use it directly in the UI. Apply changes to this object in Save() to save the changes.
     private Models.Base.PersonBase _lessorBase;
 
     #endregion
@@ -111,7 +110,7 @@ public sealed partial class LessorViewModel : ObservableRecipient
                 Debug.WriteLine(Name);
             }
 
-            if (_lessorBase.Status == EnumEntryStatus.New)
+            if (_lessorBase.Status == EnumEntityStatus.New)
             {
                 str = $"{str}：新規";
             }
@@ -510,7 +509,7 @@ public sealed partial class LessorViewModel : ObservableRecipient
             IsDirty = false;
 
             _lessorBase.IsModified = false;
-            _lessorBase.Status = EnumEntryStatus.Saved;
+            _lessorBase.Status = EnumEntityStatus.Saved;
 
             // Update title with dummy value.
             WindowTitle = string.Empty;

@@ -1,9 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Media.Imaging;
-using System.Diagnostics;
-
-namespace ZumenSearch.Models.Base;
+﻿namespace ZumenSearch.Models.Base;
 
 #pragma warning disable IDE0079 // Remove unnecessary suppression
 #pragma warning disable IDE0290 // Use primary constructor
@@ -15,7 +10,7 @@ public enum EnumPersonKind
     Undetermined
 }
 
-public abstract class PersonBase : EntryBase
+public abstract class PersonBase : Entity
 {
     public EnumPersonKind PersonKind { get; set; }
 
@@ -44,7 +39,7 @@ public abstract class PersonBase : EntryBase
         }
     } = string.Empty;
 
-    protected PersonBase(string id, EnumEntryStatus status, EnumPersonKind personKind) : base(id, status)
+    protected PersonBase(string id, EnumEntityStatus status, EnumPersonKind personKind) : base(id, status)
     {
         PersonKind = personKind;
     }

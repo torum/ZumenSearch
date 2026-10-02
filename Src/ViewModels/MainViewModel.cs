@@ -158,31 +158,31 @@ public partial class MainViewModel : ObservableRecipient,
 
     public ObservableCollection<Models.Common.Breadcrumb> BreadcrumbItemsResidential { get; set; } =
     [
-        new() { Name = "賃貸住居用", Page = typeof(Views.Rent.ResidentialSearchPage).FullName! }
+        new() { Name = "賃貸住居用 募集物件", Page = typeof(Views.Rent.ResidentialSearchPage).FullName! }
     ];
     public ObservableCollection<Models.Common.Breadcrumb> BreadcrumbItemsResidentialSearchResult { get; set; } =
     [
-        new() { Name = "賃貸住居用", Page = typeof(Views.Rent.ResidentialSearchPage).FullName! },
+        new() { Name = "賃貸住居用 募集物件", Page = typeof(Views.Rent.ResidentialSearchPage).FullName! },
         new() { Name = "検索結果", Page = typeof(Views.Rent.ResidentialSearchResultPage).FullName! },
     ];
 
     public ObservableCollection<Models.Common.Breadcrumb> BreadcrumbItemsCommercial { get; set; } =
 [
-    new() { Name = "賃貸事業用", Page = typeof(Views.Rent.CommercialSearchPage).FullName! }
+    new() { Name = "賃貸事業用 募集物件", Page = typeof(Views.Rent.CommercialSearchPage).FullName! }
 ];
     public ObservableCollection<Models.Common.Breadcrumb> BreadcrumbItemsCommercialSearchResult { get; set; } =
     [
-        new() { Name = "賃貸事業用", Page = typeof(Views.Rent.CommercialSearchPage).FullName! },
+        new() { Name = "賃貸事業用 募集物件", Page = typeof(Views.Rent.CommercialSearchPage).FullName! },
         new() { Name = "検索結果", Page = typeof(Views.Rent.CommercialSearchResultPage).FullName! },
     ];
 
     public ObservableCollection<Models.Common.Breadcrumb> BreadcrumbItemsParking { get; set; } =
 [
-new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).FullName! }
+new() { Name = "賃貸駐車場 募集物件", Page = typeof(Views.Rent.ParkingSearchPage).FullName! }
 ];
     public ObservableCollection<Models.Common.Breadcrumb> BreadcrumbItemsParkingSearchResult { get; set; } =
     [
-        new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).FullName! },
+        new() { Name = "賃貸駐車場 募集物件", Page = typeof(Views.Rent.ParkingSearchPage).FullName! },
         new() { Name = "検索結果", Page = typeof(Views.Rent.ParkingSearchResultPage).FullName! },
     ];
 
@@ -771,7 +771,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
     private void AddNewRentResidential()
     {
         var newId = Guid.CreateVersion7().ToString("N");
-        var shell = _shellRentResidentialPropertyFactory.Create(new Models.Rent.Residentials.Property(newId, Models.Base.EnumEntryStatus.New));
+        var shell = _shellRentResidentialPropertyFactory.Create(new Models.Rent.Residentials.Property(newId, Models.Base.EnumEntityStatus.New));
 
         RentResidentialEditorList.Add(shell.Window);
 
@@ -1411,7 +1411,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
     {
         var property = new Models.Rent.Commercials.Property(
             Guid.CreateVersion7().ToString("N"),
-            Models.Base.EnumEntryStatus.New);
+            Models.Base.EnumEntityStatus.New);
 
         var shell = _shellRentCommercialPropertyFactory.Create(property);
 
@@ -1999,7 +1999,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
     private void AddNewRentLessor()
     {
         var newId = Guid.CreateVersion7().ToString("N");
-        var shell = _shellRentLessorFactory.Create(new Models.Person.PersonNatural(newId, Models.Base.EnumEntryStatus.New));
+        var shell = _shellRentLessorFactory.Create(new Models.Person.PersonNatural(newId, Models.Base.EnumEntityStatus.New));
         
         LessorEditorList.Add(shell.Window);
 
@@ -2243,7 +2243,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
     {
         var property = new Models.Sale.Residentials.Property(
             Guid.CreateVersion7().ToString("N"),
-            Models.Base.EnumEntryStatus.New);
+            Models.Base.EnumEntityStatus.New);
 
         var shell =
             _shellSaleResidentialPropertyFactory.Create(property);
@@ -2435,7 +2435,7 @@ new() { Name = "賃貸駐車場", Page = typeof(Views.Rent.ParkingSearchPage).Fu
     private void AddNewBroker()
     {
         var newId = Guid.CreateVersion7().ToString("N");
-        var shell = _shellBrokerFactory.Create(new Models.Person.PersonLegal(newId, Models.Base.EnumEntryStatus.New));
+        var shell = _shellBrokerFactory.Create(new Models.Person.PersonLegal(newId, Models.Base.EnumEntityStatus.New));
 
         BrokerEditorList.Add(shell.Window);
 

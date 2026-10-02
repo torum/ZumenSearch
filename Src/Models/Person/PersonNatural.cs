@@ -33,7 +33,7 @@ public partial class PersonNatural : PersonBase
         }
     }
 
-    public PersonNatural(string id, EnumEntryStatus status) : base(id, status, EnumPersonKind.Natural)
+    public PersonNatural(string id, EnumEntityStatus status) : base(id, status, EnumPersonKind.Natural)
     {
         //
     }

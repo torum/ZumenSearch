@@ -86,9 +86,9 @@ public sealed partial class ElectricKind : ObservableObject
     public partial string Label { get; set; }
 
     [ObservableProperty]
-    public partial Models.Rent.Residentials.EntryResidential.EnumElectricKind Key { get; set; }
+    public partial Models.Rent.Residentials.EntityResidential.EnumElectricKind Key { get; set; }
 
-    public ElectricKind(Models.Rent.Residentials.EntryResidential.EnumElectricKind key, string label)
+    public ElectricKind(Models.Rent.Residentials.EntityResidential.EnumElectricKind key, string label)
     {
         Key = key;
         Label = label;

@@ -63,9 +63,9 @@ public sealed partial class Listing : ListingBase
 
     public Listing(
         string id,
-        EnumEntryStatus status,
+        EnumEntityStatus status,
         string propertyId,
-        EnumEntryStatus propertyStatus,
+        EnumEntityStatus propertyStatus,
         bool isPropertyUnitOwnership,
         string propertyName)
         : base(

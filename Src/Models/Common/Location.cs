@@ -62,25 +62,25 @@ public sealed class Prefecture(string code, string municipalityCode, string name
     public string Code { get; private set; } = code;
 
     // 市区町村コード
-    // db:loc_pref_id
+    // db:location_pref_id
     public string MunicipalityCode { get; private set; } = municipalityCode;
 
-    // db:loc_prefecture
+    // db:location_prefecture
     public string Name { get; private set; } = name;
 };
 
 public sealed class CountyAndCity(string machiazaId, string county, string city)
 {
-    // db:loc_machiaza_id
+    // db:location_machiaza_id
     public string MachiazaId
     {
         get; init;
     } = machiazaId;
 
-    // 郡 db:loc_county
+    // 郡 db:location_county
     public string County { get; init; } = county;
 
-    // 市区町村 db:loc_city
+    // 市区町村 db:location_city
     public string City { get; init; } = city;
 
     public string Combined
@@ -101,19 +101,19 @@ public sealed class CountyAndCity(string machiazaId, string county, string city)
 
 public sealed class WardAndOaza(string machiazaId, string ward, string oaza)
 {
-    // db:loc_machiaza_id
+    // db:location_machiaza_id
     public string MachiazaId
     {
         get; init;
     } = machiazaId;
 
-    // db:loc_ward
+    // db:location_ward
     public string Ward
     {
         get; init;
     } = ward;
 
-    // db:loc_oaza_cho
+    // db:location_oaza_cho
     public string Oaza
     {
         get; init;
@@ -137,13 +137,13 @@ public sealed class WardAndOaza(string machiazaId, string ward, string oaza)
 
 public sealed class Choume(string machiazaId, string choume)
 {
-    // db:loc_machiaza_id
+    // db:location_machiaza_id
     public string MachiazaId
     {
         get; init;
     } = machiazaId;
 
-    // db:loc_choume
+    // db:location_choume
     public string Chou
     {
         get; init;

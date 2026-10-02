@@ -13,7 +13,7 @@ public sealed partial class PropertySearchResultItem : PropertyBase
     public string CreatedAt = string.Empty;
     public string UpdatedAt = string.Empty;
 
-    public PropertySearchResultItem(string id, EnumPropertyKind kind) : base(id, EnumEntryStatus.Saved, kind)
+    public PropertySearchResultItem(string id, EnumPropertyKind kind) : base(id, EnumEntityStatus.Saved, kind)
     {
         //
     }
@@ -36,7 +36,7 @@ public sealed partial class ListingSearchResultItem : ListingBase
         }
     }
 
-    public ListingSearchResultItem(string id, string propertyId, EnumPropertyKind propertyKind) : base(id, EnumEntryStatus.Saved, propertyId, EnumEntryStatus.Saved, propertyKind)
+    public ListingSearchResultItem(string id, string propertyId, EnumPropertyKind propertyKind) : base(id, EnumEntityStatus.Saved, propertyId, EnumEntityStatus.Saved, propertyKind)
     {
         //PropertyId = propertyId;
     }
@@ -50,7 +50,7 @@ public sealed partial class PersonSearchResultItem : PersonBase
     public string CreatedAt = string.Empty;
     public string UpdatedAt = string.Empty;
 
-    public PersonSearchResultItem(string id, EnumPersonKind personKind) : base(id, EnumEntryStatus.Saved, personKind)
+    public PersonSearchResultItem(string id, EnumPersonKind personKind) : base(id, EnumEntityStatus.Saved, personKind)
     {
         //
     }

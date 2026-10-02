@@ -31,9 +31,9 @@ public sealed class DataAccessService : IDataAccessService
 
         try
         {
-            connectionStringBuilder = new SqliteConnectionStringBuilder("Data Source=" + dataBaseFilePath);//+ ";Pooling=false" 
             // Don't think WAL mode is needed for this application. It is single-user, single-process, single-threading app with ReaderWriterLock.
             // WAL mode is more suitable for multi-threaded or multi-process scenarios where concurrent reads and writes are expected.
+            connectionStringBuilder = new SqliteConnectionStringBuilder("Data Source=" + dataBaseFilePath);//+ ";Pooling=false" 
 
             using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
 
@@ -51,24 +51,23 @@ public sealed class DataAccessService : IDataAccessService
             {
                 tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS properties (" +
                     "property_id TEXT NOT NULL PRIMARY KEY," +
-                    "property_kind TEXT NOT NULL," +
-                    "name TEXT NOT NULL," +
-                    "thumbnail_filename TEXT," +
-                    "loc_pref_id TEXT," +
-                    "loc_prefecture TEXT," +
-                    "loc_machiaza_id TEXT," +
-                    "loc_county TEXT," +
-                    "loc_city TEXT," +
-                    "loc_ward TEXT," +
-                    "loc_oaza_cho TEXT," +
-                    "loc_choume TEXT," +
-                    "loc_edaban TEXT," +
-                    "loc_location_full TEXT," +
+                    "property_kind TEXT NOT NULL DEFAULT ''," +
+                    "name TEXT NOT NULL DEFAULT ''," +
+                    "thumbnail_filename TEXT NOT NULL DEFAULT ''," +
+                    "location_pref_id TEXT NOT NULL DEFAULT ''," +
+                    "location_prefecture TEXT NOT NULL DEFAULT ''," +
+                    "location_machiaza_id TEXT NOT NULL DEFAULT ''," +
+                    "location_county TEXT NOT NULL DEFAULT ''," +
+                    "location_city TEXT NOT NULL DEFAULT ''," +
+                    "location_ward TEXT NOT NULL DEFAULT ''," +
+                    "location_oaza_cho TEXT NOT NULL DEFAULT ''," +
+                    "location_choume TEXT NOT NULL DEFAULT ''," +
+                    "location_edaban TEXT NOT NULL DEFAULT ''," +
+                    "location_full TEXT NOT NULL DEFAULT ''," +
                     "location_latitude TEXT NOT NULL DEFAULT ''," +
                     "location_longitude TEXT NOT NULL DEFAULT ''," +
-                    // TODO: change loc_ columns to align with location_*** and set appropriate defaults ( TEXT NOT NULL DEFAULT '').
 
-                    // TODO: add more columns for location, address, etc.
+                    // TODO: add more columns.
 
 
                     "updated_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc'))," +
@@ -81,16 +80,16 @@ public sealed class DataAccessService : IDataAccessService
                 tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS rent_residentials (" +
                     "property_id TEXT NOT NULL PRIMARY KEY," +
                     //"residential_id TEXT NOT NULL," +
-                    "building_kind TEXT NOT NULL," +
+                    "building_kind TEXT NOT NULL DEFAULT ''," +
                     "is_unit_ownership INTEGER NOT NULL DEFAULT 0," +
-                    "building_structure TEXT NOT NULL," +
-                    "floor_count_above_ground INTEGER NOT NULL," +
-                    "floor_count_basement INTEGER NOT NULL," +
-                    "total_unit_count INTEGER NOT NULL," +
-                    "built_year_month TEXT NOT NULL," +
-                    "fudousan_id TEXT NOT NULL," +
-                    "fudousan_id_additional_code TEXT NOT NULL," +
-                    "remarks TEXT NOT NULL," +
+                    "building_structure TEXT NOT NULL DEFAULT ''," +
+                    "floor_count_above_ground INTEGER NOT NULL DEFAULT 0," +
+                    "floor_count_basement INTEGER NOT NULL DEFAULT 0," +
+                    "total_unit_count INTEGER NOT NULL DEFAULT 0," +
+                    "built_year_month TEXT NOT NULL DEFAULT ''," +
+                    "fudousan_id TEXT NOT NULL DEFAULT ''," +
+                    "fudousan_id_additional_code TEXT NOT NULL DEFAULT ''," +
+                    "remarks TEXT NOT NULL DEFAULT ''," +
 
 
                     //"updated_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc'))," +
@@ -100,10 +99,10 @@ public sealed class DataAccessService : IDataAccessService
 
                 tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS rent_residential_pictures (" +
                     "picture_id TEXT NOT NULL PRIMARY KEY," +
-                    "property_id TEXT NOT NULL," +
-                    "filename TEXT NOT NULL," +
-                    "type TEXT NOT NULL," +
-                    "description TEXT NOT NULL," +
+                    "property_id TEXT NOT NULL DEFAULT ''," +
+                    "filename TEXT NOT NULL DEFAULT ''," +
+                    "type TEXT NOT NULL DEFAULT ''," +
+                    "description TEXT NOT NULL DEFAULT ''," +
                     "is_main INTEGER NOT NULL DEFAULT 0," +
                     "FOREIGN KEY (property_id) REFERENCES rent_residentials(property_id) ON DELETE CASCADE," + //?
                     "FOREIGN KEY (property_id) REFERENCES properties(property_id) ON DELETE CASCADE" +
@@ -112,11 +111,11 @@ public sealed class DataAccessService : IDataAccessService
 
                 tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS rent_residential_pdfs (" +
                     "pdf_id TEXT NOT NULL PRIMARY KEY," +
-                    "property_id TEXT NOT NULL," +
-                    "filename TEXT NOT NULL," +
-                    "thumbnail_filename TEXT NOT NULL," +
-                    "type TEXT NOT NULL," +
-                    "description TEXT NOT NULL," +
+                    "property_id TEXT NOT NULL DEFAULT ''," +
+                    "filename TEXT NOT NULL DEFAULT ''," +
+                    "thumbnail_filename TEXT NOT NULL DEFAULT ''," +
+                    "type TEXT NOT NULL DEFAULT ''," +
+                    "description TEXT NOT NULL DEFAULT ''," +
                     "is_main INTEGER  NOT NULL DEFAULT 0," +
                     "created_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc'))," +
                     "updated_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc'))," +
@@ -127,9 +126,9 @@ public sealed class DataAccessService : IDataAccessService
 
                 tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS rent_residential_rooms (" +
                     "listing_id TEXT NOT NULL PRIMARY KEY," +
-                    "property_id TEXT NOT NULL," +
+                    "property_id TEXT NOT NULL DEFAULT ''," +
                     "is_property_unit_ownership INTEGER NOT NULL DEFAULT 0," +
-                    "name TEXT NOT NULL," +
+                    "name TEXT NOT NULL DEFAULT ''," +
                     "chinryou INTEGER NOT NULL DEFAULT 0," +
                     "created_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc'))," +
                     "updated_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc'))," +
@@ -140,12 +139,12 @@ public sealed class DataAccessService : IDataAccessService
 
                 tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS rent_residential_room_pictures (" +
                     "picture_id TEXT NOT NULL PRIMARY KEY," +
-                    "listing_id TEXT NOT NULL," +
-                    "property_id TEXT NOT NULL," +
-                    "filename TEXT NOT NULL," +
-                    "type TEXT NOT NULL," +
-                    "description TEXT NOT NULL," +
-                    "is_main INTEGER  NOT NULL," +
+                    "listing_id TEXT NOT NULL DEFAULT ''," +
+                    "property_id TEXT NOT NULL DEFAULT ''," +
+                    "filename TEXT NOT NULL DEFAULT ''," +
+                    "type TEXT NOT NULL DEFAULT ''," +
+                    "description TEXT NOT NULL DEFAULT ''," +
+                    "is_main INTEGER  NOT NULL DEFAULT 0," +
                     "FOREIGN KEY (listing_id) REFERENCES rent_residential_rooms(listing_id) ON DELETE CASCADE," +
                     "FOREIGN KEY (property_id) REFERENCES rent_residentials(property_id) ON DELETE CASCADE," + //?
                     "FOREIGN KEY (property_id) REFERENCES properties(property_id) ON DELETE CASCADE" +
@@ -154,13 +153,13 @@ public sealed class DataAccessService : IDataAccessService
 
                 tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS rent_residential_room_pdfs (" +
                     "pdf_id TEXT NOT NULL PRIMARY KEY," +
-                    "listing_id TEXT NOT NULL," +
-                    "property_id TEXT NOT NULL," +
-                    "filename TEXT NOT NULL," +
-                    "thumbnail_filename TEXT NOT NULL," +
-                    "type TEXT NOT NULL," +
-                    "description TEXT NOT NULL," +
-                    "is_main INTEGER  NOT NULL," +
+                    "listing_id TEXT NOT NULL DEFAULT ''," +
+                    "property_id TEXT NOT NULL DEFAULT ''," +
+                    "filename TEXT NOT NULL DEFAULT ''," +
+                    "thumbnail_filename TEXT NOT NULL DEFAULT ''," +
+                    "type TEXT NOT NULL DEFAULT ''," +
+                    "description TEXT NOT NULL DEFAULT ''," +
+                    "is_main INTEGER  NOT NULL DEFAULT 0," +
                     "created_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc'))," +
                     "updated_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc'))," +
                     "FOREIGN KEY (listing_id) REFERENCES rent_residential_rooms(listing_id) ON DELETE CASCADE," +
@@ -201,16 +200,16 @@ public sealed class DataAccessService : IDataAccessService
                 tableCmd.CommandText = """
     CREATE TABLE IF NOT EXISTS rent_commercials (
         property_id TEXT NOT NULL PRIMARY KEY,
-        commercial_kind TEXT NOT NULL,
+        commercial_kind TEXT NOT NULL DEFAULT '',
         is_unit_ownership INTEGER NOT NULL DEFAULT 0,
-        building_structure TEXT NOT NULL,
+        building_structure TEXT NOT NULL DEFAULT '',
         floor_count_above_ground INTEGER NOT NULL DEFAULT 0,
         floor_count_basement INTEGER NOT NULL DEFAULT 0,
         total_floor_area NUMERIC NOT NULL DEFAULT 0,
-        built_year_month TEXT NOT NULL,
-        fudousan_id TEXT NOT NULL,
-        fudousan_id_additional_code TEXT NOT NULL,
-        remarks TEXT NOT NULL,
+        built_year_month TEXT NOT NULL DEFAULT '',
+        fudousan_id TEXT NOT NULL DEFAULT '',
+        fudousan_id_additional_code TEXT NOT NULL DEFAULT '',
+        remarks TEXT NOT NULL DEFAULT '',
         created_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc')),
         updated_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc')),
         FOREIGN KEY (property_id)
@@ -220,25 +219,25 @@ public sealed class DataAccessService : IDataAccessService
 
     CREATE TABLE IF NOT EXISTS rent_commercial_units (
         listing_id TEXT NOT NULL PRIMARY KEY,
-        property_id TEXT NOT NULL,
+        property_id TEXT NOT NULL DEFAULT '',
         is_property_unit_ownership INTEGER NOT NULL DEFAULT 0,
-        name TEXT NOT NULL,
+        name TEXT NOT NULL DEFAULT '',
         chinryou NUMERIC NOT NULL DEFAULT 0,
         kyoueki_fee NUMERIC NOT NULL DEFAULT 0,
         shikikin NUMERIC NOT NULL DEFAULT 0,
-        shikikin_unit TEXT NOT NULL,
+        shikikin_unit TEXT NOT NULL DEFAULT '',
         reikin NUMERIC NOT NULL DEFAULT 0,
-        reikin_unit TEXT NOT NULL,
+        reikin_unit TEXT NOT NULL DEFAULT '',
         renewal_fee NUMERIC NOT NULL DEFAULT 0,
-        renewal_fee_unit TEXT NOT NULL,
+        renewal_fee_unit TEXT NOT NULL DEFAULT '',
         recontract_fee NUMERIC NOT NULL DEFAULT 0,
-        recontract_fee_unit TEXT NOT NULL,
+        recontract_fee_unit TEXT NOT NULL DEFAULT '',
         floor_area NUMERIC NOT NULL DEFAULT 0,
-        usage TEXT NOT NULL,
-        business_hours TEXT NOT NULL,
+        usage TEXT NOT NULL DEFAULT '',
+        business_hours TEXT NOT NULL DEFAULT '',
         parking_available INTEGER NOT NULL DEFAULT 0,
-        other_conditions TEXT NOT NULL,
-        remarks TEXT NOT NULL,
+        other_conditions TEXT NOT NULL DEFAULT '',
+        remarks TEXT NOT NULL DEFAULT '',
         created_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc')),
         updated_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc')),
         FOREIGN KEY (property_id)
@@ -289,17 +288,17 @@ public sealed class DataAccessService : IDataAccessService
 
                 tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS rent_lessors (" +
                     "lessor_id TEXT NOT NULL PRIMARY KEY," +
-                    "name TEXT NOT NULL," +
-                    "person_kind TEXT NOT NULL," +
-                    "name_last TEXT NOT NULL," +
-                    "name_first TEXT NOT NULL," +
-                    "name_company TEXT NOT NULL," +
-                    "name_company_type TEXT NOT NULL," +
+                    "name TEXT NOT NULL DEFAULT ''," +
+                    "person_kind TEXT NOT NULL DEFAULT ''," +
+                    "name_last TEXT NOT NULL DEFAULT ''," +
+                    "name_first TEXT NOT NULL DEFAULT ''," +
+                    "name_company TEXT NOT NULL DEFAULT ''," +
+                    "name_company_type TEXT NOT NULL DEFAULT ''," +
                     "name_company_type_position INTEGER NOT NULL DEFAULT 0," +
 
                     // Phone numbers
                     // Address
-                    "remarks TEXT," +
+                    "remarks TEXT NOT NULL DEFAULT ''," +
 
                     "updated_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc'))," +
                     "created_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc'))" + // Last column, no comma
@@ -308,10 +307,10 @@ public sealed class DataAccessService : IDataAccessService
 
                 // A composite primary key
                 tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS rent_lessors_properties_listings (" +
-                    "lessor_id TEXT NOT NULL," +
-                    "property_id TEXT NOT NULL," +
-                    "property_kind TEXT NOT NULL," +
-                    "listing_id TEXT NOT NULL," +
+                    "lessor_id TEXT NOT NULL DEFAULT ''," +
+                    "property_id TEXT NOT NULL DEFAULT ''," +
+                    "property_kind TEXT NOT NULL DEFAULT ''," +
+                    "listing_id TEXT NOT NULL DEFAULT ''," +
 
                     "PRIMARY KEY (lessor_id, property_id, listing_id)," +
 
@@ -350,16 +349,16 @@ public sealed class DataAccessService : IDataAccessService
                 tableCmd.CommandText = """
     CREATE TABLE IF NOT EXISTS sale_residentials (
         property_id TEXT NOT NULL PRIMARY KEY,
-        building_kind TEXT NOT NULL,
+        building_kind TEXT NOT NULL DEFAULT '',
         is_unit_ownership INTEGER NOT NULL DEFAULT 0,
-        building_structure TEXT NOT NULL,
+        building_structure TEXT NOT NULL DEFAULT '',
         floor_count_above_ground INTEGER NOT NULL DEFAULT 0,
         floor_count_basement INTEGER NOT NULL DEFAULT 0,
         total_unit_count INTEGER NOT NULL DEFAULT 0,
         built_year_month TEXT NOT NULL,
         fudousan_id TEXT NOT NULL,
         fudousan_id_additional_code TEXT NOT NULL,
-        remarks TEXT NOT NULL,
+        remarks TEXT NOT NULL DEFAULT '',
         created_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc')),
         updated_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc')),
         FOREIGN KEY (property_id)
@@ -369,10 +368,10 @@ public sealed class DataAccessService : IDataAccessService
 
     CREATE TABLE IF NOT EXISTS sale_residential_pictures (
         picture_id TEXT NOT NULL PRIMARY KEY,
-        property_id TEXT NOT NULL,
-        filename TEXT NOT NULL,
-        type TEXT NOT NULL,
-        description TEXT NOT NULL,
+        property_id TEXT NOT NULL DEFAULT '',
+        filename TEXT NOT NULL DEFAULT '',
+        type TEXT NOT NULL DEFAULT '',
+        description TEXT NOT NULL DEFAULT '',
         is_main INTEGER NOT NULL DEFAULT 0,
         created_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc')),
         updated_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc')),
@@ -383,11 +382,11 @@ public sealed class DataAccessService : IDataAccessService
 
     CREATE TABLE IF NOT EXISTS sale_residential_pdfs (
         pdf_id TEXT NOT NULL PRIMARY KEY,
-        property_id TEXT NOT NULL,
-        filename TEXT NOT NULL,
-        thumbnail_filename TEXT NOT NULL,
-        type TEXT NOT NULL,
-        description TEXT NOT NULL,
+        property_id TEXT NOT NULL DEFAULT '',
+        filename TEXT NOT NULL DEFAULT '',
+        thumbnail_filename TEXT NOT NULL DEFAULT '',
+        type TEXT NOT NULL DEFAULT '',
+        description TEXT NOT NULL DEFAULT '',
         is_main INTEGER NOT NULL DEFAULT 0,
         created_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc')),
         updated_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc')),
@@ -398,16 +397,16 @@ public sealed class DataAccessService : IDataAccessService
 
     CREATE TABLE IF NOT EXISTS sale_residential_units (
         listing_id TEXT NOT NULL PRIMARY KEY,
-        property_id TEXT NOT NULL,
+        property_id TEXT NOT NULL DEFAULT '',
         is_property_unit_ownership INTEGER NOT NULL DEFAULT 0,
-        name TEXT NOT NULL,
+        name TEXT NOT NULL DEFAULT '',
         sale_price NUMERIC NOT NULL DEFAULT 0,
         management_fee NUMERIC NOT NULL DEFAULT 0,
         repair_reserve_fund NUMERIC NOT NULL DEFAULT 0,
-        ownership_type TEXT NOT NULL,
-        occupancy_status TEXT NOT NULL,
-        delivery_timing TEXT NOT NULL,
-        remarks TEXT NOT NULL,
+        ownership_type TEXT NOT NULL DEFAULT '',
+        occupancy_status TEXT NOT NULL DEFAULT '',
+        delivery_timing TEXT NOT NULL DEFAULT '',
+        remarks TEXT NOT NULL DEFAULT '',
         created_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc')),
         updated_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc')),
         FOREIGN KEY (property_id)
@@ -417,11 +416,11 @@ public sealed class DataAccessService : IDataAccessService
 
     CREATE TABLE IF NOT EXISTS sale_residential_unit_pictures (
         picture_id TEXT NOT NULL PRIMARY KEY,
-        listing_id TEXT NOT NULL,
-        property_id TEXT NOT NULL,
-        filename TEXT NOT NULL,
-        type TEXT NOT NULL,
-        description TEXT NOT NULL,
+        listing_id TEXT NOT NULL DEFAULT '',
+        property_id TEXT NOT NULL DEFAULT '',
+        filename TEXT NOT NULL DEFAULT '',
+        type TEXT NOT NULL DEFAULT '',
+        description TEXT NOT NULL DEFAULT '',
         is_main INTEGER NOT NULL DEFAULT 0,
         created_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc')),
         updated_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc')),
@@ -435,12 +434,12 @@ public sealed class DataAccessService : IDataAccessService
 
     CREATE TABLE IF NOT EXISTS sale_residential_unit_pdfs (
         pdf_id TEXT NOT NULL PRIMARY KEY,
-        listing_id TEXT NOT NULL,
-        property_id TEXT NOT NULL,
-        filename TEXT NOT NULL,
-        thumbnail_filename TEXT NOT NULL,
-        type TEXT NOT NULL,
-        description TEXT NOT NULL,
+        listing_id TEXT NOT NULL DEFAULT '',
+        property_id TEXT NOT NULL DEFAULT '',
+        filename TEXT NOT NULL DEFAULT '',
+        thumbnail_filename TEXT NOT NULL DEFAULT '',
+        type TEXT NOT NULL DEFAULT '',
+        description TEXT NOT NULL DEFAULT '',
         is_main INTEGER NOT NULL DEFAULT 0,
         created_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc')),
         updated_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc')),
@@ -471,14 +470,14 @@ public sealed class DataAccessService : IDataAccessService
                 tableCmd.CommandText = """
                     CREATE TABLE IF NOT EXISTS brokers (
                         broker_id TEXT NOT NULL PRIMARY KEY,
-                        name TEXT NOT NULL,
+                        name TEXT NOT NULL DEFAULT '',
                         person_kind TEXT NOT NULL,
-                        name_last TEXT NOT NULL,
-                        name_first TEXT NOT NULL,
-                        name_company TEXT NOT NULL,
-                        name_company_type TEXT NOT NULL,
+                        name_last TEXT NOT NULL DEFAULT '',
+                        name_first TEXT NOT NULL DEFAULT '',
+                        name_company TEXT NOT NULL DEFAULT '',
+                        name_company_type TEXT NOT NULL DEFAULT '',
                         name_company_type_position INTEGER NOT NULL DEFAULT 0,
-                        remarks TEXT,
+                        remarks TEXT NOT NULL DEFAULT '',
                         updated_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc')),
                         created_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc'))
                     );
@@ -487,10 +486,10 @@ public sealed class DataAccessService : IDataAccessService
 
                 tableCmd.CommandText = """
                     CREATE TABLE IF NOT EXISTS brokers_properties_listings (
-                        broker_id TEXT NOT NULL,
-                        property_id TEXT NOT NULL,
-                        property_kind TEXT NOT NULL,
-                        listing_id TEXT NOT NULL,
+                        broker_id TEXT NOT NULL DEFAULT '',
+                        property_id TEXT NOT NULL DEFAULT '',
+                        property_kind TEXT NOT NULL DEFAULT '',
+                        listing_id TEXT NOT NULL DEFAULT '',
                         PRIMARY KEY (broker_id, property_id, listing_id),
                         FOREIGN KEY (broker_id)
                             REFERENCES brokers(broker_id)
@@ -894,22 +893,22 @@ public sealed class DataAccessService : IDataAccessService
                     }
                 }
 
-                var entry = new Models.PropertySearchResultItem(id, enumKind);
+                var item = new Models.PropertySearchResultItem(id, enumKind);
 
                 var name = reader.GetString(reader.GetOrdinal("name")) ?? string.Empty;//Convert.ToString(reader["name"]) ?? "";
-                entry.Name = name;
+                item.Name = name;
 
                 var thumb = reader.GetString(reader.GetOrdinal("thumbnail_filename")) ?? string.Empty;
-                entry.ThumbnailFilename = thumb;
+                item.ThumbnailFilename = thumb;
 
                 var createdAt = reader.GetString(reader.GetOrdinal("created_at")) ?? string.Empty;//Convert.ToString(reader["created_at"]) ?? string.Empty;
-                entry.CreatedAt = createdAt;
+                item.CreatedAt = createdAt;
                 var updatedAt = reader.GetString(reader.GetOrdinal("updated_at")) ?? string.Empty;//Convert.ToString(reader["updated_at"]) ?? string.Empty;
-                entry.UpdatedAt = updatedAt;
+                item.UpdatedAt = updatedAt;
 
                 //res.AffectedCount++;
 
-                res.PropertySearchResult.Add(entry);
+                res.PropertySearchResult.Add(item);
             }
         }
         catch (Exception ex)
@@ -971,18 +970,18 @@ public sealed class DataAccessService : IDataAccessService
                     }
                 }
 
-                var entry = new Models.PropertySearchResultItem(s, enumKind);
+                var item = new Models.PropertySearchResultItem(s, enumKind);
 
-                entry.Name = reader.GetString(reader.GetOrdinal("name")) ?? string.Empty; ;
+                item.Name = reader.GetString(reader.GetOrdinal("name")) ?? string.Empty; ;
 
-                //Debug.WriteLine($"Found entry: {entry.Name} @SelectPropertiesByKeyword() in DataAccessService");
+                //Debug.WriteLine($"Found item: {item.Name} @SelectPropertiesByKeyword() in DataAccessService");
 
-                // Reset entry Isdirty flag.
-                entry.IsModified = false;
+                // Reset item Isdirty flag.
+                item.IsModified = false;
 
                 //res.AffectedCount++;
 
-                res.PropertySearchResult.Add(entry);
+                res.PropertySearchResult.Add(item);
             }
         }
         catch (Exception ex)
@@ -1029,13 +1028,13 @@ public sealed class DataAccessService : IDataAccessService
                 cmd.CommandType = CommandType.Text;
                 cmd.Parameters.Clear();
                 // Insert
-                //cmd.CommandText = "INSERT INTO properties (property_id, name, property_kind, thumbnail_filename, loc_pref_id, loc_prefecture, loc_machiaza_id, loc_county, loc_city, loc_ward, loc_oaza_cho, loc_choume, loc_edaban, loc_location_full, updated_at) " +
+                //cmd.CommandText = "INSERT INTO properties (property_id, name, property_kind, thumbnail_filename, location_pref_id, location_prefecture, location_machiaza_id, location_county, location_city, location_ward, location_oaza_cho, location_choume, location_edaban, location_full, updated_at) " +
                 //  "VALUES (@RentId, @Name, @PropertyKind, @Thumb, @LocPrefId, @LocPrefecture, @LocMachiazaId, @LocCounty, @LocCity, @LocWard, @LocOazaCho, @LocChoume, @LocEdaban, @LocLocationFull, @updated_at)";
                 // Upsert
-                var sqlUpsert = "INSERT INTO properties (property_id, name, property_kind, thumbnail_filename, loc_pref_id, loc_prefecture, loc_machiaza_id, loc_county, loc_city, loc_ward, loc_oaza_cho, loc_choume, loc_edaban, loc_location_full, location_latitude, location_longitude, updated_at) ";
+                var sqlUpsert = "INSERT INTO properties (property_id, name, property_kind, thumbnail_filename, location_pref_id, location_prefecture, location_machiaza_id, location_county, location_city, location_ward, location_oaza_cho, location_choume, location_edaban, location_full, location_latitude, location_longitude, updated_at) ";
                 sqlUpsert += "VALUES (@propertyId, @name, @propertyKind, @thumbnailPath, @locPrefId, @locPrefecture, @locMachiazaId, @locCounty, @locCity, @locWard, @locOazaCho, @locChoume, @locEdaban, @locLocationFull, @locationLatitude, @locationLongitude, @updated_at) ";
                 sqlUpsert += "ON CONFLICT (property_id) ";
-                sqlUpsert += "DO UPDATE SET property_id = @propertyId, name = @name, property_kind = @propertyKind, thumbnail_filename = @thumbnailPath, loc_pref_id = @locPrefId, loc_prefecture = @locPrefecture, loc_machiaza_id = @locMachiazaId, loc_county = @locCounty, loc_city = @locCity, loc_ward = @locWard, loc_oaza_cho = @locOazaCho, loc_choume = @locChoume, loc_edaban = @locEdaban, loc_location_full = @locLocationFull, location_latitude = @locationLatitude, location_longitude = @locationLongitude, updated_at = @updated_at";
+                sqlUpsert += "DO UPDATE SET property_id = @propertyId, name = @name, property_kind = @propertyKind, thumbnail_filename = @thumbnailPath, location_pref_id = @locPrefId, location_prefecture = @locPrefecture, location_machiaza_id = @locMachiazaId, location_county = @locCounty, location_city = @locCity, location_ward = @locWard, location_oaza_cho = @locOazaCho, location_choume = @locChoume, location_edaban = @locEdaban, location_full = @locLocationFull, location_latitude = @locationLatitude, location_longitude = @locationLongitude, updated_at = @updated_at";
 
                 cmd.CommandText = sqlUpsert;
 
@@ -1152,7 +1151,7 @@ public sealed class DataAccessService : IDataAccessService
                     }
 
                     // let's not. Needs this to clean up the file.
-                    //entry.BuildingPicturesToBeDeleted.Clear();
+                    //building.BuildingPicturesToBeDeleted.Clear();
                 }
 
                 cmd.Parameters.Clear();
@@ -1218,7 +1217,7 @@ public sealed class DataAccessService : IDataAccessService
                     }
 
                     // let's not. Needs this to clean up the file.
-                    //entry.BuildingPdfsToBeDeleted.Clear();
+                    //building.BuildingPdfsToBeDeleted.Clear();
                 }
 
                 cmd.Parameters.Clear();
@@ -1348,8 +1347,8 @@ public sealed class DataAccessService : IDataAccessService
                         var r = cmd.ExecuteNonQuery();
                         if (r > 0)
                         {
-                            unit.PropertyStatus = EnumEntryStatus.Saved;
-                            unit.Status = EnumEntryStatus.Saved;
+                            unit.PropertyStatus = EnumEntityStatus.Saved;
+                            unit.Status = EnumEntityStatus.Saved;
                             //unit.IsNew = false;
                             unit.IsModified = false;
                         }
@@ -1408,7 +1407,7 @@ public sealed class DataAccessService : IDataAccessService
                             }
 
                             // let's not. Needs this to clean up the file.
-                            //entry.BuildingPicturesToBeDeleted.Clear();
+                            //unit.BuildingPicturesToBeDeleted.Clear();
                         }
 
                         // Room PDF
@@ -1466,7 +1465,7 @@ public sealed class DataAccessService : IDataAccessService
                             }
 
                             // let's not. Needs this to clean up the file.
-                            //entry.BuildingPicturesToBeDeleted.Clear();
+                            //unit.BuildingPicturesToBeDeleted.Clear();
                         }
 
                         // Room Lessor
@@ -1563,7 +1562,7 @@ public sealed class DataAccessService : IDataAccessService
         //Debug.WriteLine(string.Format("{0} Entries Inserted to DB", res.AffectedCount.ToString()));
 
         building.IsModified = false;
-        building.Status = EnumEntryStatus.Saved;
+        building.Status = EnumEntityStatus.Saved;
 
         return res;
     }
@@ -1572,7 +1571,7 @@ public sealed class DataAccessService : IDataAccessService
     {
         var res = new RentResidentialBuildingSingleResultWrapper();
 
-        var entry = new Models.Rent.Residentials.Property(id, EnumEntryStatus.Saved);
+        var property = new Models.Rent.Residentials.Property(id, EnumEntityStatus.Saved);
 
         if (string.IsNullOrEmpty(id))
         {
@@ -1590,16 +1589,16 @@ public sealed class DataAccessService : IDataAccessService
             using var cmd = connection.CreateCommand();
             cmd.CommandText = string.Format("SELECT properties.name as propertyName, " +
                 "properties.property_kind as propertyKind, " +
-                "properties.loc_pref_id as locPrefId, " +
-                "properties.loc_prefecture as locPrefecture, " +
-                "properties.loc_machiaza_id as locMachiazaId, " +
-                "properties.loc_county as locCounty, " +
-                "properties.loc_city as locCity, " +
-                "properties.loc_ward as locWard, " +
-                "properties.loc_oaza_cho as locOazaCho, " +
-                "properties.loc_choume as locChoume, " +
-                "properties.loc_edaban as locEdaban, " +
-                "properties.loc_location_full as locLocationFull, " +
+                "properties.location_pref_id as locPrefId, " +
+                "properties.location_prefecture as locPrefecture, " +
+                "properties.location_machiaza_id as locMachiazaId, " +
+                "properties.location_county as locCounty, " +
+                "properties.location_city as locCity, " +
+                "properties.location_ward as locWard, " +
+                "properties.location_oaza_cho as locOazaCho, " +
+                "properties.location_choume as locChoume, " +
+                "properties.location_edaban as locEdaban, " +
+                "properties.location_full as locLocationFull, " +
                 "properties.location_latitude as locationLatitude, " +
                 "properties.location_longitude as locationLongitude, " +
                 "properties.updated_at as UpdatedAt, " +
@@ -1636,36 +1635,36 @@ public sealed class DataAccessService : IDataAccessService
 
                     isFound = true;
 
-                    entry.Name = Convert.ToString(reader["propertyName"]) ?? "";
-                    entry.LocPrefId = Convert.ToString(reader["locPrefId"]) ?? "";
-                    entry.LocPrefecture = Convert.ToString(reader["locPrefecture"]) ?? "";
-                    entry.LocMachiazaId = Convert.ToString(reader["locMachiazaId"]) ?? "";
-                    entry.LocCounty = Convert.ToString(reader["locCounty"]) ?? "";
-                    entry.LocCity = Convert.ToString(reader["locCity"]) ?? "";
-                    entry.LocWard = Convert.ToString(reader["locWard"]) ?? "";
-                    entry.LocOazaCho = Convert.ToString(reader["locOazaCho"]) ?? "";
-                    entry.LocChoume = Convert.ToString(reader["locChoume"]) ?? "";
-                    entry.LocEdaban = Convert.ToString(reader["locEdaban"]) ?? "";
-                    entry.LocLocationFull = Convert.ToString(reader["locLocationFull"]) ?? "";
-                    entry.LocationLatitude = Convert.ToString(reader["locationLatitude"]) ?? string.Empty;
-                    entry.LocationLongitude = Convert.ToString(reader["locationLongitude"]) ?? string.Empty;
+                    property.Name = Convert.ToString(reader["propertyName"]) ?? "";
+                    property.LocPrefId = Convert.ToString(reader["locPrefId"]) ?? "";
+                    property.LocPrefecture = Convert.ToString(reader["locPrefecture"]) ?? "";
+                    property.LocMachiazaId = Convert.ToString(reader["locMachiazaId"]) ?? "";
+                    property.LocCounty = Convert.ToString(reader["locCounty"]) ?? "";
+                    property.LocCity = Convert.ToString(reader["locCity"]) ?? "";
+                    property.LocWard = Convert.ToString(reader["locWard"]) ?? "";
+                    property.LocOazaCho = Convert.ToString(reader["locOazaCho"]) ?? "";
+                    property.LocChoume = Convert.ToString(reader["locChoume"]) ?? "";
+                    property.LocEdaban = Convert.ToString(reader["locEdaban"]) ?? "";
+                    property.LocLocationFull = Convert.ToString(reader["locLocationFull"]) ?? "";
+                    property.LocationLatitude = Convert.ToString(reader["locationLatitude"]) ?? string.Empty;
+                    property.LocationLongitude = Convert.ToString(reader["locationLongitude"]) ?? string.Empty;
                     // TODO: more.
 
 
                     string s;
                     s = Convert.ToString(reader["resiBuildingKind"]) ?? "";
-                    entry.SetKindTypeFromString(s);
-                    entry.IsUnitOwnership = Convert.ToInt32(reader["resiUnitOwnership"]) != 0; // int to bool
+                    property.SetKindTypeFromString(s);
+                    property.IsUnitOwnership = Convert.ToInt32(reader["resiUnitOwnership"]) != 0; // int to bool
                     s = Convert.ToString(reader["resiBuildingStructure"]) ?? "";
-                    entry.SetStructureTypeFromString(s);
-                    entry.FloorCountAboveGround = Convert.ToInt32(reader["resiAboveGroundFloorCount"]);
-                    entry.FloorCountBasement = Convert.ToInt32(reader["resiBasementFloorCount"]);
-                    entry.TotalUnitCount = Convert.ToInt32(reader["resiTotalUnitCount"]);
+                    property.SetStructureTypeFromString(s);
+                    property.FloorCountAboveGround = Convert.ToInt32(reader["resiAboveGroundFloorCount"]);
+                    property.FloorCountBasement = Convert.ToInt32(reader["resiBasementFloorCount"]);
+                    property.TotalUnitCount = Convert.ToInt32(reader["resiTotalUnitCount"]);
                     s = Convert.ToString(reader["resiBuiltYearMonth"]) ?? "";
-                    entry.SetBuildYearMonthFromString(s);
-                    entry.FudousanId = Convert.ToString(reader["resiFudousanId"]) ?? "";
-                    entry.FudousanIdAdditionalCode = Convert.ToString(reader["resiFudousanIdAdditionalCode"]) ?? "";
-                    entry.Remarks = Convert.ToString(reader["resiRemarks"]) ?? "";
+                    property.SetBuildYearMonthFromString(s);
+                    property.FudousanId = Convert.ToString(reader["resiFudousanId"]) ?? "";
+                    property.FudousanIdAdditionalCode = Convert.ToString(reader["resiFudousanIdAdditionalCode"]) ?? "";
+                    property.Remarks = Convert.ToString(reader["resiRemarks"]) ?? "";
 
                     // TODO: more.
 
@@ -1704,7 +1703,7 @@ public sealed class DataAccessService : IDataAccessService
 
                         rlpic.IsMain = Convert.ToInt32(reader["is_main"]) != 0; // int to bool
 
-                        entry.Pictures.Add(rlpic);
+                        property.Pictures.Add(rlpic);
                     }
                     else
                     {
@@ -1736,7 +1735,7 @@ public sealed class DataAccessService : IDataAccessService
 
                         rlpdf.IsMain = Convert.ToInt32(reader["is_main"]) != 0; // int to bool
 
-                        entry.Pdfs.Add(rlpdf);
+                        property.Pdfs.Add(rlpdf);
                     }
                     else
                     {
@@ -1784,7 +1783,7 @@ public sealed class DataAccessService : IDataAccessService
 
                             if (lessor is not null)
                             {
-                                entry.Lessors.Add(lessor);
+                                property.Lessors.Add(lessor);
                             }
 
                             //break; // Assuming we only want the first match
@@ -1832,7 +1831,7 @@ public sealed class DataAccessService : IDataAccessService
 
                             if (broker is not null)
                             {
-                                entry.Brokers.Add(broker);
+                                property.Brokers.Add(broker);
                             }
 
                             //break; // Assuming we only want the first match
@@ -1847,24 +1846,24 @@ public sealed class DataAccessService : IDataAccessService
             {
                 while (reader.Read())
                 {
-                    var resRoom = GetRentResidentialListing(reader, id, entry.Name);
+                    var resRoom = GetRentResidentialListing(reader, id, property.Name);
                     if (resRoom is not null)
                     {
-                        entry.Rooms.Add(resRoom);
+                        property.Rooms.Add(resRoom);
                     }
                 }
             }
 
-            foreach (var room in entry.Rooms)
+            foreach (var room in property.Rooms)
             {
                 SetRentResidentialListingChildValues(cmd, room);
             }
 
-            // Reset entry Isdirty flag.
-            entry.Status = EnumEntryStatus.Saved;
-            entry.IsModified = false;
+            // Reset property Isdirty flag.
+            property.Status = EnumEntityStatus.Saved;
+            property.IsModified = false;
 
-            res.Building = entry;
+            res.Building = property;
         }
         catch (Exception ex)
         {
@@ -1896,7 +1895,7 @@ public sealed class DataAccessService : IDataAccessService
 
         var isUnitOwnership = Convert.ToInt32(reader["is_property_unit_ownership"]) != 0;
 
-        var room = new Models.Rent.Residentials.Listing.Listing(listingId, EnumEntryStatus.Saved, propertyId, EnumEntryStatus.Saved, isUnitOwnership, propertyName)
+        var room = new Models.Rent.Residentials.Listing.Listing(listingId, EnumEntityStatus.Saved, propertyId, EnumEntityStatus.Saved, isUnitOwnership, propertyName)
         {
             Name = reader.GetString(reader.GetOrdinal("name")) ?? string.Empty,
             Chinryou = reader.GetInt32(reader.GetOrdinal("chinryou")),
@@ -2017,8 +2016,8 @@ public sealed class DataAccessService : IDataAccessService
                         }
 
                         // TODO: IF natural
-                        //var lessor = new Models.Rent.Lessors.Person(lessId, EnumEntryStatus.Saved);
-                        var lessor = new Models.Person.PersonNatural(lessId, EnumEntryStatus.Saved)
+                        //var lessor = new Models.Rent.Lessors.Person(lessId, EnumEntityStatus.Saved);
+                        var lessor = new Models.Person.PersonNatural(lessId, EnumEntityStatus.Saved)
                         {
                             Name = Convert.ToString(reader2["name"]) ?? "",
                             NameLast = Convert.ToString(reader2["name_last"]) ?? "",
@@ -2184,8 +2183,8 @@ public sealed class DataAccessService : IDataAccessService
                 {
                     //room.IsNew = false;
                     room.IsModified = false;
-                    room.PropertyStatus = EnumEntryStatus.Saved;
-                    room.Status = EnumEntryStatus.Saved;
+                    room.PropertyStatus = EnumEntityStatus.Saved;
+                    room.Status = EnumEntityStatus.Saved;
                 }
                 res.AffectedCount = result;
 
@@ -2475,7 +2474,7 @@ public sealed class DataAccessService : IDataAccessService
                 var s = Convert.ToString(reader["roomName"]) ?? "";
                 unit.Name = s;
 
-                //Debug.WriteLine($"Found rent residential entry: {entry.Name} @SelectRentResidentialsByNameKeyword() in DataAccessService");
+                //Debug.WriteLine($"Found rent residential property: {property.Name} @SelectRentResidentialsByNameKeyword() in DataAccessService");
 
                 s = Convert.ToString(reader["propertyName"]);
                 if (!string.IsNullOrEmpty(s))
@@ -2483,7 +2482,7 @@ public sealed class DataAccessService : IDataAccessService
                     unit.PropertyName = s;
                 }
 
-                // Reset entry Isdirty flag.
+                // Reset unit Isdirty flag.
                 unit.IsModified = false;
 
                 //res.AffectedCount++;
@@ -2665,16 +2664,16 @@ public sealed class DataAccessService : IDataAccessService
                 name,
                 property_kind,
                 thumbnail_filename,
-                loc_pref_id,
-                loc_prefecture,
-                loc_machiaza_id,
-                loc_county,
-                loc_city,
-                loc_ward,
-                loc_oaza_cho,
-                loc_choume,
-                loc_edaban,
-                loc_location_full,
+                location_pref_id,
+                location_prefecture,
+                location_machiaza_id,
+                location_county,
+                location_city,
+                location_ward,
+                location_oaza_cho,
+                location_choume,
+                location_edaban,
+                location_full,
                 location_latitude,
                 location_longitude,
                 updated_at
@@ -2702,16 +2701,16 @@ public sealed class DataAccessService : IDataAccessService
                 name = excluded.name,
                 property_kind = excluded.property_kind,
                 thumbnail_filename = excluded.thumbnail_filename,
-                loc_pref_id = excluded.loc_pref_id,
-                loc_prefecture = excluded.loc_prefecture,
-                loc_machiaza_id = excluded.loc_machiaza_id,
-                loc_county = excluded.loc_county,
-                loc_city = excluded.loc_city,
-                loc_ward = excluded.loc_ward,
-                loc_oaza_cho = excluded.loc_oaza_cho,
-                loc_choume = excluded.loc_choume,
-                loc_edaban = excluded.loc_edaban,
-                loc_location_full = excluded.loc_location_full,
+                location_pref_id = excluded.location_pref_id,
+                location_prefecture = excluded.location_prefecture,
+                location_machiaza_id = excluded.location_machiaza_id,
+                location_county = excluded.location_county,
+                location_city = excluded.location_city,
+                location_ward = excluded.location_ward,
+                location_oaza_cho = excluded.location_oaza_cho,
+                location_choume = excluded.location_choume,
+                location_edaban = excluded.location_edaban,
+                location_full = excluded.location_full,
                 location_latitude = excluded.location_latitude,
                 location_longitude = excluded.location_longitude,
                 updated_at = excluded.updated_at;
@@ -3059,7 +3058,7 @@ public sealed class DataAccessService : IDataAccessService
             }
 
 
-            building.Status = EnumEntryStatus.Saved;
+            building.Status = EnumEntityStatus.Saved;
             building.IsModified = false;
 
         }
@@ -3291,16 +3290,16 @@ public sealed class DataAccessService : IDataAccessService
                 p.property_id,
                 p.name,
                 p.thumbnail_filename,
-                p.loc_pref_id,
-                p.loc_prefecture,
-                p.loc_machiaza_id,
-                p.loc_county,
-                p.loc_city,
-                p.loc_ward,
-                p.loc_oaza_cho,
-                p.loc_choume,
-                p.loc_edaban,
-                p.loc_location_full,
+                p.location_pref_id,
+                p.location_prefecture,
+                p.location_machiaza_id,
+                p.location_county,
+                p.location_city,
+                p.location_ward,
+                p.location_oaza_cho,
+                p.location_choume,
+                p.location_edaban,
+                p.location_full,
                 p.location_latitude,
                 p.location_longitude,
                 c.commercial_kind,
@@ -3335,41 +3334,41 @@ public sealed class DataAccessService : IDataAccessService
             var building =
                 new Models.Rent.Commercials.Property(
                     Convert.ToString(reader["property_id"])!,
-                    EnumEntryStatus.Saved)
+                    EnumEntityStatus.Saved)
                 {
                     Name = Convert.ToString(reader["name"]) ?? string.Empty,
                     ThumbnailFilename =
                         Convert.ToString(reader["thumbnail_filename"])
                         ?? string.Empty,
                     LocPrefId =
-                        Convert.ToString(reader["loc_pref_id"])
+                        Convert.ToString(reader["location_pref_id"])
                         ?? string.Empty,
                     LocPrefecture =
-                        Convert.ToString(reader["loc_prefecture"])
+                        Convert.ToString(reader["location_prefecture"])
                         ?? string.Empty,
                     LocMachiazaId =
-                        Convert.ToString(reader["loc_machiaza_id"])
+                        Convert.ToString(reader["location_machiaza_id"])
                         ?? string.Empty,
                     LocCounty =
-                        Convert.ToString(reader["loc_county"])
+                        Convert.ToString(reader["location_county"])
                         ?? string.Empty,
                     LocCity =
-                        Convert.ToString(reader["loc_city"])
+                        Convert.ToString(reader["location_city"])
                         ?? string.Empty,
                     LocWard =
-                        Convert.ToString(reader["loc_ward"])
+                        Convert.ToString(reader["location_ward"])
                         ?? string.Empty,
                     LocOazaCho =
-                        Convert.ToString(reader["loc_oaza_cho"])
+                        Convert.ToString(reader["location_oaza_cho"])
                         ?? string.Empty,
                     LocChoume =
-                        Convert.ToString(reader["loc_choume"])
+                        Convert.ToString(reader["location_choume"])
                         ?? string.Empty,
                     LocEdaban =
-                        Convert.ToString(reader["loc_edaban"])
+                        Convert.ToString(reader["location_edaban"])
                         ?? string.Empty,
                     LocLocationFull =
-                        Convert.ToString(reader["loc_location_full"])
+                        Convert.ToString(reader["location_full"])
                         ?? string.Empty,
                     LocationLatitude = Convert.ToString(reader["location_latitude"]) ?? string.Empty,
                     LocationLongitude = Convert.ToString(reader["location_longitude"]) ?? string.Empty,
@@ -3534,9 +3533,9 @@ public sealed class DataAccessService : IDataAccessService
 
                     var unit = new Models.Rent.Commercials.Listing.Listing(
                         listingId,
-                        EnumEntryStatus.Saved,
+                        EnumEntityStatus.Saved,
                         building.Id,
-                        EnumEntryStatus.Saved,
+                        EnumEntityStatus.Saved,
                         Convert.ToInt32(unitReader["is_property_unit_ownership"]) != 0,
                         building.Name)
                     {
@@ -3883,8 +3882,8 @@ public sealed class DataAccessService : IDataAccessService
 
             transaction.Commit();
 
-            room.Status = EnumEntryStatus.Saved;
-            room.PropertyStatus = EnumEntryStatus.Saved;
+            room.Status = EnumEntityStatus.Saved;
+            room.PropertyStatus = EnumEntityStatus.Saved;
             room.IsModified = false;
         }
         catch (Exception ex)
@@ -4065,9 +4064,9 @@ public sealed class DataAccessService : IDataAccessService
 
             var room = new Models.Rent.Commercials.Listing.Listing(
                 listingId,
-                EnumEntryStatus.Saved,
+                EnumEntityStatus.Saved,
                 propertyId,
-                EnumEntryStatus.Saved,
+                EnumEntityStatus.Saved,
                 Convert.ToInt32(
                     reader["is_property_unit_ownership"]) != 0,
                 propertyName)
@@ -4244,7 +4243,7 @@ public sealed class DataAccessService : IDataAccessService
                 if (result > 0)
                 {
                     lessor.IsModified = false;
-                    lessor.Status = EnumEntryStatus.Saved;
+                    lessor.Status = EnumEntityStatus.Saved;
                 }
                 res.AffectedCount = result;
 
@@ -4329,14 +4328,14 @@ public sealed class DataAccessService : IDataAccessService
                     continue;
                 }
 
-                Models.PersonSearchResultItem entry;
+                Models.PersonSearchResultItem item;
                 if (enumKind == Models.Base.EnumPersonKind.Natural)
                 {
-                    entry = new Models.PersonSearchResultItem(s, Models.Base.EnumPersonKind.Natural);
+                    item = new Models.PersonSearchResultItem(s, Models.Base.EnumPersonKind.Natural);
                 }
                 else if (enumKind == Models.Base.EnumPersonKind.Legal)
                 {
-                    entry = new Models.PersonSearchResultItem(s, Models.Base.EnumPersonKind.Legal);
+                    item = new Models.PersonSearchResultItem(s, Models.Base.EnumPersonKind.Legal);
                 }
                 else
                 {
@@ -4344,19 +4343,19 @@ public sealed class DataAccessService : IDataAccessService
                 }
 
                 s = Convert.ToString(reader["name"]) ?? "";
-                entry.Name = s;
+                item.Name = s;
 
-                //Debug.WriteLine($"Found rent residential entry: {entry.Name} @SelectRentResidentialsByNameKeyword() in DataAccessService");
+                //Debug.WriteLine($"Found rent residential item: {item.Name} @SelectRentResidentialsByNameKeyword() in DataAccessService");
 
                 s = Convert.ToString(reader["remarks"]) ?? "";
-                entry.Remarks = s;
+                item.Remarks = s;
 
-                // Reset entry Isdirty flag.
-                entry.IsModified = false;
+                // Reset item Isdirty flag.
+                item.IsModified = false;
 
                 //res.AffectedCount++;
 
-                res.PersonSearchResult.Add(entry);
+                res.PersonSearchResult.Add(item);
             }
         }
         catch (Exception ex)
@@ -4375,7 +4374,7 @@ public sealed class DataAccessService : IDataAccessService
     {
         var res = new PersonSingleResultWrapper();
 
-        Models.Base.PersonBase? entry = null; //new Models.Base.PersonBase(id, EnumEntryStatus.Saved);
+        Models.Base.PersonBase? person = null; //new Models.Base.PersonBase(id, EnumEntityStatus.Saved);
 
         if (string.IsNullOrEmpty(id))
         {
@@ -4405,7 +4404,7 @@ public sealed class DataAccessService : IDataAccessService
                         continue;
                     }
 
-                    entry = GetPerson(reader, id);
+                    person = GetPerson(reader, id);
 
                     //res.AffectedCount++;
 
@@ -4413,14 +4412,14 @@ public sealed class DataAccessService : IDataAccessService
                 }
             }
 
-            if (entry is not null)
+            if (person is not null)
             {
-                // Reset entry Isdirty flag.
-                entry.Status = EnumEntryStatus.Saved;
-                entry.IsModified = false;
+                // Reset person Isdirty flag.
+                person.Status = EnumEntityStatus.Saved;
+                person.IsModified = false;
             }
 
-            res.Person = entry;
+            res.Person = person;
         }
         catch (Exception ex)
         {
@@ -4438,7 +4437,7 @@ public sealed class DataAccessService : IDataAccessService
     {
         // Do not try to access reader["person_id"] here because it may not be present in the SELECT query. Use the provided personId parameter instead.
 
-        Models.Base.PersonBase? entry = null;
+        Models.Base.PersonBase? person = null;
 
         Models.Base.EnumPersonKind? enumKind = null;
         var kind = reader.GetString(reader.GetOrdinal("person_kind")) ?? string.Empty;
@@ -4458,28 +4457,28 @@ public sealed class DataAccessService : IDataAccessService
 
         if (enumKind == Models.Base.EnumPersonKind.Natural)
         {
-            entry = new Models.Person.PersonNatural(personId, EnumEntryStatus.Saved);
+            person = new Models.Person.PersonNatural(personId, EnumEntityStatus.Saved);
         }
         else if (enumKind == Models.Base.EnumPersonKind.Legal)
         {
-            entry = new Models.Person.PersonLegal(personId, EnumEntryStatus.Saved);
+            person = new Models.Person.PersonLegal(personId, EnumEntityStatus.Saved);
         }
 
-        if (entry is null)
+        if (person is null)
         {
             return null;
         }
 
         //s = Convert.ToString(reader["name"]) ?? "";
-        entry.Name = reader.GetString(reader.GetOrdinal("name")) ?? string.Empty;
+        person.Name = reader.GetString(reader.GetOrdinal("name")) ?? string.Empty;
 
-        if (entry is Models.Person.PersonNatural naturalPerson)
+        if (person is Models.Person.PersonNatural naturalPerson)
         {
             naturalPerson.NameLast = Convert.ToString(reader["name_last"]) ?? "";
             naturalPerson.NameFirst = Convert.ToString(reader["name_first"]) ?? "";
 
         }
-        else if (entry is Models.Person.PersonLegal legalPerson)
+        else if (person is Models.Person.PersonLegal legalPerson)
         {
             legalPerson.NameCompany = Convert.ToString(reader["name_company"]) ?? "";
             legalPerson.NameCompanyType = Convert.ToString(reader["name_company_type"]) ?? "";
@@ -4488,11 +4487,11 @@ public sealed class DataAccessService : IDataAccessService
         }
 
 
-        entry.Remarks = Convert.ToString(reader["remarks"]) ?? "";
+        person.Remarks = Convert.ToString(reader["remarks"]) ?? "";
 
         // TODO: more.
 
-        return entry;
+        return person;
     }
 
     public ResultWrapper DeleteRentLessor(string id)
@@ -4587,16 +4586,16 @@ public sealed class DataAccessService : IDataAccessService
                 name,
                 property_kind,
                 thumbnail_filename,
-                loc_pref_id,
-                loc_prefecture,
-                loc_machiaza_id,
-                loc_county,
-                loc_city,
-                loc_ward,
-                loc_oaza_cho,
-                loc_choume,
-                loc_edaban,
-                loc_location_full,
+                location_pref_id,
+                location_prefecture,
+                location_machiaza_id,
+                location_county,
+                location_city,
+                location_ward,
+                location_oaza_cho,
+                location_choume,
+                location_edaban,
+                location_full,
                 updated_at
             )
             VALUES (
@@ -4620,16 +4619,16 @@ public sealed class DataAccessService : IDataAccessService
                 name = excluded.name,
                 property_kind = excluded.property_kind,
                 thumbnail_filename = excluded.thumbnail_filename,
-                loc_pref_id = excluded.loc_pref_id,
-                loc_prefecture = excluded.loc_prefecture,
-                loc_machiaza_id = excluded.loc_machiaza_id,
-                loc_county = excluded.loc_county,
-                loc_city = excluded.loc_city,
-                loc_ward = excluded.loc_ward,
-                loc_oaza_cho = excluded.loc_oaza_cho,
-                loc_choume = excluded.loc_choume,
-                loc_edaban = excluded.loc_edaban,
-                loc_location_full = excluded.loc_location_full,
+                location_pref_id = excluded.location_pref_id,
+                location_prefecture = excluded.location_prefecture,
+                location_machiaza_id = excluded.location_machiaza_id,
+                location_county = excluded.location_county,
+                location_city = excluded.location_city,
+                location_ward = excluded.location_ward,
+                location_oaza_cho = excluded.location_oaza_cho,
+                location_choume = excluded.location_choume,
+                location_edaban = excluded.location_edaban,
+                location_full = excluded.location_full,
                 updated_at = excluded.updated_at;
             """;
 
@@ -4746,7 +4745,7 @@ public sealed class DataAccessService : IDataAccessService
 
             transaction.Commit();
 
-            building.Status = EnumEntryStatus.Saved;
+            building.Status = EnumEntityStatus.Saved;
             building.IsModified = false;
         }
         catch (Exception ex)
@@ -4877,16 +4876,16 @@ public sealed class DataAccessService : IDataAccessService
                 p.property_id,
                 p.name,
                 p.thumbnail_filename,
-                p.loc_pref_id,
-                p.loc_prefecture,
-                p.loc_machiaza_id,
-                p.loc_county,
-                p.loc_city,
-                p.loc_ward,
-                p.loc_oaza_cho,
-                p.loc_choume,
-                p.loc_edaban,
-                p.loc_location_full,
+                p.location_pref_id,
+                p.location_prefecture,
+                p.location_machiaza_id,
+                p.location_county,
+                p.location_city,
+                p.location_ward,
+                p.location_oaza_cho,
+                p.location_choume,
+                p.location_edaban,
+                p.location_full,
                 p.location_latitude,
                 p.location_longitude,
                 s.building_kind,
@@ -4917,41 +4916,41 @@ public sealed class DataAccessService : IDataAccessService
             var building =
                 new Models.Sale.Residentials.Property(
                     Convert.ToString(reader["property_id"])!,
-                    EnumEntryStatus.Saved)
+                    EnumEntityStatus.Saved)
                 {
                     Name = Convert.ToString(reader["name"]) ?? string.Empty,
                     ThumbnailFilename =
                         Convert.ToString(reader["thumbnail_filename"])
                         ?? string.Empty,
                     LocPrefId =
-                        Convert.ToString(reader["loc_pref_id"])
+                        Convert.ToString(reader["location_pref_id"])
                         ?? string.Empty,
                     LocPrefecture =
-                        Convert.ToString(reader["loc_prefecture"])
+                        Convert.ToString(reader["location_prefecture"])
                         ?? string.Empty,
                     LocMachiazaId =
-                        Convert.ToString(reader["loc_machiaza_id"])
+                        Convert.ToString(reader["location_machiaza_id"])
                         ?? string.Empty,
                     LocCounty =
-                        Convert.ToString(reader["loc_county"])
+                        Convert.ToString(reader["location_county"])
                         ?? string.Empty,
                     LocCity =
-                        Convert.ToString(reader["loc_city"])
+                        Convert.ToString(reader["location_city"])
                         ?? string.Empty,
                     LocWard =
-                        Convert.ToString(reader["loc_ward"])
+                        Convert.ToString(reader["location_ward"])
                         ?? string.Empty,
                     LocOazaCho =
-                        Convert.ToString(reader["loc_oaza_cho"])
+                        Convert.ToString(reader["location_oaza_cho"])
                         ?? string.Empty,
                     LocChoume =
-                        Convert.ToString(reader["loc_choume"])
+                        Convert.ToString(reader["location_choume"])
                         ?? string.Empty,
                     LocEdaban =
-                        Convert.ToString(reader["loc_edaban"])
+                        Convert.ToString(reader["location_edaban"])
                         ?? string.Empty,
                     LocLocationFull =
-                        Convert.ToString(reader["loc_location_full"])
+                        Convert.ToString(reader["location_full"])
                         ?? string.Empty,
                     LocationLatitude =
     Convert.ToString(reader["location_latitude"]) ?? string.Empty,
@@ -5164,8 +5163,8 @@ public sealed class DataAccessService : IDataAccessService
 
             transaction.Commit();
 
-            room.Status = EnumEntryStatus.Saved;
-            room.PropertyStatus = EnumEntryStatus.Saved;
+            room.Status = EnumEntityStatus.Saved;
+            room.PropertyStatus = EnumEntityStatus.Saved;
             room.IsModified = false;
         }
         catch (Exception ex)
@@ -5371,9 +5370,9 @@ public sealed class DataAccessService : IDataAccessService
 
             var room = new Models.Sale.Residentials.Listing.Listing(
                 listingId,
-                EnumEntryStatus.Saved,
+                EnumEntityStatus.Saved,
                 propertyId,
-                EnumEntryStatus.Saved,
+                EnumEntityStatus.Saved,
                 Convert.ToInt32(
                     reader["is_property_unit_ownership"]) != 0,
                 propertyName)
@@ -5515,7 +5514,7 @@ public sealed class DataAccessService : IDataAccessService
             res.AffectedCount = command.ExecuteNonQuery();
             transaction.Commit();
 
-            broker.Status = EnumEntryStatus.Saved;
+            broker.Status = EnumEntityStatus.Saved;
             broker.IsModified = false;
         }
         catch (Exception ex)
@@ -5595,7 +5594,7 @@ public sealed class DataAccessService : IDataAccessService
                     continue;
                 }
 
-                var entry = new Models.PersonSearchResultItem(
+                var item = new Models.PersonSearchResultItem(
                     brokerId,
                     personKind)
                 {
@@ -5604,7 +5603,7 @@ public sealed class DataAccessService : IDataAccessService
                     IsModified = false
                 };
 
-                res.PersonSearchResult.Add(entry);
+                res.PersonSearchResult.Add(item);
             }
         }
         catch (Exception ex)
@@ -5671,7 +5670,7 @@ public sealed class DataAccessService : IDataAccessService
 
                 if (res.Person is not null)
                 {
-                    res.Person.Status = EnumEntryStatus.Saved;
+                    res.Person.Status = EnumEntityStatus.Saved;
                     res.Person.IsModified = false;
                 }
             }

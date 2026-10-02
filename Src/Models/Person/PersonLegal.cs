@@ -68,7 +68,7 @@ public partial class PersonLegal : PersonBase
         }
     } = 0;
 
-    public PersonLegal(string id, EnumEntryStatus status) : base(id, status, EnumPersonKind.Legal)
+    public PersonLegal(string id, EnumEntityStatus status) : base(id, status, EnumPersonKind.Legal)
     {
         //
     }

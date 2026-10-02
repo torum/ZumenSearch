@@ -26,6 +26,8 @@ public sealed partial class ListingViewModel : ObservableRecipient,
     private const string BasicPageName = "ZumenSearch.Views.Rent.Residentials.Listing.BasicPage";
     private readonly string _id = string.Empty;
 
+    // This property holds the COPY of current entity being edited.
+    // Do not use it directly in the UI. Apply changes to this object in Save() to save the changes.
     private readonly Models.Rent.Residentials.Listing.Listing _room;
 
     private readonly string _listingDataDirectoryPath = string.Empty;
@@ -128,7 +130,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
                 str = $"{str}：{Name}";
             }
 
-            if (_room.Status == EnumEntryStatus.New)
+            if (_room.Status == EnumEntityStatus.New)
             {
                 str = $"{str}：新規";
             }
@@ -603,56 +605,6 @@ public sealed partial class ListingViewModel : ObservableRecipient,
 
     }
 
-    private bool SaveToNew()
-    {
-        Debug.WriteLine("(_room.PropertyStatus == EnumPropertyStatus.New) @ListingViewModel on Save. Sending it to Property editor window");
-        // Building is unsaved state. So, update it and done (don't save room to DB here because we don't save room without building).
-
-        // TODO: make sure property editor window is exists (opened).
-
-        // Update the selected search result's values such as name if it exists. Also, update building window's rooms list.
-        WeakReferenceMessenger.Default.Send(new Models.Messenger.ListingUpdatedMessage(_room));
-
-        return true;
-    }
-
-    private async Task<bool> SaveAsUpdate()
-    {
-        var resInsert = await Task.Run(() => _dataAccessService.UpsertRentResidentialListing(_room.PropertyId, _room), _cts.Token);
-        if (resInsert.IsError)
-        {
-            Debug.WriteLine(
-                resInsert.Error.Title + Environment.NewLine +
-                resInsert.Error.Message + Environment.NewLine +
-                resInsert.Error.Description + Environment.NewLine +
-                resInsert.Error.Operation + Environment.NewLine +
-                resInsert.Error.MethodName + Environment.NewLine +
-                resInsert.Error.FullDump);
-            
-            InfoBarErrorMessage =
-                resInsert.Error.Title + Environment.NewLine +
-                resInsert.Error.Message + Environment.NewLine +
-                resInsert.Error.Description + Environment.NewLine +
-                resInsert.Error.Operation + Environment.NewLine +
-                resInsert.Error.MethodName;
-
-            IsInfoBarErrorOpen = true;
-
-            return false;
-        }
-        else
-        {
-            _room.IsModified = false;
-            _room.PropertyStatus = EnumEntryStatus.Saved;// just in case.
-            _room.Status = EnumEntryStatus.Saved;
-
-            // Update the selected search result's values such as name if it exists. Also, update building window's rooms list.
-            WeakReferenceMessenger.Default.Send(new Models.Messenger.ListingUpdatedMessage(_room));
-
-            return true;
-        }
-    }
-
     private void PopulateValues()
     {
         if (_room is null)
@@ -869,7 +821,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
             _unsavedRoomPdfThumbnailFileList.Clear();
         }
 
-        if (_room.Status == EnumEntryStatus.New)
+        if (_room.Status == EnumEntityStatus.New)
         {
             if (Directory.Exists(_listingDataDirectoryPath))
             {
@@ -930,13 +882,54 @@ public sealed partial class ListingViewModel : ObservableRecipient,
         SetValues();
 
         bool saveResult;
-        if (_room.PropertyStatus == EnumEntryStatus.New)
+        if (_room.PropertyStatus == EnumEntityStatus.New)
         {
-            saveResult = SaveToNew();
+            Debug.WriteLine("(_room.PropertyStatus == EnumPropertyStatus.New) @ListingViewModel on Save. Sending it to Property editor window");
+            // Building is unsaved state. So, update it and done (don't save room to DB here because we don't save room without building).
+
+            // TODO: make sure property editor window is exists (opened).
+
+            // Update the selected search result's values such as name if it exists. Also, update building window's rooms list.
+            WeakReferenceMessenger.Default.Send(new Models.Messenger.ListingUpdatedMessage(_room));
+
+            saveResult = true;
         }
         else
         {
-            saveResult = await Task.Run(() => SaveAsUpdate(), _cts.Token);
+            var resInsert = await Task.Run(() => _dataAccessService.UpsertRentResidentialListing(_room.PropertyId, _room), _cts.Token);
+            if (resInsert.IsError)
+            {
+                Debug.WriteLine(
+                    resInsert.Error.Title + Environment.NewLine +
+                    resInsert.Error.Message + Environment.NewLine +
+                    resInsert.Error.Description + Environment.NewLine +
+                    resInsert.Error.Operation + Environment.NewLine +
+                    resInsert.Error.MethodName + Environment.NewLine +
+                    resInsert.Error.FullDump);
+
+                InfoBarErrorMessage =
+                    resInsert.Error.Title + Environment.NewLine +
+                    resInsert.Error.Message + Environment.NewLine +
+                    resInsert.Error.Description + Environment.NewLine +
+                    resInsert.Error.Operation + Environment.NewLine +
+                    resInsert.Error.MethodName;
+
+                IsInfoBarErrorOpen = true;
+
+                saveResult = false;
+            }
+            else
+            {
+                _room.IsModified = false;
+                _room.PropertyStatus = EnumEntityStatus.Saved;// just in case.
+                _room.Status = EnumEntityStatus.Saved;
+
+                // Update the selected search result's values such as name if it exists. Also, update building window's rooms list.
+                WeakReferenceMessenger.Default.Send(new Models.Messenger.ListingUpdatedMessage(_room));
+
+                saveResult = true;
+            }
+
         }
 
         if (saveResult)

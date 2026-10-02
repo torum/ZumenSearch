@@ -39,7 +39,7 @@ public sealed partial class Person : PersonBase
         }
     } = string.Empty;
 
-    public Person(string id, EnumEntryStatus status) : base(id, status, EnumPersonKind.Undetermined)
+    public Person(string id, EnumEntityStatus status) : base(id, status, EnumPersonKind.Undetermined)
     {
         //IsModified = false;
     }

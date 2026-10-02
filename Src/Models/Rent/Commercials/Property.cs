@@ -10,7 +10,7 @@ namespace ZumenSearch.Models.Rent.Commercials;
 
 public sealed partial class Property : PropertyBase
 {
-    public Property(string id, EnumEntryStatus status) : base(id, status, EnumPropertyKind.RentCommercial)
+    public Property(string id, EnumEntityStatus status) : base(id, status, EnumPropertyKind.RentCommercial)
     {
     }
 

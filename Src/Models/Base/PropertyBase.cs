@@ -1,7 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using Microsoft.UI.Xaml.Media;
+﻿using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Imaging;
-using System.Diagnostics;
 
 namespace ZumenSearch.Models.Base;
 
@@ -19,7 +17,7 @@ public enum EnumPropertyKind
     Unknown
 }
 
-public abstract partial class PropertyBase : EntryBase
+public abstract partial class PropertyBase : Entity
 {
     public EnumPropertyKind PropertyKind { get; init; } = EnumPropertyKind.Unknown;
 
@@ -161,7 +159,7 @@ public abstract partial class PropertyBase : EntryBase
     } = string.Empty;
     #endregion
 
-    protected PropertyBase(string id, EnumEntryStatus status, EnumPropertyKind kind): base(id, status)
+    protected PropertyBase(string id, EnumEntityStatus status, EnumPropertyKind kind): base(id, status)
     {
         PropertyKind = kind;
     }

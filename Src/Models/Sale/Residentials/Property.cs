@@ -130,7 +130,7 @@ public sealed partial class Property : PropertyBase
         }
     }
 
-    public Property(string id, EnumEntryStatus status)
+    public Property(string id, EnumEntityStatus status)
         : base(id, status, EnumPropertyKind.SaleResidential)
     {
     }

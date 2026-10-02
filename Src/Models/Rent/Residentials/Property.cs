@@ -11,7 +11,7 @@ namespace ZumenSearch.Models.Rent.Residentials;
 // 編集用（建物）
 public sealed partial class Property : PropertyBase
 {
-    public Property(string id, EnumEntryStatus status) : base(id, status, EnumPropertyKind.RentResidential)
+    public Property(string id, EnumEntityStatus status) : base(id, status, EnumPropertyKind.RentResidential)
     {
         //
     }

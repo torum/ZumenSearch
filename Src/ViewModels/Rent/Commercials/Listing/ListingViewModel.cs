@@ -13,10 +13,19 @@ public sealed partial class ListingViewModel : ObservableRecipient
 {
     private const string BasicPageName = "ZumenSearch.Views.Rent.Commercials.Listing.BasicPage";
 
+    private readonly string _listingDataDirectoryPath = string.Empty;
+    private readonly CancellationTokenSource _cts = new();
+
+    // This property holds the COPY of current entity being edited.
+    // Do not use it directly in the UI. Apply changes to this object in Save() to save the changes.
     private readonly Models.Rent.Commercials.Listing.Listing _unit;
+
+    private readonly List<string> _unsavedUnitPictureFileList = [];
+    private readonly List<string> _unsavedUnitPdfFileList = [];
+    private readonly List<string> _unsavedUnitPdfThumbnailFileList = [];
+
     private readonly IDataAccessService _dataAccessService;
     private readonly INavigationGenericService _navigationService;
-    private readonly CancellationTokenSource _cts = new();
 
     public ListingViewModel(
         Models.Rent.Commercials.Listing.Listing unit,
@@ -24,8 +33,10 @@ public sealed partial class ListingViewModel : ObservableRecipient
         IDataAccessService dataAccessService)
     {
         _unit = unit ?? throw new ArgumentNullException(nameof(unit));
+
         _navigationService = navigationService;
         _dataAccessService = dataAccessService;
+        _listingDataDirectoryPath = System.IO.Path.Combine(System.IO.Path.Combine(App.PropertyBlobDataFolder, _unit.PropertyId), _unit.Id);
 
         PopulateValues();
         IsDirty = false;
@@ -44,7 +55,7 @@ public sealed partial class ListingViewModel : ObservableRecipient
                 title += $"：{Name}";
             }
 
-            return $"{title}：{(_unit.Status == EnumEntryStatus.New ? "新規" : "編集")}";
+            return $"{title}：{(_unit.Status == EnumEntityStatus.New ? "新規" : "編集")}";
         }
         set => OnPropertyChanged();
     } = "賃貸事業用";
@@ -209,43 +220,9 @@ public sealed partial class ListingViewModel : ObservableRecipient
         return true;
     }
 
-    private bool SaveToNew()
-    {
-        WeakReferenceMessenger.Default.Send(
-            new Models.Messenger.ListingUpdatedMessage(_unit));
-
-        return true;
-    }
-
     private async Task<bool> SaveAsUpdate()
     {
-        var result = await Task.Run(() => _dataAccessService.UpsertRentCommercialListing(
-            _unit.PropertyId,
-            _unit), _cts.Token);
 
-        if (result.IsError)
-        {
-            InfoBarErrorMessage = string.Join(
-                Environment.NewLine,
-                new[]
-                {
-                result.Error.Title,
-                result.Error.Message,
-                result.Error.Description,
-                result.Error.Operation,
-                result.Error.MethodName
-                }.Where(message => !string.IsNullOrWhiteSpace(message)));
-
-            IsInfoBarErrorOpen = true;
-            return false;
-        }
-
-        _unit.Status = EnumEntryStatus.Saved;
-        _unit.PropertyStatus = EnumEntryStatus.Saved;
-        _unit.IsModified = false;
-
-        WeakReferenceMessenger.Default.Send(
-            new Models.Messenger.ListingUpdatedMessage(_unit));
 
         return true;
     }
@@ -288,56 +265,102 @@ public sealed partial class ListingViewModel : ObservableRecipient
         }
 
         SetValues();
-
+        
         bool saveResult;
 
-        if (_unit.PropertyStatus == EnumEntryStatus.New)
+        if (_unit.PropertyStatus == EnumEntityStatus.New)
         {
-            saveResult = SaveToNew();
+            Debug.WriteLine("(_room.PropertyStatus == EnumPropertyStatus.New) @ListingViewModel on Save. Sending it to Property editor window");
+            // Building is unsaved state. So, update it and done (don't save room to DB here because we don't save room without building).
+
+            // TODO: make sure property editor window is exists (opened).
+
+            // Update the selected search result's values such as name if it exists. Also, update building window's rooms list.
+            WeakReferenceMessenger.Default.Send(new Models.Messenger.ListingUpdatedMessage(_unit));
+
+            saveResult = true;
         }
-        else
+        else 
         {
-            saveResult = await SaveAsUpdate();
+            var result = await Task.Run(() => _dataAccessService.UpsertRentCommercialListing(_unit.PropertyId,_unit), _cts.Token);
+
+            if (result.IsError)
+            {
+                InfoBarErrorMessage = string.Join(
+                    Environment.NewLine,
+                    new[]
+                    {
+                result.Error.Title,
+                result.Error.Message,
+                result.Error.Description,
+                result.Error.Operation,
+                result.Error.MethodName
+                    }.Where(message => !string.IsNullOrWhiteSpace(message)));
+
+                IsInfoBarErrorOpen = true;
+
+                saveResult = false;
+            }
+            else
+            {
+                _unit.IsModified = false;
+                _unit.PropertyStatus = EnumEntityStatus.Saved;// just in case.
+                _unit.Status = EnumEntityStatus.Saved;
+
+                // Update the selected search result's values such as name if it exists. Also, update building window's rooms list.
+                WeakReferenceMessenger.Default.Send(new Models.Messenger.ListingUpdatedMessage(_unit));
+
+                saveResult = true;
+            }
+
         }
 
-        if (!saveResult)
+        if (saveResult)
         {
-            return;
-        }
+            IsDirty = false;
 
-        IsDirty = false;
-        IsInfoBarErrorOpen = false;
-        WindowTitle = string.Empty;
+            // Clear error infobar.
+            IsInfoBarErrorOpen = false;
 
-        /*
-        var result = await Task.Run(() => _dataAccessService.UpsertRentCommercialListing(
-            _unit.PropertyId,
-            _unit), _cts.Token);
+            // Update title with dummy value.
+            WindowTitle = string.Empty;
 
-        if (result.IsError)
-        {
-            InfoBarErrorMessage = string.Join(
-                Environment.NewLine,
-                new[]
+            // TODO: 
+            /*
+            // Clean up deleted picture file.
+            if (_unit.PicturesToBeDeleted.Count > 0)
+            {
+                foreach (var file in _unit.PicturesToBeDeleted)
                 {
-                    result.Error.Title,
-                    result.Error.Message,
-                    result.Error.Description,
-                    result.Error.Operation,
-                    result.Error.MethodName
-                }.Where(message => !string.IsNullOrWhiteSpace(message)));
+                    // check if (_room.Pictures.Remove(file))
+                    var delFilePath = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(App.PropertyBlobDataFolder, _unit.PropertyId), _unit.Id), file.ImageFilename);
+                    File.Delete(delFilePath);
+                }
 
-            IsInfoBarErrorOpen = true;
-            return;
+                _unit.PicturesToBeDeleted.Clear();
+            }
+
+            // Clean up deleted picture file.
+            if (_unit.PdfsToBeDeleted.Count > 0)
+            {
+                foreach (var file in _unit.PdfsToBeDeleted)
+                {
+                    
+                    // check if (_room.Pdfs.Remove(file))
+                    var delFilePath = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(App.PropertyBlobDataFolder, _unit.PropertyId), _unit.Id), file.PdfFilename);
+                    File.Delete(delFilePath);
+                    delFilePath = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(App.PropertyBlobDataFolder, _unit.PropertyId), _unit.Id), file.PdfFilename);
+                    File.Delete(delFilePath);
+                }
+
+                _unit.PdfsToBeDeleted.Clear();
+            }
+            */
+            _unsavedUnitPictureFileList.Clear();
+            _unsavedUnitPdfFileList.Clear();
+            _unsavedUnitPdfThumbnailFileList.Clear();
         }
 
-        _unit.Status = EnumEntryStatus.Saved;
-        _unit.PropertyStatus = EnumEntryStatus.Saved;
-        _unit.IsModified = false;
-        IsDirty = false;
-        IsInfoBarErrorOpen = false;
-        WindowTitle = string.Empty;
-        */
     }
 
     private bool CanSave() => IsDirty;

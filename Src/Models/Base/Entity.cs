@@ -1,22 +1,29 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Media.Imaging;
-using System.Diagnostics;
 
 namespace ZumenSearch.Models.Base;
 
 #pragma warning disable IDE0079 // Remove unnecessary suppression
 #pragma warning disable IDE0290 // Use primary constructor
 
-public enum EnumEntryStatus
+// <summary>
+// Represents the status of an entity in the application, indicating whether it is saved in the database or new.
+// It is used to track the state of entities such as properties, listings, persons, pictures, and PDFs.
+// </summary>
+// <remarks>
+// </remarks>
+public enum EnumEntityStatus
 {
     Saved,
     New,
 }
 
-public abstract class EntryBase : ObservableObject
+// <summary>
+// Base class for all entities in the application including properties, listings, persons, pictures, and PDFs.
+// Provides common properties and methods for managing entity state.
+// </summary>
+public abstract class Entity : ObservableObject
 {
-    public EnumEntryStatus Status { get; set; } = EnumEntryStatus.New;
+    public EnumEntityStatus Status { get; set; } = EnumEntityStatus.New;
 
     public string Id { get; private set; } = string.Empty;
 
@@ -34,7 +41,7 @@ public abstract class EntryBase : ObservableObject
         }
     }
 
-    protected EntryBase(string id, EnumEntryStatus staus)
+    protected Entity(string id, EnumEntityStatus staus)
     {
         Id = id;
         Status = staus;

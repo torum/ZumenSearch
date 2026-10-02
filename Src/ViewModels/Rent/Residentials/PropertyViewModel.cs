@@ -34,9 +34,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     private readonly string _id = string.Empty;
 
-    // The Entry property holds the COPY of current RentResidential entry being edited.
-    // Do not use it directly in the UI. Apply changes to this object in SaveAsync() to save the changes.
-    // MainViewModel creates a new instance of this class and call EditorShell.SetEntry(EntryResidentialFull) and sets this property.
+    // This property holds the COPY of current entity being edited.
+    // Do not use it directly in the UI. Apply changes to this object in Save() to save the changes.
     private readonly Models.Rent.Residentials.Property _building;
 
     private readonly string _propertyDataDirectoryPath = string.Empty;
@@ -131,7 +130,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                 str = $"{field}：{Name}";
             }
 
-            if (_building.Status == EnumEntryStatus.New)
+            if (_building.Status == EnumEntityStatus.New)
             {
                 str = $"{str}：新規";
             }
@@ -1505,7 +1504,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             this.Rooms.Add(room);
         }
 
-        if (room.Status == EnumEntryStatus.New)
+        if (room.Status == EnumEntityStatus.New)
         {
             //Debug.WriteLine("(room.ListingStatus == EnumListingStatus.New) @PropertyViewModel");
             IsDirty = true;
@@ -1722,7 +1721,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             {
                 foreach (Models.Rent.Residentials.Picture item in e.OldItems)
                 {
-                    Debug.WriteLine($"Item {item.Id} Removed from Pictures. @CollectionChanged in PopulateEntryValues of Bldg.MainViewModel");
+                    Debug.WriteLine($"Item {item.Id} Removed from Pictures. @CollectionChanged in PopulateEntityValues of Bldg.MainViewModel");
                     IsDirty = true;
 
                     item.PropertyChanged -= OnBuildingPicturePropertyChanged;
@@ -1734,7 +1733,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             {
                 foreach (Models.Rent.Residentials.Picture item in e.NewItems)
                 {
-                    Debug.WriteLine($"Item {item.Id} Added to Pictures. @CollectionChanged in PopulateEntryValues of Bldg.MainViewModel");
+                    Debug.WriteLine($"Item {item.Id} Added to Pictures. @CollectionChanged in PopulateEntityValues of Bldg.MainViewModel");
                     IsDirty = true;
 
                     item.PropertyChanged += OnBuildingPicturePropertyChanged;
@@ -1761,7 +1760,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             {
                 foreach (Models.Rent.Residentials.Pdf item in e.OldItems)
                 {
-                    Debug.WriteLine($"Item {item.Id} Removed from Pdfs, @CollectionChanged in PopulateEntryValues of Bldg.MainViewModel");
+                    Debug.WriteLine($"Item {item.Id} Removed from Pdfs, @CollectionChanged in PopulateEntityValues of Bldg.MainViewModel");
                     IsDirty = true;
 
                     item.PropertyChanged -= OnBuildingPdfPropertyChanged;
@@ -1773,7 +1772,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             {
                 foreach (Models.Rent.Residentials.Pdf item in e.NewItems)
                 {
-                    Debug.WriteLine($"Item {item.Id} Added to Pdfs. @CollectionChanged in PopulateEntryValues of Bldg.MainViewModel");
+                    Debug.WriteLine($"Item {item.Id} Added to Pdfs. @CollectionChanged in PopulateEntityValues of Bldg.MainViewModel");
                     IsDirty = true;
 
                     item.PropertyChanged += OnBuildingPdfPropertyChanged;
@@ -1812,7 +1811,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             {
                 foreach (Models.Rent.Residentials.Listing.Listing item in e.OldItems)
                 {
-                    //Debug.WriteLine($"Item {item.Id} Removed from Rooms. @Rooms.CollectionChanged in PopulateEntryValues of Bldg.MainViewModel");
+                    //Debug.WriteLine($"Item {item.Id} Removed from Rooms. @Rooms.CollectionChanged in PopulateEntityValues of Bldg.MainViewModel");
                     //IsDirty = true; // Don't
 
                     item.PropertyChanged -= OnRoomPropertyChanged;
@@ -1824,7 +1823,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             {
                 foreach (Models.Rent.Residentials.Listing.Listing item in e.NewItems)
                 {
-                    //Debug.WriteLine($"Item {item.Id} Added to Rooms. @Rooms.CollectionChanged in PopulateEntryValues of Bldg.MainViewModel");
+                    //Debug.WriteLine($"Item {item.Id} Added to Rooms. @Rooms.CollectionChanged in PopulateEntityValues of Bldg.MainViewModel");
                     //IsDirty = true; // don't
 
                     item.PropertyChanged += OnRoomPropertyChanged;
@@ -1832,7 +1831,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             }
         };
 
-        //Debug.WriteLine($"PopulateEntryValues: Completed populating values from Entry to VM. Entry ID: {_building.Id}, Rooms Count: {Rooms.Count}");
+        //Debug.WriteLine($"PopulateEntityValues: Completed populating values from Entity to VM. Entity ID: {_building.Id}, Rooms Count: {Rooms.Count}");
     }
 
     private void OnBuildingPicturePropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -2123,7 +2122,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             _unsavedBuildingPdfFileList.Clear();
         }
 
-        if (_building.Status == EnumEntryStatus.New)
+        if (_building.Status == EnumEntityStatus.New)
         {
             if (Directory.Exists(_propertyDataDirectoryPath))
             {
@@ -2200,7 +2199,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             IsDirty = false;
 
             _building.IsModified = false;
-            _building.Status = EnumEntryStatus.Saved;
+            _building.Status = EnumEntityStatus.Saved;
 
             // Update title with dummy value.
             WindowTitle = string.Empty;
@@ -2266,22 +2265,22 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             _unsavedBuildingPdfFileList.Clear();
 
             // Jjust in case.
-            _building.Status = EnumEntryStatus.Saved;
+            _building.Status = EnumEntityStatus.Saved;
             _building.IsModified = false;
 
             foreach (var room in Rooms)
             {
                 room.PropertyName = Name;
-                room.PropertyStatus = EnumEntryStatus.Saved;
-                room.Status = EnumEntryStatus.Saved;
+                room.PropertyStatus = EnumEntityStatus.Saved;
+                room.Status = EnumEntityStatus.Saved;
             }
 
             // Just in case.
             foreach (var room in _building.Rooms)
             {
                 room.PropertyName = Name;
-                room.PropertyStatus = EnumEntryStatus.Saved;
-                room.Status = EnumEntryStatus.Saved;
+                room.PropertyStatus = EnumEntityStatus.Saved;
+                room.Status = EnumEntityStatus.Saved;
             }
 
             WeakReferenceMessenger.Default.Send(new Models.Messenger.PropertyUpdatedMessage(_building as Models.Base.PropertyBase));
@@ -2553,7 +2552,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     private void AddNewRoom() 
     {
         var newId = Guid.CreateVersion7().ToString("N");
-        var editorShell = _shellFactory.Create(new Models.Rent.Residentials.Listing.Listing(newId, EnumEntryStatus.New, _building.Id, _building.Status, _building.IsUnitOwnership, Name));
+        var editorShell = _shellFactory.Create(new Models.Rent.Residentials.Listing.Listing(newId, EnumEntityStatus.New, _building.Id, _building.Status, _building.IsUnitOwnership, Name));
 
         // Apply the current IsUnitOwnership state because it may not be saved to the _room.
         editorShell.ViewModel.IsPropertyUnitOwnership = this.IsUnitOwnership;
