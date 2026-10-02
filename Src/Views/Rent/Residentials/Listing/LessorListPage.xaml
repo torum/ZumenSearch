@@ -18,7 +18,7 @@
         <Grid Grid.Row="0">
             <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Margin="0,0,0,0" HorizontalAlignment="Right">
                 <AppBarButton Name="AppBarButtonSelectLessor" Icon="AddFriend"  Label="追加" Command="{x:Bind ViewModel.AddLessorCommand, Mode=OneWay}" />
-                <!-- Contact -->
+
                 <AppBarButton Icon="More" Label="その他">
                     <AppBarButton.Flyout>
                         <MenuFlyout Placement="Bottom">
@@ -32,7 +32,7 @@
         <Grid Grid.Row="1">
             <ScrollViewer HorizontalScrollMode="Disabled">
 
-                <!-- TODO: chnage this to listview -->
+                <!-- TODO: change this to listview -->
                 <ItemsRepeater x:Name="ItemsView" ItemsSource="{x:Bind ViewModel.LessorsWrapper, Mode=TwoWay}" MinWidth="300" MinHeight="225" ScrollViewer.HorizontalScrollMode="Disabled" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <!--  SelectionChanged="ItemsView_SelectionChanged" SelectionMode="Single" IsItemInvokedEnabled="False"  -->
                     <ItemsRepeater.ItemTemplate>
@@ -50,7 +50,7 @@
                                     <Grid Grid.Row="0" Grid.Column="1">
                                         <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Margin="0,0,0,0" HorizontalAlignment="Right">
                                             <AppBarButton Icon="Edit" Label="編集" ToolTipService.ToolTip="貸主を編集" Command="{x:Bind ParentViewModel.EditLessorCommand, Mode=OneWay}" CommandParameter="{x:Bind}"/>
-                                            <AppBarButton Icon="Delete" Label="削除" ToolTipService.ToolTip="貸主を削除" Command="{x:Bind ParentViewModel.DeleteLessorCommand, Mode=OneWay}" CommandParameter="{x:Bind}"/>
+                                            <AppBarButton Icon="Delete" Label="削除" ToolTipService.ToolTip="貸主との関連付けを削除" Command="{x:Bind ParentViewModel.DeleteLessorCommand, Mode=OneWay}" CommandParameter="{x:Bind}"/>
                                             <!--  -->
                                         </CommandBar>
                                     </Grid>

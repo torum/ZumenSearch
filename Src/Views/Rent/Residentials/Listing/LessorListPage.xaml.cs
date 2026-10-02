@@ -10,7 +10,6 @@ public sealed partial class LessorListPage : Page
 
     public LessorListPage()
     {
-        //ViewModel = new ViewModels.Rent.Residentials.Editor.Modal.KasinusiViewModel();
         InitializeComponent();
     }
 
@@ -18,7 +17,6 @@ public sealed partial class LessorListPage : Page
     {
         if (e.Parameter is ViewModels.Rent.Residentials.Listing.ListingViewModel vm)
         {
-            //_editorShell = e.Parameter as Views.Rent.Residentials.Editor.EditorShell;
             ViewModel = vm;
             Bindings.Update();
         }

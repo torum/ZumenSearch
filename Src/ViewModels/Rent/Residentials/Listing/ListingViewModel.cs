@@ -361,7 +361,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
 
     #region == 宅建業者プロパティ ==
 
-    public ObservableCollection<Models.Brokers.PersonWrapperForPropertyViewModel> BrokersWrapper
+    public ObservableCollection<Models.Rent.Residentials.PersonWrapperForListingViewModel> BrokersWrapper
     {
         get;
         set
@@ -593,6 +593,13 @@ public sealed partial class ListingViewModel : ObservableRecipient,
             _room.Lessors.Add(item.Person);
         }
 
+        // 宅建業者
+        _room.Brokers.Clear();
+        foreach (var item in BrokersWrapper)
+        {
+            _room.Brokers.Add(item.Person);
+        }
+
     }
 
     private bool SaveToNew()
@@ -741,6 +748,13 @@ public sealed partial class ListingViewModel : ObservableRecipient,
         foreach (var item in _room.Lessors)
         {
             LessorsWrapper.Add(new Models.Rent.Residentials.PersonWrapperForListingViewModel(item, this));
+        }
+
+        // Brokers
+        BrokersWrapper = new ObservableCollection<Models.Rent.Residentials.PersonWrapperForListingViewModel>();
+        foreach (var item in _room.Brokers)
+        {
+            BrokersWrapper.Add(new Models.Rent.Residentials.PersonWrapperForListingViewModel(item, this));
         }
 
 
@@ -1338,6 +1352,99 @@ public sealed partial class ListingViewModel : ObservableRecipient,
     private static bool CanDeleteLessor(Models.Rent.Residentials.PersonWrapperForListingViewModel lessor)
     {
         return lessor is not null;
+    }
+
+
+    #endregion
+
+    #region = Broker ==
+
+    [RelayCommand]
+    public async Task AddBroker()
+    {
+        if (_dialogService is null)
+        {
+            Debug.WriteLine("_dialogService is null");
+            return;
+        }
+
+        var selectedBroker = await _dialogService.ShowBrokerSelectDialog(
+            new ViewModels.Dialogs.BrokerSelectViewModel(_dataAccessService, _cts));
+
+        if (selectedBroker is null ||
+            BrokersWrapper.Any(item => item.Person.Id == selectedBroker.Id))
+        {
+            return;
+        }
+
+        var result = _dataAccessService.SelectBrokerById(selectedBroker.Id);
+        if (result.IsError || result.Person is null)
+        {
+            Debug.WriteLine($"Could not load broker '{selectedBroker.Id}'.");
+            return;
+        }
+
+        // TODO: This needs to be copied to the property editor window's brokers list and some more too, so that when saving the property, it will save the broker association too. (or maybe not needed because we are saving the room and not the property here.)
+        // * Check if the broker is already in the list of brokers to be deleted
+        // * Remove a matching pending deletion before adding the selected broker, so deleting and then re-adding it before saving won’t delete its association
+        var pendingDeletion = _room.BrokersToBeDeleted.FirstOrDefault(person => person.Id == result.Person.Id);
+        if (pendingDeletion is not null)
+        {
+            _room.BrokersToBeDeleted.Remove(pendingDeletion);
+        }
+
+
+        BrokersWrapper.Add(
+            new Models.Rent.Residentials.PersonWrapperForListingViewModel(
+                result.Person,
+                this));
+
+        IsDirty = true;
+    }
+
+    [RelayCommand(CanExecute = nameof(CanEditBroker))]
+    private void EditBroker(
+        Models.Rent.Residentials.PersonWrapperForListingViewModel? broker)
+    {
+        if (broker?.Person is null)
+        {
+            return;
+        }
+
+        var mainViewModel = App.GetService<MainViewModel>();
+        if (mainViewModel.EditBrokerCommand.CanExecute(broker.Person))
+        {
+            mainViewModel.EditBrokerCommand.Execute(broker.Person);
+        }
+    }
+
+    private static bool CanEditBroker(
+        Models.Rent.Residentials.PersonWrapperForListingViewModel? broker)
+    {
+        return broker?.Person is not null;
+    }
+
+    [RelayCommand(CanExecute = nameof(CanDeleteBroker))]
+    private void DeleteBroker(
+        Models.Rent.Residentials.PersonWrapperForListingViewModel? broker)
+    {
+        if (broker?.Person is null)
+        {
+            return;
+        }
+
+        if (BrokersWrapper.Remove(broker))
+        {
+            _room.Brokers.Remove(broker.Person);
+            _room.BrokersToBeDeleted.Add(broker.Person);
+            IsDirty = true;
+        }
+    }
+
+    private static bool CanDeleteBroker(
+        Models.Rent.Residentials.PersonWrapperForListingViewModel? broker)
+    {
+        return broker?.Person is not null;
     }
 
 

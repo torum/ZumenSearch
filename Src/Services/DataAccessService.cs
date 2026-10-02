@@ -2033,6 +2033,42 @@ public sealed class DataAccessService : IDataAccessService
                 }
             }
         }
+
+        // 宅建業者（部屋）
+        cmd.Parameters.Clear();
+        cmd.CommandText = """
+    SELECT b.broker_id, b.name, b.person_kind,
+           b.name_last, b.name_first, b.name_company,
+           b.name_company_type, b.name_company_type_position, b.remarks
+    FROM brokers_properties_listings AS association
+    INNER JOIN brokers AS b ON b.broker_id = association.broker_id
+    WHERE association.property_id = @propertyId
+      AND association.listing_id = @listingId;
+    """;
+        cmd.Parameters.AddWithValue("@propertyId", room.PropertyId);
+        cmd.Parameters.AddWithValue("@listingId", room.Id);
+
+        using (var reader = cmd.ExecuteReader())
+        {
+            while (reader.Read())
+            {
+                var brokerId = Convert.ToString(reader["broker_id"]);
+                if (string.IsNullOrWhiteSpace(brokerId))
+                {
+                    continue;
+                }
+
+                var broker = GetPerson(reader, brokerId);
+                if (broker is not null)
+                {
+                    room.Brokers.Add(broker);
+                }
+            }
+        }
+
+        cmd.Parameters.Clear();
+
+
     }
 
     public ResultWrapper DeleteRentResidential(string rentId)
@@ -2332,12 +2368,49 @@ public sealed class DataAccessService : IDataAccessService
                             Debug.WriteLine("Lessor deleted");
                         }
                     }
-                    // TODO: should I?
-                    room.LessorsToBeDeleted.Clear();
                 }
+
+                // 部屋宅建業者 brokers_properties_listings - Insert or Update
+                foreach (var broker in room.Brokers)
+                {
+                    cmd.Parameters.Clear();
+                    cmd.CommandText = """
+        INSERT INTO brokers_properties_listings
+            (broker_id, property_id, property_kind, listing_id)
+        VALUES
+            (@brokerId, @propertyId, @propertyKind, @listingId)
+        ON CONFLICT (broker_id, property_id, listing_id) DO NOTHING;
+        """;
+                    cmd.Parameters.AddWithValue("@brokerId", broker.Id);
+                    cmd.Parameters.AddWithValue("@propertyId", room.PropertyId);
+                    cmd.Parameters.AddWithValue("@propertyKind", room.PropertyKind.ToString());
+                    cmd.Parameters.AddWithValue("@listingId", room.Id);
+                    cmd.ExecuteNonQuery();
+                }
+
+                foreach (var broker in room.BrokersToBeDeleted)
+                {
+                    cmd.Parameters.Clear();
+                    cmd.CommandText = """
+        DELETE FROM brokers_properties_listings
+        WHERE broker_id = @brokerId
+          AND property_id = @propertyId
+          AND listing_id = @listingId;
+        """;
+                    cmd.Parameters.AddWithValue("@brokerId", broker.Id);
+                    cmd.Parameters.AddWithValue("@propertyId", room.PropertyId);
+                    cmd.Parameters.AddWithValue("@listingId", room.Id);
+                    cmd.ExecuteNonQuery();
+                }
+
+
 
                 // Commit
                 cmd.Transaction.Commit();
+
+                // Clear deletion queues only after the commit succeeds.
+                room.LessorsToBeDeleted.Clear();
+                room.BrokersToBeDeleted.Clear();
             }
             catch (Exception ex)
             {

@@ -11,7 +11,6 @@ public sealed partial class BrokerListPage : Page
 
     public BrokerListPage()
     {
-        //ViewModel = new ViewModels.Rent.Residentials.Editor.Modal.GyousyaViewModel();
         InitializeComponent();
     }
 
@@ -20,8 +19,7 @@ public sealed partial class BrokerListPage : Page
         if (e.Parameter is ViewModels.Rent.Residentials.Listing.ListingViewModel vm)
         {
             ViewModel = vm;
-            // comment out when x:Bind expressions is added.
-            //Bindings.Update();
+            Bindings.Update();
         }
 
         base.OnNavigatedTo(e);

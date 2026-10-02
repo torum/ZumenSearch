@@ -76,6 +76,22 @@ public sealed partial class Listing : ListingBase
     // DBへの更新時にDBから削除されるべき貸主のIDリスト
     public ObservableCollection<Models.Base.PersonBase> LessorsToBeDeleted = [];
 
+    // 宅建業者のリスト
+    public ObservableCollection<Models.Base.PersonBase> Brokers
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;
+            }
+        }
+    } = [];
+
+    // DBへの更新時にDBから削除されるべき宅建業者のIDリスト
+    public ObservableCollection<Models.Base.PersonBase> BrokersToBeDeleted = [];
+
 
     // 賃料（円）
     public decimal Chinryou
