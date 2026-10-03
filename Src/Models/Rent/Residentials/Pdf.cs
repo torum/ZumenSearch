@@ -4,7 +4,8 @@ using ZumenSearch.Models.Base;
 namespace ZumenSearch.Models.Rent.Residentials;
 
 // TODO: Consider creating a wrapper just like Lessor wrapper?
-// Almost dupe with Models.Rent.Residentials.Listing.Pdf
+// Almost dupe of Models.Rent.Residentials.Listing.Pdf
+// ParentViewModel and type Dictionary are the main difference. Consider if we can reuse this.
 
 public enum EnumResidentialPdfType
 {

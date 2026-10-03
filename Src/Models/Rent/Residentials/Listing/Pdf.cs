@@ -7,7 +7,7 @@ namespace ZumenSearch.Models.Rent.Residentials.Listing;
 // Consider removable.
 // No... We need ParentViewModel(ViewModels.Rent.Residentials.Listing.ListingViewModel)
 // Then, consider creating a wrapper just like Lessor wrapper?
-// Consider if we can reuse this for Sales 
+// ParentViewModel and type Dictionary are the main difference.
 
 public enum EnumRoomPdfType
 {

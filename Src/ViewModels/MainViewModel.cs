@@ -158,51 +158,51 @@ public partial class MainViewModel : ObservableRecipient,
 
     public ObservableCollection<Models.Common.Breadcrumb> BreadcrumbItemsResidential { get; set; } =
     [
-        new() { Name = "賃貸住居用 募集物件", Page = typeof(Views.Rent.ResidentialSearchPage).FullName! }
+        new() { Name = "募集物件検索", Page = typeof(Views.Rent.ResidentialSearchPage).FullName! }
     ];
     public ObservableCollection<Models.Common.Breadcrumb> BreadcrumbItemsResidentialSearchResult { get; set; } =
     [
-        new() { Name = "賃貸住居用 募集物件", Page = typeof(Views.Rent.ResidentialSearchPage).FullName! },
+        new() { Name = "募集物件検索", Page = typeof(Views.Rent.ResidentialSearchPage).FullName! },
         new() { Name = "検索結果", Page = typeof(Views.Rent.ResidentialSearchResultPage).FullName! },
     ];
 
     public ObservableCollection<Models.Common.Breadcrumb> BreadcrumbItemsCommercial { get; set; } =
-[
-    new() { Name = "賃貸事業用 募集物件", Page = typeof(Views.Rent.CommercialSearchPage).FullName! }
-];
+    [
+        new() { Name = "募集物件検索", Page = typeof(Views.Rent.CommercialSearchPage).FullName! }
+    ];
     public ObservableCollection<Models.Common.Breadcrumb> BreadcrumbItemsCommercialSearchResult { get; set; } =
     [
-        new() { Name = "賃貸事業用 募集物件", Page = typeof(Views.Rent.CommercialSearchPage).FullName! },
+        new() { Name = "募集物件検索", Page = typeof(Views.Rent.CommercialSearchPage).FullName! },
         new() { Name = "検索結果", Page = typeof(Views.Rent.CommercialSearchResultPage).FullName! },
     ];
 
     public ObservableCollection<Models.Common.Breadcrumb> BreadcrumbItemsParking { get; set; } =
-[
-new() { Name = "賃貸駐車場 募集物件", Page = typeof(Views.Rent.ParkingSearchPage).FullName! }
-];
+    [
+    new() { Name = "募集物件検索", Page = typeof(Views.Rent.ParkingSearchPage).FullName! }
+    ];
     public ObservableCollection<Models.Common.Breadcrumb> BreadcrumbItemsParkingSearchResult { get; set; } =
     [
-        new() { Name = "賃貸駐車場 募集物件", Page = typeof(Views.Rent.ParkingSearchPage).FullName! },
+        new() { Name = "募集物件検索", Page = typeof(Views.Rent.ParkingSearchPage).FullName! },
         new() { Name = "検索結果", Page = typeof(Views.Rent.ParkingSearchResultPage).FullName! },
     ];
 
     public ObservableCollection<Models.Common.Breadcrumb> BreadcrumbItemsLessor { get; set; } =
     [
-    new() { Name = "貸主", Page = typeof(Views.Rent.LessorSearchPage).FullName! }
+        new() { Name = "貸主検索", Page = typeof(Views.Rent.LessorSearchPage).FullName! }
     ];
     public ObservableCollection<Models.Common.Breadcrumb> BreadcrumbItemsLessorSearchResult { get; set; } =
     [
-        new() { Name = "貸主", Page = typeof(Views.Rent.LessorSearchPage).FullName! },
+        new() { Name = "貸主検索", Page = typeof(Views.Rent.LessorSearchPage).FullName! },
         new() { Name = "検索結果", Page = typeof(Views.Rent.LessorSearchResultPage).FullName! },
     ];
 
     public ObservableCollection<Models.Common.Breadcrumb> BreadcrumbItemsBroker { get; set; } =
     [
-        new() { Name = "宅建業者", Page = typeof(Views.BrokerSearchPage).FullName! }
+        new() { Name = "宅建業者検索", Page = typeof(Views.BrokerSearchPage).FullName! }
     ];
     public ObservableCollection<Models.Common.Breadcrumb> BreadcrumbItemsBrokerSearchResult { get; set; } =
     [
-        new() { Name = "宅建業者", Page = typeof(Views.BrokerSearchPage).FullName! },
+        new() { Name = "宅建業者検索", Page = typeof(Views.BrokerSearchPage).FullName! },
         new() { Name = "検索結果", Page = typeof(Views.BrokerSearchResultPage).FullName! },
     ];
 

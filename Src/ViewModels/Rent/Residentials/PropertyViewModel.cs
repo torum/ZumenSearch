@@ -40,8 +40,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     private readonly string _propertyDataDirectoryPath = string.Empty;
 
-    // Child windows.
-    public readonly List<Views.Rent.Residentials.Listing.EditorWindow> ChildEditorList = [];
+    // Keeps truck of "New" child window because it saves to the parent window/viewmodel.
+    public readonly List<Views.Rent.Residentials.Listing.EditorWindow> UnsavedChildEditorList = [];
 
     // Tmp file list to hold unsaved picture files. (if entry is not saved, delete on close)
     private readonly List<string> _unsavedBuildingPictureFileList = [];
@@ -1509,6 +1509,16 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             //Debug.WriteLine("(room.ListingStatus == EnumListingStatus.New) @PropertyViewModel");
             IsDirty = true;
         }
+        else
+        {
+            // Remove the child editor window for this room if it exists
+            // because it is no longer new and has been saved and can be saved independently.
+            var win = this.UnsavedChildEditorList.FirstOrDefault(w => w is Views.Rent.Residentials.Listing.EditorWindow ew && ew.Id == room.Id);
+            if (win is not null)
+            {
+                this.UnsavedChildEditorList.Remove(win);
+            }
+        }
     }
 
     public void Receive(LessorUpdatedMessage person)
@@ -1593,7 +1603,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
         if (ewin is Views.Rent.Residentials.Listing.EditorWindow rlwin)
         {
-            this.ChildEditorList.Remove(rlwin);
+            this.UnsavedChildEditorList.Remove(rlwin);
         }
     }
 
@@ -2560,7 +2570,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         var mainVM = App.GetService<ViewModels.MainViewModel>();
         mainVM.RentResidentialListingEditorList.Add(editorShell.Window);
 
-        this.ChildEditorList.Add(editorShell.Window);
+        this.UnsavedChildEditorList.Add(editorShell.Window);
 
         if (editorShell.Window.AppWindow.Presenter is OverlappedPresenter presenter)
         {
@@ -2627,7 +2637,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             }
             catch (COMException)
             {
-                // 既に閉じられたウィンドウをリストから除去
+                // TODO: should we remove the window from the list? It may have been closed already.
                 //mainVM.RoomEditorList.Remove(editWin);
                 //ChildEditorList.Remove(editWin);
             }
@@ -2648,7 +2658,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
         mainVM.RentResidentialListingEditorList.Add(editorWindow);
 
-        this.ChildEditorList.Add(editorWindow);
+        // Let's not add it to the ChildEditorList because it is already saved which means it's got a own persistent id and can be saved independently.
+        //this.ChildEditorList.Add(editorWindow);
 
         editorWindow.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(mainVM.RentResidentialListingEditorWinLeft, mainVM.RentResidentialListingEditorWinTop, mainVM.RentResidentialListingEditorWinWidth, mainVM.RentResidentialListingEditorWinHeight));
         if (editorWindow.AppWindow.Presenter is OverlappedPresenter presenter)
@@ -2727,7 +2738,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             }
             catch (COMException)
             {
-                // 既に閉じられたウィンドウをリストから除去
+                // 
                 //mainVM.RoomEditorList.Remove(editWin);
                 //ChildEditorList.Remove(editWin);
             }
@@ -2738,7 +2749,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
         if (Rooms.Remove(room))
         {
-            // No. Don't
+            // No. Don't delete directly. Just mark it for deletion. It will be deleted when the property is saved.
             //if (_building.Rooms.Remove(room)) { }
             _building.RoomsToBeDeleted.Add(room);
             IsDirty = true;

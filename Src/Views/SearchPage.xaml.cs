@@ -10,6 +10,7 @@ public partial class RecentPropertyTypeTemplateSelector : DataTemplateSelector
 {
     public DataTemplate? RecentRentResidentialTemplate { get; set; }
     public DataTemplate? RecentRentCommercialTemplate { get; set; }
+    public DataTemplate? RecentSaleResidentialTemplate { get; set; }
 
     protected override DataTemplate? SelectTemplateCore(object item)
     {
@@ -22,6 +23,10 @@ public partial class RecentPropertyTypeTemplateSelector : DataTemplateSelector
             else if (searchResultItem.PropertyKind == Models.Base.EnumPropertyKind.RentCommercial)
             {
                 return RecentRentCommercialTemplate;
+            }
+            else if (searchResultItem.PropertyKind == Models.Base.EnumPropertyKind.SaleResidential)
+            {
+                return RecentSaleResidentialTemplate;
             }
             else
             {

@@ -62,10 +62,37 @@
             </ItemContainer>
         </DataTemplate>
 
+        <!-- DataTemplate for Sale Residential -->
+        <DataTemplate x:Key="SaleResidentialTemplate" x:DataType="mod:PropertySearchResultItem">
+            <ItemContainer DataContext="{x:Bind}" IsDoubleTapEnabled="True" AllowFocusOnInteraction="False" DoubleTapped="SearchResult_DoubleTapped" PointerPressed="ItemContainer_PointerPressed" PointerReleased="ItemContainer_PointerReleased" RightTapped="ItemContainer_RightTapped">
+                <ItemContainer.KeyboardAccelerators>
+                    <KeyboardAccelerator Key="Enter" Modifiers="None" Invoked="ItemsViewKeyboardAccelerator_Invoked" />
+                </ItemContainer.KeyboardAccelerators>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Ellipse x:Name="Ellipse" Grid.RowSpan="2" Width ="32" Height="32" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center" Fill="{ThemeResource SystemControlBackgroundBaseMediumBrush}"/>
+
+                    <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Margin="12,6,0,0">
+                        <TextBlock Text="{x:Bind Name, Mode=OneWay}" Style="{ThemeResource BaseTextBlockStyle}"/>
+                        <TextBlock Text="（売買住居用）" Style="{ThemeResource BaseTextBlockStyle}"/>
+                    </StackPanel>
+                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{x:Bind Id, Mode=OneTime}" x:Phase="2" Style="{ThemeResource BodyTextBlockStyle}" Margin="12,0,0,6"/>
+                </Grid>
+            </ItemContainer>
+        </DataTemplate>
+        
         <!-- Instantiate the Selector and reference our DataTemplates -->
         <local:PropertyTypeTemplateSelector x:Key="PropertyTypeTemplateSelector"
             RentResidentialTemplate="{StaticResource RentResidentialTemplate}"
-            RentCommercialTemplate="{StaticResource RentCommercialTemplate}"/>
+            RentCommercialTemplate="{StaticResource RentCommercialTemplate}"
+            SaleResidentialTemplate="{StaticResource SaleResidentialTemplate}"/>
 
     </Page.Resources>
     <Grid x:Name="ContentArea" Margin="0,0,0,0">

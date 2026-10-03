@@ -3,8 +3,6 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
 using ZumenSearch.Models.Common;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.ViewModels;
@@ -15,6 +13,7 @@ public partial class PropertyTypeTemplateSelector : DataTemplateSelector
 {
     public DataTemplate? RentResidentialTemplate { get; set; }
     public DataTemplate? RentCommercialTemplate { get; set; }
+    public DataTemplate? SaleResidentialTemplate { get; set; }
 
     protected override DataTemplate? SelectTemplateCore(object item)
     {
@@ -27,6 +26,10 @@ public partial class PropertyTypeTemplateSelector : DataTemplateSelector
             else if (searchResultItem.PropertyKind == Models.Base.EnumPropertyKind.RentCommercial)
             {
                 return RentCommercialTemplate;
+            }
+            else if (searchResultItem.PropertyKind == Models.Base.EnumPropertyKind.SaleResidential)
+            {
+                return SaleResidentialTemplate;
             }
             else
             {

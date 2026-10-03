@@ -75,10 +75,43 @@
             </ItemContainer>
         </DataTemplate>
 
+        <!-- DataTemplate for Sale Residential -->
+        <DataTemplate x:Key="SaleResidentialTemplate" x:DataType="mod:PropertySearchResultItem">
+            <ItemContainer DataContext="{x:Bind}" IsDoubleTapEnabled="True" AllowFocusOnInteraction="False" DoubleTapped="ItemContainer_DoubleTapped"  PointerPressed="ItemContainer_PointerPressed" PointerReleased="ItemContainer_PointerReleased" RightTapped="ItemContainer_RightTapped">
+                <ItemContainer.KeyboardAccelerators>
+                    <KeyboardAccelerator Key="Enter" Modifiers="None" Invoked="ItemsViewKeyboardAccelerator_Invoked" />
+                </ItemContainer.KeyboardAccelerators>
+                <Border Width="240" CornerRadius="4" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
+                    <Grid Height="180">
+                        <TextBlock Text="画像なし" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <Rectangle RadiusX="3" RadiusY="3">
+                            <Rectangle.Fill>
+                                <ImageBrush ImageSource="{x:Bind ThumbImage, TargetNullValue={x:Null}, Mode=OneWay}" Stretch="UniformToFill" />
+                            </Rectangle.Fill>
+                        </Rectangle>
+                        <Border HorizontalAlignment="Left" VerticalAlignment="Top" Margin="8" Padding="8,4" CornerRadius="4" Background="{ThemeResource AcrylicInAppFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
+                            <TextBlock Text="売買住居用" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                        </Border>
+                        <Border VerticalAlignment="Bottom" Padding="10,8" CornerRadius="0,0,3,3" Background="{ThemeResource AcrylicInAppFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,1,0,0">
+                            <StackPanel Spacing="6">
+                                <TextBlock Text="{x:Bind Name, Mode=OneWay}" FontSize="15" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" MaxLines="2" />
+                                <StackPanel Orientation="Horizontal" Spacing="4">
+                                    <TextBlock Text="更新:" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                    <TextBlock Text="{x:Bind UpdatedAt, Mode=OneWay}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </Border>
+            </ItemContainer>
+        </DataTemplate>
+
+
         <!-- Instantiate the Selector and reference our DataTemplates -->
         <local:RecentPropertyTypeTemplateSelector x:Key="RecentPropertyTypeTemplateSelector"
             RecentRentResidentialTemplate="{StaticResource RentResidentialTemplate}"
-            RecentRentCommercialTemplate="{StaticResource RentCommercialTemplate}"/>
+            RecentRentCommercialTemplate="{StaticResource RentCommercialTemplate}"
+            RecentSaleResidentialTemplate="{StaticResource SaleResidentialTemplate}"/>
 
     </Page.Resources>
     

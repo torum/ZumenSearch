@@ -199,7 +199,7 @@ public sealed partial class ShellPage : Page
             }
 
             var isCanceled = false;
-            var childEditors = ViewModel.ChildEditorList.ToList();
+            var childEditors = ViewModel.UnsavedChildEditorList.ToList();
 
             if (childEditors.Count > 0)
             {
