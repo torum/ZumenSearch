@@ -137,7 +137,7 @@ public sealed partial class Picture : PictureBase
         }
     }
 
-    public Picture(string id, string imageLocation) : base(id)
+    public Picture(string id, string imageLocation, EnumEntityStatus status) : base(id, status)
     {
         ImageFilename = imageLocation;
 

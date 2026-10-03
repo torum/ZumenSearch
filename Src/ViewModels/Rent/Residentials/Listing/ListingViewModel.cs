@@ -1037,10 +1037,9 @@ public sealed partial class ListingViewModel : ObservableRecipient,
             using var destinationStream = File.Create(destFilePath);
             await sourceStream.CopyToAsync(destinationStream);
 
-            var pic = new Models.Rent.Residentials.Listing.Picture(newId, newFilename)
+            var pic = new Models.Rent.Residentials.Listing.Picture(newId, newFilename, EnumEntityStatus.New)
             {
                 BasePath = _listingDataDirectoryPath,
-                IsNew = true,
                 ParentViewModel = this
             };
 
@@ -1170,10 +1169,9 @@ public sealed partial class ListingViewModel : ObservableRecipient,
                 // Keep track of unsaved files to delete them when discarding.
                 _unsavedRoomPdfFileList.Add(pdfDestFilePath);
 
-                var pdf = new Models.Rent.Residentials.Listing.Pdf(newId, newFilename, newThumbnailFilename)
+                var pdf = new Models.Rent.Residentials.Listing.Pdf(newId, newFilename, newThumbnailFilename, EnumEntityStatus.New)
                 {
                     BasePath = _listingDataDirectoryPath,
-                    IsNew = true,
                     ParentViewModel = this
                 };
 

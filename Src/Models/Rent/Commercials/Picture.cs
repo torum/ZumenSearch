@@ -18,23 +18,21 @@ public enum EnumCommercialPictureType
 
 public sealed class CommercialPictureType(EnumCommercialPictureType key)
 {
-    private static readonly IReadOnlyDictionary<EnumCommercialPictureType, string> Labels =
-        new Dictionary<EnumCommercialPictureType, string>
-        {
-            [EnumCommercialPictureType.Unspecified] = "未指定",
-            [EnumCommercialPictureType.Exterior] = "外観",
-            [EnumCommercialPictureType.Entrance] = "エントランス",
-            [EnumCommercialPictureType.Neighborhood] = "周辺",
-            [EnumCommercialPictureType.Interior] = "室内",
-            [EnumCommercialPictureType.Other] = "その他"
-        };
+    private static readonly Dictionary<EnumCommercialPictureType, string> PictureTypes = new()
+    {
+        [EnumCommercialPictureType.Unspecified] = "未指定",
+        [EnumCommercialPictureType.Exterior] = "外観",
+        [EnumCommercialPictureType.Entrance] = "エントランス",
+        [EnumCommercialPictureType.Neighborhood] = "周辺",
+        [EnumCommercialPictureType.Interior] = "室内",
+        [EnumCommercialPictureType.Other] = "その他"
+    };
+    private static readonly Dictionary<EnumCommercialPictureType, string> Labels = PictureTypes;
 
     public EnumCommercialPictureType Key => key;
 
     public string Label => Labels[key];
 }
-
-
 
 public sealed partial class Picture : PictureBase
 {
@@ -118,7 +116,7 @@ public sealed partial class Picture : PictureBase
         }
     }
 
-    public Picture(string id, string imageLocation) : base(id)
+    public Picture(string id, string imageLocation, EnumEntityStatus status) : base(id, status)
     {
         ImageFilename = imageLocation;
 

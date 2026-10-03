@@ -1125,7 +1125,8 @@ public sealed class DataAccessService : IDataAccessService
                         var r = cmd.ExecuteNonQuery();
                         if (r > 0)
                         {
-                            pic.IsNew = false;
+                            //pic.IsNew = false;
+                            pic.Status = Models.Base.EnumEntityStatus.Saved;
                             pic.IsModified = false;
                         }
                     }
@@ -1191,7 +1192,8 @@ public sealed class DataAccessService : IDataAccessService
                         var r = cmd.ExecuteNonQuery();
                         if (r > 0)
                         {
-                            pic.IsNew = false;
+                            //pic.IsNew = false;
+                            pic.Status = Models.Base.EnumEntityStatus.Saved;
                             pic.IsModified = false;
                         }
                     }
@@ -1383,7 +1385,8 @@ public sealed class DataAccessService : IDataAccessService
                                 var result = cmd.ExecuteNonQuery();
                                 if (result > 0)
                                 {
-                                    pic.IsNew = false;
+                                    //pic.IsNew = false;
+                                    pic.Status = Models.Base.EnumEntityStatus.Saved;
                                     pic.IsModified = false;
                                 }
                             }
@@ -1441,7 +1444,8 @@ public sealed class DataAccessService : IDataAccessService
                                 var result = cmd.ExecuteNonQuery();
                                 if (result > 0)
                                 {
-                                    pdf.IsNew = false;
+                                    //pdf.IsNew = false;
+                                    pdf.Status = Models.Base.EnumEntityStatus.Saved;
                                     pdf.IsModified = false;
                                 }
                             }
@@ -1690,11 +1694,9 @@ public sealed class DataAccessService : IDataAccessService
                     var picpath = Convert.ToString(reader["filename"]) ?? string.Empty;
                     if (!string.IsNullOrEmpty(picid) && !string.IsNullOrEmpty(picpath))
                     {
-                        var rlpic = new Models.Rent.Residentials.Picture(picid, picpath)
+                        var rlpic = new Models.Rent.Residentials.Picture(picid, picpath, EnumEntityStatus.Saved)
                         {
                             Description = Convert.ToString(reader["description"]) ?? string.Empty,
-
-                            IsNew = false,
                             IsModified = false
                         };
 
@@ -1723,10 +1725,9 @@ public sealed class DataAccessService : IDataAccessService
                     var thumbpath = Convert.ToString(reader["thumbnail_filename"]) ?? string.Empty;
                     if (!string.IsNullOrEmpty(pdfid) && !string.IsNullOrEmpty(pdfpath) && !string.IsNullOrEmpty(thumbpath))
                     {
-                        var rlpdf = new Models.Rent.Residentials.Pdf(pdfid, pdfpath, thumbpath)
+                        var rlpdf = new Models.Rent.Residentials.Pdf(pdfid, pdfpath, thumbpath, EnumEntityStatus.Saved)
                         {
                             Description = Convert.ToString(reader["description"]) ?? string.Empty,
-                            IsNew = false,
                             IsModified = false
                         };
 
@@ -1926,11 +1927,9 @@ public sealed class DataAccessService : IDataAccessService
                 var picpath = Convert.ToString(reader["filename"]) ?? string.Empty;
                 if (!string.IsNullOrEmpty(picid) && !string.IsNullOrEmpty(picpath))
                 {
-                    var rlpic = new Models.Rent.Residentials.Listing.Picture(picid, picpath)
+                    var rlpic = new Models.Rent.Residentials.Listing.Picture(picid, picpath, EnumEntityStatus.Saved)
                     {
                         Description = Convert.ToString(reader["description"]) ?? string.Empty,
-
-                        IsNew = false,
                         IsModified = false
                     };
 
@@ -1959,10 +1958,9 @@ public sealed class DataAccessService : IDataAccessService
                 var thumbpath = Convert.ToString(reader["thumbnail_filename"]) ?? string.Empty;
                 if (!string.IsNullOrEmpty(pdfid) && !string.IsNullOrEmpty(pdfpath) && !string.IsNullOrEmpty(thumbpath))
                 {
-                    var rlpdf = new Models.Rent.Residentials.Listing.Pdf(pdfid, pdfpath, thumbpath)
+                    var rlpdf = new Models.Rent.Residentials.Listing.Pdf(pdfid, pdfpath, thumbpath, EnumEntityStatus.Saved)
                     {
                         Description = Convert.ToString(reader["description"]) ?? string.Empty,
-                        IsNew = false,
                         IsModified = false
                     };
 
@@ -2231,7 +2229,8 @@ public sealed class DataAccessService : IDataAccessService
                             result = cmd.ExecuteNonQuery();
                             if (result > 0)
                             {
-                                pic.IsNew = false;
+                                //pic.IsNew = false;
+                                pic.Status = Models.Base.EnumEntityStatus.Saved;
                                 pic.IsModified = false;
                             }
                         }
@@ -2298,7 +2297,8 @@ public sealed class DataAccessService : IDataAccessService
                             result = cmd.ExecuteNonQuery();
                             if (result > 0)
                             {
-                                pdf.IsNew = false;
+                                //pdf.IsNew = false;
+                                pdf.Status = Models.Base.EnumEntityStatus.Saved;
                                 pdf.IsModified = false;
                             }
                         }
@@ -3047,16 +3047,17 @@ public sealed class DataAccessService : IDataAccessService
             // TODO: Check if this is necessary or already done in Save() in viewmodel.
             foreach (var picture in building.Pictures)
             {
-                picture.IsNew = false;
+                //picture.IsNew = false;
+                picture.Status = Models.Base.EnumEntityStatus.Saved;
                 picture.IsModified = false;
             }
 
             foreach (var pdf in building.Pdfs)
             {
-                pdf.IsNew = false;
+                //pdf.IsNew = false;
+                pdf.Status = Models.Base.EnumEntityStatus.Saved;
                 pdf.IsModified = false;
             }
-
 
             building.Status = EnumEntityStatus.Saved;
             building.IsModified = false;
@@ -3604,12 +3605,11 @@ public sealed class DataAccessService : IDataAccessService
                     continue;
                 }
 
-                var picture = new Models.Rent.Commercials.Picture(id, filename)
+                var picture = new Models.Rent.Commercials.Picture(id, filename, EnumEntityStatus.Saved)
                 {
                     Description =
                         Convert.ToString(reader["description"]) ?? string.Empty,
-                    IsMain = Convert.ToInt32(reader["is_main"]) != 0,
-                    IsNew = false
+                    IsMain = Convert.ToInt32(reader["is_main"]) != 0
                 };
 
                 picture.SetLabelFromString(
@@ -3650,12 +3650,11 @@ public sealed class DataAccessService : IDataAccessService
                 var pdf = new Models.Rent.Commercials.Pdf(
                     id,
                     filename,
-                    thumbnailFilename)
+                    thumbnailFilename, EnumEntityStatus.Saved)
                 {
                     Description =
                         Convert.ToString(reader["description"]) ?? string.Empty,
-                    IsMain = Convert.ToInt32(reader["is_main"]) != 0,
-                    IsNew = false
+                    IsMain = Convert.ToInt32(reader["is_main"]) != 0
                 };
 
                 pdf.SetTypeFromString(

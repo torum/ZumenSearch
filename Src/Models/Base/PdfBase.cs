@@ -7,8 +7,19 @@ namespace ZumenSearch.Models.Base;
 #pragma warning disable IDE0079 // Remove unnecessary suppression
 #pragma warning disable IDE0290 // Use primary constructor
 
-public abstract class PdfBase : ObservableObject
+public abstract class PdfBase : EntityBase
 {
+    protected PdfBase(string id, EnumEntityStatus staus) : base(id, staus)
+    {
+        //
+    }
+
+    //public string Id { get; } = string.Empty;
+
+    //public bool IsNew { get; set; } = true;
+
+    //public bool IsModified { get; set; } = false;
+
     public string PdfFilename
     {
         get;
@@ -70,16 +81,5 @@ public abstract class PdfBase : ObservableObject
         Uri uri = new(pdfFilePath);
         bitmapImage.UriSource = uri;
         return bitmapImage;
-    }
-
-    public string Id { get; } = string.Empty;
-
-    public bool IsNew { get; set; } = true;
-
-    public bool IsModified { get; set; } = false;
-
-    protected PdfBase(string id)
-    {
-        Id = id;
     }
 };

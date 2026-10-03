@@ -17,16 +17,16 @@ public enum EnumCommercialPdfType
 }
 public sealed class CommercialBuildingPdfType(EnumCommercialPdfType key)
 {
-    private static readonly IReadOnlyDictionary<EnumCommercialPdfType, string> Labels =
-        new Dictionary<EnumCommercialPdfType, string>
-        {
-            [EnumCommercialPdfType.Unspecified] = "未指定",
-            [EnumCommercialPdfType.Listing] = "募集図面",
-            [EnumCommercialPdfType.Architectural] = "建築図面",
-            [EnumCommercialPdfType.Registry] = "登記簿謄本",
-            [EnumCommercialPdfType.Map] = "公図・地図",
-            [EnumCommercialPdfType.Other] = "その他"
-        };
+    private static readonly Dictionary<EnumCommercialPdfType, string> pdfTypes = new()
+    {
+        [EnumCommercialPdfType.Unspecified] = "未指定",
+        [EnumCommercialPdfType.Listing] = "募集図面",
+        [EnumCommercialPdfType.Architectural] = "建築図面",
+        [EnumCommercialPdfType.Registry] = "登記簿謄本",
+        [EnumCommercialPdfType.Map] = "公図・地図",
+        [EnumCommercialPdfType.Other] = "その他"
+    };
+    private static readonly Dictionary<EnumCommercialPdfType, string> Labels = pdfTypes;
 
     public EnumCommercialPdfType Key => key;
 
@@ -115,7 +115,7 @@ public sealed partial class Pdf : PdfBase
         }
     }
 
-    public Pdf(string id, string pdfLocation, string thumbnailLocation) : base(id)
+    public Pdf(string id, string pdfLocation, string thumbnailLocation, EnumEntityStatus status) : base(id, status)
     {
         PdfFilename = pdfLocation;
         ThumbnailFilename = thumbnailLocation;

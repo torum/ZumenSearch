@@ -2350,10 +2350,9 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             using var destinationStream = File.Create(destFilePath);
             await sourceStream.CopyToAsync(destinationStream);
 
-            var pic = new Models.Rent.Residentials.Picture(newId, newFilename)
+            var pic = new Models.Rent.Residentials.Picture(newId, newFilename, EnumEntityStatus.New)
             {
                 BasePath = _propertyDataDirectoryPath,//System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id),
-                IsNew = true,
                 ParentViewModel = this
             };
 
@@ -2476,10 +2475,9 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                 // Keep track of unsaved files to delete them when discarding.
                 _unsavedBuildingPdfFileList.Add(pdfDestFilePath);
 
-                var pdf = new Models.Rent.Residentials.Pdf(newId, newFilename, newThumbnailFilename)
+                var pdf = new Models.Rent.Residentials.Pdf(newId, newFilename, newThumbnailFilename, EnumEntityStatus.New)
                 {
                     BasePath = _propertyDataDirectoryPath,//System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id),
-                    IsNew = true,
                     ParentViewModel = this
                 };
 

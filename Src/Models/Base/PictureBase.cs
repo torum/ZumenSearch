@@ -7,8 +7,19 @@ namespace ZumenSearch.Models.Base;
 #pragma warning disable IDE0079 // Remove unnecessary suppression
 #pragma warning disable IDE0290 // Use primary constructor
 
-public abstract class PictureBase : ObservableObject
+public abstract class PictureBase : EntityBase
 {
+    protected PictureBase(string id, EnumEntityStatus staus) : base(id, staus)
+    {
+        //
+    }
+
+    //public string Id { get; } = string.Empty;
+
+    //public bool IsNew { get; set; } = true;
+
+    //public bool IsModified { get; set; } = false;
+
     public string ImageFilename
     {
         get;
@@ -60,14 +71,4 @@ public abstract class PictureBase : ObservableObject
         return bitmapImage;
     }
 
-    public string Id { get; } = string.Empty;
-
-    public bool IsNew { get; set; } = true;
-
-    public bool IsModified { get; set; } = false;
-
-    protected PictureBase(string id)
-    {
-        Id = id;
-    }
 };

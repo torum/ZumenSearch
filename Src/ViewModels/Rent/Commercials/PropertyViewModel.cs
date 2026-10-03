@@ -2014,10 +2014,9 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                 ParentViewModel = this
             });
             */
-            var picture = new Models.Rent.Commercials.Picture(id, filename)
+            var picture = new Models.Rent.Commercials.Picture(id, filename, EnumEntityStatus.New)
             {
                 BasePath = _propertyDataDirectoryPath,
-                IsNew = true,
                 ParentViewModel = this
             };
 
@@ -2130,10 +2129,9 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                 // Keep track of unsaved files to delete them when discarding.
                 _unsavedBuildingPdfFileList.Add(pdfDestFilePath);
 
-                var pdf = new Models.Rent.Commercials.Pdf(newId, newFilename, newThumbnailFilename)
+                var pdf = new Models.Rent.Commercials.Pdf(newId, newFilename, newThumbnailFilename, EnumEntityStatus.New)
                 {
                     BasePath = _propertyDataDirectoryPath,//System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id),
-                    IsNew = true,
                     ParentViewModel = this
                 };
 

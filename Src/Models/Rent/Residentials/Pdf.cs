@@ -119,7 +119,7 @@ public sealed partial class Pdf : PdfBase
         }
     }
 
-    public Pdf(string id, string pdfLocation, string thumbnailLocation) : base(id)
+    public Pdf(string id, string pdfLocation, string thumbnailLocation, EnumEntityStatus status) : base(id, status)
     {
         PdfFilename = pdfLocation;
         ThumbnailFilename = thumbnailLocation;
