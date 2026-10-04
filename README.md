@@ -20,6 +20,6 @@
 
 * Windows App SDK（WinUI3）を使ったモダンUI。
 * MVVM (Model-View-ViewModel) アーキテクチャ設計パターンを使い、XAMLのUIレイヤーとドメインロジックの分離・疎結合化。
-* Generic Hostをアプリケーションの基盤としてサービス管理と依存関係注入（DI）。
-* Domain-Driven Design (DDD：ドメイン駆動設計) を現実的な限り適用。
+* Generic Hostをアプリケーションの基盤とし、統合サービス管理とDependency Injection（依存関係注入）を行う。
+* DDD (Domain-Driven Design：ドメイン駆動設計) を現実的な限り適用。
 * Native AOTによるネイティブコンパイルを可能とし、起動速度の高速化とメモリフットプリントの最小化。単体実行形式に加え、MSIX等のストア公開可能なパッケージ形式にも対応。
