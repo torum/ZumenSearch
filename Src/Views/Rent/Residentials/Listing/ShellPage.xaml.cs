@@ -37,8 +37,8 @@ public sealed partial class ShellPage : Page
     private readonly IDialogGenericService _dialogService;
 
     public ShellPage(
-        Models.Rent.Residentials.Listing.Listing room, 
-        IAbstractFactory<Models.Rent.Residentials.Listing.Listing, Services.Contracts.INavigationGenericService, IDialogGenericService, ViewModels.Rent.Residentials.Listing.ListingViewModel> vmFactory,
+        Models.Rent.Residentials.Listing room, 
+        IAbstractFactory<Models.Rent.Residentials.Listing, Services.Contracts.INavigationGenericService, IDialogGenericService, ViewModels.Rent.Residentials.ListingViewModel> vmFactory,
         INavigationGenericService navigationlService, 
         IDispatcherService dispatcherService,
         IDialogGenericService dialogService)
@@ -71,7 +71,7 @@ public sealed partial class ShellPage : Page
         Window.AppWindow.Closing += AppWindow_Closing;
     }
 
-    public ViewModels.Rent.Residentials.Listing.ListingViewModel ViewModel { get; }
+    public ViewModels.Rent.Residentials.ListingViewModel ViewModel { get; }
 
     public Views.Rent.Residentials.Listing.EditorWindow Window { get; }
 

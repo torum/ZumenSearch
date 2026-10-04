@@ -23,7 +23,7 @@ public sealed partial class Property : PropertyBase
     #region == 基本 ==
 
     // 物件種別
-    public Kind BuildingKind
+    public PropertyKind BuildingKind
     {
         get => field ?? new(EnumResidentialKinds.Unspecified);
         set
@@ -48,10 +48,8 @@ public sealed partial class Property : PropertyBase
         }
     }
 
-
-
     // 建物構造
-    public Structure BuildingStructure
+    public PropertyStructure BuildingStructure
     {
         get => field ?? new(EnumStructures.Unspecified);
         set
@@ -499,7 +497,7 @@ public sealed partial class Property : PropertyBase
         }
     } = false;
 
-    public EnumElectricKind ElectricKind
+    public EnumElectricKind PropertyElectricKind
     {
         get;
         set
@@ -761,7 +759,7 @@ public sealed partial class Property : PropertyBase
     #region == 物件に属するリスト == 
 
     // 物件に属する部屋のリスト
-    public ObservableCollection<Models.Rent.Residentials.Listing.Listing> Rooms
+    public ObservableCollection<Models.Rent.Residentials.Listing> Rooms
     {
         get;
         set
@@ -774,10 +772,10 @@ public sealed partial class Property : PropertyBase
     } = [];
 
     // DBへの更新時にDBから削除されるべき部屋のIDリスト
-    public ObservableCollection<Models.Rent.Residentials.Listing.Listing> RoomsToBeDeleted = [];
+    public ObservableCollection<Models.Rent.Residentials.Listing> RoomsToBeDeleted = [];
 
     // 物件写真（建物）リスト
-    public ObservableCollection<Picture> Pictures
+    public ObservableCollection<PropertyPicture> Pictures
     {
         get;
         set
@@ -790,10 +788,10 @@ public sealed partial class Property : PropertyBase
     } = [];
 
     // DBへの更新時にDBから削除されるべき物件写真（建物）のIDリスト
-    public ObservableCollection<Picture> PicturesToBeDeleted = [];
+    public ObservableCollection<PropertyPicture> PicturesToBeDeleted = [];
 
     // 図面（建物）リスト
-    public ObservableCollection<Pdf> Pdfs
+    public ObservableCollection<PropertyPdf> Pdfs
     {
         get;
         set
@@ -806,7 +804,7 @@ public sealed partial class Property : PropertyBase
     } = [];
 
     // DBへの更新時にDBから削除されるべき図面のIDリスト
-    public ObservableCollection<Pdf> PdfsToBeDeleted = [];
+    public ObservableCollection<PropertyPdf> PdfsToBeDeleted = [];
 
     // 貸主のリスト
     public ObservableCollection<Models.Base.PersonBase> Lessors
@@ -851,13 +849,13 @@ public sealed partial class Property : PropertyBase
         if (string.IsNullOrEmpty(Str))
         {
             // TODO:
-            BuildingKind = new Kind(EnumResidentialKinds.Unspecified);
+            BuildingKind = new PropertyKind(EnumResidentialKinds.Unspecified);
             return;
         }
 
         if (Enum.TryParse<EnumResidentialKinds>(Str, out var result))
         {
-            BuildingKind = new Kind(result);
+            BuildingKind = new PropertyKind(result);
         }
     }
 
@@ -865,13 +863,13 @@ public sealed partial class Property : PropertyBase
     {
         if (string.IsNullOrEmpty(Str))
         {
-            BuildingStructure = new Structure(EnumStructures.Unspecified);
+            BuildingStructure = new PropertyStructure(EnumStructures.Unspecified);
             return;
         }
 
         if (Enum.TryParse<EnumStructures>(Str, out var result))
         {
-            BuildingStructure = new Structure(result);
+            BuildingStructure = new PropertyStructure(result);
         }
     }
 

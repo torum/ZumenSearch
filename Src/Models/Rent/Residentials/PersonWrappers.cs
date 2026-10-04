@@ -39,7 +39,7 @@ public sealed partial class PersonWrapperForPropertyViewModel : ObservableObject
 // WinUI3 workaround. (to access viewmodel from inside itemrepeater's DataTemplate)
 public sealed partial class PersonWrapperForListingViewModel : ObservableObject // needs to be Observable in order to update Person value.
 {
-    public ViewModels.Rent.Residentials.Listing.ListingViewModel ParentViewModel { get; }
+    public ViewModels.Rent.Residentials.ListingViewModel ParentViewModel { get; }
 
     public Models.Base.PersonBase Person
     {
@@ -53,7 +53,7 @@ public sealed partial class PersonWrapperForListingViewModel : ObservableObject 
         }
     }
 
-    public PersonWrapperForListingViewModel(Models.Base.PersonBase person, ViewModels.Rent.Residentials.Listing.ListingViewModel parentListingViewModel)
+    public PersonWrapperForListingViewModel(Models.Base.PersonBase person, ViewModels.Rent.Residentials.ListingViewModel parentListingViewModel)
     {
         Person = person;
         ParentViewModel = parentListingViewModel;

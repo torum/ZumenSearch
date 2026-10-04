@@ -5,7 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:controls="using:CommunityToolkit.WinUI.Controls"
-    xmlns:modcommercial="using:ZumenSearch.Models.Rent.Commercials"
+    xmlns:modcommercials="using:ZumenSearch.Models.Rent.Commercials"
     mc:Ignorable="d"
     NavigationCacheMode="Required">
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled" Padding="36,0,36,24">
@@ -22,7 +22,7 @@
                         </Grid.ColumnDefinitions>
                         <RadioButtons Header="建物管理主体" MaxColumns="4" ItemsSource="{x:Bind ViewModel.KanriShutais, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.SelectedKanriShutai, Mode=TwoWay}" VerticalAlignment="Bottom">
                             <RadioButtons.ItemTemplate>
-                                <DataTemplate x:DataType="modcommercial:KanriShutai">
+                                <DataTemplate x:DataType="modcommercials:PropertyKanriShutai">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="{x:Bind Label, Mode=OneTime}"/>
                                     </StackPanel>

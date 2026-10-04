@@ -6,7 +6,7 @@ namespace ZumenSearch.Views.Rent.Residentials.Listing;
 
 public sealed partial class TransactionPage : Page
 {
-    public ViewModels.Rent.Residentials.Listing.ListingViewModel? ViewModel { get; private set; }
+    public ViewModels.Rent.Residentials.ListingViewModel? ViewModel { get; private set; }
 
     public TransactionPage()
     {
@@ -15,7 +15,7 @@ public sealed partial class TransactionPage : Page
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
-        if (e.Parameter is ViewModels.Rent.Residentials.Listing.ListingViewModel vm)
+        if (e.Parameter is ViewModels.Rent.Residentials.ListingViewModel vm)
         {
             ViewModel = vm;
             // comment out when x:Bind expressions is added.

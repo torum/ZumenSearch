@@ -5,7 +5,7 @@ namespace ZumenSearch.Models;
 // Result Wrapper Class
 public abstract class ResultWrapperBase
 {
-    public ErrorClass Error = new();
+    public Error Error = new();
     public bool IsError = false;
 }
 
@@ -36,7 +36,7 @@ public sealed class RentResidentialBuildingSingleResultWrapper : ResultWrapperBa
 public sealed class RentResidentialRoomSingleResultWrapper : ResultWrapperBase
 {
     public string BuildingName = string.Empty;
-    public Models.Rent.Residentials.Listing.Listing? Room;
+    public Models.Rent.Residentials.Listing? Room;
 }
 
 // Rent Commercial
@@ -76,6 +76,6 @@ public sealed class SaleResidentialRoomSingleResultWrapper : ResultWrapperBase
 {
     public string BuildingName = string.Empty;
 
-    public Models.Sale.Residentials.Listing.Listing? Room;
+    public Models.Sale.Residentials.Listing? Room;
 }
 

@@ -1,11 +1,11 @@
-﻿namespace ZumenSearch.Models.Location;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
 
-// TODO: use AddressClass, or change name...
+namespace ZumenSearch.Models.Location;
 
-// For UI parts.
-
-//「都道府県」リストクラス
-public sealed class PrefectureList()
+//「都道府県」リストPrefectureMasterクラス
+public sealed class PrefectureMaster()
 {
     public List<Prefecture> Prefectures =
     [
@@ -58,99 +58,3 @@ public sealed class PrefectureList()
             new Prefecture("47","470007", "沖縄県"),
     ];
 }
-
-// 「都道府県」クラス
-public sealed class Prefecture(string code, string municipalityCode, string name)
-{
-    // 都道府県コード
-    public string Code { get; private set; } = code;
-
-    // 市区町村コード
-    // db:location_pref_id
-    public string MunicipalityCode { get; private set; } = municipalityCode;
-
-    // db:location_prefecture
-    public string Name { get; private set; } = name;
-};
-
-public sealed class CountyAndCity(string machiazaId, string county, string city)
-{
-    // db:location_machiaza_id
-    public string MachiazaId
-    {
-        get; init;
-    } = machiazaId;
-
-    // 郡 db:location_county
-    public string County { get; init; } = county;
-
-    // 市区町村 db:location_city
-    public string City { get; init; } = city;
-
-    public string Combined
-    {
-        get
-        {
-            if (string.IsNullOrEmpty(County) && string.IsNullOrEmpty(City))
-            {
-                return "";//該当なし
-            }
-            else
-            {
-                return County + City;
-            }
-        }
-    }
-}
-
-public sealed class WardAndOaza(string machiazaId, string ward, string oaza)
-{
-    // db:location_machiaza_id
-    public string MachiazaId
-    {
-        get; init;
-    } = machiazaId;
-
-    // db:location_ward
-    public string Ward
-    {
-        get; init;
-    } = ward;
-
-    // db:location_oaza_cho
-    public string Oaza
-    {
-        get; init;
-    } = oaza;
-
-    public string Combined
-    {
-        get
-        {
-            if (string.IsNullOrEmpty(Ward) && string.IsNullOrEmpty(Oaza))
-            {
-                return "";//該当なし
-            }
-            else
-            {
-                return Ward + Oaza;
-            }
-        }
-    }
-}
-
-public sealed class Choume(string machiazaId, string choume)
-{
-    // db:location_machiaza_id
-    public string MachiazaId
-    {
-        get; init;
-    } = machiazaId;
-
-    // db:location_choume
-    public string Chou
-    {
-        get; init;
-    } = choume;
-}
-

@@ -17,20 +17,20 @@ public partial class PersonTemplateSelector : DataTemplateSelector
     {
         if (item is Models.Rent.Residentials.PersonWrapperForPropertyViewModel lessor)
         {
-            if (lessor.Person is Models.Person.NaturalPersonClass)
+            if (lessor.Person is Models.Person.NaturalPerson)
             {
                 return NaturalTemplate;
             }
-            else if (lessor.Person is Models.Person.LegalPersonClass)
+            else if (lessor.Person is Models.Person.LegalPerson)
             {
                 return LegalTemplate;
             }
         }
-        else if (item is Models.Person.NaturalPersonClass)
+        else if (item is Models.Person.NaturalPerson)
         {
             return NaturalTemplate;
         }
-        else if (item is Models.Person.LegalPersonClass)
+        else if (item is Models.Person.LegalPerson)
         {
             return LegalTemplate;
         }

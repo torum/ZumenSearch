@@ -12,7 +12,7 @@ namespace ZumenSearch.Models.Transportation;
 // </summary>
 // <remarks>
 // </remarks>
-public class TrainClass
+public class Train
 {
     // Nested classes to represent the address components.
     public sealed class RailLineClass(string lineCode, string lineName)
@@ -105,7 +105,7 @@ public class TrainClass
         */
     }
 
-    public TrainClass()
+    public Train()
     {
         //
     }

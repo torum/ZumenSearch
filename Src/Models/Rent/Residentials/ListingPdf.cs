@@ -1,23 +1,15 @@
 ﻿using System.Collections.ObjectModel;
 using ZumenSearch.Models.Base;
 
-namespace ZumenSearch.Models.Rent.Residentials.Listing;
+namespace ZumenSearch.Models.Rent.Residentials;
 
 // TODO: This is same as ZumenSearch.Models.Rent.Residentials.Pdf.
 // Consider removable.
-// No... We need ParentViewModel(ViewModels.Rent.Residentials.Listing.ListingViewModel)
+// No... We need ParentViewModel(ViewModels.Rent.Residentials.ListingViewModel)
 // Then, consider creating a wrapper just like Lessor wrapper?
 // ParentViewModel and type Dictionary are the main difference.
 
-public enum EnumRoomPdfType
-{
-    Unspecified,
-    Maisoku,
-    Architectural,
-    Toukibo,
-    Kouzu,
-    Other
-}
+
 public sealed class RoomPdfType(EnumRoomPdfType key)
 {
     private Dictionary<EnumRoomPdfType, string> RoomPdfTypeDictionary
@@ -38,18 +30,18 @@ public sealed class RoomPdfType(EnumRoomPdfType key)
     public EnumRoomPdfType Key => key;
 };
 
-public sealed partial class Pdf : PdfBase
+public sealed partial class ListingPdf : PdfBase
 {
-    public ViewModels.Rent.Residentials.Listing.ListingViewModel? ParentViewModel { get; set; }
+    public ViewModels.Rent.Residentials.ListingViewModel? ParentViewModel { get; set; }
 
     public readonly ObservableCollection<RoomPdfType> RoomPdfTypes =
         [
         //new BuildingPictureType(EnumBuildingPictureType.Unspecified, "未指定"),
-        new RoomPdfType(Models.Rent.Residentials.Listing.EnumRoomPdfType.Maisoku),
-        new RoomPdfType(Models.Rent.Residentials.Listing.EnumRoomPdfType.Architectural),
-        new RoomPdfType(Models.Rent.Residentials.Listing.EnumRoomPdfType.Toukibo),
-        new RoomPdfType(Models.Rent.Residentials.Listing.EnumRoomPdfType.Kouzu),
-        new RoomPdfType(Models.Rent.Residentials.Listing.EnumRoomPdfType.Other)
+        new RoomPdfType(Models.Rent.Residentials.EnumRoomPdfType.Maisoku),
+        new RoomPdfType(Models.Rent.Residentials.EnumRoomPdfType.Architectural),
+        new RoomPdfType(Models.Rent.Residentials.EnumRoomPdfType.Toukibo),
+        new RoomPdfType(Models.Rent.Residentials.EnumRoomPdfType.Kouzu),
+        new RoomPdfType(Models.Rent.Residentials.EnumRoomPdfType.Other)
         ];
 
     // Do not use SetProperty. PropertyChanged is being subscribed.
@@ -121,7 +113,7 @@ public sealed partial class Pdf : PdfBase
         }
     }
 
-    public Pdf(string id, string pdfLocation, string thumbnailLocation, EnumEntityStatus status) : base(id, status)
+    public ListingPdf(string id, string pdfLocation, string thumbnailLocation, EnumEntityStatus status) : base(id, status)
     {
         PdfFilename = pdfLocation;
         ThumbnailFilename = thumbnailLocation;

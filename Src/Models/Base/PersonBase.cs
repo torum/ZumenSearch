@@ -7,7 +7,7 @@
 
 // <summary>
 // Base class for all Person entities such as lessors(landlords), and real estate agents.
-// Use LegalPersonClass for legal entities such as corporations, and NaturalPersonClass for natural persons unless abstract PersonBase is needed.
+// Use LegalPerson for legal entities such as corporations, and NaturalPersonClass for natural persons unless abstract PersonBase is needed.
 // </summary>
 // <remarks>
 // 

@@ -195,7 +195,7 @@ public class DialogGenericService : IDialogGenericService
             DefaultButton = ContentDialogButton.Primary,
             IsSecondaryButtonEnabled = false,
             CloseButtonText = "キャンセル",
-            Content = new Views.Dialogs.RailLineSelectPage(new ViewModels.Dialogs.RailLineViewModel(new DataAccessTransportationService()))
+            Content = new Views.Dialogs.RailLineSelectPage(new ViewModels.Dialogs.RailLineSelectViewModel(new DataAccessTransportationService()))
         };
 
         if (dialog.Content is not RailLineSelectPage dialogContent)
@@ -256,7 +256,7 @@ public class DialogGenericService : IDialogGenericService
             DefaultButton = ContentDialogButton.Primary,
             IsSecondaryButtonEnabled = false,
             CloseButtonText = "キャンセル",
-            Content = new Views.Dialogs.RailStationSelectPage(new ViewModels.Dialogs.RailStationViewModel(new DataAccessTransportationService(), railLineCode))
+            Content = new Views.Dialogs.RailStationSelectPage(new ViewModels.Dialogs.RailStationSelectViewModel(new DataAccessTransportationService(), railLineCode))
         };
 
         if (dialog.Content is not RailStationSelectPage dialogContent)

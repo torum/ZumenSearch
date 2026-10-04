@@ -11,7 +11,7 @@ using ZumenSearch.Models.Base;
 using ZumenSearch.Models.Messenger;
 using ZumenSearch.Services.Contracts;
 
-namespace ZumenSearch.ViewModels.Rent.Residentials.Listing;
+namespace ZumenSearch.ViewModels.Rent.Residentials;
 
 public sealed partial class ListingViewModel : ObservableRecipient, 
     IRecipient<PropertyUpdatedMessage>, 
@@ -28,7 +28,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
 
     // This property holds the COPY of current entity being edited.
     // Do not use it directly in the UI. Apply changes to this object in Save() to save the changes.
-    private readonly Models.Rent.Residentials.Listing.Listing _room;
+    private readonly Models.Rent.Residentials.Listing _room;
 
     private readonly string _listingDataDirectoryPath = string.Empty;
 
@@ -51,7 +51,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
     #endregion
 
     public ListingViewModel(
-        Models.Rent.Residentials.Listing.Listing room, 
+        Models.Rent.Residentials.Listing room, 
         INavigationGenericService navigationService,
         IDialogGenericService dialogService,
         IDispatcherService dispatcherService, 
@@ -316,7 +316,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
 
     #region == 写真 & PDFプロパティ ==
 
-    public ObservableCollection<Models.Rent.Residentials.Listing.Picture> Pictures
+    public ObservableCollection<Models.Rent.Residentials.ListingPicture> Pictures
     {
         get;
         set
@@ -330,7 +330,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
         }
     } = [];
 
-    public ObservableCollection<Models.Rent.Residentials.Listing.Pdf> Pdfs
+    public ObservableCollection<Models.Rent.Residentials.ListingPdf> Pdfs
     {
         get;
         set
@@ -623,7 +623,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
         // TODO: Set other properties for editing..
 
         // Pictures
-        Pictures = new ObservableCollection<Models.Rent.Residentials.Listing.Picture>(_room.Pictures); // create a copy.
+        Pictures = new ObservableCollection<Models.Rent.Residentials.ListingPicture>(_room.Pictures); // create a copy.
         foreach (var item in Pictures)
         {
             item.BasePath = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(App.PropertyBlobDataFolder, _room.PropertyId), _room.Id));
@@ -637,7 +637,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
             // Unsubscribe from removed items
             if (e.OldItems != null)
             {
-                foreach (Models.Rent.Residentials.Listing.Picture item in e.OldItems)
+                foreach (Models.Rent.Residentials.ListingPicture item in e.OldItems)
                 {
                     Debug.WriteLine($"Item {item.Id} Removed from Pictures");
                     IsDirty = true;
@@ -649,7 +649,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
             // Subscribe to PropertyChanged.
             if (e.NewItems != null)
             {
-                foreach (Models.Rent.Residentials.Listing.Picture item in e.NewItems)
+                foreach (Models.Rent.Residentials.ListingPicture item in e.NewItems)
                 {
                     Debug.WriteLine($"Item {item.Id} Added to Pictures");
                     IsDirty = true;
@@ -660,7 +660,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
         };
 
         // PDFs
-        Pdfs = new ObservableCollection<Models.Rent.Residentials.Listing.Pdf>(_room.Pdfs); // create a copy.
+        Pdfs = new ObservableCollection<Models.Rent.Residentials.ListingPdf>(_room.Pdfs); // create a copy.
         foreach (var item in Pdfs)
         {
             item.BasePath = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(App.PropertyBlobDataFolder, _room.PropertyId), _room.Id));
@@ -674,7 +674,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
             // Unsubscribe from removed items
             if (e.OldItems != null)
             {
-                foreach (Models.Rent.Residentials.Listing.Pdf item in e.OldItems)
+                foreach (Models.Rent.Residentials.ListingPdf item in e.OldItems)
                 {
                     Debug.WriteLine($"Item {item.Id} Removed from Pdfs");
                     IsDirty = true;
@@ -686,7 +686,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
             // Subscribe to PropertyChanged.
             if (e.NewItems != null)
             {
-                foreach (Models.Rent.Residentials.Listing.Pdf item in e.NewItems)
+                foreach (Models.Rent.Residentials.ListingPdf item in e.NewItems)
                 {
                     Debug.WriteLine($"Item {item.Id} Added to Pdfs");
                     IsDirty = true;
@@ -717,7 +717,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
 
     private void OnPicturePropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (sender is not Models.Rent.Residentials.Listing.Picture picUnit)
+        if (sender is not Models.Rent.Residentials.ListingPicture picUnit)
         {
             Debug.WriteLine("OnPicturePropertyChanged returned non PictureUnit.");
             return;
@@ -748,7 +748,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
 
     private void OnPdfPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (sender is not Models.Rent.Residentials.Listing.Pdf pdfUnit)
+        if (sender is not Models.Rent.Residentials.ListingPdf pdfUnit)
         {
             Debug.WriteLine("OnPdfPropertyChanged returned non PdfUnit.");
             return;
@@ -1037,7 +1037,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
             using var destinationStream = File.Create(destFilePath);
             await sourceStream.CopyToAsync(destinationStream);
 
-            var pic = new Models.Rent.Residentials.Listing.Picture(newId, newFilename, EnumEntityStatus.New)
+            var pic = new Models.Rent.Residentials.ListingPicture(newId, newFilename, EnumEntityStatus.New)
             {
                 BasePath = _listingDataDirectoryPath,
                 ParentViewModel = this
@@ -1060,7 +1060,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
     }
 
     [RelayCommand(CanExecute = nameof(CanDeleteRoomPicture))]
-    private void DeleteRoomPicture(Models.Rent.Residentials.Listing.Picture picUnit)
+    private void DeleteRoomPicture(Models.Rent.Residentials.ListingPicture picUnit)
     {
         if (_room is null)
         {
@@ -1087,7 +1087,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
             IsDirty = true;
         }
     }
-    private static bool CanDeleteRoomPicture(Models.Rent.Residentials.Listing.Picture picUnit)
+    private static bool CanDeleteRoomPicture(Models.Rent.Residentials.ListingPicture picUnit)
     {
         return picUnit is not null;
     }
@@ -1169,7 +1169,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
                 // Keep track of unsaved files to delete them when discarding.
                 _unsavedRoomPdfFileList.Add(pdfDestFilePath);
 
-                var pdf = new Models.Rent.Residentials.Listing.Pdf(newId, newFilename, newThumbnailFilename, EnumEntityStatus.New)
+                var pdf = new Models.Rent.Residentials.ListingPdf(newId, newFilename, newThumbnailFilename, EnumEntityStatus.New)
                 {
                     BasePath = _listingDataDirectoryPath,
                     ParentViewModel = this
@@ -1194,7 +1194,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
     }
 
     [RelayCommand(CanExecute = nameof(CanDeleteRoomPdf))]
-    private void DeleteRoomPdf(Models.Rent.Residentials.Listing.Pdf pdf)
+    private void DeleteRoomPdf(Models.Rent.Residentials.ListingPdf pdf)
     {
         if (pdf is null)
         {
@@ -1209,7 +1209,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
             IsDirty = true;
         }
     }
-    private static bool CanDeleteRoomPdf(Models.Rent.Residentials.Listing.Pdf pdf)
+    private static bool CanDeleteRoomPdf(Models.Rent.Residentials.ListingPdf pdf)
     {
         return pdf is not null;
     }

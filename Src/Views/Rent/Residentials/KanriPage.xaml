@@ -22,7 +22,7 @@
                         </Grid.ColumnDefinitions>
                         <RadioButtons Header="建物管理主体" MaxColumns="4" ItemsSource="{x:Bind ViewModel.KanriShutais, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.SelectedKanriShutai, Mode=TwoWay}" VerticalAlignment="Bottom">
                             <RadioButtons.ItemTemplate>
-                                <DataTemplate x:DataType="modresidencial:KanriShutai">
+                                <DataTemplate x:DataType="modresidencial:PropertyKanriShutai">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="{x:Bind Label, Mode=OneTime}"/>
                                     </StackPanel>

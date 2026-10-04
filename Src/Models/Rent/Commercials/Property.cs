@@ -21,7 +21,7 @@ public sealed partial class Property : PropertyBase
 
     #region == 基本 ==
 
-    public Kind CommercialKind
+    public PropertyKind CommercialKind
     {
         get => field ?? new(EnumCommercialKinds.Unspecified);
         set
@@ -45,7 +45,7 @@ public sealed partial class Property : PropertyBase
         }
     }
 
-    public Structure BuildingStructure
+    public PropertyStructure BuildingStructure
     {
         get => field ?? new(EnumStructures.Unspecified);
         set
@@ -385,7 +385,7 @@ public sealed partial class Property : PropertyBase
         }
     } = false;
 
-    public EnumElectricKind ElectricKind
+    public EnumElectricKind PropertyElectricKind
     {
         get;
         set
@@ -481,7 +481,7 @@ public sealed partial class Property : PropertyBase
 
     #region == 写真 & 図面 ==
 
-    public ObservableCollection<Picture> Pictures
+    public ObservableCollection<PropertyPicture> Pictures
     {
         get;
         set
@@ -493,11 +493,11 @@ public sealed partial class Property : PropertyBase
         }
     } = [];
 
-    public ObservableCollection<Picture> PicturesToBeDeleted = [];
+    public ObservableCollection<PropertyPicture> PicturesToBeDeleted = [];
 
 
     // 図面（建物）リスト
-    public ObservableCollection<Pdf> Pdfs
+    public ObservableCollection<PropertyPdf> Pdfs
     {
         get;
         set
@@ -510,7 +510,7 @@ public sealed partial class Property : PropertyBase
     } = [];
 
     // DBへの更新時にDBから削除されるべき図面のIDリスト
-    public ObservableCollection<Pdf> PdfsToBeDeleted = [];
+    public ObservableCollection<PropertyPdf> PdfsToBeDeleted = [];
     #endregion
 
     #region == Lessors ==
@@ -579,8 +579,8 @@ public sealed partial class Property : PropertyBase
         CommercialKind = Enum.TryParse(
             value,
             out EnumCommercialKinds result)
-            ? new Kind(result)
-            : new Kind(EnumCommercialKinds.Unspecified);
+            ? new PropertyKind(result)
+            : new PropertyKind(EnumCommercialKinds.Unspecified);
     }
 
     public void SetStructureTypeFromString(string value)
@@ -588,8 +588,8 @@ public sealed partial class Property : PropertyBase
         BuildingStructure = Enum.TryParse(
             value,
             out EnumStructures result)
-            ? new Structure(result)
-            : new Structure(EnumStructures.Unspecified);
+            ? new PropertyStructure(result)
+            : new PropertyStructure(EnumStructures.Unspecified);
     }
 
     public void SetBuildYearMonthFromString(string value)

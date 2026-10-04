@@ -7,7 +7,7 @@ namespace ZumenSearch.Models.Person;
 
 // Entity
 
-public partial class NaturalPersonClass : PersonBase
+public partial class NaturalPerson : PersonBase
 {
     private string? _nameField;
 
@@ -59,7 +59,7 @@ public partial class NaturalPersonClass : PersonBase
         }
     }
 
-    public NaturalPersonClass(string id, EnumEntityStatus status) : base(id, status, EnumPersonKind.Natural)
+    public NaturalPerson(string id, EnumEntityStatus status) : base(id, status, EnumPersonKind.Natural)
     {
         //
     }

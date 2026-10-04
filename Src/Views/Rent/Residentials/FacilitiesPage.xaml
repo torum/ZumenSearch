@@ -29,7 +29,7 @@
                         </StackPanel>
                         <RadioButtons Header="種類" MaxColumns="3" Margin="0,0,0,0" ItemsSource="{x:Bind ViewModel.ElectricKinds}" SelectedItem="{x:Bind ViewModel.SelectedElectricKind, Mode=TwoWay}" >
                             <RadioButtons.ItemTemplate>
-                                <DataTemplate x:DataType="modresidencial:ElectricKind">
+                                <DataTemplate x:DataType="modresidencial:PropertyElectricKind">
                                     <TextBlock Text="{x:Bind Label, Mode=OneTime}" VerticalAlignment="Center"/>
                                 </DataTemplate>
                             </RadioButtons.ItemTemplate>

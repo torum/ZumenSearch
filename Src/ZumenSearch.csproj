@@ -13,15 +13,24 @@
     <EnableMsixTooling>true</EnableMsixTooling>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+	  <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	  <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 
-	  <!-- Windows Package Type -->
+	  <!-- Unpackaged -->
 	  <WindowsPackageType>None</WindowsPackageType>
 
 	  <!-- Runtimes -->
 	  <SelfContained>false</SelfContained>
 	  <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+	  
+	  <!-- AoT
+	  <IsAotCompatible>true</IsAotCompatible>
+	  <SuppressTrimAnalysisWarnings>false</SuppressTrimAnalysisWarnings>
+	  <TrimmerSingleWarn>false</TrimmerSingleWarn>
+	  <Optimize>true</Optimize>
+	  <TrimMode>partial</TrimMode>
+	  -->
 
-	  <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>

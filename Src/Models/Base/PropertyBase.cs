@@ -25,7 +25,7 @@ public abstract partial class PropertyBase : EntityAggregateBase
     public EnumPropertyKind PropertyKind { get; init; }
 
     // TODO: Use Address class from Models.Location.Address.cs instead of using Prefecture, CountyAndCity, WardAndOaza, Choume classes directly.
-    public AddressClass Address
+    public Address Address
     {
         get;
         set
@@ -35,7 +35,7 @@ public abstract partial class PropertyBase : EntityAggregateBase
                 IsModified = true;
             }
         }
-    } = new AddressClass();
+    } = new Address();
 
     #region == 所在地 ==
 
@@ -125,7 +125,7 @@ public abstract partial class PropertyBase : EntityAggregateBase
     #endregion
 
     // TODO: Use Train class from Models.Transportation.Train.cs instead of using classes directly.
-    public TrainClass Train
+    public Train Train
     {
         get;
         set
@@ -135,7 +135,7 @@ public abstract partial class PropertyBase : EntityAggregateBase
                 IsModified = true;
             }
         }
-    } = new TrainClass();
+    } = new Train();
 
 
     // TODO: Create a nested class for ThumbImage so that BasePath is always set along with ThumbnailFilename as parameters.

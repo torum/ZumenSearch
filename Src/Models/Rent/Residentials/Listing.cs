@@ -2,7 +2,7 @@
 using System.Collections.ObjectModel;
 using ZumenSearch.Models.Base;
 
-namespace ZumenSearch.Models.Rent.Residentials.Listing;
+namespace ZumenSearch.Models.Rent.Residentials;
 
 #pragma warning disable IDE0079 // Remove unnecessary suppression
 #pragma warning disable IDE0290 // Use primary constructor
@@ -29,7 +29,7 @@ public sealed partial class Listing : ListingBase
 
 
     // 部屋写真リスト
-    public ObservableCollection<Picture> Pictures
+    public ObservableCollection<ListingPicture> Pictures
     {
         get;
         set
@@ -42,10 +42,10 @@ public sealed partial class Listing : ListingBase
     } = [];
 
     // DBへの更新時にDBから削除されるべき部屋写真のIDリスト
-    public ObservableCollection<Picture> PicturesToBeDeleted = [];
+    public ObservableCollection<ListingPicture> PicturesToBeDeleted = [];
 
     // 部屋図面リスト
-    public ObservableCollection<Pdf> Pdfs
+    public ObservableCollection<ListingPdf> Pdfs
     {
         get;
         set
@@ -58,7 +58,7 @@ public sealed partial class Listing : ListingBase
     } = [];
 
     // DBへの更新時にDBから削除されるべき図面のIDリスト
-    public ObservableCollection<Pdf> PdfsToBeDeleted = [];
+    public ObservableCollection<ListingPdf> PdfsToBeDeleted = [];
 
     // 貸主のリスト
     public ObservableCollection<Models.Base.PersonBase> Lessors

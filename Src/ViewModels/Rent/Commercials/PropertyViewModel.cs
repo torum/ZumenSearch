@@ -158,7 +158,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         }
     }
 
-    public ObservableCollection<Models.Rent.Commercials.Kind> Kinds { get; } =
+    public ObservableCollection<Models.Rent.Commercials.PropertyKind> Kinds { get; } =
     [
         new(Models.Rent.Commercials.EnumCommercialKinds.Office),
         new(Models.Rent.Commercials.EnumCommercialKinds.Retail),
@@ -171,7 +171,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         new(Models.Rent.Commercials.EnumCommercialKinds.Other)
     ];
 
-    public Models.Rent.Commercials.Kind SelectedKind
+    public Models.Rent.Commercials.PropertyKind SelectedKind
     {
         get => field ??
             new(Models.Rent.Commercials.EnumCommercialKinds.Unspecified);
@@ -197,7 +197,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         }
     }
 
-    public ObservableCollection<Models.Rent.Commercials.Structure> Structures { get; } =
+    public ObservableCollection<Models.Rent.Commercials.PropertyStructure> Structures { get; } =
     [
         new(Models.Rent.Commercials.EnumStructures.Wood),
         new(Models.Rent.Commercials.EnumStructures.Block),
@@ -211,7 +211,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         new(Models.Rent.Commercials.EnumStructures.Other)
     ];
 
-    public Models.Rent.Commercials.Structure SelectedStructure
+    public Models.Rent.Commercials.PropertyStructure SelectedStructure
     {
         get => field ??
             new(Models.Rent.Commercials.EnumStructures.Unspecified);
@@ -339,7 +339,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     #region == Location ==
 
     public ObservableCollection<Prefecture> Prefectures { get; } =
-    new(new PrefectureList().Prefectures);
+    new(new PrefectureMaster().Prefectures);
 
     public Prefecture? SelectedPef
     {
@@ -689,13 +689,13 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         }
     } = false;
 
-    public ObservableCollection<Models.Rent.Commercials.ElectricKind> ElectricKinds =
+    public ObservableCollection<Models.Rent.Commercials.PropertyElectricKind> ElectricKinds =
     [
-        new Models.Rent.Commercials.ElectricKind(Models.Rent.Commercials.Property.EnumElectricKind.AllElectric, "オール電化"),
-        new Models.Rent.Commercials.ElectricKind(Models.Rent.Commercials.Property.EnumElectricKind.Unspecified, "未指定")
+        new Models.Rent.Commercials.PropertyElectricKind(Models.Rent.Commercials.Property.EnumElectricKind.AllElectric, "オール電化"),
+        new Models.Rent.Commercials.PropertyElectricKind(Models.Rent.Commercials.Property.EnumElectricKind.Unspecified, "未指定")
     ];
 
-    public Models.Rent.Commercials.ElectricKind SelectedElectricKind
+    public Models.Rent.Commercials.PropertyElectricKind SelectedElectricKind
     {
         get;
         set
@@ -705,7 +705,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                 IsDirty = true;
             }
         }
-    } = new Models.Rent.Commercials.ElectricKind(Models.Rent.Commercials.Property.EnumElectricKind.Unspecified, "未指定");
+    } = new Models.Rent.Commercials.PropertyElectricKind(Models.Rent.Commercials.Property.EnumElectricKind.Unspecified, "未指定");
 
     public string ElectricDetail
     {
@@ -727,15 +727,15 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     #region == 管理プロパティ ==
 
-    public ObservableCollection<Models.Rent.Commercials.KanriShutai> KanriShutais =
+    public ObservableCollection<Models.Rent.Commercials.PropertyKanriShutai> KanriShutais =
     [
-        new Models.Rent.Commercials.KanriShutai(Models.Rent.Commercials.Property.EnumKanriShutai.Unspecified, "未指定"),
-        new Models.Rent.Commercials.KanriShutai(Models.Rent.Commercials.Property.EnumKanriShutai.Jisya, "自社管理"),
-        new Models.Rent.Commercials.KanriShutai(Models.Rent.Commercials.Property.EnumKanriShutai.Tasya, "他社管理"),
-        new Models.Rent.Commercials.KanriShutai(Models.Rent.Commercials.Property.EnumKanriShutai.Kashinushi, "貸主管理")
+        new Models.Rent.Commercials.PropertyKanriShutai(Models.Rent.Commercials.Property.EnumKanriShutai.Unspecified, "未指定"),
+        new Models.Rent.Commercials.PropertyKanriShutai(Models.Rent.Commercials.Property.EnumKanriShutai.Jisya, "自社管理"),
+        new Models.Rent.Commercials.PropertyKanriShutai(Models.Rent.Commercials.Property.EnumKanriShutai.Tasya, "他社管理"),
+        new Models.Rent.Commercials.PropertyKanriShutai(Models.Rent.Commercials.Property.EnumKanriShutai.Kashinushi, "貸主管理")
     ];
 
-    public Models.Rent.Commercials.KanriShutai? SelectedKanriShutai
+    public Models.Rent.Commercials.PropertyKanriShutai? SelectedKanriShutai
     {
         get;
         set
@@ -909,7 +909,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     #region == 写真 & PDFプロパティ ==
 
-    public ObservableCollection<Models.Rent.Commercials.Picture> Pictures
+    public ObservableCollection<Models.Rent.Commercials.PropertyPicture> Pictures
     {
         get;
         set
@@ -923,7 +923,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         }
     } = [];
 
-    public ObservableCollection<Models.Rent.Commercials.Pdf> Pdfs
+    public ObservableCollection<Models.Rent.Commercials.PropertyPdf> Pdfs
     {
         get;
         set
@@ -1253,14 +1253,14 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             item.PropertyChanged += OnBuildingPicturePropertyChanged;
         }
         */
-        Pictures = new ObservableCollection<Models.Rent.Commercials.Picture>(_building.Pictures);
+        Pictures = new ObservableCollection<Models.Rent.Commercials.PropertyPicture>(_building.Pictures);
 
         foreach (var picture in Pictures)
         {
             TrackBuildingPicture(picture);
         }
 
-        Pdfs = new ObservableCollection<Models.Rent.Commercials.Pdf>(_building.Pdfs);
+        Pdfs = new ObservableCollection<Models.Rent.Commercials.PropertyPdf>(_building.Pdfs);
 
         foreach (var pdf in Pdfs)
         {
@@ -1350,7 +1350,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         LocationLongitude = _building.LocationLongitude;
     }
 
-    private void TrackBuildingPicture(Models.Rent.Commercials.Picture picture)
+    private void TrackBuildingPicture(Models.Rent.Commercials.PropertyPicture picture)
     {
         picture.BasePath = _propertyDataDirectoryPath;
         picture.ParentViewModel = this;
@@ -1359,7 +1359,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         picture.IsModified = false;
     }
 
-    private void TrackBuildingPdf(Models.Rent.Commercials.Pdf pdf)
+    private void TrackBuildingPdf(Models.Rent.Commercials.PropertyPdf pdf)
     {
         pdf.BasePath = _propertyDataDirectoryPath;
         pdf.ParentViewModel = this;
@@ -1370,11 +1370,11 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     private void OnBuildingMediaPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (sender is Models.Rent.Commercials.Picture picture)
+        if (sender is Models.Rent.Commercials.PropertyPicture picture)
         {
             picture.IsModified = true;
         }
-        else if (sender is Models.Rent.Commercials.Pdf pdf)
+        else if (sender is Models.Rent.Commercials.PropertyPdf pdf)
         {
             pdf.IsModified = true;
         }
@@ -2016,7 +2016,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                 ParentViewModel = this
             });
             */
-            var picture = new Models.Rent.Commercials.Picture(id, filename, EnumEntityStatus.New)
+            var picture = new Models.Rent.Commercials.PropertyPicture(id, filename, EnumEntityStatus.New)
             {
                 BasePath = _propertyDataDirectoryPath,
                 ParentViewModel = this
@@ -2039,7 +2039,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     }
 
     [RelayCommand(CanExecute = nameof(CanDeleteBuildingPicture))]
-    private void DeleteBuildingPicture(Models.Rent.Commercials.Picture picture)
+    private void DeleteBuildingPicture(Models.Rent.Commercials.PropertyPicture picture)
     {
         if (picture is null || !Pictures.Remove(picture))
         {
@@ -2049,7 +2049,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         _building.PicturesToBeDeleted.Add(picture);
         IsDirty = true;
     }
-    private static bool CanDeleteBuildingPicture(Models.Rent.Commercials.Picture picture)
+    private static bool CanDeleteBuildingPicture(Models.Rent.Commercials.PropertyPicture picture)
     {
         return picture is not null;
     }
@@ -2131,7 +2131,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                 // Keep track of unsaved files to delete them when discarding.
                 _unsavedBuildingPdfFileList.Add(pdfDestFilePath);
 
-                var pdf = new Models.Rent.Commercials.Pdf(newId, newFilename, newThumbnailFilename, EnumEntityStatus.New)
+                var pdf = new Models.Rent.Commercials.PropertyPdf(newId, newFilename, newThumbnailFilename, EnumEntityStatus.New)
                 {
                     BasePath = _propertyDataDirectoryPath,//System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id),
                     ParentViewModel = this
@@ -2162,7 +2162,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     }
 
     [RelayCommand(CanExecute = nameof(CanDeleteBuildingPdf))]
-    private void DeleteBuildingPdf(Models.Rent.Commercials.Pdf pdfBldg)
+    private void DeleteBuildingPdf(Models.Rent.Commercials.PropertyPdf pdfBldg)
     {
         if (pdfBldg is null)
         {
@@ -2177,7 +2177,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             IsDirty = true;
         }
     }
-    private static bool CanDeleteBuildingPdf(Models.Rent.Commercials.Pdf pdfBldg)
+    private static bool CanDeleteBuildingPdf(Models.Rent.Commercials.PropertyPdf pdfBldg)
     {
         return pdfBldg is not null;
     }

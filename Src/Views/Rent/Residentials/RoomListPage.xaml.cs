@@ -44,7 +44,7 @@ public sealed partial class RoomListPage : Page
             return;
         }
 
-        if (container.DataContext is not Models.Rent.Residentials.Listing.Listing room)
+        if (container.DataContext is not Models.Rent.Residentials.Listing room)
         {
             Debug.WriteLine($"Not Room. {container.DataContext?.GetType().FullName} @ItemContainer_DoubleTapped");
             return;
@@ -106,7 +106,7 @@ public sealed partial class RoomListPage : Page
             return;
         }
 
-        if (container.DataContext is not Models.Rent.Residentials.Listing.Listing room)
+        if (container.DataContext is not Models.Rent.Residentials.Listing room)
         {
             Debug.WriteLine($"Not Room. {container.DataContext?.GetType().FullName} @ItemContainer_RightTapped");
             return;
@@ -131,7 +131,7 @@ public sealed partial class RoomListPage : Page
             return;
         }
 
-        if (element.DataContext is not Models.Rent.Residentials.Listing.Listing room)
+        if (element.DataContext is not Models.Rent.Residentials.Listing room)
         {
             Debug.WriteLine($"Not Room. {element.DataContext?.GetType().FullName} @ItemContainerKeyboardAccelerator_Invoked");
             return;

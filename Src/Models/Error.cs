@@ -1,7 +1,7 @@
 ﻿namespace ZumenSearch.Models;
 
 // ErrorInfo Class
-public sealed class ErrorClass
+public sealed class Error
 {
     public enum ErrTypes
     {
@@ -35,7 +35,7 @@ public sealed class ErrorClass
     //
     public DateTime OccuredAt { get; set; } = default;
 
-    public ErrorClass()
+    public Error()
     {
     }
 }

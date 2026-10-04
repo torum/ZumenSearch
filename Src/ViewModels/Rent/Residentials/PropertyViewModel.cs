@@ -56,7 +56,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     #region == Services ==
 
-    private readonly IAbstractFactory<Models.Rent.Residentials.Listing.Listing, Views.Rent.Residentials.Listing.ShellPage> _shellFactory;
+    private readonly IAbstractFactory<Models.Rent.Residentials.Listing, Views.Rent.Residentials.Listing.ShellPage> _shellFactory;
     private readonly IDataAccessService _dataAccessService;
     private readonly IDataAccessLocationService _dataAccessLocationService;
     private readonly IDispatcherService _dispatcherService;
@@ -69,7 +69,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         Models.Rent.Residentials.Property building, 
         INavigationGenericService navigationService,
         IDialogGenericService dialogService,
-        IAbstractFactory<Models.Rent.Residentials.Listing.Listing, Views.Rent.Residentials.Listing.ShellPage> shellFactory, 
+        IAbstractFactory<Models.Rent.Residentials.Listing, Views.Rent.Residentials.Listing.ShellPage> shellFactory, 
         IDispatcherService dispatcherService, 
         IDataAccessService dataAccessService, 
         IDataAccessLocationService dataAccessLocationService)
@@ -201,19 +201,19 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     }
 
     // 物件種別
-    public ObservableCollection<Models.Rent.Residentials.Kind> Kinds =
+    public ObservableCollection<Models.Rent.Residentials.PropertyKind> Kinds =
     [
         //new Kind(EnumKinds.Unspecified.ToString(), "未指定"),
-        new Models.Rent.Residentials.Kind(Models.Rent.Residentials.EnumResidentialKinds.Apartment),
-        new Models.Rent.Residentials.Kind(Models.Rent.Residentials.EnumResidentialKinds.Mansion),
-        new Models.Rent.Residentials.Kind(Models.Rent.Residentials.EnumResidentialKinds.House),
-        new Models.Rent.Residentials.Kind(Models.Rent.Residentials.EnumResidentialKinds.TerraceHouse),
-        new Models.Rent.Residentials.Kind(Models.Rent.Residentials.EnumResidentialKinds.TownHouse),
-        new Models.Rent.Residentials.Kind(Models.Rent.Residentials.EnumResidentialKinds.ShareHouse),
-        new Models.Rent.Residentials.Kind(Models.Rent.Residentials.EnumResidentialKinds.Dormitory)
+        new Models.Rent.Residentials.PropertyKind(Models.Rent.Residentials.EnumResidentialKinds.Apartment),
+        new Models.Rent.Residentials.PropertyKind(Models.Rent.Residentials.EnumResidentialKinds.Mansion),
+        new Models.Rent.Residentials.PropertyKind(Models.Rent.Residentials.EnumResidentialKinds.House),
+        new Models.Rent.Residentials.PropertyKind(Models.Rent.Residentials.EnumResidentialKinds.TerraceHouse),
+        new Models.Rent.Residentials.PropertyKind(Models.Rent.Residentials.EnumResidentialKinds.TownHouse),
+        new Models.Rent.Residentials.PropertyKind(Models.Rent.Residentials.EnumResidentialKinds.ShareHouse),
+        new Models.Rent.Residentials.PropertyKind(Models.Rent.Residentials.EnumResidentialKinds.Dormitory)
     ];
 
-    public Models.Rent.Residentials.Kind SelectedKind
+    public Models.Rent.Residentials.PropertyKind SelectedKind
     {
         get => field ?? new(Models.Rent.Residentials.EnumResidentialKinds.Unspecified);
         set
@@ -261,24 +261,24 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     public partial bool IsUnitOwnershipVisible { get; private set; } = true;
 
     // 建物構造
-    public ObservableCollection<Models.Rent.Residentials.Structure> Structures =
+    public ObservableCollection<Models.Rent.Residentials.PropertyStructure> Structures =
     [
         //new Structure(EnumStructures.Unspecified.ToString(), "未指定"),
-        new Models.Rent.Residentials.Structure(Models.Rent.Residentials.EnumStructures.Wood),
-        new Models.Rent.Residentials.Structure(Models.Rent.Residentials.EnumStructures.Block),
-        new Models.Rent.Residentials.Structure(Models.Rent.Residentials.EnumStructures.LightSteel),
-        new Models.Rent.Residentials.Structure(Models.Rent.Residentials.EnumStructures.Steel),
-        new Models.Rent.Residentials.Structure(Models.Rent.Residentials.EnumStructures.RC),
-        new Models.Rent.Residentials.Structure(Models.Rent.Residentials.EnumStructures.SRC),
-        new Models.Rent.Residentials.Structure(Models.Rent.Residentials.EnumStructures.ALC),
-        new Models.Rent.Residentials.Structure(Models.Rent.Residentials.EnumStructures.PC),
-        new Models.Rent.Residentials.Structure(Models.Rent.Residentials.EnumStructures.HPC),
-        new Models.Rent.Residentials.Structure(Models.Rent.Residentials.EnumStructures.RB),
-        new Models.Rent.Residentials.Structure(Models.Rent.Residentials.EnumStructures.CFT),
-        new Models.Rent.Residentials.Structure(Models.Rent.Residentials.EnumStructures.Other)
+        new Models.Rent.Residentials.PropertyStructure(Models.Rent.Residentials.EnumStructures.Wood),
+        new Models.Rent.Residentials.PropertyStructure(Models.Rent.Residentials.EnumStructures.Block),
+        new Models.Rent.Residentials.PropertyStructure(Models.Rent.Residentials.EnumStructures.LightSteel),
+        new Models.Rent.Residentials.PropertyStructure(Models.Rent.Residentials.EnumStructures.Steel),
+        new Models.Rent.Residentials.PropertyStructure(Models.Rent.Residentials.EnumStructures.RC),
+        new Models.Rent.Residentials.PropertyStructure(Models.Rent.Residentials.EnumStructures.SRC),
+        new Models.Rent.Residentials.PropertyStructure(Models.Rent.Residentials.EnumStructures.ALC),
+        new Models.Rent.Residentials.PropertyStructure(Models.Rent.Residentials.EnumStructures.PC),
+        new Models.Rent.Residentials.PropertyStructure(Models.Rent.Residentials.EnumStructures.HPC),
+        new Models.Rent.Residentials.PropertyStructure(Models.Rent.Residentials.EnumStructures.RB),
+        new Models.Rent.Residentials.PropertyStructure(Models.Rent.Residentials.EnumStructures.CFT),
+        new Models.Rent.Residentials.PropertyStructure(Models.Rent.Residentials.EnumStructures.Other)
     ];
 
-    public Models.Rent.Residentials.Structure SelectedStructure
+    public Models.Rent.Residentials.PropertyStructure SelectedStructure
     {
         get => field ?? new(Models.Rent.Residentials.EnumStructures.Unspecified);
         set
@@ -633,7 +633,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     public string? MachiazaId;
 
-    public ObservableCollection<Prefecture> Prefectures = new(new PrefectureList().Prefectures);
+    public ObservableCollection<Prefecture> Prefectures = new(new PrefectureMaster().Prefectures);
 
     public Prefecture? SelectedPef
     {
@@ -1184,13 +1184,13 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         }
     } = false;
 
-    public ObservableCollection<Models.Rent.Residentials.ElectricKind> ElectricKinds =
+    public ObservableCollection<Models.Rent.Residentials.PropertyElectricKind> ElectricKinds =
     [
-        new Models.Rent.Residentials.ElectricKind(Models.Rent.Residentials.Property.EnumElectricKind.AllElectric, "オール電化"),
-        new Models.Rent.Residentials.ElectricKind(Models.Rent.Residentials.Property.EnumElectricKind.Unspecified, "未指定")
+        new Models.Rent.Residentials.PropertyElectricKind(Models.Rent.Residentials.Property.EnumElectricKind.AllElectric, "オール電化"),
+        new Models.Rent.Residentials.PropertyElectricKind(Models.Rent.Residentials.Property.EnumElectricKind.Unspecified, "未指定")
     ];
 
-    public Models.Rent.Residentials.ElectricKind SelectedElectricKind
+    public Models.Rent.Residentials.PropertyElectricKind SelectedElectricKind
     {
         get;
         set
@@ -1200,7 +1200,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                 IsDirty = true;
             }
         }
-    } = new Models.Rent.Residentials.ElectricKind(Models.Rent.Residentials.Property.EnumElectricKind.Unspecified, "未指定");
+    } = new Models.Rent.Residentials.PropertyElectricKind(Models.Rent.Residentials.Property.EnumElectricKind.Unspecified, "未指定");
 
     public string ElectricDetail
     {
@@ -1222,15 +1222,15 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     #region == 管理プロパティ ==
 
-    public ObservableCollection<Models.Rent.Residentials.KanriShutai> KanriShutais =
+    public ObservableCollection<Models.Rent.Residentials.PropertyKanriShutai> KanriShutais =
     [
-        new Models.Rent.Residentials.KanriShutai(Models.Rent.Residentials.Property.EnumKanriShutai.Unspecified, "未指定"),
-        new Models.Rent.Residentials.KanriShutai(Models.Rent.Residentials.Property.EnumKanriShutai.Jisya, "自社管理"),
-        new Models.Rent.Residentials.KanriShutai(Models.Rent.Residentials.Property.EnumKanriShutai.Tasya, "他社管理"),
-        new Models.Rent.Residentials.KanriShutai(Models.Rent.Residentials.Property.EnumKanriShutai.Kashinushi, "貸主管理")
+        new Models.Rent.Residentials.PropertyKanriShutai(Models.Rent.Residentials.Property.EnumKanriShutai.Unspecified, "未指定"),
+        new Models.Rent.Residentials.PropertyKanriShutai(Models.Rent.Residentials.Property.EnumKanriShutai.Jisya, "自社管理"),
+        new Models.Rent.Residentials.PropertyKanriShutai(Models.Rent.Residentials.Property.EnumKanriShutai.Tasya, "他社管理"),
+        new Models.Rent.Residentials.PropertyKanriShutai(Models.Rent.Residentials.Property.EnumKanriShutai.Kashinushi, "貸主管理")
     ];
 
-    public Models.Rent.Residentials.KanriShutai? SelectedKanriShutai
+    public Models.Rent.Residentials.PropertyKanriShutai? SelectedKanriShutai
     {
         get;
         set
@@ -1388,7 +1388,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     #region == 写真プロパティ ==
 
-    public ObservableCollection<Models.Rent.Residentials.Picture> Pictures
+    public ObservableCollection<Models.Rent.Residentials.PropertyPicture> Pictures
     {
         get;
         set
@@ -1406,7 +1406,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     #region == PDFプロパティ ==
 
-    public ObservableCollection<Models.Rent.Residentials.Pdf> Pdfs
+    public ObservableCollection<Models.Rent.Residentials.PropertyPdf> Pdfs
     {
         get;
         set
@@ -1456,7 +1456,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     #region == 部屋プロパティ ==
 
-    public ObservableCollection<Models.Rent.Residentials.Listing.Listing> Rooms
+    public ObservableCollection<Models.Rent.Residentials.Listing> Rooms
     {
         get;
         set
@@ -1471,7 +1471,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     /*
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(EditSelectedUnitCommand))]
-    public partial Models.Rent.Residentials.Listing.Listing? SelectedRoom { get; set; }
+    public partial Models.Rent.Residentials.Listing? SelectedRoom { get; set; }
     */
 
     #endregion
@@ -1488,7 +1488,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             return;
         }
 
-        if (something is not Models.Rent.Residentials.Listing.Listing room)
+        if (something is not Models.Rent.Residentials.Listing room)
         {
             return;
         }
@@ -1715,7 +1715,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
 
         // Pictures:
-        Pictures = new ObservableCollection<Models.Rent.Residentials.Picture>(_building.Pictures); // create a copy.
+        Pictures = new ObservableCollection<Models.Rent.Residentials.PropertyPicture>(_building.Pictures); // create a copy.
 
         foreach (var item in Pictures)
         {
@@ -1731,7 +1731,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             // Unsubscribe from removed items
             if (e.OldItems != null)
             {
-                foreach (Models.Rent.Residentials.Picture item in e.OldItems)
+                foreach (Models.Rent.Residentials.PropertyPicture item in e.OldItems)
                 {
                     Debug.WriteLine($"Item {item.Id} Removed from Pictures. @CollectionChanged in PopulateEntityValues of Bldg.MainViewModel");
                     IsDirty = true;
@@ -1743,7 +1743,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             // Subscribe to PropertyChanged.
             if (e.NewItems != null)
             {
-                foreach (Models.Rent.Residentials.Picture item in e.NewItems)
+                foreach (Models.Rent.Residentials.PropertyPicture item in e.NewItems)
                 {
                     Debug.WriteLine($"Item {item.Id} Added to Pictures. @CollectionChanged in PopulateEntityValues of Bldg.MainViewModel");
                     IsDirty = true;
@@ -1754,7 +1754,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         };
 
         // PDFs
-        Pdfs = new ObservableCollection<Models.Rent.Residentials.Pdf>(_building.Pdfs); // create a copy.
+        Pdfs = new ObservableCollection<Models.Rent.Residentials.PropertyPdf>(_building.Pdfs); // create a copy.
 
         foreach (var item in Pdfs)
         {
@@ -1770,7 +1770,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             // Unsubscribe from removed items
             if (e.OldItems != null)
             {
-                foreach (Models.Rent.Residentials.Pdf item in e.OldItems)
+                foreach (Models.Rent.Residentials.PropertyPdf item in e.OldItems)
                 {
                     Debug.WriteLine($"Item {item.Id} Removed from Pdfs, @CollectionChanged in PopulateEntityValues of Bldg.MainViewModel");
                     IsDirty = true;
@@ -1782,7 +1782,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             // Subscribe to PropertyChanged.
             if (e.NewItems != null)
             {
-                foreach (Models.Rent.Residentials.Pdf item in e.NewItems)
+                foreach (Models.Rent.Residentials.PropertyPdf item in e.NewItems)
                 {
                     Debug.WriteLine($"Item {item.Id} Added to Pdfs. @CollectionChanged in PopulateEntityValues of Bldg.MainViewModel");
                     IsDirty = true;
@@ -1807,7 +1807,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         }
 
         // Rooms
-        Rooms = new ObservableCollection<Models.Rent.Residentials.Listing.Listing>(_building.Rooms); // create a copy.
+        Rooms = new ObservableCollection<Models.Rent.Residentials.Listing>(_building.Rooms); // create a copy.
 
         foreach (var item in Rooms)
         {
@@ -1821,7 +1821,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             // Unsubscribe from removed items
             if (e.OldItems != null)
             {
-                foreach (Models.Rent.Residentials.Listing.Listing item in e.OldItems)
+                foreach (Models.Rent.Residentials.Listing item in e.OldItems)
                 {
                     //Debug.WriteLine($"Item {item.Id} Removed from Rooms. @Rooms.CollectionChanged in PopulateEntityValues of Bldg.MainViewModel");
                     //IsDirty = true; // Don't
@@ -1833,7 +1833,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             // Subscribe to PropertyChanged.
             if (e.NewItems != null)
             {
-                foreach (Models.Rent.Residentials.Listing.Listing item in e.NewItems)
+                foreach (Models.Rent.Residentials.Listing item in e.NewItems)
                 {
                     //Debug.WriteLine($"Item {item.Id} Added to Rooms. @Rooms.CollectionChanged in PopulateEntityValues of Bldg.MainViewModel");
                     //IsDirty = true; // don't
@@ -1848,7 +1848,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     private void OnBuildingPicturePropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (sender is not Models.Rent.Residentials.Picture picBldg)
+        if (sender is not Models.Rent.Residentials.PropertyPicture picBldg)
         {
             Debug.WriteLine("OnBuildingPicturePropertyChanged returned non PictureBldg.");
             return;
@@ -1880,7 +1880,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     private void OnBuildingPdfPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (sender is not Models.Rent.Residentials.Pdf pdfBldg)
+        if (sender is not Models.Rent.Residentials.PropertyPdf pdfBldg)
         {
             Debug.WriteLine("OnBuildingPdfPropertyChanged returned non PdfBldg.");
             return;
@@ -1912,7 +1912,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     private void OnRoomPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (sender is not Models.Rent.Residentials.Listing.Listing room)
+        if (sender is not Models.Rent.Residentials.Listing room)
         {
             Debug.WriteLine("OnRoomPropertyChanged returned non Room.");
             return;
@@ -2352,7 +2352,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             using var destinationStream = File.Create(destFilePath);
             await sourceStream.CopyToAsync(destinationStream);
 
-            var pic = new Models.Rent.Residentials.Picture(newId, newFilename, EnumEntityStatus.New)
+            var pic = new Models.Rent.Residentials.PropertyPicture(newId, newFilename, EnumEntityStatus.New)
             {
                 BasePath = _propertyDataDirectoryPath,//System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id),
                 ParentViewModel = this
@@ -2380,7 +2380,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     }
 
     [RelayCommand(CanExecute = nameof(CanDeleteBuildingPicture))]
-    private void DeleteBuildingPicture(Models.Rent.Residentials.Picture picBldg)
+    private void DeleteBuildingPicture(Models.Rent.Residentials.PropertyPicture picBldg)
     {
         if (picBldg is null)
         {
@@ -2395,7 +2395,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             IsDirty = true;
         }
     }
-    private static bool CanDeleteBuildingPicture(Models.Rent.Residentials.Picture picBldg)
+    private static bool CanDeleteBuildingPicture(Models.Rent.Residentials.PropertyPicture picBldg)
     {
         return picBldg is not null;
     }
@@ -2477,7 +2477,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                 // Keep track of unsaved files to delete them when discarding.
                 _unsavedBuildingPdfFileList.Add(pdfDestFilePath);
 
-                var pdf = new Models.Rent.Residentials.Pdf(newId, newFilename, newThumbnailFilename, EnumEntityStatus.New)
+                var pdf = new Models.Rent.Residentials.PropertyPdf(newId, newFilename, newThumbnailFilename, EnumEntityStatus.New)
                 {
                     BasePath = _propertyDataDirectoryPath,//System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id),
                     ParentViewModel = this
@@ -2507,7 +2507,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     }
 
     [RelayCommand(CanExecute = nameof(CanDeleteBuildingPdf))]
-    private void DeleteBuildingPdf(Models.Rent.Residentials.Pdf pdfBldg)
+    private void DeleteBuildingPdf(Models.Rent.Residentials.PropertyPdf pdfBldg)
     {
         if (pdfBldg is null)
         {
@@ -2522,7 +2522,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             IsDirty = true;
         }
     }
-    private static bool CanDeleteBuildingPdf(Models.Rent.Residentials.Pdf pdfBldg)
+    private static bool CanDeleteBuildingPdf(Models.Rent.Residentials.PropertyPdf pdfBldg)
     {
         return pdfBldg is not null;
     }
@@ -2562,7 +2562,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     private void AddNewRoom() 
     {
         var newId = Guid.CreateVersion7().ToString("N");
-        var editorShell = _shellFactory.Create(new Models.Rent.Residentials.Listing.Listing(newId, EnumEntityStatus.New, _building.Id, _building.Status, _building.IsUnitOwnership, Name));
+        var editorShell = _shellFactory.Create(new Models.Rent.Residentials.Listing(newId, EnumEntityStatus.New, _building.Id, _building.Status, _building.IsUnitOwnership, Name));
 
         // Apply the current IsUnitOwnership state because it may not be saved to the _room.
         editorShell.ViewModel.IsPropertyUnitOwnership = this.IsUnitOwnership;
@@ -2593,7 +2593,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     }
 
     [RelayCommand(CanExecute = nameof(EditSelectedRoomCanExecute))]
-    private void EditSelectedRoom(Models.Rent.Residentials.Listing.Listing room)
+    private void EditSelectedRoom(Models.Rent.Residentials.Listing room)
     {
         if (room is null) return;
 
@@ -2681,27 +2681,27 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         editorWindow.AppWindow.MoveInZOrderAtTop();
 
     }
-    public static bool EditSelectedRoomCanExecute(Models.Rent.Residentials.Listing.Listing room)
+    public static bool EditSelectedRoomCanExecute(Models.Rent.Residentials.Listing room)
     {
         if (room is null) return false;
         return true;
     }
 
     [RelayCommand(CanExecute = nameof(DupeSelectedRoomCanExecute))]
-    private void DupeSelectedRoom(Models.Rent.Residentials.Listing.Listing room)
+    private void DupeSelectedRoom(Models.Rent.Residentials.Listing room)
     {
         if (room is null) return;
 
         //
     }
-    public static bool DupeSelectedRoomCanExecute(Models.Rent.Residentials.Listing.Listing room)
+    public static bool DupeSelectedRoomCanExecute(Models.Rent.Residentials.Listing room)
     {
         if (room is null) return false;
         return true;
     }
 
     [RelayCommand(CanExecute = nameof(DeleteSelectedRoomCanExecute))]
-    private void DeleteSelectedRoom(Models.Rent.Residentials.Listing.Listing room)
+    private void DeleteSelectedRoom(Models.Rent.Residentials.Listing room)
     {
         if (room is null)
         {
@@ -2755,7 +2755,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             IsDirty = true;
         }
     }
-    public static bool DeleteSelectedRoomCanExecute(Models.Rent.Residentials.Listing.Listing room)
+    public static bool DeleteSelectedRoomCanExecute(Models.Rent.Residentials.Listing room)
     {
         if (room is null) return false;
         return true;

@@ -128,19 +128,19 @@ public partial class App : Application
                 services.AddGenericFactory<Models.Rent.Residentials.Property, INavigationGenericService, IDialogGenericService, ViewModels.Rent.Residentials.PropertyViewModel>();
                 services.AddGenericFactory<Models.Rent.Residentials.Property, Views.Rent.Residentials.ShellPage>();
 
-                services.AddTransient<ViewModels.Rent.Residentials.Listing.ListingViewModel>();
+                services.AddTransient<ViewModels.Rent.Residentials.ListingViewModel>();
                 services.AddTransient<Views.Rent.Residentials.Listing.ShellPage>();
-                services.AddGenericFactory<Models.Rent.Residentials.Listing.Listing, INavigationGenericService, IDialogGenericService, ViewModels.Rent.Residentials.Listing.ListingViewModel>();
-                services.AddGenericFactory<Models.Rent.Residentials.Listing.Listing, Views.Rent.Residentials.Listing.ShellPage>();
+                services.AddGenericFactory<Models.Rent.Residentials.Listing, INavigationGenericService, IDialogGenericService, ViewModels.Rent.Residentials.ListingViewModel>();
+                services.AddGenericFactory<Models.Rent.Residentials.Listing, Views.Rent.Residentials.Listing.ShellPage>();
 
                 services.AddTransient<ViewModels.Rent.Commercials.PropertyViewModel>();
                 services.AddTransient<Views.Rent.Commercials.ShellPage>();
                 services.AddGenericFactory<Models.Rent.Commercials.Property, INavigationGenericService, IDialogGenericService, ViewModels.Rent.Commercials.PropertyViewModel>();
                 services.AddGenericFactory<Models.Rent.Commercials.Property, Views.Rent.Commercials.ShellPage>();
 
-                services.AddTransient<ViewModels.Rent.Commercials.Listing.ListingViewModel>();
+                services.AddTransient<ViewModels.Rent.Commercials.ListingViewModel>();
                 services.AddTransient<Views.Rent.Commercials.Listing.ShellPage>(); 
-                services.AddGenericFactory<Models.Rent.Residentials.Listing.Listing, INavigationGenericService, IDialogGenericService, ViewModels.Rent.Commercials.Listing.ListingViewModel>();
+                services.AddGenericFactory<Models.Rent.Residentials.Listing, INavigationGenericService, IDialogGenericService, ViewModels.Rent.Commercials.ListingViewModel>();
                 services.AddGenericFactory<Models.Rent.Commercials.Listing.Listing, Views.Rent.Commercials.Listing.ShellPage>();
 
                 services.AddTransient<ViewModels.Rent.Lessors.LessorViewModel>();

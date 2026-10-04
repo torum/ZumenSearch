@@ -259,7 +259,7 @@ public sealed partial class BrokerViewModel : ObservableRecipient
     {
         Name = _broker.Name;
 
-        if (_broker is Models.Person.LegalPersonClass legalPerson)
+        if (_broker is Models.Person.LegalPerson legalPerson)
         {
             if (_broker.PersonKind != EnumPersonKind.Legal)
             {
@@ -320,9 +320,9 @@ public sealed partial class BrokerViewModel : ObservableRecipient
             return;
         }
 
-        // TODO: Create LegalPersonClass and set it.
+        // TODO: Create LegalPerson and set it.
 
-        var newBroker = new Models.Person.LegalPersonClass(_broker.Id, _broker.Status);
+        var newBroker = new Models.Person.LegalPerson(_broker.Id, _broker.Status);
 
         newBroker.SetName(Name);
 

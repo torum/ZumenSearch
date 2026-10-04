@@ -5,12 +5,12 @@ namespace ZumenSearch.Views.Dialogs;
 
 public sealed partial class RailStationSelectPage : Page
 {
-    public ViewModels.Dialogs.RailStationViewModel ViewModel
+    public ViewModels.Dialogs.RailStationSelectViewModel ViewModel
     {
         get;
     }
 
-    public RailStationSelectPage(ViewModels.Dialogs.RailStationViewModel vm)
+    public RailStationSelectPage(ViewModels.Dialogs.RailStationSelectViewModel vm)
     {
         ViewModel = vm;
         InitializeComponent();

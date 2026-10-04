@@ -31,7 +31,7 @@ public sealed partial class ShellPage : Page
         _navigationService = navigationService;
         _dialogService = dialogService;
 
-        ViewModel = new ViewModels.Rent.Commercials.Listing.ListingViewModel(
+        ViewModel = new ViewModels.Rent.Commercials.ListingViewModel(
             unit,
             navigationService,
             dataAccessService);
@@ -50,7 +50,7 @@ public sealed partial class ShellPage : Page
         Window.AppWindow.Closing += AppWindow_Closing;
     }
 
-    public ViewModels.Rent.Commercials.Listing.ListingViewModel ViewModel { get; }
+    public ViewModels.Rent.Commercials.ListingViewModel ViewModel { get; }
     public EditorWindow Window { get; }
 
     public async Task ShowEditorCloseConfirmationDialog()

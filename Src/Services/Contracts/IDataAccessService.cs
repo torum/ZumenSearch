@@ -14,7 +14,7 @@ public interface IDataAccessService
     ResultWrapper UpsertRentResidential(Models.Rent.Residentials.Property building);
     RentResidentialBuildingSingleResultWrapper SelectRentResidentialById(string id);
     ResultWrapper DeleteRentResidential(string rentId);
-    ResultWrapper UpsertRentResidentialListing(string rentId, Models.Rent.Residentials.Listing.Listing room);
+    ResultWrapper UpsertRentResidentialListing(string rentId, Models.Rent.Residentials.Listing room);
     ListingsResultWrapper SelectRentResidentialListings();
     RentResidentialRoomSingleResultWrapper SelectRentResidentialListingById(string rentId, string roomId);
     ResultWrapper DeleteRentResidentialListing(string roomId);
@@ -45,7 +45,7 @@ public interface IDataAccessService
 
     ResultWrapper DeleteSaleResidential(string saleId);
 
-    ResultWrapper UpsertSaleResidentialListing(string saleId,Models.Sale.Residentials.Listing.Listing room);
+    ResultWrapper UpsertSaleResidentialListing(string saleId,Models.Sale.Residentials.Listing room);
 
     ListingsResultWrapper SelectSaleResidentialListings();
 

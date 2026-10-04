@@ -13,95 +13,17 @@ namespace ZumenSearch.Models.Location;
 // 
 // </remarks>
 
-public class AddressClass
+public class Address
 {
-    // Nested classes to represent the address components.
-    public sealed class PrefectureClass(string code, string municipalityCode, string name)
-    {
-        // 都道府県コード
-        public string Code { get; private set; } = code;
-
-        // 市区町村コード
-        // db:location_pref_id
-        public string MunicipalityCode { get; private set; } = municipalityCode;
-
-        // db:location_prefecture
-        public string Name { get; private set; } = name;
-    };
-
-    public sealed class CountyAndCityClass(string machiazaId, string county, string city)
-    {
-        // db:location_machiaza_id
-        public string MachiazaId { get; init; } = machiazaId;
-
-        // 郡 db:location_county
-        public string County { get; init; } = county;
-
-        // 市区町村 db:location_city
-        public string City { get; init; } = city;
-
-        public string Combined
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(County) && string.IsNullOrEmpty(City))
-                {
-                    return "";//該当なし
-                }
-                else
-                {
-                    return County + City;
-                }
-            }
-        }
-    }
-
-    public sealed class WardAndOazaClass(string machiazaId, string ward, string oaza)
-    {
-        // db:location_machiaza_id
-        public string MachiazaId {get; init;} = machiazaId;
-
-        // db:location_ward
-        public string Ward {get; init;} = ward;
-
-        // db:location_oaza_cho
-        public string Oaza{get; init;} = oaza;
-
-        public string Combined
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(Ward) && string.IsNullOrEmpty(Oaza))
-                {
-                    return "";//該当なし
-                }
-                else
-                {
-                    return Ward + Oaza;
-                }
-            }
-        }
-    }
-
-    public sealed class ChoumeClass(string machiazaId, string choume)
-    {
-        // db:location_machiaza_id
-        public string MachiazaId {get; init;} = machiazaId;
-
-        // db:location_choume
-        public string Chou {get; init;} = choume;
-    }
-
-    public AddressClass()
+    public Address()
     {
         //
-        
     }
 
-    public PrefectureClass? Prefecture { get; private set; }
-    public CountyAndCityClass? CountyAndCity { get; private set; }
-    public WardAndOazaClass? WardAndOaza { get; private set; }
-    public ChoumeClass? Choume { get; private set; }
+    public Prefecture? Prefecture { get; private set; }
+    public CountyAndCity? CountyAndCity { get; private set; }
+    public WardAndOaza? WardAndOaza { get; private set; }
+    public Choume? Choume { get; private set; }
     public string Edaban {get; private set;} = string.Empty;
     // TODO:
     public string PostalCode {get;set;} = string.Empty;
@@ -132,7 +54,7 @@ public class AddressClass
         if (string.IsNullOrWhiteSpace(municipalityCode)) throw new ArgumentException("MunicipalityCode cannot be empty.", nameof(municipalityCode));
         if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Name cannot be empty.", nameof(name));
 
-        Prefecture = new PrefectureClass(code, municipalityCode, name);
+        Prefecture = new Prefecture(code, municipalityCode, name);
     }
 
     public void SetCountyAndCity(string machiazaId, string county, string city)
@@ -141,7 +63,7 @@ public class AddressClass
         //if (string.IsNullOrWhiteSpace(county)) throw new ArgumentException("County cannot be empty.", nameof(county));
         //if (string.IsNullOrWhiteSpace(city)) throw new ArgumentException("City cannot be empty.", nameof(city));
         
-        CountyAndCity = new CountyAndCityClass(machiazaId, county, city);
+        CountyAndCity = new CountyAndCity(machiazaId, county, city);
     }
 
     public void SetWardAndOaza(string machiazaId, string ward, string oaza)
@@ -150,7 +72,7 @@ public class AddressClass
         //if (string.IsNullOrWhiteSpace(ward)) throw new ArgumentException("Ward cannot be empty.", nameof(ward));
         //if (string.IsNullOrWhiteSpace(oaza)) throw new ArgumentException("Oaza cannot be empty.", nameof(oaza));
 
-        WardAndOaza = new WardAndOazaClass(machiazaId, ward, oaza);
+        WardAndOaza = new WardAndOaza(machiazaId, ward, oaza);
     }
 
     public void SetChoume(string machiazaId, string choume)
@@ -158,7 +80,7 @@ public class AddressClass
         if (string.IsNullOrWhiteSpace(machiazaId)) throw new ArgumentException("MachiazaId cannot be empty.", nameof(machiazaId));
         //if (string.IsNullOrWhiteSpace(choume)) throw new ArgumentException("Choume cannot be empty.", nameof(choume));
 
-        Choume = new ChoumeClass(machiazaId, choume);
+        Choume = new Choume(machiazaId, choume);
     }
 
     public void SetEdaban(string edaban)

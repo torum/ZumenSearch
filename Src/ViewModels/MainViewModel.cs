@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml.Media.Animation;
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Windows.ApplicationModel;
 using ZumenSearch.Helpers;
@@ -39,7 +40,7 @@ public partial class MainViewModel : ObservableRecipient,
     #region == Services ==
 
     private readonly IAbstractFactory<Models.Rent.Residentials.Property, Views.Rent.Residentials.ShellPage> _shellRentResidentialPropertyFactory;
-    private readonly IAbstractFactory<Models.Rent.Residentials.Listing.Listing, Views.Rent.Residentials.Listing.ShellPage> _shellRentResidentialListingFactory;
+    private readonly IAbstractFactory<Models.Rent.Residentials.Listing, Views.Rent.Residentials.Listing.ShellPage> _shellRentResidentialListingFactory;
 
     private readonly IAbstractFactory<Models.Rent.Commercials.Property, Views.Rent.Commercials.ShellPage> _shellRentCommercialPropertyFactory;
     private readonly IAbstractFactory<Models.Rent.Commercials.Listing.Listing, Views.Rent.Commercials.Listing.ShellPage> _shellRentCommercialListingFactory;
@@ -56,7 +57,7 @@ public partial class MainViewModel : ObservableRecipient,
 
     public MainViewModel(
         IAbstractFactory<Models.Rent.Residentials.Property, Views.Rent.Residentials.ShellPage> shellRentResidentialPropertyFactory, 
-        IAbstractFactory<Models.Rent.Residentials.Listing.Listing, Views.Rent.Residentials.Listing.ShellPage> shellRentResidentialListingFactory,
+        IAbstractFactory<Models.Rent.Residentials.Listing, Views.Rent.Residentials.Listing.ShellPage> shellRentResidentialListingFactory,
         IAbstractFactory<Models.Rent.Commercials.Property, Views.Rent.Commercials.ShellPage> shellRentCommercialPropertyFactory,
         IAbstractFactory<Models.Rent.Commercials.Listing.Listing, Views.Rent.Commercials.Listing.ShellPage> shellRentCommercialListingFactory,
         IAbstractFactory<Models.Base.PersonBase, Views.Rent.Lessors.ShellPage> shellRentLessorFactory,
@@ -474,6 +475,37 @@ public partial class MainViewModel : ObservableRecipient,
         }
 
     }
+
+    /*
+    1. To be compatible with Native AOT, we need to manually register message handlers in OnActivated and unregister them in OnDeactivated. 
+    This is due to the fact that the source generator for CommunityToolkit.Mvvm does not currently support Native AOT, as discussed in the following GitHub issue:
+    https://github.com/CommunityToolkit/dotnet/issues/962
+
+    2. Even though we register manually, simple IsActive = true; cause issues in Native AOT.
+
+    // Add both attributes to perfectly match the base class signature
+    [RequiresUnreferencedCode("Manually registering messages to avoid trimming issues.")]
+    [RequiresDynamicCode("Manually registering messages to avoid Native AOT issues.")]
+    protected override void OnActivated()
+    {
+        // Explicitly register each message handler
+        Messenger.Register<PropertyUpdatedMessage>(this);
+        Messenger.Register<ListingUpdatedMessage>(this);
+        Messenger.Register<LessorUpdatedMessage>(this);
+        Messenger.Register<BrokerUpdatedMessage>(this);
+        Messenger.Register<WindowClosedMessage>(this);
+    }
+
+    protected override void OnDeactivated()
+    {
+        // Explicitly unregister to prevent memory leaks
+        Messenger.Unregister<PropertyUpdatedMessage>(this);
+        Messenger.Unregister<ListingUpdatedMessage>(this);
+        Messenger.Unregister<LessorUpdatedMessage>(this);
+        Messenger.Unregister<BrokerUpdatedMessage>(this);
+        Messenger.Unregister<WindowClosedMessage>(this);
+    }
+    */
 
     #endregion
 
@@ -2000,7 +2032,7 @@ public partial class MainViewModel : ObservableRecipient,
     private void AddNewRentLessor()
     {
         var newId = Guid.CreateVersion7().ToString("N");
-        var shell = _shellRentLessorFactory.Create(new Models.Person.NaturalPersonClass(newId, Models.Base.EnumEntityStatus.New));
+        var shell = _shellRentLessorFactory.Create(new Models.Person.NaturalPerson(newId, Models.Base.EnumEntityStatus.New));
         
         LessorEditorList.Add(shell.Window);
 
@@ -2436,7 +2468,7 @@ public partial class MainViewModel : ObservableRecipient,
     private void AddNewBroker()
     {
         var newId = Guid.CreateVersion7().ToString("N");
-        var shell = _shellBrokerFactory.Create(new Models.Person.LegalPersonClass(newId, Models.Base.EnumEntityStatus.New));
+        var shell = _shellBrokerFactory.Create(new Models.Person.LegalPerson(newId, Models.Base.EnumEntityStatus.New));
 
         BrokerEditorList.Add(shell.Window);
 

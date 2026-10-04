@@ -7,7 +7,7 @@
     xmlns:controls="using:CommunityToolkit.WinUI.Controls"
     mc:Ignorable="d"
     xmlns:mod="using:ZumenSearch.Models"
-    xmlns:modcommercial="using:ZumenSearch.Models.Rent.Commercials"
+    xmlns:modcommercials="using:ZumenSearch.Models.Rent.Commercials"
     NavigationCacheMode="Required">
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled" Padding="36,0,36,24">
         <Grid x:Name="ContentArea">
@@ -29,7 +29,7 @@
                         </StackPanel>
                         <RadioButtons Header="種類" MaxColumns="3" Margin="0,0,0,0" ItemsSource="{x:Bind ViewModel.ElectricKinds}" SelectedItem="{x:Bind ViewModel.SelectedElectricKind, Mode=TwoWay}" >
                             <RadioButtons.ItemTemplate>
-                                <DataTemplate x:DataType="modcommercial:ElectricKind">
+                                <DataTemplate x:DataType="modcommercials:PropertyElectricKind">
                                     <TextBlock Text="{x:Bind Label, Mode=OneTime}" VerticalAlignment="Center"/>
                                 </DataTemplate>
                             </RadioButtons.ItemTemplate>

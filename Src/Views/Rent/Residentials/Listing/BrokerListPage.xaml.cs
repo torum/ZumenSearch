@@ -7,7 +7,7 @@ namespace ZumenSearch.Views.Rent.Residentials.Listing;
 
 public sealed partial class BrokerListPage : Page
 {
-    public ViewModels.Rent.Residentials.Listing.ListingViewModel? ViewModel { get; private set; }
+    public ViewModels.Rent.Residentials.ListingViewModel? ViewModel { get; private set; }
 
     public BrokerListPage()
     {
@@ -16,7 +16,7 @@ public sealed partial class BrokerListPage : Page
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
-        if (e.Parameter is ViewModels.Rent.Residentials.Listing.ListingViewModel vm)
+        if (e.Parameter is ViewModels.Rent.Residentials.ListingViewModel vm)
         {
             ViewModel = vm;
             Bindings.Update();

@@ -4,17 +4,9 @@ using ZumenSearch.Models.Base;
 namespace ZumenSearch.Models.Rent.Commercials;
 
 // TODO: Consider creating a wrapper just like Lessor wrapper?
-// Almost dupe with Models.Rent.Residentials.Listing.Pdf
+// Almost dupe with Models.Rent.Residentials.ListingPdf
 
-public enum EnumCommercialPdfType
-{
-    Unspecified,
-    Listing,
-    Architectural,
-    Registry,
-    Map,
-    Other
-}
+
 public sealed class CommercialBuildingPdfType(EnumCommercialPdfType key)
 {
     private static readonly Dictionary<EnumCommercialPdfType, string> pdfTypes = new()
@@ -33,7 +25,7 @@ public sealed class CommercialBuildingPdfType(EnumCommercialPdfType key)
     public string Label => Labels[key];
 }
 
-public sealed partial class Pdf : PdfBase
+public sealed partial class PropertyPdf : PdfBase
 {
     public ViewModels.Rent.Commercials.PropertyViewModel? ParentViewModel { get; set; }
 
@@ -115,7 +107,7 @@ public sealed partial class Pdf : PdfBase
         }
     }
 
-    public Pdf(string id, string pdfLocation, string thumbnailLocation, EnumEntityStatus status) : base(id, status)
+    public PropertyPdf(string id, string pdfLocation, string thumbnailLocation, EnumEntityStatus status) : base(id, status)
     {
         PdfFilename = pdfLocation;
         ThumbnailFilename = thumbnailLocation;

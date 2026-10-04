@@ -6,7 +6,7 @@ namespace ZumenSearch.Views.Rent.Residentials.Listing;
 
 public sealed partial class PictureListPage : Page
 {
-    public ViewModels.Rent.Residentials.Listing.ListingViewModel? ViewModel { get; private set; }
+    public ViewModels.Rent.Residentials.ListingViewModel? ViewModel { get; private set; }
 
     public PictureListPage()
     {
@@ -16,7 +16,7 @@ public sealed partial class PictureListPage : Page
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
-        if (e.Parameter is ViewModels.Rent.Residentials.Listing.ListingViewModel vm)
+        if (e.Parameter is ViewModels.Rent.Residentials.ListingViewModel vm)
         {
             //_editorShell = e.Parameter as Views.Rent.Residentials.Editor.EditorShell;
             ViewModel = vm;

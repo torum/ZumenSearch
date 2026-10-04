@@ -7,7 +7,7 @@ using ZumenSearch.Services.Contracts;
 using CommunityToolkit.Mvvm.Messaging;
 using ZumenSearch.Models;
 
-namespace ZumenSearch.ViewModels.Rent.Commercials.Listing;
+namespace ZumenSearch.ViewModels.Rent.Commercials;
 
 public sealed partial class ListingViewModel : ObservableRecipient
 {

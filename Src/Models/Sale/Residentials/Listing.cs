@@ -2,7 +2,7 @@
 using System.Collections.ObjectModel;
 using ZumenSearch.Models.Base;
 
-namespace ZumenSearch.Models.Sale.Residentials.Listing;
+namespace ZumenSearch.Models.Sale.Residentials;
 
 #pragma warning disable IDE0079 // Remove unnecessary suppression
 #pragma warning disable IDE0290 // Use primary constructor

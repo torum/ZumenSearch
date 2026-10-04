@@ -8,9 +8,9 @@ public sealed partial class EditorWindow : Window
 
     public string PropertyId { get; } = string.Empty;
 
-    public ViewModels.Rent.Residentials.Listing.ListingViewModel? ViewModel { get; private set; }
+    public ViewModels.Rent.Residentials.ListingViewModel? ViewModel { get; private set; }
 
-    public EditorWindow(string id, string propertyId, ViewModels.Rent.Residentials.Listing.ListingViewModel vm)
+    public EditorWindow(string id, string propertyId, ViewModels.Rent.Residentials.ListingViewModel vm)
     {
         Id = id;
         PropertyId = propertyId;

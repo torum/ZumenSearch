@@ -1,13 +1,8 @@
 ﻿using System.Collections.ObjectModel;
 using ZumenSearch.Models.Base;
 
-namespace ZumenSearch.Models.Rent.Residentials.Listing;
+namespace ZumenSearch.Models.Rent.Residentials;
 
-public enum EnumRoomPictureType
-{
-    Unspecified, Madori, Situnai, LivingDining, Bedroom, Kitchen, Bathroom, Restroom, Washroom, StorageSpace, Appliance, FrontDoor, Balcony, Other
-    //Unspecified, Madori, Gaikan, Entrance, Neighborhood, Other
-}
 
 public sealed class RoomPictureType(EnumRoomPictureType key)
 {
@@ -40,9 +35,9 @@ public sealed class RoomPictureType(EnumRoomPictureType key)
     public EnumRoomPictureType Key => key;
 };
 
-public sealed partial class Picture : PictureBase
+public sealed partial class ListingPicture : PictureBase
 {
-    public ViewModels.Rent.Residentials.Listing.ListingViewModel? ParentViewModel { get; set; }
+    public ViewModels.Rent.Residentials.ListingViewModel? ParentViewModel { get; set; }
 
     // Do not use SetProperty. PropertyChanged is being subscribed.
     public RoomPictureType PictureType
@@ -72,23 +67,23 @@ public sealed partial class Picture : PictureBase
 
     public readonly ObservableCollection<RoomPictureType> RoomPictureTypes =
     [
-        new RoomPictureType(Models.Rent.Residentials.Listing.EnumRoomPictureType.Unspecified),
-        new RoomPictureType(Models.Rent.Residentials.Listing.EnumRoomPictureType.Madori),
-        //new UnitPictureType(Models.Rent.Residentials.Listing.EnumUnitPictureType.Gaikan),
-        new RoomPictureType(Models.Rent.Residentials.Listing.EnumRoomPictureType.Situnai),
-        new RoomPictureType(Models.Rent.Residentials.Listing.EnumRoomPictureType.LivingDining),
-        new RoomPictureType(Models.Rent.Residentials.Listing.EnumRoomPictureType.Bedroom),
-        new RoomPictureType(Models.Rent.Residentials.Listing.EnumRoomPictureType.Kitchen),
-        new RoomPictureType(Models.Rent.Residentials.Listing.EnumRoomPictureType.Bathroom),
-        new RoomPictureType(Models.Rent.Residentials.Listing.EnumRoomPictureType.Restroom),
-        new RoomPictureType(Models.Rent.Residentials.Listing.EnumRoomPictureType.Washroom),
-        new RoomPictureType(Models.Rent.Residentials.Listing.EnumRoomPictureType.StorageSpace),
-        new RoomPictureType(Models.Rent.Residentials.Listing.EnumRoomPictureType.Appliance),
-        new RoomPictureType(Models.Rent.Residentials.Listing.EnumRoomPictureType.FrontDoor),
-        new RoomPictureType(Models.Rent.Residentials.Listing.EnumRoomPictureType.Balcony),
-        //new UnitPictureType(Models.Rent.Residentials.Listing.EnumUnitPictureType.Entrance),
-        //new UnitPictureType(Models.Rent.Residentials.Listing.EnumUnitPictureType.Neighborhood),
-        new RoomPictureType(Models.Rent.Residentials.Listing.EnumRoomPictureType.Other)
+        new RoomPictureType(Models.Rent.Residentials.EnumRoomPictureType.Unspecified),
+        new RoomPictureType(Models.Rent.Residentials.EnumRoomPictureType.Madori),
+        //new UnitPictureType(Models.Rent.Residentials.EnumUnitPictureType.Gaikan),
+        new RoomPictureType(Models.Rent.Residentials.EnumRoomPictureType.Situnai),
+        new RoomPictureType(Models.Rent.Residentials.EnumRoomPictureType.LivingDining),
+        new RoomPictureType(Models.Rent.Residentials.EnumRoomPictureType.Bedroom),
+        new RoomPictureType(Models.Rent.Residentials.EnumRoomPictureType.Kitchen),
+        new RoomPictureType(Models.Rent.Residentials.EnumRoomPictureType.Bathroom),
+        new RoomPictureType(Models.Rent.Residentials.EnumRoomPictureType.Restroom),
+        new RoomPictureType(Models.Rent.Residentials.EnumRoomPictureType.Washroom),
+        new RoomPictureType(Models.Rent.Residentials.EnumRoomPictureType.StorageSpace),
+        new RoomPictureType(Models.Rent.Residentials.EnumRoomPictureType.Appliance),
+        new RoomPictureType(Models.Rent.Residentials.EnumRoomPictureType.FrontDoor),
+        new RoomPictureType(Models.Rent.Residentials.EnumRoomPictureType.Balcony),
+        //new UnitPictureType(Models.Rent.Residentials.EnumUnitPictureType.Entrance),
+        //new UnitPictureType(Models.Rent.Residentials.EnumUnitPictureType.Neighborhood),
+        new RoomPictureType(Models.Rent.Residentials.EnumRoomPictureType.Other)
     ];
 
     // Do not use SetProperty.
@@ -134,7 +129,7 @@ public sealed partial class Picture : PictureBase
         }
     }
 
-    public Picture(string id, string imageLocation, EnumEntityStatus status) : base(id, status)
+    public ListingPicture(string id, string imageLocation, EnumEntityStatus status) : base(id, status)
     {
         ImageFilename = imageLocation;
 

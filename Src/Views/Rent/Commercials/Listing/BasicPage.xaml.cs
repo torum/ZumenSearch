@@ -6,7 +6,7 @@ namespace ZumenSearch.Views.Rent.Commercials.Listing;
 
 public sealed partial class BasicPage : Page
 {
-    public ViewModels.Rent.Commercials.Listing.ListingViewModel? ViewModel { get; private set; }
+    public ViewModels.Rent.Commercials.ListingViewModel? ViewModel { get; private set; }
 
     public BasicPage()
     {
@@ -15,7 +15,7 @@ public sealed partial class BasicPage : Page
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
-        if (e.Parameter is ViewModels.Rent.Commercials.Listing.ListingViewModel vm)
+        if (e.Parameter is ViewModels.Rent.Commercials.ListingViewModel vm)
         {
             ViewModel = vm;
             Bindings.Update();

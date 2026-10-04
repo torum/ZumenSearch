@@ -6,13 +6,13 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:mod="using:ZumenSearch.Models"
     xmlns:modperson="using:ZumenSearch.Models.Person"
-    xmlns:modcommercial="using:ZumenSearch.Models.Rent.Commercials"
+    xmlns:modcommercials="using:ZumenSearch.Models.Rent.Commercials"
     xmlns:local="using:ZumenSearch.Views.Rent.Commercials"
     mc:Ignorable="d"
     NavigationCacheMode="Required">
     <Page.Resources>
         <!-- DataTemplate for NaturalPerson -->
-        <DataTemplate x:Key="NaturalPersonTemplate" x:DataType="modcommercial:PersonWrapperForPropertyViewModel">
+        <DataTemplate x:Key="NaturalPersonTemplate" x:DataType="modcommercials:PersonWrapperForPropertyViewModel">
             <Border Style="{StaticResource RoundCardBorderStyle}">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -37,7 +37,7 @@
         </DataTemplate>
 
         <!-- DataTemplate for LegalPerson -->
-        <DataTemplate x:Key="LegalPersonTemplate" x:DataType="modcommercial:PersonWrapperForPropertyViewModel">
+        <DataTemplate x:Key="LegalPersonTemplate" x:DataType="modcommercials:PersonWrapperForPropertyViewModel">
             <Border Style="{StaticResource RoundCardBorderStyle}">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -48,7 +48,7 @@
                         <StackPanel>
                             <TextBox Header="会社名" IsReadOnly="True" Margin="0,0,0,0" Text="{x:Bind Person.Name, Mode=OneWay}"></TextBox>
                             <!-- cast -->
-                            <TextBox Header="会社" IsReadOnly="True" Margin="0,0,0,0" Text="{x:Bind ((modperson:LegalPersonClass)Person).NameCompany, Mode=OneWay}"></TextBox>
+                            <TextBox Header="会社" IsReadOnly="True" Margin="0,0,0,0" Text="{x:Bind ((modperson:LegalPerson)Person).NameCompany, Mode=OneWay}"></TextBox>
                         </StackPanel>
                     </Grid>
                     <Grid Grid.Row="0" Grid.Column="1">

@@ -6,39 +6,11 @@ namespace ZumenSearch.Models.Rent.Commercials;
 #pragma warning disable IDE0079 // Remove unnecessary suppression
 #pragma warning disable IDE0290 // Use primary constructor
 
-public enum EnumCommercialPictureType
-{
-    Unspecified,
-    Exterior,
-    Entrance,
-    Neighborhood,
-    Interior,
-    Other
-}
-
-public sealed class CommercialPictureType(EnumCommercialPictureType key)
-{
-    private static readonly Dictionary<EnumCommercialPictureType, string> PictureTypes = new()
-    {
-        [EnumCommercialPictureType.Unspecified] = "未指定",
-        [EnumCommercialPictureType.Exterior] = "外観",
-        [EnumCommercialPictureType.Entrance] = "エントランス",
-        [EnumCommercialPictureType.Neighborhood] = "周辺",
-        [EnumCommercialPictureType.Interior] = "室内",
-        [EnumCommercialPictureType.Other] = "その他"
-    };
-    private static readonly Dictionary<EnumCommercialPictureType, string> Labels = PictureTypes;
-
-    public EnumCommercialPictureType Key => key;
-
-    public string Label => Labels[key];
-}
-
-public sealed partial class Picture : PictureBase
+public sealed partial class PropertyPicture : PictureBase
 {
     public ViewModels.Rent.Commercials.PropertyViewModel? ParentViewModel { get; set; }
 
-    public readonly ObservableCollection<CommercialPictureType> CommercialPictureTypes =
+    public readonly ObservableCollection<PropertyPictureType> CommercialPictureTypes =
     [
         new(EnumCommercialPictureType.Exterior),
         new(EnumCommercialPictureType.Entrance),
@@ -48,7 +20,7 @@ public sealed partial class Picture : PictureBase
     ];
 
     // Do not use SetProperty. PropertyChanged is being subscribed.
-    public CommercialPictureType PictureType
+    public PropertyPictureType PictureType
     {
         get;
         set
@@ -116,7 +88,7 @@ public sealed partial class Picture : PictureBase
         }
     }
 
-    public Picture(string id, string imageLocation, EnumEntityStatus status) : base(id, status)
+    public PropertyPicture(string id, string imageLocation, EnumEntityStatus status) : base(id, status)
     {
         ImageFilename = imageLocation;
 
@@ -128,7 +100,7 @@ public sealed partial class Picture : PictureBase
         if (Enum.TryParse<EnumCommercialPictureType>(titleStr, out var result))
         {
             //PictureType = new(result); // Not good for assigning to combobox. So select from CommercialPictureTypes.
-            PictureType = CommercialPictureTypes.FirstOrDefault<CommercialPictureType>(x => x.Key == result) ?? new(EnumCommercialPictureType.Unspecified);
+            PictureType = CommercialPictureTypes.FirstOrDefault<PropertyPictureType>(x => x.Key == result) ?? new(EnumCommercialPictureType.Unspecified);
 
             //Debug.WriteLine($"SetLabelFromString: {titleStr} -> {PictureType.Label}");
             return result;

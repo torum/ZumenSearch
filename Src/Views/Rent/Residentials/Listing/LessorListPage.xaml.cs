@@ -6,7 +6,7 @@ namespace ZumenSearch.Views.Rent.Residentials.Listing;
 
 public sealed partial class LessorListPage : Page
 {
-    public ViewModels.Rent.Residentials.Listing.ListingViewModel? ViewModel { get; private set; }
+    public ViewModels.Rent.Residentials.ListingViewModel? ViewModel { get; private set; }
 
     public LessorListPage()
     {
@@ -15,7 +15,7 @@ public sealed partial class LessorListPage : Page
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
-        if (e.Parameter is ViewModels.Rent.Residentials.Listing.ListingViewModel vm)
+        if (e.Parameter is ViewModels.Rent.Residentials.ListingViewModel vm)
         {
             ViewModel = vm;
             Bindings.Update();
