@@ -859,9 +859,9 @@ public sealed class DataAccessService : IDataAccessService
 
     #region == Properties ==
 
-    public PropertiesResultWrapper SelectRecentProperties()
+    public PropertySearchResultWrapper SelectRecentProperties()
     {
-        var res = new PropertiesResultWrapper();
+        var res = new PropertySearchResultWrapper();
 
         _readerWriterLock.EnterReadLock();
         try
@@ -925,9 +925,9 @@ public sealed class DataAccessService : IDataAccessService
         return res;
     }
 
-    public PropertiesResultWrapper SelectPropertiesByKeyword(string keyword) // TODO: add what type of keyword eg. name/adderss/lessor.
+    public PropertySearchResultWrapper SelectPropertiesByKeyword(string keyword) // TODO: add what type of keyword eg. name/adderss/lessor.
     {
-        var res = new PropertiesResultWrapper();
+        var res = new PropertySearchResultWrapper();
 
         if (string.IsNullOrEmpty(keyword))
         {
@@ -1573,9 +1573,9 @@ public sealed class DataAccessService : IDataAccessService
         return res;
     }
 
-    public RentResidentialBuildingSingleResultWrapper SelectRentResidentialById(string id)
+    public Models.Rent.Residentials.PropertyResultWrapper SelectRentResidentialById(string id)
     {
-        var res = new RentResidentialBuildingSingleResultWrapper();
+        var res = new Models.Rent.Residentials.PropertyResultWrapper();
 
         var property = new Models.Rent.Residentials.Property(id, EnumEntityStatus.Saved);
 
@@ -2437,9 +2437,9 @@ public sealed class DataAccessService : IDataAccessService
         return res;
     }
 
-    public ListingsResultWrapper SelectRentResidentialListings()
+    public ListingSearchResultWrapper SelectRentResidentialListings()
     {
-        var res = new ListingsResultWrapper();
+        var res = new ListingSearchResultWrapper();
 
         _readerWriterLock.EnterReadLock();
         try
@@ -2502,9 +2502,9 @@ public sealed class DataAccessService : IDataAccessService
         return res;
     }
 
-    public RentResidentialRoomSingleResultWrapper SelectRentResidentialListingById(string rentId, string roomId)
+    public Models.Rent.Residentials.ListingResultWrapper SelectRentResidentialListingById(string rentId, string roomId)
     {
-        var res = new RentResidentialRoomSingleResultWrapper();
+        var res = new Models.Rent.Residentials.ListingResultWrapper();
 
         if (string.IsNullOrEmpty(roomId))
         {
@@ -3264,9 +3264,9 @@ public sealed class DataAccessService : IDataAccessService
         return result;
     }
     */
-    public RentCommercialBuildingSingleResultWrapper SelectRentCommercialById(string id)
+    public Models.Rent.Commercials.PropertyResultWrapper SelectRentCommercialById(string id)
     {
-        var result = new RentCommercialBuildingSingleResultWrapper();
+        var result = new Models.Rent.Commercials.PropertyResultWrapper();
 
         if (string.IsNullOrWhiteSpace(id))
         {
@@ -3900,9 +3900,9 @@ public sealed class DataAccessService : IDataAccessService
         return result;
     }
 
-    public ListingsResultWrapper SelectRentCommercialListings()
+    public ListingSearchResultWrapper SelectRentCommercialListings()
     {
-        var result = new ListingsResultWrapper();
+        var result = new ListingSearchResultWrapper();
 
         _readerWriterLock.EnterReadLock();
 
@@ -3978,9 +3978,9 @@ public sealed class DataAccessService : IDataAccessService
         return result;
     }
 
-    public RentCommercialUnitSingleResultWrapper SelectRentCommercialListingById(string commercialId, string roomId)
+    public Models.Rent.Commercials.ListingResultWrapper SelectRentCommercialListingById(string commercialId, string roomId)
     {
-        var result = new RentCommercialUnitSingleResultWrapper();
+        var result = new Models.Rent.Commercials.ListingResultWrapper();
 
         if (string.IsNullOrWhiteSpace(commercialId) ||
             string.IsNullOrWhiteSpace(roomId))
@@ -4276,9 +4276,9 @@ public sealed class DataAccessService : IDataAccessService
         return res;
     }
 
-    public PersonsResultWrapper SelectRentLessorsByKeyword(string keyword)
+    public PersonsSearchResultWrapper SelectRentLessorsByKeyword(string keyword)
     {
-        var res = new PersonsResultWrapper();
+        var res = new PersonsSearchResultWrapper();
 
         if (string.IsNullOrEmpty(keyword))
         {
@@ -4370,9 +4370,9 @@ public sealed class DataAccessService : IDataAccessService
         return res;
     }
 
-    public PersonSingleResultWrapper SelectRentLessorById(string id)
+    public Models.Person.ResultWrapper SelectRentLessorById(string id)
     {
-        var res = new PersonSingleResultWrapper();
+        var res = new Models.Person.ResultWrapper();
 
         Models.Base.PersonBase? person = null; //new Models.Base.PersonBase(id, EnumEntityStatus.Saved);
 
@@ -4760,9 +4760,9 @@ public sealed class DataAccessService : IDataAccessService
         return res;
     }
 
-    public PropertiesResultWrapper SelectSaleResidentialsByNameKeyword(string keyword)
+    public PropertySearchResultWrapper SelectSaleResidentialsByNameKeyword(string keyword)
     {
-        var result = new PropertiesResultWrapper();
+        var result = new PropertySearchResultWrapper();
 
         _readerWriterLock.EnterReadLock();
 
@@ -4849,9 +4849,9 @@ public sealed class DataAccessService : IDataAccessService
         return result;
     }
 
-    public SaleResidentialBuildingSingleResultWrapper SelectSaleResidentialById(string id)
+    public Models.Sale.Residentials.PropertyResultWrapper SelectSaleResidentialById(string id)
     {
-        var res = new SaleResidentialBuildingSingleResultWrapper();
+        var res = new Models.Sale.Residentials.PropertyResultWrapper();
 
         if (string.IsNullOrWhiteSpace(id))
         {
@@ -5181,9 +5181,9 @@ public sealed class DataAccessService : IDataAccessService
         return res;
     }
 
-    public ListingsResultWrapper SelectSaleResidentialListings()
+    public ListingSearchResultWrapper SelectSaleResidentialListings()
     {
-        var res = new ListingsResultWrapper();
+        var res = new ListingSearchResultWrapper();
 
         _readerWriterLock.EnterReadLock();
 
@@ -5300,9 +5300,9 @@ public sealed class DataAccessService : IDataAccessService
         return res;
     }
 
-    public SaleResidentialRoomSingleResultWrapper SelectSaleResidentialListingById(string saleId, string roomId)
+    public Models.Sale.Residentials.ListingResultWrapper SelectSaleResidentialListingById(string saleId, string roomId)
     {
-        var res = new SaleResidentialRoomSingleResultWrapper();
+        var res = new Models.Sale.Residentials.ListingResultWrapper();
 
         if (string.IsNullOrWhiteSpace(saleId) ||
             string.IsNullOrWhiteSpace(roomId))
@@ -5536,9 +5536,9 @@ public sealed class DataAccessService : IDataAccessService
         return res;
     }
 
-    public PersonsResultWrapper SelectBrokersByKeyword(string keyword)
+    public PersonsSearchResultWrapper SelectBrokersByKeyword(string keyword)
     {
-        var res = new PersonsResultWrapper();
+        var res = new PersonsSearchResultWrapper();
         var searchAll = string.IsNullOrWhiteSpace(keyword) ||
                         keyword.Trim() == "*";
 
@@ -5626,9 +5626,9 @@ public sealed class DataAccessService : IDataAccessService
         return res;
     }
 
-    public PersonSingleResultWrapper SelectBrokerById(string id)
+    public Models.Person.ResultWrapper SelectBrokerById(string id)
     {
-        var res = new PersonSingleResultWrapper();
+        var res = new Models.Person.ResultWrapper();
 
         if (string.IsNullOrWhiteSpace(id))
         {

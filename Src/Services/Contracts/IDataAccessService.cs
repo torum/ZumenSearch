@@ -7,57 +7,57 @@ public interface IDataAccessService
     ResultWrapper InitializeDatabase(string dataBaseFilePath);
 
     // Properties
-    PropertiesResultWrapper SelectRecentProperties();
-    PropertiesResultWrapper SelectPropertiesByKeyword(string keyword);
+    PropertySearchResultWrapper SelectRecentProperties();
+    PropertySearchResultWrapper SelectPropertiesByKeyword(string keyword);
 
     // Rent Residential
     ResultWrapper UpsertRentResidential(Models.Rent.Residentials.Property building);
-    RentResidentialBuildingSingleResultWrapper SelectRentResidentialById(string id);
+    Models.Rent.Residentials.PropertyResultWrapper SelectRentResidentialById(string id);
     ResultWrapper DeleteRentResidential(string rentId);
     ResultWrapper UpsertRentResidentialListing(string rentId, Models.Rent.Residentials.Listing room);
-    ListingsResultWrapper SelectRentResidentialListings();
-    RentResidentialRoomSingleResultWrapper SelectRentResidentialListingById(string rentId, string roomId);
+    ListingSearchResultWrapper SelectRentResidentialListings();
+    Models.Rent.Residentials.ListingResultWrapper SelectRentResidentialListingById(string rentId, string roomId);
     ResultWrapper DeleteRentResidentialListing(string roomId);
 
     // Rent Commercial
     ResultWrapper UpsertRentCommercial(Models.Rent.Commercials.Property building);
     //PropertiesResultWrapper SelectRentCommercialsByNameKeyword(string keyword);
-    RentCommercialBuildingSingleResultWrapper SelectRentCommercialById(string id);
+    Models.Rent.Commercials.PropertyResultWrapper SelectRentCommercialById(string id);
     ResultWrapper DeleteRentCommercial(string commercialId);
     ResultWrapper UpsertRentCommercialListing(string commercialId,Models.Rent.Commercials.Listing.Listing room);
-    ListingsResultWrapper SelectRentCommercialListings();
-    RentCommercialUnitSingleResultWrapper SelectRentCommercialListingById(string commercialId,string roomId);
+    ListingSearchResultWrapper SelectRentCommercialListings();
+    Models.Rent.Commercials.ListingResultWrapper SelectRentCommercialListingById(string commercialId,string roomId);
     ResultWrapper DeleteRentCommercialListing(string roomId);
 
     // Person
     ResultWrapper UpsertRentLessor(Models.Base.PersonBase lessor);
-    PersonsResultWrapper SelectRentLessorsByKeyword(string keyword);
-    PersonSingleResultWrapper SelectRentLessorById(string id);
+    PersonsSearchResultWrapper SelectRentLessorsByKeyword(string keyword);
+    Models.Person.ResultWrapper SelectRentLessorById(string id);
     ResultWrapper DeleteRentLessor(string id);
 
 
     // Sales
     ResultWrapper UpsertSaleResidential(Models.Sale.Residentials.Property building);
 
-    PropertiesResultWrapper SelectSaleResidentialsByNameKeyword(string keyword);
+    PropertySearchResultWrapper SelectSaleResidentialsByNameKeyword(string keyword);
 
-    SaleResidentialBuildingSingleResultWrapper SelectSaleResidentialById(string id);
+    Models.Sale.Residentials.PropertyResultWrapper SelectSaleResidentialById(string id);
 
     ResultWrapper DeleteSaleResidential(string saleId);
 
     ResultWrapper UpsertSaleResidentialListing(string saleId,Models.Sale.Residentials.Listing room);
 
-    ListingsResultWrapper SelectSaleResidentialListings();
+    ListingSearchResultWrapper SelectSaleResidentialListings();
 
-    SaleResidentialRoomSingleResultWrapper SelectSaleResidentialListingById(string saleId,string roomId);
+    Models.Sale.Residentials.ListingResultWrapper SelectSaleResidentialListingById(string saleId,string roomId);
 
     ResultWrapper DeleteSaleResidentialListing(string roomId);
 
 
     // Brokers
     ResultWrapper UpsertBroker(Models.Base.PersonBase broker);
-    PersonsResultWrapper SelectBrokersByKeyword(string keyword);
-    PersonSingleResultWrapper SelectBrokerById(string id);
+    PersonsSearchResultWrapper SelectBrokersByKeyword(string keyword);
+    Models.Person.ResultWrapper SelectBrokerById(string id);
     ResultWrapper DeleteBroker(string id);
 
 
