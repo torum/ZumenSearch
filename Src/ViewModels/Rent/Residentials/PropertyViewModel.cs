@@ -11,9 +11,11 @@ using Windows.Data.Pdf;
 using Windows.Storage;
 using Windows.Storage.Streams;
 using Windows.System;
+using ZumenSearch.Models;
 using ZumenSearch.Models.Base;
-using ZumenSearch.Models.Common;
+using ZumenSearch.Models.Location;
 using ZumenSearch.Models.Messenger;
+using ZumenSearch.Models.Transportation;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.Services.Extensions.AbstractFactory;
 
@@ -1980,7 +1982,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         }
 
         // 物件名
-        _building.Name = Name;
+        _building.SetName(Name);
 
         _building.BuildingKind = SelectedKind;
         _building.IsUnitOwnership = IsUnitOwnership;

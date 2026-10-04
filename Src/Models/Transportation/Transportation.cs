@@ -1,4 +1,4 @@
-﻿namespace ZumenSearch.Models.Common;
+﻿namespace ZumenSearch.Models.Transportation;
 
 
 public sealed class RailLine

@@ -7,7 +7,7 @@ using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
 using System.Collections.ObjectModel;
-using ZumenSearch.Models.Common;
+using ZumenSearch.Models;
 using ZumenSearch.Services.Contracts;
 
 namespace ZumenSearch.Views.Rent.Commercials.Listing;

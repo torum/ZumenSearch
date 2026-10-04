@@ -1,5 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using Microsoft.UI.Xaml.Media;
+﻿using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Imaging;
 
 namespace ZumenSearch.Models.Base;
@@ -7,18 +6,20 @@ namespace ZumenSearch.Models.Base;
 #pragma warning disable IDE0079 // Remove unnecessary suppression
 #pragma warning disable IDE0290 // Use primary constructor
 
+// Entity
+
+// <summary>
+// Base class for all PDF entities. Aggregate Root entities are property and listing.
+// </summary>
+// <remarks>
+// 
+// </remarks>
 public abstract class PdfBase : EntityBase
 {
     protected PdfBase(string id, EnumEntityStatus staus) : base(id, staus)
     {
         //
     }
-
-    //public string Id { get; } = string.Empty;
-
-    //public bool IsNew { get; set; } = true;
-
-    //public bool IsModified { get; set; } = false;
 
     public string PdfFilename
     {

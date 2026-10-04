@@ -1,10 +1,12 @@
 ﻿using Microsoft.Data.Sqlite;
 using System.Collections.ObjectModel;
 using System.Data;
-using ZumenSearch.Models.Common;
+using ZumenSearch.Models.Transportation;
 using ZumenSearch.Services.Contracts;
 
 namespace ZumenSearch.Services;
+
+// Repositories
 
 public class DataAccessTransportationService : IDataAccessTransportationService
 {

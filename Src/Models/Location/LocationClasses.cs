@@ -1,4 +1,8 @@
-﻿namespace ZumenSearch.Models.Common;
+﻿namespace ZumenSearch.Models.Location;
+
+// TODO: use AddressClass, or change name...
+
+// For UI parts.
 
 //「都道府県」リストクラス
 public sealed class PrefectureList()

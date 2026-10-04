@@ -1,7 +1,4 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
-using ZumenSearch.Models.Base;
 
 namespace ZumenSearch.Models.Brokers;
 

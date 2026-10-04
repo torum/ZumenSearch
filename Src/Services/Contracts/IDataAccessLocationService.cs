@@ -1,4 +1,4 @@
-﻿using ZumenSearch.Models.Common;
+﻿using ZumenSearch.Models.Location;
 
 namespace ZumenSearch.Services.Contracts;
 

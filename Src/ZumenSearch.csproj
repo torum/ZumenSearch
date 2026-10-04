@@ -95,9 +95,6 @@
   <ItemGroup>
     <Using Include="System.Diagnostics" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Models\Rent\Lessors\" />
-  </ItemGroup>
 
   <!--
     Defining the "HasPackageAndPublishMenuAddedByProject" property here allows the Solution

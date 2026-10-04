@@ -1,7 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Globalization;
 using ZumenSearch.Models.Base;
-using ZumenSearch.Models.Common;
+using ZumenSearch.Models;
 
 namespace ZumenSearch.Models.Sale.Residentials;
 

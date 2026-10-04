@@ -3,9 +3,9 @@ using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using ZumenSearch.Models.Base;
-using ZumenSearch.Models.Common;
 using ZumenSearch.Services.Contracts;
 using CommunityToolkit.Mvvm.Messaging;
+using ZumenSearch.Models;
 
 namespace ZumenSearch.ViewModels.Rent.Commercials.Listing;
 
@@ -181,7 +181,7 @@ public sealed partial class ListingViewModel : ObservableRecipient
 
     private void SetValues()
     {
-        _unit.Name = Name;
+        _unit.SetName(Name);
         _unit.Chinryou = ParseDecimal(Chinryou);
         _unit.KyouekiFee = ParseDecimal(KyouekiFee);
         _unit.Shikikin = ParseDecimal(Shikikin);

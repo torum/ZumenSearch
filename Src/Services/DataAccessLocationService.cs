@@ -1,9 +1,11 @@
 ﻿using Microsoft.Data.Sqlite;
 using System.Data;
-using ZumenSearch.Models.Common;
+using ZumenSearch.Models.Location;
 using ZumenSearch.Services.Contracts;
 
 namespace ZumenSearch.Services;
+
+// Repositories
 
 public class DataAccessLocationService : IDataAccessLocationService
 {

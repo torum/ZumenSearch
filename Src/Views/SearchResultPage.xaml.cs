@@ -3,7 +3,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
-using ZumenSearch.Models.Common;
+using ZumenSearch.Models;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.ViewModels;
 

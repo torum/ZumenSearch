@@ -6,8 +6,8 @@ using System.ComponentModel;
 using Windows.Data.Pdf;
 using Windows.Storage;
 using Windows.Storage.Streams;
+using ZumenSearch.Models;
 using ZumenSearch.Models.Base;
-using ZumenSearch.Models.Common;
 using ZumenSearch.Models.Messenger;
 using ZumenSearch.Services.Contracts;
 
@@ -532,7 +532,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
             return;
         }
 
-        _room.Name = Name;
+        _room.SetName(Name);
 
         if (int.TryParse(Chinryou, out var result))
         {

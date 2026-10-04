@@ -4,7 +4,6 @@ using CommunityToolkit.Mvvm.Messaging;
 using System.Collections.ObjectModel;
 using ZumenSearch.Models;
 using ZumenSearch.Models.Base;
-using ZumenSearch.Models.Common;
 using ZumenSearch.Services.Contracts;
 
 namespace ZumenSearch.ViewModels.Brokers;
@@ -260,7 +259,7 @@ public sealed partial class BrokerViewModel : ObservableRecipient
     {
         Name = _broker.Name;
 
-        if (_broker is Models.Person.PersonLegal legalPerson)
+        if (_broker is Models.Person.LegalPersonClass legalPerson)
         {
             if (_broker.PersonKind != EnumPersonKind.Legal)
             {
@@ -321,11 +320,11 @@ public sealed partial class BrokerViewModel : ObservableRecipient
             return;
         }
 
-        // TODO: Create PersonLegal and set it.
+        // TODO: Create LegalPersonClass and set it.
 
-        var newBroker = new Models.Person.PersonLegal(_broker.Id, _broker.Status);
+        var newBroker = new Models.Person.LegalPersonClass(_broker.Id, _broker.Status);
 
-        newBroker.Name = Name;
+        newBroker.SetName(Name);
 
         newBroker.PersonKind = EnumPersonKind.Legal;
 

@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -32,6 +33,8 @@ public partial class App : Application
     public static Microsoft.UI.Dispatching.DispatcherQueue CurrentDispatcherQueue { get; private set; } = null!;
 
     //public static nint WindowHandle => WinRT.Interop.WindowNative.GetWindowHandle(Window);
+    private Task? _appHostStartTask;
+    private Task? _appHostStopTask;
 
     public IHost Host
     {
@@ -93,6 +96,17 @@ public partial class App : Application
         Host = Microsoft.Extensions.Hosting.Host.
             CreateDefaultBuilder().
             UseContentRoot(AppContext.BaseDirectory).
+            ConfigureLogging((context, logging) =>
+            {
+#if DEBUG
+                logging.AddFilter("Microsoft.Extensions.Hosting", LogLevel.Debug);
+                logging.AddFilter("Microsoft.Hosting.Lifetime", LogLevel.Information);
+#else
+                // Strips log destinations and shuts down the framework engines for production
+                logging.ClearProviders(); 
+                logging.AddFilter(null, LogLevel.None); 
+#endif
+            }).
             ConfigureServices((context, services) =>
             {
                 // Services
@@ -188,6 +202,44 @@ public partial class App : Application
         //main.AppWindow.Show();
         //main.Activate();
         shell.MainWindow.AppWindow.Show(true);
+
+        shell.MainWindow.Closed += (sender, e) =>
+        {
+            _appHostStopTask = StopAppHostAsync();
+        };
+        _appHostStartTask = StartAppHostAsync();
+    }
+
+    private async Task StartAppHostAsync()
+    {
+        try
+        {
+            await Host.StartAsync();
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine("StartAppHostAsync: {0}", ex);
+            //AppendErrorLog("AppHost.StartAsync", ex.ToString());
+            //SaveErrorLog();
+        }
+    }
+
+    private async Task StopAppHostAsync()
+    {
+        if (_appHostStartTask != null)
+        {
+            await _appHostStartTask;
+        }
+        try
+        {
+            await Host.StopAsync();
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine("StopAppHostAsync: {0}", ex);
+            //AppendErrorLog("AppHost.StopAsync", ex.ToString());
+            //SaveErrorLog();
+        }
     }
 
     // Activated from other instance.

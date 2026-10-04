@@ -3,8 +3,8 @@ using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
+using ZumenSearch.Models;
 using ZumenSearch.Models.Base;
-using ZumenSearch.Models.Common;
 using ZumenSearch.Services.Contracts;
 
 namespace ZumenSearch.ViewModels.Sale.Residentials;
@@ -299,7 +299,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient
 
     private void SetValues()
     {
-        _building.Name = Name;
+        _building.SetName(Name);
         _building.BuildingKind = SelectedKind;
         _building.BuildingStructure = SelectedStructure;
         _building.IsUnitOwnership = IsUnitOwnership;

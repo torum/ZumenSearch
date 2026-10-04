@@ -1,12 +1,15 @@
 ﻿using System.Collections.ObjectModel;
 using System.Globalization;
 using ZumenSearch.Models.Base;
-using ZumenSearch.Models.Common;
+using ZumenSearch.Models.Location;
+using ZumenSearch.Models.Transportation;
 
 namespace ZumenSearch.Models.Rent.Commercials;
 
 #pragma warning disable IDE0079 // Remove unnecessary suppression
 #pragma warning disable IDE0290 // Use primary constructor
+
+// Aggregate Root entity.
 
 public sealed partial class Property : PropertyBase
 {
@@ -141,6 +144,7 @@ public sealed partial class Property : PropertyBase
     #endregion
 
     #region == Location ==
+
 
     public string MachiazaId = string.Empty;
 

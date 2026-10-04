@@ -1,14 +1,16 @@
 ﻿using System.Collections.ObjectModel;
 using System.Globalization;
 using ZumenSearch.Models.Base;
-using ZumenSearch.Models.Common;
+using ZumenSearch.Models.Location;
+using ZumenSearch.Models.Transportation;
 
 namespace ZumenSearch.Models.Rent.Residentials;
 
 #pragma warning disable IDE0079 // Remove unnecessary suppression
 #pragma warning disable IDE0290 // Use primary constructor
 
-// 編集用（建物）
+// Aggregate Root entity.
+
 public sealed partial class Property : PropertyBase
 {
     public Property(string id, EnumEntityStatus status) : base(id, status, EnumPropertyKind.RentResidential)
@@ -17,90 +19,6 @@ public sealed partial class Property : PropertyBase
     }
 
     #region == Properties ==
-
-    #region == 物件に属するリスト == 
-
-    // 物件に属する部屋のリスト
-    public ObservableCollection<Models.Rent.Residentials.Listing.Listing> Rooms
-    {
-        get;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
-        }
-    } = [];
-
-    // DBへの更新時にDBから削除されるべき部屋のIDリスト
-    public ObservableCollection<Models.Rent.Residentials.Listing.Listing> RoomsToBeDeleted = [];
-
-    // 物件写真（建物）リスト
-    public ObservableCollection<Picture> Pictures
-    {
-        get;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true; //?
-            }
-        }
-    } = [];
-
-    // DBへの更新時にDBから削除されるべき物件写真（建物）のIDリスト
-    public ObservableCollection<Picture> PicturesToBeDeleted = [];
-
-    // 図面（建物）リスト
-    public ObservableCollection<Pdf> Pdfs
-    {
-        get;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
-        }
-    } = [];
-
-    // DBへの更新時にDBから削除されるべき図面のIDリスト
-    public ObservableCollection<Pdf> PdfsToBeDeleted = [];
-
-    // 貸主のリスト
-    public ObservableCollection<Models.Base.PersonBase> Lessors
-    {
-        get;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
-        }
-    } = [];
-
-    // DBへの更新時にDBから削除されるべき貸主のIDリスト
-    public ObservableCollection<Models.Base.PersonBase> LessorsToBeDeleted = [];
-
-
-    // 宅建業者のリスト
-    public ObservableCollection<Models.Base.PersonBase> Brokers
-    {
-        get;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
-        }
-    } = [];
-
-    public ObservableCollection<Models.Base.PersonBase> BrokersToBeDeleted = [];
-
-    #endregion
 
     #region == 基本 ==
 
@@ -337,6 +255,8 @@ public sealed partial class Property : PropertyBase
     #endregion
 
     #region == 所在地 ==
+
+
 
     public string MachiazaId = string.Empty;
 
@@ -838,6 +758,90 @@ public sealed partial class Property : PropertyBase
     // TODO: More.
 
 
+    #region == 物件に属するリスト == 
+
+    // 物件に属する部屋のリスト
+    public ObservableCollection<Models.Rent.Residentials.Listing.Listing> Rooms
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;
+            }
+        }
+    } = [];
+
+    // DBへの更新時にDBから削除されるべき部屋のIDリスト
+    public ObservableCollection<Models.Rent.Residentials.Listing.Listing> RoomsToBeDeleted = [];
+
+    // 物件写真（建物）リスト
+    public ObservableCollection<Picture> Pictures
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true; //?
+            }
+        }
+    } = [];
+
+    // DBへの更新時にDBから削除されるべき物件写真（建物）のIDリスト
+    public ObservableCollection<Picture> PicturesToBeDeleted = [];
+
+    // 図面（建物）リスト
+    public ObservableCollection<Pdf> Pdfs
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;
+            }
+        }
+    } = [];
+
+    // DBへの更新時にDBから削除されるべき図面のIDリスト
+    public ObservableCollection<Pdf> PdfsToBeDeleted = [];
+
+    // 貸主のリスト
+    public ObservableCollection<Models.Base.PersonBase> Lessors
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;
+            }
+        }
+    } = [];
+
+    // DBへの更新時にDBから削除されるべき貸主のIDリスト
+    public ObservableCollection<Models.Base.PersonBase> LessorsToBeDeleted = [];
+
+
+    // 宅建業者のリスト
+    public ObservableCollection<Models.Base.PersonBase> Brokers
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;
+            }
+        }
+    } = [];
+
+    public ObservableCollection<Models.Base.PersonBase> BrokersToBeDeleted = [];
+
+    #endregion
+
     #endregion
 
     #region == Methods ==
@@ -883,4 +887,5 @@ public sealed partial class Property : PropertyBase
     }
 
     #endregion
+
 }

@@ -48,7 +48,7 @@
                         <StackPanel>
                             <TextBox Header="会社名" IsReadOnly="True" Margin="0,0,0,0" Text="{x:Bind Person.Name, Mode=OneWay}"></TextBox>
                             <!-- cast -->
-                            <TextBox Header="会社" IsReadOnly="True" Margin="0,0,0,0" Text="{x:Bind ((modperson:PersonLegal)Person).NameCompany, Mode=OneWay}"></TextBox>
+                            <TextBox Header="会社" IsReadOnly="True" Margin="0,0,0,0" Text="{x:Bind ((modperson:LegalPersonClass)Person).NameCompany, Mode=OneWay}"></TextBox>
                         </StackPanel>
                     </Grid>
                     <Grid Grid.Row="0" Grid.Column="1">

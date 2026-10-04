@@ -10,9 +10,11 @@ using System.Runtime.InteropServices;
 using Windows.Data.Pdf;
 using Windows.Storage;
 using Windows.Storage.Streams;
+using ZumenSearch.Models;
 using ZumenSearch.Models.Base;
-using ZumenSearch.Models.Common;
+using ZumenSearch.Models.Location;
 using ZumenSearch.Models.Messenger;
+using ZumenSearch.Models.Transportation;
 using ZumenSearch.Services.Contracts;
 
 namespace ZumenSearch.ViewModels.Rent.Commercials;
@@ -1382,7 +1384,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     private void SetValues()
     {
-        _building.Name = Name;
+        _building.SetName(Name);
         _building.CommercialKind = SelectedKind;
         _building.BuildingStructure = SelectedStructure;
         _building.IsUnitOwnership = IsUnitOwnership;

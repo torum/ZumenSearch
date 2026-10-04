@@ -3,14 +3,16 @@
 #pragma warning disable IDE0079 // Remove unnecessary suppression
 #pragma warning disable IDE0290 // Use primary constructor
 
-public enum EnumPersonKind
-{
-    Natural,
-    Legal,
-    Undetermined
-}
+// Aggregate Root entity.
 
-public abstract class PersonBase : Entity
+// <summary>
+// Base class for all Person entities such as lessors(landlords), and real estate agents.
+// Use LegalPersonClass for legal entities such as corporations, and NaturalPersonClass for natural persons unless abstract PersonBase is needed.
+// </summary>
+// <remarks>
+// 
+// </remarks>
+public abstract class PersonBase : EntityAggregateBase
 {
     public EnumPersonKind PersonKind { get; set; }
 
@@ -44,3 +46,11 @@ public abstract class PersonBase : Entity
         PersonKind = personKind;
     }
 };
+
+
+public enum EnumPersonKind
+{
+    Natural,
+    Legal,
+    Undetermined
+}

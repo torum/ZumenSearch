@@ -7,6 +7,7 @@ using System.Collections.ObjectModel;
 using System.Reflection;
 using Windows.ApplicationModel;
 using ZumenSearch.Helpers;
+using ZumenSearch.Models;
 using ZumenSearch.Models.Messenger;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.Services.Extensions.AbstractFactory;
@@ -146,61 +147,61 @@ public partial class MainViewModel : ObservableRecipient,
 
     #region == Navigation ==
 
-    public ObservableCollection<Models.Common.Breadcrumb> BreadcrumbItemsRent { get; set; } =
+    public ObservableCollection<Breadcrumb> BreadcrumbItemsRent { get; set; } =
     [
         new() { Name = "総合検索", Page = typeof(Views.SearchPage).FullName! }
     ];
-    public ObservableCollection<Models.Common.Breadcrumb> BreadcrumbItemsRentSearchResult { get; set; } =
+    public ObservableCollection<Breadcrumb> BreadcrumbItemsRentSearchResult { get; set; } =
     [
         new() { Name = "総合検索", Page = typeof(Views.SearchPage).FullName! },
         new() { Name = "検索結果", Page = typeof(Views.SearchResultPage).FullName! },
     ];
 
-    public ObservableCollection<Models.Common.Breadcrumb> BreadcrumbItemsResidential { get; set; } =
+    public ObservableCollection<Breadcrumb> BreadcrumbItemsResidential { get; set; } =
     [
         new() { Name = "募集物件検索", Page = typeof(Views.Rent.ResidentialSearchPage).FullName! }
     ];
-    public ObservableCollection<Models.Common.Breadcrumb> BreadcrumbItemsResidentialSearchResult { get; set; } =
+    public ObservableCollection<Breadcrumb> BreadcrumbItemsResidentialSearchResult { get; set; } =
     [
         new() { Name = "募集物件検索", Page = typeof(Views.Rent.ResidentialSearchPage).FullName! },
         new() { Name = "検索結果", Page = typeof(Views.Rent.ResidentialSearchResultPage).FullName! },
     ];
 
-    public ObservableCollection<Models.Common.Breadcrumb> BreadcrumbItemsCommercial { get; set; } =
+    public ObservableCollection<Breadcrumb> BreadcrumbItemsCommercial { get; set; } =
     [
         new() { Name = "募集物件検索", Page = typeof(Views.Rent.CommercialSearchPage).FullName! }
     ];
-    public ObservableCollection<Models.Common.Breadcrumb> BreadcrumbItemsCommercialSearchResult { get; set; } =
+    public ObservableCollection<Breadcrumb> BreadcrumbItemsCommercialSearchResult { get; set; } =
     [
         new() { Name = "募集物件検索", Page = typeof(Views.Rent.CommercialSearchPage).FullName! },
         new() { Name = "検索結果", Page = typeof(Views.Rent.CommercialSearchResultPage).FullName! },
     ];
 
-    public ObservableCollection<Models.Common.Breadcrumb> BreadcrumbItemsParking { get; set; } =
+    public ObservableCollection<Breadcrumb> BreadcrumbItemsParking { get; set; } =
     [
     new() { Name = "募集物件検索", Page = typeof(Views.Rent.ParkingSearchPage).FullName! }
     ];
-    public ObservableCollection<Models.Common.Breadcrumb> BreadcrumbItemsParkingSearchResult { get; set; } =
+    public ObservableCollection<Breadcrumb> BreadcrumbItemsParkingSearchResult { get; set; } =
     [
         new() { Name = "募集物件検索", Page = typeof(Views.Rent.ParkingSearchPage).FullName! },
         new() { Name = "検索結果", Page = typeof(Views.Rent.ParkingSearchResultPage).FullName! },
     ];
 
-    public ObservableCollection<Models.Common.Breadcrumb> BreadcrumbItemsLessor { get; set; } =
+    public ObservableCollection<Breadcrumb> BreadcrumbItemsLessor { get; set; } =
     [
         new() { Name = "貸主検索", Page = typeof(Views.Rent.LessorSearchPage).FullName! }
     ];
-    public ObservableCollection<Models.Common.Breadcrumb> BreadcrumbItemsLessorSearchResult { get; set; } =
+    public ObservableCollection<Breadcrumb> BreadcrumbItemsLessorSearchResult { get; set; } =
     [
         new() { Name = "貸主検索", Page = typeof(Views.Rent.LessorSearchPage).FullName! },
         new() { Name = "検索結果", Page = typeof(Views.Rent.LessorSearchResultPage).FullName! },
     ];
 
-    public ObservableCollection<Models.Common.Breadcrumb> BreadcrumbItemsBroker { get; set; } =
+    public ObservableCollection<Breadcrumb> BreadcrumbItemsBroker { get; set; } =
     [
         new() { Name = "宅建業者検索", Page = typeof(Views.BrokerSearchPage).FullName! }
     ];
-    public ObservableCollection<Models.Common.Breadcrumb> BreadcrumbItemsBrokerSearchResult { get; set; } =
+    public ObservableCollection<Breadcrumb> BreadcrumbItemsBrokerSearchResult { get; set; } =
     [
         new() { Name = "宅建業者検索", Page = typeof(Views.BrokerSearchPage).FullName! },
         new() { Name = "検索結果", Page = typeof(Views.BrokerSearchResultPage).FullName! },
@@ -303,7 +304,7 @@ public partial class MainViewModel : ObservableRecipient,
 
     #region == AutoSuggest ==
 
-    public ObservableCollection<Models.Common.AutoSuggestItem> AutoSuggestList
+    public ObservableCollection<AutoSuggestItem> AutoSuggestList
     {
         get; set
         {
@@ -345,7 +346,7 @@ public partial class MainViewModel : ObservableRecipient,
                 continue;
             }
 
-            item.Name = building.Name;
+            item.SetName(building.Name);
             item.ThumbnailFilename = building.ThumbnailFilename;
         }
 
@@ -369,7 +370,7 @@ public partial class MainViewModel : ObservableRecipient,
                 continue;
             }
 
-            item.Name = room.Name;
+            item.SetName(room.Name);
             isFound = true;
             break;
         }
@@ -386,7 +387,7 @@ public partial class MainViewModel : ObservableRecipient,
                 continue;
             }
 
-            item.Name = room.Name;
+            item.SetName(room.Name);
             isFound = true;
             break;
         }
@@ -415,7 +416,7 @@ public partial class MainViewModel : ObservableRecipient,
                 continue;
             }
 
-            item.Name = person.Name;
+            item.SetName(person.Name);
         }
     }
 
@@ -434,7 +435,7 @@ public partial class MainViewModel : ObservableRecipient,
                 continue;
             }
 
-            item.Name = person.Name;
+            item.SetName(person.Name);
         }
     }
 
@@ -970,7 +971,7 @@ public partial class MainViewModel : ObservableRecipient,
             {
                 foreach (var item in res.PropertySearchResult)
                 {
-                    var autoSuggest = new Models.Common.AutoSuggestItem
+                    var autoSuggest = new Models.AutoSuggestItem
                     {
                         Name = item.Name,
                         Id = item.Id
@@ -982,7 +983,7 @@ public partial class MainViewModel : ObservableRecipient,
             {
                 // TODO:
                 //Debug.WriteLine("result 0");
-                var autoSuggest = new Models.Common.AutoSuggestItem
+                var autoSuggest = new Models.AutoSuggestItem
                 {
                     Name = "Result 0",
                     Id = ""
@@ -1999,7 +2000,7 @@ public partial class MainViewModel : ObservableRecipient,
     private void AddNewRentLessor()
     {
         var newId = Guid.CreateVersion7().ToString("N");
-        var shell = _shellRentLessorFactory.Create(new Models.Person.PersonNatural(newId, Models.Base.EnumEntityStatus.New));
+        var shell = _shellRentLessorFactory.Create(new Models.Person.NaturalPersonClass(newId, Models.Base.EnumEntityStatus.New));
         
         LessorEditorList.Add(shell.Window);
 
@@ -2435,7 +2436,7 @@ public partial class MainViewModel : ObservableRecipient,
     private void AddNewBroker()
     {
         var newId = Guid.CreateVersion7().ToString("N");
-        var shell = _shellBrokerFactory.Create(new Models.Person.PersonLegal(newId, Models.Base.EnumEntityStatus.New));
+        var shell = _shellBrokerFactory.Create(new Models.Person.LegalPersonClass(newId, Models.Base.EnumEntityStatus.New));
 
         BrokerEditorList.Add(shell.Window);
 

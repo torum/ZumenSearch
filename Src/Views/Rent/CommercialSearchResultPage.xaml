@@ -5,7 +5,6 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:mod="using:ZumenSearch.Models"
-    xmlns:modcommon="using:ZumenSearch.Models.Common"
     xmlns:local="using:ZumenSearch.Views.Rent"
     mc:Ignorable="d"
     NavigationCacheMode="Required">
@@ -29,10 +28,10 @@
 
                 <BreadcrumbBar x:Name="BreadcrumbBar1" ItemsSource="{x:Bind ViewModel.BreadcrumbItemsCommercialSearchResult, Mode=OneWay}" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center">
                     <BreadcrumbBar.ItemTemplate>
-                        <DataTemplate x:DataType="modcommon:Breadcrumb">
+                        <DataTemplate x:DataType="mod:Breadcrumb">
                             <BreadcrumbBarItem>
                                 <BreadcrumbBarItem.ContentTemplate>
-                                    <DataTemplate x:DataType="modcommon:Breadcrumb">
+                                    <DataTemplate x:DataType="mod:Breadcrumb">
                                         <TextBlock Text="{x:Bind Name}" FontSize="28" FontWeight="SemiBold"/>
                                     </DataTemplate>
                                 </BreadcrumbBarItem.ContentTemplate>

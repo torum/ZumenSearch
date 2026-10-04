@@ -5,7 +5,7 @@ using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
 using System.Diagnostics;
-using ZumenSearch.Models.Common;
+using ZumenSearch.Models;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.ViewModels;
 

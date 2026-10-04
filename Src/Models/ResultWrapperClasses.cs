@@ -1,12 +1,11 @@
 ﻿using System.Collections.ObjectModel;
-using ZumenSearch.Models.Common;
 
 namespace ZumenSearch.Models;
 
 // Result Wrapper Class
 public abstract class ResultWrapperBase
 {
-    public ErrorObject Error = new();
+    public ErrorClass Error = new();
     public bool IsError = false;
 }
 

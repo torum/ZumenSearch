@@ -1,7 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
-using ZumenSearch.Models.Common;
+using ZumenSearch.Models.Transportation;
 using ZumenSearch.Services.Contracts;
 
 namespace ZumenSearch.ViewModels.Dialogs;

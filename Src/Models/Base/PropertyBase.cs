@@ -1,68 +1,33 @@
 ﻿using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Imaging;
+using ZumenSearch.Models.Location;
+using ZumenSearch.Models.Transportation;
 
 namespace ZumenSearch.Models.Base;
 
 #pragma warning disable IDE0290 // Use primary constructor
 #pragma warning disable IDE0079 // Remove unnecessary suppression
 
-public enum EnumPropertyKind
+// Aggregate Root entity. Property Listing Context.
+
+// <summary>
+// Base class for all Aggregate Root entities : properties. Provides common properties and methods for managing entity state.
+// </summary>
+// <remarks>
+// </remarks>
+public abstract partial class PropertyBase : EntityAggregateBase
 {
-    RentResidential,
-    RentCommercial,
-    RentParking,
-    SaleResidential,
-    SaleCommercial,
-    SaleLand,
-    Unknown
-}
-
-public abstract partial class PropertyBase : Entity
-{
-    public EnumPropertyKind PropertyKind { get; init; } = EnumPropertyKind.Unknown;
-
-    public string BasePath { get; set; } = string.Empty;
-
-    public ImageSource? ThumbImage 
+    protected PropertyBase(string id, EnumEntityStatus status, EnumPropertyKind kind) : base(id, status)
     {
-        get => field ?? CreateThumb();
-        set; 
+        PropertyKind = kind;
     }
 
-    private BitmapImage? CreateThumb()
+    public EnumPropertyKind PropertyKind { get; init; }
+
+    // TODO: Use Address class from Models.Location.Address.cs instead of using Prefecture, CountyAndCity, WardAndOaza, Choume classes directly.
+    public AddressClass Address
     {
-        if (string.IsNullOrEmpty(ThumbnailFilename))
-        {
-            //Debug.WriteLine("ThumbnailImageFilePath is empty. (PropertyBase)");
-            return null;
-        }
-
-        if (string.IsNullOrEmpty(BasePath))
-        {
-            Debug.WriteLine("BasePath is empty. (PropertyBase)");
-            return null;
-        }
-
-        var thumbFilemame = System.IO.Path.Combine(BasePath, ThumbnailFilename);
-
-        if (!Path.Exists(thumbFilemame))
-        {
-            Debug.WriteLine($"File ThumbnailImageFilePath does not exists. (PropertyBase) {thumbFilemame}");
-            return null;
-        }
-
-        BitmapImage bitmapImage = new()
-        {
-            DecodePixelWidth = 280
-        };
-        Uri uri = new(thumbFilemame);
-        bitmapImage.UriSource = uri;
-        return bitmapImage;
-    }
-
-    public string ThumbnailFilename
-    {
-        get => field ?? string.Empty; // Ensure a non-null value is returned
+        get;
         set
         {
             if (SetProperty(ref field, value))
@@ -70,7 +35,7 @@ public abstract partial class PropertyBase : Entity
                 IsModified = true;
             }
         }
-    }
+    } = new AddressClass();
 
     #region == 所在地 ==
 
@@ -159,9 +124,89 @@ public abstract partial class PropertyBase : Entity
     } = string.Empty;
     #endregion
 
-    protected PropertyBase(string id, EnumEntityStatus status, EnumPropertyKind kind): base(id, status)
+    // TODO: Use Train class from Models.Transportation.Train.cs instead of using classes directly.
+    public TrainClass Train
     {
-        PropertyKind = kind;
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;
+            }
+        }
+    } = new TrainClass();
+
+
+    // TODO: Create a nested class for ThumbImage so that BasePath is always set along with ThumbnailFilename as parameters.
+    #region == Thumb Image ==
+
+    public string BasePath { get; set; } = string.Empty;
+
+    public string ThumbnailFilename
+    {
+        get => field ?? string.Empty; // Ensure a non-null value is returned
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;
+            }
+        }
     }
 
+    // Automatically generate a thumbnail image when the property is accessed, if it hasn't been set yet.
+    public ImageSource? ThumbImage 
+    {
+        get => field ?? CreateThumb();
+        set; 
+    }
+
+    private BitmapImage? CreateThumb()
+    {
+        if (string.IsNullOrEmpty(ThumbnailFilename))
+        {
+            //Debug.WriteLine("ThumbnailImageFilePath is empty. (PropertyBase)");
+            return null;
+        }
+
+        if (string.IsNullOrEmpty(BasePath))
+        {
+            Debug.WriteLine("BasePath is empty. (PropertyBase)");
+            return null;
+        }
+
+        var thumbFilemame = System.IO.Path.Combine(BasePath, ThumbnailFilename);
+
+        if (!Path.Exists(thumbFilemame))
+        {
+            Debug.WriteLine($"File ThumbnailImageFilePath does not exists. (PropertyBase) {thumbFilemame}");
+            return null;
+        }
+
+        BitmapImage bitmapImage = new()
+        {
+            DecodePixelWidth = 280
+        };
+        
+        Uri uri = new(thumbFilemame);
+        bitmapImage.UriSource = uri;
+
+        return bitmapImage;
+    }
+
+    #endregion
+
+}
+
+
+public enum EnumPropertyKind
+{
+    RentResidential,
+    RentCommercial,
+    RentParking,
+    SaleResidential,
+    SaleCommercial,
+    SaleLand,
+    Unknown
 }

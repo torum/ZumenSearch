@@ -1,6 +1,6 @@
 ﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using ZumenSearch.Models.Common;
+using ZumenSearch.Models.Transportation;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.Views.Dialogs;
 

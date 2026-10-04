@@ -1,12 +1,14 @@
 ﻿using Microsoft.Data.Sqlite;
 using System.Data;
+using System.Xml.Linq;
 using ZumenSearch.Helpers;
 using ZumenSearch.Models;
 using ZumenSearch.Models.Base;
-using ZumenSearch.Models.Common;
 using ZumenSearch.Services.Contracts;
 
 namespace ZumenSearch.Services;
+
+// Repositories
 
 // <summary>
 // DataAccessService provides data access functionalities for managing properties and listings and related data in the application.
@@ -896,7 +898,7 @@ public sealed class DataAccessService : IDataAccessService
                 var item = new Models.PropertySearchResultItem(id, enumKind);
 
                 var name = reader.GetString(reader.GetOrdinal("name")) ?? string.Empty;//Convert.ToString(reader["name"]) ?? "";
-                item.Name = name;
+                item.SetName(name);
 
                 var thumb = reader.GetString(reader.GetOrdinal("thumbnail_filename")) ?? string.Empty;
                 item.ThumbnailFilename = thumb;
@@ -971,8 +973,8 @@ public sealed class DataAccessService : IDataAccessService
                 }
 
                 var item = new Models.PropertySearchResultItem(s, enumKind);
-
-                item.Name = reader.GetString(reader.GetOrdinal("name")) ?? string.Empty; ;
+                // try...
+                item.SetName(reader.GetString(reader.GetOrdinal("name")) ?? string.Empty);
 
                 //Debug.WriteLine($"Found item: {item.Name} @SelectPropertiesByKeyword() in DataAccessService");
 
@@ -1639,7 +1641,7 @@ public sealed class DataAccessService : IDataAccessService
 
                     isFound = true;
 
-                    property.Name = Convert.ToString(reader["propertyName"]) ?? "";
+                    property.SetName(Convert.ToString(reader["propertyName"]) ?? "");
                     property.LocPrefId = Convert.ToString(reader["locPrefId"]) ?? "";
                     property.LocPrefecture = Convert.ToString(reader["locPrefecture"]) ?? "";
                     property.LocMachiazaId = Convert.ToString(reader["locMachiazaId"]) ?? "";
@@ -1898,17 +1900,14 @@ public sealed class DataAccessService : IDataAccessService
 
         var room = new Models.Rent.Residentials.Listing.Listing(listingId, EnumEntityStatus.Saved, propertyId, EnumEntityStatus.Saved, isUnitOwnership, propertyName)
         {
-            Name = reader.GetString(reader.GetOrdinal("name")) ?? string.Empty,
+            
             Chinryou = reader.GetInt32(reader.GetOrdinal("chinryou")),
             // TODO: more
 
-
-
-
-
-
             IsModified = false
         };
+        // try
+        room.SetName(reader.GetString(reader.GetOrdinal("name")) ?? string.Empty);
 
         //Debug.WriteLine($"Room ID: {room.Id}, Room Name: {room.RoomName}");
 
@@ -2015,13 +2014,14 @@ public sealed class DataAccessService : IDataAccessService
 
                         // TODO: IF natural
                         //var lessor = new Models.Rent.Lessors.Person(lessId, EnumEntityStatus.Saved);
-                        var lessor = new Models.Person.PersonNatural(lessId, EnumEntityStatus.Saved)
+                        var lessor = new Models.Person.NaturalPersonClass(lessId, EnumEntityStatus.Saved)
                         {
-                            Name = Convert.ToString(reader2["name"]) ?? "",
                             NameLast = Convert.ToString(reader2["name_last"]) ?? "",
                             NameFirst = Convert.ToString(reader2["name_first"]) ?? "",
                             Remarks = Convert.ToString(reader2["remarks"]) ?? ""
                         };
+                        // Try
+                        lessor.SetName(Convert.ToString(reader2["name"]) ?? "");
 
                         // TODO: more.
 
@@ -2472,7 +2472,7 @@ public sealed class DataAccessService : IDataAccessService
                 var unit = new Models.ListingSearchResultItem(rid, eid, EnumPropertyKind.RentResidential);
 
                 var s = Convert.ToString(reader["roomName"]) ?? "";
-                unit.Name = s;
+                unit.SetName(s);
 
                 //Debug.WriteLine($"Found rent residential property: {property.Name} @SelectRentResidentialsByNameKeyword() in DataAccessService");
 
@@ -3337,7 +3337,6 @@ public sealed class DataAccessService : IDataAccessService
                     Convert.ToString(reader["property_id"])!,
                     EnumEntityStatus.Saved)
                 {
-                    Name = Convert.ToString(reader["name"]) ?? string.Empty,
                     ThumbnailFilename =
                         Convert.ToString(reader["thumbnail_filename"])
                         ?? string.Empty,
@@ -3391,6 +3390,9 @@ public sealed class DataAccessService : IDataAccessService
                         Convert.ToString(reader["remarks"])
                         ?? string.Empty
                 };
+
+            // Try
+            building.SetName(Convert.ToString(reader["name"]) ?? string.Empty);
 
             building.SetCommercialKindFromString(
                 Convert.ToString(reader["commercial_kind"])
@@ -3540,7 +3542,6 @@ public sealed class DataAccessService : IDataAccessService
                         Convert.ToInt32(unitReader["is_property_unit_ownership"]) != 0,
                         building.Name)
                     {
-                        Name = Convert.ToString(unitReader["name"]) ?? string.Empty,
                         Chinryou = Convert.ToDecimal(unitReader["chinryou"]),
                         KyouekiFee = Convert.ToDecimal(unitReader["kyoueki_fee"]),
                         Shikikin = Convert.ToDecimal(unitReader["shikikin"]),
@@ -3559,6 +3560,8 @@ public sealed class DataAccessService : IDataAccessService
                         Remarks = Convert.ToString(unitReader["remarks"]) ?? string.Empty,
                         IsModified = false
                     };
+
+                    building.SetName(Convert.ToString(unitReader["name"]) ?? string.Empty);
 
                     building.Units.Add(unit);
                 }
@@ -3952,13 +3955,13 @@ public sealed class DataAccessService : IDataAccessService
                     propertyId,
                     EnumPropertyKind.RentCommercial)
                 {
-                    Name = Convert.ToString(reader["unit_name"])
-                        ?? string.Empty,
                     PropertyName =
                         Convert.ToString(reader["property_name"])
                         ?? string.Empty,
                     IsModified = false
                 };
+                // Try
+                item.SetName(Convert.ToString(reader["unit_name"]) ?? string.Empty);
 
                 result.ListingSearchResult.Add(item);
             }
@@ -4070,8 +4073,6 @@ public sealed class DataAccessService : IDataAccessService
                     reader["is_property_unit_ownership"]) != 0,
                 propertyName)
             {
-                Name = Convert.ToString(reader["unit_name"])
-                    ?? string.Empty,
                 Chinryou = Convert.ToDecimal(reader["chinryou"]),
                 KyouekiFee =
                     Convert.ToDecimal(reader["kyoueki_fee"]),
@@ -4113,6 +4114,7 @@ public sealed class DataAccessService : IDataAccessService
                     ?? string.Empty,
                 IsModified = false
             };
+            room.SetName(Convert.ToString(reader["unit_name"]) ?? string.Empty);
 
             result.BuildingName = propertyName;
             result.Unit = room;
@@ -4214,7 +4216,7 @@ public sealed class DataAccessService : IDataAccessService
                 cmd.Parameters.AddWithValue("@name", lessor.Name);
                 cmd.Parameters.AddWithValue("@personKind", lessor.PersonKind.ToString());
 
-                if (lessor is Models.Person.PersonNatural naturalPerson)
+                if (lessor is Models.Person.NaturalPersonClass naturalPerson)
                 {
                     cmd.Parameters.AddWithValue("@name_last", naturalPerson.NameLast);
                     cmd.Parameters.AddWithValue("@name_first", naturalPerson.NameFirst);
@@ -4224,7 +4226,7 @@ public sealed class DataAccessService : IDataAccessService
                     // TODO: check if int is ok
                     cmd.Parameters.AddWithValue("@name_company_type_position", 0);
                 }
-                else if (lessor is Models.Person.PersonLegal legalPerson)
+                else if (lessor is Models.Person.LegalPersonClass legalPerson)
                 {
                     // Clear naturalPerson values
                     cmd.Parameters.AddWithValue("@name_last", string.Empty);
@@ -4341,8 +4343,7 @@ public sealed class DataAccessService : IDataAccessService
                     continue;
                 }
 
-                s = Convert.ToString(reader["name"]) ?? "";
-                item.Name = s;
+                item.SetName(Convert.ToString(reader["name"]) ?? "");
 
                 //Debug.WriteLine($"Found rent residential item: {item.Name} @SelectRentResidentialsByNameKeyword() in DataAccessService");
 
@@ -4456,11 +4457,11 @@ public sealed class DataAccessService : IDataAccessService
 
         if (enumKind == Models.Base.EnumPersonKind.Natural)
         {
-            person = new Models.Person.PersonNatural(personId, EnumEntityStatus.Saved);
+            person = new Models.Person.NaturalPersonClass(personId, EnumEntityStatus.Saved);
         }
         else if (enumKind == Models.Base.EnumPersonKind.Legal)
         {
-            person = new Models.Person.PersonLegal(personId, EnumEntityStatus.Saved);
+            person = new Models.Person.LegalPersonClass(personId, EnumEntityStatus.Saved);
         }
 
         if (person is null)
@@ -4469,15 +4470,15 @@ public sealed class DataAccessService : IDataAccessService
         }
 
         //s = Convert.ToString(reader["name"]) ?? "";
-        person.Name = reader.GetString(reader.GetOrdinal("name")) ?? string.Empty;
+        person.SetName(reader.GetString(reader.GetOrdinal("name")) ?? string.Empty);
 
-        if (person is Models.Person.PersonNatural naturalPerson)
+        if (person is Models.Person.NaturalPersonClass naturalPerson)
         {
             naturalPerson.NameLast = Convert.ToString(reader["name_last"]) ?? "";
             naturalPerson.NameFirst = Convert.ToString(reader["name_first"]) ?? "";
 
         }
-        else if (person is Models.Person.PersonLegal legalPerson)
+        else if (person is Models.Person.LegalPersonClass legalPerson)
         {
             legalPerson.NameCompany = Convert.ToString(reader["name_company"]) ?? "";
             legalPerson.NameCompanyType = Convert.ToString(reader["name_company_type"]) ?? "";
@@ -4829,9 +4830,9 @@ public sealed class DataAccessService : IDataAccessService
                     propertyId,
                     EnumPropertyKind.SaleResidential)
                 {
-                    Name = Convert.ToString(reader["name"]) ?? string.Empty,
                     IsModified = false
                 };
+                item.SetName(Convert.ToString(reader["name"]) ?? string.Empty);
 
                 result.PropertySearchResult.Add(item);
             }
@@ -4917,7 +4918,6 @@ public sealed class DataAccessService : IDataAccessService
                     Convert.ToString(reader["property_id"])!,
                     EnumEntityStatus.Saved)
                 {
-                    Name = Convert.ToString(reader["name"]) ?? string.Empty,
                     ThumbnailFilename =
                         Convert.ToString(reader["thumbnail_filename"])
                         ?? string.Empty,
@@ -4973,6 +4973,8 @@ public sealed class DataAccessService : IDataAccessService
                         Convert.ToString(reader["remarks"])
                         ?? string.Empty
                 };
+
+            building.SetName(Convert.ToString(reader["name"]) ?? string.Empty);
 
             building.SetKindTypeFromString(
                 Convert.ToString(reader["building_kind"]) ?? string.Empty);
@@ -5232,12 +5234,12 @@ public sealed class DataAccessService : IDataAccessService
                     propertyId,
                     EnumPropertyKind.SaleResidential)
                 {
-                    Name = Convert.ToString(reader["unit_name"])
-                        ?? string.Empty,
                     PropertyName = Convert.ToString(reader["property_name"])
                         ?? string.Empty,
                     IsModified = false
                 };
+
+                item.SetName(Convert.ToString(reader["unit_name"]) ?? string.Empty);
 
                 res.ListingSearchResult.Add(item);
             }
@@ -5376,7 +5378,6 @@ public sealed class DataAccessService : IDataAccessService
                     reader["is_property_unit_ownership"]) != 0,
                 propertyName)
             {
-                Name = Convert.ToString(reader["unit_name"]) ?? string.Empty,
                 SalePrice = Convert.ToDecimal(reader["sale_price"]),
                 ManagementFee =
                     Convert.ToDecimal(reader["management_fee"]),
@@ -5396,6 +5397,8 @@ public sealed class DataAccessService : IDataAccessService
                     ?? string.Empty,
                 IsModified = false
             };
+
+            room.SetName(Convert.ToString(reader["unit_name"]) ?? string.Empty);
 
             res.BuildingName = propertyName;
             res.Room = room;
@@ -5483,7 +5486,7 @@ public sealed class DataAccessService : IDataAccessService
             command.Parameters.AddWithValue("@remarks", broker.Remarks);
             command.Parameters.AddWithValue("@updatedAt", DateTimeOffset.UtcNow.ToString("s"));
 
-            if (broker is Models.Person.PersonNatural natural)
+            if (broker is Models.Person.NaturalPersonClass natural)
             {
                 command.Parameters.AddWithValue("@nameLast", natural.NameLast);
                 command.Parameters.AddWithValue("@nameFirst", natural.NameFirst);
@@ -5491,7 +5494,7 @@ public sealed class DataAccessService : IDataAccessService
                 command.Parameters.AddWithValue("@nameCompanyType", string.Empty);
                 command.Parameters.AddWithValue("@nameCompanyTypePosition", 0);
             }
-            else if (broker is Models.Person.PersonLegal legal)
+            else if (broker is Models.Person.LegalPersonClass legal)
             {
                 command.Parameters.AddWithValue("@nameLast", string.Empty);
                 command.Parameters.AddWithValue("@nameFirst", string.Empty);
@@ -5597,10 +5600,11 @@ public sealed class DataAccessService : IDataAccessService
                     brokerId,
                     personKind)
                 {
-                    Name = Convert.ToString(reader["name"]) ?? string.Empty,
                     Remarks = Convert.ToString(reader["remarks"]) ?? string.Empty,
                     IsModified = false
                 };
+
+                item.SetName(Convert.ToString(reader["name"]) ?? string.Empty);
 
                 res.PersonSearchResult.Add(item);
             }
@@ -5745,7 +5749,7 @@ public sealed class DataAccessService : IDataAccessService
     private static void SetDatabaseError(ResultWrapperBase result, Exception exception, string operation, string description, string method)
     {
         result.IsError = true;
-        result.Error.Type = ErrorObject.ErrTypes.DB;
+        result.Error.Type = ErrorClass.ErrTypes.DB;
         result.Error.Code = "";
 
         result.Error.Title = $"Error: {exception.GetType().FullName}";
