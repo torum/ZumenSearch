@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using ZumenSearch.Models.Base;
+using ZumenSearch.Models.Enums;
 
 namespace ZumenSearch.Models.Rent.Residentials;
 
@@ -9,43 +10,22 @@ namespace ZumenSearch.Models.Rent.Residentials;
 // Then, consider creating a wrapper just like Lessor wrapper?
 // ParentViewModel and type Dictionary are the main difference.
 
-
-public sealed class RoomPdfType(EnumRoomPdfType key)
-{
-    private Dictionary<EnumRoomPdfType, string> RoomPdfTypeDictionary
-    {
-        get;
-    } = new Dictionary<EnumRoomPdfType, string>()
-    {
-                {EnumRoomPdfType.Unspecified, "未指定"},
-                {EnumRoomPdfType.Maisoku, "募集図面"},
-                {EnumRoomPdfType.Architectural, "建築図面"},
-                {EnumRoomPdfType.Toukibo, "登記簿謄本"},
-                {EnumRoomPdfType.Kouzu, "公図・地図"},
-                {EnumRoomPdfType.Other, "その他"},
-    };
-
-    public string Label => RoomPdfTypeDictionary[Key];
-
-    public EnumRoomPdfType Key => key;
-};
-
 public sealed partial class ListingPdf : PdfBase
 {
     public ViewModels.Rent.Residentials.ListingViewModel? ParentViewModel { get; set; }
 
-    public readonly ObservableCollection<RoomPdfType> RoomPdfTypes =
+    public readonly ObservableCollection<ListingPdfType> RoomPdfTypes =
         [
         //new BuildingPictureType(EnumBuildingPictureType.Unspecified, "未指定"),
-        new RoomPdfType(Models.Rent.Residentials.EnumRoomPdfType.Maisoku),
-        new RoomPdfType(Models.Rent.Residentials.EnumRoomPdfType.Architectural),
-        new RoomPdfType(Models.Rent.Residentials.EnumRoomPdfType.Toukibo),
-        new RoomPdfType(Models.Rent.Residentials.EnumRoomPdfType.Kouzu),
-        new RoomPdfType(Models.Rent.Residentials.EnumRoomPdfType.Other)
+        new ListingPdfType(Models.Rent.Residentials.EnumListingPdfType.Maisoku),
+        new ListingPdfType(Models.Rent.Residentials.EnumListingPdfType.Architectural),
+        new ListingPdfType(Models.Rent.Residentials.EnumListingPdfType.Toukibo),
+        new ListingPdfType(Models.Rent.Residentials.EnumListingPdfType.Kouzu),
+        new ListingPdfType(Models.Rent.Residentials.EnumListingPdfType.Other)
         ];
 
     // Do not use SetProperty. PropertyChanged is being subscribed.
-    public RoomPdfType PdfType
+    public ListingPdfType PdfType
     {
         get;
         set
@@ -68,7 +48,7 @@ public sealed partial class ListingPdf : PdfBase
 
             OnPropertyChanged();
         }
-    } = new(EnumRoomPdfType.Unspecified);
+    } = new(EnumListingPdfType.Unspecified);
 
     // Do not use SetProperty. PropertyChanged is being subscribed.
     public string Description
@@ -121,19 +101,19 @@ public sealed partial class ListingPdf : PdfBase
         IsModified = false;
     }
 
-    public EnumRoomPdfType? SetTypeFromString(string Str)
+    public EnumListingPdfType? SetTypeFromString(string Str)
     {
-        if (Enum.TryParse<EnumRoomPdfType>(Str, out var result))
+        if (Enum.TryParse<EnumListingPdfType>(Str, out var result))
         {
-            PdfType = RoomPdfTypes.FirstOrDefault<RoomPdfType>(x => x.Key == result) ?? new(EnumRoomPdfType.Unspecified);
+            PdfType = RoomPdfTypes.FirstOrDefault<ListingPdfType>(x => x.Key == result) ?? new(EnumListingPdfType.Unspecified);
 
             return result;
         }
         else
         {
-            PdfType = new(EnumRoomPdfType.Unspecified);
+            PdfType = new(EnumListingPdfType.Unspecified);
 
-            return EnumRoomPdfType.Unspecified;
+            return EnumListingPdfType.Unspecified;
         }
     }
 };

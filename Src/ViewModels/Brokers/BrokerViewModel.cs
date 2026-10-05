@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using System.Collections.ObjectModel;
 using ZumenSearch.Models;
 using ZumenSearch.Models.Base;
+using ZumenSearch.Models.Enums;
 using ZumenSearch.Services.Contracts;
 
 namespace ZumenSearch.ViewModels.Brokers;

@@ -4,27 +4,27 @@ using System.Text;
 
 namespace ZumenSearch.Models.Rent.Commercials;
 
-public sealed class PropertyKind(EnumCommercialKinds key)
+public sealed class PropertyKind(EnumKinds key)
 {
     private static readonly IReadOnlyDictionary<
-        EnumCommercialKinds,
+        EnumKinds,
         string> Labels = new Dictionary<
-            EnumCommercialKinds,
+            EnumKinds,
             string>
         {
-            [EnumCommercialKinds.Unspecified] = "未指定",
-            [EnumCommercialKinds.Office] = "事務所",
-            [EnumCommercialKinds.Retail] = "店舗",
-            [EnumCommercialKinds.Warehouse] = "倉庫",
-            [EnumCommercialKinds.Factory] = "工場",
-            [EnumCommercialKinds.Clinic] = "診療所",
-            [EnumCommercialKinds.Restaurant] = "飲食店",
-            [EnumCommercialKinds.Hotel] = "ホテル・旅館",
-            [EnumCommercialKinds.Land] = "事業用土地",
-            [EnumCommercialKinds.Other] = "その他"
+            [EnumKinds.Unspecified] = "未指定",
+            [EnumKinds.Office] = "事務所",
+            [EnumKinds.Retail] = "店舗",
+            [EnumKinds.Warehouse] = "倉庫",
+            [EnumKinds.Factory] = "工場",
+            [EnumKinds.Clinic] = "診療所",
+            [EnumKinds.Restaurant] = "飲食店",
+            [EnumKinds.Hotel] = "ホテル・旅館",
+            [EnumKinds.Land] = "事業用土地",
+            [EnumKinds.Other] = "その他"
         };
 
-    public EnumCommercialKinds Key => key;
+    public EnumKinds Key => key;
 
     public string Label => Labels[Key];
 }

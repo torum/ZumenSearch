@@ -3,6 +3,7 @@ using System.Globalization;
 using ZumenSearch.Models.Base;
 using ZumenSearch.Models.Location;
 using ZumenSearch.Models.Transportation;
+using ZumenSearch.Models.Enums;
 
 namespace ZumenSearch.Models.Rent.Residentials;
 
@@ -25,7 +26,7 @@ public sealed partial class Property : PropertyBase
     // 物件種別
     public PropertyKind BuildingKind
     {
-        get => field ?? new(EnumResidentialKinds.Unspecified);
+        get => field ?? new(EnumKinds.Unspecified);
         set
         {
             if (SetProperty(ref field, value))
@@ -849,11 +850,11 @@ public sealed partial class Property : PropertyBase
         if (string.IsNullOrEmpty(Str))
         {
             // TODO:
-            BuildingKind = new PropertyKind(EnumResidentialKinds.Unspecified);
+            BuildingKind = new PropertyKind(EnumKinds.Unspecified);
             return;
         }
 
-        if (Enum.TryParse<EnumResidentialKinds>(Str, out var result))
+        if (Enum.TryParse<EnumKinds>(Str, out var result))
         {
             BuildingKind = new PropertyKind(result);
         }

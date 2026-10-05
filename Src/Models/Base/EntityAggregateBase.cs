@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using ZumenSearch.Models.Enums;
 
 namespace ZumenSearch.Models.Base;
 

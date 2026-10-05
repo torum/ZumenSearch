@@ -26,6 +26,8 @@ public sealed partial class ShellPage : Page
             { "ZumenSearch.Views.Rent.LessorSearchResultPage", typeof(Views.Rent.LessorSearchResultPage) },
             { "ZumenSearch.Views.Sale.ResidentialSearchPage", typeof(Views.Sale.ResidentialSearchPage) },
             { "ZumenSearch.Views.Sale.ResidentialSearchResultPage", typeof(Views.Sale.ResidentialSearchResultPage) },
+            { "ZumenSearch.Views.Sale.CommercialSearchPage", typeof(Views.Sale.CommercialSearchPage) },
+            { "ZumenSearch.Views.Sale.CommercialSearchResultPage", typeof(Views.Sale.CommercialSearchResultPage) },
             { "ZumenSearch.Views.BrokerSearchPage", typeof(Views.BrokerSearchPage) },
             { "ZumenSearch.Views.BrokerSearchResultPage", typeof(Views.BrokerSearchResultPage) },
             { "ZumenSearch.Views.SettingsPage", typeof(Views.SettingsPage) }

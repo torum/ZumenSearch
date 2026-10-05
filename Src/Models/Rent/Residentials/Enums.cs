@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Text;
 
+// TODO: separate files?
+
 namespace ZumenSearch.Models.Rent.Residentials
 {
     #region == Property ==
 
     // Kind：物件種目（アパート・マンション・一戸建て・他）
-    public enum EnumResidentialKinds
+    public enum EnumKinds
     {
         Unspecified, Apartment, Mansion, House, TerraceHouse, TownHouse, ShareHouse, Dormitory
     }
@@ -18,7 +20,7 @@ namespace ZumenSearch.Models.Rent.Residentials
         Unspecified, Wood, Block, LightSteel, Steel, RC, SRC, ALC, PC, HPC, RB, CFT, Other
     }
 
-    public enum EnumResidentialPdfType
+    public enum EnumPropertyPdfType
     {
         Unspecified,
         Maisoku,
@@ -28,7 +30,7 @@ namespace ZumenSearch.Models.Rent.Residentials
         Other
     }
 
-    public enum EnumResidentialPictureType
+    public enum EnumPropertyPictureType
     {
         //Unspecified, Madori, Gaikan, Situnai, LivingDining, Bedroom, Kitchen, Bathroom, Restroom, Washroom, StorageSpace, Appliance, FrontDoor, Balcony, Entrance, Neighborhood, Other
         Unspecified, Gaikan, Entrance, Neighborhood, Other
@@ -38,7 +40,7 @@ namespace ZumenSearch.Models.Rent.Residentials
 
     #region == listing ==
 
-    public enum EnumRoomPdfType
+    public enum EnumListingPdfType
     {
         Unspecified,
         Maisoku,
@@ -48,7 +50,7 @@ namespace ZumenSearch.Models.Rent.Residentials
         Other
     }
 
-    public enum EnumRoomPictureType
+    public enum EnumListingPictureType
     {
         Unspecified, Madori, Situnai, LivingDining, Bedroom, Kitchen, Bathroom, Restroom, Washroom, StorageSpace, Appliance, FrontDoor, Balcony, Other
         //Unspecified, Madori, Gaikan, Entrance, Neighborhood, Other

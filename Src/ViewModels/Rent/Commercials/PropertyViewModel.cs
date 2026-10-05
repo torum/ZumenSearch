@@ -12,6 +12,7 @@ using Windows.Storage;
 using Windows.Storage.Streams;
 using ZumenSearch.Models;
 using ZumenSearch.Models.Base;
+using ZumenSearch.Models.Enums;
 using ZumenSearch.Models.Location;
 using ZumenSearch.Models.Messenger;
 using ZumenSearch.Models.Transportation;
@@ -160,21 +161,21 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     public ObservableCollection<Models.Rent.Commercials.PropertyKind> Kinds { get; } =
     [
-        new(Models.Rent.Commercials.EnumCommercialKinds.Office),
-        new(Models.Rent.Commercials.EnumCommercialKinds.Retail),
-        new(Models.Rent.Commercials.EnumCommercialKinds.Warehouse),
-        new(Models.Rent.Commercials.EnumCommercialKinds.Factory),
-        new(Models.Rent.Commercials.EnumCommercialKinds.Clinic),
-        new(Models.Rent.Commercials.EnumCommercialKinds.Restaurant),
-        new(Models.Rent.Commercials.EnumCommercialKinds.Hotel),
-        new(Models.Rent.Commercials.EnumCommercialKinds.Land),
-        new(Models.Rent.Commercials.EnumCommercialKinds.Other)
+        new(Models.Rent.Commercials.EnumKinds.Office),
+        new(Models.Rent.Commercials.EnumKinds.Retail),
+        new(Models.Rent.Commercials.EnumKinds.Warehouse),
+        new(Models.Rent.Commercials.EnumKinds.Factory),
+        new(Models.Rent.Commercials.EnumKinds.Clinic),
+        new(Models.Rent.Commercials.EnumKinds.Restaurant),
+        new(Models.Rent.Commercials.EnumKinds.Hotel),
+        new(Models.Rent.Commercials.EnumKinds.Land),
+        new(Models.Rent.Commercials.EnumKinds.Other)
     ];
 
     public Models.Rent.Commercials.PropertyKind SelectedKind
     {
         get => field ??
-            new(Models.Rent.Commercials.EnumCommercialKinds.Unspecified);
+            new(Models.Rent.Commercials.EnumKinds.Unspecified);
         set
         {
             if (value is null || field?.Key == value.Key)
@@ -1189,7 +1190,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             Kinds.FirstOrDefault(
                 item => item.Key == _building.CommercialKind.Key)
             ?? new(
-                Models.Rent.Commercials.EnumCommercialKinds.Unspecified);
+                Models.Rent.Commercials.EnumKinds.Unspecified);
 
         SelectedStructure =
             Structures.FirstOrDefault(

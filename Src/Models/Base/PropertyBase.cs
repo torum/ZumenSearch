@@ -2,6 +2,7 @@
 using Microsoft.UI.Xaml.Media.Imaging;
 using ZumenSearch.Models.Location;
 using ZumenSearch.Models.Transportation;
+using ZumenSearch.Models.Enums;
 
 namespace ZumenSearch.Models.Base;
 
@@ -200,13 +201,3 @@ public abstract partial class PropertyBase : EntityAggregateBase
 }
 
 
-public enum EnumPropertyKind
-{
-    RentResidential,
-    RentCommercial,
-    RentParking,
-    SaleResidential,
-    SaleCommercial,
-    SaleLand,
-    Unknown
-}

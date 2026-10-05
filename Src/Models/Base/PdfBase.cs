@@ -1,5 +1,6 @@
 ﻿using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Imaging;
+using ZumenSearch.Models.Enums;
 
 namespace ZumenSearch.Models.Base;
 

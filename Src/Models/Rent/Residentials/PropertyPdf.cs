@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using ZumenSearch.Models.Base;
+using ZumenSearch.Models.Enums;
 
 namespace ZumenSearch.Models.Rent.Residentials;
 
@@ -7,43 +8,22 @@ namespace ZumenSearch.Models.Rent.Residentials;
 // Almost dupe of Models.Rent.Residentials.ListingPdf
 // ParentViewModel and type Dictionary are the main difference. Consider if we can reuse this.
 
-
-public sealed class ResidentialPdfType(EnumResidentialPdfType key)
-{
-    private Dictionary<EnumResidentialPdfType, string> BuildingPdfTypeDictionary
-    {
-        get;
-    } = new Dictionary<EnumResidentialPdfType, string>()
-    {
-                {EnumResidentialPdfType.Unspecified, "未指定"},
-                {EnumResidentialPdfType.Maisoku, "募集図面"},
-                {EnumResidentialPdfType.Architectural, "建築図面"},
-                {EnumResidentialPdfType.Toukibo, "登記簿謄本"},
-                {EnumResidentialPdfType.Kouzu, "公図・地図"},
-                {EnumResidentialPdfType.Other, "その他"},
-    };
-
-    public string Label => BuildingPdfTypeDictionary[Key];
-
-    public EnumResidentialPdfType Key => key;
-};
-
 public sealed partial class PropertyPdf : PdfBase
 {
     public ViewModels.Rent.Residentials.PropertyViewModel? ParentViewModel { get; set; }
 
-    public readonly ObservableCollection<ResidentialPdfType> BuildingPdfTypes =
+    public readonly ObservableCollection<PropertyPdfType> BuildingPdfTypes =
         [
         //new BuildingPictureType(EnumBuildingPictureType.Unspecified, "未指定"),
-        new ResidentialPdfType(Models.Rent.Residentials.EnumResidentialPdfType.Maisoku),
-        new ResidentialPdfType(Models.Rent.Residentials.EnumResidentialPdfType.Architectural),
-        new ResidentialPdfType(Models.Rent.Residentials.EnumResidentialPdfType.Toukibo),
-        new ResidentialPdfType(Models.Rent.Residentials.EnumResidentialPdfType.Kouzu),
-        new ResidentialPdfType(Models.Rent.Residentials.EnumResidentialPdfType.Other)
+        new PropertyPdfType(Models.Rent.Residentials.EnumPropertyPdfType.Maisoku),
+        new PropertyPdfType(Models.Rent.Residentials.EnumPropertyPdfType.Architectural),
+        new PropertyPdfType(Models.Rent.Residentials.EnumPropertyPdfType.Toukibo),
+        new PropertyPdfType(Models.Rent.Residentials.EnumPropertyPdfType.Kouzu),
+        new PropertyPdfType(Models.Rent.Residentials.EnumPropertyPdfType.Other)
         ];
 
     // Do not use SetProperty. PropertyChanged is being subscribed.
-    public ResidentialPdfType PdfType
+    public PropertyPdfType PdfType
     {
         get;
         set
@@ -66,7 +46,7 @@ public sealed partial class PropertyPdf : PdfBase
 
             OnPropertyChanged();
         }
-    } = new(EnumResidentialPdfType.Unspecified);
+    } = new(EnumPropertyPdfType.Unspecified);
 
     // Do not use SetProperty. PropertyChanged is being subscribed.
     public string Description
@@ -119,19 +99,19 @@ public sealed partial class PropertyPdf : PdfBase
         IsModified = false;
     }
 
-    public EnumResidentialPdfType? SetTypeFromString(string Str)
+    public EnumPropertyPdfType? SetTypeFromString(string Str)
     {
-        if (Enum.TryParse<EnumResidentialPdfType>(Str, out var result))
+        if (Enum.TryParse<EnumPropertyPdfType>(Str, out var result))
         {
-            PdfType = BuildingPdfTypes.FirstOrDefault<ResidentialPdfType>(x => x.Key == result) ?? new(EnumResidentialPdfType.Unspecified);
+            PdfType = BuildingPdfTypes.FirstOrDefault<PropertyPdfType>(x => x.Key == result) ?? new(EnumPropertyPdfType.Unspecified);
 
             return result;
         }
         else
         {
-            PdfType = new(EnumResidentialPdfType.Unspecified);
+            PdfType = new(EnumPropertyPdfType.Unspecified);
 
-            return EnumResidentialPdfType.Unspecified;
+            return EnumPropertyPdfType.Unspecified;
         }
     }
 };

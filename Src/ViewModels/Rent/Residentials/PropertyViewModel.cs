@@ -12,7 +12,7 @@ using Windows.Storage;
 using Windows.Storage.Streams;
 using Windows.System;
 using ZumenSearch.Models;
-using ZumenSearch.Models.Base;
+using ZumenSearch.Models.Enums;
 using ZumenSearch.Models.Location;
 using ZumenSearch.Models.Messenger;
 using ZumenSearch.Models.Transportation;
@@ -204,18 +204,18 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     public ObservableCollection<Models.Rent.Residentials.PropertyKind> Kinds =
     [
         //new Kind(EnumKinds.Unspecified.ToString(), "未指定"),
-        new Models.Rent.Residentials.PropertyKind(Models.Rent.Residentials.EnumResidentialKinds.Apartment),
-        new Models.Rent.Residentials.PropertyKind(Models.Rent.Residentials.EnumResidentialKinds.Mansion),
-        new Models.Rent.Residentials.PropertyKind(Models.Rent.Residentials.EnumResidentialKinds.House),
-        new Models.Rent.Residentials.PropertyKind(Models.Rent.Residentials.EnumResidentialKinds.TerraceHouse),
-        new Models.Rent.Residentials.PropertyKind(Models.Rent.Residentials.EnumResidentialKinds.TownHouse),
-        new Models.Rent.Residentials.PropertyKind(Models.Rent.Residentials.EnumResidentialKinds.ShareHouse),
-        new Models.Rent.Residentials.PropertyKind(Models.Rent.Residentials.EnumResidentialKinds.Dormitory)
+        new Models.Rent.Residentials.PropertyKind(Models.Rent.Residentials.EnumKinds.Apartment),
+        new Models.Rent.Residentials.PropertyKind(Models.Rent.Residentials.EnumKinds.Mansion),
+        new Models.Rent.Residentials.PropertyKind(Models.Rent.Residentials.EnumKinds.House),
+        new Models.Rent.Residentials.PropertyKind(Models.Rent.Residentials.EnumKinds.TerraceHouse),
+        new Models.Rent.Residentials.PropertyKind(Models.Rent.Residentials.EnumKinds.TownHouse),
+        new Models.Rent.Residentials.PropertyKind(Models.Rent.Residentials.EnumKinds.ShareHouse),
+        new Models.Rent.Residentials.PropertyKind(Models.Rent.Residentials.EnumKinds.Dormitory)
     ];
 
     public Models.Rent.Residentials.PropertyKind SelectedKind
     {
-        get => field ?? new(Models.Rent.Residentials.EnumResidentialKinds.Unspecified);
+        get => field ?? new(Models.Rent.Residentials.EnumKinds.Unspecified);
         set
         {
             if (value is null || field?.Key == value.Key)
@@ -1643,7 +1643,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
         //SelectedKind = _building.BuildingKind;
         var kindkey = Kinds.FirstOrDefault(k => k.Key == _building.BuildingKind.Key);
-        SelectedKind = kindkey is null ? new(Models.Rent.Residentials.EnumResidentialKinds.Unspecified) : kindkey;
+        SelectedKind = kindkey is null ? new(Models.Rent.Residentials.EnumKinds.Unspecified) : kindkey;
 
         IsUnitOwnership = _building.IsUnitOwnership;
 

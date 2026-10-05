@@ -100,9 +100,13 @@
     <Page Update="Views\Rent\ParkingSearchResultPage.xaml">
       <SubType>Designer</SubType>
     </Page>
+
   </ItemGroup>
   <ItemGroup>
     <Using Include="System.Diagnostics" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Views\Sale\Commercials\" />
   </ItemGroup>
 
   <!--

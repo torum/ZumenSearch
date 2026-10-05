@@ -1,45 +1,27 @@
 ﻿using System.Collections.ObjectModel;
 using ZumenSearch.Models.Base;
+using ZumenSearch.Models.Enums;
 
 namespace ZumenSearch.Models.Rent.Commercials;
 
 // TODO: Consider creating a wrapper just like Lessor wrapper?
 // Almost dupe with Models.Rent.Residentials.ListingPdf
 
-
-public sealed class CommercialBuildingPdfType(EnumCommercialPdfType key)
-{
-    private static readonly Dictionary<EnumCommercialPdfType, string> pdfTypes = new()
-    {
-        [EnumCommercialPdfType.Unspecified] = "未指定",
-        [EnumCommercialPdfType.Listing] = "募集図面",
-        [EnumCommercialPdfType.Architectural] = "建築図面",
-        [EnumCommercialPdfType.Registry] = "登記簿謄本",
-        [EnumCommercialPdfType.Map] = "公図・地図",
-        [EnumCommercialPdfType.Other] = "その他"
-    };
-    private static readonly Dictionary<EnumCommercialPdfType, string> Labels = pdfTypes;
-
-    public EnumCommercialPdfType Key => key;
-
-    public string Label => Labels[key];
-}
-
 public sealed partial class PropertyPdf : PdfBase
 {
     public ViewModels.Rent.Commercials.PropertyViewModel? ParentViewModel { get; set; }
 
-    public ObservableCollection<CommercialBuildingPdfType> BuildingPdfTypes { get; } =
+    public ObservableCollection<PropertyPdfType> BuildingPdfTypes { get; } =
     [
-        new(EnumCommercialPdfType.Listing),
-        new(EnumCommercialPdfType.Architectural),
-        new(EnumCommercialPdfType.Registry),
-        new(EnumCommercialPdfType.Map),
-        new(EnumCommercialPdfType.Other)
+        new(EnumPropertyPdfType.Listing),
+        new(EnumPropertyPdfType.Architectural),
+        new(EnumPropertyPdfType.Registry),
+        new(EnumPropertyPdfType.Map),
+        new(EnumPropertyPdfType.Other)
     ];
 
     // Do not use SetProperty. PropertyChanged is being subscribed.
-    public CommercialBuildingPdfType PdfType
+    public PropertyPdfType PdfType
     {
         get;
         set
@@ -62,7 +44,7 @@ public sealed partial class PropertyPdf : PdfBase
 
             OnPropertyChanged();
         }
-    } = new(EnumCommercialPdfType.Unspecified);
+    } = new(EnumPropertyPdfType.Unspecified);
 
     // Do not use SetProperty. PropertyChanged is being subscribed.
     public string Description
@@ -115,19 +97,19 @@ public sealed partial class PropertyPdf : PdfBase
         IsModified = false;
     }
 
-    public EnumCommercialPdfType? SetTypeFromString(string Str)
+    public EnumPropertyPdfType? SetTypeFromString(string Str)
     {
-        if (Enum.TryParse<EnumCommercialPdfType>(Str, out var result))
+        if (Enum.TryParse<EnumPropertyPdfType>(Str, out var result))
         {
-            PdfType = BuildingPdfTypes.FirstOrDefault<CommercialBuildingPdfType>(x => x.Key == result) ?? new(EnumCommercialPdfType.Unspecified);
+            PdfType = BuildingPdfTypes.FirstOrDefault<PropertyPdfType>(x => x.Key == result) ?? new(EnumPropertyPdfType.Unspecified);
 
             return result;
         }
         else
         {
-            PdfType = new(EnumCommercialPdfType.Unspecified);
+            PdfType = new(EnumPropertyPdfType.Unspecified);
 
-            return EnumCommercialPdfType.Unspecified;
+            return EnumPropertyPdfType.Unspecified;
         }
     }
 };

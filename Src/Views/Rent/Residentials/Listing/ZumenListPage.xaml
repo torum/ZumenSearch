@@ -58,7 +58,7 @@
                                             <StackPanel Orientation="Horizontal">
                                                 <ComboBox x:Name="ComboBoxKinds" Header="タイプ" PlaceholderText="選択" Width="200" ItemsSource="{x:Bind RoomPdfTypes, Mode=OneWay}" SelectedItem="{x:Bind PdfType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                                                     <ComboBox.ItemTemplate>
-                                                        <DataTemplate x:DataType="modresidentials:RoomPdfType">
+                                                        <DataTemplate x:DataType="modresidentials:ListingPdfType">
                                                             <StackPanel Orientation="Horizontal">
                                                                 <TextBlock Text="{x:Bind Label}" Margin="0,0,5,0"/>
                                                             </StackPanel>

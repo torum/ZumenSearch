@@ -5,6 +5,7 @@ using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
 using System.Diagnostics;
 using ZumenSearch.Models;
+using ZumenSearch.Models.Enums;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.ViewModels;
 
@@ -30,11 +31,11 @@ public partial class PersonTemplateSelector : DataTemplateSelector
         }
         else if (item is Models.PersonSearchResultItem searchResultItem)
         {
-            if (searchResultItem.PersonKind == Models.Base.EnumPersonKind.Natural)
+            if (searchResultItem.PersonKind == Models.Enums.EnumPersonKind.Natural)
             {
                 return NaturalTemplate;
             }
-            else if (searchResultItem.PersonKind == Models.Base.EnumPersonKind.Legal)
+            else if (searchResultItem.PersonKind == Models.Enums.EnumPersonKind.Legal)
             {
                 return LegalTemplate;
             }

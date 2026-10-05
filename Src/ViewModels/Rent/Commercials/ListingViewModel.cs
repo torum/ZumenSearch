@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using ZumenSearch.Models.Base;
+using ZumenSearch.Models.Enums;
 using ZumenSearch.Services.Contracts;
 using CommunityToolkit.Mvvm.Messaging;
 using ZumenSearch.Models;

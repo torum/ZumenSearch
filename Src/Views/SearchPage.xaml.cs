@@ -3,6 +3,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.ViewModels;
+using ZumenSearch.Models.Enums;
 
 namespace ZumenSearch.Views;
 
@@ -16,15 +17,15 @@ public partial class RecentPropertyTypeTemplateSelector : DataTemplateSelector
     {
         if (item is Models.PropertySearchResultItem searchResultItem)
         {
-            if (searchResultItem.PropertyKind == Models.Base.EnumPropertyKind.RentResidential)
+            if (searchResultItem.PropertyKind == Models.Enums.EnumPropertyKind.RentResidential)
             {
                 return RecentRentResidentialTemplate;
             }
-            else if (searchResultItem.PropertyKind == Models.Base.EnumPropertyKind.RentCommercial)
+            else if (searchResultItem.PropertyKind == Models.Enums.EnumPropertyKind.RentCommercial)
             {
                 return RecentRentCommercialTemplate;
             }
-            else if (searchResultItem.PropertyKind == Models.Base.EnumPropertyKind.SaleResidential)
+            else if (searchResultItem.PropertyKind == Models.Enums.EnumPropertyKind.SaleResidential)
             {
                 return RecentSaleResidentialTemplate;
             }

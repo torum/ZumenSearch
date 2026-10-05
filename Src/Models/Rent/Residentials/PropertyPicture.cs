@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using ZumenSearch.Models.Base;
+using ZumenSearch.Models.Enums;
 
 namespace ZumenSearch.Models.Rent.Residentials;
 
@@ -14,7 +15,7 @@ public sealed partial class PropertyPicture : PictureBase
     [
         //new PropertyPictureType(EnumResidentialPictureType.Unspecified, "未指定"),
         //new PropertyPictureType(Models.Rent.Residentials.EnumResidentialPictureType.Madori),
-        new PropertyPictureType(Models.Rent.Residentials.EnumResidentialPictureType.Gaikan),
+        new PropertyPictureType(Models.Rent.Residentials.EnumPropertyPictureType.Gaikan),
         //new PropertyPictureType(Models.Rent.Residentials.EnumResidentialPictureType.Situnai),
         //new PropertyPictureType(Models.Rent.Residentials.EnumResidentialPictureType.LivingDining),
         //new PropertyPictureType(Models.Rent.Residentials.EnumResidentialPictureType.Bedroom),
@@ -26,9 +27,9 @@ public sealed partial class PropertyPicture : PictureBase
         //new PropertyPictureType(Models.Rent.Residentials.EnumResidentialPictureType.Appliance),
         //new PropertyPictureType(Models.Rent.Residentials.EnumResidentialPictureType.FrontDoor),
         //new PropertyPictureType(Models.Rent.Residentials.EnumResidentialPictureType.Balcony),
-        new PropertyPictureType(Models.Rent.Residentials.EnumResidentialPictureType.Entrance),
-        new PropertyPictureType(Models.Rent.Residentials.EnumResidentialPictureType.Neighborhood),
-        new PropertyPictureType(Models.Rent.Residentials.EnumResidentialPictureType.Other)
+        new PropertyPictureType(Models.Rent.Residentials.EnumPropertyPictureType.Entrance),
+        new PropertyPictureType(Models.Rent.Residentials.EnumPropertyPictureType.Neighborhood),
+        new PropertyPictureType(Models.Rent.Residentials.EnumPropertyPictureType.Other)
     ];
 
     // Do not use SetProperty. PropertyChanged is being subscribed.
@@ -55,7 +56,7 @@ public sealed partial class PropertyPicture : PictureBase
 
             OnPropertyChanged();
         }
-    } = new(EnumResidentialPictureType.Unspecified);
+    } = new(EnumPropertyPictureType.Unspecified);
 
     // Do not use SetProperty.
     public string Description
@@ -107,21 +108,21 @@ public sealed partial class PropertyPicture : PictureBase
         IsModified = false;
     }
 
-    public EnumResidentialPictureType? SetLabelFromString(string titleStr)
+    public EnumPropertyPictureType? SetLabelFromString(string titleStr)
     {
-        if (Enum.TryParse<EnumResidentialPictureType>(titleStr, out var result))
+        if (Enum.TryParse<EnumPropertyPictureType>(titleStr, out var result))
         {
             //PictureType = new(result); // Not good for assigning to combobox. So select from ResidentialPictureTypes.
-            PictureType = ResidentialPictureTypes.FirstOrDefault<PropertyPictureType>(x => x.Key == result) ?? new(EnumResidentialPictureType.Unspecified);
+            PictureType = ResidentialPictureTypes.FirstOrDefault<PropertyPictureType>(x => x.Key == result) ?? new(EnumPropertyPictureType.Unspecified);
 
             //Debug.WriteLine($"SetLabelFromString: {titleStr} -> {PictureType.Label}");
             return result;
         }
         else
         {
-            PictureType = new(EnumResidentialPictureType.Unspecified);
+            PictureType = new(EnumPropertyPictureType.Unspecified);
 
-            return EnumResidentialPictureType.Unspecified;
+            return EnumPropertyPictureType.Unspecified;
         }
     }
 };

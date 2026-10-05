@@ -3,6 +3,7 @@ using System.Globalization;
 using ZumenSearch.Models.Base;
 using ZumenSearch.Models.Location;
 using ZumenSearch.Models.Transportation;
+using ZumenSearch.Models.Enums;
 
 namespace ZumenSearch.Models.Rent.Commercials;
 
@@ -23,7 +24,7 @@ public sealed partial class Property : PropertyBase
 
     public PropertyKind CommercialKind
     {
-        get => field ?? new(EnumCommercialKinds.Unspecified);
+        get => field ?? new(EnumKinds.Unspecified);
         set
         {
             if (SetProperty(ref field, value))
@@ -578,9 +579,9 @@ public sealed partial class Property : PropertyBase
     {
         CommercialKind = Enum.TryParse(
             value,
-            out EnumCommercialKinds result)
+            out EnumKinds result)
             ? new PropertyKind(result)
-            : new PropertyKind(EnumCommercialKinds.Unspecified);
+            : new PropertyKind(EnumKinds.Unspecified);
     }
 
     public void SetStructureTypeFromString(string value)

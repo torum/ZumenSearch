@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using ZumenSearch.Models.Base;
+using ZumenSearch.Models.Enums;
 
 #pragma warning disable IDE0079 // Remove unnecessary suppression
 #pragma warning disable IDE0290 // Use primary constructor

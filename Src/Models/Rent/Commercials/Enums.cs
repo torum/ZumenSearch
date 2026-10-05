@@ -2,9 +2,13 @@
 using System.Collections.Generic;
 using System.Text;
 
+// TODO: separate files?
+
 namespace ZumenSearch.Models.Rent.Commercials;
 
-public enum EnumCommercialKinds
+#region == Property ==
+
+public enum EnumKinds
 {
     Unspecified,
     Office,
@@ -33,7 +37,7 @@ public enum EnumStructures
     Other
 }
 
-public enum EnumCommercialPdfType
+public enum EnumPropertyPdfType
 {
     Unspecified,
     Listing,
@@ -43,7 +47,7 @@ public enum EnumCommercialPdfType
     Other
 }
 
-public enum EnumCommercialPictureType
+public enum EnumPropertyPictureType
 {
     Unspecified,
     Exterior,
@@ -52,3 +56,25 @@ public enum EnumCommercialPictureType
     Interior,
     Other
 }
+
+#endregion
+
+#region == listing ==
+
+public enum EnumListingPdfType
+{
+    Unspecified,
+    Maisoku,
+    Architectural,
+    Toukibo,
+    Kouzu,
+    Other
+}
+
+public enum EnumListingPictureType
+{
+    Unspecified, Madori, Situnai, LivingDining, Bedroom, Kitchen, Bathroom, Restroom, Washroom, StorageSpace, Appliance, FrontDoor, Balcony, Other
+    //Unspecified, Madori, Gaikan, Entrance, Neighborhood, Other
+}
+
+#endregion

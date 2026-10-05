@@ -4,24 +4,24 @@ using System.Text;
 
 namespace ZumenSearch.Models.Rent.Residentials;
 
-public sealed class PropertyKind(EnumResidentialKinds key)
+public sealed class PropertyKind(EnumKinds key)
 {
-    private Dictionary<EnumResidentialKinds, string> BuildingKindTypeDictionary
+    private Dictionary<EnumKinds, string> BuildingKindTypeDictionary
     {
         get;
-    } = new Dictionary<EnumResidentialKinds, string>()
+    } = new Dictionary<EnumKinds, string>()
         {
-            {EnumResidentialKinds.Unspecified, "未指定"},
-            {EnumResidentialKinds.Apartment, "アパート"},
-            {EnumResidentialKinds.Mansion, "マンション"},
-            {EnumResidentialKinds.House, "一戸建て"},
-            {EnumResidentialKinds.TerraceHouse, "テラスハウス"},
-            {EnumResidentialKinds.TownHouse, "タウンハウス"},
-            {EnumResidentialKinds.ShareHouse, "シェアハウス"},
-            {EnumResidentialKinds.Dormitory, "寮・下宿"}
+            {EnumKinds.Unspecified, "未指定"},
+            {EnumKinds.Apartment, "アパート"},
+            {EnumKinds.Mansion, "マンション"},
+            {EnumKinds.House, "一戸建て"},
+            {EnumKinds.TerraceHouse, "テラスハウス"},
+            {EnumKinds.TownHouse, "タウンハウス"},
+            {EnumKinds.ShareHouse, "シェアハウス"},
+            {EnumKinds.Dormitory, "寮・下宿"}
         };
 
     public string Label => BuildingKindTypeDictionary[Key];
 
-    public EnumResidentialKinds Key => key;
+    public EnumKinds Key => key;
 };

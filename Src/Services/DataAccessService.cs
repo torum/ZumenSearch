@@ -4,6 +4,7 @@ using System.Xml.Linq;
 using ZumenSearch.Helpers;
 using ZumenSearch.Models;
 using ZumenSearch.Models.Base;
+using ZumenSearch.Models.Enums;
 using ZumenSearch.Services.Contracts;
 
 namespace ZumenSearch.Services;
@@ -885,7 +886,7 @@ public sealed class DataAccessService : IDataAccessService
                 var kind = reader.GetString(reader.GetOrdinal("property_kind")) ?? string.Empty;
                 if (!string.IsNullOrEmpty(kind))
                 {
-                    if (Enum.TryParse<Models.Base.EnumPropertyKind>(kind, out var parsedKind))
+                    if (Enum.TryParse<Models.Enums.EnumPropertyKind>(kind, out var parsedKind))
                     {
                         enumKind = parsedKind;
                     }
@@ -966,7 +967,7 @@ public sealed class DataAccessService : IDataAccessService
                 var kind = reader.GetString(reader.GetOrdinal("property_kind")) ?? string.Empty;
                 if (!string.IsNullOrEmpty(kind))
                 {
-                    if (Enum.TryParse<Models.Base.EnumPropertyKind>(kind, out var parsedKind))
+                    if (Enum.TryParse<Models.Enums.EnumPropertyKind>(kind, out var parsedKind))
                     {
                         enumKind = parsedKind;
                     }
@@ -1128,7 +1129,7 @@ public sealed class DataAccessService : IDataAccessService
                         if (r > 0)
                         {
                             //pic.IsNew = false;
-                            pic.Status = Models.Base.EnumEntityStatus.Saved;
+                            pic.Status = Models.Enums.EnumEntityStatus.Saved;
                             pic.IsModified = false;
                         }
                     }
@@ -1195,7 +1196,7 @@ public sealed class DataAccessService : IDataAccessService
                         if (r > 0)
                         {
                             //pic.IsNew = false;
-                            pic.Status = Models.Base.EnumEntityStatus.Saved;
+                            pic.Status = Models.Enums.EnumEntityStatus.Saved;
                             pic.IsModified = false;
                         }
                     }
@@ -1388,7 +1389,7 @@ public sealed class DataAccessService : IDataAccessService
                                 if (result > 0)
                                 {
                                     //pic.IsNew = false;
-                                    pic.Status = Models.Base.EnumEntityStatus.Saved;
+                                    pic.Status = Models.Enums.EnumEntityStatus.Saved;
                                     pic.IsModified = false;
                                 }
                             }
@@ -1447,7 +1448,7 @@ public sealed class DataAccessService : IDataAccessService
                                 if (result > 0)
                                 {
                                     //pdf.IsNew = false;
-                                    pdf.Status = Models.Base.EnumEntityStatus.Saved;
+                                    pdf.Status = Models.Enums.EnumEntityStatus.Saved;
                                     pdf.IsModified = false;
                                 }
                             }
@@ -2230,7 +2231,7 @@ public sealed class DataAccessService : IDataAccessService
                             if (result > 0)
                             {
                                 //pic.IsNew = false;
-                                pic.Status = Models.Base.EnumEntityStatus.Saved;
+                                pic.Status = Models.Enums.EnumEntityStatus.Saved;
                                 pic.IsModified = false;
                             }
                         }
@@ -2298,7 +2299,7 @@ public sealed class DataAccessService : IDataAccessService
                             if (result > 0)
                             {
                                 //pdf.IsNew = false;
-                                pdf.Status = Models.Base.EnumEntityStatus.Saved;
+                                pdf.Status = Models.Enums.EnumEntityStatus.Saved;
                                 pdf.IsModified = false;
                             }
                         }
@@ -3048,14 +3049,14 @@ public sealed class DataAccessService : IDataAccessService
             foreach (var picture in building.Pictures)
             {
                 //picture.IsNew = false;
-                picture.Status = Models.Base.EnumEntityStatus.Saved;
+                picture.Status = Models.Enums.EnumEntityStatus.Saved;
                 picture.IsModified = false;
             }
 
             foreach (var pdf in building.Pdfs)
             {
                 //pdf.IsNew = false;
-                pdf.Status = Models.Base.EnumEntityStatus.Saved;
+                pdf.Status = Models.Enums.EnumEntityStatus.Saved;
                 pdf.IsModified = false;
             }
 
@@ -4313,11 +4314,11 @@ public sealed class DataAccessService : IDataAccessService
                     continue;
                 }
 
-                Models.Base.EnumPersonKind? enumKind = null;
+                Models.Enums.EnumPersonKind? enumKind = null;
                 var kind = reader.GetString(reader.GetOrdinal("person_kind")) ?? string.Empty;
                 if (!string.IsNullOrEmpty(kind))
                 {
-                    if (Enum.TryParse<Models.Base.EnumPersonKind>(kind, out var parsedKind))
+                    if (Enum.TryParse<Models.Enums.EnumPersonKind>(kind, out var parsedKind))
                     {
                         enumKind = parsedKind;
                     }
@@ -4330,13 +4331,13 @@ public sealed class DataAccessService : IDataAccessService
                 }
 
                 Models.PersonSearchResultItem item;
-                if (enumKind == Models.Base.EnumPersonKind.Natural)
+                if (enumKind == Models.Enums.EnumPersonKind.Natural)
                 {
-                    item = new Models.PersonSearchResultItem(s, Models.Base.EnumPersonKind.Natural);
+                    item = new Models.PersonSearchResultItem(s, Models.Enums.EnumPersonKind.Natural);
                 }
-                else if (enumKind == Models.Base.EnumPersonKind.Legal)
+                else if (enumKind == Models.Enums.EnumPersonKind.Legal)
                 {
-                    item = new Models.PersonSearchResultItem(s, Models.Base.EnumPersonKind.Legal);
+                    item = new Models.PersonSearchResultItem(s, Models.Enums.EnumPersonKind.Legal);
                 }
                 else
                 {
@@ -4439,11 +4440,11 @@ public sealed class DataAccessService : IDataAccessService
 
         Models.Base.PersonBase? person = null;
 
-        Models.Base.EnumPersonKind? enumKind = null;
+        Models.Enums.EnumPersonKind? enumKind = null;
         var kind = reader.GetString(reader.GetOrdinal("person_kind")) ?? string.Empty;
         if (!string.IsNullOrEmpty(kind))
         {
-            if (Enum.TryParse<Models.Base.EnumPersonKind>(kind, out var parsedKind))
+            if (Enum.TryParse<Models.Enums.EnumPersonKind>(kind, out var parsedKind))
             {
                 enumKind = parsedKind;
             }
@@ -4455,11 +4456,11 @@ public sealed class DataAccessService : IDataAccessService
             return null;
         }
 
-        if (enumKind == Models.Base.EnumPersonKind.Natural)
+        if (enumKind == Models.Enums.EnumPersonKind.Natural)
         {
             person = new Models.Person.NaturalPerson(personId, EnumEntityStatus.Saved);
         }
-        else if (enumKind == Models.Base.EnumPersonKind.Legal)
+        else if (enumKind == Models.Enums.EnumPersonKind.Legal)
         {
             person = new Models.Person.LegalPerson(personId, EnumEntityStatus.Saved);
         }
@@ -5588,10 +5589,10 @@ public sealed class DataAccessService : IDataAccessService
                 var personKindText =
                     Convert.ToString(reader["person_kind"]) ?? string.Empty;
 
-                if (!Enum.TryParse<Models.Base.EnumPersonKind>(
+                if (!Enum.TryParse<Models.Enums.EnumPersonKind>(
                         personKindText,
                         out var personKind) ||
-                    personKind == Models.Base.EnumPersonKind.Undetermined)
+                    personKind == Models.Enums.EnumPersonKind.Undetermined)
                 {
                     continue;
                 }
