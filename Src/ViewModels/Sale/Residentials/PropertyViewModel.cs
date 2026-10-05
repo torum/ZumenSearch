@@ -81,7 +81,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient
         }
     }
 
-    public ObservableCollection<Models.Sale.Residentials.Kind> Kinds { get; } =
+    public ObservableCollection<Models.Sale.Residentials.PropertyKind> Kinds { get; } =
     [
         new(Models.Sale.Residentials.EnumResidentialKinds.Apartment),
         new(Models.Sale.Residentials.EnumResidentialKinds.Mansion),
@@ -92,7 +92,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient
         new(Models.Sale.Residentials.EnumResidentialKinds.Dormitory)
     ];
 
-    public Models.Sale.Residentials.Kind SelectedKind
+    public Models.Sale.Residentials.PropertyKind SelectedKind
     {
         get => field ??
             new(Models.Sale.Residentials.EnumResidentialKinds.Unspecified);
@@ -105,7 +105,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient
         }
     }
 
-    public ObservableCollection<Models.Sale.Residentials.Structure> Structures { get; } =
+    public ObservableCollection<Models.Sale.Residentials.PropertyStructure> Structures { get; } =
     [
         new(Models.Sale.Residentials.EnumStructures.Wood),
         new(Models.Sale.Residentials.EnumStructures.Block),
@@ -121,7 +121,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient
         new(Models.Sale.Residentials.EnumStructures.Other)
     ];
 
-    public Models.Sale.Residentials.Structure SelectedStructure
+    public Models.Sale.Residentials.PropertyStructure SelectedStructure
     {
         get => field ??
             new(Models.Sale.Residentials.EnumStructures.Unspecified);

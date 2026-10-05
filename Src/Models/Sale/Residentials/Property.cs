@@ -11,7 +11,7 @@ namespace ZumenSearch.Models.Sale.Residentials;
 
 public sealed partial class Property : PropertyBase
 {
-    public Kind BuildingKind
+    public PropertyKind BuildingKind
     {
         get => field ?? new(EnumResidentialKinds.Unspecified);
         set
@@ -35,7 +35,7 @@ public sealed partial class Property : PropertyBase
         }
     }
 
-    public Structure BuildingStructure
+    public PropertyStructure BuildingStructure
     {
         get => field ?? new(EnumStructures.Unspecified);
         set
@@ -139,15 +139,15 @@ public sealed partial class Property : PropertyBase
     public void SetKindTypeFromString(string value)
     {
         BuildingKind = Enum.TryParse(value, out EnumResidentialKinds result)
-            ? new Kind(result)
-            : new Kind(EnumResidentialKinds.Unspecified);
+            ? new PropertyKind(result)
+            : new PropertyKind(EnumResidentialKinds.Unspecified);
     }
 
     public void SetStructureTypeFromString(string value)
     {
         BuildingStructure = Enum.TryParse(value, out EnumStructures result)
-            ? new Structure(result)
-            : new Structure(EnumStructures.Unspecified);
+            ? new PropertyStructure(result)
+            : new PropertyStructure(EnumStructures.Unspecified);
     }
 
     public void SetBuildYearMonthFromString(string value)
