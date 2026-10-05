@@ -11,17 +11,17 @@ public sealed partial class PropertyPdf : PdfBase
 {
     public ViewModels.Rent.Commercials.PropertyViewModel? ParentViewModel { get; set; }
 
-    public ObservableCollection<PropertyPdfType> BuildingPdfTypes { get; } =
+    public ObservableCollection<PropertyPdfTypeLabel> BuildingPdfTypes { get; } =
     [
-        new(EnumPropertyPdfType.Listing),
-        new(EnumPropertyPdfType.Architectural),
-        new(EnumPropertyPdfType.Registry),
-        new(EnumPropertyPdfType.Map),
-        new(EnumPropertyPdfType.Other)
+        new(PropertyPdfType.Listing),
+        new(PropertyPdfType.Architectural),
+        new(PropertyPdfType.Registry),
+        new(PropertyPdfType.Map),
+        new(PropertyPdfType.Other)
     ];
 
     // Do not use SetProperty. PropertyChanged is being subscribed.
-    public PropertyPdfType PdfType
+    public PropertyPdfTypeLabel PdfType
     {
         get;
         set
@@ -44,7 +44,7 @@ public sealed partial class PropertyPdf : PdfBase
 
             OnPropertyChanged();
         }
-    } = new(EnumPropertyPdfType.Unspecified);
+    } = new(PropertyPdfType.Unspecified);
 
     // Do not use SetProperty. PropertyChanged is being subscribed.
     public string Description
@@ -89,7 +89,7 @@ public sealed partial class PropertyPdf : PdfBase
         }
     }
 
-    public PropertyPdf(string id, string pdfLocation, string thumbnailLocation, EnumEntityStatus status) : base(id, status)
+    public PropertyPdf(string id, string pdfLocation, string thumbnailLocation, EntityStatus status) : base(id, status)
     {
         PdfFilename = pdfLocation;
         ThumbnailFilename = thumbnailLocation;
@@ -97,19 +97,19 @@ public sealed partial class PropertyPdf : PdfBase
         IsModified = false;
     }
 
-    public EnumPropertyPdfType? SetTypeFromString(string Str)
+    public PropertyPdfType? SetTypeFromString(string Str)
     {
-        if (Enum.TryParse<EnumPropertyPdfType>(Str, out var result))
+        if (Enum.TryParse<PropertyPdfType>(Str, out var result))
         {
-            PdfType = BuildingPdfTypes.FirstOrDefault<PropertyPdfType>(x => x.Key == result) ?? new(EnumPropertyPdfType.Unspecified);
+            PdfType = BuildingPdfTypes.FirstOrDefault<PropertyPdfTypeLabel>(x => x.Key == result) ?? new(PropertyPdfType.Unspecified);
 
             return result;
         }
         else
         {
-            PdfType = new(EnumPropertyPdfType.Unspecified);
+            PdfType = new(PropertyPdfType.Unspecified);
 
-            return EnumPropertyPdfType.Unspecified;
+            return PropertyPdfType.Unspecified;
         }
     }
 };

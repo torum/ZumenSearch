@@ -14,18 +14,18 @@ public sealed partial class ListingPdf : PdfBase
 {
     public ViewModels.Rent.Residentials.ListingViewModel? ParentViewModel { get; set; }
 
-    public readonly ObservableCollection<ListingPdfType> RoomPdfTypes =
+    public readonly ObservableCollection<ListingPdfTypeLabel> RoomPdfTypes =
         [
         //new BuildingPictureType(EnumBuildingPictureType.Unspecified, "未指定"),
-        new ListingPdfType(Models.Rent.Residentials.EnumListingPdfType.Maisoku),
-        new ListingPdfType(Models.Rent.Residentials.EnumListingPdfType.Architectural),
-        new ListingPdfType(Models.Rent.Residentials.EnumListingPdfType.Toukibo),
-        new ListingPdfType(Models.Rent.Residentials.EnumListingPdfType.Kouzu),
-        new ListingPdfType(Models.Rent.Residentials.EnumListingPdfType.Other)
+        new ListingPdfTypeLabel(Models.Rent.Residentials.ListingPdfType.Maisoku),
+        new ListingPdfTypeLabel(Models.Rent.Residentials.ListingPdfType.Architectural),
+        new ListingPdfTypeLabel(Models.Rent.Residentials.ListingPdfType.Toukibo),
+        new ListingPdfTypeLabel(Models.Rent.Residentials.ListingPdfType.Kouzu),
+        new ListingPdfTypeLabel(Models.Rent.Residentials.ListingPdfType.Other)
         ];
 
     // Do not use SetProperty. PropertyChanged is being subscribed.
-    public ListingPdfType PdfType
+    public ListingPdfTypeLabel PdfType
     {
         get;
         set
@@ -48,7 +48,7 @@ public sealed partial class ListingPdf : PdfBase
 
             OnPropertyChanged();
         }
-    } = new(EnumListingPdfType.Unspecified);
+    } = new(ListingPdfType.Unspecified);
 
     // Do not use SetProperty. PropertyChanged is being subscribed.
     public string Description
@@ -93,7 +93,7 @@ public sealed partial class ListingPdf : PdfBase
         }
     }
 
-    public ListingPdf(string id, string pdfLocation, string thumbnailLocation, EnumEntityStatus status) : base(id, status)
+    public ListingPdf(string id, string pdfLocation, string thumbnailLocation, EntityStatus status) : base(id, status)
     {
         PdfFilename = pdfLocation;
         ThumbnailFilename = thumbnailLocation;
@@ -101,19 +101,19 @@ public sealed partial class ListingPdf : PdfBase
         IsModified = false;
     }
 
-    public EnumListingPdfType? SetTypeFromString(string Str)
+    public ListingPdfType? SetTypeFromString(string Str)
     {
-        if (Enum.TryParse<EnumListingPdfType>(Str, out var result))
+        if (Enum.TryParse<ListingPdfType>(Str, out var result))
         {
-            PdfType = RoomPdfTypes.FirstOrDefault<ListingPdfType>(x => x.Key == result) ?? new(EnumListingPdfType.Unspecified);
+            PdfType = RoomPdfTypes.FirstOrDefault<ListingPdfTypeLabel>(x => x.Key == result) ?? new(ListingPdfType.Unspecified);
 
             return result;
         }
         else
         {
-            PdfType = new(EnumListingPdfType.Unspecified);
+            PdfType = new(ListingPdfType.Unspecified);
 
-            return EnumListingPdfType.Unspecified;
+            return ListingPdfType.Unspecified;
         }
     }
 };

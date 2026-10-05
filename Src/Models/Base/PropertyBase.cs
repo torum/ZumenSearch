@@ -18,12 +18,12 @@ namespace ZumenSearch.Models.Base;
 // </remarks>
 public abstract partial class PropertyBase : EntityAggregateBase
 {
-    protected PropertyBase(string id, EnumEntityStatus status, EnumPropertyKind kind) : base(id, status)
+    protected PropertyBase(string id, EntityStatus status, PropertyKind kind) : base(id, status)
     {
         PropertyKind = kind;
     }
 
-    public EnumPropertyKind PropertyKind { get; init; }
+    public PropertyKind PropertyKind { get; init; }
 
     // TODO: Use Address class from Models.Location.Address.cs instead of using Prefecture, CountyAndCity, WardAndOaza, Choume classes directly.
     public Address Address

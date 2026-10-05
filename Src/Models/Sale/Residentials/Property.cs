@@ -13,7 +13,7 @@ public sealed partial class Property : PropertyBase
 {
     public PropertyKind BuildingKind
     {
-        get => field ?? new(EnumResidentialKinds.Unspecified);
+        get => field ?? new(PropertyType.Unspecified);
         set
         {
             if (SetProperty(ref field, value))
@@ -37,7 +37,7 @@ public sealed partial class Property : PropertyBase
 
     public PropertyStructure BuildingStructure
     {
-        get => field ?? new(EnumStructures.Unspecified);
+        get => field ?? new(StructureType.Unspecified);
         set
         {
             if (SetProperty(ref field, value))
@@ -131,23 +131,23 @@ public sealed partial class Property : PropertyBase
         }
     }
 
-    public Property(string id, EnumEntityStatus status)
-        : base(id, status, EnumPropertyKind.SaleResidential)
+    public Property(string id, EntityStatus status)
+        : base(id, status, Enums.PropertyKind.SaleResidential)
     {
     }
 
     public void SetKindTypeFromString(string value)
     {
-        BuildingKind = Enum.TryParse(value, out EnumResidentialKinds result)
+        BuildingKind = Enum.TryParse(value, out PropertyType result)
             ? new PropertyKind(result)
-            : new PropertyKind(EnumResidentialKinds.Unspecified);
+            : new PropertyKind(PropertyType.Unspecified);
     }
 
     public void SetStructureTypeFromString(string value)
     {
-        BuildingStructure = Enum.TryParse(value, out EnumStructures result)
+        BuildingStructure = Enum.TryParse(value, out StructureType result)
             ? new PropertyStructure(result)
-            : new PropertyStructure(EnumStructures.Unspecified);
+            : new PropertyStructure(StructureType.Unspecified);
     }
 
     public void SetBuildYearMonthFromString(string value)

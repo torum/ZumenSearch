@@ -60,7 +60,7 @@ public partial class NaturalPerson : PersonBase
         }
     }
 
-    public NaturalPerson(string id, EnumEntityStatus status) : base(id, status, EnumPersonKind.Natural)
+    public NaturalPerson(string id, EntityStatus status) : base(id, status, PersonKind.Natural)
     {
         //
     }

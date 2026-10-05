@@ -15,7 +15,7 @@ using ZumenSearch.Models.Enums;
 // </remarks>
 public abstract class PersonBase : EntityAggregateBase
 {
-    public EnumPersonKind PersonKind { get; set; }
+    public PersonKind PersonKind { get; set; }
 
     // Do not use SetProperty.
     public string Remarks
@@ -42,7 +42,7 @@ public abstract class PersonBase : EntityAggregateBase
         }
     } = string.Empty;
 
-    protected PersonBase(string id, EnumEntityStatus status, EnumPersonKind personKind) : base(id, status)
+    protected PersonBase(string id, EntityStatus status, PersonKind personKind) : base(id, status)
     {
         PersonKind = personKind;
     }

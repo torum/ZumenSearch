@@ -14,7 +14,7 @@ namespace ZumenSearch.Models.Rent.Commercials;
 
 public sealed partial class Property : PropertyBase
 {
-    public Property(string id, EnumEntityStatus status) : base(id, status, EnumPropertyKind.RentCommercial)
+    public Property(string id, EntityStatus status) : base(id, status, Enums.PropertyKind.RentCommercial)
     {
     }
 
@@ -22,9 +22,9 @@ public sealed partial class Property : PropertyBase
 
     #region == 基本 ==
 
-    public PropertyKind CommercialKind
+    public PropertyTypeLabel CommercialKind
     {
-        get => field ?? new(EnumKinds.Unspecified);
+        get => field ?? new(PropertyType.Unspecified);
         set
         {
             if (SetProperty(ref field, value))
@@ -46,9 +46,9 @@ public sealed partial class Property : PropertyBase
         }
     }
 
-    public PropertyStructure BuildingStructure
+    public PropertyStructureTypeLabel BuildingStructure
     {
-        get => field ?? new(EnumStructures.Unspecified);
+        get => field ?? new(StructureType.Unspecified);
         set
         {
             if (SetProperty(ref field, value))
@@ -369,7 +369,7 @@ public sealed partial class Property : PropertyBase
 
     #region == 電気 ==
 
-    public enum EnumElectricKind
+    public enum EnumElectricType
     {
         Unspecified, AllElectric,
     }
@@ -386,7 +386,7 @@ public sealed partial class Property : PropertyBase
         }
     } = false;
 
-    public EnumElectricKind PropertyElectricKind
+    public EnumElectricType PropertyElectricKind
     {
         get;
         set
@@ -396,7 +396,7 @@ public sealed partial class Property : PropertyBase
                 IsModified = true;
             }
         }
-    } = EnumElectricKind.Unspecified;
+    } = EnumElectricType.Unspecified;
 
     public string ElectricDetail
     {
@@ -579,18 +579,18 @@ public sealed partial class Property : PropertyBase
     {
         CommercialKind = Enum.TryParse(
             value,
-            out EnumKinds result)
-            ? new PropertyKind(result)
-            : new PropertyKind(EnumKinds.Unspecified);
+            out PropertyType result)
+            ? new PropertyTypeLabel(result)
+            : new PropertyTypeLabel(PropertyType.Unspecified);
     }
 
     public void SetStructureTypeFromString(string value)
     {
         BuildingStructure = Enum.TryParse(
             value,
-            out EnumStructures result)
-            ? new PropertyStructure(result)
-            : new PropertyStructure(EnumStructures.Unspecified);
+            out StructureType result)
+            ? new PropertyStructureTypeLabel(result)
+            : new PropertyStructureTypeLabel(StructureType.Unspecified);
     }
 
     public void SetBuildYearMonthFromString(string value)

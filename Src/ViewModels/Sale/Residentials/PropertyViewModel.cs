@@ -31,7 +31,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient
                 title = $"{title}：{Name}";
             }
 
-            title = _building.Status == EnumEntityStatus.New
+            title = _building.Status == EntityStatus.New
                 ? $"{title}：新規"
                 : $"{title}：編集";
 
@@ -83,19 +83,19 @@ public sealed partial class PropertyViewModel : ObservableRecipient
 
     public ObservableCollection<Models.Sale.Residentials.PropertyKind> Kinds { get; } =
     [
-        new(Models.Sale.Residentials.EnumResidentialKinds.Apartment),
-        new(Models.Sale.Residentials.EnumResidentialKinds.Mansion),
-        new(Models.Sale.Residentials.EnumResidentialKinds.House),
-        new(Models.Sale.Residentials.EnumResidentialKinds.TerraceHouse),
-        new(Models.Sale.Residentials.EnumResidentialKinds.TownHouse),
-        new(Models.Sale.Residentials.EnumResidentialKinds.ShareHouse),
-        new(Models.Sale.Residentials.EnumResidentialKinds.Dormitory)
+        new(Models.Sale.Residentials.PropertyType.Apartment),
+        new(Models.Sale.Residentials.PropertyType.Mansion),
+        new(Models.Sale.Residentials.PropertyType.House),
+        new(Models.Sale.Residentials.PropertyType.TerraceHouse),
+        new(Models.Sale.Residentials.PropertyType.TownHouse),
+        new(Models.Sale.Residentials.PropertyType.ShareHouse),
+        new(Models.Sale.Residentials.PropertyType.Dormitory)
     ];
 
     public Models.Sale.Residentials.PropertyKind SelectedKind
     {
         get => field ??
-            new(Models.Sale.Residentials.EnumResidentialKinds.Unspecified);
+            new(Models.Sale.Residentials.PropertyType.Unspecified);
         set
         {
             if (SetProperty(ref field, value))
@@ -107,24 +107,24 @@ public sealed partial class PropertyViewModel : ObservableRecipient
 
     public ObservableCollection<Models.Sale.Residentials.PropertyStructure> Structures { get; } =
     [
-        new(Models.Sale.Residentials.EnumStructures.Wood),
-        new(Models.Sale.Residentials.EnumStructures.Block),
-        new(Models.Sale.Residentials.EnumStructures.LightSteel),
-        new(Models.Sale.Residentials.EnumStructures.Steel),
-        new(Models.Sale.Residentials.EnumStructures.RC),
-        new(Models.Sale.Residentials.EnumStructures.SRC),
-        new(Models.Sale.Residentials.EnumStructures.ALC),
-        new(Models.Sale.Residentials.EnumStructures.PC),
-        new(Models.Sale.Residentials.EnumStructures.HPC),
-        new(Models.Sale.Residentials.EnumStructures.RB),
-        new(Models.Sale.Residentials.EnumStructures.CFT),
-        new(Models.Sale.Residentials.EnumStructures.Other)
+        new(Models.Sale.Residentials.StructureType.Wood),
+        new(Models.Sale.Residentials.StructureType.Block),
+        new(Models.Sale.Residentials.StructureType.LightSteel),
+        new(Models.Sale.Residentials.StructureType.Steel),
+        new(Models.Sale.Residentials.StructureType.RC),
+        new(Models.Sale.Residentials.StructureType.SRC),
+        new(Models.Sale.Residentials.StructureType.ALC),
+        new(Models.Sale.Residentials.StructureType.PC),
+        new(Models.Sale.Residentials.StructureType.HPC),
+        new(Models.Sale.Residentials.StructureType.RB),
+        new(Models.Sale.Residentials.StructureType.CFT),
+        new(Models.Sale.Residentials.StructureType.Other)
     ];
 
     public Models.Sale.Residentials.PropertyStructure SelectedStructure
     {
         get => field ??
-            new(Models.Sale.Residentials.EnumStructures.Unspecified);
+            new(Models.Sale.Residentials.StructureType.Unspecified);
         set
         {
             if (SetProperty(ref field, value))
@@ -262,12 +262,12 @@ public sealed partial class PropertyViewModel : ObservableRecipient
         SelectedKind =
             Kinds.FirstOrDefault(
                 item => item.Key == _building.BuildingKind.Key)
-            ?? new(Models.Sale.Residentials.EnumResidentialKinds.Unspecified);
+            ?? new(Models.Sale.Residentials.PropertyType.Unspecified);
 
         SelectedStructure =
             Structures.FirstOrDefault(
                 item => item.Key == _building.BuildingStructure.Key)
-            ?? new(Models.Sale.Residentials.EnumStructures.Unspecified);
+            ?? new(Models.Sale.Residentials.StructureType.Unspecified);
 
         IsUnitOwnership = _building.IsUnitOwnership;
 
@@ -414,7 +414,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient
 
         IsDirty = false;
         _building.IsModified = false;
-        _building.Status = EnumEntityStatus.Saved;
+        _building.Status = EntityStatus.Saved;
         IsInfoBarErrorOpen = false;
         WindowTitle = string.Empty;
     }

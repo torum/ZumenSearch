@@ -4,16 +4,16 @@ using System.Text;
 
 namespace ZumenSearch.Models.Rent.Residentials;
 
-public sealed class PropertyPictureType(EnumPropertyPictureType key)
+public sealed class PropertyPictureTypeLabel(PropertyPictureType key)
 {
-    private Dictionary<EnumPropertyPictureType, string> PropertyPictureTypeDictionary
+    private Dictionary<PropertyPictureType, string> PropertyPictureTypeDictionary
     {
         get;
-    } = new Dictionary<EnumPropertyPictureType, string>()
+    } = new Dictionary<PropertyPictureType, string>()
     {
-                {EnumPropertyPictureType.Unspecified, "未指定"},
+                {PropertyPictureType.Unspecified, "未指定"},
                 //{EnumResidentialPictureType.Madori, "間取り図"},
-                {EnumPropertyPictureType.Gaikan, "外観"},
+                {PropertyPictureType.Gaikan, "外観"},
                 //{EnumResidentialPictureType.Situnai, "室内"},
                 //{EnumResidentialPictureType.LivingDining, "リビング・ダイニング"},
                 //{EnumResidentialPictureType.Bedroom, "寝室"},
@@ -25,12 +25,12 @@ public sealed class PropertyPictureType(EnumPropertyPictureType key)
                 //{EnumResidentialPictureType.Appliance, "設備"},
                 //{EnumResidentialPictureType.Balcony, "バルコニー"},
                 //{EnumResidentialPictureType.FrontDoor, "玄関"},
-                {EnumPropertyPictureType.Entrance, "エントランス"},
-                {EnumPropertyPictureType.Neighborhood, "周辺"},
-                {EnumPropertyPictureType.Other, "その他"},
+                {PropertyPictureType.Entrance, "エントランス"},
+                {PropertyPictureType.Neighborhood, "周辺"},
+                {PropertyPictureType.Other, "その他"},
             };
 
     public string Label => PropertyPictureTypeDictionary[Key];
 
-    public EnumPropertyPictureType Key => key;
+    public PropertyPictureType Key => key;
 };

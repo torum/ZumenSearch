@@ -5,7 +5,9 @@ namespace ZumenSearch.Models.Sale.Residentials;
 
 #pragma warning disable IDE0290 // Use primary constructor
 
-public enum EnumResidentialKinds
+// Remove Enux suffix it is considered bad practice.
+
+public enum PropertyType
 {
     Unspecified,
     Apartment,
@@ -18,7 +20,7 @@ public enum EnumResidentialKinds
 }
 
 
-public enum EnumStructures
+public enum StructureType
 {
     Unspecified,
     Wood,

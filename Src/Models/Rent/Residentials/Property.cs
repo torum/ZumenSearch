@@ -14,7 +14,7 @@ namespace ZumenSearch.Models.Rent.Residentials;
 
 public sealed partial class Property : PropertyBase
 {
-    public Property(string id, EnumEntityStatus status) : base(id, status, EnumPropertyKind.RentResidential)
+    public Property(string id, EntityStatus status) : base(id, status, Enums.PropertyKind.RentResidential)
     {
         //
     }
@@ -24,9 +24,9 @@ public sealed partial class Property : PropertyBase
     #region == 基本 ==
 
     // 物件種別
-    public PropertyKind BuildingKind
+    public PropertyTypeLabel BuildingKind
     {
-        get => field ?? new(EnumKinds.Unspecified);
+        get => field ?? new(PropertyType.Unspecified);
         set
         {
             if (SetProperty(ref field, value))
@@ -50,9 +50,9 @@ public sealed partial class Property : PropertyBase
     }
 
     // 建物構造
-    public PropertyStructure BuildingStructure
+    public PropertyStructureTypeLabel BuildingStructure
     {
-        get => field ?? new(EnumStructures.Unspecified);
+        get => field ?? new(StructureType.Unspecified);
         set
         {
             if (SetProperty(ref field, value))
@@ -481,7 +481,7 @@ public sealed partial class Property : PropertyBase
 
     #region == 電気 ==
 
-    public enum EnumElectricKind
+    public enum EnumElectricType
     {
         Unspecified, AllElectric,
     }
@@ -498,7 +498,7 @@ public sealed partial class Property : PropertyBase
         }
     } = false;
 
-    public EnumElectricKind PropertyElectricKind
+    public EnumElectricType PropertyElectricKind
     {
         get;
         set
@@ -508,7 +508,7 @@ public sealed partial class Property : PropertyBase
                 IsModified = true;
             }
         }
-    } = EnumElectricKind.Unspecified;
+    } = EnumElectricType.Unspecified;
 
     public string ElectricDetail
     {
@@ -850,13 +850,13 @@ public sealed partial class Property : PropertyBase
         if (string.IsNullOrEmpty(Str))
         {
             // TODO:
-            BuildingKind = new PropertyKind(EnumKinds.Unspecified);
+            BuildingKind = new PropertyTypeLabel(PropertyType.Unspecified);
             return;
         }
 
-        if (Enum.TryParse<EnumKinds>(Str, out var result))
+        if (Enum.TryParse<PropertyType>(Str, out var result))
         {
-            BuildingKind = new PropertyKind(result);
+            BuildingKind = new PropertyTypeLabel(result);
         }
     }
 
@@ -864,13 +864,13 @@ public sealed partial class Property : PropertyBase
     {
         if (string.IsNullOrEmpty(Str))
         {
-            BuildingStructure = new PropertyStructure(EnumStructures.Unspecified);
+            BuildingStructure = new PropertyStructureTypeLabel(StructureType.Unspecified);
             return;
         }
 
-        if (Enum.TryParse<EnumStructures>(Str, out var result))
+        if (Enum.TryParse<StructureType>(Str, out var result))
         {
-            BuildingStructure = new PropertyStructure(result);
+            BuildingStructure = new PropertyStructureTypeLabel(result);
         }
     }
 

@@ -103,7 +103,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                 title = $"{title}：{Name}";
             }
 
-            title = _building.Status == EnumEntityStatus.New
+            title = _building.Status == EntityStatus.New
                 ? $"{title}：新規"
                 : $"{title}：編集";
 
@@ -159,23 +159,23 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         }
     }
 
-    public ObservableCollection<Models.Rent.Commercials.PropertyKind> Kinds { get; } =
+    public ObservableCollection<Models.Rent.Commercials.PropertyTypeLabel> Kinds { get; } =
     [
-        new(Models.Rent.Commercials.EnumKinds.Office),
-        new(Models.Rent.Commercials.EnumKinds.Retail),
-        new(Models.Rent.Commercials.EnumKinds.Warehouse),
-        new(Models.Rent.Commercials.EnumKinds.Factory),
-        new(Models.Rent.Commercials.EnumKinds.Clinic),
-        new(Models.Rent.Commercials.EnumKinds.Restaurant),
-        new(Models.Rent.Commercials.EnumKinds.Hotel),
-        new(Models.Rent.Commercials.EnumKinds.Land),
-        new(Models.Rent.Commercials.EnumKinds.Other)
+        new(Models.Rent.Commercials.PropertyType.Office),
+        new(Models.Rent.Commercials.PropertyType.Retail),
+        new(Models.Rent.Commercials.PropertyType.Warehouse),
+        new(Models.Rent.Commercials.PropertyType.Factory),
+        new(Models.Rent.Commercials.PropertyType.Clinic),
+        new(Models.Rent.Commercials.PropertyType.Restaurant),
+        new(Models.Rent.Commercials.PropertyType.Hotel),
+        new(Models.Rent.Commercials.PropertyType.Land),
+        new(Models.Rent.Commercials.PropertyType.Other)
     ];
 
-    public Models.Rent.Commercials.PropertyKind SelectedKind
+    public Models.Rent.Commercials.PropertyTypeLabel SelectedKind
     {
         get => field ??
-            new(Models.Rent.Commercials.EnumKinds.Unspecified);
+            new(Models.Rent.Commercials.PropertyType.Unspecified);
         set
         {
             if (value is null || field?.Key == value.Key)
@@ -198,24 +198,24 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         }
     }
 
-    public ObservableCollection<Models.Rent.Commercials.PropertyStructure> Structures { get; } =
+    public ObservableCollection<Models.Rent.Commercials.PropertyStructureTypeLabel> Structures { get; } =
     [
-        new(Models.Rent.Commercials.EnumStructures.Wood),
-        new(Models.Rent.Commercials.EnumStructures.Block),
-        new(Models.Rent.Commercials.EnumStructures.LightSteel),
-        new(Models.Rent.Commercials.EnumStructures.Steel),
-        new(Models.Rent.Commercials.EnumStructures.RC),
-        new(Models.Rent.Commercials.EnumStructures.SRC),
-        new(Models.Rent.Commercials.EnumStructures.ALC),
-        new(Models.Rent.Commercials.EnumStructures.PC),
-        new(Models.Rent.Commercials.EnumStructures.HPC),
-        new(Models.Rent.Commercials.EnumStructures.Other)
+        new(Models.Rent.Commercials.StructureType.Wood),
+        new(Models.Rent.Commercials.StructureType.Block),
+        new(Models.Rent.Commercials.StructureType.LightSteel),
+        new(Models.Rent.Commercials.StructureType.Steel),
+        new(Models.Rent.Commercials.StructureType.RC),
+        new(Models.Rent.Commercials.StructureType.SRC),
+        new(Models.Rent.Commercials.StructureType.ALC),
+        new(Models.Rent.Commercials.StructureType.PC),
+        new(Models.Rent.Commercials.StructureType.HPC),
+        new(Models.Rent.Commercials.StructureType.Other)
     ];
 
-    public Models.Rent.Commercials.PropertyStructure SelectedStructure
+    public Models.Rent.Commercials.PropertyStructureTypeLabel SelectedStructure
     {
         get => field ??
-            new(Models.Rent.Commercials.EnumStructures.Unspecified);
+            new(Models.Rent.Commercials.StructureType.Unspecified);
         set
         {
             if (value is null || field?.Key == value.Key)
@@ -692,8 +692,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     public ObservableCollection<Models.Rent.Commercials.PropertyElectricKind> ElectricKinds =
     [
-        new Models.Rent.Commercials.PropertyElectricKind(Models.Rent.Commercials.Property.EnumElectricKind.AllElectric, "オール電化"),
-        new Models.Rent.Commercials.PropertyElectricKind(Models.Rent.Commercials.Property.EnumElectricKind.Unspecified, "未指定")
+        new Models.Rent.Commercials.PropertyElectricKind(Models.Rent.Commercials.Property.EnumElectricType.AllElectric, "オール電化"),
+        new Models.Rent.Commercials.PropertyElectricKind(Models.Rent.Commercials.Property.EnumElectricType.Unspecified, "未指定")
     ];
 
     public Models.Rent.Commercials.PropertyElectricKind SelectedElectricKind
@@ -706,7 +706,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                 IsDirty = true;
             }
         }
-    } = new Models.Rent.Commercials.PropertyElectricKind(Models.Rent.Commercials.Property.EnumElectricKind.Unspecified, "未指定");
+    } = new Models.Rent.Commercials.PropertyElectricKind(Models.Rent.Commercials.Property.EnumElectricType.Unspecified, "未指定");
 
     public string ElectricDetail
     {
@@ -1017,7 +1017,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             this.Units.Add(unit);
         }
 
-        if (unit.Status == EnumEntityStatus.New)
+        if (unit.Status == EntityStatus.New)
         {
             //Debug.WriteLine("(unit.ListingStatus == EnumListingStatus.New) @PropertyViewModel");
             IsDirty = true;
@@ -1167,7 +1167,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             _unsavedBuildingPdfFileList.Clear();
         }
 
-        if (_building.Status == EnumEntityStatus.New)
+        if (_building.Status == EntityStatus.New)
         {
             if (Directory.Exists(_propertyDataDirectoryPath))
             {
@@ -1190,13 +1190,13 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             Kinds.FirstOrDefault(
                 item => item.Key == _building.CommercialKind.Key)
             ?? new(
-                Models.Rent.Commercials.EnumKinds.Unspecified);
+                Models.Rent.Commercials.PropertyType.Unspecified);
 
         SelectedStructure =
             Structures.FirstOrDefault(
                 item => item.Key == _building.BuildingStructure.Key)
             ?? new(
-                Models.Rent.Commercials.EnumStructures.Unspecified);
+                Models.Rent.Commercials.StructureType.Unspecified);
 
         IsUnitOwnership = _building.IsUnitOwnership;
 
@@ -1642,7 +1642,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             IsDirty = false;
 
             _building.IsModified = false;
-            _building.Status = EnumEntityStatus.Saved;
+            _building.Status = EntityStatus.Saved;
 
             // Update title with dummy value.
             WindowTitle = string.Empty;
@@ -1675,22 +1675,22 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             _unsavedBuildingPdfFileList.Clear();
 
             // Just in case.
-            _building.Status = EnumEntityStatus.Saved;
+            _building.Status = EntityStatus.Saved;
             _building.IsModified = false;
 
             foreach (var room in Units)
             {
                 room.PropertyName = Name;
-                room.PropertyStatus = EnumEntityStatus.Saved;
-                room.Status = EnumEntityStatus.Saved;
+                room.PropertyStatus = EntityStatus.Saved;
+                room.Status = EntityStatus.Saved;
             }
 
             // Just in case.
             foreach (var room in _building.Units)
             {
                 room.PropertyName = Name;
-                room.PropertyStatus = EnumEntityStatus.Saved;
-                room.Status = EnumEntityStatus.Saved;
+                room.PropertyStatus = EntityStatus.Saved;
+                room.Status = EntityStatus.Saved;
             }
 
             WeakReferenceMessenger.Default.Send(new PropertyUpdatedMessage(_building));
@@ -1710,7 +1710,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     {
         var unit = new Models.Rent.Commercials.Listing.Listing(
             Guid.CreateVersion7().ToString("N"),
-            EnumEntityStatus.New,
+            EntityStatus.New,
             _building.Id,
             _building.Status,
             IsUnitOwnership,
@@ -2017,7 +2017,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                 ParentViewModel = this
             });
             */
-            var picture = new Models.Rent.Commercials.PropertyPicture(id, filename, EnumEntityStatus.New)
+            var picture = new Models.Rent.Commercials.PropertyPicture(id, filename, EntityStatus.New)
             {
                 BasePath = _propertyDataDirectoryPath,
                 ParentViewModel = this
@@ -2132,7 +2132,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                 // Keep track of unsaved files to delete them when discarding.
                 _unsavedBuildingPdfFileList.Add(pdfDestFilePath);
 
-                var pdf = new Models.Rent.Commercials.PropertyPdf(newId, newFilename, newThumbnailFilename, EnumEntityStatus.New)
+                var pdf = new Models.Rent.Commercials.PropertyPdf(newId, newFilename, newThumbnailFilename, EntityStatus.New)
                 {
                     BasePath = _propertyDataDirectoryPath,//System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id),
                     ParentViewModel = this

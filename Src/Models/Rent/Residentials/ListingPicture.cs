@@ -9,7 +9,7 @@ public sealed partial class ListingPicture : PictureBase
     public ViewModels.Rent.Residentials.ListingViewModel? ParentViewModel { get; set; }
 
     // Do not use SetProperty. PropertyChanged is being subscribed.
-    public ListingPictureType PictureType
+    public ListingPictureTypeLabel PictureType
     {
         get;
         set
@@ -32,27 +32,27 @@ public sealed partial class ListingPicture : PictureBase
 
             OnPropertyChanged();
         }
-    } = new(EnumListingPictureType.Unspecified);
+    } = new(ListingPictureType.Unspecified);
 
-    public readonly ObservableCollection<ListingPictureType> RoomPictureTypes =
+    public readonly ObservableCollection<ListingPictureTypeLabel> RoomPictureTypes =
     [
-        new ListingPictureType(Models.Rent.Residentials.EnumListingPictureType.Unspecified),
-        new ListingPictureType(Models.Rent.Residentials.EnumListingPictureType.Madori),
+        new ListingPictureTypeLabel(Models.Rent.Residentials.ListingPictureType.Unspecified),
+        new ListingPictureTypeLabel(Models.Rent.Residentials.ListingPictureType.Madori),
         //new UnitPictureType(Models.Rent.Residentials.EnumUnitPictureType.Gaikan),
-        new ListingPictureType(Models.Rent.Residentials.EnumListingPictureType.Situnai),
-        new ListingPictureType(Models.Rent.Residentials.EnumListingPictureType.LivingDining),
-        new ListingPictureType(Models.Rent.Residentials.EnumListingPictureType.Bedroom),
-        new ListingPictureType(Models.Rent.Residentials.EnumListingPictureType.Kitchen),
-        new ListingPictureType(Models.Rent.Residentials.EnumListingPictureType.Bathroom),
-        new ListingPictureType(Models.Rent.Residentials.EnumListingPictureType.Restroom),
-        new ListingPictureType(Models.Rent.Residentials.EnumListingPictureType.Washroom),
-        new ListingPictureType(Models.Rent.Residentials.EnumListingPictureType.StorageSpace),
-        new ListingPictureType(Models.Rent.Residentials.EnumListingPictureType.Appliance),
-        new ListingPictureType(Models.Rent.Residentials.EnumListingPictureType.FrontDoor),
-        new ListingPictureType(Models.Rent.Residentials.EnumListingPictureType.Balcony),
+        new ListingPictureTypeLabel(Models.Rent.Residentials.ListingPictureType.Situnai),
+        new ListingPictureTypeLabel(Models.Rent.Residentials.ListingPictureType.LivingDining),
+        new ListingPictureTypeLabel(Models.Rent.Residentials.ListingPictureType.Bedroom),
+        new ListingPictureTypeLabel(Models.Rent.Residentials.ListingPictureType.Kitchen),
+        new ListingPictureTypeLabel(Models.Rent.Residentials.ListingPictureType.Bathroom),
+        new ListingPictureTypeLabel(Models.Rent.Residentials.ListingPictureType.Restroom),
+        new ListingPictureTypeLabel(Models.Rent.Residentials.ListingPictureType.Washroom),
+        new ListingPictureTypeLabel(Models.Rent.Residentials.ListingPictureType.StorageSpace),
+        new ListingPictureTypeLabel(Models.Rent.Residentials.ListingPictureType.Appliance),
+        new ListingPictureTypeLabel(Models.Rent.Residentials.ListingPictureType.FrontDoor),
+        new ListingPictureTypeLabel(Models.Rent.Residentials.ListingPictureType.Balcony),
         //new UnitPictureType(Models.Rent.Residentials.EnumUnitPictureType.Entrance),
         //new UnitPictureType(Models.Rent.Residentials.EnumUnitPictureType.Neighborhood),
-        new ListingPictureType(Models.Rent.Residentials.EnumListingPictureType.Other)
+        new ListingPictureTypeLabel(Models.Rent.Residentials.ListingPictureType.Other)
     ];
 
     // Do not use SetProperty.
@@ -98,28 +98,28 @@ public sealed partial class ListingPicture : PictureBase
         }
     }
 
-    public ListingPicture(string id, string imageLocation, EnumEntityStatus status) : base(id, status)
+    public ListingPicture(string id, string imageLocation, EntityStatus status) : base(id, status)
     {
         ImageFilename = imageLocation;
 
         IsModified = false;
     }
 
-    public EnumListingPictureType? SetLabelFromString(string titleStr)
+    public ListingPictureType? SetLabelFromString(string titleStr)
     {
-        if (Enum.TryParse<EnumListingPictureType>(titleStr, out var result))
+        if (Enum.TryParse<ListingPictureType>(titleStr, out var result))
         {
             //PictureType = new(result); // Not good for assigning to combobox. So select from BuildingPictureTypes.
-            PictureType = RoomPictureTypes.FirstOrDefault<ListingPictureType>(x => x.Key == result) ?? new(EnumListingPictureType.Unspecified);
+            PictureType = RoomPictureTypes.FirstOrDefault<ListingPictureTypeLabel>(x => x.Key == result) ?? new(ListingPictureType.Unspecified);
 
             //Debug.WriteLine($"SetLabelFromString: {titleStr} -> {PictureType.Label}");
             return result;
         }
         else
         {
-            PictureType = new(EnumListingPictureType.Unspecified);
+            PictureType = new(ListingPictureType.Unspecified);
 
-            return EnumListingPictureType.Unspecified;
+            return ListingPictureType.Unspecified;
         }
     }
 };

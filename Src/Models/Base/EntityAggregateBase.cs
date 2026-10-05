@@ -16,7 +16,7 @@ namespace ZumenSearch.Models.Base;
 // </remarks>
 public abstract class EntityAggregateBase : EntityBase
 {
-    protected EntityAggregateBase(string id, EnumEntityStatus staus) : base(id, staus)
+    protected EntityAggregateBase(string id, EntityStatus staus) : base(id, staus)
     {
         //
     }

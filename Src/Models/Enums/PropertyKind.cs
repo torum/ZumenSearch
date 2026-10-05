@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿namespace ZumenSearch.Models.Enums;
 
-namespace ZumenSearch.Models.Enums;
-
-public enum EnumPropertyKind
+public enum PropertyKind
 {
     RentResidential,
     RentCommercial,

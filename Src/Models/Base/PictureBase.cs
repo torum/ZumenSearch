@@ -17,7 +17,7 @@ namespace ZumenSearch.Models.Base;
 // </remarks>
 public abstract class PictureBase : EntityBase
 {
-    protected PictureBase(string id, EnumEntityStatus staus) : base(id, staus)
+    protected PictureBase(string id, EntityStatus staus) : base(id, staus)
     {
         //
     }

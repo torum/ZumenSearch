@@ -2,12 +2,15 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace ZumenSearch.Models.Sale.Residentials;
+namespace ZumenSearch.Models.Rent.Commercials;
 
-public sealed class PropertyStructure(StructureType key)
+public sealed class PropertyStructureTypeLabel(StructureType key)
 {
-    private static readonly IReadOnlyDictionary<StructureType, string> Labels =
-        new Dictionary<StructureType, string>
+    private static readonly IReadOnlyDictionary<
+        StructureType,
+        string> Labels = new Dictionary<
+            StructureType,
+            string>
         {
             [StructureType.Unspecified] = "未指定",
             [StructureType.Wood] = "木造",
@@ -19,8 +22,6 @@ public sealed class PropertyStructure(StructureType key)
             [StructureType.ALC] = "軽量気泡コンクリート(ALC)造",
             [StructureType.PC] = "プレキャストコンクリート(PC)造",
             [StructureType.HPC] = "鉄骨プレキャストコンクリート(HPC)造",
-            [StructureType.RB] = "鉄筋ブロック造",
-            [StructureType.CFT] = "コンクリート充填鋼管(CFT)造",
             [StructureType.Other] = "その他"
         };
 

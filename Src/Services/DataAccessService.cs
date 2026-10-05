@@ -882,11 +882,11 @@ public sealed class DataAccessService : IDataAccessService
                     continue;
                 }
 
-                var enumKind = EnumPropertyKind.Unknown;
+                var enumKind = PropertyKind.Unknown;
                 var kind = reader.GetString(reader.GetOrdinal("property_kind")) ?? string.Empty;
                 if (!string.IsNullOrEmpty(kind))
                 {
-                    if (Enum.TryParse<Models.Enums.EnumPropertyKind>(kind, out var parsedKind))
+                    if (Enum.TryParse<Models.Enums.PropertyKind>(kind, out var parsedKind))
                     {
                         enumKind = parsedKind;
                     }
@@ -963,11 +963,11 @@ public sealed class DataAccessService : IDataAccessService
                     continue;
                 }
 
-                var enumKind = EnumPropertyKind.Unknown;
+                var enumKind = PropertyKind.Unknown;
                 var kind = reader.GetString(reader.GetOrdinal("property_kind")) ?? string.Empty;
                 if (!string.IsNullOrEmpty(kind))
                 {
-                    if (Enum.TryParse<Models.Enums.EnumPropertyKind>(kind, out var parsedKind))
+                    if (Enum.TryParse<Models.Enums.PropertyKind>(kind, out var parsedKind))
                     {
                         enumKind = parsedKind;
                     }
@@ -1129,7 +1129,7 @@ public sealed class DataAccessService : IDataAccessService
                         if (r > 0)
                         {
                             //pic.IsNew = false;
-                            pic.Status = Models.Enums.EnumEntityStatus.Saved;
+                            pic.Status = Models.Enums.EntityStatus.Saved;
                             pic.IsModified = false;
                         }
                     }
@@ -1196,7 +1196,7 @@ public sealed class DataAccessService : IDataAccessService
                         if (r > 0)
                         {
                             //pic.IsNew = false;
-                            pic.Status = Models.Enums.EnumEntityStatus.Saved;
+                            pic.Status = Models.Enums.EntityStatus.Saved;
                             pic.IsModified = false;
                         }
                     }
@@ -1352,8 +1352,8 @@ public sealed class DataAccessService : IDataAccessService
                         var r = cmd.ExecuteNonQuery();
                         if (r > 0)
                         {
-                            unit.PropertyStatus = EnumEntityStatus.Saved;
-                            unit.Status = EnumEntityStatus.Saved;
+                            unit.PropertyStatus = EntityStatus.Saved;
+                            unit.Status = EntityStatus.Saved;
                             //unit.IsNew = false;
                             unit.IsModified = false;
                         }
@@ -1389,7 +1389,7 @@ public sealed class DataAccessService : IDataAccessService
                                 if (result > 0)
                                 {
                                     //pic.IsNew = false;
-                                    pic.Status = Models.Enums.EnumEntityStatus.Saved;
+                                    pic.Status = Models.Enums.EntityStatus.Saved;
                                     pic.IsModified = false;
                                 }
                             }
@@ -1448,7 +1448,7 @@ public sealed class DataAccessService : IDataAccessService
                                 if (result > 0)
                                 {
                                     //pdf.IsNew = false;
-                                    pdf.Status = Models.Enums.EnumEntityStatus.Saved;
+                                    pdf.Status = Models.Enums.EntityStatus.Saved;
                                     pdf.IsModified = false;
                                 }
                             }
@@ -1569,7 +1569,7 @@ public sealed class DataAccessService : IDataAccessService
         //Debug.WriteLine(string.Format("{0} Entries Inserted to DB", res.AffectedCount.ToString()));
 
         building.IsModified = false;
-        building.Status = EnumEntityStatus.Saved;
+        building.Status = EntityStatus.Saved;
 
         return res;
     }
@@ -1578,7 +1578,7 @@ public sealed class DataAccessService : IDataAccessService
     {
         var res = new Models.Rent.Residentials.PropertyResultWrapper();
 
-        var property = new Models.Rent.Residentials.Property(id, EnumEntityStatus.Saved);
+        var property = new Models.Rent.Residentials.Property(id, EntityStatus.Saved);
 
         if (string.IsNullOrEmpty(id))
         {
@@ -1697,7 +1697,7 @@ public sealed class DataAccessService : IDataAccessService
                     var picpath = Convert.ToString(reader["filename"]) ?? string.Empty;
                     if (!string.IsNullOrEmpty(picid) && !string.IsNullOrEmpty(picpath))
                     {
-                        var rlpic = new Models.Rent.Residentials.PropertyPicture(picid, picpath, EnumEntityStatus.Saved)
+                        var rlpic = new Models.Rent.Residentials.PropertyPicture(picid, picpath, EntityStatus.Saved)
                         {
                             Description = Convert.ToString(reader["description"]) ?? string.Empty,
                             IsModified = false
@@ -1728,7 +1728,7 @@ public sealed class DataAccessService : IDataAccessService
                     var thumbpath = Convert.ToString(reader["thumbnail_filename"]) ?? string.Empty;
                     if (!string.IsNullOrEmpty(pdfid) && !string.IsNullOrEmpty(pdfpath) && !string.IsNullOrEmpty(thumbpath))
                     {
-                        var rlpdf = new Models.Rent.Residentials.PropertyPdf(pdfid, pdfpath, thumbpath, EnumEntityStatus.Saved)
+                        var rlpdf = new Models.Rent.Residentials.PropertyPdf(pdfid, pdfpath, thumbpath, EntityStatus.Saved)
                         {
                             Description = Convert.ToString(reader["description"]) ?? string.Empty,
                             IsModified = false
@@ -1864,7 +1864,7 @@ public sealed class DataAccessService : IDataAccessService
             }
 
             // Reset property Isdirty flag.
-            property.Status = EnumEntityStatus.Saved;
+            property.Status = EntityStatus.Saved;
             property.IsModified = false;
 
             res.Building = property;
@@ -1899,7 +1899,7 @@ public sealed class DataAccessService : IDataAccessService
 
         var isUnitOwnership = Convert.ToInt32(reader["is_property_unit_ownership"]) != 0;
 
-        var room = new Models.Rent.Residentials.Listing(listingId, EnumEntityStatus.Saved, propertyId, EnumEntityStatus.Saved, isUnitOwnership, propertyName)
+        var room = new Models.Rent.Residentials.Listing(listingId, EntityStatus.Saved, propertyId, EntityStatus.Saved, isUnitOwnership, propertyName)
         {
             
             Chinryou = reader.GetInt32(reader.GetOrdinal("chinryou")),
@@ -1927,7 +1927,7 @@ public sealed class DataAccessService : IDataAccessService
                 var picpath = Convert.ToString(reader["filename"]) ?? string.Empty;
                 if (!string.IsNullOrEmpty(picid) && !string.IsNullOrEmpty(picpath))
                 {
-                    var rlpic = new Models.Rent.Residentials.ListingPicture(picid, picpath, EnumEntityStatus.Saved)
+                    var rlpic = new Models.Rent.Residentials.ListingPicture(picid, picpath, EntityStatus.Saved)
                     {
                         Description = Convert.ToString(reader["description"]) ?? string.Empty,
                         IsModified = false
@@ -1958,7 +1958,7 @@ public sealed class DataAccessService : IDataAccessService
                 var thumbpath = Convert.ToString(reader["thumbnail_filename"]) ?? string.Empty;
                 if (!string.IsNullOrEmpty(pdfid) && !string.IsNullOrEmpty(pdfpath) && !string.IsNullOrEmpty(thumbpath))
                 {
-                    var rlpdf = new Models.Rent.Residentials.ListingPdf(pdfid, pdfpath, thumbpath, EnumEntityStatus.Saved)
+                    var rlpdf = new Models.Rent.Residentials.ListingPdf(pdfid, pdfpath, thumbpath, EntityStatus.Saved)
                     {
                         Description = Convert.ToString(reader["description"]) ?? string.Empty,
                         IsModified = false
@@ -2015,7 +2015,7 @@ public sealed class DataAccessService : IDataAccessService
 
                         // TODO: IF natural
                         //var lessor = new Models.Rent.Lessors.Person(lessId, EnumEntityStatus.Saved);
-                        var lessor = new Models.Person.NaturalPerson(lessId, EnumEntityStatus.Saved)
+                        var lessor = new Models.Person.NaturalPerson(lessId, EntityStatus.Saved)
                         {
                             NameLast = Convert.ToString(reader2["name_last"]) ?? "",
                             NameFirst = Convert.ToString(reader2["name_first"]) ?? "",
@@ -2182,8 +2182,8 @@ public sealed class DataAccessService : IDataAccessService
                 {
                     //room.IsNew = false;
                     room.IsModified = false;
-                    room.PropertyStatus = EnumEntityStatus.Saved;
-                    room.Status = EnumEntityStatus.Saved;
+                    room.PropertyStatus = EntityStatus.Saved;
+                    room.Status = EntityStatus.Saved;
                 }
                 res.AffectedCount = result;
 
@@ -2231,7 +2231,7 @@ public sealed class DataAccessService : IDataAccessService
                             if (result > 0)
                             {
                                 //pic.IsNew = false;
-                                pic.Status = Models.Enums.EnumEntityStatus.Saved;
+                                pic.Status = Models.Enums.EntityStatus.Saved;
                                 pic.IsModified = false;
                             }
                         }
@@ -2299,7 +2299,7 @@ public sealed class DataAccessService : IDataAccessService
                             if (result > 0)
                             {
                                 //pdf.IsNew = false;
-                                pdf.Status = Models.Enums.EnumEntityStatus.Saved;
+                                pdf.Status = Models.Enums.EntityStatus.Saved;
                                 pdf.IsModified = false;
                             }
                         }
@@ -2470,7 +2470,7 @@ public sealed class DataAccessService : IDataAccessService
                     continue;
                 }
 
-                var unit = new Models.ListingSearchResultItem(rid, eid, EnumPropertyKind.RentResidential);
+                var unit = new Models.ListingSearchResultItem(rid, eid, PropertyKind.RentResidential);
 
                 var s = Convert.ToString(reader["roomName"]) ?? "";
                 unit.SetName(s);
@@ -2721,7 +2721,7 @@ public sealed class DataAccessService : IDataAccessService
             command.Parameters.AddWithValue("@name", building.Name);
             command.Parameters.AddWithValue(
                 "@propertyKind",
-                EnumPropertyKind.RentCommercial.ToString());
+                PropertyKind.RentCommercial.ToString());
             command.Parameters.AddWithValue(
                 "@thumbnailFilename",
                 building.ThumbnailFilename);
@@ -2853,7 +2853,7 @@ public sealed class DataAccessService : IDataAccessService
                 command.Parameters.AddWithValue("@propertyId", building.Id);
                 command.Parameters.AddWithValue(
                     "@propertyKind",
-                    EnumPropertyKind.RentCommercial.ToString());
+                    PropertyKind.RentCommercial.ToString());
                 command.Parameters.AddWithValue("@listingId", string.Empty);
 
                 command.ExecuteNonQuery();
@@ -2874,7 +2874,7 @@ public sealed class DataAccessService : IDataAccessService
                 command.Parameters.AddWithValue("@propertyId", building.Id);
                 command.Parameters.AddWithValue(
                     "@propertyKind",
-                    EnumPropertyKind.RentCommercial.ToString());
+                    PropertyKind.RentCommercial.ToString());
                 command.Parameters.AddWithValue("@listingId", string.Empty);
 
                 command.ExecuteNonQuery();
@@ -2900,7 +2900,7 @@ public sealed class DataAccessService : IDataAccessService
                 command.Parameters.AddWithValue("@propertyId", building.Id);
                 command.Parameters.AddWithValue(
                     "@propertyKind",
-                    EnumPropertyKind.RentCommercial.ToString());
+                    PropertyKind.RentCommercial.ToString());
                 command.Parameters.AddWithValue("@listingId", string.Empty);
 
                 command.ExecuteNonQuery();
@@ -2921,7 +2921,7 @@ public sealed class DataAccessService : IDataAccessService
                 command.Parameters.AddWithValue("@propertyId", building.Id);
                 command.Parameters.AddWithValue(
                     "@propertyKind",
-                    EnumPropertyKind.RentCommercial.ToString());
+                    PropertyKind.RentCommercial.ToString());
                 command.Parameters.AddWithValue("@listingId", string.Empty);
 
                 command.ExecuteNonQuery();
@@ -3049,18 +3049,18 @@ public sealed class DataAccessService : IDataAccessService
             foreach (var picture in building.Pictures)
             {
                 //picture.IsNew = false;
-                picture.Status = Models.Enums.EnumEntityStatus.Saved;
+                picture.Status = Models.Enums.EntityStatus.Saved;
                 picture.IsModified = false;
             }
 
             foreach (var pdf in building.Pdfs)
             {
                 //pdf.IsNew = false;
-                pdf.Status = Models.Enums.EnumEntityStatus.Saved;
+                pdf.Status = Models.Enums.EntityStatus.Saved;
                 pdf.IsModified = false;
             }
 
-            building.Status = EnumEntityStatus.Saved;
+            building.Status = EntityStatus.Saved;
             building.IsModified = false;
 
         }
@@ -3324,7 +3324,7 @@ public sealed class DataAccessService : IDataAccessService
             command.Parameters.AddWithValue("@propertyId", id);
             command.Parameters.AddWithValue(
                 "@propertyKind",
-                EnumPropertyKind.RentCommercial.ToString());
+                PropertyKind.RentCommercial.ToString());
 
             using var reader = command.ExecuteReader();
 
@@ -3336,7 +3336,7 @@ public sealed class DataAccessService : IDataAccessService
             var building =
                 new Models.Rent.Commercials.Property(
                     Convert.ToString(reader["property_id"])!,
-                    EnumEntityStatus.Saved)
+                    EntityStatus.Saved)
                 {
                     ThumbnailFilename =
                         Convert.ToString(reader["thumbnail_filename"])
@@ -3437,7 +3437,7 @@ public sealed class DataAccessService : IDataAccessService
             command.Parameters.AddWithValue("@propertyId", building.Id);
             command.Parameters.AddWithValue(
                 "@propertyKind",
-                EnumPropertyKind.RentCommercial.ToString());
+                PropertyKind.RentCommercial.ToString());
             command.Parameters.AddWithValue("@listingId", string.Empty);
 
             using var lessorReader = command.ExecuteReader();
@@ -3487,7 +3487,7 @@ public sealed class DataAccessService : IDataAccessService
             command.Parameters.AddWithValue("@propertyId", building.Id);
             command.Parameters.AddWithValue(
                 "@propertyKind",
-                EnumPropertyKind.RentCommercial.ToString());
+                PropertyKind.RentCommercial.ToString());
             command.Parameters.AddWithValue("@listingId", string.Empty);
 
             using var brokerReader = command.ExecuteReader();
@@ -3537,9 +3537,9 @@ public sealed class DataAccessService : IDataAccessService
 
                     var unit = new Models.Rent.Commercials.Listing.Listing(
                         listingId,
-                        EnumEntityStatus.Saved,
+                        EntityStatus.Saved,
                         building.Id,
-                        EnumEntityStatus.Saved,
+                        EntityStatus.Saved,
                         Convert.ToInt32(unitReader["is_property_unit_ownership"]) != 0,
                         building.Name)
                     {
@@ -3609,7 +3609,7 @@ public sealed class DataAccessService : IDataAccessService
                     continue;
                 }
 
-                var picture = new Models.Rent.Commercials.PropertyPicture(id, filename, EnumEntityStatus.Saved)
+                var picture = new Models.Rent.Commercials.PropertyPicture(id, filename, EntityStatus.Saved)
                 {
                     Description =
                         Convert.ToString(reader["description"]) ?? string.Empty,
@@ -3654,7 +3654,7 @@ public sealed class DataAccessService : IDataAccessService
                 var pdf = new Models.Rent.Commercials.PropertyPdf(
                     id,
                     filename,
-                    thumbnailFilename, EnumEntityStatus.Saved)
+                    thumbnailFilename, EntityStatus.Saved)
                 {
                     Description =
                         Convert.ToString(reader["description"]) ?? string.Empty,
@@ -3707,7 +3707,7 @@ public sealed class DataAccessService : IDataAccessService
             command.Parameters.AddWithValue("@propertyId", commercialId);
             command.Parameters.AddWithValue(
                 "@propertyKind",
-                EnumPropertyKind.RentCommercial.ToString());
+                PropertyKind.RentCommercial.ToString());
 
             result.AffectedCount = command.ExecuteNonQuery();
 
@@ -3833,7 +3833,7 @@ public sealed class DataAccessService : IDataAccessService
             command.Parameters.AddWithValue("@propertyId", commercialId);
             command.Parameters.AddWithValue(
                 "@propertyKind",
-                EnumPropertyKind.RentCommercial.ToString());
+                PropertyKind.RentCommercial.ToString());
             command.Parameters.AddWithValue(
                 "@updatedAt",
                 DateTimeOffset.UtcNow.ToString("s"));
@@ -3885,8 +3885,8 @@ public sealed class DataAccessService : IDataAccessService
 
             transaction.Commit();
 
-            room.Status = EnumEntityStatus.Saved;
-            room.PropertyStatus = EnumEntityStatus.Saved;
+            room.Status = EntityStatus.Saved;
+            room.PropertyStatus = EntityStatus.Saved;
             room.IsModified = false;
         }
         catch (Exception ex)
@@ -3933,7 +3933,7 @@ public sealed class DataAccessService : IDataAccessService
 
             command.Parameters.AddWithValue(
                 "@propertyKind",
-                EnumPropertyKind.RentCommercial.ToString());
+                PropertyKind.RentCommercial.ToString());
 
             using var reader = command.ExecuteReader();
 
@@ -3954,7 +3954,7 @@ public sealed class DataAccessService : IDataAccessService
                 var item = new Models.ListingSearchResultItem(
                     listingId,
                     propertyId,
-                    EnumPropertyKind.RentCommercial)
+                    PropertyKind.RentCommercial)
                 {
                     PropertyName =
                         Convert.ToString(reader["property_name"])
@@ -4044,7 +4044,7 @@ public sealed class DataAccessService : IDataAccessService
                 roomId);
             command.Parameters.AddWithValue(
                 "@propertyKind",
-                EnumPropertyKind.RentCommercial.ToString());
+                PropertyKind.RentCommercial.ToString());
 
             using var reader = command.ExecuteReader();
 
@@ -4067,9 +4067,9 @@ public sealed class DataAccessService : IDataAccessService
 
             var room = new Models.Rent.Commercials.Listing.Listing(
                 listingId,
-                EnumEntityStatus.Saved,
+                EntityStatus.Saved,
                 propertyId,
-                EnumEntityStatus.Saved,
+                EntityStatus.Saved,
                 Convert.ToInt32(
                     reader["is_property_unit_ownership"]) != 0,
                 propertyName)
@@ -4245,7 +4245,7 @@ public sealed class DataAccessService : IDataAccessService
                 if (result > 0)
                 {
                     lessor.IsModified = false;
-                    lessor.Status = EnumEntityStatus.Saved;
+                    lessor.Status = EntityStatus.Saved;
                 }
                 res.AffectedCount = result;
 
@@ -4314,11 +4314,11 @@ public sealed class DataAccessService : IDataAccessService
                     continue;
                 }
 
-                Models.Enums.EnumPersonKind? enumKind = null;
+                Models.Enums.PersonKind? enumKind = null;
                 var kind = reader.GetString(reader.GetOrdinal("person_kind")) ?? string.Empty;
                 if (!string.IsNullOrEmpty(kind))
                 {
-                    if (Enum.TryParse<Models.Enums.EnumPersonKind>(kind, out var parsedKind))
+                    if (Enum.TryParse<Models.Enums.PersonKind>(kind, out var parsedKind))
                     {
                         enumKind = parsedKind;
                     }
@@ -4331,13 +4331,13 @@ public sealed class DataAccessService : IDataAccessService
                 }
 
                 Models.PersonSearchResultItem item;
-                if (enumKind == Models.Enums.EnumPersonKind.Natural)
+                if (enumKind == Models.Enums.PersonKind.Natural)
                 {
-                    item = new Models.PersonSearchResultItem(s, Models.Enums.EnumPersonKind.Natural);
+                    item = new Models.PersonSearchResultItem(s, Models.Enums.PersonKind.Natural);
                 }
-                else if (enumKind == Models.Enums.EnumPersonKind.Legal)
+                else if (enumKind == Models.Enums.PersonKind.Legal)
                 {
-                    item = new Models.PersonSearchResultItem(s, Models.Enums.EnumPersonKind.Legal);
+                    item = new Models.PersonSearchResultItem(s, Models.Enums.PersonKind.Legal);
                 }
                 else
                 {
@@ -4416,7 +4416,7 @@ public sealed class DataAccessService : IDataAccessService
             if (person is not null)
             {
                 // Reset person Isdirty flag.
-                person.Status = EnumEntityStatus.Saved;
+                person.Status = EntityStatus.Saved;
                 person.IsModified = false;
             }
 
@@ -4440,11 +4440,11 @@ public sealed class DataAccessService : IDataAccessService
 
         Models.Base.PersonBase? person = null;
 
-        Models.Enums.EnumPersonKind? enumKind = null;
+        Models.Enums.PersonKind? enumKind = null;
         var kind = reader.GetString(reader.GetOrdinal("person_kind")) ?? string.Empty;
         if (!string.IsNullOrEmpty(kind))
         {
-            if (Enum.TryParse<Models.Enums.EnumPersonKind>(kind, out var parsedKind))
+            if (Enum.TryParse<Models.Enums.PersonKind>(kind, out var parsedKind))
             {
                 enumKind = parsedKind;
             }
@@ -4456,13 +4456,13 @@ public sealed class DataAccessService : IDataAccessService
             return null;
         }
 
-        if (enumKind == Models.Enums.EnumPersonKind.Natural)
+        if (enumKind == Models.Enums.PersonKind.Natural)
         {
-            person = new Models.Person.NaturalPerson(personId, EnumEntityStatus.Saved);
+            person = new Models.Person.NaturalPerson(personId, EntityStatus.Saved);
         }
-        else if (enumKind == Models.Enums.EnumPersonKind.Legal)
+        else if (enumKind == Models.Enums.PersonKind.Legal)
         {
-            person = new Models.Person.LegalPerson(personId, EnumEntityStatus.Saved);
+            person = new Models.Person.LegalPerson(personId, EntityStatus.Saved);
         }
 
         if (person is null)
@@ -4746,7 +4746,7 @@ public sealed class DataAccessService : IDataAccessService
 
             transaction.Commit();
 
-            building.Status = EnumEntityStatus.Saved;
+            building.Status = EntityStatus.Saved;
             building.IsModified = false;
         }
         catch (Exception ex)
@@ -4806,7 +4806,7 @@ public sealed class DataAccessService : IDataAccessService
 
             command.Parameters.AddWithValue(
                 "@propertyKind",
-                EnumPropertyKind.SaleResidential.ToString());
+                PropertyKind.SaleResidential.ToString());
 
             if (!searchAll)
             {
@@ -4829,7 +4829,7 @@ public sealed class DataAccessService : IDataAccessService
 
                 var item = new Models.PropertySearchResultItem(
                     propertyId,
-                    EnumPropertyKind.SaleResidential)
+                    PropertyKind.SaleResidential)
                 {
                     IsModified = false
                 };
@@ -4917,7 +4917,7 @@ public sealed class DataAccessService : IDataAccessService
             var building =
                 new Models.Sale.Residentials.Property(
                     Convert.ToString(reader["property_id"])!,
-                    EnumEntityStatus.Saved)
+                    EntityStatus.Saved)
                 {
                     ThumbnailFilename =
                         Convert.ToString(reader["thumbnail_filename"])
@@ -5035,7 +5035,7 @@ public sealed class DataAccessService : IDataAccessService
             command.Parameters.AddWithValue("@propertyId", saleId);
             command.Parameters.AddWithValue(
                 "@propertyKind",
-                EnumPropertyKind.SaleResidential.ToString());
+                PropertyKind.SaleResidential.ToString());
 
             res.AffectedCount = command.ExecuteNonQuery();
 
@@ -5134,7 +5134,7 @@ public sealed class DataAccessService : IDataAccessService
             command.Parameters.AddWithValue("@propertyId", saleId);
             command.Parameters.AddWithValue(
                 "@propertyKind",
-                EnumPropertyKind.SaleResidential.ToString());
+                PropertyKind.SaleResidential.ToString());
             command.Parameters.AddWithValue(
                 "@updatedAt",
                 DateTimeOffset.UtcNow.ToString("s"));
@@ -5165,8 +5165,8 @@ public sealed class DataAccessService : IDataAccessService
 
             transaction.Commit();
 
-            room.Status = EnumEntityStatus.Saved;
-            room.PropertyStatus = EnumEntityStatus.Saved;
+            room.Status = EntityStatus.Saved;
+            room.PropertyStatus = EntityStatus.Saved;
             room.IsModified = false;
         }
         catch (Exception ex)
@@ -5212,7 +5212,7 @@ public sealed class DataAccessService : IDataAccessService
 
             command.Parameters.AddWithValue(
                 "@propertyKind",
-                EnumPropertyKind.SaleResidential.ToString());
+                PropertyKind.SaleResidential.ToString());
 
             using var reader = command.ExecuteReader();
 
@@ -5233,7 +5233,7 @@ public sealed class DataAccessService : IDataAccessService
                 var item = new Models.ListingSearchResultItem(
                     listingId,
                     propertyId,
-                    EnumPropertyKind.SaleResidential)
+                    PropertyKind.SaleResidential)
                 {
                     PropertyName = Convert.ToString(reader["property_name"])
                         ?? string.Empty,
@@ -5352,7 +5352,7 @@ public sealed class DataAccessService : IDataAccessService
             command.Parameters.AddWithValue("@listingId", roomId);
             command.Parameters.AddWithValue(
                 "@propertyKind",
-                EnumPropertyKind.SaleResidential.ToString());
+                PropertyKind.SaleResidential.ToString());
 
             using var reader = command.ExecuteReader();
 
@@ -5372,9 +5372,9 @@ public sealed class DataAccessService : IDataAccessService
 
             var room = new Models.Sale.Residentials.Listing(
                 listingId,
-                EnumEntityStatus.Saved,
+                EntityStatus.Saved,
                 propertyId,
-                EnumEntityStatus.Saved,
+                EntityStatus.Saved,
                 Convert.ToInt32(
                     reader["is_property_unit_ownership"]) != 0,
                 propertyName)
@@ -5517,7 +5517,7 @@ public sealed class DataAccessService : IDataAccessService
             res.AffectedCount = command.ExecuteNonQuery();
             transaction.Commit();
 
-            broker.Status = EnumEntityStatus.Saved;
+            broker.Status = EntityStatus.Saved;
             broker.IsModified = false;
         }
         catch (Exception ex)
@@ -5589,10 +5589,10 @@ public sealed class DataAccessService : IDataAccessService
                 var personKindText =
                     Convert.ToString(reader["person_kind"]) ?? string.Empty;
 
-                if (!Enum.TryParse<Models.Enums.EnumPersonKind>(
+                if (!Enum.TryParse<Models.Enums.PersonKind>(
                         personKindText,
                         out var personKind) ||
-                    personKind == Models.Enums.EnumPersonKind.Undetermined)
+                    personKind == Models.Enums.PersonKind.Undetermined)
                 {
                     continue;
                 }
@@ -5674,7 +5674,7 @@ public sealed class DataAccessService : IDataAccessService
 
                 if (res.Person is not null)
                 {
-                    res.Person.Status = EnumEntityStatus.Saved;
+                    res.Person.Status = EntityStatus.Saved;
                     res.Person.IsModified = false;
                 }
             }

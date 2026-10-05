@@ -52,11 +52,11 @@ public sealed partial class LessorViewModel : ObservableRecipient
         // Update title with dummy value.
         WindowTitle = string.Empty;
 
-        if (_lessorBase.PersonKind == EnumPersonKind.Natural)
+        if (_lessorBase.PersonKind == PersonKind.Natural)
         {
             PersonKindIndex = 0;
         }
-        else if (_lessorBase.PersonKind == EnumPersonKind.Legal)
+        else if (_lessorBase.PersonKind == PersonKind.Legal)
         {
             PersonKindIndex = 1;
         }
@@ -110,7 +110,7 @@ public sealed partial class LessorViewModel : ObservableRecipient
                 Debug.WriteLine(Name);
             }
 
-            if (_lessorBase.Status == EnumEntityStatus.New)
+            if (_lessorBase.Status == EntityStatus.New)
             {
                 str = $"{str}：新規";
             }
@@ -325,7 +325,7 @@ public sealed partial class LessorViewModel : ObservableRecipient
 
         if (_lessorBase is Models.Person.NaturalPerson naturalPerson)
         {
-            if (_lessorBase.PersonKind != EnumPersonKind.Natural)
+            if (_lessorBase.PersonKind != PersonKind.Natural)
             {
                 // Something is wrong.
             }
@@ -337,7 +337,7 @@ public sealed partial class LessorViewModel : ObservableRecipient
         }
         else if (_lessorBase is Models.Person.LegalPerson legalPerson)
         {
-            if (_lessorBase.PersonKind != EnumPersonKind.Legal)
+            if (_lessorBase.PersonKind != PersonKind.Legal)
             {
                 // Something is wrong.
             }
@@ -509,7 +509,7 @@ public sealed partial class LessorViewModel : ObservableRecipient
             IsDirty = false;
 
             _lessorBase.IsModified = false;
-            _lessorBase.Status = EnumEntityStatus.Saved;
+            _lessorBase.Status = EntityStatus.Saved;
 
             // Update title with dummy value.
             WindowTitle = string.Empty;

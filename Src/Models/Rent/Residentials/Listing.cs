@@ -183,7 +183,7 @@ public sealed partial class Listing : ListingBase
     [ObservableProperty]
     public partial string Remarks { get; set; } = string.Empty;
 
-    public Listing(string id, EnumEntityStatus status, string propertyId, EnumEntityStatus propertyStatus, bool isPropertyUnitOwnership, string propertyName) : base(id, status, propertyId, propertyStatus, EnumPropertyKind.RentResidential)
+    public Listing(string id, EntityStatus status, string propertyId, EntityStatus propertyStatus, bool isPropertyUnitOwnership, string propertyName) : base(id, status, propertyId, propertyStatus, Enums.PropertyKind.RentResidential)
     {
         //PropertyId = propertyId;
         IsPropertyUnitOwnership = isPropertyUnitOwnership;

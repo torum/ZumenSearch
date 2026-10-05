@@ -131,7 +131,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
                 str = $"{str}：{Name}";
             }
 
-            if (_room.Status == EnumEntityStatus.New)
+            if (_room.Status == EntityStatus.New)
             {
                 str = $"{str}：新規";
             }
@@ -822,7 +822,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
             _unsavedRoomPdfThumbnailFileList.Clear();
         }
 
-        if (_room.Status == EnumEntityStatus.New)
+        if (_room.Status == EntityStatus.New)
         {
             if (Directory.Exists(_listingDataDirectoryPath))
             {
@@ -883,7 +883,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
         SetValues();
 
         bool saveResult;
-        if (_room.PropertyStatus == EnumEntityStatus.New)
+        if (_room.PropertyStatus == EntityStatus.New)
         {
             Debug.WriteLine("(_room.PropertyStatus == EnumPropertyStatus.New) @ListingViewModel on Save. Sending it to Property editor window");
             // Building is unsaved state. So, update it and done (don't save room to DB here because we don't save room without building).
@@ -922,8 +922,8 @@ public sealed partial class ListingViewModel : ObservableRecipient,
             else
             {
                 _room.IsModified = false;
-                _room.PropertyStatus = EnumEntityStatus.Saved;// just in case.
-                _room.Status = EnumEntityStatus.Saved;
+                _room.PropertyStatus = EntityStatus.Saved;// just in case.
+                _room.Status = EntityStatus.Saved;
 
                 // Update the selected search result's values such as name if it exists. Also, update building window's rooms list.
                 WeakReferenceMessenger.Default.Send(new Models.Messenger.ListingUpdatedMessage(_room));
@@ -1038,7 +1038,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
             using var destinationStream = File.Create(destFilePath);
             await sourceStream.CopyToAsync(destinationStream);
 
-            var pic = new Models.Rent.Residentials.ListingPicture(newId, newFilename, EnumEntityStatus.New)
+            var pic = new Models.Rent.Residentials.ListingPicture(newId, newFilename, EntityStatus.New)
             {
                 BasePath = _listingDataDirectoryPath,
                 ParentViewModel = this
@@ -1170,7 +1170,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
                 // Keep track of unsaved files to delete them when discarding.
                 _unsavedRoomPdfFileList.Add(pdfDestFilePath);
 
-                var pdf = new Models.Rent.Residentials.ListingPdf(newId, newFilename, newThumbnailFilename, EnumEntityStatus.New)
+                var pdf = new Models.Rent.Residentials.ListingPdf(newId, newFilename, newThumbnailFilename, EntityStatus.New)
                 {
                     BasePath = _listingDataDirectoryPath,
                     ParentViewModel = this

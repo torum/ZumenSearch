@@ -17,7 +17,7 @@ namespace ZumenSearch.Models.Base;
 // </remarks>
 public abstract class PdfBase : EntityBase
 {
-    protected PdfBase(string id, EnumEntityStatus staus) : base(id, staus)
+    protected PdfBase(string id, EntityStatus staus) : base(id, staus)
     {
         //
     }

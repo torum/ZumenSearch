@@ -97,7 +97,7 @@ public sealed partial class BrokerViewModel : ObservableRecipient
                 str = $"{str}：{Name}";
             }
 
-            if (_broker.Status == EnumEntityStatus.New)
+            if (_broker.Status == EntityStatus.New)
             {
                 str = $"{str}：新規";
             }
@@ -262,7 +262,7 @@ public sealed partial class BrokerViewModel : ObservableRecipient
 
         if (_broker is Models.Person.LegalPerson legalPerson)
         {
-            if (_broker.PersonKind != EnumPersonKind.Legal)
+            if (_broker.PersonKind != PersonKind.Legal)
             {
                 // Something is wrong.
             }
@@ -327,7 +327,7 @@ public sealed partial class BrokerViewModel : ObservableRecipient
 
         newBroker.SetName(Name);
 
-        newBroker.PersonKind = EnumPersonKind.Legal;
+        newBroker.PersonKind = PersonKind.Legal;
 
         newBroker.NameCompany = NameCompany;
         newBroker.NameCompanyType = NameCompanyType;
@@ -393,7 +393,7 @@ public sealed partial class BrokerViewModel : ObservableRecipient
             IsDirty = false;
 
             _broker.IsModified = false;
-            _broker.Status = EnumEntityStatus.Saved;
+            _broker.Status = EntityStatus.Saved;
 
             // Update title with dummy value.
             WindowTitle = string.Empty;

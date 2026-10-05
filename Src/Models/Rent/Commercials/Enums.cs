@@ -8,7 +8,7 @@ namespace ZumenSearch.Models.Rent.Commercials;
 
 #region == Property ==
 
-public enum EnumKinds
+public enum PropertyType
 {
     Unspecified,
     Office,
@@ -22,7 +22,7 @@ public enum EnumKinds
     Other
 }
 
-public enum EnumStructures
+public enum StructureType
 {
     Unspecified,
     Wood,
@@ -37,7 +37,7 @@ public enum EnumStructures
     Other
 }
 
-public enum EnumPropertyPdfType
+public enum PropertyPdfType
 {
     Unspecified,
     Listing,
@@ -47,7 +47,7 @@ public enum EnumPropertyPdfType
     Other
 }
 
-public enum EnumPropertyPictureType
+public enum PropertyPictureType
 {
     Unspecified,
     Exterior,
@@ -61,7 +61,7 @@ public enum EnumPropertyPictureType
 
 #region == listing ==
 
-public enum EnumListingPdfType
+public enum ListingPdfType
 {
     Unspecified,
     Maisoku,
@@ -71,7 +71,7 @@ public enum EnumListingPdfType
     Other
 }
 
-public enum EnumListingPictureType
+public enum ListingPictureType
 {
     Unspecified, Madori, Situnai, LivingDining, Bedroom, Kitchen, Bathroom, Restroom, Washroom, StorageSpace, Appliance, FrontDoor, Balcony, Other
     //Unspecified, Madori, Gaikan, Entrance, Neighborhood, Other

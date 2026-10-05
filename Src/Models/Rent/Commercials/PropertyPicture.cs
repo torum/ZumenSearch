@@ -11,17 +11,17 @@ public sealed partial class PropertyPicture : PictureBase
 {
     public ViewModels.Rent.Commercials.PropertyViewModel? ParentViewModel { get; set; }
 
-    public readonly ObservableCollection<PropertyPictureType> CommercialPictureTypes =
+    public readonly ObservableCollection<PropertyPictureTypeLabel> CommercialPictureTypes =
     [
-        new(EnumPropertyPictureType.Exterior),
-        new(EnumPropertyPictureType.Entrance),
-        new(EnumPropertyPictureType.Neighborhood),
-        new(EnumPropertyPictureType.Interior),
-        new(EnumPropertyPictureType.Other)
+        new(PropertyPictureType.Exterior),
+        new(PropertyPictureType.Entrance),
+        new(PropertyPictureType.Neighborhood),
+        new(PropertyPictureType.Interior),
+        new(PropertyPictureType.Other)
     ];
 
     // Do not use SetProperty. PropertyChanged is being subscribed.
-    public PropertyPictureType PictureType
+    public PropertyPictureTypeLabel PictureType
     {
         get;
         set
@@ -44,7 +44,7 @@ public sealed partial class PropertyPicture : PictureBase
 
             OnPropertyChanged();
         }
-    } = new(EnumPropertyPictureType.Unspecified);
+    } = new(PropertyPictureType.Unspecified);
 
     // Do not use SetProperty.
     public string Description
@@ -89,28 +89,28 @@ public sealed partial class PropertyPicture : PictureBase
         }
     }
 
-    public PropertyPicture(string id, string imageLocation, EnumEntityStatus status) : base(id, status)
+    public PropertyPicture(string id, string imageLocation, EntityStatus status) : base(id, status)
     {
         ImageFilename = imageLocation;
 
         IsModified = false;
     }
 
-    public EnumPropertyPictureType? SetLabelFromString(string titleStr)
+    public PropertyPictureType? SetLabelFromString(string titleStr)
     {
-        if (Enum.TryParse<EnumPropertyPictureType>(titleStr, out var result))
+        if (Enum.TryParse<PropertyPictureType>(titleStr, out var result))
         {
             //PictureType = new(result); // Not good for assigning to combobox. So select from CommercialPictureTypes.
-            PictureType = CommercialPictureTypes.FirstOrDefault<PropertyPictureType>(x => x.Key == result) ?? new(EnumPropertyPictureType.Unspecified);
+            PictureType = CommercialPictureTypes.FirstOrDefault<PropertyPictureTypeLabel>(x => x.Key == result) ?? new(PropertyPictureType.Unspecified);
 
             //Debug.WriteLine($"SetLabelFromString: {titleStr} -> {PictureType.Label}");
             return result;
         }
         else
         {
-            PictureType = new(EnumPropertyPictureType.Unspecified);
+            PictureType = new(PropertyPictureType.Unspecified);
 
-            return EnumPropertyPictureType.Unspecified;
+            return PropertyPictureType.Unspecified;
         }
     }
 };

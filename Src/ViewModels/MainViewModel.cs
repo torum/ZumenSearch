@@ -700,27 +700,27 @@ public partial class MainViewModel : ObservableRecipient,
             return;
         }
 
-        if (selected.PropertyKind == Models.Enums.EnumPropertyKind.RentResidential)
+        if (selected.PropertyKind == Models.Enums.PropertyKind.RentResidential)
         {
             await EditRentResidentialFromId(propertyId);
         }
-        else if (selected.PropertyKind == Models.Enums.EnumPropertyKind.RentCommercial)
+        else if (selected.PropertyKind == Models.Enums.PropertyKind.RentCommercial)
         {
             await EditRentCommercialFromId(propertyId);
         }
-        else if (selected.PropertyKind == Models.Enums.EnumPropertyKind.RentParking)
+        else if (selected.PropertyKind == Models.Enums.PropertyKind.RentParking)
         {
             Debug.WriteLine("EditPropertiesCommand not yet implemented.");
         }
-        else if (selected.PropertyKind == Models.Enums.EnumPropertyKind.SaleResidential)
+        else if (selected.PropertyKind == Models.Enums.PropertyKind.SaleResidential)
         {
             Debug.WriteLine("EditPropertiesCommand not yet implemented.");
         }
-        else if (selected.PropertyKind == Models.Enums.EnumPropertyKind.SaleCommercial)
+        else if (selected.PropertyKind == Models.Enums.PropertyKind.SaleCommercial)
         {
             Debug.WriteLine("EditPropertiesCommand not yet implemented.");
         }
-        else if (selected.PropertyKind == Models.Enums.EnumPropertyKind.SaleLand)
+        else if (selected.PropertyKind == Models.Enums.PropertyKind.SaleLand)
         {
             Debug.WriteLine("EditPropertiesCommand not yet implemented.");
         }
@@ -756,27 +756,27 @@ public partial class MainViewModel : ObservableRecipient,
             return;
         }
 
-        if (selected.PropertyKind == Models.Enums.EnumPropertyKind.RentResidential)
+        if (selected.PropertyKind == Models.Enums.PropertyKind.RentResidential)
         {
             await DeleteRentResidential(selected);
         }
-        else if (selected.PropertyKind == Models.Enums.EnumPropertyKind.RentCommercial)
+        else if (selected.PropertyKind == Models.Enums.PropertyKind.RentCommercial)
         {
             await DeleteRentCommercial(selected);
         }
-        else if (selected.PropertyKind == Models.Enums.EnumPropertyKind.RentParking)
+        else if (selected.PropertyKind == Models.Enums.PropertyKind.RentParking)
         {
             Debug.WriteLine("DeletePropertyCommand not yet implemented.");
         }
-        else if (selected.PropertyKind == Models.Enums.EnumPropertyKind.SaleResidential)
+        else if (selected.PropertyKind == Models.Enums.PropertyKind.SaleResidential)
         {
             Debug.WriteLine("DeletePropertyCommand not yet implemented.");
         }
-        else if (selected.PropertyKind == Models.Enums.EnumPropertyKind.SaleCommercial)
+        else if (selected.PropertyKind == Models.Enums.PropertyKind.SaleCommercial)
         {
             Debug.WriteLine("DeletePropertyCommand not yet implemented.");
         }
-        else if (selected.PropertyKind == Models.Enums.EnumPropertyKind.SaleLand)
+        else if (selected.PropertyKind == Models.Enums.PropertyKind.SaleLand)
         {
             Debug.WriteLine("DeletePropertyCommand not yet implemented.");
         }
@@ -805,7 +805,7 @@ public partial class MainViewModel : ObservableRecipient,
     private void AddNewRentResidential()
     {
         var newId = Guid.CreateVersion7().ToString("N");
-        var shell = _shellRentResidentialPropertyFactory.Create(new Models.Rent.Residentials.Property(newId, Models.Enums.EnumEntityStatus.New));
+        var shell = _shellRentResidentialPropertyFactory.Create(new Models.Rent.Residentials.Property(newId, Models.Enums.EntityStatus.New));
 
         RentResidentialEditorList.Add(shell.Window);
 
@@ -1445,7 +1445,7 @@ public partial class MainViewModel : ObservableRecipient,
     {
         var property = new Models.Rent.Commercials.Property(
             Guid.CreateVersion7().ToString("N"),
-            Models.Enums.EnumEntityStatus.New);
+            Models.Enums.EntityStatus.New);
 
         var shell = _shellRentCommercialPropertyFactory.Create(property);
 
@@ -2033,7 +2033,7 @@ public partial class MainViewModel : ObservableRecipient,
     private void AddNewRentLessor()
     {
         var newId = Guid.CreateVersion7().ToString("N");
-        var shell = _shellRentLessorFactory.Create(new Models.Person.NaturalPerson(newId, Models.Enums.EnumEntityStatus.New));
+        var shell = _shellRentLessorFactory.Create(new Models.Person.NaturalPerson(newId, Models.Enums.EntityStatus.New));
         
         LessorEditorList.Add(shell.Window);
 
@@ -2277,7 +2277,7 @@ public partial class MainViewModel : ObservableRecipient,
     {
         var property = new Models.Sale.Residentials.Property(
             Guid.CreateVersion7().ToString("N"),
-            Models.Enums.EnumEntityStatus.New);
+            Models.Enums.EntityStatus.New);
 
         var shell =
             _shellSaleResidentialPropertyFactory.Create(property);
@@ -2469,7 +2469,7 @@ public partial class MainViewModel : ObservableRecipient,
     private void AddNewBroker()
     {
         var newId = Guid.CreateVersion7().ToString("N");
-        var shell = _shellBrokerFactory.Create(new Models.Person.LegalPerson(newId, Models.Enums.EnumEntityStatus.New));
+        var shell = _shellBrokerFactory.Create(new Models.Person.LegalPerson(newId, Models.Enums.EntityStatus.New));
 
         BrokerEditorList.Add(shell.Window);
 

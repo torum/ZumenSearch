@@ -20,7 +20,7 @@ namespace ZumenSearch.Models.Base;
 // </remarks>
 public abstract class EntityBase : ObservableObject
 {
-    protected EntityBase(string id, EnumEntityStatus status)
+    protected EntityBase(string id, EntityStatus status)
     {
         Id = id;
         Status = status;
@@ -29,7 +29,7 @@ public abstract class EntityBase : ObservableObject
     public string Id { get; private set; } = string.Empty;
 
     // ANEMIC property, but we simply want to keep track of whether the entity has been modified since it was loaded from the database.
-    public EnumEntityStatus Status { get; set; } = EnumEntityStatus.New;
+    public EntityStatus Status { get; set; } = EntityStatus.New;
 
     // ANEMIC property, but ...
     public bool IsModified { get; set; } = false;

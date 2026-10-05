@@ -9,18 +9,18 @@ namespace ZumenSearch.Models.Rent.Residentials
     #region == Property ==
 
     // Kind：物件種目（アパート・マンション・一戸建て・他）
-    public enum EnumKinds
+    public enum PropertyType
     {
         Unspecified, Apartment, Mansion, House, TerraceHouse, TownHouse, ShareHouse, Dormitory
     }
 
     // Structure: 建物構造
-    public enum EnumStructures
+    public enum StructureType
     {
         Unspecified, Wood, Block, LightSteel, Steel, RC, SRC, ALC, PC, HPC, RB, CFT, Other
     }
 
-    public enum EnumPropertyPdfType
+    public enum PropertyPdfType
     {
         Unspecified,
         Maisoku,
@@ -30,7 +30,7 @@ namespace ZumenSearch.Models.Rent.Residentials
         Other
     }
 
-    public enum EnumPropertyPictureType
+    public enum PropertyPictureType
     {
         //Unspecified, Madori, Gaikan, Situnai, LivingDining, Bedroom, Kitchen, Bathroom, Restroom, Washroom, StorageSpace, Appliance, FrontDoor, Balcony, Entrance, Neighborhood, Other
         Unspecified, Gaikan, Entrance, Neighborhood, Other
@@ -40,7 +40,7 @@ namespace ZumenSearch.Models.Rent.Residentials
 
     #region == listing ==
 
-    public enum EnumListingPdfType
+    public enum ListingPdfType
     {
         Unspecified,
         Maisoku,
@@ -50,7 +50,7 @@ namespace ZumenSearch.Models.Rent.Residentials
         Other
     }
 
-    public enum EnumListingPictureType
+    public enum ListingPictureType
     {
         Unspecified, Madori, Situnai, LivingDining, Bedroom, Kitchen, Bathroom, Restroom, Washroom, StorageSpace, Appliance, FrontDoor, Balcony, Other
         //Unspecified, Madori, Gaikan, Entrance, Neighborhood, Other

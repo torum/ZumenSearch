@@ -26,7 +26,7 @@
         ItemsSource="{x:Bind ViewModel.Kinds, Mode=OneWay}"
         SelectedItem="{x:Bind ViewModel.SelectedKind, Mode=TwoWay}">
                     <ComboBox.ItemTemplate>
-                        <DataTemplate x:DataType="modresidencial:PropertyKind">
+                        <DataTemplate x:DataType="modresidencial:PropertyTypeLabel">
                             <TextBlock Text="{x:Bind Label}" />
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
@@ -41,7 +41,7 @@
         ItemsSource="{x:Bind ViewModel.Structures, Mode=OneWay}"
         SelectedItem="{x:Bind ViewModel.SelectedStructure, Mode=TwoWay}">
                     <ComboBox.ItemTemplate>
-                        <DataTemplate x:DataType="modresidencial:PropertyStructure">
+                        <DataTemplate x:DataType="modresidencial:PropertyStructureTypeLabel">
                             <TextBlock Text="{x:Bind Label}" />
                         </DataTemplate>
                     </ComboBox.ItemTemplate>

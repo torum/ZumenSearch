@@ -26,7 +26,7 @@ public sealed partial class ListingSearchResultItem : ListingBase
         }
     }
 
-    public ListingSearchResultItem(string id, string propertyId, EnumPropertyKind propertyKind) : base(id, EnumEntityStatus.Saved, propertyId, EnumEntityStatus.Saved, propertyKind)
+    public ListingSearchResultItem(string id, string propertyId, PropertyKind propertyKind) : base(id, EntityStatus.Saved, propertyId, EntityStatus.Saved, propertyKind)
     {
         //PropertyId = propertyId;
     }

@@ -56,7 +56,7 @@ public sealed partial class ListingViewModel : ObservableRecipient
                 title += $"：{Name}";
             }
 
-            return $"{title}：{(_unit.Status == EnumEntityStatus.New ? "新規" : "編集")}";
+            return $"{title}：{(_unit.Status == EntityStatus.New ? "新規" : "編集")}";
         }
         set => OnPropertyChanged();
     } = "賃貸事業用";
@@ -269,7 +269,7 @@ public sealed partial class ListingViewModel : ObservableRecipient
         
         bool saveResult;
 
-        if (_unit.PropertyStatus == EnumEntityStatus.New)
+        if (_unit.PropertyStatus == EntityStatus.New)
         {
             Debug.WriteLine("(_room.PropertyStatus == EnumPropertyStatus.New) @ListingViewModel on Save. Sending it to Property editor window");
             // Building is unsaved state. So, update it and done (don't save room to DB here because we don't save room without building).
@@ -305,8 +305,8 @@ public sealed partial class ListingViewModel : ObservableRecipient
             else
             {
                 _unit.IsModified = false;
-                _unit.PropertyStatus = EnumEntityStatus.Saved;// just in case.
-                _unit.Status = EnumEntityStatus.Saved;
+                _unit.PropertyStatus = EntityStatus.Saved;// just in case.
+                _unit.Status = EntityStatus.Saved;
 
                 // Update the selected search result's values such as name if it exists. Also, update building window's rooms list.
                 WeakReferenceMessenger.Default.Send(new Models.Messenger.ListingUpdatedMessage(_unit));

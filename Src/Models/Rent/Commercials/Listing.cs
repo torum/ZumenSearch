@@ -64,9 +64,9 @@ public sealed partial class Listing : ListingBase
 
     public Listing(
         string id,
-        EnumEntityStatus status,
+        EntityStatus status,
         string propertyId,
-        EnumEntityStatus propertyStatus,
+        EntityStatus propertyStatus,
         bool isPropertyUnitOwnership,
         string propertyName)
         : base(
@@ -74,7 +74,7 @@ public sealed partial class Listing : ListingBase
             status,
             propertyId,
             propertyStatus,
-            EnumPropertyKind.RentCommercial)
+            Enums.PropertyKind.RentCommercial)
     {
         IsPropertyUnitOwnership = isPropertyUnitOwnership;
         PropertyName = propertyName;

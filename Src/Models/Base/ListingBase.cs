@@ -19,12 +19,12 @@ public abstract class ListingBase : EntityAggregateBase
 
     // Aggregate Root entity's status.
     // ANEMIC property, but we simply want to keep track of whether the entity has been modified since it was loaded from the database.
-    public EnumEntityStatus PropertyStatus { get; set; } = EnumEntityStatus.New;
+    public EntityStatus PropertyStatus { get; set; } = EntityStatus.New;
 
     // Aggregate Root entity's property kind.
-    public EnumPropertyKind PropertyKind { get; init; } = EnumPropertyKind.Unknown;
+    public PropertyKind PropertyKind { get; init; } = PropertyKind.Unknown;
 
-    protected ListingBase(string id, EnumEntityStatus status, string propertyId, EnumEntityStatus propertyStatus, EnumPropertyKind propertyKind) : base(id, status)
+    protected ListingBase(string id, EntityStatus status, string propertyId, EntityStatus propertyStatus, PropertyKind propertyKind) : base(id, status)
     {
         PropertyId = propertyId;
         PropertyStatus = propertyStatus;
