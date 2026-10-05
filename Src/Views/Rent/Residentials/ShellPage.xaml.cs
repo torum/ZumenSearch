@@ -337,7 +337,7 @@ public sealed partial class ShellPage : Page
             {
                 if (crumbs.Count > 1)
                 {
-                    var item = _pages.FirstOrDefault(p => p.Tag.Equals("ZumenSearch.Views.Rent.Residentials.BasicPage"));
+                    var item = _pages.FirstOrDefault(p => p.Tag.Equals("ZumenSearch.Views.Rent.Residentials.BasicPage", StringComparison.Ordinal));
                     if (item.Page is not null)
                     {
                         crumbs.RemoveAt(crumbs.Count - 1); // Remove the last breadcrumb if exists to avoid duplication.
@@ -369,7 +369,7 @@ public sealed partial class ShellPage : Page
                 return;
             }
 
-            var item = _pages.FirstOrDefault(p => p.Tag.Equals(args.InvokedItemContainer.Tag.ToString()));
+            var item = _pages.FirstOrDefault(p => p.Tag.Equals(args.InvokedItemContainer.Tag.ToString(), StringComparison.Ordinal));
 
             if (item.Page is null)
             {

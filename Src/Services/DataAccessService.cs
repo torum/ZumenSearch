@@ -1,5 +1,6 @@
 ﻿using Microsoft.Data.Sqlite;
 using System.Data;
+using System.Globalization;
 using System.Xml.Linq;
 using ZumenSearch.Helpers;
 using ZumenSearch.Models;
@@ -20,7 +21,7 @@ namespace ZumenSearch.Services;
 // * Reuse common code with other method.
 // * Create INDEX for the rest of tables.
 
-public sealed class DataAccessService : IDataAccessService
+public sealed partial class DataAccessService : IDataAccessService, IDisposable
 {
     private SqliteConnectionStringBuilder connectionStringBuilder = [];
 
@@ -956,7 +957,7 @@ public sealed class DataAccessService : IDataAccessService
             using var reader = cmd.ExecuteReader();
             while (reader.Read())
             {
-                var s = Convert.ToString(reader["property_id"]);
+                var s = Convert.ToString(reader["property_id"], CultureInfo.InvariantCulture);
                 if (string.IsNullOrEmpty(s))
                 {
                     Debug.WriteLine("DataAccess::SelectPropertiesByKeyword: propertyId is null or empty for a rent residential.");
@@ -1143,7 +1144,7 @@ public sealed class DataAccessService : IDataAccessService
                     foreach (var delp in building.PicturesToBeDeleted)
                     {
                         // 削除
-                        var sqlDeleteRentLivingPicture = string.Format("DELETE FROM rent_residential_pictures WHERE picture_id = '{0}'", delp.Id);
+                        var sqlDeleteRentLivingPicture = string.Format(CultureInfo.InvariantCulture, "DELETE FROM rent_residential_pictures WHERE picture_id = '{0}'", delp.Id);
 
                         cmd.CommandText = sqlDeleteRentLivingPicture;
                         var DelRentLivingPicResult = cmd.ExecuteNonQuery();
@@ -1210,7 +1211,7 @@ public sealed class DataAccessService : IDataAccessService
                     foreach (var delp in building.PdfsToBeDeleted)
                     {
                         // 削除
-                        var sqlDeleteRentLivingPdf = string.Format("DELETE FROM rent_residential_pdfs WHERE pdf_id = '{0}'", delp.Id);
+                        var sqlDeleteRentLivingPdf = string.Format(CultureInfo.InvariantCulture, "DELETE FROM rent_residential_pdfs WHERE pdf_id = '{0}'", delp.Id);
 
                         cmd.CommandText = sqlDeleteRentLivingPdf;
                         var DelRentLivingPdfResult = cmd.ExecuteNonQuery();
@@ -1401,7 +1402,7 @@ public sealed class DataAccessService : IDataAccessService
                             foreach (var delp in unit.PicturesToBeDeleted)
                             {
                                 // 削除
-                                var sqlDeleteRentLivingPicture = string.Format("DELETE FROM rent_residential_room_pictures WHERE picture_id = '{0}'", delp.Id);
+                                var sqlDeleteRentLivingPicture = string.Format(CultureInfo.InvariantCulture, "DELETE FROM rent_residential_room_pictures WHERE picture_id = '{0}'", delp.Id);
 
                                 cmd.CommandText = sqlDeleteRentLivingPicture;
                                 var DelRentLivingPicResult = cmd.ExecuteNonQuery();
@@ -1460,7 +1461,7 @@ public sealed class DataAccessService : IDataAccessService
                             foreach (var delp in unit.PdfsToBeDeleted)
                             {
                                 // 削除
-                                var sqlDeleteRentLivingPdf = string.Format("DELETE FROM rent_residential_room_pdfs WHERE pdf_id = '{0}'", delp.Id);
+                                var sqlDeleteRentLivingPdf = string.Format(CultureInfo.InvariantCulture, "DELETE FROM rent_residential_room_pdfs WHERE pdf_id = '{0}'", delp.Id);
 
                                 cmd.CommandText = sqlDeleteRentLivingPdf;
                                 var DelRentLivingPdfResult = cmd.ExecuteNonQuery();
@@ -1532,7 +1533,7 @@ public sealed class DataAccessService : IDataAccessService
                     foreach (var delr in building.RoomsToBeDeleted)
                     {
                         // 削除
-                        var sqlDeleteRentLivingRoom = string.Format("DELETE FROM rent_residential_rooms WHERE listing_id = '{0}'", delr.Id);
+                        var sqlDeleteRentLivingRoom = string.Format(CultureInfo.InvariantCulture, "DELETE FROM rent_residential_rooms WHERE listing_id = '{0}'", delr.Id);
 
                         cmd.CommandText = sqlDeleteRentLivingRoom;
                         var delRentLivingRoomResult = cmd.ExecuteNonQuery();
@@ -1594,7 +1595,7 @@ public sealed class DataAccessService : IDataAccessService
             connection.Open();
 
             using var cmd = connection.CreateCommand();
-            cmd.CommandText = string.Format("SELECT properties.name as propertyName, " +
+            cmd.CommandText = string.Format(CultureInfo.InvariantCulture, "SELECT properties.name as propertyName, " +
                 "properties.property_kind as propertyKind, " +
                 "properties.location_pref_id as locPrefId, " +
                 "properties.location_prefecture as locPrefecture, " +
@@ -1632,9 +1633,9 @@ public sealed class DataAccessService : IDataAccessService
             {
                 while (reader.Read())
                 {
-                    var pId = Convert.ToString(reader["propertyId"]);
+                    var pId = Convert.ToString(reader["propertyId"], CultureInfo.InvariantCulture);
 
-                    if (!id.Equals(pId))
+                    if (!id.Equals(pId, StringComparison.Ordinal))
                     {
                         Debug.WriteLine("DataAccess::SelectRentResidentialsById: propertyId is null or empty for a rent residential entry.");
                         continue;
@@ -1642,36 +1643,36 @@ public sealed class DataAccessService : IDataAccessService
 
                     isFound = true;
 
-                    property.SetName(Convert.ToString(reader["propertyName"]) ?? "");
-                    property.LocPrefId = Convert.ToString(reader["locPrefId"]) ?? "";
-                    property.LocPrefecture = Convert.ToString(reader["locPrefecture"]) ?? "";
-                    property.LocMachiazaId = Convert.ToString(reader["locMachiazaId"]) ?? "";
-                    property.LocCounty = Convert.ToString(reader["locCounty"]) ?? "";
-                    property.LocCity = Convert.ToString(reader["locCity"]) ?? "";
-                    property.LocWard = Convert.ToString(reader["locWard"]) ?? "";
-                    property.LocOazaCho = Convert.ToString(reader["locOazaCho"]) ?? "";
-                    property.LocChoume = Convert.ToString(reader["locChoume"]) ?? "";
-                    property.LocEdaban = Convert.ToString(reader["locEdaban"]) ?? "";
-                    property.LocLocationFull = Convert.ToString(reader["locLocationFull"]) ?? "";
-                    property.LocationLatitude = Convert.ToString(reader["locationLatitude"]) ?? string.Empty;
-                    property.LocationLongitude = Convert.ToString(reader["locationLongitude"]) ?? string.Empty;
+                    property.SetName(Convert.ToString(reader["propertyName"], CultureInfo.InvariantCulture) ?? "");
+                    property.LocPrefId = Convert.ToString(reader["locPrefId"], CultureInfo.InvariantCulture) ?? "";
+                    property.LocPrefecture = Convert.ToString(reader["locPrefecture"], CultureInfo.InvariantCulture) ?? "";
+                    property.LocMachiazaId = Convert.ToString(reader["locMachiazaId"], CultureInfo.InvariantCulture) ?? "";
+                    property.LocCounty = Convert.ToString(reader["locCounty"], CultureInfo.InvariantCulture) ?? "";
+                    property.LocCity = Convert.ToString(reader["locCity"], CultureInfo.InvariantCulture) ?? "";
+                    property.LocWard = Convert.ToString(reader["locWard"], CultureInfo.InvariantCulture) ?? "";
+                    property.LocOazaCho = Convert.ToString(reader["locOazaCho"], CultureInfo.InvariantCulture) ?? "";
+                    property.LocChoume = Convert.ToString(reader["locChoume"], CultureInfo.InvariantCulture) ?? "";
+                    property.LocEdaban = Convert.ToString(reader["locEdaban"], CultureInfo.InvariantCulture) ?? "";
+                    property.LocLocationFull = Convert.ToString(reader["locLocationFull"], CultureInfo.InvariantCulture) ?? "";
+                    property.LocationLatitude = Convert.ToString(reader["locationLatitude"], CultureInfo.InvariantCulture) ?? string.Empty;
+                    property.LocationLongitude = Convert.ToString(reader["locationLongitude"], CultureInfo.InvariantCulture) ?? string.Empty;
                     // TODO: more.
 
 
                     string s;
-                    s = Convert.ToString(reader["resiBuildingKind"]) ?? "";
+                    s = Convert.ToString(reader["resiBuildingKind"], CultureInfo.InvariantCulture) ?? "";
                     property.SetKindTypeFromString(s);
-                    property.IsUnitOwnership = Convert.ToInt32(reader["resiUnitOwnership"]) != 0; // int to bool
-                    s = Convert.ToString(reader["resiBuildingStructure"]) ?? "";
+                    property.IsUnitOwnership = Convert.ToInt32(reader["resiUnitOwnership"], CultureInfo.InvariantCulture) != 0; // int to bool
+                    s = Convert.ToString(reader["resiBuildingStructure"], CultureInfo.InvariantCulture) ?? "";
                     property.SetStructureTypeFromString(s);
-                    property.FloorCountAboveGround = Convert.ToInt32(reader["resiAboveGroundFloorCount"]);
-                    property.FloorCountBasement = Convert.ToInt32(reader["resiBasementFloorCount"]);
-                    property.TotalUnitCount = Convert.ToInt32(reader["resiTotalUnitCount"]);
-                    s = Convert.ToString(reader["resiBuiltYearMonth"]) ?? "";
+                    property.FloorCountAboveGround = Convert.ToInt32(reader["resiAboveGroundFloorCount"], CultureInfo.InvariantCulture);
+                    property.FloorCountBasement = Convert.ToInt32(reader["resiBasementFloorCount"], CultureInfo.InvariantCulture);
+                    property.TotalUnitCount = Convert.ToInt32(reader["resiTotalUnitCount"], CultureInfo.InvariantCulture);
+                    s = Convert.ToString(reader["resiBuiltYearMonth"], CultureInfo.InvariantCulture) ?? "";
                     property.SetBuildYearMonthFromString(s);
-                    property.FudousanId = Convert.ToString(reader["resiFudousanId"]) ?? "";
-                    property.FudousanIdAdditionalCode = Convert.ToString(reader["resiFudousanIdAdditionalCode"]) ?? "";
-                    property.Remarks = Convert.ToString(reader["resiRemarks"]) ?? "";
+                    property.FudousanId = Convert.ToString(reader["resiFudousanId"], CultureInfo.InvariantCulture) ?? "";
+                    property.FudousanIdAdditionalCode = Convert.ToString(reader["resiFudousanIdAdditionalCode"], CultureInfo.InvariantCulture) ?? "";
+                    property.Remarks = Convert.ToString(reader["resiRemarks"], CultureInfo.InvariantCulture) ?? "";
 
                     // TODO: more.
 
@@ -1688,25 +1689,25 @@ public sealed class DataAccessService : IDataAccessService
             }
 
             // 物件写真（建物）
-            cmd.CommandText = string.Format("SELECT * FROM rent_residential_pictures WHERE property_id = '{0}'", id);
+            cmd.CommandText = string.Format(CultureInfo.InvariantCulture, "SELECT * FROM rent_residential_pictures WHERE property_id = '{0}'", id);
             using (var reader = cmd.ExecuteReader())
             {
                 while (reader.Read())
                 {
-                    var picid = Convert.ToString(reader["picture_id"]) ?? string.Empty;
-                    var picpath = Convert.ToString(reader["filename"]) ?? string.Empty;
+                    var picid = Convert.ToString(reader["picture_id"], CultureInfo.InvariantCulture) ?? string.Empty;
+                    var picpath = Convert.ToString(reader["filename"], CultureInfo.InvariantCulture) ?? string.Empty;
                     if (!string.IsNullOrEmpty(picid) && !string.IsNullOrEmpty(picpath))
                     {
                         var rlpic = new Models.Rent.Residentials.PropertyPicture(picid, picpath, EntityStatus.Saved)
                         {
-                            Description = Convert.ToString(reader["description"]) ?? string.Empty,
+                            Description = Convert.ToString(reader["description"], CultureInfo.InvariantCulture) ?? string.Empty,
                             IsModified = false
                         };
 
-                        var strType = Convert.ToString(reader["type"]) ?? string.Empty;
+                        var strType = Convert.ToString(reader["type"], CultureInfo.InvariantCulture) ?? string.Empty;
                         rlpic.SetLabelFromString(strType);
 
-                        rlpic.IsMain = Convert.ToInt32(reader["is_main"]) != 0; // int to bool
+                        rlpic.IsMain = Convert.ToInt32(reader["is_main"], CultureInfo.InvariantCulture) != 0; // int to bool
 
                         property.Pictures.Add(rlpic);
                     }
@@ -1718,26 +1719,26 @@ public sealed class DataAccessService : IDataAccessService
             }
 
             // PDF（建物）
-            cmd.CommandText = string.Format("SELECT * FROM rent_residential_pdfs WHERE property_id = '{0}'", id);
+            cmd.CommandText = string.Format(CultureInfo.InvariantCulture, "SELECT * FROM rent_residential_pdfs WHERE property_id = '{0}'", id);
             using (var reader = cmd.ExecuteReader())
             {
                 while (reader.Read())
                 {
-                    var pdfid = Convert.ToString(reader["pdf_id"]) ?? string.Empty;
-                    var pdfpath = Convert.ToString(reader["filename"]) ?? string.Empty;
-                    var thumbpath = Convert.ToString(reader["thumbnail_filename"]) ?? string.Empty;
+                    var pdfid = Convert.ToString(reader["pdf_id"], CultureInfo.InvariantCulture) ?? string.Empty;
+                    var pdfpath = Convert.ToString(reader["filename"], CultureInfo.InvariantCulture) ?? string.Empty;
+                    var thumbpath = Convert.ToString(reader["thumbnail_filename"], CultureInfo.InvariantCulture) ?? string.Empty;
                     if (!string.IsNullOrEmpty(pdfid) && !string.IsNullOrEmpty(pdfpath) && !string.IsNullOrEmpty(thumbpath))
                     {
                         var rlpdf = new Models.Rent.Residentials.PropertyPdf(pdfid, pdfpath, thumbpath, EntityStatus.Saved)
                         {
-                            Description = Convert.ToString(reader["description"]) ?? string.Empty,
+                            Description = Convert.ToString(reader["description"], CultureInfo.InvariantCulture) ?? string.Empty,
                             IsModified = false
                         };
 
-                        var strType = Convert.ToString(reader["type"]) ?? string.Empty;
+                        var strType = Convert.ToString(reader["type"], CultureInfo.InvariantCulture) ?? string.Empty;
                         rlpdf.SetTypeFromString(strType);
 
-                        rlpdf.IsMain = Convert.ToInt32(reader["is_main"]) != 0; // int to bool
+                        rlpdf.IsMain = Convert.ToInt32(reader["is_main"], CultureInfo.InvariantCulture) != 0; // int to bool
 
                         property.Pdfs.Add(rlpdf);
                     }
@@ -1750,12 +1751,12 @@ public sealed class DataAccessService : IDataAccessService
 
             // 貸主（建物）
             var lessorIdList = new List<string>();
-            cmd.CommandText = string.Format("SELECT * FROM rent_lessors_properties_listings WHERE property_id = '{0}' AND listing_id = ''", id);
+            cmd.CommandText = string.Format(CultureInfo.InvariantCulture, "SELECT * FROM rent_lessors_properties_listings WHERE property_id = '{0}' AND listing_id = ''", id);
             using (var reader = cmd.ExecuteReader())
             {
                 while (reader.Read())
                 {
-                    var lessorId = Convert.ToString(reader["lessor_id"]) ?? string.Empty;
+                    var lessorId = Convert.ToString(reader["lessor_id"], CultureInfo.InvariantCulture) ?? string.Empty;
                     if (!string.IsNullOrEmpty(lessorId))
                     {
                         lessorIdList.Add(lessorId);
@@ -1776,7 +1777,7 @@ public sealed class DataAccessService : IDataAccessService
                     {
                         while (reader2.Read())
                         {
-                            var s = Convert.ToString(reader2["lessor_id"]);
+                            var s = Convert.ToString(reader2["lessor_id"], CultureInfo.InvariantCulture);
                             if (string.IsNullOrEmpty(s))
                             {
                                 Debug.WriteLine("DataAccess::SelectRentResidentialById: lessor_id is null or empty.");
@@ -1798,12 +1799,12 @@ public sealed class DataAccessService : IDataAccessService
 
             // 宅建業者（建物）
             var brokerIdList = new List<string>();
-            cmd.CommandText = string.Format("SELECT * FROM brokers_properties_listings WHERE property_id = '{0}' AND listing_id = ''", id);
+            cmd.CommandText = string.Format(CultureInfo.InvariantCulture, "SELECT * FROM brokers_properties_listings WHERE property_id = '{0}' AND listing_id = ''", id);
             using (var reader = cmd.ExecuteReader())
             {
                 while (reader.Read())
                 {
-                    var brokerId = Convert.ToString(reader["broker_id"]) ?? string.Empty;
+                    var brokerId = Convert.ToString(reader["broker_id"], CultureInfo.InvariantCulture) ?? string.Empty;
                     if (!string.IsNullOrEmpty(brokerId))
                     {
                         brokerIdList.Add(brokerId);
@@ -1824,7 +1825,7 @@ public sealed class DataAccessService : IDataAccessService
                     {
                         while (reader2.Read())
                         {
-                            var s = Convert.ToString(reader2["broker_id"]);
+                            var s = Convert.ToString(reader2["broker_id"], CultureInfo.InvariantCulture);
                             if (string.IsNullOrEmpty(s))
                             {
                                 Debug.WriteLine("DataAccess::SelectRentResidentialById: broker_id is null or empty.");
@@ -1845,7 +1846,7 @@ public sealed class DataAccessService : IDataAccessService
             }
 
             // 部屋
-            cmd.CommandText = string.Format("SELECT * FROM rent_residential_rooms WHERE property_id = '{0}'", id);
+            cmd.CommandText = string.Format(CultureInfo.InvariantCulture, "SELECT * FROM rent_residential_rooms WHERE property_id = '{0}'", id);
             using (var reader = cmd.ExecuteReader())
             {
                 while (reader.Read())
@@ -1891,13 +1892,13 @@ public sealed class DataAccessService : IDataAccessService
         }
 
         var pId = reader.GetString(reader.GetOrdinal("property_id")) ?? string.Empty;
-        if (!propertyId.Equals(pId))
+        if (!propertyId.Equals(pId, StringComparison.Ordinal))
         {
             Debug.WriteLine("DataAccess::GetRentResidentialListing: property_id is not Equals to given param.");
             return null;
         }
 
-        var isUnitOwnership = Convert.ToInt32(reader["is_property_unit_ownership"]) != 0;
+        var isUnitOwnership = Convert.ToInt32(reader["is_property_unit_ownership"], CultureInfo.InvariantCulture) != 0;
 
         var room = new Models.Rent.Residentials.Listing(listingId, EntityStatus.Saved, propertyId, EntityStatus.Saved, isUnitOwnership, propertyName)
         {
@@ -1918,25 +1919,25 @@ public sealed class DataAccessService : IDataAccessService
     private static void SetRentResidentialListingChildValues(SqliteCommand cmd, Models.Rent.Residentials.Listing room)
     {
         // 部屋写真
-        cmd.CommandText = string.Format("SELECT * FROM rent_residential_room_pictures WHERE listing_id = '{0}'", room.Id);
+        cmd.CommandText = string.Format(CultureInfo.InvariantCulture, "SELECT * FROM rent_residential_room_pictures WHERE listing_id = '{0}'", room.Id);
         using (var reader = cmd.ExecuteReader())
         {
             while (reader.Read())
             {
-                var picid = Convert.ToString(reader["picture_id"]) ?? string.Empty;
-                var picpath = Convert.ToString(reader["filename"]) ?? string.Empty;
+                var picid = Convert.ToString(reader["picture_id"], CultureInfo.InvariantCulture) ?? string.Empty;
+                var picpath = Convert.ToString(reader["filename"], CultureInfo.InvariantCulture) ?? string.Empty;
                 if (!string.IsNullOrEmpty(picid) && !string.IsNullOrEmpty(picpath))
                 {
                     var rlpic = new Models.Rent.Residentials.ListingPicture(picid, picpath, EntityStatus.Saved)
                     {
-                        Description = Convert.ToString(reader["description"]) ?? string.Empty,
+                        Description = Convert.ToString(reader["description"], CultureInfo.InvariantCulture) ?? string.Empty,
                         IsModified = false
                     };
 
-                    var strType = Convert.ToString(reader["type"]) ?? string.Empty;
+                    var strType = Convert.ToString(reader["type"], CultureInfo.InvariantCulture) ?? string.Empty;
                     rlpic.SetLabelFromString(strType);
 
-                    rlpic.IsMain = Convert.ToInt32(reader["is_main"]) != 0; // int to bool
+                    rlpic.IsMain = Convert.ToInt32(reader["is_main"], CultureInfo.InvariantCulture) != 0; // int to bool
 
                     room.Pictures.Add(rlpic);
                 }
@@ -1948,26 +1949,26 @@ public sealed class DataAccessService : IDataAccessService
         }
 
         // 部屋PDF
-        cmd.CommandText = string.Format("SELECT * FROM rent_residential_room_pdfs WHERE listing_id = '{0}'", room.Id);
+        cmd.CommandText = string.Format(CultureInfo.InvariantCulture, "SELECT * FROM rent_residential_room_pdfs WHERE listing_id = '{0}'", room.Id);
         using (var reader = cmd.ExecuteReader())
         {
             while (reader.Read())
             {
-                var pdfid = Convert.ToString(reader["pdf_id"]) ?? string.Empty;
-                var pdfpath = Convert.ToString(reader["filename"]) ?? string.Empty;
-                var thumbpath = Convert.ToString(reader["thumbnail_filename"]) ?? string.Empty;
+                var pdfid = Convert.ToString(reader["pdf_id"], CultureInfo.InvariantCulture) ?? string.Empty;
+                var pdfpath = Convert.ToString(reader["filename"], CultureInfo.InvariantCulture) ?? string.Empty;
+                var thumbpath = Convert.ToString(reader["thumbnail_filename"], CultureInfo.InvariantCulture) ?? string.Empty;
                 if (!string.IsNullOrEmpty(pdfid) && !string.IsNullOrEmpty(pdfpath) && !string.IsNullOrEmpty(thumbpath))
                 {
                     var rlpdf = new Models.Rent.Residentials.ListingPdf(pdfid, pdfpath, thumbpath, EntityStatus.Saved)
                     {
-                        Description = Convert.ToString(reader["description"]) ?? string.Empty,
+                        Description = Convert.ToString(reader["description"], CultureInfo.InvariantCulture) ?? string.Empty,
                         IsModified = false
                     };
 
-                    var strType = Convert.ToString(reader["type"]) ?? string.Empty;
+                    var strType = Convert.ToString(reader["type"], CultureInfo.InvariantCulture) ?? string.Empty;
                     rlpdf.SetTypeFromString(strType);
 
-                    rlpdf.IsMain = Convert.ToInt32(reader["is_main"]) != 0; // int to bool
+                    rlpdf.IsMain = Convert.ToInt32(reader["is_main"], CultureInfo.InvariantCulture) != 0; // int to bool
 
                     room.Pdfs.Add(rlpdf);
                 }
@@ -1980,12 +1981,12 @@ public sealed class DataAccessService : IDataAccessService
 
         // 部屋貸主
         var lessorIds = new List<string>();
-        cmd.CommandText = string.Format("SELECT * FROM rent_lessors_properties_listings WHERE listing_id = '{0}'", room.Id);
+        cmd.CommandText = string.Format(CultureInfo.InvariantCulture, "SELECT * FROM rent_lessors_properties_listings WHERE listing_id = '{0}'", room.Id);
         using (var reader = cmd.ExecuteReader())
         {
             while (reader.Read())
             {
-                var lessorId = Convert.ToString(reader["lessor_id"]) ?? string.Empty;
+                var lessorId = Convert.ToString(reader["lessor_id"], CultureInfo.InvariantCulture) ?? string.Empty;
                 if (!string.IsNullOrEmpty(lessorId))
                 {
                     lessorIds.Add(lessorId);
@@ -2006,7 +2007,7 @@ public sealed class DataAccessService : IDataAccessService
                 {
                     while (reader2.Read())
                     {
-                        var s = Convert.ToString(reader2["lessor_id"]);
+                        var s = Convert.ToString(reader2["lessor_id"], CultureInfo.InvariantCulture);
                         if (string.IsNullOrEmpty(s))
                         {
                             Debug.WriteLine("DataAccess::SelectRentResidentialById: lessor_id is null or empty.");
@@ -2017,12 +2018,12 @@ public sealed class DataAccessService : IDataAccessService
                         //var lessor = new Models.Rent.Lessors.Person(lessId, EnumEntityStatus.Saved);
                         var lessor = new Models.Person.NaturalPerson(lessId, EntityStatus.Saved)
                         {
-                            NameLast = Convert.ToString(reader2["name_last"]) ?? "",
-                            NameFirst = Convert.ToString(reader2["name_first"]) ?? "",
-                            Remarks = Convert.ToString(reader2["remarks"]) ?? ""
+                            NameLast = Convert.ToString(reader2["name_last"], CultureInfo.InvariantCulture) ?? "",
+                            NameFirst = Convert.ToString(reader2["name_first"], CultureInfo.InvariantCulture) ?? "",
+                            Remarks = Convert.ToString(reader2["remarks"], CultureInfo.InvariantCulture) ?? ""
                         };
                         // Try
-                        lessor.SetName(Convert.ToString(reader2["name"]) ?? "");
+                        lessor.SetName(Convert.ToString(reader2["name"], CultureInfo.InvariantCulture) ?? "");
 
                         // TODO: more.
 
@@ -2052,7 +2053,7 @@ public sealed class DataAccessService : IDataAccessService
         {
             while (reader.Read())
             {
-                var brokerId = Convert.ToString(reader["broker_id"]);
+                var brokerId = Convert.ToString(reader["broker_id"], CultureInfo.InvariantCulture);
                 if (string.IsNullOrWhiteSpace(brokerId))
                 {
                     continue;
@@ -2096,7 +2097,7 @@ public sealed class DataAccessService : IDataAccessService
             cmd.Transaction = connection.BeginTransaction();
             try
             {
-                cmd.CommandText = string.Format("DELETE FROM properties WHERE property_id = '{0}';", rentId);
+                cmd.CommandText = string.Format(CultureInfo.InvariantCulture, "DELETE FROM properties WHERE property_id = '{0}';", rentId);
                 res.AffectedCount = cmd.ExecuteNonQuery();
 
                 cmd.Transaction.Commit();
@@ -2154,8 +2155,8 @@ public sealed class DataAccessService : IDataAccessService
 
                 // Update updated_at in the properties table.
                 var sql = "UPDATE properties SET ";
-                sql += String.Format("updated_at = '{0}' ", DateTimeOffset.UtcNow.ToString("s"));
-                sql += string.Format(" WHERE property_id = '{0}'; ", rentId);
+                sql += String.Format(CultureInfo.InvariantCulture, "updated_at = '{0}' ", DateTimeOffset.UtcNow.ToString("s"));
+                sql += string.Format(CultureInfo.InvariantCulture, " WHERE property_id = '{0}'; ", rentId);
 
                 cmd.CommandText = sql;
                 cmd.ExecuteNonQuery();
@@ -2245,7 +2246,7 @@ public sealed class DataAccessService : IDataAccessService
                     foreach (var delr in room.PicturesToBeDeleted)
                     {
                         // 削除
-                        var sqlDeleteRentLivingRoom = string.Format("DELETE FROM rent_residential_room_pictures WHERE picture_id = '{0}'", delr.Id);
+                        var sqlDeleteRentLivingRoom = string.Format(CultureInfo.InvariantCulture, "DELETE FROM rent_residential_room_pictures WHERE picture_id = '{0}'", delr.Id);
 
                         cmd.CommandText = sqlDeleteRentLivingRoom;
                         var DelRentLivingRoomResult = cmd.ExecuteNonQuery();
@@ -2313,7 +2314,7 @@ public sealed class DataAccessService : IDataAccessService
                     foreach (var delr in room.PdfsToBeDeleted)
                     {
                         // 削除
-                        var sqlDeleteRentLivingRoom = string.Format("DELETE FROM rent_residential_room_pdfs WHERE pdf_id = '{0}'", delr.Id);
+                        var sqlDeleteRentLivingRoom = string.Format(CultureInfo.InvariantCulture, "DELETE FROM rent_residential_room_pdfs WHERE pdf_id = '{0}'", delr.Id);
 
                         cmd.CommandText = sqlDeleteRentLivingRoom;
                         var DelRentLivingRoomResult = cmd.ExecuteNonQuery();
@@ -2456,14 +2457,14 @@ public sealed class DataAccessService : IDataAccessService
 
             while (reader.Read())
             {
-                var eid = Convert.ToString(reader["propertyId"]);
+                var eid = Convert.ToString(reader["propertyId"], CultureInfo.InvariantCulture);
                 if (string.IsNullOrEmpty(eid))
                 {
                     Debug.WriteLine("DataAccess::SelectRentResidentialsByNameKeyword: propertyId is null or empty for a rent residential.");
                     continue;
                 }
 
-                var rid = Convert.ToString(reader["roomId"]);
+                var rid = Convert.ToString(reader["roomId"], CultureInfo.InvariantCulture);
                 if (string.IsNullOrEmpty(rid))
                 {
                     Debug.WriteLine("DataAccess::SelectRentResidentialsByNameKeyword: roomId is null or empty for a rent residential room.");
@@ -2472,12 +2473,12 @@ public sealed class DataAccessService : IDataAccessService
 
                 var unit = new Models.ListingSearchResultItem(rid, eid, PropertyKind.RentResidential);
 
-                var s = Convert.ToString(reader["roomName"]) ?? "";
+                var s = Convert.ToString(reader["roomName"], CultureInfo.InvariantCulture) ?? "";
                 unit.SetName(s);
 
                 //Debug.WriteLine($"Found rent residential property: {property.Name} @SelectRentResidentialsByNameKeyword() in DataAccessService");
 
-                s = Convert.ToString(reader["propertyName"]);
+                s = Convert.ToString(reader["propertyName"], CultureInfo.InvariantCulture);
                 if (!string.IsNullOrEmpty(s))
                 {
                     unit.PropertyName = s;
@@ -2532,7 +2533,7 @@ public sealed class DataAccessService : IDataAccessService
             var buildingName = string.Empty;
             var isFound = false;
 
-            cmd.CommandText = string.Format("SELECT name FROM properties WHERE property_id = '{0}'", rentId);
+            cmd.CommandText = string.Format(CultureInfo.InvariantCulture, "SELECT name FROM properties WHERE property_id = '{0}'", rentId);
             using (var reader = cmd.ExecuteReader())
             {
                 while (reader.Read())
@@ -2547,7 +2548,7 @@ public sealed class DataAccessService : IDataAccessService
 
             if (isFound)
             {
-                cmd.CommandText = string.Format("SELECT * FROM rent_residential_rooms WHERE listing_id = '{0}'", roomId);
+                cmd.CommandText = string.Format(CultureInfo.InvariantCulture, "SELECT * FROM rent_residential_rooms WHERE listing_id = '{0}'", roomId);
                 using (var reader = cmd.ExecuteReader())
                 {
                     while (reader.Read())
@@ -2599,7 +2600,7 @@ public sealed class DataAccessService : IDataAccessService
             cmd.Transaction = connection.BeginTransaction();
             try
             {
-                cmd.CommandText = string.Format("DELETE FROM rent_residential_rooms WHERE listing_id = '{0}';", roomId);
+                cmd.CommandText = string.Format(CultureInfo.InvariantCulture, "DELETE FROM rent_residential_rooms WHERE listing_id = '{0}';", roomId);
                 res.AffectedCount = cmd.ExecuteNonQuery();
 
                 cmd.Transaction.Commit();
@@ -3335,76 +3336,75 @@ public sealed class DataAccessService : IDataAccessService
 
             var building =
                 new Models.Rent.Commercials.Property(
-                    Convert.ToString(reader["property_id"])!,
+                    Convert.ToString(reader["property_id"], CultureInfo.InvariantCulture)!,
                     EntityStatus.Saved)
                 {
                     ThumbnailFilename =
-                        Convert.ToString(reader["thumbnail_filename"])
+                        Convert.ToString(reader["thumbnail_filename"], CultureInfo.InvariantCulture)
                         ?? string.Empty,
                     LocPrefId =
-                        Convert.ToString(reader["location_pref_id"])
+                        Convert.ToString(reader["location_pref_id"], CultureInfo.InvariantCulture)
                         ?? string.Empty,
                     LocPrefecture =
-                        Convert.ToString(reader["location_prefecture"])
+                        Convert.ToString(reader["location_prefecture"], CultureInfo.InvariantCulture)
                         ?? string.Empty,
                     LocMachiazaId =
-                        Convert.ToString(reader["location_machiaza_id"])
+                        Convert.ToString(reader["location_machiaza_id"], CultureInfo.InvariantCulture)
                         ?? string.Empty,
                     LocCounty =
-                        Convert.ToString(reader["location_county"])
+                        Convert.ToString(reader["location_county"], CultureInfo.InvariantCulture)
                         ?? string.Empty,
                     LocCity =
-                        Convert.ToString(reader["location_city"])
+                        Convert.ToString(reader["location_city"], CultureInfo.InvariantCulture)
                         ?? string.Empty,
                     LocWard =
-                        Convert.ToString(reader["location_ward"])
+                        Convert.ToString(reader["location_ward"], CultureInfo.InvariantCulture)
                         ?? string.Empty,
                     LocOazaCho =
-                        Convert.ToString(reader["location_oaza_cho"])
+                        Convert.ToString(reader["location_oaza_cho"], CultureInfo.InvariantCulture)
                         ?? string.Empty,
                     LocChoume =
-                        Convert.ToString(reader["location_choume"])
+                        Convert.ToString(reader["location_choume"], CultureInfo.InvariantCulture)
                         ?? string.Empty,
                     LocEdaban =
-                        Convert.ToString(reader["location_edaban"])
+                        Convert.ToString(reader["location_edaban"], CultureInfo.InvariantCulture)
                         ?? string.Empty,
                     LocLocationFull =
-                        Convert.ToString(reader["location_full"])
+                        Convert.ToString(reader["location_full"], CultureInfo.InvariantCulture)
                         ?? string.Empty,
-                    LocationLatitude = Convert.ToString(reader["location_latitude"]) ?? string.Empty,
-                    LocationLongitude = Convert.ToString(reader["location_longitude"]) ?? string.Empty,
+                    LocationLatitude = Convert.ToString(reader["location_latitude"], CultureInfo.InvariantCulture) ?? string.Empty,
+                    LocationLongitude = Convert.ToString(reader["location_longitude"], CultureInfo.InvariantCulture) ?? string.Empty,
                     IsUnitOwnership =
-                        Convert.ToInt32(reader["is_unit_ownership"]) != 0,
+                        Convert.ToInt32(reader["is_unit_ownership"], CultureInfo.InvariantCulture) != 0,
                     FloorCountAboveGround =
-                        Convert.ToInt32(reader["floor_count_above_ground"]),
+                        Convert.ToInt32(reader["floor_count_above_ground"], CultureInfo.InvariantCulture),
                     FloorCountBasement =
-                        Convert.ToInt32(reader["floor_count_basement"]),
+                        Convert.ToInt32(reader["floor_count_basement"], CultureInfo.InvariantCulture),
                     TotalFloorArea =
-                        Convert.ToDecimal(reader["total_floor_area"]),
+                        Convert.ToDecimal(reader["total_floor_area"], CultureInfo.InvariantCulture),
                     FudousanId =
-                        Convert.ToString(reader["fudousan_id"])
+                        Convert.ToString(reader["fudousan_id"], CultureInfo.InvariantCulture)
                         ?? string.Empty,
                     FudousanIdAdditionalCode =
-                        Convert.ToString(reader["fudousan_id_additional_code"])
+                        Convert.ToString(reader["fudousan_id_additional_code"], CultureInfo.InvariantCulture)
                         ?? string.Empty,
                     Remarks =
-                        Convert.ToString(reader["remarks"])
-                        ?? string.Empty
+                        Convert.ToString(reader["remarks"], CultureInfo.InvariantCulture) ?? string.Empty
                 };
 
             // Try
-            building.SetName(Convert.ToString(reader["name"]) ?? string.Empty);
+            building.SetName(Convert.ToString(reader["name"], CultureInfo.InvariantCulture) ?? string.Empty);
 
             building.SetCommercialKindFromString(
-                Convert.ToString(reader["commercial_kind"])
+                Convert.ToString(reader["commercial_kind"], CultureInfo.InvariantCulture)
                 ?? string.Empty);
 
             building.SetStructureTypeFromString(
-                Convert.ToString(reader["building_structure"])
+                Convert.ToString(reader["building_structure"], CultureInfo.InvariantCulture)
                 ?? string.Empty);
 
             building.SetBuildYearMonthFromString(
-                Convert.ToString(reader["built_year_month"])
+                Convert.ToString(reader["built_year_month"], CultureInfo.InvariantCulture)
                 ?? string.Empty);
 
 
@@ -3445,7 +3445,7 @@ public sealed class DataAccessService : IDataAccessService
             while (lessorReader.Read())
             {
                 var personId =
-                    Convert.ToString(lessorReader["lessor_id"]);
+                    Convert.ToString(lessorReader["lessor_id"], CultureInfo.InvariantCulture);
 
                 if (string.IsNullOrWhiteSpace(personId))
                 {
@@ -3495,7 +3495,7 @@ public sealed class DataAccessService : IDataAccessService
             while (brokerReader.Read())
             {
                 var brokerId =
-                    Convert.ToString(brokerReader["broker_id"]);
+                    Convert.ToString(brokerReader["broker_id"], CultureInfo.InvariantCulture);
 
                 if (string.IsNullOrWhiteSpace(brokerId))
                 {
@@ -3529,7 +3529,7 @@ public sealed class DataAccessService : IDataAccessService
             {
                 while (unitReader.Read())
                 {
-                    var listingId = Convert.ToString(unitReader["listing_id"]) ?? string.Empty;
+                    var listingId = Convert.ToString(unitReader["listing_id"], CultureInfo.InvariantCulture) ?? string.Empty;
                     if (string.IsNullOrWhiteSpace(listingId))
                     {
                         continue;
@@ -3540,29 +3540,29 @@ public sealed class DataAccessService : IDataAccessService
                         EntityStatus.Saved,
                         building.Id,
                         EntityStatus.Saved,
-                        Convert.ToInt32(unitReader["is_property_unit_ownership"]) != 0,
+                        Convert.ToInt32(unitReader["is_property_unit_ownership"], CultureInfo.InvariantCulture) != 0,
                         building.Name)
                     {
-                        Chinryou = Convert.ToDecimal(unitReader["chinryou"]),
-                        KyouekiFee = Convert.ToDecimal(unitReader["kyoueki_fee"]),
-                        Shikikin = Convert.ToDecimal(unitReader["shikikin"]),
-                        ShikikinUnit = Convert.ToString(unitReader["shikikin_unit"]) ?? "ヵ月",
-                        Reikin = Convert.ToDecimal(unitReader["reikin"]),
-                        ReikinUnit = Convert.ToString(unitReader["reikin_unit"]) ?? "ヵ月",
-                        RenewalFee = Convert.ToDecimal(unitReader["renewal_fee"]),
-                        RenewalFeeUnit = Convert.ToString(unitReader["renewal_fee_unit"]) ?? "ヵ月",
-                        RecontractFee = Convert.ToDecimal(unitReader["recontract_fee"]),
-                        RecontractFeeUnit = Convert.ToString(unitReader["recontract_fee_unit"]) ?? "円",
-                        FloorArea = Convert.ToDecimal(unitReader["floor_area"]),
-                        Usage = Convert.ToString(unitReader["usage"]) ?? "未指定",
-                        BusinessHours = Convert.ToString(unitReader["business_hours"]) ?? string.Empty,
-                        ParkingAvailable = Convert.ToInt32(unitReader["parking_available"]) != 0,
-                        OtherConditions = Convert.ToString(unitReader["other_conditions"]) ?? string.Empty,
-                        Remarks = Convert.ToString(unitReader["remarks"]) ?? string.Empty,
+                        Chinryou = Convert.ToDecimal(unitReader["chinryou"], CultureInfo.InvariantCulture),
+                        KyouekiFee = Convert.ToDecimal(unitReader["kyoueki_fee"], CultureInfo.InvariantCulture),
+                        Shikikin = Convert.ToDecimal(unitReader["shikikin"], CultureInfo.InvariantCulture),
+                        ShikikinUnit = Convert.ToString(unitReader["shikikin_unit"], CultureInfo.InvariantCulture) ?? "ヵ月",
+                        Reikin = Convert.ToDecimal(unitReader["reikin"], CultureInfo.InvariantCulture),
+                        ReikinUnit = Convert.ToString(unitReader["reikin_unit"], CultureInfo.InvariantCulture) ?? "ヵ月",
+                        RenewalFee = Convert.ToDecimal(unitReader["renewal_fee"], CultureInfo.InvariantCulture),
+                        RenewalFeeUnit = Convert.ToString(unitReader["renewal_fee_unit"], CultureInfo.InvariantCulture) ?? "ヵ月",
+                        RecontractFee = Convert.ToDecimal(unitReader["recontract_fee"], CultureInfo.InvariantCulture),
+                        RecontractFeeUnit = Convert.ToString(unitReader["recontract_fee_unit"], CultureInfo.InvariantCulture) ?? "円",
+                        FloorArea = Convert.ToDecimal(unitReader["floor_area"], CultureInfo.InvariantCulture),
+                        Usage = Convert.ToString(unitReader["usage"], CultureInfo.InvariantCulture) ?? "未指定",
+                        BusinessHours = Convert.ToString(unitReader["business_hours"], CultureInfo.InvariantCulture) ?? string.Empty,
+                        ParkingAvailable = Convert.ToInt32(unitReader["parking_available"], CultureInfo.InvariantCulture) != 0,
+                        OtherConditions = Convert.ToString(unitReader["other_conditions"], CultureInfo.InvariantCulture) ?? string.Empty,
+                        Remarks = Convert.ToString(unitReader["remarks"], CultureInfo.InvariantCulture) ?? string.Empty,
                         IsModified = false
                     };
 
-                    building.SetName(Convert.ToString(unitReader["name"]) ?? string.Empty);
+                    building.SetName(Convert.ToString(unitReader["name"], CultureInfo.InvariantCulture) ?? string.Empty);
 
                     building.Units.Add(unit);
                 }
@@ -3600,8 +3600,8 @@ public sealed class DataAccessService : IDataAccessService
         {
             while (reader.Read())
             {
-                var id = Convert.ToString(reader["picture_id"]) ?? string.Empty;
-                var filename = Convert.ToString(reader["filename"]) ?? string.Empty;
+                var id = Convert.ToString(reader["picture_id"], CultureInfo.InvariantCulture) ?? string.Empty;
+                var filename = Convert.ToString(reader["filename"], CultureInfo.InvariantCulture) ?? string.Empty;
 
                 if (string.IsNullOrWhiteSpace(id) ||
                     string.IsNullOrWhiteSpace(filename))
@@ -3612,12 +3612,12 @@ public sealed class DataAccessService : IDataAccessService
                 var picture = new Models.Rent.Commercials.PropertyPicture(id, filename, EntityStatus.Saved)
                 {
                     Description =
-                        Convert.ToString(reader["description"]) ?? string.Empty,
-                    IsMain = Convert.ToInt32(reader["is_main"]) != 0
+                        Convert.ToString(reader["description"], CultureInfo.InvariantCulture) ?? string.Empty,
+                    IsMain = Convert.ToInt32(reader["is_main"], CultureInfo.InvariantCulture) != 0
                 };
 
                 picture.SetLabelFromString(
-                    Convert.ToString(reader["type"]) ?? string.Empty);
+                    Convert.ToString(reader["type"], CultureInfo.InvariantCulture) ?? string.Empty);
                 picture.IsModified = false;
 
                 building.Pictures.Add(picture);
@@ -3638,10 +3638,10 @@ public sealed class DataAccessService : IDataAccessService
         {
             while (reader.Read())
             {
-                var id = Convert.ToString(reader["pdf_id"]) ?? string.Empty;
-                var filename = Convert.ToString(reader["filename"]) ?? string.Empty;
+                var id = Convert.ToString(reader["pdf_id"], CultureInfo.InvariantCulture) ?? string.Empty;
+                var filename = Convert.ToString(reader["filename"], CultureInfo.InvariantCulture) ?? string.Empty;
                 var thumbnailFilename =
-                    Convert.ToString(reader["thumbnail_filename"])
+                    Convert.ToString(reader["thumbnail_filename"], CultureInfo.InvariantCulture)
                     ?? string.Empty;
 
                 if (string.IsNullOrWhiteSpace(id) ||
@@ -3657,12 +3657,12 @@ public sealed class DataAccessService : IDataAccessService
                     thumbnailFilename, EntityStatus.Saved)
                 {
                     Description =
-                        Convert.ToString(reader["description"]) ?? string.Empty,
-                    IsMain = Convert.ToInt32(reader["is_main"]) != 0
+                        Convert.ToString(reader["description"], CultureInfo.InvariantCulture) ?? string.Empty,
+                    IsMain = Convert.ToInt32(reader["is_main"], CultureInfo.InvariantCulture) != 0
                 };
 
                 pdf.SetTypeFromString(
-                    Convert.ToString(reader["type"]) ?? string.Empty);
+                    Convert.ToString(reader["type"], CultureInfo.InvariantCulture) ?? string.Empty);
                 pdf.IsModified = false;
 
                 building.Pdfs.Add(pdf);
@@ -3940,10 +3940,10 @@ public sealed class DataAccessService : IDataAccessService
             while (reader.Read())
             {
                 var propertyId =
-                    Convert.ToString(reader["property_id"]);
+                    Convert.ToString(reader["property_id"], CultureInfo.InvariantCulture);
 
                 var listingId =
-                    Convert.ToString(reader["listing_id"]);
+                    Convert.ToString(reader["listing_id"], CultureInfo.InvariantCulture);
 
                 if (string.IsNullOrWhiteSpace(propertyId) ||
                     string.IsNullOrWhiteSpace(listingId))
@@ -3957,12 +3957,12 @@ public sealed class DataAccessService : IDataAccessService
                     PropertyKind.RentCommercial)
                 {
                     PropertyName =
-                        Convert.ToString(reader["property_name"])
+                        Convert.ToString(reader["property_name"], CultureInfo.InvariantCulture)
                         ?? string.Empty,
                     IsModified = false
                 };
                 // Try
-                item.SetName(Convert.ToString(reader["unit_name"]) ?? string.Empty);
+                item.SetName(Convert.ToString(reader["unit_name"], CultureInfo.InvariantCulture) ?? string.Empty);
 
                 result.ListingSearchResult.Add(item);
             }
@@ -4054,15 +4054,15 @@ public sealed class DataAccessService : IDataAccessService
             }
 
             var propertyId =
-                Convert.ToString(reader["property_id"])
+                Convert.ToString(reader["property_id"], CultureInfo.InvariantCulture)
                 ?? string.Empty;
 
             var listingId =
-                Convert.ToString(reader["listing_id"])
+                Convert.ToString(reader["listing_id"], CultureInfo.InvariantCulture)
                 ?? string.Empty;
 
             var propertyName =
-                Convert.ToString(reader["property_name"])
+                Convert.ToString(reader["property_name"], CultureInfo.InvariantCulture)
                 ?? string.Empty;
 
             var room = new Models.Rent.Commercials.Listing.Listing(
@@ -4071,51 +4071,51 @@ public sealed class DataAccessService : IDataAccessService
                 propertyId,
                 EntityStatus.Saved,
                 Convert.ToInt32(
-                    reader["is_property_unit_ownership"]) != 0,
+                    reader["is_property_unit_ownership"], CultureInfo.InvariantCulture) != 0,
                 propertyName)
             {
-                Chinryou = Convert.ToDecimal(reader["chinryou"]),
+                Chinryou = Convert.ToDecimal(reader["chinryou"], CultureInfo.InvariantCulture),
                 KyouekiFee =
-                    Convert.ToDecimal(reader["kyoueki_fee"]),
+                    Convert.ToDecimal(reader["kyoueki_fee"], CultureInfo.InvariantCulture),
                 Shikikin =
-                    Convert.ToDecimal(reader["shikikin"]),
+                    Convert.ToDecimal(reader["shikikin"], CultureInfo.InvariantCulture),
                 ShikikinUnit =
-                    Convert.ToString(reader["shikikin_unit"])
+                    Convert.ToString(reader["shikikin_unit"], CultureInfo.InvariantCulture)
                     ?? "ヵ月",
                 Reikin =
-                    Convert.ToDecimal(reader["reikin"]),
+                    Convert.ToDecimal(reader["reikin"], CultureInfo.InvariantCulture),
                 ReikinUnit =
-                    Convert.ToString(reader["reikin_unit"])
+                    Convert.ToString(reader["reikin_unit"], CultureInfo.InvariantCulture)
                     ?? "ヵ月",
                 RenewalFee =
-                    Convert.ToDecimal(reader["renewal_fee"]),
+                    Convert.ToDecimal(reader["renewal_fee"], CultureInfo.InvariantCulture),
                 RenewalFeeUnit =
-                    Convert.ToString(reader["renewal_fee_unit"])
+                    Convert.ToString(reader["renewal_fee_unit"], CultureInfo.InvariantCulture)
                     ?? "ヵ月",
                 RecontractFee =
-                    Convert.ToDecimal(reader["recontract_fee"]),
+                    Convert.ToDecimal(reader["recontract_fee"], CultureInfo.InvariantCulture),
                 RecontractFeeUnit =
-                    Convert.ToString(reader["recontract_fee_unit"])
+                    Convert.ToString(reader["recontract_fee_unit"], CultureInfo.InvariantCulture)
                     ?? "円",
                 FloorArea =
-                    Convert.ToDecimal(reader["floor_area"]),
+                    Convert.ToDecimal(reader["floor_area"], CultureInfo.InvariantCulture),
                 Usage =
-                    Convert.ToString(reader["usage"])
+                    Convert.ToString(reader["usage"], CultureInfo.InvariantCulture)
                     ?? "未指定",
                 BusinessHours =
-                    Convert.ToString(reader["business_hours"])
+                    Convert.ToString(reader["business_hours"], CultureInfo.InvariantCulture)
                     ?? string.Empty,
                 ParkingAvailable =
-                    Convert.ToInt32(reader["parking_available"]) != 0,
+                    Convert.ToInt32(reader["parking_available"], CultureInfo.InvariantCulture) != 0,
                 OtherConditions =
-                    Convert.ToString(reader["other_conditions"])
+                    Convert.ToString(reader["other_conditions"], CultureInfo.InvariantCulture)
                     ?? string.Empty,
                 Remarks =
-                    Convert.ToString(reader["remarks"])
+                    Convert.ToString(reader["remarks"], CultureInfo.InvariantCulture)
                     ?? string.Empty,
                 IsModified = false
             };
-            room.SetName(Convert.ToString(reader["unit_name"]) ?? string.Empty);
+            room.SetName(Convert.ToString(reader["unit_name"], CultureInfo.InvariantCulture) ?? string.Empty);
 
             result.BuildingName = propertyName;
             result.Unit = room;
@@ -4301,13 +4301,13 @@ public sealed class DataAccessService : IDataAccessService
             }
             else
             {
-                cmd.CommandText = string.Format("SELECT lessor_id, name, person_kind, remarks FROM rent_lessors WHERE REPLACE(REPLACE(name, ' ', ''), '　', '') LIKE '%{0}%'", keyword);
+                cmd.CommandText = string.Format(CultureInfo.InvariantCulture, "SELECT lessor_id, name, person_kind, remarks FROM rent_lessors WHERE REPLACE(REPLACE(name, ' ', ''), '　', '') LIKE '%{0}%'", keyword);
             }
 
             using var reader = cmd.ExecuteReader();
             while (reader.Read())
             {
-                var s = Convert.ToString(reader["lessor_id"]);
+                var s = Convert.ToString(reader["lessor_id"], CultureInfo.InvariantCulture);
                 if (string.IsNullOrEmpty(s))
                 {
                     Debug.WriteLine("DataAccess::SelectRentLessorByKeyword: lessor_id is null or empty.");
@@ -4344,11 +4344,11 @@ public sealed class DataAccessService : IDataAccessService
                     continue;
                 }
 
-                item.SetName(Convert.ToString(reader["name"]) ?? "");
+                item.SetName(Convert.ToString(reader["name"], CultureInfo.InvariantCulture) ?? "");
 
                 //Debug.WriteLine($"Found rent residential item: {item.Name} @SelectRentResidentialsByNameKeyword() in DataAccessService");
 
-                s = Convert.ToString(reader["remarks"]) ?? "";
+                s = Convert.ToString(reader["remarks"], CultureInfo.InvariantCulture) ?? "";
                 item.Remarks = s;
 
                 // Reset item Isdirty flag.
@@ -4398,7 +4398,7 @@ public sealed class DataAccessService : IDataAccessService
             {
                 while (reader.Read())
                 {
-                    var s = Convert.ToString(reader["lessor_id"]);
+                    var s = Convert.ToString(reader["lessor_id"], CultureInfo.InvariantCulture);
                     if (string.IsNullOrEmpty(s))
                     {
                         Debug.WriteLine("DataAccess::SelectRentLessorById: lessor_id is null or empty for a lessor entry.");
@@ -4475,20 +4475,20 @@ public sealed class DataAccessService : IDataAccessService
 
         if (person is Models.Person.NaturalPerson naturalPerson)
         {
-            naturalPerson.NameLast = Convert.ToString(reader["name_last"]) ?? "";
-            naturalPerson.NameFirst = Convert.ToString(reader["name_first"]) ?? "";
+            naturalPerson.NameLast = Convert.ToString(reader["name_last"], CultureInfo.InvariantCulture) ?? "";
+            naturalPerson.NameFirst = Convert.ToString(reader["name_first"], CultureInfo.InvariantCulture) ?? "";
 
         }
         else if (person is Models.Person.LegalPerson legalPerson)
         {
-            legalPerson.NameCompany = Convert.ToString(reader["name_company"]) ?? "";
-            legalPerson.NameCompanyType = Convert.ToString(reader["name_company_type"]) ?? "";
-            legalPerson.NameCompanyTypePosition = Convert.ToInt32(reader["name_company_type_position"]);// int
+            legalPerson.NameCompany = Convert.ToString(reader["name_company"], CultureInfo.InvariantCulture) ?? "";
+            legalPerson.NameCompanyType = Convert.ToString(reader["name_company_type"], CultureInfo.InvariantCulture) ?? "";
+            legalPerson.NameCompanyTypePosition = Convert.ToInt32(reader["name_company_type_position"], CultureInfo.InvariantCulture);// int
 
         }
 
 
-        person.Remarks = Convert.ToString(reader["remarks"]) ?? "";
+        person.Remarks = Convert.ToString(reader["remarks"], CultureInfo.InvariantCulture) ?? "";
 
         // TODO: more.
 
@@ -4520,7 +4520,7 @@ public sealed class DataAccessService : IDataAccessService
             cmd.Transaction = connection.BeginTransaction();
             try
             {
-                cmd.CommandText = string.Format("DELETE FROM rent_lessors WHERE lessor_id = '{0}';", id);
+                cmd.CommandText = string.Format(CultureInfo.InvariantCulture, "DELETE FROM rent_lessors WHERE lessor_id = '{0}';", id);
                 res.AffectedCount = cmd.ExecuteNonQuery();
 
                 cmd.Transaction.Commit();
@@ -4820,7 +4820,7 @@ public sealed class DataAccessService : IDataAccessService
             while (reader.Read())
             {
                 var propertyId =
-                    Convert.ToString(reader["property_id"]);
+                    Convert.ToString(reader["property_id"], CultureInfo.InvariantCulture);
 
                 if (string.IsNullOrWhiteSpace(propertyId))
                 {
@@ -4833,7 +4833,7 @@ public sealed class DataAccessService : IDataAccessService
                 {
                     IsModified = false
                 };
-                item.SetName(Convert.ToString(reader["name"]) ?? string.Empty);
+                item.SetName(Convert.ToString(reader["name"], CultureInfo.InvariantCulture) ?? string.Empty);
 
                 result.PropertySearchResult.Add(item);
             }
@@ -4916,75 +4916,75 @@ public sealed class DataAccessService : IDataAccessService
 
             var building =
                 new Models.Sale.Residentials.Property(
-                    Convert.ToString(reader["property_id"])!,
+                    Convert.ToString(reader["property_id"], CultureInfo.InvariantCulture)!,
                     EntityStatus.Saved)
                 {
                     ThumbnailFilename =
-                        Convert.ToString(reader["thumbnail_filename"])
+                        Convert.ToString(reader["thumbnail_filename"], CultureInfo.InvariantCulture)
                         ?? string.Empty,
                     LocPrefId =
-                        Convert.ToString(reader["location_pref_id"])
+                        Convert.ToString(reader["location_pref_id"], CultureInfo.InvariantCulture)
                         ?? string.Empty,
                     LocPrefecture =
-                        Convert.ToString(reader["location_prefecture"])
+                        Convert.ToString(reader["location_prefecture"], CultureInfo.InvariantCulture)
                         ?? string.Empty,
                     LocMachiazaId =
-                        Convert.ToString(reader["location_machiaza_id"])
+                        Convert.ToString(reader["location_machiaza_id"], CultureInfo.InvariantCulture)
                         ?? string.Empty,
                     LocCounty =
-                        Convert.ToString(reader["location_county"])
+                        Convert.ToString(reader["location_county"], CultureInfo.InvariantCulture)
                         ?? string.Empty,
                     LocCity =
-                        Convert.ToString(reader["location_city"])
+                        Convert.ToString(reader["location_city"], CultureInfo.InvariantCulture)
                         ?? string.Empty,
                     LocWard =
-                        Convert.ToString(reader["location_ward"])
+                        Convert.ToString(reader["location_ward"], CultureInfo.InvariantCulture)
                         ?? string.Empty,
                     LocOazaCho =
-                        Convert.ToString(reader["location_oaza_cho"])
+                        Convert.ToString(reader["location_oaza_cho"], CultureInfo.InvariantCulture)
                         ?? string.Empty,
                     LocChoume =
-                        Convert.ToString(reader["location_choume"])
+                        Convert.ToString(reader["location_choume"], CultureInfo.InvariantCulture)
                         ?? string.Empty,
                     LocEdaban =
-                        Convert.ToString(reader["location_edaban"])
+                        Convert.ToString(reader["location_edaban"], CultureInfo.InvariantCulture)
                         ?? string.Empty,
                     LocLocationFull =
-                        Convert.ToString(reader["location_full"])
+                        Convert.ToString(reader["location_full"], CultureInfo.InvariantCulture)
                         ?? string.Empty,
                     LocationLatitude =
-    Convert.ToString(reader["location_latitude"]) ?? string.Empty,
+    Convert.ToString(reader["location_latitude"], CultureInfo.InvariantCulture) ?? string.Empty,
                     LocationLongitude =
-    Convert.ToString(reader["location_longitude"]) ?? string.Empty,
+    Convert.ToString(reader["location_longitude"], CultureInfo.InvariantCulture) ?? string.Empty,
                     IsUnitOwnership =
-                        Convert.ToInt32(reader["is_unit_ownership"]) != 0,
+                        Convert.ToInt32(reader["is_unit_ownership"], CultureInfo.InvariantCulture) != 0,
                     FloorCountAboveGround =
-                        Convert.ToInt32(reader["floor_count_above_ground"]),
+                        Convert.ToInt32(reader["floor_count_above_ground"], CultureInfo.InvariantCulture),
                     FloorCountBasement =
-                        Convert.ToInt32(reader["floor_count_basement"]),
+                        Convert.ToInt32(reader["floor_count_basement"], CultureInfo.InvariantCulture),
                     TotalUnitCount =
-                        Convert.ToInt32(reader["total_unit_count"]),
+                        Convert.ToInt32(reader["total_unit_count"], CultureInfo.InvariantCulture),
                     FudousanId =
-                        Convert.ToString(reader["fudousan_id"])
+                        Convert.ToString(reader["fudousan_id"], CultureInfo.InvariantCulture)
                         ?? string.Empty,
                     FudousanIdAdditionalCode =
-                        Convert.ToString(reader["fudousan_id_additional_code"])
+                        Convert.ToString(reader["fudousan_id_additional_code"], CultureInfo.InvariantCulture)
                         ?? string.Empty,
                     Remarks =
-                        Convert.ToString(reader["remarks"])
+                        Convert.ToString(reader["remarks"], CultureInfo.InvariantCulture)
                         ?? string.Empty
                 };
 
-            building.SetName(Convert.ToString(reader["name"]) ?? string.Empty);
+            building.SetName(Convert.ToString(reader["name"], CultureInfo.InvariantCulture) ?? string.Empty);
 
             building.SetKindTypeFromString(
-                Convert.ToString(reader["building_kind"]) ?? string.Empty);
+                Convert.ToString(reader["building_kind"], CultureInfo.InvariantCulture) ?? string.Empty);
 
             building.SetStructureTypeFromString(
-                Convert.ToString(reader["building_structure"]) ?? string.Empty);
+                Convert.ToString(reader["building_structure"], CultureInfo.InvariantCulture) ?? string.Empty);
 
             building.SetBuildYearMonthFromString(
-                Convert.ToString(reader["built_year_month"]) ?? string.Empty);
+                Convert.ToString(reader["built_year_month"], CultureInfo.InvariantCulture) ?? string.Empty);
 
             res.Building = building;
         }
@@ -5219,10 +5219,10 @@ public sealed class DataAccessService : IDataAccessService
             while (reader.Read())
             {
                 var propertyId =
-                    Convert.ToString(reader["property_id"]);
+                    Convert.ToString(reader["property_id"], CultureInfo.InvariantCulture);
 
                 var listingId =
-                    Convert.ToString(reader["listing_id"]);
+                    Convert.ToString(reader["listing_id"], CultureInfo.InvariantCulture);
 
                 if (string.IsNullOrWhiteSpace(propertyId) ||
                     string.IsNullOrWhiteSpace(listingId))
@@ -5235,12 +5235,12 @@ public sealed class DataAccessService : IDataAccessService
                     propertyId,
                     PropertyKind.SaleResidential)
                 {
-                    PropertyName = Convert.ToString(reader["property_name"])
+                    PropertyName = Convert.ToString(reader["property_name"], CultureInfo.InvariantCulture)
                         ?? string.Empty,
                     IsModified = false
                 };
 
-                item.SetName(Convert.ToString(reader["unit_name"]) ?? string.Empty);
+                item.SetName(Convert.ToString(reader["unit_name"], CultureInfo.InvariantCulture) ?? string.Empty);
 
                 res.ListingSearchResult.Add(item);
             }
@@ -5362,13 +5362,13 @@ public sealed class DataAccessService : IDataAccessService
             }
 
             var propertyId =
-                Convert.ToString(reader["property_id"]) ?? string.Empty;
+                Convert.ToString(reader["property_id"], CultureInfo.InvariantCulture) ?? string.Empty;
 
             var listingId =
-                Convert.ToString(reader["listing_id"]) ?? string.Empty;
+                Convert.ToString(reader["listing_id"], CultureInfo.InvariantCulture) ?? string.Empty;
 
             var propertyName =
-                Convert.ToString(reader["property_name"]) ?? string.Empty;
+                Convert.ToString(reader["property_name"], CultureInfo.InvariantCulture) ?? string.Empty;
 
             var room = new Models.Sale.Residentials.Listing(
                 listingId,
@@ -5376,30 +5376,30 @@ public sealed class DataAccessService : IDataAccessService
                 propertyId,
                 EntityStatus.Saved,
                 Convert.ToInt32(
-                    reader["is_property_unit_ownership"]) != 0,
+                    reader["is_property_unit_ownership"], CultureInfo.InvariantCulture) != 0,
                 propertyName)
             {
-                SalePrice = Convert.ToDecimal(reader["sale_price"]),
+                SalePrice = Convert.ToDecimal(reader["sale_price"], CultureInfo.InvariantCulture),
                 ManagementFee =
-                    Convert.ToDecimal(reader["management_fee"]),
+                    Convert.ToDecimal(reader["management_fee"], CultureInfo.InvariantCulture),
                 RepairReserveFund =
-                    Convert.ToDecimal(reader["repair_reserve_fund"]),
+                    Convert.ToDecimal(reader["repair_reserve_fund"], CultureInfo.InvariantCulture),
                 OwnershipType =
-                    Convert.ToString(reader["ownership_type"])
+                    Convert.ToString(reader["ownership_type"], CultureInfo.InvariantCulture)
                     ?? "所有権",
                 OccupancyStatus =
-                    Convert.ToString(reader["occupancy_status"])
+                    Convert.ToString(reader["occupancy_status"], CultureInfo.InvariantCulture)
                     ?? "空室",
                 DeliveryTiming =
-                    Convert.ToString(reader["delivery_timing"])
+                    Convert.ToString(reader["delivery_timing"], CultureInfo.InvariantCulture)
                     ?? "相談",
                 Remarks =
-                    Convert.ToString(reader["remarks"])
+                    Convert.ToString(reader["remarks"], CultureInfo.InvariantCulture)
                     ?? string.Empty,
                 IsModified = false
             };
 
-            room.SetName(Convert.ToString(reader["unit_name"]) ?? string.Empty);
+            room.SetName(Convert.ToString(reader["unit_name"], CultureInfo.InvariantCulture) ?? string.Empty);
 
             res.BuildingName = propertyName;
             res.Room = room;
@@ -5579,7 +5579,7 @@ public sealed class DataAccessService : IDataAccessService
 
             while (reader.Read())
             {
-                var brokerId = Convert.ToString(reader["broker_id"]);
+                var brokerId = Convert.ToString(reader["broker_id"], CultureInfo.InvariantCulture);
 
                 if (string.IsNullOrWhiteSpace(brokerId))
                 {
@@ -5587,7 +5587,7 @@ public sealed class DataAccessService : IDataAccessService
                 }
 
                 var personKindText =
-                    Convert.ToString(reader["person_kind"]) ?? string.Empty;
+                    Convert.ToString(reader["person_kind"], CultureInfo.InvariantCulture) ?? string.Empty;
 
                 if (!Enum.TryParse<Models.Enums.PersonKind>(
                         personKindText,
@@ -5601,11 +5601,11 @@ public sealed class DataAccessService : IDataAccessService
                     brokerId,
                     personKind)
                 {
-                    Remarks = Convert.ToString(reader["remarks"]) ?? string.Empty,
+                    Remarks = Convert.ToString(reader["remarks"], CultureInfo.InvariantCulture) ?? string.Empty,
                     IsModified = false
                 };
 
-                item.SetName(Convert.ToString(reader["name"]) ?? string.Empty);
+                item.SetName(Convert.ToString(reader["name"], CultureInfo.InvariantCulture) ?? string.Empty);
 
                 res.PersonSearchResult.Add(item);
             }
@@ -5750,7 +5750,7 @@ public sealed class DataAccessService : IDataAccessService
     private static void SetDatabaseError(ResultWrapperBase result, Exception exception, string operation, string description, string method)
     {
         result.IsError = true;
-        result.Error.Type = Error.ErrTypes.DB;
+        result.Error.Type = ErrorInfo.ErrTypes.DB;
         result.Error.Code = "";
 
         result.Error.Title = $"Error: {exception.GetType().FullName}";
@@ -5781,7 +5781,7 @@ public sealed class DataAccessService : IDataAccessService
     {
         for (var i = 0; i < dr.FieldCount; i++)
         {
-            if (dr.GetName(i).Equals(columnName, StringComparison.InvariantCultureIgnoreCase))
+            if (dr.GetName(i).Equals(columnName, StringComparison.OrdinalIgnoreCase))
             {
                 return true;
             }
@@ -5801,4 +5801,10 @@ public sealed class DataAccessService : IDataAccessService
 
     #endregion
 
+    public void Dispose()
+    {
+        _readerWriterLock?.Dispose();
+
+        GC.SuppressFinalize(this);
+    }
 }

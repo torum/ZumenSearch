@@ -52,7 +52,7 @@ public sealed partial class TransportationPage : Page
         }
     }
 
-    private void TextBox4DigitOrLess_TextChanging(TextBox sender, TextBoxTextChangingEventArgs args)
+    private static void TextBox4DigitOrLess_TextChanging(TextBox sender, TextBoxTextChangingEventArgs args)
     {
         var text = ((TextBox)sender).Text;
 

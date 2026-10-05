@@ -8,6 +8,6 @@ namespace ZumenSearch.Models.Base;
 // Result Wrapper 
 public abstract class ResultWrapperBase
 {
-    public Error Error = new();
-    public bool IsError = false;
+    public ErrorInfo Error { get; set; } = new();
+    public bool IsError { get; set; }
 }

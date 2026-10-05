@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Globalization;
 using Windows.Data.Pdf;
 using Windows.Storage;
 using Windows.Storage.Streams;
@@ -20,7 +21,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
     IRecipient<LessorUpdatedMessage>,
     IRecipient<BrokerUpdatedMessage>,
     IRecipient<LessorDeletedMessage>,
-    IRecipient<BrokerDeletedMessage>
+    IRecipient<BrokerDeletedMessage>, IDisposable
 {
     #region == Private variables ==
 
@@ -268,7 +269,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
                 return;
             }
 
-            if (value.Equals("0"))
+            if (value.Equals("0", StringComparison.Ordinal))
             {
                 field = "";
                 return;
@@ -404,7 +405,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
             return;
         }
 
-        var psn = LessorsWrapper.FirstOrDefault(r => r.Person.Id.Equals(lessor.Id));
+        var psn = LessorsWrapper.FirstOrDefault(r => r.Person.Id.Equals(lessor.Id, StringComparison.Ordinal));
         if (psn is null) return;
 
         psn.Person = lessor;
@@ -418,7 +419,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
             return;
         }
 
-        var psn = BrokersWrapper.FirstOrDefault(r => r.Person.Id.Equals(broker.Id));
+        var psn = BrokersWrapper.FirstOrDefault(r => r.Person.Id.Equals(broker.Id, StringComparison.Ordinal));
         if (psn is null) return;
 
         psn.Person = broker; //= new PersonWrapperForPropertyViewModel(lessor, this);
@@ -455,7 +456,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
             return;
         }
 
-        var psn = LessorsWrapper.FirstOrDefault(r => r.Person.Id.Equals(id));
+        var psn = LessorsWrapper.FirstOrDefault(r => r.Person.Id.Equals(id, StringComparison.Ordinal));
         if (psn is null) return;
         LessorsWrapper.Remove(psn);
     }
@@ -468,7 +469,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
             return;
         }
 
-        var psn = BrokersWrapper.FirstOrDefault(r => r.Person.Id.Equals(id));
+        var psn = BrokersWrapper.FirstOrDefault(r => r.Person.Id.Equals(id, StringComparison.Ordinal));
         if (psn is null) return;
         BrokersWrapper.Remove(psn);
     }
@@ -618,7 +619,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
         Name = _room.Name; // Set the value to trigger the setter logic if needed.
 
         //var test = _room.Chinryou.ToString();
-        Chinryou = _room.Chinryou.ToString();
+        Chinryou = _room.Chinryou.ToString(CultureInfo.InvariantCulture);
 
 
         // TODO: Set other properties for editing..
@@ -730,7 +731,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
             IsDirty = true;
 
             var prop = e.PropertyName ?? string.Empty;
-            if (prop.Equals("IsMain"))
+            if (prop.Equals("IsMain", StringComparison.Ordinal))
             {
                 if (picUnit.IsMain)
                 {
@@ -761,7 +762,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
             IsDirty = true;
 
             var prop = e.PropertyName ?? string.Empty;
-            if (prop.Equals("IsMain"))
+            if (prop.Equals("IsMain", StringComparison.Ordinal))
             {
                 if (pdfUnit.IsMain)
                 {
@@ -1119,7 +1120,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
             // TODO: set max file size?
 
             string extension = Path.GetExtension(System.IO.Path.GetFileName(filePath));
-            if (!extension.Equals(".pdf")) // TODO: check case.
+            if (!extension.Equals(".pdf", StringComparison.OrdinalIgnoreCase)) // TODO: check case.
             {
                 continue;
             }
@@ -1261,7 +1262,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
             var lessorId = lessor.Id;
 
             // Check if already exists
-            var match = LessorsWrapper.FirstOrDefault(x => x.Person.Id.Equals(lessorId));
+            var match = LessorsWrapper.FirstOrDefault(x => x.Person.Id.Equals(lessorId, StringComparison.Ordinal));
             if (match is not null)
             {
                 Debug.WriteLine($"lessor {lessor.Name} already in the list.");
@@ -1443,4 +1444,10 @@ public sealed partial class ListingViewModel : ObservableRecipient,
 
     #endregion
 
+    public void Dispose()
+    {
+        _cts?.Dispose();
+
+        GC.SuppressFinalize(this);
+    }
 }

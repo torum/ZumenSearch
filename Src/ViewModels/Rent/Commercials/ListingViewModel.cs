@@ -10,7 +10,7 @@ using ZumenSearch.Models;
 
 namespace ZumenSearch.ViewModels.Rent.Commercials;
 
-public sealed partial class ListingViewModel : ObservableRecipient
+public sealed partial class ListingViewModel : ObservableRecipient, IDisposable
 {
     private const string BasicPageName = "ZumenSearch.Views.Rent.Commercials.Listing.BasicPage";
 
@@ -221,13 +221,6 @@ public sealed partial class ListingViewModel : ObservableRecipient
         return true;
     }
 
-    private async Task<bool> SaveAsUpdate()
-    {
-
-
-        return true;
-    }
-
     private static string Format(decimal value) =>
         value == 0
             ? string.Empty
@@ -380,4 +373,10 @@ public sealed partial class ListingViewModel : ObservableRecipient
 
     #endregion
 
+    public void Dispose()
+    {
+        _cts?.Dispose();
+
+        GC.SuppressFinalize(this);
+    }
 }

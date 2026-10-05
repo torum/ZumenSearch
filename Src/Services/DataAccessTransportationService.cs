@@ -1,6 +1,7 @@
 ﻿using Microsoft.Data.Sqlite;
 using System.Collections.ObjectModel;
 using System.Data;
+using System.Globalization;
 using ZumenSearch.Models.Transportation;
 using ZumenSearch.Services.Contracts;
 
@@ -55,13 +56,13 @@ public class DataAccessTransportationService : IDataAccessTransportationService
         }
         else
         {
-            cmd.CommandText = string.Format("SELECT line_cd, line_name FROM rail_lines WHERE line_name LIKE '%{0}%' AND line_name NOT LIKE '%新幹線%'", query);
+            cmd.CommandText = string.Format(CultureInfo.InvariantCulture, "SELECT line_cd, line_name FROM rail_lines WHERE line_name LIKE '%{0}%' AND line_name NOT LIKE '%新幹線%'", query);
         }
         using var reader = cmd.ExecuteReader();
         while (reader.Read())
         {
-            var cd = Convert.ToString(reader["line_cd"]) ?? "";
-            var name = Convert.ToString(reader["line_name"]) ?? "";
+            var cd = Convert.ToString(reader["line_cd"], CultureInfo.InvariantCulture) ?? "";
+            var name = Convert.ToString(reader["line_name"], CultureInfo.InvariantCulture) ?? "";
             if (cd is not null)
             {
                 var rline = new RailLine
@@ -96,19 +97,19 @@ public class DataAccessTransportationService : IDataAccessTransportationService
 
         if (string.IsNullOrEmpty(query))
         {
-            cmd.CommandText = string.Format("SELECT station_cd, line_cd, station_name FROM rail_stations WHERE line_cd LIKE '{0}'", _railLineCode);
+            cmd.CommandText = string.Format(CultureInfo.InvariantCulture, "SELECT station_cd, line_cd, station_name FROM rail_stations WHERE line_cd LIKE '{0}'", _railLineCode);
         }
         else
         {
-            cmd.CommandText = string.Format("SELECT station_cd, line_cd, station_name FROM rail_stations WHERE line_cd LIKE '{0}' AND station_name LIKE '%{1}%'", _railLineCode, query);
+            cmd.CommandText = string.Format(CultureInfo.InvariantCulture, "SELECT station_cd, line_cd, station_name FROM rail_stations WHERE line_cd LIKE '{0}' AND station_name LIKE '%{1}%'", _railLineCode, query);
         }
 
         using var reader = cmd.ExecuteReader();
         while (reader.Read())
         {
-            var scd = Convert.ToString(reader["station_cd"]) ?? "";
-            var lcd = Convert.ToString(reader["line_cd"]) ?? "";
-            var name = Convert.ToString(reader["station_name"]) ?? "";
+            var scd = Convert.ToString(reader["station_cd"], CultureInfo.InvariantCulture) ?? "";
+            var lcd = Convert.ToString(reader["line_cd"], CultureInfo.InvariantCulture) ?? "";
+            var name = Convert.ToString(reader["station_name"], CultureInfo.InvariantCulture) ?? "";
             if (scd is not null)
             {
                 var rline = new RailStation
@@ -130,7 +131,7 @@ public class DataAccessTransportationService : IDataAccessTransportationService
     {
         for (var i = 0; i < dr.FieldCount; i++)
         {
-            if (dr.GetName(i).Equals(columnName, StringComparison.InvariantCultureIgnoreCase))
+            if (dr.GetName(i).Equals(columnName, StringComparison.OrdinalIgnoreCase))
             {
                 return true;
             }

@@ -12,5 +12,5 @@ namespace ZumenSearch.Models;
 // Person SearchResult
 public sealed class PersonsSearchResultWrapper : ResultWrapperBase
 {
-    public ObservableCollection<PersonSearchResultItem> PersonSearchResult = [];
+    public ObservableCollection<PersonSearchResultItem> PersonSearchResult { get; set; } = [];
 }

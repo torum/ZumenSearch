@@ -14,8 +14,8 @@ public sealed partial class PersonSearchResultItem : PersonBase
 {
     // TODO: more
 
-    public string CreatedAt = string.Empty;
-    public string UpdatedAt = string.Empty;
+    public string CreatedAt { get; set; } = string.Empty;
+    public string UpdatedAt { get; set; } = string.Empty;
 
     public PersonSearchResultItem(string id, PersonKind personKind) : base(id, EntityStatus.Saved, personKind)
     {

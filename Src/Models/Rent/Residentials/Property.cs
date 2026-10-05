@@ -257,7 +257,7 @@ public sealed partial class Property : PropertyBase
 
 
 
-    public string MachiazaId = string.Empty;
+    public string MachiazaId { get; set; } = string.Empty;
 
     public Prefecture? Pref
     {
@@ -496,7 +496,7 @@ public sealed partial class Property : PropertyBase
                 IsModified = true;
             }
         }
-    } = false;
+    }
 
     public EnumElectricType PropertyElectricKind
     {
@@ -773,7 +773,7 @@ public sealed partial class Property : PropertyBase
     } = [];
 
     // DBへの更新時にDBから削除されるべき部屋のIDリスト
-    public ObservableCollection<Models.Rent.Residentials.Listing> RoomsToBeDeleted = [];
+    public ObservableCollection<Models.Rent.Residentials.Listing> RoomsToBeDeleted { get; set; } = [];
 
     // 物件写真（建物）リスト
     public ObservableCollection<PropertyPicture> Pictures
@@ -789,7 +789,7 @@ public sealed partial class Property : PropertyBase
     } = [];
 
     // DBへの更新時にDBから削除されるべき物件写真（建物）のIDリスト
-    public ObservableCollection<PropertyPicture> PicturesToBeDeleted = [];
+    public ObservableCollection<PropertyPicture> PicturesToBeDeleted { get; set; } = [];
 
     // 図面（建物）リスト
     public ObservableCollection<PropertyPdf> Pdfs
@@ -805,7 +805,7 @@ public sealed partial class Property : PropertyBase
     } = [];
 
     // DBへの更新時にDBから削除されるべき図面のIDリスト
-    public ObservableCollection<PropertyPdf> PdfsToBeDeleted = [];
+    public ObservableCollection<PropertyPdf> PdfsToBeDeleted { get; set; } = [];
 
     // 貸主のリスト
     public ObservableCollection<Models.Base.PersonBase> Lessors
@@ -821,7 +821,7 @@ public sealed partial class Property : PropertyBase
     } = [];
 
     // DBへの更新時にDBから削除されるべき貸主のIDリスト
-    public ObservableCollection<Models.Base.PersonBase> LessorsToBeDeleted = [];
+    public ObservableCollection<Models.Base.PersonBase> LessorsToBeDeleted { get; set; } = [];
 
 
     // 宅建業者のリスト
@@ -837,7 +837,7 @@ public sealed partial class Property : PropertyBase
         }
     } = [];
 
-    public ObservableCollection<Models.Base.PersonBase> BrokersToBeDeleted = [];
+    public ObservableCollection<Models.Base.PersonBase> BrokersToBeDeleted { get; set; } = [];
 
     #endregion
 

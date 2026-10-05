@@ -101,7 +101,7 @@ public partial class LessorSelectViewModel : ObservableObject
             SuggestedLessors = new(res.PersonSearchResult);
         }
     }
-    private bool CanSearch()
+    private static bool CanSearch()
     {
         //return !string.IsNullOrEmpty(Query);
         // Allow empty (treat as "*")
@@ -109,7 +109,7 @@ public partial class LessorSelectViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void AddNewRentLessor()
+    private static void AddNewRentLessor()
     {
         var mainVm = App.GetService<MainViewModel>();
         mainVm.AddNewRentLessorCommand.Execute(null);

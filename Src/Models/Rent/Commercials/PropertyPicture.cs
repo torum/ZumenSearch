@@ -11,7 +11,7 @@ public sealed partial class PropertyPicture : PictureBase
 {
     public ViewModels.Rent.Commercials.PropertyViewModel? ParentViewModel { get; set; }
 
-    public readonly ObservableCollection<PropertyPictureTypeLabel> CommercialPictureTypes =
+    public ObservableCollection<PropertyPictureTypeLabel> CommercialPictureTypes { get;} =
     [
         new(PropertyPictureType.Exterior),
         new(PropertyPictureType.Entrance),

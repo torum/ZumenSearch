@@ -21,7 +21,7 @@ public class NavigationGenericService : INavigationGenericService
         return _frame;
     }
 
-    public bool NavigateTo(object? selectedPage, object? _param)
+    public bool NavigateTo(object? selectedPage, object? param)
     {
         if (_frame is null)
         {
@@ -49,7 +49,7 @@ public class NavigationGenericService : INavigationGenericService
             return false;
         }
 
-        var item = _pages.FirstOrDefault(p => p.Tag.Equals(tag));
+        var item = _pages.FirstOrDefault(p => p.Tag.Equals(tag, StringComparison.Ordinal));
 
         if (item.Page is null)
         {
@@ -57,7 +57,7 @@ public class NavigationGenericService : INavigationGenericService
             return false;
         }
 
-        if (_frame.Navigate(item.Page, _param, new DrillInNavigationTransitionInfo())) //new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom })SuppressNavigationTransitionInfo
+        if (_frame.Navigate(item.Page, param, new DrillInNavigationTransitionInfo())) //new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromBottom })SuppressNavigationTransitionInfo
         {
             return true;
         }
@@ -96,7 +96,7 @@ public class NavigationGenericService : INavigationGenericService
             return false;
         }
 
-        var item = _pages.FirstOrDefault(p => p.Tag.Equals(tag));
+        var item = _pages.FirstOrDefault(p => p.Tag.Equals(tag, StringComparison.Ordinal));
 
         if (item.Page is null)
         {

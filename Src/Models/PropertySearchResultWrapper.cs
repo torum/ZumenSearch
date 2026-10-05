@@ -9,5 +9,5 @@ namespace ZumenSearch.Models;
 // Common Properties SearchResult
 public sealed class PropertySearchResultWrapper : ResultWrapperBase
 {
-    public ObservableCollection<Models.PropertySearchResultItem> PropertySearchResult = [];
+    public ObservableCollection<Models.PropertySearchResultItem> PropertySearchResult { get; set; } = [];
 }

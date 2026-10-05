@@ -9,7 +9,7 @@ using ZumenSearch.Services.Contracts;
 
 namespace ZumenSearch.ViewModels.Rent.Lessors;
 
-public sealed partial class LessorViewModel : ObservableRecipient
+public sealed partial class LessorViewModel : ObservableRecipient, IDisposable
 {
     #region == Private variables and const ==
 
@@ -181,7 +181,7 @@ public sealed partial class LessorViewModel : ObservableRecipient
                 IsDirty = true;
             }
         }
-    } = 0;
+    }
 
     public string NameFirst
     {
@@ -531,4 +531,11 @@ public sealed partial class LessorViewModel : ObservableRecipient
     }
 
     #endregion
+
+    public void Dispose()
+    {
+        _cts?.Dispose();
+
+        GC.SuppressFinalize(this);
+    }
 }

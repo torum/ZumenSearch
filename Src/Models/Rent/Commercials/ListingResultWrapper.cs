@@ -8,8 +8,8 @@ namespace ZumenSearch.Models.Rent.Commercials;
 // Rent Commercial listing
 public sealed class ListingResultWrapper : ResultWrapperBase
 {
-    public string BuildingName = string.Empty;
+    public string BuildingName { get; set; } = string.Empty;
 
-    public Models.Rent.Commercials.Listing.Listing? Unit;
+    public Models.Rent.Commercials.Listing.Listing? Unit { get; set; }
 }
 

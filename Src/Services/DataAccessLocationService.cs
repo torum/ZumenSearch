@@ -1,5 +1,6 @@
 ﻿using Microsoft.Data.Sqlite;
 using System.Data;
+using System.Globalization;
 using ZumenSearch.Models.Location;
 using ZumenSearch.Services.Contracts;
 
@@ -27,13 +28,13 @@ public class DataAccessLocationService : IDataAccessLocationService
         // TODO; Try catch for connection.Open() and log error if fails
         connection.Open();
         using var cmd = connection.CreateCommand();
-        cmd.CommandText = string.Format("SELECT machiaza_id, county, city FROM mt_town_all WHERE pref LIKE '{0}'", pref);
+        cmd.CommandText = string.Format(CultureInfo.InvariantCulture, "SELECT machiaza_id, county, city FROM mt_town_all WHERE pref LIKE '{0}'", pref);
         using var reader = cmd.ExecuteReader();
         while (reader.Read())
         {
-            var county = Convert.ToString(reader["county"]) ?? "";
-            var city = Convert.ToString(reader["city"]) ?? "";
-            var id = Convert.ToString(reader["machiaza_id"]);
+            var county = Convert.ToString(reader["county"], CultureInfo.InvariantCulture) ?? "";
+            var city = Convert.ToString(reader["city"], CultureInfo.InvariantCulture) ?? "";
+            var id = Convert.ToString(reader["machiaza_id"], CultureInfo.InvariantCulture);
             if (id is not null)
             {
                 var ccty = new CountyAndCity(id, county, city);
@@ -52,13 +53,13 @@ public class DataAccessLocationService : IDataAccessLocationService
         using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
         connection.Open();
         using var cmd = connection.CreateCommand();
-        cmd.CommandText = string.Format("SELECT machiaza_id, ward, oaza_cho FROM mt_town_all WHERE pref LIKE '{0}' AND county LIKE '{1}' AND city LIKE '{2}'", pref, county, city);
+        cmd.CommandText = string.Format(CultureInfo.InvariantCulture, "SELECT machiaza_id, ward, oaza_cho FROM mt_town_all WHERE pref LIKE '{0}' AND county LIKE '{1}' AND city LIKE '{2}'", pref, county, city);
         using var reader = cmd.ExecuteReader();
         while (reader.Read())
         {
-            var ward = Convert.ToString(reader["ward"]) ?? "";
-            var oaza = Convert.ToString(reader["oaza_cho"]) ?? "";
-            var id = Convert.ToString(reader["machiaza_id"]);
+            var ward = Convert.ToString(reader["ward"], CultureInfo.InvariantCulture) ?? "";
+            var oaza = Convert.ToString(reader["oaza_cho"], CultureInfo.InvariantCulture) ?? "";
+            var id = Convert.ToString(reader["machiaza_id"], CultureInfo.InvariantCulture);
             if (id is not null)
             {
                 var ccty = new WardAndOaza(id, ward, oaza);
@@ -77,12 +78,12 @@ public class DataAccessLocationService : IDataAccessLocationService
         using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
         connection.Open();
         using var cmd = connection.CreateCommand();
-        cmd.CommandText = string.Format("SELECT machiaza_id, chome FROM mt_town_all WHERE pref LIKE '{0}' AND county LIKE '{1}' AND city LIKE '{2}' AND ward LIKE '{3}' AND oaza_cho LIKE '{4}'", pref, county, city, ward, oaza);
+        cmd.CommandText = string.Format(CultureInfo.InvariantCulture, "SELECT machiaza_id, chome FROM mt_town_all WHERE pref LIKE '{0}' AND county LIKE '{1}' AND city LIKE '{2}' AND ward LIKE '{3}' AND oaza_cho LIKE '{4}'", pref, county, city, ward, oaza);
         using var reader = cmd.ExecuteReader();
         while (reader.Read())
         {
-            var cho = Convert.ToString(reader["chome"]) ?? "";
-            var id = Convert.ToString(reader["machiaza_id"]);
+            var cho = Convert.ToString(reader["chome"], CultureInfo.InvariantCulture) ?? "";
+            var id = Convert.ToString(reader["machiaza_id"], CultureInfo.InvariantCulture);
             if (id is not null)
             {
                 var ccty = new Choume(id, cho);
@@ -99,7 +100,7 @@ public class DataAccessLocationService : IDataAccessLocationService
     {
         for (var i = 0; i < dr.FieldCount; i++)
         {
-            if (dr.GetName(i).Equals(columnName, StringComparison.InvariantCultureIgnoreCase))
+            if (dr.GetName(i).Equals(columnName, StringComparison.OrdinalIgnoreCase))
             {
                 return true;
             }

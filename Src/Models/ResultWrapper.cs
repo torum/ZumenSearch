@@ -7,5 +7,5 @@ namespace ZumenSearch.Models;
 
 public class ResultWrapper : ResultWrapperBase
 {
-    public int AffectedCount = 0;
+    public int AffectedCount { get; set; }
 }

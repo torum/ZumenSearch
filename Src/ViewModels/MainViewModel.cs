@@ -21,7 +21,8 @@ public partial class MainViewModel : ObservableRecipient,
     IRecipient<ListingUpdatedMessage>,
     IRecipient<LessorUpdatedMessage>,
     IRecipient<BrokerUpdatedMessage>,
-    IRecipient<WindowClosedMessage>
+    IRecipient<WindowClosedMessage>, 
+    IDisposable
 {
 
     #region == Private Variables and Const ==
@@ -108,41 +109,41 @@ public partial class MainViewModel : ObservableRecipient,
 
     #region == Window management ==
 
-    public readonly List<Views.Rent.Residentials.EditorWindow> RentResidentialEditorList = [];
-    public int RentResidentialEditorWinWidth = 1366;
-    public int RentResidentialEditorWinHeight = 768;
-    public int RentResidentialEditorWinLeft = 130;
-    public int RentResidentialEditorWinTop = 130;
+    public List<Views.Rent.Residentials.EditorWindow> RentResidentialEditorList { get; } = [];
+    public int RentResidentialEditorWinWidth { get; set; } = 1366;
+    public int RentResidentialEditorWinHeight { get; set; } = 768;
+    public int RentResidentialEditorWinLeft { get; set; } = 130;
+    public int RentResidentialEditorWinTop { get; set; } = 130;
 
-    public readonly List<Views.Rent.Residentials.Listing.EditorWindow> RentResidentialListingEditorList = [];
-    public int RentResidentialListingEditorWinWidth = 1366;
-    public int RentResidentialListingEditorWinHeight = 768;
-    public int RentResidentialListingEditorWinLeft = 130;
-    public int RentResidentialListingEditorWinTop = 130;
+    public List<Views.Rent.Residentials.Listing.EditorWindow> RentResidentialListingEditorList { get; } = [];
+    public int RentResidentialListingEditorWinWidth { get; set; } = 1366;
+    public int RentResidentialListingEditorWinHeight { get; set; } = 768;
+    public int RentResidentialListingEditorWinLeft { get; set; } = 130;
+    public int RentResidentialListingEditorWinTop { get; set; } = 130;
 
-    public readonly List<Views.Rent.Commercials.EditorWindow> RentCommercialEditorList = [];
-    public int RentCommercialEditorWinWidth = 1366;
-    public int RentCommercialEditorWinHeight = 768;
-    public int RentCommercialEditorWinLeft = 130;
-    public int RentCommercialEditorWinTop = 130;
+    public List<Views.Rent.Commercials.EditorWindow> RentCommercialEditorList { get;} = [];
+    public int RentCommercialEditorWinWidth { get; set; } = 1366;
+    public int RentCommercialEditorWinHeight { get; set; } = 768;
+    public int RentCommercialEditorWinLeft { get; set; } = 130;
+    public int RentCommercialEditorWinTop { get; set; } = 130;
 
-    public readonly List<Views.Rent.Commercials.Listing.EditorWindow> RentCommercialListingEditorList = [];
-    public int RentCommercialListingEditorWinWidth = 1366;
-    public int RentCommercialListingEditorWinHeight = 768;
-    public int RentCommercialListingEditorWinLeft = 130;
-    public int RentCommercialListingEditorWinTop = 130;
+    public List<Views.Rent.Commercials.Listing.EditorWindow> RentCommercialListingEditorList { get;} = [];
+    public int RentCommercialListingEditorWinWidth { get; set; } = 1366;
+    public int RentCommercialListingEditorWinHeight { get; set; } = 768;
+    public int RentCommercialListingEditorWinLeft { get; set; } = 130;
+    public int RentCommercialListingEditorWinTop { get; set; } = 130;
 
-    public readonly List<Views.Rent.Lessors.EditorWindow> LessorEditorList = [];
-    public int LessorEditorWinWidth = 1366;
-    public int LessorEditorWinHeight = 768;
-    public int LessorEditorWinLeft = 130;
-    public int LessorEditorWinTop = 130;
+    public List<Views.Rent.Lessors.EditorWindow> LessorEditorList { get;} = [];
+    public int LessorEditorWinWidth { get; set; } = 1366;
+    public int LessorEditorWinHeight { get; set; } = 768;
+    public int LessorEditorWinLeft { get; set; } = 130;
+    public int LessorEditorWinTop { get; set; } = 130;
 
-    public readonly List<Views.Brokers.EditorWindow> BrokerEditorList = [];
-    public int BrokerEditorWinWidth = 1366;
-    public int BrokerEditorWinHeight = 768;
-    public int BrokerEditorWinLeft = 130;
-    public int BrokerEditorWinTop = 130;
+    public List<Views.Brokers.EditorWindow> BrokerEditorList { get;} = [];
+    public int BrokerEditorWinWidth { get; set; } = 1366;
+    public int BrokerEditorWinHeight { get; set; } = 768;
+    public int BrokerEditorWinLeft { get; set; } = 130;
+    public int BrokerEditorWinTop { get; set; } = 130;
 
 
     #endregion
@@ -343,7 +344,7 @@ public partial class MainViewModel : ObservableRecipient,
 
         foreach (var item in PropertySearchResult)
         {
-            if (!item.Id.Equals(building.Id))
+            if (!item.Id.Equals(building.Id, StringComparison.Ordinal))
             {
                 continue;
             }
@@ -367,7 +368,7 @@ public partial class MainViewModel : ObservableRecipient,
 
         foreach (var item in RentResidentialListingSearchResult)
         {
-            if (!item.Id.Equals(room.Id))
+            if (!item.Id.Equals(room.Id, StringComparison.Ordinal))
             {
                 continue;
             }
@@ -384,7 +385,7 @@ public partial class MainViewModel : ObservableRecipient,
 
         foreach (var item in RentCommercialListingSearchResult)
         {
-            if (!item.Id.Equals(room.Id))
+            if (!item.Id.Equals(room.Id, StringComparison.Ordinal))
             {
                 continue;
             }
@@ -413,7 +414,7 @@ public partial class MainViewModel : ObservableRecipient,
 
         foreach (var item in RentLessorSearchResult)
         {
-            if (!item.Id.Equals(person.Id))
+            if (!item.Id.Equals(person.Id, StringComparison.Ordinal))
             {
                 continue;
             }
@@ -432,7 +433,7 @@ public partial class MainViewModel : ObservableRecipient,
 
         foreach (var item in BrokerSearchResult)
         {
-            if (!item.Id.Equals(person.Id))
+            if (!item.Id.Equals(person.Id, StringComparison.Ordinal))
             {
                 continue;
             }
@@ -2237,7 +2238,7 @@ public partial class MainViewModel : ObservableRecipient,
         }
         else
         {
-            var match = RentLessorSearchResult.FirstOrDefault(x => x.Id.Equals(lessorId));
+            var match = RentLessorSearchResult.FirstOrDefault(x => x.Id.Equals(lessorId, StringComparison.Ordinal));
             if (match is not null)
             {
                 if (RentLessorSearchResult.Remove(match))
@@ -2714,7 +2715,7 @@ public partial class MainViewModel : ObservableRecipient,
         }
         else
         {
-            var match = BrokerSearchResult.FirstOrDefault(x => x.Id.Equals(lessorId));
+            var match = BrokerSearchResult.FirstOrDefault(x => x.Id.Equals(lessorId, StringComparison.Ordinal));
             if (match is not null)
             {
                 if (BrokerSearchResult.Remove(match))
@@ -2764,4 +2765,10 @@ public partial class MainViewModel : ObservableRecipient,
 
     #endregion
 
+    public void Dispose()
+    {
+        _cts?.Dispose();
+
+        GC.SuppressFinalize(this);
+    }
 }

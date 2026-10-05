@@ -10,7 +10,7 @@ using ZumenSearch.Services.Contracts;
 
 namespace ZumenSearch.ViewModels.Sale.Residentials;
 
-public sealed partial class PropertyViewModel : ObservableRecipient
+public sealed partial class PropertyViewModel : ObservableRecipient, IDisposable
 {
     private const string BasicPageName = "ZumenSearch.Views.Sale.Residentials.BasicPage";
     private readonly Models.Sale.Residentials.Property _building;
@@ -274,17 +274,17 @@ public sealed partial class PropertyViewModel : ObservableRecipient
         FloorCountAboveGround =
             _building.FloorCountAboveGround == 0
                 ? string.Empty
-                : _building.FloorCountAboveGround.ToString();
+                : _building.FloorCountAboveGround.ToString(CultureInfo.InvariantCulture);
 
         FloorCountBasement =
             _building.FloorCountBasement == 0
                 ? string.Empty
-                : _building.FloorCountBasement.ToString();
+                : _building.FloorCountBasement.ToString(CultureInfo.InvariantCulture);
 
         TotalUnitCount =
             _building.TotalUnitCount == 0
                 ? string.Empty
-                : _building.TotalUnitCount.ToString();
+                : _building.TotalUnitCount.ToString(CultureInfo.InvariantCulture);
 
         BuiltYearAndMonth =
             _building.BuiltYearAndMonth.Year == 1900
@@ -422,5 +422,12 @@ public sealed partial class PropertyViewModel : ObservableRecipient
     private bool CanSave()
     {
         return IsDirty;
+    }
+
+    public void Dispose()
+    {
+        _cts?.Dispose();
+
+        GC.SuppressFinalize(this);
     }
 }

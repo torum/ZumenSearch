@@ -1,6 +1,7 @@
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using System.Diagnostics;
+using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics.Arm;
 using System.Xml;
@@ -102,28 +103,28 @@ public sealed partial class MainWindow : Window
                     hoge = mainWindow.Attribute("top");
                     if (hoge != null)
                     {
-                        winTop = int.Parse(hoge.Value);
+                        winTop = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
                         _winRestoreTop = winTop;
                     }
 
                     hoge = mainWindow.Attribute("left");
                     if (hoge != null)
                     {
-                        winLeft = int.Parse(hoge.Value);
+                        winLeft = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
                         _winRestoreLeft = winLeft;
                     }
 
                     hoge = mainWindow.Attribute("height");
                     if (hoge != null)
                     {
-                        winHeight = int.Parse(hoge.Value);
+                        winHeight = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
                         _winRestoreHeight = winHeight;
                     }
 
                     hoge = mainWindow.Attribute("width");
                     if (hoge != null)
                     {
-                        winWidth = int.Parse(hoge.Value);
+                        winWidth = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
                         _winRestoreWidth = winWidth;
                     }
                 }
@@ -152,25 +153,25 @@ public sealed partial class MainWindow : Window
                     var hoge = editWindow.Attribute("top");
                     if (hoge != null)
                     {
-                        _viewModel.RentResidentialEditorWinTop = int.Parse(hoge.Value);
+                        _viewModel.RentResidentialEditorWinTop = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
                     }
 
                     hoge = editWindow.Attribute("left");
                     if (hoge != null)
                     {
-                        _viewModel.RentResidentialEditorWinLeft = int.Parse(hoge.Value);
+                        _viewModel.RentResidentialEditorWinLeft = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
                     }
 
                     hoge = editWindow.Attribute("height");
                     if (hoge != null)
                     {
-                        _viewModel.RentResidentialEditorWinHeight = int.Parse(hoge.Value);
+                        _viewModel.RentResidentialEditorWinHeight = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
                     }
 
                     hoge = editWindow.Attribute("width");
                     if (hoge != null)
                     {
-                        _viewModel.RentResidentialEditorWinWidth = int.Parse(hoge.Value);
+                        _viewModel.RentResidentialEditorWinWidth = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
                     }
                 }
 
@@ -198,25 +199,25 @@ public sealed partial class MainWindow : Window
                     var hoge = editWindow.Attribute("top");
                     if (hoge != null)
                     {
-                        _viewModel.RentResidentialListingEditorWinTop = int.Parse(hoge.Value);
+                        _viewModel.RentResidentialListingEditorWinTop = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
                     }
 
                     hoge = editWindow.Attribute("left");
                     if (hoge != null)
                     {
-                        _viewModel.RentResidentialListingEditorWinLeft = int.Parse(hoge.Value);
+                        _viewModel.RentResidentialListingEditorWinLeft = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
                     }
 
                     hoge = editWindow.Attribute("height");
                     if (hoge != null)
                     {
-                        _viewModel.RentResidentialListingEditorWinHeight = int.Parse(hoge.Value);
+                        _viewModel.RentResidentialListingEditorWinHeight = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
                     }
 
                     hoge = editWindow.Attribute("width");
                     if (hoge != null)
                     {
-                        _viewModel.RentResidentialListingEditorWinWidth = int.Parse(hoge.Value);
+                        _viewModel.RentResidentialListingEditorWinWidth = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
                     }
                 }
 
@@ -244,25 +245,25 @@ public sealed partial class MainWindow : Window
                     var hoge = editWindow.Attribute("top");
                     if (hoge != null)
                     {
-                        _viewModel.RentCommercialEditorWinTop = int.Parse(hoge.Value);
+                        _viewModel.RentCommercialEditorWinTop = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
                     }
 
                     hoge = editWindow.Attribute("left");
                     if (hoge != null)
                     {
-                        _viewModel.RentCommercialEditorWinLeft = int.Parse(hoge.Value);
+                        _viewModel.RentCommercialEditorWinLeft = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
                     }
 
                     hoge = editWindow.Attribute("height");
                     if (hoge != null)
                     {
-                        _viewModel.RentCommercialEditorWinHeight = int.Parse(hoge.Value);
+                        _viewModel.RentCommercialEditorWinHeight = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
                     }
 
                     hoge = editWindow.Attribute("width");
                     if (hoge != null)
                     {
-                        _viewModel.RentCommercialEditorWinWidth = int.Parse(hoge.Value);
+                        _viewModel.RentCommercialEditorWinWidth = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
                     }
                 }
 
@@ -290,25 +291,25 @@ public sealed partial class MainWindow : Window
                     var hoge = editWindow.Attribute("top");
                     if (hoge != null)
                     {
-                        _viewModel.RentCommercialListingEditorWinTop = int.Parse(hoge.Value);
+                        _viewModel.RentCommercialListingEditorWinTop = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
                     }
 
                     hoge = editWindow.Attribute("left");
                     if (hoge != null)
                     {
-                        _viewModel.RentCommercialListingEditorWinLeft = int.Parse(hoge.Value);
+                        _viewModel.RentCommercialListingEditorWinLeft = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
                     }
 
                     hoge = editWindow.Attribute("height");
                     if (hoge != null)
                     {
-                        _viewModel.RentCommercialListingEditorWinHeight = int.Parse(hoge.Value);
+                        _viewModel.RentCommercialListingEditorWinHeight = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
                     }
 
                     hoge = editWindow.Attribute("width");
                     if (hoge != null)
                     {
-                        _viewModel.RentCommercialListingEditorWinWidth = int.Parse(hoge.Value);
+                        _viewModel.RentCommercialListingEditorWinWidth = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
                     }
                 }
 
@@ -336,25 +337,25 @@ public sealed partial class MainWindow : Window
                     var hoge = editWindow.Attribute("top");
                     if (hoge != null)
                     {
-                        _viewModel.LessorEditorWinTop = int.Parse(hoge.Value);
+                        _viewModel.LessorEditorWinTop = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
                     }
 
                     hoge = editWindow.Attribute("left");
                     if (hoge != null)
                     {
-                        _viewModel.LessorEditorWinLeft = int.Parse(hoge.Value);
+                        _viewModel.LessorEditorWinLeft = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
                     }
 
                     hoge = editWindow.Attribute("height");
                     if (hoge != null)
                     {
-                        _viewModel.LessorEditorWinHeight = int.Parse(hoge.Value);
+                        _viewModel.LessorEditorWinHeight = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
                     }
 
                     hoge = editWindow.Attribute("width");
                     if (hoge != null)
                     {
-                        _viewModel.LessorEditorWinWidth = int.Parse(hoge.Value);
+                        _viewModel.LessorEditorWinWidth = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
                     }
                 }
 
@@ -382,25 +383,25 @@ public sealed partial class MainWindow : Window
                     var hoge = editWindow.Attribute("top");
                     if (hoge != null)
                     {
-                        _viewModel.BrokerEditorWinTop = int.Parse(hoge.Value);
+                        _viewModel.BrokerEditorWinTop = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
                     }
 
                     hoge = editWindow.Attribute("left");
                     if (hoge != null)
                     {
-                        _viewModel.BrokerEditorWinLeft = int.Parse(hoge.Value);
+                        _viewModel.BrokerEditorWinLeft = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
                     }
 
                     hoge = editWindow.Attribute("height");
                     if (hoge != null)
                     {
-                        _viewModel.BrokerEditorWinHeight = int.Parse(hoge.Value);
+                        _viewModel.BrokerEditorWinHeight = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
                     }
 
                     hoge = editWindow.Attribute("width");
                     if (hoge != null)
                     {
-                        _viewModel.BrokerEditorWinWidth = int.Parse(hoge.Value);
+                        _viewModel.BrokerEditorWinWidth = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
                     }
                 }
 
@@ -865,44 +866,44 @@ public sealed partial class MainWindow : Window
             attrs = doc.CreateAttribute("width");
             if (winState == OverlappedPresenterState.Restored)
             {
-                attrs.Value = winWidth.ToString();
+                attrs.Value = winWidth.ToString(CultureInfo.InvariantCulture);
             }
             else
             {
-                attrs.Value = _winRestoreWidth.ToString();
+                attrs.Value = _winRestoreWidth.ToString(CultureInfo.InvariantCulture);
             }
             mainWindow.SetAttributeNode(attrs);
 
             attrs = doc.CreateAttribute("height");
             if (winState == OverlappedPresenterState.Restored)
             {
-                attrs.Value = winHeight.ToString();
+                attrs.Value = winHeight.ToString(CultureInfo.InvariantCulture);
             }
             else
             {
-                attrs.Value = _winRestoreHeight.ToString();
+                attrs.Value = _winRestoreHeight.ToString(CultureInfo.InvariantCulture);
             }
             mainWindow.SetAttributeNode(attrs);
 
             attrs = doc.CreateAttribute("top");
             if (winState == OverlappedPresenterState.Restored)
             {
-                attrs.Value = winTop.ToString();
+                attrs.Value = winTop.ToString(CultureInfo.InvariantCulture);
             }
             else
             {
-                attrs.Value = _winRestoreTop.ToString();
+                attrs.Value = _winRestoreTop.ToString(CultureInfo.InvariantCulture);
             }
             mainWindow.SetAttributeNode(attrs);
 
             attrs = doc.CreateAttribute("left");
             if (winState == OverlappedPresenterState.Restored)
             {
-                attrs.Value = winLeft.ToString();
+                attrs.Value = winLeft.ToString(CultureInfo.InvariantCulture);
             }
             else
             {
-                attrs.Value = _winRestoreLeft.ToString();
+                attrs.Value = _winRestoreLeft.ToString(CultureInfo.InvariantCulture);
             }
             mainWindow.SetAttributeNode(attrs);
 
@@ -935,19 +936,19 @@ public sealed partial class MainWindow : Window
 
         // Editor window attributes
         attrs = doc.CreateAttribute("width");
-        attrs.Value = _viewModel.RentResidentialEditorWinWidth.ToString();
+        attrs.Value = _viewModel.RentResidentialEditorWinWidth.ToString(CultureInfo.InvariantCulture);
         editWindow.SetAttributeNode(attrs);
 
         attrs = doc.CreateAttribute("height");
-        attrs.Value = _viewModel.RentResidentialEditorWinHeight.ToString();
+        attrs.Value = _viewModel.RentResidentialEditorWinHeight.ToString(CultureInfo.InvariantCulture);
         editWindow.SetAttributeNode(attrs);
 
         attrs = doc.CreateAttribute("top");
-        attrs.Value = _viewModel.RentResidentialEditorWinTop.ToString();
+        attrs.Value = _viewModel.RentResidentialEditorWinTop.ToString(CultureInfo.InvariantCulture);
         editWindow.SetAttributeNode(attrs);
 
         attrs = doc.CreateAttribute("left");
-        attrs.Value = _viewModel.RentResidentialEditorWinLeft.ToString();
+        attrs.Value = _viewModel.RentResidentialEditorWinLeft.ToString(CultureInfo.InvariantCulture);
         editWindow.SetAttributeNode(attrs);
 
         // Set editor window element to root.
@@ -958,19 +959,19 @@ public sealed partial class MainWindow : Window
 
         // Editor window attributes
         attrs = doc.CreateAttribute("width");
-        attrs.Value = _viewModel.RentResidentialListingEditorWinWidth.ToString();
+        attrs.Value = _viewModel.RentResidentialListingEditorWinWidth.ToString(CultureInfo.InvariantCulture);
         editWindow.SetAttributeNode(attrs);
 
         attrs = doc.CreateAttribute("height");
-        attrs.Value = _viewModel.RentResidentialListingEditorWinHeight.ToString();
+        attrs.Value = _viewModel.RentResidentialListingEditorWinHeight.ToString(CultureInfo.InvariantCulture);
         editWindow.SetAttributeNode(attrs);
 
         attrs = doc.CreateAttribute("top");
-        attrs.Value = _viewModel.RentResidentialListingEditorWinTop.ToString();
+        attrs.Value = _viewModel.RentResidentialListingEditorWinTop.ToString(CultureInfo.InvariantCulture);
         editWindow.SetAttributeNode(attrs);
 
         attrs = doc.CreateAttribute("left");
-        attrs.Value = _viewModel.RentResidentialListingEditorWinLeft.ToString();
+        attrs.Value = _viewModel.RentResidentialListingEditorWinLeft.ToString(CultureInfo.InvariantCulture);
         editWindow.SetAttributeNode(attrs);
 
         // Set editor window element to root.
@@ -981,19 +982,19 @@ public sealed partial class MainWindow : Window
 
         // Editor window attributes
         attrs = doc.CreateAttribute("width");
-        attrs.Value = _viewModel.RentCommercialEditorWinWidth.ToString();
+        attrs.Value = _viewModel.RentCommercialEditorWinWidth.ToString(CultureInfo.InvariantCulture);
         editWindow.SetAttributeNode(attrs);
 
         attrs = doc.CreateAttribute("height");
-        attrs.Value = _viewModel.RentCommercialEditorWinHeight.ToString();
+        attrs.Value = _viewModel.RentCommercialEditorWinHeight.ToString(CultureInfo.InvariantCulture);
         editWindow.SetAttributeNode(attrs);
 
         attrs = doc.CreateAttribute("top");
-        attrs.Value = _viewModel.RentCommercialEditorWinTop.ToString();
+        attrs.Value = _viewModel.RentCommercialEditorWinTop.ToString(CultureInfo.InvariantCulture);
         editWindow.SetAttributeNode(attrs);
 
         attrs = doc.CreateAttribute("left");
-        attrs.Value = _viewModel.RentCommercialEditorWinLeft.ToString();
+        attrs.Value = _viewModel.RentCommercialEditorWinLeft.ToString(CultureInfo.InvariantCulture);
         editWindow.SetAttributeNode(attrs);
 
         // Set editor window element to root.
@@ -1004,19 +1005,19 @@ public sealed partial class MainWindow : Window
 
         // Editor window attributes
         attrs = doc.CreateAttribute("width");
-        attrs.Value = _viewModel.RentCommercialListingEditorWinWidth.ToString();
+        attrs.Value = _viewModel.RentCommercialListingEditorWinWidth.ToString(CultureInfo.InvariantCulture);
         editWindow.SetAttributeNode(attrs);
 
         attrs = doc.CreateAttribute("height");
-        attrs.Value = _viewModel.RentCommercialListingEditorWinHeight.ToString();
+        attrs.Value = _viewModel.RentCommercialListingEditorWinHeight.ToString(CultureInfo.InvariantCulture);
         editWindow.SetAttributeNode(attrs);
 
         attrs = doc.CreateAttribute("top");
-        attrs.Value = _viewModel.RentCommercialListingEditorWinTop.ToString();
+        attrs.Value = _viewModel.RentCommercialListingEditorWinTop.ToString(CultureInfo.InvariantCulture);
         editWindow.SetAttributeNode(attrs);
 
         attrs = doc.CreateAttribute("left");
-        attrs.Value = _viewModel.RentCommercialListingEditorWinLeft.ToString();
+        attrs.Value = _viewModel.RentCommercialListingEditorWinLeft.ToString(CultureInfo.InvariantCulture);
         editWindow.SetAttributeNode(attrs);
 
         // Set editor window element to root.
@@ -1027,19 +1028,19 @@ public sealed partial class MainWindow : Window
 
         // Editor window attributes
         attrs = doc.CreateAttribute("width");
-        attrs.Value = _viewModel.LessorEditorWinWidth.ToString();
+        attrs.Value = _viewModel.LessorEditorWinWidth.ToString(CultureInfo.InvariantCulture);
         editWindow.SetAttributeNode(attrs);
 
         attrs = doc.CreateAttribute("height");
-        attrs.Value = _viewModel.LessorEditorWinHeight.ToString();
+        attrs.Value = _viewModel.LessorEditorWinHeight.ToString(CultureInfo.InvariantCulture);
         editWindow.SetAttributeNode(attrs);
 
         attrs = doc.CreateAttribute("top");
-        attrs.Value = _viewModel.LessorEditorWinTop.ToString();
+        attrs.Value = _viewModel.LessorEditorWinTop.ToString(CultureInfo.InvariantCulture);
         editWindow.SetAttributeNode(attrs);
 
         attrs = doc.CreateAttribute("left");
-        attrs.Value = _viewModel.LessorEditorWinLeft.ToString();
+        attrs.Value = _viewModel.LessorEditorWinLeft.ToString(CultureInfo.InvariantCulture);
         editWindow.SetAttributeNode(attrs);
 
         // Set editor window element to root.
@@ -1051,19 +1052,19 @@ public sealed partial class MainWindow : Window
 
         // Editor window attributes
         attrs = doc.CreateAttribute("width");
-        attrs.Value = _viewModel.BrokerEditorWinWidth.ToString();
+        attrs.Value = _viewModel.BrokerEditorWinWidth.ToString(CultureInfo.InvariantCulture);
         editWindow.SetAttributeNode(attrs);
 
         attrs = doc.CreateAttribute("height");
-        attrs.Value = _viewModel.BrokerEditorWinHeight.ToString();
+        attrs.Value = _viewModel.BrokerEditorWinHeight.ToString(CultureInfo.InvariantCulture);
         editWindow.SetAttributeNode(attrs);
 
         attrs = doc.CreateAttribute("top");
-        attrs.Value = _viewModel.BrokerEditorWinTop.ToString();
+        attrs.Value = _viewModel.BrokerEditorWinTop.ToString(CultureInfo.InvariantCulture);
         editWindow.SetAttributeNode(attrs);
 
         attrs = doc.CreateAttribute("left");
-        attrs.Value = _viewModel.BrokerEditorWinLeft.ToString();
+        attrs.Value = _viewModel.BrokerEditorWinLeft.ToString(CultureInfo.InvariantCulture);
         editWindow.SetAttributeNode(attrs);
 
         // Set editor window element to root.

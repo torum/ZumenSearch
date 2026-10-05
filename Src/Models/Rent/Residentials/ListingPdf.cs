@@ -14,7 +14,7 @@ public sealed partial class ListingPdf : PdfBase
 {
     public ViewModels.Rent.Residentials.ListingViewModel? ParentViewModel { get; set; }
 
-    public readonly ObservableCollection<ListingPdfTypeLabel> RoomPdfTypes =
+    public ObservableCollection<ListingPdfTypeLabel> RoomPdfTypes { get; set; } =
         [
         //new BuildingPictureType(EnumBuildingPictureType.Unspecified, "未指定"),
         new ListingPdfTypeLabel(Models.Rent.Residentials.ListingPdfType.Maisoku),

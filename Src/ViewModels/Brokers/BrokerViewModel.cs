@@ -9,7 +9,7 @@ using ZumenSearch.Services.Contracts;
 
 namespace ZumenSearch.ViewModels.Brokers;
 
-public sealed partial class BrokerViewModel : ObservableRecipient
+public sealed partial class BrokerViewModel : ObservableRecipient, IDisposable
 {
     #region == Private Variables ==
 
@@ -415,4 +415,11 @@ public sealed partial class BrokerViewModel : ObservableRecipient
     }
 
     #endregion
+
+    public void Dispose()
+    {
+        _cts?.Dispose();
+
+        GC.SuppressFinalize(this);
+    }
 }

@@ -26,12 +26,13 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     IRecipient<LessorDeletedMessage>,
     IRecipient<BrokerUpdatedMessage>,
     IRecipient<BrokerDeletedMessage>,
-    IRecipient<ListingUpdatedMessage>
+    IRecipient<ListingUpdatedMessage>,
+    IDisposable
 {
     private const string BasicPageName = "ZumenSearch.Views.Rent.Commercials.BasicPage";
     private readonly CancellationTokenSource _cts = new();
     // Keeps truck of "New" child window because it saves to the parent window/viewmodel.
-    public readonly List<Views.Rent.Commercials.Listing.EditorWindow> UnsavedChildEditorList = [];
+    public List<Views.Rent.Commercials.Listing.EditorWindow> UnsavedChildEditorList { get; } = [];
     // This property holds the COPY of current entity being edited.
     // Do not use it directly in the UI. Apply changes to this object in Save() to save the changes.
     private readonly Models.Rent.Commercials.Property _building;
@@ -688,9 +689,9 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                 IsDirty = true;
             }
         }
-    } = false;
+    }
 
-    public ObservableCollection<Models.Rent.Commercials.PropertyElectricKind> ElectricKinds =
+    public ObservableCollection<Models.Rent.Commercials.PropertyElectricKind> ElectricKinds { get; set; } =
     [
         new Models.Rent.Commercials.PropertyElectricKind(Models.Rent.Commercials.Property.EnumElectricType.AllElectric, "オール電化"),
         new Models.Rent.Commercials.PropertyElectricKind(Models.Rent.Commercials.Property.EnumElectricType.Unspecified, "未指定")
@@ -728,7 +729,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     #region == 管理プロパティ ==
 
-    public ObservableCollection<Models.Rent.Commercials.PropertyKanriShutai> KanriShutais =
+    public ObservableCollection<Models.Rent.Commercials.PropertyKanriShutai> KanriShutais { get; set; } =
     [
         new Models.Rent.Commercials.PropertyKanriShutai(Models.Rent.Commercials.Property.EnumKanriShutai.Unspecified, "未指定"),
         new Models.Rent.Commercials.PropertyKanriShutai(Models.Rent.Commercials.Property.EnumKanriShutai.Jisya, "自社管理"),
@@ -1004,7 +1005,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             return;
         }
 
-        var existingUnit = this.Units.FirstOrDefault(r => r.Id.Equals(unit.Id));
+        var existingUnit = this.Units.FirstOrDefault(r => r.Id.Equals(unit.Id, StringComparison.Ordinal));
         if (existingUnit is not null)
         {
             // Update existing unit
@@ -1046,10 +1047,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         var wrapper = LessorsWrapper
             .FirstOrDefault(item => item.Person.Id == lessor.Id);
 
-        if (wrapper is not null)
-        {
-            wrapper.Person = lessor;
-        }
+        wrapper?.Person = lessor;
     }
 
     public void Receive(LessorDeletedMessage message)
@@ -1084,10 +1082,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         var wrapper = BrokersWrapper
             .FirstOrDefault(item => item.Person.Id == broker.Id);
 
-        if (wrapper is not null)
-        {
-            wrapper.Person = broker;
-        }
+        wrapper?.Person = broker;
     }
 
     public void Receive(BrokerDeletedMessage message)
@@ -1203,12 +1198,12 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         FloorCountAboveGround =
             _building.FloorCountAboveGround == 0
                 ? string.Empty
-                : _building.FloorCountAboveGround.ToString();
+                : _building.FloorCountAboveGround.ToString(CultureInfo.InvariantCulture);
 
         FloorCountBasement =
             _building.FloorCountBasement == 0
                 ? string.Empty
-                : _building.FloorCountBasement.ToString();
+                : _building.FloorCountBasement.ToString(CultureInfo.InvariantCulture);
 
         TotalFloorArea =
             _building.TotalFloorArea == 0
@@ -2082,7 +2077,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
 
             string extension = Path.GetExtension(System.IO.Path.GetFileName(filePath));
-            if (!extension.Equals(".pdf")) // TODO: check case.
+            if (!extension.Equals(".pdf", StringComparison.OrdinalIgnoreCase)) // TODO: check case.
             {
                 continue;
             }
@@ -2363,4 +2358,10 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     #endregion
 
+    public void Dispose()
+    {
+        _cts?.Dispose();
+
+        GC.SuppressFinalize(this);
+    }
 }

@@ -9,5 +9,5 @@ namespace ZumenSearch.Models;
 // Common Listings SearchResult
 public sealed class ListingSearchResultWrapper : ResultWrapperBase
 {
-    public ObservableCollection<Models.ListingSearchResultItem> ListingSearchResult = [];
+    public ObservableCollection<Models.ListingSearchResultItem> ListingSearchResult { get; set; } = [];
 }

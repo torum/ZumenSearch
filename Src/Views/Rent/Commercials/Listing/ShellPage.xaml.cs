@@ -161,7 +161,7 @@ public sealed partial class ShellPage : Page
                 return;
             }
 
-            var item = _pages.FirstOrDefault(p => p.Tag.Equals(args.InvokedItemContainer.Tag.ToString()));
+            var item = _pages.FirstOrDefault(p => p.Tag.Equals(args.InvokedItemContainer.Tag.ToString(), StringComparison.Ordinal));
 
             if (item.Page is null)
             {

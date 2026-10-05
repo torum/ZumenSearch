@@ -7,7 +7,7 @@ namespace ZumenSearch.Models.Location;
 //「都道府県」リストPrefectureMasterクラス
 public sealed class PrefectureMaster()
 {
-    public List<Prefecture> Prefectures =
+    public List<Prefecture> Prefectures { get; set; } =
     [
         new Prefecture("01","010006", "北海道"),
         new Prefecture("02","020001", "青森県"),

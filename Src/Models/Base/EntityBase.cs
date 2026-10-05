@@ -32,7 +32,7 @@ public abstract class EntityBase : ObservableObject
     public EntityStatus Status { get; set; } = EntityStatus.New;
 
     // ANEMIC property, but ...
-    public bool IsModified { get; set; } = false;
+    public bool IsModified { get; set; }
 
     #region == Public Methods ==
 

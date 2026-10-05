@@ -147,7 +147,7 @@ public sealed partial class Property : PropertyBase
     #region == Location ==
 
 
-    public string MachiazaId = string.Empty;
+    public string MachiazaId { get; set; } = string.Empty;
 
     public Prefecture? Pref
     {
@@ -384,7 +384,7 @@ public sealed partial class Property : PropertyBase
                 IsModified = true;
             }
         }
-    } = false;
+    }
 
     public EnumElectricType PropertyElectricKind
     {
@@ -494,7 +494,7 @@ public sealed partial class Property : PropertyBase
         }
     } = [];
 
-    public ObservableCollection<PropertyPicture> PicturesToBeDeleted = [];
+    public ObservableCollection<PropertyPicture> PicturesToBeDeleted { get; set; } = [];
 
 
     // 図面（建物）リスト
@@ -511,7 +511,7 @@ public sealed partial class Property : PropertyBase
     } = [];
 
     // DBへの更新時にDBから削除されるべき図面のIDリスト
-    public ObservableCollection<PropertyPdf> PdfsToBeDeleted = [];
+    public ObservableCollection<PropertyPdf> PdfsToBeDeleted { get; set; } = [];
     #endregion
 
     #region == Lessors ==
@@ -528,7 +528,7 @@ public sealed partial class Property : PropertyBase
         }
     } = [];
 
-    public ObservableCollection<PersonBase> LessorsToBeDeleted = [];
+    public ObservableCollection<PersonBase> LessorsToBeDeleted { get; set; } = [];
 
     #endregion
 
@@ -546,7 +546,7 @@ public sealed partial class Property : PropertyBase
         }
     } = [];
 
-    public ObservableCollection<PersonBase> BrokersToBeDeleted = [];
+    public ObservableCollection<PersonBase> BrokersToBeDeleted { get; set; } = [];
 
     #endregion
 
@@ -567,7 +567,7 @@ public sealed partial class Property : PropertyBase
 
     // DBへの更新時にDBから削除されるべき区画のIDリスト
 
-    public ObservableCollection<Models.Rent.Commercials.Listing.Listing> UnitsToBeDeleted = [];
+    public ObservableCollection<Models.Rent.Commercials.Listing.Listing> UnitsToBeDeleted { get; set; } = [];
 
     #endregion
 

@@ -101,7 +101,7 @@ public partial class BrokerSelectViewModel : ObservableObject
             SuggestedBrokers = new(res.PersonSearchResult);
         }
     }
-    private bool CanSearch()
+    private static bool CanSearch()
     {
         //return !string.IsNullOrEmpty(Query);
         // Allow empty (treat as "*")
@@ -109,7 +109,7 @@ public partial class BrokerSelectViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void AddNewBroker()
+    private static void AddNewBroker()
     {
         var mainVm = App.GetService<MainViewModel>();
         mainVm.AddNewBrokerCommand.Execute(null);

@@ -34,7 +34,7 @@ public sealed partial class ListingPicture : PictureBase
         }
     } = new(ListingPictureType.Unspecified);
 
-    public readonly ObservableCollection<ListingPictureTypeLabel> RoomPictureTypes =
+    public ObservableCollection<ListingPictureTypeLabel> RoomPictureTypes { get;} =
     [
         new ListingPictureTypeLabel(Models.Rent.Residentials.ListingPictureType.Unspecified),
         new ListingPictureTypeLabel(Models.Rent.Residentials.ListingPictureType.Madori),

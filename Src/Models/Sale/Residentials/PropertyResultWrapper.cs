@@ -10,5 +10,5 @@ namespace ZumenSearch.Models.Sale.Residentials;
 // Sales Residential
 public sealed class PropertyResultWrapper : ResultWrapperBase
 {
-    public Models.Sale.Residentials.Property? Building;
+    public Models.Sale.Residentials.Property? Building { get; set; }
 }

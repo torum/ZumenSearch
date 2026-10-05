@@ -11,7 +11,7 @@ public sealed partial class PropertyPicture : PictureBase
 {
     public ViewModels.Rent.Residentials.PropertyViewModel? ParentViewModel { get; set; }
 
-    public readonly ObservableCollection<PropertyPictureTypeLabel> ResidentialPictureTypes =
+    public ObservableCollection<PropertyPictureTypeLabel> ResidentialPictureTypes { get; } =
     [
         //new PropertyPictureTypeLabel(EnumResidentialPictureType.Unspecified, "未指定"),
         new PropertyPictureTypeLabel(Models.Rent.Residentials.PropertyPictureType.Gaikan),

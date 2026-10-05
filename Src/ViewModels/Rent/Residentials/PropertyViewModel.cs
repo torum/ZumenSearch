@@ -28,7 +28,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     IRecipient<LessorUpdatedMessage>,
     IRecipient<BrokerUpdatedMessage>,
     IRecipient<LessorDeletedMessage>,
-    IRecipient<BrokerDeletedMessage>
+    IRecipient<BrokerDeletedMessage>,
+    IDisposable
 {
     #region == Private variables and const ==
 
@@ -43,7 +44,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     private readonly string _propertyDataDirectoryPath = string.Empty;
 
     // Keeps truck of "New" child window because it saves to the parent window/viewmodel.
-    public readonly List<Views.Rent.Residentials.Listing.EditorWindow> UnsavedChildEditorList = [];
+    public List<Views.Rent.Residentials.Listing.EditorWindow> UnsavedChildEditorList { get;} = [];
 
     // Tmp file list to hold unsaved picture files. (if entry is not saved, delete on close)
     private readonly List<string> _unsavedBuildingPictureFileList = [];
@@ -201,7 +202,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     }
 
     // 物件種別
-    public ObservableCollection<Models.Rent.Residentials.PropertyTypeLabel> Kinds =
+    public ObservableCollection<Models.Rent.Residentials.PropertyTypeLabel> Kinds { get; set; } =
     [
         //new Kind(EnumKinds.Unspecified.ToString(), "未指定"),
         new Models.Rent.Residentials.PropertyTypeLabel(Models.Rent.Residentials.PropertyType.Apartment),
@@ -261,7 +262,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     public partial bool IsUnitOwnershipVisible { get; private set; } = true;
 
     // 建物構造
-    public ObservableCollection<Models.Rent.Residentials.PropertyStructureTypeLabel> Structures =
+    public ObservableCollection<Models.Rent.Residentials.PropertyStructureTypeLabel> Structures { get; set; } =
     [
         //new Structure(StructureType.Unspecified.ToString(), "未指定"),
         new Models.Rent.Residentials.PropertyStructureTypeLabel(Models.Rent.Residentials.StructureType.Wood),
@@ -631,9 +632,9 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     #region == 所在地プロパティ ==
 
-    public string? MachiazaId;
+    public string? MachiazaId { get; set; }
 
-    public ObservableCollection<Prefecture> Prefectures = new(new PrefectureMaster().Prefectures);
+    public ObservableCollection<Prefecture> Prefectures { get; set; } = new(new PrefectureMaster().Prefectures);
 
     public Prefecture? SelectedPef
     {
@@ -1182,9 +1183,9 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                 IsDirty = true;
             }
         }
-    } = false;
+    }
 
-    public ObservableCollection<Models.Rent.Residentials.PropertyElectricKind> ElectricKinds =
+    public ObservableCollection<Models.Rent.Residentials.PropertyElectricKind> ElectricKinds { get; set; } =
     [
         new Models.Rent.Residentials.PropertyElectricKind(Models.Rent.Residentials.Property.EnumElectricType.AllElectric, "オール電化"),
         new Models.Rent.Residentials.PropertyElectricKind(Models.Rent.Residentials.Property.EnumElectricType.Unspecified, "未指定")
@@ -1222,7 +1223,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     #region == 管理プロパティ ==
 
-    public ObservableCollection<Models.Rent.Residentials.PropertyKanriShutai> KanriShutais =
+    public ObservableCollection<Models.Rent.Residentials.PropertyKanriShutai> KanriShutais { get; set; } =
     [
         new Models.Rent.Residentials.PropertyKanriShutai(Models.Rent.Residentials.Property.EnumKanriShutai.Unspecified, "未指定"),
         new Models.Rent.Residentials.PropertyKanriShutai(Models.Rent.Residentials.Property.EnumKanriShutai.Jisya, "自社管理"),
@@ -1493,7 +1494,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             return;
         }
 
-        var existingRoom = this.Rooms.FirstOrDefault(r => r.Id.Equals(room.Id));
+        var existingRoom = this.Rooms.FirstOrDefault(r => r.Id.Equals(room.Id, StringComparison.Ordinal));
         if (existingRoom is not null)
         {
             // Update existing room
@@ -1531,7 +1532,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             return;
         }
 
-        var psn = LessorsWrapper.FirstOrDefault(r => r.Person.Id.Equals(lessor.Id));
+        var psn = LessorsWrapper.FirstOrDefault(r => r.Person.Id.Equals(lessor.Id, StringComparison.Ordinal));
         if (psn is null) return;
 
         psn.Person = lessor; //= new PersonWrapperForPropertyViewModel(lessor, this);
@@ -1545,7 +1546,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             return;
         }
 
-        var psn = BrokersWrapper.FirstOrDefault(r => r.Person.Id.Equals(broker.Id));
+        var psn = BrokersWrapper.FirstOrDefault(r => r.Person.Id.Equals(broker.Id, StringComparison.Ordinal));
         if (psn is null) return;
 
         psn.Person = broker; //= new PersonWrapperForPropertyViewModel(lessor, this);
@@ -1559,7 +1560,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             return;
         }
 
-        var room = Rooms.FirstOrDefault(r => r.Id.Equals(id));
+        var room = Rooms.FirstOrDefault(r => r.Id.Equals(id, StringComparison.Ordinal));
         if (room is null) return;
         Rooms.Remove(room);
     }
@@ -1572,7 +1573,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             return;
         }
 
-        var psn = LessorsWrapper.FirstOrDefault(r => r.Person.Id.Equals(id));
+        var psn = LessorsWrapper.FirstOrDefault(r => r.Person.Id.Equals(id, StringComparison.Ordinal));
         if (psn is null) return;
         LessorsWrapper.Remove(psn);
 
@@ -1587,7 +1588,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             return;
         }
 
-        var psn = BrokersWrapper.FirstOrDefault(r => r.Person.Id.Equals(id));
+        var psn = BrokersWrapper.FirstOrDefault(r => r.Person.Id.Equals(id, StringComparison.Ordinal));
         if (psn is null) return;
         BrokersWrapper.Remove(psn);
 
@@ -1653,9 +1654,9 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         var Structurekey = Structures.FirstOrDefault(k => k.Key == _building.BuildingStructure.Key);
         SelectedStructure = Structurekey is null ? new(Models.Rent.Residentials.StructureType.Unspecified) : Structurekey;
 
-        FloorCountAboveGround = _building.FloorCountAboveGround == 0 ? string.Empty : _building.FloorCountAboveGround.ToString();
-        FloorCountBasement = _building.FloorCountBasement == 0 ? string.Empty : _building.FloorCountBasement.ToString();
-        TotalUnitCount = _building.TotalUnitCount == 0 ? string.Empty : _building.TotalUnitCount.ToString();
+        FloorCountAboveGround = _building.FloorCountAboveGround == 0 ? string.Empty : _building.FloorCountAboveGround.ToString(CultureInfo.InvariantCulture);
+        FloorCountBasement = _building.FloorCountBasement == 0 ? string.Empty : _building.FloorCountBasement.ToString(CultureInfo.InvariantCulture);
+        TotalUnitCount = _building.TotalUnitCount == 0 ? string.Empty : _building.TotalUnitCount.ToString(CultureInfo.InvariantCulture);
         BuiltYearAndMonth = _building.BuiltYearAndMonth.Year != 1900 ? _building.BuiltYearAndMonth : null;
         FudousanId = _building.FudousanId;
         FudousanIdAdditionalCode = _building.FudousanIdAdditionalCode;
@@ -1666,7 +1667,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
         if (!string.IsNullOrEmpty(_building.LocPrefId))
         {
-            var hoge = Prefectures.FirstOrDefault<Prefecture>(p => p.MunicipalityCode.Equals(_building.LocPrefId));
+            var hoge = Prefectures.FirstOrDefault<Prefecture>(p => p.MunicipalityCode.Equals(_building.LocPrefId, StringComparison.Ordinal));
             if (hoge is not null)
             {
                 SelectedPef = hoge;
@@ -1677,7 +1678,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         {
             foreach (var cty in Cities)
             {
-                if (cty.County.Equals(_building.LocCounty) && cty.City.Equals(_building.LocCity))
+                if (cty.County.Equals(_building.LocCounty, StringComparison.Ordinal) && cty.City.Equals(_building.LocCity, StringComparison.Ordinal))
                 {
                     SelectedCity = cty;
                     break;
@@ -1689,7 +1690,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         {
             foreach (var twn in Towns)
             {
-                if (twn.Ward.Equals(_building.LocWard) && twn.Oaza.Equals(_building.LocOazaCho))
+                if (twn.Ward.Equals(_building.LocWard, StringComparison.Ordinal) && twn.Oaza.Equals(_building.LocOazaCho, StringComparison.Ordinal))
                 {
                     SelectedTown = twn;
                     break;
@@ -1699,7 +1700,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
         if (Chous is not null) // Allow an empty string. //&& (!string.IsNullOrEmpty(_building.LocChoume))
         {
-            var hoge = Chous.FirstOrDefault<Choume>(p => p.Chou.Equals(_building.LocChoume));
+            var hoge = Chous.FirstOrDefault<Choume>(p => p.Chou.Equals(_building.LocChoume, StringComparison.Ordinal));
             if (hoge is not null)
             {
                 SelectedChou = hoge;
@@ -1861,7 +1862,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             IsDirty = true;
 
             var prop = e.PropertyName ?? string.Empty;
-            if (prop.Equals("IsMain"))
+            if (prop.Equals("IsMain", StringComparison.Ordinal))
             {
                 if (picBldg.IsMain)
                 {
@@ -1893,7 +1894,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             IsDirty = true;
 
             var prop = e.PropertyName ?? string.Empty;
-            if (prop.Equals("IsMain"))
+            if (prop.Equals("IsMain", StringComparison.Ordinal))
             {
                 if (pdfBldg.IsMain)
                 {
@@ -2427,7 +2428,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
 
             string extension = Path.GetExtension(System.IO.Path.GetFileName(filePath));
-            if (!extension.Equals(".pdf")) // TODO: check case.
+            if (!extension.Equals(".pdf", StringComparison.OrdinalIgnoreCase)) // TODO: check case.
             {
                 continue;
             }
@@ -2860,7 +2861,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             var lessorId = lessor.Id;
 
             // Check if already exists
-            var match = LessorsWrapper.FirstOrDefault(x => x.Person.Id.Equals(lessorId));
+            var match = LessorsWrapper.FirstOrDefault(x => x.Person.Id.Equals(lessorId, StringComparison.Ordinal));
             if (match is not null)
             {
                 Debug.WriteLine($"lessor {lessor.Name} already in the list.");
@@ -2964,7 +2965,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             var brokerId = broker.Id;
 
             // Check if already exists
-            var match = BrokersWrapper.FirstOrDefault(x => x.Person.Id.Equals(brokerId));
+            var match = BrokersWrapper.FirstOrDefault(x => x.Person.Id.Equals(brokerId, StringComparison.Ordinal));
             if (match is not null)
             {
                 Debug.WriteLine($"broker {broker.Name} already in the list.");
@@ -3048,4 +3049,10 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     #endregion
 
+    public void Dispose()
+    {
+        _cts?.Dispose();
+
+        GC.SuppressFinalize(this);
+    }
 }
