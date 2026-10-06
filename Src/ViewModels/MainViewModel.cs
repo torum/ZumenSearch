@@ -9,7 +9,6 @@ using System.Reflection;
 using Windows.ApplicationModel;
 using ZumenSearch.Helpers;
 using ZumenSearch.Models;
-using ZumenSearch.Models.Enums;
 using ZumenSearch.Models.Messenger;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.Services.Extensions.AbstractFactory;
@@ -87,8 +86,38 @@ public partial class MainViewModel : ObservableRecipient,
         _ = InitializeDatabase();
         // No code after this point should be automatically executed until the database initialization is completed.
 
+        /*
+        // Intercept changes to the inherited IsActive property safely without overriding OnActivated
+        this.PropertyChanged += (s, e) =>
+        {
+            if (e.PropertyName == nameof(IsActive))
+            {
+                if (IsActive)
+                {
+                    // This implicitly uses WeakReferenceMessenger.Default under the hood
+                    Messenger.Register<PropertyUpdatedMessage>(this);
+                    Messenger.Register<ListingUpdatedMessage>(this);
+                    Messenger.Register<LessorUpdatedMessage>(this);
+                    Messenger.Register<BrokerUpdatedMessage>(this);
+                    Messenger.Register<WindowClosedMessage>(this);
+                }
+                else
+                {
+                    Messenger.Unregister<PropertyUpdatedMessage>(this);
+                    Messenger.Unregister<ListingUpdatedMessage>(this);
+                    Messenger.Unregister<LessorUpdatedMessage>(this);
+                    Messenger.Unregister<BrokerUpdatedMessage>(this);
+                    Messenger.Unregister<WindowClosedMessage>(this);
+                }
+            }
+        };
+        */
         // Ready to receive messages.
-        this.IsActive = true;
+#pragma warning disable IL3050 // Disable AOT dynamic code warning
+#pragma warning disable IL2026 // Disable Trimming unreferenced code warning
+        IsActive = true;
+#pragma warning restore IL2026
+#pragma warning restore IL3050
     }
 
     #region == Properties ==
@@ -1947,7 +1976,9 @@ public partial class MainViewModel : ObservableRecipient,
     #region == 賃貸駐車場 ==
 
     [RelayCommand]
+#pragma warning disable CA1822 // Mark members as static
     private void AddNewRentParking()
+#pragma warning restore CA1822 // Mark members as static
     {
         //
     }
@@ -2767,6 +2798,11 @@ public partial class MainViewModel : ObservableRecipient,
 
     public void Dispose()
     {
+        // Unsubscribe
+        //WeakReferenceMessenger.Default.UnregisterAll(this);
+        //or
+        //this.IsActive = false;
+
         _cts?.Dispose();
 
         GC.SuppressFinalize(this);

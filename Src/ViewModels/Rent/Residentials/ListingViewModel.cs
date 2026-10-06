@@ -21,7 +21,8 @@ public sealed partial class ListingViewModel : ObservableRecipient,
     IRecipient<LessorUpdatedMessage>,
     IRecipient<BrokerUpdatedMessage>,
     IRecipient<LessorDeletedMessage>,
-    IRecipient<BrokerDeletedMessage>, IDisposable
+    IRecipient<BrokerDeletedMessage>, 
+    IDisposable
 {
     #region == Private variables ==
 
@@ -81,8 +82,40 @@ public sealed partial class ListingViewModel : ObservableRecipient,
         _room.IsModified = false;
         IsDirty = false;
 
+        /*
+        // Intercept changes to the inherited IsActive property safely without overriding OnActivated
+        this.PropertyChanged += (s, e) =>
+        {
+            if (e.PropertyName == nameof(IsActive))
+            {
+                if (IsActive)
+                {
+                    // This implicitly uses WeakReferenceMessenger.Default under the hood
+                    Messenger.Register<PropertyUpdatedMessage>(this);
+                    Messenger.Register<LessorUpdatedMessage>(this);
+                    Messenger.Register<LessorDeletedMessage>(this);
+                    Messenger.Register<BrokerUpdatedMessage>(this);
+                    Messenger.Register<BrokerDeletedMessage>(this);
+                    Messenger.Register<PropertyIsUnitOwnershipChangedMessage>(this);
+                }
+                else
+                {
+                    Messenger.Unregister<PropertyUpdatedMessage>(this);
+                    Messenger.Unregister<LessorUpdatedMessage>(this);
+                    Messenger.Unregister<LessorDeletedMessage>(this);
+                    Messenger.Unregister<BrokerUpdatedMessage>(this);
+                    Messenger.Unregister<BrokerDeletedMessage>(this);
+                    Messenger.Unregister<PropertyIsUnitOwnershipChangedMessage>(this);
+                }
+            }
+        };
+        */
         // Ready to receive messages.
-        this.IsActive = true;
+#pragma warning disable IL3050 // Disable AOT dynamic code warning
+#pragma warning disable IL2026 // Disable Trimming unreferenced code warning
+        IsActive = true;
+#pragma warning restore IL2026
+#pragma warning restore IL3050
     }
 
     #region == Properties ==
@@ -492,7 +525,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
         // Unsubscribe
         //WeakReferenceMessenger.Default.UnregisterAll(this);
         //or
-        this.IsActive = false;
+        //this.IsActive = false;
     }
 
     public void DiscardChanges()

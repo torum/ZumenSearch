@@ -9,6 +9,7 @@ namespace ZumenSearch.Models.Sale.Residentials;
 #pragma warning disable IDE0079 // Remove unnecessary suppression
 #pragma warning disable IDE0290 // Use primary constructor
 
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "CA1716:Identifiers should not match keywords", Justification = "Required for clarity. And I don't care about Visual Basic Keywords.")]
 public sealed partial class Property : PropertyBase
 {
     public PropertyKind BuildingKind

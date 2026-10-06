@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Text;
+﻿using System.Collections.ObjectModel;
 using ZumenSearch.Models.Base;
 
 #pragma warning disable IDE0079 // Remove unnecessary suppression

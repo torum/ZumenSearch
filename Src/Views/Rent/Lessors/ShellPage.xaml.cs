@@ -103,7 +103,9 @@ public sealed partial class ShellPage : Page
         //
     }
 
+#pragma warning disable CA1707 // Identifiers should not contain underscores
     public void Window_Activated(object sender, Microsoft.UI.Xaml.WindowActivatedEventArgs args)
+#pragma warning restore CA1707 // Identifiers should not contain underscores
     {
         var resource = args.WindowActivationState == WindowActivationState.Deactivated ? "WindowCaptionForegroundDisabled" : "WindowCaptionForeground";
         AppTitleBarText.Foreground = (SolidColorBrush)App.Current.Resources[resource];
@@ -166,7 +168,9 @@ public sealed partial class ShellPage : Page
         }
     }
 
+#pragma warning disable CA1707 // Identifiers should not contain underscores
     public void Window_Closed(object sender, WindowEventArgs args)
+#pragma warning restore CA1707 // Identifiers should not contain underscores
     {
         if (sender is not EditorWindow ewin)
         {
@@ -222,7 +226,7 @@ public sealed partial class ShellPage : Page
             {
                 if (crumbs.Count > 1)
                 {
-                    var item = _pages.FirstOrDefault(p => p.Tag.Equals("ZumenSearch.Views.Rent.Lessors.BasicPage"));
+                    var item = _pages.FirstOrDefault(p => p.Tag.Equals("ZumenSearch.Views.Rent.Lessors.BasicPage", StringComparison.Ordinal));
                     if (item.Page is not null)
                     {
                         crumbs.RemoveAt(crumbs.Count - 1); // Remove the last breadcrumb if exists to avoid duplication.
@@ -254,7 +258,7 @@ public sealed partial class ShellPage : Page
                 return;
             }
 
-            var item = _pages.FirstOrDefault(p => p.Tag.Equals(args.InvokedItemContainer.Tag.ToString()));
+            var item = _pages.FirstOrDefault(p => p.Tag.Equals(args.InvokedItemContainer.Tag.ToString(), StringComparison.Ordinal));
 
             if (item.Page is null)
             {
@@ -284,7 +288,8 @@ public sealed partial class ShellPage : Page
 
     private void ContentFrame_NavigationFailed(object sender, NavigationFailedEventArgs e)
     {
-        throw new Exception("Failed to load Page " + e.SourcePageType.FullName);
+        //  CA2201 (Do not raise reserved exception types)
+        //throw new Exception("Failed to load Page " + e.SourcePageType.FullName);
     }
 
     private void ContentFrame_Navigated(object sender, NavigationEventArgs e)

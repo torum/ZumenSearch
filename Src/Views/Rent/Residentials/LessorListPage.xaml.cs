@@ -138,7 +138,7 @@ public sealed partial class LessorListPage : Page
         window.AppWindow.Move(CenteredPosition);
     }
 
-    private void SetWindowOwner(IntPtr ownerHwnd, WindowId id)
+    private static void SetWindowOwner(IntPtr ownerHwnd, WindowId id)
     {
         // Get the HWND (window handle) of the owner window (main window).
         //IntPtr ownerHwnd = WindowNative.GetWindowHandle(owner);

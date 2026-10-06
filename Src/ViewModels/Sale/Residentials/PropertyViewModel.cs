@@ -245,7 +245,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IDisposable
 
         PopulateValues();
         IsDirty = false;
-        IsActive = true;
+        //IsActive = true;
     }
 
     public void DiscardChanges()

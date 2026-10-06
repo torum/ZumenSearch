@@ -109,8 +109,42 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             IsDirty = false;
         }
 
+        /*
+        // Intercept changes to the inherited IsActive property safely without overriding OnActivated
+        this.PropertyChanged += (s, e) =>
+        {
+            if (e.PropertyName == nameof(IsActive))
+            {
+                if (IsActive)
+                {
+                    // This implicitly uses WeakReferenceMessenger.Default under the hood
+                    Messenger.Register<ListingUpdatedMessage>(this);
+                    Messenger.Register<WindowClosedMessage>(this);
+                    Messenger.Register<ListingDeletedMessage>(this);
+                    Messenger.Register<LessorUpdatedMessage>(this);
+                    Messenger.Register<BrokerUpdatedMessage>(this);
+                    Messenger.Register<LessorDeletedMessage>(this);
+                    Messenger.Register<BrokerDeletedMessage>(this);
+                }
+                else
+                {
+                    Messenger.Unregister<ListingUpdatedMessage>(this);
+                    Messenger.Unregister<WindowClosedMessage>(this);
+                    Messenger.Unregister<ListingDeletedMessage>(this);
+                    Messenger.Unregister<LessorUpdatedMessage>(this);
+                    Messenger.Unregister<BrokerUpdatedMessage>(this);
+                    Messenger.Unregister<LessorDeletedMessage>(this);
+                    Messenger.Unregister<BrokerDeletedMessage>(this);
+                }
+            }
+        };
+        */
         // Ready to receive messages.
-        this.IsActive = true;
+#pragma warning disable IL3050 // Disable AOT dynamic code warning
+#pragma warning disable IL2026 // Disable Trimming unreferenced code warning
+        IsActive = true;
+#pragma warning restore IL2026
+#pragma warning restore IL3050
     }
 
 
@@ -1626,7 +1660,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         // Unsubscribe
         //WeakReferenceMessenger.Default.UnregisterAll(this);
         //or
-        this.IsActive = false;
+        //this.IsActive = false;
 
         _cts.Cancel();
         _cts.Dispose();

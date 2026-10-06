@@ -52,7 +52,9 @@ public sealed partial class TransportationPage : Page
         }
     }
 
+#pragma warning disable CA1822 // Mark members as static
     private void TextBox4DigitOrLess_TextChanging(TextBox sender, TextBoxTextChangingEventArgs args)
+#pragma warning restore CA1822 // Mark members as static
     {
         var text = ((TextBox)sender).Text;
 

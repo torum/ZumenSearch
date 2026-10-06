@@ -12,6 +12,7 @@ namespace ZumenSearch.Models.Rent.Residentials;
 
 // Aggregate Root entity.
 
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "CA1716:Identifiers should not match keywords", Justification = "Required for clarity. And I don't care about Visual Basic Keywords.")]
 public sealed partial class Property : PropertyBase
 {
     public Property(string id, EntityStatus status) : base(id, status, Enums.PropertyKind.RentResidential)

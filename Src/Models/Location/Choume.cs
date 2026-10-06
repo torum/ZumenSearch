@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ZumenSearch.Models.Location;
+﻿namespace ZumenSearch.Models.Location;
 
 public sealed class Choume(string machiazaId, string choume)
 {

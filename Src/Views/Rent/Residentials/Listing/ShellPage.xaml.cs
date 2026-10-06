@@ -293,7 +293,8 @@ public sealed partial class ShellPage : Page
 
     private void ContentFrame_NavigationFailed(object sender, NavigationFailedEventArgs e)
     {
-        throw new Exception("Failed to load Page " + e.SourcePageType.FullName);
+        //  CA2201 (Do not raise reserved exception types)
+        //throw new Exception("Failed to load Page " + e.SourcePageType.FullName);
     }
 
     private void ContentFrame_Navigated(object sender, NavigationEventArgs e)

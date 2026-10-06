@@ -1,12 +1,14 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using ZumenSearch.Models;
 using ZumenSearch.Models.Base;
 using ZumenSearch.Models.Enums;
+using ZumenSearch.Models.Messenger;
 using ZumenSearch.Services.Contracts;
-using CommunityToolkit.Mvvm.Messaging;
-using ZumenSearch.Models;
 
 namespace ZumenSearch.ViewModels.Rent.Commercials;
 
@@ -41,7 +43,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IDisposable
 
         PopulateValues();
         IsDirty = false;
-        IsActive = true;
+
     }
 
     #region == Properties ==
@@ -126,7 +128,9 @@ public sealed partial class ListingViewModel : ObservableRecipient, IDisposable
 
     #region == Public Methods ==
 
+#pragma warning disable CA1822 // tmp
     public void CleanUp()
+#pragma warning restore CA1822 // tmp
     {
         /*
         // TODO: ?
@@ -142,7 +146,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IDisposable
         // Unsubscribe
         //WeakReferenceMessenger.Default.UnregisterAll(this);
         //or
-        this.IsActive = false;
+        //this.IsActive = false;
     }
 
     public void DiscardChanges()
@@ -375,6 +379,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IDisposable
 
     public void Dispose()
     {
+
         _cts?.Dispose();
 
         GC.SuppressFinalize(this);

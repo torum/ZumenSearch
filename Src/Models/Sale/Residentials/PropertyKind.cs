@@ -6,7 +6,7 @@ namespace ZumenSearch.Models.Sale.Residentials;
 
 public sealed class PropertyKind(PropertyType key)
 {
-    private static readonly IReadOnlyDictionary<PropertyType, string> Labels =
+    private static readonly Dictionary<PropertyType, string> Labels =
         new Dictionary<PropertyType, string>
         {
             [PropertyType.Unspecified] = "未指定",

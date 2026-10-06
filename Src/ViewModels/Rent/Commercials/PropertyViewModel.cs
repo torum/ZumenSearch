@@ -88,7 +88,41 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         }
 
         IsDirty = false;
+
+        /*
+        // Intercept changes to the inherited IsActive property safely without overriding OnActivated
+        this.PropertyChanged += (s, e) =>
+        {
+            if (e.PropertyName == nameof(IsActive))
+            {
+                if (IsActive)
+                {
+                    // This implicitly uses WeakReferenceMessenger.Default under the hood
+                    Messenger.Register<WindowClosedMessage>(this);
+                    Messenger.Register<LessorUpdatedMessage>(this);
+                    Messenger.Register<LessorDeletedMessage>(this);
+                    Messenger.Register<BrokerUpdatedMessage>(this);
+                    Messenger.Register<BrokerDeletedMessage>(this);
+                    Messenger.Register<ListingUpdatedMessage>(this);
+                }
+                else
+                {
+                    Messenger.Unregister<WindowClosedMessage>(this);
+                    Messenger.Unregister<LessorUpdatedMessage>(this);
+                    Messenger.Unregister<LessorDeletedMessage>(this);
+                    Messenger.Unregister<BrokerUpdatedMessage>(this);
+                    Messenger.Unregister<BrokerDeletedMessage>(this);
+                    Messenger.Unregister<ListingUpdatedMessage>(this);
+                }
+            }
+        };
+        */
+        // Ready to receive messages.
+#pragma warning disable IL3050 // Disable AOT dynamic code warning
+#pragma warning disable IL2026 // Disable Trimming unreferenced code warning
         IsActive = true;
+#pragma warning restore IL2026
+#pragma warning restore IL3050
     }
 
     #region == Properties ==
@@ -2360,6 +2394,11 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     public void Dispose()
     {
+        // Unsubscribe
+        //WeakReferenceMessenger.Default.UnregisterAll(this);
+        //or
+        //this.IsActive = false;
+
         _cts?.Dispose();
 
         GC.SuppressFinalize(this);

@@ -51,7 +51,9 @@ public sealed partial class BasicPage : Page
         Init();
     }
 
+#pragma warning disable CA1822 // Mark members as static
     private void TextBoxDigitOnly_TextChanging(TextBox sender, TextBoxTextChangingEventArgs args)
+#pragma warning restore CA1822 // Mark members as static
     {
         /*
         var text = ((TextBox)sender).Text;
@@ -93,7 +95,9 @@ public sealed partial class BasicPage : Page
         */
     }
 
+#pragma warning disable CA1822 // Mark members as static
     private void TextBox4DigitOrLess_TextChanging(TextBox sender, TextBoxTextChangingEventArgs args)
+#pragma warning restore CA1822 // Mark members as static
     {
         var text = ((TextBox)sender).Text;
 
@@ -153,7 +157,9 @@ public sealed partial class BasicPage : Page
         */
     }
 
+#pragma warning disable CA1822 // Mark members as static
     private void TextBox5DigitOrLess_TextChanging(TextBox sender, TextBoxTextChangingEventArgs args)
+#pragma warning restore CA1822 // Mark members as static
     {
         var text = ((TextBox)sender).Text;
 
@@ -209,7 +215,9 @@ public sealed partial class BasicPage : Page
         */
     }
 
+#pragma warning disable CA1822 // Mark members as static
     private void TextBox4DigitOnly_TextChanging(TextBox sender, TextBoxTextChangingEventArgs args)
+#pragma warning restore CA1822 // Mark members as static
     {
         var text = ((TextBox)sender).Text;
 
@@ -258,7 +266,9 @@ public sealed partial class BasicPage : Page
         */
     }
 
+#pragma warning disable CA1822 // Mark members as static
     private void TextBox13DigitOnly_TextChanging(TextBox sender, TextBoxTextChangingEventArgs args)
+#pragma warning restore CA1822 // Mark members as static
     {
         var text = ((TextBox)sender).Text;
 

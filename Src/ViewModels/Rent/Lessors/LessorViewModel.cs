@@ -84,7 +84,7 @@ public sealed partial class LessorViewModel : ObservableRecipient, IDisposable
         }
 
         // Ready to receive messages.
-        this.IsActive = true;
+        //this.IsActive = true;
     }
 
     #region == Properties ==

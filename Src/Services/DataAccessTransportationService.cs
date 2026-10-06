@@ -78,11 +78,11 @@ public class DataAccessTransportationService : IDataAccessTransportationService
         return dataset;
     }
 
-    public ObservableCollection<RailStation> GetRailStationsBy(string _railLineCode, string query)
+    public ObservableCollection<RailStation> GetRailStationsBy(string railLineCode, string query)
     {
         var dataset = new ObservableCollection<RailStation>();
 
-        if (string.IsNullOrEmpty(_railLineCode))
+        if (string.IsNullOrEmpty(railLineCode))
         {
             return dataset;
         }
@@ -97,11 +97,11 @@ public class DataAccessTransportationService : IDataAccessTransportationService
 
         if (string.IsNullOrEmpty(query))
         {
-            cmd.CommandText = string.Format(CultureInfo.InvariantCulture, "SELECT station_cd, line_cd, station_name FROM rail_stations WHERE line_cd LIKE '{0}'", _railLineCode);
+            cmd.CommandText = string.Format(CultureInfo.InvariantCulture, "SELECT station_cd, line_cd, station_name FROM rail_stations WHERE line_cd LIKE '{0}'", railLineCode);
         }
         else
         {
-            cmd.CommandText = string.Format(CultureInfo.InvariantCulture, "SELECT station_cd, line_cd, station_name FROM rail_stations WHERE line_cd LIKE '{0}' AND station_name LIKE '%{1}%'", _railLineCode, query);
+            cmd.CommandText = string.Format(CultureInfo.InvariantCulture, "SELECT station_cd, line_cd, station_name FROM rail_stations WHERE line_cd LIKE '{0}' AND station_name LIKE '%{1}%'", railLineCode, query);
         }
 
         using var reader = cmd.ExecuteReader();

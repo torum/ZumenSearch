@@ -138,7 +138,7 @@ public sealed partial class LessorListPage : Page
         window.AppWindow.Move(CenteredPosition);
     }
 
-    private void SetWindowOwner(IntPtr ownerHwnd, WindowId id)
+    private static void SetWindowOwner(IntPtr ownerHwnd, WindowId id)
     {
         // Get the HWND (window handle) of the owner window (main window).
         //IntPtr ownerHwnd = WindowNative.GetWindowHandle(owner);
@@ -159,11 +159,11 @@ public sealed partial class LessorListPage : Page
     }
 
     // Import the Windows API function SetWindowLongPtr for modifying window properties on 64-bit systems.
-    [DllImport("User32.dll", CharSet = CharSet.Auto, EntryPoint = "SetWindowLongPtr")]
-    private static extern IntPtr SetWindowLongPtr(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
+    [LibraryImport("User32.dll", EntryPoint = "SetWindowLongPtrW")]
+    private static partial IntPtr SetWindowLongPtr(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
 
     // Import the Windows API function SetWindowLong for modifying window properties on 32-bit systems.
-    [DllImport("User32.dll", CharSet = CharSet.Auto, EntryPoint = "SetWindowLong")]
-    private static extern IntPtr SetWindowLong(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
+    [LibraryImport("User32.dll", EntryPoint = "SetWindowLongW")]
+    private static partial IntPtr SetWindowLong(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
 
 }

@@ -9,10 +9,10 @@ public class NavigationService : INavigationService
     private Frame? _frame;
 
 
-    public void Initialize(Frame frame, Dictionary<string, Type> _pages)
+    public void Initialize(Frame frame, Dictionary<string, Type> pages)
     {
         _frame = frame;
-        _pageMap = _pages;
+        _pageMap = pages;
     }
 
     private Dictionary<string, Type>? _pageMap;

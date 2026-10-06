@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ZumenSearch.Models.Rent.Commercials;
+﻿namespace ZumenSearch.Models.Rent.Commercials;
 
 public sealed class PropertyStructureTypeLabel(StructureType key)
 {
-    private static readonly IReadOnlyDictionary<
+    private static readonly Dictionary<
         StructureType,
         string> Labels = new Dictionary<
             StructureType,

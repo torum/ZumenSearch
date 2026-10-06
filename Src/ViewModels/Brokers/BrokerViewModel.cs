@@ -71,7 +71,7 @@ public sealed partial class BrokerViewModel : ObservableRecipient, IDisposable
         }
 
         // Ready to receive messages.
-        this.IsActive = true;
+        //this.IsActive = true;
     }
 
 

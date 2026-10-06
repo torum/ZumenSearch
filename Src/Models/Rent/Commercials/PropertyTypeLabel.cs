@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ZumenSearch.Models.Rent.Commercials;
+﻿namespace ZumenSearch.Models.Rent.Commercials;
 
 public sealed class PropertyTypeLabel(PropertyType key)
 {
-    private static readonly IReadOnlyDictionary<
+    private static readonly Dictionary<
         PropertyType,
         string> Labels = new Dictionary<
             PropertyType,

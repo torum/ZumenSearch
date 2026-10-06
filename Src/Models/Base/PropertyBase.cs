@@ -1,8 +1,8 @@
 ﻿using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Imaging;
+using ZumenSearch.Models.Enums;
 using ZumenSearch.Models.Location;
 using ZumenSearch.Models.Transportation;
-using ZumenSearch.Models.Enums;
 
 namespace ZumenSearch.Models.Base;
 

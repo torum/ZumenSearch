@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using ZumenSearch.Models.Base;
+﻿using ZumenSearch.Models.Base;
 
 namespace ZumenSearch.Models.Person;
 

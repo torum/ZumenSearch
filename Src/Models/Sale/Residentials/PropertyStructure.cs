@@ -6,7 +6,7 @@ namespace ZumenSearch.Models.Sale.Residentials;
 
 public sealed class PropertyStructure(StructureType key)
 {
-    private static readonly IReadOnlyDictionary<StructureType, string> Labels =
+    private static readonly Dictionary<StructureType, string> Labels =
         new Dictionary<StructureType, string>
         {
             [StructureType.Unspecified] = "未指定",
