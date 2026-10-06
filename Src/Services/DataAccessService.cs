@@ -1049,7 +1049,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 cmd.Parameters.AddWithValue("@propertyKind", building.PropertyKind.ToString());
                 cmd.Parameters.AddWithValue("@thumbnailPath", building.ThumbnailFilename);
                 // Address/Location
-                cmd.Parameters.AddWithValue("@locPrefId", building.Address.Prefecture?.Code ?? string.Empty);
+                cmd.Parameters.AddWithValue("@locPrefId", building.Address.Prefecture?.MunicipalityCode ?? string.Empty);
                 cmd.Parameters.AddWithValue("@locPrefecture", building.Address.Prefecture?.Name ?? string.Empty);
                 cmd.Parameters.AddWithValue("@locMachiazaId", building.Address.MachiazaId ?? string.Empty);
                 cmd.Parameters.AddWithValue("@locCounty", building.Address.CountyAndCity?.County ?? string.Empty);
@@ -2730,7 +2730,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             command.Parameters.AddWithValue("@thumbnailFilename",building.ThumbnailFilename);
 
             // Address/Location
-            command.Parameters.AddWithValue("@locPrefId", building.Address.Prefecture?.Code ?? string.Empty);
+            command.Parameters.AddWithValue("@locPrefId", building.Address.Prefecture?.MunicipalityCode ?? string.Empty);
             command.Parameters.AddWithValue("@locPrefecture", building.Address.Prefecture?.Name ?? string.Empty);
             command.Parameters.AddWithValue("@locMachiazaId", building.Address.MachiazaId ?? string.Empty);
             command.Parameters.AddWithValue("@locCounty", building.Address.CountyAndCity?.County ?? string.Empty);
@@ -4619,7 +4619,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             command.Parameters.AddWithValue("@thumbnailFilename",building.ThumbnailFilename);
 
             // Address/Location
-            command.Parameters.AddWithValue("@locPrefId", building.Address.Prefecture?.Code ?? string.Empty);
+            command.Parameters.AddWithValue("@locPrefId", building.Address.Prefecture?.MunicipalityCode ?? string.Empty);
             command.Parameters.AddWithValue("@locPrefecture", building.Address.Prefecture?.Name ?? string.Empty);
             command.Parameters.AddWithValue("@locMachiazaId", building.Address.MachiazaId ?? string.Empty);
             command.Parameters.AddWithValue("@locCounty", building.Address.CountyAndCity?.County ?? string.Empty);

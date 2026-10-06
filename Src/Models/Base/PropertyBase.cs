@@ -25,7 +25,6 @@ public abstract partial class PropertyBase : EntityAggregateBase
 
     public PropertyKind PropertyKind { get; init; }
 
-    // TODO: Use Address class from Models.Location.Address.cs instead of using Prefecture, CountyAndCity, WardAndOaza, Choume classes directly.
     public Address Address
     {
         get;
@@ -37,76 +36,11 @@ public abstract partial class PropertyBase : EntityAggregateBase
             }
         }
     } = new Address();
-    /*
-    #region == 所在地 ==
 
-    public string LocPrefId
-    {
-        get => field ?? string.Empty;
-        set => SetProperty(ref field, value);
-    }
-
-    public string LocPrefecture
-    {
-        get => field ?? string.Empty;
-        set => SetProperty(ref field, value);
-    }
-
-    public string LocMachiazaId
-    {
-        get => field ?? string.Empty;
-        set => SetProperty(ref field, value);
-    }
-
-    public string LocCounty
-    {
-        get => field ?? string.Empty;
-        set => SetProperty(ref field, value);
-    }
-
-    public string LocCity
-    {
-        get => field ?? string.Empty;
-        set => SetProperty(ref field, value);
-    }
-
-    public string LocWard
-    {
-        get => field ?? string.Empty;
-        set => SetProperty(ref field, value);
-    }
-
-    public string LocOazaCho
-    {
-        get => field ?? string.Empty;
-        set => SetProperty(ref field, value);
-    }
-
-    public string LocChoume
-    {
-        get => field ?? string.Empty;
-        set => SetProperty(ref field, value);
-    }
-
-    public string LocEdaban
-    {
-        get => field ?? string.Empty;
-        set => SetProperty(ref field, value);
-    }
-
-    public string LocLocationFull
-    {
-        get => field ?? string.Empty;
-        set => SetProperty(ref field, value);
-    }
-
-    #endregion
-    */
-    // TODO: Use Train class from Models.Transportation.Train.cs instead of using classes directly.
     public Train Train
     {
         get;
-        set
+        private set
         {
             if (SetProperty(ref field, value))
             {
@@ -114,7 +48,6 @@ public abstract partial class PropertyBase : EntityAggregateBase
             }
         }
     } = new Train();
-
 
     // TODO: Create a nested class for ThumbImage so that BasePath is always set along with ThumbnailFilename as parameters.
     #region == Thumb Image ==
@@ -175,11 +108,8 @@ public abstract partial class PropertyBase : EntityAggregateBase
 
     #endregion
 
-
     #region == Public Methods ==
-    /*
 
-    */
 
     #endregion
 

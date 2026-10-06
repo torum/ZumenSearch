@@ -65,11 +65,7 @@ public class DataAccessTransportationService : IDataAccessTransportationService
             var name = Convert.ToString(reader["line_name"], CultureInfo.InvariantCulture) ?? "";
             if (cd is not null)
             {
-                var rline = new RailLine
-                {
-                    LineCode = cd,
-                    LineName = name
-                };
+                var rline = new RailLine(cd,name);
 
                 dataset.Add(rline);
             }
@@ -112,12 +108,7 @@ public class DataAccessTransportationService : IDataAccessTransportationService
             var name = Convert.ToString(reader["station_name"], CultureInfo.InvariantCulture) ?? "";
             if (scd is not null)
             {
-                var rline = new RailStation
-                {
-                    StationCode = scd,
-                    LineCode = lcd,
-                    StationName = name
-                };
+                var rline = new RailStation(scd,lcd,name);
 
                 dataset.Add(rline);
             }

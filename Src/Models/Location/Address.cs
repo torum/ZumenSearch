@@ -16,6 +16,8 @@ public class Address
         //
     }
 
+    public bool IsModified { get; private set; }
+
     #region ==  Address Components ==
 
     public string MachiazaId { get; private set; } = string.Empty;
@@ -64,6 +66,11 @@ public class Address
 
     #endregion
 
+    public void SetIsModified(bool isModified)
+    {
+        IsModified = isModified;
+    }
+
     #region == Methods to Set Address Components ==
 
     // TODO: Add methods to set the address components, ensuring that the address remains valid and consistent.
@@ -73,7 +80,7 @@ public class Address
         { value = string.Empty; }
 
         MachiazaId = value;
-        // TODO: ?Populate the Prefecture, CountyAndCity, WardAndOaza, and Choume based on the Machiaza ID.
+        IsModified = true;
     }
 
     public void SetPrefecture(string code, string municipalityCode, string name)
@@ -82,6 +89,7 @@ public class Address
         if (string.IsNullOrWhiteSpace(municipalityCode)) throw new ArgumentException("MunicipalityCode cannot be empty.", nameof(municipalityCode));
         if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Name cannot be empty.", nameof(name));
         Prefecture = new Prefecture(code, municipalityCode, name);
+        IsModified = true;
     }
 
     public void SetPrefectureByMunicipalityCode(string municipalityCode, string? name = "")
@@ -92,14 +100,15 @@ public class Address
             Prefecture = null;
             return;
         }
-
         Prefecture = new Prefecture(municipalityCode, name);
+        IsModified = true;
     }
 
     public void SetPrefecture(Prefecture? value)
     {
         // TODO: Validate the prefecture value, if required.
         Prefecture = value;
+        IsModified = true;
     }
 
     public void SetCountyAndCity(string machiazaId, string county, string city)
@@ -107,14 +116,15 @@ public class Address
         //if (string.IsNullOrWhiteSpace(machiazaId)) throw new ArgumentException("MachiazaId cannot be empty.", nameof(machiazaId));
         //if (string.IsNullOrWhiteSpace(county)) throw new ArgumentException("County cannot be empty.", nameof(county));
         //if (string.IsNullOrWhiteSpace(city)) throw new ArgumentException("City cannot be empty.", nameof(city));
-        
         CountyAndCity = new CountyAndCity(machiazaId, county, city);
+        IsModified = true;
     }
 
     public void SetCountyAndCity(CountyAndCity? value)
     {
         // TODO: Validate the city and its relationship to the selected prefecture.
         CountyAndCity = value;
+        IsModified = true;
     }
 
     public void SetWardAndOaza(string machiazaId, string ward, string oaza)
@@ -122,53 +132,57 @@ public class Address
         //if (string.IsNullOrWhiteSpace(machiazaId)) throw new ArgumentException("MachiazaId cannot be empty.", nameof(machiazaId));
         //if (string.IsNullOrWhiteSpace(ward)) throw new ArgumentException("Ward cannot be empty.", nameof(ward));
         //if (string.IsNullOrWhiteSpace(oaza)) throw new ArgumentException("Oaza cannot be empty.", nameof(oaza));
-
         WardAndOaza = new WardAndOaza(machiazaId, ward, oaza);
+        IsModified = true;
     }
 
     public void SetWardAndOaza(WardAndOaza? value)
     {
         // TODO: Validate the town and its relationship to the selected city.
         WardAndOaza = value;
+        IsModified = true;
     }
 
     public void SetChoume(string machiazaId, string choume)
     {
         //if (string.IsNullOrWhiteSpace(machiazaId)) throw new ArgumentException("MachiazaId cannot be empty.", nameof(machiazaId));
         //if (string.IsNullOrWhiteSpace(choume)) throw new ArgumentException("Choume cannot be empty.", nameof(choume));
-
         Choume = new Choume(machiazaId, choume);
+        IsModified = true;
     }
     public void SetChoume(Choume? value)
     {
         // TODO: Validate the chōme and its relationship to the selected town.
         Choume = value;
+        IsModified = true;
     }
 
     public void SetEdaban(string edaban)
     {
         //if (string.IsNullOrWhiteSpace(edaban)) throw new ArgumentException("Edaban cannot be empty.", nameof(edaban));
-
         Edaban = edaban;
+        IsModified = true;
     }
 
     public void SetPostalCode(string postalCode)
     {
         if (string.IsNullOrWhiteSpace(postalCode)) throw new ArgumentException("PostalCode cannot be empty.", nameof(postalCode));
-
         PostalCode = postalCode;
+        IsModified = true;
     }
 
     public void SetLocationLatitude(string value)
     {
         // TODO: Validate the latitude value and allowed range.
         LocationLatitude = value;
+        IsModified = true;
     }
 
     public void SetLocationLongitude(string value)
     {
         // TODO: Validate the longitude value and allowed range.
         LocationLongitude = value;
+        IsModified = true;
     }
 
     #endregion

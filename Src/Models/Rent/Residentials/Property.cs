@@ -350,7 +350,7 @@ public sealed partial class Property : PropertyBase
     #endregion
 
     #region == 交通 ==
-
+    /*
     public RailLine? RailLine1
     {
         get;
@@ -386,7 +386,7 @@ public sealed partial class Property : PropertyBase
             }
         }
     } = string.Empty;
-
+    */
     public string BusStop1
     {
         get;
@@ -1007,10 +1007,11 @@ public sealed partial class Property : PropertyBase
         Remarks = value;
     }
 
-
+    /*
     public void SetRailLine1(RailLine? value) => RailLine1 = value;
     public void SetRailStation1(RailStation? value) => RailStation1 = value;
     public void SetEkiToho1(string value) => EkiToho1 = value;
+    */
     public void SetBusStop1(string value) => BusStop1 = value;
     public void SetBusJyousya1(string value) => BusJyousya1 = value;
     public void SetBusStopToho1(string value) => BusStopToho1 = value;

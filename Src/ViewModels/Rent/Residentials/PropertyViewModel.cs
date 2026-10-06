@@ -2,7 +2,6 @@
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI.Windowing;
-using Microsoft.UI.Xaml.Data;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
@@ -19,7 +18,6 @@ using ZumenSearch.Models.Messenger;
 using ZumenSearch.Models.Transportation;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.Services.Extensions.AbstractFactory;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ZumenSearch.ViewModels.Rent.Residentials;
 
@@ -79,7 +77,6 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     {
         _building = building;
         _id = building.Id;
-
         _navigationService = navigationService;
         _dialogService = dialogService;
         _shellFactory = shellFactory;
@@ -99,8 +96,6 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             // Reset errors
             IsNameHasError = false;
             // TODO: more.
-
-            //HasErrors = false;
         }
         catch (Exception ex)
         {
@@ -641,7 +636,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     public ObservableCollection<Prefecture> Prefectures { get; init; } = new(PrefectureMaster.Prefectures);
 
-    public Prefecture? SelectedPef
+    public Prefecture? SelectedPrefecture
     {
         get;
         set
@@ -699,7 +694,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
                 OnPropertyChanged(nameof(AddressPreview));
 
-                if (SelectedPef is null)
+                if (SelectedPrefecture is null)
                 {
                     Towns = null;
                     return;
@@ -713,7 +708,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
                 var dataset = new List<WardAndOaza>();
 
-                dataset = _dataAccessLocationService.GetWardAndOazaByPrefCountyCity(SelectedPef.Name, field.County, field.City);
+                dataset = _dataAccessLocationService.GetWardAndOazaByPrefCountyCity(SelectedPrefecture.Name, field.County, field.City);
 
                 Towns = [.. dataset.DistinctBy(p => p.Combined)];
             }
@@ -747,7 +742,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
                 OnPropertyChanged(nameof(AddressPreview));
 
-                if (SelectedPef is null)
+                if (SelectedPrefecture is null)
                 {
                     Chous = null;
                     return;
@@ -768,7 +763,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
                 var dataset = new List<Choume>();
 
-                dataset = _dataAccessLocationService.GetChoumeByPrefCountyCityWardOaza(SelectedPef.Name, SelectedCity.County, SelectedCity.City, field.Ward, field.Oaza);
+                dataset = _dataAccessLocationService.GetChoumeByPrefCountyCityWardOaza(SelectedPrefecture.Name, SelectedCity.County, SelectedCity.City, field.Ward, field.Oaza);
 
                 Chous = [.. dataset.DistinctBy(p => p.Chou)];
             }
@@ -838,7 +833,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         get
         {
             // If the SelectedPef is not set, return an empty string.
-            if (SelectedPef == null)
+            if (SelectedPrefecture == null)
             {
                 return string.Empty;
             }
@@ -849,7 +844,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                 s = "-" + Edaban;
             }
             // TODO:
-            return $"{SelectedPef.Name}{SelectedCity?.Combined}{SelectedTown?.Combined}{SelectedChou?.Chou}{s}";
+            return $"{SelectedPrefecture.Name}{SelectedCity?.Combined}{SelectedTown?.Combined}{SelectedChou?.Chou}{s}";
         }
     }
 
@@ -932,8 +927,9 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             if ((value is null) && (field is not null))
             {
                 // Clear old value.
-                field.StationName = string.Empty;
-                OnPropertyChanged(nameof(SelectedRailStation1));
+                //field.StationName = string.Empty;
+                SelectedRailLine1 = null;
+                //OnPropertyChanged(nameof(SelectedRailStation1));
             }
 
             if (SetProperty(ref field, value))
@@ -1662,63 +1658,50 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         FudousanIdAdditionalCode = _building.FudousanIdAdditionalCode;
         Remarks = _building.Remarks;
 
-
         // Location
-
-        MachiazaId = _building.Address.MachiazaId;
-        if (!string.IsNullOrEmpty(MachiazaId))
+        if (!string.IsNullOrEmpty(_building.Address.Prefecture?.MunicipalityCode))
         {
-            // TODO: Get Pref, City, Town, Choume from MachiazaId?
-        }
-
-        /*
-        if (!string.IsNullOrEmpty(_building.LocPrefId))
-        {
-            var hoge = Prefectures.FirstOrDefault<Prefecture>(p => p.MunicipalityCode.Equals(_building.LocPrefId, StringComparison.Ordinal));
+            var hoge = Prefectures.FirstOrDefault<Prefecture>(p => p.MunicipalityCode.Equals(_building.Address.Prefecture.MunicipalityCode, StringComparison.Ordinal));
             if (hoge is not null)
             {
-                SelectedPef = hoge;
+                SelectedPrefecture = hoge;
             }
         }
-
-        if ((Cities is not null) && ((!string.IsNullOrEmpty(_building.LocCounty)) || (!string.IsNullOrEmpty(_building.LocCity))))
+        if ((Cities is not null) && ((!string.IsNullOrEmpty(_building.Address.CountyAndCity?.County)) || (!string.IsNullOrEmpty(_building.Address.CountyAndCity?.City))))
         {
             foreach (var cty in Cities)
             {
-                if (cty.County.Equals(_building.LocCounty, StringComparison.Ordinal) && cty.City.Equals(_building.LocCity, StringComparison.Ordinal))
+                if (cty.County.Equals(_building.Address.CountyAndCity.County, StringComparison.Ordinal) && cty.City.Equals(_building.Address.CountyAndCity.City, StringComparison.Ordinal))
                 {
                     SelectedCity = cty;
                     break;
                 }
             }
         }
-
-        if ((Towns is not null) && ((!string.IsNullOrEmpty(_building.LocWard)) || (!string.IsNullOrEmpty(_building.LocOazaCho))))
+        if ((Towns is not null) && ((!string.IsNullOrEmpty(_building.Address.WardAndOaza?.Ward)) || (!string.IsNullOrEmpty(_building.Address.WardAndOaza?.Oaza))))
         {
             foreach (var twn in Towns)
             {
-                if (twn.Ward.Equals(_building.LocWard, StringComparison.Ordinal) && twn.Oaza.Equals(_building.LocOazaCho, StringComparison.Ordinal))
+                if (twn.Ward.Equals(_building.Address.WardAndOaza.Ward, StringComparison.Ordinal) && twn.Oaza.Equals(_building.Address.WardAndOaza.Oaza, StringComparison.Ordinal))
                 {
                     SelectedTown = twn;
                     break;
                 }
             }
         }
-
         if (Chous is not null) // Allow an empty string. //&& (!string.IsNullOrEmpty(_building.LocChoume))
         {
-            var hoge = Chous.FirstOrDefault<Choume>(p => p.Chou.Equals(_building.LocChoume, StringComparison.Ordinal));
+            var hoge = Chous.FirstOrDefault<Choume>(p => p.Chou.Equals(_building.Address.Choume?.Chou, StringComparison.Ordinal));
             if (hoge is not null)
             {
                 SelectedChou = hoge;
             }
         }
+        Edaban = _building.Address.Edaban;
+        MachiazaId = _building.Address.MachiazaId; // Must be at the end of the location properties, because it is set and cleared by the other properties.
+        LocationLatitude = _building.Address.LocationLatitude;
+        LocationLongitude = _building.Address.LocationLongitude;
 
-        Edaban = _building.LocEdaban;
-
-        LocationLatitude = _building.LocationLatitude;
-        LocationLongitude = _building.LocationLongitude;
-        */
         //TODO: Set other properties
 
 
@@ -2039,7 +2022,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
             // 所在地
             _building.Address.SetMachiazaId(MachiazaId ?? string.Empty);
-            _building.Address.SetPrefecture(SelectedPef);
+            _building.Address.SetPrefecture(SelectedPrefecture);
             _building.Address.SetCountyAndCity(SelectedCity);
             _building.Address.SetWardAndOaza(SelectedTown);
             _building.Address.SetChoume(SelectedChou);
@@ -2057,7 +2040,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                 Code = "",
                 Message = ex.Message,
                 Description = ex.StackTrace ?? string.Empty,
-                Operation = "入力値チェック",
+                Operation = "Input Validation",
                 MethodName = nameof(SetValues),
                 OccuredAt = DateTime.Now
             };
