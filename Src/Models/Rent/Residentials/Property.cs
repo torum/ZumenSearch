@@ -1,9 +1,10 @@
 ﻿using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Xml.Linq;
 using ZumenSearch.Models.Base;
+using ZumenSearch.Models.Enums;
 using ZumenSearch.Models.Location;
 using ZumenSearch.Models.Transportation;
-using ZumenSearch.Models.Enums;
 
 namespace ZumenSearch.Models.Rent.Residentials;
 
@@ -25,10 +26,10 @@ public sealed partial class Property : PropertyBase
     #region == 基本 ==
 
     // 物件種別
-    public PropertyTypeLabel BuildingKind
+    public PropertyTypeLabel BuildingType
     {
         get => field ?? new(PropertyType.Unspecified);
-        set
+        private set
         {
             if (SetProperty(ref field, value))
             {
@@ -41,7 +42,7 @@ public sealed partial class Property : PropertyBase
     public bool IsUnitOwnership
     {
         get;
-        set
+        private set
         {
             if (SetProperty(ref field, value))
             {
@@ -54,7 +55,7 @@ public sealed partial class Property : PropertyBase
     public PropertyStructureTypeLabel BuildingStructure
     {
         get => field ?? new(StructureType.Unspecified);
-        set
+        private set
         {
             if (SetProperty(ref field, value))
             {
@@ -67,7 +68,7 @@ public sealed partial class Property : PropertyBase
     public int FloorCountAboveGround
     {
         get;
-        set
+        private set
         {
             if (field == value)
             {
@@ -101,7 +102,7 @@ public sealed partial class Property : PropertyBase
     public int FloorCountBasement
     {
         get;
-        set
+        private set
         {
             if (field == value)
             {
@@ -150,7 +151,7 @@ public sealed partial class Property : PropertyBase
     public int TotalUnitCount
     {
         get;
-        set
+        private set
         {
             if (field == value)
             {
@@ -199,7 +200,7 @@ public sealed partial class Property : PropertyBase
     public DateTimeOffset BuiltYearAndMonth
     {
         get;
-        set
+        private set
         {
             if (SetProperty(ref field, value))
             {
@@ -213,7 +214,7 @@ public sealed partial class Property : PropertyBase
     public string FudousanId
     {
         get => field ?? string.Empty;
-        set
+        private set
         {
             // TODO: check 13桁.
 
@@ -228,7 +229,7 @@ public sealed partial class Property : PropertyBase
     public string FudousanIdAdditionalCode
     {
         get => field ?? string.Empty; // keep non-null empty string.
-        set
+        private set
         {
             // TODO: check ４桁.
 
@@ -243,7 +244,7 @@ public sealed partial class Property : PropertyBase
     public string Remarks
     {
         get;
-        set
+        private set
         {
             if (SetProperty(ref field, value))
             {
@@ -256,8 +257,8 @@ public sealed partial class Property : PropertyBase
 
     #region == 所在地 ==
 
-
-
+    /*
+    // TODO: 
     public string MachiazaId { get; set; } = string.Empty;
 
     public Prefecture? Pref
@@ -345,7 +346,7 @@ public sealed partial class Property : PropertyBase
             return $"https://maps.google.co.jp/?q={LocationLatitude},{LocationLongitude}";
         }
     }
-
+    */
     #endregion
 
     #region == 交通 ==
@@ -846,20 +847,26 @@ public sealed partial class Property : PropertyBase
 
     #region == Methods ==
 
-    public void SetKindTypeFromString(string Str)
+    public void SetBuildingType(PropertyTypeLabel value) => BuildingType = value;
+
+    public void SetPropertyTypeFromString(string Str)
     {
         if (string.IsNullOrEmpty(Str))
         {
             // TODO:
-            BuildingKind = new PropertyTypeLabel(PropertyType.Unspecified);
+            BuildingType = new PropertyTypeLabel(PropertyType.Unspecified);
             return;
         }
 
         if (Enum.TryParse<PropertyType>(Str, out var result))
         {
-            BuildingKind = new PropertyTypeLabel(result);
+            BuildingType = new PropertyTypeLabel(result);
         }
     }
+
+    public void SetIsUnitOwnership(bool value) => IsUnitOwnership = value;
+
+    public void SetBuildingStructure(PropertyStructureTypeLabel value) => BuildingStructure = value;
 
     public void SetStructureTypeFromString(string Str)
     {
@@ -875,16 +882,152 @@ public sealed partial class Property : PropertyBase
         }
     }
 
-    public void SetBuildYearMonthFromString(string str)
+    public void SetFloorCountAboveGroundFromString(string Str)
     {
-        if (string.IsNullOrEmpty(str))
+        if (string.IsNullOrWhiteSpace(Str))
         {
-            BuiltYearAndMonth = new DateTimeOffset(1900, 1, 1, 0, 0, 0, TimeSpan.Zero); ;
+            SetFloorCountAboveGround(0);
             return;
         }
-        
-        BuiltYearAndMonth = DateTimeOffset.Parse(str, CultureInfo.InvariantCulture);
+
+        if (!int.TryParse(Str.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var result))
+        {
+            throw new ArgumentException("地上階の値が不正です。整数に変換出来ませんでした。", nameof(Str));
+        }
+
+        SetFloorCountAboveGround(result);
     }
+
+    public void SetFloorCountAboveGround(int value)
+    {
+        if (value < 0)
+        {
+            throw new ArgumentException("地上階の値が不正です。0以上の整数である必要があります。", nameof(value));
+        }
+
+        FloorCountAboveGround = value;
+    }
+
+    public void SetFloorCountBasementFromString(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            SetFloorCountBasement(0);
+            return;
+        }
+
+        if (!int.TryParse(value.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var result))
+        {
+            throw new ArgumentException("地下階の値が不正です。整数に変換出来ませんでした。", nameof(value));
+        }
+
+        SetFloorCountBasement(result);
+    }
+
+    public void SetFloorCountBasement(int value)
+    {
+        if (value < 0)
+        {
+            throw new ArgumentException("地下階の値が不正です。0以上の整数である必要があります。", nameof(value));
+        }
+
+        FloorCountBasement = value;
+    }
+
+    public void SetTotalUnitCount(int value)
+    {
+        if (value < 0)
+        {
+            throw new ArgumentException("総戸数の値が不正です。0以上の整数である必要があります。", nameof(value));
+        }
+
+        TotalUnitCount = value;
+    }
+
+    public void SetTotalUnitCountFromString(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            SetTotalUnitCount(0);
+            return;
+        }
+
+        if (!int.TryParse(value.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var result))
+        {
+            throw new ArgumentException("総戸数の値が不正です。整数に変換出来ませんでした。", nameof(value));
+        }
+
+        SetTotalUnitCount(result);
+    }
+    
+    public void SetBuiltYearAndMonth(DateTimeOffset? value)
+    {
+        BuiltYearAndMonth = value ?? new DateTimeOffset(1900, 1, 1, 0, 0, 0, TimeSpan.Zero);
+    }
+
+    public void SetBuiltYearAndMonthFromString(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            BuiltYearAndMonth = new DateTimeOffset(1900, 1, 1, 0, 0, 0, TimeSpan.Zero);
+            return;
+        }
+
+        if (!DateTimeOffset.TryParse(value.Trim(),CultureInfo.InvariantCulture,DateTimeStyles.None,out var parsedValue))
+        {
+            throw new ArgumentException("築年月の値が不正です。有効な日付に変換出来ませんでした。", nameof(value));
+        }
+
+        BuiltYearAndMonth = parsedValue;
+    }
+
+    public void SetFudousanId(string value)
+    {
+        ValidateFudousanId(value);
+        FudousanId = value;
+    }
+    private static void ValidateFudousanId(string value)
+    {
+        // TODO: Validate that the trimmed ID contains exactly 13 digits.
+    }
+
+    public void SetFudousanIdAdditionalCode(string value)
+    {
+        ValidateFudousanIdAdditionalCode(value);
+        FudousanIdAdditionalCode = value;
+    }
+    private static void ValidateFudousanIdAdditionalCode(string value)
+    {
+        // TODO: Validate that the trimmed additional code contains exactly 4 digits.
+    }
+
+    public void SetRemarks(string value)
+    {
+        // TODO: Validate remarks if necessary.
+        Remarks = value;
+    }
+
+
+    public void SetRailLine1(RailLine? value) => RailLine1 = value;
+    public void SetRailStation1(RailStation? value) => RailStation1 = value;
+    public void SetEkiToho1(string value) => EkiToho1 = value;
+    public void SetBusStop1(string value) => BusStop1 = value;
+    public void SetBusJyousya1(string value) => BusJyousya1 = value;
+    public void SetBusStopToho1(string value) => BusStopToho1 = value;
+
+    public void SetPropertyElectricKind(EnumElectricType value) => PropertyElectricKind = value;
+    public void SetElectricDetail(string value) => ElectricDetail = value;
+
+    public void SetRooms(ObservableCollection<Listing> value) => Rooms = value;
+    public void SetRoomsToBeDeleted(ObservableCollection<Listing> value) => RoomsToBeDeleted = value;
+    public void SetPictures(ObservableCollection<PropertyPicture> value) => Pictures = value;
+    public void SetPicturesToBeDeleted(ObservableCollection<PropertyPicture> value) => PicturesToBeDeleted = value;
+    public void SetPdfs(ObservableCollection<PropertyPdf> value) => Pdfs = value;
+    public void SetPdfsToBeDeleted(ObservableCollection<PropertyPdf> value) => PdfsToBeDeleted = value;
+    public void SetLessors(ObservableCollection<PersonBase> value) => Lessors = value;
+    public void SetLessorsToBeDeleted(ObservableCollection<PersonBase> value) => LessorsToBeDeleted = value;
+    public void SetBrokers(ObservableCollection<PersonBase> value) => Brokers = value;
+    public void SetBrokersToBeDeleted(ObservableCollection<PersonBase> value) => BrokersToBeDeleted = value;
 
     #endregion
 

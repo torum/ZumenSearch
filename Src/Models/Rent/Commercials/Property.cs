@@ -147,7 +147,7 @@ public sealed partial class Property : PropertyBase
 
     #region == Location ==
 
-
+    /*
     public string MachiazaId { get; set; } = string.Empty;
 
     public Prefecture? Pref
@@ -222,7 +222,8 @@ public sealed partial class Property : PropertyBase
             }
         }
     } = string.Empty;
-
+    */
+    /*
     public string GeoUri
     {
         get
@@ -235,6 +236,7 @@ public sealed partial class Property : PropertyBase
             return $"https://maps.google.co.jp/?q={LocationLatitude},{LocationLongitude}";
         }
     }
+    */
 
     #endregion
 

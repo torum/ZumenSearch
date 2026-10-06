@@ -375,7 +375,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     #region == Location ==
 
     public ObservableCollection<Prefecture> Prefectures { get; } =
-    new(new PrefectureMaster().Prefectures);
+    new(PrefectureMaster.Prefectures);
 
     public Prefecture? SelectedPef
     {
@@ -1255,7 +1255,56 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             _building.FudousanIdAdditionalCode;
         Remarks = _building.Remarks;
 
-        PopulateLocationValues();
+        /*
+        SelectedChou = null;
+        SelectedTown = null;
+        SelectedCity = null;
+        SelectedPef = null;
+
+        Cities = [];
+        Towns = [];
+        Chous = [];
+
+        var prefecture = Prefectures.FirstOrDefault(item =>
+            item.MunicipalityCode == _building.LocPrefId ||
+            item.Name == _building.LocPrefecture);
+
+        if (prefecture is not null)
+        {
+            SelectedPef = prefecture;
+        }
+
+        var city = Cities.FirstOrDefault(item =>
+            item.County == _building.LocCounty &&
+            item.City == _building.LocCity);
+
+        if (city is not null)
+        {
+            SelectedCity = city;
+        }
+
+        var town = Towns.FirstOrDefault(item =>
+            item.Ward == _building.LocWard &&
+            item.Oaza == _building.LocOazaCho);
+
+        if (town is not null)
+        {
+            SelectedTown = town;
+        }
+
+        var choume = Chous.FirstOrDefault(item =>
+            item.Chou == _building.LocChoume);
+
+        if (choume is not null)
+        {
+            SelectedChou = choume;
+        }
+
+        Edaban = _building.LocEdaban;
+
+        LocationLatitude = _building.LocationLatitude;
+        LocationLongitude = _building.LocationLongitude;
+        */
 
         SelectedRailLine1 = _building.RailLine1;
         SelectedRailStation1 = _building.RailStation1;
@@ -1328,58 +1377,6 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         }
     }
 
-    private void PopulateLocationValues()
-    {
-        SelectedChou = null;
-        SelectedTown = null;
-        SelectedCity = null;
-        SelectedPef = null;
-
-        Cities = [];
-        Towns = [];
-        Chous = [];
-
-        var prefecture = Prefectures.FirstOrDefault(item =>
-            item.MunicipalityCode == _building.LocPrefId ||
-            item.Name == _building.LocPrefecture);
-
-        if (prefecture is not null)
-        {
-            SelectedPef = prefecture;
-        }
-
-        var city = Cities.FirstOrDefault(item =>
-            item.County == _building.LocCounty &&
-            item.City == _building.LocCity);
-
-        if (city is not null)
-        {
-            SelectedCity = city;
-        }
-
-        var town = Towns.FirstOrDefault(item =>
-            item.Ward == _building.LocWard &&
-            item.Oaza == _building.LocOazaCho);
-
-        if (town is not null)
-        {
-            SelectedTown = town;
-        }
-
-        var choume = Chous.FirstOrDefault(item =>
-            item.Chou == _building.LocChoume);
-
-        if (choume is not null)
-        {
-            SelectedChou = choume;
-        }
-
-        Edaban = _building.LocEdaban;
-
-        LocationLatitude = _building.LocationLatitude;
-        LocationLongitude = _building.LocationLongitude;
-    }
-
     private void TrackBuildingPicture(Models.Rent.Commercials.PropertyPicture picture)
     {
         picture.BasePath = _propertyDataDirectoryPath;
@@ -1449,6 +1446,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         _building.Remarks = Remarks;
 
         // location
+        /*
         _building.LocPrefId = SelectedPef?.MunicipalityCode ?? string.Empty;
         _building.LocPrefecture = SelectedPef?.Name ?? string.Empty;
         _building.LocMachiazaId =
@@ -1465,7 +1463,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         _building.LocLocationFull = AddressPreview;
         _building.LocationLatitude = LocationLatitude;
         _building.LocationLongitude = LocationLongitude;
-
+        */
         // transportation
         _building.RailLine1 = SelectedRailLine1;
         _building.RailStation1 = SelectedRailStation1;

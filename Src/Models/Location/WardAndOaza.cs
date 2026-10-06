@@ -1,15 +1,22 @@
 ﻿namespace ZumenSearch.Models.Location;
-
-public sealed class WardAndOaza(string machiazaId, string ward, string oaza)
+#pragma warning disable IDE0079 // Remove unnecessary suppression
+#pragma warning disable IDE0290 // Use primary constructor
+public sealed class WardAndOaza
 {
+    public WardAndOaza(string machiazaId, string ward, string oaza)
+    {
+        MachiazaId = machiazaId;
+        Ward = ward;
+        Oaza = oaza;
+    }
     // db:location_machiaza_id
-    public string MachiazaId { get; init; } = machiazaId;
+    public string MachiazaId { get; init; } = string.Empty;
 
     // db:location_ward
-    public string Ward { get; init; } = ward;
+    public string Ward { get; init; } = string.Empty;
 
     // db:location_oaza_cho
-    public string Oaza { get; init; } = oaza;
+    public string Oaza { get; init; } = string.Empty;
 
     public string Combined
     {

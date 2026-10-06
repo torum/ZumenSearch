@@ -8,6 +8,7 @@
 - Do not put parameters on separate lines.
 - Example: `private void Handle(object sender, EventArgs args)`.
 - Keep argument lists on one line when practical.
+- Do not wrap argument lists for formatting alone; wrap them only when keeping them on one line would make the code excessively long or hard to read.
 
 
 

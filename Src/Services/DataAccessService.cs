@@ -6,6 +6,7 @@ using ZumenSearch.Helpers;
 using ZumenSearch.Models;
 using ZumenSearch.Models.Base;
 using ZumenSearch.Models.Enums;
+using ZumenSearch.Models.Location;
 using ZumenSearch.Services.Contracts;
 
 namespace ZumenSearch.Services;
@@ -58,9 +59,10 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     "property_kind TEXT NOT NULL DEFAULT ''," +
                     "name TEXT NOT NULL DEFAULT ''," +
                     "thumbnail_filename TEXT NOT NULL DEFAULT ''," +
-                    "location_pref_id TEXT NOT NULL DEFAULT ''," +
-                    "location_prefecture TEXT NOT NULL DEFAULT ''," +
+
                     "location_machiaza_id TEXT NOT NULL DEFAULT ''," +
+                    "location_pref_id TEXT NOT NULL DEFAULT ''," + // MunicipalityCode
+                    "location_prefecture TEXT NOT NULL DEFAULT ''," +
                     "location_county TEXT NOT NULL DEFAULT ''," +
                     "location_city TEXT NOT NULL DEFAULT ''," +
                     "location_ward TEXT NOT NULL DEFAULT ''," +
@@ -1041,23 +1043,24 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 sqlUpsert += "DO UPDATE SET property_id = @propertyId, name = @name, property_kind = @propertyKind, thumbnail_filename = @thumbnailPath, location_pref_id = @locPrefId, location_prefecture = @locPrefecture, location_machiaza_id = @locMachiazaId, location_county = @locCounty, location_city = @locCity, location_ward = @locWard, location_oaza_cho = @locOazaCho, location_choume = @locChoume, location_edaban = @locEdaban, location_full = @locLocationFull, location_latitude = @locationLatitude, location_longitude = @locationLongitude, updated_at = @updated_at";
 
                 cmd.CommandText = sqlUpsert;
-
+                
                 cmd.Parameters.AddWithValue("@propertyId", building.Id);
                 cmd.Parameters.AddWithValue("@name", building.Name);
                 cmd.Parameters.AddWithValue("@propertyKind", building.PropertyKind.ToString());
                 cmd.Parameters.AddWithValue("@thumbnailPath", building.ThumbnailFilename);
-                cmd.Parameters.AddWithValue("@locPrefId", building.LocPrefId);
-                cmd.Parameters.AddWithValue("@locPrefecture", building.LocPrefecture);
-                cmd.Parameters.AddWithValue("@locMachiazaId", building.LocMachiazaId);
-                cmd.Parameters.AddWithValue("@locCounty", building.LocCounty);
-                cmd.Parameters.AddWithValue("@locCity", building.LocCity);
-                cmd.Parameters.AddWithValue("@locWard", building.LocWard);
-                cmd.Parameters.AddWithValue("@locOazaCho", building.LocOazaCho);
-                cmd.Parameters.AddWithValue("@locChoume", building.LocChoume);
-                cmd.Parameters.AddWithValue("@locEdaban", building.LocEdaban);
-                cmd.Parameters.AddWithValue("@locLocationFull", building.LocLocationFull);
-                cmd.Parameters.AddWithValue("@locationLatitude", building.LocationLatitude);
-                cmd.Parameters.AddWithValue("@locationLongitude", building.LocationLongitude);
+                // Address/Location
+                cmd.Parameters.AddWithValue("@locPrefId", building.Address.Prefecture?.Code ?? string.Empty);
+                cmd.Parameters.AddWithValue("@locPrefecture", building.Address.Prefecture?.Name ?? string.Empty);
+                cmd.Parameters.AddWithValue("@locMachiazaId", building.Address.MachiazaId ?? string.Empty);
+                cmd.Parameters.AddWithValue("@locCounty", building.Address.CountyAndCity?.County ?? string.Empty);
+                cmd.Parameters.AddWithValue("@locCity", building.Address.CountyAndCity?.City ?? string.Empty);
+                cmd.Parameters.AddWithValue("@locWard", building.Address.WardAndOaza?.Ward ?? string.Empty);
+                cmd.Parameters.AddWithValue("@locOazaCho", building.Address.WardAndOaza?.Oaza ?? string.Empty);
+                cmd.Parameters.AddWithValue("@locChoume", building.Address.Choume?.Chou ?? string.Empty);
+                cmd.Parameters.AddWithValue("@locEdaban", building.Address.Edaban ?? string.Empty);
+                cmd.Parameters.AddWithValue("@locLocationFull", building.Address.AddressFull ?? string.Empty);
+                cmd.Parameters.AddWithValue("@locationLatitude", building.Address.LocationLatitude);
+                cmd.Parameters.AddWithValue("@locationLongitude", building.Address.LocationLongitude);
                 // TODO: more
 
                 cmd.Parameters.AddWithValue("@updated_at", DateTimeOffset.UtcNow.ToString("s"));
@@ -1077,7 +1080,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 cmd.CommandText = sqlUpsert;
 
                 cmd.Parameters.AddWithValue("@propertyId", building.Id);
-                cmd.Parameters.AddWithValue("@buildingKind", building.BuildingKind.Key.ToString());
+                cmd.Parameters.AddWithValue("@buildingKind", building.BuildingType.Key.ToString());
                 cmd.Parameters.AddWithValue("@isUnitOwnership", building.IsUnitOwnership ? 1 : 0); // bool to int
                 cmd.Parameters.AddWithValue("@buildingStructure", building.BuildingStructure.Key.ToString());
                 cmd.Parameters.AddWithValue("@floorCountAboveGround", building.FloorCountAboveGround);// int
@@ -1644,35 +1647,38 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     isFound = true;
 
                     property.SetName(Convert.ToString(reader["propertyName"], CultureInfo.InvariantCulture) ?? "");
-                    property.LocPrefId = Convert.ToString(reader["locPrefId"], CultureInfo.InvariantCulture) ?? "";
-                    property.LocPrefecture = Convert.ToString(reader["locPrefecture"], CultureInfo.InvariantCulture) ?? "";
-                    property.LocMachiazaId = Convert.ToString(reader["locMachiazaId"], CultureInfo.InvariantCulture) ?? "";
-                    property.LocCounty = Convert.ToString(reader["locCounty"], CultureInfo.InvariantCulture) ?? "";
-                    property.LocCity = Convert.ToString(reader["locCity"], CultureInfo.InvariantCulture) ?? "";
-                    property.LocWard = Convert.ToString(reader["locWard"], CultureInfo.InvariantCulture) ?? "";
-                    property.LocOazaCho = Convert.ToString(reader["locOazaCho"], CultureInfo.InvariantCulture) ?? "";
-                    property.LocChoume = Convert.ToString(reader["locChoume"], CultureInfo.InvariantCulture) ?? "";
-                    property.LocEdaban = Convert.ToString(reader["locEdaban"], CultureInfo.InvariantCulture) ?? "";
-                    property.LocLocationFull = Convert.ToString(reader["locLocationFull"], CultureInfo.InvariantCulture) ?? "";
-                    property.LocationLatitude = Convert.ToString(reader["locationLatitude"], CultureInfo.InvariantCulture) ?? string.Empty;
-                    property.LocationLongitude = Convert.ToString(reader["locationLongitude"], CultureInfo.InvariantCulture) ?? string.Empty;
+                    // Address/Location
+                    property.Address.SetMachiazaId(Convert.ToString(reader["locMachiazaId"], CultureInfo.InvariantCulture) ?? "");
+                    property.Address.SetPrefectureByMunicipalityCode(Convert.ToString(reader["locPrefId"], CultureInfo.InvariantCulture) ?? "",
+                        Convert.ToString(reader["locPrefecture"], CultureInfo.InvariantCulture) ?? "");
+                    property.Address.SetCountyAndCity(property.Address.MachiazaId,
+                        Convert.ToString(reader["locCounty"], CultureInfo.InvariantCulture) ?? "",
+                        Convert.ToString(reader["locCity"], CultureInfo.InvariantCulture) ?? "");
+
+                    property.Address.SetWardAndOaza(property.Address.MachiazaId,
+                        Convert.ToString(reader["locWard"], CultureInfo.InvariantCulture) ?? "",
+                        Convert.ToString(reader["locOazaCho"], CultureInfo.InvariantCulture) ?? "");
+
+                    property.Address.SetChoume(property.Address.MachiazaId,
+                        Convert.ToString(reader["locChoume"], CultureInfo.InvariantCulture) ?? "");
+
+                    property.Address.SetEdaban(Convert.ToString(reader["locEdaban"], CultureInfo.InvariantCulture) ?? "");
+                    //property.SetLocLocationFull(Convert.ToString(reader["locLocationFull"], CultureInfo.InvariantCulture) ?? "");
+                    property.Address.SetLocationLatitude(Convert.ToString(reader["locationLatitude"], CultureInfo.InvariantCulture) ?? string.Empty);
+                    property.Address.SetLocationLongitude(Convert.ToString(reader["locationLongitude"], CultureInfo.InvariantCulture) ?? string.Empty);
                     // TODO: more.
 
 
-                    string s;
-                    s = Convert.ToString(reader["resiBuildingKind"], CultureInfo.InvariantCulture) ?? "";
-                    property.SetKindTypeFromString(s);
-                    property.IsUnitOwnership = Convert.ToInt32(reader["resiUnitOwnership"], CultureInfo.InvariantCulture) != 0; // int to bool
-                    s = Convert.ToString(reader["resiBuildingStructure"], CultureInfo.InvariantCulture) ?? "";
-                    property.SetStructureTypeFromString(s);
-                    property.FloorCountAboveGround = Convert.ToInt32(reader["resiAboveGroundFloorCount"], CultureInfo.InvariantCulture);
-                    property.FloorCountBasement = Convert.ToInt32(reader["resiBasementFloorCount"], CultureInfo.InvariantCulture);
-                    property.TotalUnitCount = Convert.ToInt32(reader["resiTotalUnitCount"], CultureInfo.InvariantCulture);
-                    s = Convert.ToString(reader["resiBuiltYearMonth"], CultureInfo.InvariantCulture) ?? "";
-                    property.SetBuildYearMonthFromString(s);
-                    property.FudousanId = Convert.ToString(reader["resiFudousanId"], CultureInfo.InvariantCulture) ?? "";
-                    property.FudousanIdAdditionalCode = Convert.ToString(reader["resiFudousanIdAdditionalCode"], CultureInfo.InvariantCulture) ?? "";
-                    property.Remarks = Convert.ToString(reader["resiRemarks"], CultureInfo.InvariantCulture) ?? "";
+                    property.SetPropertyTypeFromString(Convert.ToString(reader["resiBuildingKind"], CultureInfo.InvariantCulture) ?? "");
+                    property.SetIsUnitOwnership(Convert.ToInt32(reader["resiUnitOwnership"], CultureInfo.InvariantCulture) != 0); // int to bool
+                    property.SetStructureTypeFromString(Convert.ToString(reader["resiBuildingStructure"], CultureInfo.InvariantCulture) ?? "");
+                    property.SetFloorCountAboveGround(Convert.ToInt32(reader["resiAboveGroundFloorCount"], CultureInfo.InvariantCulture));
+                    property.SetFloorCountBasement(Convert.ToInt32(reader["resiBasementFloorCount"], CultureInfo.InvariantCulture));
+                    property.SetTotalUnitCount(Convert.ToInt32(reader["resiTotalUnitCount"], CultureInfo.InvariantCulture));
+                    property.SetBuiltYearAndMonthFromString(Convert.ToString(reader["resiBuiltYearMonth"], CultureInfo.InvariantCulture) ?? "");
+                    property.SetFudousanId(Convert.ToString(reader["resiFudousanId"], CultureInfo.InvariantCulture) ?? "");
+                    property.SetFudousanIdAdditionalCode(Convert.ToString(reader["resiFudousanIdAdditionalCode"], CultureInfo.InvariantCulture) ?? "");
+                    property.SetRemarks(Convert.ToString(reader["resiRemarks"], CultureInfo.InvariantCulture) ?? "");
 
                     // TODO: more.
 
@@ -2720,33 +2726,24 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
             command.Parameters.AddWithValue("@propertyId", building.Id);
             command.Parameters.AddWithValue("@name", building.Name);
-            command.Parameters.AddWithValue(
-                "@propertyKind",
-                PropertyKind.RentCommercial.ToString());
-            command.Parameters.AddWithValue(
-                "@thumbnailFilename",
-                building.ThumbnailFilename);
-            command.Parameters.AddWithValue("@locPrefId", building.LocPrefId);
-            command.Parameters.AddWithValue(
-                "@locPrefecture",
-                building.LocPrefecture);
-            command.Parameters.AddWithValue(
-                "@locMachiazaId",
-                building.LocMachiazaId);
-            command.Parameters.AddWithValue("@locCounty", building.LocCounty);
-            command.Parameters.AddWithValue("@locCity", building.LocCity);
-            command.Parameters.AddWithValue("@locWard", building.LocWard);
-            command.Parameters.AddWithValue("@locOazaCho", building.LocOazaCho);
-            command.Parameters.AddWithValue("@locChoume", building.LocChoume);
-            command.Parameters.AddWithValue("@locEdaban", building.LocEdaban);
-            command.Parameters.AddWithValue(
-                "@locLocationFull",
-                building.LocLocationFull);
-            command.Parameters.AddWithValue("@locationLatitude", building.LocationLatitude);
-            command.Parameters.AddWithValue("@locationLongitude", building.LocationLongitude);
-            command.Parameters.AddWithValue(
-                "@updatedAt",
-                DateTimeOffset.UtcNow.ToString("s"));
+            command.Parameters.AddWithValue("@propertyKind",PropertyKind.RentCommercial.ToString());
+            command.Parameters.AddWithValue("@thumbnailFilename",building.ThumbnailFilename);
+
+            // Address/Location
+            command.Parameters.AddWithValue("@locPrefId", building.Address.Prefecture?.Code ?? string.Empty);
+            command.Parameters.AddWithValue("@locPrefecture", building.Address.Prefecture?.Name ?? string.Empty);
+            command.Parameters.AddWithValue("@locMachiazaId", building.Address.MachiazaId ?? string.Empty);
+            command.Parameters.AddWithValue("@locCounty", building.Address.CountyAndCity?.County ?? string.Empty);
+            command.Parameters.AddWithValue("@locCity", building.Address.CountyAndCity?.City ?? string.Empty);
+            command.Parameters.AddWithValue("@locWard", building.Address.WardAndOaza?.Ward ?? string.Empty);
+            command.Parameters.AddWithValue("@locOazaCho", building.Address.WardAndOaza?.Oaza ?? string.Empty);
+            command.Parameters.AddWithValue("@locChoume", building.Address.Choume?.Chou ?? string.Empty);
+            command.Parameters.AddWithValue("@locEdaban", building.Address.Edaban ?? string.Empty);
+            command.Parameters.AddWithValue("@locLocationFull", building.Address.AddressFull ?? string.Empty);
+            command.Parameters.AddWithValue("@locationLatitude", building.Address.LocationLatitude);
+            command.Parameters.AddWithValue("@locationLongitude", building.Address.LocationLongitude);
+
+            command.Parameters.AddWithValue("@updatedAt",DateTimeOffset.UtcNow.ToString("s"));
 
             command.ExecuteNonQuery();
 
@@ -3334,46 +3331,10 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 return result;
             }
 
-            var building =
-                new Models.Rent.Commercials.Property(
-                    Convert.ToString(reader["property_id"], CultureInfo.InvariantCulture)!,
-                    EntityStatus.Saved)
+            var building = new Models.Rent.Commercials.Property(Convert.ToString(reader["property_id"], CultureInfo.InvariantCulture)!,EntityStatus.Saved)
                 {
-                    ThumbnailFilename =
-                        Convert.ToString(reader["thumbnail_filename"], CultureInfo.InvariantCulture)
-                        ?? string.Empty,
-                    LocPrefId =
-                        Convert.ToString(reader["location_pref_id"], CultureInfo.InvariantCulture)
-                        ?? string.Empty,
-                    LocPrefecture =
-                        Convert.ToString(reader["location_prefecture"], CultureInfo.InvariantCulture)
-                        ?? string.Empty,
-                    LocMachiazaId =
-                        Convert.ToString(reader["location_machiaza_id"], CultureInfo.InvariantCulture)
-                        ?? string.Empty,
-                    LocCounty =
-                        Convert.ToString(reader["location_county"], CultureInfo.InvariantCulture)
-                        ?? string.Empty,
-                    LocCity =
-                        Convert.ToString(reader["location_city"], CultureInfo.InvariantCulture)
-                        ?? string.Empty,
-                    LocWard =
-                        Convert.ToString(reader["location_ward"], CultureInfo.InvariantCulture)
-                        ?? string.Empty,
-                    LocOazaCho =
-                        Convert.ToString(reader["location_oaza_cho"], CultureInfo.InvariantCulture)
-                        ?? string.Empty,
-                    LocChoume =
-                        Convert.ToString(reader["location_choume"], CultureInfo.InvariantCulture)
-                        ?? string.Empty,
-                    LocEdaban =
-                        Convert.ToString(reader["location_edaban"], CultureInfo.InvariantCulture)
-                        ?? string.Empty,
-                    LocLocationFull =
-                        Convert.ToString(reader["location_full"], CultureInfo.InvariantCulture)
-                        ?? string.Empty,
-                    LocationLatitude = Convert.ToString(reader["location_latitude"], CultureInfo.InvariantCulture) ?? string.Empty,
-                    LocationLongitude = Convert.ToString(reader["location_longitude"], CultureInfo.InvariantCulture) ?? string.Empty,
+                    ThumbnailFilename =Convert.ToString(reader["thumbnail_filename"], CultureInfo.InvariantCulture)?? string.Empty,
+
                     IsUnitOwnership =
                         Convert.ToInt32(reader["is_unit_ownership"], CultureInfo.InvariantCulture) != 0,
                     FloorCountAboveGround =
@@ -3394,6 +3355,25 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
             // Try
             building.SetName(Convert.ToString(reader["name"], CultureInfo.InvariantCulture) ?? string.Empty);
+            // Address/Location
+            building.Address.SetMachiazaId(Convert.ToString(reader["locMachiazaId"], CultureInfo.InvariantCulture) ?? "");
+            building.Address.SetPrefectureByMunicipalityCode(Convert.ToString(reader["locPrefId"], CultureInfo.InvariantCulture) ?? "",
+                Convert.ToString(reader["locPrefecture"], CultureInfo.InvariantCulture) ?? "");
+            building.Address.SetCountyAndCity(building.Address.MachiazaId,
+                Convert.ToString(reader["locCounty"], CultureInfo.InvariantCulture) ?? "",
+                Convert.ToString(reader["locCity"], CultureInfo.InvariantCulture) ?? "");
+
+            building.Address.SetWardAndOaza(building.Address.MachiazaId,
+                Convert.ToString(reader["locWard"], CultureInfo.InvariantCulture) ?? "",
+                Convert.ToString(reader["locOazaCho"], CultureInfo.InvariantCulture) ?? "");
+
+            building.Address.SetChoume(building.Address.MachiazaId,
+                Convert.ToString(reader["locChoume"], CultureInfo.InvariantCulture) ?? "");
+
+            building.Address.SetEdaban(Convert.ToString(reader["locEdaban"], CultureInfo.InvariantCulture) ?? "");
+            //building.Address.SetLocLocationFull(Convert.ToString(reader["locLocationFull"], CultureInfo.InvariantCulture) ?? "");
+            building.Address.SetLocationLatitude(Convert.ToString(reader["locationLatitude"], CultureInfo.InvariantCulture) ?? string.Empty);
+            building.Address.SetLocationLongitude(Convert.ToString(reader["locationLongitude"], CultureInfo.InvariantCulture) ?? string.Empty);
 
             building.SetCommercialKindFromString(
                 Convert.ToString(reader["commercial_kind"], CultureInfo.InvariantCulture)
@@ -4635,31 +4615,24 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
             command.Parameters.AddWithValue("@propertyId", building.Id);
             command.Parameters.AddWithValue("@name", building.Name);
-            command.Parameters.AddWithValue(
-                "@propertyKind",
-                building.PropertyKind.ToString());
-            command.Parameters.AddWithValue(
-                "@thumbnailFilename",
-                building.ThumbnailFilename);
-            command.Parameters.AddWithValue("@locPrefId", building.LocPrefId);
-            command.Parameters.AddWithValue(
-                "@locPrefecture",
-                building.LocPrefecture);
-            command.Parameters.AddWithValue(
-                "@locMachiazaId",
-                building.LocMachiazaId);
-            command.Parameters.AddWithValue("@locCounty", building.LocCounty);
-            command.Parameters.AddWithValue("@locCity", building.LocCity);
-            command.Parameters.AddWithValue("@locWard", building.LocWard);
-            command.Parameters.AddWithValue("@locOazaCho", building.LocOazaCho);
-            command.Parameters.AddWithValue("@locChoume", building.LocChoume);
-            command.Parameters.AddWithValue("@locEdaban", building.LocEdaban);
-            command.Parameters.AddWithValue(
-                "@locLocationFull",
-                building.LocLocationFull);
-            command.Parameters.AddWithValue(
-                "@updatedAt",
-                DateTimeOffset.UtcNow.ToString("s"));
+            command.Parameters.AddWithValue("@propertyKind",building.PropertyKind.ToString());
+            command.Parameters.AddWithValue("@thumbnailFilename",building.ThumbnailFilename);
+
+            // Address/Location
+            command.Parameters.AddWithValue("@locPrefId", building.Address.Prefecture?.Code ?? string.Empty);
+            command.Parameters.AddWithValue("@locPrefecture", building.Address.Prefecture?.Name ?? string.Empty);
+            command.Parameters.AddWithValue("@locMachiazaId", building.Address.MachiazaId ?? string.Empty);
+            command.Parameters.AddWithValue("@locCounty", building.Address.CountyAndCity?.County ?? string.Empty);
+            command.Parameters.AddWithValue("@locCity", building.Address.CountyAndCity?.City ?? string.Empty);
+            command.Parameters.AddWithValue("@locWard", building.Address.WardAndOaza?.Ward ?? string.Empty);
+            command.Parameters.AddWithValue("@locOazaCho", building.Address.WardAndOaza?.Oaza ?? string.Empty);
+            command.Parameters.AddWithValue("@locChoume", building.Address.Choume?.Chou ?? string.Empty);
+            command.Parameters.AddWithValue("@locEdaban", building.Address.Edaban ?? string.Empty);
+            command.Parameters.AddWithValue("@locLocationFull", building.Address.AddressFull ?? string.Empty);
+            command.Parameters.AddWithValue("@locationLatitude", building.Address.LocationLatitude);
+            command.Parameters.AddWithValue("@locationLongitude", building.Address.LocationLongitude);
+
+            command.Parameters.AddWithValue("@updatedAt", DateTimeOffset.UtcNow.ToString("s"));
 
             command.ExecuteNonQuery();
 
@@ -4922,40 +4895,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     ThumbnailFilename =
                         Convert.ToString(reader["thumbnail_filename"], CultureInfo.InvariantCulture)
                         ?? string.Empty,
-                    LocPrefId =
-                        Convert.ToString(reader["location_pref_id"], CultureInfo.InvariantCulture)
-                        ?? string.Empty,
-                    LocPrefecture =
-                        Convert.ToString(reader["location_prefecture"], CultureInfo.InvariantCulture)
-                        ?? string.Empty,
-                    LocMachiazaId =
-                        Convert.ToString(reader["location_machiaza_id"], CultureInfo.InvariantCulture)
-                        ?? string.Empty,
-                    LocCounty =
-                        Convert.ToString(reader["location_county"], CultureInfo.InvariantCulture)
-                        ?? string.Empty,
-                    LocCity =
-                        Convert.ToString(reader["location_city"], CultureInfo.InvariantCulture)
-                        ?? string.Empty,
-                    LocWard =
-                        Convert.ToString(reader["location_ward"], CultureInfo.InvariantCulture)
-                        ?? string.Empty,
-                    LocOazaCho =
-                        Convert.ToString(reader["location_oaza_cho"], CultureInfo.InvariantCulture)
-                        ?? string.Empty,
-                    LocChoume =
-                        Convert.ToString(reader["location_choume"], CultureInfo.InvariantCulture)
-                        ?? string.Empty,
-                    LocEdaban =
-                        Convert.ToString(reader["location_edaban"], CultureInfo.InvariantCulture)
-                        ?? string.Empty,
-                    LocLocationFull =
-                        Convert.ToString(reader["location_full"], CultureInfo.InvariantCulture)
-                        ?? string.Empty,
-                    LocationLatitude =
-    Convert.ToString(reader["location_latitude"], CultureInfo.InvariantCulture) ?? string.Empty,
-                    LocationLongitude =
-    Convert.ToString(reader["location_longitude"], CultureInfo.InvariantCulture) ?? string.Empty,
+
                     IsUnitOwnership =
                         Convert.ToInt32(reader["is_unit_ownership"], CultureInfo.InvariantCulture) != 0,
                     FloorCountAboveGround =
@@ -4976,6 +4916,25 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 };
 
             building.SetName(Convert.ToString(reader["name"], CultureInfo.InvariantCulture) ?? string.Empty);
+            // Address/Location
+            building.Address.SetMachiazaId(Convert.ToString(reader["locMachiazaId"], CultureInfo.InvariantCulture) ?? "");
+            building.Address.SetPrefectureByMunicipalityCode(Convert.ToString(reader["locPrefId"], CultureInfo.InvariantCulture) ?? "",
+                Convert.ToString(reader["locPrefecture"], CultureInfo.InvariantCulture) ?? "");
+            building.Address.SetCountyAndCity(building.Address.MachiazaId,
+                Convert.ToString(reader["locCounty"], CultureInfo.InvariantCulture) ?? "",
+                Convert.ToString(reader["locCity"], CultureInfo.InvariantCulture) ?? "");
+
+            building.Address.SetWardAndOaza(building.Address.MachiazaId,
+                Convert.ToString(reader["locWard"], CultureInfo.InvariantCulture) ?? "",
+                Convert.ToString(reader["locOazaCho"], CultureInfo.InvariantCulture) ?? "");
+
+            building.Address.SetChoume(building.Address.MachiazaId,
+                Convert.ToString(reader["locChoume"], CultureInfo.InvariantCulture) ?? "");
+
+            building.Address.SetEdaban(Convert.ToString(reader["locEdaban"], CultureInfo.InvariantCulture) ?? "");
+            //building.Address.SetLocLocationFull(Convert.ToString(reader["locLocationFull"], CultureInfo.InvariantCulture) ?? "");
+            building.Address.SetLocationLatitude(Convert.ToString(reader["locationLatitude"], CultureInfo.InvariantCulture) ?? string.Empty);
+            building.Address.SetLocationLongitude(Convert.ToString(reader["locationLongitude"], CultureInfo.InvariantCulture) ?? string.Empty);
 
             building.SetKindTypeFromString(
                 Convert.ToString(reader["building_kind"], CultureInfo.InvariantCulture) ?? string.Empty);
@@ -5750,7 +5709,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
     private static void SetDatabaseError(ResultWrapperBase result, Exception exception, string operation, string description, string method)
     {
         result.IsError = true;
-        result.Error.Type = ErrorInfo.ErrTypes.DB;
+        result.Error.Type = ErrorInfo.ErrType.DB;
         result.Error.Code = "";
 
         result.Error.Title = $"Error: {exception.GetType().FullName}";

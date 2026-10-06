@@ -3,13 +3,13 @@
 // ErrorInfo Class
 public sealed class ErrorInfo
 {
-    public enum ErrTypes
+    public enum ErrType
     {
-        DB, API, HTTP, XML, Other
+        DB, API, HTTP, XML,UserInput, Other
     };
 
     // ErrTypes
-    public ErrTypes Type { get; set; } = ErrTypes.Other;
+    public ErrType Type { get; set; } = ErrType.Other;
 
     // HTTP error code?
     public string Code { get; set; } = string.Empty;

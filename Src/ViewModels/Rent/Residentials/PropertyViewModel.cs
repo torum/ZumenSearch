@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI.Windowing;
+using Microsoft.UI.Xaml.Data;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
@@ -18,6 +19,7 @@ using ZumenSearch.Models.Messenger;
 using ZumenSearch.Models.Transportation;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.Services.Extensions.AbstractFactory;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ZumenSearch.ViewModels.Rent.Residentials;
 
@@ -78,7 +80,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         _building = building;
         _id = building.Id;
 
-        _navigationService = navigationService; // _navigationService.NavigateTo("ZumenSearch.Views.Rent.Residentials.RoomListPage", this, new DrillInNavigationTransitionInfo());
+        _navigationService = navigationService;
         _dialogService = dialogService;
         _shellFactory = shellFactory;
         _dispatcherService = dispatcherService;
@@ -109,36 +111,6 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             IsDirty = false;
         }
 
-        /*
-        // Intercept changes to the inherited IsActive property safely without overriding OnActivated
-        this.PropertyChanged += (s, e) =>
-        {
-            if (e.PropertyName == nameof(IsActive))
-            {
-                if (IsActive)
-                {
-                    // This implicitly uses WeakReferenceMessenger.Default under the hood
-                    Messenger.Register<ListingUpdatedMessage>(this);
-                    Messenger.Register<WindowClosedMessage>(this);
-                    Messenger.Register<ListingDeletedMessage>(this);
-                    Messenger.Register<LessorUpdatedMessage>(this);
-                    Messenger.Register<BrokerUpdatedMessage>(this);
-                    Messenger.Register<LessorDeletedMessage>(this);
-                    Messenger.Register<BrokerDeletedMessage>(this);
-                }
-                else
-                {
-                    Messenger.Unregister<ListingUpdatedMessage>(this);
-                    Messenger.Unregister<WindowClosedMessage>(this);
-                    Messenger.Unregister<ListingDeletedMessage>(this);
-                    Messenger.Unregister<LessorUpdatedMessage>(this);
-                    Messenger.Unregister<BrokerUpdatedMessage>(this);
-                    Messenger.Unregister<LessorDeletedMessage>(this);
-                    Messenger.Unregister<BrokerDeletedMessage>(this);
-                }
-            }
-        };
-        */
         // Ready to receive messages.
 #pragma warning disable IL3050 // Disable AOT dynamic code warning
 #pragma warning disable IL2026 // Disable Trimming unreferenced code warning
@@ -146,7 +118,6 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 #pragma warning restore IL2026
 #pragma warning restore IL3050
     }
-
 
     #region == Properties ==
 
@@ -212,7 +183,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     #endregion
 
-    #region == 基本プロパティ == 
+    #region == 基本物件プロパティ == 
 
     // 物件名
     public string Name
@@ -236,7 +207,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     }
 
     // 物件種別
-    public ObservableCollection<Models.Rent.Residentials.PropertyTypeLabel> Kinds { get; set; } =
+    public ObservableCollection<Models.Rent.Residentials.PropertyTypeLabel> PropertyTypes { get; set; } =
     [
         //new Kind(EnumKinds.Unspecified.ToString(), "未指定"),
         new Models.Rent.Residentials.PropertyTypeLabel(Models.Rent.Residentials.PropertyType.Apartment),
@@ -248,7 +219,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         new Models.Rent.Residentials.PropertyTypeLabel(Models.Rent.Residentials.PropertyType.Dormitory)
     ];
 
-    public Models.Rent.Residentials.PropertyTypeLabel SelectedKind
+    public Models.Rent.Residentials.PropertyTypeLabel SelectedPropertyType
     {
         get => field ?? new(Models.Rent.Residentials.PropertyType.Unspecified);
         set
@@ -668,7 +639,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     public string? MachiazaId { get; set; }
 
-    public ObservableCollection<Prefecture> Prefectures { get; set; } = new(new PrefectureMaster().Prefectures);
+    public ObservableCollection<Prefecture> Prefectures { get; init; } = new(PrefectureMaster.Prefectures);
 
     public Prefecture? SelectedPef
     {
@@ -1677,16 +1648,11 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         Name = _building.Name;
 
         //SelectedKind = _building.BuildingKind;
-        var kindkey = Kinds.FirstOrDefault(k => k.Key == _building.BuildingKind.Key);
-        SelectedKind = kindkey is null ? new(Models.Rent.Residentials.PropertyType.Unspecified) : kindkey;
-
+        var propertyTypeKey = PropertyTypes.FirstOrDefault(k => k.Key == _building.BuildingType.Key);
+        SelectedPropertyType = propertyTypeKey is null ? new(Models.Rent.Residentials.PropertyType.Unspecified) : propertyTypeKey;
         IsUnitOwnership = _building.IsUnitOwnership;
-
-        //IsUnitOwnershipVisible = !IsUnitOwnership;
-
-        //SelectedStructure = _building.BuildingStructure;
-        var Structurekey = Structures.FirstOrDefault(k => k.Key == _building.BuildingStructure.Key);
-        SelectedStructure = Structurekey is null ? new(Models.Rent.Residentials.StructureType.Unspecified) : Structurekey;
+        var structureKey = Structures.FirstOrDefault(k => k.Key == _building.BuildingStructure.Key);
+        SelectedStructure = structureKey is null ? new(Models.Rent.Residentials.StructureType.Unspecified) : structureKey;
 
         FloorCountAboveGround = _building.FloorCountAboveGround == 0 ? string.Empty : _building.FloorCountAboveGround.ToString(CultureInfo.InvariantCulture);
         FloorCountBasement = _building.FloorCountBasement == 0 ? string.Empty : _building.FloorCountBasement.ToString(CultureInfo.InvariantCulture);
@@ -1699,6 +1665,13 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
         // Location
 
+        MachiazaId = _building.Address.MachiazaId;
+        if (!string.IsNullOrEmpty(MachiazaId))
+        {
+            // TODO: Get Pref, City, Town, Choume from MachiazaId?
+        }
+
+        /*
         if (!string.IsNullOrEmpty(_building.LocPrefId))
         {
             var hoge = Prefectures.FirstOrDefault<Prefecture>(p => p.MunicipalityCode.Equals(_building.LocPrefId, StringComparison.Ordinal));
@@ -1745,7 +1718,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
         LocationLatitude = _building.LocationLatitude;
         LocationLongitude = _building.LocationLongitude;
-
+        */
         //TODO: Set other properties
 
 
@@ -2009,6 +1982,18 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         return true;
     }
 
+    private void ShowErrorInfoBar(Models.ErrorInfo err, bool isShowBar = true)
+    {
+        InfoBarErrorMessage =
+            err.Title + Environment.NewLine +
+        err.Message + Environment.NewLine +
+            err.Description + Environment.NewLine +
+            err.Operation + Environment.NewLine +
+            err.MethodName;
+
+        IsInfoBarErrorOpen = isShowBar;
+    }
+
     private void SetValues()
     {
         if (!IsDirty)
@@ -2016,37 +2001,80 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             return;
         }
 
-        // 物件名
-        _building.SetName(Name);
+        try
+        {
+            // 物件名
+            _building.SetName(Name);
 
-        _building.BuildingKind = SelectedKind;
-        _building.IsUnitOwnership = IsUnitOwnership;
-        
-        _building.BuildingStructure = SelectedStructure;
-        _building.FloorCountAboveGround = int.TryParse(Helpers.Common.ReplaceZenkakuNumbers(FloorCountAboveGround), out var floorCountAboveGround) ? floorCountAboveGround : 0; //Convert.ToInt32(FloorCountAboveGround)
-        _building.FloorCountBasement = int.TryParse(Helpers.Common.ReplaceZenkakuNumbers(FloorCountBasement), out var floorCountBasement) ? floorCountBasement : 0;
-        _building.TotalUnitCount = int.TryParse(Helpers.Common.ReplaceZenkakuNumbers(TotalUnitCount), out var totalUnitCount) ? totalUnitCount : 0;
-        _building.BuiltYearAndMonth = BuiltYearAndMonth ?? new DateTimeOffset(1900, 1, 1, 0, 0, 0, TimeSpan.Zero);
-        _building.FudousanId = Helpers.Common.ReplaceZenkakuNumbers(FudousanId);
-        _building.FudousanIdAdditionalCode = Helpers.Common.ReplaceZenkakuNumbers(FudousanIdAdditionalCode);
-        _building.Remarks = Remarks;
+            _building.SetBuildingType(SelectedPropertyType);
+            _building.SetIsUnitOwnership(IsUnitOwnership);
+            _building.SetBuildingStructure(SelectedStructure);
+
+            if (!string.IsNullOrWhiteSpace(FloorCountAboveGround))
+            {
+                _building.SetFloorCountAboveGroundFromString(Helpers.Common.ReplaceZenkakuNumbers(FloorCountAboveGround));
+                /*
+                if (int.TryParse(Helpers.Common.ReplaceZenkakuNumbers(FloorCountAboveGround), out var floorCountAboveGround))
+                {
+                    _building.SetFloorCountAboveGround(floorCountAboveGround);
+                }
+                else
+                {
+                    _building.SetFloorCountAboveGround(0);
+                }
+                */
+            }
+            if (!string.IsNullOrWhiteSpace(FloorCountBasement))
+            {
+                _building.SetFloorCountBasementFromString(Helpers.Common.ReplaceZenkakuNumbers(FloorCountBasement));
+            }
+            if (!string.IsNullOrWhiteSpace(TotalUnitCount))
+            {
+                _building.SetTotalUnitCountFromString(Helpers.Common.ReplaceZenkakuNumbers(TotalUnitCount));
+            }
+            _building.SetBuiltYearAndMonth(BuiltYearAndMonth);
+            _building.SetFudousanId(Helpers.Common.ReplaceZenkakuNumbers(FudousanId));
+            _building.SetFudousanIdAdditionalCode(Helpers.Common.ReplaceZenkakuNumbers(FudousanIdAdditionalCode));
+            _building.SetRemarks(Remarks);
+
+            // 所在地
+            _building.Address.SetMachiazaId(MachiazaId ?? string.Empty);
+            _building.Address.SetPrefecture(SelectedPef);
+            _building.Address.SetCountyAndCity(SelectedCity);
+            _building.Address.SetWardAndOaza(SelectedTown);
+            _building.Address.SetChoume(SelectedChou);
+            _building.Address.SetEdaban(Edaban);
+
+            // TODO: Set other properties
+
+        }
+        catch (ArgumentException ex)
+        {
+            var err = new Models.ErrorInfo
+            {
+                Title = "入力値にエラーがあります。物件情報の保存が出来ませんでした。",
+                Type = Models.ErrorInfo.ErrType.UserInput,
+                Code = "",
+                Message = ex.Message,
+                Description = ex.StackTrace ?? string.Empty,
+                Operation = "入力値チェック",
+                MethodName = nameof(SetValues),
+                OccuredAt = DateTime.Now
+            };
+
+            ShowErrorInfoBar(err,true);
+        }
+
+
 
         // TODO: Set other properties
         // TODO: Don't forget to check if Helpers.Common.ReplaceZenkakuNumbers is needed.
 
-        // 所在地
-        _building.LocPrefId = (SelectedPef is not null) ? SelectedPef.MunicipalityCode : string.Empty;
-        _building.LocPrefecture = (SelectedPef is not null) ? SelectedPef.Name : string.Empty;
-        _building.LocMachiazaId = (!string.IsNullOrEmpty(MachiazaId)) ? MachiazaId : string.Empty;
-        _building.LocCounty = (SelectedCity is not null) ? SelectedCity.County : string.Empty;
-        _building.LocCity = (SelectedCity is not null) ? SelectedCity.City : string.Empty;
-        _building.LocWard = (SelectedTown is not null) ? SelectedTown.Ward : string.Empty;
-        _building.LocOazaCho = (SelectedTown is not null) ? SelectedTown.Oaza : string.Empty;
-        _building.LocChoume = (SelectedChou is not null) ? SelectedChou.Chou : string.Empty;
-        _building.LocEdaban = (!string.IsNullOrEmpty(Edaban)) ? Edaban : string.Empty;
-        _building.LocLocationFull = AddressPreview;
-        _building.LocationLatitude = LocationLatitude;
-        _building.LocationLongitude = LocationLongitude;
+
+        //_building.SetLocLocationFull(AddressPreview);
+        //_building.SetLocationLatitude(LocationLatitude);
+        //_building.SetLocationLongitude(LocationLongitude);
+        
         // TODO: Set other properties
         // TODO: Don't forget to check if Helpers.Common.ReplaceZenkakuNumbers is needed.
 
@@ -2224,14 +2252,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                 resInsert.Error.MethodName + Environment.NewLine +
                 resInsert.Error.FullDump);
 
-            InfoBarErrorMessage =
-                resInsert.Error.Title + Environment.NewLine +
-                resInsert.Error.Message + Environment.NewLine +
-                resInsert.Error.Description + Environment.NewLine +
-                resInsert.Error.Operation + Environment.NewLine +
-                resInsert.Error.MethodName;
-
-            IsInfoBarErrorOpen = true;
+            ShowErrorInfoBar(resInsert.Error, true);
 
             saveResult = false;
         }

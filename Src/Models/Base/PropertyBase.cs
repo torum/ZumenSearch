@@ -29,7 +29,7 @@ public abstract partial class PropertyBase : EntityAggregateBase
     public Address Address
     {
         get;
-        set
+        private set
         {
             if (SetProperty(ref field, value))
             {
@@ -37,7 +37,7 @@ public abstract partial class PropertyBase : EntityAggregateBase
             }
         }
     } = new Address();
-
+    /*
     #region == 所在地 ==
 
     public string LocPrefId
@@ -100,31 +100,8 @@ public abstract partial class PropertyBase : EntityAggregateBase
         set => SetProperty(ref field, value);
     }
 
-    public string LocationLatitude
-    {
-        get => field ?? string.Empty;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
-        }
-    } = string.Empty;
-
-    public string LocationLongitude
-    {
-        get => field ?? string.Empty;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
-        }
-    } = string.Empty;
     #endregion
-
+    */
     // TODO: Use Train class from Models.Transportation.Train.cs instead of using classes directly.
     public Train Train
     {
@@ -195,6 +172,14 @@ public abstract partial class PropertyBase : EntityAggregateBase
 
         return bitmapImage;
     }
+
+    #endregion
+
+
+    #region == Public Methods ==
+    /*
+
+    */
 
     #endregion
 

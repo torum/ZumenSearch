@@ -2,10 +2,8 @@
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
-using System.Diagnostics;
 using System.Text.RegularExpressions;
 using Windows.ApplicationModel.DataTransfer;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace ZumenSearch.Views.Rent.Residentials;
 
@@ -51,49 +49,6 @@ public sealed partial class BasicPage : Page
         Init();
     }
 
-#pragma warning disable CA1822 // Mark members as static
-    private void TextBoxDigitOnly_TextChanging(TextBox sender, TextBoxTextChangingEventArgs args)
-#pragma warning restore CA1822 // Mark members as static
-    {
-        /*
-        var text = ((TextBox)sender).Text;
-
-        var regex = new Regex("^[0-9]*$");
-
-        string pattern = @"^\d{10,}$"; // 10 or more digits
-        if (Regex.IsMatch(text, pattern))
-        {
-            ((TextBox)sender).BorderBrush = new SolidColorBrush(Colors.Red);
-            return;
-        }
-
-        if (!regex.IsMatch(text))
-        {
-            ((TextBox)sender).BorderBrush = new SolidColorBrush(Colors.Red);
-        }
-        else
-        {
-            ((TextBox)sender).BorderBrush = (App.Current.Resources["TextControlBorderBrush"] as Brush)!;
-        }
-        */
-        /*
-        var currentPosition = sender.SelectionStart - 1;
-        var text = ((TextBox)sender).Text;
-
-        var regex = new Regex("^[0-9]*$");
-
-        if (!regex.IsMatch(text))
-        {
-            var foundChar = Regex.Match(sender.Text, @"[^0-9]");
-            if (foundChar.Success)
-            {
-                sender.Text = sender.Text.Remove(foundChar.Index, 1);
-            }
-
-            sender.Select(currentPosition, 0);
-        }
-        */
-    }
 
 #pragma warning disable CA1822 // Mark members as static
     private void TextBox4DigitOrLess_TextChanging(TextBox sender, TextBoxTextChangingEventArgs args)
@@ -126,35 +81,7 @@ public sealed partial class BasicPage : Page
                 ((TextBox)sender).BorderBrush = new SolidColorBrush(Colors.Red);
             }
         }
-        /*
-        var regex = new Regex("^[0-9]*$");
 
-        if (!regex.IsMatch(text))
-        {
-            ((TextBox)sender).BorderBrush = new SolidColorBrush(Colors.Red);
-        }
-        else
-        {
-            string pattern = @"^(?:\d{5,})?$";//@"^\d{5,}$"; // 5 or more digits
-            if (Regex.IsMatch(text, pattern))
-            {
-                Debug.WriteLine("5 or more digits @TextBoxHalfWidth4DigitOrLess_TextChanging");
-                ((TextBox)sender).BorderBrush = new SolidColorBrush(Colors.Red);
-                return;
-            }
-
-            regex = new Regex(@"^(?:\d{0,4})?$");//new Regex(@"^\d{0,4}$");
-            if (!regex.IsMatch(text))
-            {
-                Debug.WriteLine("^(?:\\d{0,4})?$ @TextBoxHalfWidth4DigitOrLess_TextChanging");
-                ((TextBox)sender).BorderBrush = new SolidColorBrush(Colors.Yellow);
-            }
-            else
-            {
-                ((TextBox)sender).BorderBrush = (App.Current.Resources["TextControlBorderBrush"] as Brush)!;
-            }
-        }
-        */
     }
 
 #pragma warning disable CA1822 // Mark members as static
@@ -186,33 +113,6 @@ public sealed partial class BasicPage : Page
                 ((TextBox)sender).BorderBrush = new SolidColorBrush(Colors.Red);
             }
         }
-        /*
-        var regex = new Regex("^[0-9]*$");
-
-        if (!regex.IsMatch(text))
-        {
-            ((TextBox)sender).BorderBrush = new SolidColorBrush(Colors.Red);
-        }
-        else
-        {
-            string pattern = @"^\d{6,}$"; // 6 or more digits
-            if (Regex.IsMatch(text, pattern))
-            {
-                ((TextBox)sender).BorderBrush = new SolidColorBrush(Colors.Red);
-                return;
-            }
-
-            regex = new Regex(@"^(?:\d{0,5})?$");//new Regex(@"^\d{4}$");
-            if (!regex.IsMatch(text))
-            {
-                ((TextBox)sender).BorderBrush = new SolidColorBrush(Colors.Yellow);
-            }
-            else
-            {
-                ((TextBox)sender).BorderBrush = (App.Current.Resources["TextControlBorderBrush"] as Brush)!;
-            }
-        }
-        */
     }
 
 #pragma warning disable CA1822 // Mark members as static
@@ -251,19 +151,6 @@ public sealed partial class BasicPage : Page
                 ((TextBox)sender).BorderBrush = new SolidColorBrush(Colors.Red);
             }
         }
-        /*
-        var regex = new Regex("^[0-9]*$");
-
-        if (!regex.IsMatch(text))
-        {
-            ((TextBox)sender).BorderBrush = new SolidColorBrush(Colors.Red);
-        }
-        else
-        {
-
-
-        }
-        */
     }
 
 #pragma warning disable CA1822 // Mark members as static
@@ -302,41 +189,6 @@ public sealed partial class BasicPage : Page
                 ((TextBox)sender).BorderBrush = new SolidColorBrush(Colors.Red);
             }
         }
-        /*
-        var regex = new Regex("^[0-9]*$");
-
-        if (!regex.IsMatch(text))
-        {
-            ((TextBox)sender).BorderBrush = new SolidColorBrush(Colors.Red);
-        }
-        else
-        {
-            string pattern = @"^\d{14,}$"; // 14 or more digits
-            if (Regex.IsMatch(text, pattern))
-            {
-                ((TextBox)sender).BorderBrush = new SolidColorBrush(Colors.Red);
-                return;
-            }
-
-            regex = new Regex(@"^(?:\d{13})?$");//new Regex(@"^\d{13}$");
-            if (!regex.IsMatch(text))
-            {
-                regex = new Regex(@"^(?:\d{0,13})?$");//new Regex(@"^\d{13}$");
-                if (!regex.IsMatch(text))
-                {
-                    ((TextBox)sender).BorderBrush = new SolidColorBrush(Colors.Red);
-                }
-                else
-                {
-                    ((TextBox)sender).BorderBrush = new SolidColorBrush(Colors.Yellow);
-                }
-            }
-            else
-            {
-                ((TextBox)sender).BorderBrush = (App.Current.Resources["TextControlBorderBrush"] as Brush)!;
-            }
-        }
-        */
     }
 
     private async void TextBoxCleanNonDigitMax4_Paste(object sender, TextControlPasteEventArgs e)

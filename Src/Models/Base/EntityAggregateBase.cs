@@ -35,7 +35,7 @@ public abstract class EntityAggregateBase : EntityBase
 
     public void SetName(string name)
     {
-        if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Name cannot be empty.", nameof(name));
+        if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("名前欄（必須項目）が空です。", nameof(name));// Name cannot be empty.
         // InvalidOperationException 
         Name = name.Trim();
     }
