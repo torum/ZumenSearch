@@ -1843,6 +1843,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             }
         }
         Edaban = _building.Address.Edaban;
+        PostalCode = _building.Address.PostalCode;
         MachiazaId = _building.Address.MachiazaId; // Must be at the end of the location properties, because it is set and cleared by the other properties.
         LocationLatitude = _building.Address.LocationLatitude;
         LocationLongitude = _building.Address.LocationLongitude;
@@ -2203,6 +2204,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             _building.Address.SetWardAndOaza(SelectedTown);
             _building.Address.SetChoume(SelectedChou);
             _building.Address.SetEdaban(Edaban);
+            _building.Address.SetPostalCode(PostalCode);
             //_building.SetLocLocationFull(AddressPreview);
             _building.Address.SetLocationLatitude(LocationLatitude);
             _building.Address.SetLocationLongitude(LocationLongitude);
