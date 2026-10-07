@@ -78,22 +78,36 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     "train1_station_code TEXT NOT NULL DEFAULT ''," +
                     "train1_station_name TEXT NOT NULL DEFAULT ''," +
                     "train1_ekitoho INTEGER NOT NULL DEFAULT 0," +
+                    "buss1_stop_name TEXT NOT NULL DEFAULT ''," +
+                    "buss1_Jyousya INTEGER NOT NULL DEFAULT 0," +
+                    "buss1_Toho INTEGER NOT NULL DEFAULT 0," +
+
                     "train2_line_code TEXT NOT NULL DEFAULT ''," +
                     "train2_line_name TEXT NOT NULL DEFAULT ''," +
                     "train2_station_code TEXT NOT NULL DEFAULT ''," +
                     "train2_station_name TEXT NOT NULL DEFAULT ''," +
                     "train2_ekitoho INTEGER NOT NULL DEFAULT 0," +
+                    "buss2_stop_name TEXT NOT NULL DEFAULT ''," +
+                    "buss2_Jyousya INTEGER NOT NULL DEFAULT 0," +
+                    "buss2_Toho INTEGER NOT NULL DEFAULT 0," +
+
                     "train3_line_code TEXT NOT NULL DEFAULT ''," +
                     "train3_line_name TEXT NOT NULL DEFAULT ''," +
                     "train3_station_code TEXT NOT NULL DEFAULT ''," +
                     "train3_station_name TEXT NOT NULL DEFAULT ''," +
                     "train3_ekitoho INTEGER NOT NULL DEFAULT 0," +
+                    "buss3_stop_name TEXT NOT NULL DEFAULT ''," +
+                    "buss3_Jyousya INTEGER NOT NULL DEFAULT 0," +
+                    "buss3_Toho INTEGER NOT NULL DEFAULT 0," +
+
                     "train4_line_code TEXT NOT NULL DEFAULT ''," +
                     "train4_line_name TEXT NOT NULL DEFAULT ''," +
                     "train4_station_code TEXT NOT NULL DEFAULT ''," +
                     "train4_station_name TEXT NOT NULL DEFAULT ''," +
                     "train4_ekitoho INTEGER NOT NULL DEFAULT 0," +
-
+                    "buss4_stop_name TEXT NOT NULL DEFAULT ''," +
+                    "buss4_Jyousya INTEGER NOT NULL DEFAULT 0," +
+                    "buss4_Toho INTEGER NOT NULL DEFAULT 0," +
                     // TODO: add more columns.
 
 
@@ -107,7 +121,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS rent_residentials (" +
                     "property_id TEXT NOT NULL PRIMARY KEY," +
                     //"residential_id TEXT NOT NULL," +
-                    "building_kind TEXT NOT NULL DEFAULT ''," +
+                    "building_type TEXT NOT NULL DEFAULT ''," +
                     "is_unit_ownership INTEGER NOT NULL DEFAULT 0," +
                     "building_structure TEXT NOT NULL DEFAULT ''," +
                     "floor_count_above_ground INTEGER NOT NULL DEFAULT 0," +
@@ -376,7 +390,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 tableCmd.CommandText = """
     CREATE TABLE IF NOT EXISTS sale_residentials (
         property_id TEXT NOT NULL PRIMARY KEY,
-        building_kind TEXT NOT NULL DEFAULT '',
+        building_type TEXT NOT NULL DEFAULT '',
         is_unit_ownership INTEGER NOT NULL DEFAULT 0,
         building_structure TEXT NOT NULL DEFAULT '',
         floor_count_above_ground INTEGER NOT NULL DEFAULT 0,
@@ -1058,10 +1072,29 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 //cmd.CommandText = "INSERT INTO properties (property_id, name, property_kind, thumbnail_filename, location_prefecture_code, location_prefecture, location_machiaza_id, location_county, location_city, location_ward, location_oaza_cho, location_choume, location_edaban, location_full, updated_at) " +
                 //  "VALUES (@RentId, @Name, @PropertyKind, @Thumb, @LocPrefId, @LocPrefecture, @LocMachiazaId, @LocCounty, @LocCity, @LocWard, @LocOazaCho, @LocChoume, @LocEdaban, @LocLocationFull, @updated_at)";
                 // Upsert
-                var sqlUpsert = "INSERT INTO properties (property_id, name, property_kind, thumbnail_filename, location_prefecture_code, location_prefecture, location_machiaza_id, location_county, location_city, location_ward, location_oaza_cho, location_choume, location_edaban, location_full, location_latitude, location_longitude, train1_line_code, train1_line_name, train1_station_code, train1_station_name, train1_ekitoho, updated_at) ";
-                sqlUpsert += "VALUES (@propertyId, @name, @propertyKind, @thumbnailPath, @locPrefId, @locPrefecture, @locMachiazaId, @locCounty, @locCity, @locWard, @locOazaCho, @locChoume, @locEdaban, @locLocationFull, @locationLatitude, @locationLongitude, @train1_line_code, @train1_line_name, @train1_station_code, @train1_station_name, @train1_ekitoho, @updated_at) ";
-                sqlUpsert += "ON CONFLICT (property_id) ";
-                sqlUpsert += "DO UPDATE SET property_id = @propertyId, name = @name, property_kind = @propertyKind, thumbnail_filename = @thumbnailPath, location_prefecture_code = @locPrefId, location_prefecture = @locPrefecture, location_machiaza_id = @locMachiazaId, location_county = @locCounty, location_city = @locCity, location_ward = @locWard, location_oaza_cho = @locOazaCho, location_choume = @locChoume, location_edaban = @locEdaban, location_full = @locLocationFull, location_latitude = @locationLatitude, location_longitude = @locationLongitude, train1_line_code = @train1_line_code, train1_line_name = @train1_line_name, train1_station_code = @train1_station_code, train1_station_name = @train1_station_name, train1_ekitoho = @train1_ekitoho, updated_at = @updated_at";
+                var sqlUpsert = "INSERT INTO properties (property_id, name, property_kind, thumbnail_filename, location_prefecture_code, location_prefecture, location_machiaza_id, location_county, location_city, location_ward, location_oaza_cho, location_choume, location_edaban, location_full, location_latitude, location_longitude, " +
+                    "train1_line_code, train1_line_name, train1_station_code, train1_station_name, train1_ekitoho, buss1_stop_name, buss1_Jyousya, buss1_Toho, " +
+                    "train2_line_code, train2_line_name, train2_station_code, train2_station_name, train2_ekitoho, buss2_stop_name, buss2_Jyousya, buss2_Toho, " +
+                    "train3_line_code, train3_line_name, train3_station_code, train3_station_name, train3_ekitoho, buss3_stop_name, buss3_Jyousya, buss3_Toho, " +
+                    "train4_line_code, train4_line_name, train4_station_code, train4_station_name, train4_ekitoho, buss4_stop_name, buss4_Jyousya, buss4_Toho, updated_at) ";
+
+                sqlUpsert += "VALUES (@propertyId, @name, @propertyKind, @thumbnailPath, @locPrefId, @locPrefecture, @locMachiazaId, @locCounty, @locCity, @locWard, @locOazaCho, @locChoume, @locEdaban, @locLocationFull, @locationLatitude, @locationLongitude, " +
+                    "@train1_line_code, @train1_line_name, @train1_station_code, @train1_station_name, @train1_ekitoho, @buss1_stop_name, @buss1_Jyousya, @buss1_Toho, " +
+                    "@train2_line_code, @train2_line_name, @train2_station_code, @train2_station_name, @train2_ekitoho, @buss2_stop_name, @buss2_Jyousya, @buss2_Toho, " +
+                    "@train3_line_code, @train3_line_name, @train3_station_code, @train3_station_name, @train3_ekitoho, @buss3_stop_name, @buss3_Jyousya, @buss3_Toho, " +
+                    "@train4_line_code, @train4_line_name, @train4_station_code, @train4_station_name, @train4_ekitoho, @buss4_stop_name, @buss4_Jyousya, @buss4_Toho, @updated_at) ";
+
+                sqlUpsert += "ON CONFLICT (property_id) DO UPDATE SET " +
+                    "name = @name, property_kind = @propertyKind, thumbnail_filename = @thumbnailPath, " +
+                    "location_prefecture_code = @locPrefId, location_prefecture = @locPrefecture, location_machiaza_id = @locMachiazaId, " +
+                    "location_county = @locCounty, location_city = @locCity, location_ward = @locWard, location_oaza_cho = @locOazaCho, " +
+                    "location_choume = @locChoume, location_edaban = @locEdaban, location_full = @locLocationFull, " +
+                    "location_latitude = @locationLatitude, location_longitude = @locationLongitude, " +
+                    "train1_line_code = @train1_line_code, train1_line_name = @train1_line_name, train1_station_code = @train1_station_code, train1_station_name = @train1_station_name, train1_ekitoho = @train1_ekitoho, buss1_stop_name = @buss1_stop_name, buss1_Jyousya = @buss1_Jyousya, buss1_Toho = @buss1_Toho, " +
+                    "train2_line_code = @train2_line_code, train2_line_name = @train2_line_name, train2_station_code = @train2_station_code, train2_station_name = @train2_station_name, train2_ekitoho = @train2_ekitoho, buss2_stop_name = @buss2_stop_name, buss2_Jyousya = @buss2_Jyousya, buss2_Toho = @buss2_Toho, " +
+                    "train3_line_code = @train3_line_code, train3_line_name = @train3_line_name, train3_station_code = @train3_station_code, train3_station_name = @train3_station_name, train3_ekitoho = @train3_ekitoho, buss3_stop_name = @buss3_stop_name, buss3_Jyousya = @buss3_Jyousya, buss3_Toho = @buss3_Toho, " +
+                    "train4_line_code = @train4_line_code, train4_line_name = @train4_line_name, train4_station_code = @train4_station_code, train4_station_name = @train4_station_name, train4_ekitoho = @train4_ekitoho, buss4_stop_name = @buss4_stop_name, buss4_Jyousya = @buss4_Jyousya, buss4_Toho = @buss4_Toho, " +
+                    "updated_at = @updated_at";
 
                 cmd.CommandText = sqlUpsert;
                 
@@ -1082,12 +1115,49 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 cmd.Parameters.AddWithValue("@locLocationFull", building.Address.AddressFull ?? string.Empty);
                 cmd.Parameters.AddWithValue("@locationLatitude", building.Address.LocationLatitude);
                 cmd.Parameters.AddWithValue("@locationLongitude", building.Address.LocationLongitude);
-                // Train 1
+                // Train1
                 cmd.Parameters.AddWithValue("@train1_line_code", building.Train1.RailLine.LineCode);
                 cmd.Parameters.AddWithValue("@train1_line_name", building.Train1.RailLine.LineName);
                 cmd.Parameters.AddWithValue("@train1_station_code", building.Train1.RailStation.StationCode);
                 cmd.Parameters.AddWithValue("@train1_station_name", building.Train1.RailStation.StationName);
                 cmd.Parameters.AddWithValue("@train1_ekitoho", building.Train1.EkiToho); //int
+                // Buss1
+                cmd.Parameters.AddWithValue("@buss1_stop_name", building.BusStop1);
+                cmd.Parameters.AddWithValue("@buss1_Jyousya", building.BusJyousya1);
+                cmd.Parameters.AddWithValue("@buss1_Toho", building.BusStopToho1);
+
+                // Train2
+                cmd.Parameters.AddWithValue("@train2_line_code", building.Train2.RailLine.LineCode);
+                cmd.Parameters.AddWithValue("@train2_line_name", building.Train2.RailLine.LineName);
+                cmd.Parameters.AddWithValue("@train2_station_code", building.Train2.RailStation.StationCode);
+                cmd.Parameters.AddWithValue("@train2_station_name", building.Train2.RailStation.StationName);
+                cmd.Parameters.AddWithValue("@train2_ekitoho", building.Train2.EkiToho); //int
+                // Buss2
+                cmd.Parameters.AddWithValue("@buss2_stop_name", building.BusStop2);
+                cmd.Parameters.AddWithValue("@buss2_Jyousya", building.BusJyousya2);
+                cmd.Parameters.AddWithValue("@buss2_Toho", building.BusStopToho2);
+                
+                // Train3
+                cmd.Parameters.AddWithValue("@train3_line_code", building.Train3.RailLine.LineCode);
+                cmd.Parameters.AddWithValue("@train3_line_name", building.Train3.RailLine.LineName);
+                cmd.Parameters.AddWithValue("@train3_station_code", building.Train3.RailStation.StationCode);
+                cmd.Parameters.AddWithValue("@train3_station_name", building.Train3.RailStation.StationName);
+                cmd.Parameters.AddWithValue("@train3_ekitoho", building.Train3.EkiToho); //int
+                // Buss3
+                cmd.Parameters.AddWithValue("@buss3_stop_name", building.BusStop3);
+                cmd.Parameters.AddWithValue("@buss3_Jyousya", building.BusJyousya3);
+                cmd.Parameters.AddWithValue("@buss3_Toho", building.BusStopToho3);
+
+                // Train4
+                cmd.Parameters.AddWithValue("@train4_line_code", building.Train4.RailLine.LineCode);
+                cmd.Parameters.AddWithValue("@train4_line_name", building.Train4.RailLine.LineName);
+                cmd.Parameters.AddWithValue("@train4_station_code", building.Train4.RailStation.StationCode);
+                cmd.Parameters.AddWithValue("@train4_station_name", building.Train4.RailStation.StationName);
+                cmd.Parameters.AddWithValue("@train4_ekitoho", building.Train4.EkiToho); //int
+                // Buss4
+                cmd.Parameters.AddWithValue("@buss4_stop_name", building.BusStop4);
+                cmd.Parameters.AddWithValue("@buss4_Jyousya", building.BusJyousya4);
+                cmd.Parameters.AddWithValue("@buss4_Toho", building.BusStopToho4);
 
                 // TODO: more
 
@@ -1097,18 +1167,18 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 // rent_residentials
                 cmd.Parameters.Clear();
                 // Insert
-                //cmd.CommandText = "INSERT INTO rent_residentials (property_id, building_kind, is_unit_ownership, building_structure, floor_count_above_ground, floor_count_basement, total_unit_count, built_year_month, fudousan_id, fudousan_id_additional_code, remarks) " +
+                //cmd.CommandText = "INSERT INTO rent_residentials (property_id, building_type, is_unit_ownership, building_structure, floor_count_above_ground, floor_count_basement, total_unit_count, built_year_month, fudousan_id, fudousan_id_additional_code, remarks) " +
                 //    "VALUES (@RentId, @BuildingKind, @IsUnitOwnership, @BuildingStructure, @FloorCountAboveGround, @FloorCountBasement, @TotalUnitCount, @BuiltYearMonth, @FudousanId, @FudousanIdAdditionalCode, @Remarks)";
                 // Upsert
-                sqlUpsert = "INSERT INTO rent_residentials (property_id, building_kind, is_unit_ownership, building_structure, floor_count_above_ground, floor_count_basement, total_unit_count, built_year_month, fudousan_id, fudousan_id_additional_code, remarks) ";
-                sqlUpsert += "VALUES (@propertyId, @buildingKind, @isUnitOwnership, @buildingStructure, @floorCountAboveGround, @floorCountBasement, @totalUnitCount, @builtYearMonth, @fudousanId, @fudousanIdAdditionalCode, @remarks)";
+                sqlUpsert = "INSERT INTO rent_residentials (property_id, building_type, is_unit_ownership, building_structure, floor_count_above_ground, floor_count_basement, total_unit_count, built_year_month, fudousan_id, fudousan_id_additional_code, remarks) ";
+                sqlUpsert += "VALUES (@propertyId, @buildingType, @isUnitOwnership, @buildingStructure, @floorCountAboveGround, @floorCountBasement, @totalUnitCount, @builtYearMonth, @fudousanId, @fudousanIdAdditionalCode, @remarks)";
                 sqlUpsert += "ON CONFLICT(property_id) ";
-                sqlUpsert += "DO UPDATE SET building_kind = @buildingKind, is_unit_ownership = @isUnitOwnership, building_structure = @buildingStructure, floor_count_above_ground = @floorCountAboveGround, floor_count_basement = @floorCountBasement, total_unit_count = @totalUnitCount, built_year_month = @builtYearMonth, fudousan_id = @fudousanId, fudousan_id_additional_code = @fudousanIdAdditionalCode, remarks = @remarks";
+                sqlUpsert += "DO UPDATE SET building_type = @buildingType, is_unit_ownership = @isUnitOwnership, building_structure = @buildingStructure, floor_count_above_ground = @floorCountAboveGround, floor_count_basement = @floorCountBasement, total_unit_count = @totalUnitCount, built_year_month = @builtYearMonth, fudousan_id = @fudousanId, fudousan_id_additional_code = @fudousanIdAdditionalCode, remarks = @remarks";
 
                 cmd.CommandText = sqlUpsert;
 
                 cmd.Parameters.AddWithValue("@propertyId", building.Id);
-                cmd.Parameters.AddWithValue("@buildingKind", building.BuildingType.Key.ToString());
+                cmd.Parameters.AddWithValue("@buildingType", building.BuildingType.Key.ToString());
                 cmd.Parameters.AddWithValue("@isUnitOwnership", building.IsUnitOwnership ? 1 : 0); // bool to int
                 cmd.Parameters.AddWithValue("@buildingStructure", building.BuildingStructure.Key.ToString());
                 cmd.Parameters.AddWithValue("@floorCountAboveGround", building.FloorCountAboveGround);// int
@@ -1626,7 +1696,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             connection.Open();
 
             using var cmd = connection.CreateCommand();
-            cmd.CommandText = string.Format(CultureInfo.InvariantCulture, "SELECT properties.name as propertyName, " +
+            cmd.CommandText = "SELECT properties.name as propertyName, " +
                 "properties.property_kind as propertyKind, " +
                 "properties.location_prefecture_code as locPrefId, " +
                 "properties.location_prefecture as locPrefecture, " +
@@ -1645,9 +1715,36 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 "properties.train1_station_code as train1StationCode, " +
                 "properties.train1_station_name as train1StationName, " +
                 "properties.train1_ekitoho as train1EkiToho, " +
+                "properties.buss1_stop_name as buss1StopName, " +
+                "properties.buss1_Jyousya as buss1Jyousya, " +
+                "properties.buss1_Toho as buss1Toho, " +
+                "properties.train2_line_code as train2LineCode, " +
+                "properties.train2_line_name as train2LineName, " +
+                "properties.train2_station_code as train2StationCode, " +
+                "properties.train2_station_name as train2StationName, " +
+                "properties.train2_ekitoho as train2EkiToho, " +
+                "properties.buss2_stop_name as buss2StopName, " +
+                "properties.buss2_Jyousya as buss2Jyousya, " +
+                "properties.buss2_Toho as buss2Toho, " +
+                "properties.train3_line_code as train3LineCode, " +
+                "properties.train3_line_name as train3LineName, " +
+                "properties.train3_station_code as train3StationCode, " +
+                "properties.train3_station_name as train3StationName, " +
+                "properties.train3_ekitoho as train3EkiToho, " +
+                "properties.buss3_stop_name as buss3StopName, " +
+                "properties.buss3_Jyousya as buss3Jyousya, " +
+                "properties.buss3_Toho as buss3Toho, " +
+                "properties.train4_line_code as train4LineCode, " +
+                "properties.train4_line_name as train4LineName, " +
+                "properties.train4_station_code as train4StationCode, " +
+                "properties.train4_station_name as train4StationName, " +
+                "properties.train4_ekitoho as train4EkiToho, " +
+                "properties.buss4_stop_name as buss4StopName, " +
+                "properties.buss4_Jyousya as buss4Jyousya, " +
+                "properties.buss4_Toho as buss4Toho, " +
                 "properties.updated_at as UpdatedAt, " +
 
-                "rent_residentials.building_kind as resiBuildingKind, " +
+                "rent_residentials.building_type as resiBuildingKind, " +
                 "rent_residentials.is_unit_ownership as resiUnitOwnership, " +
                 "rent_residentials.building_structure as resiBuildingStructure, " +
                 "rent_residentials.floor_count_above_ground as resiAboveGroundFloorCount, " +
@@ -1661,7 +1758,9 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
                 //"rent_residentials.updated_at as UpdatedAt, " +
                 "properties.property_id as propertyId " +
-                "FROM rent_residentials INNER JOIN properties USING (property_id) WHERE properties.property_id = '{0}'", id);
+                "FROM rent_residentials INNER JOIN properties USING (property_id) WHERE properties.property_id = @propertyId";
+            cmd.Parameters.Clear();
+            cmd.Parameters.AddWithValue("@propertyId", id);
 
             bool isFound = false;
 
@@ -1699,12 +1798,41 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     //property.SetLocLocationFull(Convert.ToString(reader["locLocationFull"], CultureInfo.InvariantCulture) ?? "");
                     property.Address.SetLocationLatitude(Convert.ToString(reader["locationLatitude"], CultureInfo.InvariantCulture) ?? string.Empty);
                     property.Address.SetLocationLongitude(Convert.ToString(reader["locationLongitude"], CultureInfo.InvariantCulture) ?? string.Empty);
-                    property.Train1.RailLine.SetLineCode(Convert.ToString(reader["train1LineCode"], CultureInfo.InvariantCulture) ?? string.Empty);
-                    property.Train1.RailLine.SetLineName(Convert.ToString(reader["train1LineName"], CultureInfo.InvariantCulture) ?? string.Empty);
-                    property.Train1.RailStation.SetLineCode(Convert.ToString(reader["train1LineCode"], CultureInfo.InvariantCulture) ?? string.Empty);
-                    property.Train1.RailStation.SetStationCode(Convert.ToString(reader["train1StationCode"], CultureInfo.InvariantCulture) ?? string.Empty);
-                    property.Train1.RailStation.SetStationName(Convert.ToString(reader["train1StationName"], CultureInfo.InvariantCulture) ?? string.Empty);
-                    property.Train1.SetEkiToho(Convert.ToInt32(reader["train1EkiToho"], CultureInfo.InvariantCulture));
+
+                    //property.Train1.RailLine.SetLineCode(Convert.ToString(reader["train1LineCode"], CultureInfo.InvariantCulture) ?? string.Empty);
+                    //property.Train1.RailLine.SetLineName(Convert.ToString(reader["train1LineName"], CultureInfo.InvariantCulture) ?? string.Empty);
+                    //property.Train1.RailStation.SetLineCode(property.Train1.RailLine.LineCode);
+                    //property.Train1.RailStation.SetStationCode(Convert.ToString(reader["train1StationCode"], CultureInfo.InvariantCulture) ?? string.Empty);
+                    //property.Train1.RailStation.SetStationName(Convert.ToString(reader["train1StationName"], CultureInfo.InvariantCulture) ?? string.Empty);
+                    //property.Train1.SetEkiToho(Convert.ToInt32(reader["train1EkiToho"], CultureInfo.InvariantCulture));
+
+                    property.Train1.SetRailLine(Convert.ToString(reader["train1LineCode"], CultureInfo.InvariantCulture) ?? "",Convert.ToString(reader["train1LineName"], CultureInfo.InvariantCulture) ?? "");
+                    property.Train1.SetRailStation(property.Train1.RailLine.LineCode, Convert.ToString(reader["train1StationCode"], CultureInfo.InvariantCulture) ?? "", Convert.ToString(reader["train1StationName"], CultureInfo.InvariantCulture) ?? "");
+                    property.SetBusStop1(Convert.ToString(reader["buss1StopName"], CultureInfo.InvariantCulture) ?? "");
+                    property.SetBusJyousya1(Convert.ToString(reader["buss1Jyousya"], CultureInfo.InvariantCulture) ?? "");
+                    property.SetBusStopToho1(Convert.ToString(reader["buss1Toho"], CultureInfo.InvariantCulture) ?? "");
+
+                    property.Train2.SetRailLine(Convert.ToString(reader["train2LineCode"], CultureInfo.InvariantCulture) ?? "", Convert.ToString(reader["train2LineName"], CultureInfo.InvariantCulture) ?? "");
+                    property.Train2.SetRailStation(property.Train2.RailLine.LineCode, Convert.ToString(reader["train2StationCode"], CultureInfo.InvariantCulture) ?? "", Convert.ToString(reader["train2StationName"], CultureInfo.InvariantCulture) ?? "");
+                    property.SetBusStop2(Convert.ToString(reader["buss2StopName"], CultureInfo.InvariantCulture) ?? "");
+                    property.SetBusJyousya2(Convert.ToString(reader["buss2Jyousya"], CultureInfo.InvariantCulture) ?? "");
+                    property.SetBusStopToho2(Convert.ToString(reader["buss2Toho"], CultureInfo.InvariantCulture) ?? "");
+                    property.Train2.SetEkiToho(Convert.ToInt32(reader["train2EkiToho"], CultureInfo.InvariantCulture));
+
+                    property.Train3.SetRailLine(Convert.ToString(reader["train3LineCode"], CultureInfo.InvariantCulture) ?? "", Convert.ToString(reader["train3LineName"], CultureInfo.InvariantCulture) ?? "");
+                    property.Train3.SetRailStation(property.Train3.RailLine.LineCode, Convert.ToString(reader["train3StationCode"], CultureInfo.InvariantCulture) ?? "", Convert.ToString(reader["train3StationName"], CultureInfo.InvariantCulture) ?? "");
+                    property.SetBusStop3(Convert.ToString(reader["buss3StopName"], CultureInfo.InvariantCulture) ?? "");
+                    property.SetBusJyousya3(Convert.ToString(reader["buss3Jyousya"], CultureInfo.InvariantCulture) ?? "");
+                    property.SetBusStopToho3(Convert.ToString(reader["buss3Toho"], CultureInfo.InvariantCulture) ?? "");
+                    property.Train3.SetEkiToho(Convert.ToInt32(reader["train3EkiToho"], CultureInfo.InvariantCulture));
+
+                    property.Train4.SetRailLine(Convert.ToString(reader["train4LineCode"], CultureInfo.InvariantCulture) ?? "", Convert.ToString(reader["train4LineName"], CultureInfo.InvariantCulture) ?? "");
+                    property.Train4.SetRailStation(property.Train4.RailLine.LineCode, Convert.ToString(reader["train4StationCode"], CultureInfo.InvariantCulture) ?? "", Convert.ToString(reader["train4StationName"], CultureInfo.InvariantCulture) ?? "");
+                    property.SetBusStop4(Convert.ToString(reader["buss4StopName"], CultureInfo.InvariantCulture) ?? "");
+                    property.SetBusJyousya4(Convert.ToString(reader["buss4Jyousya"], CultureInfo.InvariantCulture) ?? "");
+                    property.SetBusStopToho4(Convert.ToString(reader["buss4Toho"], CultureInfo.InvariantCulture) ?? "");
+                    property.Train4.SetEkiToho(Convert.ToInt32(reader["train4EkiToho"], CultureInfo.InvariantCulture));
+
                     // TODO: more.
 
 
@@ -1721,6 +1849,11 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
                     // TODO: more.
 
+
+                    property.SetIsModified(false);
+
+                    // TODO: more.
+
                     //res.AffectedCount++;
 
                     //break; // Assuming we only want the first match
@@ -1734,7 +1867,9 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             }
 
             // 物件写真（建物）
-            cmd.CommandText = string.Format(CultureInfo.InvariantCulture, "SELECT * FROM rent_residential_pictures WHERE property_id = '{0}'", id);
+            cmd.CommandText = "SELECT * FROM rent_residential_pictures WHERE property_id = @propertyId";
+            cmd.Parameters.Clear();
+            cmd.Parameters.AddWithValue("@propertyId", id);
             using (var reader = cmd.ExecuteReader())
             {
                 while (reader.Read())
@@ -1765,7 +1900,9 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             }
 
             // PDF（建物）
-            cmd.CommandText = string.Format(CultureInfo.InvariantCulture, "SELECT * FROM rent_residential_pdfs WHERE property_id = '{0}'", id);
+            cmd.CommandText = "SELECT * FROM rent_residential_pdfs WHERE property_id = @propertyId";
+            cmd.Parameters.Clear();
+            cmd.Parameters.AddWithValue("@propertyId", id);
             using (var reader = cmd.ExecuteReader())
             {
                 while (reader.Read())
@@ -1798,7 +1935,9 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
             // 貸主（建物）
             var lessorIdList = new List<string>();
-            cmd.CommandText = string.Format(CultureInfo.InvariantCulture, "SELECT * FROM rent_lessors_properties_listings WHERE property_id = '{0}' AND listing_id = ''", id);
+            cmd.CommandText = "SELECT * FROM rent_lessors_properties_listings WHERE property_id = @propertyId AND listing_id = ''";
+            cmd.Parameters.Clear();
+            cmd.Parameters.AddWithValue("@propertyId", id);
             using (var reader = cmd.ExecuteReader())
             {
                 while (reader.Read())
@@ -1819,7 +1958,9 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 foreach (var lessId in lessorIdList)
                 {
                     // Get actuall lessors
-                    cmd.CommandText = $"SELECT lessor_id, name, person_kind, name_last, name_first, name_company, name_company_type, name_company_type_position, remarks FROM rent_lessors WHERE lessor_id = '{lessId}'";
+                    cmd.CommandText = "SELECT lessor_id, name, person_kind, name_last, name_first, name_company, name_company_type, name_company_type_position, remarks FROM rent_lessors WHERE lessor_id = @lessorId";
+                    cmd.Parameters.Clear();
+                    cmd.Parameters.AddWithValue("@lessorId", lessId);
                     using (var reader2 = cmd.ExecuteReader())
                     {
                         while (reader2.Read())
@@ -1846,7 +1987,9 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
             // 宅建業者（建物）
             var brokerIdList = new List<string>();
-            cmd.CommandText = string.Format(CultureInfo.InvariantCulture, "SELECT * FROM brokers_properties_listings WHERE property_id = '{0}' AND listing_id = ''", id);
+            cmd.CommandText = "SELECT * FROM brokers_properties_listings WHERE property_id = @propertyId AND listing_id = ''";
+            cmd.Parameters.Clear();
+            cmd.Parameters.AddWithValue("@propertyId", id);
             using (var reader = cmd.ExecuteReader())
             {
                 while (reader.Read())
@@ -1867,7 +2010,9 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 foreach (var brokerId in brokerIdList)
                 {
                     // Get actuall brokers
-                    cmd.CommandText = $"SELECT broker_id, name, person_kind, name_last, name_first, name_company, name_company_type, name_company_type_position, remarks FROM brokers WHERE broker_id = '{brokerId}'";
+                    cmd.CommandText = "SELECT broker_id, name, person_kind, name_last, name_first, name_company, name_company_type, name_company_type_position, remarks FROM brokers WHERE broker_id = @brokerId";
+                    cmd.Parameters.Clear();
+                    cmd.Parameters.AddWithValue("@brokerId", brokerId);
                     using (var reader2 = cmd.ExecuteReader())
                     {
                         while (reader2.Read())
@@ -1893,7 +2038,9 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             }
 
             // 部屋
-            cmd.CommandText = string.Format(CultureInfo.InvariantCulture, "SELECT * FROM rent_residential_rooms WHERE property_id = '{0}'", id);
+            cmd.CommandText = "SELECT * FROM rent_residential_rooms WHERE property_id = @propertyId";
+            cmd.Parameters.Clear();
+            cmd.Parameters.AddWithValue("@propertyId", id);
             using (var reader = cmd.ExecuteReader())
             {
                 while (reader.Read())
@@ -1966,7 +2113,9 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
     private static void SetRentResidentialListingChildValues(SqliteCommand cmd, Models.Rent.Residentials.Listing room)
     {
         // 部屋写真
-        cmd.CommandText = string.Format(CultureInfo.InvariantCulture, "SELECT * FROM rent_residential_room_pictures WHERE listing_id = '{0}'", room.Id);
+        cmd.CommandText = "SELECT * FROM rent_residential_room_pictures WHERE listing_id = @listingId";
+        cmd.Parameters.Clear();
+        cmd.Parameters.AddWithValue("@listingId", room.Id);
         using (var reader = cmd.ExecuteReader())
         {
             while (reader.Read())
@@ -1997,7 +2146,9 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         }
 
         // 部屋PDF
-        cmd.CommandText = string.Format(CultureInfo.InvariantCulture, "SELECT * FROM rent_residential_room_pdfs WHERE listing_id = '{0}'", room.Id);
+        cmd.CommandText = "SELECT * FROM rent_residential_room_pdfs WHERE listing_id = @listingId";
+        cmd.Parameters.Clear();
+        cmd.Parameters.AddWithValue("@listingId", room.Id);
         using (var reader = cmd.ExecuteReader())
         {
             while (reader.Read())
@@ -2030,7 +2181,9 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
         // 部屋貸主
         var lessorIds = new List<string>();
-        cmd.CommandText = string.Format(CultureInfo.InvariantCulture, "SELECT * FROM rent_lessors_properties_listings WHERE listing_id = '{0}'", room.Id);
+        cmd.CommandText = "SELECT * FROM rent_lessors_properties_listings WHERE listing_id = @listingId";
+        cmd.Parameters.Clear();
+        cmd.Parameters.AddWithValue("@listingId", room.Id);
         using (var reader = cmd.ExecuteReader())
         {
             while (reader.Read())
@@ -2051,7 +2204,9 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             foreach (var lessId in lessorIds)
             {
                 // Get actuall lessors
-                cmd.CommandText = $"SELECT lessor_id, name, name_last, name_first, remarks FROM rent_lessors WHERE lessor_id = '{lessId}'";
+                cmd.CommandText = "SELECT lessor_id, name, name_last, name_first, remarks FROM rent_lessors WHERE lessor_id = @lessorId";
+                cmd.Parameters.Clear();
+                cmd.Parameters.AddWithValue("@lessorId", lessId);
                 using (var reader2 = cmd.ExecuteReader())
                 {
                     while (reader2.Read())
@@ -2085,16 +2240,13 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         }
 
         // 宅建業者（部屋）
-        cmd.Parameters.Clear();
         cmd.CommandText = """
-    SELECT b.broker_id, b.name, b.person_kind,
-           b.name_last, b.name_first, b.name_company,
-           b.name_company_type, b.name_company_type_position, b.remarks
-    FROM brokers_properties_listings AS association
-    INNER JOIN brokers AS b ON b.broker_id = association.broker_id
-    WHERE association.property_id = @propertyId
-      AND association.listing_id = @listingId;
-    """;
+            SELECT b.broker_id, b.name, b.person_kind, b.name_last, b.name_first, b.name_company, b.name_company_type, b.name_company_type_position, b.remarks
+            FROM brokers_properties_listings AS association
+            INNER JOIN brokers AS b ON b.broker_id = association.broker_id
+            WHERE association.property_id = @propertyId AND association.listing_id = @listingId;
+            """;
+        cmd.Parameters.Clear();
         cmd.Parameters.AddWithValue("@propertyId", room.PropertyId);
         cmd.Parameters.AddWithValue("@listingId", room.Id);
 
@@ -2117,8 +2269,6 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         }
 
         cmd.Parameters.Clear();
-
-
     }
 
     public ResultWrapper DeleteRentResidential(string rentId)
@@ -4685,7 +4835,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             command.CommandText = """
             INSERT INTO sale_residentials (
                 property_id,
-                building_kind,
+                building_type,
                 is_unit_ownership,
                 building_structure,
                 floor_count_above_ground,
@@ -4699,7 +4849,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             )
             VALUES (
                 @propertyId,
-                @buildingKind,
+                @buildingType,
                 @isUnitOwnership,
                 @buildingStructure,
                 @floorCountAboveGround,
@@ -4712,7 +4862,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 @updatedAt
             )
             ON CONFLICT(property_id) DO UPDATE SET
-                building_kind = excluded.building_kind,
+                building_type = excluded.building_type,
                 is_unit_ownership = excluded.is_unit_ownership,
                 building_structure = excluded.building_structure,
                 floor_count_above_ground = excluded.floor_count_above_ground,
@@ -4728,7 +4878,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
             command.Parameters.AddWithValue("@propertyId", building.Id);
             command.Parameters.AddWithValue(
-                "@buildingKind",
+                "@buildingType",
                 building.BuildingKind.Key.ToString());
             command.Parameters.AddWithValue(
                 "@isUnitOwnership",
@@ -4906,7 +5056,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 p.location_full,
                 p.location_latitude,
                 p.location_longitude,
-                s.building_kind,
+                s.building_type,
                 s.is_unit_ownership,
                 s.building_structure,
                 s.floor_count_above_ground,
@@ -4981,7 +5131,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             building.Address.SetLocationLongitude(Convert.ToString(reader["locationLongitude"], CultureInfo.InvariantCulture) ?? string.Empty);
 
             building.SetKindTypeFromString(
-                Convert.ToString(reader["building_kind"], CultureInfo.InvariantCulture) ?? string.Empty);
+                Convert.ToString(reader["building_type"], CultureInfo.InvariantCulture) ?? string.Empty);
 
             building.SetStructureTypeFromString(
                 Convert.ToString(reader["building_structure"], CultureInfo.InvariantCulture) ?? string.Empty);

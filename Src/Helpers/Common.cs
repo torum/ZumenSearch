@@ -8,9 +8,7 @@ public static class Common
     public static string ReplaceZenkakuNumbers(string text)
     {
         // 1. Convert full-width numbers (０-９) to half-width (0-9)
-        string convertedText = Regex.Replace(text, "[０-９]", m =>
-            ((char)(m.Value[0] - '０' + '0')).ToString()
-        );
+        string convertedText = Regex.Replace(text, "[０-９]", m => ((char)(m.Value[0] - '０' + '0')).ToString());
 
         // 2. Remove all non-number characters
         string result = Regex.Replace(convertedText, "[^0-9]", "");

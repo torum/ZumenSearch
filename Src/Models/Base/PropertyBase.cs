@@ -1,5 +1,6 @@
 ﻿using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Imaging;
+using System.Globalization;
 using ZumenSearch.Models.Enums;
 using ZumenSearch.Models.Location;
 using ZumenSearch.Models.Transportation;
@@ -49,6 +50,42 @@ public abstract partial class PropertyBase : EntityAggregateBase
         }
     } = new Train();
 
+    public string BusStop1
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;
+            }
+        }
+    } = string.Empty;
+
+    public int BusJyousya1
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;
+            }
+        }
+    }
+
+    public int BusStopToho1
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;
+            }
+        }
+    }
+
     public Train Train2
     {
         get;
@@ -60,6 +97,42 @@ public abstract partial class PropertyBase : EntityAggregateBase
             }
         }
     } = new Train();
+
+    public string BusStop2
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;
+            }
+        }
+    } = string.Empty;
+
+    public int BusJyousya2
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;
+            }
+        }
+    }
+
+    public int BusStopToho2
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;
+            }
+        }
+    }
 
     public Train Train3
     {
@@ -73,6 +146,42 @@ public abstract partial class PropertyBase : EntityAggregateBase
         }
     } = new Train();
 
+    public string BusStop3
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;
+            }
+        }
+    } = string.Empty;
+
+    public int BusJyousya3
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;
+            }
+        }
+    }
+
+    public int BusStopToho3
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;
+            }
+        }
+    }
+
     public Train Train4
     {
         get;
@@ -85,7 +194,41 @@ public abstract partial class PropertyBase : EntityAggregateBase
         }
     } = new Train();
 
+    public string BusStop4
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;
+            }
+        }
+    } = string.Empty;
 
+    public int BusJyousya4
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;
+            }
+        }
+    }
+
+    public int BusStopToho4
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;
+            }
+        }
+    }
 
     // TODO: Create a nested class for ThumbImage so that BasePath is always set along with ThumbnailFilename as parameters.
     #region == Thumb Image ==
@@ -148,7 +291,169 @@ public abstract partial class PropertyBase : EntityAggregateBase
 
     #region == Public Methods ==
 
-    // TODO: Implement similar setter methods for Train1, Train2, Train3, Train4 .
+    public void SetBusStop1(string value) => BusStop1 = value;
+
+    public void SetBusJyousya1(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            BusJyousya1 = 0;
+            return;
+        }
+
+        if (!int.TryParse(value.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var result))
+        {
+            throw new ArgumentException("バス乗車時間（分）の値が不正です。整数に変換出来ませんでした。", nameof(value));
+        }
+
+        if (result < 0)
+        {
+            throw new ArgumentException("バス乗車時間（分）の値が不正です。0以上の整数である必要があります。", nameof(value));
+        }
+
+        BusJyousya1 = result;
+    }
+
+    public void SetBusStopToho1(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            BusStopToho1 = 0;
+            return;
+        }
+        if (!int.TryParse(value.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var result))
+        {
+            throw new ArgumentException("バス停から徒歩（分）の値が不正です。整数に変換出来ませんでした。", nameof(value));
+        }
+        if (result < 0)
+        {
+            throw new ArgumentException("バス停から徒歩（分）の値が不正です。0以上の整数である必要があります。", nameof(value));
+        }
+        BusStopToho1 = result;
+    }
+
+    public void SetBusStop2(string value) => BusStop2 = value;
+
+    public void SetBusJyousya2(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            BusJyousya2 = 0;
+            return;
+        }
+
+        if (!int.TryParse(value.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var result))
+        {
+            throw new ArgumentException("バス乗車時間（分）の値が不正です。整数に変換出来ませんでした。", nameof(value));
+        }
+
+        if (result < 0)
+        {
+            throw new ArgumentException("バス乗車時間（分）の値が不正です。0以上の整数である必要があります。", nameof(value));
+        }
+
+        BusJyousya2 = result;
+    }
+
+    public void SetBusStopToho2(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            BusStopToho2 = 0;
+            return;
+        }
+        if (!int.TryParse(value.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var result))
+        {
+            throw new ArgumentException("バス停から徒歩（分）の値が不正です。整数に変換出来ませんでした。", nameof(value));
+        }
+        if (result < 0)
+        {
+            throw new ArgumentException("バス停から徒歩（分）の値が不正です。0以上の整数である必要があります。", nameof(value));
+        }
+        BusStopToho2 = result;
+    }
+
+    public void SetBusStop3(string value) => BusStop3 = value;
+
+    public void SetBusJyousya3(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            BusJyousya3 = 0;
+            return;
+        }
+
+        if (!int.TryParse(value.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var result))
+        {
+            throw new ArgumentException("バス乗車時間（分）の値が不正です。整数に変換出来ませんでした。", nameof(value));
+        }
+
+        if (result < 0)
+        {
+            throw new ArgumentException("バス乗車時間（分）の値が不正です。0以上の整数である必要があります。", nameof(value));
+        }
+
+        BusJyousya3 = result;
+    }
+
+    public void SetBusStopToho3(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            BusStopToho3 = 0;
+            return;
+        }
+        if (!int.TryParse(value.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var result))
+        {
+            throw new ArgumentException("バス停から徒歩（分）の値が不正です。整数に変換出来ませんでした。", nameof(value));
+        }
+        if (result < 0)
+        {
+            throw new ArgumentException("バス停から徒歩（分）の値が不正です。0以上の整数である必要があります。", nameof(value));
+        }
+        BusStopToho3 = result;
+    }
+    
+    public void SetBusStop4(string value) => BusStop4 = value;
+
+    public void SetBusJyousya4(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            BusJyousya4 = 0;
+            return;
+        }
+
+        if (!int.TryParse(value.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var result))
+        {
+            throw new ArgumentException("バス乗車時間（分）の値が不正です。整数に変換出来ませんでした。", nameof(value));
+        }
+
+        if (result < 0)
+        {
+            throw new ArgumentException("バス乗車時間（分）の値が不正です。0以上の整数である必要があります。", nameof(value));
+        }
+
+        BusJyousya4 = result;
+    }
+
+    public void SetBusStopToho4(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            BusStopToho4 = 0;
+            return;
+        }
+        if (!int.TryParse(value.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var result))
+        {
+            throw new ArgumentException("バス停から徒歩（分）の値が不正です。整数に変換出来ませんでした。", nameof(value));
+        }
+        if (result < 0)
+        {
+            throw new ArgumentException("バス停から徒歩（分）の値が不正です。0以上の整数である必要があります。", nameof(value));
+        }
+        BusStopToho4 = result;
+    }
 
     #endregion
 

@@ -18,6 +18,8 @@ public sealed partial class BasicPage : Page
         //Debug.WriteLine("Views.Rent.Residentials.Editor.BasicPage init!");
 
         InitializeComponent();
+
+        Loaded += Page_Loaded;
     }
 
     private void Init()

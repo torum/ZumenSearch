@@ -20,7 +20,7 @@
                 </ItemContainer.KeyboardAccelerators>
                 <Border Width="240" CornerRadius="4" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
                     <Grid Height="180">
-                        <TextBlock Text="画像なし" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock Text="画像・図面登録なし" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                         <Rectangle RadiusX="3" RadiusY="3">
                             <Rectangle.Fill>
                                 <ImageBrush ImageSource="{x:Bind ThumbImage, TargetNullValue={x:Null}, Mode=OneWay}" Stretch="UniformToFill" />
@@ -51,7 +51,7 @@
                 </ItemContainer.KeyboardAccelerators>
                 <Border Width="240" CornerRadius="4" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
                     <Grid Height="180">
-                        <TextBlock Text="画像なし" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock Text="画像・図面登録なし" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                         <Rectangle RadiusX="3" RadiusY="3">
                             <Rectangle.Fill>
                                 <ImageBrush ImageSource="{x:Bind ThumbImage, TargetNullValue={x:Null}, Mode=OneWay}" Stretch="UniformToFill" />
@@ -82,7 +82,7 @@
                 </ItemContainer.KeyboardAccelerators>
                 <Border Width="240" CornerRadius="4" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
                     <Grid Height="180">
-                        <TextBlock Text="画像なし" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock Text="画像・図面登録なし" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                         <Rectangle RadiusX="3" RadiusY="3">
                             <Rectangle.Fill>
                                 <ImageBrush ImageSource="{x:Bind ThumbImage, TargetNullValue={x:Null}, Mode=OneWay}" Stretch="UniformToFill" />

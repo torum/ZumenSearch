@@ -56,4 +56,22 @@ public class Train
         IsModified = true;
     }
 
+    public void SetEkiToho(string ekiToho)
+    {
+        if (string.IsNullOrWhiteSpace(ekiToho))
+        {
+            EkiToho = 0;
+        }
+        else
+        {
+            if (!int.TryParse(ekiToho, out int parsedValue) || parsedValue < 0)
+            {
+                throw new ArgumentException("EkiToho must be a non-negative integer.", nameof(ekiToho));
+            }
+            EkiToho = parsedValue;
+        }
+        IsModified = true;
+    }
+
+
 }

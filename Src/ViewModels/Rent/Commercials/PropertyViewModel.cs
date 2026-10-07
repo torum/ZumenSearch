@@ -1318,14 +1318,14 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         LocationLatitude = _building.LocationLatitude;
         LocationLongitude = _building.LocationLongitude;
         */
-
+        /*
         SelectedRailLine1 = _building.RailLine1;
         SelectedRailStation1 = _building.RailStation1;
         EkiToho1 = _building.EkiToho1;
         BusStop = _building.BusStop1;
         BusJyousya1 = _building.BusJyousya1;
         BusStopToho1 = _building.BusStopToho1;
-
+        */
 
         HasElevator = _building.HasElevator;
         HasAutolock = _building.HasAutolock;
@@ -1477,6 +1477,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         _building.LocationLatitude = LocationLatitude;
         _building.LocationLongitude = LocationLongitude;
         */
+        /*
         // transportation
         _building.RailLine1 = SelectedRailLine1;
         _building.RailStation1 = SelectedRailStation1;
@@ -1484,6 +1485,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         _building.BusStop1 = BusStop;
         _building.BusJyousya1 = BusJyousya1;
         _building.BusStopToho1 = BusStopToho1;
+        */
 
         // facilities
         _building.HasElevator = HasElevator;

@@ -9,8 +9,7 @@
     xmlns:ui="using:CommunityToolkit.WinUI"
     xmlns:mod="using:ZumenSearch.Models"
     xmlns:modresidencial="using:ZumenSearch.Models.Rent.Residentials"
-    NavigationCacheMode="Required"
-    Loaded="Page_Loaded">
+    NavigationCacheMode="Required">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled" Padding="36,0,36,24">
         <Grid x:Name="ContentArea">

@@ -190,7 +190,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             {
                 IsDirty = true;
 
-                ValidateName();
+                ValidateName(false);
 
                 // Update title with dummy value.
                 WindowTitle = string.Empty;
@@ -903,6 +903,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     #region == 交通プロパティ ==
 
+    // one
     public RailLine SelectedRailLine1
     {
         get;
@@ -913,6 +914,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                 IsDirty = true;
                 // Clear  old value.
                 SelectedRailStation1.Clear();
+                OnPropertyChanged(nameof(SelectedRailStation1));
             }
 
             ShowRailStationSelect1Command.NotifyCanExecuteChanged();
@@ -924,15 +926,6 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         get;
         set
         {
-            /*
-            if ((value is null) && (field is not null))
-            {
-                // Clear old value.
-                //field.StationName = string.Empty;
-                SelectedRailLine1.Clear();
-                //OnPropertyChanged(nameof(SelectedRailStation1));
-            }
-            */
             if (SetProperty(ref field, value))
             {
                 IsDirty = true;
@@ -949,39 +942,6 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             {
                 IsDirty = true;
             }
-            /*
-            if (field == value)
-            {
-                return;
-            }
-
-            if (value is null)
-            {
-                return;
-            }
-            var text = value.Trim();
-            if (string.IsNullOrEmpty(text))
-            {
-                field = string.Empty;
-                IsDirty = true;
-                OnPropertyChanged();
-                return;
-            }
-
-            //var regex = new Regex(@"^\d{0,4}$"); // 4 digit or less. (Alow zenkaku Full-Width)
-            var regex = new Regex(@"^(?:\d{0,4})?$");
-            if (regex.IsMatch(text))
-            {
-                field = text;
-                IsDirty = true;
-                OnPropertyChanged();
-            }
-            else
-            {
-                //Debug.WriteLine($"EkiToho1: not * digits");
-                // TODO: show err?
-            }
-            */
         }
     } = string.Empty;
 
@@ -1002,37 +962,9 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         get;
         set
         {
-            if (field == value)
+            if (SetProperty(ref field, value))
             {
-                return;
-            }
-
-            if (value is null)
-            {
-                return;
-            }
-
-            var text = value.Trim();
-            if (string.IsNullOrEmpty(text))
-            {
-                field = string.Empty;
                 IsDirty = true;
-                OnPropertyChanged();
-                return;
-            }
-
-            //var regex = new Regex(@"^\d{0,4}$"); // 4 digit or less. (Alow zenkaku Full-Width)
-            var regex = new Regex(@"^(?:\d{0,4})?$");
-            if (regex.IsMatch(text))
-            {
-                field = text;
-                IsDirty = true;
-                OnPropertyChanged();
-            }
-            else
-            {
-                //Debug.WriteLine($"BusJyousya1: not * digits");
-                // TODO: show err?
             }
         }
     } = string.Empty;
@@ -1042,42 +974,246 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         get;
         set
         {
-            if (field == value)
+            if (SetProperty(ref field, value))
             {
-                return;
-            }
-
-            if (value is null)
-            {
-                return;
-            }
-
-            var text = value.Trim();
-            if (string.IsNullOrEmpty(text))
-            {
-                field = string.Empty;
                 IsDirty = true;
-                OnPropertyChanged();
-                return;
-            }
-
-            //var regex = new Regex(@"^\d{0,4}$"); // 4 digit or less. (Alow zenkaku Full-Width)
-            var regex = new Regex(@"^(?:\d{0,4})?$");
-            if (regex.IsMatch(text))
-            {
-                field = text;
-                IsDirty = true;
-                OnPropertyChanged();
-            }
-            else
-            {
-                //Debug.WriteLine($"BusJyousya1: not * digits");
-                // TODO: show err?
             }
         }
     } = string.Empty;
 
-    // TODO: more.
+    // two
+    public RailLine SelectedRailLine2
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+                // Clear  old value.
+                SelectedRailStation2.Clear();
+                OnPropertyChanged(nameof(SelectedRailStation2));
+            }
+
+            ShowRailStationSelect2Command.NotifyCanExecuteChanged();
+        }
+    } = new("", "");
+
+    public RailStation SelectedRailStation2
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+            }
+        }
+    } = new("", "", "");
+
+    public string EkiToho2
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+            }
+        }
+    } = string.Empty;
+
+    public string BusStop2
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+            }
+        }
+    } = string.Empty;
+
+    public string BusJyousya2
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+            }
+        }
+    } = string.Empty;
+
+    public string BusStopToho2
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+            }
+        }
+    } = string.Empty;
+
+    // three
+    public RailLine SelectedRailLine3
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+                // Clear  old value.
+                SelectedRailStation3.Clear();
+                OnPropertyChanged(nameof(SelectedRailStation3));
+            }
+
+            ShowRailStationSelect3Command.NotifyCanExecuteChanged();
+        }
+    } = new("", "");
+
+    public RailStation SelectedRailStation3
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+            }
+        }
+    } = new("", "", "");
+
+    public string EkiToho3
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+            }
+        }
+    } = string.Empty;
+
+    public string BusStop3
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+            }
+        }
+    } = string.Empty;
+
+    public string BusJyousya3
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+            }
+        }
+    } = string.Empty;
+
+    public string BusStopToho3
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+            }
+        }
+    } = string.Empty;
+
+    // four
+    public RailLine SelectedRailLine4
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+                // Clear  old value.
+                SelectedRailStation4.Clear();
+                OnPropertyChanged(nameof(SelectedRailStation4));
+            }
+
+            ShowRailStationSelect4Command.NotifyCanExecuteChanged();
+        }
+    } = new("", "");
+
+    public RailStation SelectedRailStation4
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+            }
+        }
+    } = new("", "", "");
+
+    public string EkiToho4
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+            }
+        }
+    } = string.Empty;
+
+    public string BusStop4
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+            }
+        }
+    } = string.Empty;
+
+    public string BusJyousya4
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+            }
+        }
+    } = string.Empty;
+
+    public string BusStopToho4
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+            }
+        }
+    } = string.Empty;
 
     #endregion
 
@@ -1721,6 +1857,37 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             SelectedRailStation1.SetStationCode(_building.Train1.RailStation?.StationCode ?? "");
             SelectedRailStation1.SetStationName(_building.Train1.RailStation?.StationName ?? "");
         }
+        EkiToho1 = _building.Train1.EkiToho <= 0 ? "" : _building.Train1.EkiToho.ToString(CultureInfo.InvariantCulture);
+
+        SelectedRailLine2.SetLineCode(_building.Train2.RailLine?.LineCode ?? "");
+        SelectedRailLine2.SetLineName(_building.Train2.RailLine?.LineName ?? "");
+        if (SelectedRailLine2.LineCode.Equals(_building.Train2.RailStation?.LineCode ?? "", StringComparison.Ordinal))
+        {
+            SelectedRailStation2.SetLineCode(_building.Train2.RailStation?.LineCode ?? "");
+            SelectedRailStation2.SetStationCode(_building.Train2.RailStation?.StationCode ?? "");
+            SelectedRailStation2.SetStationName(_building.Train2.RailStation?.StationName ?? "");
+        }
+        EkiToho2 = _building.Train2.EkiToho <= 0 ? "" : _building.Train2.EkiToho.ToString(CultureInfo.InvariantCulture);
+
+        SelectedRailLine3.SetLineCode(_building.Train3.RailLine?.LineCode ?? "");
+        SelectedRailLine3.SetLineName(_building.Train3.RailLine?.LineName ?? "");
+        if (SelectedRailLine3.LineCode.Equals(_building.Train3.RailStation?.LineCode ?? "", StringComparison.Ordinal))
+        {
+            SelectedRailStation3.SetLineCode(_building.Train3.RailStation?.LineCode ?? "");
+            SelectedRailStation3.SetStationCode(_building.Train3.RailStation?.StationCode ?? "");
+            SelectedRailStation3.SetStationName(_building.Train3.RailStation?.StationName ?? "");
+        }
+        EkiToho3 = _building.Train3.EkiToho <= 0 ? "" : _building.Train3.EkiToho.ToString(CultureInfo.InvariantCulture);
+
+        SelectedRailLine4.SetLineCode(_building.Train4.RailLine?.LineCode ?? "");
+        SelectedRailLine4.SetLineName(_building.Train4.RailLine?.LineName ?? "");
+        if (SelectedRailLine4.LineCode.Equals(_building.Train4.RailStation?.LineCode ?? "", StringComparison.Ordinal))
+        {
+            SelectedRailStation4.SetLineCode(_building.Train4.RailStation?.LineCode ?? "");
+            SelectedRailStation4.SetStationCode(_building.Train4.RailStation?.StationCode ?? "");
+            SelectedRailStation4.SetStationName(_building.Train4.RailStation?.StationName ?? "");
+        }
+        EkiToho4 = _building.Train4.EkiToho <= 0 ? "" : _building.Train4.EkiToho.ToString(CultureInfo.InvariantCulture);
 
         //TODO: Set other properties
 
@@ -1956,7 +2123,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         }
     }
 
-    private bool ValidateName()
+    private bool ValidateName(bool isShowError = true)
     {
         if (string.IsNullOrWhiteSpace(Name))
         {
@@ -1964,7 +2131,10 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
             IsNameHasError = true;
 
-            //HasErrors = true;
+            if (isShowError)
+            {
+                IsInfoBarErrorOpen = true;
+            }
 
             return false;
         }
@@ -1976,7 +2146,10 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
             IsNameHasError = true;
 
-            //HasErrors = true;
+            if (isShowError)
+            {
+                IsInfoBarErrorOpen = true;
+            }
 
             return false;
         }
@@ -1997,11 +2170,11 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         IsInfoBarErrorOpen = isShowBar;
     }
 
-    private void SetValues()
+    private bool SetValues()
     {
         if (!IsDirty)
         {
-            return;
+            return true;
         }
 
         try
@@ -2013,31 +2186,14 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             _building.SetIsUnitOwnership(IsUnitOwnership);
             _building.SetBuildingStructure(SelectedStructure);
 
-            if (!string.IsNullOrWhiteSpace(FloorCountAboveGround))
-            {
-                _building.SetFloorCountAboveGroundFromString(Helpers.Common.ReplaceZenkakuNumbers(FloorCountAboveGround));
-                /*
-                if (int.TryParse(Helpers.Common.ReplaceZenkakuNumbers(FloorCountAboveGround), out var floorCountAboveGround))
-                {
-                    _building.SetFloorCountAboveGround(floorCountAboveGround);
-                }
-                else
-                {
-                    _building.SetFloorCountAboveGround(0);
-                }
-                */
-            }
-            if (!string.IsNullOrWhiteSpace(FloorCountBasement))
-            {
-                _building.SetFloorCountBasementFromString(Helpers.Common.ReplaceZenkakuNumbers(FloorCountBasement));
-            }
-            if (!string.IsNullOrWhiteSpace(TotalUnitCount))
-            {
-                _building.SetTotalUnitCountFromString(Helpers.Common.ReplaceZenkakuNumbers(TotalUnitCount));
-            }
+            _building.SetFloorCountAboveGroundFromString(Helpers.Common.ReplaceZenkakuNumbers(FloorCountAboveGround));
+            _building.SetFloorCountBasementFromString(Helpers.Common.ReplaceZenkakuNumbers(FloorCountBasement));
+            _building.SetTotalUnitCountFromString(Helpers.Common.ReplaceZenkakuNumbers(TotalUnitCount));
             _building.SetBuiltYearAndMonth(BuiltYearAndMonth);
-            _building.SetFudousanId(Helpers.Common.ReplaceZenkakuNumbers(FudousanId));
-            _building.SetFudousanIdAdditionalCode(Helpers.Common.ReplaceZenkakuNumbers(FudousanIdAdditionalCode));
+            // Don't strip non numeric chars. Should be validated and stripped in the UI and domain layer, not here.
+            _building.SetFudousanId(FudousanId);
+            // Don't strip non numeric chars. Should be validated and stripped in the UI and domain layer, not here.
+            _building.SetFudousanIdAdditionalCode(FudousanIdAdditionalCode);
             _building.SetRemarks(Remarks);
 
             // 所在地
@@ -2047,14 +2203,56 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             _building.Address.SetWardAndOaza(SelectedTown);
             _building.Address.SetChoume(SelectedChou);
             _building.Address.SetEdaban(Edaban);
-
             //_building.SetLocLocationFull(AddressPreview);
             _building.Address.SetLocationLatitude(LocationLatitude);
             _building.Address.SetLocationLongitude(LocationLongitude);
-
+            // 交通1
             _building.Train1.SetRailLine(SelectedRailLine1.LineCode, SelectedRailLine1.LineName);
-            _building.Train1.SetRailStation(SelectedRailStation1.LineCode, SelectedRailStation1.StationCode, SelectedRailStation1.StationName);
-            //Debug.WriteLine($"SelectedRailLine1.LineCode: {SelectedRailLine1.LineCode}, _building.Train1.RailStation.LineCode: {_building.Train1.RailStation?.LineCode ?? ""}");
+            if (SelectedRailLine1.LineCode.Equals(SelectedRailStation1.LineCode, StringComparison.Ordinal))
+            {
+                _building.Train1.SetRailStation(SelectedRailStation1.LineCode, SelectedRailStation1.StationCode, SelectedRailStation1.StationName);
+            }
+            else
+            {
+                _building.Train1.SetRailStation(string.Empty, string.Empty, string.Empty);
+            }
+            _building.Train1.SetEkiToho(Helpers.Common.ReplaceZenkakuNumbers(EkiToho1));
+            // 交通2
+            _building.Train2.SetRailLine(SelectedRailLine2.LineCode, SelectedRailLine2.LineName);
+            if (SelectedRailLine2.LineCode.Equals(SelectedRailStation2.LineCode, StringComparison.Ordinal))
+            {
+                _building.Train2.SetRailStation(SelectedRailStation2.LineCode, SelectedRailStation2.StationCode, SelectedRailStation2.StationName);
+            }
+            else
+            {
+                _building.Train2.SetRailStation(string.Empty, string.Empty, string.Empty);
+            }
+            _building.Train2.SetEkiToho(Helpers.Common.ReplaceZenkakuNumbers(EkiToho2));
+            // 交通3
+            _building.Train3.SetRailLine(SelectedRailLine3.LineCode, SelectedRailLine3.LineName);
+            if (SelectedRailLine3.LineCode.Equals(SelectedRailStation3.LineCode, StringComparison.Ordinal))
+            {
+                _building.Train3.SetRailStation(SelectedRailStation3.LineCode, SelectedRailStation3.StationCode, SelectedRailStation3.StationName);
+            }
+            else
+            {
+                _building.Train3.SetRailStation(string.Empty, string.Empty, string.Empty);
+            }
+            _building.Train3.SetEkiToho(Helpers.Common.ReplaceZenkakuNumbers(EkiToho3));
+            // 交通4
+            _building.Train4.SetRailLine(SelectedRailLine4.LineCode, SelectedRailLine4.LineName);
+            if (SelectedRailLine4.LineCode.Equals(SelectedRailStation4.LineCode, StringComparison.Ordinal))
+            {
+                _building.Train4.SetRailStation(SelectedRailStation4.LineCode, SelectedRailStation4.StationCode, SelectedRailStation4.StationName);
+            }
+            else
+            {
+                _building.Train4.SetRailStation(string.Empty, string.Empty, string.Empty);
+            }
+            _building.Train4.SetEkiToho(Helpers.Common.ReplaceZenkakuNumbers(EkiToho4));
+
+
+
 
             // TODO: Set other properties
 
@@ -2074,6 +2272,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             };
 
             ShowErrorInfoBar(err,true);
+
+            return false;
         }
 
 
@@ -2163,6 +2363,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         // 部屋set
         _building.Rooms = Rooms;
 
+
+        return true;
     }
 
     private void DiscardUnsavedFiles()
@@ -2231,10 +2433,10 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         }
 
         // Validate input.
-        if (!ValidateName())
+        if (!ValidateName(true))
         {
             //InfoBarErrorMessage = "入力項目に誤りがあります。保存出来ませんでした。";
-            IsInfoBarErrorOpen = true;
+            //IsInfoBarErrorOpen = true;
 
             if (!_navigationService.IsCurrentPageSameAs(BasicPageName))
             {
@@ -2246,7 +2448,10 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
         // TODO: more.
 
-        SetValues();
+        if (!SetValues())
+        {
+            return;
+        }
 
         bool saveResult;
 
@@ -2859,12 +3064,12 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     #region == Transportation related commands ==
 
+    // one
     [RelayCommand]
     public async Task ShowRailLineSelect1()
     {
         if (_dialogService is null)
         {
-            Debug.WriteLine("_dlgService is null");
             return;
         }
 
@@ -2881,7 +3086,6 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     {
         if (_dialogService is null)
         {
-            Debug.WriteLine("_dlgService is null");
             return;
         }
 
@@ -2906,6 +3110,148 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
         return true;
     }
+
+    // two
+    [RelayCommand]
+    public async Task ShowRailLineSelect2()
+    {
+        if (_dialogService is null)
+        {
+            return;
+        }
+
+        var railLine = await _dialogService.ShowRailLineSelectDialog();
+
+        if (railLine is not null)
+        {
+            SelectedRailLine2 = railLine;
+        }
+    }
+
+    [RelayCommand(CanExecute = nameof(CanShowRailStationSelect2))]
+    public async Task ShowRailStationSelect2()
+    {
+        if (_dialogService is null)
+        {
+            return;
+        }
+
+        if (SelectedRailLine2 is null)
+        {
+            return;
+        }
+
+        var railStation = await _dialogService.ShowRailStationSelectDialog(SelectedRailLine2.LineCode);
+
+        if (railStation is not null)
+        {
+            SelectedRailStation2 = railStation;
+        }
+    }
+    private bool CanShowRailStationSelect2()
+    {
+        if (SelectedRailLine2 is null)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    // three
+    [RelayCommand]
+    public async Task ShowRailLineSelect3()
+    {
+        if (_dialogService is null)
+        {
+            return;
+        }
+
+        var railLine = await _dialogService.ShowRailLineSelectDialog();
+
+        if (railLine is not null)
+        {
+            SelectedRailLine3 = railLine;
+        }
+    }
+
+    [RelayCommand(CanExecute = nameof(CanShowRailStationSelect3))]
+    public async Task ShowRailStationSelect3()
+    {
+        if (_dialogService is null)
+        {
+            return;
+        }
+
+        if (SelectedRailLine3 is null)
+        {
+            return;
+        }
+
+        var railStation = await _dialogService.ShowRailStationSelectDialog(SelectedRailLine3.LineCode);
+
+        if (railStation is not null)
+        {
+            SelectedRailStation3 = railStation;
+        }
+    }
+    private bool CanShowRailStationSelect3()
+    {
+        if (SelectedRailLine3 is null)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    // four
+    [RelayCommand]
+    public async Task ShowRailLineSelect4()
+    {
+        if (_dialogService is null)
+        {
+            return;
+        }
+
+        var railLine = await _dialogService.ShowRailLineSelectDialog();
+
+        if (railLine is not null)
+        {
+            SelectedRailLine4 = railLine;
+        }
+    }
+
+    [RelayCommand(CanExecute = nameof(CanShowRailStationSelect4))]
+    public async Task ShowRailStationSelect4()
+    {
+        if (_dialogService is null)
+        {
+            return;
+        }
+
+        if (SelectedRailLine4 is null)
+        {
+            return;
+        }
+
+        var railStation = await _dialogService.ShowRailStationSelectDialog(SelectedRailLine4.LineCode);
+
+        if (railStation is not null)
+        {
+            SelectedRailStation4 = railStation;
+        }
+    }
+    private bool CanShowRailStationSelect4()
+    {
+        if (SelectedRailLine4 is null)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
 
     #endregion
 

@@ -34,8 +34,8 @@
 
                 <controls:SwitchPresenter Value="{x:Bind ((framework:FrameworkElement)SegmentedControl.SelectedItem).Tag, Mode=OneWay}">
                     <controls:Case Value="one">
+                        
                         <StackPanel Spacing="12" Margin="0,6,0,0" animations:Implicit.HideAnimations="{StaticResource HideTransitions}" animations:Implicit.ShowAnimations="{StaticResource ShowTransitions}">
-
                             <Border HorizontalAlignment="Stretch" Style="{StaticResource RoundCardBorderStyle}">
                                 <StackPanel Spacing="12" HorizontalAlignment="Stretch">
                                     <Grid>
@@ -101,31 +101,205 @@
 
                     </controls:Case>
                     <controls:Case Value="two">
-                        <Border animations:Implicit.HideAnimations="{StaticResource HideTransitions}"
-                            animations:Implicit.ShowAnimations="{StaticResource ShowTransitions}"
-                            HorizontalAlignment="Stretch"  Style="{StaticResource RoundCardBorderStyle}">
+                        
+                        <StackPanel Spacing="12" Margin="0,6,0,0" animations:Implicit.HideAnimations="{StaticResource HideTransitions}" animations:Implicit.ShowAnimations="{StaticResource ShowTransitions}">
+                            <Border HorizontalAlignment="Stretch" Style="{StaticResource RoundCardBorderStyle}">
+                                <StackPanel Spacing="12" HorizontalAlignment="Stretch">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="1*" MinWidth="320"/>
+                                            <ColumnDefinition Width="1*" MinWidth="320"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid Grid.Column="0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid Grid.Column="0">
+                                                <TextBox x:Name="TextBoxRailLine2" Header="路線" IsReadOnly="True" IsEnabled="False" TextChanged="TextBoxRailLine2_TextChanged" Text="{x:Bind ViewModel.SelectedRailLine2.LineName, Mode=OneWay}" Margin="0" HorizontalAlignment="Stretch"></TextBox>
+                                            </Grid>
+                                            <Grid Grid.Column="1" Margin="6,0,0,0">
+                                                <Button x:Name="ButtonRailLine2" VerticalAlignment="Bottom" Content="選択" Command="{x:Bind ViewModel.ShowRailLineSelect2Command, Mode=OneWay}"></Button>
+                                            </Grid>
+                                        </Grid>
+                                        <Grid Grid.Column="1">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid Grid.Column="0">
+                                                <TextBox x:Name="TextBoxRailStation2" Header="駅名" IsReadOnly="True" IsEnabled="False" TextChanged="TextBoxRailStation2_TextChanged" Text="{x:Bind ViewModel.SelectedRailStation2.StationName, Mode=OneWay}" Margin="12,0,0,0" HorizontalAlignment="Stretch"></TextBox>
+                                            </Grid>
+                                            <Grid Grid.Column="1" Margin="6,0,0,0">
+                                                <Button VerticalAlignment="Bottom" Content="選択" Command="{x:Bind ViewModel.ShowRailStationSelect2Command, Mode=OneWay}"></Button>
+                                            </Grid>
+                                        </Grid>
+                                    </Grid>
+                                    <Grid>
+                                        <TextBox Header="駅から徒歩（分）"  PlaceholderText="半角英数" InputScope="Number" MaxLength="4" Text="{x:Bind ViewModel.EkiToho2, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Paste="TextBoxCleanNonDigitMax4_Paste" TextChanging="TextBox4DigitOrLess_TextChanging" MinWidth="90" Margin="0" HorizontalAlignment="Left"></TextBox>
+                                    </Grid>
 
-                            <TextBlock VerticalAlignment="Center"
-                               Text="This is the two panel" />
-                        </Border>
+                                </StackPanel>
+                            </Border>
+                            <Border HorizontalAlignment="Stretch" Style="{StaticResource RoundCardBorderStyle}">
+                                <StackPanel Spacing="12" HorizontalAlignment="Stretch">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="1*" MinWidth="320"/>
+                                            <ColumnDefinition Width="1*" MinWidth="320"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"></RowDefinition>
+                                            <RowDefinition Height="Auto"></RowDefinition>
+                                        </Grid.RowDefinitions>
+                                        <Grid Grid.Row="0" Grid.Column="0">
+                                            <TextBox Header="バス停名" Text="{x:Bind ViewModel.BusStop2, Mode=TwoWay}" HorizontalAlignment="Stretch"></TextBox>
+                                        </Grid>
+                                        <Grid Grid.Row="1" Grid.Column="0">
+                                            <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,12,0,0">
+                                                <TextBox Header="バス乗車時間（分）"  PlaceholderText="半角英数" InputScope="Number" MaxLength="4" Text="{x:Bind ViewModel.BusJyousya2, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Paste="TextBoxCleanNonDigitMax4_Paste" TextChanging="TextBox4DigitOrLess_TextChanging" MinWidth="90" Margin="0" HorizontalAlignment="Left"></TextBox>
+                                                <TextBox Header="バス停から徒歩（分）"  PlaceholderText="半角英数" InputScope="Number" MaxLength="4" Text="{x:Bind ViewModel.BusStopToho2, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Paste="TextBoxCleanNonDigitMax4_Paste" TextChanging="TextBox4DigitOrLess_TextChanging" MinWidth="90" Margin="12,0,0,0" HorizontalAlignment="Left"></TextBox>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+
                     </controls:Case>
                     <controls:Case Value="three">
-                        <Border animations:Implicit.HideAnimations="{StaticResource HideTransitions}"
-                            animations:Implicit.ShowAnimations="{StaticResource ShowTransitions}"
-                            HorizontalAlignment="Stretch"  Style="{StaticResource RoundCardBorderStyle}">
 
-                            <TextBlock VerticalAlignment="Center"
-                               Text="This is the three panel" />
-                        </Border>
+                        <StackPanel Spacing="12" Margin="0,6,0,0" animations:Implicit.HideAnimations="{StaticResource HideTransitions}" animations:Implicit.ShowAnimations="{StaticResource ShowTransitions}">
+                            <Border HorizontalAlignment="Stretch" Style="{StaticResource RoundCardBorderStyle}">
+                                <StackPanel Spacing="12" HorizontalAlignment="Stretch">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="1*" MinWidth="320"/>
+                                            <ColumnDefinition Width="1*" MinWidth="320"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid Grid.Column="0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid Grid.Column="0">
+                                                <TextBox x:Name="TextBoxRailLine3" Header="路線" IsReadOnly="True" IsEnabled="False" TextChanged="TextBoxRailLine3_TextChanged" Text="{x:Bind ViewModel.SelectedRailLine3.LineName, Mode=OneWay}" Margin="0" HorizontalAlignment="Stretch"></TextBox>
+                                            </Grid>
+                                            <Grid Grid.Column="1" Margin="6,0,0,0">
+                                                <Button x:Name="ButtonRailLine3" VerticalAlignment="Bottom" Content="選択" Command="{x:Bind ViewModel.ShowRailLineSelect3Command, Mode=OneWay}"></Button>
+                                            </Grid>
+                                        </Grid>
+                                        <Grid Grid.Column="1">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid Grid.Column="0">
+                                                <TextBox x:Name="TextBoxRailStation3" Header="駅名" IsReadOnly="True" IsEnabled="False" TextChanged="TextBoxRailStation3_TextChanged" Text="{x:Bind ViewModel.SelectedRailStation3.StationName, Mode=OneWay}" Margin="12,0,0,0" HorizontalAlignment="Stretch"></TextBox>
+                                            </Grid>
+                                            <Grid Grid.Column="1" Margin="6,0,0,0">
+                                                <Button VerticalAlignment="Bottom" Content="選択" Command="{x:Bind ViewModel.ShowRailStationSelect3Command, Mode=OneWay}"></Button>
+                                            </Grid>
+                                        </Grid>
+                                    </Grid>
+                                    <Grid>
+                                        <TextBox Header="駅から徒歩（分）"  PlaceholderText="半角英数" InputScope="Number" MaxLength="4" Text="{x:Bind ViewModel.EkiToho3, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Paste="TextBoxCleanNonDigitMax4_Paste" TextChanging="TextBox4DigitOrLess_TextChanging" MinWidth="90" Margin="0" HorizontalAlignment="Left"></TextBox>
+                                    </Grid>
+
+                                </StackPanel>
+                            </Border>
+                            <Border HorizontalAlignment="Stretch" Style="{StaticResource RoundCardBorderStyle}">
+                                <StackPanel Spacing="12" HorizontalAlignment="Stretch">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="1*" MinWidth="320"/>
+                                            <ColumnDefinition Width="1*" MinWidth="320"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"></RowDefinition>
+                                            <RowDefinition Height="Auto"></RowDefinition>
+                                        </Grid.RowDefinitions>
+                                        <Grid Grid.Row="0" Grid.Column="0">
+                                            <TextBox Header="バス停名" Text="{x:Bind ViewModel.BusStop3, Mode=TwoWay}" HorizontalAlignment="Stretch"></TextBox>
+                                        </Grid>
+                                        <Grid Grid.Row="1" Grid.Column="0">
+                                            <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,12,0,0">
+                                                <TextBox Header="バス乗車時間（分）"  PlaceholderText="半角英数" InputScope="Number" MaxLength="4" Text="{x:Bind ViewModel.BusJyousya3, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Paste="TextBoxCleanNonDigitMax4_Paste" TextChanging="TextBox4DigitOrLess_TextChanging" MinWidth="90" Margin="0" HorizontalAlignment="Left"></TextBox>
+                                                <TextBox Header="バス停から徒歩（分）"  PlaceholderText="半角英数" InputScope="Number" MaxLength="4" Text="{x:Bind ViewModel.BusStopToho3, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Paste="TextBoxCleanNonDigitMax4_Paste" TextChanging="TextBox4DigitOrLess_TextChanging" MinWidth="90" Margin="12,0,0,0" HorizontalAlignment="Left"></TextBox>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+
                     </controls:Case>
                     <controls:Case Value="four">
-                        <Border animations:Implicit.HideAnimations="{StaticResource HideTransitions}"
-                            animations:Implicit.ShowAnimations="{StaticResource ShowTransitions}"
-                            HorizontalAlignment="Stretch"  Style="{StaticResource RoundCardBorderStyle}">
 
-                            <TextBlock VerticalAlignment="Center"
-                               Text="This is the four panel" />
-                        </Border>
+                        <StackPanel Spacing="12" Margin="0,6,0,0" animations:Implicit.HideAnimations="{StaticResource HideTransitions}" animations:Implicit.ShowAnimations="{StaticResource ShowTransitions}">
+                            <Border HorizontalAlignment="Stretch" Style="{StaticResource RoundCardBorderStyle}">
+                                <StackPanel Spacing="12" HorizontalAlignment="Stretch">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="1*" MinWidth="320"/>
+                                            <ColumnDefinition Width="1*" MinWidth="320"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid Grid.Column="0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid Grid.Column="0">
+                                                <TextBox x:Name="TextBoxRailLine4" Header="路線" IsReadOnly="True" IsEnabled="False" TextChanged="TextBoxRailLine4_TextChanged" Text="{x:Bind ViewModel.SelectedRailLine4.LineName, Mode=OneWay}" Margin="0" HorizontalAlignment="Stretch"></TextBox>
+                                            </Grid>
+                                            <Grid Grid.Column="1" Margin="6,0,0,0">
+                                                <Button x:Name="ButtonRailLine4" VerticalAlignment="Bottom" Content="選択" Command="{x:Bind ViewModel.ShowRailLineSelect4Command, Mode=OneWay}"></Button>
+                                            </Grid>
+                                        </Grid>
+                                        <Grid Grid.Column="1">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid Grid.Column="0">
+                                                <TextBox x:Name="TextBoxRailStation4" Header="駅名" IsReadOnly="True" IsEnabled="False" TextChanged="TextBoxRailStation4_TextChanged" Text="{x:Bind ViewModel.SelectedRailStation4.StationName, Mode=OneWay}" Margin="12,0,0,0" HorizontalAlignment="Stretch"></TextBox>
+                                            </Grid>
+                                            <Grid Grid.Column="1" Margin="6,0,0,0">
+                                                <Button VerticalAlignment="Bottom" Content="選択" Command="{x:Bind ViewModel.ShowRailStationSelect4Command, Mode=OneWay}"></Button>
+                                            </Grid>
+                                        </Grid>
+                                    </Grid>
+                                    <Grid>
+                                        <TextBox Header="駅から徒歩（分）"  PlaceholderText="半角英数" InputScope="Number" MaxLength="4" Text="{x:Bind ViewModel.EkiToho4, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Paste="TextBoxCleanNonDigitMax4_Paste" TextChanging="TextBox4DigitOrLess_TextChanging" MinWidth="90" Margin="0" HorizontalAlignment="Left"></TextBox>
+                                    </Grid>
+
+                                </StackPanel>
+                            </Border>
+                            <Border HorizontalAlignment="Stretch" Style="{StaticResource RoundCardBorderStyle}">
+                                <StackPanel Spacing="12" HorizontalAlignment="Stretch">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="1*" MinWidth="320"/>
+                                            <ColumnDefinition Width="1*" MinWidth="320"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"></RowDefinition>
+                                            <RowDefinition Height="Auto"></RowDefinition>
+                                        </Grid.RowDefinitions>
+                                        <Grid Grid.Row="0" Grid.Column="0">
+                                            <TextBox Header="バス停名" Text="{x:Bind ViewModel.BusStop4, Mode=TwoWay}" HorizontalAlignment="Stretch"></TextBox>
+                                        </Grid>
+                                        <Grid Grid.Row="1" Grid.Column="0">
+                                            <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,12,0,0">
+                                                <TextBox Header="バス乗車時間（分）"  PlaceholderText="半角英数" InputScope="Number" MaxLength="4" Text="{x:Bind ViewModel.BusJyousya4, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Paste="TextBoxCleanNonDigitMax4_Paste" TextChanging="TextBox4DigitOrLess_TextChanging" MinWidth="90" Margin="0" HorizontalAlignment="Left"></TextBox>
+                                                <TextBox Header="バス停から徒歩（分）"  PlaceholderText="半角英数" InputScope="Number" MaxLength="4" Text="{x:Bind ViewModel.BusStopToho4, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Paste="TextBoxCleanNonDigitMax4_Paste" TextChanging="TextBox4DigitOrLess_TextChanging" MinWidth="90" Margin="12,0,0,0" HorizontalAlignment="Left"></TextBox>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+
                     </controls:Case>
                 </controls:SwitchPresenter>
 

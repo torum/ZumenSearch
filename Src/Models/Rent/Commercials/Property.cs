@@ -239,7 +239,7 @@ public sealed partial class Property : PropertyBase
     */
 
     #endregion
-
+    /*
     #region == Transportation ==
 
     public RailLine? RailLine1
@@ -315,6 +315,7 @@ public sealed partial class Property : PropertyBase
     }
 
     #endregion
+    */
 
     #region == Facilities ==
 

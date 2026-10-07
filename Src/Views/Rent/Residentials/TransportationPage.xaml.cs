@@ -52,6 +52,79 @@ public sealed partial class TransportationPage : Page
         }
     }
 
+    private void TextBoxRailLine2_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        if (string.IsNullOrEmpty(TextBoxRailLine2.Text))
+        {
+            TextBoxRailLine2.IsEnabled = false;
+        }
+        else
+        {
+            TextBoxRailLine2.IsEnabled = true;
+        }
+    }
+
+    private void TextBoxRailStation2_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        if (string.IsNullOrEmpty(TextBoxRailStation2.Text))
+        {
+            TextBoxRailStation2.IsEnabled = false;
+        }
+        else
+        {
+            TextBoxRailStation2.IsEnabled = true;
+        }
+    }
+
+    private void TextBoxRailLine3_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        if (string.IsNullOrEmpty(TextBoxRailLine3.Text))
+        {
+            TextBoxRailLine3.IsEnabled = false;
+        }
+        else
+        {
+            TextBoxRailLine3.IsEnabled = true;
+        }
+    }
+
+    private void TextBoxRailStation3_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        if (string.IsNullOrEmpty(TextBoxRailStation3.Text))
+        {
+            TextBoxRailStation3.IsEnabled = false;
+        }
+        else
+        {
+            TextBoxRailStation3.IsEnabled = true;
+        }
+    }
+
+    private void TextBoxRailLine4_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        if (string.IsNullOrEmpty(TextBoxRailLine4.Text))
+        {
+            TextBoxRailLine4.IsEnabled = false;
+        }
+        else
+        {
+            TextBoxRailLine4.IsEnabled = true;
+        }
+    }
+
+    private void TextBoxRailStation4_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        if (string.IsNullOrEmpty(TextBoxRailStation4.Text))
+        {
+            TextBoxRailStation4.IsEnabled = false;
+        }
+        else
+        {
+            TextBoxRailStation4.IsEnabled = true;
+        }
+    }
+
+
 #pragma warning disable CA1822 // Mark members as static
     private void TextBox4DigitOrLess_TextChanging(TextBox sender, TextBoxTextChangingEventArgs args)
 #pragma warning restore CA1822 // Mark members as static

@@ -197,17 +197,13 @@ public partial class App : Application
             Microsoft.Windows.AppLifecycle.AppInstance.GetCurrent().Activated += App_Activated;
         }
 
+        _appHostStartTask = StartAppHostAsync();
         var shell = GetService<Views.ShellPage>();
-
-        //main.AppWindow.Show();
-        //main.Activate();
-        shell.MainWindow.AppWindow.Show(true);
-
         shell.MainWindow.Closed += (sender, e) =>
         {
             _appHostStopTask = StopAppHostAsync();
         };
-        _appHostStartTask = StartAppHostAsync();
+        shell.MainWindow.AppWindow.Show(true);
     }
 
     private async Task StartAppHostAsync()

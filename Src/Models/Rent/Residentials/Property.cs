@@ -353,41 +353,7 @@ public sealed partial class Property : PropertyBase
 
 
 
-    public string BusStop1
-    {
-        get;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
-        }
-    } = string.Empty;
 
-    public string BusJyousya1
-    {
-        get;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
-        }
-    } = string.Empty;
-
-    public string BusStopToho1
-    {
-        get;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
-        }
-    } = string.Empty;
 
     // TODO: more.
 
@@ -973,15 +939,9 @@ public sealed partial class Property : PropertyBase
         Remarks = value;
     }
 
-    /*
-    public void SetRailLine1(RailLine? value) => RailLine1 = value;
-    public void SetRailStation1(RailStation? value) => RailStation1 = value;
-    public void SetEkiToho1(string value) => EkiToho1 = value;
-    */
+
     // 以下TODO:
-    public void SetBusStop1(string value) => BusStop1 = value;
-    public void SetBusJyousya1(string value) => BusJyousya1 = value;
-    public void SetBusStopToho1(string value) => BusStopToho1 = value;
+
 
     public void SetPropertyElectricKind(EnumElectricType value) => PropertyElectricKind = value;
     public void SetElectricDetail(string value) => ElectricDetail = value;
