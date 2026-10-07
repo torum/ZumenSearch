@@ -103,12 +103,12 @@ public class DataAccessTransportationService : IDataAccessTransportationService
         using var reader = cmd.ExecuteReader();
         while (reader.Read())
         {
-            var scd = Convert.ToString(reader["station_cd"], CultureInfo.InvariantCulture) ?? "";
             var lcd = Convert.ToString(reader["line_cd"], CultureInfo.InvariantCulture) ?? "";
+            var scd = Convert.ToString(reader["station_cd"], CultureInfo.InvariantCulture) ?? "";
             var name = Convert.ToString(reader["station_name"], CultureInfo.InvariantCulture) ?? "";
             if (scd is not null)
             {
-                var rline = new RailStation(scd,lcd,name);
+                var rline = new RailStation(lcd, scd, name);
 
                 dataset.Add(rline);
             }

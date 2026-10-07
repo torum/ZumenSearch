@@ -32,7 +32,7 @@ public partial class NaturalPerson : PersonBase
                 {
                     IsModified = true;
                 }
-            }
+            }   
         }
     }
 

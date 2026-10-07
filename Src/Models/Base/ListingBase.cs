@@ -1,10 +1,9 @@
-﻿namespace ZumenSearch.Models.Base;
-using ZumenSearch.Models.Enums;
+﻿using ZumenSearch.Models.Enums;
 
 #pragma warning disable IDE0079 // Remove unnecessary suppression
 #pragma warning disable IDE0290 // Use primary constructor
 
-// Entity
+namespace ZumenSearch.Models.Base;
 
 // <summary>
 // Base class for all listings entities. Aggregate Root entity is property.

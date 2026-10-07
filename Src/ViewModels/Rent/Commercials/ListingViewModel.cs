@@ -128,10 +128,8 @@ public sealed partial class ListingViewModel : ObservableRecipient, IDisposable
 
     #region == Public Methods ==
 
-#pragma warning disable CA1822 // tmp
-    public void CleanUp()
-#pragma warning restore CA1822 // tmp
-    {
+    public void Dispose()
+    {        
         /*
         // TODO: ?
         foreach (var item in Pictures)
@@ -147,6 +145,11 @@ public sealed partial class ListingViewModel : ObservableRecipient, IDisposable
         //WeakReferenceMessenger.Default.UnregisterAll(this);
         //or
         //this.IsActive = false;
+
+        _cts?.Cancel();
+        _cts?.Dispose();
+
+        GC.SuppressFinalize(this);
     }
 
     public void DiscardChanges()
@@ -301,9 +304,8 @@ public sealed partial class ListingViewModel : ObservableRecipient, IDisposable
             }
             else
             {
-                _unit.IsModified = false;
-                _unit.PropertyStatus = EntityStatus.Saved;// just in case.
-                _unit.Status = EntityStatus.Saved;
+                _unit.SetStatus(EntityStatus.Saved);
+                _unit.SetIsModified(false);
 
                 // Update the selected search result's values such as name if it exists. Also, update building window's rooms list.
                 WeakReferenceMessenger.Default.Send(new Models.Messenger.ListingUpdatedMessage(_unit));
@@ -377,11 +379,4 @@ public sealed partial class ListingViewModel : ObservableRecipient, IDisposable
 
     #endregion
 
-    public void Dispose()
-    {
-
-        _cts?.Dispose();
-
-        GC.SuppressFinalize(this);
-    }
 }

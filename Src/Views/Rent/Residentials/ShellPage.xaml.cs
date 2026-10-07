@@ -285,8 +285,6 @@ public sealed partial class ShellPage : Page
             return;
         }
 
-        ViewModel.CleanUp();
-
         ewin.Activated -= Window_Activated;
         ewin.Closed -= Window_Closed;
         ewin.AppWindow.Closing -= AppWindow_Closing;

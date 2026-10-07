@@ -1,12 +1,10 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using ZumenSearch.Models.Enums;
 
-namespace ZumenSearch.Models.Base;
-
 #pragma warning disable IDE0079 // Remove unnecessary suppression
 #pragma warning disable IDE0290 // Use primary constructor
 
-// Entity
+namespace ZumenSearch.Models.Base;
 
 // <summary>
 // Base class for all entities like properties, listings, persons, pictures, and PDFs that are going to be saved in the database independently .
@@ -25,11 +23,11 @@ public abstract class EntityBase : ObservableObject
 
     public string Id { get; private set; } = string.Empty;
 
-    // ANEMIC property, but we simply want to keep track of whether the entity has been modified since it was loaded from the database.
-    public EntityStatus Status { get; set; } = EntityStatus.New;
+    // Non-ANEMIC/Rich property
+    public EntityStatus Status { get; protected set; } = EntityStatus.New;
 
-    // ANEMIC property, but ...
-    public bool IsModified { get; set; }
+    // Non-ANEMIC/Rich property
+    public bool IsModified { get; protected set; }
 
     #region == Public Methods ==
 
@@ -38,6 +36,11 @@ public abstract class EntityBase : ObservableObject
         IsModified = isModified;
     }
 
+    public void SetStatus(EntityStatus status)
+    {
+        Status = status;
+        // No don't. IsModified = true;
+    }
 
     /*
     public void ClearId()

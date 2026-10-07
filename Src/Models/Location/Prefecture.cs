@@ -31,11 +31,11 @@ public sealed class Prefecture
         }
     }
 
-
     // 都道府県コード not used in the database, just in case.
-    public string Code { get; private set; } = string.Empty;
+    // Private property to store the code, but not exposed publicly. Should probably be removed if not needed.
+    private string Code { get; set; } = string.Empty;
 
-    // 市区町村コード
+    // 
     // db:location_pref_id
     public string MunicipalityCode { get; private set; } = string.Empty;
 

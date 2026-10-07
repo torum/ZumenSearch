@@ -2,12 +2,10 @@
 using Microsoft.UI.Xaml.Media.Imaging;
 using ZumenSearch.Models.Enums;
 
-namespace ZumenSearch.Models.Base;
-
 #pragma warning disable IDE0079 // Remove unnecessary suppression
 #pragma warning disable IDE0290 // Use primary constructor
 
-// Entity
+namespace ZumenSearch.Models.Base;
 
 // <summary>
 // Base class for all Picture entities. Aggregate Root entities are property and listing.

@@ -182,8 +182,6 @@ public sealed partial class ShellPage : Page
         ewin.Closed -= Window_Closed;
         ewin.AppWindow.Closing -= AppWindow_Closing;
 
-        ViewModel.CleanUp();
-
         var mainVM = App.GetService<ViewModels.MainViewModel>();
         // Save window size and position.
         var appWindow = ewin.AppWindow;

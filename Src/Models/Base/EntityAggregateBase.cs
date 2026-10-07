@@ -1,10 +1,9 @@
 ﻿using ZumenSearch.Models.Enums;
 
-namespace ZumenSearch.Models.Base;
-
 #pragma warning disable IDE0079 // Remove unnecessary suppression
 #pragma warning disable IDE0290 // Use primary constructor
 
+namespace ZumenSearch.Models.Base;
 // Aggregate Root entity.
 
 // <summary>
@@ -20,7 +19,7 @@ public abstract class EntityAggregateBase : EntityBase
         //
     }
 
-    // Non-ANEMIC
+    // Non-ANEMIC/Rich property
     public string Name
     {
         get => field ?? string.Empty;
@@ -35,7 +34,7 @@ public abstract class EntityAggregateBase : EntityBase
 
     public void SetName(string name)
     {
-        if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("名前欄（必須項目）が空です。", nameof(name));// Name cannot be empty.
+        if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Name cannot be empty.", nameof(name));// 
         // InvalidOperationException 
         Name = name.Trim();
     }

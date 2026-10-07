@@ -413,8 +413,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IDisposable
         }
 
         IsDirty = false;
-        _building.IsModified = false;
-        _building.Status = EntityStatus.Saved;
+        _building.SetStatus(EntityStatus.Saved);
+        _building.SetIsModified(false);
         IsInfoBarErrorOpen = false;
         WindowTitle = string.Empty;
     }

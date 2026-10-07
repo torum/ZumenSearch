@@ -3,10 +3,10 @@ using System.Collections.ObjectModel;
 using ZumenSearch.Models.Base;
 using ZumenSearch.Models.Enums;
 
-namespace ZumenSearch.Models.Rent.Residentials;
-
 #pragma warning disable IDE0079 // Remove unnecessary suppression
 #pragma warning disable IDE0290 // Use primary constructor
+
+namespace ZumenSearch.Models.Rent.Residentials;
 
 // 部屋（編集用）
 public sealed partial class Listing : ListingBase

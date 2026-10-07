@@ -1206,6 +1206,19 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         }
     }
 
+    public void Dispose()
+    {
+        // Unsubscribe
+        //WeakReferenceMessenger.Default.UnregisterAll(this);
+        //or
+        //this.IsActive = false;
+
+        _cts?.Cancel();
+        _cts?.Dispose();
+
+        GC.SuppressFinalize(this);
+    }
+
     #endregion
 
     #region == Private Methods ==
@@ -1372,7 +1385,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         foreach (var item in Units)
         {
             //
-            item.IsModified = false; // Needed this.
+            item.SetIsModified(false); // Needed this.
             //item.PropertyChanged += OnRoomPropertyChanged;
         }
     }
@@ -1383,7 +1396,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         picture.ParentViewModel = this;
         picture.PropertyChanged -= OnBuildingMediaPropertyChanged;
         picture.PropertyChanged += OnBuildingMediaPropertyChanged;
-        picture.IsModified = false;
+        picture.SetIsModified(false);
     }
 
     private void TrackBuildingPdf(Models.Rent.Commercials.PropertyPdf pdf)
@@ -1392,18 +1405,18 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         pdf.ParentViewModel = this;
         pdf.PropertyChanged -= OnBuildingMediaPropertyChanged;
         pdf.PropertyChanged += OnBuildingMediaPropertyChanged;
-        pdf.IsModified = false;
+        pdf.SetIsModified(false);
     }
 
     private void OnBuildingMediaPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (sender is Models.Rent.Commercials.PropertyPicture picture)
         {
-            picture.IsModified = true;
+            picture.SetIsModified(true);
         }
         else if (sender is Models.Rent.Commercials.PropertyPdf pdf)
         {
-            pdf.IsModified = true;
+            pdf.SetIsModified(true);
         }
 
         IsDirty = true;
@@ -1668,8 +1681,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         {
             IsDirty = false;
 
-            _building.IsModified = false;
-            _building.Status = EntityStatus.Saved;
+            _building.SetStatus(EntityStatus.Saved);
+            _building.SetIsModified(false);
 
             // Update title with dummy value.
             WindowTitle = string.Empty;
@@ -1702,14 +1715,15 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             _unsavedBuildingPdfFileList.Clear();
 
             // Just in case.
-            _building.Status = EntityStatus.Saved;
-            _building.IsModified = false;
+            _building.SetStatus(EntityStatus.Saved);
+            _building.SetIsModified(false);
 
             foreach (var room in Units)
             {
                 room.PropertyName = Name;
                 room.PropertyStatus = EntityStatus.Saved;
-                room.Status = EntityStatus.Saved;
+                room.SetStatus(EntityStatus.Saved);
+                room.SetIsModified(false);
             }
 
             // Just in case.
@@ -1717,7 +1731,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             {
                 room.PropertyName = Name;
                 room.PropertyStatus = EntityStatus.Saved;
-                room.Status = EntityStatus.Saved;
+                room.SetStatus(EntityStatus.Saved);
+                room.SetIsModified(false);
             }
 
             WeakReferenceMessenger.Default.Send(new PropertyUpdatedMessage(_building));
@@ -2390,15 +2405,4 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     #endregion
 
-    public void Dispose()
-    {
-        // Unsubscribe
-        //WeakReferenceMessenger.Default.UnregisterAll(this);
-        //or
-        //this.IsActive = false;
-
-        _cts?.Dispose();
-
-        GC.SuppressFinalize(this);
-    }
 }

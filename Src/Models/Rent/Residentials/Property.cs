@@ -6,10 +6,10 @@ using ZumenSearch.Models.Enums;
 using ZumenSearch.Models.Location;
 using ZumenSearch.Models.Transportation;
 
-namespace ZumenSearch.Models.Rent.Residentials;
-
 #pragma warning disable IDE0079 // Remove unnecessary suppression
 #pragma warning disable IDE0290 // Use primary constructor
+
+namespace ZumenSearch.Models.Rent.Residentials;
 
 // Aggregate Root entity.
 
@@ -350,43 +350,9 @@ public sealed partial class Property : PropertyBase
     #endregion
 
     #region == 交通 ==
-    /*
-    public RailLine? RailLine1
-    {
-        get;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
-        }
-    }
 
-    public RailStation? RailStation1
-    {
-        get;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
-        }
-    }
 
-    public string EkiToho1
-    {
-        get;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
-        }
-    } = string.Empty;
-    */
+
     public string BusStop1
     {
         get;
@@ -1012,6 +978,7 @@ public sealed partial class Property : PropertyBase
     public void SetRailStation1(RailStation? value) => RailStation1 = value;
     public void SetEkiToho1(string value) => EkiToho1 = value;
     */
+    // 以下TODO:
     public void SetBusStop1(string value) => BusStop1 = value;
     public void SetBusJyousya1(string value) => BusJyousya1 = value;
     public void SetBusStopToho1(string value) => BusStopToho1 = value;

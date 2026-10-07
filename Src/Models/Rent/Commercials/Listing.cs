@@ -78,8 +78,8 @@ public sealed partial class Listing : ListingBase
     {
         IsPropertyUnitOwnership = isPropertyUnitOwnership;
         PropertyName = propertyName;
-        PropertyChanged += (_, _) => IsModified = true;
-        IsModified = false;
+        PropertyChanged += (_, _) => SetIsModified(true);
+        SetIsModified(false);
 
     }
 }

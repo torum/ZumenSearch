@@ -40,12 +40,12 @@ public class Train
         IsModified = true;
     }
 
-    public void SetRailStation(string stationCode, string stationName, string lineCode)
+    public void SetRailStation(string lineCode, string stationCode, string stationName)
     {
         //if (string.IsNullOrWhiteSpace(stationCode)) throw new ArgumentException("Station code cannot be empty.", nameof(stationCode));
         //if (string.IsNullOrWhiteSpace(stationName)) throw new ArgumentException("Station name cannot be empty.", nameof(stationName));
         //if (string.IsNullOrWhiteSpace(lineCode)) throw new ArgumentException("Line code cannot be empty.", nameof(lineCode));
-        RailStation = new RailStation(stationCode, stationName, lineCode);
+        RailStation = new RailStation(lineCode, stationCode, stationName);
         IsModified = true;
     }
 

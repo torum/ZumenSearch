@@ -806,9 +806,6 @@ public sealed partial class MainWindow : Window
     {
         // Save window state and position, etc.
         SaveSetting();
-
-        _viewModel.CleanUp();
-
     }
 
     private void SaveSetting()

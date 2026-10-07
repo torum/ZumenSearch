@@ -4,9 +4,9 @@ namespace ZumenSearch.Models.Transportation;
 
 public sealed class RailStation
 {
-    public RailStation(string stationCode, string stationName, string lineCode)
+    public RailStation(string lineCode, string stationCode, string stationName)
     {
-        //if (string.IsNullOrWhiteSpace(stationCode)) throw new ArgumentException("Station code cannot be empty.", nameof(stationCode));
+        //if (string.IsNullOrWhitSpace(stationCode)) throw new ArgumentException("Station code cannot be empty.", nameof(stationCode));
         //if (string.IsNullOrWhiteSpace(stationName)) throw new ArgumentException("Station name cannot be empty.", nameof(stationName));
         //if (string.IsNullOrWhiteSpace(lineCode)) throw new ArgumentException("Line code cannot be empty.", nameof(lineCode));
         StationCode = stationCode;

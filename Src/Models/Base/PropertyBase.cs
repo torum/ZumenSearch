@@ -4,10 +4,10 @@ using ZumenSearch.Models.Enums;
 using ZumenSearch.Models.Location;
 using ZumenSearch.Models.Transportation;
 
-namespace ZumenSearch.Models.Base;
-
 #pragma warning disable IDE0290 // Use primary constructor
 #pragma warning disable IDE0079 // Remove unnecessary suppression
+
+namespace ZumenSearch.Models.Base;
 
 // Aggregate Root entity. Property Listing Context.
 
@@ -28,7 +28,7 @@ public abstract partial class PropertyBase : EntityAggregateBase
     public Address Address
     {
         get;
-        private set
+        init
         {
             if (SetProperty(ref field, value))
             {
@@ -37,10 +37,10 @@ public abstract partial class PropertyBase : EntityAggregateBase
         }
     } = new Address();
 
-    public Train Train
+    public Train Train1
     {
         get;
-        private set
+        init
         {
             if (SetProperty(ref field, value))
             {
@@ -48,6 +48,44 @@ public abstract partial class PropertyBase : EntityAggregateBase
             }
         }
     } = new Train();
+
+    public Train Train2
+    {
+        get;
+        init
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;
+            }
+        }
+    } = new Train();
+
+    public Train Train3
+    {
+        get;
+        init
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;
+            }
+        }
+    } = new Train();
+
+    public Train Train4
+    {
+        get;
+        init
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;
+            }
+        }
+    } = new Train();
+
+
 
     // TODO: Create a nested class for ThumbImage so that BasePath is always set along with ThumbnailFilename as parameters.
     #region == Thumb Image ==
@@ -110,6 +148,7 @@ public abstract partial class PropertyBase : EntityAggregateBase
 
     #region == Public Methods ==
 
+    // TODO: Implement similar setter methods for Train1, Train2, Train3, Train4 .
 
     #endregion
 

@@ -315,6 +315,13 @@ public sealed partial class LessorViewModel : ObservableRecipient, IDisposable
         IsDirty = false;
     }
 
+    public void Dispose()
+    {
+        _cts?.Dispose();
+
+        GC.SuppressFinalize(this);
+    }
+
     #endregion
 
     #region == Private Methods ==
@@ -508,8 +515,8 @@ public sealed partial class LessorViewModel : ObservableRecipient, IDisposable
 
             IsDirty = false;
 
-            _lessorBase.IsModified = false;
-            _lessorBase.Status = EntityStatus.Saved;
+            _lessorBase.SetStatus(EntityStatus.Saved);
+            _lessorBase.SetIsModified(false);
 
             // Update title with dummy value.
             WindowTitle = string.Empty;
@@ -532,10 +539,4 @@ public sealed partial class LessorViewModel : ObservableRecipient, IDisposable
 
     #endregion
 
-    public void Dispose()
-    {
-        _cts?.Dispose();
-
-        GC.SuppressFinalize(this);
-    }
 }

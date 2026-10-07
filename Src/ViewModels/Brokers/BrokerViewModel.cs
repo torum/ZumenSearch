@@ -392,8 +392,8 @@ public sealed partial class BrokerViewModel : ObservableRecipient, IDisposable
 
             IsDirty = false;
 
-            _broker.IsModified = false;
-            _broker.Status = EntityStatus.Saved;
+            _broker.SetIsModified(false);
+            _broker.SetStatus(EntityStatus.Saved);
 
             // Update title with dummy value.
             WindowTitle = string.Empty;

@@ -61,7 +61,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     "thumbnail_filename TEXT NOT NULL DEFAULT ''," +
 
                     "location_machiaza_id TEXT NOT NULL DEFAULT ''," +
-                    "location_pref_id TEXT NOT NULL DEFAULT ''," + // MunicipalityCode
+                    "location_prefecture_code TEXT NOT NULL DEFAULT ''," + // MunicipalityCode - rename it?
                     "location_prefecture TEXT NOT NULL DEFAULT ''," +
                     "location_county TEXT NOT NULL DEFAULT ''," +
                     "location_city TEXT NOT NULL DEFAULT ''," +
@@ -72,6 +72,27 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     "location_full TEXT NOT NULL DEFAULT ''," +
                     "location_latitude TEXT NOT NULL DEFAULT ''," +
                     "location_longitude TEXT NOT NULL DEFAULT ''," +
+
+                    "train1_line_code TEXT NOT NULL DEFAULT ''," +
+                    "train1_line_name TEXT NOT NULL DEFAULT ''," +
+                    "train1_station_code TEXT NOT NULL DEFAULT ''," +
+                    "train1_station_name TEXT NOT NULL DEFAULT ''," +
+                    "train1_ekitoho TEXT NOT NULL DEFAULT ''," +
+                    "train2_line_code TEXT NOT NULL DEFAULT ''," +
+                    "train2_line_name TEXT NOT NULL DEFAULT ''," +
+                    "train2_station_code TEXT NOT NULL DEFAULT ''," +
+                    "train2_station_name TEXT NOT NULL DEFAULT ''," +
+                    "train2_ekitoho TEXT NOT NULL DEFAULT ''," +
+                    "train3_line_code TEXT NOT NULL DEFAULT ''," +
+                    "train3_line_name TEXT NOT NULL DEFAULT ''," +
+                    "train3_station_code TEXT NOT NULL DEFAULT ''," +
+                    "train3_station_name TEXT NOT NULL DEFAULT ''," +
+                    "train3_ekitoho TEXT NOT NULL DEFAULT ''," +
+                    "train4_line_code TEXT NOT NULL DEFAULT ''," +
+                    "train4_line_name TEXT NOT NULL DEFAULT ''," +
+                    "train4_station_code TEXT NOT NULL DEFAULT ''," +
+                    "train4_station_name TEXT NOT NULL DEFAULT ''," +
+                    "train4_ekitoho TEXT NOT NULL DEFAULT ''," +
 
                     // TODO: add more columns.
 
@@ -919,7 +940,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         }
         catch (Exception ex)
         {
-            SetDatabaseError(res, ex, "connection.Open(), reader.Read()", "Failed to connect to / read a SQLite database file", nameof(SelectRecentProperties));
+            SetDatabaseError(res, ex, "connection.Open(), reader.Read()", "Failed to connect to or read a SQLite database file", nameof(SelectRecentProperties));
         }
         finally
         {
@@ -983,7 +1004,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 //Debug.WriteLine($"Found item: {item.Name} @SelectPropertiesByKeyword() in DataAccessService");
 
                 // Reset item Isdirty flag.
-                item.IsModified = false;
+                item.SetIsModified(false);
 
                 //res.AffectedCount++;
 
@@ -992,7 +1013,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         }
         catch (Exception ex)
         {
-            SetDatabaseError(res, ex, "connection.Open(), reader.Read()", "Failed to connect to / read a SQLite database file", nameof(SelectPropertiesByKeyword));
+            SetDatabaseError(res, ex, "connection.Open(), reader.Read()", "Failed to connect to or read a SQLite database file", nameof(SelectPropertiesByKeyword));
         }
         finally
         {
@@ -1034,13 +1055,13 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 cmd.CommandType = CommandType.Text;
                 cmd.Parameters.Clear();
                 // Insert
-                //cmd.CommandText = "INSERT INTO properties (property_id, name, property_kind, thumbnail_filename, location_pref_id, location_prefecture, location_machiaza_id, location_county, location_city, location_ward, location_oaza_cho, location_choume, location_edaban, location_full, updated_at) " +
+                //cmd.CommandText = "INSERT INTO properties (property_id, name, property_kind, thumbnail_filename, location_prefecture_code, location_prefecture, location_machiaza_id, location_county, location_city, location_ward, location_oaza_cho, location_choume, location_edaban, location_full, updated_at) " +
                 //  "VALUES (@RentId, @Name, @PropertyKind, @Thumb, @LocPrefId, @LocPrefecture, @LocMachiazaId, @LocCounty, @LocCity, @LocWard, @LocOazaCho, @LocChoume, @LocEdaban, @LocLocationFull, @updated_at)";
                 // Upsert
-                var sqlUpsert = "INSERT INTO properties (property_id, name, property_kind, thumbnail_filename, location_pref_id, location_prefecture, location_machiaza_id, location_county, location_city, location_ward, location_oaza_cho, location_choume, location_edaban, location_full, location_latitude, location_longitude, updated_at) ";
+                var sqlUpsert = "INSERT INTO properties (property_id, name, property_kind, thumbnail_filename, location_prefecture_code, location_prefecture, location_machiaza_id, location_county, location_city, location_ward, location_oaza_cho, location_choume, location_edaban, location_full, location_latitude, location_longitude, updated_at) ";
                 sqlUpsert += "VALUES (@propertyId, @name, @propertyKind, @thumbnailPath, @locPrefId, @locPrefecture, @locMachiazaId, @locCounty, @locCity, @locWard, @locOazaCho, @locChoume, @locEdaban, @locLocationFull, @locationLatitude, @locationLongitude, @updated_at) ";
                 sqlUpsert += "ON CONFLICT (property_id) ";
-                sqlUpsert += "DO UPDATE SET property_id = @propertyId, name = @name, property_kind = @propertyKind, thumbnail_filename = @thumbnailPath, location_pref_id = @locPrefId, location_prefecture = @locPrefecture, location_machiaza_id = @locMachiazaId, location_county = @locCounty, location_city = @locCity, location_ward = @locWard, location_oaza_cho = @locOazaCho, location_choume = @locChoume, location_edaban = @locEdaban, location_full = @locLocationFull, location_latitude = @locationLatitude, location_longitude = @locationLongitude, updated_at = @updated_at";
+                sqlUpsert += "DO UPDATE SET property_id = @propertyId, name = @name, property_kind = @propertyKind, thumbnail_filename = @thumbnailPath, location_prefecture_code = @locPrefId, location_prefecture = @locPrefecture, location_machiaza_id = @locMachiazaId, location_county = @locCounty, location_city = @locCity, location_ward = @locWard, location_oaza_cho = @locOazaCho, location_choume = @locChoume, location_edaban = @locEdaban, location_full = @locLocationFull, location_latitude = @locationLatitude, location_longitude = @locationLongitude, updated_at = @updated_at";
 
                 cmd.CommandText = sqlUpsert;
                 
@@ -1133,8 +1154,8 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                         if (r > 0)
                         {
                             //pic.IsNew = false;
-                            pic.Status = Models.Enums.EntityStatus.Saved;
-                            pic.IsModified = false;
+                            pic.SetStatus(Models.Enums.EntityStatus.Saved);
+                            pic.SetIsModified(false);
                         }
                     }
                 }
@@ -1200,8 +1221,8 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                         if (r > 0)
                         {
                             //pic.IsNew = false;
-                            pic.Status = Models.Enums.EntityStatus.Saved;
-                            pic.IsModified = false;
+                            pic.SetStatus(Models.Enums.EntityStatus.Saved);
+                            pic.SetIsModified(false);
                         }
                     }
                 }
@@ -1357,9 +1378,9 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                         if (r > 0)
                         {
                             unit.PropertyStatus = EntityStatus.Saved;
-                            unit.Status = EntityStatus.Saved;
+                            unit.SetStatus(EntityStatus.Saved);
                             //unit.IsNew = false;
-                            unit.IsModified = false;
+                            unit.SetIsModified(false);
                         }
 
                         // Room Pics
@@ -1393,8 +1414,8 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                                 if (result > 0)
                                 {
                                     //pic.IsNew = false;
-                                    pic.Status = Models.Enums.EntityStatus.Saved;
-                                    pic.IsModified = false;
+                                    pic.SetStatus(Models.Enums.EntityStatus.Saved);
+                                    pic.SetIsModified(false);
                                 }
                             }
                         }
@@ -1452,8 +1473,8 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                                 if (result > 0)
                                 {
                                     //pdf.IsNew = false;
-                                    pdf.Status = Models.Enums.EntityStatus.Saved;
-                                    pdf.IsModified = false;
+                                    pdf.SetStatus(Models.Enums.EntityStatus.Saved);
+                                    pdf.SetIsModified(false);
                                 }
                             }
                         }
@@ -1572,8 +1593,8 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
         //Debug.WriteLine(string.Format("{0} Entries Inserted to DB", res.AffectedCount.ToString()));
 
-        building.IsModified = false;
-        building.Status = EntityStatus.Saved;
+        building.SetIsModified(false);
+        building.SetStatus(EntityStatus.Saved);
 
         return res;
     }
@@ -1600,7 +1621,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             using var cmd = connection.CreateCommand();
             cmd.CommandText = string.Format(CultureInfo.InvariantCulture, "SELECT properties.name as propertyName, " +
                 "properties.property_kind as propertyKind, " +
-                "properties.location_pref_id as locPrefId, " +
+                "properties.location_prefecture_code as locPrefId, " +
                 "properties.location_prefecture as locPrefecture, " +
                 "properties.location_machiaza_id as locMachiazaId, " +
                 "properties.location_county as locCounty, " +
@@ -1707,8 +1728,9 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                         var rlpic = new Models.Rent.Residentials.PropertyPicture(picid, picpath, EntityStatus.Saved)
                         {
                             Description = Convert.ToString(reader["description"], CultureInfo.InvariantCulture) ?? string.Empty,
-                            IsModified = false
                         };
+
+                        rlpic.SetIsModified(false);
 
                         var strType = Convert.ToString(reader["type"], CultureInfo.InvariantCulture) ?? string.Empty;
                         rlpic.SetLabelFromString(strType);
@@ -1737,9 +1759,10 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     {
                         var rlpdf = new Models.Rent.Residentials.PropertyPdf(pdfid, pdfpath, thumbpath, EntityStatus.Saved)
                         {
-                            Description = Convert.ToString(reader["description"], CultureInfo.InvariantCulture) ?? string.Empty,
-                            IsModified = false
+                            Description = Convert.ToString(reader["description"], CultureInfo.InvariantCulture) ?? string.Empty
                         };
+
+                        rlpdf.SetIsModified(false);
 
                         var strType = Convert.ToString(reader["type"], CultureInfo.InvariantCulture) ?? string.Empty;
                         rlpdf.SetTypeFromString(strType);
@@ -1871,14 +1894,14 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             }
 
             // Reset property Isdirty flag.
-            property.Status = EntityStatus.Saved;
-            property.IsModified = false;
+            property.SetStatus(EntityStatus.Saved);
+            property.SetIsModified(false);
 
             res.Building = property;
         }
         catch (Exception ex)
         {
-            SetDatabaseError(res, ex, "connection.Open(), reader.Read()", "Failed to connect to / read a SQLite database file", nameof(SelectRentResidentialById));
+            SetDatabaseError(res, ex, "connection.Open(), reader.Read()", "Failed to connect to or read a SQLite database file", nameof(SelectRentResidentialById));
         }
         finally
         {
@@ -1912,10 +1935,10 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             Chinryou = reader.GetInt32(reader.GetOrdinal("chinryou")),
             // TODO: more
 
-            IsModified = false
         };
         // try
         room.SetName(reader.GetString(reader.GetOrdinal("name")) ?? string.Empty);
+        room.SetIsModified(false);
 
         //Debug.WriteLine($"Room ID: {room.Id}, Room Name: {room.RoomName}");
 
@@ -1936,9 +1959,10 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 {
                     var rlpic = new Models.Rent.Residentials.ListingPicture(picid, picpath, EntityStatus.Saved)
                     {
-                        Description = Convert.ToString(reader["description"], CultureInfo.InvariantCulture) ?? string.Empty,
-                        IsModified = false
+                        Description = Convert.ToString(reader["description"], CultureInfo.InvariantCulture) ?? string.Empty
                     };
+
+                    rlpic.SetIsModified(false);
 
                     var strType = Convert.ToString(reader["type"], CultureInfo.InvariantCulture) ?? string.Empty;
                     rlpic.SetLabelFromString(strType);
@@ -1967,9 +1991,10 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 {
                     var rlpdf = new Models.Rent.Residentials.ListingPdf(pdfid, pdfpath, thumbpath, EntityStatus.Saved)
                     {
-                        Description = Convert.ToString(reader["description"], CultureInfo.InvariantCulture) ?? string.Empty,
-                        IsModified = false
+                        Description = Convert.ToString(reader["description"], CultureInfo.InvariantCulture) ?? string.Empty
                     };
+
+                    rlpdf.SetIsModified(false);
 
                     var strType = Convert.ToString(reader["type"], CultureInfo.InvariantCulture) ?? string.Empty;
                     rlpdf.SetTypeFromString(strType);
@@ -2188,9 +2213,8 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 if (result > 0)
                 {
                     //room.IsNew = false;
-                    room.IsModified = false;
-                    room.PropertyStatus = EntityStatus.Saved;
-                    room.Status = EntityStatus.Saved;
+                    room.SetIsModified(false);
+                    room.SetStatus(EntityStatus.Saved);
                 }
                 res.AffectedCount = result;
 
@@ -2238,8 +2262,8 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                             if (result > 0)
                             {
                                 //pic.IsNew = false;
-                                pic.Status = Models.Enums.EntityStatus.Saved;
-                                pic.IsModified = false;
+                                pic.SetStatus(Models.Enums.EntityStatus.Saved);
+                                pic.SetIsModified(false);
                             }
                         }
 
@@ -2306,8 +2330,8 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                             if (result > 0)
                             {
                                 //pdf.IsNew = false;
-                                pdf.Status = Models.Enums.EntityStatus.Saved;
-                                pdf.IsModified = false;
+                                pdf.SetStatus(Models.Enums.EntityStatus.Saved);
+                                pdf.SetIsModified(false);
                             }
                         }
 
@@ -2491,7 +2515,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 }
 
                 // Reset unit Isdirty flag.
-                unit.IsModified = false;
+                unit.SetIsModified(false);
 
                 //res.AffectedCount++;
 
@@ -2500,7 +2524,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         }
         catch (Exception ex)
         {
-            SetDatabaseError(res, ex, "connection.Open(), reader.Read()", "Failed to connect to / read a SQLite database file", nameof(SelectRentResidentialListings));
+            SetDatabaseError(res, ex, "connection.Open(), reader.Read()", "Failed to connect to or read a SQLite database file", nameof(SelectRentResidentialListings));
         }
         finally
         {
@@ -2571,7 +2595,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         }
         catch (Exception ex)
         {
-            SetDatabaseError(res, ex, "connection.Open(), reader.Read()", "Failed to connect to / read a SQLite database file", nameof(SelectRentResidentialListingById));
+            SetDatabaseError(res, ex, "connection.Open(), reader.Read()", "Failed to connect to or read a SQLite database file", nameof(SelectRentResidentialListingById));
         }
         finally
         {
@@ -2672,7 +2696,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 name,
                 property_kind,
                 thumbnail_filename,
-                location_pref_id,
+                location_prefecture_code,
                 location_prefecture,
                 location_machiaza_id,
                 location_county,
@@ -2709,7 +2733,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 name = excluded.name,
                 property_kind = excluded.property_kind,
                 thumbnail_filename = excluded.thumbnail_filename,
-                location_pref_id = excluded.location_pref_id,
+                location_prefecture_code = excluded.location_prefecture_code,
                 location_prefecture = excluded.location_prefecture,
                 location_machiaza_id = excluded.location_machiaza_id,
                 location_county = excluded.location_county,
@@ -3047,19 +3071,19 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             foreach (var picture in building.Pictures)
             {
                 //picture.IsNew = false;
-                picture.Status = Models.Enums.EntityStatus.Saved;
-                picture.IsModified = false;
+                picture.SetStatus(Models.Enums.EntityStatus.Saved);
+                picture.SetIsModified(false);
             }
 
             foreach (var pdf in building.Pdfs)
             {
                 //pdf.IsNew = false;
-                pdf.Status = Models.Enums.EntityStatus.Saved;
-                pdf.IsModified = false;
+                pdf.SetStatus(Models.Enums.EntityStatus.Saved);
+                pdf.SetIsModified(false);
             }
 
-            building.Status = EntityStatus.Saved;
-            building.IsModified = false;
+            building.SetStatus(EntityStatus.Saved);
+            building.SetIsModified(false);
 
         }
         catch (Exception ex)
@@ -3253,7 +3277,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         }
         catch (Exception ex)
         {
-            SetDatabaseError(result, ex, "connection.Open(), reader.Read()", "Failed to connect to / read a SQLite database file", nameof(SelectRentCommercialsByNameKeyword));
+            SetDatabaseError(result, ex, "connection.Open(), reader.Read()", "Failed to connect to or read a SQLite database file", nameof(SelectRentCommercialsByNameKeyword));
         }
         finally
         {
@@ -3290,7 +3314,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 p.property_id,
                 p.name,
                 p.thumbnail_filename,
-                p.location_pref_id,
+                p.location_prefecture_code,
                 p.location_prefecture,
                 p.location_machiaza_id,
                 p.location_county,
@@ -3356,24 +3380,24 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             // Try
             building.SetName(Convert.ToString(reader["name"], CultureInfo.InvariantCulture) ?? string.Empty);
             // Address/Location
-            building.Address.SetMachiazaId(Convert.ToString(reader["locMachiazaId"], CultureInfo.InvariantCulture) ?? "");
-            building.Address.SetPrefectureByMunicipalityCode(Convert.ToString(reader["locPrefId"], CultureInfo.InvariantCulture) ?? "",
-                Convert.ToString(reader["locPrefecture"], CultureInfo.InvariantCulture) ?? "");
+            building.Address.SetMachiazaId(Convert.ToString(reader["location_machiaza_id"], CultureInfo.InvariantCulture) ?? "");
+            building.Address.SetPrefectureByMunicipalityCode(Convert.ToString(reader["location_prefecture_code"], CultureInfo.InvariantCulture) ?? "",
+                Convert.ToString(reader["location_prefecture"], CultureInfo.InvariantCulture) ?? "");
             building.Address.SetCountyAndCity(building.Address.MachiazaId,
-                Convert.ToString(reader["locCounty"], CultureInfo.InvariantCulture) ?? "",
-                Convert.ToString(reader["locCity"], CultureInfo.InvariantCulture) ?? "");
+                Convert.ToString(reader["location_county"], CultureInfo.InvariantCulture) ?? "",
+                Convert.ToString(reader["location_city"], CultureInfo.InvariantCulture) ?? "");
 
             building.Address.SetWardAndOaza(building.Address.MachiazaId,
-                Convert.ToString(reader["locWard"], CultureInfo.InvariantCulture) ?? "",
-                Convert.ToString(reader["locOazaCho"], CultureInfo.InvariantCulture) ?? "");
+                Convert.ToString(reader["location_ward"], CultureInfo.InvariantCulture) ?? "",
+                Convert.ToString(reader["location_oaza_cho"], CultureInfo.InvariantCulture) ?? "");
 
             building.Address.SetChoume(building.Address.MachiazaId,
-                Convert.ToString(reader["locChoume"], CultureInfo.InvariantCulture) ?? "");
+                Convert.ToString(reader["location_choume"], CultureInfo.InvariantCulture) ?? "");
 
-            building.Address.SetEdaban(Convert.ToString(reader["locEdaban"], CultureInfo.InvariantCulture) ?? "");
+            building.Address.SetEdaban(Convert.ToString(reader["location_edaban"], CultureInfo.InvariantCulture) ?? "");
             //building.Address.SetLocLocationFull(Convert.ToString(reader["locLocationFull"], CultureInfo.InvariantCulture) ?? "");
-            building.Address.SetLocationLatitude(Convert.ToString(reader["locationLatitude"], CultureInfo.InvariantCulture) ?? string.Empty);
-            building.Address.SetLocationLongitude(Convert.ToString(reader["locationLongitude"], CultureInfo.InvariantCulture) ?? string.Empty);
+            building.Address.SetLocationLatitude(Convert.ToString(reader["location_latitude"], CultureInfo.InvariantCulture) ?? string.Empty);
+            building.Address.SetLocationLongitude(Convert.ToString(reader["location_longitude"], CultureInfo.InvariantCulture) ?? string.Empty);
 
             building.SetCommercialKindFromString(
                 Convert.ToString(reader["commercial_kind"], CultureInfo.InvariantCulture)
@@ -3538,9 +3562,10 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                         BusinessHours = Convert.ToString(unitReader["business_hours"], CultureInfo.InvariantCulture) ?? string.Empty,
                         ParkingAvailable = Convert.ToInt32(unitReader["parking_available"], CultureInfo.InvariantCulture) != 0,
                         OtherConditions = Convert.ToString(unitReader["other_conditions"], CultureInfo.InvariantCulture) ?? string.Empty,
-                        Remarks = Convert.ToString(unitReader["remarks"], CultureInfo.InvariantCulture) ?? string.Empty,
-                        IsModified = false
+                        Remarks = Convert.ToString(unitReader["remarks"], CultureInfo.InvariantCulture) ?? string.Empty
                     };
+
+                    unit.SetIsModified(false);
 
                     building.SetName(Convert.ToString(unitReader["name"], CultureInfo.InvariantCulture) ?? string.Empty);
 
@@ -3555,7 +3580,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         }
         catch (Exception ex)
         {
-            SetDatabaseError(result, ex, "connection.Open(), reader.Read()", "Failed to connect to / read a SQLite database file", nameof(SelectRentCommercialById));
+            SetDatabaseError(result, ex, "connection.Open(), reader.Read()", "Failed to connect to or read a SQLite database file", nameof(SelectRentCommercialById));
         }
         finally
         {
@@ -3598,7 +3623,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
                 picture.SetLabelFromString(
                     Convert.ToString(reader["type"], CultureInfo.InvariantCulture) ?? string.Empty);
-                picture.IsModified = false;
+                picture.SetIsModified(false);
 
                 building.Pictures.Add(picture);
             }
@@ -3643,7 +3668,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
                 pdf.SetTypeFromString(
                     Convert.ToString(reader["type"], CultureInfo.InvariantCulture) ?? string.Empty);
-                pdf.IsModified = false;
+                pdf.SetIsModified(false);
 
                 building.Pdfs.Add(pdf);
             }
@@ -3865,9 +3890,8 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
             transaction.Commit();
 
-            room.Status = EntityStatus.Saved;
-            room.PropertyStatus = EntityStatus.Saved;
-            room.IsModified = false;
+            room.SetStatus(EntityStatus.Saved);
+            room.SetIsModified(false);
         }
         catch (Exception ex)
         {
@@ -3938,18 +3962,20 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 {
                     PropertyName =
                         Convert.ToString(reader["property_name"], CultureInfo.InvariantCulture)
-                        ?? string.Empty,
-                    IsModified = false
+                        ?? string.Empty
                 };
                 // Try
                 item.SetName(Convert.ToString(reader["unit_name"], CultureInfo.InvariantCulture) ?? string.Empty);
+
+
+                item.SetIsModified(false);
 
                 result.ListingSearchResult.Add(item);
             }
         }
         catch (Exception ex)
         {
-            SetDatabaseError(result, ex, "connection.Open(), reader.Read()", "Failed to connect to / read a SQLite database file", nameof(SelectRentCommercialListings));
+            SetDatabaseError(result, ex, "connection.Open(), reader.Read()", "Failed to connect to or read a SQLite database file", nameof(SelectRentCommercialListings));
         }
         finally
         {
@@ -4092,17 +4118,17 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     ?? string.Empty,
                 Remarks =
                     Convert.ToString(reader["remarks"], CultureInfo.InvariantCulture)
-                    ?? string.Empty,
-                IsModified = false
+                    ?? string.Empty
             };
             room.SetName(Convert.ToString(reader["unit_name"], CultureInfo.InvariantCulture) ?? string.Empty);
+            room.SetIsModified(false);
 
             result.BuildingName = propertyName;
             result.Unit = room;
         }
         catch (Exception ex)
         {
-            SetDatabaseError(result, ex, "connection.Open(), reader.Read()", "Failed to connect to / read a SQLite database file", nameof(SelectRentCommercialListingById));
+            SetDatabaseError(result, ex, "connection.Open(), reader.Read()", "Failed to connect to or read a SQLite database file", nameof(SelectRentCommercialListingById));
         }
         finally
         {
@@ -4224,8 +4250,8 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 var result = cmd.ExecuteNonQuery();
                 if (result > 0)
                 {
-                    lessor.IsModified = false;
-                    lessor.Status = EntityStatus.Saved;
+                    lessor.SetStatus(EntityStatus.Saved);
+                    lessor.SetIsModified(false);
                 }
                 res.AffectedCount = result;
 
@@ -4332,7 +4358,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 item.Remarks = s;
 
                 // Reset item Isdirty flag.
-                item.IsModified = false;
+                item.SetIsModified(false);
 
                 //res.AffectedCount++;
 
@@ -4341,7 +4367,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         }
         catch (Exception ex)
         {
-            SetDatabaseError(res, ex, "connection.Open(), reader.Read()", "Failed to connect to / read a SQLite database file", nameof(SelectRentLessorsByKeyword));
+            SetDatabaseError(res, ex, "connection.Open(), reader.Read()", "Failed to connect to or read a SQLite database file", nameof(SelectRentLessorsByKeyword));
         }
         finally
         {
@@ -4396,15 +4422,15 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             if (person is not null)
             {
                 // Reset person Isdirty flag.
-                person.Status = EntityStatus.Saved;
-                person.IsModified = false;
+                person.SetStatus(EntityStatus.Saved);
+                person.SetIsModified(false);
             }
 
             res.Person = person;
         }
         catch (Exception ex)
         {
-            SetDatabaseError(res, ex, "connection.Open(), reader.Read()", "Failed to connect to / read a SQLite database file", nameof(SelectRentLessorById));
+            SetDatabaseError(res, ex, "connection.Open(), reader.Read()", "Failed to connect to or read a SQLite database file", nameof(SelectRentLessorById));
         }
         finally
         {
@@ -4567,7 +4593,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 name,
                 property_kind,
                 thumbnail_filename,
-                location_pref_id,
+                location_prefecture_code,
                 location_prefecture,
                 location_machiaza_id,
                 location_county,
@@ -4600,7 +4626,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 name = excluded.name,
                 property_kind = excluded.property_kind,
                 thumbnail_filename = excluded.thumbnail_filename,
-                location_pref_id = excluded.location_pref_id,
+                location_prefecture_code = excluded.location_prefecture_code,
                 location_prefecture = excluded.location_prefecture,
                 location_machiaza_id = excluded.location_machiaza_id,
                 location_county = excluded.location_county,
@@ -4719,8 +4745,8 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
             transaction.Commit();
 
-            building.Status = EntityStatus.Saved;
-            building.IsModified = false;
+            building.SetStatus(EntityStatus.Saved);
+            building.SetIsModified(false);
         }
         catch (Exception ex)
         {
@@ -4804,16 +4830,16 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     propertyId,
                     PropertyKind.SaleResidential)
                 {
-                    IsModified = false
                 };
                 item.SetName(Convert.ToString(reader["name"], CultureInfo.InvariantCulture) ?? string.Empty);
+                item.SetIsModified(false);
 
                 result.PropertySearchResult.Add(item);
             }
         }
         catch (Exception ex)
         {
-            SetDatabaseError(result, ex, "connection.Open(), reader.Read()", "Failed to connect to / read a SQLite database file", nameof(SelectSaleResidentialsByNameKeyword));
+            SetDatabaseError(result, ex, "connection.Open(), reader.Read()", "Failed to connect to or read a SQLite database file", nameof(SelectSaleResidentialsByNameKeyword));
         }
         finally
         {
@@ -4850,7 +4876,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 p.property_id,
                 p.name,
                 p.thumbnail_filename,
-                p.location_pref_id,
+                p.location_prefecture_code,
                 p.location_prefecture,
                 p.location_machiaza_id,
                 p.location_county,
@@ -4949,7 +4975,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         }
         catch (Exception ex)
         {
-            SetDatabaseError(res, ex, "connection.Open(), reader.Read()", "Failed to connect to / read a SQLite database file", nameof(SelectSaleResidentialById));
+            SetDatabaseError(res, ex, "connection.Open(), reader.Read()", "Failed to connect to or read a SQLite database file", nameof(SelectSaleResidentialById));
         }
         finally
         {
@@ -5124,9 +5150,8 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
             transaction.Commit();
 
-            room.Status = EntityStatus.Saved;
-            room.PropertyStatus = EntityStatus.Saved;
-            room.IsModified = false;
+            room.SetStatus(EntityStatus.Saved);
+            room.SetIsModified(false);
         }
         catch (Exception ex)
         {
@@ -5195,18 +5220,18 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     PropertyKind.SaleResidential)
                 {
                     PropertyName = Convert.ToString(reader["property_name"], CultureInfo.InvariantCulture)
-                        ?? string.Empty,
-                    IsModified = false
+                        ?? string.Empty
                 };
 
                 item.SetName(Convert.ToString(reader["unit_name"], CultureInfo.InvariantCulture) ?? string.Empty);
+                item.SetIsModified(false);
 
                 res.ListingSearchResult.Add(item);
             }
         }
         catch (Exception ex)
         {
-            SetDatabaseError(res, ex, "connection.Open(), reader.Read()", "Failed to connect to / read a SQLite database file", nameof(SelectSaleResidentialListings));
+            SetDatabaseError(res, ex, "connection.Open(), reader.Read()", "Failed to connect to or read a SQLite database file", nameof(SelectSaleResidentialListings));
         }
         finally
         {
@@ -5354,18 +5379,20 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     ?? "相談",
                 Remarks =
                     Convert.ToString(reader["remarks"], CultureInfo.InvariantCulture)
-                    ?? string.Empty,
-                IsModified = false
+                    ?? string.Empty
             };
 
             room.SetName(Convert.ToString(reader["unit_name"], CultureInfo.InvariantCulture) ?? string.Empty);
+
+
+            room.SetIsModified(false);
 
             res.BuildingName = propertyName;
             res.Room = room;
         }
         catch (Exception ex)
         {
-            SetDatabaseError(res, ex, "connection.Open(), reader.Read()", "Failed to connect to / read a SQLite database file", nameof(SelectSaleResidentialListingById));
+            SetDatabaseError(res, ex, "connection.Open(), reader.Read()", "Failed to connect to or read a SQLite database file", nameof(SelectSaleResidentialListingById));
         }
         finally
         {
@@ -5476,8 +5503,9 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             res.AffectedCount = command.ExecuteNonQuery();
             transaction.Commit();
 
-            broker.Status = EntityStatus.Saved;
-            broker.IsModified = false;
+            broker.SetStatus(EntityStatus.Saved);
+
+            broker.SetIsModified(false);
         }
         catch (Exception ex)
         {
@@ -5560,11 +5588,11 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     brokerId,
                     personKind)
                 {
-                    Remarks = Convert.ToString(reader["remarks"], CultureInfo.InvariantCulture) ?? string.Empty,
-                    IsModified = false
+                    Remarks = Convert.ToString(reader["remarks"], CultureInfo.InvariantCulture) ?? string.Empty
                 };
 
                 item.SetName(Convert.ToString(reader["name"], CultureInfo.InvariantCulture) ?? string.Empty);
+                item.SetIsModified(false);
 
                 res.PersonSearchResult.Add(item);
             }
@@ -5633,8 +5661,8 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
                 if (res.Person is not null)
                 {
-                    res.Person.Status = EntityStatus.Saved;
-                    res.Person.IsModified = false;
+                    res.Person.SetStatus(EntityStatus.Saved);
+                    res.Person.SetIsModified(false);
                 }
             }
         }

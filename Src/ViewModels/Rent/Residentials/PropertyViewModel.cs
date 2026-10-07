@@ -1622,15 +1622,17 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         IsDirty = false;
     }
 
-    public void CleanUp()
+    public void Dispose()
     {
         // Unsubscribe
         //WeakReferenceMessenger.Default.UnregisterAll(this);
         //or
         //this.IsActive = false;
 
-        _cts.Cancel();
-        _cts.Dispose();
+        _cts?.Cancel();
+        _cts?.Dispose();
+
+        GC.SuppressFinalize(this);
     }
 
     #endregion
@@ -1713,7 +1715,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             // Filename to actuall path.
             item.BasePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id);
             item.ParentViewModel = this;
-            item.IsModified = false; // Needed this.
+            item.SetIsModified(false); // Needed this.
             item.PropertyChanged += OnBuildingPicturePropertyChanged;
         }
 
@@ -1752,7 +1754,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             // Filename to actuall path.
             item.BasePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id);
             item.ParentViewModel = this;
-            item.IsModified = false; // Needed this.
+            item.SetIsModified(false); // Needed this.
             item.PropertyChanged += OnBuildingPdfPropertyChanged;
         }
 
@@ -1803,7 +1805,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         foreach (var item in Rooms)
         {
             //
-            item.IsModified = false; // Needed this.
+            item.SetIsModified(false); // Needed this.
             item.PropertyChanged += OnRoomPropertyChanged;
         }
 
@@ -2249,8 +2251,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         {
             IsDirty = false;
 
-            _building.IsModified = false;
-            _building.Status = EntityStatus.Saved;
+            _building.SetIsModified(false);
+            _building.SetStatus(EntityStatus.Saved);
 
             // Update title with dummy value.
             WindowTitle = string.Empty;
@@ -2315,15 +2317,16 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             _unsavedBuildingPdfThumbnailFileList.Clear();
             _unsavedBuildingPdfFileList.Clear();
 
-            // Jjust in case.
-            _building.Status = EntityStatus.Saved;
-            _building.IsModified = false;
+            // Just in case.
+            _building.SetStatus(EntityStatus.Saved);
+            _building.SetIsModified(false);
 
             foreach (var room in Rooms)
             {
                 room.PropertyName = Name;
                 room.PropertyStatus = EntityStatus.Saved;
-                room.Status = EntityStatus.Saved;
+                room.SetStatus(EntityStatus.Saved);
+                room.SetIsModified(false);
             }
 
             // Just in case.
@@ -2331,7 +2334,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             {
                 room.PropertyName = Name;
                 room.PropertyStatus = EntityStatus.Saved;
-                room.Status = EntityStatus.Saved;
+                room.SetStatus(EntityStatus.Saved);
+                room.SetIsModified(false);
             }
 
             WeakReferenceMessenger.Default.Send(new Models.Messenger.PropertyUpdatedMessage(_building as Models.Base.PropertyBase));
@@ -3087,10 +3091,5 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     #endregion
 
-    public void Dispose()
-    {
-        _cts?.Dispose();
 
-        GC.SuppressFinalize(this);
-    }
 }

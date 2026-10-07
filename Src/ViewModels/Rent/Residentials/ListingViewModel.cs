@@ -8,7 +8,6 @@ using Windows.Data.Pdf;
 using Windows.Storage;
 using Windows.Storage.Streams;
 using ZumenSearch.Models;
-using ZumenSearch.Models.Base;
 using ZumenSearch.Models.Enums;
 using ZumenSearch.Models.Messenger;
 using ZumenSearch.Services.Contracts;
@@ -79,7 +78,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
 
         //HasErrors = false;
 
-        _room.IsModified = false;
+        _room.SetIsModified(false);
         IsDirty = false;
 
         /*
@@ -511,7 +510,15 @@ public sealed partial class ListingViewModel : ObservableRecipient,
 
     #region == Public Methods ==
 
-    public void CleanUp()
+    public void DiscardChanges()
+    {
+        DiscardUnsavedFiles();
+
+        //_room = null;
+        IsDirty = false;
+    }
+
+    public void Dispose()
     {
         // TODO: ?
         foreach (var item in Pictures)
@@ -526,14 +533,11 @@ public sealed partial class ListingViewModel : ObservableRecipient,
         //WeakReferenceMessenger.Default.UnregisterAll(this);
         //or
         //this.IsActive = false;
-    }
 
-    public void DiscardChanges()
-    {
-        DiscardUnsavedFiles();
+        _cts?.Cancel();
+        _cts?.Dispose();
 
-        //_room = null;
-        IsDirty = false;
+        GC.SuppressFinalize(this);
     }
 
     #endregion
@@ -663,7 +667,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
         {
             item.BasePath = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(App.PropertyBlobDataFolder, _room.PropertyId), _room.Id));
             item.ParentViewModel = this;
-            item.IsModified = false; // Needed this.
+            item.SetIsModified(false); // Needed this.
             item.PropertyChanged += OnPicturePropertyChanged;
         }
 
@@ -700,7 +704,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
         {
             item.BasePath = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(App.PropertyBlobDataFolder, _room.PropertyId), _room.Id));
             item.ParentViewModel = this;
-            item.IsModified = false; // Needed this.
+            item.SetIsModified(false); // Needed this.
             item.PropertyChanged += OnPdfPropertyChanged;
         }
 
@@ -746,7 +750,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
         }
 
 
-        _room.IsModified = false;
+        _room.SetIsModified(false);
         IsDirty = false;
     }
 
@@ -955,9 +959,8 @@ public sealed partial class ListingViewModel : ObservableRecipient,
             }
             else
             {
-                _room.IsModified = false;
-                _room.PropertyStatus = EntityStatus.Saved;// just in case.
-                _room.Status = EntityStatus.Saved;
+                _room.SetStatus(EntityStatus.Saved);
+                _room.SetIsModified(false);
 
                 // Update the selected search result's values such as name if it exists. Also, update building window's rooms list.
                 WeakReferenceMessenger.Default.Send(new Models.Messenger.ListingUpdatedMessage(_room));
@@ -1477,10 +1480,5 @@ public sealed partial class ListingViewModel : ObservableRecipient,
 
     #endregion
 
-    public void Dispose()
-    {
-        _cts?.Dispose();
 
-        GC.SuppressFinalize(this);
-    }
 }

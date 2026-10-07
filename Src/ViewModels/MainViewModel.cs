@@ -353,10 +353,18 @@ public partial class MainViewModel : ObservableRecipient,
 
     #region == Public Methods ==
 
-    public void CleanUp()
+    public void Dispose()
     {
-        _cts.Cancel();
-        _cts.Dispose();
+        // Unsubscribe
+        //WeakReferenceMessenger.Default.UnregisterAll(this);
+        //or
+        //this.IsActive = false;
+        
+        _cts?.Cancel();
+        
+        _cts?.Dispose();
+
+        GC.SuppressFinalize(this);
     }
 
     #endregion
@@ -2796,15 +2804,5 @@ public partial class MainViewModel : ObservableRecipient,
 
     #endregion
 
-    public void Dispose()
-    {
-        // Unsubscribe
-        //WeakReferenceMessenger.Default.UnregisterAll(this);
-        //or
-        //this.IsActive = false;
 
-        _cts?.Dispose();
-
-        GC.SuppressFinalize(this);
-    }
 }
