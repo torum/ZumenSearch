@@ -1,4 +1,6 @@
-﻿namespace ZumenSearch.Models.Location;
+﻿using System.Globalization;
+
+namespace ZumenSearch.Models.Location;
 
 // Value Object
 
@@ -164,25 +166,69 @@ public class Address
         IsModified = true;
     }
 
-    public void SetPostalCode(string postalCode)
-    {
-        if (string.IsNullOrWhiteSpace(postalCode)) throw new ArgumentException("PostalCode cannot be empty.", nameof(postalCode));
-        PostalCode = postalCode;
-        IsModified = true;
-    }
-
     public void SetLocationLatitude(string value)
     {
-        // TODO: Validate the latitude value and allowed range.
-        LocationLatitude = value;
+        LocationLatitude = NormalizeCoordinate(value, "Latitude", -90m, 90m);
         IsModified = true;
     }
 
     public void SetLocationLongitude(string value)
     {
-        // TODO: Validate the longitude value and allowed range.
-        LocationLongitude = value;
+        LocationLongitude = NormalizeCoordinate(value, "Longitude", -180m, 180m);
         IsModified = true;
+    }
+
+    public void SetPostalCode(string? postalCode)
+    {
+        var normalized = postalCode?.Trim() ?? string.Empty;
+
+        if (normalized.Length == 0)
+        {
+            PostalCode = string.Empty;
+            IsModified = true;
+            return;
+        }
+
+        var digits = normalized.Replace("-", string.Empty, StringComparison.Ordinal);
+        var validLengthAndFormat =
+            normalized.Length == 7 ||
+            (normalized.Length == 8 && normalized[3] == '-');
+
+        if (!validLengthAndFormat || digits.Length != 7 || !digits.All(char.IsAsciiDigit))
+        {
+            throw new ArgumentException(
+                "Postal code must contain seven digits, optionally formatted as NNN-NNNN.",
+                nameof(postalCode));
+        }
+
+        PostalCode = $"{digits[..3]}-{digits[3..]}";
+        IsModified = true;
+    }
+
+    private static string NormalizeCoordinate(
+        string value,
+        string coordinateName,
+        decimal minimum,
+        decimal maximum)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return string.Empty;
+        }
+
+        var normalized = value.Trim();
+        const NumberStyles styles = NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint;
+
+        if (!decimal.TryParse(normalized, styles, CultureInfo.InvariantCulture, out var coordinate) ||
+            coordinate < minimum ||
+            coordinate > maximum)
+        {
+            throw new ArgumentException(
+                $"{coordinateName} must be a decimal between {minimum} and {maximum}, or blank.",
+                nameof(value));
+        }
+
+        return coordinate.ToString(CultureInfo.InvariantCulture);
     }
 
     #endregion
