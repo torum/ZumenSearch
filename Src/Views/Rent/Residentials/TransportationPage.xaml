@@ -86,7 +86,7 @@
                                             <RowDefinition Height="Auto"></RowDefinition>
                                         </Grid.RowDefinitions>
                                         <Grid Grid.Row="0" Grid.Column="0">
-                                            <TextBox Header="バス停名" Text="{x:Bind ViewModel.BusStop, Mode=TwoWay}" HorizontalAlignment="Stretch"></TextBox>
+                                            <TextBox Header="バス停名" Text="{x:Bind ViewModel.BusStop1, Mode=TwoWay}" HorizontalAlignment="Stretch"></TextBox>
                                         </Grid>
                                         <Grid Grid.Row="1" Grid.Column="0">
                                             <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,12,0,0">

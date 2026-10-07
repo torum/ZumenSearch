@@ -58,4 +58,29 @@ public sealed class RailLine
     } = string.Empty;
     */
 
+    public void SetLineCode(string lineCode)
+    {
+        //if (string.IsNullOrWhiteSpace(lineCode)) throw new ArgumentException("Line code cannot be empty.", nameof(lineCode));
+        LineCode = lineCode;
+    }
+
+    public void SetLineName(string lineName)
+    {
+        //if (string.IsNullOrWhiteSpace(lineName)) throw new ArgumentException("Line name cannot be empty.", nameof(lineName));
+        LineName = lineName;
+    }
+
+    public void SetRainLine(string lineCode, string lineName)
+    {
+        //if (string.IsNullOrWhiteSpace(lineCode)) throw new ArgumentException("Line code cannot be empty.", nameof(lineCode));
+        //if (string.IsNullOrWhiteSpace(lineName)) throw new ArgumentException("Line name cannot be empty.", nameof(lineName));
+        LineCode = lineCode;
+        LineName = lineName;
+    }
+
+    public void Clear()
+    {
+        LineCode = string.Empty;
+        LineName = string.Empty;
+    }
 }

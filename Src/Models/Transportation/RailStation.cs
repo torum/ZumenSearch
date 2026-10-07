@@ -54,4 +54,31 @@ public sealed class RailStation
     } = string.Empty;
     */
 
+    public void SetStationCode(string stationCode)
+    {
+        if (string.IsNullOrWhiteSpace(stationCode))
+        { stationCode = string.Empty; }
+        StationCode = stationCode;
+    }
+
+    public void SetStationName(string stationName)
+    {
+        if (string.IsNullOrWhiteSpace(stationName))
+        { stationName = string.Empty; }
+        StationName = stationName;
+    }
+
+    public void SetLineCode(string lineCode)
+    {
+        if (string.IsNullOrWhiteSpace(lineCode))
+        { lineCode = string.Empty; }
+        LineCode = lineCode;
+    }
+
+    public void Clear()
+    {
+        StationCode = string.Empty;
+        StationName = string.Empty;
+        LineCode = string.Empty;
+    }
 }

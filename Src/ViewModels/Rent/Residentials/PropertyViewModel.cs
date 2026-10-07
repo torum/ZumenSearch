@@ -903,7 +903,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     #region == 交通プロパティ ==
 
-    public RailLine? SelectedRailLine1
+    public RailLine SelectedRailLine1
     {
         get;
         set
@@ -912,38 +912,44 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             {
                 IsDirty = true;
                 // Clear  old value.
-                SelectedRailStation1 = null;
+                SelectedRailStation1.Clear();
             }
 
             ShowRailStationSelect1Command.NotifyCanExecuteChanged();
         }
-    }
+    } = new("","");
 
-    public RailStation? SelectedRailStation1
+    public RailStation SelectedRailStation1
     {
         get;
         set
         {
+            /*
             if ((value is null) && (field is not null))
             {
                 // Clear old value.
                 //field.StationName = string.Empty;
-                SelectedRailLine1 = null;
+                SelectedRailLine1.Clear();
                 //OnPropertyChanged(nameof(SelectedRailStation1));
             }
-
+            */
             if (SetProperty(ref field, value))
             {
                 IsDirty = true;
             }
         }
-    }
+    } = new("", "", "");
 
     public string EkiToho1
     {
         get;
         set
         {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+            }
+            /*
             if (field == value)
             {
                 return;
@@ -975,10 +981,11 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                 //Debug.WriteLine($"EkiToho1: not * digits");
                 // TODO: show err?
             }
+            */
         }
     } = string.Empty;
 
-    public string BusStop
+    public string BusStop1
     {
         get;
         set
@@ -1704,6 +1711,17 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         LocationLatitude = _building.Address.LocationLatitude;
         LocationLongitude = _building.Address.LocationLongitude;
 
+        // 交通
+        //SelectedRailLine1 = new(_building.Train1.RailLine?.LineCode ?? "", _building.Train1.RailLine?.LineName ?? "");
+        SelectedRailLine1.SetLineCode(_building.Train1.RailLine?.LineCode ?? "");
+        SelectedRailLine1.SetLineName(_building.Train1.RailLine?.LineName ?? "");
+        if (SelectedRailLine1.LineCode.Equals(_building.Train1.RailStation?.LineCode ?? "", StringComparison.Ordinal))
+        {
+            SelectedRailStation1.SetLineCode(_building.Train1.RailStation?.LineCode ?? "");
+            SelectedRailStation1.SetStationCode(_building.Train1.RailStation?.StationCode ?? "");
+            SelectedRailStation1.SetStationName(_building.Train1.RailStation?.StationName ?? "");
+        }
+
         //TODO: Set other properties
 
 
@@ -2030,6 +2048,14 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             _building.Address.SetChoume(SelectedChou);
             _building.Address.SetEdaban(Edaban);
 
+            //_building.SetLocLocationFull(AddressPreview);
+            _building.Address.SetLocationLatitude(LocationLatitude);
+            _building.Address.SetLocationLongitude(LocationLongitude);
+
+            _building.Train1.SetRailLine(SelectedRailLine1.LineCode, SelectedRailLine1.LineName);
+            _building.Train1.SetRailStation(SelectedRailStation1.LineCode, SelectedRailStation1.StationCode, SelectedRailStation1.StationName);
+            //Debug.WriteLine($"SelectedRailLine1.LineCode: {SelectedRailLine1.LineCode}, _building.Train1.RailStation.LineCode: {_building.Train1.RailStation?.LineCode ?? ""}");
+
             // TODO: Set other properties
 
         }
@@ -2056,9 +2082,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         // TODO: Don't forget to check if Helpers.Common.ReplaceZenkakuNumbers is needed.
 
 
-        //_building.SetLocLocationFull(AddressPreview);
-        //_building.SetLocationLatitude(LocationLatitude);
-        //_building.SetLocationLongitude(LocationLongitude);
+
         
         // TODO: Set other properties
         // TODO: Don't forget to check if Helpers.Common.ReplaceZenkakuNumbers is needed.

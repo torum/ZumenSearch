@@ -21,9 +21,9 @@ public class Train
 
     public bool IsModified { get; private set; }
 
-    public RailLine? RailLine { get; private set; }
+    public RailLine RailLine { get; private set; } = new RailLine(string.Empty, string.Empty);
 
-    public RailStation? RailStation { get; private set; }
+    public RailStation RailStation { get; private set; } = new RailStation(string.Empty, string.Empty, string.Empty);
 
     public int EkiToho { get; private set; }
 

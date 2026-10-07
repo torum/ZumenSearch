@@ -77,22 +77,22 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     "train1_line_name TEXT NOT NULL DEFAULT ''," +
                     "train1_station_code TEXT NOT NULL DEFAULT ''," +
                     "train1_station_name TEXT NOT NULL DEFAULT ''," +
-                    "train1_ekitoho TEXT NOT NULL DEFAULT ''," +
+                    "train1_ekitoho INTEGER NOT NULL DEFAULT 0," +
                     "train2_line_code TEXT NOT NULL DEFAULT ''," +
                     "train2_line_name TEXT NOT NULL DEFAULT ''," +
                     "train2_station_code TEXT NOT NULL DEFAULT ''," +
                     "train2_station_name TEXT NOT NULL DEFAULT ''," +
-                    "train2_ekitoho TEXT NOT NULL DEFAULT ''," +
+                    "train2_ekitoho INTEGER NOT NULL DEFAULT 0," +
                     "train3_line_code TEXT NOT NULL DEFAULT ''," +
                     "train3_line_name TEXT NOT NULL DEFAULT ''," +
                     "train3_station_code TEXT NOT NULL DEFAULT ''," +
                     "train3_station_name TEXT NOT NULL DEFAULT ''," +
-                    "train3_ekitoho TEXT NOT NULL DEFAULT ''," +
+                    "train3_ekitoho INTEGER NOT NULL DEFAULT 0," +
                     "train4_line_code TEXT NOT NULL DEFAULT ''," +
                     "train4_line_name TEXT NOT NULL DEFAULT ''," +
                     "train4_station_code TEXT NOT NULL DEFAULT ''," +
                     "train4_station_name TEXT NOT NULL DEFAULT ''," +
-                    "train4_ekitoho TEXT NOT NULL DEFAULT ''," +
+                    "train4_ekitoho INTEGER NOT NULL DEFAULT 0," +
 
                     // TODO: add more columns.
 
@@ -1058,10 +1058,10 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 //cmd.CommandText = "INSERT INTO properties (property_id, name, property_kind, thumbnail_filename, location_prefecture_code, location_prefecture, location_machiaza_id, location_county, location_city, location_ward, location_oaza_cho, location_choume, location_edaban, location_full, updated_at) " +
                 //  "VALUES (@RentId, @Name, @PropertyKind, @Thumb, @LocPrefId, @LocPrefecture, @LocMachiazaId, @LocCounty, @LocCity, @LocWard, @LocOazaCho, @LocChoume, @LocEdaban, @LocLocationFull, @updated_at)";
                 // Upsert
-                var sqlUpsert = "INSERT INTO properties (property_id, name, property_kind, thumbnail_filename, location_prefecture_code, location_prefecture, location_machiaza_id, location_county, location_city, location_ward, location_oaza_cho, location_choume, location_edaban, location_full, location_latitude, location_longitude, updated_at) ";
-                sqlUpsert += "VALUES (@propertyId, @name, @propertyKind, @thumbnailPath, @locPrefId, @locPrefecture, @locMachiazaId, @locCounty, @locCity, @locWard, @locOazaCho, @locChoume, @locEdaban, @locLocationFull, @locationLatitude, @locationLongitude, @updated_at) ";
+                var sqlUpsert = "INSERT INTO properties (property_id, name, property_kind, thumbnail_filename, location_prefecture_code, location_prefecture, location_machiaza_id, location_county, location_city, location_ward, location_oaza_cho, location_choume, location_edaban, location_full, location_latitude, location_longitude, train1_line_code, train1_line_name, train1_station_code, train1_station_name, train1_ekitoho, updated_at) ";
+                sqlUpsert += "VALUES (@propertyId, @name, @propertyKind, @thumbnailPath, @locPrefId, @locPrefecture, @locMachiazaId, @locCounty, @locCity, @locWard, @locOazaCho, @locChoume, @locEdaban, @locLocationFull, @locationLatitude, @locationLongitude, @train1_line_code, @train1_line_name, @train1_station_code, @train1_station_name, @train1_ekitoho, @updated_at) ";
                 sqlUpsert += "ON CONFLICT (property_id) ";
-                sqlUpsert += "DO UPDATE SET property_id = @propertyId, name = @name, property_kind = @propertyKind, thumbnail_filename = @thumbnailPath, location_prefecture_code = @locPrefId, location_prefecture = @locPrefecture, location_machiaza_id = @locMachiazaId, location_county = @locCounty, location_city = @locCity, location_ward = @locWard, location_oaza_cho = @locOazaCho, location_choume = @locChoume, location_edaban = @locEdaban, location_full = @locLocationFull, location_latitude = @locationLatitude, location_longitude = @locationLongitude, updated_at = @updated_at";
+                sqlUpsert += "DO UPDATE SET property_id = @propertyId, name = @name, property_kind = @propertyKind, thumbnail_filename = @thumbnailPath, location_prefecture_code = @locPrefId, location_prefecture = @locPrefecture, location_machiaza_id = @locMachiazaId, location_county = @locCounty, location_city = @locCity, location_ward = @locWard, location_oaza_cho = @locOazaCho, location_choume = @locChoume, location_edaban = @locEdaban, location_full = @locLocationFull, location_latitude = @locationLatitude, location_longitude = @locationLongitude, train1_line_code = @train1_line_code, train1_line_name = @train1_line_name, train1_station_code = @train1_station_code, train1_station_name = @train1_station_name, train1_ekitoho = @train1_ekitoho, updated_at = @updated_at";
 
                 cmd.CommandText = sqlUpsert;
                 
@@ -1082,6 +1082,13 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 cmd.Parameters.AddWithValue("@locLocationFull", building.Address.AddressFull ?? string.Empty);
                 cmd.Parameters.AddWithValue("@locationLatitude", building.Address.LocationLatitude);
                 cmd.Parameters.AddWithValue("@locationLongitude", building.Address.LocationLongitude);
+                // Train 1
+                cmd.Parameters.AddWithValue("@train1_line_code", building.Train1.RailLine.LineCode);
+                cmd.Parameters.AddWithValue("@train1_line_name", building.Train1.RailLine.LineName);
+                cmd.Parameters.AddWithValue("@train1_station_code", building.Train1.RailStation.StationCode);
+                cmd.Parameters.AddWithValue("@train1_station_name", building.Train1.RailStation.StationName);
+                cmd.Parameters.AddWithValue("@train1_ekitoho", building.Train1.EkiToho); //int
+
                 // TODO: more
 
                 cmd.Parameters.AddWithValue("@updated_at", DateTimeOffset.UtcNow.ToString("s"));
@@ -1633,6 +1640,11 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 "properties.location_full as locLocationFull, " +
                 "properties.location_latitude as locationLatitude, " +
                 "properties.location_longitude as locationLongitude, " +
+                "properties.train1_line_code as train1LineCode, " +
+                "properties.train1_line_name as train1LineName, " +
+                "properties.train1_station_code as train1StationCode, " +
+                "properties.train1_station_name as train1StationName, " +
+                "properties.train1_ekitoho as train1EkiToho, " +
                 "properties.updated_at as UpdatedAt, " +
 
                 "rent_residentials.building_kind as resiBuildingKind, " +
@@ -1687,6 +1699,12 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     //property.SetLocLocationFull(Convert.ToString(reader["locLocationFull"], CultureInfo.InvariantCulture) ?? "");
                     property.Address.SetLocationLatitude(Convert.ToString(reader["locationLatitude"], CultureInfo.InvariantCulture) ?? string.Empty);
                     property.Address.SetLocationLongitude(Convert.ToString(reader["locationLongitude"], CultureInfo.InvariantCulture) ?? string.Empty);
+                    property.Train1.RailLine.SetLineCode(Convert.ToString(reader["train1LineCode"], CultureInfo.InvariantCulture) ?? string.Empty);
+                    property.Train1.RailLine.SetLineName(Convert.ToString(reader["train1LineName"], CultureInfo.InvariantCulture) ?? string.Empty);
+                    property.Train1.RailStation.SetLineCode(Convert.ToString(reader["train1LineCode"], CultureInfo.InvariantCulture) ?? string.Empty);
+                    property.Train1.RailStation.SetStationCode(Convert.ToString(reader["train1StationCode"], CultureInfo.InvariantCulture) ?? string.Empty);
+                    property.Train1.RailStation.SetStationName(Convert.ToString(reader["train1StationName"], CultureInfo.InvariantCulture) ?? string.Empty);
+                    property.Train1.SetEkiToho(Convert.ToInt32(reader["train1EkiToho"], CultureInfo.InvariantCulture));
                     // TODO: more.
 
 
