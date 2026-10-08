@@ -3,6 +3,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using System.Diagnostics;
+using System.Globalization;
 using System.Runtime.InteropServices;
 using WinRT.Interop;
 using ZumenSearch.Helpers;
@@ -276,18 +277,24 @@ public partial class App : Application
 
     private void App_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
     {
-        Debug.WriteLine("App_UnhandledException", e.Message);
-        Debug.WriteLine($"StackTrace: {e.Exception.StackTrace}, Source: {e.Exception.Source}");
+        Debug.WriteLine("App_UnhandledException", $"{e.Exception.Message}, {e.Exception.Data}");
+        //AppendErrorLog("App_UnhandledException", $"{e.Exception.Message}, {e.Exception.Data}");
+        //SaveErrorLog();
+
+        e.Handled = true;
     }
 
     private void TaskScheduler_UnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
     {
         if (e.Exception.InnerException is not Exception exception)
         {
+            Debug.WriteLine("TaskScheduler_UnobservedTaskException: " + e.ToString());
             return;
         }
 
         Debug.WriteLine("TaskScheduler_UnobservedTaskException: " + exception.Message);
+        //AppendErrorLog("TaskScheduler_UnobservedTaskException", exception.Message);
+        //SaveErrorLog();
 
         e.SetObserved();
     }
@@ -296,6 +303,7 @@ public partial class App : Application
     {
         if (e.ExceptionObject is not Exception exception)
         {
+            Debug.WriteLine("CurrentDomain_UnhandledException: " + e.ToString());
             return;
         }
 
@@ -303,12 +311,54 @@ public partial class App : Application
         {
             // can ignore.
             Debug.WriteLine("CurrentDomain_UnhandledException (TaskCanceledException): " + exception.Message);
+            //AppendErrorLog("CurrentDomain_UnhandledException (TaskCanceledException)", exception.Message);
+            return;
         }
-        else
+
+        Debug.WriteLine("CurrentDomain_UnhandledException: " + exception.Message);
+        //AppendErrorLog("CurrentDomain_UnhandledException", exception.Message);
+        //SaveErrorLog();
+    }
+
+    /*
+    public void AppendErrorLog(string kindTxt, string errorTxt)
+    {
+        if (!IsSaveErrorLog)
         {
-            Debug.WriteLine("CurrentDomain_UnhandledException: " + exception.Message);
+            return;
+        }
+
+        _errortxt.AppendLine(kindTxt + ": " + errorTxt);
+        var dt = DateTime.Now;
+        _errortxt.AppendLine(CultureInfo.InvariantCulture, $"Occured at {dt.ToString("yyyy/MM/dd HH:mm:ss", CultureInfo.InvariantCulture)}");
+    }
+
+    public void SaveErrorLog()
+    {
+        if (!IsSaveErrorLog)
+        {
+            return;
+        }
+
+        if (string.IsNullOrEmpty(_logFilePath))
+        {
+            return;
+        }
+
+        if (_errortxt.Length > 0)
+        {
+            var dt = DateTime.Now;
+            _errortxt.AppendLine(CultureInfo.InvariantCulture, $"Saved at {dt.ToString("yyyy/MM/dd HH:mm:ss", CultureInfo.InvariantCulture)}");
+            _errortxt.AppendLine("");
+
+            var s = _errortxt.ToString();
+            if (!string.IsNullOrEmpty(s))
+            {
+                File.WriteAllText(_logFilePath, s);
+            }
         }
     }
+    */
 
     #endregion
 }
