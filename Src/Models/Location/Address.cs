@@ -190,26 +190,18 @@ public class Address
         }
 
         var digits = normalized.Replace("-", string.Empty, StringComparison.Ordinal);
-        var validLengthAndFormat =
-            normalized.Length == 7 ||
-            (normalized.Length == 8 && normalized[3] == '-');
+        var validLengthAndFormat = normalized.Length == 7 ||  (normalized.Length == 8 && normalized[3] == '-');
 
         if (!validLengthAndFormat || digits.Length != 7 || !digits.All(char.IsAsciiDigit))
         {
-            throw new ArgumentException(
-                "Postal code must contain seven digits, optionally formatted as NNN-NNNN.",
-                nameof(postalCode));
+            throw new ArgumentException( "Postal code must contain seven digits, optionally formatted as NNN-NNNN.", nameof(postalCode));
         }
 
         PostalCode = $"{digits[..3]}-{digits[3..]}";
         IsModified = true;
     }
 
-    private static string NormalizeCoordinate(
-        string value,
-        string coordinateName,
-        decimal minimum,
-        decimal maximum)
+    private static string NormalizeCoordinate(string value,string coordinateName,decimal minimum,decimal maximum)
     {
         if (string.IsNullOrWhiteSpace(value))
         {
@@ -219,9 +211,7 @@ public class Address
         var normalized = value.Trim();
         const NumberStyles styles = NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint;
 
-        if (!decimal.TryParse(normalized, styles, CultureInfo.InvariantCulture, out var coordinate) ||
-            coordinate < minimum ||
-            coordinate > maximum)
+        if (!decimal.TryParse(normalized, styles, CultureInfo.InvariantCulture, out var coordinate) || coordinate < minimum || coordinate > maximum)
         {
             throw new ArgumentException(
                 $"{coordinateName} must be a decimal between {minimum} and {maximum}, or blank.",

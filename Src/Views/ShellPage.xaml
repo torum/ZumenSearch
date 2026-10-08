@@ -152,8 +152,13 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <Button x:Name="BackButton" Grid.Column="0" Height="36" Width="40" Margin="6,6,0,0" ToolTipService.ToolTip="Alt+Left" Style="{ThemeResource TitleBarBackButtonStyle}" IsEnabled="{x:Bind ContentFrame.CanGoBack, Mode=OneWay}" Click="BackButton_Click" VerticalAlignment="Top"/>
+
+                        <StackPanel x:Name="AppTitleBarCustomButtonPanel" Grid.Column="2" HorizontalAlignment="Right" Visibility="Collapsed">
+                            <Button Height="36" Width="40" Margin="6,6,0,0" IsTabStop="False" Content="x"  />
+                        </StackPanel>
                     </Grid>
                     
                     <Frame x:Name="ContentFrame" Grid.Row="1" Navigated="NavigationViewControl_Navigated" Padding="0"></Frame>

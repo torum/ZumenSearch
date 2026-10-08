@@ -178,7 +178,7 @@
                             <ColumnDefinition Width="1*" MinWidth="320"></ColumnDefinition>
                         </Grid.ColumnDefinitions>
                         <Grid Grid.Row="0" Grid.Column="0">
-                            <DatePicker Header="現況確認日" Margin="0 0 6 6" HorizontalAlignment="Left" IsEnabled="True"/>
+                            <DatePicker x:Name="CurrentStatusDatePicker" Header="現況確認日" Margin="0 0 6 6" HorizontalAlignment="Left" IsEnabled="True"/>
                         </Grid>
                         <Grid Grid.Row="0" Grid.Column="1" Margin="12,0,0,0">
                             <Grid.ColumnDefinitions>
@@ -186,7 +186,7 @@
                                 <ColumnDefinition Width="*"></ColumnDefinition>
                             </Grid.ColumnDefinitions>
                             <Grid Grid.Row="0" Grid.Column="0">
-                                <Button Content="本日確認" Margin="0,0,0,6" Padding="6" VerticalAlignment="Bottom" />
+                                <Button Content="本日確認" Margin="0,0,0,6" Padding="6" VerticalAlignment="Bottom" Click="SetCurrentStatusDateToToday"/>
                             </Grid>
                             <Grid Grid.Row="0" Grid.Column="1" Margin="12,0,0,0">
                             </Grid>

@@ -1,9 +1,11 @@
 using Microsoft.UI.Input;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
+using System.ComponentModel;
 using System.Diagnostics;
 using ZumenSearch.Services;
 using ZumenSearch.Services.Contracts;
@@ -48,9 +50,11 @@ public sealed partial class ShellPage : Page
         _navigationService.Initialize(ContentFrame, _pageMap);
 
         MainWindow.SetTitleBar(this.AppTitleBar);
+        //MainWindow.AppWindow.TitleBar.PreferredHeightOption = TitleBarHeightOption.Tall;
         MainWindow.Activated += MainWindow_Activated;
 
         this.Loaded += Page_Loaded;
+        //MainWindow.AppWindow.TitleBar.LayoutMetricsChanged += (s, e) => UpdateCaptionButtonPadding();
     }
 
     public ViewModels.MainViewModel ViewModel { get; }
@@ -59,8 +63,16 @@ public sealed partial class ShellPage : Page
 
     public MainWindow MainWindow { get; }
 
+    private void UpdateCaptionButtonPadding()
+    {
+        //CaptionButtonPadding = new Thickness(0, 0, MainWindow.AppWindow.TitleBar.RightInset, 0);
+        AppTitleBarCustomButtonPanel.Padding = new Thickness(0, 0, MainWindow.AppWindow.TitleBar.RightInset, 0);
+    }
+
     private void Page_Loaded(object sender, RoutedEventArgs e)
     {
+        UpdateCaptionButtonPadding();
+
         if (this.ContentFrame.Navigate(typeof(ZumenSearch.Views.SearchPage), null, new Microsoft.UI.Xaml.Media.Animation.EntranceNavigationTransitionInfo()))
         {
             SetRegionsForCustomTitleBar("Page_Loaded");

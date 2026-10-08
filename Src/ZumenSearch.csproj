@@ -1,60 +1,59 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net10.0-windows10.0.26100.0</TargetFramework>
-    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
-    <RootNamespace>ZumenSearch</RootNamespace>
-    <ApplicationManifest>app.manifest</ApplicationManifest>
-    <Platforms>x86;x64;ARM64</Platforms>
-    <RuntimeIdentifier Condition="'$(RuntimeIdentifier)' == ''">win-$([System.Runtime.InteropServices.RuntimeInformation]::ProcessArchitecture.ToString().ToLowerInvariant())</RuntimeIdentifier>
-    <PublishProfile Condition="Exists('Properties\PublishProfiles\win-$(Platform).pubxml')">win-$(Platform).pubxml</PublishProfile>
-    <UseWinUI>true</UseWinUI>
-    <WinUISDKReferences>false</WinUISDKReferences>
-    <EnableMsixTooling>true</EnableMsixTooling>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-	  <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-	  <ApplicationIcon>Assets\App.ico</ApplicationIcon>
-	  
-	  <!-- Code Quality -->
-	  <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-	  <AnalysisLevel>latest-recommended</AnalysisLevel>
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net10.0-windows10.0.26100.0</TargetFramework>
+		<TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+		<RootNamespace>ZumenSearch</RootNamespace>
+		<ApplicationManifest>app.manifest</ApplicationManifest>
+		<Platforms>x86;x64;ARM64</Platforms>
+		<RuntimeIdentifier Condition="'$(RuntimeIdentifier)' == ''">win-$([System.Runtime.InteropServices.RuntimeInformation]::ProcessArchitecture.ToString().ToLowerInvariant())</RuntimeIdentifier>
+		<PublishProfile Condition="Exists('Properties\PublishProfiles\win-$(Platform).pubxml')">win-$(Platform).pubxml</PublishProfile>
+		<UseWinUI>true</UseWinUI>
+		<WinUISDKReferences>false</WinUISDKReferences>
+		<EnableMsixTooling>true</EnableMsixTooling>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<ApplicationIcon>Assets\App.ico</ApplicationIcon>
 
-	  <!-- Unpackaged -->
-	  <WindowsPackageType>None</WindowsPackageType>
+		<!-- Code Quality -->
+		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+		<AnalysisLevel>latest-recommended</AnalysisLevel>
 
-	  <!-- Runtimes -->
-	  <SelfContained>false</SelfContained>
-	  <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
-	  
-	  <!-- AoT
-	  -->
-	  <IsAotCompatible>true</IsAotCompatible>
-	  <SuppressTrimAnalysisWarnings>false</SuppressTrimAnalysisWarnings>
-	  <TrimmerSingleWarn>false</TrimmerSingleWarn>
-	  <Optimize>true</Optimize>
-	  <TrimMode>partial</TrimMode>
+		<!-- Unpackaged -->
+		<WindowsPackageType>None</WindowsPackageType>
 
-  </PropertyGroup>
+		<!-- Runtimes -->
+		<SelfContained>false</SelfContained>
+		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
 
-  <ItemGroup>
-	  <Content Include="Assets\App.ico" />
-  </ItemGroup>
+		<!-- AoT -->
+		<IsAotCompatible>true</IsAotCompatible>
+		<SuppressTrimAnalysisWarnings>false</SuppressTrimAnalysisWarnings>
+		<TrimmerSingleWarn>false</TrimmerSingleWarn>
+		<Optimize>true</Optimize>
+		<TrimMode>partial</TrimMode>
 
-  <ItemGroup>
-    <Manifest Include="$(ApplicationManifest)" />
-  </ItemGroup>
+	</PropertyGroup>
 
-  <!--
+	<ItemGroup>
+		<Content Include="Assets\App.ico" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Manifest Include="$(ApplicationManifest)" />
+	</ItemGroup>
+
+	<!--
     Defining the "Msix" ProjectCapability here allows the Single-project MSIX Packaging
     Tools extension to be activated for this project even if the Windows App SDK Nuget
     package has not yet been restored.
   -->
-  <ItemGroup Condition="'$(DisableMsixProjectCapabilityAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
-    <ProjectCapability Include="Msix" />
-  </ItemGroup>
+	<ItemGroup Condition="'$(DisableMsixProjectCapabilityAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
+		<ProjectCapability Include="Msix" />
+	</ItemGroup>
 
-  <!--
+	<!--
     Microsoft.Windows.SDK.BuildTools.WinApp adds first-class support for
     `dotnet run` on packaged WinUI apps: it hooks the .NET CLI Run target to
     register a debug identity via the winapp CLI and launch the app with
@@ -62,73 +61,73 @@
     Set <EnableWinAppRunSupport>false</EnableWinAppRunSupport> in a
     <PropertyGroup> above to opt out.
   -->
-  <ItemGroup>
-	  <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
-	  <PackageReference Include="CommunityToolkit.WinUI.Animations" Version="8.3.260402-preview2" />
-	  <PackageReference Include="CommunityToolkit.WinUI.Controls.Primitives" Version="8.3.260402-preview2" />
-	  <PackageReference Include="CommunityToolkit.WinUI.Controls.Segmented" Version="8.3.260402-preview2" />
-	  <PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.3.260402-preview2" />
-	  <PackageReference Include="CommunityToolkit.WinUI.Converters" Version="8.3.260402-preview2" />
-	  <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.12" />
-	  <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.12" />
-	  <PackageReference Include="Microsoft.WindowsAppSDK.Foundation" Version="2.3.12" />
-	  <PackageReference Include="Microsoft.WindowsAppSDK.InteractiveExperiences" Version="2.1.9" />
-	  <PackageReference Include="Microsoft.WindowsAppSDK.WinUI" Version="2.3.9" />
-	  <PackageReference Include="Microsoft.WindowsAppSDK.Runtime" Version="2.5.1" />
-	  <PackageReference Include="SQLitePCLRaw.lib.e_sqlite3" Version="3.53.3" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Update="Data\mt_town_all.db">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Data\rail_lines.db">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Data\rail_stations.db">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Page Update="Views\Brokers\BasicPage.xaml">
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="Views\Brokers\EditorWindow.xaml">
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="Views\Brokers\ShellPage.xaml">
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="Views\Rent\ParkingSearchPage.xaml">
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="Views\Rent\ParkingSearchResultPage.xaml">
-      <SubType>Designer</SubType>
-    </Page>
+	<ItemGroup>
+		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+		<PackageReference Include="CommunityToolkit.WinUI.Animations" Version="8.3.260402-preview2" />
+		<PackageReference Include="CommunityToolkit.WinUI.Controls.Primitives" Version="8.3.260402-preview2" />
+		<PackageReference Include="CommunityToolkit.WinUI.Controls.Segmented" Version="8.3.260402-preview2" />
+		<PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.3.260402-preview2" />
+		<PackageReference Include="CommunityToolkit.WinUI.Converters" Version="8.3.260402-preview2" />
+		<PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.12" />
+		<PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.12" />
+		<PackageReference Include="Microsoft.WindowsAppSDK.Foundation" Version="2.3.12" />
+		<PackageReference Include="Microsoft.WindowsAppSDK.InteractiveExperiences" Version="2.1.9" />
+		<PackageReference Include="Microsoft.WindowsAppSDK.WinUI" Version="2.3.9" />
+		<PackageReference Include="Microsoft.WindowsAppSDK.Runtime" Version="2.5.1" />
+		<PackageReference Include="SQLitePCLRaw.lib.e_sqlite3" Version="3.53.3" />
+	</ItemGroup>
+	<ItemGroup>
+		<None Update="Data\mt_town_all.db">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Data\rail_lines.db">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Data\rail_stations.db">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+	<ItemGroup>
+		<Page Update="Views\Brokers\BasicPage.xaml">
+			<SubType>Designer</SubType>
+		</Page>
+		<Page Update="Views\Brokers\EditorWindow.xaml">
+			<SubType>Designer</SubType>
+		</Page>
+		<Page Update="Views\Brokers\ShellPage.xaml">
+			<SubType>Designer</SubType>
+		</Page>
+		<Page Update="Views\Rent\ParkingSearchPage.xaml">
+			<SubType>Designer</SubType>
+		</Page>
+		<Page Update="Views\Rent\ParkingSearchResultPage.xaml">
+			<SubType>Designer</SubType>
+		</Page>
 
-  </ItemGroup>
-  <ItemGroup>
-    <Using Include="System.Diagnostics" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Views\Sale\Commercials\" />
-  </ItemGroup>
+	</ItemGroup>
+	<ItemGroup>
+		<Using Include="System.Diagnostics" />
+	</ItemGroup>
+	<ItemGroup>
+		<Folder Include="Views\Sale\Commercials\" />
+	</ItemGroup>
 
-  <!--
+	<!--
     Defining the "HasPackageAndPublishMenuAddedByProject" property here allows the Solution
     Explorer "Package and Publish" context menu entry to be enabled for this project even if
     the Windows App SDK Nuget package has not yet been restored.
   -->
-  <PropertyGroup Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
-    <HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
-  </PropertyGroup>
+	<PropertyGroup Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
+		<HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
+	</PropertyGroup>
 
-  <!-- Publish Properties -->
-  <PropertyGroup>
-    <PublishReadyToRun Condition="'$(Configuration)' == 'Debug'">False</PublishReadyToRun>
-    <PublishReadyToRun Condition="'$(Configuration)' != 'Debug'">True</PublishReadyToRun>
-    <!--
+	<!-- Publish Properties -->
+	<PropertyGroup>
+		<PublishReadyToRun Condition="'$(Configuration)' == 'Debug'">False</PublishReadyToRun>
+		<PublishReadyToRun Condition="'$(Configuration)' != 'Debug'">True</PublishReadyToRun>
+		<!--
       <PublishTrimmed Condition="'$(Configuration)' == 'Debug'">False</PublishTrimmed>
 	  <PublishTrimmed Condition="'$(Configuration)' != 'Debug'">True</PublishTrimmed>
 	  -->
-  </PropertyGroup>
+	</PropertyGroup>
 </Project>

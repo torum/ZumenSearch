@@ -45,4 +45,9 @@ public sealed partial class BasicPage : Page
     {
         Init();
     }
+
+    private void SetCurrentStatusDateToToday(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    {
+        CurrentStatusDatePicker.Date = DateTimeOffset.Now;
+    }
 }
