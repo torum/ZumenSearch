@@ -8,6 +8,7 @@ public sealed partial class BasicPage : Page
     public ViewModels.Rent.Residentials.ListingViewModel? ViewModel { get; private set; }
 
     private bool _initialized;
+    private bool _isSynchronizingStatusDate;
 
     public BasicPage()
     {
@@ -43,11 +44,43 @@ public sealed partial class BasicPage : Page
 
     private void Page_Loaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
+        if (ViewModel?.CurrentStatusCheckedAt is DateTimeOffset checkedAt)
+        {
+            SetStatusDatePickerDate(checkedAt);
+        }
+
         Init();
+    }
+
+    private void CurrentStatusDatePicker_DateChanged(object sender, DatePickerValueChangedEventArgs e)
+    {
+        if (!_isSynchronizingStatusDate && ViewModel is not null)
+        {
+            ViewModel.CurrentStatusCheckedAt = e.NewDate;
+        }
     }
 
     private void SetCurrentStatusDateToToday(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
-        CurrentStatusDatePicker.Date = DateTimeOffset.Now;
+        var clickedAt = DateTimeOffset.Now;
+        SetStatusDatePickerDate(clickedAt);
+
+        if (ViewModel is not null)
+        {
+            ViewModel.CurrentStatusCheckedAt = clickedAt;
+        }
+    }
+
+    private void SetStatusDatePickerDate(DateTimeOffset value)
+    {
+        _isSynchronizingStatusDate = true;
+        try
+        {
+            CurrentStatusDatePicker.Date = value;
+        }
+        finally
+        {
+            _isSynchronizingStatusDate = false;
+        }
     }
 }

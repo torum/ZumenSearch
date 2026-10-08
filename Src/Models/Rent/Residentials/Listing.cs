@@ -122,6 +122,45 @@ public sealed partial class Listing : ListingBase
         }
     }
 
+    [ObservableProperty]
+    public partial int RoomCount { get; set; } = 1;
+
+    [ObservableProperty]
+    public partial RoomLayout RoomLayoutType { get; set; } = RoomLayout.R;
+
+    [ObservableProperty]
+    public partial decimal FloorArea { get; set; }
+
+    [ObservableProperty]
+    public partial FloorPosition FloorType { get; set; } = FloorPosition.AboveGround;
+
+    [ObservableProperty]
+    public partial int? FloorNumber { get; set; }
+
+    [ObservableProperty]
+    public partial bool IsCornerRoom { get; set; }
+
+    [ObservableProperty]
+    public partial ExposureDirection MainExposureDirection { get; set; } = ExposureDirection.Unspecified;
+
+    [ObservableProperty]
+    public partial ListingCurrentStatus CurrentStatus { get; set; } = ListingCurrentStatus.Unspecified;
+
+    [ObservableProperty]
+    public partial bool IsRecruiting { get; set; }
+
+    [ObservableProperty]
+    public partial int? AvailableFromMonth { get; set; }
+
+    [ObservableProperty]
+    public partial AvailabilityPeriod AvailableFromPeriod { get; set; } = AvailabilityPeriod.Unspecified;
+
+    [ObservableProperty]
+    public partial bool IsImmediateOccupancy { get; set; }
+
+    [ObservableProperty]
+    public partial DateTimeOffset? CurrentStatusCheckedAt { get; set; }
+
 
     [ObservableProperty]
     public partial decimal KyouekiFee { get; set; }
@@ -189,5 +228,7 @@ public sealed partial class Listing : ListingBase
         IsPropertyUnitOwnership = isPropertyUnitOwnership;
         PropertyName = propertyName;
         //PropertyStatus = propertyStatus;
+        PropertyChanged += (_, _) => SetIsModified(true);
+        SetIsModified(false);
     }
 }
