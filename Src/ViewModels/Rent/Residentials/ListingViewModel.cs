@@ -9,6 +9,7 @@ using Windows.Storage;
 using Windows.Storage.Streams;
 using ZumenSearch.Models;
 using ZumenSearch.Models.Enums;
+using ZumenSearch.Models.Rent.Residentials;
 using ZumenSearch.Models.Messenger;
 using ZumenSearch.Services.Contracts;
 
@@ -244,6 +245,148 @@ public sealed partial class ListingViewModel : ObservableRecipient,
     #endregion
 
     #region == 基本プロパティ == 
+
+    [ObservableProperty]
+    public partial int RoomCount { get; set; } = 1;
+
+    [ObservableProperty]
+    public partial RoomLayout RoomLayoutType { get; set; } = RoomLayout.R;
+
+    [ObservableProperty]
+    public partial string FloorArea { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial FloorPosition FloorType { get; set; } = FloorPosition.AboveGround;
+
+    [ObservableProperty]
+    public partial string FloorNumber { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial bool IsCornerRoom { get; set; }
+
+    [ObservableProperty]
+    public partial ExposureDirection MainExposureDirection { get; set; } = ExposureDirection.Unspecified;
+
+    [ObservableProperty]
+    public partial ListingCurrentStatus CurrentStatus { get; set; } = ListingCurrentStatus.Unspecified;
+
+    [ObservableProperty]
+    public partial bool IsRecruiting { get; set; }
+
+    [ObservableProperty]
+    public partial int? AvailableFromMonth { get; set; }
+
+    [ObservableProperty]
+    public partial AvailabilityPeriod AvailableFromPeriod { get; set; } = AvailabilityPeriod.Unspecified;
+
+    [ObservableProperty]
+    public partial bool IsImmediateOccupancy { get; set; }
+
+    [ObservableProperty]
+    public partial DateTimeOffset? CurrentStatusCheckedAt { get; set; }
+
+    [ObservableProperty]
+    public partial string Remarks { get; set; } = string.Empty;
+
+    public IReadOnlyList<string> RoomLayoutOptions { get; } = ListingOptionExtensions.GetRoomLayoutOptions();
+    public IReadOnlyList<string> FloorTypeOptions { get; } = ListingOptionExtensions.GetFloorPositionOptions();
+    public IReadOnlyList<string> MainExposureDirectionOptions { get; } = ListingOptionExtensions.GetExposureDirectionOptions();
+    public IReadOnlyList<string> CurrentStatusOptions { get; } = ListingOptionExtensions.GetCurrentStatusOptions();
+    public IReadOnlyList<string> AvailableFromPeriodOptions { get; } = ListingOptionExtensions.GetAvailabilityPeriodOptions();
+    public IReadOnlyList<string> RoomCountOptions { get; } = ListingOptionExtensions.GetRoomCountOptions();
+    public IReadOnlyList<string> AvailableFromMonthOptions { get; } = ListingOptionExtensions.GetAvailabilityMonthOptions();
+
+    public string SelectedRoomCountOption
+    {
+        get => RoomCount.ToString(CultureInfo.InvariantCulture);
+        set { if (int.TryParse(value, NumberStyles.None, CultureInfo.InvariantCulture, out var count)) RoomCount = count; }
+    }
+
+    public string SelectedRoomLayoutOption
+    {
+        get => RoomLayoutType.GetStorageValue();
+        set => RoomLayoutType = ListingOptionExtensions.ParseRoomLayout(value);
+    }
+
+    public string SelectedFloorTypeOption
+    {
+        get => FloorType.GetStorageValue();
+        set => FloorType = ListingOptionExtensions.ParseFloorPosition(value);
+    }
+
+    public string SelectedExposureDirectionOption
+    {
+        get => MainExposureDirection.GetStorageValue();
+        set => MainExposureDirection = ListingOptionExtensions.ParseExposureDirection(value);
+    }
+
+    public string SelectedCurrentStatusOption
+    {
+        get => CurrentStatus.GetStorageValue();
+        set => CurrentStatus = ListingOptionExtensions.ParseCurrentStatus(value);
+    }
+
+    public string? SelectedAvailableFromMonthOption
+    {
+        get => AvailableFromMonth is int month && month is >= 1 and <= 12 ? AvailableFromMonthOptions[month - 1] : null;
+        set => AvailableFromMonth = ListingOptionExtensions.ParseAvailabilityMonth(value);
+    }
+
+    public string SelectedAvailableFromPeriodOption
+    {
+        get => AvailableFromPeriod.GetStorageValue();
+        set => AvailableFromPeriod = ListingOptionExtensions.ParseAvailabilityPeriod(value);
+    }
+
+    partial void OnRoomCountChanged(int value)
+    {
+        IsDirty = true;
+        OnPropertyChanged(nameof(SelectedRoomCountOption));
+    }
+
+    partial void OnRoomLayoutTypeChanged(RoomLayout oldValue, RoomLayout newValue)
+    {
+        IsDirty = true;
+        OnPropertyChanged(nameof(SelectedRoomLayoutOption));
+    }
+
+    partial void OnFloorAreaChanged(string value) => IsDirty = true;
+    partial void OnFloorTypeChanged(FloorPosition oldValue, FloorPosition newValue)
+    {
+        IsDirty = true;
+        OnPropertyChanged(nameof(SelectedFloorTypeOption));
+    }
+
+    partial void OnFloorNumberChanged(string value) => IsDirty = true;
+    partial void OnIsCornerRoomChanged(bool value) => IsDirty = true;
+    partial void OnMainExposureDirectionChanged(ExposureDirection oldValue, ExposureDirection newValue)
+    {
+        IsDirty = true;
+        OnPropertyChanged(nameof(SelectedExposureDirectionOption));
+    }
+
+    partial void OnCurrentStatusChanged(ListingCurrentStatus oldValue, ListingCurrentStatus newValue)
+    {
+        IsDirty = true;
+        OnPropertyChanged(nameof(SelectedCurrentStatusOption));
+    }
+
+    partial void OnIsRecruitingChanged(bool value) => IsDirty = true;
+
+    partial void OnAvailableFromMonthChanged(int? value)
+    {
+        IsDirty = true;
+        OnPropertyChanged(nameof(SelectedAvailableFromMonthOption));
+    }
+
+    partial void OnAvailableFromPeriodChanged(AvailabilityPeriod oldValue, AvailabilityPeriod newValue)
+    {
+        IsDirty = true;
+        OnPropertyChanged(nameof(SelectedAvailableFromPeriodOption));
+    }
+    partial void OnIsImmediateOccupancyChanged(bool value) => IsDirty = true;
+    partial void OnCurrentStatusCheckedAtChanged(DateTimeOffset? value) => IsDirty = true;
+    partial void OnRemarksChanged(string value) => IsDirty = true;
 
     public string Name
     {
@@ -558,6 +701,34 @@ public sealed partial class ListingViewModel : ObservableRecipient,
         return true;
     }
 
+    private bool TryParseBasicNumericValues(out decimal floorArea, out int? floorNumber)
+    {
+        floorArea = 0;
+        floorNumber = null;
+
+        var areaText = Helpers.Common.ReplaceZenkakuNumbers(FloorArea.Trim());
+        if (!string.IsNullOrEmpty(areaText) &&
+            (!decimal.TryParse(areaText, NumberStyles.Number, CultureInfo.CurrentCulture, out floorArea) || floorArea < 0))
+        {
+            InfoBarErrorMessage = "専有面積は0以上の数値で入力してください。";
+            return false;
+        }
+
+        var floorText = Helpers.Common.ReplaceZenkakuNumbers(FloorNumber.Trim());
+        if (!string.IsNullOrEmpty(floorText))
+        {
+            if (!int.TryParse(floorText, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsedFloor) || parsedFloor <= 0)
+            {
+                InfoBarErrorMessage = "所在階は1以上の整数で入力してください。";
+                return false;
+            }
+
+            floorNumber = parsedFloor;
+        }
+
+        return true;
+    }
+
     private void SetValues()
     {
         if (!IsDirty)
@@ -572,6 +743,26 @@ public sealed partial class ListingViewModel : ObservableRecipient,
         }
 
         _room.SetName(Name);
+
+        if (!TryParseBasicNumericValues(out var floorArea, out var floorNumber))
+        {
+            return;
+        }
+
+        _room.RoomCount = RoomCount;
+        _room.RoomLayoutType = RoomLayoutType;
+        _room.FloorArea = floorArea;
+        _room.FloorType = FloorType;
+        _room.FloorNumber = floorNumber;
+        _room.IsCornerRoom = IsCornerRoom;
+        _room.MainExposureDirection = MainExposureDirection;
+        _room.CurrentStatus = CurrentStatus;
+        _room.IsRecruiting = IsRecruiting;
+        _room.AvailableFromMonth = AvailableFromMonth;
+        _room.AvailableFromPeriod = AvailableFromPeriod;
+        _room.IsImmediateOccupancy = IsImmediateOccupancy;
+        _room.CurrentStatusCheckedAt = CurrentStatusCheckedAt;
+        _room.Remarks = Remarks;
 
         if (int.TryParse(Chinryou, out var result))
         {
@@ -654,6 +845,21 @@ public sealed partial class ListingViewModel : ObservableRecipient,
         IsPropertyUnitOwnership = _room.IsPropertyUnitOwnership;
 
         Name = _room.Name; // Set the value to trigger the setter logic if needed.
+
+        RoomCount = _room.RoomCount;
+        RoomLayoutType = _room.RoomLayoutType;
+        FloorArea = _room.FloorArea == 0 ? string.Empty : _room.FloorArea.ToString(CultureInfo.CurrentCulture);
+        FloorType = _room.FloorType;
+        FloorNumber = _room.FloorNumber?.ToString(CultureInfo.InvariantCulture) ?? string.Empty;
+        IsCornerRoom = _room.IsCornerRoom;
+        MainExposureDirection = _room.MainExposureDirection;
+        CurrentStatus = _room.CurrentStatus;
+        IsRecruiting = _room.IsRecruiting;
+        AvailableFromMonth = _room.AvailableFromMonth;
+        AvailableFromPeriod = _room.AvailableFromPeriod;
+        IsImmediateOccupancy = _room.IsImmediateOccupancy;
+        CurrentStatusCheckedAt = _room.CurrentStatusCheckedAt;
+        Remarks = _room.Remarks;
 
         //var test = _room.Chinryou.ToString();
         Chinryou = _room.Chinryou.ToString(CultureInfo.InvariantCulture);
@@ -903,7 +1109,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
         }
 
         // Validate input.
-        if (!ValidateName()) 
+        if (!ValidateName() || !TryParseBasicNumericValues(out _, out _))
         {
             //InfoBarErrorMessage = "入力項目に誤りがあります。保存出来ませんでした。";
             IsInfoBarErrorOpen = true;

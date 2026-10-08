@@ -7,6 +7,7 @@ using ZumenSearch.Models;
 using ZumenSearch.Models.Base;
 using ZumenSearch.Models.Enums;
 using ZumenSearch.Models.Location;
+using ZumenSearch.Models.Rent.Residentials;
 using ZumenSearch.Services.Contracts;
 
 namespace ZumenSearch.Services;
@@ -172,12 +173,27 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     "is_property_unit_ownership INTEGER NOT NULL DEFAULT 0," +
                     "name TEXT NOT NULL DEFAULT ''," +
                     "chinryou INTEGER NOT NULL DEFAULT 0," +
+                    "room_count INTEGER NOT NULL DEFAULT 1," +
+                    "room_layout_type TEXT NOT NULL DEFAULT 'R'," +
+                    "floor_area NUMERIC NOT NULL DEFAULT 0," +
+                    "floor_type TEXT NOT NULL DEFAULT '地上'," +
+                    "floor_number INTEGER," +
+                    "is_corner_room INTEGER NOT NULL DEFAULT 0," +
+                    "main_exposure_direction TEXT NOT NULL DEFAULT ''," +
+                    "current_status TEXT NOT NULL DEFAULT '未指定'," +
+                    "is_recruiting INTEGER NOT NULL DEFAULT 0," +
+                    "available_from_month INTEGER," +
+                    "available_from_period TEXT NOT NULL DEFAULT ''," +
+                    "is_immediate_occupancy INTEGER NOT NULL DEFAULT 0," +
+                    "current_status_checked_at TEXT," +
+                    "remarks TEXT NOT NULL DEFAULT ''," +
                     "created_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc'))," +
                     "updated_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc'))," +
                     "FOREIGN KEY (property_id) REFERENCES rent_residentials(property_id) ON DELETE CASCADE," + //?
                     "FOREIGN KEY (property_id) REFERENCES properties(property_id) ON DELETE CASCADE" +
                     " )";
                 tableCmd.ExecuteNonQuery();
+                //EnsureResidentialListingColumns(tableCmd);
 
                 tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS rent_residential_room_pictures (" +
                     "picture_id TEXT NOT NULL PRIMARY KEY," +
@@ -553,6 +569,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
                 tableCmd.Transaction.Commit();
             }
+
             catch (Exception ex)
             {
                 tableCmd.Transaction.Rollback();
@@ -566,6 +583,50 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         }
 
         return res;
+    }
+
+    private static void EnsureResidentialListingColumns(SqliteCommand command)
+    {
+        var existingColumns = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        command.CommandText = "PRAGMA table_info(rent_residential_rooms);";
+        command.Parameters.Clear();
+
+        using (var reader = command.ExecuteReader())
+        {
+            while (reader.Read())
+            {
+                existingColumns.Add(reader.GetString(reader.GetOrdinal("name")));
+            }
+        }
+
+        (string Name, string Definition)[] columns =
+        [
+            ("room_count", "INTEGER NOT NULL DEFAULT 1"),
+            ("room_layout_type", "TEXT NOT NULL DEFAULT 'R'"),
+            ("floor_area", "NUMERIC NOT NULL DEFAULT 0"),
+            ("floor_type", "TEXT NOT NULL DEFAULT '地上'"),
+            ("floor_number", "INTEGER"),
+            ("is_corner_room", "INTEGER NOT NULL DEFAULT 0"),
+            ("main_exposure_direction", "TEXT NOT NULL DEFAULT ''"),
+            ("current_status", "TEXT NOT NULL DEFAULT '未指定'"),
+            ("is_recruiting", "INTEGER NOT NULL DEFAULT 0"),
+            ("available_from_month", "INTEGER"),
+            ("available_from_period", "TEXT NOT NULL DEFAULT ''"),
+            ("is_immediate_occupancy", "INTEGER NOT NULL DEFAULT 0"),
+            ("current_status_checked_at", "TEXT"),
+            ("remarks", "TEXT NOT NULL DEFAULT ''")
+        ];
+
+        foreach (var (name, definition) in columns)
+        {
+            if (existingColumns.Contains(name))
+            {
+                continue;
+            }
+
+            command.CommandText = $"ALTER TABLE rent_residential_rooms ADD COLUMN {name} {definition};";
+            command.ExecuteNonQuery();
+        }
     }
 
     private static void AddColumnsIfNotExist(SqliteConnection conn)
@@ -1434,24 +1495,63 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 {
                     foreach (var unit in building.Rooms)
                     {
-                        // Insert
-                        //var sqlInsertIntoRentLivingRoom = "INSERT INTO rent_residential_rooms (listing_id, property_id, is_property_unit_ownership, name, chinryou) VALUES (@RoomId, @RentId, @isPropertyUnitOwnership, @Name, @Chinryou)";
-                        // Upsert
-                        var sqlUpsertRoom = "INSERT INTO rent_residential_rooms (listing_id, property_id, is_property_unit_ownership, name, chinryou) ";
-                        sqlUpsertRoom += "VALUES (@listing_id, @propertyId, @isPropertyUnitOwnership, @name, @chinryou) ";
-                        sqlUpsertRoom += "ON CONFLICT (listing_id) ";
-                        sqlUpsertRoom += "DO UPDATE SET is_property_unit_ownership = @isPropertyUnitOwnership, name = @name, chinryou = @chinryou";
-
-                        cmd.CommandText = sqlUpsertRoom;
+                        cmd.CommandText = """
+                            INSERT INTO rent_residential_rooms (
+                                listing_id, property_id, is_property_unit_ownership, name, chinryou,
+                                room_count, room_layout_type, floor_area, floor_type, floor_number,
+                                is_corner_room, main_exposure_direction, current_status, is_recruiting,
+                                available_from_month, available_from_period, is_immediate_occupancy,
+                                current_status_checked_at, remarks)
+                            VALUES (
+                                @listing_id, @property_id, @is_property_unit_ownership, @name, @chinryou,
+                                @room_count, @room_layout_type, @floor_area, @floor_type, @floor_number,
+                                @is_corner_room, @main_exposure_direction, @current_status, @is_recruiting,
+                                @available_from_month, @available_from_period, @is_immediate_occupancy,
+                                @current_status_checked_at, @remarks)
+                            ON CONFLICT(listing_id) DO UPDATE SET
+                                is_property_unit_ownership = @is_property_unit_ownership,
+                                name = @name,
+                                chinryou = @chinryou,
+                                room_count = @room_count,
+                                room_layout_type = @room_layout_type,
+                                floor_area = @floor_area,
+                                floor_type = @floor_type,
+                                floor_number = @floor_number,
+                                is_corner_room = @is_corner_room,
+                                main_exposure_direction = @main_exposure_direction,
+                                current_status = @current_status,
+                                is_recruiting = @is_recruiting,
+                                available_from_month = @available_from_month,
+                                available_from_period = @available_from_period,
+                                is_immediate_occupancy = @is_immediate_occupancy,
+                                current_status_checked_at = @current_status_checked_at,
+                                remarks = @remarks,
+                                updated_at = @updated_at;
+                            """;
 
                         // ループなので、前のパラメーターをクリアする。
                         cmd.Parameters.Clear();
 
                         cmd.Parameters.AddWithValue("@listing_id", unit.Id);
-                        cmd.Parameters.AddWithValue("@propertyId", building.Id);
-                        cmd.Parameters.AddWithValue("@isPropertyUnitOwnership", building.IsUnitOwnership ? 1 : 0); // bool to int
+                        cmd.Parameters.AddWithValue("@property_id", building.Id);
+                        cmd.Parameters.AddWithValue("@is_property_unit_ownership", building.IsUnitOwnership ? 1 : 0); // bool to int
                         cmd.Parameters.AddWithValue("@name", unit.Name);
                         cmd.Parameters.AddWithValue("@chinryou", unit.Chinryou);
+                        cmd.Parameters.AddWithValue("@room_count", unit.RoomCount);
+                        cmd.Parameters.AddWithValue("@room_layout_type", unit.RoomLayoutType.GetStorageValue());
+                        cmd.Parameters.AddWithValue("@floor_area", unit.FloorArea);
+                        cmd.Parameters.AddWithValue("@floor_type", unit.FloorType.GetStorageValue());
+                        cmd.Parameters.AddWithValue("@floor_number", (object?)unit.FloorNumber ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("@is_corner_room", unit.IsCornerRoom ? 1 : 0);
+                        cmd.Parameters.AddWithValue("@main_exposure_direction", unit.MainExposureDirection.GetStorageValue());
+                        cmd.Parameters.AddWithValue("@current_status", unit.CurrentStatus.GetStorageValue());
+                        cmd.Parameters.AddWithValue("@is_recruiting", unit.IsRecruiting ? 1 : 0);
+                        cmd.Parameters.AddWithValue("@available_from_month", (object?)unit.AvailableFromMonth ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("@available_from_period", unit.AvailableFromPeriod.GetStorageValue());
+                        cmd.Parameters.AddWithValue("@is_immediate_occupancy", unit.IsImmediateOccupancy ? 1 : 0);
+                        cmd.Parameters.AddWithValue("@current_status_checked_at", ToDatabaseStatusCheckedAt(unit.CurrentStatusCheckedAt));
+                        cmd.Parameters.AddWithValue("@remarks", unit.Remarks ?? string.Empty);
+                        cmd.Parameters.AddWithValue("@updated_at", DateTimeOffset.UtcNow.ToString("s"));
 
                         var r = cmd.ExecuteNonQuery();
                         if (r > 0)
@@ -2100,10 +2200,21 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
         var room = new Models.Rent.Residentials.Listing(listingId, EntityStatus.Saved, propertyId, EntityStatus.Saved, isUnitOwnership, propertyName)
         {
-            
             Chinryou = reader.GetInt32(reader.GetOrdinal("chinryou")),
-            // TODO: more
-
+            RoomCount = Convert.ToInt32(reader["room_count"], CultureInfo.InvariantCulture),
+            RoomLayoutType = ListingOptionExtensions.ParseRoomLayout(Convert.ToString(reader["room_layout_type"], CultureInfo.InvariantCulture)),
+            FloorArea = Convert.ToDecimal(reader["floor_area"], CultureInfo.InvariantCulture),
+            FloorType = ListingOptionExtensions.ParseFloorPosition(Convert.ToString(reader["floor_type"], CultureInfo.InvariantCulture)),
+            FloorNumber = reader.IsDBNull(reader.GetOrdinal("floor_number")) ? null : Convert.ToInt32(reader["floor_number"], CultureInfo.InvariantCulture),
+            IsCornerRoom = Convert.ToInt32(reader["is_corner_room"], CultureInfo.InvariantCulture) != 0,
+            MainExposureDirection = ListingOptionExtensions.ParseExposureDirection(Convert.ToString(reader["main_exposure_direction"], CultureInfo.InvariantCulture)),
+            CurrentStatus = ListingOptionExtensions.ParseCurrentStatus(Convert.ToString(reader["current_status"], CultureInfo.InvariantCulture)),
+            IsRecruiting = Convert.ToInt32(reader["is_recruiting"], CultureInfo.InvariantCulture) != 0,
+            AvailableFromMonth = reader.IsDBNull(reader.GetOrdinal("available_from_month")) ? null : Convert.ToInt32(reader["available_from_month"], CultureInfo.InvariantCulture),
+            AvailableFromPeriod = ListingOptionExtensions.ParseAvailabilityPeriod(Convert.ToString(reader["available_from_period"], CultureInfo.InvariantCulture)),
+            IsImmediateOccupancy = Convert.ToInt32(reader["is_immediate_occupancy"], CultureInfo.InvariantCulture) != 0,
+            CurrentStatusCheckedAt = ParseStatusCheckedAt(reader["current_status_checked_at"]),
+            Remarks = Convert.ToString(reader["remarks"], CultureInfo.InvariantCulture) ?? string.Empty
         };
         // try
         room.SetName(reader.GetString(reader.GetOrdinal("name")) ?? string.Empty);
@@ -2112,6 +2223,29 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         //Debug.WriteLine($"Room ID: {room.Id}, Room Name: {room.RoomName}");
 
         return room;
+    }
+
+    private static object ToDatabaseStatusCheckedAt(DateTimeOffset? value)
+    {
+        return value is DateTimeOffset checkedAt
+            ? checkedAt.ToString("O", CultureInfo.InvariantCulture)
+            : DBNull.Value;
+    }
+
+    private static DateTimeOffset? ParseStatusCheckedAt(object value)
+    {
+        var text = Convert.ToString(value, CultureInfo.InvariantCulture);
+        if (DateTimeOffset.TryParseExact(text, "O", CultureInfo.InvariantCulture, DateTimeStyles.None, out var timestamp))
+        {
+            return timestamp;
+        }
+
+        if (DateOnly.TryParseExact(text, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var date))
+        {
+            return new DateTimeOffset(date.ToDateTime(TimeOnly.MinValue));
+        }
+
+        return null;
     }
 
     private static void SetRentResidentialListingChildValues(SqliteCommand cmd, Models.Rent.Residentials.Listing room)
@@ -2367,18 +2501,59 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 cmd.Parameters.Clear();
 
                 // Upsert into rent_residential_rooms
-                var sqlInsertIntoRentLivingRoom = "INSERT INTO rent_residential_rooms (listing_id, property_id, is_property_unit_ownership, name, chinryou) VALUES (@listing_id, @property_id, @is_property_unit_ownership, @name, @chinryou) ";
-                sqlInsertIntoRentLivingRoom += "ON CONFLICT(listing_id) ";
-                //sqlInsertIntoRentLivingRoom += string.Format("DO UPDATE SET name = '{0}'", EscapeSingleQuote(room.RoomName));
-                sqlInsertIntoRentLivingRoom += "DO UPDATE SET is_property_unit_ownership = @is_property_unit_ownership, name = @name, chinryou = @chinryou, updated_at = @updated_at";
-
-                cmd.CommandText = sqlInsertIntoRentLivingRoom;
+                cmd.CommandText = """
+                    INSERT INTO rent_residential_rooms (
+                        listing_id, property_id, is_property_unit_ownership, name, chinryou,
+                        room_count, room_layout_type, floor_area, floor_type, floor_number,
+                        is_corner_room, main_exposure_direction, current_status, is_recruiting,
+                        available_from_month, available_from_period, is_immediate_occupancy,
+                        current_status_checked_at, remarks)
+                    VALUES (
+                        @listing_id, @property_id, @is_property_unit_ownership, @name, @chinryou,
+                        @room_count, @room_layout_type, @floor_area, @floor_type, @floor_number,
+                        @is_corner_room, @main_exposure_direction, @current_status, @is_recruiting,
+                        @available_from_month, @available_from_period, @is_immediate_occupancy,
+                        @current_status_checked_at, @remarks)
+                    ON CONFLICT(listing_id) DO UPDATE SET
+                        is_property_unit_ownership = @is_property_unit_ownership,
+                        name = @name,
+                        chinryou = @chinryou,
+                        room_count = @room_count,
+                        room_layout_type = @room_layout_type,
+                        floor_area = @floor_area,
+                        floor_type = @floor_type,
+                        floor_number = @floor_number,
+                        is_corner_room = @is_corner_room,
+                        main_exposure_direction = @main_exposure_direction,
+                        current_status = @current_status,
+                        is_recruiting = @is_recruiting,
+                        available_from_month = @available_from_month,
+                        available_from_period = @available_from_period,
+                        is_immediate_occupancy = @is_immediate_occupancy,
+                        current_status_checked_at = @current_status_checked_at,
+                        remarks = @remarks,
+                        updated_at = @updated_at;
+                    """;
 
                 cmd.Parameters.AddWithValue("@listing_id", room.Id);
                 cmd.Parameters.AddWithValue("@property_id", rentId);
                 cmd.Parameters.AddWithValue("@is_property_unit_ownership", room.IsPropertyUnitOwnership ? 1 : 0); // bool to int
                 cmd.Parameters.AddWithValue("@name", room.Name);
                 cmd.Parameters.AddWithValue("@chinryou", room.Chinryou);
+                cmd.Parameters.AddWithValue("@room_count", room.RoomCount);
+                cmd.Parameters.AddWithValue("@room_layout_type", room.RoomLayoutType.GetStorageValue());
+                cmd.Parameters.AddWithValue("@floor_area", room.FloorArea);
+                cmd.Parameters.AddWithValue("@floor_type", room.FloorType.GetStorageValue());
+                cmd.Parameters.AddWithValue("@floor_number", (object?)room.FloorNumber ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@is_corner_room", room.IsCornerRoom ? 1 : 0);
+                cmd.Parameters.AddWithValue("@main_exposure_direction", room.MainExposureDirection.GetStorageValue());
+                cmd.Parameters.AddWithValue("@current_status", room.CurrentStatus.GetStorageValue());
+                cmd.Parameters.AddWithValue("@is_recruiting", room.IsRecruiting ? 1 : 0);
+                cmd.Parameters.AddWithValue("@available_from_month", (object?)room.AvailableFromMonth ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@available_from_period", room.AvailableFromPeriod.GetStorageValue());
+                cmd.Parameters.AddWithValue("@is_immediate_occupancy", room.IsImmediateOccupancy ? 1 : 0);
+                cmd.Parameters.AddWithValue("@current_status_checked_at", ToDatabaseStatusCheckedAt(room.CurrentStatusCheckedAt));
+                cmd.Parameters.AddWithValue("@remarks", room.Remarks ?? string.Empty);
                 cmd.Parameters.AddWithValue("@updated_at", DateTimeOffset.UtcNow.ToString("s"));
 
                 var result = cmd.ExecuteNonQuery();
