@@ -10,6 +10,7 @@ using Windows.ApplicationModel;
 using ZumenSearch.Helpers;
 using ZumenSearch.Models;
 using ZumenSearch.Models.Messenger;
+using ZumenSearch.Models.SearchResult;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.Services.Extensions.AbstractFactory;
 
@@ -243,7 +244,7 @@ public partial class MainViewModel : ObservableRecipient,
 
     #region == RecentProperties ==
 
-    public ObservableCollection<Models.PropertySearchResultItem> RecentProperties
+    public ObservableCollection<Models.SearchResult.PropertySearchResultItem> RecentProperties
     {
         get; set
         {
@@ -265,7 +266,7 @@ public partial class MainViewModel : ObservableRecipient,
     [ObservableProperty]
     public partial string SearchQuery { get; set; } = string.Empty;
 
-    public ObservableCollection<Models.PropertySearchResultItem> PropertySearchResult
+    public ObservableCollection<Models.SearchResult.PropertySearchResultItem> PropertySearchResult
     {
         get; set
         {
@@ -276,7 +277,7 @@ public partial class MainViewModel : ObservableRecipient,
         }
     } = [];
 
-    public ObservableCollection<Models.ListingSearchResultItem> RentResidentialListingSearchResult
+    public ObservableCollection<Models.SearchResult.ListingSearchResultItem> RentResidentialListingSearchResult
     {
         get; set
         {
@@ -287,7 +288,7 @@ public partial class MainViewModel : ObservableRecipient,
         }
     } = [];
 
-    public ObservableCollection<Models.ListingSearchResultItem> RentCommercialListingSearchResult
+    public ObservableCollection<Models.SearchResult.ListingSearchResultItem> RentCommercialListingSearchResult
     {
         get; set
         {
@@ -298,7 +299,7 @@ public partial class MainViewModel : ObservableRecipient,
         }
     } = [];
 
-    public ObservableCollection<Models.PersonSearchResultItem> RentLessorSearchResult
+    public ObservableCollection<Models.SearchResult.PersonSearchResultItem> RentLessorSearchResult
     {
         get; set
         {
@@ -309,7 +310,7 @@ public partial class MainViewModel : ObservableRecipient,
         }
     } = [];
 
-    public ObservableCollection<Models.PersonSearchResultItem> BrokerSearchResult
+    public ObservableCollection<Models.SearchResult.PersonSearchResultItem> BrokerSearchResult
     {
         get; set
         {
@@ -320,7 +321,7 @@ public partial class MainViewModel : ObservableRecipient,
         }
     } = [];
 
-    public ObservableCollection<Models.PropertySearchResultItem> SaleResidentialSearchResult
+    public ObservableCollection<Models.SearchResult.PropertySearchResultItem> SaleResidentialSearchResult
     {
         get;
         private set
@@ -723,7 +724,7 @@ public partial class MainViewModel : ObservableRecipient,
 
     // 物件編集
     [RelayCommand(CanExecute = nameof(EditPropertyCanExecute))]
-    private async Task EditProperty(Models.PropertySearchResultItem? selected)
+    private async Task EditProperty(Models.SearchResult.PropertySearchResultItem? selected)
     {
         if (selected is null)
         {
@@ -738,34 +739,34 @@ public partial class MainViewModel : ObservableRecipient,
             return;
         }
 
-        if (selected.PropertyContextType == Models.Enums.PropertyContextType.RentResidential)
+        if (selected.PropertyContextType == PropertyContextType.RentResidential)
         {
             await EditRentResidentialFromId(propertyId);
         }
-        else if (selected.PropertyContextType == Models.Enums.PropertyContextType.RentCommercial)
+        else if (selected.PropertyContextType == PropertyContextType.RentCommercial)
         {
             await EditRentCommercialFromId(propertyId);
         }
-        else if (selected.PropertyContextType == Models.Enums.PropertyContextType.RentParking)
+        else if (selected.PropertyContextType == PropertyContextType.RentParking)
         {
             Debug.WriteLine("EditPropertiesCommand not yet implemented.");
         }
-        else if (selected.PropertyContextType == Models.Enums.PropertyContextType.SaleResidential)
+        else if (selected.PropertyContextType == PropertyContextType.SaleResidential)
         {
             Debug.WriteLine("EditPropertiesCommand not yet implemented.");
         }
-        else if (selected.PropertyContextType == Models.Enums.PropertyContextType.SaleCommercial)
+        else if (selected.PropertyContextType == PropertyContextType.SaleCommercial)
         {
             Debug.WriteLine("EditPropertiesCommand not yet implemented.");
         }
-        else if (selected.PropertyContextType == Models.Enums.PropertyContextType.SaleLand)
+        else if (selected.PropertyContextType == PropertyContextType.SaleLand)
         {
             Debug.WriteLine("EditPropertiesCommand not yet implemented.");
         }
 
         // TODO lessor and broker
     }
-    private static bool EditPropertyCanExecute(Models.PropertySearchResultItem? selected)
+    private static bool EditPropertyCanExecute(Models.SearchResult.PropertySearchResultItem? selected)
     {
         if (selected is null)
         //if (string.IsNullOrEmpty(rentId))
@@ -778,7 +779,7 @@ public partial class MainViewModel : ObservableRecipient,
 
     // 物件削除
     [RelayCommand(CanExecute = nameof(DeletePropertyCanExecute))]
-    private async Task DeleteProperty(Models.PropertySearchResultItem? selected)
+    private async Task DeleteProperty(Models.SearchResult.PropertySearchResultItem? selected)
     {
         if (selected is null)
         {
@@ -794,34 +795,34 @@ public partial class MainViewModel : ObservableRecipient,
             return;
         }
 
-        if (selected.PropertyContextType == Models.Enums.PropertyContextType.RentResidential)
+        if (selected.PropertyContextType == PropertyContextType.RentResidential)
         {
             await DeleteRentResidential(selected);
         }
-        else if (selected.PropertyContextType == Models.Enums.PropertyContextType.RentCommercial)
+        else if (selected.PropertyContextType == PropertyContextType.RentCommercial)
         {
             await DeleteRentCommercial(selected);
         }
-        else if (selected.PropertyContextType == Models.Enums.PropertyContextType.RentParking)
+        else if (selected.PropertyContextType == PropertyContextType.RentParking)
         {
             Debug.WriteLine("DeletePropertyCommand not yet implemented.");
         }
-        else if (selected.PropertyContextType == Models.Enums.PropertyContextType.SaleResidential)
+        else if (selected.PropertyContextType == PropertyContextType.SaleResidential)
         {
             Debug.WriteLine("DeletePropertyCommand not yet implemented.");
         }
-        else if (selected.PropertyContextType == Models.Enums.PropertyContextType.SaleCommercial)
+        else if (selected.PropertyContextType == PropertyContextType.SaleCommercial)
         {
             Debug.WriteLine("DeletePropertyCommand not yet implemented.");
         }
-        else if (selected.PropertyContextType == Models.Enums.PropertyContextType.SaleLand)
+        else if (selected.PropertyContextType == PropertyContextType.SaleLand)
         {
             Debug.WriteLine("DeletePropertyCommand not yet implemented.");
         }
 
         // TODO lessor and broker
     }
-    private static bool DeletePropertyCanExecute(Models.PropertySearchResultItem? selected)
+    private static bool DeletePropertyCanExecute(Models.SearchResult.PropertySearchResultItem? selected)
     {
         if (selected is null)
         //if (string.IsNullOrEmpty(rentId))
@@ -843,7 +844,7 @@ public partial class MainViewModel : ObservableRecipient,
     private void AddNewRentResidential()
     {
         var newId = Guid.CreateVersion7().ToString("N");
-        var shell = _shellRentResidentialPropertyFactory.Create(new Models.Rent.Residentials.Property(newId, Models.Enums.EntityStatus.New));
+        var shell = _shellRentResidentialPropertyFactory.Create(new Models.Rent.Residentials.Property(newId, EntityStatus.New));
 
         RentResidentialEditorList.Add(shell.Window);
 
@@ -869,7 +870,7 @@ public partial class MainViewModel : ObservableRecipient,
 
     // 建物編集（検索結果から）
     [RelayCommand(CanExecute = nameof(EditRentResidentialCanExecute))]
-    private async Task EditRentResidential(Models.PropertySearchResultItem? selected) 
+    private async Task EditRentResidential(Models.SearchResult.PropertySearchResultItem? selected) 
     {
         var propertyId = selected?.Id;
 
@@ -881,7 +882,7 @@ public partial class MainViewModel : ObservableRecipient,
 
         await EditRentResidentialFromId(propertyId);
     }
-    private static bool EditRentResidentialCanExecute(Models.PropertySearchResultItem? selected)
+    private static bool EditRentResidentialCanExecute(Models.SearchResult.PropertySearchResultItem? selected)
     {
         if (selected is null)
         //if (string.IsNullOrEmpty(rentId))
@@ -1042,7 +1043,7 @@ public partial class MainViewModel : ObservableRecipient,
             {
                 foreach (var item in res.PropertySearchResult)
                 {
-                    var autoSuggest = new Models.AutoSuggestItem
+                    var autoSuggest = new Models.SearchResult.AutoSuggestItem
                     {
                         Name = item.Name,
                         Id = item.Id
@@ -1054,7 +1055,7 @@ public partial class MainViewModel : ObservableRecipient,
             {
                 // TODO:
                 //Debug.WriteLine("result 0");
-                var autoSuggest = new Models.AutoSuggestItem
+                var autoSuggest = new Models.SearchResult.AutoSuggestItem
                 {
                     Name = "Result 0",
                     Id = ""
@@ -1075,7 +1076,7 @@ public partial class MainViewModel : ObservableRecipient,
 
     // 物件削除
     [RelayCommand(CanExecute = nameof(DeleteRentResidentialCanExecute))]
-    private async Task DeleteRentResidential(Models.PropertySearchResultItem? selected)
+    private async Task DeleteRentResidential(Models.SearchResult.PropertySearchResultItem? selected)
     {
         if (selected is null)
         {
@@ -1189,7 +1190,7 @@ public partial class MainViewModel : ObservableRecipient,
             }
         }
     }
-    private static bool DeleteRentResidentialCanExecute(Models.PropertySearchResultItem? selected)
+    private static bool DeleteRentResidentialCanExecute(Models.SearchResult.PropertySearchResultItem? selected)
     {
         if (selected is null)
         {
@@ -1238,7 +1239,7 @@ public partial class MainViewModel : ObservableRecipient,
 
     // 部屋編集
     [RelayCommand(CanExecute = nameof(EditRentResidentialRoomCanExecute))]
-    private async Task EditRentResidentialRoom(Models.ListingSearchResultItem? selected)
+    private async Task EditRentResidentialRoom(Models.SearchResult.ListingSearchResultItem? selected)
     {
         if (selected is null)
         {
@@ -1345,7 +1346,7 @@ public partial class MainViewModel : ObservableRecipient,
 
         editorWindow.AppWindow.MoveInZOrderAtTop();
     }
-    private static bool EditRentResidentialRoomCanExecute(Models.ListingSearchResultItem? selected)
+    private static bool EditRentResidentialRoomCanExecute(Models.SearchResult.ListingSearchResultItem? selected)
     {
         if (selected is null)
         {
@@ -1357,7 +1358,7 @@ public partial class MainViewModel : ObservableRecipient,
 
     // 部屋削除
     [RelayCommand(CanExecute = nameof(DeleteRentResidentialRoomCanExecute))]
-    private async Task DeleteRentResidentialRoom(Models.ListingSearchResultItem? selected)
+    private async Task DeleteRentResidentialRoom(Models.SearchResult.ListingSearchResultItem? selected)
     {
         if (selected is null)
         {
@@ -1463,7 +1464,7 @@ public partial class MainViewModel : ObservableRecipient,
             }
         }
     }
-    private static bool DeleteRentResidentialRoomCanExecute(Models.ListingSearchResultItem? selected)
+    private static bool DeleteRentResidentialRoomCanExecute(Models.SearchResult.ListingSearchResultItem? selected)
     {
         if (selected is null)
         {
@@ -1483,7 +1484,7 @@ public partial class MainViewModel : ObservableRecipient,
     {
         var property = new Models.Rent.Commercials.Property(
             Guid.CreateVersion7().ToString("N"),
-            Models.Enums.EntityStatus.New);
+            EntityStatus.New);
 
         var shell = _shellRentCommercialPropertyFactory.Create(property);
 
@@ -1508,7 +1509,7 @@ public partial class MainViewModel : ObservableRecipient,
 
     // 建物編集（検索結果から）
     [RelayCommand(CanExecute = nameof(EditRentCommercialCanExecute))]
-    private async Task EditRentCommercial(Models.ListingSearchResultItem? selected)
+    private async Task EditRentCommercial(Models.SearchResult.ListingSearchResultItem? selected)
     {
         var propertyId = selected?.Id;
 
@@ -1520,7 +1521,7 @@ public partial class MainViewModel : ObservableRecipient,
 
         await EditRentCommercialFromId(propertyId);
     }
-    private static bool EditRentCommercialCanExecute(Models.ListingSearchResultItem? selected)
+    private static bool EditRentCommercialCanExecute(Models.SearchResult.ListingSearchResultItem? selected)
     {
         return selected is not null &&
                !string.IsNullOrWhiteSpace(selected.Id);
@@ -1633,7 +1634,7 @@ public partial class MainViewModel : ObservableRecipient,
 
     // 建物削除
     [RelayCommand(CanExecute = nameof(DeleteRentCommercialCanExecute))]
-    private async Task DeleteRentCommercial(Models.PropertySearchResultItem? selected)
+    private async Task DeleteRentCommercial(Models.SearchResult.PropertySearchResultItem? selected)
     {
         if (selected is null || string.IsNullOrWhiteSpace(selected.Id))
         {
@@ -1725,7 +1726,7 @@ public partial class MainViewModel : ObservableRecipient,
         }
 
     }
-    private static bool DeleteRentCommercialCanExecute(Models.PropertySearchResultItem? selected)
+    private static bool DeleteRentCommercialCanExecute(Models.SearchResult.PropertySearchResultItem? selected)
     {
         return selected is not null &&
                !string.IsNullOrWhiteSpace(selected.Id);
@@ -1769,7 +1770,7 @@ public partial class MainViewModel : ObservableRecipient,
 
     // 区画編集
     [RelayCommand(CanExecute = nameof(EditRentCommercialListingCanExecute))]
-    private async Task EditRentCommercialListing(Models.ListingSearchResultItem? selected)
+    private async Task EditRentCommercialListing(Models.SearchResult.ListingSearchResultItem? selected)
     {
         if (selected is null)
         {
@@ -1876,7 +1877,7 @@ public partial class MainViewModel : ObservableRecipient,
 
         editorWindow.AppWindow.MoveInZOrderAtTop();
     }
-    private static bool EditRentCommercialListingCanExecute(Models.ListingSearchResultItem? selected)
+    private static bool EditRentCommercialListingCanExecute(Models.SearchResult.ListingSearchResultItem? selected)
     {
         if (selected is null)
         {
@@ -1888,7 +1889,7 @@ public partial class MainViewModel : ObservableRecipient,
 
     // 区画削除
     [RelayCommand(CanExecute = nameof(DeleteRentCommercialListingCanExecute))]
-    private async Task DeleteRentCommercialListing(Models.ListingSearchResultItem? selected)
+    private async Task DeleteRentCommercialListing(Models.SearchResult.ListingSearchResultItem? selected)
     {
         if (selected is null || string.IsNullOrWhiteSpace(selected.Id))
         {
@@ -1973,7 +1974,7 @@ public partial class MainViewModel : ObservableRecipient,
         }
     }
 
-    private static bool DeleteRentCommercialListingCanExecute(Models.ListingSearchResultItem? selected)
+    private static bool DeleteRentCommercialListingCanExecute(Models.SearchResult.ListingSearchResultItem? selected)
     {
         return selected is not null &&
                !string.IsNullOrWhiteSpace(selected.Id);
@@ -2073,7 +2074,7 @@ public partial class MainViewModel : ObservableRecipient,
     private void AddNewRentLessor()
     {
         var newId = Guid.CreateVersion7().ToString("N");
-        var shell = _shellRentLessorFactory.Create(new Models.Person.NaturalPerson(newId, Models.Enums.EntityStatus.New));
+        var shell = _shellRentLessorFactory.Create(new Models.Person.NaturalPerson(newId, EntityStatus.New));
         
         LessorEditorList.Add(shell.Window);
 
@@ -2098,7 +2099,7 @@ public partial class MainViewModel : ObservableRecipient,
     }
 
     [RelayCommand(CanExecute = nameof(EditRentLessorCanExecute))]
-    public async Task EditRentLessor(Models.Base.PersonBase selected) //Models.PersonSearchResultItem
+    public async Task EditRentLessor(Models.Base.PersonBase selected) //Models.SearchResult.PersonSearchResultItem
     {
         var lessorId = selected?.Id;
 
@@ -2317,7 +2318,7 @@ public partial class MainViewModel : ObservableRecipient,
     {
         var property = new Models.Sale.Residentials.Property(
             Guid.CreateVersion7().ToString("N"),
-            Models.Enums.EntityStatus.New);
+            EntityStatus.New);
 
         var shell =
             _shellSaleResidentialPropertyFactory.Create(property);
@@ -2393,7 +2394,7 @@ public partial class MainViewModel : ObservableRecipient,
 
     [RelayCommand(CanExecute = nameof(EditSaleResidentialCanExecute))]
     private async Task EditSaleResidential(
-    Models.PropertySearchResultItem? selected)
+    Models.SearchResult.PropertySearchResultItem? selected)
     {
         if (selected is null || string.IsNullOrWhiteSpace(selected.Id))
         {
@@ -2450,7 +2451,7 @@ public partial class MainViewModel : ObservableRecipient,
         shell.Window.AppWindow.MoveInZOrderAtTop();
     }
     private static bool EditSaleResidentialCanExecute(
-        Models.PropertySearchResultItem? selected)
+        Models.SearchResult.PropertySearchResultItem? selected)
     {
         return selected is not null &&
                !string.IsNullOrWhiteSpace(selected.Id);
@@ -2458,7 +2459,7 @@ public partial class MainViewModel : ObservableRecipient,
 
     [RelayCommand(CanExecute = nameof(DeleteSaleResidentialCanExecute))]
     private async Task DeleteSaleResidential(
-    Models.PropertySearchResultItem? selected)
+    Models.SearchResult.PropertySearchResultItem? selected)
     {
         if (selected is null || string.IsNullOrWhiteSpace(selected.Id))
         {
@@ -2494,7 +2495,7 @@ public partial class MainViewModel : ObservableRecipient,
     }
 
     private static bool DeleteSaleResidentialCanExecute(
-        Models.PropertySearchResultItem? selected)
+        Models.SearchResult.PropertySearchResultItem? selected)
     {
         return selected is not null &&
                !string.IsNullOrWhiteSpace(selected.Id);
@@ -2509,7 +2510,7 @@ public partial class MainViewModel : ObservableRecipient,
     private void AddNewBroker()
     {
         var newId = Guid.CreateVersion7().ToString("N");
-        var shell = _shellBrokerFactory.Create(new Models.Person.LegalPerson(newId, Models.Enums.EntityStatus.New));
+        var shell = _shellBrokerFactory.Create(new Models.Person.LegalPerson(newId, EntityStatus.New));
 
         BrokerEditorList.Add(shell.Window);
 

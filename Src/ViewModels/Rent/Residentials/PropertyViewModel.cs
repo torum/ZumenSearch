@@ -12,7 +12,6 @@ using Windows.Storage;
 using Windows.Storage.Streams;
 using Windows.System;
 using ZumenSearch.Models;
-using ZumenSearch.Models.Enums;
 using ZumenSearch.Models.Location;
 using ZumenSearch.Models.Messenger;
 using ZumenSearch.Models.Rent.Residentials;

@@ -1,6 +1,4 @@
-﻿using ZumenSearch.Models.Enums;
-
-#pragma warning disable IDE0079 // Remove unnecessary suppression
+﻿#pragma warning disable IDE0079 // Remove unnecessary suppression
 #pragma warning disable IDE0290 // Use primary constructor
 
 namespace ZumenSearch.Models.Base;

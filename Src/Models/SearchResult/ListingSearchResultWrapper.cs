@@ -1,10 +1,10 @@
 ﻿using System.Collections.ObjectModel;
 using ZumenSearch.Models.Base;
 
-namespace ZumenSearch.Models;
+namespace ZumenSearch.Models.SearchResult;
 
 // Common Listings SearchResult
 public sealed class ListingSearchResultWrapper : ResultWrapperBase
 {
-    public ObservableCollection<Models.ListingSearchResultItem> ListingSearchResult { get; set; } = [];
+    public ObservableCollection<ListingSearchResultItem> ListingSearchResult { get; set; } = [];
 }

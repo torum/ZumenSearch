@@ -5,9 +5,8 @@ using System.Xml.Linq;
 using ZumenSearch.Helpers;
 using ZumenSearch.Models;
 using ZumenSearch.Models.Base;
-using ZumenSearch.Models.Enums;
 using ZumenSearch.Models.Location;
-using ZumenSearch.Models.Rent.Residentials;
+using ZumenSearch.Models.SearchResult;
 using ZumenSearch.Services.Contracts;
 
 namespace ZumenSearch.Services;
@@ -946,7 +945,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 var kind = reader.GetString(reader.GetOrdinal("property_kind")) ?? string.Empty;
                 if (!string.IsNullOrEmpty(kind))
                 {
-                    if (Enum.TryParse<Models.Enums.PropertyContextType>(kind, out var parsedKind))
+                    if (Enum.TryParse<PropertyContextType>(kind, out var parsedKind))
                     {
                         enumKind = parsedKind;
                     }
@@ -956,7 +955,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     }
                 }
 
-                var item = new Models.PropertySearchResultItem(id, enumKind);
+                var item = new Models.SearchResult.PropertySearchResultItem(id, enumKind);
 
                 var name = reader.GetString(reader.GetOrdinal("name")) ?? string.Empty;//Convert.ToString(reader["name"]) ?? "";
                 item.SetName(name);
@@ -1027,13 +1026,13 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 var kind = reader.GetString(reader.GetOrdinal("property_kind")) ?? string.Empty;
                 if (!string.IsNullOrEmpty(kind))
                 {
-                    if (Enum.TryParse<Models.Enums.PropertyContextType>(kind, out var parsedKind))
+                    if (Enum.TryParse<PropertyContextType>(kind, out var parsedKind))
                     {
                         enumKind = parsedKind;
                     }
                 }
 
-                var item = new Models.PropertySearchResultItem(s, enumKind);
+                var item = new Models.SearchResult.PropertySearchResultItem(s, enumKind);
                 // try...
                 item.SetName(reader.GetString(reader.GetOrdinal("name")) ?? string.Empty);
 
@@ -1254,7 +1253,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                         if (r > 0)
                         {
                             //pic.IsNew = false;
-                            pic.SetStatus(Models.Enums.EntityStatus.Saved);
+                            pic.SetStatus(EntityStatus.Saved);
                             pic.SetIsModified(false);
                         }
                     }
@@ -1321,7 +1320,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                         if (r > 0)
                         {
                             //pic.IsNew = false;
-                            pic.SetStatus(Models.Enums.EntityStatus.Saved);
+                            pic.SetStatus(EntityStatus.Saved);
                             pic.SetIsModified(false);
                         }
                     }
@@ -1501,7 +1500,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                         cmd.Parameters.AddWithValue("@is_property_unit_ownership", building.IsUnitOwnership ? 1 : 0); // bool to int
                         cmd.Parameters.AddWithValue("@name", unit.Name);
                         cmd.Parameters.AddWithValue("@chinryou", unit.Chinryou);
-                        cmd.Parameters.AddWithValue("@room_count", unit.RoomCount);
+                        //cmd.Parameters.AddWithValue("@room_count", unit.RoomCount);
                         /*
                         cmd.Parameters.AddWithValue("@floor_plan_type", unit.FloorPlanType.GetStorageValue());
                         cmd.Parameters.AddWithValue("@floor_plan_extra_type", unit.FloorPlanExtraType.GetStorageValue());
@@ -1560,7 +1559,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                                 if (result > 0)
                                 {
                                     //pic.IsNew = false;
-                                    pic.SetStatus(Models.Enums.EntityStatus.Saved);
+                                    pic.SetStatus(EntityStatus.Saved);
                                     pic.SetIsModified(false);
                                 }
                             }
@@ -1619,7 +1618,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                                 if (result > 0)
                                 {
                                     //pdf.IsNew = false;
-                                    pdf.SetStatus(Models.Enums.EntityStatus.Saved);
+                                    pdf.SetStatus(EntityStatus.Saved);
                                     pdf.SetIsModified(false);
                                 }
                             }
@@ -2170,7 +2169,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         var room = new Models.Rent.Residentials.Listing(listingId, EntityStatus.Saved, propertyId, EntityStatus.Saved, isUnitOwnership, propertyName)
         {
             Chinryou = reader.GetInt32(reader.GetOrdinal("chinryou")),
-            RoomCount = Convert.ToInt32(reader["room_count"], CultureInfo.InvariantCulture),
+            //RoomCount = Convert.ToInt32(reader["room_count"], CultureInfo.InvariantCulture),
             /*
             FloorPlanType = legacyExtraType != FloorPlanExtraType.Unspecified
                 ? FloorPlanType.OneR
@@ -2494,7 +2493,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 cmd.Parameters.AddWithValue("@is_property_unit_ownership", room.IsPropertyUnitOwnership ? 1 : 0); // bool to int
                 cmd.Parameters.AddWithValue("@name", room.Name);
                 cmd.Parameters.AddWithValue("@chinryou", room.Chinryou);
-                cmd.Parameters.AddWithValue("@room_count", room.RoomCount);
+                //cmd.Parameters.AddWithValue("@room_count", room.RoomCount);
                 /*
                 cmd.Parameters.AddWithValue("@floor_plan_type", room.FloorPlanType.GetStorageValue());
                 cmd.Parameters.AddWithValue("@floor_plan_extra_type", room.FloorPlanExtraType.GetStorageValue());
@@ -2566,7 +2565,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                             if (result > 0)
                             {
                                 //pic.IsNew = false;
-                                pic.SetStatus(Models.Enums.EntityStatus.Saved);
+                                pic.SetStatus(EntityStatus.Saved);
                                 pic.SetIsModified(false);
                             }
                         }
@@ -2634,7 +2633,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                             if (result > 0)
                             {
                                 //pdf.IsNew = false;
-                                pdf.SetStatus(Models.Enums.EntityStatus.Saved);
+                                pdf.SetStatus(EntityStatus.Saved);
                                 pdf.SetIsModified(false);
                             }
                         }
@@ -2805,7 +2804,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     continue;
                 }
 
-                var unit = new Models.ListingSearchResultItem(rid, eid, PropertyContextType.RentResidential);
+                var unit = new Models.SearchResult.ListingSearchResultItem(rid, eid, PropertyContextType.RentResidential);
 
                 var s = Convert.ToString(reader["roomName"], CultureInfo.InvariantCulture) ?? "";
                 unit.SetName(s);
@@ -3377,14 +3376,14 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             foreach (var picture in building.Pictures)
             {
                 //picture.IsNew = false;
-                picture.SetStatus(Models.Enums.EntityStatus.Saved);
+                picture.SetStatus(EntityStatus.Saved);
                 picture.SetIsModified(false);
             }
 
             foreach (var pdf in building.Pdfs)
             {
                 //pdf.IsNew = false;
-                pdf.SetStatus(Models.Enums.EntityStatus.Saved);
+                pdf.SetStatus(EntityStatus.Saved);
                 pdf.SetIsModified(false);
             }
 
@@ -4263,7 +4262,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     continue;
                 }
 
-                var item = new Models.ListingSearchResultItem(
+                var item = new Models.SearchResult.ListingSearchResultItem(
                     listingId,
                     propertyId,
                     PropertyContextType.RentCommercial)
@@ -4628,11 +4627,11 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     continue;
                 }
 
-                Models.Enums.PersonKindType? enumKind = null;
+                Models.Person.PersonKindType? enumKind = null;
                 var kind = reader.GetString(reader.GetOrdinal("person_kind")) ?? string.Empty;
                 if (!string.IsNullOrEmpty(kind))
                 {
-                    if (Enum.TryParse<Models.Enums.PersonKindType>(kind, out var parsedKind))
+                    if (Enum.TryParse<Models.Person.PersonKindType>(kind, out var parsedKind))
                     {
                         enumKind = parsedKind;
                     }
@@ -4644,14 +4643,14 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     continue;
                 }
 
-                Models.PersonSearchResultItem item;
-                if (enumKind == Models.Enums.PersonKindType.Natural)
+                Models.SearchResult.PersonSearchResultItem item;
+                if (enumKind == Models.Person.PersonKindType.Natural)
                 {
-                    item = new Models.PersonSearchResultItem(s, Models.Enums.PersonKindType.Natural);
+                    item = new Models.SearchResult.PersonSearchResultItem(s, Models.Person.PersonKindType.Natural);
                 }
-                else if (enumKind == Models.Enums.PersonKindType.Legal)
+                else if (enumKind == Models.Person.PersonKindType.Legal)
                 {
-                    item = new Models.PersonSearchResultItem(s, Models.Enums.PersonKindType.Legal);
+                    item = new Models.SearchResult.PersonSearchResultItem(s, Models.Person.PersonKindType.Legal);
                 }
                 else
                 {
@@ -4754,11 +4753,11 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
         Models.Base.PersonBase? person = null;
 
-        Models.Enums.PersonKindType? enumKind = null;
+        Models.Person.PersonKindType? enumKind = null;
         var kind = reader.GetString(reader.GetOrdinal("person_kind")) ?? string.Empty;
         if (!string.IsNullOrEmpty(kind))
         {
-            if (Enum.TryParse<Models.Enums.PersonKindType>(kind, out var parsedKind))
+            if (Enum.TryParse<Models.Person.PersonKindType>(kind, out var parsedKind))
             {
                 enumKind = parsedKind;
             }
@@ -4770,11 +4769,11 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             return null;
         }
 
-        if (enumKind == Models.Enums.PersonKindType.Natural)
+        if (enumKind == Models.Person.PersonKindType.Natural)
         {
             person = new Models.Person.NaturalPerson(personId, EntityStatus.Saved);
         }
-        else if (enumKind == Models.Enums.PersonKindType.Legal)
+        else if (enumKind == Models.Person.PersonKindType.Legal)
         {
             person = new Models.Person.LegalPerson(personId, EntityStatus.Saved);
         }
@@ -5134,7 +5133,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     continue;
                 }
 
-                var item = new Models.PropertySearchResultItem(
+                var item = new Models.SearchResult.PropertySearchResultItem(
                     propertyId,
                     PropertyContextType.SaleResidential)
                 {
@@ -5524,7 +5523,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     continue;
                 }
 
-                var item = new Models.ListingSearchResultItem(
+                var item = new Models.SearchResult.ListingSearchResultItem(
                     listingId,
                     propertyId,
                     PropertyContextType.SaleResidential)
@@ -5886,15 +5885,15 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 var personKindText =
                     Convert.ToString(reader["person_kind"], CultureInfo.InvariantCulture) ?? string.Empty;
 
-                if (!Enum.TryParse<Models.Enums.PersonKindType>(
+                if (!Enum.TryParse<Models.Person.PersonKindType>(
                         personKindText,
                         out var personKind) ||
-                    personKind == Models.Enums.PersonKindType.Undetermined)
+                    personKind == Models.Person.PersonKindType.Undetermined)
                 {
                     continue;
                 }
 
-                var item = new Models.PersonSearchResultItem(
+                var item = new Models.SearchResult.PersonSearchResultItem(
                     brokerId,
                     personKind)
                 {

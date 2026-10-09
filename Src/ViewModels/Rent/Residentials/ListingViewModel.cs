@@ -8,7 +8,6 @@ using Windows.Data.Pdf;
 using Windows.Storage;
 using Windows.Storage.Streams;
 using ZumenSearch.Models;
-using ZumenSearch.Models.Enums;
 using ZumenSearch.Models.Rent.Residentials;
 using ZumenSearch.Models.Messenger;
 using ZumenSearch.Services.Contracts;
@@ -1086,18 +1085,6 @@ public sealed partial class ListingViewModel : ObservableRecipient,
 
     #region == Commands ==
 
-    [RelayCommand]
-    private void OpenPropertyEditorWindow()
-    {
-        var vm = App.GetService<ViewModels.MainViewModel>();
-
-        if (vm.EditRentResidentialFromIdCommand.CanExecute(_room.PropertyId))
-        {
-            //await vm.EditRentResidentialFromIdCommand(_room.PropertyId);
-            vm.EditRentResidentialFromIdCommand.Execute(_room.PropertyId);
-        }
-    }
-
     #region == Save ==
 
     [RelayCommand(CanExecute = nameof(CanSave))]
@@ -1689,6 +1676,18 @@ public sealed partial class ListingViewModel : ObservableRecipient,
 
 
     #endregion
+
+    [RelayCommand]
+    private void OpenPropertyEditorWindow()
+    {
+        var vm = App.GetService<ViewModels.MainViewModel>();
+
+        if (vm.EditRentResidentialFromIdCommand.CanExecute(_room.PropertyId))
+        {
+            //await vm.EditRentResidentialFromIdCommand(_room.PropertyId);
+            vm.EditRentResidentialFromIdCommand.Execute(_room.PropertyId);
+        }
+    }
 
     #endregion
 

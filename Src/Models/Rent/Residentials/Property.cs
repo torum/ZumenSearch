@@ -1,10 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Globalization;
-using System.Xml.Linq;
 using ZumenSearch.Models.Base;
-using ZumenSearch.Models.Enums;
-using ZumenSearch.Models.Location;
-using ZumenSearch.Models.Transportation;
 
 #pragma warning disable IDE0079 // Remove unnecessary suppression
 #pragma warning disable IDE0290 // Use primary constructor
@@ -16,7 +12,7 @@ namespace ZumenSearch.Models.Rent.Residentials;
 [System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "CA1716:Identifiers should not match keywords", Justification = "Required for clarity. And I don't care about Visual Basic Keywords.")]
 public sealed partial class Property : PropertyBase
 {
-    public Property(string id, EntityStatus status) : base(id, status, Enums.PropertyContextType.RentResidential)
+    public Property(string id, EntityStatus status) : base(id, status, PropertyContextType.RentResidential)
     {
         //
     }
@@ -236,110 +232,6 @@ public sealed partial class Property : PropertyBase
             IsModified = true;
         }
     } = string.Empty;
-
-    #endregion
-
-    #region == 所在地 ==
-
-    /*
-    // TODO: 
-    public string MachiazaId { get; set; } = string.Empty;
-
-    public Prefecture? Pref
-    {
-        get;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
-        }
-    }
-
-    public CountyAndCity? City
-    {
-        get;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
-        }
-    }
-
-    public WardAndOaza? Town
-    {
-        get;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
-        }
-    }
-
-    public Choume? Chou
-    {
-        get;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
-        }
-    }
-
-    public string Edaban
-    {
-        get;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
-        }
-    } = string.Empty;
-
-    // TODO:
-    public string PostalCode
-    {
-        get;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
-        }
-    } = string.Empty;
-
-    public string GeoUri
-    {
-        get
-        {
-            if (string.IsNullOrEmpty(LocationLatitude) || string.IsNullOrEmpty(LocationLongitude))
-            {
-                return "https://maps.google.co.jp/";
-            }
-
-            return $"https://maps.google.co.jp/?q={LocationLatitude},{LocationLongitude}";
-        }
-    }
-    */
-    #endregion
-
-    #region == 交通 ==
-
-
-
-
-
-    // TODO: more.
 
     #endregion
 

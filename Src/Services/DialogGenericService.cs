@@ -66,7 +66,7 @@ public class DialogGenericService : IDialogGenericService
         return result;
     }
 
-    public async Task<Models.PersonSearchResultItem?> ShowLessorSelectDialog(ViewModels.Dialogs.LessorSelectViewModel viewModel)
+    public async Task<Models.SearchResult.PersonSearchResultItem?> ShowLessorSelectDialog(ViewModels.Dialogs.LessorSelectViewModel viewModel)
     {
         if (_isDialogOpened)
         {
@@ -100,7 +100,7 @@ public class DialogGenericService : IDialogGenericService
 
         dialogContent.ViewModel.SelectionChanged += (sender, e) =>
         {
-            if ((e is not null) && (e is Models.PersonSearchResultItem rl))
+            if ((e is not null) && (e is Models.SearchResult.PersonSearchResultItem rl))
             {
                 //dialogContent.ViewModel.SelectedRailLine
                 dialog.IsPrimaryButtonEnabled = true;
@@ -120,7 +120,7 @@ public class DialogGenericService : IDialogGenericService
         return null;
     }
 
-    public async Task<Models.PersonSearchResultItem?> ShowBrokerSelectDialog(ViewModels.Dialogs.BrokerSelectViewModel viewModel)
+    public async Task<Models.SearchResult.PersonSearchResultItem?> ShowBrokerSelectDialog(ViewModels.Dialogs.BrokerSelectViewModel viewModel)
     {
         if (_isDialogOpened)
         {
@@ -153,7 +153,7 @@ public class DialogGenericService : IDialogGenericService
 
         dialogContent.ViewModel.SelectionChanged += (sender, e) =>
         {
-            if ((e is not null) && (e is Models.PersonSearchResultItem))
+            if ((e is not null) && (e is Models.SearchResult.PersonSearchResultItem))
             {
                 dialog.IsPrimaryButtonEnabled = true;
             }

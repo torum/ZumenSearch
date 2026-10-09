@@ -1,8 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Globalization;
 using ZumenSearch.Models.Base;
-using ZumenSearch.Models;
-using ZumenSearch.Models.Enums;
 
 namespace ZumenSearch.Models.Sale.Residentials;
 
@@ -113,7 +111,7 @@ public sealed partial class Property : PropertyBase
     }
 
     public Property(string id, EntityStatus status)
-        : base(id, status, Enums.PropertyContextType.SaleResidential)
+        : base(id, status, Models.PropertyContextType.SaleResidential)
     {
     }
 

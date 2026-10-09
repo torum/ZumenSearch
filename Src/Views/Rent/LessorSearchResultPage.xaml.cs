@@ -5,7 +5,7 @@ using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
 using System.Diagnostics;
 using ZumenSearch.Models;
-using ZumenSearch.Models.Enums;
+using ZumenSearch.Models.Person;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.ViewModels;
 
@@ -29,13 +29,13 @@ public partial class PersonTemplateSelector : DataTemplateSelector
                 return LegalTemplate;
             }
         }
-        else if (item is Models.PersonSearchResultItem searchResultItem)
+        else if (item is Models.SearchResult.PersonSearchResultItem searchResultItem)
         {
-            if (searchResultItem.PersonKind == Models.Enums.PersonKindType.Natural)
+            if (searchResultItem.PersonKind == PersonKindType.Natural)
             {
                 return NaturalTemplate;
             }
-            else if (searchResultItem.PersonKind == Models.Enums.PersonKindType.Legal)
+            else if (searchResultItem.PersonKind == PersonKindType.Legal)
             {
                 return LegalTemplate;
             }
@@ -118,7 +118,7 @@ public sealed partial class LessorSearchResultPage : Page
             return;
         }
 
-        if (container.DataContext is not Models.PersonSearchResultItem searchresult)
+        if (container.DataContext is not Models.SearchResult.PersonSearchResultItem searchresult)
         {
             Debug.WriteLine($"Not LessorSearchResultItem. {container.DataContext?.GetType().FullName} @SearchResult_DoubleTapped");
             return;
@@ -180,7 +180,7 @@ public sealed partial class LessorSearchResultPage : Page
             return;
         }
 
-        if (container.DataContext is not Models.ListingSearchResultItem)
+        if (container.DataContext is not Models.SearchResult.ListingSearchResultItem)
         {
             Debug.WriteLine($"Not ListingSearchResultItem. {container.DataContext?.GetType().FullName} @ItemContainer_RightTapped");
             return;
@@ -204,7 +204,7 @@ public sealed partial class LessorSearchResultPage : Page
             return;
         }
 
-        if (element.DataContext is not Models.PersonSearchResultItem searchresult)
+        if (element.DataContext is not Models.SearchResult.PersonSearchResultItem searchresult)
         {
             Debug.WriteLine($"Not LessorSearchResultItem. {element.DataContext?.GetType().FullName} @ItemContainerKeyboardAccelerator_Invoked");
             return;

@@ -1,7 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.ObjectModel;
 using ZumenSearch.Models.Base;
-using ZumenSearch.Models.Enums;
 
 namespace ZumenSearch.Models.Sale.Residentials;
 
@@ -57,7 +56,7 @@ public sealed partial class Listing : ListingBase
             status,
             propertyId,
             propertyStatus,
-            Enums.PropertyContextType.SaleResidential)
+            Models.PropertyContextType.SaleResidential)
     {
         IsPropertyUnitOwnership = isPropertyUnitOwnership;
         PropertyName = propertyName;

@@ -6,7 +6,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using ZumenSearch.Models;
 using ZumenSearch.Models.Base;
-using ZumenSearch.Models.Enums;
 using ZumenSearch.Models.Messenger;
 using ZumenSearch.Services.Contracts;
 

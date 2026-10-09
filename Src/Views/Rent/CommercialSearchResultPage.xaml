@@ -5,6 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:mod="using:ZumenSearch.Models"
+    xmlns:modsearchresult="using:ZumenSearch.Models.SearchResult"
     xmlns:local="using:ZumenSearch.Views.Rent"
     mc:Ignorable="d"
     NavigationCacheMode="Required">
@@ -94,7 +95,7 @@
                     </ItemsView.ContextFlyout>
 
                     <ItemsView.ItemTemplate>
-                        <DataTemplate x:DataType="mod:ListingSearchResultItem">
+                        <DataTemplate x:DataType="modsearchresult:ListingSearchResultItem">
                             <ItemContainer DataContext="{x:Bind}" IsDoubleTapEnabled="True" DoubleTapped="SearchResult_DoubleTapped" PointerPressed="ItemContainer_PointerPressed" PointerReleased="ItemContainer_PointerReleased" RightTapped="ItemContainer_RightTapped">
                                 <ItemContainer.KeyboardAccelerators>
                                     <KeyboardAccelerator Key="Enter" Modifiers="None" Invoked="ItemsViewKeyboardAccelerator_Invoked" />

@@ -1,5 +1,4 @@
 ﻿using ZumenSearch.Models.Base;
-using ZumenSearch.Models.Enums;
 
 namespace ZumenSearch.Models.Person;
 

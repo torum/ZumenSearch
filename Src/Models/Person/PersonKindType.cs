@@ -1,4 +1,4 @@
-﻿namespace ZumenSearch.Models.Enums;
+﻿namespace ZumenSearch.Models.Person;
 
 public enum PersonKindType
 {

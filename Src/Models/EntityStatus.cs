@@ -1,4 +1,4 @@
-﻿namespace ZumenSearch.Models.Enums;
+﻿namespace ZumenSearch.Models;
 
 // <summary>
 // Represents the status of an entity in the application, indicating whether it is saved in the database or new.

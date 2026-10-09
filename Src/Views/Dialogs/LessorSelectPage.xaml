@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:ZumenSearch.Views.Dialogs"
     xmlns:mod="using:ZumenSearch.Models"
+    xmlns:modsearchresult="using:ZumenSearch.Models.SearchResult"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
@@ -37,7 +38,7 @@
             <Border Style="{StaticResource RoundCardBorderStyle}" Padding="0">
                 <ListView x:Name="SelectionListView" ItemsSource="{x:Bind ViewModel.SuggestedLessors, Mode=OneWay}" SelectionMode="Single" SelectedItem="{x:Bind ViewModel.SelectedLessor,Mode=TwoWay}" Margin="0,6,0,6" Height="150" Width="260">
                     <ListView.ItemTemplate>
-                        <DataTemplate x:DataType="mod:PersonSearchResultItem">
+                        <DataTemplate x:DataType="modsearchresult:PersonSearchResultItem">
                             <TextBlock Text="{x:Bind Name}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"></TextBlock>
                         </DataTemplate>
                     </ListView.ItemTemplate>

@@ -26,7 +26,7 @@ public partial class LessorSelectViewModel : ObservableObject
         }
     } = string.Empty;
 
-    public ObservableCollection<Models.PersonSearchResultItem>? SuggestedLessors
+    public ObservableCollection<Models.SearchResult.PersonSearchResultItem>? SuggestedLessors
     {
         get;
         set
@@ -38,7 +38,7 @@ public partial class LessorSelectViewModel : ObservableObject
         }
     } = [];
 
-    public Models.PersonSearchResultItem? SelectedLessor
+    public Models.SearchResult.PersonSearchResultItem? SelectedLessor
     {
         get;
         set
@@ -53,7 +53,7 @@ public partial class LessorSelectViewModel : ObservableObject
         }
     }
 
-    public event EventHandler<Models.PersonSearchResultItem>? SelectionChanged; // TODO:
+    public event EventHandler<Models.SearchResult.PersonSearchResultItem>? SelectionChanged; // TODO:
 
     private readonly IDataAccessService _dataAccessService;
 

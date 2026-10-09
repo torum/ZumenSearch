@@ -2,7 +2,6 @@
 using System.Collections.ObjectModel;
 using System.Globalization;
 using ZumenSearch.Models.Base;
-using ZumenSearch.Models.Enums;
 
 #pragma warning disable IDE0079 // Remove unnecessary suppression
 #pragma warning disable IDE0290 // Use primary constructor
@@ -24,47 +23,148 @@ public sealed partial class Listing : ListingBase
 
     #region == 部屋の基本情報 ==
 
-    public ListingFloorPlanTypeLabel FloorPlan { get; private set; } = new(FloorPlanType.Unspecified);
+    public ListingFloorPlanTypeLabel FloorPlan
+    {
+        get => field ?? new(FloorPlanType.Unspecified);
+        private set
+        {
+            field = value;
+            IsModified = true;
+        }
+    }
 
-    public ListingFloorPlanExtraTypeLabel FloorPlanExtra { get; private set; } = new(FloorPlanExtraType.Unspecified);
+    public ListingFloorPlanExtraTypeLabel FloorPlanExtra
+    {
+        get => field ?? new(FloorPlanExtraType.Unspecified);
+        private set
+        {
+            field = value;
+            IsModified = true;
+        }
+    }
 
-    public FloorGroundType FloorNumberType { get; set; } = FloorGroundType.AboveGround;
+    public ListingFloorGroundTypeLabel FloorGround
+    {
+        get => field ?? new(FloorGroundType.AboveGround);
+        private set
+        {
+            field = value;
+            IsModified = true;
+        }
+    }
 
-    public int RoomCount { get; set; } = 1;
+    public string FloorExclusiveAreaSqm
+    {
+        get => field ?? string.Empty; // Ensure a non-null value is returned
+        private set
+        {
+            field = value;
+            IsModified = true;
+        }
+    }
+
+    public string FloorNumber
+    {
+        get => field ?? string.Empty; // Ensure a non-null value is returned
+        private set
+        {
+            field = value;
+            IsModified = true;
+        }
+    }
+
+    public bool IsCornerRoom
+    {
+        get;
+        private set
+        {
+            field = value;
+            IsModified = true;
+        }
+    }
+
+    public ListingExposureDirectionTypeLabel SelectedExposureDirectionType
+    {
+        get => field ?? new(ExposureDirectionType.Unspecified);
+        private set
+        {
+            field = value;
+            IsModified = true;
+        }
+    }
+
+    public ListingAvailabilityStatusTypeLabel SelectedAvailabilityStatusType
+    {
+        get => field ?? new(AvailabilityStatusType.Unspecified);
+        private set
+        {
+            field = value;
+            IsModified = true;
+        }
+    }
+
+    public ListingAvailabilityMonthTypeLabel SelectedAvailabilityMonthType
+    {
+        get => field ?? new(AvailabilityMonthType.Unspecified);
+        private set
+        {
+            field = value;
+            IsModified = true;
+        }
+    }
+
+    public ListingAvailabilityPeriodTypeLabel SelectedAvailabilityPeriodType
+    {
+        get => field ?? new(AvailabilityPeriodType.Unspecified);
+        private set
+        {
+            field = value;
+            IsModified = true;
+        }
+    }
+
+    public ListingOccupancyStatusLabel SelectedOccupancyStatus
+    {
+        get => field ?? new(OccupancyStatus.Unspecified);
+        private set
+        {
+            field = value;
+            IsModified = true;
+        }
+    }
+
+    public bool IsAvailableForImmediateMoveIn
+    {
+        get;
+        private set
+        {
+            field = value;
+            IsModified = true;
+        }
+    }
+
+    public bool IsAvailableForRentNow
+    {
+        get;
+        private set
+        {
+            field = value;
+            IsModified = true;
+        }
+    }
+
+    public DateTimeOffset OccupancyStatusCheckedAt
+    {
+        get;
+        private set
+        {
+            field = value;
+            IsModified = true;
+        }
+    } = DateTimeOffset.Now;
+
 
     /*
-     * 
-    [ObservableProperty]
-    public partial decimal FloorArea { get; set; }
-
-    [ObservableProperty]
-    public partial int? FloorNumber { get; set; }
-
-    [ObservableProperty]
-    public partial bool IsCornerRoom { get; set; }
-
-    [ObservableProperty]
-    public partial ExposureDirectionType MainExposureDirection { get; set; } = ExposureDirectionType.Unspecified;
-
-    [ObservableProperty]
-    public partial ListingCurrentStatusType CurrentStatus { get; set; } = ListingCurrentStatusType.Unspecified;
-
-    [ObservableProperty]
-    public partial bool IsRecruiting { get; set; }
-
-    [ObservableProperty]
-    public partial int? AvailableFromMonth { get; set; }
-
-    [ObservableProperty]
-    public partial AvailabilityPeriodType AvailableFromPeriod { get; set; } = AvailabilityPeriodType.Unspecified;
-
-    [ObservableProperty]
-    public partial bool IsImmediateOccupancy { get; set; }
-
-    [ObservableProperty]
-    public partial DateTimeOffset? CurrentStatusCheckedAt { get; set; }
-
-
     [ObservableProperty]
     public partial decimal KyouekiFee { get; set; }
 
@@ -216,7 +316,7 @@ public sealed partial class Listing : ListingBase
 
     #endregion
 
-    public Listing(string id, EntityStatus status, string propertyId, EntityStatus propertyStatus, bool isPropertyUnitOwnership, string propertyName) : base(id, status, propertyId, propertyStatus, Enums.PropertyContextType.RentResidential)
+    public Listing(string id, EntityStatus status, string propertyId, EntityStatus propertyStatus, bool isPropertyUnitOwnership, string propertyName) : base(id, status, propertyId, propertyStatus, PropertyContextType.RentResidential)
     {
         //PropertyId = propertyId;
         IsPropertyUnitOwnership = isPropertyUnitOwnership;

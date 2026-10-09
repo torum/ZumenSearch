@@ -3,7 +3,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.ViewModels;
-using ZumenSearch.Models.Enums;
+using ZumenSearch.Models;
 
 namespace ZumenSearch.Views;
 
@@ -15,17 +15,17 @@ public partial class RecentPropertyTypeTemplateSelector : DataTemplateSelector
 
     protected override DataTemplate? SelectTemplateCore(object item)
     {
-        if (item is Models.PropertySearchResultItem searchResultItem)
+        if (item is Models.SearchResult.PropertySearchResultItem searchResultItem)
         {
-            if (searchResultItem.PropertyContextType == Models.Enums.PropertyContextType.RentResidential)
+            if (searchResultItem.PropertyContextType == PropertyContextType.RentResidential)
             {
                 return RecentRentResidentialTemplate;
             }
-            else if (searchResultItem.PropertyContextType == Models.Enums.PropertyContextType.RentCommercial)
+            else if (searchResultItem.PropertyContextType == PropertyContextType.RentCommercial)
             {
                 return RecentRentCommercialTemplate;
             }
-            else if (searchResultItem.PropertyContextType == Models.Enums.PropertyContextType.SaleResidential)
+            else if (searchResultItem.PropertyContextType == PropertyContextType.SaleResidential)
             {
                 return RecentSaleResidentialTemplate;
             }
@@ -124,7 +124,7 @@ public sealed partial class SearchPage : Page
             return;
         }
 
-        if (container.DataContext is not Models.PropertySearchResultItem searchresult)
+        if (container.DataContext is not Models.SearchResult.PropertySearchResultItem searchresult)
         {
             Debug.WriteLine($"Not PropertySearchResult. {container.DataContext?.GetType().FullName} @ItemContainer_DoubleTapped");
             return;
@@ -169,7 +169,7 @@ public sealed partial class SearchPage : Page
             return;
         }
 
-        if (container.DataContext is not Models.PropertySearchResultItem)
+        if (container.DataContext is not Models.SearchResult.PropertySearchResultItem)
         {
             Debug.WriteLine($"Not PropertySearchResult. {container.DataContext?.GetType().FullName} @ItemContainer_RightTapped");
             return;
@@ -192,7 +192,7 @@ public sealed partial class SearchPage : Page
             return;
         }
 
-        if (element.DataContext is not Models.PropertySearchResultItem searchresult)
+        if (element.DataContext is not Models.SearchResult.PropertySearchResultItem searchresult)
         {
             Debug.WriteLine($"Not PropertySearchResult. {element.DataContext?.GetType().FullName} @ItemContainerKeyboardAccelerator_Invoked");
             return;

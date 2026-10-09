@@ -3,7 +3,6 @@ using System.Globalization;
 using ZumenSearch.Models.Base;
 using ZumenSearch.Models.Location;
 using ZumenSearch.Models.Transportation;
-using ZumenSearch.Models.Enums;
 
 namespace ZumenSearch.Models.Rent.Commercials;
 
@@ -15,7 +14,7 @@ namespace ZumenSearch.Models.Rent.Commercials;
 [System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "CA1716:Identifiers should not match keywords", Justification = "Required for clarity. And I don't care about Visual Basic Keywords.")]
 public sealed partial class Property : PropertyBase
 {
-    public Property(string id, EntityStatus status) : base(id, status, Enums.PropertyContextType.RentCommercial)
+    public Property(string id, EntityStatus status) : base(id, status, PropertyContextType.RentCommercial)
     {
     }
 

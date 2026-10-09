@@ -1,10 +1,10 @@
 ﻿using ZumenSearch.Models.Base;
-using ZumenSearch.Models.Enums;
+using ZumenSearch.Models.Person;
 
 #pragma warning disable IDE0079 // Remove unnecessary suppression
 #pragma warning disable IDE0290 // Use primary constructor
 
-namespace ZumenSearch.Models;
+namespace ZumenSearch.Models.SearchResult;
 
 // 貸主検索結果一覧表示用 
 public sealed partial class PersonSearchResultItem : PersonBase

@@ -26,7 +26,7 @@ public partial class BrokerSelectViewModel : ObservableObject
         }
     } = string.Empty;
 
-    public ObservableCollection<Models.PersonSearchResultItem>? SuggestedBrokers
+    public ObservableCollection<Models.SearchResult.PersonSearchResultItem>? SuggestedBrokers
     {
         get;
         set
@@ -38,7 +38,7 @@ public partial class BrokerSelectViewModel : ObservableObject
         }
     } = [];
 
-    public Models.PersonSearchResultItem? SelectedBroker
+    public Models.SearchResult.PersonSearchResultItem? SelectedBroker
     {
         get;
         set
@@ -53,7 +53,7 @@ public partial class BrokerSelectViewModel : ObservableObject
         }
     }
 
-    public event EventHandler<Models.PersonSearchResultItem>? SelectionChanged; // TODO:
+    public event EventHandler<Models.SearchResult.PersonSearchResultItem>? SelectionChanged; // TODO:
 
     private readonly IDataAccessService _dataAccessService;
 
