@@ -12,13 +12,14 @@ Strictly follow these boundaries:
 - Keep each element's opening tag and all its attributes on a single line.
 - Do not wrap an element's attributes across multiple lines.
 
-## C# formatting
+### C# formatting
 - Keep method, constructor, and lambda parameter lists on one line, even when the line is long.
 - Do not put parameters on separate lines.
 - Example: `private void Handle(object sender, EventArgs args)`.
 - Keep argument lists on one line when practical.
 - Do not wrap argument lists for formatting alone; wrap them only when keeping them on one line would make the code excessively long or hard to read.
 - Prefer avoiding hard-coded enum member-name strings in parsers; use enum member ToString() or generic enum parsing so enum renames do not require updating duplicated string constants.
+- For enum choices that need human-readable labels, use a model label type containing the enum Key and localized Label, following PropertyKindTypeLabel, instead of displaying enum member names.
 
 ## WinUI 3 & Windows App SDK Architecture Guidelines (.NET 10)
 
@@ -35,8 +36,8 @@ Strictly follow these boundaries:
 - **Content Dialogs:** Always explicitly set the `.XamlRoot` property when showing a `ContentDialog`, otherwise it will throw a runtime exception.
 
 ### MVVM Architecture (CommunityToolkit.Mvvm)
-- **Source Generators:** Do not write manual backing fields or `INotifyPropertyChanged` boilerplate.
-- **Properties:** Use `[ObservableProperty]` on private fields (using `camelCase` or `_camelCase`) so the Toolkit generates public `PascalCase` properties.
+- **Source Generators:** Do not write `INotifyPropertyChanged` boilerplate.
+- **Properties:** Use `[ObservableProperty]` on private fields (using `camelCase` or `_camelCase`) so the Toolkit generates public `PascalCase` properties when the generated property requires no custom getter or setter logic. For properties that require custom logic, implement them manually and call ` SetProperty(ref field, value)`  in the setter instead of using [ObservableProperty].
 - **Commands:** Use `[RelayCommand]` on methods instead of creating `ICommand` properties manually.
 - Use `ObservableRecipient` or `Messenger` patterns for decoupled View-Model communication.
 

@@ -4,12 +4,15 @@ using System.Text;
 
 namespace ZumenSearch.Models.Rent.Residentials;
 
+// Structure: 建物構造
+public enum StructureType
+{
+    Unspecified, Wood, Block, LightSteel, Steel, RC, SRC, ALC, PC, HPC, RB, CFT, Other
+}
+
 public sealed class PropertyStructureTypeLabel(StructureType key)
 {
-    private Dictionary<StructureType, string> BuildingStructureTypeDictionary
-    {
-        get;
-    } = new Dictionary<StructureType, string>()
+    private Dictionary<StructureType, string> PropertyStructureTypeDictionary { get; } = new()
         {
             {StructureType.Unspecified, "未指定"},
             {StructureType.Wood, "木造"},
@@ -26,7 +29,11 @@ public sealed class PropertyStructureTypeLabel(StructureType key)
             {StructureType.Other, "その他"}
 
         };
-    public string Label => BuildingStructureTypeDictionary[Key];
+    public string Label => PropertyStructureTypeDictionary[Key];
 
     public StructureType Key => key;
+
+    public static IReadOnlyList<PropertyStructureTypeLabel> GetAll() => Enum.GetValues<StructureType>()
+    .Select(value => new PropertyStructureTypeLabel(value))
+    .ToArray();
 };

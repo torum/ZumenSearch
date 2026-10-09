@@ -6,8 +6,8 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     xmlns:mod="using:ZumenSearch.Models" 
-    NavigationCacheMode="Required"
-    Loaded="Page_Loaded">
+    xmlns:modresidencial="using:ZumenSearch.Models.Rent.Residentials"
+    NavigationCacheMode="Required">
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled" Padding="36,0,36,24">
         <Grid x:Name="ContentArea">
 
@@ -44,79 +44,77 @@
                                 <ColumnDefinition Width="*"></ColumnDefinition>
                             </Grid.ColumnDefinitions>
                             <Grid Grid.Row="0" Grid.Column="0">
-                                <StackPanel VerticalAlignment="Bottom">
-                                    <TextBlock Text="間取り" Margin="0,0,0,8"/>
-                                    <StackPanel Orientation="Horizontal">
-                                         <ComboBox ItemsSource="{x:Bind ViewModel.RoomCountOptions}" SelectedItem="{x:Bind ViewModel.SelectedRoomCountOption, Mode=TwoWay}" Width="80" VerticalAlignment="Bottom" />
-                                         <ComboBox ItemsSource="{x:Bind ViewModel.RoomLayoutOptions}" SelectedItem="{x:Bind ViewModel.SelectedRoomLayoutOption, Mode=TwoWay}" Margin="6,0,0,0" Width="100" VerticalAlignment="Bottom" />
-                                    </StackPanel>
-                                </StackPanel>
-                            </Grid>
-                            <Grid Grid.Row="0" Grid.Column="1" Margin="12,0,0,0">
-                                <TextBox Header="専有面積（平米）" Text="{x:Bind ViewModel.FloorArea, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MinWidth="120" HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
-                            </Grid>
-                        </Grid>
-                    </Grid>
-                </Border>
-
-                <Border Style="{StaticResource RoundCardBorderStyle}">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"></RowDefinition>
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="1*" MinWidth="320"></ColumnDefinition>
-                            <ColumnDefinition Width="1*" MinWidth="320"></ColumnDefinition>
-                        </Grid.ColumnDefinitions>
-                        <Grid Grid.Row="0" Grid.Column="0">
-                            <StackPanel Orientation="Horizontal" Margin="0" VerticalAlignment="Bottom">
-                                <ComboBox Header="所在階" ItemsSource="{x:Bind ViewModel.FloorTypeOptions}" Width="80" Margin="0" SelectedItem="{x:Bind ViewModel.SelectedFloorTypeOption, Mode=TwoWay}" HorizontalAlignment="Left" VerticalAlignment="Bottom" />
-                                <TextBox Text="{x:Bind ViewModel.FloorNumber, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="60" Margin="6,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Bottom" />
-                                <CheckBox IsChecked="{x:Bind ViewModel.IsCornerRoom, Mode=TwoWay}" Margin="12,0,0,0" Content="角部屋" VerticalAlignment="Bottom"/>
-                            </StackPanel>
-                        </Grid>
-                        <Grid Grid.Row="0" Grid.Column="1" Margin="12,0,0,0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"></ColumnDefinition>
-                                <ColumnDefinition Width="*"></ColumnDefinition>
-                            </Grid.ColumnDefinitions>
-                            <Grid Grid.Row="0" Grid.Column="0">
-                                <ComboBox Header="主要採光面" ItemsSource="{x:Bind ViewModel.MainExposureDirectionOptions}" Margin="0" HorizontalAlignment="Left" VerticalAlignment="Bottom" SelectedItem="{x:Bind ViewModel.SelectedExposureDirectionOption, Mode=TwoWay}" />
-                            </Grid>
-                            <Grid Grid.Row="0" Grid.Column="1" Margin="12,0,0,0">
-                            </Grid>
-                        </Grid>
-                    </Grid>
-                </Border>
-
-                <Border Style="{StaticResource RoundCardBorderStyle}">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"></RowDefinition>
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="1*" MinWidth="320"></ColumnDefinition>
-                            <ColumnDefinition Width="1*" MinWidth="320"></ColumnDefinition>
-                        </Grid.ColumnDefinitions>
-                        <Grid Grid.Row="0" Grid.Column="0">
-                            <StackPanel Orientation="Horizontal" Margin="0" VerticalAlignment="Bottom">
-                                <ComboBox Header="現況" ItemsSource="{x:Bind ViewModel.CurrentStatusOptions}" Width="224" Margin="0" SelectedItem="{x:Bind ViewModel.SelectedCurrentStatusOption, Mode=TwoWay}" />
-                                <CheckBox IsChecked="{x:Bind ViewModel.IsRecruiting, Mode=TwoWay}" Content="募集中" Margin="12,0,0,0" VerticalAlignment="Bottom"></CheckBox>
-                            </StackPanel>
-                        </Grid>
-                        <Grid Grid.Row="0" Grid.Column="1" Margin="12,0,0,0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"></ColumnDefinition>
-                                <ColumnDefinition Width="*"></ColumnDefinition>
-                            </Grid.ColumnDefinitions>
-                            <Grid Grid.Row="0" Grid.Column="0">
                                 <StackPanel Orientation="Horizontal">
-                                    <ComboBox Header="入居可能日" ItemsSource="{x:Bind ViewModel.AvailableFromMonthOptions}" Width="100" SelectedItem="{x:Bind ViewModel.SelectedAvailableFromMonthOption, Mode=TwoWay}" Margin="0" VerticalAlignment="Bottom" />
-                                    <ComboBox ItemsSource="{x:Bind ViewModel.AvailableFromPeriodOptions}" Width="90" SelectedItem="{x:Bind ViewModel.SelectedAvailableFromPeriodOption, Mode=TwoWay}" Margin="6,0,0,0" VerticalAlignment="Bottom" />
+                                    <StackPanel VerticalAlignment="Bottom">
+                                        <TextBlock Text="間取り" Margin="0,0,0,8"/>
+                                        <StackPanel Orientation="Horizontal">
+                                            <ComboBox Margin="0,0,0,0" Width="130" VerticalAlignment="Bottom" ItemsSource="{x:Bind ViewModel.FloorPlanTypes, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.SelectedFloorPlanType, Mode=TwoWay}">
+                                                <ComboBox.ItemTemplate>
+                                                    <DataTemplate x:DataType="modresidencial:ListingFloorPlanTypeLabel">
+                                                        <TextBlock Text="{x:Bind Label}" />
+                                                    </DataTemplate>
+                                                </ComboBox.ItemTemplate>
+                                            </ComboBox>
+                                        </StackPanel>
+                                    </StackPanel>
+                                    <ComboBox Header="" Margin="6,0,0,0" Width="130" VerticalAlignment="Bottom" ItemsSource="{x:Bind ViewModel.FloorPlanExtraTypes, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.SelectedFloorPlanExtraType, Mode=TwoWay}">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate x:DataType="modresidencial:ListingFloorPlanExtraTypeLabel">
+                                                <TextBlock Text="{x:Bind Label}" />
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
                                 </StackPanel>
                             </Grid>
-                            <Grid Grid.Row="0" Grid.Column="1" Margin="12,0,0,0">
-                                <CheckBox IsChecked="{x:Bind ViewModel.IsImmediateOccupancy, Mode=TwoWay}" Content="入居即可" Margin="0,0,0,0" VerticalAlignment="Bottom"></CheckBox>
+                        </Grid>
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource RoundCardBorderStyle}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*" MinWidth="320"></ColumnDefinition>
+                            <ColumnDefinition Width="1*" MinWidth="320"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        
+                        <Grid Grid.Row="0" Grid.Column="0">
+                            <Grid Grid.Row="0" Grid.Column="0" Margin="0,0,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                    <ColumnDefinition Width="*"></ColumnDefinition>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Grid.Column="0" Header="専有面積（平米）" Text="{x:Bind ViewModel.FloorExclusiveAreaSqm, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MinWidth="120" Width="120" HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Bottom" Margin="6,0,0,0">
+                                    <ComboBox Header="所在階" ItemsSource="{x:Bind ViewModel.FloorGroundTypes, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.SelectedFloorGroundType, Mode=TwoWay}" Margin="6,0,0,0" MinWidth="90" Width="90" HorizontalAlignment="Left" VerticalAlignment="Bottom" >
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate x:DataType="modresidencial:ListingFloorGroundTypeLabel">
+                                                <TextBlock Text="{x:Bind Label}" />
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
+                                    <TextBox Text="{x:Bind ViewModel.FloorNumber, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="60" Margin="6,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Bottom" />
+                                </StackPanel>
+                            </Grid>
+                        </Grid>
+                        <Grid Grid.Row="0" Grid.Column="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                <ColumnDefinition Width="*"></ColumnDefinition>
+                            </Grid.ColumnDefinitions>
+                            <Grid Grid.Row="0" Grid.Column="0">
+                                <ComboBox Header="主要採光面" ItemsSource="{x:Bind ViewModel.ExposureDirectionTypes, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.SelectedExposureDirectionType, Mode=TwoWay}" Margin="12,0,0,0" MinWidth="90" Width="90" HorizontalAlignment="Left" VerticalAlignment="Bottom" >
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate x:DataType="modresidencial:ListingExposureDirectionTypeLabel">
+                                            <TextBlock Text="{x:Bind Label}" />
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                            </Grid>
+                            <Grid Grid.Row="0" Grid.Column="1">
+                                <CheckBox Margin="12,0,0,0" Content="角部屋" IsChecked="{x:Bind ViewModel.IsCornerRoom, Mode=TwoWay}" VerticalAlignment="Bottom"/>
                             </Grid>
                         </Grid>
                     </Grid>
@@ -132,18 +130,77 @@
                             <ColumnDefinition Width="1*" MinWidth="320"></ColumnDefinition>
                         </Grid.ColumnDefinitions>
                         <Grid Grid.Row="0" Grid.Column="0">
-                            <DatePicker x:Name="CurrentStatusDatePicker" Header="現況確認日" DateChanged="CurrentStatusDatePicker_DateChanged" Margin="0 0 6 6" HorizontalAlignment="Left"/>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                <ColumnDefinition Width="*"></ColumnDefinition>
+                            </Grid.ColumnDefinitions>
+                            <Grid Grid.Row="0" Grid.Column="0">
+                                <ComboBox Header="現況" Width="170" ItemsSource="{x:Bind ViewModel.AvailabilityStatusTypes, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.SelectedAvailabilityStatusType, Mode=TwoWay}" Margin="0" VerticalAlignment="Bottom" >
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate x:DataType="modresidencial:ListingAvailabilityStatusTypeLabel">
+                                            <TextBlock Text="{x:Bind Label}" />
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                            </Grid>
+                            <Grid Grid.Row="0" Grid.Column="1">
+                                <CheckBox Content="募集中" Margin="12,0,0,0" IsChecked="{x:Bind ViewModel.IsAvailableForRentNow, Mode=TwoWay}" VerticalAlignment="Bottom"></CheckBox>
+                            </Grid>
                         </Grid>
+
                         <Grid Grid.Row="0" Grid.Column="1" Margin="12,0,0,0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"></ColumnDefinition>
                                 <ColumnDefinition Width="*"></ColumnDefinition>
                             </Grid.ColumnDefinitions>
                             <Grid Grid.Row="0" Grid.Column="0">
-                                <Button Content="本日確認" Margin="0,0,0,6" Padding="6" VerticalAlignment="Bottom" Click="SetCurrentStatusDateToToday"/>
+                                <CalendarDatePicker x:Name="CurrentStatusDatePicker" Header="現況確認日" Date="{x:Bind ViewModel.OccupancyStatusCheckedAt, Mode=TwoWay}" Margin="0" HorizontalAlignment="Left"/>
                             </Grid>
-                            <Grid Grid.Row="0" Grid.Column="1" Margin="12,0,0,0">
+                            <Grid Grid.Row="0" Grid.Column="1">
+                                <Button Content="本日確認" Margin="6,0,0,0" Padding="6" VerticalAlignment="Bottom"/>
                             </Grid>
+                        </Grid>
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource RoundCardBorderStyle}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*" MinWidth="320"></ColumnDefinition>
+                            <ColumnDefinition Width="1*" MinWidth="320"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+
+                        <Grid Grid.Row="0" Grid.Column="0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                <ColumnDefinition Width="*"></ColumnDefinition>
+                            </Grid.ColumnDefinitions>
+                            <Grid Grid.Row="0" Grid.Column="0">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom">
+                                    <ComboBox Header="入居可能日" ItemsSource="{x:Bind ViewModel.AvailabilityMonthTypes, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.SelectedAvailabilityMonthType, Mode=TwoWay}" Width="100" Margin="0" VerticalAlignment="Bottom">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate x:DataType="modresidencial:ListingAvailabilityMonthTypeLabel">
+                                                <TextBlock Text="{x:Bind Label}" />
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
+                                    <ComboBox ItemsSource="{x:Bind ViewModel.AvailabilityPeriodTypes, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.SelectedAvailabilityPeriodType, Mode=TwoWay}" Width="90" Margin="6,0,0,0" VerticalAlignment="Bottom">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate x:DataType="modresidencial:ListingAvailabilityPeriodTypeLabel">
+                                                <TextBlock Text="{x:Bind Label}" />
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
+                                </StackPanel>
+                            </Grid>
+                            <Grid Grid.Row="0" Grid.Column="1">
+                                <CheckBox Content="即入居可" Margin="12,0,0,0" IsChecked="{x:Bind ViewModel.IsAvailableForImmediateMoveIn, Mode=TwoWay}" VerticalAlignment="Bottom"></CheckBox>
+                            </Grid>
+                        </Grid>
+                        <Grid Grid.Row="0" Grid.Column="1" Margin="12,0,0,0">
                         </Grid>
                     </Grid>
                 </Border>

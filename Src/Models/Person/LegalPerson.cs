@@ -12,33 +12,36 @@ public partial class LegalPerson : PersonBase
 {
     private string? _nameField;
 
+    public LegalPerson(string id, EntityStatus status) : base(id, status, PersonKindType.Legal)
+    {
+        //
+    }
+
     public string NameCompany
     {
         get => field ?? string.Empty;
         set
         {
-            if (SetProperty(ref field, value))
+            field = value;
+            if (NameCompanyTypePosition == 0)
             {
-                if (NameCompanyTypePosition == 0)
-                {
-                    _nameField = $"{NameCompanyType}{NameCompany}";
-                }
-                else
-                {
-                    _nameField = $"{NameCompany}{NameCompanyType}";
-                }
+                _nameField = $"{NameCompanyType}{NameCompany}";
+            }
+            else
+            {
+                _nameField = $"{NameCompany}{NameCompanyType}";
+            }
 
-                try
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(_nameField))
                 {
-                    if (!string.IsNullOrWhiteSpace(_nameField))
-                    {
-                        SetName(_nameField);
-                    }
+                    SetName(_nameField);
                 }
-                finally
-                {
-                    IsModified = true;
-                }
+            }
+            finally
+            {
+                IsModified = true;
             }
         }
     }
@@ -48,28 +51,26 @@ public partial class LegalPerson : PersonBase
         get => field ?? string.Empty;
         set
         {
-            if (SetProperty(ref field, value))
+            field = value;
+            if (NameCompanyTypePosition == 0)
             {
-                if (NameCompanyTypePosition == 0)
-                {
-                    _nameField = $"{NameCompanyType}{NameCompany}";
-                }
-                else
-                {
-                    _nameField = $"{NameCompany}{NameCompanyType}";
-                }
+                _nameField = $"{NameCompanyType}{NameCompany}";
+            }
+            else
+            {
+                _nameField = $"{NameCompany}{NameCompanyType}";
+            }
 
-                try
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(_nameField))
                 {
-                    if (!string.IsNullOrWhiteSpace(_nameField))
-                    {
-                        SetName(_nameField);
-                    }
+                    SetName(_nameField);
                 }
-                finally
-                {
-                    IsModified = true;
-                }
+            }
+            finally
+            {
+                IsModified = true;
             }
         }
     }
@@ -80,34 +81,28 @@ public partial class LegalPerson : PersonBase
         get;
         set
         {
-            if (SetProperty(ref field, value))
+            field = value;
+            if (value == 0)
             {
-                if (value == 0)
-                {
-                    _nameField = $"{NameCompanyType}{NameCompany}";
-                }
-                else
-                {
-                    _nameField = $"{NameCompany}{NameCompanyType}";
-                }
+                _nameField = $"{NameCompanyType}{NameCompany}";
+            }
+            else
+            {
+                _nameField = $"{NameCompany}{NameCompanyType}";
+            }
 
-                try
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(_nameField))
                 {
-                    if (!string.IsNullOrWhiteSpace(_nameField))
-                    {
-                        SetName(_nameField);
-                    }
+                    SetName(_nameField);
                 }
-                finally
-                {
-                    IsModified = true;
-                }
+            }
+            finally
+            {
+                IsModified = true;
             }
         }
     }
 
-    public LegalPerson(string id, EntityStatus status) : base(id, status, PersonKind.Legal)
-    {
-        //
-    }
 };

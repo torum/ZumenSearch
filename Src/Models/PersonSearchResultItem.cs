@@ -9,13 +9,15 @@ namespace ZumenSearch.Models;
 // 貸主検索結果一覧表示用 
 public sealed partial class PersonSearchResultItem : PersonBase
 {
+    public PersonSearchResultItem(string id, PersonKindType personKind) : base(id, EntityStatus.Saved, personKind)
+    {
+        //
+    }
+
+
     // TODO: more
 
     public string CreatedAt { get; set; } = string.Empty;
     public string UpdatedAt { get; set; } = string.Empty;
 
-    public PersonSearchResultItem(string id, PersonKind personKind) : base(id, EntityStatus.Saved, personKind)
-    {
-        //
-    }
 }

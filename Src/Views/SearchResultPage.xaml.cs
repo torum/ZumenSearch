@@ -19,15 +19,15 @@ public partial class PropertyTypeTemplateSelector : DataTemplateSelector
     {
         if (item is Models.PropertySearchResultItem searchResultItem)
         {
-            if (searchResultItem.PropertyKind == Models.Enums.PropertyKind.RentResidential)
+            if (searchResultItem.PropertyContextType == Models.Enums.PropertyContextType.RentResidential)
             {
                 return RentResidentialTemplate;
             }
-            else if (searchResultItem.PropertyKind == Models.Enums.PropertyKind.RentCommercial)
+            else if (searchResultItem.PropertyContextType == Models.Enums.PropertyContextType.RentCommercial)
             {
                 return RentCommercialTemplate;
             }
-            else if (searchResultItem.PropertyKind == Models.Enums.PropertyKind.SaleResidential)
+            else if (searchResultItem.PropertyContextType == Models.Enums.PropertyContextType.SaleResidential)
             {
                 return SaleResidentialTemplate;
             }

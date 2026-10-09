@@ -1,6 +1,6 @@
 ﻿namespace ZumenSearch.Models.Enums;
 
-public enum PropertyKind
+public enum PropertyContextType
 {
     RentResidential,
     RentCommercial,

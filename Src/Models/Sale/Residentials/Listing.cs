@@ -15,11 +15,11 @@ public sealed partial class Listing : ListingBase
     public string PropertyName
     {
         get => field ?? string.Empty;
-        set => SetProperty(ref field, value);
+        private set { field = value; IsModified = true; }
     }
 
     // Sale-specific fields
-
+    /*
     [ObservableProperty]
     public partial decimal SalePrice { get; set; }
 
@@ -37,9 +37,13 @@ public sealed partial class Listing : ListingBase
 
     [ObservableProperty]
     public partial string DeliveryTiming { get; set; } = "相談";
+    */
 
-    [ObservableProperty]
-    public partial string Remarks { get; set; } = string.Empty;
+    public string Remarks
+    {
+        get => field ?? string.Empty;
+        private set { field = value; IsModified = true; }
+    }
 
     public Listing(
         string id,
@@ -53,9 +57,23 @@ public sealed partial class Listing : ListingBase
             status,
             propertyId,
             propertyStatus,
-            Enums.PropertyKind.SaleResidential)
+            Enums.PropertyContextType.SaleResidential)
     {
         IsPropertyUnitOwnership = isPropertyUnitOwnership;
         PropertyName = propertyName;
     }
+
+    #region == Setter Methods ==
+
+    public void SetPropertyName(string propertyName)
+    {
+        PropertyName = propertyName;
+    }
+
+    public void SetRemarks(string remarks)
+    {
+        Remarks = remarks;
+    }
+
+    #endregion
 }

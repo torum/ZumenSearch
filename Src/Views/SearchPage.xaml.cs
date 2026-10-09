@@ -17,15 +17,15 @@ public partial class RecentPropertyTypeTemplateSelector : DataTemplateSelector
     {
         if (item is Models.PropertySearchResultItem searchResultItem)
         {
-            if (searchResultItem.PropertyKind == Models.Enums.PropertyKind.RentResidential)
+            if (searchResultItem.PropertyContextType == Models.Enums.PropertyContextType.RentResidential)
             {
                 return RecentRentResidentialTemplate;
             }
-            else if (searchResultItem.PropertyKind == Models.Enums.PropertyKind.RentCommercial)
+            else if (searchResultItem.PropertyContextType == Models.Enums.PropertyContextType.RentCommercial)
             {
                 return RecentRentCommercialTemplate;
             }
-            else if (searchResultItem.PropertyKind == Models.Enums.PropertyKind.SaleResidential)
+            else if (searchResultItem.PropertyContextType == Models.Enums.PropertyContextType.SaleResidential)
             {
                 return RecentSaleResidentialTemplate;
             }

@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using ZumenSearch.Models.Base;
 using ZumenSearch.Models.Enums;
 
@@ -11,128 +12,30 @@ namespace ZumenSearch.Models.Rent.Residentials;
 // 部屋（編集用）
 public sealed partial class Listing : ListingBase
 {
-
-    // 部屋が属する建物が区分所有化どうかをここでも保持（部屋を直接開いた際に必要）
-    public bool IsPropertyUnitOwnership { get; set; }
-
     // 物件（建物の名前を保持 - タイトル等に表示）
     public string PropertyName
     {
         get => field ?? string.Empty;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-
-            }
-        }
+        private set;
     }
 
+    // 部屋が属する建物が区分所有化どうかをここでも保持（部屋を直接開いた際に必要）
+    public bool IsPropertyUnitOwnership { get; private set; }
 
-    // 部屋写真リスト
-    public ObservableCollection<ListingPicture> Pictures
-    {
-        get;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;//?
-            }
-        }
-    } = [];
+    #region == 部屋の基本情報 ==
 
-    // DBへの更新時にDBから削除されるべき部屋写真のIDリスト
-    public ObservableCollection<ListingPicture> PicturesToBeDeleted { get; set; } = [];
+    public ListingFloorPlanTypeLabel FloorPlan { get; private set; } = new(FloorPlanType.Unspecified);
 
-    // 部屋図面リスト
-    public ObservableCollection<ListingPdf> Pdfs
-    {
-        get;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;//?
-            }
-        }
-    } = [];
+    public ListingFloorPlanExtraTypeLabel FloorPlanExtra { get; private set; } = new(FloorPlanExtraType.Unspecified);
 
-    // DBへの更新時にDBから削除されるべき図面のIDリスト
-    public ObservableCollection<ListingPdf> PdfsToBeDeleted { get; set; } = [];
+    public FloorGroundType FloorNumberType { get; set; } = FloorGroundType.AboveGround;
 
-    // 貸主のリスト
-    public ObservableCollection<Models.Base.PersonBase> Lessors
-    {
-        get;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
-        }
-    } = [];
+    public int RoomCount { get; set; } = 1;
 
-    // DBへの更新時にDBから削除されるべき貸主のIDリスト
-    public ObservableCollection<Models.Base.PersonBase> LessorsToBeDeleted { get; set; } = [];
-
-    // 宅建業者のリスト
-    public ObservableCollection<Models.Base.PersonBase> Brokers
-    {
-        get;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
-        }
-    } = [];
-
-    // DBへの更新時にDBから削除されるべき宅建業者のIDリスト
-    public ObservableCollection<Models.Base.PersonBase> BrokersToBeDeleted { get; set; } = [];
-
-
-    // 賃料（円）
-    public decimal Chinryou
-    {
-        get;
-        set
-        {
-            if (field == value)
-            {
-                return;
-            }
-
-            if (value > -1)
-            {
-                field = value;
-                OnPropertyChanged();
-                IsModified = true;
-            }
-            else
-            {
-                // TODO: show error
-                //field = string.Empty;
-                //IsModified = true;
-
-                throw new ArgumentOutOfRangeException("Chinryou", "Must be at least 0.");
-            }
-        }
-    }
-
-    [ObservableProperty]
-    public partial int RoomCount { get; set; } = 1;
-
-    [ObservableProperty]
-    public partial RoomLayout RoomLayoutType { get; set; } = RoomLayout.R;
-
+    /*
+     * 
     [ObservableProperty]
     public partial decimal FloorArea { get; set; }
-
-    [ObservableProperty]
-    public partial FloorPosition FloorType { get; set; } = FloorPosition.AboveGround;
 
     [ObservableProperty]
     public partial int? FloorNumber { get; set; }
@@ -141,10 +44,10 @@ public sealed partial class Listing : ListingBase
     public partial bool IsCornerRoom { get; set; }
 
     [ObservableProperty]
-    public partial ExposureDirection MainExposureDirection { get; set; } = ExposureDirection.Unspecified;
+    public partial ExposureDirectionType MainExposureDirection { get; set; } = ExposureDirectionType.Unspecified;
 
     [ObservableProperty]
-    public partial ListingCurrentStatus CurrentStatus { get; set; } = ListingCurrentStatus.Unspecified;
+    public partial ListingCurrentStatusType CurrentStatus { get; set; } = ListingCurrentStatusType.Unspecified;
 
     [ObservableProperty]
     public partial bool IsRecruiting { get; set; }
@@ -153,7 +56,7 @@ public sealed partial class Listing : ListingBase
     public partial int? AvailableFromMonth { get; set; }
 
     [ObservableProperty]
-    public partial AvailabilityPeriod AvailableFromPeriod { get; set; } = AvailabilityPeriod.Unspecified;
+    public partial AvailabilityPeriodType AvailableFromPeriod { get; set; } = AvailabilityPeriodType.Unspecified;
 
     [ObservableProperty]
     public partial bool IsImmediateOccupancy { get; set; }
@@ -218,17 +121,158 @@ public sealed partial class Listing : ListingBase
 
     [ObservableProperty]
     public partial string OtherConditions { get; set; } = string.Empty;
+    */
 
-    [ObservableProperty]
-    public partial string Remarks { get; set; } = string.Empty;
+    public string Remarks { get; set; } = string.Empty;
 
-    public Listing(string id, EntityStatus status, string propertyId, EntityStatus propertyStatus, bool isPropertyUnitOwnership, string propertyName) : base(id, status, propertyId, propertyStatus, Enums.PropertyKind.RentResidential)
+    // 賃料（円）
+    public decimal Chinryou
+    {
+        get;
+        set
+        {
+            if (field == value)
+            {
+                return;
+            }
+
+            if (value > -1)
+            {
+                field = value;
+                //OnPropertyChanged();
+                IsModified = true;
+            }
+            else
+            {
+                // TODO: show error
+                //field = string.Empty;
+                //IsModified = true;
+
+                throw new ArgumentOutOfRangeException("Chinryou", "Must be at least 0.");
+            }
+        }
+    }
+
+
+    #endregion
+
+    #region == 部屋に属するリスト ==
+
+    // 部屋写真リスト
+    public ObservableCollection<ListingPicture> Pictures
+    {
+        get;
+        set
+        {
+            field = value;
+            IsModified = true;
+        }
+    } = [];
+
+    // DBへの更新時にDBから削除されるべき部屋写真のIDリスト
+    public ObservableCollection<ListingPicture> PicturesToBeDeleted { get; set; } = [];
+
+    // 部屋図面リスト
+    public ObservableCollection<ListingPdf> Pdfs
+    {
+        get;
+        set
+        {
+            field = value;
+            IsModified = true;
+        }
+    } = [];
+
+    // DBへの更新時にDBから削除されるべき図面のIDリスト
+    public ObservableCollection<ListingPdf> PdfsToBeDeleted { get; set; } = [];
+
+    // 貸主のリスト
+    public ObservableCollection<Models.Base.PersonBase> Lessors
+    {
+        get;
+        set
+        {
+            field = value;
+            IsModified = true;
+        }
+    } = [];
+
+    // DBへの更新時にDBから削除されるべき貸主のIDリスト
+    public ObservableCollection<Models.Base.PersonBase> LessorsToBeDeleted { get; set; } = [];
+
+    // 宅建業者のリスト
+    public ObservableCollection<Models.Base.PersonBase> Brokers
+    {
+        get;
+        set
+        {
+            field = value;
+            IsModified = true;
+        }
+    } = [];
+
+    // DBへの更新時にDBから削除されるべき宅建業者のIDリスト
+    public ObservableCollection<Models.Base.PersonBase> BrokersToBeDeleted { get; set; } = [];
+
+    #endregion
+
+    public Listing(string id, EntityStatus status, string propertyId, EntityStatus propertyStatus, bool isPropertyUnitOwnership, string propertyName) : base(id, status, propertyId, propertyStatus, Enums.PropertyContextType.RentResidential)
     {
         //PropertyId = propertyId;
         IsPropertyUnitOwnership = isPropertyUnitOwnership;
         PropertyName = propertyName;
         //PropertyStatus = propertyStatus;
-        PropertyChanged += (_, _) => SetIsModified(true);
+        //PropertyChanged += (_, _) => SetIsModified(true);
         SetIsModified(false);
     }
+
+    #region == Setter Methods ==
+
+    public void SetPropertyName(string propertyName)
+    {
+        PropertyName = propertyName;
+    }
+
+    public void SetIsPropertyUnitOwnership(bool isUnitOwnership)
+    {
+        IsPropertyUnitOwnership = isUnitOwnership;
+    }
+
+    public void SetFloorPlanTypeLabel(ListingFloorPlanTypeLabel floorPlan)
+    {
+        FloorPlan = floorPlan;
+    }
+    public void SetFloorPlanTypeLabelFromString(string Str)
+    {
+        if (string.IsNullOrEmpty(Str))
+        {
+            FloorPlan = new ListingFloorPlanTypeLabel(FloorPlanType.Unspecified);
+            return;
+        }
+
+        if (Enum.TryParse<FloorPlanType>(Str, out var result))
+        {
+            FloorPlan = new ListingFloorPlanTypeLabel(result);
+        }
+    }
+
+    public void SetFloorPlanExtraTypeLabel(ListingFloorPlanExtraTypeLabel floorPlanExtra)
+    {
+        FloorPlanExtra = floorPlanExtra;
+    }
+    public void SetFloorPlanExtraTypeLabelFromString(string Str)
+    {
+        if (string.IsNullOrEmpty(Str))
+        {
+            FloorPlanExtra = new ListingFloorPlanExtraTypeLabel(FloorPlanExtraType.Unspecified);
+            return;
+        }
+
+        if (Enum.TryParse<FloorPlanExtraType>(Str, out var result))
+        {
+            FloorPlanExtra = new ListingFloorPlanExtraTypeLabel(result);
+        }
+    }
+
+    #endregion
 }

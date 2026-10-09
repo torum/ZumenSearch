@@ -82,34 +82,6 @@ public sealed partial class ListingViewModel : ObservableRecipient,
         _room.SetIsModified(false);
         IsDirty = false;
 
-        /*
-        // Intercept changes to the inherited IsActive property safely without overriding OnActivated
-        this.PropertyChanged += (s, e) =>
-        {
-            if (e.PropertyName == nameof(IsActive))
-            {
-                if (IsActive)
-                {
-                    // This implicitly uses WeakReferenceMessenger.Default under the hood
-                    Messenger.Register<PropertyUpdatedMessage>(this);
-                    Messenger.Register<LessorUpdatedMessage>(this);
-                    Messenger.Register<LessorDeletedMessage>(this);
-                    Messenger.Register<BrokerUpdatedMessage>(this);
-                    Messenger.Register<BrokerDeletedMessage>(this);
-                    Messenger.Register<PropertyIsUnitOwnershipChangedMessage>(this);
-                }
-                else
-                {
-                    Messenger.Unregister<PropertyUpdatedMessage>(this);
-                    Messenger.Unregister<LessorUpdatedMessage>(this);
-                    Messenger.Unregister<LessorDeletedMessage>(this);
-                    Messenger.Unregister<BrokerUpdatedMessage>(this);
-                    Messenger.Unregister<BrokerDeletedMessage>(this);
-                    Messenger.Unregister<PropertyIsUnitOwnershipChangedMessage>(this);
-                }
-            }
-        };
-        */
         // Ready to receive messages.
 #pragma warning disable IL3050 // Disable AOT dynamic code warning
 #pragma warning disable IL2026 // Disable Trimming unreferenced code warning
@@ -120,39 +92,27 @@ public sealed partial class ListingViewModel : ObservableRecipient,
 
     #region == Properties ==
 
-    //public string Id => _id;
+    #region == Internal flags ==
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SaveCommand))]
     public partial bool IsDirty { get; private set; }
 
-    /*
-    public bool IsDirty
+    public bool IsPropertyUnitOwnership
     {
         get;
         private set
         {
             if (SetProperty(ref field, value))
             {
-                SaveCommand.NotifyCanExecuteChanged();
-            }
-        }
-    }
-    */
-
-    public bool IsPropertyUnitOwnership
-    {
-        get;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-
+                //
             }
         }
     }
 
-    #region == 画面表示関連 ==
+    #endregion
+
+    #region == Window and other page related stuff ==
 
     public string WindowTitle
     {
@@ -226,8 +186,8 @@ public sealed partial class ListingViewModel : ObservableRecipient,
 
     #endregion
 
-    #region == エラー関連 ==
-
+    #region == Error related ==
+    
     /*
     [ObservableProperty]
     public partial bool HasErrors { get; private set; }
@@ -244,149 +204,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
 
     #endregion
 
-    #region == 基本プロパティ == 
-
-    [ObservableProperty]
-    public partial int RoomCount { get; set; } = 1;
-
-    [ObservableProperty]
-    public partial RoomLayout RoomLayoutType { get; set; } = RoomLayout.R;
-
-    [ObservableProperty]
-    public partial string FloorArea { get; set; } = string.Empty;
-
-    [ObservableProperty]
-    public partial FloorPosition FloorType { get; set; } = FloorPosition.AboveGround;
-
-    [ObservableProperty]
-    public partial string FloorNumber { get; set; } = string.Empty;
-
-    [ObservableProperty]
-    public partial bool IsCornerRoom { get; set; }
-
-    [ObservableProperty]
-    public partial ExposureDirection MainExposureDirection { get; set; } = ExposureDirection.Unspecified;
-
-    [ObservableProperty]
-    public partial ListingCurrentStatus CurrentStatus { get; set; } = ListingCurrentStatus.Unspecified;
-
-    [ObservableProperty]
-    public partial bool IsRecruiting { get; set; }
-
-    [ObservableProperty]
-    public partial int? AvailableFromMonth { get; set; }
-
-    [ObservableProperty]
-    public partial AvailabilityPeriod AvailableFromPeriod { get; set; } = AvailabilityPeriod.Unspecified;
-
-    [ObservableProperty]
-    public partial bool IsImmediateOccupancy { get; set; }
-
-    [ObservableProperty]
-    public partial DateTimeOffset? CurrentStatusCheckedAt { get; set; }
-
-    [ObservableProperty]
-    public partial string Remarks { get; set; } = string.Empty;
-
-    public IReadOnlyList<string> RoomLayoutOptions { get; } = ListingOptionExtensions.GetRoomLayoutOptions();
-    public IReadOnlyList<string> FloorTypeOptions { get; } = ListingOptionExtensions.GetFloorPositionOptions();
-    public IReadOnlyList<string> MainExposureDirectionOptions { get; } = ListingOptionExtensions.GetExposureDirectionOptions();
-    public IReadOnlyList<string> CurrentStatusOptions { get; } = ListingOptionExtensions.GetCurrentStatusOptions();
-    public IReadOnlyList<string> AvailableFromPeriodOptions { get; } = ListingOptionExtensions.GetAvailabilityPeriodOptions();
-    public IReadOnlyList<string> RoomCountOptions { get; } = ListingOptionExtensions.GetRoomCountOptions();
-    public IReadOnlyList<string> AvailableFromMonthOptions { get; } = ListingOptionExtensions.GetAvailabilityMonthOptions();
-
-    public string SelectedRoomCountOption
-    {
-        get => RoomCount.ToString(CultureInfo.InvariantCulture);
-        set { if (int.TryParse(value, NumberStyles.None, CultureInfo.InvariantCulture, out var count)) RoomCount = count; }
-    }
-
-    public string SelectedRoomLayoutOption
-    {
-        get => RoomLayoutType.GetStorageValue();
-        set => RoomLayoutType = ListingOptionExtensions.ParseRoomLayout(value);
-    }
-
-    public string SelectedFloorTypeOption
-    {
-        get => FloorType.GetStorageValue();
-        set => FloorType = ListingOptionExtensions.ParseFloorPosition(value);
-    }
-
-    public string SelectedExposureDirectionOption
-    {
-        get => MainExposureDirection.GetStorageValue();
-        set => MainExposureDirection = ListingOptionExtensions.ParseExposureDirection(value);
-    }
-
-    public string SelectedCurrentStatusOption
-    {
-        get => CurrentStatus.GetStorageValue();
-        set => CurrentStatus = ListingOptionExtensions.ParseCurrentStatus(value);
-    }
-
-    public string? SelectedAvailableFromMonthOption
-    {
-        get => AvailableFromMonth is int month && month is >= 1 and <= 12 ? AvailableFromMonthOptions[month - 1] : null;
-        set => AvailableFromMonth = ListingOptionExtensions.ParseAvailabilityMonth(value);
-    }
-
-    public string SelectedAvailableFromPeriodOption
-    {
-        get => AvailableFromPeriod.GetStorageValue();
-        set => AvailableFromPeriod = ListingOptionExtensions.ParseAvailabilityPeriod(value);
-    }
-
-    partial void OnRoomCountChanged(int value)
-    {
-        IsDirty = true;
-        OnPropertyChanged(nameof(SelectedRoomCountOption));
-    }
-
-    partial void OnRoomLayoutTypeChanged(RoomLayout oldValue, RoomLayout newValue)
-    {
-        IsDirty = true;
-        OnPropertyChanged(nameof(SelectedRoomLayoutOption));
-    }
-
-    partial void OnFloorAreaChanged(string value) => IsDirty = true;
-    partial void OnFloorTypeChanged(FloorPosition oldValue, FloorPosition newValue)
-    {
-        IsDirty = true;
-        OnPropertyChanged(nameof(SelectedFloorTypeOption));
-    }
-
-    partial void OnFloorNumberChanged(string value) => IsDirty = true;
-    partial void OnIsCornerRoomChanged(bool value) => IsDirty = true;
-    partial void OnMainExposureDirectionChanged(ExposureDirection oldValue, ExposureDirection newValue)
-    {
-        IsDirty = true;
-        OnPropertyChanged(nameof(SelectedExposureDirectionOption));
-    }
-
-    partial void OnCurrentStatusChanged(ListingCurrentStatus oldValue, ListingCurrentStatus newValue)
-    {
-        IsDirty = true;
-        OnPropertyChanged(nameof(SelectedCurrentStatusOption));
-    }
-
-    partial void OnIsRecruitingChanged(bool value) => IsDirty = true;
-
-    partial void OnAvailableFromMonthChanged(int? value)
-    {
-        IsDirty = true;
-        OnPropertyChanged(nameof(SelectedAvailableFromMonthOption));
-    }
-
-    partial void OnAvailableFromPeriodChanged(AvailabilityPeriod oldValue, AvailabilityPeriod newValue)
-    {
-        IsDirty = true;
-        OnPropertyChanged(nameof(SelectedAvailableFromPeriodOption));
-    }
-    partial void OnIsImmediateOccupancyChanged(bool value) => IsDirty = true;
-    partial void OnCurrentStatusCheckedAtChanged(DateTimeOffset? value) => IsDirty = true;
-    partial void OnRemarksChanged(string value) => IsDirty = true;
+    #region == Basic listing properties == 
 
     public string Name
     {
@@ -402,26 +220,202 @@ public sealed partial class ListingViewModel : ObservableRecipient,
                 // Update title with dummy value.
                 WindowTitle = string.Empty;
             }
+        }
+    }
 
-            /*
-            if (field == value) return;
-            if (value is null) return;
-            if (string.IsNullOrWhiteSpace(value))
+    public IReadOnlyList<ListingFloorPlanTypeLabel> FloorPlanTypes { get; } = ListingFloorPlanTypeLabel.GetAll();
+
+    public ListingFloorPlanTypeLabel SelectedFloorPlanType
+    {
+        get => field ?? new(FloorPlanType.Unspecified);
+        set
+        {
+            if (SetProperty(ref field, value))
             {
-                NameErrorMessage = "Can not empty.";
-                NameHasError = true;
-                return;
+                IsDirty = true;
             }
+        }
+    }
 
-            field = value;
-            IsDirty = true;
-            NameHasError = false;
+    public IReadOnlyList<ListingFloorPlanExtraTypeLabel> FloorPlanExtraTypes { get; } = ListingFloorPlanExtraTypeLabel.GetAll();
 
-            // Update title with dummy value.
-            _mainViewModel.WindowTitle = string.Empty;
+    public ListingFloorPlanExtraTypeLabel SelectedFloorPlanExtraType
+    {
+        get => field ?? new(FloorPlanExtraType.Unspecified);
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+            }
+        }
+    }
 
-            OnPropertyChanged();
-            */
+    public IReadOnlyList<ListingFloorGroundTypeLabel> FloorGroundTypes { get; } = ListingFloorGroundTypeLabel.GetAll();
+
+    public ListingFloorGroundTypeLabel SelectedFloorGroundType
+    {
+        get => field ?? new(FloorGroundType.AboveGround);
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+            }
+        }
+    }
+
+    public string FloorExclusiveAreaSqm
+    {
+        get => field ?? string.Empty; // Ensure a non-null value is returned
+        set
+        {
+            if (SetProperty(ref field, value.Trim()))
+            {
+                IsDirty = true;
+            }
+        }
+    }
+
+    public string FloorNumber
+    {
+        get => field ?? string.Empty; // Ensure a non-null value is returned
+        set
+        {
+            if (SetProperty(ref field, value.Trim()))
+            {
+                IsDirty = true;
+            }
+        }
+    }
+
+    public bool IsCornerRoom
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+            }
+        }
+    }
+
+    public IReadOnlyList<ListingExposureDirectionTypeLabel> ExposureDirectionTypes { get; } = ListingExposureDirectionTypeLabel.GetAll();
+
+    public ListingExposureDirectionTypeLabel SelectedExposureDirectionType
+    {
+        get => field ?? new(ExposureDirectionType.Unspecified);
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+            }
+        }
+    }
+
+    public IReadOnlyList<ListingAvailabilityStatusTypeLabel> AvailabilityStatusTypes { get; } = ListingAvailabilityStatusTypeLabel.GetAll();
+
+    public ListingAvailabilityStatusTypeLabel SelectedAvailabilityStatusType
+    {
+        get => field ?? new(AvailabilityStatusType.Unspecified);
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+            }
+        }
+    }
+
+    public IReadOnlyList<ListingAvailabilityMonthTypeLabel> AvailabilityMonthTypes { get; } = ListingAvailabilityMonthTypeLabel.GetAll();
+
+    public ListingAvailabilityMonthTypeLabel SelectedAvailabilityMonthType
+    {
+        get => field ?? new(AvailabilityMonthType.Unspecified);
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+            }
+        }
+    }
+
+    public IReadOnlyList<ListingAvailabilityPeriodTypeLabel> AvailabilityPeriodTypes { get; } = ListingAvailabilityPeriodTypeLabel.GetAll();
+
+    public ListingAvailabilityPeriodTypeLabel SelectedAvailabilityPeriodType
+    {
+        get => field ?? new(AvailabilityPeriodType.Unspecified);
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+            }
+        }
+    }
+
+    public IReadOnlyList<ListingOccupancyStatusLabel> OccupancyStatusTypes { get; } = ListingOccupancyStatusLabel.GetAll();
+
+    public ListingOccupancyStatusLabel SelectedOccupancyStatus
+    {
+        get => field ?? new(OccupancyStatus.Unspecified);
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+            }
+        }
+    }
+
+    public bool IsAvailableForImmediateMoveIn
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+            }
+        }
+    }
+
+    public bool IsAvailableForRentNow
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+            }
+        }
+    }
+
+    public DateTimeOffset OccupancyStatusCheckedAt
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+            }
+        }
+    } = DateTimeOffset.Now;
+
+    public string Remarks
+    {
+        get => field ?? string.Empty;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+            }
         }
     }
 
@@ -564,9 +558,16 @@ public sealed partial class ListingViewModel : ObservableRecipient,
         var building = property.Value;
         if (building is not null) 
         {
-            _room.PropertyStatus = building.Status;
-
-            _room.PropertyName = building.Name;
+            _room.SetPropertyStatus(building.Status);
+            _room.SetPropertyName(building.Name);
+            /*
+             * Use 
+                WeakReferenceMessenger.Default.Send(new Models.Messenger.PropertyIsUnitOwnershipChangedMessage(value));
+            if (building is Models.Rent.Residentials.Property residentialProperty)
+            {
+                _room.SetIsPropertyUnitOwnership(residentialProperty.IsUnitOwnership);
+            }
+            */
             // Update window title with dummy string.
             WindowTitle = string.Empty;
         }
@@ -706,7 +707,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
         floorArea = 0;
         floorNumber = null;
 
-        var areaText = Helpers.Common.ReplaceZenkakuNumbers(FloorArea.Trim());
+        var areaText = Helpers.Common.ReplaceZenkakuNumbers(FloorExclusiveAreaSqm.Trim());
         if (!string.IsNullOrEmpty(areaText) &&
             (!decimal.TryParse(areaText, NumberStyles.Number, CultureInfo.CurrentCulture, out floorArea) || floorArea < 0))
         {
@@ -749,10 +750,12 @@ public sealed partial class ListingViewModel : ObservableRecipient,
             return;
         }
 
-        _room.RoomCount = RoomCount;
-        _room.RoomLayoutType = RoomLayoutType;
+        _room.SetFloorPlanTypeLabel(SelectedFloorPlanType);
+        _room.SetFloorPlanExtraTypeLabel(SelectedFloorPlanExtraType);
+        //_room.FloorNumberType = SelectedFloorNumberType.Key;
+        /*
+         * 
         _room.FloorArea = floorArea;
-        _room.FloorType = FloorType;
         _room.FloorNumber = floorNumber;
         _room.IsCornerRoom = IsCornerRoom;
         _room.MainExposureDirection = MainExposureDirection;
@@ -762,6 +765,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
         _room.AvailableFromPeriod = AvailableFromPeriod;
         _room.IsImmediateOccupancy = IsImmediateOccupancy;
         _room.CurrentStatusCheckedAt = CurrentStatusCheckedAt;
+        */
         _room.Remarks = Remarks;
 
         if (int.TryParse(Chinryou, out var result))
@@ -846,10 +850,11 @@ public sealed partial class ListingViewModel : ObservableRecipient,
 
         Name = _room.Name; // Set the value to trigger the setter logic if needed.
 
-        RoomCount = _room.RoomCount;
-        RoomLayoutType = _room.RoomLayoutType;
+        SelectedFloorPlanType = _room.FloorPlan;
+        SelectedFloorPlanExtraType = _room.FloorPlanExtra;
+        /*
         FloorArea = _room.FloorArea == 0 ? string.Empty : _room.FloorArea.ToString(CultureInfo.CurrentCulture);
-        FloorType = _room.FloorType;
+        //SelectedFloorNumberType = _room.FloorNumberType;
         FloorNumber = _room.FloorNumber?.ToString(CultureInfo.InvariantCulture) ?? string.Empty;
         IsCornerRoom = _room.IsCornerRoom;
         MainExposureDirection = _room.MainExposureDirection;
@@ -859,6 +864,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
         AvailableFromPeriod = _room.AvailableFromPeriod;
         IsImmediateOccupancy = _room.IsImmediateOccupancy;
         CurrentStatusCheckedAt = _room.CurrentStatusCheckedAt;
+        */
         Remarks = _room.Remarks;
 
         //var test = _room.Chinryou.ToString();

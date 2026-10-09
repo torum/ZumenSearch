@@ -4,22 +4,22 @@ using System.Text;
 
 namespace ZumenSearch.Models.Sale.Residentials;
 
-public sealed class PropertyKind(PropertyType key)
+public sealed class PropertyContextType(PropertyKindType key)
 {
-    private static readonly Dictionary<PropertyType, string> Labels =
-        new Dictionary<PropertyType, string>
+    private static readonly Dictionary<PropertyKindType, string> Labels =
+        new Dictionary<PropertyKindType, string>
         {
-            [PropertyType.Unspecified] = "未指定",
-            [PropertyType.Apartment] = "アパート",
-            [PropertyType.Mansion] = "マンション",
-            [PropertyType.House] = "一戸建て",
-            [PropertyType.TerraceHouse] = "テラスハウス",
-            [PropertyType.TownHouse] = "タウンハウス",
-            [PropertyType.ShareHouse] = "シェアハウス",
-            [PropertyType.Dormitory] = "寮・下宿"
+            [PropertyKindType.Unspecified] = "未指定",
+            [PropertyKindType.Apartment] = "アパート",
+            [PropertyKindType.Mansion] = "マンション",
+            [PropertyKindType.House] = "一戸建て",
+            [PropertyKindType.TerraceHouse] = "テラスハウス",
+            [PropertyKindType.TownHouse] = "タウンハウス",
+            [PropertyKindType.ShareHouse] = "シェアハウス",
+            [PropertyKindType.Dormitory] = "寮・下宿"
         };
 
-    public PropertyType Key => key;
+    public PropertyKindType Key => key;
 
     public string Label => Labels[Key];
 }

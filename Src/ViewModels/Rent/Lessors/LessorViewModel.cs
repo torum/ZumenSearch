@@ -52,11 +52,11 @@ public sealed partial class LessorViewModel : ObservableRecipient, IDisposable
         // Update title with dummy value.
         WindowTitle = string.Empty;
 
-        if (_lessorBase.PersonKind == PersonKind.Natural)
+        if (_lessorBase.PersonKind == PersonKindType.Natural)
         {
             PersonKindIndex = 0;
         }
-        else if (_lessorBase.PersonKind == PersonKind.Legal)
+        else if (_lessorBase.PersonKind == PersonKindType.Legal)
         {
             PersonKindIndex = 1;
         }
@@ -332,7 +332,7 @@ public sealed partial class LessorViewModel : ObservableRecipient, IDisposable
 
         if (_lessorBase is Models.Person.NaturalPerson naturalPerson)
         {
-            if (_lessorBase.PersonKind != PersonKind.Natural)
+            if (_lessorBase.PersonKind != PersonKindType.Natural)
             {
                 // Something is wrong.
             }
@@ -344,7 +344,7 @@ public sealed partial class LessorViewModel : ObservableRecipient, IDisposable
         }
         else if (_lessorBase is Models.Person.LegalPerson legalPerson)
         {
-            if (_lessorBase.PersonKind != PersonKind.Legal)
+            if (_lessorBase.PersonKind != PersonKindType.Legal)
             {
                 // Something is wrong.
             }

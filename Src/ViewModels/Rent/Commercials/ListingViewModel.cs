@@ -169,6 +169,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IDisposable
     {
         Name = _unit.Name;
         Chinryou = Format(_unit.Chinryou);
+        /*
         KyouekiFee = Format(_unit.KyouekiFee);
         Shikikin = Format(_unit.Shikikin);
         ShikikinUnit = _unit.ShikikinUnit;
@@ -183,6 +184,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IDisposable
         BusinessHours = _unit.BusinessHours;
         ParkingAvailable = _unit.ParkingAvailable;
         OtherConditions = _unit.OtherConditions;
+        */
         Remarks = _unit.Remarks;
         WindowTitle = string.Empty;
     }
@@ -190,7 +192,8 @@ public sealed partial class ListingViewModel : ObservableRecipient, IDisposable
     private void SetValues()
     {
         _unit.SetName(Name);
-        _unit.Chinryou = ParseDecimal(Chinryou);
+        _unit.SetChinryou(ParseDecimal(Chinryou));
+        /*
         _unit.KyouekiFee = ParseDecimal(KyouekiFee);
         _unit.Shikikin = ParseDecimal(Shikikin);
         _unit.ShikikinUnit = ShikikinUnit;
@@ -206,6 +209,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IDisposable
         _unit.ParkingAvailable = ParkingAvailable;
         _unit.OtherConditions = OtherConditions;
         _unit.Remarks = Remarks;
+        */
     }
 
     private bool ValidateName()

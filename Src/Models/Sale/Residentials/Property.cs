@@ -12,15 +12,13 @@ namespace ZumenSearch.Models.Sale.Residentials;
 [System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "CA1716:Identifiers should not match keywords", Justification = "Required for clarity. And I don't care about Visual Basic Keywords.")]
 public sealed partial class Property : PropertyBase
 {
-    public PropertyKind BuildingKind
+    public PropertyContextType BuildingKind
     {
-        get => field ?? new(PropertyType.Unspecified);
+        get => field ?? new(PropertyKindType.Unspecified);
         set
         {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
+            field = value;
+            IsModified = true;
         }
     }
 
@@ -29,22 +27,18 @@ public sealed partial class Property : PropertyBase
         get;
         set
         {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
+            field = value;
+            IsModified = true;
         }
     }
 
-    public PropertyStructure BuildingStructure
+    public PropertyStructure PropertyStructure
     {
         get => field ?? new(StructureType.Unspecified);
         set
         {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
+            field = value;
+            IsModified = true;
         }
     }
 
@@ -53,10 +47,8 @@ public sealed partial class Property : PropertyBase
         get;
         set
         {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
+            field = value;
+            IsModified = true;
         }
     }
 
@@ -65,10 +57,8 @@ public sealed partial class Property : PropertyBase
         get;
         set
         {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
+            field = value;
+            IsModified = true;
         }
     }
 
@@ -77,10 +67,8 @@ public sealed partial class Property : PropertyBase
         get;
         set
         {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
+            field = value;
+            IsModified = true;
         }
     }
 
@@ -89,10 +77,8 @@ public sealed partial class Property : PropertyBase
         get;
         set
         {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
+            field = value;
+            IsModified = true;
         }
     } = new(1900, 1, 1, 0, 0, 0, TimeSpan.Zero);
 
@@ -101,10 +87,8 @@ public sealed partial class Property : PropertyBase
         get => field ?? string.Empty;
         set
         {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
+            field = value;
+            IsModified = true;
         }
     }
 
@@ -113,10 +97,8 @@ public sealed partial class Property : PropertyBase
         get => field ?? string.Empty;
         set
         {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
+            field = value;
+            IsModified = true;
         }
     }
 
@@ -125,28 +107,26 @@ public sealed partial class Property : PropertyBase
         get => field ?? string.Empty;
         set
         {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
+            field = value;
+            IsModified = true;
         }
     }
 
     public Property(string id, EntityStatus status)
-        : base(id, status, Enums.PropertyKind.SaleResidential)
+        : base(id, status, Enums.PropertyContextType.SaleResidential)
     {
     }
 
     public void SetKindTypeFromString(string value)
     {
-        BuildingKind = Enum.TryParse(value, out PropertyType result)
-            ? new PropertyKind(result)
-            : new PropertyKind(PropertyType.Unspecified);
+        BuildingKind = Enum.TryParse(value, out PropertyKindType result)
+            ? new PropertyContextType(result)
+            : new PropertyContextType(PropertyKindType.Unspecified);
     }
 
     public void SetStructureTypeFromString(string value)
     {
-        BuildingStructure = Enum.TryParse(value, out StructureType result)
+        PropertyStructure = Enum.TryParse(value, out StructureType result)
             ? new PropertyStructure(result)
             : new PropertyStructure(StructureType.Unspecified);
     }

@@ -4,6 +4,16 @@ using System.Text;
 
 namespace ZumenSearch.Models.Rent.Residentials;
 
+public enum PropertyPdfType
+{
+    Unspecified,
+    Maisoku,
+    Architectural,
+    Toukibo,
+    Kouzu,
+    Other
+}
+
 public sealed class PropertyPdfTypeLabel(PropertyPdfType key)
 {
     private Dictionary<PropertyPdfType, string> BuildingPdfTypeDictionary

@@ -26,7 +26,7 @@
         ItemsSource="{x:Bind ViewModel.Kinds, Mode=OneWay}"
         SelectedItem="{x:Bind ViewModel.SelectedKind, Mode=TwoWay}">
                     <ComboBox.ItemTemplate>
-                        <DataTemplate x:DataType="modresidencial:PropertyTypeLabel">
+                        <DataTemplate x:DataType="modresidencial:PropertyKindTypeLabel">
                             <TextBlock Text="{x:Bind Label}" />
                         </DataTemplate>
                     </ComboBox.ItemTemplate>

@@ -7,7 +7,7 @@ namespace ZumenSearch.Models.Sale.Residentials;
 
 // Remove Enux suffix it is considered bad practice.
 
-public enum PropertyType
+public enum PropertyKindType
 {
     Unspecified,
     Apartment,

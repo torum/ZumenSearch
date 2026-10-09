@@ -19,22 +19,20 @@ namespace ZumenSearch.Models.Base;
 // </remarks>
 public abstract partial class PropertyBase : EntityAggregateBase
 {
-    protected PropertyBase(string id, EntityStatus status, PropertyKind kind) : base(id, status)
+    protected PropertyBase(string id, EntityStatus status, PropertyContextType contextType) : base(id, status)
     {
-        PropertyKind = kind;
+        PropertyContextType = contextType;
     }
 
-    public PropertyKind PropertyKind { get; init; }
+    public PropertyContextType PropertyContextType { get; init; }
 
     public Address Address
     {
         get;
         init
         {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
+            field = value;
+            IsModified = true;
         }
     } = new Address();
 
@@ -43,46 +41,38 @@ public abstract partial class PropertyBase : EntityAggregateBase
         get;
         init
         {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
+            field = value;
+            IsModified = true;
         }
     } = new Train();
 
     public string BusStop1
     {
         get;
-        set
+        private set
         {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
+            field = value;
+            IsModified = true;
         }
     } = string.Empty;
 
     public int BusJyousya1
     {
         get;
-        set
+        private set
         {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
+            field = value;
+            IsModified = true;
         }
     }
 
     public int BusStopToho1
     {
         get;
-        set
+        private set
         {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
+            field = value;
+            IsModified = true;
         }
     }
 
@@ -91,46 +81,38 @@ public abstract partial class PropertyBase : EntityAggregateBase
         get;
         init
         {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
+            field = value;
+            IsModified = true;
         }
     } = new Train();
 
     public string BusStop2
     {
         get;
-        set
+        private set
         {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
+            field = value;
+            IsModified = true;
         }
     } = string.Empty;
 
     public int BusJyousya2
     {
         get;
-        set
+        private set
         {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
+            field = value;
+            IsModified = true;
         }
     }
 
     public int BusStopToho2
     {
         get;
-        set
+        private set
         {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
+            field = value;
+            IsModified = true;
         }
     }
 
@@ -139,46 +121,38 @@ public abstract partial class PropertyBase : EntityAggregateBase
         get;
         init
         {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
+            field = value;
+            IsModified = true;
         }
     } = new Train();
 
     public string BusStop3
     {
         get;
-        set
+        private set
         {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
+            field = value;
+            IsModified = true;
         }
     } = string.Empty;
 
     public int BusJyousya3
     {
         get;
-        set
+        private set
         {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
+            field = value;
+            IsModified = true;
         }
     }
 
     public int BusStopToho3
     {
         get;
-        set
+        private set
         {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
+            field = value;
+            IsModified = true;
         }
     }
 
@@ -187,46 +161,38 @@ public abstract partial class PropertyBase : EntityAggregateBase
         get;
         init
         {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
+            field = value;
+            IsModified = true;
         }
     } = new Train();
 
     public string BusStop4
     {
         get;
-        set
+        private set
         {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
+            field = value;
+            IsModified = true;
         }
     } = string.Empty;
 
     public int BusJyousya4
     {
         get;
-        set
+        private set
         {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
+            field = value;
+            IsModified = true;
         }
     }
 
     public int BusStopToho4
     {
         get;
-        set
+        private set
         {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
+            field = value;
+            IsModified = true;
         }
     }
 
@@ -240,13 +206,12 @@ public abstract partial class PropertyBase : EntityAggregateBase
         get => field ?? string.Empty; // Ensure a non-null value is returned
         set
         {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
+            field = value;
+            IsModified = true;
         }
     }
 
+    // TODO:
     // Automatically generate a thumbnail image when the property is accessed, if it hasn't been set yet.
     public ImageSource? ThumbImage 
     {

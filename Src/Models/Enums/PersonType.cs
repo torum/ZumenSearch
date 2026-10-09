@@ -1,6 +1,6 @@
 ﻿namespace ZumenSearch.Models.Enums;
 
-public enum PersonKind
+public enum PersonKindType
 {
     Natural,
     Legal,

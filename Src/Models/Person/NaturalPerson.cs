@@ -12,27 +12,30 @@ public partial class NaturalPerson : PersonBase
 {
     private string? _nameField;
 
+    public NaturalPerson(string id, EntityStatus status) : base(id, status, PersonKindType.Natural)
+    {
+        //
+    }
+
     public string NameFirst
     {
         get => field ?? string.Empty;
         set
         {
-            if (SetProperty(ref field, value))
-            {
-                _nameField = $"{NameLast} {NameFirst}";
+            field = value;
+            _nameField = $"{NameLast} {NameFirst}";
 
-                try
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(_nameField))
                 {
-                    if (!string.IsNullOrWhiteSpace(_nameField))
-                    {
-                        SetName(_nameField);
-                    }
+                    SetName(_nameField);
                 }
-                finally
-                {
-                    IsModified = true;
-                }
-            }   
+            }
+            finally
+            {
+                IsModified = true;
+            }
         }
     }
 
@@ -41,27 +44,21 @@ public partial class NaturalPerson : PersonBase
         get => field ?? string.Empty;
         set
         {
-            if (SetProperty(ref field, value))
-            {
-                _nameField = $"{NameLast} {NameFirst}";
+            field = value;
+            _nameField = $"{NameLast} {NameFirst}";
 
-                try
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(_nameField))
                 {
-                    if (!string.IsNullOrWhiteSpace(_nameField))
-                    {
-                        SetName(_nameField);
-                    }
+                    SetName(_nameField);
                 }
-                finally
-                {
-                    IsModified = true;
-                }
+            }
+            finally
+            {
+                IsModified = true;
             }
         }
     }
 
-    public NaturalPerson(string id, EntityStatus status) : base(id, status, PersonKind.Natural)
-    {
-        //
-    }
 };

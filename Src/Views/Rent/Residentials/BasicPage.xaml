@@ -50,7 +50,7 @@
                             <!-- 物件種目 -->
                             <ComboBox x:Name="ComboBoxKinds" Grid.Row="0" Grid.Column="0" Header="物件種目" PlaceholderText="選択" Width="200" SelectedIndex="-1" ItemsSource="{x:Bind ViewModel.PropertyTypes, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.SelectedPropertyType, Mode=TwoWay}" VerticalAlignment="Bottom">
                                 <ComboBox.ItemTemplate>
-                                    <DataTemplate x:DataType="modresidencial:PropertyTypeLabel">
+                                    <DataTemplate x:DataType="modresidencial:PropertyKindTypeLabel">
                                         <StackPanel Orientation="Horizontal">
                                             <TextBlock Text="{x:Bind Label, Mode=OneTime}"/>
                                         </StackPanel>
@@ -74,7 +74,7 @@
 
                         <Grid Grid.Row="0" Grid.Column="0">
                             <!-- 構造 -->
-                            <ComboBox Header="構造" HorizontalAlignment="Stretch" PlaceholderText="選択" SelectedIndex="-1" ItemsSource="{x:Bind ViewModel.Structures, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.SelectedStructure, Mode=TwoWay}">
+                            <ComboBox Header="構造" HorizontalAlignment="Stretch" PlaceholderText="選択" SelectedIndex="-1" ItemsSource="{x:Bind ViewModel.StructureTypes, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.SelectedStructureType, Mode=TwoWay}">
                                 <ComboBox.ItemTemplate>
                                     <!-- Needed for AOT -->
                                     <DataTemplate x:DataType="modresidencial:PropertyStructureTypeLabel">

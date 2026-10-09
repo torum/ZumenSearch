@@ -16,25 +16,23 @@ namespace ZumenSearch.Models.Rent.Residentials;
 [System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "CA1716:Identifiers should not match keywords", Justification = "Required for clarity. And I don't care about Visual Basic Keywords.")]
 public sealed partial class Property : PropertyBase
 {
-    public Property(string id, EntityStatus status) : base(id, status, Enums.PropertyKind.RentResidential)
+    public Property(string id, EntityStatus status) : base(id, status, Enums.PropertyContextType.RentResidential)
     {
         //
     }
 
     #region == Properties ==
 
-    #region == 基本 ==
+    #region == 建物の基本情報 ==
 
     // 物件種別
-    public PropertyTypeLabel BuildingType
+    public PropertyKindTypeLabel PropertyKind
     {
-        get => field ?? new(PropertyType.Unspecified);
+        get => field ?? new(PropertyKindType.Unspecified);
         private set
         {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
+            field = value;
+            IsModified = true;
         }
     }
 
@@ -44,23 +42,19 @@ public sealed partial class Property : PropertyBase
         get;
         private set
         {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
+            field = value;
+            IsModified = true;
         }
     }
 
     // 建物構造
-    public PropertyStructureTypeLabel BuildingStructure
+    public PropertyStructureTypeLabel PropertyStructure
     {
         get => field ?? new(StructureType.Unspecified);
         private set
         {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
+            field = value;
+            IsModified = true;
         }
     }
 
@@ -94,7 +88,6 @@ public sealed partial class Property : PropertyBase
             }
             */
 
-            OnPropertyChanged();
         }
     }
 
@@ -112,7 +105,6 @@ public sealed partial class Property : PropertyBase
             field = value;
             IsModified = true;
 
-            OnPropertyChanged();
         }
         /*
         get => field ?? string.Empty;
@@ -161,7 +153,6 @@ public sealed partial class Property : PropertyBase
             field = value;
             IsModified = true;
 
-            OnPropertyChanged();
         }
         /*
         get => field ?? string.Empty;
@@ -202,11 +193,9 @@ public sealed partial class Property : PropertyBase
         get;
         private set
         {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-                //OnPropertyChanged();
-            }
+
+            field = value;
+            IsModified = true;
         }
     } = new DateTimeOffset(1900, 1, 1, 0, 0, 0, TimeSpan.Zero);
 
@@ -218,10 +207,8 @@ public sealed partial class Property : PropertyBase
         {
             // TODO: check 13桁.
 
-            if (SetProperty(ref field, value.Trim()))
-            {
-                IsModified = true;
-            }
+            field = value;
+            IsModified = true;
         }
     }
 
@@ -233,10 +220,9 @@ public sealed partial class Property : PropertyBase
         {
             // TODO: check ４桁.
 
-            if (SetProperty(ref field, value.Trim()))
-            {
-                IsModified = true;
-            }
+
+            field = value;
+            IsModified = true;
         }
     } = "0000";
 
@@ -246,10 +232,8 @@ public sealed partial class Property : PropertyBase
         get;
         private set
         {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
+            field = value;
+            IsModified = true;
         }
     } = string.Empty;
 
@@ -368,10 +352,8 @@ public sealed partial class Property : PropertyBase
         get;
         set
         {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
+            field = value;
+            IsModified = true;
         }
     }
 
@@ -380,10 +362,8 @@ public sealed partial class Property : PropertyBase
         get;
         set
         {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
+            field = value;
+            IsModified = true;
         }
     }
 
@@ -392,10 +372,8 @@ public sealed partial class Property : PropertyBase
         get;
         set
         {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
+            field = value;
+            IsModified = true;
         }
     }
 
@@ -404,10 +382,8 @@ public sealed partial class Property : PropertyBase
         get;
         set
         {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
+            field = value;
+            IsModified = true;
         }
     }
 
@@ -425,10 +401,8 @@ public sealed partial class Property : PropertyBase
         get;
         set
         {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
+            field = value;
+            IsModified = true;
         }
     }
 
@@ -437,10 +411,8 @@ public sealed partial class Property : PropertyBase
         get;
         set
         {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
+            field = value;
+            IsModified = true;
         }
     } = EnumElectricType.Unspecified;
 
@@ -449,10 +421,8 @@ public sealed partial class Property : PropertyBase
         get;
         set
         {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
+            field = value;
+            IsModified = true;
         }
     } = string.Empty;
 
@@ -699,10 +669,8 @@ public sealed partial class Property : PropertyBase
         get;
         set
         {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
+            field = value;
+            IsModified = true;
         }
     } = [];
 
@@ -715,10 +683,8 @@ public sealed partial class Property : PropertyBase
         get;
         set
         {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true; //?
-            }
+            field = value;
+            IsModified = true;
         }
     } = [];
 
@@ -731,10 +697,8 @@ public sealed partial class Property : PropertyBase
         get;
         set
         {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
+            field = value;
+            IsModified = true;
         }
     } = [];
 
@@ -747,10 +711,8 @@ public sealed partial class Property : PropertyBase
         get;
         set
         {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
+            field = value;
+            IsModified = true;
         }
     } = [];
 
@@ -764,10 +726,8 @@ public sealed partial class Property : PropertyBase
         get;
         set
         {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
+            field = value;
+            IsModified = true;
         }
     } = [];
 
@@ -779,38 +739,38 @@ public sealed partial class Property : PropertyBase
 
     #region == Methods ==
 
-    public void SetBuildingType(PropertyTypeLabel value) => BuildingType = value;
+    public void SetBuildingType(PropertyKindTypeLabel value) => PropertyKind = value;
 
     public void SetPropertyTypeFromString(string Str)
     {
         if (string.IsNullOrEmpty(Str))
         {
             // TODO:
-            BuildingType = new PropertyTypeLabel(PropertyType.Unspecified);
+            PropertyKind = new PropertyKindTypeLabel(PropertyKindType.Unspecified);
             return;
         }
 
-        if (Enum.TryParse<PropertyType>(Str, out var result))
+        if (Enum.TryParse<PropertyKindType>(Str, out var result))
         {
-            BuildingType = new PropertyTypeLabel(result);
+            PropertyKind = new PropertyKindTypeLabel(result);
         }
     }
 
     public void SetIsUnitOwnership(bool value) => IsUnitOwnership = value;
 
-    public void SetBuildingStructure(PropertyStructureTypeLabel value) => BuildingStructure = value;
+    public void SetBuildingStructure(PropertyStructureTypeLabel value) => PropertyStructure = value;
 
     public void SetStructureTypeFromString(string Str)
     {
         if (string.IsNullOrEmpty(Str))
         {
-            BuildingStructure = new PropertyStructureTypeLabel(StructureType.Unspecified);
+            PropertyStructure = new PropertyStructureTypeLabel(StructureType.Unspecified);
             return;
         }
 
         if (Enum.TryParse<StructureType>(Str, out var result))
         {
-            BuildingStructure = new PropertyStructureTypeLabel(result);
+            PropertyStructure = new PropertyStructureTypeLabel(result);
         }
     }
 

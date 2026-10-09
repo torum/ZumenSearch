@@ -8,7 +8,7 @@ namespace ZumenSearch.Models.Rent.Commercials;
 
 #region == Property ==
 
-public enum PropertyType
+public enum PropertyKindType
 {
     Unspecified,
     Office,

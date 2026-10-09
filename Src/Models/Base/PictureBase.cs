@@ -25,10 +25,8 @@ public abstract class PictureBase : EntityBase
         get;
         set
         {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
+            field = value;
+            IsModified = true;
         }
     } = string.Empty;
 
@@ -37,7 +35,6 @@ public abstract class PictureBase : EntityBase
     public ImageSource? ThumbImage
     {
         get => field ?? CreateThumb();
-        set;
     }
 
     private BitmapImage? CreateThumb()

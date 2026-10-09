@@ -738,27 +738,27 @@ public partial class MainViewModel : ObservableRecipient,
             return;
         }
 
-        if (selected.PropertyKind == Models.Enums.PropertyKind.RentResidential)
+        if (selected.PropertyContextType == Models.Enums.PropertyContextType.RentResidential)
         {
             await EditRentResidentialFromId(propertyId);
         }
-        else if (selected.PropertyKind == Models.Enums.PropertyKind.RentCommercial)
+        else if (selected.PropertyContextType == Models.Enums.PropertyContextType.RentCommercial)
         {
             await EditRentCommercialFromId(propertyId);
         }
-        else if (selected.PropertyKind == Models.Enums.PropertyKind.RentParking)
+        else if (selected.PropertyContextType == Models.Enums.PropertyContextType.RentParking)
         {
             Debug.WriteLine("EditPropertiesCommand not yet implemented.");
         }
-        else if (selected.PropertyKind == Models.Enums.PropertyKind.SaleResidential)
+        else if (selected.PropertyContextType == Models.Enums.PropertyContextType.SaleResidential)
         {
             Debug.WriteLine("EditPropertiesCommand not yet implemented.");
         }
-        else if (selected.PropertyKind == Models.Enums.PropertyKind.SaleCommercial)
+        else if (selected.PropertyContextType == Models.Enums.PropertyContextType.SaleCommercial)
         {
             Debug.WriteLine("EditPropertiesCommand not yet implemented.");
         }
-        else if (selected.PropertyKind == Models.Enums.PropertyKind.SaleLand)
+        else if (selected.PropertyContextType == Models.Enums.PropertyContextType.SaleLand)
         {
             Debug.WriteLine("EditPropertiesCommand not yet implemented.");
         }
@@ -794,27 +794,27 @@ public partial class MainViewModel : ObservableRecipient,
             return;
         }
 
-        if (selected.PropertyKind == Models.Enums.PropertyKind.RentResidential)
+        if (selected.PropertyContextType == Models.Enums.PropertyContextType.RentResidential)
         {
             await DeleteRentResidential(selected);
         }
-        else if (selected.PropertyKind == Models.Enums.PropertyKind.RentCommercial)
+        else if (selected.PropertyContextType == Models.Enums.PropertyContextType.RentCommercial)
         {
             await DeleteRentCommercial(selected);
         }
-        else if (selected.PropertyKind == Models.Enums.PropertyKind.RentParking)
+        else if (selected.PropertyContextType == Models.Enums.PropertyContextType.RentParking)
         {
             Debug.WriteLine("DeletePropertyCommand not yet implemented.");
         }
-        else if (selected.PropertyKind == Models.Enums.PropertyKind.SaleResidential)
+        else if (selected.PropertyContextType == Models.Enums.PropertyContextType.SaleResidential)
         {
             Debug.WriteLine("DeletePropertyCommand not yet implemented.");
         }
-        else if (selected.PropertyKind == Models.Enums.PropertyKind.SaleCommercial)
+        else if (selected.PropertyContextType == Models.Enums.PropertyContextType.SaleCommercial)
         {
             Debug.WriteLine("DeletePropertyCommand not yet implemented.");
         }
-        else if (selected.PropertyKind == Models.Enums.PropertyKind.SaleLand)
+        else if (selected.PropertyContextType == Models.Enums.PropertyContextType.SaleLand)
         {
             Debug.WriteLine("DeletePropertyCommand not yet implemented.");
         }

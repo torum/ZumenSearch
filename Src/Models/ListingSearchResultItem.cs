@@ -16,14 +16,12 @@ public sealed partial class ListingSearchResultItem : ListingBase
         get => field ?? string.Empty;
         set
         {
-            if (SetProperty(ref field, value))
-            {
-
-            }
+            field = value;
+            IsModified = true;//?
         }
     }
 
-    public ListingSearchResultItem(string id, string propertyId, PropertyKind propertyKind) : base(id, EntityStatus.Saved, propertyId, EntityStatus.Saved, propertyKind)
+    public ListingSearchResultItem(string id, string propertyId, PropertyContextType contextType) : base(id, EntityStatus.Saved, propertyId, EntityStatus.Saved, contextType)
     {
         //PropertyId = propertyId;
     }

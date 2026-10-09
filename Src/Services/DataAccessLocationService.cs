@@ -10,21 +10,21 @@ namespace ZumenSearch.Services;
 
 public class DataAccessLocationService : IDataAccessLocationService
 {
-    private readonly SqliteConnectionStringBuilder connectionStringBuilder;
+    private readonly SqliteConnectionStringBuilder _connectionStringBuilder;
 
     //private readonly ReaderWriterLockSlim _readerWriterLock = new();
 
     public DataAccessLocationService()
     {
         string dbPath = Path.Combine(AppContext.BaseDirectory, "Data", "mt_town_all.db");
-        connectionStringBuilder = new SqliteConnectionStringBuilder($"Data Source={dbPath}");
+        _connectionStringBuilder = new SqliteConnectionStringBuilder($"Data Source={dbPath}");
     }
 
     public List<CountyAndCity> GetCountyAndCityByPref(string pref)
     {
         var dataset = new List<CountyAndCity>();
 
-        using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
+        using var connection = new SqliteConnection(_connectionStringBuilder.ConnectionString);
         // TODO; Try catch for connection.Open() and log error if fails
         connection.Open();
         using var cmd = connection.CreateCommand();
@@ -50,7 +50,7 @@ public class DataAccessLocationService : IDataAccessLocationService
     {
         var dataset = new List<WardAndOaza>();
 
-        using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
+        using var connection = new SqliteConnection(_connectionStringBuilder.ConnectionString);
         connection.Open();
         using var cmd = connection.CreateCommand();
         cmd.CommandText = string.Format(CultureInfo.InvariantCulture, "SELECT machiaza_id, ward, oaza_cho FROM mt_town_all WHERE pref LIKE '{0}' AND county LIKE '{1}' AND city LIKE '{2}'", pref, county, city);
@@ -75,7 +75,7 @@ public class DataAccessLocationService : IDataAccessLocationService
     {
         var dataset = new List<Choume>();
 
-        using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
+        using var connection = new SqliteConnection(_connectionStringBuilder.ConnectionString);
         connection.Open();
         using var cmd = connection.CreateCommand();
         cmd.CommandText = string.Format(CultureInfo.InvariantCulture, "SELECT machiaza_id, chome FROM mt_town_all WHERE pref LIKE '{0}' AND county LIKE '{1}' AND city LIKE '{2}' AND ward LIKE '{3}' AND oaza_cho LIKE '{4}'", pref, county, city, ward, oaza);

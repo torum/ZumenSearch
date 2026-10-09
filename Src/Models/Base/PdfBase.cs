@@ -25,10 +25,8 @@ public abstract class PdfBase : EntityBase
         get;
         set
         {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
+            field = value;
+            IsModified = true;
         }
     } = string.Empty;
 
@@ -39,17 +37,14 @@ public abstract class PdfBase : EntityBase
         get;
         set
         {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
+            field = value;
+            IsModified = true;
         }
     } = string.Empty;
 
     public ImageSource? ThumbImage
     {
         get => field ?? CreateThumb();
-        set;
     }
 
     private BitmapImage? CreateThumb()

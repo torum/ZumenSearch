@@ -25,7 +25,7 @@ namespace ZumenSearch.Services;
 
 public sealed partial class DataAccessService : IDataAccessService, IDisposable
 {
-    private SqliteConnectionStringBuilder connectionStringBuilder = [];
+    private SqliteConnectionStringBuilder _connectionStringBuilder = [];
 
     private readonly ReaderWriterLockSlim _readerWriterLock = new();
 
@@ -39,14 +39,14 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         {
             // Don't think WAL mode is needed for this application. It is single-user, single-process, single-threading app with ReaderWriterLock.
             // WAL mode is more suitable for multi-threaded or multi-process scenarios where concurrent reads and writes are expected.
-            connectionStringBuilder = new SqliteConnectionStringBuilder("Data Source=" + dataBaseFilePath);//+ ";Pooling=false" 
+            _connectionStringBuilder = new SqliteConnectionStringBuilder("Data Source=" + dataBaseFilePath);//+ ";Pooling=false" 
 
             // Known issue. I personaly reported the issue to Microsoft.
             // https://github.com/dotnet/efcore/issues/38275
             // It is not a problem for packaged apps, but it is a problem for unpackaged apps. Database initialization succeeds with the exceptions, but it the debugger stops at the exception.
             // The issue is that Microsoft.Data.Sqlite SqliteConnection() calls Windows.Storage.ApplicationData.Current.get() which results in System.InvalidOperationException "Operation is not valid due to the current state of the object."
             // To avoid the debugger stopping here, change the Visual Studio exception settings for System.InvalidOperationException and System.Reflection.TargetInvocationException so it does not break when thrown; avoid disabling thrown-exception breaks globally if you still need them for other exceptions.
-            using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
+            using var connection = new SqliteConnection(_connectionStringBuilder.ConnectionString);
             if (!RuntimeHelper.IsMSIX)
             {
                 // https://github.com/dotnet/efcore/issues/38275
@@ -127,9 +127,9 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS rent_residentials (" +
                     "property_id TEXT NOT NULL PRIMARY KEY," +
                     //"residential_id TEXT NOT NULL," +
-                    "building_type TEXT NOT NULL DEFAULT ''," +
+                    "property_type TEXT NOT NULL DEFAULT ''," +
                     "is_unit_ownership INTEGER NOT NULL DEFAULT 0," +
-                    "building_structure TEXT NOT NULL DEFAULT ''," +
+                    "property_structure TEXT NOT NULL DEFAULT ''," +
                     "floor_count_above_ground INTEGER NOT NULL DEFAULT 0," +
                     "floor_count_basement INTEGER NOT NULL DEFAULT 0," +
                     "total_unit_count INTEGER NOT NULL DEFAULT 0," +
@@ -171,20 +171,21 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     " )";
                 tableCmd.ExecuteNonQuery();
 
-                tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS rent_residential_rooms (" +
+                tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS rent_residential_listings (" +
                     "listing_id TEXT NOT NULL PRIMARY KEY," +
                     "property_id TEXT NOT NULL DEFAULT ''," +
                     "is_property_unit_ownership INTEGER NOT NULL DEFAULT 0," +
                     "name TEXT NOT NULL DEFAULT ''," +
                     "chinryou INTEGER NOT NULL DEFAULT 0," +
                     "room_count INTEGER NOT NULL DEFAULT 1," +
-                    "room_layout_type TEXT NOT NULL DEFAULT 'R'," +
+                    "floor_plan_type TEXT NOT NULL DEFAULT ''," +
+                    "floor_plan_extra_type TEXT NOT NULL DEFAULT ''," +
                     "floor_area NUMERIC NOT NULL DEFAULT 0," +
-                    "floor_type TEXT NOT NULL DEFAULT '地上'," +
+                    "floor_type TEXT NOT NULL DEFAULT ''," +
                     "floor_number INTEGER," +
                     "is_corner_room INTEGER NOT NULL DEFAULT 0," +
                     "main_exposure_direction TEXT NOT NULL DEFAULT ''," +
-                    "current_status TEXT NOT NULL DEFAULT '未指定'," +
+                    "current_status TEXT NOT NULL DEFAULT ''," +
                     "is_recruiting INTEGER NOT NULL DEFAULT 0," +
                     "available_from_month INTEGER," +
                     "available_from_period TEXT NOT NULL DEFAULT ''," +
@@ -197,9 +198,8 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     "FOREIGN KEY (property_id) REFERENCES properties(property_id) ON DELETE CASCADE" +
                     " )";
                 tableCmd.ExecuteNonQuery();
-                //EnsureResidentialListingColumns(tableCmd);
 
-                tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS rent_residential_room_pictures (" +
+                tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS rent_residential_listing_pictures (" +
                     "picture_id TEXT NOT NULL PRIMARY KEY," +
                     "listing_id TEXT NOT NULL DEFAULT ''," +
                     "property_id TEXT NOT NULL DEFAULT ''," +
@@ -207,13 +207,13 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     "type TEXT NOT NULL DEFAULT ''," +
                     "description TEXT NOT NULL DEFAULT ''," +
                     "is_main INTEGER  NOT NULL DEFAULT 0," +
-                    "FOREIGN KEY (listing_id) REFERENCES rent_residential_rooms(listing_id) ON DELETE CASCADE," +
+                    "FOREIGN KEY (listing_id) REFERENCES rent_residential_listings(listing_id) ON DELETE CASCADE," +
                     "FOREIGN KEY (property_id) REFERENCES rent_residentials(property_id) ON DELETE CASCADE," + //?
                     "FOREIGN KEY (property_id) REFERENCES properties(property_id) ON DELETE CASCADE" +
                     " )";
                 tableCmd.ExecuteNonQuery();
 
-                tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS rent_residential_room_pdfs (" +
+                tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS rent_residential_listing_pdfs (" +
                     "pdf_id TEXT NOT NULL PRIMARY KEY," +
                     "listing_id TEXT NOT NULL DEFAULT ''," +
                     "property_id TEXT NOT NULL DEFAULT ''," +
@@ -224,7 +224,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     "is_main INTEGER  NOT NULL DEFAULT 0," +
                     "created_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc'))," +
                     "updated_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc'))," +
-                    "FOREIGN KEY (listing_id) REFERENCES rent_residential_rooms(listing_id) ON DELETE CASCADE," +
+                    "FOREIGN KEY (listing_id) REFERENCES rent_residential_listings(listing_id) ON DELETE CASCADE," +
                     "FOREIGN KEY (property_id) REFERENCES rent_residentials(property_id) ON DELETE CASCADE," + //?
                     "FOREIGN KEY (property_id) REFERENCES properties(property_id) ON DELETE CASCADE" +
                     " )";
@@ -244,13 +244,13 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                         ON rent_residential_pdfs(property_id);
                     
                     CREATE INDEX IF NOT EXISTS ix_rent_residential_rooms_property_id
-                        ON rent_residential_rooms(property_id);
+                        ON rent_residential_listings(property_id);
 
                     CREATE INDEX IF NOT EXISTS ix_rent_residential_room_pictures_listing_id
-                        ON rent_residential_room_pictures(listing_id);
+                        ON rent_residential_listing_pictures(listing_id);
 
                     CREATE INDEX IF NOT EXISTS ix_rent_residential_room_pdfs_listing_id
-                        ON rent_residential_room_pdfs(listing_id);
+                        ON rent_residential_listing_pdfs(listing_id);
                     """;
                 // TODO: more?
                 tableCmd.ExecuteNonQuery();
@@ -264,7 +264,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         property_id TEXT NOT NULL PRIMARY KEY,
         commercial_kind TEXT NOT NULL DEFAULT '',
         is_unit_ownership INTEGER NOT NULL DEFAULT 0,
-        building_structure TEXT NOT NULL DEFAULT '',
+        property_structure TEXT NOT NULL DEFAULT '',
         floor_count_above_ground INTEGER NOT NULL DEFAULT 0,
         floor_count_basement INTEGER NOT NULL DEFAULT 0,
         total_floor_area NUMERIC NOT NULL DEFAULT 0,
@@ -411,9 +411,9 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 tableCmd.CommandText = """
     CREATE TABLE IF NOT EXISTS sale_residentials (
         property_id TEXT NOT NULL PRIMARY KEY,
-        building_type TEXT NOT NULL DEFAULT '',
+        property_type TEXT NOT NULL DEFAULT '',
         is_unit_ownership INTEGER NOT NULL DEFAULT 0,
-        building_structure TEXT NOT NULL DEFAULT '',
+        property_structure TEXT NOT NULL DEFAULT '',
         floor_count_above_ground INTEGER NOT NULL DEFAULT 0,
         floor_count_basement INTEGER NOT NULL DEFAULT 0,
         total_unit_count INTEGER NOT NULL DEFAULT 0,
@@ -589,50 +589,6 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         return res;
     }
 
-    private static void EnsureResidentialListingColumns(SqliteCommand command)
-    {
-        var existingColumns = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        command.CommandText = "PRAGMA table_info(rent_residential_rooms);";
-        command.Parameters.Clear();
-
-        using (var reader = command.ExecuteReader())
-        {
-            while (reader.Read())
-            {
-                existingColumns.Add(reader.GetString(reader.GetOrdinal("name")));
-            }
-        }
-
-        (string Name, string Definition)[] columns =
-        [
-            ("room_count", "INTEGER NOT NULL DEFAULT 1"),
-            ("room_layout_type", "TEXT NOT NULL DEFAULT 'R'"),
-            ("floor_area", "NUMERIC NOT NULL DEFAULT 0"),
-            ("floor_type", "TEXT NOT NULL DEFAULT '地上'"),
-            ("floor_number", "INTEGER"),
-            ("is_corner_room", "INTEGER NOT NULL DEFAULT 0"),
-            ("main_exposure_direction", "TEXT NOT NULL DEFAULT ''"),
-            ("current_status", "TEXT NOT NULL DEFAULT '未指定'"),
-            ("is_recruiting", "INTEGER NOT NULL DEFAULT 0"),
-            ("available_from_month", "INTEGER"),
-            ("available_from_period", "TEXT NOT NULL DEFAULT ''"),
-            ("is_immediate_occupancy", "INTEGER NOT NULL DEFAULT 0"),
-            ("current_status_checked_at", "TEXT"),
-            ("remarks", "TEXT NOT NULL DEFAULT ''")
-        ];
-
-        foreach (var (name, definition) in columns)
-        {
-            if (existingColumns.Contains(name))
-            {
-                continue;
-            }
-
-            command.CommandText = $"ALTER TABLE rent_residential_rooms ADD COLUMN {name} {definition};";
-            command.ExecuteNonQuery();
-        }
-    }
-
     private static void AddColumnsIfNotExist(SqliteConnection conn)
     {
         //var cmd = conn.CreateCommand();
@@ -734,9 +690,9 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         */
         #endregion
 
-        #region == add to rent_residential_rooms ==
+        #region == add to rent_residential_listings ==
         /*
-        cmd.CommandText = "PRAGMA table_info(rent_residential_rooms);";
+        cmd.CommandText = "PRAGMA table_info(rent_residential_listings);";
         
         using (var reader = cmd.ExecuteReader())
         {
@@ -755,7 +711,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
                 try
                 {
-                    altcmd.CommandText = "ALTER TABLE rent_residential_rooms ADD COLUMN chinryou INTEGER NOT NULL DEFAULT 0;";
+                    altcmd.CommandText = "ALTER TABLE rent_residential_listings ADD COLUMN chinryou INTEGER NOT NULL DEFAULT 0;";
                     altcmd.ExecuteNonQuery();
                 }
                 catch (SqliteException ex)
@@ -785,7 +741,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
                 try
                 {
-                    altcmd.CommandText = "ALTER TABLE rent_residential_rooms ADD COLUMN created_at TEXT NOT NULL DEFAULT '';";
+                    altcmd.CommandText = "ALTER TABLE rent_residential_listings ADD COLUMN created_at TEXT NOT NULL DEFAULT '';";
                     altcmd.ExecuteNonQuery();
                 }
                 catch (SqliteException ex)
@@ -815,7 +771,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
                 try
                 {
-                    altcmd.CommandText = "ALTER TABLE rent_residential_rooms ADD COLUMN updated_at TEXT NOT NULL DEFAULT '';";
+                    altcmd.CommandText = "ALTER TABLE rent_residential_listings ADD COLUMN updated_at TEXT NOT NULL DEFAULT '';";
                     altcmd.ExecuteNonQuery();
                 }
                 catch (SqliteException ex)
@@ -925,9 +881,9 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         */
         #endregion
 
-        #region == add to rent_residential_room_pictures ==
+        #region == add to rent_residential_listing_pictures ==
         /*
-        cmd.CommandText = "PRAGMA table_info(rent_residential_room_pictures);";
+        cmd.CommandText = "PRAGMA table_info(rent_residential_listing_pictures);";
         exists = false;
         using (var reader = cmd.ExecuteReader())
         {
@@ -946,7 +902,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
                 try
                 {
-                    altcmd.CommandText = "ALTER TABLE rent_residential_room_pictures ADD COLUMN listing_id TEXT NOT NULL DEFAULT '';";
+                    altcmd.CommandText = "ALTER TABLE rent_residential_listing_pictures ADD COLUMN listing_id TEXT NOT NULL DEFAULT '';";
                     altcmd.ExecuteNonQuery();
                 }
                 catch (SqliteException ex)
@@ -971,7 +927,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         _readerWriterLock.EnterReadLock();
         try
         {
-            using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
+            using var connection = new SqliteConnection(_connectionStringBuilder.ConnectionString);
             connection.Open();
             using var cmd = connection.CreateCommand();
             cmd.CommandText = "SELECT * FROM properties ORDER BY updated_at DESC LIMIT 10"; // limit 10 for now.
@@ -986,11 +942,11 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     continue;
                 }
 
-                var enumKind = PropertyKind.Unknown;
+                var enumKind = PropertyContextType.Unknown;
                 var kind = reader.GetString(reader.GetOrdinal("property_kind")) ?? string.Empty;
                 if (!string.IsNullOrEmpty(kind))
                 {
-                    if (Enum.TryParse<Models.Enums.PropertyKind>(kind, out var parsedKind))
+                    if (Enum.TryParse<Models.Enums.PropertyContextType>(kind, out var parsedKind))
                     {
                         enumKind = parsedKind;
                     }
@@ -1042,7 +998,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         _readerWriterLock.EnterReadLock();
         try
         {
-            using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
+            using var connection = new SqliteConnection(_connectionStringBuilder.ConnectionString);
             connection.Open();
 
             using var cmd = connection.CreateCommand();
@@ -1067,11 +1023,11 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     continue;
                 }
 
-                var enumKind = PropertyKind.Unknown;
+                var enumKind = PropertyContextType.Unknown;
                 var kind = reader.GetString(reader.GetOrdinal("property_kind")) ?? string.Empty;
                 if (!string.IsNullOrEmpty(kind))
                 {
-                    if (Enum.TryParse<Models.Enums.PropertyKind>(kind, out var parsedKind))
+                    if (Enum.TryParse<Models.Enums.PropertyContextType>(kind, out var parsedKind))
                     {
                         enumKind = parsedKind;
                     }
@@ -1122,9 +1078,9 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         try
         {
             // System.Data.SQLite
-            //using var connection = new SQLiteConnection(connectionStringBuilder.ConnectionString);
+            //using var connection = new SQLiteConnection(_connectionStringBuilder.ConnectionString);
             // Microsoft.Data.Sqlite
-            using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
+            using var connection = new SqliteConnection(_connectionStringBuilder.ConnectionString);
             connection.Open();
 
             using var cmd = connection.CreateCommand();
@@ -1136,7 +1092,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 cmd.Parameters.Clear();
                 // Insert
                 //cmd.CommandText = "INSERT INTO properties (property_id, name, property_kind, thumbnail_filename, location_prefecture_code, location_prefecture, location_machiaza_id, location_county, location_city, location_ward, location_oaza_cho, location_choume, location_edaban, location_full, updated_at) " +
-                //  "VALUES (@RentId, @Name, @PropertyKind, @Thumb, @LocPrefId, @LocPrefecture, @LocMachiazaId, @LocCounty, @LocCity, @LocWard, @LocOazaCho, @LocChoume, @LocEdaban, @LocLocationFull, @updated_at)";
+                //  "VALUES (@RentId, @Name, @PropertyContextType, @Thumb, @LocPrefId, @LocPrefecture, @LocMachiazaId, @LocCounty, @LocCity, @LocWard, @LocOazaCho, @LocChoume, @LocEdaban, @LocLocationFull, @updated_at)";
                 // Upsert
                 var sqlUpsert = "INSERT INTO properties (property_id, name, property_kind, thumbnail_filename, location_prefecture_code, location_prefecture, location_machiaza_id, location_county, location_city, location_ward, location_oaza_cho, location_choume, location_edaban, location_postal_code, location_full, location_latitude, location_longitude, " +
                     "train1_line_code, train1_line_name, train1_station_code, train1_station_name, train1_ekitoho, buss1_stop_name, buss1_Jyousya, buss1_Toho, " +
@@ -1166,7 +1122,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 
                 cmd.Parameters.AddWithValue("@propertyId", building.Id);
                 cmd.Parameters.AddWithValue("@name", building.Name);
-                cmd.Parameters.AddWithValue("@propertyKind", building.PropertyKind.ToString());
+                cmd.Parameters.AddWithValue("@propertyKind", building.PropertyContextType.ToString());
                 cmd.Parameters.AddWithValue("@thumbnailPath", building.ThumbnailFilename);
                 // Address/Location
                 cmd.Parameters.AddWithValue("@locPrefId", building.Address.Prefecture?.MunicipalityCode ?? string.Empty);
@@ -1234,20 +1190,20 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 // rent_residentials
                 cmd.Parameters.Clear();
                 // Insert
-                //cmd.CommandText = "INSERT INTO rent_residentials (property_id, building_type, is_unit_ownership, building_structure, floor_count_above_ground, floor_count_basement, total_unit_count, built_year_month, fudousan_id, fudousan_id_additional_code, remarks) " +
-                //    "VALUES (@RentId, @BuildingKind, @IsUnitOwnership, @BuildingStructure, @FloorCountAboveGround, @FloorCountBasement, @TotalUnitCount, @BuiltYearMonth, @FudousanId, @FudousanIdAdditionalCode, @Remarks)";
+                //cmd.CommandText = "INSERT INTO rent_residentials (property_id, property_type, is_unit_ownership, property_structure, floor_count_above_ground, floor_count_basement, total_unit_count, built_year_month, fudousan_id, fudousan_id_additional_code, remarks) " +
+                //    "VALUES (@RentId, @BuildingKind, @IsUnitOwnership, @PropertyStructure, @FloorCountAboveGround, @FloorCountBasement, @TotalUnitCount, @BuiltYearMonth, @FudousanId, @FudousanIdAdditionalCode, @Remarks)";
                 // Upsert
-                sqlUpsert = "INSERT INTO rent_residentials (property_id, building_type, is_unit_ownership, building_structure, floor_count_above_ground, floor_count_basement, total_unit_count, built_year_month, fudousan_id, fudousan_id_additional_code, remarks) ";
+                sqlUpsert = "INSERT INTO rent_residentials (property_id, property_type, is_unit_ownership, property_structure, floor_count_above_ground, floor_count_basement, total_unit_count, built_year_month, fudousan_id, fudousan_id_additional_code, remarks) ";
                 sqlUpsert += "VALUES (@propertyId, @buildingType, @isUnitOwnership, @buildingStructure, @floorCountAboveGround, @floorCountBasement, @totalUnitCount, @builtYearMonth, @fudousanId, @fudousanIdAdditionalCode, @remarks)";
                 sqlUpsert += "ON CONFLICT(property_id) ";
-                sqlUpsert += "DO UPDATE SET building_type = @buildingType, is_unit_ownership = @isUnitOwnership, building_structure = @buildingStructure, floor_count_above_ground = @floorCountAboveGround, floor_count_basement = @floorCountBasement, total_unit_count = @totalUnitCount, built_year_month = @builtYearMonth, fudousan_id = @fudousanId, fudousan_id_additional_code = @fudousanIdAdditionalCode, remarks = @remarks";
+                sqlUpsert += "DO UPDATE SET property_type = @buildingType, is_unit_ownership = @isUnitOwnership, property_structure = @buildingStructure, floor_count_above_ground = @floorCountAboveGround, floor_count_basement = @floorCountBasement, total_unit_count = @totalUnitCount, built_year_month = @builtYearMonth, fudousan_id = @fudousanId, fudousan_id_additional_code = @fudousanIdAdditionalCode, remarks = @remarks";
 
                 cmd.CommandText = sqlUpsert;
 
                 cmd.Parameters.AddWithValue("@propertyId", building.Id);
-                cmd.Parameters.AddWithValue("@buildingType", building.BuildingType.Key.ToString());
+                cmd.Parameters.AddWithValue("@buildingType", building.PropertyKind.Key.ToString());
                 cmd.Parameters.AddWithValue("@isUnitOwnership", building.IsUnitOwnership ? 1 : 0); // bool to int
-                cmd.Parameters.AddWithValue("@buildingStructure", building.BuildingStructure.Key.ToString());
+                cmd.Parameters.AddWithValue("@buildingStructure", building.PropertyStructure.Key.ToString());
                 cmd.Parameters.AddWithValue("@floorCountAboveGround", building.FloorCountAboveGround);// int
                 cmd.Parameters.AddWithValue("@floorCountBasement", building.FloorCountBasement);// int
                 cmd.Parameters.AddWithValue("@totalUnitCount", building.TotalUnitCount);// int
@@ -1415,7 +1371,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
                         cmd.Parameters.AddWithValue("@lessor_id", psn.Id);
                         cmd.Parameters.AddWithValue("@property_id", building.Id);
-                        cmd.Parameters.AddWithValue("@property_kind", building.PropertyKind.ToString());
+                        cmd.Parameters.AddWithValue("@property_kind", building.PropertyContextType.ToString());
                         cmd.Parameters.AddWithValue("@listing_id", string.Empty);// since this is building.
 
                         cmd.ExecuteNonQuery();
@@ -1463,7 +1419,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
                         cmd.Parameters.AddWithValue("@broker_id", psn.Id);
                         cmd.Parameters.AddWithValue("@property_id", building.Id);
-                        cmd.Parameters.AddWithValue("@property_kind", building.PropertyKind.ToString());
+                        cmd.Parameters.AddWithValue("@property_kind", building.PropertyContextType.ToString());
                         cmd.Parameters.AddWithValue("@listing_id", string.Empty);// since this is building.
 
                         cmd.ExecuteNonQuery();
@@ -1494,21 +1450,24 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
                 cmd.Parameters.Clear();
 
-                // 部屋 rent_residential_rooms
+                // 部屋 rent_residential_listings
                 if (building.Rooms.Count > 0)
                 {
                     foreach (var unit in building.Rooms)
                     {
+                        // TODO: reuse the code for upsert listing.
+
+
                         cmd.CommandText = """
-                            INSERT INTO rent_residential_rooms (
+                            INSERT INTO rent_residential_listings (
                                 listing_id, property_id, is_property_unit_ownership, name, chinryou,
-                                room_count, room_layout_type, floor_area, floor_type, floor_number,
+                                room_count, floor_plan_type, floor_plan_extra_type, floor_area, floor_type, floor_number,
                                 is_corner_room, main_exposure_direction, current_status, is_recruiting,
                                 available_from_month, available_from_period, is_immediate_occupancy,
                                 current_status_checked_at, remarks)
                             VALUES (
                                 @listing_id, @property_id, @is_property_unit_ownership, @name, @chinryou,
-                                @room_count, @room_layout_type, @floor_area, @floor_type, @floor_number,
+                                @room_count, @floor_plan_type, @floor_plan_extra_type, @floor_area, @floor_type, @floor_number,
                                 @is_corner_room, @main_exposure_direction, @current_status, @is_recruiting,
                                 @available_from_month, @available_from_period, @is_immediate_occupancy,
                                 @current_status_checked_at, @remarks)
@@ -1517,7 +1476,8 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                                 name = @name,
                                 chinryou = @chinryou,
                                 room_count = @room_count,
-                                room_layout_type = @room_layout_type,
+                                floor_plan_type = @floor_plan_type,
+                                floor_plan_extra_type = @floor_plan_extra_type,
                                 floor_area = @floor_area,
                                 floor_type = @floor_type,
                                 floor_number = @floor_number,
@@ -1542,9 +1502,11 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                         cmd.Parameters.AddWithValue("@name", unit.Name);
                         cmd.Parameters.AddWithValue("@chinryou", unit.Chinryou);
                         cmd.Parameters.AddWithValue("@room_count", unit.RoomCount);
-                        cmd.Parameters.AddWithValue("@room_layout_type", unit.RoomLayoutType.GetStorageValue());
+                        /*
+                        cmd.Parameters.AddWithValue("@floor_plan_type", unit.FloorPlanType.GetStorageValue());
+                        cmd.Parameters.AddWithValue("@floor_plan_extra_type", unit.FloorPlanExtraType.GetStorageValue());
                         cmd.Parameters.AddWithValue("@floor_area", unit.FloorArea);
-                        cmd.Parameters.AddWithValue("@floor_type", unit.FloorType.GetStorageValue());
+                        cmd.Parameters.AddWithValue("@floor_type", unit.FloorNumberType.GetStorageValue());
                         cmd.Parameters.AddWithValue("@floor_number", (object?)unit.FloorNumber ?? DBNull.Value);
                         cmd.Parameters.AddWithValue("@is_corner_room", unit.IsCornerRoom ? 1 : 0);
                         cmd.Parameters.AddWithValue("@main_exposure_direction", unit.MainExposureDirection.GetStorageValue());
@@ -1554,13 +1516,14 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                         cmd.Parameters.AddWithValue("@available_from_period", unit.AvailableFromPeriod.GetStorageValue());
                         cmd.Parameters.AddWithValue("@is_immediate_occupancy", unit.IsImmediateOccupancy ? 1 : 0);
                         cmd.Parameters.AddWithValue("@current_status_checked_at", ToDatabaseStatusCheckedAt(unit.CurrentStatusCheckedAt));
+                        */
                         cmd.Parameters.AddWithValue("@remarks", unit.Remarks ?? string.Empty);
                         cmd.Parameters.AddWithValue("@updated_at", DateTimeOffset.UtcNow.ToString("s"));
 
                         var r = cmd.ExecuteNonQuery();
                         if (r > 0)
                         {
-                            unit.PropertyStatus = EntityStatus.Saved;
+                            unit.SetPropertyStatus(EntityStatus.Saved);
                             unit.SetStatus(EntityStatus.Saved);
                             //unit.IsNew = false;
                             unit.SetIsModified(false);
@@ -1572,7 +1535,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                             foreach (var pic in unit.Pictures)
                             {
                                 // Upsert
-                                var sqlUpsertRoomPicture = "INSERT INTO rent_residential_room_pictures (picture_id, listing_id, property_id, filename, type, description, is_main) VALUES (@PicId, @roomId, @RentId, @Path, @type, @Desc, @Main) ";
+                                var sqlUpsertRoomPicture = "INSERT INTO rent_residential_listing_pictures (picture_id, listing_id, property_id, filename, type, description, is_main) VALUES (@PicId, @roomId, @RentId, @Path, @type, @Desc, @Main) ";
                                 sqlUpsertRoomPicture += "ON CONFLICT(picture_id) ";
                                 sqlUpsertRoomPicture += "DO UPDATE SET filename = @Path, type = @type, description = @Desc, is_main = @Main";
 
@@ -1609,7 +1572,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                             foreach (var delp in unit.PicturesToBeDeleted)
                             {
                                 // 削除
-                                var sqlDeleteRentLivingPicture = string.Format(CultureInfo.InvariantCulture, "DELETE FROM rent_residential_room_pictures WHERE picture_id = '{0}'", delp.Id);
+                                var sqlDeleteRentLivingPicture = string.Format(CultureInfo.InvariantCulture, "DELETE FROM rent_residential_listing_pictures WHERE picture_id = '{0}'", delp.Id);
 
                                 cmd.CommandText = sqlDeleteRentLivingPicture;
                                 var DelRentLivingPicResult = cmd.ExecuteNonQuery();
@@ -1630,7 +1593,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                             foreach (var pdf in unit.Pdfs)
                             {
                                 // Upsert
-                                var sqlUpsertRoomPdf = "INSERT INTO rent_residential_room_pdfs (pdf_id, listing_id, property_id, filename, thumbnail_filename, type, description, is_main) VALUES (@PdfId, @roomId, @RentId, @Path, @Thumb, @type, @Desc, @Main) ";
+                                var sqlUpsertRoomPdf = "INSERT INTO rent_residential_listing_pdfs (pdf_id, listing_id, property_id, filename, thumbnail_filename, type, description, is_main) VALUES (@PdfId, @roomId, @RentId, @Path, @Thumb, @type, @Desc, @Main) ";
                                 sqlUpsertRoomPdf += "ON CONFLICT(pdf_id) ";
                                 sqlUpsertRoomPdf += "DO UPDATE SET filename = @Path, thumbnail_filename = @Thumb, type = @type, description = @Desc, is_main = @Main";
 
@@ -1668,7 +1631,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                             foreach (var delp in unit.PdfsToBeDeleted)
                             {
                                 // 削除
-                                var sqlDeleteRentLivingPdf = string.Format(CultureInfo.InvariantCulture, "DELETE FROM rent_residential_room_pdfs WHERE pdf_id = '{0}'", delp.Id);
+                                var sqlDeleteRentLivingPdf = string.Format(CultureInfo.InvariantCulture, "DELETE FROM rent_residential_listing_pdfs WHERE pdf_id = '{0}'", delp.Id);
 
                                 cmd.CommandText = sqlDeleteRentLivingPdf;
                                 var DelRentLivingPdfResult = cmd.ExecuteNonQuery();
@@ -1702,7 +1665,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
                                 cmd.Parameters.AddWithValue("@lessor_id", psn.Id);
                                 cmd.Parameters.AddWithValue("@property_id", building.Id);
-                                cmd.Parameters.AddWithValue("@property_kind", building.PropertyKind.ToString());
+                                cmd.Parameters.AddWithValue("@property_kind", building.PropertyContextType.ToString());
                                 cmd.Parameters.AddWithValue("@listing_id", unit.Id);
 
                                 cmd.ExecuteNonQuery();
@@ -1740,7 +1703,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     foreach (var delr in building.RoomsToBeDeleted)
                     {
                         // 削除
-                        var sqlDeleteRentLivingRoom = string.Format(CultureInfo.InvariantCulture, "DELETE FROM rent_residential_rooms WHERE listing_id = '{0}'", delr.Id);
+                        var sqlDeleteRentLivingRoom = string.Format(CultureInfo.InvariantCulture, "DELETE FROM rent_residential_listings WHERE listing_id = '{0}'", delr.Id);
 
                         cmd.CommandText = sqlDeleteRentLivingRoom;
                         var delRentLivingRoomResult = cmd.ExecuteNonQuery();
@@ -1798,7 +1761,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         _readerWriterLock.EnterReadLock();
         try
         {
-            using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
+            using var connection = new SqliteConnection(_connectionStringBuilder.ConnectionString);
             connection.Open();
 
             using var cmd = connection.CreateCommand();
@@ -1851,9 +1814,9 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 "properties.buss4_Toho as buss4Toho, " +
                 "properties.updated_at as UpdatedAt, " +
 
-                "rent_residentials.building_type as resiBuildingKind, " +
+                "rent_residentials.property_type as resiBuildingKind, " +
                 "rent_residentials.is_unit_ownership as resiUnitOwnership, " +
-                "rent_residentials.building_structure as resiBuildingStructure, " +
+                "rent_residentials.property_structure as resiBuildingStructure, " +
                 "rent_residentials.floor_count_above_ground as resiAboveGroundFloorCount, " +
                 "rent_residentials.floor_count_basement as resiBasementFloorCount, " +
                 "rent_residentials.total_unit_count as resiTotalUnitCount, " +
@@ -2146,7 +2109,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             }
 
             // 部屋
-            cmd.CommandText = "SELECT * FROM rent_residential_rooms WHERE property_id = @propertyId";
+            cmd.CommandText = "SELECT * FROM rent_residential_listings WHERE property_id = @propertyId";
             cmd.Parameters.Clear();
             cmd.Parameters.AddWithValue("@propertyId", id);
             using (var reader = cmd.ExecuteReader())
@@ -2202,13 +2165,21 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
         var isUnitOwnership = Convert.ToInt32(reader["is_property_unit_ownership"], CultureInfo.InvariantCulture) != 0;
 
+        var storedFloorPlanType = Convert.ToString(reader["floor_plan_type"], CultureInfo.InvariantCulture);
+        var storedFloorPlanExtraType = Convert.ToString(reader["floor_plan_extra_type"], CultureInfo.InvariantCulture);
         var room = new Models.Rent.Residentials.Listing(listingId, EntityStatus.Saved, propertyId, EntityStatus.Saved, isUnitOwnership, propertyName)
         {
             Chinryou = reader.GetInt32(reader.GetOrdinal("chinryou")),
             RoomCount = Convert.ToInt32(reader["room_count"], CultureInfo.InvariantCulture),
-            RoomLayoutType = ListingOptionExtensions.ParseRoomLayout(Convert.ToString(reader["room_layout_type"], CultureInfo.InvariantCulture)),
+            /*
+            FloorPlanType = legacyExtraType != FloorPlanExtraType.Unspecified
+                ? FloorPlanType.OneR
+                : ListingOptionExtensions.ParseFloorPlanType(storedFloorPlanType),
+            FloorPlanExtraType = ListingOptionExtensions.ParseFloorPlanExtraType(storedFloorPlanExtraType) != FloorPlanExtraType.Unspecified
+                ? ListingOptionExtensions.ParseFloorPlanExtraType(storedFloorPlanExtraType)
+                : legacyExtraType,
             FloorArea = Convert.ToDecimal(reader["floor_area"], CultureInfo.InvariantCulture),
-            FloorType = ListingOptionExtensions.ParseFloorPosition(Convert.ToString(reader["floor_type"], CultureInfo.InvariantCulture)),
+            FloorNumberType = ListingOptionExtensions.ParseFloorNumberType(Convert.ToString(reader["floor_type"], CultureInfo.InvariantCulture)),
             FloorNumber = reader.IsDBNull(reader.GetOrdinal("floor_number")) ? null : Convert.ToInt32(reader["floor_number"], CultureInfo.InvariantCulture),
             IsCornerRoom = Convert.ToInt32(reader["is_corner_room"], CultureInfo.InvariantCulture) != 0,
             MainExposureDirection = ListingOptionExtensions.ParseExposureDirection(Convert.ToString(reader["main_exposure_direction"], CultureInfo.InvariantCulture)),
@@ -2218,6 +2189,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             AvailableFromPeriod = ListingOptionExtensions.ParseAvailabilityPeriod(Convert.ToString(reader["available_from_period"], CultureInfo.InvariantCulture)),
             IsImmediateOccupancy = Convert.ToInt32(reader["is_immediate_occupancy"], CultureInfo.InvariantCulture) != 0,
             CurrentStatusCheckedAt = ParseStatusCheckedAt(reader["current_status_checked_at"]),
+            */
             Remarks = Convert.ToString(reader["remarks"], CultureInfo.InvariantCulture) ?? string.Empty
         };
         // try
@@ -2229,33 +2201,10 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         return room;
     }
 
-    private static object ToDatabaseStatusCheckedAt(DateTimeOffset? value)
-    {
-        return value is DateTimeOffset checkedAt
-            ? checkedAt.ToString("O", CultureInfo.InvariantCulture)
-            : DBNull.Value;
-    }
-
-    private static DateTimeOffset? ParseStatusCheckedAt(object value)
-    {
-        var text = Convert.ToString(value, CultureInfo.InvariantCulture);
-        if (DateTimeOffset.TryParseExact(text, "O", CultureInfo.InvariantCulture, DateTimeStyles.None, out var timestamp))
-        {
-            return timestamp;
-        }
-
-        if (DateOnly.TryParseExact(text, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var date))
-        {
-            return new DateTimeOffset(date.ToDateTime(TimeOnly.MinValue));
-        }
-
-        return null;
-    }
-
     private static void SetRentResidentialListingChildValues(SqliteCommand cmd, Models.Rent.Residentials.Listing room)
     {
         // 部屋写真
-        cmd.CommandText = "SELECT * FROM rent_residential_room_pictures WHERE listing_id = @listingId";
+        cmd.CommandText = "SELECT * FROM rent_residential_listing_pictures WHERE listing_id = @listingId";
         cmd.Parameters.Clear();
         cmd.Parameters.AddWithValue("@listingId", room.Id);
         using (var reader = cmd.ExecuteReader())
@@ -2288,7 +2237,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         }
 
         // 部屋PDF
-        cmd.CommandText = "SELECT * FROM rent_residential_room_pdfs WHERE listing_id = @listingId";
+        cmd.CommandText = "SELECT * FROM rent_residential_listing_pdfs WHERE listing_id = @listingId";
         cmd.Parameters.Clear();
         cmd.Parameters.AddWithValue("@listingId", room.Id);
         using (var reader = cmd.ExecuteReader())
@@ -2413,11 +2362,11 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         cmd.Parameters.Clear();
     }
 
-    public ResultWrapper DeleteRentResidential(string rentId)
+    public ResultWrapper DeleteRentResidential(string propertyId)
     {
         var res = new ResultWrapper();
 
-        if (string.IsNullOrEmpty(rentId))
+        if (string.IsNullOrEmpty(propertyId))
         {
             res.IsError = true;
             // TODO:
@@ -2428,9 +2377,9 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         try
         {
             // System.Data.SQLite
-            //using var connection = new SQLiteConnection(connectionStringBuilder.ConnectionString);
+            //using var connection = new SQLiteConnection(_connectionStringBuilder.ConnectionString);
             // Microsoft.Data.Sqlite
-            using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
+            using var connection = new SqliteConnection(_connectionStringBuilder.ConnectionString);
             connection.Open();
 
             using var cmd = connection.CreateCommand();
@@ -2438,7 +2387,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             cmd.Transaction = connection.BeginTransaction();
             try
             {
-                cmd.CommandText = string.Format(CultureInfo.InvariantCulture, "DELETE FROM properties WHERE property_id = '{0}';", rentId);
+                cmd.CommandText = string.Format(CultureInfo.InvariantCulture, "DELETE FROM properties WHERE property_id = '{0}';", propertyId);
                 res.AffectedCount = cmd.ExecuteNonQuery();
 
                 cmd.Transaction.Commit();
@@ -2471,11 +2420,12 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
     #region == Rent Residential Listing ==
 
-    public ResultWrapper UpsertRentResidentialListing(string rentId, Models.Rent.Residentials.Listing room)
+    // TODO: Reuse UpsertRentResidential's code for Insert and Update
+    public ResultWrapper UpsertRentResidentialListing(string propertyId, Models.Rent.Residentials.Listing room)
     {
         var res = new ResultWrapper();
 
-        if (string.IsNullOrEmpty(rentId))
+        if (string.IsNullOrEmpty(propertyId))
         {
             res.IsError = true;
             // TODO:
@@ -2485,7 +2435,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         _readerWriterLock.EnterWriteLock();
         try
         {
-            using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
+            using var connection = new SqliteConnection(_connectionStringBuilder.ConnectionString);
             connection.Open();
 
             using var cmd = connection.CreateCommand();
@@ -2495,26 +2445,25 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 cmd.CommandType = CommandType.Text;
 
                 // Update updated_at in the properties table.
-                var sql = "UPDATE properties SET ";
-                sql += String.Format(CultureInfo.InvariantCulture, "updated_at = '{0}' ", DateTimeOffset.UtcNow.ToString("s"));
-                sql += string.Format(CultureInfo.InvariantCulture, " WHERE property_id = '{0}'; ", rentId);
+                cmd.CommandText = "UPDATE properties SET updated_at = @updatedAt WHERE property_id = @propertyId;";
+                cmd.Parameters.Add("@updatedAt", SqliteType.Text).Value = DateTimeOffset.UtcNow.ToString("s", CultureInfo.InvariantCulture);
+                cmd.Parameters.Add("@propertyId", SqliteType.Text).Value = propertyId;
 
-                cmd.CommandText = sql;
                 cmd.ExecuteNonQuery();
 
                 cmd.Parameters.Clear();
 
-                // Upsert into rent_residential_rooms
+                // Upsert into rent_residential_listings
                 cmd.CommandText = """
-                    INSERT INTO rent_residential_rooms (
+                    INSERT INTO rent_residential_listings (
                         listing_id, property_id, is_property_unit_ownership, name, chinryou,
-                        room_count, room_layout_type, floor_area, floor_type, floor_number,
+                        room_count, floor_plan_type, floor_plan_extra_type, floor_area, floor_type, floor_number,
                         is_corner_room, main_exposure_direction, current_status, is_recruiting,
                         available_from_month, available_from_period, is_immediate_occupancy,
                         current_status_checked_at, remarks)
                     VALUES (
                         @listing_id, @property_id, @is_property_unit_ownership, @name, @chinryou,
-                        @room_count, @room_layout_type, @floor_area, @floor_type, @floor_number,
+                        @room_count, @floor_plan_type, @floor_plan_extra_type, @floor_area, @floor_type, @floor_number,
                         @is_corner_room, @main_exposure_direction, @current_status, @is_recruiting,
                         @available_from_month, @available_from_period, @is_immediate_occupancy,
                         @current_status_checked_at, @remarks)
@@ -2523,7 +2472,8 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                         name = @name,
                         chinryou = @chinryou,
                         room_count = @room_count,
-                        room_layout_type = @room_layout_type,
+                        floor_plan_type = @floor_plan_type,
+                        floor_plan_extra_type = @floor_plan_extra_type,
                         floor_area = @floor_area,
                         floor_type = @floor_type,
                         floor_number = @floor_number,
@@ -2540,14 +2490,16 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     """;
 
                 cmd.Parameters.AddWithValue("@listing_id", room.Id);
-                cmd.Parameters.AddWithValue("@property_id", rentId);
+                cmd.Parameters.AddWithValue("@property_id", propertyId);
                 cmd.Parameters.AddWithValue("@is_property_unit_ownership", room.IsPropertyUnitOwnership ? 1 : 0); // bool to int
                 cmd.Parameters.AddWithValue("@name", room.Name);
                 cmd.Parameters.AddWithValue("@chinryou", room.Chinryou);
                 cmd.Parameters.AddWithValue("@room_count", room.RoomCount);
-                cmd.Parameters.AddWithValue("@room_layout_type", room.RoomLayoutType.GetStorageValue());
+                /*
+                cmd.Parameters.AddWithValue("@floor_plan_type", room.FloorPlanType.GetStorageValue());
+                cmd.Parameters.AddWithValue("@floor_plan_extra_type", room.FloorPlanExtraType.GetStorageValue());
                 cmd.Parameters.AddWithValue("@floor_area", room.FloorArea);
-                cmd.Parameters.AddWithValue("@floor_type", room.FloorType.GetStorageValue());
+                cmd.Parameters.AddWithValue("@floor_type", room.FloorNumberType.GetStorageValue());
                 cmd.Parameters.AddWithValue("@floor_number", (object?)room.FloorNumber ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@is_corner_room", room.IsCornerRoom ? 1 : 0);
                 cmd.Parameters.AddWithValue("@main_exposure_direction", room.MainExposureDirection.GetStorageValue());
@@ -2557,6 +2509,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 cmd.Parameters.AddWithValue("@available_from_period", room.AvailableFromPeriod.GetStorageValue());
                 cmd.Parameters.AddWithValue("@is_immediate_occupancy", room.IsImmediateOccupancy ? 1 : 0);
                 cmd.Parameters.AddWithValue("@current_status_checked_at", ToDatabaseStatusCheckedAt(room.CurrentStatusCheckedAt));
+                */
                 cmd.Parameters.AddWithValue("@remarks", room.Remarks ?? string.Empty);
                 cmd.Parameters.AddWithValue("@updated_at", DateTimeOffset.UtcNow.ToString("s"));
 
@@ -2571,13 +2524,13 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
                 cmd.Parameters.Clear();
 
-                // 部屋写真 rent_residential_room_pictures table - Insert or Update
+                // 部屋写真 rent_residential_listing_pictures table - Insert or Update
                 if (room.Pictures.Count > 0)
                 {
                     foreach (var pic in room.Pictures)
                     {
                         // Upsert
-                        var sqlUpsertRoom = "INSERT INTO rent_residential_room_pictures (picture_id, listing_id, property_id, filename, type, description, is_main) VALUES (@picture_id, @listing_id, @property_id, @filename, @type, @description, @is_main) ";
+                        var sqlUpsertRoom = "INSERT INTO rent_residential_listing_pictures (picture_id, listing_id, property_id, filename, type, description, is_main) VALUES (@picture_id, @listing_id, @property_id, @filename, @type, @description, @is_main) ";
                         sqlUpsertRoom += "ON CONFLICT(picture_id) ";
                         sqlUpsertRoom += "DO UPDATE SET filename = @filename, type = @type, description = @description, is_main = @is_main";
                         var exec = true;
@@ -2591,7 +2544,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
                             cmd.Parameters.AddWithValue("@picture_id", pic.Id);
                             cmd.Parameters.AddWithValue("@listing_id", room.Id);
-                            cmd.Parameters.AddWithValue("@property_id", rentId);
+                            cmd.Parameters.AddWithValue("@property_id", propertyId);
                             cmd.Parameters.AddWithValue("@filename", pic.ImageFilename);
                             cmd.Parameters.AddWithValue("@type", pic.PictureType.Key.ToString());
                             cmd.Parameters.AddWithValue("@description", pic.Description);
@@ -2627,7 +2580,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     foreach (var delr in room.PicturesToBeDeleted)
                     {
                         // 削除
-                        var sqlDeleteRentLivingRoom = string.Format(CultureInfo.InvariantCulture, "DELETE FROM rent_residential_room_pictures WHERE picture_id = '{0}'", delr.Id);
+                        var sqlDeleteRentLivingRoom = string.Format(CultureInfo.InvariantCulture, "DELETE FROM rent_residential_listing_pictures WHERE picture_id = '{0}'", delr.Id);
 
                         cmd.CommandText = sqlDeleteRentLivingRoom;
                         var DelRentLivingRoomResult = cmd.ExecuteNonQuery();
@@ -2641,13 +2594,13 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     //room.UnitPicturesToBeDeleted.Clear();
                 }
 
-                // 部屋図面 rent_residential_room_pdfs table - Insert or Update
+                // 部屋図面 rent_residential_listing_pdfs table - Insert or Update
                 if (room.Pdfs.Count > 0)
                 {
                     foreach (var pdf in room.Pdfs)
                     {
                         // Upsert
-                        var sqlUpsertRoom = "INSERT INTO rent_residential_room_pdfs (pdf_id, listing_id, property_id, filename, thumbnail_filename, type, description, is_main) VALUES (@pdf_id, @listing_id, @property_id, @filename, @thumbnail_filename, @type, @description, @is_main) ";
+                        var sqlUpsertRoom = "INSERT INTO rent_residential_listing_pdfs (pdf_id, listing_id, property_id, filename, thumbnail_filename, type, description, is_main) VALUES (@pdf_id, @listing_id, @property_id, @filename, @thumbnail_filename, @type, @description, @is_main) ";
                         sqlUpsertRoom += "ON CONFLICT(pdf_id) ";
                         sqlUpsertRoom += "DO UPDATE SET filename = @filename, thumbnail_filename = @thumbnail_filename, type = @type, description = @description, is_main = @is_main";
                         var exec = true;
@@ -2661,7 +2614,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
                             cmd.Parameters.AddWithValue("@pdf_id", pdf.Id);
                             cmd.Parameters.AddWithValue("@listing_id", room.Id);
-                            cmd.Parameters.AddWithValue("@property_id", rentId);
+                            cmd.Parameters.AddWithValue("@property_id", propertyId);
                             cmd.Parameters.AddWithValue("@filename", pdf.PdfFilename);
                             cmd.Parameters.AddWithValue("@thumbnail_filename", pdf.ThumbnailFilename);
                             cmd.Parameters.AddWithValue("@type", pdf.PdfType.Key.ToString());
@@ -2695,7 +2648,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     foreach (var delr in room.PdfsToBeDeleted)
                     {
                         // 削除
-                        var sqlDeleteRentLivingRoom = string.Format(CultureInfo.InvariantCulture, "DELETE FROM rent_residential_room_pdfs WHERE pdf_id = '{0}'", delr.Id);
+                        var sqlDeleteRentLivingRoom = string.Format(CultureInfo.InvariantCulture, "DELETE FROM rent_residential_listing_pdfs WHERE pdf_id = '{0}'", delr.Id);
 
                         cmd.CommandText = sqlDeleteRentLivingRoom;
                         var DelRentLivingRoomResult = cmd.ExecuteNonQuery();
@@ -2729,7 +2682,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
                         cmd.Parameters.AddWithValue("@lessor_id", psn.Id);
                         cmd.Parameters.AddWithValue("@property_id", room.PropertyId);
-                        cmd.Parameters.AddWithValue("@property_kind", room.PropertyKind.ToString());
+                        cmd.Parameters.AddWithValue("@property_kind", room.PropertyContextType.ToString());
                         cmd.Parameters.AddWithValue("@listing_id", room.Id);
 
                         cmd.ExecuteNonQuery();
@@ -2767,7 +2720,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         """;
                     cmd.Parameters.AddWithValue("@brokerId", broker.Id);
                     cmd.Parameters.AddWithValue("@propertyId", room.PropertyId);
-                    cmd.Parameters.AddWithValue("@propertyKind", room.PropertyKind.ToString());
+                    cmd.Parameters.AddWithValue("@propertyKind", room.PropertyContextType.ToString());
                     cmd.Parameters.AddWithValue("@listingId", room.Id);
                     cmd.ExecuteNonQuery();
                 }
@@ -2827,12 +2780,12 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         _readerWriterLock.EnterReadLock();
         try
         {
-            using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
+            using var connection = new SqliteConnection(_connectionStringBuilder.ConnectionString);
             connection.Open();
 
             using var cmd = connection.CreateCommand();
 
-            cmd.CommandText = "SELECT properties.name as propertyName, rent_residential_rooms.name as roomName, rent_residential_rooms.listing_id as roomId, properties.property_id as propertyId FROM rent_residential_rooms INNER JOIN properties USING (property_id) INNER JOIN rent_residentials USING (property_id)";
+            cmd.CommandText = "SELECT properties.name as propertyName, rent_residential_listings.name as roomName, rent_residential_listings.listing_id as roomId, properties.property_id as propertyId FROM rent_residential_listings INNER JOIN properties USING (property_id) INNER JOIN rent_residentials USING (property_id)";
 
             using var reader = cmd.ExecuteReader();
 
@@ -2852,7 +2805,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     continue;
                 }
 
-                var unit = new Models.ListingSearchResultItem(rid, eid, PropertyKind.RentResidential);
+                var unit = new Models.ListingSearchResultItem(rid, eid, PropertyContextType.RentResidential);
 
                 var s = Convert.ToString(reader["roomName"], CultureInfo.InvariantCulture) ?? "";
                 unit.SetName(s);
@@ -2885,7 +2838,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         return res;
     }
 
-    public Models.Rent.Residentials.ListingResultWrapper SelectRentResidentialListingById(string rentId, string roomId)
+    public Models.Rent.Residentials.ListingResultWrapper SelectRentResidentialListingById(string propertyId, string roomId)
     {
         var res = new Models.Rent.Residentials.ListingResultWrapper();
 
@@ -2896,7 +2849,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             return res;
         }
 
-        if (string.IsNullOrEmpty(rentId))
+        if (string.IsNullOrEmpty(propertyId))
         {
             res.IsError = true;
             // TODO:
@@ -2906,7 +2859,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         _readerWriterLock.EnterReadLock();
         try
         {
-            using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
+            using var connection = new SqliteConnection(_connectionStringBuilder.ConnectionString);
             connection.Open();
 
             using var cmd = connection.CreateCommand();
@@ -2914,7 +2867,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             var buildingName = string.Empty;
             var isFound = false;
 
-            cmd.CommandText = string.Format(CultureInfo.InvariantCulture, "SELECT name FROM properties WHERE property_id = '{0}'", rentId);
+            cmd.CommandText = string.Format(CultureInfo.InvariantCulture, "SELECT name FROM properties WHERE property_id = '{0}'", propertyId);
             using (var reader = cmd.ExecuteReader())
             {
                 while (reader.Read())
@@ -2929,12 +2882,12 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
             if (isFound)
             {
-                cmd.CommandText = string.Format(CultureInfo.InvariantCulture, "SELECT * FROM rent_residential_rooms WHERE listing_id = '{0}'", roomId);
+                cmd.CommandText = string.Format(CultureInfo.InvariantCulture, "SELECT * FROM rent_residential_listings WHERE listing_id = '{0}'", roomId);
                 using (var reader = cmd.ExecuteReader())
                 {
                     while (reader.Read())
                     {
-                        res.Room = GetRentResidentialListing(reader, rentId, buildingName);
+                        res.Room = GetRentResidentialListing(reader, propertyId, buildingName);
                     }
                 }
 
@@ -2971,9 +2924,9 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         try
         {
             // System.Data.SQLite
-            //using var connection = new SQLiteConnection(connectionStringBuilder.ConnectionString);
+            //using var connection = new SQLiteConnection(_connectionStringBuilder.ConnectionString);
             // Microsoft.Data.Sqlite
-            using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
+            using var connection = new SqliteConnection(_connectionStringBuilder.ConnectionString);
             connection.Open();
 
             using var cmd = connection.CreateCommand();
@@ -2981,7 +2934,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             cmd.Transaction = connection.BeginTransaction();
             try
             {
-                cmd.CommandText = string.Format(CultureInfo.InvariantCulture, "DELETE FROM rent_residential_rooms WHERE listing_id = '{0}';", roomId);
+                cmd.CommandText = string.Format(CultureInfo.InvariantCulture, "DELETE FROM rent_residential_listings WHERE listing_id = '{0}';", roomId);
                 res.AffectedCount = cmd.ExecuteNonQuery();
 
                 cmd.Transaction.Commit();
@@ -3030,7 +2983,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         try
         {
             using var connection =
-                new SqliteConnection(connectionStringBuilder.ConnectionString);
+                new SqliteConnection(_connectionStringBuilder.ConnectionString);
 
             connection.Open();
 
@@ -3101,7 +3054,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
             command.Parameters.AddWithValue("@propertyId", building.Id);
             command.Parameters.AddWithValue("@name", building.Name);
-            command.Parameters.AddWithValue("@propertyKind",PropertyKind.RentCommercial.ToString());
+            command.Parameters.AddWithValue("@propertyKind",PropertyContextType.RentCommercial.ToString());
             command.Parameters.AddWithValue("@thumbnailFilename",building.ThumbnailFilename);
 
             // Address/Location
@@ -3129,7 +3082,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 property_id,
                 commercial_kind,
                 is_unit_ownership,
-                building_structure,
+                property_structure,
                 floor_count_above_ground,
                 floor_count_basement,
                 total_floor_area,
@@ -3156,7 +3109,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             ON CONFLICT(property_id) DO UPDATE SET
                 commercial_kind = excluded.commercial_kind,
                 is_unit_ownership = excluded.is_unit_ownership,
-                building_structure = excluded.building_structure,
+                property_structure = excluded.property_structure,
                 floor_count_above_ground =
                     excluded.floor_count_above_ground,
                 floor_count_basement =
@@ -3179,7 +3132,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 building.IsUnitOwnership ? 1 : 0);
             command.Parameters.AddWithValue(
                 "@buildingStructure",
-                building.BuildingStructure.Key.ToString());
+                building.PropertyStructure.Key.ToString());
             command.Parameters.AddWithValue(
                 "@floorCountAboveGround",
                 building.FloorCountAboveGround);
@@ -3226,7 +3179,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 command.Parameters.AddWithValue("@propertyId", building.Id);
                 command.Parameters.AddWithValue(
                     "@propertyKind",
-                    PropertyKind.RentCommercial.ToString());
+                    PropertyContextType.RentCommercial.ToString());
                 command.Parameters.AddWithValue("@listingId", string.Empty);
 
                 command.ExecuteNonQuery();
@@ -3247,7 +3200,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 command.Parameters.AddWithValue("@propertyId", building.Id);
                 command.Parameters.AddWithValue(
                     "@propertyKind",
-                    PropertyKind.RentCommercial.ToString());
+                    PropertyContextType.RentCommercial.ToString());
                 command.Parameters.AddWithValue("@listingId", string.Empty);
 
                 command.ExecuteNonQuery();
@@ -3273,7 +3226,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 command.Parameters.AddWithValue("@propertyId", building.Id);
                 command.Parameters.AddWithValue(
                     "@propertyKind",
-                    PropertyKind.RentCommercial.ToString());
+                    PropertyContextType.RentCommercial.ToString());
                 command.Parameters.AddWithValue("@listingId", string.Empty);
 
                 command.ExecuteNonQuery();
@@ -3294,7 +3247,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 command.Parameters.AddWithValue("@propertyId", building.Id);
                 command.Parameters.AddWithValue(
                     "@propertyKind",
-                    PropertyKind.RentCommercial.ToString());
+                    PropertyContextType.RentCommercial.ToString());
                 command.Parameters.AddWithValue("@listingId", string.Empty);
 
                 command.ExecuteNonQuery();
@@ -3379,6 +3332,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 command.Parameters.AddWithValue("@isUnitOwnership", unit.IsPropertyUnitOwnership ? 1 : 0);
                 command.Parameters.AddWithValue("@name", unit.Name);
                 command.Parameters.AddWithValue("@chinryou", unit.Chinryou);
+                /*
                 command.Parameters.AddWithValue("@kyouekiFee", unit.KyouekiFee);
                 command.Parameters.AddWithValue("@shikikin", unit.Shikikin);
                 command.Parameters.AddWithValue("@shikikinUnit", unit.ShikikinUnit);
@@ -3393,6 +3347,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 command.Parameters.AddWithValue("@businessHours", unit.BusinessHours);
                 command.Parameters.AddWithValue("@parkingAvailable", unit.ParkingAvailable ? 1 : 0);
                 command.Parameters.AddWithValue("@otherConditions", unit.OtherConditions);
+                */
                 command.Parameters.AddWithValue("@remarks", unit.Remarks);
                 command.Parameters.AddWithValue(
                     "@updatedAt",
@@ -3557,7 +3512,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         try
         {
             using var connection =
-                new SqliteConnection(connectionStringBuilder.ConnectionString);
+                new SqliteConnection(_connectionStringBuilder.ConnectionString);
 
             connection.Open();
 
@@ -3654,7 +3609,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         try
         {
             using var connection =
-                new SqliteConnection(connectionStringBuilder.ConnectionString);
+                new SqliteConnection(_connectionStringBuilder.ConnectionString);
 
             connection.Open();
 
@@ -3679,7 +3634,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 p.location_longitude,
                 c.commercial_kind,
                 c.is_unit_ownership,
-                c.building_structure,
+                c.property_structure,
                 c.floor_count_above_ground,
                 c.floor_count_basement,
                 c.total_floor_area,
@@ -3697,7 +3652,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             command.Parameters.AddWithValue("@propertyId", id);
             command.Parameters.AddWithValue(
                 "@propertyKind",
-                PropertyKind.RentCommercial.ToString());
+                PropertyContextType.RentCommercial.ToString());
 
             using var reader = command.ExecuteReader();
 
@@ -3755,7 +3710,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 ?? string.Empty);
 
             building.SetStructureTypeFromString(
-                Convert.ToString(reader["building_structure"], CultureInfo.InvariantCulture)
+                Convert.ToString(reader["property_structure"], CultureInfo.InvariantCulture)
                 ?? string.Empty);
 
             building.SetBuildYearMonthFromString(
@@ -3792,7 +3747,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             command.Parameters.AddWithValue("@propertyId", building.Id);
             command.Parameters.AddWithValue(
                 "@propertyKind",
-                PropertyKind.RentCommercial.ToString());
+                PropertyContextType.RentCommercial.ToString());
             command.Parameters.AddWithValue("@listingId", string.Empty);
 
             using var lessorReader = command.ExecuteReader();
@@ -3842,7 +3797,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             command.Parameters.AddWithValue("@propertyId", building.Id);
             command.Parameters.AddWithValue(
                 "@propertyKind",
-                PropertyKind.RentCommercial.ToString());
+                PropertyContextType.RentCommercial.ToString());
             command.Parameters.AddWithValue("@listingId", string.Empty);
 
             using var brokerReader = command.ExecuteReader();
@@ -3896,7 +3851,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                         building.Id,
                         EntityStatus.Saved,
                         Convert.ToInt32(unitReader["is_property_unit_ownership"], CultureInfo.InvariantCulture) != 0,
-                        building.Name)
+                        building.Name)/*
                     {
                         Chinryou = Convert.ToDecimal(unitReader["chinryou"], CultureInfo.InvariantCulture),
                         KyouekiFee = Convert.ToDecimal(unitReader["kyoueki_fee"], CultureInfo.InvariantCulture),
@@ -3914,7 +3869,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                         ParkingAvailable = Convert.ToInt32(unitReader["parking_available"], CultureInfo.InvariantCulture) != 0,
                         OtherConditions = Convert.ToString(unitReader["other_conditions"], CultureInfo.InvariantCulture) ?? string.Empty,
                         Remarks = Convert.ToString(unitReader["remarks"], CultureInfo.InvariantCulture) ?? string.Empty
-                    };
+                    }*/;
 
                     unit.SetIsModified(false);
 
@@ -4044,7 +3999,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         try
         {
             using var connection =
-                new SqliteConnection(connectionStringBuilder.ConnectionString);
+                new SqliteConnection(_connectionStringBuilder.ConnectionString);
 
             connection.Open();
 
@@ -4063,7 +4018,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             command.Parameters.AddWithValue("@propertyId", commercialId);
             command.Parameters.AddWithValue(
                 "@propertyKind",
-                PropertyKind.RentCommercial.ToString());
+                PropertyContextType.RentCommercial.ToString());
 
             result.AffectedCount = command.ExecuteNonQuery();
 
@@ -4099,7 +4054,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         try
         {
             using var connection =
-                new SqliteConnection(connectionStringBuilder.ConnectionString);
+                new SqliteConnection(_connectionStringBuilder.ConnectionString);
 
             connection.Open();
 
@@ -4189,7 +4144,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             command.Parameters.AddWithValue("@propertyId", commercialId);
             command.Parameters.AddWithValue(
                 "@propertyKind",
-                PropertyKind.RentCommercial.ToString());
+                PropertyContextType.RentCommercial.ToString());
             command.Parameters.AddWithValue(
                 "@updatedAt",
                 DateTimeOffset.UtcNow.ToString("s"));
@@ -4199,6 +4154,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 room.IsPropertyUnitOwnership ? 1 : 0);
             command.Parameters.AddWithValue("@name", room.Name);
             command.Parameters.AddWithValue("@chinryou", room.Chinryou);
+            /*
             command.Parameters.AddWithValue(
                 "@kyouekiFee",
                 room.KyouekiFee);
@@ -4235,6 +4191,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             command.Parameters.AddWithValue(
                 "@otherConditions",
                 room.OtherConditions);
+            */
             command.Parameters.AddWithValue("@remarks", room.Remarks);
 
             result.AffectedCount = command.ExecuteNonQuery();
@@ -4265,7 +4222,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         try
         {
             using var connection =
-                new SqliteConnection(connectionStringBuilder.ConnectionString);
+                new SqliteConnection(_connectionStringBuilder.ConnectionString);
 
             connection.Open();
 
@@ -4288,7 +4245,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
             command.Parameters.AddWithValue(
                 "@propertyKind",
-                PropertyKind.RentCommercial.ToString());
+                PropertyContextType.RentCommercial.ToString());
 
             using var reader = command.ExecuteReader();
 
@@ -4309,7 +4266,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 var item = new Models.ListingSearchResultItem(
                     listingId,
                     propertyId,
-                    PropertyKind.RentCommercial)
+                    PropertyContextType.RentCommercial)
                 {
                     PropertyName =
                         Convert.ToString(reader["property_name"], CultureInfo.InvariantCulture)
@@ -4354,7 +4311,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         try
         {
             using var connection =
-                new SqliteConnection(connectionStringBuilder.ConnectionString);
+                new SqliteConnection(_connectionStringBuilder.ConnectionString);
 
             connection.Open();
 
@@ -4401,7 +4358,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 roomId);
             command.Parameters.AddWithValue(
                 "@propertyKind",
-                PropertyKind.RentCommercial.ToString());
+                PropertyContextType.RentCommercial.ToString());
 
             using var reader = command.ExecuteReader();
 
@@ -4429,7 +4386,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 EntityStatus.Saved,
                 Convert.ToInt32(
                     reader["is_property_unit_ownership"], CultureInfo.InvariantCulture) != 0,
-                propertyName)
+                propertyName)/*
             {
                 Chinryou = Convert.ToDecimal(reader["chinryou"], CultureInfo.InvariantCulture),
                 KyouekiFee =
@@ -4470,7 +4427,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 Remarks =
                     Convert.ToString(reader["remarks"], CultureInfo.InvariantCulture)
                     ?? string.Empty
-            };
+            }*/;
             room.SetName(Convert.ToString(reader["unit_name"], CultureInfo.InvariantCulture) ?? string.Empty);
             room.SetIsModified(false);
 
@@ -4505,7 +4462,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         try
         {
             using var connection =
-                new SqliteConnection(connectionStringBuilder.ConnectionString);
+                new SqliteConnection(_connectionStringBuilder.ConnectionString);
 
             connection.Open();
 
@@ -4554,7 +4511,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         _readerWriterLock.EnterWriteLock();
         try
         {
-            using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
+            using var connection = new SqliteConnection(_connectionStringBuilder.ConnectionString);
             connection.Open();
 
             using var cmd = connection.CreateCommand();
@@ -4648,7 +4605,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         _readerWriterLock.EnterReadLock();
         try
         {
-            using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
+            using var connection = new SqliteConnection(_connectionStringBuilder.ConnectionString);
             connection.Open();
 
             using var cmd = connection.CreateCommand();
@@ -4671,11 +4628,11 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     continue;
                 }
 
-                Models.Enums.PersonKind? enumKind = null;
+                Models.Enums.PersonKindType? enumKind = null;
                 var kind = reader.GetString(reader.GetOrdinal("person_kind")) ?? string.Empty;
                 if (!string.IsNullOrEmpty(kind))
                 {
-                    if (Enum.TryParse<Models.Enums.PersonKind>(kind, out var parsedKind))
+                    if (Enum.TryParse<Models.Enums.PersonKindType>(kind, out var parsedKind))
                     {
                         enumKind = parsedKind;
                     }
@@ -4688,13 +4645,13 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 }
 
                 Models.PersonSearchResultItem item;
-                if (enumKind == Models.Enums.PersonKind.Natural)
+                if (enumKind == Models.Enums.PersonKindType.Natural)
                 {
-                    item = new Models.PersonSearchResultItem(s, Models.Enums.PersonKind.Natural);
+                    item = new Models.PersonSearchResultItem(s, Models.Enums.PersonKindType.Natural);
                 }
-                else if (enumKind == Models.Enums.PersonKind.Legal)
+                else if (enumKind == Models.Enums.PersonKindType.Legal)
                 {
-                    item = new Models.PersonSearchResultItem(s, Models.Enums.PersonKind.Legal);
+                    item = new Models.PersonSearchResultItem(s, Models.Enums.PersonKindType.Legal);
                 }
                 else
                 {
@@ -4744,7 +4701,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         _readerWriterLock.EnterReadLock();
         try
         {
-            using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
+            using var connection = new SqliteConnection(_connectionStringBuilder.ConnectionString);
             connection.Open();
 
             using var cmd = connection.CreateCommand();
@@ -4797,11 +4754,11 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
         Models.Base.PersonBase? person = null;
 
-        Models.Enums.PersonKind? enumKind = null;
+        Models.Enums.PersonKindType? enumKind = null;
         var kind = reader.GetString(reader.GetOrdinal("person_kind")) ?? string.Empty;
         if (!string.IsNullOrEmpty(kind))
         {
-            if (Enum.TryParse<Models.Enums.PersonKind>(kind, out var parsedKind))
+            if (Enum.TryParse<Models.Enums.PersonKindType>(kind, out var parsedKind))
             {
                 enumKind = parsedKind;
             }
@@ -4813,11 +4770,11 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             return null;
         }
 
-        if (enumKind == Models.Enums.PersonKind.Natural)
+        if (enumKind == Models.Enums.PersonKindType.Natural)
         {
             person = new Models.Person.NaturalPerson(personId, EntityStatus.Saved);
         }
-        else if (enumKind == Models.Enums.PersonKind.Legal)
+        else if (enumKind == Models.Enums.PersonKindType.Legal)
         {
             person = new Models.Person.LegalPerson(personId, EntityStatus.Saved);
         }
@@ -4867,9 +4824,9 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         try
         {
             // System.Data.SQLite
-            //using var connection = new SQLiteConnection(connectionStringBuilder.ConnectionString);
+            //using var connection = new SQLiteConnection(_connectionStringBuilder.ConnectionString);
             // Microsoft.Data.Sqlite
-            using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
+            using var connection = new SqliteConnection(_connectionStringBuilder.ConnectionString);
             connection.Open();
 
             using var cmd = connection.CreateCommand();
@@ -4927,7 +4884,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         try
         {
             using var connection =
-                new SqliteConnection(connectionStringBuilder.ConnectionString);
+                new SqliteConnection(_connectionStringBuilder.ConnectionString);
 
             connection.Open();
 
@@ -4992,7 +4949,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
             command.Parameters.AddWithValue("@propertyId", building.Id);
             command.Parameters.AddWithValue("@name", building.Name);
-            command.Parameters.AddWithValue("@propertyKind",building.PropertyKind.ToString());
+            command.Parameters.AddWithValue("@propertyKind",building.PropertyContextType.ToString());
             command.Parameters.AddWithValue("@thumbnailFilename",building.ThumbnailFilename);
 
             // Address/Location
@@ -5018,9 +4975,9 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             command.CommandText = """
             INSERT INTO sale_residentials (
                 property_id,
-                building_type,
+                property_type,
                 is_unit_ownership,
-                building_structure,
+                property_structure,
                 floor_count_above_ground,
                 floor_count_basement,
                 total_unit_count,
@@ -5045,9 +5002,9 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 @updatedAt
             )
             ON CONFLICT(property_id) DO UPDATE SET
-                building_type = excluded.building_type,
+                property_type = excluded.property_type,
                 is_unit_ownership = excluded.is_unit_ownership,
-                building_structure = excluded.building_structure,
+                property_structure = excluded.property_structure,
                 floor_count_above_ground = excluded.floor_count_above_ground,
                 floor_count_basement = excluded.floor_count_basement,
                 total_unit_count = excluded.total_unit_count,
@@ -5068,7 +5025,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 building.IsUnitOwnership ? 1 : 0);
             command.Parameters.AddWithValue(
                 "@buildingStructure",
-                building.BuildingStructure.Key.ToString());
+                building.PropertyStructure.Key.ToString());
             command.Parameters.AddWithValue(
                 "@floorCountAboveGround",
                 building.FloorCountAboveGround);
@@ -5120,7 +5077,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         try
         {
             using var connection =
-                new SqliteConnection(connectionStringBuilder.ConnectionString);
+                new SqliteConnection(_connectionStringBuilder.ConnectionString);
 
             connection.Open();
 
@@ -5156,7 +5113,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
             command.Parameters.AddWithValue(
                 "@propertyKind",
-                PropertyKind.SaleResidential.ToString());
+                PropertyContextType.SaleResidential.ToString());
 
             if (!searchAll)
             {
@@ -5179,7 +5136,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
                 var item = new Models.PropertySearchResultItem(
                     propertyId,
-                    PropertyKind.SaleResidential)
+                    PropertyContextType.SaleResidential)
                 {
                 };
                 item.SetName(Convert.ToString(reader["name"], CultureInfo.InvariantCulture) ?? string.Empty);
@@ -5216,7 +5173,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         try
         {
             using var connection =
-                new SqliteConnection(connectionStringBuilder.ConnectionString);
+                new SqliteConnection(_connectionStringBuilder.ConnectionString);
 
             connection.Open();
 
@@ -5239,9 +5196,9 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 p.location_full,
                 p.location_latitude,
                 p.location_longitude,
-                s.building_type,
+                s.property_type,
                 s.is_unit_ownership,
-                s.building_structure,
+                s.property_structure,
                 s.floor_count_above_ground,
                 s.floor_count_basement,
                 s.total_unit_count,
@@ -5314,10 +5271,10 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             building.Address.SetLocationLongitude(Convert.ToString(reader["locationLongitude"], CultureInfo.InvariantCulture) ?? string.Empty);
 
             building.SetKindTypeFromString(
-                Convert.ToString(reader["building_type"], CultureInfo.InvariantCulture) ?? string.Empty);
+                Convert.ToString(reader["property_type"], CultureInfo.InvariantCulture) ?? string.Empty);
 
             building.SetStructureTypeFromString(
-                Convert.ToString(reader["building_structure"], CultureInfo.InvariantCulture) ?? string.Empty);
+                Convert.ToString(reader["property_structure"], CultureInfo.InvariantCulture) ?? string.Empty);
 
             building.SetBuildYearMonthFromString(
                 Convert.ToString(reader["built_year_month"], CultureInfo.InvariantCulture) ?? string.Empty);
@@ -5352,7 +5309,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         try
         {
             using var connection =
-                new SqliteConnection(connectionStringBuilder.ConnectionString);
+                new SqliteConnection(_connectionStringBuilder.ConnectionString);
 
             connection.Open();
 
@@ -5371,7 +5328,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             command.Parameters.AddWithValue("@propertyId", saleId);
             command.Parameters.AddWithValue(
                 "@propertyKind",
-                PropertyKind.SaleResidential.ToString());
+                PropertyContextType.SaleResidential.ToString());
 
             res.AffectedCount = command.ExecuteNonQuery();
 
@@ -5407,7 +5364,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         try
         {
             using var connection =
-                new SqliteConnection(connectionStringBuilder.ConnectionString);
+                new SqliteConnection(_connectionStringBuilder.ConnectionString);
 
             connection.Open();
 
@@ -5470,7 +5427,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             command.Parameters.AddWithValue("@propertyId", saleId);
             command.Parameters.AddWithValue(
                 "@propertyKind",
-                PropertyKind.SaleResidential.ToString());
+                PropertyContextType.SaleResidential.ToString());
             command.Parameters.AddWithValue(
                 "@updatedAt",
                 DateTimeOffset.UtcNow.ToString("s"));
@@ -5479,6 +5436,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 "@isUnitOwnership",
                 room.IsPropertyUnitOwnership ? 1 : 0);
             command.Parameters.AddWithValue("@name", room.Name);
+            /*
             command.Parameters.AddWithValue("@salePrice", room.SalePrice);
             command.Parameters.AddWithValue(
                 "@managementFee",
@@ -5495,6 +5453,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             command.Parameters.AddWithValue(
                 "@deliveryTiming",
                 room.DeliveryTiming);
+            */
             command.Parameters.AddWithValue("@remarks", room.Remarks);
 
             res.AffectedCount = command.ExecuteNonQuery();
@@ -5526,7 +5485,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         try
         {
             using var connection =
-                new SqliteConnection(connectionStringBuilder.ConnectionString);
+                new SqliteConnection(_connectionStringBuilder.ConnectionString);
 
             connection.Open();
 
@@ -5547,7 +5506,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
             command.Parameters.AddWithValue(
                 "@propertyKind",
-                PropertyKind.SaleResidential.ToString());
+                PropertyContextType.SaleResidential.ToString());
 
             using var reader = command.ExecuteReader();
 
@@ -5568,7 +5527,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 var item = new Models.ListingSearchResultItem(
                     listingId,
                     propertyId,
-                    PropertyKind.SaleResidential)
+                    PropertyContextType.SaleResidential)
                 {
                     PropertyName = Convert.ToString(reader["property_name"], CultureInfo.InvariantCulture)
                         ?? string.Empty
@@ -5608,7 +5567,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         try
         {
             using var connection =
-                new SqliteConnection(connectionStringBuilder.ConnectionString);
+                new SqliteConnection(_connectionStringBuilder.ConnectionString);
 
             connection.Open();
 
@@ -5653,7 +5612,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         try
         {
             using var connection =
-                new SqliteConnection(connectionStringBuilder.ConnectionString);
+                new SqliteConnection(_connectionStringBuilder.ConnectionString);
 
             connection.Open();
 
@@ -5687,7 +5646,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             command.Parameters.AddWithValue("@listingId", roomId);
             command.Parameters.AddWithValue(
                 "@propertyKind",
-                PropertyKind.SaleResidential.ToString());
+                PropertyContextType.SaleResidential.ToString());
 
             using var reader = command.ExecuteReader();
 
@@ -5712,7 +5671,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 EntityStatus.Saved,
                 Convert.ToInt32(
                     reader["is_property_unit_ownership"], CultureInfo.InvariantCulture) != 0,
-                propertyName)
+                propertyName)/*
             {
                 SalePrice = Convert.ToDecimal(reader["sale_price"], CultureInfo.InvariantCulture),
                 ManagementFee =
@@ -5731,7 +5690,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 Remarks =
                     Convert.ToString(reader["remarks"], CultureInfo.InvariantCulture)
                     ?? string.Empty
-            };
+            }*/;
 
             room.SetName(Convert.ToString(reader["unit_name"], CultureInfo.InvariantCulture) ?? string.Empty);
 
@@ -5773,7 +5732,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         try
         {
             using var connection =
-                new SqliteConnection(connectionStringBuilder.ConnectionString);
+                new SqliteConnection(_connectionStringBuilder.ConnectionString);
 
             connection.Open();
 
@@ -5886,7 +5845,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         try
         {
             using var connection =
-                new SqliteConnection(connectionStringBuilder.ConnectionString);
+                new SqliteConnection(_connectionStringBuilder.ConnectionString);
 
             connection.Open();
 
@@ -5927,10 +5886,10 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 var personKindText =
                     Convert.ToString(reader["person_kind"], CultureInfo.InvariantCulture) ?? string.Empty;
 
-                if (!Enum.TryParse<Models.Enums.PersonKind>(
+                if (!Enum.TryParse<Models.Enums.PersonKindType>(
                         personKindText,
                         out var personKind) ||
-                    personKind == Models.Enums.PersonKind.Undetermined)
+                    personKind == Models.Enums.PersonKindType.Undetermined)
                 {
                     continue;
                 }
@@ -5981,7 +5940,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         try
         {
             using var connection =
-                new SqliteConnection(connectionStringBuilder.ConnectionString);
+                new SqliteConnection(_connectionStringBuilder.ConnectionString);
 
             connection.Open();
 
@@ -6050,7 +6009,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         try
         {
             using var connection =
-                new SqliteConnection(connectionStringBuilder.ConnectionString);
+                new SqliteConnection(_connectionStringBuilder.ConnectionString);
 
             connection.Open();
 

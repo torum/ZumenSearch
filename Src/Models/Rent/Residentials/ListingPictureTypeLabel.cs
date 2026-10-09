@@ -4,6 +4,12 @@ using System.Text;
 
 namespace ZumenSearch.Models.Rent.Residentials;
 
+public enum ListingPictureType
+{
+    Unspecified, Madori, Situnai, LivingDining, Bedroom, Kitchen, Bathroom, Restroom, Washroom, StorageSpace, Appliance, FrontDoor, Balcony, Other
+    //Unspecified, Madori, Gaikan, Entrance, Neighborhood, Other
+}
+
 public sealed class ListingPictureTypeLabel(ListingPictureType key)
 {
     private Dictionary<ListingPictureType, string> RoomPictureTypeDictionary

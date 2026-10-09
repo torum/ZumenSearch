@@ -11,12 +11,16 @@ public sealed partial class Listing : ListingBase
     public string PropertyName
     {
         get => field ?? string.Empty;
-        set => SetProperty(ref field, value);
+        private set { field = value; IsModified = true; }
     }
 
-    [ObservableProperty]
-    public partial decimal Chinryou { get; set; }
+    public decimal Chinryou
+    {
+        get;
+        private set { field = value; IsModified = true; }
+    }
 
+    /*
     [ObservableProperty]
     public partial decimal KyouekiFee { get; set; }
 
@@ -58,9 +62,13 @@ public sealed partial class Listing : ListingBase
 
     [ObservableProperty]
     public partial string OtherConditions { get; set; } = string.Empty;
+    */
 
-    [ObservableProperty]
-    public partial string Remarks { get; set; } = string.Empty;
+    public string Remarks
+    {
+        get => field ?? string.Empty;
+        private set { field = value; IsModified = true; }
+    }
 
     public Listing(
         string id,
@@ -74,12 +82,30 @@ public sealed partial class Listing : ListingBase
             status,
             propertyId,
             propertyStatus,
-            Enums.PropertyKind.RentCommercial)
+            Enums.PropertyContextType.RentCommercial)
     {
         IsPropertyUnitOwnership = isPropertyUnitOwnership;
         PropertyName = propertyName;
-        PropertyChanged += (_, _) => SetIsModified(true);
         SetIsModified(false);
-
     }
+
+    #region == Setter Methods ==
+
+    public void SetPropertyName(string propertyName)
+    {
+        PropertyName = propertyName;
+    }
+
+    public void SetChinryou(decimal chinryou)
+    {
+        Chinryou = chinryou;
+    }
+
+    public void SetRemarks(string remarks)
+    {
+        Remarks = remarks;
+    }
+
+
+    #endregion
 }

@@ -262,7 +262,7 @@ public sealed partial class BrokerViewModel : ObservableRecipient, IDisposable
 
         if (_broker is Models.Person.LegalPerson legalPerson)
         {
-            if (_broker.PersonKind != PersonKind.Legal)
+            if (_broker.PersonKind != PersonKindType.Legal)
             {
                 // Something is wrong.
             }
@@ -327,7 +327,7 @@ public sealed partial class BrokerViewModel : ObservableRecipient, IDisposable
 
         newBroker.SetName(Name);
 
-        newBroker.PersonKind = PersonKind.Legal;
+        newBroker.PersonKind = PersonKindType.Legal;
 
         newBroker.NameCompany = NameCompany;
         newBroker.NameCompanyType = NameCompanyType;

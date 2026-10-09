@@ -196,21 +196,21 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     public ObservableCollection<Models.Rent.Commercials.PropertyTypeLabel> Kinds { get; } =
     [
-        new(Models.Rent.Commercials.PropertyType.Office),
-        new(Models.Rent.Commercials.PropertyType.Retail),
-        new(Models.Rent.Commercials.PropertyType.Warehouse),
-        new(Models.Rent.Commercials.PropertyType.Factory),
-        new(Models.Rent.Commercials.PropertyType.Clinic),
-        new(Models.Rent.Commercials.PropertyType.Restaurant),
-        new(Models.Rent.Commercials.PropertyType.Hotel),
-        new(Models.Rent.Commercials.PropertyType.Land),
-        new(Models.Rent.Commercials.PropertyType.Other)
+        new(Models.Rent.Commercials.PropertyKindType.Office),
+        new(Models.Rent.Commercials.PropertyKindType.Retail),
+        new(Models.Rent.Commercials.PropertyKindType.Warehouse),
+        new(Models.Rent.Commercials.PropertyKindType.Factory),
+        new(Models.Rent.Commercials.PropertyKindType.Clinic),
+        new(Models.Rent.Commercials.PropertyKindType.Restaurant),
+        new(Models.Rent.Commercials.PropertyKindType.Hotel),
+        new(Models.Rent.Commercials.PropertyKindType.Land),
+        new(Models.Rent.Commercials.PropertyKindType.Other)
     ];
 
     public Models.Rent.Commercials.PropertyTypeLabel SelectedKind
     {
         get => field ??
-            new(Models.Rent.Commercials.PropertyType.Unspecified);
+            new(Models.Rent.Commercials.PropertyKindType.Unspecified);
         set
         {
             if (value is null || field?.Key == value.Key)
@@ -1232,11 +1232,11 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             Kinds.FirstOrDefault(
                 item => item.Key == _building.CommercialKind.Key)
             ?? new(
-                Models.Rent.Commercials.PropertyType.Unspecified);
+                Models.Rent.Commercials.PropertyKindType.Unspecified);
 
         SelectedStructure =
             Structures.FirstOrDefault(
-                item => item.Key == _building.BuildingStructure.Key)
+                item => item.Key == _building.PropertyStructure.Key)
             ?? new(
                 Models.Rent.Commercials.StructureType.Unspecified);
 
@@ -1426,7 +1426,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     {
         _building.SetName(Name);
         _building.CommercialKind = SelectedKind;
-        _building.BuildingStructure = SelectedStructure;
+        _building.PropertyStructure = SelectedStructure;
         _building.IsUnitOwnership = IsUnitOwnership;
 
         _building.FloorCountAboveGround =
@@ -1722,8 +1722,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
             foreach (var room in Units)
             {
-                room.PropertyName = Name;
-                room.PropertyStatus = EntityStatus.Saved;
+                room.SetPropertyName(Name);
+                room.SetPropertyStatus(EntityStatus.Saved);
                 room.SetStatus(EntityStatus.Saved);
                 room.SetIsModified(false);
             }
@@ -1731,8 +1731,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             // Just in case.
             foreach (var room in _building.Units)
             {
-                room.PropertyName = Name;
-                room.PropertyStatus = EntityStatus.Saved;
+                room.SetPropertyName(Name);
+                room.SetPropertyStatus(EntityStatus.Saved);
                 room.SetStatus(EntityStatus.Saved);
                 room.SetIsModified(false);
             }

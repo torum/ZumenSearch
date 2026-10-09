@@ -31,11 +31,11 @@ public partial class PersonTemplateSelector : DataTemplateSelector
         }
         else if (item is Models.PersonSearchResultItem searchResultItem)
         {
-            if (searchResultItem.PersonKind == Models.Enums.PersonKind.Natural)
+            if (searchResultItem.PersonKind == Models.Enums.PersonKindType.Natural)
             {
                 return NaturalTemplate;
             }
-            else if (searchResultItem.PersonKind == Models.Enums.PersonKind.Legal)
+            else if (searchResultItem.PersonKind == Models.Enums.PersonKindType.Legal)
             {
                 return LegalTemplate;
             }

@@ -11,7 +11,7 @@ namespace ZumenSearch.Services;
 
 public class DataAccessTransportationService : IDataAccessTransportationService
 {
-    private readonly SqliteConnectionStringBuilder connectionStringBuilder;// = new("Data Source=rail_lines.db");
+    private readonly SqliteConnectionStringBuilder _connectionStringBuilder;// = new("Data Source=rail_lines.db");
     private readonly string railLineDbPath;
     private readonly string railStationDbPath;
 
@@ -20,14 +20,14 @@ public class DataAccessTransportationService : IDataAccessTransportationService
 
     public DataAccessTransportationService()
     {
-        //connectionStringBuilder = new SqliteConnectionStringBuilder("Data Source=rail_lines.db");
+        //_connectionStringBuilder = new SqliteConnectionStringBuilder("Data Source=rail_lines.db");
 
-        //connectionStringBuilder.DataSource = "rail_lines.db";
-        //connectionStringBuilder.DataSource = "rail_stations.db";
+        //_connectionStringBuilder.DataSource = "rail_lines.db";
+        //_connectionStringBuilder.DataSource = "rail_stations.db";
 
         railLineDbPath = Path.Combine(AppContext.BaseDirectory, "Data", "rail_lines.db");
         railStationDbPath = Path.Combine(AppContext.BaseDirectory, "Data", "rail_stations.db");
-        connectionStringBuilder = new SqliteConnectionStringBuilder($"Data Source={railLineDbPath};");
+        _connectionStringBuilder = new SqliteConnectionStringBuilder($"Data Source={railLineDbPath};");
     }
 
     public ObservableCollection<RailLine> GetRailLinesBy(string query)
@@ -43,9 +43,9 @@ public class DataAccessTransportationService : IDataAccessTransportationService
 
         query = EscapeSingleQuote(query.Trim());
 
-        connectionStringBuilder.DataSource = railLineDbPath;//"rail_lines.db";
+        _connectionStringBuilder.DataSource = railLineDbPath;//"rail_lines.db";
 
-        using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
+        using var connection = new SqliteConnection(_connectionStringBuilder.ConnectionString);
 
         // TODO: try catch
         connection.Open();
@@ -85,9 +85,9 @@ public class DataAccessTransportationService : IDataAccessTransportationService
 
         query = EscapeSingleQuote(query.Trim());
 
-        connectionStringBuilder.DataSource = railStationDbPath;// = "rail_stations.db";
+        _connectionStringBuilder.DataSource = railStationDbPath;// = "rail_stations.db";
 
-        using var connection = new SqliteConnection(connectionStringBuilder.ConnectionString);
+        using var connection = new SqliteConnection(_connectionStringBuilder.ConnectionString);
         connection.Open();
         using var cmd = connection.CreateCommand();
 

@@ -25,10 +25,8 @@ public abstract class EntityAggregateBase : EntityBase
         get => field ?? string.Empty;
         private set
         {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
+            field = value;
+            IsModified = true;
         }
     }
 

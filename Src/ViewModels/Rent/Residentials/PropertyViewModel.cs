@@ -15,6 +15,7 @@ using ZumenSearch.Models;
 using ZumenSearch.Models.Enums;
 using ZumenSearch.Models.Location;
 using ZumenSearch.Models.Messenger;
+using ZumenSearch.Models.Rent.Residentials;
 using ZumenSearch.Models.Transportation;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.Services.Extensions.AbstractFactory;
@@ -202,21 +203,22 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     }
 
     // 物件種別
-    public ObservableCollection<Models.Rent.Residentials.PropertyTypeLabel> PropertyTypes { get; set; } =
+    public IReadOnlyCollection<Models.Rent.Residentials.PropertyKindTypeLabel> PropertyTypes { get; set; } = PropertyKindTypeLabel.GetAll();
+    /*
     [
         //new Kind(EnumKinds.Unspecified.ToString(), "未指定"),
-        new Models.Rent.Residentials.PropertyTypeLabel(Models.Rent.Residentials.PropertyType.Apartment),
-        new Models.Rent.Residentials.PropertyTypeLabel(Models.Rent.Residentials.PropertyType.Mansion),
-        new Models.Rent.Residentials.PropertyTypeLabel(Models.Rent.Residentials.PropertyType.House),
-        new Models.Rent.Residentials.PropertyTypeLabel(Models.Rent.Residentials.PropertyType.TerraceHouse),
-        new Models.Rent.Residentials.PropertyTypeLabel(Models.Rent.Residentials.PropertyType.TownHouse),
-        new Models.Rent.Residentials.PropertyTypeLabel(Models.Rent.Residentials.PropertyType.ShareHouse),
-        new Models.Rent.Residentials.PropertyTypeLabel(Models.Rent.Residentials.PropertyType.Dormitory)
-    ];
+        new Models.Rent.Residentials.PropertyKindTypeLabel(Models.Rent.Residentials.PropertyKindType.Apartment),
+        new Models.Rent.Residentials.PropertyKindTypeLabel(Models.Rent.Residentials.PropertyKindType.Mansion),
+        new Models.Rent.Residentials.PropertyKindTypeLabel(Models.Rent.Residentials.PropertyKindType.House),
+        new Models.Rent.Residentials.PropertyKindTypeLabel(Models.Rent.Residentials.PropertyKindType.TerraceHouse),
+        new Models.Rent.Residentials.PropertyKindTypeLabel(Models.Rent.Residentials.PropertyKindType.TownHouse),
+        new Models.Rent.Residentials.PropertyKindTypeLabel(Models.Rent.Residentials.PropertyKindType.ShareHouse),
+        new Models.Rent.Residentials.PropertyKindTypeLabel(Models.Rent.Residentials.PropertyKindType.Dormitory)
+    ];*/
 
-    public Models.Rent.Residentials.PropertyTypeLabel SelectedPropertyType
+    public Models.Rent.Residentials.PropertyKindTypeLabel SelectedPropertyType
     {
-        get => field ?? new(Models.Rent.Residentials.PropertyType.Unspecified);
+        get => field ?? new(Models.Rent.Residentials.PropertyKindType.Unspecified);
         set
         {
             if (value is null || field?.Key == value.Key)
@@ -262,7 +264,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     public partial bool IsUnitOwnershipVisible { get; private set; } = true;
 
     // 建物構造
-    public ObservableCollection<Models.Rent.Residentials.PropertyStructureTypeLabel> Structures { get; set; } =
+    public IReadOnlyCollection<Models.Rent.Residentials.PropertyStructureTypeLabel> StructureTypes { get; set; } = PropertyStructureTypeLabel.GetAll();
+    /*
     [
         //new Structure(StructureType.Unspecified.ToString(), "未指定"),
         new Models.Rent.Residentials.PropertyStructureTypeLabel(Models.Rent.Residentials.StructureType.Wood),
@@ -277,9 +280,9 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         new Models.Rent.Residentials.PropertyStructureTypeLabel(Models.Rent.Residentials.StructureType.RB),
         new Models.Rent.Residentials.PropertyStructureTypeLabel(Models.Rent.Residentials.StructureType.CFT),
         new Models.Rent.Residentials.PropertyStructureTypeLabel(Models.Rent.Residentials.StructureType.Other)
-    ];
+    ];*/
 
-    public Models.Rent.Residentials.PropertyStructureTypeLabel SelectedStructure
+    public Models.Rent.Residentials.PropertyStructureTypeLabel SelectedStructureType
     {
         get => field ?? new(Models.Rent.Residentials.StructureType.Unspecified);
         set
@@ -1789,11 +1792,11 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         Name = _building.Name;
 
         //SelectedKind = _building.BuildingKind;
-        var propertyTypeKey = PropertyTypes.FirstOrDefault(k => k.Key == _building.BuildingType.Key);
-        SelectedPropertyType = propertyTypeKey is null ? new(Models.Rent.Residentials.PropertyType.Unspecified) : propertyTypeKey;
+        var propertyTypeKey = PropertyTypes.FirstOrDefault(k => k.Key == _building.PropertyKind.Key);
+        SelectedPropertyType = propertyTypeKey is null ? new(Models.Rent.Residentials.PropertyKindType.Unspecified) : propertyTypeKey;
         IsUnitOwnership = _building.IsUnitOwnership;
-        var structureKey = Structures.FirstOrDefault(k => k.Key == _building.BuildingStructure.Key);
-        SelectedStructure = structureKey is null ? new(Models.Rent.Residentials.StructureType.Unspecified) : structureKey;
+        var structureKey = StructureTypes.FirstOrDefault(k => k.Key == _building.PropertyStructure.Key);
+        SelectedStructureType = structureKey is null ? new(Models.Rent.Residentials.StructureType.Unspecified) : structureKey;
 
         FloorCountAboveGround = _building.FloorCountAboveGround == 0 ? string.Empty : _building.FloorCountAboveGround.ToString(CultureInfo.InvariantCulture);
         FloorCountBasement = _building.FloorCountBasement == 0 ? string.Empty : _building.FloorCountBasement.ToString(CultureInfo.InvariantCulture);
@@ -2185,7 +2188,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
             _building.SetBuildingType(SelectedPropertyType);
             _building.SetIsUnitOwnership(IsUnitOwnership);
-            _building.SetBuildingStructure(SelectedStructure);
+            _building.SetBuildingStructure(SelectedStructureType);
 
             _building.SetFloorCountAboveGroundFromString(Helpers.Common.ReplaceZenkakuNumbers(FloorCountAboveGround));
             _building.SetFloorCountBasementFromString(Helpers.Common.ReplaceZenkakuNumbers(FloorCountBasement));
@@ -2359,7 +2362,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         // 部屋
         foreach (var rm in Rooms)
         {
-            rm.IsPropertyUnitOwnership = IsUnitOwnership;
+            rm.SetIsPropertyUnitOwnership(IsUnitOwnership);
         }
 
         // 部屋set
@@ -2554,8 +2557,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
             foreach (var room in Rooms)
             {
-                room.PropertyName = Name;
-                room.PropertyStatus = EntityStatus.Saved;
+                room.SetPropertyName(Name);
+                room.SetPropertyStatus(EntityStatus.Saved);
                 room.SetStatus(EntityStatus.Saved);
                 room.SetIsModified(false);
             }
@@ -2563,8 +2566,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             // Just in case.
             foreach (var room in _building.Rooms)
             {
-                room.PropertyName = Name;
-                room.PropertyStatus = EntityStatus.Saved;
+                room.SetPropertyName(Name);
+                room.SetPropertyStatus(EntityStatus.Saved);
                 room.SetStatus(EntityStatus.Saved);
                 room.SetIsModified(false);
             }
@@ -2838,8 +2841,10 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         var newId = Guid.CreateVersion7().ToString("N");
         var editorShell = _shellFactory.Create(new Models.Rent.Residentials.Listing(newId, EntityStatus.New, _building.Id, _building.Status, _building.IsUnitOwnership, Name));
 
-        // Apply the current IsUnitOwnership state because it may not be saved to the _room.
-        editorShell.ViewModel.IsPropertyUnitOwnership = this.IsUnitOwnership;
+        // Apply the current IsUnitOwnership state because it may not be saved to the _room YET.
+        //editorShell.ViewModel.SetIsPropertyUnitOwnership(this.IsUnitOwnership);
+        // Use message. If this is set, then show/hide the owner and zumen from shell menu.
+        WeakReferenceMessenger.Default.Send(new Models.Messenger.PropertyIsUnitOwnershipChangedMessage(this.IsUnitOwnership));
 
         var mainVM = App.GetService<ViewModels.MainViewModel>();
         mainVM.RentResidentialListingEditorList.Add(editorShell.Window);
@@ -2919,8 +2924,10 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
         var editorShell = _shellFactory.Create(room);
 
-        // Apply the current IsUnitOwnership state because it may not be saved to the _room.
-        editorShell.ViewModel.IsPropertyUnitOwnership = this.IsUnitOwnership;
+        // Apply the current IsUnitOwnership state because it may not be saved to the _room YET.
+        //editorShell.ViewModel.SetIsPropertyUnitOwnership(this.IsUnitOwnership);
+        // Use message. If this is set, then show/hide the owner and zumen from shell menu.
+        WeakReferenceMessenger.Default.Send(new Models.Messenger.PropertyIsUnitOwnershipChangedMessage(this.IsUnitOwnership));
 
         var editorWindow = editorShell.Window;
         if (editorWindow == null)

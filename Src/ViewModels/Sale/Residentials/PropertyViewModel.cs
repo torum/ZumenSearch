@@ -81,21 +81,21 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IDisposable
         }
     }
 
-    public ObservableCollection<Models.Sale.Residentials.PropertyKind> Kinds { get; } =
+    public ObservableCollection<Models.Sale.Residentials.PropertyContextType> Kinds { get; } =
     [
-        new(Models.Sale.Residentials.PropertyType.Apartment),
-        new(Models.Sale.Residentials.PropertyType.Mansion),
-        new(Models.Sale.Residentials.PropertyType.House),
-        new(Models.Sale.Residentials.PropertyType.TerraceHouse),
-        new(Models.Sale.Residentials.PropertyType.TownHouse),
-        new(Models.Sale.Residentials.PropertyType.ShareHouse),
-        new(Models.Sale.Residentials.PropertyType.Dormitory)
+        new(Models.Sale.Residentials.PropertyKindType.Apartment),
+        new(Models.Sale.Residentials.PropertyKindType.Mansion),
+        new(Models.Sale.Residentials.PropertyKindType.House),
+        new(Models.Sale.Residentials.PropertyKindType.TerraceHouse),
+        new(Models.Sale.Residentials.PropertyKindType.TownHouse),
+        new(Models.Sale.Residentials.PropertyKindType.ShareHouse),
+        new(Models.Sale.Residentials.PropertyKindType.Dormitory)
     ];
 
-    public Models.Sale.Residentials.PropertyKind SelectedKind
+    public Models.Sale.Residentials.PropertyContextType SelectedKind
     {
         get => field ??
-            new(Models.Sale.Residentials.PropertyType.Unspecified);
+            new(Models.Sale.Residentials.PropertyKindType.Unspecified);
         set
         {
             if (SetProperty(ref field, value))
@@ -262,11 +262,11 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IDisposable
         SelectedKind =
             Kinds.FirstOrDefault(
                 item => item.Key == _building.BuildingKind.Key)
-            ?? new(Models.Sale.Residentials.PropertyType.Unspecified);
+            ?? new(Models.Sale.Residentials.PropertyKindType.Unspecified);
 
         SelectedStructure =
             Structures.FirstOrDefault(
-                item => item.Key == _building.BuildingStructure.Key)
+                item => item.Key == _building.PropertyStructure.Key)
             ?? new(Models.Sale.Residentials.StructureType.Unspecified);
 
         IsUnitOwnership = _building.IsUnitOwnership;
@@ -302,7 +302,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IDisposable
     {
         _building.SetName(Name);
         _building.BuildingKind = SelectedKind;
-        _building.BuildingStructure = SelectedStructure;
+        _building.PropertyStructure = SelectedStructure;
         _building.IsUnitOwnership = IsUnitOwnership;
 
         _building.FloorCountAboveGround =
