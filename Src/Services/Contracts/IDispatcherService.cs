@@ -1,4 +1,6 @@
-﻿namespace ZumenSearch.Services.Contracts;
+﻿using System.Collections;
+
+namespace ZumenSearch.Services.Contracts;
 
 public interface IDispatcherService
 {
@@ -6,4 +8,6 @@ public interface IDispatcherService
     Task EnqueueAsync(Action action);
     Task<T> EnqueueAsync<T>(Func<T> func);
     Task EnqueueAsync(Func<Task> func);
+
+    bool HasThreadAccess { get; }
 }

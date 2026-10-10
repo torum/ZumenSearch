@@ -11,6 +11,16 @@ namespace ZumenSearch.Models.Rent.Residentials;
 // 部屋（編集用）
 public sealed partial class Listing : ListingBase
 {
+    public Listing(string id, EntityStatus status, string propertyId, EntityStatus propertyStatus, bool isPropertyUnitOwnership, string propertyName) : base(id, status, propertyId, propertyStatus, PropertyContextType.RentResidential)
+    {
+        //PropertyId = propertyId;
+        IsPropertyUnitOwnership = isPropertyUnitOwnership;
+        PropertyName = propertyName;
+        //PropertyStatus = propertyStatus;
+        //PropertyChanged += (_, _) => SetIsModified(true);
+        SetIsModified(false);
+    }
+
     // 物件（建物の名前を保持 - タイトル等に表示）
     public string PropertyName
     {
@@ -153,7 +163,7 @@ public sealed partial class Listing : ListingBase
         }
     }
 
-    public DateTimeOffset OccupancyStatusCheckedAt
+    public DateTimeOffset? OccupancyStatusCheckedAt
     {
         get;
         private set
@@ -161,7 +171,7 @@ public sealed partial class Listing : ListingBase
             field = value;
             IsModified = true;
         }
-    } = DateTimeOffset.Now;
+    }
 
 
     /*
@@ -315,16 +325,6 @@ public sealed partial class Listing : ListingBase
     public ObservableCollection<Models.Base.PersonBase> BrokersToBeDeleted { get; set; } = [];
 
     #endregion
-
-    public Listing(string id, EntityStatus status, string propertyId, EntityStatus propertyStatus, bool isPropertyUnitOwnership, string propertyName) : base(id, status, propertyId, propertyStatus, PropertyContextType.RentResidential)
-    {
-        //PropertyId = propertyId;
-        IsPropertyUnitOwnership = isPropertyUnitOwnership;
-        PropertyName = propertyName;
-        //PropertyStatus = propertyStatus;
-        //PropertyChanged += (_, _) => SetIsModified(true);
-        SetIsModified(false);
-    }
 
     #region == Setter Methods ==
 
@@ -513,9 +513,23 @@ public sealed partial class Listing : ListingBase
         IsAvailableForRentNow = isAvailable;
     }
 
-    public void SetOccupancyStatusCheckedAt(DateTimeOffset checkedAt)
+    public void SetOccupancyStatusCheckedAt(DateTimeOffset? checkedAt)
     {
         OccupancyStatusCheckedAt = checkedAt;
+    }
+
+    public void SetOccupancyStatusCheckedAtFromString(string Str)
+    {
+        if (string.IsNullOrEmpty(Str))
+        {
+            OccupancyStatusCheckedAt = null;
+            return;
+        }
+
+        if (DateTimeOffset.TryParse(Str, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var result))
+        {
+            OccupancyStatusCheckedAt = result;
+        }
     }
 
     public void SetRemarks(string remarks)

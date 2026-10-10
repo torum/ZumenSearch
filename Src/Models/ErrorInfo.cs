@@ -3,6 +3,8 @@
 // ErrorInfo Class
 public sealed class ErrorInfo
 {
+    public ErrorInfo() {}
+
     public enum ErrType
     {
         DB, API, HTTP, XML,UserInput, Other
@@ -35,7 +37,4 @@ public sealed class ErrorInfo
     //
     public DateTime OccuredAt { get; set; }
 
-    public ErrorInfo()
-    {
-    }
 }

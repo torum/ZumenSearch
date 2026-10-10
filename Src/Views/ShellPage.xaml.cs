@@ -54,7 +54,6 @@ public sealed partial class ShellPage : Page
         MainWindow.Activated += MainWindow_Activated;
 
         this.Loaded += Page_Loaded;
-        //MainWindow.AppWindow.TitleBar.LayoutMetricsChanged += (s, e) => UpdateCaptionButtonPadding();
     }
 
     public ViewModels.MainViewModel ViewModel { get; }
@@ -69,9 +68,11 @@ public sealed partial class ShellPage : Page
         AppTitleBarCustomButtonPanel.Padding = new Thickness(0, 0, MainWindow.AppWindow.TitleBar.RightInset, 0);
     }
 
-    private void Page_Loaded(object sender, RoutedEventArgs e)
+    private async void Page_Loaded(object sender, RoutedEventArgs e)
     {
         UpdateCaptionButtonPadding();
+
+        await ViewModel.InitializeAsync();
 
         if (this.ContentFrame.Navigate(typeof(ZumenSearch.Views.SearchPage), null, new Microsoft.UI.Xaml.Media.Animation.EntranceNavigationTransitionInfo()))
         {

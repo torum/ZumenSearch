@@ -16,6 +16,11 @@ namespace ZumenSearch.Models.Base;
 // </remarks>
 public abstract class PersonBase : EntityAggregateBase
 {
+    protected PersonBase(string id, EntityStatus status, PersonKindType personKind) : base(id, status)
+    {
+        PersonKind = personKind;
+    }
+
     public PersonKindType PersonKind { get; set; }
 
     // Do not use SetProperty.
@@ -42,10 +47,6 @@ public abstract class PersonBase : EntityAggregateBase
         }
     } = string.Empty;
 
-    protected PersonBase(string id, EntityStatus status, PersonKindType personKind) : base(id, status)
-    {
-        PersonKind = personKind;
-    }
 };
 
 

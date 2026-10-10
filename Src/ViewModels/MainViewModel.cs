@@ -4,13 +4,13 @@ using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml.Media.Animation;
 using System.Collections.ObjectModel;
-using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Windows.ApplicationModel;
 using ZumenSearch.Helpers;
 using ZumenSearch.Models;
 using ZumenSearch.Models.Messenger;
 using ZumenSearch.Models.SearchResult;
+using ZumenSearch.Services;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.Services.Extensions.AbstractFactory;
 
@@ -36,6 +36,10 @@ public partial class MainViewModel : ObservableRecipient,
     private const string BrokerSearchResultPagePath = "ZumenSearch.Views.BrokerSearchResultPage";
 
     private readonly CancellationTokenSource _cts = new();
+
+    private Task? _initializationTask;
+
+    public Task InitializeAsync() => _initializationTask ??= InitializeDatabase();
 
     #endregion
 
@@ -84,7 +88,7 @@ public partial class MainViewModel : ObservableRecipient,
 
         // Initialize the database and get recent properties.
         // No wait. 
-        _ = InitializeDatabase();
+        //_ = InitializeDatabase();
         // No code after this point should be automatically executed until the database initialization is completed.
 
         /*
@@ -570,11 +574,11 @@ public partial class MainViewModel : ObservableRecipient,
                     res.Error.FullDump);
 
                 InfoBarErrorMessage =
-                    res.Error.Title + Environment.NewLine +
-                    res.Error.Message + Environment.NewLine +
-                    res.Error.Description + Environment.NewLine +
-                    res.Error.Operation + Environment.NewLine +
-                    res.Error.MethodName;
+                res.Error.Title + Environment.NewLine +
+                res.Error.Message + Environment.NewLine +
+                res.Error.Description + Environment.NewLine +
+                res.Error.Operation + Environment.NewLine +
+                res.Error.MethodName;
 
                 IsInfoBarErrorOpen = true;
 

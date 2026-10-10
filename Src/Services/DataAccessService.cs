@@ -1,11 +1,9 @@
 ﻿using Microsoft.Data.Sqlite;
 using System.Data;
 using System.Globalization;
-using System.Xml.Linq;
 using ZumenSearch.Helpers;
 using ZumenSearch.Models;
 using ZumenSearch.Models.Base;
-using ZumenSearch.Models.Location;
 using ZumenSearch.Models.SearchResult;
 using ZumenSearch.Services.Contracts;
 
@@ -598,6 +596,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
     private static void AddColumnsIfNotExist(SqliteConnection conn)
     {
+        _ = conn; // Just to avoid the warning. The code below is commented out for now, but it may be useful in the future if we need to add columns to existing tables.
         //var cmd = conn.CreateCommand();
         //bool exists = false;
 
@@ -1804,6 +1803,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     cmd.CommandText = "SELECT lessor_id, name, person_kind, name_last, name_first, name_company, name_company_type, name_company_type_position, remarks FROM rent_lessors WHERE lessor_id = @lessorId";
                     cmd.Parameters.Clear();
                     cmd.Parameters.AddWithValue("@lessorId", lessId);
+#pragma warning disable IDE0063 // Use simple 'using' statement
                     using (var reader2 = cmd.ExecuteReader())
                     {
                         while (reader2.Read())
@@ -1825,6 +1825,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                             //break; // Assuming we only want the first match
                         }
                     }
+#pragma warning restore IDE0063 // Use simple 'using' statement
                 }
             }
 
@@ -1856,6 +1857,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     cmd.CommandText = "SELECT broker_id, name, person_kind, name_last, name_first, name_company, name_company_type, name_company_type_position, remarks FROM brokers WHERE broker_id = @brokerId";
                     cmd.Parameters.Clear();
                     cmd.Parameters.AddWithValue("@brokerId", brokerId);
+#pragma warning disable IDE0063 // Use simple 'using' statement
                     using (var reader2 = cmd.ExecuteReader())
                     {
                         while (reader2.Read())
@@ -1877,6 +1879,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                             //break; // Assuming we only want the first match
                         }
                     }
+#pragma warning restore IDE0063 // Use simple 'using' statement
                 }
             }
 
@@ -2035,7 +2038,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         cmd.Parameters.AddWithValue("@available_from_month", room.SelectedAvailabilityMonthType.Key.ToString());
         cmd.Parameters.AddWithValue("@available_from_period", room.SelectedAvailabilityPeriodType.Key.ToString());
         cmd.Parameters.AddWithValue("@is_immediate_occupancy", room.IsAvailableForImmediateMoveIn ? 1 : 0);
-        cmd.Parameters.AddWithValue("@current_status_checked_at", room.OccupancyStatusCheckedAt.ToString("O", CultureInfo.InvariantCulture));
+        cmd.Parameters.AddWithValue("@current_status_checked_at", room.OccupancyStatusCheckedAt?.ToString("O", CultureInfo.InvariantCulture) ?? "");
 
         cmd.Parameters.AddWithValue("@remarks", room.Remarks ?? string.Empty);
 
@@ -2479,13 +2482,8 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         room.SetAvailabilityMonthTypeLabelFromString(Convert.ToString(reader["available_from_month"], CultureInfo.InvariantCulture) ?? string.Empty);
         room.SetAvailabilityPeriodTypeLabelFromString(Convert.ToString(reader["available_from_period"], CultureInfo.InvariantCulture) ?? string.Empty);
         room.SetIsAvailableForImmediateMoveIn(Convert.ToInt32(reader["is_immediate_occupancy"], CultureInfo.InvariantCulture) != 0);
+        room.SetOccupancyStatusCheckedAtFromString(Convert.ToString(reader["current_status_checked_at"], CultureInfo.InvariantCulture) ?? string.Empty);
 
-        var checkedAtText = Convert.ToString(reader["current_status_checked_at"], CultureInfo.InvariantCulture);
-        if (DateTimeOffset.TryParse(checkedAtText, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var checkedAt))
-        {
-            room.SetOccupancyStatusCheckedAt(checkedAt);
-        }
-        
         room.SetRemarks(Convert.ToString(reader["remarks"], CultureInfo.InvariantCulture) ?? string.Empty);
         room.SetChinryouFromString(Convert.ToString(reader["chinryou"], CultureInfo.InvariantCulture) ?? string.Empty);
 
@@ -2594,6 +2592,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 cmd.CommandText = "SELECT lessor_id, name, name_last, name_first, remarks FROM rent_lessors WHERE lessor_id = @lessorId";
                 cmd.Parameters.Clear();
                 cmd.Parameters.AddWithValue("@lessorId", lessId);
+#pragma warning disable IDE0063 // Use simple 'using' statement
                 using (var reader2 = cmd.ExecuteReader())
                 {
                     while (reader2.Read())
@@ -2623,6 +2622,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                         //break; // Assuming we only want the first match
                     }
                 }
+#pragma warning restore IDE0063 // Use simple 'using' statement
             }
         }
 

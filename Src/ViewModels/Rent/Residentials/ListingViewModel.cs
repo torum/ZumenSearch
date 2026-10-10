@@ -203,7 +203,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
 
     #endregion
 
-    #region == Basic listing properties == 
+    #region == 基本情報 == 
 
     public string Name
     {
@@ -394,7 +394,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
         }
     }
 
-    public DateTimeOffset OccupancyStatusCheckedAt
+    public DateTimeOffset? OccupancyStatusCheckedAt
     {
         get;
         set
@@ -404,7 +404,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
                 IsDirty = true;
             }
         }
-    } = DateTimeOffset.Now;
+    }
 
     public string Remarks
     {

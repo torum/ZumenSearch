@@ -5,6 +5,25 @@ namespace ZumenSearch.Models.Rent.Commercials.Listing;
 
 public sealed partial class Listing : ListingBase
 {
+    public Listing(
+        string id,
+        EntityStatus status,
+        string propertyId,
+        EntityStatus propertyStatus,
+        bool isPropertyUnitOwnership,
+        string propertyName)
+        : base(
+            id,
+            status,
+            propertyId,
+            propertyStatus,
+            PropertyContextType.RentCommercial)
+    {
+        IsPropertyUnitOwnership = isPropertyUnitOwnership;
+        PropertyName = propertyName;
+        SetIsModified(false);
+    }
+
     public bool IsPropertyUnitOwnership { get; set; }
 
     public string PropertyName
@@ -67,25 +86,6 @@ public sealed partial class Listing : ListingBase
     {
         get => field ?? string.Empty;
         private set { field = value; IsModified = true; }
-    }
-
-    public Listing(
-        string id,
-        EntityStatus status,
-        string propertyId,
-        EntityStatus propertyStatus,
-        bool isPropertyUnitOwnership,
-        string propertyName)
-        : base(
-            id,
-            status,
-            propertyId,
-            propertyStatus,
-            PropertyContextType.RentCommercial)
-    {
-        IsPropertyUnitOwnership = isPropertyUnitOwnership;
-        PropertyName = propertyName;
-        SetIsModified(false);
     }
 
     #region == Setter Methods ==

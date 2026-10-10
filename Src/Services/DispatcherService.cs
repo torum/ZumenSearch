@@ -1,6 +1,9 @@
 ﻿using CommunityToolkit.WinUI;
 using ZumenSearch.Services.Contracts;
 
+#pragma warning disable IDE0079 // Remove unnecessary suppression
+#pragma warning disable IDE0290 // Use primary constructor
+
 namespace ZumenSearch.Services;
 
 public class DispatcherService : IDispatcherService
@@ -57,7 +60,6 @@ public class DispatcherService : IDispatcherService
         }
     }
 
-
     // Awaitable action
     public Task EnqueueAsync(Action action) => _queue.EnqueueAsync(action);
 
@@ -66,5 +68,7 @@ public class DispatcherService : IDispatcherService
 
     // Awaitable async function (e.g., showing a ContentDialog)
     public Task EnqueueAsync(Func<Task> func) => _queue.EnqueueAsync(func);
+
+    public bool HasThreadAccess => _queue.HasThreadAccess;
 
 }
