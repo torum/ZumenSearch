@@ -744,41 +744,28 @@ public sealed partial class ListingViewModel : ObservableRecipient,
 
         _room.SetName(Name);
 
-        if (!TryParseBasicNumericValues(out var floorArea, out var floorNumber))
+        // TODO: Validate numeric values before setting them. If invalid, show error message and return.
+        if (!TryParseBasicNumericValues(out var _, out var _))
         {
             return;
         }
 
         _room.SetFloorPlanTypeLabel(SelectedFloorPlanType);
         _room.SetFloorPlanExtraTypeLabel(SelectedFloorPlanExtraType);
-        //_room.FloorNumberType = SelectedFloorNumberType.Key;
-        /*
-         * 
-        _room.FloorArea = floorArea;
-        _room.FloorNumber = floorNumber;
-        _room.IsCornerRoom = IsCornerRoom;
-        _room.MainExposureDirection = MainExposureDirection;
-        _room.CurrentStatus = CurrentStatus;
-        _room.IsRecruiting = IsRecruiting;
-        _room.AvailableFromMonth = AvailableFromMonth;
-        _room.AvailableFromPeriod = AvailableFromPeriod;
-        _room.IsImmediateOccupancy = IsImmediateOccupancy;
-        _room.CurrentStatusCheckedAt = CurrentStatusCheckedAt;
-        */
-        _room.Remarks = Remarks;
-
-        if (int.TryParse(Chinryou, out var result))
-        {
-            if (result > -1)
-            {
-                _room.Chinryou = result;
-            }
-            else
-            {
-                Debug.WriteLine("整数変換に失敗。（マイナス）");
-            }
-        }
-
+        _room.SetFloorGroundTypeLabel(SelectedFloorGroundType);
+        _room.SetFloorExclusiveAreaSqm(FloorExclusiveAreaSqm);
+        _room.SetFloorNumber(FloorNumber);
+        _room.SetIsCornerRoom(IsCornerRoom);
+        _room.SetExposureDirectionTypeLabel(SelectedExposureDirectionType);
+        _room.SetAvailabilityStatusTypeLabel(SelectedAvailabilityStatusType);
+        _room.SetAvailabilityMonthTypeLabel(SelectedAvailabilityMonthType);
+        _room.SetAvailabilityPeriodTypeLabel(SelectedAvailabilityPeriodType);
+        _room.SetOccupancyStatusLabel(SelectedOccupancyStatus);
+        _room.SetIsAvailableForImmediateMoveIn(IsAvailableForImmediateMoveIn);
+        _room.SetIsAvailableForRentNow(IsAvailableForRentNow);
+        _room.SetOccupancyStatusCheckedAt(OccupancyStatusCheckedAt);
+        _room.SetRemarks(Remarks);
+        _room.SetChinryouFromString(Chinryou);
 
 
         // TODO: More.
@@ -851,19 +838,19 @@ public sealed partial class ListingViewModel : ObservableRecipient,
 
         SelectedFloorPlanType = _room.FloorPlan;
         SelectedFloorPlanExtraType = _room.FloorPlanExtra;
-        /*
-        FloorArea = _room.FloorArea == 0 ? string.Empty : _room.FloorArea.ToString(CultureInfo.CurrentCulture);
-        //SelectedFloorNumberType = _room.FloorNumberType;
-        FloorNumber = _room.FloorNumber?.ToString(CultureInfo.InvariantCulture) ?? string.Empty;
+        SelectedFloorGroundType = _room.FloorGround;
+        FloorExclusiveAreaSqm = _room.FloorExclusiveAreaSqm;
+        FloorNumber = _room.FloorNumber;
         IsCornerRoom = _room.IsCornerRoom;
-        MainExposureDirection = _room.MainExposureDirection;
-        CurrentStatus = _room.CurrentStatus;
-        IsRecruiting = _room.IsRecruiting;
-        AvailableFromMonth = _room.AvailableFromMonth;
-        AvailableFromPeriod = _room.AvailableFromPeriod;
-        IsImmediateOccupancy = _room.IsImmediateOccupancy;
-        CurrentStatusCheckedAt = _room.CurrentStatusCheckedAt;
-        */
+        SelectedExposureDirectionType = _room.SelectedExposureDirectionType;
+        SelectedAvailabilityStatusType = _room.SelectedAvailabilityStatusType;
+        SelectedAvailabilityMonthType = _room.SelectedAvailabilityMonthType;
+        SelectedAvailabilityPeriodType = _room.SelectedAvailabilityPeriodType;
+        SelectedOccupancyStatus = _room.SelectedOccupancyStatus;
+        IsAvailableForImmediateMoveIn = _room.IsAvailableForImmediateMoveIn;
+        IsAvailableForRentNow = _room.IsAvailableForRentNow;
+        OccupancyStatusCheckedAt = _room.OccupancyStatusCheckedAt;
+
         Remarks = _room.Remarks;
 
         //var test = _room.Chinryou.ToString();

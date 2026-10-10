@@ -11,7 +11,7 @@ using ZumenSearch.Services.Contracts;
 
 namespace ZumenSearch.Services;
 
-// Repositories
+// Repository
 
 // <summary>
 // DataAccessService provides data access functionalities for managing properties and listings and related data in the application.
@@ -64,6 +64,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     "name TEXT NOT NULL DEFAULT ''," +
                     "thumbnail_filename TEXT NOT NULL DEFAULT ''," +
 
+                #region == Properties location ==
                     "location_machiaza_id TEXT NOT NULL DEFAULT ''," +
                     "location_prefecture_code TEXT NOT NULL DEFAULT ''," + // MunicipalityCode - rename it?
                     "location_prefecture TEXT NOT NULL DEFAULT ''," +
@@ -113,6 +114,8 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     "buss4_stop_name TEXT NOT NULL DEFAULT ''," +
                     "buss4_Jyousya INTEGER NOT NULL DEFAULT 0," +
                     "buss4_Toho INTEGER NOT NULL DEFAULT 0," +
+                #endregion
+
                     // TODO: add more columns.
 
 
@@ -170,27 +173,32 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     " )";
                 tableCmd.ExecuteNonQuery();
 
+                // Listing
                 tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS rent_residential_listings (" +
                     "listing_id TEXT NOT NULL PRIMARY KEY," +
                     "property_id TEXT NOT NULL DEFAULT ''," +
                     "is_property_unit_ownership INTEGER NOT NULL DEFAULT 0," +
                     "name TEXT NOT NULL DEFAULT ''," +
-                    "chinryou INTEGER NOT NULL DEFAULT 0," +
-                    "room_count INTEGER NOT NULL DEFAULT 1," +
+
                     "floor_plan_type TEXT NOT NULL DEFAULT ''," +
                     "floor_plan_extra_type TEXT NOT NULL DEFAULT ''," +
-                    "floor_area NUMERIC NOT NULL DEFAULT 0," +
+                    "floor_area TEXT NOT NULL DEFAULT ''," +
                     "floor_type TEXT NOT NULL DEFAULT ''," +
-                    "floor_number INTEGER," +
+                    "floor_number TEXT NOT NULL DEFAULT ''," +
                     "is_corner_room INTEGER NOT NULL DEFAULT 0," +
                     "main_exposure_direction TEXT NOT NULL DEFAULT ''," +
+                    "availability_status TEXT NOT NULL DEFAULT ''," +
                     "current_status TEXT NOT NULL DEFAULT ''," +
                     "is_recruiting INTEGER NOT NULL DEFAULT 0," +
-                    "available_from_month INTEGER," +
+                    "available_from_month TEXT NOT NULL DEFAULT ''," +
                     "available_from_period TEXT NOT NULL DEFAULT ''," +
                     "is_immediate_occupancy INTEGER NOT NULL DEFAULT 0," +
-                    "current_status_checked_at TEXT," +
+                    "current_status_checked_at TEXT NOT NULL DEFAULT ''," +
+
                     "remarks TEXT NOT NULL DEFAULT ''," +
+
+                    "chinryou INTEGER NOT NULL DEFAULT 0," +
+
                     "created_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc'))," +
                     "updated_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc'))," +
                     "FOREIGN KEY (property_id) REFERENCES rent_residentials(property_id) ON DELETE CASCADE," + //?
@@ -1454,243 +1462,8 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 {
                     foreach (var unit in building.Rooms)
                     {
-                        // TODO: reuse the code for upsert listing.
-
-
-                        cmd.CommandText = """
-                            INSERT INTO rent_residential_listings (
-                                listing_id, property_id, is_property_unit_ownership, name, chinryou,
-                                room_count, floor_plan_type, floor_plan_extra_type, floor_area, floor_type, floor_number,
-                                is_corner_room, main_exposure_direction, current_status, is_recruiting,
-                                available_from_month, available_from_period, is_immediate_occupancy,
-                                current_status_checked_at, remarks)
-                            VALUES (
-                                @listing_id, @property_id, @is_property_unit_ownership, @name, @chinryou,
-                                @room_count, @floor_plan_type, @floor_plan_extra_type, @floor_area, @floor_type, @floor_number,
-                                @is_corner_room, @main_exposure_direction, @current_status, @is_recruiting,
-                                @available_from_month, @available_from_period, @is_immediate_occupancy,
-                                @current_status_checked_at, @remarks)
-                            ON CONFLICT(listing_id) DO UPDATE SET
-                                is_property_unit_ownership = @is_property_unit_ownership,
-                                name = @name,
-                                chinryou = @chinryou,
-                                room_count = @room_count,
-                                floor_plan_type = @floor_plan_type,
-                                floor_plan_extra_type = @floor_plan_extra_type,
-                                floor_area = @floor_area,
-                                floor_type = @floor_type,
-                                floor_number = @floor_number,
-                                is_corner_room = @is_corner_room,
-                                main_exposure_direction = @main_exposure_direction,
-                                current_status = @current_status,
-                                is_recruiting = @is_recruiting,
-                                available_from_month = @available_from_month,
-                                available_from_period = @available_from_period,
-                                is_immediate_occupancy = @is_immediate_occupancy,
-                                current_status_checked_at = @current_status_checked_at,
-                                remarks = @remarks,
-                                updated_at = @updated_at;
-                            """;
-
-                        // ループなので、前のパラメーターをクリアする。
-                        cmd.Parameters.Clear();
-
-                        cmd.Parameters.AddWithValue("@listing_id", unit.Id);
-                        cmd.Parameters.AddWithValue("@property_id", building.Id);
-                        cmd.Parameters.AddWithValue("@is_property_unit_ownership", building.IsUnitOwnership ? 1 : 0); // bool to int
-                        cmd.Parameters.AddWithValue("@name", unit.Name);
-                        cmd.Parameters.AddWithValue("@chinryou", unit.Chinryou);
-                        //cmd.Parameters.AddWithValue("@room_count", unit.RoomCount);
-                        /*
-                        cmd.Parameters.AddWithValue("@floor_plan_type", unit.FloorPlanType.GetStorageValue());
-                        cmd.Parameters.AddWithValue("@floor_plan_extra_type", unit.FloorPlanExtraType.GetStorageValue());
-                        cmd.Parameters.AddWithValue("@floor_area", unit.FloorArea);
-                        cmd.Parameters.AddWithValue("@floor_type", unit.FloorNumberType.GetStorageValue());
-                        cmd.Parameters.AddWithValue("@floor_number", (object?)unit.FloorNumber ?? DBNull.Value);
-                        cmd.Parameters.AddWithValue("@is_corner_room", unit.IsCornerRoom ? 1 : 0);
-                        cmd.Parameters.AddWithValue("@main_exposure_direction", unit.MainExposureDirection.GetStorageValue());
-                        cmd.Parameters.AddWithValue("@current_status", unit.CurrentStatus.GetStorageValue());
-                        cmd.Parameters.AddWithValue("@is_recruiting", unit.IsRecruiting ? 1 : 0);
-                        cmd.Parameters.AddWithValue("@available_from_month", (object?)unit.AvailableFromMonth ?? DBNull.Value);
-                        cmd.Parameters.AddWithValue("@available_from_period", unit.AvailableFromPeriod.GetStorageValue());
-                        cmd.Parameters.AddWithValue("@is_immediate_occupancy", unit.IsImmediateOccupancy ? 1 : 0);
-                        cmd.Parameters.AddWithValue("@current_status_checked_at", ToDatabaseStatusCheckedAt(unit.CurrentStatusCheckedAt));
-                        */
-                        cmd.Parameters.AddWithValue("@remarks", unit.Remarks ?? string.Empty);
-                        cmd.Parameters.AddWithValue("@updated_at", DateTimeOffset.UtcNow.ToString("s"));
-
-                        var r = cmd.ExecuteNonQuery();
-                        if (r > 0)
-                        {
-                            unit.SetPropertyStatus(EntityStatus.Saved);
-                            unit.SetStatus(EntityStatus.Saved);
-                            //unit.IsNew = false;
-                            unit.SetIsModified(false);
-                        }
-
-                        // Room Pics
-                        if (unit.Pictures.Count > 0)
-                        {
-                            foreach (var pic in unit.Pictures)
-                            {
-                                // Upsert
-                                var sqlUpsertRoomPicture = "INSERT INTO rent_residential_listing_pictures (picture_id, listing_id, property_id, filename, type, description, is_main) VALUES (@PicId, @roomId, @RentId, @Path, @type, @Desc, @Main) ";
-                                sqlUpsertRoomPicture += "ON CONFLICT(picture_id) ";
-                                sqlUpsertRoomPicture += "DO UPDATE SET filename = @Path, type = @type, description = @Desc, is_main = @Main";
-
-                                cmd.CommandText = sqlUpsertRoomPicture;
-
-                                // ループなので、前のパラメーターをクリアする。
-                                cmd.Parameters.Clear();
-
-                                cmd.Parameters.AddWithValue("@PicId", pic.Id);
-                                cmd.Parameters.AddWithValue("@roomId", unit.Id);
-                                cmd.Parameters.AddWithValue("@RentId", building.Id);
-                                cmd.Parameters.AddWithValue("@Path", pic.ImageFilename);
-                                cmd.Parameters.AddWithValue("@type", pic.PictureType.Key.ToString());
-                                cmd.Parameters.AddWithValue("@Desc", pic.Description);
-                                var paramIsMain = new SqliteParameter("@Main", System.Data.DbType.Int32)
-                                {
-                                    Value = pic.IsMain ? 1 : 0
-                                };
-                                cmd.Parameters.Add(paramIsMain);
-
-                                var result = cmd.ExecuteNonQuery();
-                                if (result > 0)
-                                {
-                                    //pic.IsNew = false;
-                                    pic.SetStatus(EntityStatus.Saved);
-                                    pic.SetIsModified(false);
-                                }
-                            }
-                        }
-
-                        // Room Pics 削除リスト
-                        if (unit.PicturesToBeDeleted.Count > 0)
-                        {
-                            foreach (var delp in unit.PicturesToBeDeleted)
-                            {
-                                // 削除
-                                var sqlDeleteRentLivingPicture = string.Format(CultureInfo.InvariantCulture, "DELETE FROM rent_residential_listing_pictures WHERE picture_id = '{0}'", delp.Id);
-
-                                cmd.CommandText = sqlDeleteRentLivingPicture;
-                                var DelRentLivingPicResult = cmd.ExecuteNonQuery();
-                                if (DelRentLivingPicResult > 0)
-                                {
-                                    // TODO:
-                                    Debug.WriteLine("Picture deleted");
-                                }
-                            }
-
-                            // let's not. Needs this to clean up the file.
-                            //unit.BuildingPicturesToBeDeleted.Clear();
-                        }
-
-                        // Room PDF
-                        if (unit.Pdfs.Count > 0)
-                        {
-                            foreach (var pdf in unit.Pdfs)
-                            {
-                                // Upsert
-                                var sqlUpsertRoomPdf = "INSERT INTO rent_residential_listing_pdfs (pdf_id, listing_id, property_id, filename, thumbnail_filename, type, description, is_main) VALUES (@PdfId, @roomId, @RentId, @Path, @Thumb, @type, @Desc, @Main) ";
-                                sqlUpsertRoomPdf += "ON CONFLICT(pdf_id) ";
-                                sqlUpsertRoomPdf += "DO UPDATE SET filename = @Path, thumbnail_filename = @Thumb, type = @type, description = @Desc, is_main = @Main";
-
-                                cmd.CommandText = sqlUpsertRoomPdf;
-
-                                // ループなので、前のパラメーターをクリアする。
-                                cmd.Parameters.Clear();
-
-                                cmd.Parameters.AddWithValue("@PdfId", pdf.Id);
-                                cmd.Parameters.AddWithValue("@roomId", unit.Id);
-                                cmd.Parameters.AddWithValue("@RentId", building.Id);
-                                cmd.Parameters.AddWithValue("@Path", pdf.PdfFilename);
-                                cmd.Parameters.AddWithValue("@Thumb", pdf.ThumbnailFilename);
-                                cmd.Parameters.AddWithValue("@type", pdf.PdfType.Key.ToString());
-                                cmd.Parameters.AddWithValue("@Desc", pdf.Description);
-                                var paramIsMain = new SqliteParameter("@Main", System.Data.DbType.Int32)
-                                {
-                                    Value = pdf.IsMain ? 1 : 0
-                                };
-                                cmd.Parameters.Add(paramIsMain);
-
-                                var result = cmd.ExecuteNonQuery();
-                                if (result > 0)
-                                {
-                                    //pdf.IsNew = false;
-                                    pdf.SetStatus(EntityStatus.Saved);
-                                    pdf.SetIsModified(false);
-                                }
-                            }
-                        }
-
-                        // Room Pdfs 削除リスト
-                        if (unit.PdfsToBeDeleted.Count > 0)
-                        {
-                            foreach (var delp in unit.PdfsToBeDeleted)
-                            {
-                                // 削除
-                                var sqlDeleteRentLivingPdf = string.Format(CultureInfo.InvariantCulture, "DELETE FROM rent_residential_listing_pdfs WHERE pdf_id = '{0}'", delp.Id);
-
-                                cmd.CommandText = sqlDeleteRentLivingPdf;
-                                var DelRentLivingPdfResult = cmd.ExecuteNonQuery();
-                                if (DelRentLivingPdfResult > 0)
-                                {
-                                    // TODO:
-                                    Debug.WriteLine("Pdf deleted");
-                                }
-                            }
-
-                            // let's not. Needs this to clean up the file.
-                            //unit.BuildingPicturesToBeDeleted.Clear();
-                        }
-
-                        // Room Lessor
-                        if (unit.Lessors.Count > 0)
-                        {
-                            foreach (var psn in unit.Lessors)
-                            {
-                                //var sqlInsertInto = "INSERT INTO rent_lessors_properties_listings (lessor_id, property_id, property_kind, listing_id) " +
-                                //                "VALUES (@lessor_id, @property_id, @property_kind, @listing_id)";
-                                var sqlUpsertLessor = "INSERT INTO rent_lessors_properties_listings (lessor_id, property_id, property_kind, listing_id) ";
-                                sqlUpsertLessor += "VALUES (@lessor_id, @property_id, @property_kind, @listing_id) ";
-                                sqlUpsertLessor += "ON CONFLICT (lessor_id, property_id, listing_id) ";
-                                sqlUpsertLessor += "DO NOTHING";
-
-                                cmd.CommandText = sqlUpsertLessor;
-
-                                // ループなので、前のパラメーターをクリアする。
-                                cmd.Parameters.Clear();
-
-                                cmd.Parameters.AddWithValue("@lessor_id", psn.Id);
-                                cmd.Parameters.AddWithValue("@property_id", building.Id);
-                                cmd.Parameters.AddWithValue("@property_kind", building.PropertyContextType.ToString());
-                                cmd.Parameters.AddWithValue("@listing_id", unit.Id);
-
-                                cmd.ExecuteNonQuery();
-                            }
-                        }
-
-                        // Room Lessor 削除リスト
-                        if (unit.LessorsToBeDeleted.Count > 0)
-                        {
-                            foreach (var psn in unit.LessorsToBeDeleted)
-                            {
-                                // 削除
-                                var sqlDelete = ($"DELETE FROM rent_lessors_properties_listings WHERE lessor_id = '{psn.Id}' AND property_id = '{building.Id}' AND listing_id = '{unit.Id}'");
-
-                                cmd.CommandText = sqlDelete;
-                                var sqlResult = cmd.ExecuteNonQuery();
-                                if (sqlResult > 0)
-                                {
-                                    // TODO:
-                                    Debug.WriteLine("Lessor deleted");
-                                }
-                            }
-                            // TODO: should I?
-                            unit.LessorsToBeDeleted.Clear();
-                        }
-
+                        // Reuse the code for upsert listing.
+                        _ = DoUpsertRentResidentialListing(cmd, building.Id, unit);
                     }
                 }
 
@@ -2146,6 +1919,532 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         return res;
     }
 
+    public ResultWrapper DeleteRentResidential(string propertyId)
+    {
+        var res = new ResultWrapper();
+
+        if (string.IsNullOrEmpty(propertyId))
+        {
+            res.IsError = true;
+            // TODO:
+            return res;
+        }
+
+        _readerWriterLock.EnterWriteLock();
+        try
+        {
+            // System.Data.SQLite
+            //using var connection = new SQLiteConnection(_connectionStringBuilder.ConnectionString);
+            // Microsoft.Data.Sqlite
+            using var connection = new SqliteConnection(_connectionStringBuilder.ConnectionString);
+            connection.Open();
+
+            using var cmd = connection.CreateCommand();
+
+            cmd.Transaction = connection.BeginTransaction();
+            try
+            {
+                cmd.CommandText = string.Format(CultureInfo.InvariantCulture, "DELETE FROM properties WHERE property_id = '{0}';", propertyId);
+                res.AffectedCount = cmd.ExecuteNonQuery();
+
+                cmd.Transaction.Commit();
+            }
+            catch (Exception ex)
+            {
+                cmd.Transaction.Rollback();
+
+                SetDatabaseError(res, ex, "cmd.ExecuteNonQuery(), cmd.Transaction.Commit", "Failed to delete database recode. Transaction.Rollback()", nameof(DeleteRentResidential));
+                return res;
+            }
+        }
+        catch (Exception ex)
+        {
+            SetDatabaseError(res, ex, "Connection.Open", "Failed to Connect to a SQLite database file", nameof(DeleteRentResidential));
+
+            return res;
+        }
+        finally
+        {
+            _readerWriterLock.ExitWriteLock();
+        }
+
+        //Debug.WriteLine(string.Format("{0} feed Deleted from DB", res.AffectedCount));
+
+        return res;
+    }
+
+    #endregion
+
+    #region == Rent Residential Listing ==
+
+    private static int DoUpsertRentResidentialListing(SqliteCommand cmd, string propertyId, Models.Rent.Residentials.Listing room)
+    {
+        cmd.CommandText = """
+            INSERT INTO rent_residential_listings (
+                listing_id, property_id, is_property_unit_ownership, name,
+                floor_plan_type, floor_plan_extra_type, floor_area, floor_type, floor_number,
+                is_corner_room, main_exposure_direction, availability_status, current_status,
+                is_recruiting, available_from_month, available_from_period,
+                is_immediate_occupancy, current_status_checked_at, remarks, chinryou)
+            VALUES (
+                @listing_id, @property_id, @is_property_unit_ownership, @name,
+                @floor_plan_type, @floor_plan_extra_type, @floor_area, @floor_type, @floor_number,
+                @is_corner_room, @main_exposure_direction, @availability_status, @current_status,
+                @is_recruiting, @available_from_month, @available_from_period,
+                @is_immediate_occupancy, @current_status_checked_at, @remarks, @chinryou)
+            ON CONFLICT(listing_id) DO UPDATE SET
+                is_property_unit_ownership = @is_property_unit_ownership,
+                name = @name,
+                floor_plan_type = @floor_plan_type,
+                floor_plan_extra_type = @floor_plan_extra_type,
+                floor_area = @floor_area,
+                floor_type = @floor_type,
+                floor_number = @floor_number,
+                is_corner_room = @is_corner_room,
+                main_exposure_direction = @main_exposure_direction,
+                availability_status = @availability_status,
+                current_status = @current_status,
+                is_recruiting = @is_recruiting,
+                available_from_month = @available_from_month,
+                available_from_period = @available_from_period,
+                is_immediate_occupancy = @is_immediate_occupancy,
+                current_status_checked_at = @current_status_checked_at,
+                remarks = @remarks,
+                chinryou = @chinryou,
+                updated_at = @updated_at;
+            """;
+
+        // Clear parameters before setting new ones because this method can be called multiple times in a loop.
+        cmd.Parameters.Clear();
+
+        cmd.Parameters.AddWithValue("@listing_id", room.Id);
+        cmd.Parameters.AddWithValue("@property_id", propertyId);
+        cmd.Parameters.AddWithValue("@is_property_unit_ownership", room.IsPropertyUnitOwnership ? 1 : 0); // bool to int
+        cmd.Parameters.AddWithValue("@name", room.Name);
+
+        cmd.Parameters.AddWithValue("@floor_plan_type", room.FloorPlan.Key.ToString());
+        cmd.Parameters.AddWithValue("@floor_plan_extra_type", room.FloorPlanExtra.Key.ToString());
+        cmd.Parameters.AddWithValue("@floor_area", room.FloorExclusiveAreaSqm);
+        cmd.Parameters.AddWithValue("@floor_type", room.FloorGround.Key.ToString());
+        cmd.Parameters.AddWithValue("@floor_number", room.FloorNumber);
+        cmd.Parameters.AddWithValue("@is_corner_room", room.IsCornerRoom ? 1 : 0);
+        cmd.Parameters.AddWithValue("@main_exposure_direction", room.SelectedExposureDirectionType.Key.ToString());
+        cmd.Parameters.AddWithValue("@availability_status", room.SelectedAvailabilityStatusType.Key.ToString());
+        cmd.Parameters.AddWithValue("@current_status", room.SelectedOccupancyStatus.Key.ToString());
+        cmd.Parameters.AddWithValue("@is_recruiting", room.IsAvailableForRentNow ? 1 : 0);
+        cmd.Parameters.AddWithValue("@available_from_month", room.SelectedAvailabilityMonthType.Key.ToString());
+        cmd.Parameters.AddWithValue("@available_from_period", room.SelectedAvailabilityPeriodType.Key.ToString());
+        cmd.Parameters.AddWithValue("@is_immediate_occupancy", room.IsAvailableForImmediateMoveIn ? 1 : 0);
+        cmd.Parameters.AddWithValue("@current_status_checked_at", room.OccupancyStatusCheckedAt.ToString("O", CultureInfo.InvariantCulture));
+
+        cmd.Parameters.AddWithValue("@remarks", room.Remarks ?? string.Empty);
+
+
+        cmd.Parameters.AddWithValue("@chinryou", room.Chinryou);
+
+        cmd.Parameters.AddWithValue("@updated_at", DateTimeOffset.UtcNow.ToString("s"));
+
+        var result = cmd.ExecuteNonQuery();
+        if (result > 0)
+        {
+            //room.IsNew = false;
+            room.SetIsModified(false);
+            room.SetStatus(EntityStatus.Saved);
+            room.SetPropertyStatus(EntityStatus.Saved);
+        }
+        //res.AffectedCount = result;
+
+        cmd.Parameters.Clear();
+
+        // 部屋写真 rent_residential_listing_pictures table - Insert or Update
+        if (room.Pictures.Count > 0)
+        {
+            foreach (var pic in room.Pictures)
+            {
+                // Upsert
+                var sqlUpsertRoom = "INSERT INTO rent_residential_listing_pictures (picture_id, listing_id, property_id, filename, type, description, is_main) VALUES (@picture_id, @listing_id, @property_id, @filename, @type, @description, @is_main) ";
+                sqlUpsertRoom += "ON CONFLICT(picture_id) ";
+                sqlUpsertRoom += "DO UPDATE SET filename = @filename, type = @type, description = @description, is_main = @is_main";
+                var exec = true;
+
+                cmd.CommandText = sqlUpsertRoom;
+
+                if (exec)
+                {
+                    // ループなので、前のパラメーターをクリアする。
+                    cmd.Parameters.Clear();
+
+                    cmd.Parameters.AddWithValue("@picture_id", pic.Id);
+                    cmd.Parameters.AddWithValue("@listing_id", room.Id);
+                    cmd.Parameters.AddWithValue("@property_id", propertyId);
+                    cmd.Parameters.AddWithValue("@filename", pic.ImageFilename);
+                    cmd.Parameters.AddWithValue("@type", pic.PictureType.Key.ToString());
+                    cmd.Parameters.AddWithValue("@description", pic.Description);
+                    /*
+                    var paramIsMain = new SqliteParameter("@is_main", System.Data.DbType.Int32);
+                    if (pic.IsMain)
+                    {
+                        paramIsMain.Value = 1;
+                    }
+                    else
+                    {
+                        paramIsMain.Value = 0;
+                    }
+                    cmd.Parameters.Add(paramIsMain);
+                    */
+                    cmd.Parameters.AddWithValue("@is_main", pic.IsMain ? 1 : 0); // bool to int
+
+                    result = cmd.ExecuteNonQuery();
+                    if (result > 0)
+                    {
+                        //pic.IsNew = false;
+                        pic.SetStatus(EntityStatus.Saved);
+                        pic.SetIsModified(false);
+                    }
+                }
+
+            }
+        }
+
+        // 部屋写真の削除リストを処理
+        if (room.PicturesToBeDeleted.Count > 0)
+        {
+            foreach (var delr in room.PicturesToBeDeleted)
+            {
+                // 削除
+                var sqlDeleteRentLivingRoom = string.Format(CultureInfo.InvariantCulture, "DELETE FROM rent_residential_listing_pictures WHERE picture_id = '{0}'", delr.Id);
+
+                cmd.CommandText = sqlDeleteRentLivingRoom;
+                var DelRentLivingRoomResult = cmd.ExecuteNonQuery();
+                if (DelRentLivingRoomResult > 0)
+                {
+                    // TODO:
+                    Debug.WriteLine("Room Pic deleted");
+                }
+            }
+            // let's not do this.
+            //room.UnitPicturesToBeDeleted.Clear();
+        }
+
+        // 部屋図面 rent_residential_listing_pdfs table - Insert or Update
+        if (room.Pdfs.Count > 0)
+        {
+            foreach (var pdf in room.Pdfs)
+            {
+                // Upsert
+                var sqlUpsertRoom = "INSERT INTO rent_residential_listing_pdfs (pdf_id, listing_id, property_id, filename, thumbnail_filename, type, description, is_main) VALUES (@pdf_id, @listing_id, @property_id, @filename, @thumbnail_filename, @type, @description, @is_main) ";
+                sqlUpsertRoom += "ON CONFLICT(pdf_id) ";
+                sqlUpsertRoom += "DO UPDATE SET filename = @filename, thumbnail_filename = @thumbnail_filename, type = @type, description = @description, is_main = @is_main";
+                var exec = true;
+
+                cmd.CommandText = sqlUpsertRoom;
+
+                if (exec)
+                {
+                    // ループなので、前のパラメーターをクリアする。
+                    cmd.Parameters.Clear();
+
+                    cmd.Parameters.AddWithValue("@pdf_id", pdf.Id);
+                    cmd.Parameters.AddWithValue("@listing_id", room.Id);
+                    cmd.Parameters.AddWithValue("@property_id", propertyId);
+                    cmd.Parameters.AddWithValue("@filename", pdf.PdfFilename);
+                    cmd.Parameters.AddWithValue("@thumbnail_filename", pdf.ThumbnailFilename);
+                    cmd.Parameters.AddWithValue("@type", pdf.PdfType.Key.ToString());
+                    cmd.Parameters.AddWithValue("@description", pdf.Description);
+                    var paramIsMain = new SqliteParameter("@is_main", System.Data.DbType.Int32);
+                    if (pdf.IsMain)
+                    {
+                        paramIsMain.Value = 1;
+                    }
+                    else
+                    {
+                        paramIsMain.Value = 0;
+                    }
+                    cmd.Parameters.Add(paramIsMain);
+
+                    result = cmd.ExecuteNonQuery();
+                    if (result > 0)
+                    {
+                        //pdf.IsNew = false;
+                        pdf.SetStatus(EntityStatus.Saved);
+                        pdf.SetIsModified(false);
+                    }
+                }
+
+            }
+        }
+
+        // 部屋図面の削除リストを処理
+        if (room.PdfsToBeDeleted.Count > 0)
+        {
+            foreach (var delr in room.PdfsToBeDeleted)
+            {
+                // 削除
+                var sqlDeleteRentLivingRoom = string.Format(CultureInfo.InvariantCulture, "DELETE FROM rent_residential_listing_pdfs WHERE pdf_id = '{0}'", delr.Id);
+
+                cmd.CommandText = sqlDeleteRentLivingRoom;
+                var DelRentLivingRoomResult = cmd.ExecuteNonQuery();
+                if (DelRentLivingRoomResult > 0)
+                {
+                    // TODO:
+                    Debug.WriteLine("Room Pdf deleted @UpdateRentResidential in DataAccessService");
+                }
+            }
+            // let's not do this.
+            //room.UnitPicturesToBeDeleted.Clear();
+        }
+
+        // 部屋貸主 rent_lessors_properties_listings - Insert or Update
+        if (room.Lessors.Count > 0)
+        {
+            foreach (var psn in room.Lessors)
+            {
+                //var sqlInsertInto = "INSERT INTO rent_lessors_properties_listings (lessor_id, property_id, property_kind, listing_id) " +
+                //                "VALUES (@lessor_id, @property_id, @property_kind, @listing_id)";
+
+                // Upsert 
+                var sqlUpsert = "INSERT INTO rent_lessors_properties_listings (lessor_id, property_id, property_kind, listing_id) VALUES (@lessor_id, @property_id, @property_kind, @listing_id) ";
+                sqlUpsert += "ON CONFLICT(lessor_id, property_id, listing_id) ";
+                sqlUpsert += "DO NOTHING";//"DO UPDATE SET lessor_id = @lessor_id, property_id = @property_id, property_kind = @property_kind, listing_id = @listing_id";
+
+                cmd.CommandText = sqlUpsert;
+
+                // ループなので、前のパラメーターをクリアする。
+                cmd.Parameters.Clear();
+
+                cmd.Parameters.AddWithValue("@lessor_id", psn.Id);
+                cmd.Parameters.AddWithValue("@property_id", room.PropertyId);
+                cmd.Parameters.AddWithValue("@property_kind", room.PropertyContextType.ToString());
+                cmd.Parameters.AddWithValue("@listing_id", room.Id);
+
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        // 部屋貸主の削除リストを処理
+        if (room.LessorsToBeDeleted.Count > 0)
+        {
+            foreach (var psn in room.LessorsToBeDeleted)
+            {
+                // 削除
+                var sqlDelete = ($"DELETE FROM rent_lessors_properties_listings WHERE lessor_id = '{psn.Id}' AND property_id = '{room.PropertyId}' AND listing_id = '{room.Id}'");
+
+                cmd.CommandText = sqlDelete;
+                var sqlResult = cmd.ExecuteNonQuery();
+                if (sqlResult > 0)
+                {
+                    // TODO:
+                    Debug.WriteLine("Lessor deleted");
+                }
+            }
+        }
+
+        // 部屋宅建業者 brokers_properties_listings - Insert or Update
+        foreach (var broker in room.Brokers)
+        {
+            cmd.Parameters.Clear();
+            cmd.CommandText = """
+                INSERT INTO brokers_properties_listings
+                    (broker_id, property_id, property_kind, listing_id)
+                VALUES
+                    (@brokerId, @propertyId, @propertyKind, @listingId)
+                ON CONFLICT (broker_id, property_id, listing_id) DO NOTHING;
+                """;
+            cmd.Parameters.AddWithValue("@brokerId", broker.Id);
+            cmd.Parameters.AddWithValue("@propertyId", room.PropertyId);
+            cmd.Parameters.AddWithValue("@propertyKind", room.PropertyContextType.ToString());
+            cmd.Parameters.AddWithValue("@listingId", room.Id);
+            cmd.ExecuteNonQuery();
+        }
+
+        // 部屋宅建業者の削除リストを処理
+        foreach (var broker in room.BrokersToBeDeleted)
+        {
+            cmd.Parameters.Clear();
+            cmd.CommandText = """
+                DELETE FROM brokers_properties_listings
+                WHERE broker_id = @brokerId
+                  AND property_id = @propertyId
+                  AND listing_id = @listingId;
+                """;
+            cmd.Parameters.AddWithValue("@brokerId", broker.Id);
+            cmd.Parameters.AddWithValue("@propertyId", room.PropertyId);
+            cmd.Parameters.AddWithValue("@listingId", room.Id);
+            cmd.ExecuteNonQuery();
+        }
+
+
+        return result;
+    }
+
+    public ResultWrapper UpsertRentResidentialListing(string propertyId, Models.Rent.Residentials.Listing room)
+    {
+        var res = new ResultWrapper();
+
+        if (string.IsNullOrEmpty(propertyId))
+        {
+            res.IsError = true;
+            // TODO:
+            return res;
+        }
+
+        _readerWriterLock.EnterWriteLock();
+        try
+        {
+            using var connection = new SqliteConnection(_connectionStringBuilder.ConnectionString);
+            connection.Open();
+
+            using var cmd = connection.CreateCommand();
+            cmd.Transaction = connection.BeginTransaction();
+            try
+            {
+                cmd.CommandType = CommandType.Text;
+
+                // Update updated_at in the properties table.
+                cmd.CommandText = "UPDATE properties SET updated_at = @updatedAt WHERE property_id = @propertyId;";
+                cmd.Parameters.Add("@updatedAt", SqliteType.Text).Value = DateTimeOffset.UtcNow.ToString("s", CultureInfo.InvariantCulture);
+                cmd.Parameters.Add("@propertyId", SqliteType.Text).Value = propertyId;
+
+                cmd.ExecuteNonQuery();
+                /*
+                
+                // Upsert into rent_residential_listings
+                cmd.CommandText = """
+                    INSERT INTO rent_residential_listings (
+                        listing_id, property_id, is_property_unit_ownership, name, chinryou,
+                        room_count, floor_plan_type, floor_plan_extra_type, floor_area, floor_type, floor_number,
+                        is_corner_room, main_exposure_direction, current_status, is_recruiting,
+                        available_from_month, available_from_period, is_immediate_occupancy,
+                        current_status_checked_at, remarks)
+                    VALUES (
+                        @listing_id, @property_id, @is_property_unit_ownership, @name, @chinryou,
+                        @room_count, @floor_plan_type, @floor_plan_extra_type, @floor_area, @floor_type, @floor_number,
+                        @is_corner_room, @main_exposure_direction, @current_status, @is_recruiting,
+                        @available_from_month, @available_from_period, @is_immediate_occupancy,
+                        @current_status_checked_at, @remarks)
+                    ON CONFLICT(listing_id) DO UPDATE SET
+                        is_property_unit_ownership = @is_property_unit_ownership,
+                        name = @name,
+                        chinryou = @chinryou,
+                        room_count = @room_count,
+                        floor_plan_type = @floor_plan_type,
+                        floor_plan_extra_type = @floor_plan_extra_type,
+                        floor_area = @floor_area,
+                        floor_type = @floor_type,
+                        floor_number = @floor_number,
+                        is_corner_room = @is_corner_room,
+                        main_exposure_direction = @main_exposure_direction,
+                        current_status = @current_status,
+                        is_recruiting = @is_recruiting,
+                        available_from_month = @available_from_month,
+                        available_from_period = @available_from_period,
+                        is_immediate_occupancy = @is_immediate_occupancy,
+                        current_status_checked_at = @current_status_checked_at,
+                        remarks = @remarks,
+                        updated_at = @updated_at;
+                    """;
+                cmd.Parameters.Clear();
+
+                */
+                //
+                res.AffectedCount = DoUpsertRentResidentialListing(cmd, propertyId, room);
+
+                // Commit
+                cmd.Transaction.Commit();
+
+                // Clear deletion queues only after the commit succeeds.
+                room.LessorsToBeDeleted.Clear();
+                room.BrokersToBeDeleted.Clear();
+            }
+            catch (Exception ex)
+            {
+                cmd.Transaction.Rollback();
+
+                SetDatabaseError(res, ex, "cmd.ExecuteNonQuery(), cmd.Transaction.Commit", "Failed to update database tables. Transaction.Rollback()", nameof(UpsertRentResidentialListing));
+
+                return res;
+            }
+        }
+        catch (Exception ex)
+        {
+            SetDatabaseError(res, ex, "connection.Open", "Failed to Connect to a SQLite database file", nameof(UpsertRentResidentialListing));
+            return res;
+        }
+        finally
+        {
+            _readerWriterLock.ExitWriteLock();
+        }
+
+        //Debug.WriteLine(string.Format("{0} Entries Inserted to DB", res.AffectedCount.ToString()));
+
+        return res;
+    }
+
+    public ListingSearchResultWrapper SelectRentResidentialListings()
+    {
+        var res = new ListingSearchResultWrapper();
+
+        _readerWriterLock.EnterReadLock();
+        try
+        {
+            using var connection = new SqliteConnection(_connectionStringBuilder.ConnectionString);
+            connection.Open();
+
+            using var cmd = connection.CreateCommand();
+
+            cmd.CommandText = "SELECT properties.name as propertyName, rent_residential_listings.name as roomName, rent_residential_listings.listing_id as roomId, properties.property_id as propertyId FROM rent_residential_listings INNER JOIN properties USING (property_id) INNER JOIN rent_residentials USING (property_id)";
+
+            using var reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                var eid = Convert.ToString(reader["propertyId"], CultureInfo.InvariantCulture);
+                if (string.IsNullOrEmpty(eid))
+                {
+                    Debug.WriteLine("DataAccess::SelectRentResidentialsByNameKeyword: propertyId is null or empty for a rent residential.");
+                    continue;
+                }
+
+                var rid = Convert.ToString(reader["roomId"], CultureInfo.InvariantCulture);
+                if (string.IsNullOrEmpty(rid))
+                {
+                    Debug.WriteLine("DataAccess::SelectRentResidentialsByNameKeyword: roomId is null or empty for a rent residential room.");
+                    continue;
+                }
+
+                var unit = new Models.SearchResult.ListingSearchResultItem(rid, eid, PropertyContextType.RentResidential);
+
+                var s = Convert.ToString(reader["roomName"], CultureInfo.InvariantCulture) ?? "";
+                unit.SetName(s);
+
+                //Debug.WriteLine($"Found rent residential property: {property.Name} @SelectRentResidentialsByNameKeyword() in DataAccessService");
+
+                s = Convert.ToString(reader["propertyName"], CultureInfo.InvariantCulture);
+                if (!string.IsNullOrEmpty(s))
+                {
+                    unit.PropertyName = s;
+                }
+
+                // Reset unit Isdirty flag.
+                unit.SetIsModified(false);
+
+                //res.AffectedCount++;
+
+                res.ListingSearchResult.Add(unit);
+            }
+        }
+        catch (Exception ex)
+        {
+            SetDatabaseError(res, ex, "connection.Open(), reader.Read()", "Failed to connect to or read a SQLite database file", nameof(SelectRentResidentialListings));
+        }
+        finally
+        {
+            _readerWriterLock.ExitReadLock();
+        }
+
+        return res;
+    }
+
     private static Models.Rent.Residentials.Listing? GetRentResidentialListing(SqliteDataReader reader, string propertyId, string propertyName)
     {
         var listingId = reader.GetString(reader.GetOrdinal("listing_id")) ?? string.Empty;
@@ -2163,36 +2462,34 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         }
 
         var isUnitOwnership = Convert.ToInt32(reader["is_property_unit_ownership"], CultureInfo.InvariantCulture) != 0;
-
-        var storedFloorPlanType = Convert.ToString(reader["floor_plan_type"], CultureInfo.InvariantCulture);
-        var storedFloorPlanExtraType = Convert.ToString(reader["floor_plan_extra_type"], CultureInfo.InvariantCulture);
-        var room = new Models.Rent.Residentials.Listing(listingId, EntityStatus.Saved, propertyId, EntityStatus.Saved, isUnitOwnership, propertyName)
-        {
-            Chinryou = reader.GetInt32(reader.GetOrdinal("chinryou")),
-            //RoomCount = Convert.ToInt32(reader["room_count"], CultureInfo.InvariantCulture),
-            /*
-            FloorPlanType = legacyExtraType != FloorPlanExtraType.Unspecified
-                ? FloorPlanType.OneR
-                : ListingOptionExtensions.ParseFloorPlanType(storedFloorPlanType),
-            FloorPlanExtraType = ListingOptionExtensions.ParseFloorPlanExtraType(storedFloorPlanExtraType) != FloorPlanExtraType.Unspecified
-                ? ListingOptionExtensions.ParseFloorPlanExtraType(storedFloorPlanExtraType)
-                : legacyExtraType,
-            FloorArea = Convert.ToDecimal(reader["floor_area"], CultureInfo.InvariantCulture),
-            FloorNumberType = ListingOptionExtensions.ParseFloorNumberType(Convert.ToString(reader["floor_type"], CultureInfo.InvariantCulture)),
-            FloorNumber = reader.IsDBNull(reader.GetOrdinal("floor_number")) ? null : Convert.ToInt32(reader["floor_number"], CultureInfo.InvariantCulture),
-            IsCornerRoom = Convert.ToInt32(reader["is_corner_room"], CultureInfo.InvariantCulture) != 0,
-            MainExposureDirection = ListingOptionExtensions.ParseExposureDirection(Convert.ToString(reader["main_exposure_direction"], CultureInfo.InvariantCulture)),
-            CurrentStatus = ListingOptionExtensions.ParseCurrentStatus(Convert.ToString(reader["current_status"], CultureInfo.InvariantCulture)),
-            IsRecruiting = Convert.ToInt32(reader["is_recruiting"], CultureInfo.InvariantCulture) != 0,
-            AvailableFromMonth = reader.IsDBNull(reader.GetOrdinal("available_from_month")) ? null : Convert.ToInt32(reader["available_from_month"], CultureInfo.InvariantCulture),
-            AvailableFromPeriod = ListingOptionExtensions.ParseAvailabilityPeriod(Convert.ToString(reader["available_from_period"], CultureInfo.InvariantCulture)),
-            IsImmediateOccupancy = Convert.ToInt32(reader["is_immediate_occupancy"], CultureInfo.InvariantCulture) != 0,
-            CurrentStatusCheckedAt = ParseStatusCheckedAt(reader["current_status_checked_at"]),
-            */
-            Remarks = Convert.ToString(reader["remarks"], CultureInfo.InvariantCulture) ?? string.Empty
-        };
+        // Create listing.
+        var room = new Models.Rent.Residentials.Listing(listingId, EntityStatus.Saved, propertyId, EntityStatus.Saved, isUnitOwnership, propertyName);
         // try
         room.SetName(reader.GetString(reader.GetOrdinal("name")) ?? string.Empty);
+        room.SetFloorPlanTypeLabelFromString(Convert.ToString(reader["floor_plan_type"], CultureInfo.InvariantCulture) ?? string.Empty);
+        room.SetFloorPlanExtraTypeLabelFromString(Convert.ToString(reader["floor_plan_extra_type"], CultureInfo.InvariantCulture) ?? string.Empty);
+        room.SetFloorGroundTypeLabelFromString(Convert.ToString(reader["floor_type"], CultureInfo.InvariantCulture) ?? string.Empty);
+        room.SetFloorExclusiveAreaSqm(Convert.ToString(reader["floor_area"], CultureInfo.InvariantCulture) ?? string.Empty);
+        room.SetFloorNumber(Convert.ToString(reader["floor_number"], CultureInfo.InvariantCulture) ?? string.Empty);
+        room.SetIsCornerRoom(Convert.ToInt32(reader["is_corner_room"], CultureInfo.InvariantCulture) != 0);
+        room.SetExposureDirectionTypeLabelFromString(Convert.ToString(reader["main_exposure_direction"], CultureInfo.InvariantCulture) ?? string.Empty);
+        room.SetAvailabilityStatusTypeLabelFromString(Convert.ToString(reader["availability_status"], CultureInfo.InvariantCulture) ?? string.Empty);
+        room.SetOccupancyStatusLabelFromString(Convert.ToString(reader["current_status"], CultureInfo.InvariantCulture) ?? string.Empty);
+        room.SetIsAvailableForRentNow(Convert.ToInt32(reader["is_recruiting"], CultureInfo.InvariantCulture) != 0);
+        room.SetAvailabilityMonthTypeLabelFromString(Convert.ToString(reader["available_from_month"], CultureInfo.InvariantCulture) ?? string.Empty);
+        room.SetAvailabilityPeriodTypeLabelFromString(Convert.ToString(reader["available_from_period"], CultureInfo.InvariantCulture) ?? string.Empty);
+        room.SetIsAvailableForImmediateMoveIn(Convert.ToInt32(reader["is_immediate_occupancy"], CultureInfo.InvariantCulture) != 0);
+
+        var checkedAtText = Convert.ToString(reader["current_status_checked_at"], CultureInfo.InvariantCulture);
+        if (DateTimeOffset.TryParse(checkedAtText, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var checkedAt))
+        {
+            room.SetOccupancyStatusCheckedAt(checkedAt);
+        }
+        
+        room.SetRemarks(Convert.ToString(reader["remarks"], CultureInfo.InvariantCulture) ?? string.Empty);
+        room.SetChinryouFromString(Convert.ToString(reader["chinryou"], CultureInfo.InvariantCulture) ?? string.Empty);
+
+
         room.SetIsModified(false);
 
         //Debug.WriteLine($"Room ID: {room.Id}, Room Name: {room.RoomName}");
@@ -2359,482 +2656,6 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         }
 
         cmd.Parameters.Clear();
-    }
-
-    public ResultWrapper DeleteRentResidential(string propertyId)
-    {
-        var res = new ResultWrapper();
-
-        if (string.IsNullOrEmpty(propertyId))
-        {
-            res.IsError = true;
-            // TODO:
-            return res;
-        }
-
-        _readerWriterLock.EnterWriteLock();
-        try
-        {
-            // System.Data.SQLite
-            //using var connection = new SQLiteConnection(_connectionStringBuilder.ConnectionString);
-            // Microsoft.Data.Sqlite
-            using var connection = new SqliteConnection(_connectionStringBuilder.ConnectionString);
-            connection.Open();
-
-            using var cmd = connection.CreateCommand();
-
-            cmd.Transaction = connection.BeginTransaction();
-            try
-            {
-                cmd.CommandText = string.Format(CultureInfo.InvariantCulture, "DELETE FROM properties WHERE property_id = '{0}';", propertyId);
-                res.AffectedCount = cmd.ExecuteNonQuery();
-
-                cmd.Transaction.Commit();
-            }
-            catch (Exception ex)
-            {
-                cmd.Transaction.Rollback();
-
-                SetDatabaseError(res, ex, "cmd.ExecuteNonQuery(), cmd.Transaction.Commit", "Failed to delete database recode. Transaction.Rollback()", nameof(DeleteRentResidential));
-                return res;
-            }
-        }
-        catch (Exception ex)
-        {
-            SetDatabaseError(res, ex, "Connection.Open", "Failed to Connect to a SQLite database file", nameof(DeleteRentResidential));
-
-            return res;
-        }
-        finally
-        {
-            _readerWriterLock.ExitWriteLock();
-        }
-
-        //Debug.WriteLine(string.Format("{0} feed Deleted from DB", res.AffectedCount));
-
-        return res;
-    }
-
-    #endregion
-
-    #region == Rent Residential Listing ==
-
-    // TODO: Reuse UpsertRentResidential's code for Insert and Update
-    public ResultWrapper UpsertRentResidentialListing(string propertyId, Models.Rent.Residentials.Listing room)
-    {
-        var res = new ResultWrapper();
-
-        if (string.IsNullOrEmpty(propertyId))
-        {
-            res.IsError = true;
-            // TODO:
-            return res;
-        }
-
-        _readerWriterLock.EnterWriteLock();
-        try
-        {
-            using var connection = new SqliteConnection(_connectionStringBuilder.ConnectionString);
-            connection.Open();
-
-            using var cmd = connection.CreateCommand();
-            cmd.Transaction = connection.BeginTransaction();
-            try
-            {
-                cmd.CommandType = CommandType.Text;
-
-                // Update updated_at in the properties table.
-                cmd.CommandText = "UPDATE properties SET updated_at = @updatedAt WHERE property_id = @propertyId;";
-                cmd.Parameters.Add("@updatedAt", SqliteType.Text).Value = DateTimeOffset.UtcNow.ToString("s", CultureInfo.InvariantCulture);
-                cmd.Parameters.Add("@propertyId", SqliteType.Text).Value = propertyId;
-
-                cmd.ExecuteNonQuery();
-
-                cmd.Parameters.Clear();
-
-                // Upsert into rent_residential_listings
-                cmd.CommandText = """
-                    INSERT INTO rent_residential_listings (
-                        listing_id, property_id, is_property_unit_ownership, name, chinryou,
-                        room_count, floor_plan_type, floor_plan_extra_type, floor_area, floor_type, floor_number,
-                        is_corner_room, main_exposure_direction, current_status, is_recruiting,
-                        available_from_month, available_from_period, is_immediate_occupancy,
-                        current_status_checked_at, remarks)
-                    VALUES (
-                        @listing_id, @property_id, @is_property_unit_ownership, @name, @chinryou,
-                        @room_count, @floor_plan_type, @floor_plan_extra_type, @floor_area, @floor_type, @floor_number,
-                        @is_corner_room, @main_exposure_direction, @current_status, @is_recruiting,
-                        @available_from_month, @available_from_period, @is_immediate_occupancy,
-                        @current_status_checked_at, @remarks)
-                    ON CONFLICT(listing_id) DO UPDATE SET
-                        is_property_unit_ownership = @is_property_unit_ownership,
-                        name = @name,
-                        chinryou = @chinryou,
-                        room_count = @room_count,
-                        floor_plan_type = @floor_plan_type,
-                        floor_plan_extra_type = @floor_plan_extra_type,
-                        floor_area = @floor_area,
-                        floor_type = @floor_type,
-                        floor_number = @floor_number,
-                        is_corner_room = @is_corner_room,
-                        main_exposure_direction = @main_exposure_direction,
-                        current_status = @current_status,
-                        is_recruiting = @is_recruiting,
-                        available_from_month = @available_from_month,
-                        available_from_period = @available_from_period,
-                        is_immediate_occupancy = @is_immediate_occupancy,
-                        current_status_checked_at = @current_status_checked_at,
-                        remarks = @remarks,
-                        updated_at = @updated_at;
-                    """;
-
-                cmd.Parameters.AddWithValue("@listing_id", room.Id);
-                cmd.Parameters.AddWithValue("@property_id", propertyId);
-                cmd.Parameters.AddWithValue("@is_property_unit_ownership", room.IsPropertyUnitOwnership ? 1 : 0); // bool to int
-                cmd.Parameters.AddWithValue("@name", room.Name);
-                cmd.Parameters.AddWithValue("@chinryou", room.Chinryou);
-                //cmd.Parameters.AddWithValue("@room_count", room.RoomCount);
-                /*
-                cmd.Parameters.AddWithValue("@floor_plan_type", room.FloorPlanType.GetStorageValue());
-                cmd.Parameters.AddWithValue("@floor_plan_extra_type", room.FloorPlanExtraType.GetStorageValue());
-                cmd.Parameters.AddWithValue("@floor_area", room.FloorArea);
-                cmd.Parameters.AddWithValue("@floor_type", room.FloorNumberType.GetStorageValue());
-                cmd.Parameters.AddWithValue("@floor_number", (object?)room.FloorNumber ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("@is_corner_room", room.IsCornerRoom ? 1 : 0);
-                cmd.Parameters.AddWithValue("@main_exposure_direction", room.MainExposureDirection.GetStorageValue());
-                cmd.Parameters.AddWithValue("@current_status", room.CurrentStatus.GetStorageValue());
-                cmd.Parameters.AddWithValue("@is_recruiting", room.IsRecruiting ? 1 : 0);
-                cmd.Parameters.AddWithValue("@available_from_month", (object?)room.AvailableFromMonth ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("@available_from_period", room.AvailableFromPeriod.GetStorageValue());
-                cmd.Parameters.AddWithValue("@is_immediate_occupancy", room.IsImmediateOccupancy ? 1 : 0);
-                cmd.Parameters.AddWithValue("@current_status_checked_at", ToDatabaseStatusCheckedAt(room.CurrentStatusCheckedAt));
-                */
-                cmd.Parameters.AddWithValue("@remarks", room.Remarks ?? string.Empty);
-                cmd.Parameters.AddWithValue("@updated_at", DateTimeOffset.UtcNow.ToString("s"));
-
-                var result = cmd.ExecuteNonQuery();
-                if (result > 0)
-                {
-                    //room.IsNew = false;
-                    room.SetIsModified(false);
-                    room.SetStatus(EntityStatus.Saved);
-                }
-                res.AffectedCount = result;
-
-                cmd.Parameters.Clear();
-
-                // 部屋写真 rent_residential_listing_pictures table - Insert or Update
-                if (room.Pictures.Count > 0)
-                {
-                    foreach (var pic in room.Pictures)
-                    {
-                        // Upsert
-                        var sqlUpsertRoom = "INSERT INTO rent_residential_listing_pictures (picture_id, listing_id, property_id, filename, type, description, is_main) VALUES (@picture_id, @listing_id, @property_id, @filename, @type, @description, @is_main) ";
-                        sqlUpsertRoom += "ON CONFLICT(picture_id) ";
-                        sqlUpsertRoom += "DO UPDATE SET filename = @filename, type = @type, description = @description, is_main = @is_main";
-                        var exec = true;
-
-                        cmd.CommandText = sqlUpsertRoom;
-
-                        if (exec)
-                        {
-                            // ループなので、前のパラメーターをクリアする。
-                            cmd.Parameters.Clear();
-
-                            cmd.Parameters.AddWithValue("@picture_id", pic.Id);
-                            cmd.Parameters.AddWithValue("@listing_id", room.Id);
-                            cmd.Parameters.AddWithValue("@property_id", propertyId);
-                            cmd.Parameters.AddWithValue("@filename", pic.ImageFilename);
-                            cmd.Parameters.AddWithValue("@type", pic.PictureType.Key.ToString());
-                            cmd.Parameters.AddWithValue("@description", pic.Description);
-                            /*
-                            var paramIsMain = new SqliteParameter("@is_main", System.Data.DbType.Int32);
-                            if (pic.IsMain)
-                            {
-                                paramIsMain.Value = 1;
-                            }
-                            else
-                            {
-                                paramIsMain.Value = 0;
-                            }
-                            cmd.Parameters.Add(paramIsMain);
-                            */
-                            cmd.Parameters.AddWithValue("@is_main", pic.IsMain ? 1 : 0); // bool to int
-
-                            result = cmd.ExecuteNonQuery();
-                            if (result > 0)
-                            {
-                                //pic.IsNew = false;
-                                pic.SetStatus(EntityStatus.Saved);
-                                pic.SetIsModified(false);
-                            }
-                        }
-
-                    }
-                }
-
-                // 部屋写真の削除リストを処理
-                if (room.PicturesToBeDeleted.Count > 0)
-                {
-                    foreach (var delr in room.PicturesToBeDeleted)
-                    {
-                        // 削除
-                        var sqlDeleteRentLivingRoom = string.Format(CultureInfo.InvariantCulture, "DELETE FROM rent_residential_listing_pictures WHERE picture_id = '{0}'", delr.Id);
-
-                        cmd.CommandText = sqlDeleteRentLivingRoom;
-                        var DelRentLivingRoomResult = cmd.ExecuteNonQuery();
-                        if (DelRentLivingRoomResult > 0)
-                        {
-                            // TODO:
-                            Debug.WriteLine("Room Pic deleted");
-                        }
-                    }
-                    // let's not do this.
-                    //room.UnitPicturesToBeDeleted.Clear();
-                }
-
-                // 部屋図面 rent_residential_listing_pdfs table - Insert or Update
-                if (room.Pdfs.Count > 0)
-                {
-                    foreach (var pdf in room.Pdfs)
-                    {
-                        // Upsert
-                        var sqlUpsertRoom = "INSERT INTO rent_residential_listing_pdfs (pdf_id, listing_id, property_id, filename, thumbnail_filename, type, description, is_main) VALUES (@pdf_id, @listing_id, @property_id, @filename, @thumbnail_filename, @type, @description, @is_main) ";
-                        sqlUpsertRoom += "ON CONFLICT(pdf_id) ";
-                        sqlUpsertRoom += "DO UPDATE SET filename = @filename, thumbnail_filename = @thumbnail_filename, type = @type, description = @description, is_main = @is_main";
-                        var exec = true;
-
-                        cmd.CommandText = sqlUpsertRoom;
-
-                        if (exec)
-                        {
-                            // ループなので、前のパラメーターをクリアする。
-                            cmd.Parameters.Clear();
-
-                            cmd.Parameters.AddWithValue("@pdf_id", pdf.Id);
-                            cmd.Parameters.AddWithValue("@listing_id", room.Id);
-                            cmd.Parameters.AddWithValue("@property_id", propertyId);
-                            cmd.Parameters.AddWithValue("@filename", pdf.PdfFilename);
-                            cmd.Parameters.AddWithValue("@thumbnail_filename", pdf.ThumbnailFilename);
-                            cmd.Parameters.AddWithValue("@type", pdf.PdfType.Key.ToString());
-                            cmd.Parameters.AddWithValue("@description", pdf.Description);
-                            var paramIsMain = new SqliteParameter("@is_main", System.Data.DbType.Int32);
-                            if (pdf.IsMain)
-                            {
-                                paramIsMain.Value = 1;
-                            }
-                            else
-                            {
-                                paramIsMain.Value = 0;
-                            }
-                            cmd.Parameters.Add(paramIsMain);
-
-                            result = cmd.ExecuteNonQuery();
-                            if (result > 0)
-                            {
-                                //pdf.IsNew = false;
-                                pdf.SetStatus(EntityStatus.Saved);
-                                pdf.SetIsModified(false);
-                            }
-                        }
-
-                    }
-                }
-
-                // 部屋図面の削除リストを処理
-                if (room.PdfsToBeDeleted.Count > 0)
-                {
-                    foreach (var delr in room.PdfsToBeDeleted)
-                    {
-                        // 削除
-                        var sqlDeleteRentLivingRoom = string.Format(CultureInfo.InvariantCulture, "DELETE FROM rent_residential_listing_pdfs WHERE pdf_id = '{0}'", delr.Id);
-
-                        cmd.CommandText = sqlDeleteRentLivingRoom;
-                        var DelRentLivingRoomResult = cmd.ExecuteNonQuery();
-                        if (DelRentLivingRoomResult > 0)
-                        {
-                            // TODO:
-                            Debug.WriteLine("Room Pdf deleted @UpdateRentResidential in DataAccessService");
-                        }
-                    }
-                    // let's not do this.
-                    //room.UnitPicturesToBeDeleted.Clear();
-                }
-
-                // 部屋貸主 rent_lessors_properties_listings - Insert or Update
-                if (room.Lessors.Count > 0)
-                {
-                    foreach (var psn in room.Lessors)
-                    {
-                        //var sqlInsertInto = "INSERT INTO rent_lessors_properties_listings (lessor_id, property_id, property_kind, listing_id) " +
-                        //                "VALUES (@lessor_id, @property_id, @property_kind, @listing_id)";
-
-                        // Upsert 
-                        var sqlUpsert = "INSERT INTO rent_lessors_properties_listings (lessor_id, property_id, property_kind, listing_id) VALUES (@lessor_id, @property_id, @property_kind, @listing_id) ";
-                        sqlUpsert += "ON CONFLICT(lessor_id, property_id, listing_id) ";
-                        sqlUpsert += "DO NOTHING";//"DO UPDATE SET lessor_id = @lessor_id, property_id = @property_id, property_kind = @property_kind, listing_id = @listing_id";
-
-                        cmd.CommandText = sqlUpsert;
-
-                        // ループなので、前のパラメーターをクリアする。
-                        cmd.Parameters.Clear();
-
-                        cmd.Parameters.AddWithValue("@lessor_id", psn.Id);
-                        cmd.Parameters.AddWithValue("@property_id", room.PropertyId);
-                        cmd.Parameters.AddWithValue("@property_kind", room.PropertyContextType.ToString());
-                        cmd.Parameters.AddWithValue("@listing_id", room.Id);
-
-                        cmd.ExecuteNonQuery();
-                    }
-                }
-
-                // 部屋貸主の削除リストを処理
-                if (room.LessorsToBeDeleted.Count > 0)
-                {
-                    foreach (var psn in room.LessorsToBeDeleted)
-                    {
-                        // 削除
-                        var sqlDelete = ($"DELETE FROM rent_lessors_properties_listings WHERE lessor_id = '{psn.Id}' AND property_id = '{room.PropertyId}' AND listing_id = '{room.Id}'");
-
-                        cmd.CommandText = sqlDelete;
-                        var sqlResult = cmd.ExecuteNonQuery();
-                        if (sqlResult > 0)
-                        {
-                            // TODO:
-                            Debug.WriteLine("Lessor deleted");
-                        }
-                    }
-                }
-
-                // 部屋宅建業者 brokers_properties_listings - Insert or Update
-                foreach (var broker in room.Brokers)
-                {
-                    cmd.Parameters.Clear();
-                    cmd.CommandText = """
-        INSERT INTO brokers_properties_listings
-            (broker_id, property_id, property_kind, listing_id)
-        VALUES
-            (@brokerId, @propertyId, @propertyKind, @listingId)
-        ON CONFLICT (broker_id, property_id, listing_id) DO NOTHING;
-        """;
-                    cmd.Parameters.AddWithValue("@brokerId", broker.Id);
-                    cmd.Parameters.AddWithValue("@propertyId", room.PropertyId);
-                    cmd.Parameters.AddWithValue("@propertyKind", room.PropertyContextType.ToString());
-                    cmd.Parameters.AddWithValue("@listingId", room.Id);
-                    cmd.ExecuteNonQuery();
-                }
-
-                foreach (var broker in room.BrokersToBeDeleted)
-                {
-                    cmd.Parameters.Clear();
-                    cmd.CommandText = """
-        DELETE FROM brokers_properties_listings
-        WHERE broker_id = @brokerId
-          AND property_id = @propertyId
-          AND listing_id = @listingId;
-        """;
-                    cmd.Parameters.AddWithValue("@brokerId", broker.Id);
-                    cmd.Parameters.AddWithValue("@propertyId", room.PropertyId);
-                    cmd.Parameters.AddWithValue("@listingId", room.Id);
-                    cmd.ExecuteNonQuery();
-                }
-
-
-
-                // Commit
-                cmd.Transaction.Commit();
-
-                // Clear deletion queues only after the commit succeeds.
-                room.LessorsToBeDeleted.Clear();
-                room.BrokersToBeDeleted.Clear();
-            }
-            catch (Exception ex)
-            {
-                cmd.Transaction.Rollback();
-
-                SetDatabaseError(res, ex, "cmd.ExecuteNonQuery(), cmd.Transaction.Commit", "Failed to update database tables. Transaction.Rollback()", nameof(UpsertRentResidentialListing));
-
-                return res;
-            }
-        }
-        catch (Exception ex)
-        {
-            SetDatabaseError(res, ex, "connection.Open", "Failed to Connect to a SQLite database file", nameof(UpsertRentResidentialListing));
-            return res;
-        }
-        finally
-        {
-            _readerWriterLock.ExitWriteLock();
-        }
-
-        //Debug.WriteLine(string.Format("{0} Entries Inserted to DB", res.AffectedCount.ToString()));
-
-        return res;
-    }
-
-    public ListingSearchResultWrapper SelectRentResidentialListings()
-    {
-        var res = new ListingSearchResultWrapper();
-
-        _readerWriterLock.EnterReadLock();
-        try
-        {
-            using var connection = new SqliteConnection(_connectionStringBuilder.ConnectionString);
-            connection.Open();
-
-            using var cmd = connection.CreateCommand();
-
-            cmd.CommandText = "SELECT properties.name as propertyName, rent_residential_listings.name as roomName, rent_residential_listings.listing_id as roomId, properties.property_id as propertyId FROM rent_residential_listings INNER JOIN properties USING (property_id) INNER JOIN rent_residentials USING (property_id)";
-
-            using var reader = cmd.ExecuteReader();
-
-            while (reader.Read())
-            {
-                var eid = Convert.ToString(reader["propertyId"], CultureInfo.InvariantCulture);
-                if (string.IsNullOrEmpty(eid))
-                {
-                    Debug.WriteLine("DataAccess::SelectRentResidentialsByNameKeyword: propertyId is null or empty for a rent residential.");
-                    continue;
-                }
-
-                var rid = Convert.ToString(reader["roomId"], CultureInfo.InvariantCulture);
-                if (string.IsNullOrEmpty(rid))
-                {
-                    Debug.WriteLine("DataAccess::SelectRentResidentialsByNameKeyword: roomId is null or empty for a rent residential room.");
-                    continue;
-                }
-
-                var unit = new Models.SearchResult.ListingSearchResultItem(rid, eid, PropertyContextType.RentResidential);
-
-                var s = Convert.ToString(reader["roomName"], CultureInfo.InvariantCulture) ?? "";
-                unit.SetName(s);
-
-                //Debug.WriteLine($"Found rent residential property: {property.Name} @SelectRentResidentialsByNameKeyword() in DataAccessService");
-
-                s = Convert.ToString(reader["propertyName"], CultureInfo.InvariantCulture);
-                if (!string.IsNullOrEmpty(s))
-                {
-                    unit.PropertyName = s;
-                }
-
-                // Reset unit Isdirty flag.
-                unit.SetIsModified(false);
-
-                //res.AffectedCount++;
-
-                res.ListingSearchResult.Add(unit);
-            }
-        }
-        catch (Exception ex)
-        {
-            SetDatabaseError(res, ex, "connection.Open(), reader.Read()", "Failed to connect to or read a SQLite database file", nameof(SelectRentResidentialListings));
-        }
-        finally
-        {
-            _readerWriterLock.ExitReadLock();
-        }
-
-        return res;
     }
 
     public Models.Rent.Residentials.ListingResultWrapper SelectRentResidentialListingById(string propertyId, string roomId)

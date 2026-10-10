@@ -1,3 +1,5 @@
+# Copilot Instructions
+
 You are an expert Windows App SDK and WinUI 3 developer. 
 Strictly follow these boundaries:
 
@@ -20,6 +22,8 @@ Strictly follow these boundaries:
 - Do not wrap argument lists for formatting alone; wrap them only when keeping them on one line would make the code excessively long or hard to read.
 - Prefer avoiding hard-coded enum member-name strings in parsers; use enum member ToString() or generic enum parsing so enum renames do not require updating duplicated string constants.
 - For enum choices that need human-readable labels, use a model label type containing the enum Key and localized Label, following PropertyKindTypeLabel, instead of displaying enum member names.
+- Follow existing setter conventions: typed-label properties use matching `Set...TypeLabel`/`Set...Label` methods and should have `FromString` counterparts when applicable; preserve the existing parsing pattern.
+- In general, follow the existing conventions and patterns for maintainability and readability. Do not introduce new patterns or conventions unless they are necessary for a specific feature or requirement.
 
 ## WinUI 3 & Windows App SDK Architecture Guidelines (.NET 10)
 
@@ -37,7 +41,7 @@ Strictly follow these boundaries:
 
 ### MVVM Architecture (CommunityToolkit.Mvvm)
 - **Source Generators:** Do not write `INotifyPropertyChanged` boilerplate.
-- **Properties:** Use `[ObservableProperty]` on private fields (using `camelCase` or `_camelCase`) so the Toolkit generates public `PascalCase` properties when the generated property requires no custom getter or setter logic. For properties that require custom logic, implement them manually and call ` SetProperty(ref field, value)`  in the setter instead of using [ObservableProperty].
+- **Properties:** Use `[ObservableProperty]` on private fields (using `camelCase` or `_camelCase`) so the Toolkit generates public `PascalCase` properties when the generated property requires no custom getter or setter logic. For properties that require custom logic, implement them manually and call ` SetProperty(ref field, value)` in the setter instead of using [ObservableProperty].
 - **Commands:** Use `[RelayCommand]` on methods instead of creating `ICommand` properties manually.
 - Use `ObservableRecipient` or `Messenger` patterns for decoupled View-Model communication.
 

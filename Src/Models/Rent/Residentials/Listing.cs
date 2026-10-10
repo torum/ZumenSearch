@@ -223,13 +223,13 @@ public sealed partial class Listing : ListingBase
     public partial string OtherConditions { get; set; } = string.Empty;
     */
 
-    public string Remarks { get; set; } = string.Empty;
+    public string Remarks { get; private set; } = string.Empty;
 
     // 賃料（円）
     public decimal Chinryou
     {
         get;
-        set
+        private set
         {
             if (field == value)
             {
@@ -371,6 +371,176 @@ public sealed partial class Listing : ListingBase
         if (Enum.TryParse<FloorPlanExtraType>(Str, out var result))
         {
             FloorPlanExtra = new ListingFloorPlanExtraTypeLabel(result);
+        }
+    }
+
+    public void SetFloorGroundTypeLabel(ListingFloorGroundTypeLabel floorGround)
+    {
+        FloorGround = floorGround;
+    }
+
+    public void SetFloorGroundTypeLabelFromString(string Str)
+    {
+        if (string.IsNullOrEmpty(Str))
+        {
+            FloorGround = new ListingFloorGroundTypeLabel(FloorGroundType.AboveGround);
+            return;
+        }
+
+        if (Enum.TryParse<FloorGroundType>(Str, out var result))
+        {
+            FloorGround = new ListingFloorGroundTypeLabel(result);
+        }
+    }
+
+    public void SetFloorExclusiveAreaSqm(string floorExclusiveAreaSqm)
+    {
+        FloorExclusiveAreaSqm = floorExclusiveAreaSqm;
+    }
+
+    public void SetFloorNumber(string floorNumber)
+    {
+        FloorNumber = floorNumber;
+    }
+
+    public void SetIsCornerRoom(bool isCornerRoom)
+    {
+        IsCornerRoom = isCornerRoom;
+    }
+
+    public void SetExposureDirectionTypeLabel(ListingExposureDirectionTypeLabel exposureDirectionType)
+    {
+        SelectedExposureDirectionType = exposureDirectionType;
+    }
+
+    public void SetExposureDirectionTypeLabelFromString(string Str)
+    {
+        if (string.IsNullOrEmpty(Str))
+        {
+            SelectedExposureDirectionType = new ListingExposureDirectionTypeLabel(ExposureDirectionType.Unspecified);
+            return;
+        }
+
+        if (Enum.TryParse<ExposureDirectionType>(Str, out var result))
+        {
+            SelectedExposureDirectionType = new ListingExposureDirectionTypeLabel(result);
+        }
+    }
+
+    public void SetAvailabilityStatusTypeLabel(ListingAvailabilityStatusTypeLabel availabilityStatusType)
+    {
+        SelectedAvailabilityStatusType = availabilityStatusType;
+    }
+
+    public void SetAvailabilityStatusTypeLabelFromString(string Str)
+    {
+        if (string.IsNullOrEmpty(Str))
+        {
+            SelectedAvailabilityStatusType = new ListingAvailabilityStatusTypeLabel(AvailabilityStatusType.Unspecified);
+            return;
+        }
+
+        if (Enum.TryParse<AvailabilityStatusType>(Str, out var result))
+        {
+            SelectedAvailabilityStatusType = new ListingAvailabilityStatusTypeLabel(result);
+        }
+    }
+
+    public void SetAvailabilityMonthTypeLabel(ListingAvailabilityMonthTypeLabel availabilityMonthType)
+    {
+        SelectedAvailabilityMonthType = availabilityMonthType;
+    }
+
+    public void SetAvailabilityMonthTypeLabelFromString(string Str)
+    {
+        if (string.IsNullOrEmpty(Str))
+        {
+            SelectedAvailabilityMonthType = new ListingAvailabilityMonthTypeLabel(AvailabilityMonthType.Unspecified);
+            return;
+        }
+
+        if (Enum.TryParse<AvailabilityMonthType>(Str, out var result))
+        {
+            SelectedAvailabilityMonthType = new ListingAvailabilityMonthTypeLabel(result);
+        }
+    }
+
+    public void SetAvailabilityPeriodTypeLabel(ListingAvailabilityPeriodTypeLabel availabilityPeriodType)
+    {
+        SelectedAvailabilityPeriodType = availabilityPeriodType;
+    }
+
+    public void SetAvailabilityPeriodTypeLabelFromString(string Str)
+    {
+        if (string.IsNullOrEmpty(Str))
+        {
+            SelectedAvailabilityPeriodType = new ListingAvailabilityPeriodTypeLabel(AvailabilityPeriodType.Unspecified);
+            return;
+        }
+
+        if (Enum.TryParse<AvailabilityPeriodType>(Str, out var result))
+        {
+            SelectedAvailabilityPeriodType = new ListingAvailabilityPeriodTypeLabel(result);
+        }
+    }
+
+    public void SetOccupancyStatusLabel(ListingOccupancyStatusLabel occupancyStatus)
+    {
+        SelectedOccupancyStatus = occupancyStatus;
+    }
+
+    public void SetOccupancyStatusLabelFromString(string Str)
+    {
+        if (string.IsNullOrEmpty(Str))
+        {
+            SelectedOccupancyStatus = new ListingOccupancyStatusLabel(OccupancyStatus.Unspecified);
+            return;
+        }
+
+        if (Enum.TryParse<OccupancyStatus>(Str, out var result))
+        {
+            SelectedOccupancyStatus = new ListingOccupancyStatusLabel(result);
+        }
+    }
+
+    public void SetIsAvailableForImmediateMoveIn(bool isAvailable)
+    {
+        IsAvailableForImmediateMoveIn = isAvailable;
+    }
+
+    public void SetIsAvailableForRentNow(bool isAvailable)
+    {
+        IsAvailableForRentNow = isAvailable;
+    }
+
+    public void SetOccupancyStatusCheckedAt(DateTimeOffset checkedAt)
+    {
+        OccupancyStatusCheckedAt = checkedAt;
+    }
+
+    public void SetRemarks(string remarks)
+    {
+        Remarks = remarks;
+    }
+
+    public void SetChinryou(decimal chinryou)
+    {
+        Chinryou = chinryou;
+    }
+
+    public void SetChinryouFromString(string Str)
+    {
+        if (string.IsNullOrWhiteSpace(Str))
+        {
+            SetChinryou(0);
+            return;
+        }
+
+        var text = Helpers.Common.ReplaceZenkakuNumbers(Str.Trim());
+        if (Helpers.Common.CanConvertToPositiveNumber(text) &&
+            long.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var result))
+        {
+            SetChinryou(result);
         }
     }
 
