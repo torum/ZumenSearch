@@ -42,6 +42,7 @@ public partial class App : Application
         get;
     }
 
+    /*
     public static T GetService<T>()
         where T : class
     {
@@ -52,7 +53,11 @@ public partial class App : Application
 
         return service;
     }
-
+    */
+    public static T GetService<T>() where T : class
+    {
+        return ((App)Current).Host.Services.GetRequiredService<T>();
+    }
     public App()
     {
         var culture = new System.Globalization.CultureInfo("ja-JP");
@@ -172,39 +177,55 @@ public partial class App : Application
 
     protected async override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
     {
-        base.OnLaunched(args);
-        /*
-        * https://learn.microsoft.com/en-us/windows/apps/windows-app-sdk/migrate-to-windows-app-sdk/guides/applifecycle
-        */
-        // If this is the first instance launched, then register it as the "main" instance.
-        // If this isn't the first instance launched, then "main" will already be registered,
-        // so retrieve it.
-        var mainInstance = Microsoft.Windows.AppLifecycle.AppInstance.FindOrRegisterForKey(AppName + "Main");
-
-        // If the instance that's executing the OnLaunched handler right now
-        // isn't the "main" instance.
-        if (!mainInstance.IsCurrent)
+        try
         {
-            // Redirect the activation (and args) to the "main" instance, and exit.
-            var activatedEventArgs = Microsoft.Windows.AppLifecycle.AppInstance.GetCurrent().GetActivatedEventArgs();
-            await mainInstance.RedirectActivationToAsync(activatedEventArgs);
+            base.OnLaunched(args);
+            /*
+            * https://learn.microsoft.com/en-us/windows/apps/windows-app-sdk/migrate-to-windows-app-sdk/guides/applifecycle
+            */
+            // If this is the first instance launched, then register it as the "main" instance.
+            // If this isn't the first instance launched, then "main" will already be registered,
+            // so retrieve it.
+            var mainInstance = Microsoft.Windows.AppLifecycle.AppInstance.FindOrRegisterForKey(AppName + "Main");
 
-            System.Diagnostics.Process.GetCurrentProcess().Kill();
-            return;
+            // If the instance that's executing the OnLaunched handler right now
+            // isn't the "main" instance.
+            if (!mainInstance.IsCurrent)
+            {
+                // Redirect the activation (and args) to the "main" instance, and exit.
+                var activatedEventArgs = Microsoft.Windows.AppLifecycle.AppInstance.GetCurrent().GetActivatedEventArgs();
+                await mainInstance.RedirectActivationToAsync(activatedEventArgs);
+
+                //System.Diagnostics.Process.GetCurrentProcess().Kill();
+                Environment.Exit(0);
+                return;
+            }
+            else
+            {
+                // Otherwise, register for activation redirection
+                Microsoft.Windows.AppLifecycle.AppInstance.GetCurrent().Activated += App_Activated;
+            }
+
+            _appHostStartTask = StartAppHostAsync();
+            var shell = GetService<Views.ShellPage>();
+            shell.MainWindow.Closed += (sender, e) =>
+            {
+                _appHostStopTask = StopAppHostAsync();
+            };
+            //shell.MainWindow.AppWindow.Show(true);
+            shell.MainWindow.Activate();
+            shell.MainWindow.AppWindow.MoveInZOrderAtTop();
+
         }
-        else
+        catch (Exception ex)
         {
-            // Otherwise, register for activation redirection
-            Microsoft.Windows.AppLifecycle.AppInstance.GetCurrent().Activated += App_Activated;
-        }
+            Debug.WriteLine($"OnLaunched: {ex}");
+            //AppendErrorLog("OnLaunched", ex.ToString());
+            //SaveErrorLog();
 
-        _appHostStartTask = StartAppHostAsync();
-        var shell = GetService<Views.ShellPage>();
-        shell.MainWindow.Closed += (sender, e) =>
-        {
-            _appHostStopTask = StopAppHostAsync();
-        };
-        shell.MainWindow.AppWindow.Show(true);
+            // Startup failed and the app is in an unknown state, so exit instead of leaving a half-initialized process.
+            Environment.Exit(1);
+        }
     }
 
     private async Task StartAppHostAsync()
@@ -246,8 +267,8 @@ public partial class App : Application
         {
             var main = App.GetService<Views.MainWindow>();
 
-            //main?.Activate();
-            main?.AppWindow.Show(true);
+            main?.Activate();
+            //main?.AppWindow.Show(true);
 
             IntPtr hWnd = WindowNative.GetWindowHandle(main);
             NativeMethods.ShowWindow(hWnd, NativeMethods.SW_RESTORE); // Ensure it's not minimized

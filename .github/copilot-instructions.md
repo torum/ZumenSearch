@@ -7,6 +7,8 @@ Strictly follow these boundaries:
 - Follow .github/copilot-instructions.md: WinUI 3/Microsoft.UI.Xaml, .NET 10 Windows TFM.
 - Acknowledge the app supports unpackaged deployment. When initializing app startup logic outside of a package lifecycle, ensure the Windows App SDK Bootstrapper is explicitly managed or `<WindowsPackageType>None</WindowsPackageType>` configurations are respected.
 - The app is AOT-compatible; code changes must remain compatible with trimming and Native AOT. Prefer compiled `x:Bind` in XAML and avoid reflection/dynamic patterns that cannot be statically analyzed.
+- All XAML data bindings in this codebase must use compiled `x:Bind`; do not introduce runtime `{Binding}` expressions.
+- Avoid presenting code changes as unified diff/patch blocks; use clear replacement code snippets with line numbers and file names and paths or concise prose instead.
 
 ## Code Style
 
