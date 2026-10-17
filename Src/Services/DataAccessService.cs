@@ -5923,5 +5923,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         _readerWriterLock?.Dispose();
 
         GC.SuppressFinalize(this);
+
+        Debug.WriteLine("DataAccessService disposed.");
     }
 }

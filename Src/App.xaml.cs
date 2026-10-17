@@ -212,9 +212,7 @@ public partial class App : Application
             {
                 _appHostStopTask = StopAppHostAsync();
             };
-            //shell.MainWindow.AppWindow.Show(true);
             shell.MainWindow.Activate();
-            shell.MainWindow.AppWindow.MoveInZOrderAtTop();
 
         }
         catch (Exception ex)
@@ -240,6 +238,8 @@ public partial class App : Application
             //AppendErrorLog("AppHost.StartAsync", ex.ToString());
             //SaveErrorLog();
         }
+
+        Debug.WriteLine("AppHost started.");
     }
 
     private async Task StopAppHostAsync()
@@ -258,6 +258,11 @@ public partial class App : Application
             //AppendErrorLog("AppHost.StopAsync", ex.ToString());
             //SaveErrorLog();
         }
+        finally
+        {
+            Host.Dispose();
+            Debug.WriteLine("AppHost disposed.");
+        }
     }
 
     // Activated from other instance.
@@ -269,6 +274,7 @@ public partial class App : Application
 
             main?.Activate();
             //main?.AppWindow.Show(true);
+            main?.AppWindow.MoveInZOrderAtTop();
 
             IntPtr hWnd = WindowNative.GetWindowHandle(main);
             NativeMethods.ShowWindow(hWnd, NativeMethods.SW_RESTORE); // Ensure it's not minimized

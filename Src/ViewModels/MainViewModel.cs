@@ -356,24 +356,6 @@ public partial class MainViewModel : ObservableRecipient,
 
     #endregion
 
-    #region == Public Methods ==
-
-    public void Dispose()
-    {
-        // Unsubscribe
-        //WeakReferenceMessenger.Default.UnregisterAll(this);
-        //or
-        //this.IsActive = false;
-        
-        _cts?.Cancel();
-        
-        _cts?.Dispose();
-
-        GC.SuppressFinalize(this);
-    }
-
-    #endregion
-
     #region == Messages ==
 
     public void Receive(PropertyUpdatedMessage property)
@@ -550,6 +532,26 @@ public partial class MainViewModel : ObservableRecipient,
         Messenger.Unregister<WindowClosedMessage>(this);
     }
     */
+
+    #endregion
+
+    #region == Public Methods ==
+
+    public void Dispose()
+    {
+        // Unsubscribe
+        //WeakReferenceMessenger.Default.UnregisterAll(this);
+        //or
+        //this.IsActive = false;
+        
+        _cts?.Cancel();
+        
+        _cts?.Dispose();
+
+        GC.SuppressFinalize(this);
+
+        Debug.WriteLine("MainViewModel disposed.");
+    }
 
     #endregion
 

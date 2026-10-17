@@ -428,6 +428,8 @@ public sealed partial class MainWindow : Window
 
     private async void AppWindow_Closing(Microsoft.UI.Windowing.AppWindow sender, Microsoft.UI.Windowing.AppWindowClosingEventArgs args)
     {
+        Debug.WriteLine("AppWindow_Closing");
+
         var isCancel = false;
 
         if (_viewModel.RentResidentialListingEditorList.Count > 0)
@@ -800,12 +802,13 @@ public sealed partial class MainWindow : Window
             return;
         }
 
+        // Save window state and position, etc.
+        SaveSetting();
     }
 
     private void Window_Closed(object sender, WindowEventArgs args)
     {
-        // Save window state and position, etc.
-        SaveSetting();
+        Debug.WriteLine("MainWindow_Closed");
     }
 
     private void SaveSetting()

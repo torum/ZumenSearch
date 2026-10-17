@@ -681,6 +681,8 @@ public sealed partial class ListingViewModel : ObservableRecipient,
         _cts?.Dispose();
 
         GC.SuppressFinalize(this);
+
+        Debug.WriteLine($"ListingViewModel.Dispose() called. Id={_id}");
     }
 
     #endregion

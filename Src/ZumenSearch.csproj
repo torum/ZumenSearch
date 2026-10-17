@@ -68,8 +68,8 @@
 		<PackageReference Include="CommunityToolkit.WinUI.Controls.Segmented" Version="8.3.260402-preview2" />
 		<PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.3.260402-preview2" />
 		<PackageReference Include="CommunityToolkit.WinUI.Converters" Version="8.3.260402-preview2" />
-		<PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.12" />
-		<PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.12" />
+		<PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.13" />
+		<PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.13" />
 		<PackageReference Include="Microsoft.WindowsAppSDK.Foundation" Version="2.3.12" />
 		<PackageReference Include="Microsoft.WindowsAppSDK.InteractiveExperiences" Version="2.1.9" />
 		<PackageReference Include="Microsoft.WindowsAppSDK.WinUI" Version="2.3.9" />

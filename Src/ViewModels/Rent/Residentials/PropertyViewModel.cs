@@ -52,6 +52,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     private readonly List<string> _unsavedBuildingPdfThumbnailFileList = [];
 
     private readonly CancellationTokenSource _cts = new();
+    private bool _disposed;
 
     #endregion
 
@@ -1769,15 +1770,29 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     public void Dispose()
     {
-        // Unsubscribe
+        // Currently, this Dispose method is not called when the window is closed. It is called when the application exits.
+        if (_disposed)
+        {
+            return;
+        }
+
+        _disposed = true;
+
+#pragma warning disable IL3050 // Disable AOT dynamic code warning
+#pragma warning disable IL2026 // Disable Trimming unreferenced code warning
+        IsActive = false;
+#pragma warning restore IL2026
+#pragma warning restore IL3050
+
+        // or Unsubscribe
         //WeakReferenceMessenger.Default.UnregisterAll(this);
-        //or
-        //this.IsActive = false;
 
         _cts?.Cancel();
         _cts?.Dispose();
 
         GC.SuppressFinalize(this);
+
+        Debug.WriteLine($"PropertyViewModel.Dispose() called. Id: {this._id}");
     }
 
     #endregion
