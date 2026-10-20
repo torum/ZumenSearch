@@ -5,6 +5,7 @@ using Microsoft.UI.Xaml;
 using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
+using System.Text;
 using WinRT.Interop;
 using ZumenSearch.Helpers;
 using ZumenSearch.Services;
@@ -29,31 +30,26 @@ public partial class App : Application
     // Config file path
     public static string AppConfigFilePath { get; private set; } = System.IO.Path.Combine(AppDataFolder, AppName + ".config");
 
-    //public static Window Window { get; private set; } = null!;
-
     public static Microsoft.UI.Dispatching.DispatcherQueue CurrentDispatcherQueue { get; private set; } = null!;
 
-    //public static nint WindowHandle => WinRT.Interop.WindowNative.GetWindowHandle(Window);
     private Task? _appHostStartTask;
     private Task? _appHostStopTask;
+
+    // ErrorLog
+    private static readonly string _logFilePath = System.Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + System.IO.Path.DirectorySeparatorChar + "ZumenSearch_errors.txt";
+    private readonly StringBuilder _errortxt = new();
+    private readonly Lock _errorLogLock = new();
+#if DEBUG
+    public bool IsSaveErrorLog { get; set; } = true;
+#else
+    public bool IsSaveErrorLog { get; set; } = false;
+#endif
 
     public IHost Host
     {
         get;
     }
 
-    /*
-    public static T GetService<T>()
-        where T : class
-    {
-        if ((App.Current as App)!.Host.Services.GetService(typeof(T)) is not T service)
-        {
-            throw new ArgumentException($"{typeof(T)} needs to be registered in ConfigureServices within App.xaml.cs.");
-        }
-
-        return service;
-    }
-    */
     public static T GetService<T>() where T : class
     {
         return ((App)Current).Host.Services.GetRequiredService<T>();
@@ -92,8 +88,8 @@ public partial class App : Application
             Debug.WriteLine("CreateDirectory @App(): " + ex.Message);
 
             // Log the exception for debugging
-            //AppendErrorLog("Failed to create folders on startup.", ex.ToString());
-            //SaveErrorLog();
+            AppendErrorLog("Failed to create folders on startup.", ex.ToString());
+            SaveErrorLog();
         }
 
         // Used for DispatcherService (passed as a parameter) to enqueue actions to the UI thread.
@@ -123,6 +119,7 @@ public partial class App : Application
                 services.AddTransient<IDialogGenericService, DialogGenericService>();
                 services.AddTransient<IDataAccessLocationService, DataAccessLocationService>();
                 services.AddTransient<IDataAccessTransportationService, DataAccessTransportationService>();
+                services.AddSingleton<IConfigurationService, ConfigurationService>();
 
                 // Views and ViewModels
                 services.AddSingleton<ViewModels.MainViewModel>();
@@ -206,6 +203,10 @@ public partial class App : Application
                 Microsoft.Windows.AppLifecycle.AppInstance.GetCurrent().Activated += App_Activated;
             }
 
+            var configurationService = GetService<IConfigurationService>();
+            configurationService.Initialize(AppConfigFilePath);
+            await configurationService.LoadConfigurationAsync();
+
             _appHostStartTask = StartAppHostAsync();
             var shell = GetService<Views.ShellPage>();
             shell.MainWindow.Closed += (sender, e) =>
@@ -218,8 +219,8 @@ public partial class App : Application
         catch (Exception ex)
         {
             Debug.WriteLine($"OnLaunched: {ex}");
-            //AppendErrorLog("OnLaunched", ex.ToString());
-            //SaveErrorLog();
+            AppendErrorLog("OnLaunched", ex.ToString());
+            SaveErrorLog();
 
             // Startup failed and the app is in an unknown state, so exit instead of leaving a half-initialized process.
             Environment.Exit(1);
@@ -255,13 +256,13 @@ public partial class App : Application
         catch (Exception ex)
         {
             Debug.WriteLine("StopAppHostAsync: {0}", ex);
-            //AppendErrorLog("AppHost.StopAsync", ex.ToString());
-            //SaveErrorLog();
+            AppendErrorLog("AppHost.StopAsync", ex.ToString());
         }
         finally
         {
             Host.Dispose();
             Debug.WriteLine("AppHost disposed.");
+            SaveErrorLog();
         }
     }
 
@@ -304,24 +305,32 @@ public partial class App : Application
 
     private void App_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
     {
-        Debug.WriteLine("App_UnhandledException", $"{e.Exception.Message}, {e.Exception.Data}");
-        //AppendErrorLog("App_UnhandledException", $"{e.Exception.Message}, {e.Exception.Data}");
-        //SaveErrorLog();
+        //Debug.WriteLine("App_UnhandledException", $"{e.Exception.Message}, {e.Exception.Data}");
 
-        e.Handled = true;
+        // e.Exception can lose detail when it crosses the WinRT boundary,
+        // but ToString() still gives the best available type, message, HResult and stack trace.
+        var details = $"{e.Exception}{Environment.NewLine}HResult: 0x{e.Exception.HResult:X8}{Environment.NewLine}Message: {e.Message}";
+
+        Debug.WriteLine($"App_UnhandledException: {details}");
+        AppendErrorLog("App_UnhandledException", details);
+        SaveErrorLog();
+
+        // Mark as handled only for exceptions that are known to be recoverable.
+        // Leaving it unhandled lets the app terminate, which is safer for unknown states.
+        if (e.Exception is OperationCanceledException)
+        {
+            e.Handled = true;
+        }
     }
 
     private void TaskScheduler_UnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
     {
-        if (e.Exception.InnerException is not Exception exception)
-        {
-            Debug.WriteLine("TaskScheduler_UnobservedTaskException: " + e.ToString());
-            return;
-        }
+        // Flatten so nested AggregateExceptions are unwrapped, and log full details (type, message, stack trace).
+        var details = e.Exception.Flatten().ToString();
 
-        Debug.WriteLine("TaskScheduler_UnobservedTaskException: " + exception.Message);
-        //AppendErrorLog("TaskScheduler_UnobservedTaskException", exception.Message);
-        //SaveErrorLog();
+        Debug.WriteLine($"TaskScheduler_UnobservedTaskException: {details}");
+        AppendErrorLog("TaskScheduler_UnobservedTaskException", details);
+        SaveErrorLog();
 
         e.SetObserved();
     }
@@ -330,34 +339,40 @@ public partial class App : Application
     {
         if (e.ExceptionObject is not Exception exception)
         {
-            Debug.WriteLine("CurrentDomain_UnhandledException: " + e.ToString());
+            var raw = e.ExceptionObject?.ToString() ?? "Unknown exception object";
+            Debug.WriteLine($"CurrentDomain_UnhandledException: {raw}");
+            AppendErrorLog("CurrentDomain_UnhandledException", raw);
+            SaveErrorLog();
             return;
         }
 
         if (exception is TaskCanceledException)
         {
             // can ignore.
-            Debug.WriteLine("CurrentDomain_UnhandledException (TaskCanceledException): " + exception.Message);
-            //AppendErrorLog("CurrentDomain_UnhandledException (TaskCanceledException)", exception.Message);
+            Debug.WriteLine($"CurrentDomain_UnhandledException (TaskCanceledException): {exception.Message}");
             return;
         }
 
-        Debug.WriteLine("CurrentDomain_UnhandledException: " + exception.Message);
-        //AppendErrorLog("CurrentDomain_UnhandledException", exception.Message);
-        //SaveErrorLog();
+        // Log full details (type, message, stack trace, inner exceptions).
+        var details = exception.ToString();
+
+        Debug.WriteLine($"CurrentDomain_UnhandledException (IsTerminating={e.IsTerminating}): {details}");
+        AppendErrorLog("CurrentDomain_UnhandledException", details);
+        SaveErrorLog();
     }
 
-    /*
     public void AppendErrorLog(string kindTxt, string errorTxt)
     {
         if (!IsSaveErrorLog)
         {
             return;
         }
-
-        _errortxt.AppendLine(kindTxt + ": " + errorTxt);
-        var dt = DateTime.Now;
-        _errortxt.AppendLine(CultureInfo.InvariantCulture, $"Occured at {dt.ToString("yyyy/MM/dd HH:mm:ss", CultureInfo.InvariantCulture)}");
+        var timestamp = DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss", CultureInfo.InvariantCulture);
+        lock (_errorLogLock)
+        {
+            _errortxt.AppendLine(kindTxt + ": " + errorTxt);
+            _errortxt.AppendLine(CultureInfo.InvariantCulture, $"Occurred at {timestamp}");
+        }
     }
 
     public void SaveErrorLog()
@@ -372,20 +387,29 @@ public partial class App : Application
             return;
         }
 
-        if (_errortxt.Length > 0)
-        {
-            var dt = DateTime.Now;
-            _errortxt.AppendLine(CultureInfo.InvariantCulture, $"Saved at {dt.ToString("yyyy/MM/dd HH:mm:ss", CultureInfo.InvariantCulture)}");
-            _errortxt.AppendLine("");
+        var timestamp = DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss", CultureInfo.InvariantCulture);
 
-            var s = _errortxt.ToString();
-            if (!string.IsNullOrEmpty(s))
+        lock (_errorLogLock)
+        {
+            if (_errortxt.Length == 0)
             {
-                File.WriteAllText(_logFilePath, s);
+                return;
+            }
+
+            _errortxt.AppendLine(CultureInfo.InvariantCulture, $"Saved at {timestamp}");
+            _errortxt.AppendLine();
+
+            try
+            {
+                File.WriteAllText(_logFilePath, _errortxt.ToString());
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                // The error logger must never throw from inside an exception handler.
+                Debug.WriteLine($"SaveErrorLog failed: {ex.Message}");
             }
         }
     }
-    */
 
     #endregion
 }

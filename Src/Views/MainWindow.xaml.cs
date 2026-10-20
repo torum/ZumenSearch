@@ -6,27 +6,31 @@ using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics.Arm;
 using System.Xml;
 using System.Xml.Linq;
+using WinRT;
 using WinRT.Interop;
+using ZumenSearch.Services;
 using ZumenSearch.Services.Contracts;
 
 namespace ZumenSearch.Views;
 
 public sealed partial class MainWindow : Window
 {
-    private OverlappedPresenterState _winState = OverlappedPresenterState.Restored;
-
     private int _winRestoreWidth = 1274;
     private int _winRestoreHeight = 794;
     private int _winRestoreTop = 100;
     private int _winRestoreLeft = 100;
 
+    private bool _isClosing;
+
     private readonly ViewModels.MainViewModel _viewModel;
     private readonly IDispatcherService _dispatcherService;
+    private readonly IConfigurationService _configurationService;
 
-    public MainWindow(ViewModels.MainViewModel viewModel, IDispatcherService dispatcherService)
+    public MainWindow(ViewModels.MainViewModel viewModel, IDispatcherService dispatcherService, IConfigurationService configurationService)
     {
         _viewModel = viewModel;
         _dispatcherService = dispatcherService;
+        _configurationService = configurationService;
 
         InitializeComponent();
 
@@ -35,400 +39,242 @@ public sealed partial class MainWindow : Window
         //this.AppWindow.SetIcon(Path.Combine(AppContext.BaseDirectory, "Assets\\App.ico"));
         this.AppWindow.SetIcon("Assets/App.ico");
 
+        LoadSetting();
+
         this.AppWindow.Closing += AppWindow_Closing;
         this.Closed += Window_Closed;
         this.SizeChanged += Window_SizeChanged;
-
-        LoadSetting();
+        this.AppWindow.Changed += AppWindow_Changed;
+        this.Activated += Window_Activated;
 
         if (this.AppWindow.Presenter is OverlappedPresenter presenter)
         {
             presenter.PreferredMinimumWidth = 700;
             presenter.PreferredMinimumHeight = 600;
-
-            if (_winState == OverlappedPresenterState.Maximized)
-            {
-                this.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(_winRestoreLeft, _winRestoreTop, _winRestoreWidth, _winRestoreHeight));
-                presenter.Maximize();
-            }
-            else if (_winState == OverlappedPresenterState.Minimized)
-            {
-                this.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(_winRestoreLeft, _winRestoreTop, _winRestoreWidth, _winRestoreHeight));
-            }
-            else
-            {
-                this.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(_winRestoreLeft, _winRestoreTop, _winRestoreWidth, _winRestoreHeight));
-            }
         }
     }
 
     private void LoadSetting()
     {
-        System.IO.Directory.CreateDirectory(App.AppDataFolder);
+        var config = _configurationService.CurrentConfiguration;
 
-        int winHeight;
-        int winWidth;
-        int winTop;
-        int winLeft;
+        Debug.WriteLine($"LoadSetting: MainWindow: Width={config.MainWindow.Width}, Height={config.MainWindow.Height}, Top={config.MainWindow.Top}, Left={config.MainWindow.Left}, WindowState={config.MainWindow.WindowState}");
 
-        if (System.IO.File.Exists(App.AppConfigFilePath))
+        if (config.MainWindow.Width < 500)
         {
-            var xdoc = XDocument.Load(App.AppConfigFilePath);
-            //Debug.WriteLine(xdoc.ToString());
+            config.MainWindow.Width = 500;
+        }
+        if (config.MainWindow.Height < 500)
+        {
+            config.MainWindow.Height = 500;
+        }
+        if (config.MainWindow.Top < 0)
+        {
+            config.MainWindow.Top = 0;
+        }
+        if (config.MainWindow.Left < 0)
+        {
+            config.MainWindow.Left = 0;
+        }
 
-            if (xdoc.Root != null)
+        if (config.MainWindow.RestoreWidth < 500)
+        {
+            config.MainWindow.RestoreWidth = 500;
+        }
+        if (config.MainWindow.RestoreHeight < 500)
+        {
+            config.MainWindow.RestoreHeight = 500;
+        }
+        if (config.MainWindow.RestoreTop < 0)
+        {
+            config.MainWindow.RestoreTop = 0;
+        }
+        if (config.MainWindow.RestoreLeft < 0)
+        {
+            config.MainWindow.RestoreLeft = 0;
+        }
+
+        // Restore window size and position
+        Microsoft.UI.Windowing.AppWindow? appWindow = this.AppWindow;
+        if (appWindow != null)
+        {
+            // AOT bad
+            /*
+            // https://github.com/microsoft/CsWinRT/issues/1930
+            // Window state
+            if (appWindow.Presenter is OverlappedPresenter presenter)
             {
-                // Main window
-                var mainWindow = xdoc.Root.Element("MainWindow");
-                if (mainWindow != null)
-                {
-                    var hoge = mainWindow.Attribute("state");
-                    if (hoge != null)
-                    {
-                        if (hoge.Value == "Maximized")
-                        {
-                            _winState = OverlappedPresenterState.Maximized;
-                        }
-                        else if (hoge.Value == "Normal")
-                        {
-                            _winState = OverlappedPresenterState.Restored;
-                        }
-                        else if (hoge.Value == "Minimized")
-                        {
-                            // Let's not minimized on startup, so restore it.
-                            _winState = OverlappedPresenterState.Restored;
-                        }
-                    }
+            }
+            */
 
-                    hoge = mainWindow.Attribute("top");
-                    if (hoge != null)
-                    {
-                        winTop = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
-                        _winRestoreTop = winTop;
-                    }
+            if (config.MainWindow.WindowState == OverlappedPresenterState.Maximized)
+            {
+                // Sets restore size and position.
+                appWindow.MoveAndResize(new Windows.Graphics.RectInt32(config.MainWindow.Left, config.MainWindow.Top, config.MainWindow.Width, config.MainWindow.Height));
+                // Maximize the window.
+                (appWindow.Presenter as OverlappedPresenter)!.Maximize();
+            }
+            else if (config.MainWindow.WindowState == OverlappedPresenterState.Minimized)
+            {
+                // This should not happen. DONT restore minimized size and pos.
 
-                    hoge = mainWindow.Attribute("left");
-                    if (hoge != null)
-                    {
-                        winLeft = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
-                        _winRestoreLeft = winLeft;
-                    }
+                (appWindow.Presenter as OverlappedPresenter)!.Restore();
 
-                    hoge = mainWindow.Attribute("height");
-                    if (hoge != null)
-                    {
-                        winHeight = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
-                        _winRestoreHeight = winHeight;
-                    }
+                appWindow.MoveAndResize(new Windows.Graphics.RectInt32(config.MainWindow.Left, config.MainWindow.Top, config.MainWindow.Width, config.MainWindow.Height));
+            }
+            else if (config.MainWindow.WindowState == OverlappedPresenterState.Restored)
+            {
+                // TODO:
+                //var dpi = Windows.Win32.PInvoke.GetDpiForWindow(new Windows.Win32.Foundation.HWND(WinRT.Interop.WindowNative.GetWindowHandle(this)));
+                //var scalingFactor = (float)dpi / 96;
+                //AppWindow.Resize(new Windows.Graphics.SizeInt32((int)(400.0f * scalingFactor), (int)(300.0f * scalingFactor)));
 
-                    hoge = mainWindow.Attribute("width");
-                    if (hoge != null)
-                    {
-                        winWidth = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
-                        _winRestoreWidth = winWidth;
-                    }
-                }
-
-                if (_winRestoreWidth < 542)
-                {
-                    _winRestoreWidth = 542;
-                }
-                if (_winRestoreHeight < 600)
-                {
-                    _winRestoreHeight = 600;
-                }
-                if (_winRestoreTop < 0)
-                {
-                    _winRestoreTop = 0;
-                }
-                if (_winRestoreLeft < 0)
-                {
-                    _winRestoreLeft = 0;
-                }
-
-                // RentResidentialEditorWindow element
-                var editWindow = xdoc.Root.Element("RentResidentialEditorWindow");
-                if (editWindow != null)
-                {
-                    var hoge = editWindow.Attribute("top");
-                    if (hoge != null)
-                    {
-                        _viewModel.RentResidentialEditorWinTop = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
-                    }
-
-                    hoge = editWindow.Attribute("left");
-                    if (hoge != null)
-                    {
-                        _viewModel.RentResidentialEditorWinLeft = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
-                    }
-
-                    hoge = editWindow.Attribute("height");
-                    if (hoge != null)
-                    {
-                        _viewModel.RentResidentialEditorWinHeight = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
-                    }
-
-                    hoge = editWindow.Attribute("width");
-                    if (hoge != null)
-                    {
-                        _viewModel.RentResidentialEditorWinWidth = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
-                    }
-                }
-
-                if (_viewModel.RentResidentialEditorWinWidth < 500)
-                {
-                    _viewModel.RentResidentialEditorWinWidth = 500;
-                }
-                if (_viewModel.RentResidentialEditorWinHeight < 500)
-                {
-                    _viewModel.RentResidentialEditorWinHeight = 500;
-                }
-                if (_viewModel.RentResidentialEditorWinTop < 0)
-                {
-                    _viewModel.RentResidentialEditorWinTop = 0;
-                }
-                if (_viewModel.RentResidentialEditorWinLeft < 0)
-                {
-                    _viewModel.RentResidentialEditorWinLeft = 0;
-                }
-
-                // RentResidentialListingEditorWindow element
-                editWindow = xdoc.Root.Element("RentResidentialListingEditorWindow");
-                if (editWindow != null)
-                {
-                    var hoge = editWindow.Attribute("top");
-                    if (hoge != null)
-                    {
-                        _viewModel.RentResidentialListingEditorWinTop = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
-                    }
-
-                    hoge = editWindow.Attribute("left");
-                    if (hoge != null)
-                    {
-                        _viewModel.RentResidentialListingEditorWinLeft = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
-                    }
-
-                    hoge = editWindow.Attribute("height");
-                    if (hoge != null)
-                    {
-                        _viewModel.RentResidentialListingEditorWinHeight = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
-                    }
-
-                    hoge = editWindow.Attribute("width");
-                    if (hoge != null)
-                    {
-                        _viewModel.RentResidentialListingEditorWinWidth = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
-                    }
-                }
-
-                if (_viewModel.RentResidentialListingEditorWinWidth < 500)
-                {
-                    _viewModel.RentResidentialListingEditorWinWidth = 500;
-                }
-                if (_viewModel.RentResidentialListingEditorWinHeight < 500)
-                {
-                    _viewModel.RentResidentialListingEditorWinHeight = 500;
-                }
-                if (_viewModel.RentResidentialListingEditorWinTop < 0)
-                {
-                    _viewModel.RentResidentialListingEditorWinTop = 0;
-                }
-                if (_viewModel.RentResidentialListingEditorWinLeft < 0)
-                {
-                    _viewModel.RentResidentialListingEditorWinLeft = 0;
-                }
-
-                // RentCommercialEditorWindow element
-                editWindow = xdoc.Root.Element("RentCommercialEditorWindow");
-                if (editWindow != null)
-                {
-                    var hoge = editWindow.Attribute("top");
-                    if (hoge != null)
-                    {
-                        _viewModel.RentCommercialEditorWinTop = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
-                    }
-
-                    hoge = editWindow.Attribute("left");
-                    if (hoge != null)
-                    {
-                        _viewModel.RentCommercialEditorWinLeft = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
-                    }
-
-                    hoge = editWindow.Attribute("height");
-                    if (hoge != null)
-                    {
-                        _viewModel.RentCommercialEditorWinHeight = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
-                    }
-
-                    hoge = editWindow.Attribute("width");
-                    if (hoge != null)
-                    {
-                        _viewModel.RentCommercialEditorWinWidth = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
-                    }
-                }
-
-                if (_viewModel.RentCommercialEditorWinWidth < 500)
-                {
-                    _viewModel.RentCommercialEditorWinWidth = 500;
-                }
-                if (_viewModel.RentCommercialEditorWinHeight < 500)
-                {
-                    _viewModel.RentCommercialEditorWinHeight = 500;
-                }
-                if (_viewModel.RentCommercialEditorWinTop < 0)
-                {
-                    _viewModel.RentCommercialEditorWinTop = 0;
-                }
-                if (_viewModel.RentCommercialEditorWinLeft < 0)
-                {
-                    _viewModel.RentCommercialEditorWinLeft = 0;
-                }
-
-                // RentCommercialListingEditorWindow element
-                editWindow = xdoc.Root.Element("RentCommercialListingEditorWindow");
-                if (editWindow != null)
-                {
-                    var hoge = editWindow.Attribute("top");
-                    if (hoge != null)
-                    {
-                        _viewModel.RentCommercialListingEditorWinTop = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
-                    }
-
-                    hoge = editWindow.Attribute("left");
-                    if (hoge != null)
-                    {
-                        _viewModel.RentCommercialListingEditorWinLeft = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
-                    }
-
-                    hoge = editWindow.Attribute("height");
-                    if (hoge != null)
-                    {
-                        _viewModel.RentCommercialListingEditorWinHeight = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
-                    }
-
-                    hoge = editWindow.Attribute("width");
-                    if (hoge != null)
-                    {
-                        _viewModel.RentCommercialListingEditorWinWidth = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
-                    }
-                }
-
-                if (_viewModel.RentCommercialListingEditorWinWidth < 500)
-                {
-                    _viewModel.RentCommercialListingEditorWinWidth = 500;
-                }
-                if (_viewModel.RentCommercialListingEditorWinHeight < 500)
-                {
-                    _viewModel.RentCommercialListingEditorWinHeight = 500;
-                }
-                if (_viewModel.RentCommercialListingEditorWinTop < 0)
-                {
-                    _viewModel.RentCommercialListingEditorWinTop = 0;
-                }
-                if (_viewModel.RentCommercialListingEditorWinLeft < 0)
-                {
-                    _viewModel.RentCommercialListingEditorWinLeft = 0;
-                }
-
-                // LessorEditorWindow element
-                editWindow = xdoc.Root.Element("LessorEditorWindow");
-                if (editWindow != null)
-                {
-                    var hoge = editWindow.Attribute("top");
-                    if (hoge != null)
-                    {
-                        _viewModel.LessorEditorWinTop = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
-                    }
-
-                    hoge = editWindow.Attribute("left");
-                    if (hoge != null)
-                    {
-                        _viewModel.LessorEditorWinLeft = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
-                    }
-
-                    hoge = editWindow.Attribute("height");
-                    if (hoge != null)
-                    {
-                        _viewModel.LessorEditorWinHeight = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
-                    }
-
-                    hoge = editWindow.Attribute("width");
-                    if (hoge != null)
-                    {
-                        _viewModel.LessorEditorWinWidth = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
-                    }
-                }
-
-                if (_viewModel.LessorEditorWinWidth < 500)
-                {
-                    _viewModel.LessorEditorWinWidth = 500;
-                }
-                if (_viewModel.LessorEditorWinHeight < 500)
-                {
-                    _viewModel.LessorEditorWinHeight = 500;
-                }
-                if (_viewModel.LessorEditorWinTop < 0)
-                {
-                    _viewModel.LessorEditorWinTop = 0;
-                }
-                if (_viewModel.LessorEditorWinLeft < 0)
-                {
-                    _viewModel.LessorEditorWinLeft = 0;
-                }
-
-                // BrokerEditorWindow element
-                editWindow = xdoc.Root.Element("BrokerEditorWindow");
-                if (editWindow != null)
-                {
-                    var hoge = editWindow.Attribute("top");
-                    if (hoge != null)
-                    {
-                        _viewModel.BrokerEditorWinTop = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
-                    }
-
-                    hoge = editWindow.Attribute("left");
-                    if (hoge != null)
-                    {
-                        _viewModel.BrokerEditorWinLeft = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
-                    }
-
-                    hoge = editWindow.Attribute("height");
-                    if (hoge != null)
-                    {
-                        _viewModel.BrokerEditorWinHeight = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
-                    }
-
-                    hoge = editWindow.Attribute("width");
-                    if (hoge != null)
-                    {
-                        _viewModel.BrokerEditorWinWidth = int.Parse(hoge.Value, CultureInfo.InvariantCulture);
-                    }
-                }
-
-                if (_viewModel.BrokerEditorWinWidth < 500)
-                {
-                    _viewModel.BrokerEditorWinWidth = 500;
-                }
-                if (_viewModel.BrokerEditorWinHeight < 500)
-                {
-                    _viewModel.BrokerEditorWinHeight = 500;
-                }
-                if (_viewModel.BrokerEditorWinTop < 0)
-                {
-                    _viewModel.BrokerEditorWinTop = 0;
-                }
-                if (_viewModel.BrokerEditorWinLeft < 0)
-                {
-                    _viewModel.BrokerEditorWinLeft = 0;
-                }
-
+                // Sets restore size and position.
+                appWindow.MoveAndResize(new Windows.Graphics.RectInt32(config.MainWindow.Left, config.MainWindow.Top, config.MainWindow.Width, config.MainWindow.Height));
             }
         }
+
+        //
+        _viewModel.RentResidentialEditorWinTop = config.RentResidentialEditorWindow.Top;
+        _viewModel.RentResidentialEditorWinLeft = config.RentResidentialEditorWindow.Left;
+        _viewModel.RentResidentialEditorWinHeight = config.RentResidentialEditorWindow.Height;
+        _viewModel.RentResidentialEditorWinWidth = config.RentResidentialEditorWindow.Width;
+        if (_viewModel.RentResidentialEditorWinWidth < 500)
+        {
+            _viewModel.RentResidentialEditorWinWidth = 500;
+        }
+        if (_viewModel.RentResidentialEditorWinHeight < 500)
+        {
+            _viewModel.RentResidentialEditorWinHeight = 500;
+        }
+        if (_viewModel.RentResidentialEditorWinTop < 0)
+        {
+            _viewModel.RentResidentialEditorWinTop = 0;
+        }
+        if (_viewModel.RentResidentialEditorWinLeft < 0)
+        {
+            _viewModel.RentResidentialEditorWinLeft = 0;
+        }
+
+        //
+        _viewModel.RentResidentialListingEditorWinTop = config.RentResidentialListingEditorWindow.Top;
+        _viewModel.RentResidentialListingEditorWinLeft = config.RentResidentialListingEditorWindow.Left;
+        _viewModel.RentResidentialListingEditorWinHeight = config.RentResidentialListingEditorWindow.Height;
+        _viewModel.RentResidentialListingEditorWinWidth = config.RentResidentialListingEditorWindow.Width;
+        if (_viewModel.RentResidentialListingEditorWinWidth < 500)
+        {
+            _viewModel.RentResidentialListingEditorWinWidth = 500;
+        }
+        if (_viewModel.RentResidentialListingEditorWinHeight < 500)
+        {
+            _viewModel.RentResidentialListingEditorWinHeight = 500;
+        }
+        if (_viewModel.RentResidentialListingEditorWinTop < 0)
+        {
+            _viewModel.RentResidentialListingEditorWinTop = 0;
+        }
+        if (_viewModel.RentResidentialListingEditorWinLeft < 0)
+        {
+            _viewModel.RentResidentialListingEditorWinLeft = 0;
+        }
+
+        //
+        _viewModel.RentCommercialEditorWinWidth = config.RentCommercialEditorWindow.Width;
+        _viewModel.RentCommercialEditorWinHeight = config.RentCommercialEditorWindow.Height;
+        _viewModel.RentCommercialEditorWinTop = config.RentCommercialEditorWindow.Top;
+        _viewModel.RentCommercialEditorWinLeft = config.RentCommercialEditorWindow.Left;
+        if (_viewModel.RentCommercialEditorWinWidth < 500)
+        {
+            _viewModel.RentCommercialEditorWinWidth = 500;
+        }
+        if (_viewModel.RentCommercialEditorWinHeight < 500)
+        {
+            _viewModel.RentCommercialEditorWinHeight = 500;
+        }
+        if (_viewModel.RentCommercialEditorWinTop < 0)
+        {
+            _viewModel.RentCommercialEditorWinTop = 0;
+        }
+        if (_viewModel.RentCommercialEditorWinLeft < 0)
+        {
+            _viewModel.RentCommercialEditorWinLeft = 0;
+        }
+
+        //
+        _viewModel.RentCommercialListingEditorWinTop = config.RentCommercialListingEditorWindow.Top;
+        _viewModel.RentCommercialListingEditorWinLeft = config.RentCommercialListingEditorWindow.Left;
+        _viewModel.RentCommercialListingEditorWinHeight = config.RentCommercialListingEditorWindow.Height;
+        _viewModel.RentCommercialListingEditorWinWidth = config.RentCommercialListingEditorWindow.Width;
+        if (_viewModel.RentCommercialListingEditorWinWidth < 500)
+        {
+            _viewModel.RentCommercialListingEditorWinWidth = 500;
+        }
+        if (_viewModel.RentCommercialListingEditorWinHeight < 500)
+        {
+            _viewModel.RentCommercialListingEditorWinHeight = 500;
+        }
+        if (_viewModel.RentCommercialListingEditorWinTop < 0)
+        {
+            _viewModel.RentCommercialListingEditorWinTop = 0;
+        }
+        if (_viewModel.RentCommercialListingEditorWinLeft < 0)
+        {
+            _viewModel.RentCommercialListingEditorWinLeft = 0;
+        }
+
+        //
+        _viewModel.LessorEditorWinTop = config.LessorEditorWindow.Top;
+        _viewModel.LessorEditorWinLeft = config.LessorEditorWindow.Left;
+        _viewModel.LessorEditorWinHeight = config.LessorEditorWindow.Height;
+        _viewModel.LessorEditorWinWidth = config.LessorEditorWindow.Width;
+        if (_viewModel.LessorEditorWinWidth < 500)
+        {
+            _viewModel.LessorEditorWinWidth = 500;
+        }
+        if (_viewModel.LessorEditorWinHeight < 500)
+        {
+            _viewModel.LessorEditorWinHeight = 500;
+        }
+        if (_viewModel.LessorEditorWinTop < 0)
+        {
+            _viewModel.LessorEditorWinTop = 0;
+        }
+        if (_viewModel.LessorEditorWinLeft < 0)
+        {
+            _viewModel.LessorEditorWinLeft = 0;
+        }
+
+        //
+        _viewModel.BrokerEditorWinTop = config.BrokerEditorWindow.Top;
+        _viewModel.BrokerEditorWinLeft = config.BrokerEditorWindow.Left;
+        _viewModel.BrokerEditorWinHeight = config.BrokerEditorWindow.Height;
+        _viewModel.BrokerEditorWinWidth = config.BrokerEditorWindow.Width;
+        if (_viewModel.BrokerEditorWinWidth < 500)
+        {
+            _viewModel.BrokerEditorWinWidth = 500;
+        }
+        if (_viewModel.BrokerEditorWinHeight < 500)
+        {
+            _viewModel.BrokerEditorWinHeight = 500;
+        }
+        if (_viewModel.BrokerEditorWinTop < 0)
+        {
+            _viewModel.BrokerEditorWinTop = 0;
+        }
+        if (_viewModel.BrokerEditorWinLeft < 0)
+        {
+            _viewModel.BrokerEditorWinLeft = 0;
+        }
+
     }
 
     private async void AppWindow_Closing(Microsoft.UI.Windowing.AppWindow sender, Microsoft.UI.Windowing.AppWindowClosingEventArgs args)
     {
         Debug.WriteLine("AppWindow_Closing");
+        
+        args.Cancel = true;
+        if (_isClosing) return;
+        _isClosing = true;
 
         var isCancel = false;
 
@@ -493,6 +339,7 @@ public sealed partial class MainWindow : Window
 
         if (isCancel)
         {
+            _isClosing = false;
             return;
         }
 
@@ -553,6 +400,7 @@ public sealed partial class MainWindow : Window
 
         if (isCancel)
         {
+            _isClosing = false;
             return;
         }
 
@@ -615,6 +463,7 @@ public sealed partial class MainWindow : Window
 
         if (isCancel)
         {
+            _isClosing = false;
             return;
         }
 
@@ -677,6 +526,7 @@ public sealed partial class MainWindow : Window
 
         if (isCancel)
         {
+            _isClosing = false;
             return;
         }
 
@@ -737,6 +587,7 @@ public sealed partial class MainWindow : Window
 
         if (isCancel)
         {
+            _isClosing = false;
             return;
         }
 
@@ -799,286 +650,180 @@ public sealed partial class MainWindow : Window
 
         if (isCancel)
         {
+            _isClosing = false;
             return;
         }
 
+        // 
+        _viewModel.UpdateSettings();
+
         // Save window state and position, etc.
-        SaveSetting();
+        await SaveSettingAsync();
+
+        this.Close();
     }
 
     private void Window_Closed(object sender, WindowEventArgs args)
     {
         Debug.WriteLine("MainWindow_Closed");
+
+        this.AppWindow.Closing -= AppWindow_Closing;
+        this.Closed -= Window_Closed;
+        this.SizeChanged -= Window_SizeChanged;
+        this.AppWindow.Changed -= AppWindow_Changed;
+        this.Activated -= Window_Activated;
     }
 
-    private void SaveSetting()
+    private async Task SaveSettingAsync()
     {
-        var winHeight = 794;
-        var winWidth = 1274;
-        var winTop = 100;
-        var winLeft = 100;
-        var winState = OverlappedPresenterState.Restored;
+        var config = _configurationService.CurrentConfiguration;
 
+        OverlappedPresenterState? winState = null; // For AOT workaround, don't set default.  = OverlappedPresenterState.Restored;
+
+        // AOT bad
+        // https://github.com/microsoft/CsWinRT/issues/1930
         if (this.AppWindow.Presenter is OverlappedPresenter presenter)
         {
-            if (presenter.State == OverlappedPresenterState.Maximized)
+            // AOT bad
+            //OverlappedPresenter? presenter = appWindow.Presenter as OverlappedPresenter;
+
+            if (presenter?.State == OverlappedPresenterState.Maximized)
             {
                 winState = OverlappedPresenterState.Maximized;
             }
-            else if (presenter.State == OverlappedPresenterState.Minimized)
+            else if (presenter?.State == OverlappedPresenterState.Minimized)
             {
                 winState = OverlappedPresenterState.Minimized;
             }
-            else if (presenter.State == OverlappedPresenterState.Restored)
+            else if (presenter?.State == OverlappedPresenterState.Restored)
             {
                 winState = OverlappedPresenterState.Restored;
             }
-            else
+        }
+        else
+        {
+            //App.AppendErrorLog("AOT Error",$"{appWindow.Presenter}"); //Microsoft.UI.Windowing.AppWindowPresenter
+            //App.SaveErrorLog();
+
+            try
             {
-                winState = OverlappedPresenterState.Restored;
+                // For AOT tmp workaround
+                OverlappedPresenter presenterAOT = this.AppWindow.Presenter.As<OverlappedPresenter>();
+
+                if (presenterAOT.State == OverlappedPresenterState.Maximized)
+                {
+                    winState = OverlappedPresenterState.Maximized;
+                }
+                else if (presenterAOT.State == OverlappedPresenterState.Minimized)
+                {
+                    winState = OverlappedPresenterState.Minimized;
+                }
+                else if (presenterAOT.State == OverlappedPresenterState.Restored)
+                {
+                    winState = OverlappedPresenterState.Restored;
+                }
+            }
+            catch (Exception ex)
+            {
+                (Application.Current as App)?.AppendErrorLog("AOT Error@SaveSettings", $"{ex}");
+                (Application.Current as App)?.SaveErrorLog();
             }
 
-            // TODO: needs "Window.RestoreBounds Property"
-            //if (winState == OverlappedPresenterState.Restored) {}
-            winHeight = (int)this.AppWindow.Size.Height;
-            winWidth = (int)this.AppWindow.Size.Width;
-            winTop = (int)this.AppWindow.Position.Y;
-            winLeft = (int)this.AppWindow.Position.X;
         }
 
-        XmlDocument doc = new();
-        var xmlDeclaration = doc.CreateXmlDeclaration("1.0", "UTF-8", null);
-        doc.InsertBefore(xmlDeclaration, doc.DocumentElement);
-
-        // Root Document Element
-        var root = doc.CreateElement(string.Empty, "App", string.Empty);
-        doc.AppendChild(root);
-
-        XmlAttribute attrs;
-
-        // Main window
-        if (this.AppWindow != null)
+        // For AOT, check if winState is null or not.
+        if (winState != null)
         {
-            // Main window element
-            var mainWindow = doc.CreateElement(string.Empty, "MainWindow", string.Empty);
-
-            // Main window attributes
-            attrs = doc.CreateAttribute("width");
+            // Main Window attributes
             if (winState == OverlappedPresenterState.Restored)
             {
-                attrs.Value = winWidth.ToString(CultureInfo.InvariantCulture);
+                config.MainWindow.Width = this.AppWindow.Size.Width;
             }
             else
             {
-                attrs.Value = _winRestoreWidth.ToString(CultureInfo.InvariantCulture);
+                config.MainWindow.Width = _winRestoreWidth;
             }
-            mainWindow.SetAttributeNode(attrs);
+            config.MainWindow.RestoreWidth = _winRestoreWidth;
 
-            attrs = doc.CreateAttribute("height");
             if (winState == OverlappedPresenterState.Restored)
             {
-                attrs.Value = winHeight.ToString(CultureInfo.InvariantCulture);
+                config.MainWindow.Height = this.AppWindow.Size.Height;
             }
             else
             {
-                attrs.Value = _winRestoreHeight.ToString(CultureInfo.InvariantCulture);
+                config.MainWindow.Height = _winRestoreHeight;
             }
-            mainWindow.SetAttributeNode(attrs);
+            config.MainWindow.RestoreHeight = _winRestoreHeight;
 
-            attrs = doc.CreateAttribute("top");
             if (winState == OverlappedPresenterState.Restored)
             {
-                attrs.Value = winTop.ToString(CultureInfo.InvariantCulture);
+                config.MainWindow.Top = this.AppWindow.Position.Y;
             }
             else
             {
-                attrs.Value = _winRestoreTop.ToString(CultureInfo.InvariantCulture);
+                config.MainWindow.Top = _winRestoreTop;
             }
-            mainWindow.SetAttributeNode(attrs);
+            config.MainWindow.RestoreTop = _winRestoreTop;
 
-            attrs = doc.CreateAttribute("left");
             if (winState == OverlappedPresenterState.Restored)
             {
-                attrs.Value = winLeft.ToString(CultureInfo.InvariantCulture);
+                config.MainWindow.Left = this.AppWindow.Position.X;
             }
             else
             {
-                attrs.Value = _winRestoreLeft.ToString(CultureInfo.InvariantCulture);
+                config.MainWindow.Left = _winRestoreLeft;
             }
-            mainWindow.SetAttributeNode(attrs);
+            config.MainWindow.RestoreLeft = _winRestoreLeft;
 
-            attrs = doc.CreateAttribute("state");
             if (winState == OverlappedPresenterState.Maximized)
             {
-                attrs.Value = "Maximized";
+                //attrs.Value = "Maximized";
+                config.MainWindow.WindowState = OverlappedPresenterState.Maximized;
             }
             else if (winState == OverlappedPresenterState.Restored)
             {
-                attrs.Value = "Normal";
-
+                //attrs.Value = "Normal";
+                config.MainWindow.WindowState = OverlappedPresenterState.Restored;
             }
             else if (winState == OverlappedPresenterState.Minimized)
             {
-                attrs.Value = "Minimized";
+                //attrs.Value = "Minimized";
+                config.MainWindow.WindowState = OverlappedPresenterState.Restored; // Ignore actual value.
             }
-            else
-            {
-                attrs.Value = "Normal";
-            }
-            mainWindow.SetAttributeNode(attrs);
-
-            // Set main window element to root.
-            root.AppendChild(mainWindow);
         }
 
-        // Editor window Bldg
-        var editWindow = doc.CreateElement(string.Empty, "RentResidentialEditorWindow", string.Empty);
+        config.RentResidentialEditorWindow.Top = _viewModel.RentResidentialEditorWinTop;
+        config.RentResidentialEditorWindow.Left = _viewModel.RentResidentialEditorWinLeft;
+        config.RentResidentialEditorWindow.Height = _viewModel.RentResidentialEditorWinHeight;
+        config.RentResidentialEditorWindow.Width = _viewModel.RentResidentialEditorWinWidth;
 
-        // Editor window attributes
-        attrs = doc.CreateAttribute("width");
-        attrs.Value = _viewModel.RentResidentialEditorWinWidth.ToString(CultureInfo.InvariantCulture);
-        editWindow.SetAttributeNode(attrs);
+        config.RentResidentialListingEditorWindow.Top = _viewModel.RentResidentialListingEditorWinTop;
+        config.RentResidentialListingEditorWindow.Left = _viewModel.RentResidentialListingEditorWinLeft;
+        config.RentResidentialListingEditorWindow.Height = _viewModel.RentResidentialListingEditorWinHeight;
+        config.RentResidentialListingEditorWindow.Width = _viewModel.RentResidentialListingEditorWinWidth;
 
-        attrs = doc.CreateAttribute("height");
-        attrs.Value = _viewModel.RentResidentialEditorWinHeight.ToString(CultureInfo.InvariantCulture);
-        editWindow.SetAttributeNode(attrs);
+        config.RentCommercialEditorWindow.Top = _viewModel.RentCommercialEditorWinTop;
+        config.RentCommercialEditorWindow.Left = _viewModel.RentCommercialEditorWinLeft;
+        config.RentCommercialEditorWindow.Height = _viewModel.RentCommercialEditorWinHeight;
+        config.RentCommercialEditorWindow.Width = _viewModel.RentCommercialEditorWinWidth;
 
-        attrs = doc.CreateAttribute("top");
-        attrs.Value = _viewModel.RentResidentialEditorWinTop.ToString(CultureInfo.InvariantCulture);
-        editWindow.SetAttributeNode(attrs);
+        config.RentCommercialListingEditorWindow.Top = _viewModel.RentCommercialListingEditorWinTop;
+        config.RentCommercialListingEditorWindow.Left = _viewModel.RentCommercialListingEditorWinLeft;
+        config.RentCommercialListingEditorWindow.Height = _viewModel.RentCommercialListingEditorWinHeight;
+        config.RentCommercialListingEditorWindow.Width = _viewModel.RentCommercialListingEditorWinWidth;
 
-        attrs = doc.CreateAttribute("left");
-        attrs.Value = _viewModel.RentResidentialEditorWinLeft.ToString(CultureInfo.InvariantCulture);
-        editWindow.SetAttributeNode(attrs);
+        config.LessorEditorWindow.Top = _viewModel.LessorEditorWinTop;
+        config.LessorEditorWindow.Left = _viewModel.LessorEditorWinLeft;
+        config.LessorEditorWindow.Height = _viewModel.LessorEditorWinHeight;
+        config.LessorEditorWindow.Width = _viewModel.LessorEditorWinWidth;
 
-        // Set editor window element to root.
-        root.AppendChild(editWindow);
+        config.BrokerEditorWindow.Top = _viewModel.BrokerEditorWinTop;
+        config.BrokerEditorWindow.Left = _viewModel.BrokerEditorWinLeft;
+        config.BrokerEditorWindow.Height = _viewModel.BrokerEditorWinHeight;
+        config.BrokerEditorWindow.Width = _viewModel.BrokerEditorWinWidth;
 
-        // Editor window Room
-        editWindow = doc.CreateElement(string.Empty, "RentResidentialListingEditorWindow", string.Empty);
+        await _configurationService.SaveConfigurationAsync();
 
-        // Editor window attributes
-        attrs = doc.CreateAttribute("width");
-        attrs.Value = _viewModel.RentResidentialListingEditorWinWidth.ToString(CultureInfo.InvariantCulture);
-        editWindow.SetAttributeNode(attrs);
-
-        attrs = doc.CreateAttribute("height");
-        attrs.Value = _viewModel.RentResidentialListingEditorWinHeight.ToString(CultureInfo.InvariantCulture);
-        editWindow.SetAttributeNode(attrs);
-
-        attrs = doc.CreateAttribute("top");
-        attrs.Value = _viewModel.RentResidentialListingEditorWinTop.ToString(CultureInfo.InvariantCulture);
-        editWindow.SetAttributeNode(attrs);
-
-        attrs = doc.CreateAttribute("left");
-        attrs.Value = _viewModel.RentResidentialListingEditorWinLeft.ToString(CultureInfo.InvariantCulture);
-        editWindow.SetAttributeNode(attrs);
-
-        // Set editor window element to root.
-        root.AppendChild(editWindow);
-
-        // Editor window Rent Commercial
-        editWindow = doc.CreateElement(string.Empty, "RentCommercialEditorWindow", string.Empty);
-
-        // Editor window attributes
-        attrs = doc.CreateAttribute("width");
-        attrs.Value = _viewModel.RentCommercialEditorWinWidth.ToString(CultureInfo.InvariantCulture);
-        editWindow.SetAttributeNode(attrs);
-
-        attrs = doc.CreateAttribute("height");
-        attrs.Value = _viewModel.RentCommercialEditorWinHeight.ToString(CultureInfo.InvariantCulture);
-        editWindow.SetAttributeNode(attrs);
-
-        attrs = doc.CreateAttribute("top");
-        attrs.Value = _viewModel.RentCommercialEditorWinTop.ToString(CultureInfo.InvariantCulture);
-        editWindow.SetAttributeNode(attrs);
-
-        attrs = doc.CreateAttribute("left");
-        attrs.Value = _viewModel.RentCommercialEditorWinLeft.ToString(CultureInfo.InvariantCulture);
-        editWindow.SetAttributeNode(attrs);
-
-        // Set editor window element to root.
-        root.AppendChild(editWindow);
-
-        // Editor window Rent Commercial Listing
-        editWindow = doc.CreateElement(string.Empty, "RentCommercialListingEditorWindow", string.Empty);
-
-        // Editor window attributes
-        attrs = doc.CreateAttribute("width");
-        attrs.Value = _viewModel.RentCommercialListingEditorWinWidth.ToString(CultureInfo.InvariantCulture);
-        editWindow.SetAttributeNode(attrs);
-
-        attrs = doc.CreateAttribute("height");
-        attrs.Value = _viewModel.RentCommercialListingEditorWinHeight.ToString(CultureInfo.InvariantCulture);
-        editWindow.SetAttributeNode(attrs);
-
-        attrs = doc.CreateAttribute("top");
-        attrs.Value = _viewModel.RentCommercialListingEditorWinTop.ToString(CultureInfo.InvariantCulture);
-        editWindow.SetAttributeNode(attrs);
-
-        attrs = doc.CreateAttribute("left");
-        attrs.Value = _viewModel.RentCommercialListingEditorWinLeft.ToString(CultureInfo.InvariantCulture);
-        editWindow.SetAttributeNode(attrs);
-
-        // Set editor window element to root.
-        root.AppendChild(editWindow);
-
-        // Editor window Lessor
-        editWindow = doc.CreateElement(string.Empty, "LessorEditorWindow", string.Empty);
-
-        // Editor window attributes
-        attrs = doc.CreateAttribute("width");
-        attrs.Value = _viewModel.LessorEditorWinWidth.ToString(CultureInfo.InvariantCulture);
-        editWindow.SetAttributeNode(attrs);
-
-        attrs = doc.CreateAttribute("height");
-        attrs.Value = _viewModel.LessorEditorWinHeight.ToString(CultureInfo.InvariantCulture);
-        editWindow.SetAttributeNode(attrs);
-
-        attrs = doc.CreateAttribute("top");
-        attrs.Value = _viewModel.LessorEditorWinTop.ToString(CultureInfo.InvariantCulture);
-        editWindow.SetAttributeNode(attrs);
-
-        attrs = doc.CreateAttribute("left");
-        attrs.Value = _viewModel.LessorEditorWinLeft.ToString(CultureInfo.InvariantCulture);
-        editWindow.SetAttributeNode(attrs);
-
-        // Set editor window element to root.
-        root.AppendChild(editWindow);
-
-
-        // Editor window Broker
-        editWindow = doc.CreateElement(string.Empty, "BrokerEditorWindow", string.Empty);
-
-        // Editor window attributes
-        attrs = doc.CreateAttribute("width");
-        attrs.Value = _viewModel.BrokerEditorWinWidth.ToString(CultureInfo.InvariantCulture);
-        editWindow.SetAttributeNode(attrs);
-
-        attrs = doc.CreateAttribute("height");
-        attrs.Value = _viewModel.BrokerEditorWinHeight.ToString(CultureInfo.InvariantCulture);
-        editWindow.SetAttributeNode(attrs);
-
-        attrs = doc.CreateAttribute("top");
-        attrs.Value = _viewModel.BrokerEditorWinTop.ToString(CultureInfo.InvariantCulture);
-        editWindow.SetAttributeNode(attrs);
-
-        attrs = doc.CreateAttribute("left");
-        attrs.Value = _viewModel.BrokerEditorWinLeft.ToString(CultureInfo.InvariantCulture);
-        editWindow.SetAttributeNode(attrs);
-
-        // Set editor window element to root.
-        root.AppendChild(editWindow);
-
-
-        try
-        {
-            doc.Save(App.AppConfigFilePath);
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine("MainWindow_Closed: " + ex + " while saving : " + App.AppConfigFilePath);
-        }
     }
 
     private void Window_SizeChanged(object sender, WindowSizeChangedEventArgs args)
@@ -1092,6 +837,52 @@ public sealed partial class MainWindow : Window
                 _winRestoreTop = (int)this.AppWindow.Position.Y;
                 _winRestoreLeft = (int)this.AppWindow.Position.X;
             }
+        }
+    }
+
+    private void AppWindow_Changed(AppWindow sender, AppWindowChangedEventArgs args)
+    {
+        if (!args.DidPositionChange)
+        {
+            return;
+        }
+
+        //Microsoft.UI.Windowing.AppWindow? appWindow = this.AppWindow;
+        if (sender == null)
+        {
+            return;
+        }
+        if (sender.Presenter is not OverlappedPresenter presenter)
+        {
+            return;
+        }
+        if (presenter.State == OverlappedPresenterState.Restored)
+        {
+            _winRestoreHeight = sender.Size.Height;
+            _winRestoreWidth = sender.Size.Width;
+            _winRestoreTop = sender.Position.Y;
+            _winRestoreLeft = sender.Position.X;
+        }
+    }
+
+    private void Window_Activated(object sender, WindowActivatedEventArgs args)
+    {
+        // Ensure that the restore position and sizes are updated when the window is activated, especially after being minimized or restored.
+        Microsoft.UI.Windowing.AppWindow? appWindow = this.AppWindow;
+        if (appWindow == null)
+        {
+            return;
+        }
+        if (appWindow.Presenter is not OverlappedPresenter presenter)
+        {
+            return;
+        }
+        if (presenter.State == OverlappedPresenterState.Restored)
+        {
+            _winRestoreHeight = appWindow.Size.Height;
+            _winRestoreWidth = appWindow.Size.Width;
+            _winRestoreTop = appWindow.Position.Y;
+            _winRestoreLeft = appWindow.Position.X;
         }
     }
 

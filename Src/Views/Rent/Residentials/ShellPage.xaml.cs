@@ -307,8 +307,10 @@ public sealed partial class ShellPage : Page
         // Update the selected search result's values such as name if it exists. Also, update building window's rooms list.
         WeakReferenceMessenger.Default.Send(new Models.Messenger.WindowClosedMessage(ewin));
 
-        //
-        //ViewModel.Dispose();
+        // AbstractFactory will manage instances and IHost dispose the AbstractFactory in turn dispose ViewModel when the app is shutdown,
+        // so we don't need to call Dispose() here.
+        // But let's do it here anyway.
+        ViewModel.Dispose();
     }
 
     private void BreadcrumbBar_ItemClicked(BreadcrumbBar sender, BreadcrumbBarItemClickedEventArgs args)

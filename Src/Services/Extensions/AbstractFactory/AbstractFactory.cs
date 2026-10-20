@@ -1,6 +1,9 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System.Diagnostics.CodeAnalysis;
 
+#pragma warning disable IDE0079 // Remove unnecessary suppression
+#pragma warning disable IDE0290 // Use primary constructor
+
 namespace ZumenSearch.Services.Extensions.AbstractFactory;
 
 /*
@@ -27,7 +30,7 @@ public sealed partial class AbstractFactory<TParam, [DynamicallyAccessedMembers(
     private readonly IServiceProvider _serviceProvider;
 
     // Ownership tracking.
-    private readonly object _gate = new();
+    private readonly Lock _gate = new();
     private readonly List<IDisposable> _instances = [];
     private bool _disposed;
 
@@ -88,7 +91,7 @@ public partial class AbstractFactory<TParam1, TParam2, [DynamicallyAccessedMembe
     private readonly IServiceProvider _serviceProvider;
 
     // Ownership tracking.
-    private readonly object _gate = new();
+    private readonly Lock _gate = new();
     private readonly List<IDisposable> _instances = [];
     private bool _disposed;
 
@@ -149,7 +152,7 @@ public partial class AbstractFactory<TParam1, TParam2, TParam3, [DynamicallyAcce
     private readonly IServiceProvider _serviceProvider;
 
     // Ownership tracking.
-    private readonly object _gate = new();
+    private readonly Lock _gate = new();
     private readonly List<IDisposable> _instances = [];
     private bool _disposed;
 

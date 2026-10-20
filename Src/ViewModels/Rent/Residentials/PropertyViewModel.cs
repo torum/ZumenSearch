@@ -1770,7 +1770,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     public void Dispose()
     {
-        // Currently, this Dispose method is not called when the window is closed. It is called when the application exits.
+        // Currently, this Dispose method is (not decided) called when the window is closed. It is (also) called when the application exits.
         if (_disposed)
         {
             return;
@@ -1989,14 +1989,14 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         };
 
         // Lessors
-        LessorsWrapper = new ObservableCollection<Models.Rent.Residentials.PersonWrapperForPropertyViewModel>();
+        LessorsWrapper = [];
         foreach (var item in _building.Lessors)
         {
             LessorsWrapper.Add(new Models.Rent.Residentials.PersonWrapperForPropertyViewModel(item,this));
         }
 
         // Brokers
-        BrokersWrapper = new ObservableCollection<Models.Rent.Residentials.PersonWrapperForPropertyViewModel>();
+        BrokersWrapper = [];
         foreach (var item in _building.Brokers)
         {
             BrokersWrapper.Add(new Models.Rent.Residentials.PersonWrapperForPropertyViewModel(item, this));

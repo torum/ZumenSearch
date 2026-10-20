@@ -58,6 +58,7 @@ public partial class MainViewModel : ObservableRecipient,
     private readonly IDataAccessService _dataAccessService;
     private readonly INavigationService _navigationService;
     private readonly IDispatcherService _dispatcherService;
+    private readonly IConfigurationService _configurationService;
 
     #endregion
 
@@ -71,7 +72,8 @@ public partial class MainViewModel : ObservableRecipient,
         IAbstractFactory<Models.Base.PersonBase, Views.Brokers.ShellPage> shellBrokerFactory,
         INavigationService navigationService, 
         IDataAccessService dataAccessService, 
-        IDispatcherService dispatcherService)
+        IDispatcherService dispatcherService,
+        IConfigurationService configurationService)
     {
         _shellRentResidentialPropertyFactory = shellRentResidentialPropertyFactory;
         _shellRentResidentialListingFactory = shellRentResidentialListingFactory;
@@ -82,6 +84,7 @@ public partial class MainViewModel : ObservableRecipient,
         _shellBrokerFactory = shellBrokerFactory;
         _navigationService = navigationService;
         _dataAccessService = dataAccessService;
+        _configurationService = configurationService;
         _dispatcherService = dispatcherService;
 
         VersionDescription = GetVersionDescription();
@@ -536,6 +539,16 @@ public partial class MainViewModel : ObservableRecipient,
     #endregion
 
     #region == Public Methods ==
+
+    public void UpdateSettings()
+    {
+        // Update settings logic here
+        var config = _configurationService.CurrentConfiguration;
+        //config.IsNavigationViewMenuOpen = IsNavigationViewMenuOpen;
+        //config.Theme = Theme;
+        //config.SystemBackdrop = Material;
+
+    }
 
     public void Dispose()
     {
