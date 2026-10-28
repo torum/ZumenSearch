@@ -7,15 +7,13 @@ namespace ZumenSearch.Services;
 public class NavigationService : INavigationService
 {
     private Frame? _frame;
-
+    private Dictionary<string, Type>? _pageMap;
 
     public void Initialize(Frame frame, Dictionary<string, Type> pages)
     {
         _frame = frame;
         _pageMap = pages;
     }
-
-    private Dictionary<string, Type>? _pageMap;
 
     public bool NavigateTo(object? selectedPage, SlideNavigationTransitionEffect effect)
     {

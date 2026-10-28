@@ -72,6 +72,8 @@ public sealed partial class ShellPage : Page
     {
         UpdateCaptionButtonPadding();
 
+        await Task.Yield();
+
         await ViewModel.InitializeAsync();
 
         if (this.ContentFrame.Navigate(typeof(ZumenSearch.Views.SearchPage), null, new Microsoft.UI.Xaml.Media.Animation.EntranceNavigationTransitionInfo()))
