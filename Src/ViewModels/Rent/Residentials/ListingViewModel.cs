@@ -11,6 +11,7 @@ using ZumenSearch.Models;
 using ZumenSearch.Models.Rent.Residentials;
 using ZumenSearch.Models.Messenger;
 using ZumenSearch.Services.Contracts;
+using ZumenSearch.Views.Services.Contracts;
 
 namespace ZumenSearch.ViewModels.Rent.Residentials;
 
@@ -68,7 +69,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
         _dispatcherService = dispatcherService;
         _dataAccessService = dataAccessService;
 
-        _listingDataDirectoryPath = System.IO.Path.Combine(System.IO.Path.Combine(App.PropertyBlobDataFolder, _room.PropertyId), _room.Id);
+        _listingDataDirectoryPath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _room.PropertyId, _room.Id);
 
         PopulateValues();
 
@@ -1180,7 +1181,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
                     {
                     }
                     */
-                    var delFilePath = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(App.PropertyBlobDataFolder, _room.PropertyId), _room.Id), file.ImageFilename);
+                    var delFilePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _room.PropertyId, _room.Id, file.ImageFilename);
                     File.Delete(delFilePath);
                 }
 
@@ -1197,9 +1198,9 @@ public sealed partial class ListingViewModel : ObservableRecipient,
                     {
                     }
                     */
-                    var delFilePath = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(App.PropertyBlobDataFolder, _room.PropertyId), _room.Id), file.PdfFilename);
+                    var delFilePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _room.PropertyId, _room.Id, file.PdfFilename);
                     File.Delete(delFilePath);
-                    delFilePath = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(App.PropertyBlobDataFolder, _room.PropertyId), _room.Id), file.PdfFilename);
+                    delFilePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _room.PropertyId, _room.Id, file.PdfFilename);
                     File.Delete(delFilePath);
                 }
 

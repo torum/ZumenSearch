@@ -12,6 +12,7 @@ using System.Diagnostics;
 using ZumenSearch.Models;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.Services.Extensions.AbstractFactory;
+using ZumenSearch.Views.Services.Contracts;
 
 namespace ZumenSearch.Views.Rent.Residentials.Listing;
 
@@ -38,7 +39,7 @@ public sealed partial class ShellPage : Page
 
     public ShellPage(
         Models.Rent.Residentials.Listing room, 
-        IAbstractFactory<Models.Rent.Residentials.Listing, Services.Contracts.INavigationGenericService, IDialogGenericService, ViewModels.Rent.Residentials.ListingViewModel> vmFactory,
+        IAbstractFactory<Models.Rent.Residentials.Listing, INavigationGenericService, IDialogGenericService, ViewModels.Rent.Residentials.ListingViewModel> vmFactory,
         INavigationGenericService navigationlService, 
         IDispatcherService dispatcherService,
         IDialogGenericService dialogService)
@@ -199,7 +200,7 @@ public sealed partial class ShellPage : Page
         //mainVM.RoomEditorList.Remove(ewin);
 
         // Update the selected search result's values such as name if it exists. Also, update building window's rooms list.
-        WeakReferenceMessenger.Default.Send(new Models.Messenger.WindowClosedMessage(ewin));
+        WeakReferenceMessenger.Default.Send(new Models.Messenger.WindowClosedMessage<Microsoft.UI.Xaml.Window>(ewin));
     }
 
     private void BreadcrumbBar_ItemClicked(BreadcrumbBar sender, BreadcrumbBarItemClickedEventArgs args)

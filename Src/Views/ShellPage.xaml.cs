@@ -9,6 +9,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using ZumenSearch.Services;
 using ZumenSearch.Services.Contracts;
+using ZumenSearch.Views.Services.Contracts;
 
 namespace ZumenSearch.Views;
 

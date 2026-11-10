@@ -1,7 +1,4 @@
-﻿using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Media.Imaging;
-
-#pragma warning disable IDE0079 // Remove unnecessary suppression
+﻿#pragma warning disable IDE0079 // Remove unnecessary suppression
 #pragma warning disable IDE0290 // Use primary constructor
 
 namespace ZumenSearch.Models.Base;
@@ -41,39 +38,16 @@ public abstract class PdfBase : EntityBase
         }
     } = string.Empty;
 
-    public ImageSource? ThumbImage
+    public string? ThumbImagePath => GetThumbImagePath();
+
+    private string? GetThumbImagePath()
     {
-        get => field ?? CreateThumb();
-    }
-
-    private BitmapImage? CreateThumb()
-    {
-        if (string.IsNullOrEmpty(ThumbnailFilename))
+        if (string.IsNullOrWhiteSpace(ThumbnailFilename) || string.IsNullOrWhiteSpace(BasePath))
         {
-            Debug.WriteLine("ThumbnailLocation is empty. (PdfBase)");
             return null;
         }
 
-        if (string.IsNullOrEmpty(BasePath))
-        {
-            Debug.WriteLine("BasePath is empty. (PdfBase)");
-            return null;
-        }
-
-        var pdfFilePath = System.IO.Path.Combine(BasePath, ThumbnailFilename);
-
-        if (!Path.Exists(pdfFilePath))
-        {
-            Debug.WriteLine($"File ThumbnailLocation does not exists. (PdfBase) {pdfFilePath}");
-            return null;
-        }
-
-        BitmapImage bitmapImage = new()
-        {
-            DecodePixelWidth = 280
-        };
-        Uri uri = new(pdfFilePath);
-        bitmapImage.UriSource = uri;
-        return bitmapImage;
+        var imagePath = Path.Combine(BasePath, ThumbnailFilename);
+        return Path.Exists(imagePath) ? imagePath : null;
     }
 };

@@ -6,6 +6,7 @@ using System.Globalization;
 using ZumenSearch.Models;
 using ZumenSearch.Models.Base;
 using ZumenSearch.Services.Contracts;
+using ZumenSearch.Views.Services.Contracts;
 
 namespace ZumenSearch.ViewModels.Sale.Residentials;
 

@@ -1,7 +1,18 @@
-﻿using Microsoft.UI.Windowing;
-using Microsoft.UI.Xaml;
+﻿namespace ZumenSearch.Models;
 
-namespace ZumenSearch.Models;
+public enum WindowStateOption
+{
+    Restored,
+    Maximized,
+    Minimized
+}
+
+public enum ThemeOption
+{
+    Default,
+    Light,
+    Dark
+}
 
 public class Configuration
 {
@@ -11,7 +22,7 @@ public class Configuration
         public int Height { get; set; } = 600;
         public int Left { get; set; } = 100;
         public int Top { get; set; } = 100;
-        public OverlappedPresenterState WindowState { get; set; } = OverlappedPresenterState.Restored;
+        public WindowStateOption WindowState { get; set; } = WindowStateOption.Restored;
 
         public int RestoreWidth { get; set; } = 780;
         public int RestoreHeight { get; set; } = 600;
@@ -28,7 +39,7 @@ public class Configuration
     public WindowSettings LessorEditorWindow { get; set; } = new WindowSettings();
     public WindowSettings BrokerEditorWindow { get; set; } = new WindowSettings();
 
-    public ElementTheme Theme { get; set; } = ElementTheme.Default;
+    public ThemeOption Theme { get; set; } = ThemeOption.Default;
 
     public SystemBackdropOption SystemBackdrop { get; set; } = SystemBackdropOption.Mica;
 

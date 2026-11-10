@@ -15,6 +15,7 @@ using ZumenSearch.Models;
 using ZumenSearch.Services;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.Services.Extensions.AbstractFactory;
+using ZumenSearch.Views.Services.Contracts;
 
 namespace ZumenSearch.Views.Rent.Lessors;
 
@@ -197,7 +198,7 @@ public sealed partial class ShellPage : Page
 
         //mainVM.BldgEditorList.Remove(ewin);
         // Update the selected search result's values such as name if it exists. Also, update building window's rooms list.
-        WeakReferenceMessenger.Default.Send(new Models.Messenger.WindowClosedMessage(ewin));
+        WeakReferenceMessenger.Default.Send(new Models.Messenger.WindowClosedMessage<Microsoft.UI.Xaml.Window>(ewin));
     }
 
     private void BreadcrumbBar_ItemClicked(BreadcrumbBar sender, BreadcrumbBarItemClickedEventArgs args)

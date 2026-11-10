@@ -5,6 +5,7 @@ using ZumenSearch.Models.Base;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.Services.Extensions.AbstractFactory;
 using ZumenSearch.ViewModels;
+using ZumenSearch.Views.Services.Contracts;
 
 namespace ZumenSearch.Views.Sale;
 

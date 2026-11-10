@@ -18,12 +18,13 @@ using ZumenSearch.Models.Rent.Residentials;
 using ZumenSearch.Models.Transportation;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.Services.Extensions.AbstractFactory;
+using ZumenSearch.Views.Services.Contracts;
 
 namespace ZumenSearch.ViewModels.Rent.Residentials;
 
 public sealed partial class PropertyViewModel : ObservableRecipient, 
     IRecipient<ListingUpdatedMessage>, 
-    IRecipient<WindowClosedMessage>, 
+    IRecipient<WindowClosedMessage<Microsoft.UI.Xaml.Window>>, 
     IRecipient<ListingDeletedMessage>,
     IRecipient<LessorUpdatedMessage>,
     IRecipient<BrokerUpdatedMessage>,
@@ -1742,7 +1743,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         // should be auto deleted from the table due to "cascade"
     }
 
-    public void Receive(WindowClosedMessage window)
+    public void Receive(WindowClosedMessage<Microsoft.UI.Xaml.Window> window)
     {
         var ewin = window.Value;
 
@@ -2513,7 +2514,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             {
                 foreach (var file in _building.PicturesToBeDeleted)
                 {
-                    var delFilePath = System.IO.Path.Combine(System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id), file.ImageFilename);
+                    var delFilePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id, file.ImageFilename);
                     File.Delete(delFilePath);
                 }
                 _building.PicturesToBeDeleted.Clear();
@@ -2524,9 +2525,9 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             {
                 foreach (var file in _building.PdfsToBeDeleted)
                 {
-                    var delFilePath = System.IO.Path.Combine(System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id), file.PdfFilename);
+                    var delFilePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id, file.PdfFilename);
                     File.Delete(delFilePath);
-                    delFilePath = System.IO.Path.Combine(System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id), file.ThumbnailFilename);
+                    delFilePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id, file.ThumbnailFilename);
                     File.Delete(delFilePath);
                 }
                 _building.PdfsToBeDeleted.Clear();
@@ -2543,15 +2544,15 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                 {
                     foreach (var roomPic in room.Pictures)
                     {
-                        var delFilePath = System.IO.Path.Combine(System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id), roomPic.ImageFilename);
+                        var delFilePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id, roomPic.ImageFilename);
                         File.Delete(delFilePath);
                     }
 
                     foreach (var roomPdf in room.Pdfs)
                     {
-                        var delFilePath = System.IO.Path.Combine(System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id), roomPdf.PdfFilename);
+                        var delFilePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id, roomPdf.PdfFilename);
                         File.Delete(delFilePath);
-                        delFilePath = System.IO.Path.Combine(System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id), roomPdf.ThumbnailFilename);
+                        delFilePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id, roomPdf.ThumbnailFilename);
                         File.Delete(delFilePath);
                     }
 

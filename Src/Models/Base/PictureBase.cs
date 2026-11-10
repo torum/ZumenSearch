@@ -1,7 +1,4 @@
-﻿using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Media.Imaging;
-
-#pragma warning disable IDE0079 // Remove unnecessary suppression
+﻿#pragma warning disable IDE0079 // Remove unnecessary suppression
 #pragma warning disable IDE0290 // Use primary constructor
 
 namespace ZumenSearch.Models.Base;
@@ -31,40 +28,17 @@ public abstract class PictureBase : EntityBase
 
     public string BasePath { get; set; } = string.Empty;
 
-    public ImageSource? ThumbImage
+    public string? ThumbImagePath => GetThumbImagePath();
+
+    private string? GetThumbImagePath()
     {
-        get => field ?? CreateThumb();
-    }
-
-    private BitmapImage? CreateThumb()
-    {
-        if (string.IsNullOrEmpty(ImageFilename))
+        if (string.IsNullOrWhiteSpace(ImageFilename) || string.IsNullOrWhiteSpace(BasePath))
         {
-            Debug.WriteLine("ImageFilename is empty. (PictureBase)");
             return null;
         }
 
-        if (string.IsNullOrEmpty(BasePath))
-        {
-            Debug.WriteLine("BasePath is empty. (PictureBase)");
-            return null;
-        }
-
-        var imageFilePath = System.IO.Path.Combine(BasePath, ImageFilename);
-
-        if (!Path.Exists(imageFilePath))
-        {
-            Debug.WriteLine($"File ImageFilename does not exists. (PictureBase) {imageFilePath}");
-            return null;
-        }
-
-        BitmapImage bitmapImage = new()
-        {
-            DecodePixelWidth = 280
-        };
-        Uri uri = new(imageFilePath);
-        bitmapImage.UriSource = uri;
-        return bitmapImage;
+        var imagePath = Path.Combine(BasePath, ImageFilename);
+        return Path.Exists(imagePath) ? imagePath : null;
     }
 
 };

@@ -6,6 +6,7 @@ using ZumenSearch.Models;
 using ZumenSearch.Models.Base;
 using ZumenSearch.Models.Person;
 using ZumenSearch.Services.Contracts;
+using ZumenSearch.Views.Services.Contracts;
 
 namespace ZumenSearch.ViewModels.Brokers;
 

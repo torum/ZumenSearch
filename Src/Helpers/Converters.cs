@@ -2,9 +2,35 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Media.Imaging;
 using System.Globalization;
+using System.IO;
 
 namespace ZumenSearch.Helpers.Converters;
+
+public partial class ImagePathToImageSourceConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, string language)
+    {
+        if (value is not string imagePath || string.IsNullOrWhiteSpace(imagePath) || !File.Exists(imagePath))
+        {
+            return null!;
+        }
+
+        var bitmapImage = new BitmapImage
+        {
+            DecodePixelWidth = 280,
+            UriSource = new Uri(imagePath)
+        };
+
+        return bitmapImage;
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, string language)
+    {
+        throw new NotImplementedException();
+    }
+}
 
 // not used for now.
 public partial class ThemeEnumToBooleanConverter : IValueConverter

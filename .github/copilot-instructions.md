@@ -9,6 +9,7 @@ Strictly follow these boundaries:
 - The app is AOT-compatible; code changes must remain compatible with trimming and Native AOT. Prefer compiled `x:Bind` in XAML and avoid reflection/dynamic patterns that cannot be statically analyzed.
 - All XAML data bindings in this codebase must use compiled `x:Bind`; do not introduce runtime `{Binding}` expressions.
 - Avoid presenting code changes as unified diff/patch blocks; use clear replacement code snippets with line numbers and file names and paths or concise prose instead.
+- Maintain the application as a single project for the foreseeable future, enforcing cleaner internal boundaries rather than splitting into multiple projects.
 
 ## Code Style
 

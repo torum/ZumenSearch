@@ -2,6 +2,7 @@
 using Microsoft.UI.Xaml.Controls;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.ViewModels;
+using ZumenSearch.Views.Services.Contracts;
 
 namespace ZumenSearch.Views.Rent;
 

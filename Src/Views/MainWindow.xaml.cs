@@ -8,8 +8,10 @@ using System.Xml;
 using System.Xml.Linq;
 using WinRT;
 using WinRT.Interop;
+using ZumenSearch.Models;
 using ZumenSearch.Services;
 using ZumenSearch.Services.Contracts;
+using ZumenSearch.Views.Services.Contracts;
 
 namespace ZumenSearch.Views;
 
@@ -107,14 +109,14 @@ public sealed partial class MainWindow : Window
             }
             */
 
-            if (config.MainWindow.WindowState == OverlappedPresenterState.Maximized)
+            if (config.MainWindow.WindowState == WindowStateOption.Maximized)
             {
                 // Sets restore size and position.
                 appWindow.MoveAndResize(new Windows.Graphics.RectInt32(config.MainWindow.Left, config.MainWindow.Top, config.MainWindow.Width, config.MainWindow.Height));
                 // Maximize the window.
                 (appWindow.Presenter as OverlappedPresenter)!.Maximize();
             }
-            else if (config.MainWindow.WindowState == OverlappedPresenterState.Minimized)
+            else if (config.MainWindow.WindowState == WindowStateOption.Minimized)
             {
                 // This should not happen. DONT restore minimized size and pos.
 
@@ -122,7 +124,7 @@ public sealed partial class MainWindow : Window
 
                 appWindow.MoveAndResize(new Windows.Graphics.RectInt32(config.MainWindow.Left, config.MainWindow.Top, config.MainWindow.Width, config.MainWindow.Height));
             }
-            else if (config.MainWindow.WindowState == OverlappedPresenterState.Restored)
+            else if (config.MainWindow.WindowState == WindowStateOption.Restored)
             {
                 // TODO:
                 //var dpi = Windows.Win32.PInvoke.GetDpiForWindow(new Windows.Win32.Foundation.HWND(WinRT.Interop.WindowNative.GetWindowHandle(this)));
@@ -778,17 +780,17 @@ public sealed partial class MainWindow : Window
             if (winState == OverlappedPresenterState.Maximized)
             {
                 //attrs.Value = "Maximized";
-                config.MainWindow.WindowState = OverlappedPresenterState.Maximized;
+                config.MainWindow.WindowState = WindowStateOption.Maximized;
             }
             else if (winState == OverlappedPresenterState.Restored)
             {
                 //attrs.Value = "Normal";
-                config.MainWindow.WindowState = OverlappedPresenterState.Restored;
+                config.MainWindow.WindowState = WindowStateOption.Restored;
             }
             else if (winState == OverlappedPresenterState.Minimized)
             {
                 //attrs.Value = "Minimized";
-                config.MainWindow.WindowState = OverlappedPresenterState.Restored; // Ignore actual value.
+                config.MainWindow.WindowState = WindowStateOption.Restored; // Ignore actual value.
             }
         }
 

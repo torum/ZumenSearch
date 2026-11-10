@@ -9,6 +9,7 @@ using System.Runtime.InteropServices;
 using WinRT.Interop;
 using ZumenSearch.Models;
 using ZumenSearch.Services.Contracts;
+using ZumenSearch.Views.Services.Contracts;
 
 namespace ZumenSearch.Views.Rent.Commercials;
 
@@ -433,7 +434,7 @@ public sealed partial class ShellPage : Page
             mainViewModel.RentCommercialEditorWinLeft = (int)appWindow.Position.X;
         }
 
-        WeakReferenceMessenger.Default.Send(new Models.Messenger.WindowClosedMessage(editorWindow));
+        WeakReferenceMessenger.Default.Send(new Models.Messenger.WindowClosedMessage<Microsoft.UI.Xaml.Window>(editorWindow));
     }
 
     #region == BringToFront ==

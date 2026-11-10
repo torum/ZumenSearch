@@ -1,10 +1,11 @@
 ﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using ZumenSearch.Models.Transportation;
-using ZumenSearch.Services.Contracts;
+using ZumenSearch.Services;
+using ZumenSearch.Views.Services.Contracts;
 using ZumenSearch.Views.Dialogs;
 
-namespace ZumenSearch.Services;
+namespace ZumenSearch.Views.Services;
 
 public class DialogGenericService : IDialogGenericService
 {

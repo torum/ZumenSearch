@@ -30,7 +30,7 @@ public class BrokerDeletedMessage(string value) : ValueChangedMessage<string>(va
 {
 }
 
-public class WindowClosedMessage(Microsoft.UI.Xaml.Window value) : ValueChangedMessage<Microsoft.UI.Xaml.Window>(value)
+public class WindowClosedMessage<TWindow>(TWindow value) : ValueChangedMessage<TWindow>(value)
 {
 }
 

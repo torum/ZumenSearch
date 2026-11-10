@@ -16,11 +16,12 @@ using ZumenSearch.Models.Location;
 using ZumenSearch.Models.Messenger;
 using ZumenSearch.Models.Transportation;
 using ZumenSearch.Services.Contracts;
+using ZumenSearch.Views.Services.Contracts;
 
 namespace ZumenSearch.ViewModels.Rent.Commercials;
 
 public sealed partial class PropertyViewModel : ObservableRecipient, 
-    IRecipient<WindowClosedMessage>,
+    IRecipient<WindowClosedMessage<Microsoft.UI.Xaml.Window>>,
     IRecipient<LessorUpdatedMessage>,
     IRecipient<LessorDeletedMessage>,
     IRecipient<BrokerUpdatedMessage>,
@@ -97,7 +98,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                 if (IsActive)
                 {
                     // This implicitly uses WeakReferenceMessenger.Default under the hood
-                    Messenger.Register<WindowClosedMessage>(this);
+                    Messenger.Register<WindowClosedMessage<Microsoft.UI.Xaml.Window>>(this);
                     Messenger.Register<LessorUpdatedMessage>(this);
                     Messenger.Register<LessorDeletedMessage>(this);
                     Messenger.Register<BrokerUpdatedMessage>(this);
@@ -106,7 +107,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                 }
                 else
                 {
-                    Messenger.Unregister<WindowClosedMessage>(this);
+                    Messenger.Unregister<WindowClosedMessage<Microsoft.UI.Xaml.Window>>(this);
                     Messenger.Unregister<LessorUpdatedMessage>(this);
                     Messenger.Unregister<LessorDeletedMessage>(this);
                     Messenger.Unregister<BrokerUpdatedMessage>(this);
@@ -1010,7 +1011,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     #region == Messages ==
 
-    public void Receive(WindowClosedMessage window)
+    public void Receive(WindowClosedMessage<Microsoft.UI.Xaml.Window> window)
     {
         var ewin = window.Value;
 

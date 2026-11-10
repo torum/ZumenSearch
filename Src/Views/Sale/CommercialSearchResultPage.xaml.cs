@@ -8,6 +8,7 @@ using System.Diagnostics;
 using ZumenSearch.Models;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.ViewModels;
+using ZumenSearch.Views.Services.Contracts;
 
 namespace ZumenSearch.Views.Sale;
 

@@ -8,6 +8,7 @@ using ZumenSearch.Models;
 using ZumenSearch.Models.Base;
 using ZumenSearch.Models.Messenger;
 using ZumenSearch.Services.Contracts;
+using ZumenSearch.Views.Services.Contracts;
 
 namespace ZumenSearch.ViewModels.Rent.Commercials;
 
@@ -38,7 +39,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IDisposable
 
         _navigationService = navigationService;
         _dataAccessService = dataAccessService;
-        _listingDataDirectoryPath = System.IO.Path.Combine(System.IO.Path.Combine(App.PropertyBlobDataFolder, _unit.PropertyId), _unit.Id);
+        _listingDataDirectoryPath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _unit.PropertyId, _unit.Id);
 
         PopulateValues();
         IsDirty = false;

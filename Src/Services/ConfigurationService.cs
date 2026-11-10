@@ -1,6 +1,4 @@
-﻿using Microsoft.UI.Windowing;
-using Microsoft.UI.Xaml;
-using ZumenSearch.Models;
+﻿using ZumenSearch.Models;
 using ZumenSearch.Services.Contracts;
 using System;
 using System.Diagnostics;
@@ -34,11 +32,12 @@ public sealed class ConfigurationService : IConfigurationService
     private bool _isConfigLoaded;
     private string? _configFilePath = string.Empty;
     private XDocument? _xdoc;
-    private readonly IDispatcherService _dispatcherService;
+    private readonly Action<string, string> _appendErrorLog;
 
-    public ConfigurationService(IDispatcherService dispatcherService)
+    public ConfigurationService(Action<string, string> appendErrorLog)
     {
-        _dispatcherService = dispatcherService;
+        ArgumentNullException.ThrowIfNull(appendErrorLog);
+        _appendErrorLog = appendErrorLog;
 
         _isConfigLoaded = false;
         CurrentConfiguration = new Models.Configuration();
@@ -193,16 +192,16 @@ public sealed class ConfigurationService : IConfigurationService
                     if (hoge.Value == "Maximized")
                     {
                         // TODO: Since there is no restorebounds in AvaloniaUI or WinUI3.....
-                        config.MainWindow.WindowState = OverlappedPresenterState.Maximized;
+                        config.MainWindow.WindowState = WindowStateOption.Maximized;
                     }
                     else if (hoge.Value == "Normal")
                     {
-                        config.MainWindow.WindowState = OverlappedPresenterState.Restored;
+                        config.MainWindow.WindowState = WindowStateOption.Restored;
                     }
                     else if (hoge.Value == "Minimized")
                     {
                         // Ignore minimized state, and restore to normal state.
-                        config.MainWindow.WindowState = OverlappedPresenterState.Restored;
+                        config.MainWindow.WindowState = WindowStateOption.Restored;
                     }
                 }
 
@@ -305,16 +304,16 @@ public sealed class ConfigurationService : IConfigurationService
                     if (hoge.Value == "Maximized")
                     {
                         // TODO: Since there is no restorebounds in AvaloniaUI or WinUI3.....
-                        config.RentResidentialEditorWindow.WindowState = OverlappedPresenterState.Maximized;
+                        config.RentResidentialEditorWindow.WindowState = WindowStateOption.Maximized;
                     }
                     else if (hoge.Value == "Normal")
                     {
-                        config.RentResidentialEditorWindow.WindowState = OverlappedPresenterState.Restored;
+                        config.RentResidentialEditorWindow.WindowState = WindowStateOption.Restored;
                     }
                     else if (hoge.Value == "Minimized")
                     {
                         // Ignore minimized state, and restore to normal state.
-                        config.RentResidentialEditorWindow.WindowState = OverlappedPresenterState.Restored;
+                        config.RentResidentialEditorWindow.WindowState = WindowStateOption.Restored;
                     }
                 }
 
@@ -417,16 +416,16 @@ public sealed class ConfigurationService : IConfigurationService
                     if (hoge.Value == "Maximized")
                     {
                         // TODO: Since there is no restorebounds in AvaloniaUI or WinUI3.....
-                        config.RentResidentialListingEditorWindow.WindowState = OverlappedPresenterState.Maximized;
+                        config.RentResidentialListingEditorWindow.WindowState = WindowStateOption.Maximized;
                     }
                     else if (hoge.Value == "Normal")
                     {
-                        config.RentResidentialListingEditorWindow.WindowState = OverlappedPresenterState.Restored;
+                        config.RentResidentialListingEditorWindow.WindowState = WindowStateOption.Restored;
                     }
                     else if (hoge.Value == "Minimized")
                     {
                         // Ignore minimized state, and restore to normal state.
-                        config.RentResidentialListingEditorWindow.WindowState = OverlappedPresenterState.Restored;
+                        config.RentResidentialListingEditorWindow.WindowState = WindowStateOption.Restored;
                     }
                 }
 
@@ -529,16 +528,16 @@ public sealed class ConfigurationService : IConfigurationService
                     if (hoge.Value == "Maximized")
                     {
                         // TODO: Since there is no restorebounds in AvaloniaUI or WinUI3.....
-                        config.RentCommercialEditorWindow.WindowState = OverlappedPresenterState.Maximized;
+                        config.RentCommercialEditorWindow.WindowState = WindowStateOption.Maximized;
                     }
                     else if (hoge.Value == "Normal")
                     {
-                        config.RentCommercialEditorWindow.WindowState = OverlappedPresenterState.Restored;
+                        config.RentCommercialEditorWindow.WindowState = WindowStateOption.Restored;
                     }
                     else if (hoge.Value == "Minimized")
                     {
                         // Ignore minimized state, and restore to normal state.
-                        config.RentCommercialEditorWindow.WindowState = OverlappedPresenterState.Restored;
+                        config.RentCommercialEditorWindow.WindowState = WindowStateOption.Restored;
                     }
                 }
 
@@ -641,16 +640,16 @@ public sealed class ConfigurationService : IConfigurationService
                     if (hoge.Value == "Maximized")
                     {
                         // TODO: Since there is no restorebounds in AvaloniaUI or WinUI3.....
-                        config.RentCommercialListingEditorWindow.WindowState = OverlappedPresenterState.Maximized;
+                        config.RentCommercialListingEditorWindow.WindowState = WindowStateOption.Maximized;
                     }
                     else if (hoge.Value == "Normal")
                     {
-                        config.RentCommercialListingEditorWindow.WindowState = OverlappedPresenterState.Restored;
+                        config.RentCommercialListingEditorWindow.WindowState = WindowStateOption.Restored;
                     }
                     else if (hoge.Value == "Minimized")
                     {
                         // Ignore minimized state, and restore to normal state.
-                        config.RentCommercialListingEditorWindow.WindowState = OverlappedPresenterState.Restored;
+                        config.RentCommercialListingEditorWindow.WindowState = WindowStateOption.Restored;
                     }
                 }
 
@@ -753,16 +752,16 @@ public sealed class ConfigurationService : IConfigurationService
                     if (hoge.Value == "Maximized")
                     {
                         // TODO: Since there is no restorebounds in AvaloniaUI or WinUI3.....
-                        config.LessorEditorWindow.WindowState = OverlappedPresenterState.Maximized;
+                        config.LessorEditorWindow.WindowState = WindowStateOption.Maximized;
                     }
                     else if (hoge.Value == "Normal")
                     {
-                        config.LessorEditorWindow.WindowState = OverlappedPresenterState.Restored;
+                        config.LessorEditorWindow.WindowState = WindowStateOption.Restored;
                     }
                     else if (hoge.Value == "Minimized")
                     {
                         // Ignore minimized state, and restore to normal state.
-                        config.LessorEditorWindow.WindowState = OverlappedPresenterState.Restored;
+                        config.LessorEditorWindow.WindowState = WindowStateOption.Restored;
                     }
                 }
 
@@ -865,16 +864,16 @@ public sealed class ConfigurationService : IConfigurationService
                     if (hoge.Value == "Maximized")
                     {
                         // TODO: Since there is no restorebounds in AvaloniaUI or WinUI3.....
-                        config.BrokerEditorWindow.WindowState = OverlappedPresenterState.Maximized;
+                        config.BrokerEditorWindow.WindowState = WindowStateOption.Maximized;
                     }
                     else if (hoge.Value == "Normal")
                     {
-                        config.BrokerEditorWindow.WindowState = OverlappedPresenterState.Restored;
+                        config.BrokerEditorWindow.WindowState = WindowStateOption.Restored;
                     }
                     else if (hoge.Value == "Minimized")
                     {
                         // Ignore minimized state, and restore to normal state.
-                        config.BrokerEditorWindow.WindowState = OverlappedPresenterState.Restored;
+                        config.BrokerEditorWindow.WindowState = WindowStateOption.Restored;
                     }
                 }
 
@@ -898,7 +897,7 @@ public sealed class ConfigurationService : IConfigurationService
                 {
                     if (!string.IsNullOrEmpty(xvalue.Value))
                     {
-                        if (Enum.TryParse(xvalue.Value, out ElementTheme cacheTheme))
+                        if (Enum.TryParse(xvalue.Value, out ThemeOption cacheTheme))
                         {
                             config.Theme = cacheTheme;
                             //isFoundNewThemeSetting = true;
@@ -924,7 +923,7 @@ public sealed class ConfigurationService : IConfigurationService
                 {
                     if (!string.IsNullOrEmpty(xvalue.Value))
                     {
-                        if (Enum.TryParse(xvalue.Value, out ElementTheme cacheTheme))
+                        if (Enum.TryParse(xvalue.Value, out ThemeOption cacheTheme))
                         {
                             config.Theme = cacheTheme;
                             //isFoundNewThemeSetting = true;
@@ -1042,7 +1041,7 @@ public sealed class ConfigurationService : IConfigurationService
         catch (Exception ex)
         {
             Debug.WriteLine($"Error loading configuration: {ex}");
-            _dispatcherService.TryEnqueue(() => { (App.Current as App)?.AppendErrorLog("Error loading configuration", ex.Message); });
+            _appendErrorLog("Error loading configuration", ex.ToString());
         }
 
         CurrentConfiguration = config;
@@ -1097,20 +1096,20 @@ public sealed class ConfigurationService : IConfigurationService
 
         // Window sizes
         attrs = doc.CreateAttribute("height");
-        attrs.Value = w.WindowState == OverlappedPresenterState.Restored ? w.Height.ToString(CultureInfo.InvariantCulture) : w.RestoreHeight.ToString(CultureInfo.InvariantCulture);
+        attrs.Value = w.WindowState == WindowStateOption.Restored ? w.Height.ToString(CultureInfo.InvariantCulture) : w.RestoreHeight.ToString(CultureInfo.InvariantCulture);
         mainWindow.SetAttributeNode(attrs);
 
         attrs = doc.CreateAttribute("width");
-        attrs.Value = w.WindowState == OverlappedPresenterState.Restored ? w.Width.ToString(CultureInfo.InvariantCulture) : w.RestoreWidth.ToString(CultureInfo.InvariantCulture);
+        attrs.Value = w.WindowState == WindowStateOption.Restored ? w.Width.ToString(CultureInfo.InvariantCulture) : w.RestoreWidth.ToString(CultureInfo.InvariantCulture);
 
         mainWindow.SetAttributeNode(attrs);
 
         attrs = doc.CreateAttribute("top");
-        attrs.Value = w.WindowState == OverlappedPresenterState.Restored ? w.Top.ToString(CultureInfo.InvariantCulture) : w.RestoreTop.ToString(CultureInfo.InvariantCulture);
+        attrs.Value = w.WindowState == WindowStateOption.Restored ? w.Top.ToString(CultureInfo.InvariantCulture) : w.RestoreTop.ToString(CultureInfo.InvariantCulture);
         mainWindow.SetAttributeNode(attrs);
 
         attrs = doc.CreateAttribute("left");
-        attrs.Value = w.WindowState == OverlappedPresenterState.Restored ? w.Left.ToString(CultureInfo.InvariantCulture) : w.RestoreLeft.ToString(CultureInfo.InvariantCulture);
+        attrs.Value = w.WindowState == WindowStateOption.Restored ? w.Left.ToString(CultureInfo.InvariantCulture) : w.RestoreLeft.ToString(CultureInfo.InvariantCulture);
         mainWindow.SetAttributeNode(attrs);
 
         // Restore window sizes
@@ -1133,9 +1132,9 @@ public sealed class ConfigurationService : IConfigurationService
         attrs = doc.CreateAttribute("state");
         attrs.Value = w.WindowState switch
         {
-            OverlappedPresenterState.Maximized => "Maximized",
-            OverlappedPresenterState.Restored => "Normal",
-            OverlappedPresenterState.Minimized => "Minimized",
+            WindowStateOption.Maximized => "Maximized",
+            WindowStateOption.Restored => "Normal",
+            WindowStateOption.Minimized => "Minimized",
             _ => attrs.Value
         };
         mainWindow.SetAttributeNode(attrs);
@@ -1159,20 +1158,20 @@ public sealed class ConfigurationService : IConfigurationService
         // Window attributes
 
         attrs = doc.CreateAttribute("height");
-        attrs.Value = w.WindowState == OverlappedPresenterState.Restored ? w.Height.ToString(CultureInfo.InvariantCulture) : w.RestoreHeight.ToString(CultureInfo.InvariantCulture);
+        attrs.Value = w.WindowState == WindowStateOption.Restored ? w.Height.ToString(CultureInfo.InvariantCulture) : w.RestoreHeight.ToString(CultureInfo.InvariantCulture);
         subWindow.SetAttributeNode(attrs);
 
         attrs = doc.CreateAttribute("width");
-        attrs.Value = w.WindowState == OverlappedPresenterState.Restored ? w.Width.ToString(CultureInfo.InvariantCulture) : w.RestoreWidth.ToString(CultureInfo.InvariantCulture);
+        attrs.Value = w.WindowState == WindowStateOption.Restored ? w.Width.ToString(CultureInfo.InvariantCulture) : w.RestoreWidth.ToString(CultureInfo.InvariantCulture);
 
         subWindow.SetAttributeNode(attrs);
 
         attrs = doc.CreateAttribute("top");
-        attrs.Value = w.WindowState == OverlappedPresenterState.Restored ? w.Top.ToString(CultureInfo.InvariantCulture) : w.RestoreTop.ToString(CultureInfo.InvariantCulture);
+        attrs.Value = w.WindowState == WindowStateOption.Restored ? w.Top.ToString(CultureInfo.InvariantCulture) : w.RestoreTop.ToString(CultureInfo.InvariantCulture);
         subWindow.SetAttributeNode(attrs);
 
         attrs = doc.CreateAttribute("left");
-        attrs.Value = w.WindowState == OverlappedPresenterState.Restored ? w.Left.ToString(CultureInfo.InvariantCulture) : w.RestoreLeft.ToString(CultureInfo.InvariantCulture);
+        attrs.Value = w.WindowState == WindowStateOption.Restored ? w.Left.ToString(CultureInfo.InvariantCulture) : w.RestoreLeft.ToString(CultureInfo.InvariantCulture);
         subWindow.SetAttributeNode(attrs);
 
         // Restore window sizes
@@ -1195,9 +1194,9 @@ public sealed class ConfigurationService : IConfigurationService
         attrs = doc.CreateAttribute("state");
         attrs.Value = w.WindowState switch
         {
-            OverlappedPresenterState.Maximized => "Maximized",
-            OverlappedPresenterState.Restored => "Normal",
-            OverlappedPresenterState.Minimized => "Minimized",
+            WindowStateOption.Maximized => "Maximized",
+            WindowStateOption.Restored => "Normal",
+            WindowStateOption.Minimized => "Minimized",
             _ => attrs.Value
         };
         subWindow.SetAttributeNode(attrs);
@@ -1221,20 +1220,20 @@ public sealed class ConfigurationService : IConfigurationService
         // Window attributes
 
         attrs = doc.CreateAttribute("height");
-        attrs.Value = w.WindowState == OverlappedPresenterState.Restored ? w.Height.ToString(CultureInfo.InvariantCulture) : w.RestoreHeight.ToString(CultureInfo.InvariantCulture);
+        attrs.Value = w.WindowState == WindowStateOption.Restored ? w.Height.ToString(CultureInfo.InvariantCulture) : w.RestoreHeight.ToString(CultureInfo.InvariantCulture);
         subWindow.SetAttributeNode(attrs);
 
         attrs = doc.CreateAttribute("width");
-        attrs.Value = w.WindowState == OverlappedPresenterState.Restored ? w.Width.ToString(CultureInfo.InvariantCulture) : w.RestoreWidth.ToString(CultureInfo.InvariantCulture);
+        attrs.Value = w.WindowState == WindowStateOption.Restored ? w.Width.ToString(CultureInfo.InvariantCulture) : w.RestoreWidth.ToString(CultureInfo.InvariantCulture);
 
         subWindow.SetAttributeNode(attrs);
 
         attrs = doc.CreateAttribute("top");
-        attrs.Value = w.WindowState == OverlappedPresenterState.Restored ? w.Top.ToString(CultureInfo.InvariantCulture) : w.RestoreTop.ToString(CultureInfo.InvariantCulture);
+        attrs.Value = w.WindowState == WindowStateOption.Restored ? w.Top.ToString(CultureInfo.InvariantCulture) : w.RestoreTop.ToString(CultureInfo.InvariantCulture);
         subWindow.SetAttributeNode(attrs);
 
         attrs = doc.CreateAttribute("left");
-        attrs.Value = w.WindowState == OverlappedPresenterState.Restored ? w.Left.ToString(CultureInfo.InvariantCulture) : w.RestoreLeft.ToString(CultureInfo.InvariantCulture);
+        attrs.Value = w.WindowState == WindowStateOption.Restored ? w.Left.ToString(CultureInfo.InvariantCulture) : w.RestoreLeft.ToString(CultureInfo.InvariantCulture);
         subWindow.SetAttributeNode(attrs);
 
         // Restore window sizes
@@ -1257,9 +1256,9 @@ public sealed class ConfigurationService : IConfigurationService
         attrs = doc.CreateAttribute("state");
         attrs.Value = w.WindowState switch
         {
-            OverlappedPresenterState.Maximized => "Maximized",
-            OverlappedPresenterState.Restored => "Normal",
-            OverlappedPresenterState.Minimized => "Minimized",
+            WindowStateOption.Maximized => "Maximized",
+            WindowStateOption.Restored => "Normal",
+            WindowStateOption.Minimized => "Minimized",
             _ => attrs.Value
         };
         subWindow.SetAttributeNode(attrs);
@@ -1283,20 +1282,20 @@ public sealed class ConfigurationService : IConfigurationService
         // Window attributes
 
         attrs = doc.CreateAttribute("height");
-        attrs.Value = w.WindowState == OverlappedPresenterState.Restored ? w.Height.ToString(CultureInfo.InvariantCulture) : w.RestoreHeight.ToString(CultureInfo.InvariantCulture);
+        attrs.Value = w.WindowState == WindowStateOption.Restored ? w.Height.ToString(CultureInfo.InvariantCulture) : w.RestoreHeight.ToString(CultureInfo.InvariantCulture);
         subWindow.SetAttributeNode(attrs);
 
         attrs = doc.CreateAttribute("width");
-        attrs.Value = w.WindowState == OverlappedPresenterState.Restored ? w.Width.ToString(CultureInfo.InvariantCulture) : w.RestoreWidth.ToString(CultureInfo.InvariantCulture);
+        attrs.Value = w.WindowState == WindowStateOption.Restored ? w.Width.ToString(CultureInfo.InvariantCulture) : w.RestoreWidth.ToString(CultureInfo.InvariantCulture);
 
         subWindow.SetAttributeNode(attrs);
 
         attrs = doc.CreateAttribute("top");
-        attrs.Value = w.WindowState == OverlappedPresenterState.Restored ? w.Top.ToString(CultureInfo.InvariantCulture) : w.RestoreTop.ToString(CultureInfo.InvariantCulture);
+        attrs.Value = w.WindowState == WindowStateOption.Restored ? w.Top.ToString(CultureInfo.InvariantCulture) : w.RestoreTop.ToString(CultureInfo.InvariantCulture);
         subWindow.SetAttributeNode(attrs);
 
         attrs = doc.CreateAttribute("left");
-        attrs.Value = w.WindowState == OverlappedPresenterState.Restored ? w.Left.ToString(CultureInfo.InvariantCulture) : w.RestoreLeft.ToString(CultureInfo.InvariantCulture);
+        attrs.Value = w.WindowState == WindowStateOption.Restored ? w.Left.ToString(CultureInfo.InvariantCulture) : w.RestoreLeft.ToString(CultureInfo.InvariantCulture);
         subWindow.SetAttributeNode(attrs);
 
         // Restore window sizes
@@ -1319,9 +1318,9 @@ public sealed class ConfigurationService : IConfigurationService
         attrs = doc.CreateAttribute("state");
         attrs.Value = w.WindowState switch
         {
-            OverlappedPresenterState.Maximized => "Maximized",
-            OverlappedPresenterState.Restored => "Normal",
-            OverlappedPresenterState.Minimized => "Minimized",
+            WindowStateOption.Maximized => "Maximized",
+            WindowStateOption.Restored => "Normal",
+            WindowStateOption.Minimized => "Minimized",
             _ => attrs.Value
         };
         subWindow.SetAttributeNode(attrs);
@@ -1345,20 +1344,20 @@ public sealed class ConfigurationService : IConfigurationService
         // Window attributes
 
         attrs = doc.CreateAttribute("height");
-        attrs.Value = w.WindowState == OverlappedPresenterState.Restored ? w.Height.ToString(CultureInfo.InvariantCulture) : w.RestoreHeight.ToString(CultureInfo.InvariantCulture);
+        attrs.Value = w.WindowState == WindowStateOption.Restored ? w.Height.ToString(CultureInfo.InvariantCulture) : w.RestoreHeight.ToString(CultureInfo.InvariantCulture);
         subWindow.SetAttributeNode(attrs);
 
         attrs = doc.CreateAttribute("width");
-        attrs.Value = w.WindowState == OverlappedPresenterState.Restored ? w.Width.ToString(CultureInfo.InvariantCulture) : w.RestoreWidth.ToString(CultureInfo.InvariantCulture);
+        attrs.Value = w.WindowState == WindowStateOption.Restored ? w.Width.ToString(CultureInfo.InvariantCulture) : w.RestoreWidth.ToString(CultureInfo.InvariantCulture);
 
         subWindow.SetAttributeNode(attrs);
 
         attrs = doc.CreateAttribute("top");
-        attrs.Value = w.WindowState == OverlappedPresenterState.Restored ? w.Top.ToString(CultureInfo.InvariantCulture) : w.RestoreTop.ToString(CultureInfo.InvariantCulture);
+        attrs.Value = w.WindowState == WindowStateOption.Restored ? w.Top.ToString(CultureInfo.InvariantCulture) : w.RestoreTop.ToString(CultureInfo.InvariantCulture);
         subWindow.SetAttributeNode(attrs);
 
         attrs = doc.CreateAttribute("left");
-        attrs.Value = w.WindowState == OverlappedPresenterState.Restored ? w.Left.ToString(CultureInfo.InvariantCulture) : w.RestoreLeft.ToString(CultureInfo.InvariantCulture);
+        attrs.Value = w.WindowState == WindowStateOption.Restored ? w.Left.ToString(CultureInfo.InvariantCulture) : w.RestoreLeft.ToString(CultureInfo.InvariantCulture);
         subWindow.SetAttributeNode(attrs);
 
         // Restore window sizes
@@ -1381,9 +1380,9 @@ public sealed class ConfigurationService : IConfigurationService
         attrs = doc.CreateAttribute("state");
         attrs.Value = w.WindowState switch
         {
-            OverlappedPresenterState.Maximized => "Maximized",
-            OverlappedPresenterState.Restored => "Normal",
-            OverlappedPresenterState.Minimized => "Minimized",
+            WindowStateOption.Maximized => "Maximized",
+            WindowStateOption.Restored => "Normal",
+            WindowStateOption.Minimized => "Minimized",
             _ => attrs.Value
         };
         subWindow.SetAttributeNode(attrs);
@@ -1407,20 +1406,20 @@ public sealed class ConfigurationService : IConfigurationService
         // Window attributes
 
         attrs = doc.CreateAttribute("height");
-        attrs.Value = w.WindowState == OverlappedPresenterState.Restored ? w.Height.ToString(CultureInfo.InvariantCulture) : w.RestoreHeight.ToString(CultureInfo.InvariantCulture);
+        attrs.Value = w.WindowState == WindowStateOption.Restored ? w.Height.ToString(CultureInfo.InvariantCulture) : w.RestoreHeight.ToString(CultureInfo.InvariantCulture);
         subWindow.SetAttributeNode(attrs);
 
         attrs = doc.CreateAttribute("width");
-        attrs.Value = w.WindowState == OverlappedPresenterState.Restored ? w.Width.ToString(CultureInfo.InvariantCulture) : w.RestoreWidth.ToString(CultureInfo.InvariantCulture);
+        attrs.Value = w.WindowState == WindowStateOption.Restored ? w.Width.ToString(CultureInfo.InvariantCulture) : w.RestoreWidth.ToString(CultureInfo.InvariantCulture);
 
         subWindow.SetAttributeNode(attrs);
 
         attrs = doc.CreateAttribute("top");
-        attrs.Value = w.WindowState == OverlappedPresenterState.Restored ? w.Top.ToString(CultureInfo.InvariantCulture) : w.RestoreTop.ToString(CultureInfo.InvariantCulture);
+        attrs.Value = w.WindowState == WindowStateOption.Restored ? w.Top.ToString(CultureInfo.InvariantCulture) : w.RestoreTop.ToString(CultureInfo.InvariantCulture);
         subWindow.SetAttributeNode(attrs);
 
         attrs = doc.CreateAttribute("left");
-        attrs.Value = w.WindowState == OverlappedPresenterState.Restored ? w.Left.ToString(CultureInfo.InvariantCulture) : w.RestoreLeft.ToString(CultureInfo.InvariantCulture);
+        attrs.Value = w.WindowState == WindowStateOption.Restored ? w.Left.ToString(CultureInfo.InvariantCulture) : w.RestoreLeft.ToString(CultureInfo.InvariantCulture);
         subWindow.SetAttributeNode(attrs);
 
         // Restore window sizes
@@ -1443,9 +1442,9 @@ public sealed class ConfigurationService : IConfigurationService
         attrs = doc.CreateAttribute("state");
         attrs.Value = w.WindowState switch
         {
-            OverlappedPresenterState.Maximized => "Maximized",
-            OverlappedPresenterState.Restored => "Normal",
-            OverlappedPresenterState.Minimized => "Minimized",
+            WindowStateOption.Maximized => "Maximized",
+            WindowStateOption.Restored => "Normal",
+            WindowStateOption.Minimized => "Minimized",
             _ => attrs.Value
         };
         subWindow.SetAttributeNode(attrs);
@@ -1469,20 +1468,20 @@ public sealed class ConfigurationService : IConfigurationService
         // Window attributes
 
         attrs = doc.CreateAttribute("height");
-        attrs.Value = w.WindowState == OverlappedPresenterState.Restored ? w.Height.ToString(CultureInfo.InvariantCulture) : w.RestoreHeight.ToString(CultureInfo.InvariantCulture);
+        attrs.Value = w.WindowState == WindowStateOption.Restored ? w.Height.ToString(CultureInfo.InvariantCulture) : w.RestoreHeight.ToString(CultureInfo.InvariantCulture);
         subWindow.SetAttributeNode(attrs);
 
         attrs = doc.CreateAttribute("width");
-        attrs.Value = w.WindowState == OverlappedPresenterState.Restored ? w.Width.ToString(CultureInfo.InvariantCulture) : w.RestoreWidth.ToString(CultureInfo.InvariantCulture);
+        attrs.Value = w.WindowState == WindowStateOption.Restored ? w.Width.ToString(CultureInfo.InvariantCulture) : w.RestoreWidth.ToString(CultureInfo.InvariantCulture);
 
         subWindow.SetAttributeNode(attrs);
 
         attrs = doc.CreateAttribute("top");
-        attrs.Value = w.WindowState == OverlappedPresenterState.Restored ? w.Top.ToString(CultureInfo.InvariantCulture) : w.RestoreTop.ToString(CultureInfo.InvariantCulture);
+        attrs.Value = w.WindowState == WindowStateOption.Restored ? w.Top.ToString(CultureInfo.InvariantCulture) : w.RestoreTop.ToString(CultureInfo.InvariantCulture);
         subWindow.SetAttributeNode(attrs);
 
         attrs = doc.CreateAttribute("left");
-        attrs.Value = w.WindowState == OverlappedPresenterState.Restored ? w.Left.ToString(CultureInfo.InvariantCulture) : w.RestoreLeft.ToString(CultureInfo.InvariantCulture);
+        attrs.Value = w.WindowState == WindowStateOption.Restored ? w.Left.ToString(CultureInfo.InvariantCulture) : w.RestoreLeft.ToString(CultureInfo.InvariantCulture);
         subWindow.SetAttributeNode(attrs);
 
         // Restore window sizes
@@ -1505,9 +1504,9 @@ public sealed class ConfigurationService : IConfigurationService
         attrs = doc.CreateAttribute("state");
         attrs.Value = w.WindowState switch
         {
-            OverlappedPresenterState.Maximized => "Maximized",
-            OverlappedPresenterState.Restored => "Normal",
-            OverlappedPresenterState.Minimized => "Minimized",
+            WindowStateOption.Maximized => "Maximized",
+            WindowStateOption.Restored => "Normal",
+            WindowStateOption.Minimized => "Minimized",
             _ => attrs.Value
         };
         subWindow.SetAttributeNode(attrs);
@@ -1545,13 +1544,6 @@ public sealed class ConfigurationService : IConfigurationService
 
         try
         {
-            // Now this is redundant, because we already create the directory in Initialize() method.
-            if (!Directory.Exists(App.AppDataFolder))
-            {
-                Directory.CreateDirectory(App.AppDataFolder);
-            }
-
-            //doc.Save(App.AppConfigFilePath);
             var temporaryPath = _configFilePath + ".tmp";
             doc.Save(temporaryPath);
             File.Move(temporaryPath, _configFilePath, overwrite: true);
@@ -1559,10 +1551,7 @@ public sealed class ConfigurationService : IConfigurationService
         //catch (System.IO.FileNotFoundException) { }
         catch (Exception ex)
         {
-            _dispatcherService.TryEnqueue(() =>
-            {
-                (App.Current as App)?.AppendErrorLog("Exception@SaveConfigurationAsync", ex.ToString());
-            });
+            _appendErrorLog("Exception@SaveConfigurationAsync", ex.ToString());
         }
 
     }

@@ -1,6 +1,4 @@
-﻿using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Media.Imaging;
-using System.Globalization;
+﻿using System.Globalization;
 using ZumenSearch.Models.Location;
 using ZumenSearch.Models.Transportation;
 
@@ -212,43 +210,22 @@ public abstract partial class PropertyBase : EntityAggregateBase
 
     // TODO:
     // Automatically generate a thumbnail image when the property is accessed, if it hasn't been set yet.
-    public ImageSource? ThumbImage 
+    public string? ThumbImagePath => CreateThumbImagePath();
+
+    private string? CreateThumbImagePath()
     {
-        get => field ?? CreateThumb();
-        set; 
-    }
-
-    private BitmapImage? CreateThumb()
-    {
-        if (string.IsNullOrEmpty(ThumbnailFilename))
+        if (string.IsNullOrWhiteSpace(ThumbnailFilename))
         {
-            //Debug.WriteLine("ThumbnailImageFilePath is empty. (PropertyBase)");
             return null;
         }
 
-        if (string.IsNullOrEmpty(BasePath))
+        if (string.IsNullOrWhiteSpace(BasePath))
         {
-            Debug.WriteLine("BasePath is empty. (PropertyBase)");
             return null;
         }
 
-        var thumbFilemame = System.IO.Path.Combine(BasePath, ThumbnailFilename);
-
-        if (!Path.Exists(thumbFilemame))
-        {
-            Debug.WriteLine($"File ThumbnailImageFilePath does not exists. (PropertyBase) {thumbFilemame}");
-            return null;
-        }
-
-        BitmapImage bitmapImage = new()
-        {
-            DecodePixelWidth = 280
-        };
-        
-        Uri uri = new(thumbFilemame);
-        bitmapImage.UriSource = uri;
-
-        return bitmapImage;
+        var imagePath = Path.Combine(BasePath, ThumbnailFilename);
+        return Path.Exists(imagePath) ? imagePath : null;
     }
 
     #endregion

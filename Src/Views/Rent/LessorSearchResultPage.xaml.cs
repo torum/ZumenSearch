@@ -8,6 +8,7 @@ using ZumenSearch.Models;
 using ZumenSearch.Models.Person;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.ViewModels;
+using ZumenSearch.Views.Services.Contracts;
 
 namespace ZumenSearch.Views.Rent;
 

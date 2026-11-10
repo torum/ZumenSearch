@@ -2,7 +2,7 @@
 using Microsoft.UI.Xaml.Controls;
 using ZumenSearch.Models.Transportation;
 
-namespace ZumenSearch.Services.Contracts;
+namespace ZumenSearch.Views.Services.Contracts;
 
 public interface IDialogGenericService
 {

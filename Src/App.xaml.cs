@@ -11,6 +11,8 @@ using ZumenSearch.Helpers;
 using ZumenSearch.Services;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.Services.Extensions;
+using ZumenSearch.Views.Services;
+using ZumenSearch.Views.Services.Contracts;
 
 namespace ZumenSearch;
 
@@ -22,7 +24,7 @@ public partial class App : Application
 
     // Data folder path
     private static readonly string _envDataFolder = System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);//ApplicationData 
-    public static string AppDataFolder { get; private set; } = System.IO.Path.Combine(System.IO.Path.Combine(_envDataFolder, AppDeveloper), AppName);
+    public static string AppDataFolder { get; private set; } = System.IO.Path.Combine(_envDataFolder, AppDeveloper, AppName);
 
     // "BlobData" includes building/unit pictures, PDF and its thumbnail image files.
     public static string PropertyBlobDataFolder { get; private set; } = System.IO.Path.Combine(AppDataFolder, "BlobData");
@@ -67,9 +69,9 @@ public partial class App : Application
         {
             Debug.WriteLine("IsMSIX");
             var envDataFolder = Windows.Storage.ApplicationData.Current.LocalFolder.Path;
-            AppDataFolder = System.IO.Path.Combine(System.IO.Path.Combine(envDataFolder, AppDeveloper), AppName);
+            AppDataFolder = System.IO.Path.Combine(envDataFolder, AppDeveloper, AppName);
             AppConfigFilePath = System.IO.Path.Combine(AppDataFolder, AppName + ".config");
-            PropertyBlobDataFolder = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(AppDataFolder, AppDeveloper), AppName), "BlobData");
+            PropertyBlobDataFolder = System.IO.Path.Combine(AppDataFolder, AppDeveloper, AppName, "BlobData");
         }
 
         try
@@ -119,7 +121,7 @@ public partial class App : Application
                 services.AddTransient<IDialogGenericService, DialogGenericService>();
                 services.AddTransient<IDataAccessLocationService, DataAccessLocationService>();
                 services.AddTransient<IDataAccessTransportationService, DataAccessTransportationService>();
-                services.AddSingleton<IConfigurationService, ConfigurationService>();
+                services.AddSingleton<IConfigurationService>(new ConfigurationService(AppendErrorLog));
 
                 // Views and ViewModels
                 services.AddSingleton<ViewModels.MainViewModel>();

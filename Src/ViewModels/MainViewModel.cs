@@ -13,6 +13,7 @@ using ZumenSearch.Models.SearchResult;
 using ZumenSearch.Services;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.Services.Extensions.AbstractFactory;
+using ZumenSearch.Views.Services.Contracts;
 
 namespace ZumenSearch.ViewModels;
 
@@ -21,7 +22,7 @@ public partial class MainViewModel : ObservableRecipient,
     IRecipient<ListingUpdatedMessage>,
     IRecipient<LessorUpdatedMessage>,
     IRecipient<BrokerUpdatedMessage>,
-    IRecipient<WindowClosedMessage>, 
+    IRecipient<WindowClosedMessage<Microsoft.UI.Xaml.Window>>, 
     IDisposable
 {
 
@@ -107,7 +108,7 @@ public partial class MainViewModel : ObservableRecipient,
                     Messenger.Register<ListingUpdatedMessage>(this);
                     Messenger.Register<LessorUpdatedMessage>(this);
                     Messenger.Register<BrokerUpdatedMessage>(this);
-                    Messenger.Register<WindowClosedMessage>(this);
+                    Messenger.Register<WindowClosedMessage<Microsoft.UI.Xaml.Window>>(this);
                 }
                 else
                 {
@@ -115,7 +116,7 @@ public partial class MainViewModel : ObservableRecipient,
                     Messenger.Unregister<ListingUpdatedMessage>(this);
                     Messenger.Unregister<LessorUpdatedMessage>(this);
                     Messenger.Unregister<BrokerUpdatedMessage>(this);
-                    Messenger.Unregister<WindowClosedMessage>(this);
+                    Messenger.Unregister<WindowClosedMessage<Microsoft.UI.Xaml.Window>>(this);
                 }
             }
         };
@@ -469,7 +470,7 @@ public partial class MainViewModel : ObservableRecipient,
         }
     }
 
-    public void Receive(WindowClosedMessage window)
+    public void Receive(WindowClosedMessage<Microsoft.UI.Xaml.Window> window)
     {
         var win = window.Value;
 
@@ -522,7 +523,7 @@ public partial class MainViewModel : ObservableRecipient,
         Messenger.Register<ListingUpdatedMessage>(this);
         Messenger.Register<LessorUpdatedMessage>(this);
         Messenger.Register<BrokerUpdatedMessage>(this);
-        Messenger.Register<WindowClosedMessage>(this);
+        Messenger.Register<WindowClosedMessage<Microsoft.UI.Xaml.Window>>(this);
     }
 
     protected override void OnDeactivated()
@@ -532,7 +533,7 @@ public partial class MainViewModel : ObservableRecipient,
         Messenger.Unregister<ListingUpdatedMessage>(this);
         Messenger.Unregister<LessorUpdatedMessage>(this);
         Messenger.Unregister<BrokerUpdatedMessage>(this);
-        Messenger.Unregister<WindowClosedMessage>(this);
+        Messenger.Unregister<WindowClosedMessage<Microsoft.UI.Xaml.Window>>(this);
     }
     */
 
@@ -1475,7 +1476,7 @@ public partial class MainViewModel : ObservableRecipient,
             });
 
             // clean up pics and pdfs.
-            var listingDataDirectoryPath = System.IO.Path.Combine(System.IO.Path.Combine(App.PropertyBlobDataFolder, selectedPropertyId), selectedId);
+            var listingDataDirectoryPath = System.IO.Path.Combine(App.PropertyBlobDataFolder, selectedPropertyId, selectedId);
             if (Directory.Exists(listingDataDirectoryPath))
             {
                 Debug.WriteLine($"Deleting folder: {listingDataDirectoryPath}");

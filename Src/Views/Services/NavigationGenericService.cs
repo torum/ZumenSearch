@@ -1,8 +1,8 @@
 ﻿using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Animation;
-using ZumenSearch.Services.Contracts;
+using ZumenSearch.Views.Services.Contracts;
 
-namespace ZumenSearch.Services;
+namespace ZumenSearch.Views.Services;
 
 public class NavigationGenericService : INavigationGenericService
 {

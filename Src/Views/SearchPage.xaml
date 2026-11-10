@@ -24,7 +24,7 @@
                         <TextBlock Text="画像・図面登録なし" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                         <Rectangle RadiusX="3" RadiusY="3">
                             <Rectangle.Fill>
-                                <ImageBrush ImageSource="{x:Bind ThumbImage, TargetNullValue={x:Null}, Mode=OneWay}" Stretch="UniformToFill" />
+                                <ImageBrush ImageSource="{x:Bind ThumbImagePath, Converter={StaticResource ImagePathToImageSourceConverter}, TargetNullValue={x:Null}, Mode=OneWay}" Stretch="UniformToFill" />
                             </Rectangle.Fill>
                         </Rectangle>
                         <Border HorizontalAlignment="Left" VerticalAlignment="Top" Margin="8" Padding="8,4" CornerRadius="4" Background="{ThemeResource AcrylicInAppFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
@@ -55,7 +55,7 @@
                         <TextBlock Text="画像・図面登録なし" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                         <Rectangle RadiusX="3" RadiusY="3">
                             <Rectangle.Fill>
-                                <ImageBrush ImageSource="{x:Bind ThumbImage, TargetNullValue={x:Null}, Mode=OneWay}" Stretch="UniformToFill" />
+                                <ImageBrush ImageSource="{x:Bind ThumbImagePath, Converter={StaticResource ImagePathToImageSourceConverter}, TargetNullValue={x:Null}, Mode=OneWay}" Stretch="UniformToFill" />
                             </Rectangle.Fill>
                         </Rectangle>
                         <Border HorizontalAlignment="Left" VerticalAlignment="Top" Margin="8" Padding="8,4" CornerRadius="4" Background="{ThemeResource AcrylicInAppFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
@@ -86,7 +86,7 @@
                         <TextBlock Text="画像・図面登録なし" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                         <Rectangle RadiusX="3" RadiusY="3">
                             <Rectangle.Fill>
-                                <ImageBrush ImageSource="{x:Bind ThumbImage, TargetNullValue={x:Null}, Mode=OneWay}" Stretch="UniformToFill" />
+                                <ImageBrush ImageSource="{x:Bind ThumbImagePath, Converter={StaticResource ImagePathToImageSourceConverter}, TargetNullValue={x:Null}, Mode=OneWay}" Stretch="UniformToFill" />
                             </Rectangle.Fill>
                         </Rectangle>
                         <Border HorizontalAlignment="Left" VerticalAlignment="Top" Margin="8" Padding="8,4" CornerRadius="4" Background="{ThemeResource AcrylicInAppFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">

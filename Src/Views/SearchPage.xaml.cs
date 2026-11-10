@@ -4,6 +4,7 @@ using Microsoft.UI.Xaml.Media;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.ViewModels;
 using ZumenSearch.Models;
+using ZumenSearch.Views.Services.Contracts;
 
 namespace ZumenSearch.Views;
 
