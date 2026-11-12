@@ -1,10 +1,6 @@
-﻿using Microsoft.UI;
-using Microsoft.UI.Windowing;
-using Microsoft.UI.Xaml;
+﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
-using System.Runtime.InteropServices;
-using Windows.Graphics;
 
 namespace ZumenSearch.Views.Rent.Residentials;
 
@@ -51,7 +47,6 @@ public sealed partial class LessorListPage : Page
 
     public LessorListPage()
     {
-        //ViewModel = new KasinusiViewModel();//App.GetService<RentLivingEditZumenViewModel>();
         InitializeComponent();
     }
 
@@ -59,111 +54,11 @@ public sealed partial class LessorListPage : Page
     {
         if (e.Parameter is ViewModels.Rent.Residentials.PropertyViewModel vm)
         {
-            //_editorShell = e.Parameter as Views.Rent.Residentials.Editor.EditorShell;
-            //ViewModel = _editorShell?.ViewModel as ViewModels.Rent.Residentials.Editor.EditorViewModel;
             ViewModel = vm;
             Bindings.Update();
         }
 
         base.OnNavigatedTo(e);
     }
-
-    private void AppBarButtonSelectLessor_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
-    {
-        /*
-        if (ViewModel is null)
-        {
-            return;
-        }
-
-        if (sender is not AppBarButton button)
-        {
-            return;
-        }
-
-        button.IsEnabled = false;
-
-        var modalWindow = new Views.Dialogs.SelectLessorWindow();
-        //OverlappedPresenter? presenter = modalWindow.AppWindow.Presenter as OverlappedPresenter;
-        OverlappedPresenter presenter = OverlappedPresenter.CreateForDialog();
-        presenter.IsModal = true;
-        presenter.IsResizable = true;
-
-        var thisWindowId = this.XamlRoot.ContentIslandEnvironment.AppWindowId;
-        IntPtr thisHWnd = Microsoft.UI.Win32Interop.GetWindowFromWindowId(thisWindowId);
-        SetWindowOwner(ownerHwnd: thisHWnd, id: modalWindow.AppWindow.Id);
-
-        modalWindow.AppWindow.SetPresenter(presenter);
-
-        modalWindow.AppWindow.Resize(new Windows.Graphics.SizeInt32(600, 400));
-        var thisAppWindow = Microsoft.UI.Windowing.AppWindow.GetFromWindowId(thisWindowId);
-
-        CenterWindow(modalWindow, thisAppWindow);
-
-        modalWindow.AppWindow.Show(true);
-
-        modalWindow.Closed += ModalWindow_Closed;
-
-        button.IsEnabled = true;
-        */
-    }
-
-    private void ModalWindow_Closed(object sender, WindowEventArgs args)
-    {
-        // Reactivate the owner window when the modal window closes.
-        // TODO: not gonna work without getting actual "Window".
-
-        /*
-        var thisWindowId = this.XamlRoot.ContentIslandEnvironment.AppWindowId;
-        var thisAppWindow = Microsoft.UI.Windowing.AppWindow.GetFromWindowId(thisWindowId);
-        thisAppWindow.MoveInZOrderAtTop();
-        */
-
-        /*
-        if (sender is Window modalWindow)
-        {
-            var thisAppWindow = Microsoft.UI.Windowing.AppWindow.GetFromWindowId(modalWindow.AppWindow.OwnerWindowId);
-            thisAppWindow.MoveInZOrderAtTop();
-        }
-        */
-    }
-
-
-    private static void CenterWindow(Window window, AppWindow ownerAppWindow)
-    {
-        //
-        PointInt32 CenteredPosition = ownerAppWindow.Position;
-        CenteredPosition.X += (ownerAppWindow.Size.Width - window.AppWindow.Size.Width) / 2;
-        CenteredPosition.Y += (ownerAppWindow.Size.Height - window.AppWindow.Size.Height) / 2;
-        window.AppWindow.Move(CenteredPosition);
-    }
-
-    private static void SetWindowOwner(IntPtr ownerHwnd, WindowId id)
-    {
-        // Get the HWND (window handle) of the owner window (main window).
-        //IntPtr ownerHwnd = WindowNative.GetWindowHandle(owner);
-
-        // Get the HWND of the AppWindow (modal window).
-        IntPtr ownedHwnd = Win32Interop.GetWindowFromWindowId(id);
-
-        // Set the owner window using SetWindowLongPtr for 64-bit systems
-        // or SetWindowLong for 32-bit systems.
-        if (IntPtr.Size == 8) // Check if the system is 64-bit
-        {
-            SetWindowLongPtr(ownedHwnd, -8, ownerHwnd); // -8 = GWLP_HWNDPARENT
-        }
-        else // 32-bit system
-        {
-            SetWindowLong(ownedHwnd, -8, ownerHwnd); // -8 = GWL_HWNDPARENT
-        }
-    }
-
-    // Import the Windows API function SetWindowLongPtr for modifying window properties on 64-bit systems.
-    [DllImport("User32.dll", CharSet = CharSet.Auto, EntryPoint = "SetWindowLongPtr")]
-    private static extern IntPtr SetWindowLongPtr(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
-
-    // Import the Windows API function SetWindowLong for modifying window properties on 32-bit systems.
-    [DllImport("User32.dll", CharSet = CharSet.Auto, EntryPoint = "SetWindowLong")]
-    private static extern IntPtr SetWindowLong(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
 
 }

@@ -3,12 +3,6 @@ using ZumenSearch.Models.Base;
 
 namespace ZumenSearch.Models.Rent.Residentials;
 
-// TODO: This is same as ZumenSearch.Models.Rent.Residentials.Pdf.
-// Consider removable.
-// No... We need ParentViewModel(ViewModels.Rent.Residentials.ListingViewModel)
-// Then, consider creating a wrapper just like Lessor wrapper?
-// ParentViewModel and type Dictionary are the main difference.
-
 public sealed partial class ListingPdf : PdfBase
 {
     public ViewModels.Rent.Residentials.ListingViewModel? ParentViewModel { get; set; }

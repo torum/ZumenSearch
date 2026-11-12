@@ -108,10 +108,10 @@ public sealed partial class ShellPage : Page
             }
             else if (result == ContentDialogResult.Secondary)
             {
-                // Discard change and close.
-                ViewModel.DiscardChanges();
-
-                Window.Close();
+                if (ViewModel.DiscardChanges())
+                {
+                    Window.Close();
+                }
             }
             else if (result == ContentDialogResult.None)
             {
@@ -182,11 +182,11 @@ public sealed partial class ShellPage : Page
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"@AppWindow_Closing: {ex}");
-                _closingWindow = null;
-                args.Cancel = false;
-                _isClosing = false;
+                Debug.WriteLine($"Failed to reactivate the child editor while closing its parent: {ex}");
             }
+
+            args.Cancel = true;
+            return;
         }
 
         _isClosing = true;
@@ -232,13 +232,12 @@ public sealed partial class ShellPage : Page
                                 await shell.ShowEditorCloseConfirmationDialog();
                             }
                         }
-                        catch(Exception ex)
+                        catch (Exception ex)
                         {
-                            Debug.WriteLine($"@AppWindow_Closing: {ex}");
-                            args.Cancel = false;
-                            isCanceled = false;
-
-                            continue;
+                            Debug.WriteLine($"Failed to handle unsaved child editor during parent close: {ex}");
+                            args.Cancel = true;
+                            isCanceled = true;
+                            break;
                         }
                         finally
                         {
@@ -304,7 +303,6 @@ public sealed partial class ShellPage : Page
             }
         }
 
-        //mainVM.BldgEditorList.Remove(ewin);
         // Update the selected search result's values such as name if it exists. Also, update building window's rooms list.
         WeakReferenceMessenger.Default.Send(new Models.Messenger.WindowClosedMessage<Microsoft.UI.Xaml.Window>(ewin));
 
@@ -467,13 +465,6 @@ public sealed partial class ShellPage : Page
 
         // set this first.
         args.Handled = true;
-
-        if (args.KeyboardAccelerator.Key == Windows.System.VirtualKey.F1)
-        {
-            // TODO:
-
-            return;
-        }
 
         if (args.KeyboardAccelerator.Modifiers == Windows.System.VirtualKeyModifiers.Menu)
         {

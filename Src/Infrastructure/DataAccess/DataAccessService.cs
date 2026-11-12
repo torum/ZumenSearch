@@ -135,6 +135,16 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     "fudousan_id TEXT NOT NULL DEFAULT ''," +
                     "fudousan_id_additional_code TEXT NOT NULL DEFAULT ''," +
                     "remarks TEXT NOT NULL DEFAULT ''," +
+                    "kanri_shutai TEXT NOT NULL DEFAULT '" + nameof(Models.Rent.Residentials.Property.EnumKanriShutai.Unspecified) + "'," +
+                    "kanri_is_maintenance_management INTEGER NOT NULL DEFAULT 0," +
+                    "kanri_is_tenant_management INTEGER NOT NULL DEFAULT 0," +
+                    "kanri_is_payment_management INTEGER NOT NULL DEFAULT 0," +
+                    "kanri_is_other_management INTEGER NOT NULL DEFAULT 0," +
+                    "kanri_remark_jisya TEXT NOT NULL DEFAULT ''," +
+                    "kanri_name_of_company_tasya TEXT NOT NULL DEFAULT ''," +
+                    "kanri_contact_info_of_company_tasya TEXT NOT NULL DEFAULT ''," +
+                    "kanri_remark_tasya TEXT NOT NULL DEFAULT ''," +
+                    "kanri_remark_kashinushi TEXT NOT NULL DEFAULT ''," +
                     "has_autolock INTEGER NOT NULL DEFAULT 0," +
                     "has_elevator INTEGER NOT NULL DEFAULT 0," +
                     "has_security_camera INTEGER NOT NULL DEFAULT 0," +
@@ -1280,8 +1290,6 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 cmd.Parameters.AddWithValue("@buss4_Jyousya", building.BusJyousya4);
                 cmd.Parameters.AddWithValue("@buss4_Toho", building.BusStopToho4);
 
-                // TODO: more
-
                 cmd.Parameters.AddWithValue("@updated_at", DateTimeOffset.UtcNow.ToString("s"));
                 res.AffectedCount = cmd.ExecuteNonQuery();
 
@@ -1292,6 +1300,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 //    "VALUES (@RentId, @BuildingKind, @IsUnitOwnership, @PropertyStructure, @FloorCountAboveGround, @FloorCountBasement, @TotalUnitCount, @BuiltYearMonth, @FudousanId, @FudousanIdAdditionalCode, @Remarks)";
                 // Upsert
                 sqlUpsert = "INSERT INTO rent_residentials (property_id, property_type, is_unit_ownership, property_structure, floor_count_above_ground, floor_count_basement, total_unit_count, built_year_month, fudousan_id, fudousan_id_additional_code, remarks, " +
+                    "kanri_shutai, kanri_is_maintenance_management, kanri_is_tenant_management, kanri_is_payment_management, kanri_is_other_management, kanri_remark_jisya, kanri_name_of_company_tasya, kanri_contact_info_of_company_tasya, kanri_remark_tasya, kanri_remark_kashinushi, " +
                     "has_autolock, has_elevator, has_security_camera, has_parcel_locker, has_electric, " +
                     "property_electric_kind, electric_detail, has_gas, gas_type, gas_detail, " +
                     "tap_water_type, tap_water_detail, sewerage_type, sewerage_detail, ground_digital, " +
@@ -1302,6 +1311,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     "is_bicycle_parking_free, bicycle_parking_fee, bicycle_parking_fee_tax_type, bicycle_parking_notes, has_motorcycle_parking, " +
                     "motorcycle_parking_availability, is_motorcycle_parking_free, motorcycle_parking_fee, motorcycle_parking_fee_tax_type, motorcycle_parking_notes) ";
                 sqlUpsert += "VALUES (@propertyId, @buildingType, @isUnitOwnership, @buildingStructure, @floorCountAboveGround, @floorCountBasement, @totalUnitCount, @builtYearMonth, @fudousanId, @fudousanIdAdditionalCode, @remarks, " +
+                    "@kanri_shutai, @kanri_is_maintenance_management, @kanri_is_tenant_management, @kanri_is_payment_management, @kanri_is_other_management, @kanri_remark_jisya, @kanri_name_of_company_tasya, @kanri_contact_info_of_company_tasya, @kanri_remark_tasya, @kanri_remark_kashinushi, " +
                     "@facility_has_autolock, @facility_has_elevator, @facility_has_security_camera, @facility_has_parcel_locker, @facility_has_electric, " +
                     "@facility_property_electric_kind, @facility_electric_detail, @facility_has_gas, @facility_gas_type, @facility_gas_detail, " +
                     "@facility_tap_water_type, @facility_tap_water_detail, @facility_sewerage_type, @facility_sewerage_detail, @facility_ground_digital, " +
@@ -1313,6 +1323,8 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     "@facility_motorcycle_parking_availability, @facility_is_motorcycle_parking_free, @facility_motorcycle_parking_fee, @facility_motorcycle_parking_fee_tax_type, @facility_motorcycle_parking_notes) ";
                 sqlUpsert += "ON CONFLICT(property_id) ";
                 sqlUpsert += "DO UPDATE SET property_type = @buildingType, is_unit_ownership = @isUnitOwnership, property_structure = @buildingStructure, floor_count_above_ground = @floorCountAboveGround, floor_count_basement = @floorCountBasement, total_unit_count = @totalUnitCount, built_year_month = @builtYearMonth, fudousan_id = @fudousanId, fudousan_id_additional_code = @fudousanIdAdditionalCode, remarks = @remarks, " +
+                    "kanri_shutai = excluded.kanri_shutai, kanri_is_maintenance_management = excluded.kanri_is_maintenance_management, kanri_is_tenant_management = excluded.kanri_is_tenant_management, kanri_is_payment_management = excluded.kanri_is_payment_management, kanri_is_other_management = excluded.kanri_is_other_management, " +
+                    "kanri_remark_jisya = excluded.kanri_remark_jisya, kanri_name_of_company_tasya = excluded.kanri_name_of_company_tasya, kanri_contact_info_of_company_tasya = excluded.kanri_contact_info_of_company_tasya, kanri_remark_tasya = excluded.kanri_remark_tasya, kanri_remark_kashinushi = excluded.kanri_remark_kashinushi, " +
                     "has_autolock = excluded.has_autolock, has_elevator = excluded.has_elevator, has_security_camera = excluded.has_security_camera, has_parcel_locker = excluded.has_parcel_locker, has_electric = excluded.has_electric, " +
                     "property_electric_kind = excluded.property_electric_kind, electric_detail = excluded.electric_detail, has_gas = excluded.has_gas, gas_type = excluded.gas_type, gas_detail = excluded.gas_detail, " +
                     "tap_water_type = excluded.tap_water_type, tap_water_detail = excluded.tap_water_detail, sewerage_type = excluded.sewerage_type, sewerage_detail = excluded.sewerage_detail, ground_digital = excluded.ground_digital, " +
@@ -1336,6 +1348,16 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 cmd.Parameters.AddWithValue("@fudousanId", building.FudousanId);
                 cmd.Parameters.AddWithValue("@fudousanIdAdditionalCode", building.FudousanIdAdditionalCode);
                 cmd.Parameters.AddWithValue("@remarks", building.Remarks);
+                cmd.Parameters.AddWithValue("@kanri_shutai", building.KanriShutai.ToString());
+                cmd.Parameters.AddWithValue("@kanri_is_maintenance_management", building.KanriIsMaintenanceManagementIfIsKanriJisya ? 1 : 0);
+                cmd.Parameters.AddWithValue("@kanri_is_tenant_management", building.KanriIsTenantManagementIfIsKanriJisya ? 1 : 0);
+                cmd.Parameters.AddWithValue("@kanri_is_payment_management", building.KanriIsPaymentManagementIfIsKanriJisya ? 1 : 0);
+                cmd.Parameters.AddWithValue("@kanri_is_other_management", building.KanriIsOtherManagementIfIsKanriJisya ? 1 : 0);
+                cmd.Parameters.AddWithValue("@kanri_remark_jisya", building.KanriRemarkIfIsKanriJisya);
+                cmd.Parameters.AddWithValue("@kanri_name_of_company_tasya", building.KanriNameOfCompanyIfIsKanriTasya);
+                cmd.Parameters.AddWithValue("@kanri_contact_info_of_company_tasya", building.KanriContactInfoOfCompanyIfIsKanriTasya);
+                cmd.Parameters.AddWithValue("@kanri_remark_tasya", building.KanriRemarkIfIsKanriTasya);
+                cmd.Parameters.AddWithValue("@kanri_remark_kashinushi", building.KanriRemarkIfIsKanriKashinushi);
                 cmd.Parameters.AddWithValue("@facility_has_autolock", building.HasAutolock ? 1 : 0);
                 cmd.Parameters.AddWithValue("@facility_has_elevator", building.HasElevator ? 1 : 0);
                 cmd.Parameters.AddWithValue("@facility_has_security_camera", building.HasSecurityCamera ? 1 : 0);
@@ -1381,7 +1403,6 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 cmd.Parameters.AddWithValue("@facility_motorcycle_parking_fee", building.MotorcycleParkingFee ?? string.Empty);
                 cmd.Parameters.AddWithValue("@facility_motorcycle_parking_fee_tax_type", FormatFacilityEnum(building.MotorcycleParkingFeeTaxType));
                 cmd.Parameters.AddWithValue("@facility_motorcycle_parking_notes", building.MotorcycleParkingNotes ?? string.Empty);
-                // TODO: more
 
                 cmd.ExecuteNonQuery();
 
@@ -1804,7 +1825,16 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 "rent_residentials.motorcycle_parking_fee as motorcycle_parking_fee, " +
                 "rent_residentials.motorcycle_parking_fee_tax_type as motorcycle_parking_fee_tax_type, " +
                 "rent_residentials.motorcycle_parking_notes as motorcycle_parking_notes, " +
-                // TODO: more fields to be added here.
+                "rent_residentials.kanri_shutai as kanri_shutai, " +
+                "rent_residentials.kanri_is_maintenance_management as kanri_is_maintenance_management, " +
+                "rent_residentials.kanri_is_tenant_management as kanri_is_tenant_management, " +
+                "rent_residentials.kanri_is_payment_management as kanri_is_payment_management, " +
+                "rent_residentials.kanri_is_other_management as kanri_is_other_management, " +
+                "rent_residentials.kanri_remark_jisya as kanri_remark_jisya, " +
+                "rent_residentials.kanri_name_of_company_tasya as kanri_name_of_company_tasya, " +
+                "rent_residentials.kanri_contact_info_of_company_tasya as kanri_contact_info_of_company_tasya, " +
+                "rent_residentials.kanri_remark_tasya as kanri_remark_tasya, " +
+                "rent_residentials.kanri_remark_kashinushi as kanri_remark_kashinushi, " +
 
                 //"rent_residentials.updated_at as UpdatedAt, " +
                 "properties.property_id as propertyId " +
@@ -1884,9 +1914,6 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     property.SetBusStopToho4(Convert.ToString(reader["buss4Toho"], CultureInfo.InvariantCulture) ?? "");
                     property.Train4.SetEkiToho(Convert.ToInt32(reader["train4EkiToho"], CultureInfo.InvariantCulture));
 
-                    // TODO: more.
-
-
                     property.SetPropertyTypeFromString(Convert.ToString(reader["resiBuildingKind"], CultureInfo.InvariantCulture) ?? "");
                     property.SetIsUnitOwnership(Convert.ToInt32(reader["resiUnitOwnership"], CultureInfo.InvariantCulture) != 0); // int to bool
                     property.SetStructureTypeFromString(Convert.ToString(reader["resiBuildingStructure"], CultureInfo.InvariantCulture) ?? "");
@@ -1897,6 +1924,16 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     property.SetFudousanId(Convert.ToString(reader["resiFudousanId"], CultureInfo.InvariantCulture) ?? "");
                     property.SetFudousanIdAdditionalCode(Convert.ToString(reader["resiFudousanIdAdditionalCode"], CultureInfo.InvariantCulture) ?? "");
                     property.SetRemarks(Convert.ToString(reader["resiRemarks"], CultureInfo.InvariantCulture) ?? "");
+                    property.SetKanriShutaiFromString(reader.GetString(reader.GetOrdinal("kanri_shutai")));
+                    property.SetKanriIsMaintenanceManagementIfIsKanriJisya(Convert.ToInt32(reader["kanri_is_maintenance_management"], CultureInfo.InvariantCulture) != 0);
+                    property.SetKanriIsTenantManagementIfIsKanriJisya(Convert.ToInt32(reader["kanri_is_tenant_management"], CultureInfo.InvariantCulture) != 0);
+                    property.SetKanriIsPaymentManagementIfIsKanriJisya(Convert.ToInt32(reader["kanri_is_payment_management"], CultureInfo.InvariantCulture) != 0);
+                    property.SetKanriIsOtherManagementIfIsKanriJisya(Convert.ToInt32(reader["kanri_is_other_management"], CultureInfo.InvariantCulture) != 0);
+                    property.SetKanriRemarkIfIsKanriJisya(reader.GetString(reader.GetOrdinal("kanri_remark_jisya")));
+                    property.SetKanriNameOfCompanyIfIsKanriTasya(reader.GetString(reader.GetOrdinal("kanri_name_of_company_tasya")));
+                    property.SetKanriContactInfoOfCompanyIfIsKanriTasya(reader.GetString(reader.GetOrdinal("kanri_contact_info_of_company_tasya")));
+                    property.SetKanriRemarkIfIsKanriTasya(reader.GetString(reader.GetOrdinal("kanri_remark_tasya")));
+                    property.SetKanriRemarkIfIsKanriKashinushi(reader.GetString(reader.GetOrdinal("kanri_remark_kashinushi")));
 
                     property.HasAutolock = Convert.ToInt32(reader["has_autolock"], CultureInfo.InvariantCulture) != 0;
                     property.HasElevator = Convert.ToInt32(reader["has_elevator"], CultureInfo.InvariantCulture) != 0;
@@ -1944,12 +1981,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     property.MotorcycleParkingFeeTaxType = ParseFacilityEnum<Models.Rent.Residentials.FacilityTaxType>(reader, "motorcycle_parking_fee_tax_type");
                     property.MotorcycleParkingNotes = reader.GetString(reader.GetOrdinal("motorcycle_parking_notes"));
 
-                    // TODO: more.
-
-
                     property.SetIsModified(false);
-
-                    // TODO: more.
 
                     //res.AffectedCount++;
 

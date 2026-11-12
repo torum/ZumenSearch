@@ -61,7 +61,6 @@
         <Grid Grid.Row="1">
             <ScrollViewer HorizontalScrollMode="Disabled">
 
-                <!-- TODO: chnage this to listview -->
                 <!-- ItemTemplateSelector="{StaticResource PersonTypeSelector}"  -->
                 <ItemsRepeater x:Name="ItemsView" ItemsSource="{x:Bind ViewModel.BrokersWrapper, Mode=TwoWay}" ItemTemplate="{StaticResource BrokerTemplate}" MinWidth="300" MinHeight="225" ScrollViewer.HorizontalScrollMode="Disabled" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <!--  SelectionChanged="ItemsView_SelectionChanged" SelectionMode="Single" IsItemInvokedEnabled="False"  -->

@@ -61,10 +61,42 @@ public class DialogGenericService : IDialogGenericService
 
         _isDialogOpened = true;
         //_ownerWindowList.Add(win);
-        var result = await dialog.ShowAsync();
-        _isDialogOpened = false;
-        //_ownerWindowList.Remove(win);
-        return result;
+        try
+        {
+            return await dialog.ShowAsync();
+        }
+        finally
+        {
+            _isDialogOpened = false;
+        }
+    }
+
+    public async Task<ContentDialogResult> ShowDeleteConfirmationDialog(string message)
+    {
+        if (_isDialogOpened || _xamlRoot is null)
+        {
+            return ContentDialogResult.None;
+        }
+
+        var dialog = new ContentDialog
+        {
+            XamlRoot = _xamlRoot,
+            Title = "削除の確認",
+            PrimaryButtonText = "削除",
+            CloseButtonText = "キャンセル",
+            DefaultButton = ContentDialogButton.Close,
+            Content = message
+        };
+
+        _isDialogOpened = true;
+        try
+        {
+            return await dialog.ShowAsync();
+        }
+        finally
+        {
+            _isDialogOpened = false;
+        }
     }
 
     public async Task<Models.SearchResult.PersonSearchResultItem?> ShowLessorSelectDialog(ViewModels.Dialogs.LessorSelectViewModel viewModel)

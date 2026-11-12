@@ -39,6 +39,8 @@ public sealed partial class ListingViewModel : ObservableRecipient,
     private readonly List<string> _unsavedRoomPictureFileList = [];
     private readonly List<string> _unsavedRoomPdfFileList = [];
     private readonly List<string> _unsavedRoomPdfThumbnailFileList = [];
+    private bool _hasPendingFileCleanupAfterSave;
+    private bool _disposed;
 
     private readonly CancellationTokenSource _cts = new();
 
@@ -75,7 +77,6 @@ public sealed partial class ListingViewModel : ObservableRecipient,
 
         // Reset errors
         IsNameHasError = false;
-        // TODO: more.
 
         //HasErrors = false;
 
@@ -499,42 +500,11 @@ public sealed partial class ListingViewModel : ObservableRecipient,
                 return;
             }
 
-            var text = value.Trim();
-            if (string.IsNullOrEmpty(text))
+            var text = Helpers.Common.NormalizeFullWidthCharacters(value.Trim());
+            if (SetProperty(ref field, text))
             {
-                field = string.Empty;
-                IsDirty = true;
-                OnPropertyChanged();
-                return;
-            }
-
-            text = Helpers.Common.ReplaceZenkakuNumbers(text);
-            if (Helpers.Common.CanConvertToPositiveNumber(text))
-            {
-                field = text;
-                IsDirty = true;
-                OnPropertyChanged();
-            }
-            else
-            {
-                OnPropertyChanged();
-            }
-            /*
-            var text = Helpers.Common.ReplaceZenkakuNumber(value.Trim());
-
-            if (Helpers.Common.CanConvertToPositiveNumber(text))
-            {
-                field = text;
                 IsDirty = true;
             }
-            else
-            {
-                // TODO: show error
-                //field = string.Empty;
-            }
-
-            OnPropertyChanged();
-            */
         }
     }
 
@@ -709,35 +679,54 @@ public sealed partial class ListingViewModel : ObservableRecipient,
 
     #region == Public Methods ==
 
-    public void DiscardChanges()
+    public bool DiscardChanges()
     {
-        DiscardUnsavedFiles();
+        if (!DiscardUnsavedFiles())
+        {
+            return false;
+        }
 
-        //_room = null;
+        if (_hasPendingFileCleanupAfterSave)
+        {
+            ShowAttachmentError("保存済みデータの削除済みファイルが残っています。ファイルの削除を完了するため、もう一度保存してください。");
+            return false;
+        }
+
         IsDirty = false;
+        return true;
     }
 
     public void Dispose()
     {
-        // TODO: ?
-        foreach (var item in Pictures)
+        if (_disposed)
         {
-            item.PropertyChanged -= OnPicturePropertyChanged;
+            return;
         }
 
-        // TODO: ?
+        _disposed = true;
+        foreach (var picture in Pictures)
+        {
+            picture.PropertyChanged -= OnPicturePropertyChanged;
+        }
+
+        foreach (var pdf in Pdfs)
+        {
+            pdf.PropertyChanged -= OnPdfPropertyChanged;
+        }
+
         Pictures.Clear();
+        Pdfs.Clear();
 
-        // Unsubscribe
-        //WeakReferenceMessenger.Default.UnregisterAll(this);
-        //or
-        //this.IsActive = false;
+#pragma warning disable IL3050 // Disable AOT dynamic code warning
+#pragma warning disable IL2026 // Disable Trimming unreferenced code warning
+        IsActive = false;
+#pragma warning restore IL2026
+#pragma warning restore IL3050
 
-        _cts?.Cancel();
-        _cts?.Dispose();
+        _cts.Cancel();
+        _cts.Dispose();
 
         GC.SuppressFinalize(this);
-
         Debug.WriteLine($"ListingViewModel.Dispose() called. Id={_id}");
     }
 
@@ -753,6 +742,17 @@ public sealed partial class ListingViewModel : ObservableRecipient,
         }
     }
 
+    private void ShowErrorInfoBar(Models.ErrorInfo error)
+    {
+        InfoBarErrorMessage =
+            error.Title + Environment.NewLine +
+            error.Message + Environment.NewLine +
+            error.Description + Environment.NewLine +
+            error.Operation + Environment.NewLine +
+            error.MethodName;
+        IsInfoBarErrorOpen = true;
+    }
+
     private bool ValidateContractNumericValues()
     {
         (string Label, string Value)[] values =
@@ -766,6 +766,35 @@ public sealed partial class ListingViewModel : ObservableRecipient,
         ];
 
         return ValidateNonNegativeNumericValues(values);
+    }
+
+    private bool ValidateChinryou()
+    {
+        var text = Helpers.Common.NormalizeFullWidthCharacters(Chinryou.Trim());
+        if (string.IsNullOrEmpty(text))
+        {
+            return true;
+        }
+
+        if (text.Contains(',', StringComparison.Ordinal))
+        {
+            if (!long.TryParse(text, NumberStyles.AllowThousands, CultureInfo.InvariantCulture, out var parsedWithSeparators) ||
+                !string.Equals(parsedWithSeparators.ToString("N0", CultureInfo.InvariantCulture), text, StringComparison.Ordinal))
+            {
+                InfoBarErrorMessage = "賃料は0以上の整数で入力してください。";
+                return false;
+            }
+
+            return true;
+        }
+
+        if (!long.TryParse(text, NumberStyles.None, CultureInfo.InvariantCulture, out _))
+        {
+            InfoBarErrorMessage = "賃料は0以上の整数で入力してください。";
+            return false;
+        }
+
+        return true;
     }
 
     private bool ValidateTransactionNumericValues()
@@ -853,12 +882,6 @@ public sealed partial class ListingViewModel : ObservableRecipient,
 
         _room.SetName(Name);
 
-        // TODO: Validate numeric values before setting them. If invalid, show error message and return.
-        if (!TryParseBasicNumericValues(out var _, out var _))
-        {
-            return;
-        }
-
         _room.SetFloorPlanTypeLabel(SelectedFloorPlanType);
         _room.SetFloorPlanExtraTypeLabel(SelectedFloorPlanExtraType);
         _room.SetFloorGroundTypeLabel(SelectedFloorGroundType);
@@ -922,9 +945,6 @@ public sealed partial class ListingViewModel : ObservableRecipient,
         _room.SetListingBrokerCommissionUnitTypeLabel(SelectedListingBrokerCommissionUnit);
         _room.SetTenantBrokerCommissionUnitTypeLabel(SelectedTenantBrokerCommissionUnit);
         _room.SetTransactionRemarks(TransactionRemarks);
-
-        // TODO: More.
-
 
         // 写真
         //_room.Pictures = Pictures;
@@ -1056,8 +1076,6 @@ public sealed partial class ListingViewModel : ObservableRecipient,
         SelectedListingBrokerCommissionUnit = CommissionUnitTypes.First(x => x.Key == _room.ListingBrokerCommissionUnit.Key);
         SelectedTenantBrokerCommissionUnit = CommissionUnitTypes.First(x => x.Key == _room.TenantBrokerCommissionUnit.Key);
         TransactionRemarks = _room.TransactionRemarks;
-
-        // TODO: Set other properties for editing..
 
         // Pictures
         Pictures = new ObservableCollection<Models.Rent.Residentials.ListingPicture>(_room.Pictures); // create a copy.
@@ -1214,58 +1232,70 @@ public sealed partial class ListingViewModel : ObservableRecipient,
         }
     }
 
-    private void DiscardUnsavedFiles()
+    private bool DiscardUnsavedFiles()
     {
-        if (_unsavedRoomPictureFileList.Count > 0)
+        var failures = new List<string>();
+        DeleteTrackedFiles(_unsavedRoomPictureFileList, failures);
+        DeleteTrackedFiles(_unsavedRoomPdfFileList, failures);
+        DeleteTrackedFiles(_unsavedRoomPdfThumbnailFileList, failures);
+
+        if (_room.Status == EntityStatus.New && Directory.Exists(_listingDataDirectoryPath))
         {
-            foreach (var file in _unsavedRoomPictureFileList)
+            try
             {
-                if (File.Exists(file))
-                {
-                    Debug.WriteLine($"Deleting unsaved picture file: {file}");
-                    File.Delete(file);
-                }
-            }
-
-            _unsavedRoomPictureFileList.Clear();
-        }
-
-        if (_unsavedRoomPdfFileList.Count > 0)
-        {
-            foreach (var file in _unsavedRoomPdfFileList)
-            {
-                if (File.Exists(file))
-                {
-                    Debug.WriteLine($"Deleting unsaved pdf file: {file}");
-                    File.Delete(file);
-                }
-            }
-
-            _unsavedRoomPdfFileList.Clear();
-        }
-
-        if (_unsavedRoomPdfThumbnailFileList.Count > 0)
-        {
-            foreach (var file in _unsavedRoomPdfThumbnailFileList)
-            {
-                if (File.Exists(file))
-                {
-                    Debug.WriteLine($"Deleting unsaved pdf thumb picture file: {file}");
-                    File.Delete(file);
-                }
-            }
-
-            _unsavedRoomPdfThumbnailFileList.Clear();
-        }
-
-        if (_room.Status == EntityStatus.New)
-        {
-            if (Directory.Exists(_listingDataDirectoryPath))
-            {
-                Debug.WriteLine($"Deleting folder: {_listingDataDirectoryPath}");
                 Directory.Delete(_listingDataDirectoryPath, true);
             }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                Debug.WriteLine($"Failed to delete listing data directory '{_listingDataDirectoryPath}': {ex}");
+                failures.Add(_listingDataDirectoryPath);
+            }
         }
+
+        if (failures.Count == 0)
+        {
+            return true;
+        }
+
+        ShowAttachmentError($"変更の破棄中にファイルを削除できませんでした。ファイルを閉じてから再試行してください: {string.Join(", ", failures)}");
+        return false;
+    }
+
+    private static void DeleteTrackedFiles(List<string> trackedFiles, List<string> failures)
+    {
+        foreach (var file in trackedFiles.ToList())
+        {
+            try
+            {
+                File.Delete(file);
+                trackedFiles.Remove(file);
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                Debug.WriteLine($"Failed to delete file '{file}': {ex}");
+                failures.Add(file);
+            }
+        }
+    }
+
+    private static bool TryDeleteFiles(IEnumerable<string> filePaths, List<string> failures)
+    {
+        var succeeded = true;
+        foreach (var filePath in filePaths)
+        {
+            try
+            {
+                File.Delete(filePath);
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                Debug.WriteLine($"Failed to delete file '{filePath}': {ex}");
+                failures.Add(filePath);
+                succeeded = false;
+            }
+        }
+
+        return succeeded;
     }
 
     #endregion
@@ -1302,7 +1332,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
             return;
         }
 
-        if (!ValidateContractNumericValues())
+        if (!ValidateContractNumericValues() || !ValidateChinryou())
         {
             IsInfoBarErrorOpen = true;
             const string contractPageName = "ZumenSearch.Views.Rent.Residentials.Listing.ContractPage";
@@ -1332,10 +1362,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
         if (_room.PropertyStatus == EntityStatus.New)
         {
             Debug.WriteLine("(_room.PropertyStatus == EnumPropertyStatus.New) @ListingViewModel on Save. Sending it to Property editor window");
-            // Building is unsaved state. So, update it and done (don't save room to DB here because we don't save room without building).
-
-            // TODO: make sure property editor window is exists (opened).
-
+            // The parent property editor owns persistence until the property is saved.
             // Update the selected search result's values such as name if it exists. Also, update building window's rooms list.
             WeakReferenceMessenger.Default.Send(new Models.Messenger.ListingUpdatedMessage(_room));
 
@@ -1388,47 +1415,36 @@ public sealed partial class ListingViewModel : ObservableRecipient,
             // Update title with dummy value.
             WindowTitle = string.Empty;
 
-            // TODO: 
-
-            // Clean up deleted picture file.
-            if (_room.PicturesToBeDeleted.Count > 0)
+            var cleanupFailures = new List<string>();
+            foreach (var file in _room.PicturesToBeDeleted.ToList())
             {
-                foreach (var file in _room.PicturesToBeDeleted)
+                var picturePath = Path.Combine(App.PropertyBlobDataFolder, _room.PropertyId, _room.Id, file.ImageFilename);
+                if (TryDeleteFiles(new[] { picturePath }, cleanupFailures))
                 {
-                    /*
-                    if (_room.Pictures.Remove(file))
-                    {
-                    }
-                    */
-                    var delFilePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _room.PropertyId, _room.Id, file.ImageFilename);
-                    File.Delete(delFilePath);
+                    _room.PicturesToBeDeleted.Remove(file);
                 }
-
-                _room.PicturesToBeDeleted.Clear();
             }
 
-            // Clean up deleted picture file.
-            if (_room.PdfsToBeDeleted.Count > 0)
+            foreach (var file in _room.PdfsToBeDeleted.ToList())
             {
-                foreach (var file in _room.PdfsToBeDeleted)
+                var pdfPath = Path.Combine(App.PropertyBlobDataFolder, _room.PropertyId, _room.Id, file.PdfFilename);
+                var thumbnailPath = Path.Combine(App.PropertyBlobDataFolder, _room.PropertyId, _room.Id, file.ThumbnailFilename);
+                if (TryDeleteFiles(new[] { pdfPath, thumbnailPath }, cleanupFailures))
                 {
-                    /*
-                    if (_room.Pdfs.Remove(file))
-                    {
-                    }
-                    */
-                    var delFilePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _room.PropertyId, _room.Id, file.PdfFilename);
-                    File.Delete(delFilePath);
-                    delFilePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _room.PropertyId, _room.Id, file.PdfFilename);
-                    File.Delete(delFilePath);
+                    _room.PdfsToBeDeleted.Remove(file);
                 }
-
-                _room.PdfsToBeDeleted.Clear();
             }
 
             _unsavedRoomPictureFileList.Clear();
             _unsavedRoomPdfFileList.Clear();
             _unsavedRoomPdfThumbnailFileList.Clear();
+
+            _hasPendingFileCleanupAfterSave = cleanupFailures.Count > 0;
+            if (_hasPendingFileCleanupAfterSave)
+            {
+                IsDirty = true;
+                ShowAttachmentError($"保存しましたが、一部の削除済みファイルを削除できませんでした。次回の保存時に再試行します: {string.Join(", ", cleanupFailures)}");
+            }
         }
     }   
     private bool CanSave()
@@ -1466,16 +1482,16 @@ public sealed partial class ListingViewModel : ObservableRecipient,
                 continue;
             }
 
-            // TODO: check file ext for valid image type.
-            // TODO: set max file size?
-
-            // TODO: Create thumbnail image?
-
+            string extension = Path.GetExtension(filePath);
+            if (!IsSupportedImageExtension(extension))
+            {
+                ShowAttachmentError($"画像形式に対応していません: {Path.GetFileName(filePath)}");
+                continue;
+            }
 
             using var sourceStream = File.Open(filePath, FileMode.Open);
 
             string newId = Guid.CreateVersion7().ToString("N");
-            string extension = Path.GetExtension(System.IO.Path.GetFileName(filePath));
             string newFilename = newId + extension;
             var destFilePath = Path.Combine(_listingDataDirectoryPath, newFilename);
             //Debug.WriteLine($"{file} to {destFilePath}  @SetNewBuildingPicturesAsync()");
@@ -1505,8 +1521,21 @@ public sealed partial class ListingViewModel : ObservableRecipient,
         return true;
     }
 
+    private static bool IsSupportedImageExtension(string extension) =>
+        extension.Equals(".jpg", StringComparison.OrdinalIgnoreCase) ||
+        extension.Equals(".jpeg", StringComparison.OrdinalIgnoreCase) ||
+        extension.Equals(".png", StringComparison.OrdinalIgnoreCase) ||
+        extension.Equals(".gif", StringComparison.OrdinalIgnoreCase) ||
+        extension.Equals(".webp", StringComparison.OrdinalIgnoreCase);
+
+    private void ShowAttachmentError(string message)
+    {
+        InfoBarErrorMessage = message;
+        IsInfoBarErrorOpen = true;
+    }
+
     [RelayCommand(CanExecute = nameof(CanDeleteRoomPicture))]
-    private void DeleteRoomPicture(Models.Rent.Residentials.ListingPicture picUnit)
+    private async Task DeleteRoomPicture(Models.Rent.Residentials.ListingPicture picUnit)
     {
         if (_room is null)
         {
@@ -1518,7 +1547,10 @@ public sealed partial class ListingViewModel : ObservableRecipient,
             return;
         }
 
-        // TODO: show dialog to comfirm.
+        if (_dialogService is null || await _dialogService.ShowDeleteConfirmationDialog("この募集物件の写真を削除しますか？") != Microsoft.UI.Xaml.Controls.ContentDialogResult.Primary)
+        {
+            return;
+        }
 
         if (Pictures.Remove(picUnit))
         {
@@ -1561,93 +1593,80 @@ public sealed partial class ListingViewModel : ObservableRecipient,
             }
 
 
-            // TODO: set max file size?
-
-            string extension = Path.GetExtension(System.IO.Path.GetFileName(filePath));
-            if (!extension.Equals(".pdf", StringComparison.OrdinalIgnoreCase)) // TODO: check case.
+            string extension = Path.GetExtension(filePath);
+            if (!extension.Equals(".pdf", StringComparison.OrdinalIgnoreCase))
             {
+                ShowAttachmentError($"PDFファイルを選択してください: {Path.GetFileName(filePath)}");
                 continue;
             }
 
-            //using var sourceStream = File.Open(file, FileMode.Open);
-
-            StorageFile sfile = await StorageFile.GetFileFromPathAsync(filePath);
-            PdfDocument pdfDocument = await PdfDocument.LoadFromFileAsync(sfile);
-
-            if (pdfDocument.PageCount > 0)
+            try
             {
-                using PdfPage pdfPage = pdfDocument.GetPage(0);
-                using var stream = new InMemoryRandomAccessStream();
+                StorageFile sfile = await StorageFile.GetFileFromPathAsync(filePath);
+                PdfDocument pdfDocument = await PdfDocument.LoadFromFileAsync(sfile);
 
-                // Set screen standard DPI
-                //float targetDpi = 96f;
-                //float scaleFactor = targetDpi / 72f; 
-                //uint calculatedWidth = (uint)Math.Round(pdfPage.Size.Width * scaleFactor);
-
-                var options = new PdfPageRenderOptions
+                if (pdfDocument.PageCount > 0)
                 {
-                    // Set the desired target width in pixels (e.g., 1024px)
-                    // Aspect ratio is locked; height scales automatically.
-                    DestinationWidth = 512//calculatedWidth//1024
-                };
+                    using PdfPage pdfPage = pdfDocument.GetPage(0);
+                    using var stream = new InMemoryRandomAccessStream();
+                    var options = new PdfPageRenderOptions { DestinationWidth = 512 };
+                    await pdfPage.RenderToStreamAsync(stream, options);
 
-                await pdfPage.RenderToStreamAsync(stream, options);
+                    string newId = Guid.CreateVersion7().ToString("N");
+                    string newThumbnailFilename = newId + ".bmp";
+                    var thumbnailDestFilePath = Path.Combine(_listingDataDirectoryPath, newThumbnailFilename);
 
-                //var bitmapImage = new BitmapImage();
-                //await bitmapImage.SetSourceAsync(stream);
+                    using var destinationStream = File.Create(thumbnailDestFilePath);
+                    using var managedSourceStream = stream.AsStreamForRead();
+                    await managedSourceStream.CopyToAsync(destinationStream);
+                    _unsavedRoomPdfThumbnailFileList.Add(thumbnailDestFilePath);
 
-                string newId = Guid.CreateVersion7().ToString("N");
-                string newThumbnailFilename = newId + ".bmp";
-                var thumbnailDestFilePath = Path.Combine(_listingDataDirectoryPath, newThumbnailFilename);
+                    string newFilename = newId + extension;
+                    var pdfDestFilePath = Path.Combine(_listingDataDirectoryPath, newFilename);
+                    File.Copy(filePath, pdfDestFilePath);
+                    _unsavedRoomPdfFileList.Add(pdfDestFilePath);
 
-                using var destinationStream = File.Create(thumbnailDestFilePath);
-                using var managedSourceStream = stream.AsStreamForRead();
-                await managedSourceStream.CopyToAsync(destinationStream);
+                    var pdf = new Models.Rent.Residentials.ListingPdf(newId, newFilename, newThumbnailFilename, EntityStatus.New)
+                    {
+                        BasePath = _listingDataDirectoryPath,
+                        ParentViewModel = this
+                    };
 
-                // Keep track of unsaved files to delete them when discarding.
-                _unsavedRoomPdfThumbnailFileList.Add(thumbnailDestFilePath);
-
-                string newFilename = newId + extension;
-
-                var pdfDestFilePath = Path.Combine(_listingDataDirectoryPath, newFilename);
-                File.Copy(filePath, pdfDestFilePath);
-
-                // Keep track of unsaved files to delete them when discarding.
-                _unsavedRoomPdfFileList.Add(pdfDestFilePath);
-
-                var pdf = new Models.Rent.Residentials.ListingPdf(newId, newFilename, newThumbnailFilename, EntityStatus.New)
+                    Pdfs.Add(pdf);
+                    OpenBlobDirectoryCommand.NotifyCanExecuteChanged();
+                    DeleteRoomPdfCommand.NotifyCanExecuteChanged();
+                    IsDirty = true;
+                }
+                else
                 {
-                    BasePath = _listingDataDirectoryPath,
-                    ParentViewModel = this
-                };
-
-                Pdfs.Add(pdf);
-
-                OpenBlobDirectoryCommand.NotifyCanExecuteChanged();
-                DeleteRoomPdfCommand.NotifyCanExecuteChanged();
-
-                IsDirty = true;
+                    ShowAttachmentError($"PDFにページがありません: {Path.GetFileName(filePath)}");
+                }
             }
-            else
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Runtime.InteropServices.COMException or InvalidOperationException or ArgumentException)
             {
-                Debug.WriteLine("0 page.");
+                Debug.WriteLine($"Failed to import PDF '{filePath}': {ex}");
+                ShowAttachmentError($"PDFを読み込めませんでした: {Path.GetFileName(filePath)}。{ex.Message}");
             }
         }
     }
+
     private static bool CanAddNewRoomPdfs()
     {
         return true;
     }
 
     [RelayCommand(CanExecute = nameof(CanDeleteRoomPdf))]
-    private void DeleteRoomPdf(Models.Rent.Residentials.ListingPdf pdf)
+    private async Task DeleteRoomPdf(Models.Rent.Residentials.ListingPdf pdf)
     {
         if (pdf is null)
         {
             return;
         }
 
-        // TODO: show dialog to comfirm.
+        if (_dialogService is null || await _dialogService.ShowDeleteConfirmationDialog("この募集物件の図面を削除しますか？") != Microsoft.UI.Xaml.Controls.ContentDialogResult.Primary)
+        {
+            return;
+        }
 
         if (Pdfs.Remove(pdf))
         {
@@ -1671,8 +1690,9 @@ public sealed partial class ListingViewModel : ObservableRecipient,
             }
             catch (Exception ex)
             {
-                // TODO: show error to user.
-                Debug.WriteLine($"Error opening folder: {ex.Message}");
+                Debug.WriteLine($"Error opening folder: {ex}");
+                InfoBarErrorMessage = $"フォルダーを開けませんでした。{ex.Message}";
+                IsInfoBarErrorOpen = true;
             }
         }
     }
@@ -1723,16 +1743,15 @@ public sealed partial class ListingViewModel : ObservableRecipient,
                     res.Error.Operation + Environment.NewLine +
                     res.Error.MethodName + Environment.NewLine +
                     res.Error.FullDump);
-                //ErrorMain = res.Error;
-                //IsMainErrorInfoBarVisible = true;
-
-                // TODO: Show error message to user
+                ShowErrorInfoBar(res.Error);
                 return;
             }
 
             if (res.Person is null)
             {
                 Debug.WriteLine($"{lessorId} is null. Cannot open editor.");
+                InfoBarErrorMessage = "選択した貸主を読み込めませんでした。";
+                IsInfoBarErrorOpen = true;
                 return;
             }
 
@@ -1814,9 +1833,24 @@ public sealed partial class ListingViewModel : ObservableRecipient,
         }
 
         var result = await Task.Run(() => _dataAccessService.SelectBrokerById(selectedBroker.Id), _cts.Token);
-        if (result.IsError || result.Person is null)
+        if (result.IsError)
+        {
+            Debug.WriteLine(
+                result.Error.Title + Environment.NewLine +
+                result.Error.Message + Environment.NewLine +
+                result.Error.Description + Environment.NewLine +
+                result.Error.Operation + Environment.NewLine +
+                result.Error.MethodName + Environment.NewLine +
+                result.Error.FullDump);
+            ShowErrorInfoBar(result.Error);
+            return;
+        }
+
+        if (result.Person is null)
         {
             Debug.WriteLine($"Could not load broker '{selectedBroker.Id}'.");
+            InfoBarErrorMessage = "選択した宅建業者を読み込めませんでした。";
+            IsInfoBarErrorOpen = true;
             return;
         }
 

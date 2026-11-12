@@ -110,10 +110,10 @@
                             <ColumnDefinition Width="1*" MinWidth="320"></ColumnDefinition>
                         </Grid.ColumnDefinitions>
                         <Grid Grid.Row="0" Grid.Column="0">
-                            <TextBox Header="不動産ID" PlaceholderText="13桁の半角英数字" MaxLength="13" InputScope="Number" Text="{x:Bind ViewModel.FudousanId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Paste="TextBoxCleanNonDigitExact13_Paste" TextChanging="TextBox13DigitOnly_TextChanging"></TextBox>
+                            <TextBox Header="不動産番号" PlaceholderText="13桁の半角数字" MaxLength="13" InputScope="Number" Text="{x:Bind ViewModel.FudousanId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Paste="TextBoxCleanNonDigitExact13_Paste" TextChanging="TextBox13DigitOnly_TextChanging"></TextBox>
                         </Grid>
                         <Grid Grid.Row="0" Grid.Column="1" Margin="12,0,0,0">
-                            <TextBox Header="特定コード" PlaceholderText="4桁の半角英数字" MaxLength="4" InputScope="Number" Text="{x:Bind ViewModel.FudousanIdAdditionalCode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Paste="TextBoxCleanNonDigitExact4_Paste" TextChanging="TextBox4DigitOnly_TextChanging"></TextBox>
+                            <TextBox Header="特定コード" PlaceholderText="4桁の半角英数字（英字は大文字）" MaxLength="4" Text="{x:Bind ViewModel.FudousanIdAdditionalCode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Paste="TextBoxCleanNonDigitExact4_Paste" TextChanging="TextBox4DigitOnly_TextChanging"></TextBox>
                         </Grid>
                     </Grid>
                 </Border>

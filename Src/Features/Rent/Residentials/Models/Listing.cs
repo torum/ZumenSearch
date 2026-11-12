@@ -348,11 +348,7 @@ public sealed partial class Listing : ListingBase
             }
             else
             {
-                // TODO: show error
-                //field = string.Empty;
-                //IsModified = true;
-
-                throw new ArgumentOutOfRangeException("Chinryou", "Must be at least 0.");
+                throw new ArgumentOutOfRangeException(nameof(Chinryou), "Must be at least 0.");
             }
         }
     }

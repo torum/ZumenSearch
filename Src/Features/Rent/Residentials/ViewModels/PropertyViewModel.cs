@@ -51,6 +51,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     private readonly List<string> _unsavedBuildingPictureFileList = [];
     private readonly List<string> _unsavedBuildingPdfFileList = [];
     private readonly List<string> _unsavedBuildingPdfThumbnailFileList = [];
+    private bool _hasPendingFileCleanupAfterSave;
 
     private readonly CancellationTokenSource _cts = new();
     private bool _disposed;
@@ -97,7 +98,6 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
             // Reset errors
             IsNameHasError = false;
-            // TODO: more.
         }
         catch (Exception ex)
         {
@@ -353,8 +353,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             }
             else
             {
-                Debug.WriteLine($"FloorCountAboveGround: not * digits");
-                // TODO: show err?
+                ShowInputValidationError("地上階数は半角数字4桁以内で入力してください。");
             }
             /*
             if (Helpers.Common.CanConvertToPositiveNumber(text))
@@ -407,8 +406,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             }
             else
             {
-                Debug.WriteLine($"FloorCountBasement: not * digits");
-                // TODO: show err?
+                ShowInputValidationError("地下階数は半角数字4桁以内で入力してください。");
             }
         }
     }
@@ -448,8 +446,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             }
             else
             {
-                Debug.WriteLine($"TotalUnitCount: not * digits");
-                // TODO: show err?
+                ShowInputValidationError("総戸数は半角数字5桁以内で入力してください。");
             }
         }
     }
@@ -489,114 +486,49 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         }
     }
 
-    // 不動産ID (13桁)
+    // 不動産番号 (13桁)
     public string FudousanId
     {
         get => field ?? string.Empty;
         set
         {
-            // TODO: check 13桁.
-
-            if (field == value)
-            {
-                return;
-            }
-
             if (value is null)
             {
                 return;
             }
 
-            var text = value.Trim();
-            if (string.IsNullOrEmpty(text))
+            var text = Helpers.Common.NormalizeFullWidthCharacters(value).Trim();
+            if (field == text || !Regex.IsMatch(text, @"\A[0-9]{0,13}\z"))
             {
-                field = string.Empty;
-                IsDirty = true;
-                OnPropertyChanged();
                 return;
             }
 
-            var regex = new Regex(@"^(?:\d{13})?$");
-            if (regex.IsMatch(text))
-            {
-                field = text;
-                IsDirty = true;
-                OnPropertyChanged();
-            }
-            else
-            {
-                //Debug.WriteLine($"FudousanId: not 13 digits");
-                // TODO: show err?
-            }
-
-            /*
-            if (Helpers.Common.CanConvertToPositiveNumber(text))
-            {
-                field = text;
-                IsDirty = true;
-                OnPropertyChanged();
-            }
-            else
-            {
-                // Do nothing.
-                return;
-            }
-            */
+            field = text;
+            IsDirty = true;
+            OnPropertyChanged();
         }
     }
 
     // 特定コード（４桁）建物全体は0000
     public string FudousanIdAdditionalCode
     {
-        get => field ?? string.Empty; // keep non-null empty string.
+        get => field ?? string.Empty;
         set
         {
-            // TODO: check （４桁）
-
-            if (field == value)
-            {
-                return;
-            }
-
             if (value is null)
             {
                 return;
             }
 
-            var text = value.Trim();
-            if (string.IsNullOrEmpty(text))
+            var text = Helpers.Common.NormalizeFullWidthCharacters(value).Trim().ToUpperInvariant();
+            if (field == text || !Regex.IsMatch(text, @"\A[A-Z0-9]{0,4}\z"))
             {
-                field = string.Empty;
-                IsDirty = true;
-                OnPropertyChanged();
                 return;
             }
 
-            var regex = new Regex(@"^(?:\d{4})?$");
-            if (regex.IsMatch(text))
-            {
-                field = text;
-                IsDirty = true;
-                OnPropertyChanged();
-            }
-            else
-            {
-                //Debug.WriteLine($"FudousanIdAdditionalCode: not 4 digits");
-                // TODO: show err?
-            }
-            /*
-            if (Helpers.Common.CanConvertToPositiveNumber(text))
-            {
-                field = text;
-                IsDirty = true;
-                OnPropertyChanged();
-            }
-            else
-            {
-                // Do nothing.
-                return;
-            }
-            */
+            field = text;
+            IsDirty = true;
+            OnPropertyChanged();
         }
     } = "0000";
 
@@ -2467,11 +2399,21 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     #region == Public Methods ==
 
-    public void DiscardChanges()
+    public bool DiscardChanges()
     {
-        DiscardUnsavedFiles();
+        if (!DiscardUnsavedFiles())
+        {
+            return false;
+        }
+
+        if (_hasPendingFileCleanupAfterSave)
+        {
+            ShowInputValidationError("保存済みデータの削除済みファイルが残っています。ファイルの削除を完了するため、もう一度保存してください。");
+            return false;
+        }
 
         IsDirty = false;
+        return true;
     }
 
     public void Dispose()
@@ -2582,6 +2524,9 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             SelectedRailStation1.SetStationName(_building.Train1.RailStation?.StationName ?? "");
         }
         EkiToho1 = _building.Train1.EkiToho <= 0 ? "" : _building.Train1.EkiToho.ToString(CultureInfo.InvariantCulture);
+        BusStop1 = _building.BusStop1;
+        BusJyousya1 = _building.BusJyousya1 == 0 ? string.Empty : _building.BusJyousya1.ToString(CultureInfo.InvariantCulture);
+        BusStopToho1 = _building.BusStopToho1 == 0 ? string.Empty : _building.BusStopToho1.ToString(CultureInfo.InvariantCulture);
 
         SelectedRailLine2.SetLineCode(_building.Train2.RailLine?.LineCode ?? "");
         SelectedRailLine2.SetLineName(_building.Train2.RailLine?.LineName ?? "");
@@ -2592,6 +2537,9 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             SelectedRailStation2.SetStationName(_building.Train2.RailStation?.StationName ?? "");
         }
         EkiToho2 = _building.Train2.EkiToho <= 0 ? "" : _building.Train2.EkiToho.ToString(CultureInfo.InvariantCulture);
+        BusStop2 = _building.BusStop2;
+        BusJyousya2 = _building.BusJyousya2 == 0 ? string.Empty : _building.BusJyousya2.ToString(CultureInfo.InvariantCulture);
+        BusStopToho2 = _building.BusStopToho2 == 0 ? string.Empty : _building.BusStopToho2.ToString(CultureInfo.InvariantCulture);
 
         SelectedRailLine3.SetLineCode(_building.Train3.RailLine?.LineCode ?? "");
         SelectedRailLine3.SetLineName(_building.Train3.RailLine?.LineName ?? "");
@@ -2602,6 +2550,9 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             SelectedRailStation3.SetStationName(_building.Train3.RailStation?.StationName ?? "");
         }
         EkiToho3 = _building.Train3.EkiToho <= 0 ? "" : _building.Train3.EkiToho.ToString(CultureInfo.InvariantCulture);
+        BusStop3 = _building.BusStop3;
+        BusJyousya3 = _building.BusJyousya3 == 0 ? string.Empty : _building.BusJyousya3.ToString(CultureInfo.InvariantCulture);
+        BusStopToho3 = _building.BusStopToho3 == 0 ? string.Empty : _building.BusStopToho3.ToString(CultureInfo.InvariantCulture);
 
         SelectedRailLine4.SetLineCode(_building.Train4.RailLine?.LineCode ?? "");
         SelectedRailLine4.SetLineName(_building.Train4.RailLine?.LineName ?? "");
@@ -2612,6 +2563,9 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             SelectedRailStation4.SetStationName(_building.Train4.RailStation?.StationName ?? "");
         }
         EkiToho4 = _building.Train4.EkiToho <= 0 ? "" : _building.Train4.EkiToho.ToString(CultureInfo.InvariantCulture);
+        BusStop4 = _building.BusStop4;
+        BusJyousya4 = _building.BusJyousya4 == 0 ? string.Empty : _building.BusJyousya4.ToString(CultureInfo.InvariantCulture);
+        BusStopToho4 = _building.BusStopToho4 == 0 ? string.Empty : _building.BusStopToho4.ToString(CultureInfo.InvariantCulture);
 
         // Facilities
         HasAutolock = _building.HasAutolock;
@@ -2660,10 +2614,20 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         MotorcycleParkingFee = _building.MotorcycleParkingFee;
         SelectedMotorcycleParkingFeeTaxType = TaxTypes.First(item => item.Key == _building.MotorcycleParkingFeeTaxType);
         MotorcycleParkingNotes = _building.MotorcycleParkingNotes;
-        //TODO: Set other properties
 
+        SelectedKanriShutai = KanriShutais.First(item => item.Key == _building.KanriShutai);
+        KanriIsMaintenanceManagementIfIsKanriJisya = _building.KanriIsMaintenanceManagementIfIsKanriJisya;
+        KanriIsTenantManagementIfIsKanriJisya = _building.KanriIsTenantManagementIfIsKanriJisya;
+        KanriIsPaymentManagementIfIsKanriJisya = _building.KanriIsPaymentManagementIfIsKanriJisya;
+        KanriIsOtherManagementIfIsKanriJisya = _building.KanriIsOtherManagementIfIsKanriJisya;
+        KanriRemarkIfIsKanriJisya = _building.KanriRemarkIfIsKanriJisya;
+        KanriNameOfCompanyIfIsKanriTasya = _building.KanriNameOfCompanyIfIsKanriTasya;
+        KanriContactInfoOfCompanyIfIsKanriTasya = _building.KanriContactInfoOfCompanyIfIsKanriTasya;
+        KanriRemarkIfIsKanriTasya = _building.KanriRemarkIfIsKanriTasya;
+        KanriRemarkIfIsKanriKashinushi = _building.KanriRemarkIfIsKanriKashinushi;
 
         // Pictures:
+
         Pictures = new ObservableCollection<Models.Rent.Residentials.PropertyPicture>(_building.Pictures); // create a copy.
 
         foreach (var item in Pictures)
@@ -2941,6 +2905,12 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         IsInfoBarErrorOpen = isShowBar;
     }
 
+    private void ShowInputValidationError(string message)
+    {
+        InfoBarErrorMessage = message;
+        IsInfoBarErrorOpen = true;
+    }
+
     private bool SetValues()
     {
         if (!IsDirty)
@@ -2989,6 +2959,9 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                 _building.Train1.SetRailStation(string.Empty, string.Empty, string.Empty);
             }
             _building.Train1.SetEkiToho(Helpers.Common.ReplaceZenkakuNumbers(EkiToho1));
+            _building.SetBusStop1(BusStop1);
+            _building.SetBusJyousya1(Helpers.Common.ReplaceZenkakuNumbers(BusJyousya1));
+            _building.SetBusStopToho1(Helpers.Common.ReplaceZenkakuNumbers(BusStopToho1));
             // 交通2
             _building.Train2.SetRailLine(SelectedRailLine2.LineCode, SelectedRailLine2.LineName);
             if (SelectedRailLine2.LineCode.Equals(SelectedRailStation2.LineCode, StringComparison.Ordinal))
@@ -3000,6 +2973,9 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                 _building.Train2.SetRailStation(string.Empty, string.Empty, string.Empty);
             }
             _building.Train2.SetEkiToho(Helpers.Common.ReplaceZenkakuNumbers(EkiToho2));
+            _building.SetBusStop2(BusStop2);
+            _building.SetBusJyousya2(Helpers.Common.ReplaceZenkakuNumbers(BusJyousya2));
+            _building.SetBusStopToho2(Helpers.Common.ReplaceZenkakuNumbers(BusStopToho2));
             // 交通3
             _building.Train3.SetRailLine(SelectedRailLine3.LineCode, SelectedRailLine3.LineName);
             if (SelectedRailLine3.LineCode.Equals(SelectedRailStation3.LineCode, StringComparison.Ordinal))
@@ -3011,6 +2987,9 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                 _building.Train3.SetRailStation(string.Empty, string.Empty, string.Empty);
             }
             _building.Train3.SetEkiToho(Helpers.Common.ReplaceZenkakuNumbers(EkiToho3));
+            _building.SetBusStop3(BusStop3);
+            _building.SetBusJyousya3(Helpers.Common.ReplaceZenkakuNumbers(BusJyousya3));
+            _building.SetBusStopToho3(Helpers.Common.ReplaceZenkakuNumbers(BusStopToho3));
             // 交通4
             _building.Train4.SetRailLine(SelectedRailLine4.LineCode, SelectedRailLine4.LineName);
             if (SelectedRailLine4.LineCode.Equals(SelectedRailStation4.LineCode, StringComparison.Ordinal))
@@ -3022,9 +3001,9 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                 _building.Train4.SetRailStation(string.Empty, string.Empty, string.Empty);
             }
             _building.Train4.SetEkiToho(Helpers.Common.ReplaceZenkakuNumbers(EkiToho4));
-
-
-
+            _building.SetBusStop4(BusStop4);
+            _building.SetBusJyousya4(Helpers.Common.ReplaceZenkakuNumbers(BusJyousya4));
+            _building.SetBusStopToho4(Helpers.Common.ReplaceZenkakuNumbers(BusStopToho4));
 
             // Facilities
             _building.HasAutolock = HasAutolock;
@@ -3072,8 +3051,17 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             _building.MotorcycleParkingFee = MotorcycleParkingFee;
             _building.MotorcycleParkingFeeTaxType = SelectedMotorcycleParkingFeeTaxType.Key;
             _building.MotorcycleParkingNotes = MotorcycleParkingNotes;
-            // TODO: Set other properties
 
+            _building.SetKanriShutai(SelectedKanriShutai?.Key ?? Models.Rent.Residentials.Property.EnumKanriShutai.Unspecified);
+            _building.SetKanriIsMaintenanceManagementIfIsKanriJisya(KanriIsMaintenanceManagementIfIsKanriJisya);
+            _building.SetKanriIsTenantManagementIfIsKanriJisya(KanriIsTenantManagementIfIsKanriJisya);
+            _building.SetKanriIsPaymentManagementIfIsKanriJisya(KanriIsPaymentManagementIfIsKanriJisya);
+            _building.SetKanriIsOtherManagementIfIsKanriJisya(KanriIsOtherManagementIfIsKanriJisya);
+            _building.SetKanriRemarkIfIsKanriJisya(KanriRemarkIfIsKanriJisya);
+            _building.SetKanriNameOfCompanyIfIsKanriTasya(KanriNameOfCompanyIfIsKanriTasya);
+            _building.SetKanriContactInfoOfCompanyIfIsKanriTasya(KanriContactInfoOfCompanyIfIsKanriTasya);
+            _building.SetKanriRemarkIfIsKanriTasya(KanriRemarkIfIsKanriTasya);
+            _building.SetKanriRemarkIfIsKanriKashinushi(KanriRemarkIfIsKanriKashinushi);
         }
         catch (ArgumentException ex)
         {
@@ -3093,20 +3081,6 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
             return false;
         }
-
-
-
-        // TODO: Set other properties
-        // TODO: Don't forget to check if Helpers.Common.ReplaceZenkakuNumbers is needed.
-
-
-
-        
-        // TODO: Set other properties
-        // TODO: Don't forget to check if Helpers.Common.ReplaceZenkakuNumbers is needed.
-
-
-
 
         // Reset main ThumbnailImageFilePath here.
         _building.ThumbnailFilename = string.Empty;
@@ -3185,55 +3159,70 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         return true;
     }
 
-    private void DiscardUnsavedFiles()
+    private bool DiscardUnsavedFiles()
     {
-        if (_unsavedBuildingPictureFileList.Count > 0)
-        {
-            foreach (var file in _unsavedBuildingPictureFileList)
-            {
-                if (File.Exists(file))
-                {
-                    Debug.WriteLine($"Deleting unsaved picture file: {file}");
-                    File.Delete(file);
-                }
-            }
-            _unsavedBuildingPictureFileList.Clear();
-        }
+        var failures = new List<string>();
+        DeleteTrackedFiles(_unsavedBuildingPictureFileList, failures);
+        DeleteTrackedFiles(_unsavedBuildingPdfThumbnailFileList, failures);
+        DeleteTrackedFiles(_unsavedBuildingPdfFileList, failures);
 
-        if (_unsavedBuildingPdfThumbnailFileList.Count > 0)
+        if (_building.Status == EntityStatus.New && Directory.Exists(_propertyDataDirectoryPath))
         {
-            foreach (var file in _unsavedBuildingPdfThumbnailFileList)
+            try
             {
-                if (File.Exists(file))
-                {
-                    Debug.WriteLine($"Deleting unsaved PDF Thumbnail file: {file}");
-                    File.Delete(file);
-                }
-            }
-            _unsavedBuildingPdfThumbnailFileList.Clear();
-        }
-
-        if (_unsavedBuildingPdfFileList.Count > 0)
-        {
-            foreach (var file in _unsavedBuildingPdfFileList)
-            {
-                if (File.Exists(file))
-                {
-                    Debug.WriteLine($"Deleting unsaved PDF file: {file}");
-                    File.Delete(file);
-                }
-            }
-            _unsavedBuildingPdfFileList.Clear();
-        }
-
-        if (_building.Status == EntityStatus.New)
-        {
-            if (Directory.Exists(_propertyDataDirectoryPath))
-            {
-                Debug.WriteLine($"Deleting folder: {_propertyDataDirectoryPath}");
                 Directory.Delete(_propertyDataDirectoryPath, true);
             }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                Debug.WriteLine($"Failed to delete property data directory '{_propertyDataDirectoryPath}': {ex}");
+                failures.Add(_propertyDataDirectoryPath);
+            }
         }
+
+        if (failures.Count == 0)
+        {
+            return true;
+        }
+
+        ShowInputValidationError($"変更の破棄中にファイルを削除できませんでした。ファイルを閉じてから再試行してください: {string.Join(", ", failures)}");
+        return false;
+    }
+
+    private static void DeleteTrackedFiles(List<string> trackedFiles, List<string> failures)
+    {
+        foreach (var file in trackedFiles.ToList())
+        {
+            try
+            {
+                File.Delete(file);
+                trackedFiles.Remove(file);
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                Debug.WriteLine($"Failed to delete file '{file}': {ex}");
+                failures.Add(file);
+            }
+        }
+    }
+
+    private static bool TryDeleteFiles(IEnumerable<string> filePaths, List<string> failures)
+    {
+        var succeeded = true;
+        foreach (var filePath in filePaths)
+        {
+            try
+            {
+                File.Delete(filePath);
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                Debug.WriteLine($"Failed to delete file '{filePath}': {ex}");
+                failures.Add(filePath);
+                succeeded = false;
+            }
+        }
+
+        return succeeded;
     }
 
     #endregion
@@ -3263,8 +3252,6 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
             return;
         }
-
-        // TODO: more.
 
         if (!SetValues())
         {
@@ -3307,57 +3294,44 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             // Clear error infobar.
             IsInfoBarErrorOpen = false;
 
-            // Clean up deleted picture file.
-            if (_building.PicturesToBeDeleted.Count > 0)
+            var cleanupFailures = new List<string>();
+            foreach (var file in _building.PicturesToBeDeleted.ToList())
             {
-                foreach (var file in _building.PicturesToBeDeleted)
+                var picturePath = Path.Combine(App.PropertyBlobDataFolder, _building.Id, file.ImageFilename);
+                if (TryDeleteFiles(new[] { picturePath }, cleanupFailures))
                 {
-                    var delFilePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id, file.ImageFilename);
-                    File.Delete(delFilePath);
+                    _building.PicturesToBeDeleted.Remove(file);
                 }
-                _building.PicturesToBeDeleted.Clear();
             }
 
-            // Clean up deleted PDF and thumb file.
-            if (_building.PdfsToBeDeleted.Count > 0)
+            foreach (var file in _building.PdfsToBeDeleted.ToList())
             {
-                foreach (var file in _building.PdfsToBeDeleted)
+                var pdfPath = Path.Combine(App.PropertyBlobDataFolder, _building.Id, file.PdfFilename);
+                var thumbnailPath = Path.Combine(App.PropertyBlobDataFolder, _building.Id, file.ThumbnailFilename);
+                if (TryDeleteFiles(new[] { pdfPath, thumbnailPath }, cleanupFailures))
                 {
-                    var delFilePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id, file.PdfFilename);
-                    File.Delete(delFilePath);
-                    delFilePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id, file.ThumbnailFilename);
-                    File.Delete(delFilePath);
+                    _building.PdfsToBeDeleted.Remove(file);
                 }
-                _building.PdfsToBeDeleted.Clear();
             }
 
-            // Just in case clear LessorsToBeDeleted, BrokersToBeDeleted
             _building.LessorsToBeDeleted.Clear();
             _building.BrokersToBeDeleted.Clear();
 
-            // Clear rooms pic and pdfs and lessors
-            if (_building.RoomsToBeDeleted.Count > 0)
+            foreach (var room in _building.RoomsToBeDeleted.ToList())
             {
-                foreach (var room in _building.RoomsToBeDeleted)
+                var roomFiles = room.Pictures
+                    .Select(picture => Path.Combine(App.PropertyBlobDataFolder, _building.Id, picture.ImageFilename))
+                    .Concat(room.Pdfs.SelectMany(pdf => new[]
+                    {
+                        Path.Combine(App.PropertyBlobDataFolder, _building.Id, pdf.PdfFilename),
+                        Path.Combine(App.PropertyBlobDataFolder, _building.Id, pdf.ThumbnailFilename)
+                    }));
+
+                if (TryDeleteFiles(roomFiles, cleanupFailures))
                 {
-                    foreach (var roomPic in room.Pictures)
-                    {
-                        var delFilePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id, roomPic.ImageFilename);
-                        File.Delete(delFilePath);
-                    }
-
-                    foreach (var roomPdf in room.Pdfs)
-                    {
-                        var delFilePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id, roomPdf.PdfFilename);
-                        File.Delete(delFilePath);
-                        delFilePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id, roomPdf.ThumbnailFilename);
-                        File.Delete(delFilePath);
-                    }
-
-                    // Just in case clear LessorsToBeDeleted
                     room.LessorsToBeDeleted.Clear();
+                    _building.RoomsToBeDeleted.Remove(room);
                 }
-                _building.RoomsToBeDeleted.Clear();
             }
 
             _unsavedBuildingPictureFileList.Clear();
@@ -3383,6 +3357,13 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                 room.SetPropertyStatus(EntityStatus.Saved);
                 room.SetStatus(EntityStatus.Saved);
                 room.SetIsModified(false);
+            }
+
+            _hasPendingFileCleanupAfterSave = cleanupFailures.Count > 0;
+            if (_hasPendingFileCleanupAfterSave)
+            {
+                IsDirty = true;
+                ShowInputValidationError($"保存しましたが、一部の削除済みファイルを削除できませんでした。次回の保存時に再試行します: {string.Join(", ", cleanupFailures)}");
             }
 
             WeakReferenceMessenger.Default.Send(new Models.Messenger.PropertyUpdatedMessage(_building as Models.Base.PropertyBase));
@@ -3425,16 +3406,16 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                 continue;
             }
 
-            // TODO: check file ext for valid image type.
-            // TODO: set max file size?
-
-            // TODO: Create thumbnail image?
-
+            string extension = Path.GetExtension(filePath);
+            if (!IsSupportedImageExtension(extension))
+            {
+                ShowAttachmentError($"画像形式に対応していません: {Path.GetFileName(filePath)}");
+                continue;
+            }
 
             using var sourceStream = File.Open(filePath, FileMode.Open);
 
             string newId = Guid.CreateVersion7().ToString("N");
-            string extension = Path.GetExtension(System.IO.Path.GetFileName(filePath));
             string newFilename = newId + extension;
             var destFilePath = Path.Combine(_propertyDataDirectoryPath, newFilename);
             //Debug.WriteLine($"{file} to {destFilePath}  @SetNewBuildingPicturesAsync()");
@@ -3469,15 +3450,31 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         return true;
     }
 
+    private static bool IsSupportedImageExtension(string extension) =>
+        extension.Equals(".jpg", StringComparison.OrdinalIgnoreCase) ||
+        extension.Equals(".jpeg", StringComparison.OrdinalIgnoreCase) ||
+        extension.Equals(".png", StringComparison.OrdinalIgnoreCase) ||
+        extension.Equals(".gif", StringComparison.OrdinalIgnoreCase) ||
+        extension.Equals(".webp", StringComparison.OrdinalIgnoreCase);
+
+    private void ShowAttachmentError(string message)
+    {
+        InfoBarErrorMessage = message;
+        IsInfoBarErrorOpen = true;
+    }
+
     [RelayCommand(CanExecute = nameof(CanDeleteBuildingPicture))]
-    private void DeleteBuildingPicture(Models.Rent.Residentials.PropertyPicture picBldg)
+    private async Task DeleteBuildingPicture(Models.Rent.Residentials.PropertyPicture picBldg)
     {
         if (picBldg is null)
         {
             return;
         }
 
-        // TODO: show dialog to comfirm.
+        if (await _dialogService.ShowDeleteConfirmationDialog("この建物写真を削除しますか？") != Microsoft.UI.Xaml.Controls.ContentDialogResult.Primary)
+        {
+            return;
+        }
 
         if (Pictures.Remove(picBldg))
         {
@@ -3512,80 +3509,63 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                 continue;
             }
 
-            // TODO: check file ext for valid image type.
-            // TODO: set max file size?
-
-
-            string extension = Path.GetExtension(System.IO.Path.GetFileName(filePath));
-            if (!extension.Equals(".pdf", StringComparison.OrdinalIgnoreCase)) // TODO: check case.
+            string extension = Path.GetExtension(filePath);
+            if (!extension.Equals(".pdf", StringComparison.OrdinalIgnoreCase))
             {
+                ShowAttachmentError($"PDFファイルを選択してください: {Path.GetFileName(filePath)}");
                 continue;
             }
 
-            //using var sourceStream = File.Open(file, FileMode.Open);
-
-            StorageFile sfile = await StorageFile.GetFileFromPathAsync(filePath);
-            PdfDocument pdfDocument = await PdfDocument.LoadFromFileAsync(sfile);
-
-            if (pdfDocument.PageCount > 0)
+            try
             {
-                using PdfPage pdfPage = pdfDocument.GetPage(0);
-                using var stream = new InMemoryRandomAccessStream();
+                StorageFile sfile = await StorageFile.GetFileFromPathAsync(filePath);
+                PdfDocument pdfDocument = await PdfDocument.LoadFromFileAsync(sfile);
 
-                // Set screen standard DPI
-                //float targetDpi = 96f;
-                //float scaleFactor = targetDpi / 72f; 
-                //uint calculatedWidth = (uint)Math.Round(pdfPage.Size.Width * scaleFactor);
-
-                var options = new PdfPageRenderOptions
+                if (pdfDocument.PageCount > 0)
                 {
-                    // Set the desired target width in pixels (e.g., 1024px)
-                    // Aspect ratio is locked; height scales automatically.
-                    DestinationWidth = 512//calculatedWidth//1024
-                };
+                    using PdfPage pdfPage = pdfDocument.GetPage(0);
+                    using var stream = new InMemoryRandomAccessStream();
+                    var options = new PdfPageRenderOptions { DestinationWidth = 512 };
+                    await pdfPage.RenderToStreamAsync(stream, options);
 
-                await pdfPage.RenderToStreamAsync(stream, options);
+                    string newId = Guid.CreateVersion7().ToString("N");
+                    string newThumbnailFilename = newId + ".bmp";
+                    var thumbnailDestFilePath = Path.Combine(_propertyDataDirectoryPath, newThumbnailFilename);
 
-                //var bitmapImage = new BitmapImage();
-                //await bitmapImage.SetSourceAsync(stream);
+                    using var destinationStream = File.Create(thumbnailDestFilePath);
+                    using var managedSourceStream = stream.AsStreamForRead();
+                    await managedSourceStream.CopyToAsync(destinationStream);
+                    _unsavedBuildingPdfThumbnailFileList.Add(thumbnailDestFilePath);
 
-                string newId = Guid.CreateVersion7().ToString("N");
-                string newThumbnailFilename = newId + ".bmp";
-                var thumbnailDestFilePath = Path.Combine(_propertyDataDirectoryPath, newThumbnailFilename);
+                    string newFilename = newId + extension;
+                    var pdfDestFilePath = Path.Combine(_propertyDataDirectoryPath, newFilename);
+                    File.Copy(filePath, pdfDestFilePath);
+                    _unsavedBuildingPdfFileList.Add(pdfDestFilePath);
 
-                using var destinationStream = File.Create(thumbnailDestFilePath);
-                using var managedSourceStream = stream.AsStreamForRead();
-                await managedSourceStream.CopyToAsync(destinationStream);
+                    var pdf = new Models.Rent.Residentials.PropertyPdf(newId, newFilename, newThumbnailFilename, EntityStatus.New)
+                    {
+                        BasePath = _propertyDataDirectoryPath,
+                        ParentViewModel = this
+                    };
 
-                // Keep track of unsaved files to delete them when discarding.
-                _unsavedBuildingPdfThumbnailFileList.Add(thumbnailDestFilePath);
-
-                string newFilename = newId + extension;
-                var pdfDestFilePath = Path.Combine(_propertyDataDirectoryPath, newFilename);
-                File.Copy(filePath, pdfDestFilePath);
-
-                // Keep track of unsaved files to delete them when discarding.
-                _unsavedBuildingPdfFileList.Add(pdfDestFilePath);
-
-                var pdf = new Models.Rent.Residentials.PropertyPdf(newId, newFilename, newThumbnailFilename, EntityStatus.New)
+                    Pdfs.Add(pdf);
+                    OpenBuildingBlobDirectoryCommand.NotifyCanExecuteChanged();
+                    DeleteBuildingPdfCommand.NotifyCanExecuteChanged();
+                    IsDirty = true;
+                }
+                else
                 {
-                    BasePath = _propertyDataDirectoryPath,//System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id),
-                    ParentViewModel = this
-                };
-
-                Pdfs.Add(pdf);
-
-                OpenBuildingBlobDirectoryCommand.NotifyCanExecuteChanged();
-                DeleteBuildingPdfCommand.NotifyCanExecuteChanged();
-
-                IsDirty = true;
+                    ShowAttachmentError($"PDFにページがありません: {Path.GetFileName(filePath)}");
+                }
             }
-            else
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or COMException or InvalidOperationException or ArgumentException)
             {
-                Debug.WriteLine("0 page.");
+                Debug.WriteLine($"Failed to import PDF '{filePath}': {ex}");
+                ShowAttachmentError($"PDFを読み込めませんでした: {Path.GetFileName(filePath)}。{ex.Message}");
             }
         }
     }
+
     private static bool CanAddNewBuildingPdfs(List<string> filePathList)
     {
         if (filePathList.Count < 1)
@@ -3597,14 +3577,17 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     }
 
     [RelayCommand(CanExecute = nameof(CanDeleteBuildingPdf))]
-    private void DeleteBuildingPdf(Models.Rent.Residentials.PropertyPdf pdfBldg)
+    private async Task DeleteBuildingPdf(Models.Rent.Residentials.PropertyPdf pdfBldg)
     {
         if (pdfBldg is null)
         {
             return;
         }
 
-        // TODO: show dialog to comfirm.
+        if (await _dialogService.ShowDeleteConfirmationDialog("この建物図面を削除しますか？") != Microsoft.UI.Xaml.Controls.ContentDialogResult.Primary)
+        {
+            return;
+        }
 
         if (Pdfs.Remove(pdfBldg))
         {
@@ -3628,8 +3611,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             }
             catch (Exception ex)
             {
-                // TODO: show error to user.
-                Debug.WriteLine($"Error opening folder: {ex.Message}");
+                Debug.WriteLine($"Error opening folder: {ex}");
+                ShowInputValidationError($"フォルダーを開けませんでした。{ex.Message}");
             }
         }
     }
@@ -3729,9 +3712,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             }
             catch (COMException)
             {
-                // TODO: should we remove the window from the list? It may have been closed already.
-                //mainVM.RoomEditorList.Remove(editWin);
-                //ChildEditorList.Remove(editWin);
+                WeakReferenceMessenger.Default.Send(new WindowClosedMessage<Microsoft.UI.Xaml.Window>(editWin));
             }
         }
 
@@ -3795,7 +3776,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     }
 
     [RelayCommand(CanExecute = nameof(DeleteSelectedRoomCanExecute))]
-    private void DeleteSelectedRoom(Models.Rent.Residentials.Listing room)
+    private async Task DeleteSelectedRoom(Models.Rent.Residentials.Listing room)
     {
         if (room is null)
         {
@@ -3832,14 +3813,15 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             }
             catch (COMException)
             {
-                // 
-                //mainVM.RoomEditorList.Remove(editWin);
-                //ChildEditorList.Remove(editWin);
+                WeakReferenceMessenger.Default.Send(new WindowClosedMessage<Microsoft.UI.Xaml.Window>(editWin));
             }
         }
 
 
-        // TODO: show dialog to comfirm.
+        if (await _dialogService.ShowDeleteConfirmationDialog("この募集物件を削除しますか？") != Microsoft.UI.Xaml.Controls.ContentDialogResult.Primary)
+        {
+            return;
+        }
 
         if (Rooms.Remove(room))
         {
@@ -4112,16 +4094,14 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                     res.Error.Operation + Environment.NewLine +
                     res.Error.MethodName + Environment.NewLine +
                     res.Error.FullDump);
-                //ErrorMain = res.Error;
-                //IsMainErrorInfoBarVisible = true;
-
-                // TODO: Show error message to user
+                ShowErrorInfoBar(res.Error);
                 return;
             }
 
             if (res.Person is null)
             {
                 Debug.WriteLine($"{lessorId} is null. Cannot open editor.");
+                ShowInputValidationError("選択した貸主を読み込めませんでした。");
                 return;
             }
 
@@ -4217,13 +4197,14 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                     res.Error.MethodName + Environment.NewLine +
                     res.Error.FullDump);
 
-                // TODO: Show error message to user
+                ShowErrorInfoBar(res.Error);
                 return;
             }
 
             if (res.Person is null)
             {
                 Debug.WriteLine($"{brokerId} is null. Cannot open editor.");
+                ShowInputValidationError("選択した宅建業者を読み込めませんでした。");
                 return;
             }
 

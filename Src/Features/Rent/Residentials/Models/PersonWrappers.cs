@@ -8,9 +8,6 @@ namespace ZumenSearch.Models.Rent.Residentials;
 #pragma warning disable IDE0079 // Remove unnecessary suppression
 #pragma warning disable IDE0290 // Use primary constructor
 
-// TODO: See if reuse this with broker
-
-
 // WinUI3 workaround. (to access viewmodel from inside itemrepeater's DataTemplate)
 public sealed partial class PersonWrapperForPropertyViewModel : ObservableObject // needs to be Observable in order to update Person value.
 {

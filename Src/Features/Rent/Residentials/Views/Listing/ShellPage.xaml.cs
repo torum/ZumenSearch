@@ -62,7 +62,6 @@ public sealed partial class ShellPage : Page
         _navigationlService.Initialize(this.ContentFrame, _pages);
 
         this.Loaded += ShellPage_Loaded;
-        this.Unloaded += ShellPage_Unloaded;
         this.BreadcrumbBar1.ItemClicked += BreadcrumbBar_ItemClicked;
 
         Window.Title = "賃貸住居用：募集物件";
@@ -92,13 +91,9 @@ public sealed partial class ShellPage : Page
 
             if (result == ContentDialogResult.Primary)
             {
-                if (ViewModel.IsDirty)
+                if (ViewModel.IsDirty && ViewModel.SaveCommand.CanExecute(null))
                 {
-                    //ViewModel.Save();
-                    if (ViewModel.SaveCommand.CanExecute(null))
-                    {
-                        ViewModel.SaveCommand.Execute(null);
-                    }
+                    await ViewModel.SaveCommand.ExecuteAsync(null);
                 }
 
                 if (ViewModel.IsDirty == false)
@@ -108,10 +103,10 @@ public sealed partial class ShellPage : Page
             }
             else if (result == ContentDialogResult.Secondary)
             {
-                // Discard change and close.
-                ViewModel.DiscardChanges();
-
-                Window.Close();
+                if (ViewModel.DiscardChanges())
+                {
+                    Window.Close();
+                }
             }
             else if (result == ContentDialogResult.None)
             {
@@ -124,11 +119,6 @@ public sealed partial class ShellPage : Page
     {
         // XamlRoot is no longer null.
         _dialogService.Initialize(this.XamlRoot, Window);
-    }
-
-    private void ShellPage_Unloaded(object sender, RoutedEventArgs e)
-    {
-        //
     }
 
     private void Window_Activated(object sender, Microsoft.UI.Xaml.WindowActivatedEventArgs args)
@@ -197,10 +187,9 @@ public sealed partial class ShellPage : Page
             }
         }
 
-        //mainVM.RoomEditorList.Remove(ewin);
-
         // Update the selected search result's values such as name if it exists. Also, update building window's rooms list.
         WeakReferenceMessenger.Default.Send(new Models.Messenger.WindowClosedMessage<Microsoft.UI.Xaml.Window>(ewin));
+        ViewModel.Dispose();
     }
 
     private void BreadcrumbBar_ItemClicked(BreadcrumbBar sender, BreadcrumbBarItemClickedEventArgs args)
@@ -354,13 +343,6 @@ public sealed partial class ShellPage : Page
     {
         // set this first.
         args.Handled = true;
-
-        if (args.KeyboardAccelerator.Key == Windows.System.VirtualKey.F1)
-        {
-            // TODO:
-
-            return;
-        }
 
         if (args.KeyboardAccelerator.Modifiers == Windows.System.VirtualKeyModifiers.Menu)
         {

@@ -121,76 +121,14 @@ public sealed partial class BasicPage : Page
     private void TextBox4DigitOnly_TextChanging(TextBox sender, TextBoxTextChangingEventArgs args)
 #pragma warning restore CA1822 // Mark members as static
     {
-        var text = ((TextBox)sender).Text;
-
-        if (string.IsNullOrEmpty(text))
-        {
-            ((TextBox)sender).BorderBrush = (App.Current.Resources["TextControlBorderBrush"] as Brush)!;
-            return;
-        }
-
-        string pattern = @"^\d{5,}$"; // 5 or more digits
-        if (Regex.IsMatch(text, pattern))
-        {
-            ((TextBox)sender).BorderBrush = new SolidColorBrush(Colors.Red);
-            return;
-        }
-
-        var regex = new Regex(@"^(?:\d{4})?$");//new Regex(@"^\d{4}$");
-        if (regex.IsMatch(text))
-        {
-            ((TextBox)sender).BorderBrush = (App.Current.Resources["TextControlBorderBrush"] as Brush)!;
-        }
-        else
-        {
-            regex = new Regex(@"^(?:\d{0,4})?$");//new Regex(@"^\d{13}$");
-            if (regex.IsMatch(text))
-            {
-                ((TextBox)sender).BorderBrush = new SolidColorBrush(Colors.Yellow);
-            }
-            else
-            {
-                ((TextBox)sender).BorderBrush = new SolidColorBrush(Colors.Red);
-            }
-        }
+        UpdateFudousanIdComponentBorder(sender, 4, allowLetters: true);
     }
 
 #pragma warning disable CA1822 // Mark members as static
     private void TextBox13DigitOnly_TextChanging(TextBox sender, TextBoxTextChangingEventArgs args)
 #pragma warning restore CA1822 // Mark members as static
     {
-        var text = ((TextBox)sender).Text;
-
-        if (string.IsNullOrEmpty(text))
-        {
-            ((TextBox)sender).BorderBrush = (App.Current.Resources["TextControlBorderBrush"] as Brush)!;
-            return;
-        }
-
-        string pattern = @"^\d{14,}$"; // 14 or more digits
-        if (Regex.IsMatch(text, pattern))
-        {
-            ((TextBox)sender).BorderBrush = new SolidColorBrush(Colors.Red);
-            return;
-        }
-
-        var regex = new Regex(@"^(?:\d{13})?$");//new Regex(@"^\d{13}$");
-        if (regex.IsMatch(text))
-        {
-            ((TextBox)sender).BorderBrush = (App.Current.Resources["TextControlBorderBrush"] as Brush)!;
-        }
-        else
-        {
-            regex = new Regex(@"^(?:\d{0,13})?$");//new Regex(@"^\d{13}$");
-            if (regex.IsMatch(text))
-            {
-                ((TextBox)sender).BorderBrush = new SolidColorBrush(Colors.Yellow);
-            }
-            else
-            {
-                ((TextBox)sender).BorderBrush = new SolidColorBrush(Colors.Red);
-            }
-        }
+        UpdateFudousanIdComponentBorder(sender, 13, allowLetters: false);
     }
 
     private async void TextBoxCleanNonDigitMax4_Paste(object sender, TextControlPasteEventArgs e)
@@ -294,108 +232,58 @@ public sealed partial class BasicPage : Page
     private async void TextBoxCleanNonDigitExact4_Paste(object sender, TextControlPasteEventArgs e)
     {
         e.Handled = true;
-
-        var textBox = sender as TextBox;
-        if (textBox == null) return;
-
-        var dataPackageView = Clipboard.GetContent();
-        if (dataPackageView.Contains(StandardDataFormats.Text))
+        if (sender is TextBox textBox)
         {
-            // Fetch text asynchronously
-            string originalText = await dataPackageView.GetTextAsync();
-
-            string cleanedText = Helpers.Common.ReplaceZenkakuNumbers(originalText);
-
-            // Manually insert the manipulated text at the current cursor position
-            int selectionStart = textBox.SelectionStart;
-
-            // Remove any currently highlighted text before inserting
-            if (textBox.SelectionLength > 0)
-            {
-                textBox.Text = textBox.Text.Remove(selectionStart, textBox.SelectionLength);
-            }
-
-            // Inject the text
-            textBox.Text = textBox.Text.Insert(selectionStart, cleanedText);
-
-            // Move the caret forward to the end of your newly pasted text
-            textBox.SelectionStart = selectionStart + cleanedText.Length;
-
-            string pattern = @"^\d{5,}$"; // 10 or more digits
-            if (Regex.IsMatch(textBox.Text, pattern))
-            {
-                ((TextBox)sender).BorderBrush = new SolidColorBrush(Colors.Red);
-                return;
-            }
-
-            var regex = new Regex(@"^(?:\d{4})?$");
-            if (!regex.IsMatch(textBox.Text))
-            {
-                regex = new Regex(@"^(?:\d{0,4})?$");
-                if (!regex.IsMatch(textBox.Text))
-                {
-                    ((TextBox)sender).BorderBrush = new SolidColorBrush(Colors.Red);
-                }
-                else
-                {
-                    ((TextBox)sender).BorderBrush = new SolidColorBrush(Colors.Yellow);
-                }
-            }
-            else
-            {
-                ((TextBox)sender).BorderBrush = (App.Current.Resources["TextControlBorderBrush"] as Brush)!;
-            }
+            await PasteFudousanIdComponentAsync(textBox, allowLetters: true);
         }
     }
 
     private async void TextBoxCleanNonDigitExact13_Paste(object sender, TextControlPasteEventArgs e)
     {
         e.Handled = true;
-
-        var textBox = sender as TextBox;
-        if (textBox == null) return;
-
-        var dataPackageView = Clipboard.GetContent();
-        if (dataPackageView.Contains(StandardDataFormats.Text))
+        if (sender is TextBox textBox)
         {
-            // Fetch text asynchronously
-            string originalText = await dataPackageView.GetTextAsync();
-
-            string cleanedText = Helpers.Common.ReplaceZenkakuNumbers(originalText);
-
-            // Manually insert the manipulated text at the current cursor position
-            int selectionStart = textBox.SelectionStart;
-
-            // Remove any currently highlighted text before inserting
-            if (textBox.SelectionLength > 0)
-            {
-                textBox.Text = textBox.Text.Remove(selectionStart, textBox.SelectionLength);
-            }
-
-            // Inject the text
-            textBox.Text = textBox.Text.Insert(selectionStart, cleanedText);
-
-            // Move the caret forward to the end of your newly pasted text
-            textBox.SelectionStart = selectionStart + cleanedText.Length;
-
-            var regex = new Regex(@"^(?:\d{13})?$");
-            if (!regex.IsMatch(textBox.Text))
-            {
-                regex = new Regex(@"^(?:\d{0,13})?$");
-                if (!regex.IsMatch(textBox.Text))
-                {
-                    ((TextBox)sender).BorderBrush = new SolidColorBrush(Colors.Red);
-                }
-                else
-                {
-                    ((TextBox)sender).BorderBrush = new SolidColorBrush(Colors.Yellow);
-                }
-            }
-            else
-            {
-                ((TextBox)sender).BorderBrush = (App.Current.Resources["TextControlBorderBrush"] as Brush)!;
-            }
+            await PasteFudousanIdComponentAsync(textBox, allowLetters: false);
         }
+    }
+
+    private static void UpdateFudousanIdComponentBorder(TextBox textBox, int expectedLength, bool allowLetters)
+    {
+        var text = Helpers.Common.NormalizeFullWidthCharacters(textBox.Text).ToUpperInvariant();
+        var pattern = allowLetters ? @"\A[A-Z0-9]{0," + expectedLength + @"}\z" : @"\A[0-9]{0," + expectedLength + @"}\z";
+
+        if (!Regex.IsMatch(text, pattern))
+        {
+            textBox.BorderBrush = new SolidColorBrush(Colors.Red);
+        }
+        else if (text.Length > 0 && text.Length < expectedLength)
+        {
+            textBox.BorderBrush = new SolidColorBrush(Colors.Yellow);
+        }
+        else
+        {
+            textBox.BorderBrush = (App.Current.Resources["TextControlBorderBrush"] as Brush)!;
+        }
+    }
+
+    private static async Task PasteFudousanIdComponentAsync(TextBox textBox, bool allowLetters)
+    {
+        var dataPackageView = Clipboard.GetContent();
+        if (!dataPackageView.Contains(StandardDataFormats.Text))
+        {
+            return;
+        }
+
+        var pastedText = Helpers.Common.NormalizeFullWidthCharacters(await dataPackageView.GetTextAsync());
+        if (allowLetters)
+        {
+            pastedText = pastedText.ToUpperInvariant();
+        }
+
+        var selectionStart = textBox.SelectionStart;
+        textBox.Text = textBox.Text.Remove(selectionStart, textBox.SelectionLength).Insert(selectionStart, pastedText);
+        textBox.SelectionStart = Math.Min(selectionStart + pastedText.Length, textBox.Text.Length);
+        UpdateFudousanIdComponentBorder(textBox, allowLetters ? 4 : 13, allowLetters);
     }
 
     private async void TextBox_MaxLength_Paste(object sender, TextControlPasteEventArgs e)

@@ -10,6 +10,8 @@ public interface IDialogGenericService
 
     Task<ContentDialogResult> ShowEditorCloseConfirmationDialog();
 
+    Task<ContentDialogResult> ShowDeleteConfirmationDialog(string message);
+
     Task<Models.SearchResult.PersonSearchResultItem?> ShowLessorSelectDialog(ViewModels.Dialogs.LessorSelectViewModel viewModel);
 
     Task<Models.SearchResult.PersonSearchResultItem?> ShowBrokerSelectDialog(ViewModels.Dialogs.BrokerSelectViewModel viewModel);

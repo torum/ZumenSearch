@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Text.RegularExpressions;
 using ZumenSearch.Models.Base;
 
 #pragma warning disable IDE0079 // Remove unnecessary suppression
@@ -67,23 +68,6 @@ public sealed partial class Property : PropertyBase
 
             field = value;
             IsModified = true;
-
-            /*
-            var text = Helpers.Common.ReplaceZenkakuNumber(value.Trim());
-
-            if (Helpers.Common.CanConvertToPositiveNumber(text))
-            {
-                field = text;
-                IsDirty = true;
-            }
-            else
-            {
-                // TODO: show error
-                field = string.Empty;
-                IsDirty = true;
-            }
-            */
-
         }
     }
 
@@ -100,39 +84,7 @@ public sealed partial class Property : PropertyBase
 
             field = value;
             IsModified = true;
-
         }
-        /*
-        get => field ?? string.Empty;
-        set
-        {
-            if (field == value)
-            {
-                return;
-            }
-
-            if (value is null)
-            {
-                return;
-            }
-
-            var text = Helpers.Common.ReplaceZenkakuNumber(value.Trim());
-
-            if (Helpers.Common.CanConvertToPositiveNumber(text))
-            {
-                field = text;
-                IsDirty = true;
-            }
-            else
-            {
-                // TODO: show error
-                field = string.Empty;
-                IsDirty = true;
-            }
-
-            OnPropertyChanged();
-        }
-        */
     }
 
     // 総戸数
@@ -148,39 +100,7 @@ public sealed partial class Property : PropertyBase
 
             field = value;
             IsModified = true;
-
         }
-        /*
-        get => field ?? string.Empty;
-        set
-        {
-            if (field == value)
-            {
-                return;
-            }
-
-            if (value is null)
-            {
-                return;
-            }
-
-            var text = Helpers.Common.ReplaceZenkakuNumber(value.Trim());
-
-            if (Helpers.Common.CanConvertToPositiveNumber(text))
-            {
-                field = text;
-                IsDirty = true;
-            }
-            else
-            {
-                // TODO: show error
-                field = string.Empty;
-                IsDirty = true;
-            }
-
-            OnPropertyChanged();
-        }
-        */
     }
 
     // 築年月
@@ -201,8 +121,6 @@ public sealed partial class Property : PropertyBase
         get => field ?? string.Empty;
         private set
         {
-            // TODO: check 13桁.
-
             field = value;
             IsModified = true;
         }
@@ -214,9 +132,6 @@ public sealed partial class Property : PropertyBase
         get => field ?? string.Empty; // keep non-null empty string.
         private set
         {
-            // TODO: check ４桁.
-
-
             field = value;
             IsModified = true;
         }
@@ -320,238 +235,32 @@ public sealed partial class Property : PropertyBase
 
     #endregion
 
-    #region == ガス ==
-
-    /*
-    public bool Ap_HasGas
-    {
-        get => _hasGas;
-        set => SetProperty(ref _hasGas, value);
-    }
-
-    public string Kind
-    {
-        get => _kind;
-        set => SetProperty(ref _kind, value);
-    }
-
-    public string Detail
-    {
-        get => _detail;
-        set => SetProperty(ref _detail, value);
-    }
-    */
-
-    #endregion
-
-    #region == 水道 ==
-
-    /*
-    public string TapWaterKind
-    {
-        get => _tapWaterKind;
-        set => SetProperty(ref _tapWaterKind, value);
-    }
-
-    public string SewerageKind
-    {
-        get => _sewerageKind;
-        set => SetProperty(ref _sewerageKind, value);
-    }
-
-    public string TapWaterDetail
-    {
-        get => _tapWaterDetail;
-        set => SetProperty(ref _tapWaterDetail, value);
-    }
-
-    public string SewerageDetail
-    {
-        get => _sewerageDetail;
-        set => SetProperty(ref _sewerageDetail, value);
-    }
-    */
-
-    #endregion
-
-    #region == 共聴設備 ==
-
-    /*
-    public bool GroundDigital
-    {
-        get => _groundDigital;
-        set => SetProperty(ref _groundDigital, value);
-    }
-
-    public bool BsAntenna
-    {
-        get => _bsAntenna;
-        set => SetProperty(ref _bsAntenna, value);
-    }
-
-    public bool CsAntenna
-    {
-        get => _csAntenna;
-        set => SetProperty(ref _csAntenna, value);
-    }
-
-    public bool Catv
-    {
-        get => _catv;
-        set => SetProperty(ref _catv, value);
-    }
-
-    public bool Usen
-    {
-        get => _usen;
-        set => SetProperty(ref _usen, value);
-    }
-
-    public bool Internet
-    {
-        get => _internet;
-        set => SetProperty(ref _internet, value);
-    }
-
-    public bool Fiber
-    {
-        get => _fiber;
-        set => SetProperty(ref _fiber, value);
-    }
-
-    public bool InternetFree
-    {
-        get => _internetFree;
-        set => SetProperty(ref _internetFree, value);
-    }
-
-    public string TvAntennaDetail
-    {
-        get => _tvAntennaDetail;
-        set => SetProperty(ref _tvAntennaDetail, value);
-    }
-
-    public string InternetDetail
-    {
-        get => _internetDetail;
-        set => SetProperty(ref _internetDetail, value);
-    }
-    */
-
-    #endregion
-
-    #region == 駐車場 ==
-
-    /*
-    public bool Available
-    {
-        get => _available;
-        set => SetProperty(ref _available, value);
-    }
-
-    public bool IsFree
-    {
-        get => _isFree;
-        set => SetProperty(ref _isFree, value);
-    }
-
-    public string ContractType
-    {
-        get => _contractType;
-        set => SetProperty(ref _contractType, value);
-    }
-
-    public string Fee
-    {
-        get => _fee;
-        set => SetProperty(ref _fee, value);
-    }
-
-    public string FeeTaxType
-    {
-        get => _feeTaxType;
-        set => SetProperty(ref _feeTaxType, value);
-    }
-
-    public string Availability
-    {
-        get => _availability;
-        set => SetProperty(ref _availability, value);
-    }
-
-    public string Spaces
-    {
-        get => _spaces;
-        set => SetProperty(ref _spaces, value);
-    }
-
-    public string Distance
-    {
-        get => _distance;
-        set => SetProperty(ref _distance, value);
-    }
-
-    public string Notes
-    {
-        get => _notes;
-        set => SetProperty(ref _notes, value);
-    }
-    */
-
-    #endregion
-
-    #region == 駐輪場 ==
-
-
-
-    #endregion
-
-    #region == バイク置き場 ==
-
-
-
-    #endregion
-
     #endregion
 
     #region == 管理 ==
 
-    // KanriShutai：建物管理主体
     public enum EnumKanriShutai
     {
         Unspecified, Jisya, Tasya, Kashinushi
     }
 
-    // TODO: more.
+    public EnumKanriShutai KanriShutai
+    {
+        get;
+        private set { field = value; IsModified = true; }
+    } = EnumKanriShutai.Unspecified;
+
+    public bool KanriIsMaintenanceManagementIfIsKanriJisya { get; private set { field = value; IsModified = true; } }
+    public bool KanriIsTenantManagementIfIsKanriJisya { get; private set { field = value; IsModified = true; } }
+    public bool KanriIsPaymentManagementIfIsKanriJisya { get; private set { field = value; IsModified = true; } }
+    public bool KanriIsOtherManagementIfIsKanriJisya { get; private set { field = value; IsModified = true; } }
+    public string KanriRemarkIfIsKanriJisya { get => field ?? string.Empty; private set { field = value; IsModified = true; } } = string.Empty;
+    public string KanriNameOfCompanyIfIsKanriTasya { get => field ?? string.Empty; private set { field = value; IsModified = true; } } = string.Empty;
+    public string KanriContactInfoOfCompanyIfIsKanriTasya { get => field ?? string.Empty; private set { field = value; IsModified = true; } } = string.Empty;
+    public string KanriRemarkIfIsKanriTasya { get => field ?? string.Empty; private set { field = value; IsModified = true; } } = string.Empty;
+    public string KanriRemarkIfIsKanriKashinushi { get => field ?? string.Empty; private set { field = value; IsModified = true; } } = string.Empty;
 
     #endregion
-
-    #region == 写真 ==
-
-
-
-    #endregion
-
-    #region == 図面 ==
-
-
-
-    #endregion
-
-    #region == 貸主 ==
-
-
-
-    #endregion
-
-    #region == 宅建業者 ==
-
-
-
-    #endregion
-
-    // TODO: More.
-
 
     #region == 物件に属するリスト == 
 
@@ -637,7 +346,6 @@ public sealed partial class Property : PropertyBase
     {
         if (string.IsNullOrEmpty(Str))
         {
-            // TODO:
             PropertyKind = new PropertyKindTypeLabel(PropertyKindType.Unspecified);
             return;
         }
@@ -767,33 +475,72 @@ public sealed partial class Property : PropertyBase
 
     public void SetFudousanId(string value)
     {
-        ValidateFudousanId(value);
-        FudousanId = value;
+        ArgumentNullException.ThrowIfNull(value);
+
+        var normalizedValue = Helpers.Common.NormalizeFullWidthCharacters(value).Trim();
+        ValidateFudousanId(normalizedValue);
+        FudousanId = normalizedValue;
     }
+
     private static void ValidateFudousanId(string value)
     {
-        // TODO: Validate that the trimmed ID contains exactly 13 digits.
+        if (value.Length > 0 && !Regex.IsMatch(value, @"\A[0-9]{13}\z"))
+        {
+            throw new ArgumentException("不動産番号は半角数字13桁で入力してください。", nameof(value));
+        }
     }
 
     public void SetFudousanIdAdditionalCode(string value)
     {
-        ValidateFudousanIdAdditionalCode(value);
-        FudousanIdAdditionalCode = value;
+        ArgumentNullException.ThrowIfNull(value);
+
+        var normalizedValue = Helpers.Common.NormalizeFullWidthCharacters(value).Trim().ToUpperInvariant();
+        ValidateFudousanIdAdditionalCode(normalizedValue);
+        FudousanIdAdditionalCode = normalizedValue;
     }
+
     private static void ValidateFudousanIdAdditionalCode(string value)
     {
-        // TODO: Validate that the trimmed additional code contains exactly 4 digits.
+        if (value.Length > 0 && !Regex.IsMatch(value, @"\A[A-Z0-9]{4}\z"))
+        {
+            throw new ArgumentException("特定コードは半角英数字4桁（英字は大文字）で入力してください。", nameof(value));
+        }
     }
 
     public void SetRemarks(string value)
     {
-        // TODO: Validate remarks if necessary.
         Remarks = value;
     }
 
+    public void SetKanriShutai(EnumKanriShutai value)
+    {
+        if (!Enum.IsDefined(value))
+        {
+            throw new ArgumentOutOfRangeException(nameof(value), value, "Invalid management type.");
+        }
 
-    // 以下TODO:
+        KanriShutai = value;
+    }
 
+    public void SetKanriShutaiFromString(string value)
+    {
+        if (!Enum.TryParse<EnumKanriShutai>(value, out var result) || !Enum.IsDefined(result) || !string.Equals(value, result.ToString(), StringComparison.Ordinal))
+        {
+            throw new FormatException($"Invalid management type: {value}");
+        }
+
+        SetKanriShutai(result);
+    }
+
+    public void SetKanriIsMaintenanceManagementIfIsKanriJisya(bool value) => KanriIsMaintenanceManagementIfIsKanriJisya = value;
+    public void SetKanriIsTenantManagementIfIsKanriJisya(bool value) => KanriIsTenantManagementIfIsKanriJisya = value;
+    public void SetKanriIsPaymentManagementIfIsKanriJisya(bool value) => KanriIsPaymentManagementIfIsKanriJisya = value;
+    public void SetKanriIsOtherManagementIfIsKanriJisya(bool value) => KanriIsOtherManagementIfIsKanriJisya = value;
+    public void SetKanriRemarkIfIsKanriJisya(string value) => KanriRemarkIfIsKanriJisya = value;
+    public void SetKanriNameOfCompanyIfIsKanriTasya(string value) => KanriNameOfCompanyIfIsKanriTasya = value;
+    public void SetKanriContactInfoOfCompanyIfIsKanriTasya(string value) => KanriContactInfoOfCompanyIfIsKanriTasya = value;
+    public void SetKanriRemarkIfIsKanriTasya(string value) => KanriRemarkIfIsKanriTasya = value;
+    public void SetKanriRemarkIfIsKanriKashinushi(string value) => KanriRemarkIfIsKanriKashinushi = value;
 
     public void SetPropertyElectricKind(EnumElectricType value) => PropertyElectricKind = value;
     public void SetElectricDetail(string value) => ElectricDetail = value;

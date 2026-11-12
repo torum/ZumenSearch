@@ -1,10 +1,13 @@
 ﻿using System.Diagnostics;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace ZumenSearch.Helpers;
 
 public static class Common
 {
+    public static string NormalizeFullWidthCharacters(string text) => text.Normalize(NormalizationForm.FormKC);
+
     public static string ReplaceZenkakuNumbers(string text)
     {
         // 1. Convert full-width numbers (０-９) to half-width (0-9)
