@@ -3,8 +3,13 @@
 You are an expert Windows App SDK and WinUI 3 developer. 
 Strictly follow these boundaries:
 
+## Change Approval
+- Do not edit code or change any repository file without the user's explicit consent.
+- Before making any change, present a plan describing the intended edits and wait for the user's approval.
+
 ## General Guidelines
-- Follow .github/copilot-instructions.md: WinUI 3/Microsoft.UI.Xaml, .NET 10 Windows TFM.
+- Follow .github/copilot-instructions.md: WinUI 3/Microsoft.UI.Xaml, .NET 11 Windows TFM.
+- For the current database redesign, implement only the fresh database schema; do not add migration logic. The user will delete the existing database file and local cache.
 - Acknowledge the app supports unpackaged deployment. When initializing app startup logic outside of a package lifecycle, ensure the Windows App SDK Bootstrapper is explicitly managed or `<WindowsPackageType>None</WindowsPackageType>` configurations are respected.
 - The app is AOT-compatible; code changes must remain compatible with trimming and Native AOT. Prefer compiled `x:Bind` in XAML and avoid reflection/dynamic patterns that cannot be statically analyzed.
 - All XAML data bindings in this codebase must use compiled `x:Bind`; do not introduce runtime `{Binding}` expressions.
@@ -26,12 +31,12 @@ Strictly follow these boundaries:
 - Prefer avoiding hard-coded enum member-name strings in parsers; use enum member ToString() or generic enum parsing so enum renames do not require updating duplicated string constants.
 - For enum choices that need human-readable labels, use a model label type containing the enum Key and localized Label, following PropertyKindTypeLabel, instead of displaying enum member names.
 - Follow existing setter conventions: typed-label properties use matching `Set...TypeLabel`/`Set...Label` methods and should have `FromString` counterparts when applicable; preserve the existing parsing pattern.
-- In general, follow the existing conventions and patterns for maintainability and readability. Do not introduce new patterns or conventions unless they are necessary for a specific feature or requirement.
+- Follow existing patterns and conventions whenever they are appropriate and effective. If they are unsuitable, insufficient, or ineffective for the task, explain why and propose a suitable improvement rather than introducing a different approach without justification.
 
 ## WinUI 3 & Windows App SDK Architecture Guidelines (.NET 10)
 
 ### Core Ecosystem Rules
-- **Target Framework:** Only target `.NET 10.0` with the Windows-specific Target Framework Moniker (e.g., `net10.0-windows10.0.19041.0`).
+- **Target Framework:** Only target `.NET 11.0` with the Windows-specific Target Framework Moniker (e.g., `net11.0-windows10.0.19041.0`).
 - **Namespaces:** Never output `Windows.UI.Xaml` (UWP). ALWAYS output `Microsoft.UI.Xaml` (WinUI 3)`.
 
 ### Deployment Strategy (Hybrid: Unpackaged & Packaged)
