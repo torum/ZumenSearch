@@ -4215,6 +4215,9 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
             try
             {
+                InfoBarErrorMessage = "募集物件の編集画面を閉じてから、建物を削除してください。";
+                IsInfoBarErrorOpen = true;
+
                 editWin.Activate();
 
                 if (editWin.Content is Views.Rent.Residentials.Listing.ShellPage editShell)
@@ -4233,7 +4236,6 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
                 WeakReferenceMessenger.Default.Send(new WindowClosedMessage<Microsoft.UI.Xaml.Window>(editWin));
             }
         }
-
 
         if (!mainVM.TryBeginResidentialOperation(_id))
         {
@@ -4710,6 +4712,5 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
     #endregion
 
     #endregion
-
 
 }

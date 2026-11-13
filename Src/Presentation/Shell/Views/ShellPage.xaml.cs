@@ -76,6 +76,7 @@ public sealed partial class ShellPage : Page
         await Task.Yield();
 
         await ViewModel.InitializeAsync();
+        ViewModel.Initialize(this.XamlRoot, MainWindow);
 
         if (this.ContentFrame.Navigate(typeof(ZumenSearch.Views.SearchPage), null, new Microsoft.UI.Xaml.Media.Animation.EntranceNavigationTransitionInfo()))
         {

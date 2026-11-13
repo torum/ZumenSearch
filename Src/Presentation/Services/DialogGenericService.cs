@@ -14,19 +14,21 @@ public class DialogGenericService : IDialogGenericService
     private Window? _window;
 
     private bool _isDialogOpened;
+    private bool _isInitialized;
 
     //private readonly List<Window> _ownerWindowList; // I made the service transient, so this won't be needed. But needs to be checked lator.
 
     public DialogGenericService()
     {
         _isDialogOpened = false;
-        //_ownerWindowList = new List<Window>();
+        _isInitialized = false;
     }
 
     public void Initialize(XamlRoot xamlRoot, Window window)
     {
         _xamlRoot = xamlRoot;
         _window = window;
+        _isInitialized = true;
     }
 
     public async Task<ContentDialogResult> ShowEditorCloseConfirmationDialog()
@@ -38,9 +40,9 @@ public class DialogGenericService : IDialogGenericService
             return ContentDialogResult.None;
         }
 
-        if (_xamlRoot is null)
+        if (_xamlRoot is null || !_isInitialized)
         {
-            Debug.WriteLine("ModalDialogService: _xamlRoot is null. Not initialized");
+            Debug.WriteLine("ModalDialogService: _xamlRoot is null or not initialized.");
             return ContentDialogResult.None;
         }
 
@@ -73,7 +75,7 @@ public class DialogGenericService : IDialogGenericService
 
     public async Task<ContentDialogResult> ShowDeleteConfirmationDialog(string message)
     {
-        if (_isDialogOpened || _xamlRoot is null)
+        if (_isDialogOpened || _xamlRoot is null || !_isInitialized)
         {
             return ContentDialogResult.None;
         }
@@ -108,9 +110,9 @@ public class DialogGenericService : IDialogGenericService
             return null;
         }
 
-        if (_xamlRoot is null)
+        if (_xamlRoot is null || !_isInitialized)
         {
-            System.Diagnostics.Debug.WriteLine("_xamlRoot is null @ShowRailLineSelectDialog");
+            System.Diagnostics.Debug.WriteLine("_xamlRoot is null or not initialized @ShowLessorSelectDialog");
             return null;
         }
 
@@ -161,9 +163,9 @@ public class DialogGenericService : IDialogGenericService
             return null;
         }
 
-        if (_xamlRoot is null)
+        if (_xamlRoot is null || !_isInitialized)
         {
-            System.Diagnostics.Debug.WriteLine("_xamlRoot is null @ShowBrokerSelectDialog");
+            System.Diagnostics.Debug.WriteLine("_xamlRoot is null or not initialized @ShowBrokerSelectDialog");
             return null;
         }
 
@@ -213,9 +215,9 @@ public class DialogGenericService : IDialogGenericService
             return null;
         }
 
-        if (_xamlRoot is null)
+        if (_xamlRoot is null || !_isInitialized)
         {
-            System.Diagnostics.Debug.WriteLine("_xamlRoot is null @ShowRailLineSelectDialog");
+            System.Diagnostics.Debug.WriteLine("_xamlRoot is null or not initialized @ShowRailLineSelectDialog");
             return null;
         }
 
@@ -275,8 +277,9 @@ public class DialogGenericService : IDialogGenericService
             return null;
         }
 
-        if (_xamlRoot is null)
+        if (_xamlRoot is null || !_isInitialized)
         {
+            System.Diagnostics.Debug.WriteLine("_xamlRoot is null or not initialized @ShowRailStationSelectDialog");
             return null;
         }
 

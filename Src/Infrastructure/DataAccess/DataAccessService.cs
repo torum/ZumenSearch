@@ -1335,11 +1335,14 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 if ((building.Status == EntityStatus.New) == propertyExists)
                     throw new InvalidOperationException("The residential property was already created or no longer exists. Reload before saving.");
                 cmd.Parameters.Clear();
+
+                /*
                 var thumbnailFilename = building.Pictures.FirstOrDefault(picture => picture.IsMain)?.ImageFilename ?? string.Empty;
                 if (string.IsNullOrWhiteSpace(thumbnailFilename))
                 {
                     thumbnailFilename = building.Pdfs.FirstOrDefault(pdf => pdf.IsMain)?.ThumbnailFilename ?? string.Empty;
                 }
+                */
 
                 // Main property table
                 cmd.CommandType = CommandType.Text;
@@ -1377,7 +1380,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 cmd.Parameters.AddWithValue("@propertyId", building.Id);
                 cmd.Parameters.AddWithValue("@name", building.Name);
                 cmd.Parameters.AddWithValue("@propertyKind", building.PropertyContextType.ToString());
-                cmd.Parameters.AddWithValue("@thumbnailPath", thumbnailFilename);
+                cmd.Parameters.AddWithValue("@thumbnailPath", building.ThumbnailFilename);
                 // Address/Location
                 cmd.Parameters.AddWithValue("@locPrefId", building.Address.Prefecture?.MunicipalityCode ?? string.Empty);
                 cmd.Parameters.AddWithValue("@locPrefecture", building.Address.Prefecture?.Name ?? string.Empty);

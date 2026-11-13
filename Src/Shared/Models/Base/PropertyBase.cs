@@ -203,29 +203,44 @@ public abstract partial class PropertyBase : EntityAggregateBase
         get => field ?? string.Empty; // Ensure a non-null value is returned
         set
         {
-            field = value;
-            IsModified = true;
+            if (SetProperty(ref field, value))
+            {
+                IsModified = true;
+                OnPropertyChanged(nameof(ThumbImagePath)); // Notify that ThumbImagePath has changed
+            }
         }
     }
 
+    // Needs to fire property changed event when the value is set, so that the UI can update accordingly.
     // TODO:
     // Automatically generate a thumbnail image when the property is accessed, if it hasn't been set yet.
-    public string? ThumbImagePath => CreateThumbImagePath();
-
-    private string? CreateThumbImagePath()
+    public string? ThumbImagePath// => CreateThumbImagePath();
     {
-        if (string.IsNullOrWhiteSpace(ThumbnailFilename))
+        get
         {
-            return null;
-        }
+            if (string.IsNullOrWhiteSpace(ThumbnailFilename))
+            {
+                field = null;
+                return field;
+            }
 
-        if (string.IsNullOrWhiteSpace(BasePath))
+            if (string.IsNullOrWhiteSpace(BasePath))
+            {
+                field = null;
+                return field;
+            }
+
+            var imagePath = Path.Combine(BasePath, ThumbnailFilename);
+            field = Path.Exists(imagePath) ? imagePath : null;
+            return field;
+        }
+        private set
         {
-            return null;
+            if (SetProperty(ref field, value))
+            {
+                //
+            }
         }
-
-        var imagePath = Path.Combine(BasePath, ThumbnailFilename);
-        return Path.Exists(imagePath) ? imagePath : null;
     }
 
     #endregion

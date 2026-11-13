@@ -67,12 +67,12 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
-                        <TextBox x:Name="TextBoxName" Grid.Row="0" Grid.Column="0" Header="物件名" PlaceholderText="物件名を入力" Margin="0,0,0,16" Text="{x:Bind SearchCriteria.PropertyName, Mode=TwoWay}"/>
-                        <TextBox x:Name="AddressTextBox" Grid.Row="1" Grid.Column="0" Header="所在地" PlaceholderText="所在地を入力" Margin="0,0,0,16" Text="{x:Bind SearchCriteria.Address, Mode=TwoWay}"/>
-                        <TextBox x:Name="StationTextBox" Grid.Row="2" Grid.Column="0" Header="最寄り駅" PlaceholderText="駅名を入力" Margin="0,0,0,16" Text="{x:Bind SearchCriteria.Station, Mode=TwoWay}"/>
-                        <TextBox x:Name="LineTextBox" Grid.Row="3" Grid.Column="0" Header="沿線名" PlaceholderText="沿線名を入力" Margin="0,0,0,16" Text="{x:Bind SearchCriteria.Line, Mode=TwoWay}"/>
-                        <TextBox x:Name="LessorTextBox" Grid.Row="4" Grid.Column="0" Header="貸主名" PlaceholderText="貸主名を入力" Margin="0,0,0,16" Text="{x:Bind SearchCriteria.LessorName, Mode=TwoWay}"/>
-                        <TextBox x:Name="RealEstateIdTextBox" Grid.Row="5" Grid.Column="0" Header="不動産ID" PlaceholderText="不動産IDを入力" Margin="0,0,0,16" Text="{x:Bind SearchCriteria.FudousanId, Mode=TwoWay}"/>
+                        <TextBox x:Name="TextBoxName" Grid.Row="0" Grid.Column="0" Header="物件名" PlaceholderText="物件名を入力" Margin="0,0,0,16" Text="{x:Bind SearchCriteria.PropertyName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                        <TextBox x:Name="AddressTextBox" Grid.Row="1" Grid.Column="0" Header="所在地" PlaceholderText="所在地を入力" Margin="0,0,0,16" Text="{x:Bind SearchCriteria.Address, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                        <TextBox x:Name="StationTextBox" Grid.Row="2" Grid.Column="0" Header="最寄り駅" PlaceholderText="駅名を入力" Margin="0,0,0,16" Text="{x:Bind SearchCriteria.Station, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                        <TextBox x:Name="LineTextBox" Grid.Row="3" Grid.Column="0" Header="沿線名" PlaceholderText="沿線名を入力" Margin="0,0,0,16" Text="{x:Bind SearchCriteria.Line, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                        <TextBox x:Name="LessorTextBox" Grid.Row="4" Grid.Column="0" Header="貸主名" PlaceholderText="貸主名を入力" Margin="0,0,0,16" Text="{x:Bind SearchCriteria.LessorName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                        <TextBox x:Name="RealEstateIdTextBox" Grid.Row="5" Grid.Column="0" Header="不動産ID" PlaceholderText="不動産IDを入力" Margin="0,0,0,16" Text="{x:Bind SearchCriteria.FudousanId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                     </Grid>
 
                     <TextBlock Text="詳細条件" Style="{ThemeResource SubtitleTextBlockStyle}" Margin="0,24,0,0"/>
@@ -81,19 +81,19 @@
                     <Expander Header="賃料等条件" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
                         <StackPanel Spacing="12" Padding="0,0,0,12">
                             <VariableSizedWrapGrid Orientation="Horizontal">
-                                <NumberBox Header="賃料 下限（円）" Minimum="0" Width="160" Margin="0,0,12,12" PlaceholderText="下限なし" Value="{x:Bind SearchCriteria.MinimumRent, Mode=TwoWay}"/>
-                                <NumberBox Header="賃料 上限（円）" Minimum="0" Width="160" Margin="0,0,12,12" PlaceholderText="上限なし" Value="{x:Bind SearchCriteria.MaximumRent, Mode=TwoWay}"/>
-                                <NumberBox Header="管理費 上限（円）" Minimum="0" Width="160" Margin="0,0,12,12" PlaceholderText="上限なし" Value="{x:Bind SearchCriteria.MaximumManagementFee, Mode=TwoWay}"/>
+                                <NumberBox Header="賃料 下限（円）" Minimum="0" Width="160" Margin="0,0,12,12" PlaceholderText="下限なし" Value="{x:Bind SearchCriteria.MinimumRent, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                <NumberBox Header="賃料 上限（円）" Minimum="0" Width="160" Margin="0,0,12,12" PlaceholderText="上限なし" Value="{x:Bind SearchCriteria.MaximumRent, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                <NumberBox Header="管理費 上限（円）" Minimum="0" Width="160" Margin="0,0,12,12" PlaceholderText="上限なし" Value="{x:Bind SearchCriteria.MaximumManagementFee, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                             </VariableSizedWrapGrid>
                             <VariableSizedWrapGrid Orientation="Horizontal">
-                                <CheckBox Content="敷金なし" Margin="0,0,24,8" IsChecked="{x:Bind SearchCriteria.NoSecurityDeposit, Mode=TwoWay}"/>
-                                <CheckBox Content="礼金なし" Margin="0,0,24,8" IsChecked="{x:Bind SearchCriteria.NoKeyMoney, Mode=TwoWay}"/>
+                                <CheckBox Content="敷金なし" Margin="0,0,24,8" IsChecked="{x:Bind SearchCriteria.NoSecurityDeposit, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                <CheckBox Content="礼金なし" Margin="0,0,24,8" IsChecked="{x:Bind SearchCriteria.NoKeyMoney, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                             </VariableSizedWrapGrid>
                         </StackPanel>
                     </Expander>
 
                     <Expander Header="交通" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
-                        <NumberBox Header="駅徒歩 上限（分）" Minimum="0" Width="180" HorizontalAlignment="Left" PlaceholderText="上限なし" Margin="0,0,0,12" Value="{x:Bind SearchCriteria.MaximumStationWalkMinutes, Mode=TwoWay}"/>
+                        <NumberBox Header="駅徒歩 上限（分）" Minimum="0" Width="180" HorizontalAlignment="Left" PlaceholderText="上限なし" Margin="0,0,0,12" Value="{x:Bind SearchCriteria.MaximumStationWalkMinutes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                     </Expander>
 
                     <Expander Header="建物種別・建物構造" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
@@ -120,7 +120,7 @@
                                     </DataTemplate>
                                 </ItemsRepeater.ItemTemplate>
                             </ItemsRepeater>
-                            <NumberBox Header="築年数 上限（年）" Minimum="0" Width="180" HorizontalAlignment="Left" PlaceholderText="上限なし" Margin="0,8,0,0" Value="{x:Bind SearchCriteria.MaximumBuildingAgeYears, Mode=TwoWay}"/>
+                            <NumberBox Header="築年数 上限（年）" Minimum="0" Width="180" HorizontalAlignment="Left" PlaceholderText="上限なし" Margin="0,8,0,0" Value="{x:Bind SearchCriteria.MaximumBuildingAgeYears, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                         </StackPanel>
                     </Expander>
 
@@ -138,18 +138,18 @@
                                 </ItemsRepeater.ItemTemplate>
                             </ItemsRepeater>
                             <VariableSizedWrapGrid Orientation="Horizontal" Margin="0,8,0,0">
-                                <NumberBox Header="専有面積 下限（㎡）" Minimum="0" Width="180" Margin="0,0,12,12" PlaceholderText="下限なし" Value="{x:Bind SearchCriteria.MinimumFloorArea, Mode=TwoWay}"/>
-                                <NumberBox Header="専有面積 上限（㎡）" Minimum="0" Width="180" Margin="0,0,12,12" PlaceholderText="上限なし" Value="{x:Bind SearchCriteria.MaximumFloorArea, Mode=TwoWay}"/>
+                                <NumberBox Header="専有面積 下限（㎡）" Minimum="0" Width="180" Margin="0,0,12,12" PlaceholderText="下限なし" Value="{x:Bind SearchCriteria.MinimumFloorArea, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                <NumberBox Header="専有面積 上限（㎡）" Minimum="0" Width="180" Margin="0,0,12,12" PlaceholderText="上限なし" Value="{x:Bind SearchCriteria.MaximumFloorArea, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                             </VariableSizedWrapGrid>
                         </StackPanel>
                     </Expander>
 
                     <Expander Header="条件" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
                         <VariableSizedWrapGrid Orientation="Horizontal" Margin="0,0,0,12">
-                            <CheckBox Content="ペット可" Margin="0,0,24,8" IsChecked="{x:Bind SearchCriteria.PetFriendly, Mode=TwoWay}"/>
-                            <CheckBox Content="二人入居可" Margin="0,0,24,8" IsChecked="{x:Bind SearchCriteria.TwoPersonOccupancy, Mode=TwoWay}"/>
-                            <CheckBox Content="保証人不要" Margin="0,0,24,8" IsChecked="{x:Bind SearchCriteria.NoGuarantorNeeded, Mode=TwoWay}"/>
-                            <CheckBox Content="事務所利用可" Margin="0,0,24,8" IsChecked="{x:Bind SearchCriteria.OfficeUseAllowed, Mode=TwoWay}"/>
+                            <CheckBox Content="ペット可" Margin="0,0,24,8" IsChecked="{x:Bind SearchCriteria.PetFriendly, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            <CheckBox Content="二人入居可" Margin="0,0,24,8" IsChecked="{x:Bind SearchCriteria.TwoPersonOccupancy, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            <CheckBox Content="保証人不要" Margin="0,0,24,8" IsChecked="{x:Bind SearchCriteria.NoGuarantorNeeded, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            <CheckBox Content="事務所利用可" Margin="0,0,24,8" IsChecked="{x:Bind SearchCriteria.OfficeUseAllowed, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                         </VariableSizedWrapGrid>
                     </Expander>
 
@@ -176,8 +176,8 @@
                                 <StackPanel Margin="0,0,16,12">
                                     <TextBlock Text="貸主"/>
                                     <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <NumberBox Width="110" Minimum="0" PlaceholderText="指定なし" AutomationProperties.Name="貸主手数料" Value="{x:Bind SearchCriteria.MaximumLessorCommission, Mode=TwoWay}"/>
-                                        <ComboBox Width="100" PlaceholderText="単位" AutomationProperties.Name="貸主手数料の単位" ItemsSource="{x:Bind CommissionUnits}" SelectedItem="{x:Bind SearchCriteria.LessorCommissionUnit, Mode=TwoWay}">
+                                        <NumberBox Width="110" Minimum="0" PlaceholderText="指定なし" AutomationProperties.Name="貸主手数料" Value="{x:Bind SearchCriteria.MaximumLessorCommission, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <ComboBox Width="100" PlaceholderText="単位" AutomationProperties.Name="貸主手数料の単位" ItemsSource="{x:Bind CommissionUnits}" SelectedItem="{x:Bind SearchCriteria.LessorCommissionUnit, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                                             <ComboBox.ItemTemplate>
                                                 <DataTemplate x:DataType="residential:ListingCommissionUnitTypeLabel">
                                                     <TextBlock Text="{x:Bind Label}"/>
@@ -189,8 +189,8 @@
                                 <StackPanel Margin="0,0,16,12">
                                     <TextBlock Text="借主"/>
                                     <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <NumberBox Width="110" Minimum="0" PlaceholderText="指定なし" AutomationProperties.Name="借主手数料" Value="{x:Bind SearchCriteria.MaximumLesseeCommission, Mode=TwoWay}"/>
-                                        <ComboBox Width="100" PlaceholderText="単位" AutomationProperties.Name="借主手数料の単位" ItemsSource="{x:Bind CommissionUnits}" SelectedItem="{x:Bind SearchCriteria.LesseeCommissionUnit, Mode=TwoWay}">
+                                        <NumberBox Width="110" Minimum="0" PlaceholderText="指定なし" AutomationProperties.Name="借主手数料" Value="{x:Bind SearchCriteria.MaximumLesseeCommission, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <ComboBox Width="100" PlaceholderText="単位" AutomationProperties.Name="借主手数料の単位" ItemsSource="{x:Bind CommissionUnits}" SelectedItem="{x:Bind SearchCriteria.LesseeCommissionUnit, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                                             <ComboBox.ItemTemplate>
                                                 <DataTemplate x:DataType="residential:ListingCommissionUnitTypeLabel">
                                                     <TextBlock Text="{x:Bind Label}"/>
@@ -202,8 +202,8 @@
                                 <StackPanel Margin="0,0,16,12">
                                     <TextBlock Text="元付"/>
                                     <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <NumberBox Width="110" Minimum="0" PlaceholderText="指定なし" AutomationProperties.Name="元付手数料" Value="{x:Bind SearchCriteria.MaximumListingBrokerCommission, Mode=TwoWay}"/>
-                                        <ComboBox Width="100" PlaceholderText="単位" AutomationProperties.Name="元付手数料の単位" ItemsSource="{x:Bind CommissionUnits}" SelectedItem="{x:Bind SearchCriteria.ListingBrokerCommissionUnit, Mode=TwoWay}">
+                                        <NumberBox Width="110" Minimum="0" PlaceholderText="指定なし" AutomationProperties.Name="元付手数料" Value="{x:Bind SearchCriteria.MaximumListingBrokerCommission, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <ComboBox Width="100" PlaceholderText="単位" AutomationProperties.Name="元付手数料の単位" ItemsSource="{x:Bind CommissionUnits}" SelectedItem="{x:Bind SearchCriteria.ListingBrokerCommissionUnit, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                                             <ComboBox.ItemTemplate>
                                                 <DataTemplate x:DataType="residential:ListingCommissionUnitTypeLabel">
                                                     <TextBlock Text="{x:Bind Label}"/>
@@ -215,8 +215,8 @@
                                 <StackPanel Margin="0,0,16,12">
                                     <TextBlock Text="客付け"/>
                                     <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <NumberBox Width="110" Minimum="0" PlaceholderText="指定なし" AutomationProperties.Name="客付け手数料" Value="{x:Bind SearchCriteria.MaximumTenantBrokerCommission, Mode=TwoWay}"/>
-                                        <ComboBox Width="100" PlaceholderText="単位" AutomationProperties.Name="客付け手数料の単位" ItemsSource="{x:Bind CommissionUnits}" SelectedItem="{x:Bind SearchCriteria.TenantBrokerCommissionUnit, Mode=TwoWay}">
+                                        <NumberBox Width="110" Minimum="0" PlaceholderText="指定なし" AutomationProperties.Name="客付け手数料" Value="{x:Bind SearchCriteria.MaximumTenantBrokerCommission, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <ComboBox Width="100" PlaceholderText="単位" AutomationProperties.Name="客付け手数料の単位" ItemsSource="{x:Bind CommissionUnits}" SelectedItem="{x:Bind SearchCriteria.TenantBrokerCommissionUnit, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                                             <ComboBox.ItemTemplate>
                                                 <DataTemplate x:DataType="residential:ListingCommissionUnitTypeLabel">
                                                     <TextBlock Text="{x:Bind Label}"/>

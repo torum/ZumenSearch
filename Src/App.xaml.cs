@@ -216,7 +216,6 @@ public partial class App : Application
                 _appHostStopTask = StopAppHostAsync();
             };
             shell.MainWindow.Activate();
-
         }
         catch (Exception ex)
         {

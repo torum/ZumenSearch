@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI.Windowing;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media.Animation;
 using System.Collections.ObjectModel;
 using System.Reflection;
@@ -13,19 +14,13 @@ using ZumenSearch.Models.SearchResult;
 using ZumenSearch.Services;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.Services.Extensions.AbstractFactory;
+using ZumenSearch.Views;
 using ZumenSearch.Views.Services.Contracts;
 
 namespace ZumenSearch.ViewModels;
 
-public partial class MainViewModel : ObservableRecipient, 
-    IRecipient<PropertyUpdatedMessage>, 
-    IRecipient<ListingUpdatedMessage>,
-    IRecipient<LessorUpdatedMessage>,
-    IRecipient<BrokerUpdatedMessage>,
-    IRecipient<WindowClosedMessage<Microsoft.UI.Xaml.Window>>, 
-    IDisposable
+public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpdatedMessage>, IRecipient<ListingUpdatedMessage>, IRecipient<LessorUpdatedMessage>, IRecipient<BrokerUpdatedMessage>, IRecipient<WindowClosedMessage<Microsoft.UI.Xaml.Window>>, IDisposable
 {
-
     #region == Private Variables and Const ==
 
     private const string SearchResultPagePath = "ZumenSearch.Views.SearchResultPage";
@@ -43,86 +38,6 @@ public partial class MainViewModel : ObservableRecipient,
     private TaskCompletionSource? _residentialOperationsCompleted;
 
     private Task? _initializationTask;
-
-    public Task InitializeAsync() => _initializationTask ??= InitializeDatabase();
-
-    public bool TryBeginCommercialOperation(string propertyId)
-    {
-        if (!_commercialOperations.Add(propertyId)) return false;
-        _commercialOperationsCompleted ??= new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-        foreach (var editor in RentCommercialEditorList.Where(editor => editor.Id == propertyId)) editor.ViewModel?.SetPropertyBusy(true);
-        foreach (var editor in RentCommercialListingEditorList.Where(editor => editor.PropertyId == propertyId)) editor.ViewModel?.SetPropertyBusy(true);
-        return true;
-    }
-
-    public void EndCommercialOperation(string propertyId)
-    {
-        if (!_commercialOperations.Contains(propertyId)) return;
-        foreach (var editor in RentCommercialEditorList.Where(editor => editor.Id == propertyId).ToList()) editor.ViewModel?.SetPropertyBusy(false);
-        foreach (var editor in RentCommercialListingEditorList.Where(editor => editor.PropertyId == propertyId).ToList()) editor.ViewModel?.SetPropertyBusy(false);
-        if (_commercialOperations.Remove(propertyId) && _commercialOperations.Count == 0)
-        {
-            _commercialOperationsCompleted?.TrySetResult();
-            _commercialOperationsCompleted = null;
-        }
-    }
-
-    public async Task WaitForCommercialOperationsAsync()
-    {
-        while (_commercialOperationsCompleted is not null)
-        {
-            await _commercialOperationsCompleted.Task;
-        }
-    }
-
-    public bool TryBeginResidentialOperation(string propertyId)
-    {
-        if (!_residentialOperations.Add(propertyId)) return false;
-        _residentialOperationsCompleted ??= new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-        foreach (var editor in RentResidentialEditorList.Where(editor => editor.Id == propertyId)) editor.ViewModel?.SetPropertyBusy(true);
-        foreach (var editor in RentResidentialListingEditorList.Where(editor => editor.PropertyId == propertyId)) editor.ViewModel?.SetPropertyBusy(true);
-        return true;
-    }
-
-    public void EndResidentialOperation(string propertyId)
-    {
-        if (!_residentialOperations.Contains(propertyId)) return;
-        foreach (var editor in RentResidentialEditorList.Where(editor => editor.Id == propertyId).ToList()) editor.ViewModel?.SetPropertyBusy(false);
-        foreach (var editor in RentResidentialListingEditorList.Where(editor => editor.PropertyId == propertyId).ToList()) editor.ViewModel?.SetPropertyBusy(false);
-        _residentialOperations.Remove(propertyId);
-        if (_residentialOperations.Count == 0)
-        {
-            _residentialOperationsCompleted?.TrySetResult();
-            _residentialOperationsCompleted = null;
-        }
-    }
-
-    public async Task WaitForResidentialOperationsAsync()
-    {
-        while (_residentialOperationsCompleted is not null) await _residentialOperationsCompleted.Task;
-    }
-
-    private void ShowResidentialOperationBusy()
-    {
-        InfoBarErrorMessage = "関連する保存、削除または読み込みが完了してから、もう一度操作してください。";
-        IsInfoBarErrorOpen = true;
-    }
-
-    public void RemoveResidentialListingSearchResults(string propertyId, string listingId)
-    {
-        foreach (var result in RentResidentialListingSearchResult.Where(result => result.Id.Equals(listingId, StringComparison.Ordinal) && result.PropertyId.Equals(propertyId, StringComparison.Ordinal)).ToList())
-        {
-            RentResidentialListingSearchResult.Remove(result);
-        }
-    }
-
-    public void RemoveCommercialListingSearchResults(string propertyId, string listingId)
-    {
-        foreach (var result in RentCommercialListingSearchResult.Where(result => result.Id.Equals(listingId, StringComparison.Ordinal) && result.PropertyId.Equals(propertyId, StringComparison.Ordinal)).ToList())
-        {
-            RentCommercialListingSearchResult.Remove(result);
-        }
-    }
 
     #endregion
 
@@ -142,21 +57,11 @@ public partial class MainViewModel : ObservableRecipient,
     private readonly INavigationService _navigationService;
     private readonly IDispatcherService _dispatcherService;
     private readonly IConfigurationService _configurationService;
+    private readonly IDialogGenericService _dialogService;
 
     #endregion
 
-    public MainViewModel(
-        IAbstractFactory<Models.Rent.Residentials.Property, Views.Rent.Residentials.ShellPage> shellRentResidentialPropertyFactory, 
-        IAbstractFactory<Models.Rent.Residentials.Listing, Views.Rent.Residentials.Listing.ShellPage> shellRentResidentialListingFactory,
-        IAbstractFactory<Models.Rent.Commercials.Property, Views.Rent.Commercials.ShellPage> shellRentCommercialPropertyFactory,
-        IAbstractFactory<Models.Rent.Commercials.Listing.Listing, Views.Rent.Commercials.Listing.ShellPage> shellRentCommercialListingFactory,
-        IAbstractFactory<Models.Base.PersonBase, Views.Rent.Lessors.ShellPage> shellRentLessorFactory,
-        IAbstractFactory<Models.Sale.Residentials.Property, Views.Sale.Residentials.ShellPage> shellSaleResidentialPropertyFactory,
-        IAbstractFactory<Models.Base.PersonBase, Views.Brokers.ShellPage> shellBrokerFactory,
-        INavigationService navigationService, 
-        IDataAccessService dataAccessService, 
-        IDispatcherService dispatcherService,
-        IConfigurationService configurationService)
+    public MainViewModel(IAbstractFactory<Models.Rent.Residentials.Property, Views.Rent.Residentials.ShellPage> shellRentResidentialPropertyFactory, IAbstractFactory<Models.Rent.Residentials.Listing, Views.Rent.Residentials.Listing.ShellPage> shellRentResidentialListingFactory, IAbstractFactory<Models.Rent.Commercials.Property, Views.Rent.Commercials.ShellPage> shellRentCommercialPropertyFactory, IAbstractFactory<Models.Rent.Commercials.Listing.Listing, Views.Rent.Commercials.Listing.ShellPage> shellRentCommercialListingFactory, IAbstractFactory<Models.Base.PersonBase, Views.Rent.Lessors.ShellPage> shellRentLessorFactory, IAbstractFactory<Models.Sale.Residentials.Property, Views.Sale.Residentials.ShellPage> shellSaleResidentialPropertyFactory, IAbstractFactory<Models.Base.PersonBase, Views.Brokers.ShellPage> shellBrokerFactory, INavigationService navigationService, IDataAccessService dataAccessService, IDispatcherService dispatcherService, IConfigurationService configurationService, IDialogGenericService dialogService)
     {
         _shellRentResidentialPropertyFactory = shellRentResidentialPropertyFactory;
         _shellRentResidentialListingFactory = shellRentResidentialListingFactory;
@@ -169,6 +74,7 @@ public partial class MainViewModel : ObservableRecipient,
         _dataAccessService = dataAccessService;
         _configurationService = configurationService;
         _dispatcherService = dispatcherService;
+        _dialogService = dialogService;
 
         VersionDescription = GetVersionDescription();
 
@@ -428,11 +334,28 @@ public partial class MainViewModel : ObservableRecipient,
                 continue;
             }
 
+            Debug.WriteLine($"PropertyUpdatedMessage received for property ID: {building.Id}, updating PropertySearchResult item.");
+
             item.SetName(building.Name);
             item.ThumbnailFilename = building.ThumbnailFilename;
         }
 
-        GetRecentPropertiesCommand.Execute(null);
+        //RecentProperties
+        //GetRecentPropertiesCommand.Execute(null);
+        foreach (var item in RecentProperties)
+        {
+            if (!item.Id.Equals(building.Id, StringComparison.Ordinal))
+            {
+                Debug.WriteLine($"PropertyUpdatedMessage received for property ID: {building.Id}, but no matching PropertySearchResult item found.");
+                continue;
+            }
+
+            Debug.WriteLine($"PropertyUpdatedMessage received for property ID: {building.Id}, updating PropertySearchResult item.");
+
+            item.SetName(building.Name);
+            item.ThumbnailFilename = building.ThumbnailFilename;
+        }
+
     }
 
     public void Receive(ListingUpdatedMessage listing)
@@ -571,6 +494,91 @@ public partial class MainViewModel : ObservableRecipient,
 
     #region == Public Methods ==
 
+    public void Initialize(XamlRoot xamlRoot, MainWindow mainWindow)
+    {
+        _dialogService.Initialize(xamlRoot, mainWindow);
+    }
+
+    public Task InitializeAsync() => _initializationTask ??= InitializeDatabase();
+
+    public bool TryBeginCommercialOperation(string propertyId)
+    {
+        if (!_commercialOperations.Add(propertyId)) return false;
+        _commercialOperationsCompleted ??= new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        foreach (var editor in RentCommercialEditorList.Where(editor => editor.Id == propertyId)) editor.ViewModel?.SetPropertyBusy(true);
+        foreach (var editor in RentCommercialListingEditorList.Where(editor => editor.PropertyId == propertyId)) editor.ViewModel?.SetPropertyBusy(true);
+        return true;
+    }
+
+    public void EndCommercialOperation(string propertyId)
+    {
+        if (!_commercialOperations.Contains(propertyId)) return;
+        foreach (var editor in RentCommercialEditorList.Where(editor => editor.Id == propertyId).ToList()) editor.ViewModel?.SetPropertyBusy(false);
+        foreach (var editor in RentCommercialListingEditorList.Where(editor => editor.PropertyId == propertyId).ToList()) editor.ViewModel?.SetPropertyBusy(false);
+        if (_commercialOperations.Remove(propertyId) && _commercialOperations.Count == 0)
+        {
+            _commercialOperationsCompleted?.TrySetResult();
+            _commercialOperationsCompleted = null;
+        }
+    }
+
+    public async Task WaitForCommercialOperationsAsync()
+    {
+        while (_commercialOperationsCompleted is not null)
+        {
+            await _commercialOperationsCompleted.Task;
+        }
+    }
+
+    public bool TryBeginResidentialOperation(string propertyId)
+    {
+        if (!_residentialOperations.Add(propertyId)) return false;
+        _residentialOperationsCompleted ??= new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        foreach (var editor in RentResidentialEditorList.Where(editor => editor.Id == propertyId)) editor.ViewModel?.SetPropertyBusy(true);
+        foreach (var editor in RentResidentialListingEditorList.Where(editor => editor.PropertyId == propertyId)) editor.ViewModel?.SetPropertyBusy(true);
+        return true;
+    }
+
+    public void EndResidentialOperation(string propertyId)
+    {
+        if (!_residentialOperations.Contains(propertyId)) return;
+        foreach (var editor in RentResidentialEditorList.Where(editor => editor.Id == propertyId).ToList()) editor.ViewModel?.SetPropertyBusy(false);
+        foreach (var editor in RentResidentialListingEditorList.Where(editor => editor.PropertyId == propertyId).ToList()) editor.ViewModel?.SetPropertyBusy(false);
+        _residentialOperations.Remove(propertyId);
+        if (_residentialOperations.Count == 0)
+        {
+            _residentialOperationsCompleted?.TrySetResult();
+            _residentialOperationsCompleted = null;
+        }
+    }
+
+    public async Task WaitForResidentialOperationsAsync()
+    {
+        while (_residentialOperationsCompleted is not null) await _residentialOperationsCompleted.Task;
+    }
+
+    private void ShowResidentialOperationBusy()
+    {
+        InfoBarErrorMessage = "関連する保存、削除または読み込みが完了してから、もう一度操作してください。";
+        IsInfoBarErrorOpen = true;
+    }
+
+    public void RemoveResidentialListingSearchResults(string propertyId, string listingId)
+    {
+        foreach (var result in RentResidentialListingSearchResult.Where(result => result.Id.Equals(listingId, StringComparison.Ordinal) && result.PropertyId.Equals(propertyId, StringComparison.Ordinal)).ToList())
+        {
+            RentResidentialListingSearchResult.Remove(result);
+        }
+    }
+
+    public void RemoveCommercialListingSearchResults(string propertyId, string listingId)
+    {
+        foreach (var result in RentCommercialListingSearchResult.Where(result => result.Id.Equals(listingId, StringComparison.Ordinal) && result.PropertyId.Equals(propertyId, StringComparison.Ordinal)).ToList())
+        {
+            RentCommercialListingSearchResult.Remove(result);
+        }
+    }
+
     public void UpdateSettings()
     {
         // Update settings logic here
@@ -578,7 +586,6 @@ public partial class MainViewModel : ObservableRecipient,
         //config.IsNavigationViewMenuOpen = IsNavigationViewMenuOpen;
         //config.Theme = Theme;
         //config.SystemBackdrop = Material;
-
     }
 
     public void Dispose()
@@ -1120,6 +1127,8 @@ public partial class MainViewModel : ObservableRecipient,
             propertyEditor.Activate();
             return;
         }
+
+        if (await _dialogService.ShowDeleteConfirmationDialog("この募集物件を削除しますか？") != Microsoft.UI.Xaml.Controls.ContentDialogResult.Primary) return;
 
         var res = await Task.Run(() => _dataAccessService.DeleteRentResidential(selectedId), _cts.Token);
         if (res.IsError)
