@@ -163,7 +163,7 @@ public partial class MainViewModel : ObservableRecipient,
         _shellRentCommercialPropertyFactory = shellRentCommercialPropertyFactory;
         _shellRentCommercialListingFactory = shellRentCommercialListingFactory;
         _shellRentLessorFactory = shellRentLessorFactory;
-        _shellSaleResidentialPropertyFactory =shellSaleResidentialPropertyFactory;
+        _shellSaleResidentialPropertyFactory = shellSaleResidentialPropertyFactory;
         _shellBrokerFactory = shellBrokerFactory;
         _navigationService = navigationService;
         _dataAccessService = dataAccessService;
@@ -172,37 +172,6 @@ public partial class MainViewModel : ObservableRecipient,
 
         VersionDescription = GetVersionDescription();
 
-        // Initialize the database and get recent properties.
-        // No wait. 
-        //_ = InitializeDatabase();
-        // No code after this point should be automatically executed until the database initialization is completed.
-
-        /*
-        // Intercept changes to the inherited IsActive property safely without overriding OnActivated
-        this.PropertyChanged += (s, e) =>
-        {
-            if (e.PropertyName == nameof(IsActive))
-            {
-                if (IsActive)
-                {
-                    // This implicitly uses WeakReferenceMessenger.Default under the hood
-                    Messenger.Register<PropertyUpdatedMessage>(this);
-                    Messenger.Register<ListingUpdatedMessage>(this);
-                    Messenger.Register<LessorUpdatedMessage>(this);
-                    Messenger.Register<BrokerUpdatedMessage>(this);
-                    Messenger.Register<WindowClosedMessage<Microsoft.UI.Xaml.Window>>(this);
-                }
-                else
-                {
-                    Messenger.Unregister<PropertyUpdatedMessage>(this);
-                    Messenger.Unregister<ListingUpdatedMessage>(this);
-                    Messenger.Unregister<LessorUpdatedMessage>(this);
-                    Messenger.Unregister<BrokerUpdatedMessage>(this);
-                    Messenger.Unregister<WindowClosedMessage<Microsoft.UI.Xaml.Window>>(this);
-                }
-            }
-        };
-        */
         // Ready to receive messages.
 #pragma warning disable IL3050 // Disable AOT dynamic code warning
 #pragma warning disable IL2026 // Disable Trimming unreferenced code warning
@@ -543,29 +512,26 @@ public partial class MainViewModel : ObservableRecipient,
             return;
         }
 
-        if (win is Views.Rent.Residentials.EditorWindow rwin)
+        switch (win)
         {
-            this.RentResidentialEditorList.Remove(rwin);
-        }
-        else if (win is Views.Rent.Residentials.Listing.EditorWindow rlwin)
-        {
-            this.RentResidentialListingEditorList.Remove(rlwin);
-        }
-        else if (win is Views.Rent.Commercials.EditorWindow cwin)
-        {
-            this.RentCommercialEditorList.Remove(cwin);
-        }
-        else if (win is Views.Rent.Commercials.Listing.EditorWindow clwin)
-        {
-            this.RentCommercialListingEditorList.Remove(clwin);
-        }
-        else if (win is Views.Rent.Lessors.EditorWindow lewin)
-        {
-            this.LessorEditorList.Remove(lewin);
-        }
-        else if (win is Views.Brokers.EditorWindow bwin)
-        {
-            this.BrokerEditorList.Remove(bwin);
+            case Views.Rent.Residentials.EditorWindow rwin:
+                RentResidentialEditorList.Remove(rwin);
+                break;
+            case Views.Rent.Residentials.Listing.EditorWindow rlwin:
+                RentResidentialListingEditorList.Remove(rlwin);
+                break;
+            case Views.Rent.Commercials.EditorWindow cwin:
+                RentCommercialEditorList.Remove(cwin);
+                break;
+            case Views.Rent.Commercials.Listing.EditorWindow clwin:
+                RentCommercialListingEditorList.Remove(clwin);
+                break;
+            case Views.Rent.Lessors.EditorWindow lewin:
+                LessorEditorList.Remove(lewin);
+                break;
+            case Views.Brokers.EditorWindow bwin:
+                BrokerEditorList.Remove(bwin);
+                break;
         }
 
     }
@@ -987,6 +953,7 @@ public partial class MainViewModel : ObservableRecipient,
             return;
         }
 
+        // TODO:TryBeginResidentialOperation is dummy for now.
         if (!TryBeginResidentialOperation(propertyId))
         {
             ShowResidentialOperationBusy();
@@ -1058,12 +1025,13 @@ public partial class MainViewModel : ObservableRecipient,
 
         if (res.Building is null)
         {
+            // TODO: Show error message to user.
             Debug.WriteLine($"Building for {propertyId} is null. Cannot open editor.");
             return;
         }
 
         var editorShell = _shellRentResidentialPropertyFactory.Create(res.Building);//_editorFactory.Create();
-        editorShell.ViewModel.SetListingSummaries(res.ListingSummaries);
+        //editorShell.ViewModel.SetListingSummaries(res.ListingSummaries);
 
         var editorWindow = editorShell.Window;
         if (editorWindow == null)
@@ -1093,82 +1061,6 @@ public partial class MainViewModel : ObservableRecipient,
     private static bool EditRentResidentialByIdCanExecute(string propertyId)
     {
         if (string.IsNullOrEmpty(propertyId))
-        {
-            return false;
-        }
-
-        return true;
-    }
-
-    // クイック検索Box（建物）TODO:
-    [RelayCommand(CanExecute = nameof(SearchRentForAutoSuggestCanExecute))]
-    private async Task SearchRentForAutoSuggest(string? queryText)
-    {
-        if (string.IsNullOrWhiteSpace(queryText))
-        {
-            AutoSuggestList.Clear();
-            return;
-        }
-
-        // TODO: Residentials only for now.
-        Debug.WriteLine($"SearchRentForAutoSuggest {queryText}");
-
-        AutoSuggestList.Clear();
-
-        queryText = queryText.Trim();
-
-        var res = await Task.Run(() => _dataAccessService.SelectPropertiesByKeyword(queryText), _cts.Token);
-        //var res = _dataAccessService.SelectRentResidentialsByNameKeyword("*");
-
-        if (res.IsError)
-        {
-            Debug.WriteLine(
-                res.Error.Title + Environment.NewLine +
-                res.Error.Message + Environment.NewLine +
-                res.Error.Description + Environment.NewLine +
-                res.Error.Operation + Environment.NewLine +
-                res.Error.MethodName + Environment.NewLine +
-                res.Error.FullDump);
-
-            InfoBarErrorMessage =
-                res.Error.Title + Environment.NewLine +
-                res.Error.Message + Environment.NewLine +
-                res.Error.Description + Environment.NewLine +
-                res.Error.Operation + Environment.NewLine +
-                res.Error.MethodName;
-
-            IsInfoBarErrorOpen = true;
-        }
-        else
-        {
-            if (res.PropertySearchResult.Count > 0)
-            {
-                foreach (var item in res.PropertySearchResult)
-                {
-                    var autoSuggest = new Models.SearchResult.AutoSuggestItem
-                    {
-                        Name = item.Name,
-                        Id = item.Id
-                    };
-                    AutoSuggestList.Add(autoSuggest);
-                }
-            }
-            else
-            {
-                // TODO:
-                //Debug.WriteLine("result 0");
-                var autoSuggest = new Models.SearchResult.AutoSuggestItem
-                {
-                    Name = "Result 0",
-                    Id = ""
-                };
-                AutoSuggestList.Add(autoSuggest);
-            }
-        }
-    }
-    private static bool SearchRentForAutoSuggestCanExecute(string? queryText)
-    {
-        if (string.IsNullOrEmpty(queryText))
         {
             return false;
         }
@@ -1362,12 +1254,14 @@ public partial class MainViewModel : ObservableRecipient,
     {
         var roomId = selected.Id;
         var buildingId = selected.PropertyId;
+        /*
         if (RentResidentialEditorList.Any(editor => editor.Id == buildingId && editor.ViewModel?.IsListingPendingDeletion(roomId) == true))
         {
             InfoBarErrorMessage = "建物の編集画面で削除予定の募集物件は開けません。";
             IsInfoBarErrorOpen = true;
             return;
         }
+        */
         //Debug.WriteLine($"EditRentResidentialRoomCommand executed for {selected.Id}");
 
         var isFound = false;
@@ -1430,7 +1324,7 @@ public partial class MainViewModel : ObservableRecipient,
 
         var editorShell = _shellRentResidentialListingFactory.Create(res.Room);
         var propertyEditor = RentResidentialEditorList.FirstOrDefault(editor => editor.Id == buildingId && editor.ViewModel is { IsActive: true });
-        if (propertyEditor?.ViewModel is { } propertyViewModel) editorShell.ViewModel.SetOwnershipVisibility(propertyViewModel.IsUnitOwnership);
+        if (propertyEditor?.ViewModel is { } propertyViewModel) editorShell.ViewModel.SetOwnershipVisibility(propertyViewModel.IsUnitLevelOwnership);
         var editorWindow = editorShell.Window;
         if (editorWindow == null)
         {
@@ -1598,6 +1492,83 @@ public partial class MainViewModel : ObservableRecipient,
 
         return true;
     }
+
+    // クイック検索Box（建物）TODO:
+    [RelayCommand(CanExecute = nameof(SearchRentForAutoSuggestCanExecute))]
+    private async Task SearchRentForAutoSuggest(string? queryText)
+    {
+        if (string.IsNullOrWhiteSpace(queryText))
+        {
+            AutoSuggestList.Clear();
+            return;
+        }
+
+        // TODO: Residentials only for now.
+        Debug.WriteLine($"SearchRentForAutoSuggest {queryText}");
+
+        AutoSuggestList.Clear();
+
+        queryText = queryText.Trim();
+
+        var res = await Task.Run(() => _dataAccessService.SelectPropertiesByKeyword(queryText), _cts.Token);
+        //var res = _dataAccessService.SelectRentResidentialsByNameKeyword("*");
+
+        if (res.IsError)
+        {
+            Debug.WriteLine(
+                res.Error.Title + Environment.NewLine +
+                res.Error.Message + Environment.NewLine +
+                res.Error.Description + Environment.NewLine +
+                res.Error.Operation + Environment.NewLine +
+                res.Error.MethodName + Environment.NewLine +
+                res.Error.FullDump);
+
+            InfoBarErrorMessage =
+                res.Error.Title + Environment.NewLine +
+                res.Error.Message + Environment.NewLine +
+                res.Error.Description + Environment.NewLine +
+                res.Error.Operation + Environment.NewLine +
+                res.Error.MethodName;
+
+            IsInfoBarErrorOpen = true;
+        }
+        else
+        {
+            if (res.PropertySearchResult.Count > 0)
+            {
+                foreach (var item in res.PropertySearchResult)
+                {
+                    var autoSuggest = new Models.SearchResult.AutoSuggestItem
+                    {
+                        Name = item.Name,
+                        Id = item.Id
+                    };
+                    AutoSuggestList.Add(autoSuggest);
+                }
+            }
+            else
+            {
+                // TODO:
+                //Debug.WriteLine("result 0");
+                var autoSuggest = new Models.SearchResult.AutoSuggestItem
+                {
+                    Name = "Result 0",
+                    Id = ""
+                };
+                AutoSuggestList.Add(autoSuggest);
+            }
+        }
+    }
+    private static bool SearchRentForAutoSuggestCanExecute(string? queryText)
+    {
+        if (string.IsNullOrEmpty(queryText))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
 
     #endregion
 

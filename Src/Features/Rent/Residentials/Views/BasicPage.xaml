@@ -51,7 +51,7 @@
                             </ComboBox>
                             <Grid Grid.Row="0" Grid.Column="1">
                                 <!-- 区分所有 -->
-                                <CheckBox x:Name="CheckBoxUnitOwnership" Margin="12,12,0,0" Content="区分所有" IsChecked="{x:Bind ViewModel.IsUnitOwnership, Mode=TwoWay}" HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
+                                <CheckBox x:Name="CheckBoxUnitOwnership" Margin="12,12,0,0" Content="区分所有" IsChecked="{x:Bind ViewModel.IsUnitLevelOwnership, Mode=TwoWay}" HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
                             </Grid>
                         </Grid>
                     </Grid>

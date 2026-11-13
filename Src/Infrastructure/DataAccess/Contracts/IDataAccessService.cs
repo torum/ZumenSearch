@@ -11,7 +11,7 @@ public interface IDataAccessService
     PropertySearchResultWrapper SelectPropertiesByKeyword(string keyword);
 
     // Rent Residential
-    ResultWrapper UpsertRentResidential(Models.Rent.Residentials.Property building, IReadOnlyCollection<Models.Rent.Residentials.ResidentialListingDraft> pendingListings, IReadOnlyCollection<string> deletedListingIds);
+    ResultWrapper UpsertRentResidential(Models.Rent.Residentials.Property building);//, IReadOnlyCollection<Models.Rent.Residentials.ResidentialListingDraft> pendingListings, IReadOnlyCollection<string> deletedListingIds
     Models.Rent.Residentials.PropertyResultWrapper SelectRentResidentialById(string id);
     ResultWrapper DeleteRentResidential(string propertyId);
     ResultWrapper UpsertRentResidentialListing(string propertyId, Models.Rent.Residentials.Listing room);

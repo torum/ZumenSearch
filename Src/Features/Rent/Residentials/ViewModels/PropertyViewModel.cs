@@ -37,22 +37,6 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     private const string BasicPageName = "ZumenSearch.Views.Rent.Residentials.BasicPage";
 
     private readonly string _id = string.Empty;
-    private readonly TransportationEntryViewModel[] _transportationEntries;
-    private int _selectedTransportationIndex;
-
-    public int SelectedTransportationIndex
-    {
-        get => _selectedTransportationIndex;
-        set
-        {
-            if (value >= 0 && value < _transportationEntries.Length && SetProperty(ref _selectedTransportationIndex, value))
-            {
-                OnPropertyChanged(nameof(SelectedTransportation));
-            }
-        }
-    }
-
-    public TransportationEntryViewModel SelectedTransportation => _transportationEntries[SelectedTransportationIndex];
 
     // This property holds the COPY of current entity being edited.
     // Do not use it directly in the UI. Apply changes to this object in Save() to save the changes.
@@ -67,26 +51,29 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     private readonly List<string> _unsavedBuildingPictureFileList = [];
     private readonly List<string> _unsavedBuildingPdfFileList = [];
     private readonly List<string> _unsavedBuildingPdfThumbnailFileList = [];
-    private readonly List<string> _pendingBuildingPdfCleanupFiles = [];
+    // Tmp listing list to hold unsaved listing where listing reside here while property is not yet saved. (if entry is not saved, delete on close)
+    private readonly List<Listing> _unsavedListingList = [];
+
+    //private readonly List<string> _pendingBuildingPdfCleanupFiles = [];
     // Failed listing file deletions remain with the property editor for retry.
-    private readonly List<string> _pendingListingPdfCleanupFiles = [];
-    private readonly Dictionary<string, ResidentialListingDraft> _pendingListingDrafts = new(StringComparer.Ordinal);
-    private readonly Dictionary<string, ResidentialListingDraft> _committedListingDrafts = new(StringComparer.Ordinal);
-    private readonly Dictionary<string, (List<ListingPicture> Pictures, List<ListingPdf> Pdfs, List<Models.Base.PersonBase> Lessors, List<Models.Base.PersonBase> Brokers)> _pendingListingObjects = new(StringComparer.Ordinal);
-    private readonly Dictionary<string, HashSet<string>> _supersededDraftFiles = new(StringComparer.Ordinal);
-    private readonly HashSet<string> _stagedListingDeletions = new(StringComparer.Ordinal);
-    private readonly HashSet<string> _stagedPendingListingDeletions = new(StringComparer.Ordinal);
-    private readonly HashSet<string> _pendingListingDirectoryCleanup = new(StringComparer.Ordinal);
-    private readonly List<string> _incompleteAttachmentFiles = [];
-    private List<Models.Rent.Residentials.PropertyPdf> _committedBuildingPdfs = [];
-    private bool _hasPendingFileCleanupAfterSave;
+    //private readonly List<string> _pendingListingPdfCleanupFiles = [];
+    //private readonly Dictionary<string, ResidentialListingDraft> _pendingListingDrafts = new(StringComparer.Ordinal);
+    //private readonly Dictionary<string, ResidentialListingDraft> _committedListingDrafts = new(StringComparer.Ordinal);
+    //private readonly Dictionary<string, (List<ListingPicture> Pictures, List<ListingPdf> Pdfs, List<Models.Base.PersonBase> Lessors, List<Models.Base.PersonBase> Brokers)> _pendingListingObjects = new(StringComparer.Ordinal);
+    //private readonly Dictionary<string, HashSet<string>> _supersededDraftFiles = new(StringComparer.Ordinal);
+    //private readonly HashSet<string> _stagedListingDeletions = new(StringComparer.Ordinal);
+    //private readonly HashSet<string> _stagedPendingListingDeletions = new(StringComparer.Ordinal);
+    //private readonly HashSet<string> _pendingListingDirectoryCleanup = new(StringComparer.Ordinal);
+    //private readonly List<string> _incompleteAttachmentFiles = [];
+    //private List<Models.Rent.Residentials.PropertyPdf> _committedBuildingPdfs = [];
+    //private bool _hasPendingFileCleanupAfterSave;
     private bool _discardPending;
     private bool _isClosing;
     private bool _propertyBusy;
-    private bool _committedUnitOwnership;
-    private int _ownershipVersion;
-    private int _pendingPickers;
-    private TaskCompletionSource? _pickersCompleted;
+    //private bool _committedUnitOwnership;
+    //private int _ownershipVersion;
+    //private int _pendingPickers;
+    //private TaskCompletionSource? _pickersCompleted;
     private readonly Queue<Action> _deferredMessages = new();
 
     private readonly CancellationTokenSource _cts = new();
@@ -116,14 +103,16 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     {
         _building = building;
         _id = building.Id;
-        _committedUnitOwnership = building.IsUnitOwnership;
-        _committedBuildingPdfs = building.Status == EntityStatus.New ? [] : building.Pdfs.ToList();
+
         _navigationService = navigationService;
         _dialogService = dialogService;
         _shellFactory = shellFactory;
         _dispatcherService = dispatcherService;
         _dataAccessService = dataAccessService;
         _dataAccessLocationService = dataAccessLocationService;
+
+        IsUnitLevelOwnership = building.IsUnitLevelOwnership;
+
         _transportationEntries = [new(this, 0), new(this, 1), new(this, 2), new(this, 3)];
 
         _propertyDataDirectoryPath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _id);
@@ -134,7 +123,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         try
         {
             PopulateValues();
-            WeakReferenceMessenger.Default.Send(new PropertyIsUnitOwnershipChangedMessage(_id, IsUnitOwnership));
+            WeakReferenceMessenger.Default.Send(new PropertyIsUnitOwnershipChangedMessage(_id, IsUnitLevelOwnership));
 
             // Reset errors
             IsNameHasError = false;
@@ -283,17 +272,17 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     }
 
     // 区分所有か一括所有か
-    public bool IsUnitOwnership
+    public bool IsUnitLevelOwnership
     {
         get;
         set
         {
             if (SetProperty(ref field, value))
             {
-                _ownershipVersion++;
+                //_ownershipVersion++;
                 IsDirty = true;
 
-                IsUnitOwnershipVisible = !value;
+                IsNotUnitLevelOwnership = !value;
                 if (value)
                 {
                     if (_navigationService.IsCurrentPageSameAs("ZumenSearch.Views.Rent.Residentials.ZumenListPage") ||
@@ -305,14 +294,13 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                 }
 
                 // If this is set, then show/hide the owner and zumen from shell menu.
-                //EventIsUnitOwnershipChanged?.Invoke(this, field);
                 WeakReferenceMessenger.Default.Send(new Models.Messenger.PropertyIsUnitOwnershipChangedMessage(_id, value));
             }
         }
     }
 
     [ObservableProperty]
-    public partial bool IsUnitOwnershipVisible { get; private set; } = true;
+    public partial bool IsNotUnitLevelOwnership { get; private set; } = true;
 
     // 建物構造
     public IReadOnlyCollection<Models.Rent.Residentials.PropertyStructureTypeLabel> StructureTypes { get; set; } = PropertyStructureTypeLabel.GetAll();
@@ -775,6 +763,23 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     #endregion
 
     #region == 交通プロパティ ==
+
+    private int _selectedTransportationIndex;
+
+    public int SelectedTransportationIndex
+    {
+        get => _selectedTransportationIndex;
+        set
+        {
+            if (value >= 0 && value < _transportationEntries.Length && SetProperty(ref _selectedTransportationIndex, value))
+            {
+                OnPropertyChanged(nameof(SelectedTransportation));
+            }
+        }
+    }
+
+    private readonly TransportationEntryViewModel[] _transportationEntries;
+    public TransportationEntryViewModel SelectedTransportation => _transportationEntries[SelectedTransportationIndex];
 
     // one
     public RailLine SelectedRailLine1
@@ -2179,7 +2184,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     #region == 部屋プロパティ ==
 
-    public ObservableCollection<ListingSummary> Rooms
+    public ObservableCollection<ListingSummary> ListingSummaries
     {
         get;
         set
@@ -2217,6 +2222,48 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             return;
         }
 
+        // Get the existing summary for this room, if it exists, and update or add it to the collection.
+        var existingSummary = ListingSummaries.FirstOrDefault(item => item.Id.Equals(room.Id, StringComparison.Ordinal));
+        var summary = new ListingSummary(room.Id, room.Name);
+        if (existingSummary is null)
+        {
+            ListingSummaries.Add(summary);
+        }
+        else
+        {
+            ListingSummaries[ListingSummaries.IndexOf(existingSummary)] = summary;
+        }
+
+        // Update the unsaved listing list with the new room data.
+        var existingListing = _unsavedListingList.FirstOrDefault(item => item.Id.Equals(room.Id, StringComparison.Ordinal));
+        if (existingListing is not null)
+        {
+            Debug.WriteLine($"Updating existing room {room.Id} in unsaved listing list.");
+            existingListing = room;
+            IsDirty = true;
+        }
+        else
+        {
+            if (room.Status == EntityStatus.New)
+            {
+                Debug.WriteLine($"Adding new room {room.Id} to unsaved listing list.");
+                _unsavedListingList.Add(room);
+                IsDirty = true;
+            }
+            else
+            {
+                // Remove the child editor window for this room if it exists
+                // because it is no longer new and has been saved and can be saved independently.
+                var win = this.UnsavedChildEditorList.FirstOrDefault(w => w is Views.Rent.Residentials.Listing.EditorWindow ew && ew.Id == room.Id);
+                if (win is not null)
+                {
+                    Debug.WriteLine($"Removing child editor window for room {room.Id} because it is no longer new and has been saved.");
+                    this.UnsavedChildEditorList.Remove(win);
+                }
+            }
+        }
+
+        /*
         if (IsListingPendingDeletion(room.Id)) return;
         var isPendingDraft = room.Status == EntityStatus.New && _building.Status == EntityStatus.New;
         if (isPendingDraft)
@@ -2239,7 +2286,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             var retained = room.Pictures.Select(picture => Path.Combine(directory, picture.ImageFilename)).Concat(room.Pdfs.SelectMany(pdf => new[] { Path.Combine(directory, pdf.PdfFilename), Path.Combine(directory, pdf.ThumbnailFilename) })).ToHashSet(StringComparer.OrdinalIgnoreCase);
             _pendingListingPdfCleanupFiles.RemoveAll(retained.Contains);
         }
-
+        
         var existingRoom = Rooms.FirstOrDefault(item => item.Id.Equals(room.Id, StringComparison.Ordinal));
         var summary = new ListingSummary(room.Id, room.Name, isPendingDraft);
         if (existingRoom is null) Rooms.Add(summary);
@@ -2261,6 +2308,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                 this.UnsavedChildEditorList.Remove(win);
             }
         }
+        */
     }
 
     public void Receive(LessorUpdatedMessage person)
@@ -2302,15 +2350,18 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             return;
         }
 
-        var room = Rooms.FirstOrDefault(r => r.Id.Equals(id, StringComparison.Ordinal));
-        if (room is not null) Rooms.Remove(room);
-        _building.ListingIds.Remove(id);
+        var room = ListingSummaries.FirstOrDefault(r => r.Id.Equals(id, StringComparison.Ordinal));
+        if (room is not null) ListingSummaries.Remove(room);
+        var summary = _building.ListingSummaries.FirstOrDefault(ls => ls.Id.Equals(id, StringComparison.Ordinal));
+        if (summary is not null) _building.ListingSummaries.Remove(summary);
+        /*
         _pendingListingDrafts.Remove(id);
         _pendingListingObjects.Remove(id);
         _committedListingDrafts.Remove(id);
         _supersededDraftFiles.Remove(id);
         _stagedListingDeletions.Remove(id);
         _stagedPendingListingDeletions.Remove(id);
+        */
     }
 
     public void Receive(LessorDeletedMessage lessorId)
@@ -2326,7 +2377,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         if (psn is null) return;
         LessorsWrapper.Remove(psn);
 
-        // should be auto deleted from the table due to "cascade"
+        // Should be auto deleted from the database table thanks to "cascade".
     }
 
     public void Receive(BrokerDeletedMessage lessorId)
@@ -2342,7 +2393,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         if (psn is null) return;
         BrokersWrapper.Remove(psn);
 
-        // should be auto deleted from the table due to "cascade"
+        // Should be auto deleted from the database table thanks to "cascade".
     }
 
     public void Receive(WindowClosedMessage<Microsoft.UI.Xaml.Window> window)
@@ -2369,17 +2420,20 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     public bool IsPropertyBusy => _propertyBusy;
     public bool IsDiscardPending => _discardPending;
     public bool IsEditorEnabled => !IsSaving && !_isClosing && !_propertyBusy && !_discardPending;
-    public bool HasPendingEditorOperations => _pendingPickers > 0 || PendingEditorTasks().Count > 0;
-    public bool HasUncommittedOwnershipChange => IsUnitOwnership != _committedUnitOwnership;
-    public bool IsListingPendingDeletion(string listingId) => _stagedListingDeletions.Contains(listingId) || _stagedPendingListingDeletions.Contains(listingId);
-    public ResidentialListingDraft? GetPendingListingDraft(string listingId) => _pendingListingDrafts.GetValueOrDefault(listingId);
-    public ResidentialListingDraft? GetCommittedListingDraft(string listingId) => _committedListingDrafts.GetValueOrDefault(listingId);
+    //public bool HasPendingEditorOperations => _pendingPickers > 0 || PendingEditorTasks().Count > 0;
+    public bool HasPendingEditorOperations => IsEditorEnabled;//tmp
+    //public bool HasUncommittedOwnershipChange => IsUnitLevelOwnership != _committedUnitOwnership;
+    //public bool IsListingPendingDeletion(string listingId) => _stagedListingDeletions.Contains(listingId) || _stagedPendingListingDeletions.Contains(listingId);
+    //public ResidentialListingDraft? GetPendingListingDraft(string listingId) => _pendingListingDrafts.GetValueOrDefault(listingId);
+    //public ResidentialListingDraft? GetCommittedListingDraft(string listingId) => _committedListingDrafts.GetValueOrDefault(listingId);
 
+    /*
     public void SetListingSummaries(IEnumerable<ListingSummary> summaries)
     {
         Rooms = new ObservableCollection<ListingSummary>(summaries);
         IsDirty = false;
     }
+    */
 
     public void SetPropertyBusy(bool value)
     {
@@ -2389,6 +2443,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         if (!value && !IsSaving) while (_deferredMessages.TryDequeue(out var message)) message();
     }
 
+    /*
     public void BeginPicker()
     {
         if (_pendingPickers++ == 0) _pickersCompleted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -2402,6 +2457,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             _pickersCompleted = null;
         }
     }
+    */
 
     public void SetClosing(bool value)
     {
@@ -2410,6 +2466,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         SaveCommand.NotifyCanExecuteChanged();
     }
 
+    /*
     public async Task<bool> WaitForEditorOperationsAsync()
     {
         while (true)
@@ -2429,6 +2486,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             }
         }
     }
+    */
 
     private List<Task> PendingEditorTasks()
     {
@@ -2445,29 +2503,20 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     public bool DiscardChanges()
     {
-        var mainViewModel = App.GetService<ViewModels.MainViewModel>();
-        if (mainViewModel.RentResidentialListingEditorList.Any(editor => editor.PropertyId == _id))
-        {
-            ShowInputValidationError("募集物件の編集画面を閉じてから建物の変更を破棄してください。");
-            return false;
-        }
-
-        if (_hasPendingFileCleanupAfterSave)
-        {
-            ShowInputValidationError("保存済みデータの削除済みファイルが残っています。ファイルの削除を完了するため、もう一度保存してください。");
-            return false;
-        }
-
         _discardPending = true;
         OnPropertyChanged(nameof(IsEditorEnabled));
         SaveCommand.NotifyCanExecuteChanged();
+        /*
         if (!DiscardUnsavedFiles())
         {
             ShowInputValidationError($"{InfoBarErrorMessage} 破棄を完了するには、もう一度画面を閉じてください。");
             return false;
         }
+        */
 
-        WeakReferenceMessenger.Default.Send(new PropertyIsUnitOwnershipChangedMessage(_id, _committedUnitOwnership));
+        // Need to restore the original values from unsaved _building because IsUnitLevelOwnership change is real-time not save-time update.
+        WeakReferenceMessenger.Default.Send(new PropertyIsUnitOwnershipChangedMessage(_id, _building.IsUnitLevelOwnership));
+
         _discardPending = false;
         IsDirty = false;
         return true;
@@ -2482,7 +2531,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         }
 
         _disposed = true;
-        _ownershipVersion++;
+
         foreach (var entry in _transportationEntries)
         {
             entry.Dispose();
@@ -2518,7 +2567,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         //SelectedKind = _building.BuildingKind;
         var propertyTypeKey = PropertyTypes.FirstOrDefault(k => k.Key == _building.PropertyKind.Key);
         SelectedPropertyType = propertyTypeKey is null ? new(Models.Rent.Residentials.PropertyKindType.Unspecified) : propertyTypeKey;
-        IsUnitOwnership = _building.IsUnitOwnership;
+        IsUnitLevelOwnership = _building.IsUnitLevelOwnership;
         var structureKey = StructureTypes.FirstOrDefault(k => k.Key == _building.PropertyStructure.Key);
         SelectedStructureType = structureKey is null ? new(Models.Rent.Residentials.StructureType.Unspecified) : structureKey;
 
@@ -2576,7 +2625,6 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         LocationLongitude = _building.Address.LocationLongitude;
 
         // 交通
-        //SelectedRailLine1 = new(_building.Train1.RailLine?.LineCode ?? "", _building.Train1.RailLine?.LineName ?? "");
         SelectedRailLine1.SetLineCode(_building.Train1.RailLine?.LineCode ?? "");
         SelectedRailLine1.SetLineName(_building.Train1.RailLine?.LineName ?? "");
         if (SelectedRailLine1.LineCode.Equals(_building.Train1.RailStation?.LineCode ?? "", StringComparison.Ordinal))
@@ -2746,7 +2794,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             BrokersWrapper.Add(new Models.Rent.Residentials.PersonWrapperForPropertyViewModel(item, this));
         }
 
-        Rooms = [];
+        ListingSummaries = new ObservableCollection<Models.Rent.Residentials.ListingSummary>(_building.ListingSummaries);
     }
 
     private void OnBuildingPicturePropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -2919,7 +2967,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     {
         InfoBarErrorMessage =
             err.Title + Environment.NewLine +
-        err.Message + Environment.NewLine +
+            err.Message + Environment.NewLine +
             err.Description + Environment.NewLine +
             err.Operation + Environment.NewLine +
             err.MethodName;
@@ -2927,7 +2975,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         IsInfoBarErrorOpen = isShowBar;
     }
 
-    private void ShowInputValidationError(string message)
+    private void ShowSimpleErrorInfoBar(string message)
     {
         InfoBarErrorMessage = message;
         IsInfoBarErrorOpen = true;
@@ -2947,11 +2995,12 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             ("地下階数", FloorCountBasement, 4),
             ("総戸数", TotalUnitCount, 5)
         ];
+
         foreach (var (label, value, maxLength) in basicValues)
         {
             if (!IsValidOptionalDigits(value, maxLength))
             {
-                ShowInputValidationError($"{label}は0以上の{maxLength}桁以内の整数で入力してください。");
+                ShowSimpleErrorInfoBar($"{label}は0以上の{maxLength}桁以内の整数で入力してください。");
                 if (!_navigationService.IsCurrentPageSameAs(BasicPageName)) _navigationService.NavigateTo(BasicPageName, this);
                 return false;
             }
@@ -2964,15 +3013,21 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             ("交通3の駅から徒歩", EkiToho3), ("交通3のバス乗車時間", BusJyousya3), ("交通3のバス停から徒歩", BusStopToho3),
             ("交通4の駅から徒歩", EkiToho4), ("交通4のバス乗車時間", BusJyousya4), ("交通4のバス停から徒歩", BusStopToho4)
         ];
+
         for (var index = 0; index < transportationValues.Length; index++)
         {
             var (label, value) = transportationValues[index];
+
             if (!IsValidOptionalDigits(value, 4))
             {
                 SelectedTransportationIndex = index / 3;
-                ShowInputValidationError($"{label}は0以上の4桁以内の整数で入力してください。");
+                
+                ShowSimpleErrorInfoBar($"{label}は0以上の4桁以内の整数で入力してください。");
+                
                 const string pageName = "ZumenSearch.Views.Rent.Residentials.TransportationPage";
+                
                 if (!_navigationService.IsCurrentPageSameAs(pageName)) _navigationService.NavigateTo(pageName, this);
+
                 return false;
             }
         }
@@ -2993,7 +3048,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             _building.SetName(Name);
 
             _building.SetBuildingType(SelectedPropertyType);
-            _building.SetIsUnitOwnership(IsUnitOwnership);
+            _building.SetIsUnitLevelOwnership(IsUnitLevelOwnership);
             _building.SetBuildingStructure(SelectedStructureType);
 
             _building.SetFloorCountAboveGroundFromString(Helpers.Common.NormalizeFullWidthCharacters(FloorCountAboveGround));
@@ -3014,7 +3069,6 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             _building.Address.SetChoume(SelectedChou);
             _building.Address.SetEdaban(Edaban);
             _building.Address.SetPostalCode(PostalCode);
-            //_building.SetLocLocationFull(AddressPreview);
             _building.Address.SetLocationLatitude(LocationLatitude);
             _building.Address.SetLocationLongitude(LocationLongitude);
             // 交通1
@@ -3172,7 +3226,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             var thumbPdf = Pdfs.FirstOrDefault(i => i.IsMain);
             if (thumbPdf is not null)
             {
-                if (!IsUnitOwnership)
+                if (!IsUnitLevelOwnership)
                 {
                     // 物件写真サムネイルに指定
                     _building.ThumbnailFilename = thumbPdf.ThumbnailFilename;
@@ -3193,38 +3247,54 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             foreach (var deleted in _building.BrokersToBeDeleted.Where(person => person.Id == item.Person.Id).ToList()) _building.BrokersToBeDeleted.Remove(deleted);
         }
 
+        _building.ListingsToBeSaved = _unsavedListingList;
+
         return true;
     }
 
+    /*
     public bool CleanIncompleteAttachments()
     {
         var failures = new List<string>();
+        
         var savedBuildingPdfPaths = _committedBuildingPdfs.SelectMany(pdf => new[]
         {
             Path.Combine(App.PropertyBlobDataFolder, _building.Id, pdf.PdfFilename),
             Path.Combine(App.PropertyBlobDataFolder, _building.Id, pdf.ThumbnailFilename)
         }).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        
         _pendingBuildingPdfCleanupFiles.RemoveAll(savedBuildingPdfPaths.Contains);
+        
         DeleteTrackedFiles(_incompleteAttachmentFiles, failures);
         DeleteTrackedFiles(_pendingBuildingPdfCleanupFiles, failures);
+        
         if (failures.Count == 0) return true;
+        
         ShowAttachmentError($"読み込みまたは破棄した図面ファイルを削除できませんでした: {string.Join(", ", failures)}");
+
         return false;
     }
+    */
 
+    /*
     private bool DiscardUnsavedFiles()
     {
         if (!CleanIncompleteAttachments()) return false;
+        
         var failures = new List<string>();
+        
         DeleteTrackedFiles(_unsavedBuildingPictureFileList, failures);
+        
         var savedBuildingPdfPaths = _committedBuildingPdfs.SelectMany(pdf => new[]
         {
             Path.Combine(App.PropertyBlobDataFolder, _building.Id, pdf.PdfFilename),
             Path.Combine(App.PropertyBlobDataFolder, _building.Id, pdf.ThumbnailFilename)
         }).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        
         _unsavedBuildingPdfFileList.RemoveAll(savedBuildingPdfPaths.Contains);
         _unsavedBuildingPdfThumbnailFileList.RemoveAll(savedBuildingPdfPaths.Contains);
         _pendingBuildingPdfCleanupFiles.RemoveAll(savedBuildingPdfPaths.Contains);
+
         DeleteTrackedFiles(_unsavedBuildingPdfThumbnailFileList, failures);
         DeleteTrackedFiles(_unsavedBuildingPdfFileList, failures);
         DeleteTrackedFiles(_pendingBuildingPdfCleanupFiles, failures);
@@ -3250,14 +3320,18 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         ShowInputValidationError($"変更の破棄中にファイルを削除できませんでした。ファイルを閉じてから再試行してください: {string.Join(", ", failures)}");
         return false;
     }
+    */
 
+    /*
     private IEnumerable<string> GetDraftAttachmentFiles(ResidentialListingDraft draft)
     {
         var directory = Path.Combine(_propertyDataDirectoryPath, draft.Id);
         return draft.Pictures.Concat(draft.PicturesToBeDeleted).Select(picture => Path.Combine(directory, picture.ImageFilename))
             .Concat(draft.Pdfs.Concat(draft.PdfsToBeDeleted).SelectMany(pdf => new[] { Path.Combine(directory, pdf.PdfFilename), Path.Combine(directory, pdf.ThumbnailFilename) }));
     }
+    */
 
+    /*
     private void CleanupListingFiles(List<string> failures)
     {
         var editors = App.GetService<ViewModels.MainViewModel>().RentResidentialListingEditorList.Where(editor => editor.PropertyId == _id).ToList();
@@ -3267,7 +3341,9 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             if (TryDeleteFiles(new[] { file }, failures)) _pendingListingPdfCleanupFiles.Remove(file);
         }
     }
+    */
 
+    /*
     private void CleanupListingDirectories(List<string> failures)
     {
         foreach (var listingId in _pendingListingDirectoryCleanup.ToList())
@@ -3285,6 +3361,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             }
         }
     }
+    */
 
     private static void DeleteTrackedFiles(List<string> trackedFiles, List<string> failures)
     {
@@ -3334,28 +3411,29 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     {
         if (_discardPending)
         {
-            ShowInputValidationError("変更の破棄が完了していないため保存できません。もう一度画面を閉じて再試行してください。");
+            ShowSimpleErrorInfoBar("変更の破棄が完了していないため保存できません。もう一度画面を閉じて再試行してください。");
             return;
         }
         if (IsSaving || !IsDirty) return;
-
+        /*
         var main = App.GetService<ViewModels.MainViewModel>();
         if (main.RentResidentialListingEditorList.Any(editor => editor.PropertyId == _id && editor.ViewModel is { IsDiscardPending: true }))
         {
-            ShowInputValidationError("募集物件の変更の破棄を完了してから、もう一度保存してください。");
+            ShowSimpleErrorInfoBar("募集物件の変更の破棄を完了してから、もう一度保存してください。");
             return;
         }
         if (HasPendingEditorOperations || main.RentResidentialListingEditorList.Any(editor => editor.PropertyId == _id && editor.ViewModel is { } vm && (vm.HasPendingEditorOperations || vm.IsClosing)))
         {
-            ShowInputValidationError("関連する選択、ファイル処理または編集画面の終了が完了してから、もう一度保存してください。");
+            ShowSimpleErrorInfoBar("関連する選択、ファイル処理または編集画面の終了が完了してから、もう一度保存してください。");
             return;
         }
         if (!CleanIncompleteAttachments()) return;
         if (!main.TryBeginResidentialOperation(_id))
         {
-            ShowInputValidationError("関連する保存、削除または読み込みが完了してから、もう一度保存してください。");
+            ShowSimpleErrorInfoBar("関連する保存、削除または読み込みが完了してから、もう一度保存してください。");
             return;
         }
+        */
 
         IsSaving = true;
         OnPropertyChanged(nameof(IsEditorEnabled));
@@ -3367,11 +3445,11 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         finally
         {
             IsSaving = false;
-            main.EndResidentialOperation(_id);
+            //main.EndResidentialOperation(_id);
             OnPropertyChanged(nameof(IsEditorEnabled));
             SaveCommand.NotifyCanExecuteChanged();
-            while (_deferredMessages.TryDequeue(out var message)) message();
-            foreach (var editor in main.RentResidentialListingEditorList.Where(editor => editor.PropertyId == _id).ToList()) editor.ViewModel?.ApplyDeferredMessages();
+            //while (_deferredMessages.TryDequeue(out var message)) message();
+            //foreach (var editor in main.RentResidentialListingEditorList.Where(editor => editor.PropertyId == _id).ToList()) editor.ViewModel?.ApplyDeferredMessages();
         }
     }
 
@@ -3398,12 +3476,12 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
         if (Pdfs.Count(pdf => pdf.IsMain) > 1)
         {
-            ShowInputValidationError("メインの図面は1枚だけ選択してください。");
+            ShowSimpleErrorInfoBar("メインの図面は1枚だけ選択してください。");
             const string pageName = "ZumenSearch.Views.Rent.Residentials.ZumenListPage";
             if (!_navigationService.IsCurrentPageSameAs(pageName)) _navigationService.NavigateTo(pageName, this);
             return;
         }
-
+        /*
         var pendingListings = _building.Status == EntityStatus.New ? _pendingListingDrafts.Values.ToList() : [];
         var deletedListingIds = _stagedListingDeletions.ToArray();
         var listingWithMultipleMainPdfs = pendingListings.FirstOrDefault(room => room.Pdfs.Count(pdf => pdf.IsMain) > 1);
@@ -3426,25 +3504,26 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         var buildingLessorDeletesBeforeSave = _building.LessorsToBeDeleted.ToList();
         var buildingBrokerDeletesBeforeSave = _building.BrokersToBeDeleted.ToList();
         var buildingThumbnailBeforeSave = _building.ThumbnailFilename;
+        */
         if (!SetValues())
         {
-            _building.SetIsUnitOwnership(_committedUnitOwnership);
+            //_building.SetIsUnitLevelOwnership(_committedUnitOwnership);
             return;
         }
 
-        bool saveResult;
+        var saveResult = false;
         Models.SearchResult.ResultWrapper resInsert;
-        var committed = false;
         try
         {
-            resInsert = await Task.Run(() => _dataAccessService.UpsertRentResidential(_building, pendingListings, deletedListingIds), _cts.Token);
-            committed = !resInsert.IsError;
+            resInsert = await Task.Run(() => _dataAccessService.UpsertRentResidential(_building), _cts.Token);//, pendingListings, deletedListingIds
+            saveResult = !resInsert.IsError;
         }
         finally
         {
-            if (!committed)
+            if (!saveResult)
             {
-                _building.SetIsUnitOwnership(_committedUnitOwnership);
+                /*
+                _building.SetIsUnitLevelOwnership(_committedUnitOwnership);
                 _building.ThumbnailFilename = buildingThumbnailBeforeSave;
                 LessorsWrapper.Clear();
                 foreach (var lessor in lessorsBeforeSave) LessorsWrapper.Add(lessor);
@@ -3456,9 +3535,10 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                 foreach (var lessor in buildingLessorDeletesBeforeSave) _building.LessorsToBeDeleted.Add(lessor);
                 _building.BrokersToBeDeleted.Clear();
                 foreach (var broker in buildingBrokerDeletesBeforeSave) _building.BrokersToBeDeleted.Add(broker);
+                */
             }
         }
-        if (resInsert.IsError)
+        if (!saveResult)
         {
             Debug.WriteLine(
                 resInsert.Error.Title + Environment.NewLine +
@@ -3469,21 +3549,127 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                 resInsert.Error.FullDump);
 
             ShowErrorInfoBar(resInsert.Error, true);
-
-            saveResult = false;
+            return;
         }
         else
         {
             Debug.WriteLine("No errors on update.");
-            saveResult = true;
         }
 
         if (saveResult)
         {
+            IsDirty = false;
+
+            _building.SetIsModified(false);
+            _building.SetStatus(EntityStatus.Saved);
+
+            // Update title with dummy value.
+            WindowTitle = string.Empty;
+
+            // Clear error infobar.
+            IsInfoBarErrorOpen = false;
+
+            // Clean up deleted picture file.
+            if (_building.PicturesToBeDeleted.Count > 0)
+            {
+                foreach (var file in _building.PicturesToBeDeleted)
+                {
+                    var delFilePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id, file.ImageFilename);
+                    File.Delete(delFilePath);
+                }
+                _building.PicturesToBeDeleted.Clear();
+            }
+
+            // Clean up deleted PDF and thumb file.
+            if (_building.PdfsToBeDeleted.Count > 0)
+            {
+                foreach (var file in _building.PdfsToBeDeleted)
+                {
+                    var delFilePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id, file.PdfFilename);
+                    File.Delete(delFilePath);
+                    delFilePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id, file.ThumbnailFilename);
+                    File.Delete(delFilePath);
+                }
+                _building.PdfsToBeDeleted.Clear();
+            }
+
+            // Just in case clear LessorsToBeDeleted, BrokersToBeDeleted
+            _building.LessorsToBeDeleted.Clear();
+            _building.BrokersToBeDeleted.Clear();
+
+            // Clear rooms, pic and pdfs and lessors
+
+            if (_building.ListingsToBeDeleted.Count > 0)
+            {
+                // TODO: Clean up deleted listing files and directories
+                /*
+                foreach (var listing in _building.ListingsToBeDeleted)
+                {
+                    foreach (var listingPic in listing.Pictures)
+                    {
+                        var delFilePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id, listingPic.ImageFilename);
+                        File.Delete(delFilePath);
+                    }
+
+                    foreach (var listingPdf in listing.Pdfs)
+                    {
+                        var delFilePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id, listingPdf.PdfFilename);
+                        File.Delete(delFilePath);
+                        delFilePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id, listingPdf.ThumbnailFilename);
+                        File.Delete(delFilePath);
+                    }
+
+                    // Just in case clear LessorsToBeDeleted
+                    listing.LessorsToBeDeleted.Clear();
+                }
+                */
+                _building.ListingsToBeDeleted.Clear();
+            }
+
+            _unsavedBuildingPictureFileList.Clear();
+            _unsavedBuildingPdfThumbnailFileList.Clear();
+            _unsavedBuildingPdfFileList.Clear();
+
+            // Just in case.
+            _building.SetStatus(EntityStatus.Saved);
+            _building.SetIsModified(false);
+
+            // Clear unsaved rooms and set status to saved.
+            foreach (var room in _unsavedListingList)
+            {
+                room.SetPropertyName(Name);
+                room.SetPropertyStatus(EntityStatus.Saved);
+                room.SetStatus(EntityStatus.Saved);
+                room.SetIsModified(false);
+            }
+            _unsavedListingList.Clear();
+
+            // Clear unsaved child editors and quit tracking them.
+            UnsavedChildEditorList.Clear();
+
+            /*
+            foreach (var room in Rooms)
+            {
+                room.SetPropertyName(Name);
+                room.SetPropertyStatus(EntityStatus.Saved);
+                room.SetStatus(EntityStatus.Saved);
+                room.SetIsModified(false);
+            }
+
+            // Just in case.
+            foreach (var room in _building.Rooms)
+            {
+                room.SetPropertyName(Name);
+                room.SetPropertyStatus(EntityStatus.Saved);
+                room.SetStatus(EntityStatus.Saved);
+                room.SetIsModified(false);
+            }
+            */
+            /*
             _building.ThumbnailFilename = _building.ThumbnailFilenameOnLastSave;
             IsDirty = false;
             _committedBuildingPdfs = _building.Pdfs.ToList();
-            _committedUnitOwnership = IsUnitOwnership;
+            _committedUnitOwnership = IsUnitLevelOwnership;
 
             _building.SetIsModified(false);
             _building.SetStatus(EntityStatus.Saved);
@@ -3566,6 +3752,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                 IsDirty = true;
                 ShowInputValidationError(cleanupFailures.Count > 0 ? $"保存しましたが、一部の削除済みファイルを削除できませんでした。次回の保存時に再試行します: {string.Join(", ", cleanupFailures)}" : "編集中の募集物件で使用中の添付ファイルがあります。編集画面を保存または閉じてから、建物を再度保存してください。");
             }
+            */
 
             WeakReferenceMessenger.Default.Send(new Models.Messenger.PropertyUpdatedMessage(_building as Models.Base.PropertyBase));
         }
@@ -3606,7 +3793,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             string extension = Path.GetExtension(filePath);
             if (!IsSupportedImageExtension(extension))
             {
-                ShowAttachmentError($"画像形式に対応していません: {Path.GetFileName(filePath)}");
+                ShowSimpleErrorInfoBar($"画像形式に対応していません: {Path.GetFileName(filePath)}");
                 continue;
             }
 
@@ -3618,7 +3805,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             //Debug.WriteLine($"{file} to {destFilePath}  @SetNewBuildingPicturesAsync()");
 
             using var destinationStream = new FileStream(destFilePath, FileMode.CreateNew, FileAccess.Write);
-            _incompleteAttachmentFiles.Add(destFilePath);
+            //_incompleteAttachmentFiles.Add(destFilePath);
             await sourceStream.CopyToAsync(destinationStream);
 
             var pic = new Models.Rent.Residentials.PropertyPicture(newId, newFilename, EntityStatus.New)
@@ -3636,7 +3823,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
             // Keep track of unsaved files to delete them when discarding.
             _unsavedBuildingPictureFileList.Add(destFilePath);
-            _incompleteAttachmentFiles.Remove(destFilePath);
+            //_incompleteAttachmentFiles.Remove(destFilePath);
         }
     }
     private static bool CanAddNewBuildingPictures(List<string> filePathList)
@@ -3655,12 +3842,6 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         extension.Equals(".png", StringComparison.OrdinalIgnoreCase) ||
         extension.Equals(".gif", StringComparison.OrdinalIgnoreCase) ||
         extension.Equals(".webp", StringComparison.OrdinalIgnoreCase);
-
-    private void ShowAttachmentError(string message)
-    {
-        InfoBarErrorMessage = message;
-        IsInfoBarErrorOpen = true;
-    }
 
     [RelayCommand(CanExecute = nameof(CanDeleteBuildingPicture))]
     private async Task DeleteBuildingPicture(Models.Rent.Residentials.PropertyPicture picBldg)
@@ -3690,8 +3871,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     private async Task AddNewBuildingPdfs(List<string> filePathList)
     {
         if (filePathList is null) return;
-        if (filePathList.Count == 0 || IsUnitOwnership) return;
-        var ownershipVersion = _ownershipVersion;
+        if (filePathList.Count == 0 || IsUnitLevelOwnership) return;
+        //var ownershipVersion = _ownershipVersion;
 
         Debug.WriteLine($"destDirectory={_propertyDataDirectoryPath}  @AddNewBuildingPdfs()");
 
@@ -3712,7 +3893,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             string extension = Path.GetExtension(filePath);
             if (!extension.Equals(".pdf", StringComparison.OrdinalIgnoreCase))
             {
-                ShowAttachmentError($"PDFファイルを選択してください: {Path.GetFileName(filePath)}");
+                ShowSimpleErrorInfoBar($"PDFファイルを選択してください: {Path.GetFileName(filePath)}");
                 continue;
             }
 
@@ -3735,7 +3916,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
                     using (var destinationStream = new FileStream(thumbnailDestFilePath, FileMode.CreateNew, FileAccess.Write))
                     {
-                        _incompleteAttachmentFiles.Add(thumbnailDestFilePath);
+                        //_incompleteAttachmentFiles.Add(thumbnailDestFilePath);
                         importedPaths.Add(thumbnailDestFilePath);
                         using var managedSourceStream = stream.AsStreamForRead();
                         await managedSourceStream.CopyToAsync(destinationStream);
@@ -3746,17 +3927,15 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                     using (var pdfSource = File.OpenRead(filePath))
                     using (var pdfDestination = new FileStream(pdfDestFilePath, FileMode.CreateNew, FileAccess.Write))
                     {
-                        _incompleteAttachmentFiles.Add(pdfDestFilePath);
+                        //_incompleteAttachmentFiles.Add(pdfDestFilePath);
                         importedPaths.Add(pdfDestFilePath);
                         await pdfSource.CopyToAsync(pdfDestination);
                     }
 
-                    if (ownershipVersion != _ownershipVersion || IsUnitOwnership)
+                    if (IsUnitLevelOwnership)
                     {
                         _unsavedBuildingPdfThumbnailFileList.Add(thumbnailDestFilePath);
                         _unsavedBuildingPdfFileList.Add(pdfDestFilePath);
-                        _incompleteAttachmentFiles.Remove(thumbnailDestFilePath);
-                        _incompleteAttachmentFiles.Remove(pdfDestFilePath);
                         IsDirty = true;
                         continue;
                     }
@@ -3770,20 +3949,19 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                     Pdfs.Add(pdf);
                     _unsavedBuildingPdfThumbnailFileList.Add(thumbnailDestFilePath);
                     _unsavedBuildingPdfFileList.Add(pdfDestFilePath);
-                    _incompleteAttachmentFiles.Remove(thumbnailDestFilePath);
-                    _incompleteAttachmentFiles.Remove(pdfDestFilePath);
                     OpenBuildingBlobDirectoryCommand.NotifyCanExecuteChanged();
                     DeleteBuildingPdfCommand.NotifyCanExecuteChanged();
                     IsDirty = true;
                 }
                 else
                 {
-                    ShowAttachmentError($"PDFにページがありません: {Path.GetFileName(filePath)}");
+                    ShowSimpleErrorInfoBar($"PDFにページがありません: {Path.GetFileName(filePath)}");
                 }
             }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or COMException or InvalidOperationException or ArgumentException)
             {
-                if (ownershipVersion != _ownershipVersion || IsUnitOwnership)
+                /*
+                if (ownershipVersion != _ownershipVersion || IsUnitLevelOwnership)
                 {
                     foreach (var path in importedPaths)
                     {
@@ -3791,8 +3969,9 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                         _incompleteAttachmentFiles.Remove(path);
                     }
                 }
+                */
                 Debug.WriteLine($"Failed to import PDF '{filePath}': {ex}");
-                ShowAttachmentError($"PDFを読み込めませんでした: {Path.GetFileName(filePath)}。{ex.Message}");
+                ShowSimpleErrorInfoBar($"PDFを読み込めませんでした: {Path.GetFileName(filePath)}。{ex.Message}");
             }
         }
     }
@@ -3817,13 +3996,13 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             var file = await StorageFile.GetFileFromPathAsync(Path.Combine(_propertyDataDirectoryPath, pdf.PdfFilename));
             if (!await Windows.System.Launcher.LaunchFileAsync(file))
             {
-                ShowAttachmentError("PDFを開けませんでした。PDFを開くアプリが設定されているか確認してください。");
+                ShowSimpleErrorInfoBar("PDFを開けませんでした。PDFを開くアプリが設定されているか確認してください。");
             }
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or COMException or InvalidOperationException or ArgumentException)
         {
             Debug.WriteLine($"Failed to open residential property PDF: {ex}");
-            ShowAttachmentError($"PDFを開けませんでした: {ex.Message}");
+            ShowSimpleErrorInfoBar($"PDFを開けませんでした: {ex.Message}");
         }
     }
 
@@ -3863,7 +4042,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             catch (Exception ex)
             {
                 Debug.WriteLine($"Error opening folder: {ex}");
-                ShowInputValidationError($"フォルダーを開けませんでした。{ex.Message}");
+                ShowSimpleErrorInfoBar($"フォルダーを開けませんでした。{ex.Message}");
             }
         }
     }
@@ -3886,17 +4065,22 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     private void AddNewRoom() 
     {
         var newId = Guid.CreateVersion7().ToString("N");
-        var editorShell = _shellFactory.Create(new Models.Rent.Residentials.Listing(newId, EntityStatus.New, _building.Id, _building.Status, _building.IsUnitOwnership, Name));
+        var editorShell = _shellFactory.Create(new Models.Rent.Residentials.Listing(newId, EntityStatus.New, _building.Id, _building.Status, _building.IsUnitLevelOwnership, Name));
 
         // Apply the current IsUnitOwnership state because it may not be saved to the _room YET.
         //editorShell.ViewModel.SetIsPropertyUnitOwnership(this.IsUnitOwnership);
         // Use message. If this is set, then show/hide the owner and zumen from shell menu.
-        WeakReferenceMessenger.Default.Send(new Models.Messenger.PropertyIsUnitOwnershipChangedMessage(_id, this.IsUnitOwnership));
+        WeakReferenceMessenger.Default.Send(new Models.Messenger.PropertyIsUnitOwnershipChangedMessage(_id, this.IsUnitLevelOwnership));
 
         var mainVM = App.GetService<ViewModels.MainViewModel>();
         mainVM.RentResidentialListingEditorList.Add(editorShell.Window);
 
-        this.UnsavedChildEditorList.Add(editorShell.Window);
+        // Track unsaved child editor windows so that they can be closed when the parent is closed 
+        // because the building/property is not saved yet, the child editor windows/listing is dependent of this building/property.
+        if (_building.Status == EntityStatus.New)
+        {
+            this.UnsavedChildEditorList.Add(editorShell.Window);
+        }
 
         if (editorShell.Window.AppWindow.Presenter is OverlappedPresenter presenter)
         {
@@ -3921,11 +4105,11 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     [RelayCommand(CanExecute = nameof(EditSelectedRoomCanExecute))]
     private async Task EditSelectedRoom(ListingSummary summary)
     {
-        if (summary is null || !Rooms.Contains(summary) || !IsEditorEnabled) return;
+        if (summary is null || !ListingSummaries.Contains(summary) || !IsEditorEnabled) return;
         var mainVM = App.GetService<ViewModels.MainViewModel>();
         if (!mainVM.TryBeginResidentialOperation(_id))
         {
-            ShowInputValidationError("関連する保存、削除または読み込みが完了してから、もう一度操作してください。");
+            ShowSimpleErrorInfoBar("関連する保存、削除または読み込みが完了してから、もう一度操作してください。");
             return;
         }
         try
@@ -3970,17 +4154,21 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             }
             catch (COMException)
             {
-                ShowInputValidationError("募集物件の編集画面を開けませんでした。既存の編集画面を確認してから再試行してください。");
+                ShowSimpleErrorInfoBar("募集物件の編集画面を開けませんでした。既存の編集画面を確認してから再試行してください。");
+
+                WeakReferenceMessenger.Default.Send(new WindowClosedMessage<Microsoft.UI.Xaml.Window>(editWin));
+
                 return;
             }
         }
 
         Models.Rent.Residentials.Listing room;
+        /*
         if (_pendingListingDrafts.TryGetValue(unitId, out var draft))
         {
             if (!_pendingListingObjects.TryGetValue(unitId, out var retained))
             {
-                ShowInputValidationError("募集物件の下書きを復元できません。建物を保存してから再試行してください。");
+                ShowSimpleErrorInfoBar("募集物件の下書きを復元できません。建物を保存してから再試行してください。");
                 return;
             }
             room = draft.ToEditorModel(retained.Pictures, retained.Pdfs, retained.Lessors, retained.Brokers);
@@ -3995,18 +4183,30 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             }
             if (result.Room is null)
             {
-                ShowInputValidationError("募集物件が見つかりませんでした。再読み込みしてください。");
+                ShowSimpleErrorInfoBar("募集物件が見つかりませんでした。再読み込みしてください。");
                 return;
             }
             room = result.Room;
         }
-
+        */
+        var result = await Task.Run(() => _dataAccessService.SelectRentResidentialListingById(_id, unitId), _cts.Token);
+        if (result.IsError)
+        {
+            ShowErrorInfoBar(result.Error, true);
+            return;
+        }
+        if (result.Room is null)
+        {
+            ShowSimpleErrorInfoBar("募集物件が見つかりませんでした。再読み込みしてください。");
+            return;
+        }
+        room = result.Room;
         var editorShell = _shellFactory.Create(room);
 
         // Apply the current IsUnitOwnership state because it may not be saved to the _room YET.
         //editorShell.ViewModel.SetIsPropertyUnitOwnership(this.IsUnitOwnership);
         // Use message. If this is set, then show/hide the owner and zumen from shell menu.
-        WeakReferenceMessenger.Default.Send(new Models.Messenger.PropertyIsUnitOwnershipChangedMessage(_id, this.IsUnitOwnership));
+        WeakReferenceMessenger.Default.Send(new Models.Messenger.PropertyIsUnitOwnershipChangedMessage(_id, this.IsUnitLevelOwnership));
 
         var editorWindow = editorShell.Window;
         if (editorWindow == null)
@@ -4017,7 +4217,9 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         }
 
         mainVM.RentResidentialListingEditorList.Add(editorWindow);
-        if (_building.Status == EntityStatus.New) UnsavedChildEditorList.Add(editorWindow);
+
+        // Let's not add it to the ChildEditorList because it is already saved which means it's got a own persistent id and can be saved independently.
+        //this.ChildEditorList.Add(editorWindow);
 
         editorWindow.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(mainVM.RentResidentialListingEditorWinLeft, mainVM.RentResidentialListingEditorWinTop, mainVM.RentResidentialListingEditorWinWidth, mainVM.RentResidentialListingEditorWinHeight));
         if (editorWindow.AppWindow.Presenter is OverlappedPresenter presenter)
@@ -4029,7 +4231,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             presenter.PreferredMinimumHeight = 794;
         }
 
-        editorWindow.AppWindow.Show();
+        //editorWindow.AppWindow.Show();
         editorWindow.Activate();
 
         if (editorWindow.Content is Views.Rent.Residentials.Listing.ShellPage shell)
@@ -4101,7 +4303,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
         if (!mainVM.TryBeginResidentialOperation(_id))
         {
-            ShowInputValidationError("関連する保存、削除または読み込みが完了してから、もう一度操作してください。");
+            ShowSimpleErrorInfoBar("関連する保存、削除または読み込みが完了してから、もう一度操作してください。");
             return;
         }
         try
@@ -4109,18 +4311,27 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             if (await _dialogService.ShowDeleteConfirmationDialog("この募集物件を削除しますか？") != Microsoft.UI.Xaml.Controls.ContentDialogResult.Primary) return;
             if (mainVM.RentResidentialListingEditorList.FirstOrDefault(editor => editor.Id == room.Id) is { } openedEditor)
             {
-                ShowInputValidationError("募集物件の編集画面を閉じてから削除してください。");
+                ShowSimpleErrorInfoBar("募集物件の編集画面を閉じてから削除してください。");
                 openedEditor.Activate();
                 return;
             }
-            if (Rooms.Remove(room))
+
+            if (ListingSummaries.Remove(room))
             {
+                // Don't delete directly. Just mark it for deletion. It will be deleted when the property is saved.
+                //if (_building.Rooms.Remove(room)) { }
+                _building.ListingsToBeDeleted.Add(room.Id);
+
+                /*
                 if (room.IsPendingDraft) _stagedPendingListingDeletions.Add(room.Id);
                 else _stagedListingDeletions.Add(room.Id);
-                _building.ListingIds.Remove(room.Id);
+                */
+                _building.ListingSummaries.Remove(room);
+                /*
                 _pendingListingDrafts.Remove(room.Id);
                 _pendingListingObjects.Remove(room.Id);
                 _supersededDraftFiles.Remove(room.Id);
+                */
                 IsDirty = true;
             }
         }
@@ -4403,7 +4614,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             if (res.Person is null)
             {
                 Debug.WriteLine($"{lessorId} is null. Cannot open editor.");
-                ShowInputValidationError("選択した貸主を読み込めませんでした。");
+                ShowSimpleErrorInfoBar("選択した貸主を読み込めませんでした。");
                 return;
             }
 
@@ -4506,7 +4717,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             if (res.Person is null)
             {
                 Debug.WriteLine($"{brokerId} is null. Cannot open editor.");
-                ShowInputValidationError("選択した宅建業者を読み込めませんでした。");
+                ShowSimpleErrorInfoBar("選択した宅建業者を読み込めませんでした。");
                 return;
             }
 

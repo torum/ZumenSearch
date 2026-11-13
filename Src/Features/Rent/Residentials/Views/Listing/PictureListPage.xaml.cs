@@ -39,7 +39,7 @@ public sealed partial class PictureListPage : Page
         }
 
         button.IsEnabled = false;
-        ViewModel.BeginPicker();
+        //ViewModel.BeginPicker();
         try
         {
             var openPicker = new Microsoft.Windows.Storage.Pickers.FileOpenPicker(button.XamlRoot.ContentIslandEnvironment.AppWindowId)
@@ -67,7 +67,7 @@ public sealed partial class PictureListPage : Page
         }
         finally
         {
-            ViewModel.EndPicker();
+            //ViewModel.EndPicker();
             button.IsEnabled = true;
         }
     }

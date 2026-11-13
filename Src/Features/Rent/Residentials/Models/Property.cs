@@ -34,7 +34,7 @@ public sealed partial class Property : PropertyBase
     }
 
     // 区分所有か一括所有か
-    public bool IsUnitOwnership
+    public bool IsUnitLevelOwnership
     {
         get;
         private set
@@ -44,7 +44,7 @@ public sealed partial class Property : PropertyBase
         }
     }
 
-    internal string ThumbnailFilenameOnLastSave { get; set; } = string.Empty;
+    //internal string ThumbnailFilenameOnLastSave { get; set; } = string.Empty;
 
     // 建物構造
     public PropertyStructureTypeLabel PropertyStructure
@@ -266,7 +266,15 @@ public sealed partial class Property : PropertyBase
 
     #region == 物件に属するリスト == 
 
-    public ObservableCollection<string> ListingIds { get; } = [];
+    // 物件リスト（建物）に属する募集物件（部屋）のIDリスト（未保存時の一時保持リスト）
+    public List<Listing> ListingsToBeSaved { get; set; } = [];
+
+    // 物件リスト（建物）に属する募集物件（部屋）のサマリーリスト（一覧表示用）
+    public ObservableCollection<ListingSummary> ListingSummaries { get; } = [];
+
+    // TODO: make it a just a List<>
+    // DBへの更新時にDBから削除されるべき部屋のIDリスト
+    public ObservableCollection<string> ListingsToBeDeleted { get; set; } = [];
 
     // 物件写真（建物）リスト
     public ObservableCollection<PropertyPicture> Pictures
@@ -279,6 +287,7 @@ public sealed partial class Property : PropertyBase
         }
     } = [];
 
+    // TODO: make it a just a List<>
     // DBへの更新時にDBから削除されるべき物件写真（建物）のIDリスト
     public ObservableCollection<PropertyPicture> PicturesToBeDeleted { get; set; } = [];
 
@@ -293,6 +302,7 @@ public sealed partial class Property : PropertyBase
         }
     } = [];
 
+    // TODO: make it a just a List<>
     // DBへの更新時にDBから削除されるべき図面のIDリスト
     public ObservableCollection<PropertyPdf> PdfsToBeDeleted { get; set; } = [];
 
@@ -307,6 +317,7 @@ public sealed partial class Property : PropertyBase
         }
     } = [];
 
+    // TODO: make it a just a List<>
     // DBへの更新時にDBから削除されるべき貸主のIDリスト
     public ObservableCollection<Models.Base.PersonBase> LessorsToBeDeleted { get; set; } = [];
 
@@ -322,6 +333,8 @@ public sealed partial class Property : PropertyBase
         }
     } = [];
 
+    // TODO: make it a just a List<>
+    // DBへの更新時にDBから削除されるべき宅建業者のIDリスト
     public ObservableCollection<Models.Base.PersonBase> BrokersToBeDeleted { get; set; } = [];
 
     #endregion
@@ -346,7 +359,7 @@ public sealed partial class Property : PropertyBase
         }
     }
 
-    public void SetIsUnitOwnership(bool value) => IsUnitOwnership = value;
+    public void SetIsUnitLevelOwnership(bool value) => IsUnitLevelOwnership = value;
 
     public void SetBuildingStructure(PropertyStructureTypeLabel value) => PropertyStructure = value;
 

@@ -91,6 +91,7 @@ public sealed partial class ShellPage : Page
         ViewModel.SetClosing(true);
         try
         {
+            /*
             if (!await ViewModel.WaitForEditorOperationsAsync()) return;
             await App.GetService<ViewModels.MainViewModel>().WaitForResidentialOperationsAsync();
             if (ViewModel.SaveCommand.IsRunning && ViewModel.SaveCommand.ExecutionTask is Task pendingSave) await pendingSave;
@@ -110,6 +111,22 @@ public sealed partial class ShellPage : Page
                     if (ViewModel.IsDirty) return;
                 }
                 else if (result != ContentDialogResult.Secondary || !ViewModel.DiscardChanges())
+                {
+                    return;
+                }
+            }
+            */
+
+            if (ViewModel.IsDirty)
+            {
+                var result = await _dialogService.ShowEditorCloseConfirmationDialog();
+                await App.GetService<ViewModels.MainViewModel>().WaitForResidentialOperationsAsync();
+                if (result == ContentDialogResult.Primary)
+                {
+                    if (ViewModel.IsDirty) await ViewModel.Save();
+                    if (ViewModel.IsDirty) return;
+                }
+                else if (result != ContentDialogResult.Secondary)
                 {
                     return;
                 }
@@ -280,14 +297,14 @@ public sealed partial class ShellPage : Page
 
     private void ViewModel_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
-        if (e.PropertyName != nameof(ViewModel.IsPropertyUnitOwnership) || ViewModel.IsPropertyUnitOwnership) return;
+        if (e.PropertyName != nameof(ViewModel.IsPropertyUnitLevelOwnership) || ViewModel.IsPropertyUnitLevelOwnership) return;
         PruneHiddenHistory();
         NavView.IsBackEnabled = ContentFrame.CanGoBack;
     }
 
     private void PruneHiddenHistory()
     {
-        if (ViewModel.IsPropertyUnitOwnership) return;
+        if (ViewModel.IsPropertyUnitLevelOwnership) return;
         for (var index = ContentFrame.BackStack.Count - 1; index >= 0; index--)
         {
             var page = ContentFrame.BackStack[index].SourcePageType;

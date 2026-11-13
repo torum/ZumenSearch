@@ -36,7 +36,7 @@ public sealed partial class ZumenListPage : Page
         if (sender is not AppBarButton button) return;
 
         button.IsEnabled = false;
-        ViewModel.BeginPicker();
+        //ViewModel.BeginPicker();
         try
         {
             var openPicker = new Microsoft.Windows.Storage.Pickers.FileOpenPicker(button.XamlRoot.ContentIslandEnvironment.AppWindowId)
@@ -60,7 +60,7 @@ public sealed partial class ZumenListPage : Page
         }
         finally
         {
-            ViewModel.EndPicker();
+            //ViewModel.EndPicker();
             button.IsEnabled = true;
         }
     }

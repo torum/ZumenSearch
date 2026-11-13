@@ -32,7 +32,7 @@ public sealed partial class ShellPage : Page
         ("ZumenSearch.Views.Rent.Residentials.ZumenListPage", "図面", typeof(Views.Rent.Residentials.ZumenListPage)),
         ("ZumenSearch.Views.Rent.Residentials.LessorListPage", "貸主", typeof(Views.Rent.Residentials.LessorListPage)),
         ("ZumenSearch.Views.Rent.Residentials.BrokerListPage", "宅建業者", typeof(Views.Rent.Residentials.BrokerListPage)),
-        ("ZumenSearch.Views.Rent.Residentials.RoomListPage", "募集物件", typeof(Views.Rent.Residentials.RoomListPage))
+        ("ZumenSearch.Views.Rent.Residentials.ListingListPage", "募集物件", typeof(Views.Rent.Residentials.ListingListPage))
     ];
 
     private bool _isClosing;
@@ -91,11 +91,11 @@ public sealed partial class ShellPage : Page
         ViewModel.SetClosing(true);
         try
         {
-            if (!await ViewModel.WaitForEditorOperationsAsync()) return;
+            //if (!await ViewModel.WaitForEditorOperationsAsync()) return;
             var main = App.GetService<ViewModels.MainViewModel>();
             await main.WaitForResidentialOperationsAsync();
             if (ViewModel.SaveCommand.IsRunning && ViewModel.SaveCommand.ExecutionTask is Task pendingSave) await pendingSave;
-            if (!ViewModel.CleanIncompleteAttachments()) return;
+            //if (!ViewModel.CleanIncompleteAttachments()) return;
 
             foreach (var editor in ViewModel.UnsavedChildEditorList.ToList())
             {
@@ -307,7 +307,7 @@ public sealed partial class ShellPage : Page
 
     private void ViewModel_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
-        if (e.PropertyName != nameof(ViewModel.IsUnitOwnership) || !ViewModel.IsUnitOwnership) return;
+        if (e.PropertyName != nameof(ViewModel.IsUnitLevelOwnership) || !ViewModel.IsUnitLevelOwnership) return;
         PruneHiddenHistory();
         if (ContentFrame.SourcePageType == typeof(ZumenListPage) || ContentFrame.SourcePageType == typeof(LessorListPage) || ContentFrame.SourcePageType == typeof(BrokerListPage))
         {
@@ -318,7 +318,7 @@ public sealed partial class ShellPage : Page
 
     private void PruneHiddenHistory()
     {
-        if (!ViewModel.IsUnitOwnership) return;
+        if (!ViewModel.IsUnitLevelOwnership) return;
         for (var index = ContentFrame.BackStack.Count - 1; index >= 0; index--)
         {
             var page = ContentFrame.BackStack[index].SourcePageType;

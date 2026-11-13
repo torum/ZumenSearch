@@ -6,11 +6,11 @@ using System.Diagnostics;
 
 namespace ZumenSearch.Views.Rent.Residentials;
 
-public sealed partial class RoomListPage : Page
+public sealed partial class ListingListPage : Page
 {
     public ViewModels.Rent.Residentials.PropertyViewModel? ViewModel { get; private set; }
 
-    public RoomListPage()
+    public ListingListPage()
     {
         InitializeComponent();
     }

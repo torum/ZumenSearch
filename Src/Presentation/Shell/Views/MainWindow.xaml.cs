@@ -1,15 +1,9 @@
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
-using System.Diagnostics;
-using System.Globalization;
 using System.Runtime.InteropServices;
-using System.Runtime.Intrinsics.Arm;
-using System.Xml;
-using System.Xml.Linq;
 using WinRT;
 using WinRT.Interop;
 using ZumenSearch.Models;
-using ZumenSearch.Services;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.Views.Services.Contracts;
 
@@ -278,8 +272,8 @@ public sealed partial class MainWindow : Window
         if (_isClosing) return;
         _isClosing = true;
 
-        await _viewModel.WaitForCommercialOperationsAsync();
-        await _viewModel.WaitForResidentialOperationsAsync();
+        //await _viewModel.WaitForCommercialOperationsAsync();
+        //await _viewModel.WaitForResidentialOperationsAsync();
 
         var isCancel = false;
 
@@ -292,7 +286,8 @@ public sealed partial class MainWindow : Window
                     Debug.WriteLine("AppWindow_Closing: editor.ViewModel is null");
                     continue;
                 }
-                if (editor.ViewModel.IsDirty || editor.ViewModel.SaveCommand.IsRunning || editor.ViewModel.IsClosing || editor.ViewModel.IsPropertyBusy || editor.ViewModel.HasPendingEditorOperations)
+                if (editor.ViewModel.IsDirty)
+                    //|| editor.ViewModel.SaveCommand.IsRunning || editor.ViewModel.IsClosing || editor.ViewModel.IsPropertyBusy || editor.ViewModel.HasPendingEditorOperations)
                 {
                     args.Cancel = true;
                     isCancel = true;
@@ -357,8 +352,11 @@ public sealed partial class MainWindow : Window
                     Debug.WriteLine("AppWindow_Closing: editor.ViewModel is null");
                     continue;
                 }
-                if (editor.ViewModel.IsDirty || editor.ViewModel.IsSaving || editor.ViewModel.IsClosing || editor.ViewModel.IsPropertyBusy || editor.ViewModel.HasPendingEditorOperations || editor.ViewModel.UnsavedChildEditorList.Count > 0)
+                if (editor.ViewModel.IsDirty)
+                    //|| editor.ViewModel.IsSaving || editor.ViewModel.IsClosing || editor.ViewModel.IsPropertyBusy || editor.ViewModel.HasPendingEditorOperations || editor.ViewModel.UnsavedChildEditorList.Count > 0)
                 {
+                    Debug.WriteLine($"AppWindow_Closing: editor {editor.Title} is dirty or has unsaved changes.");
+
                     args.Cancel = true;
                     isCancel = true;
 
@@ -398,6 +396,8 @@ public sealed partial class MainWindow : Window
 
                     //editor.Activate();
 
+                    Debug.WriteLine($"AppWindow_Closing: Closing editor {editor.Title} with ViewModel {editor.ViewModel?.GetType().Name}");
+
                     editor.Close();
                 }
             }
@@ -418,7 +418,8 @@ public sealed partial class MainWindow : Window
                     Debug.WriteLine("AppWindow_Closing: editor.ViewModel is null");
                     continue;
                 }
-                if (editor.ViewModel.IsDirty || editor.ViewModel.SaveCommand.IsRunning || (editor.Content is Views.Rent.Commercials.Listing.ShellPage listingShell && listingShell.IsClosePending))
+                if (editor.ViewModel.IsDirty)
+                    //|| editor.ViewModel.SaveCommand.IsRunning || (editor.Content is Views.Rent.Commercials.Listing.ShellPage listingShell && listingShell.IsClosePending))
                 {
                     args.Cancel = true;
                     isCancel = true;
@@ -481,7 +482,9 @@ public sealed partial class MainWindow : Window
                     Debug.WriteLine("AppWindow_Closing: editor.ViewModel is null");
                     continue;
                 }
-                if (editor.ViewModel.IsDirty || editor.ViewModel.IsSaving || editor.ViewModel.IsClosing || editor.ViewModel.HasPendingEditorOperations || editor.ViewModel.UnsavedChildEditorList.Count > 0)
+                if (editor.ViewModel.IsDirty
+                    //|| editor.ViewModel.IsSaving || editor.ViewModel.IsClosing || editor.ViewModel.HasPendingEditorOperations || editor.ViewModel.UnsavedChildEditorList.Count > 0
+                    )
                 {
                     args.Cancel = true;
                     isCancel = true;
@@ -664,12 +667,14 @@ public sealed partial class MainWindow : Window
 
         // Save window state and position, etc.
         await SaveSettingAsync();
-        await _viewModel.WaitForResidentialOperationsAsync();
+        //await _viewModel.WaitForResidentialOperationsAsync();
+        /*
         if (_viewModel.RentResidentialEditorList.Count > 0 || _viewModel.RentResidentialListingEditorList.Count > 0)
         {
             _isClosing = false;
             return;
         }
+        */
 
         this.Close();
     }

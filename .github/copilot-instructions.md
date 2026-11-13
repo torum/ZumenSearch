@@ -1,6 +1,5 @@
 # Copilot Instructions
 
-You are an expert Windows App SDK and WinUI 3 developer. 
 Strictly follow these boundaries:
 
 ## Change Approval
@@ -15,6 +14,7 @@ Strictly follow these boundaries:
 - All XAML data bindings in this codebase must use compiled `x:Bind`; do not introduce runtime `{Binding}` expressions.
 - Avoid presenting code changes as unified diff/patch blocks; use clear replacement code snippets with line numbers and file names and paths or concise prose instead.
 - Maintain the application as a single project for the foreseeable future, enforcing cleaner internal boundaries rather than splitting into multiple projects.
+- Follow existing patterns and conventions whenever they are appropriate and effective. If they are unsuitable, insufficient, or ineffective for the task, explain why and propose a suitable improvement rather than introducing a different approach without justification.
 
 ## Code Style
 
@@ -31,7 +31,6 @@ Strictly follow these boundaries:
 - Prefer avoiding hard-coded enum member-name strings in parsers; use enum member ToString() or generic enum parsing so enum renames do not require updating duplicated string constants.
 - For enum choices that need human-readable labels, use a model label type containing the enum Key and localized Label, following PropertyKindTypeLabel, instead of displaying enum member names.
 - Follow existing setter conventions: typed-label properties use matching `Set...TypeLabel`/`Set...Label` methods and should have `FromString` counterparts when applicable; preserve the existing parsing pattern.
-- Follow existing patterns and conventions whenever they are appropriate and effective. If they are unsuitable, insufficient, or ineffective for the task, explain why and propose a suitable improvement rather than introducing a different approach without justification.
 
 ## WinUI 3 & Windows App SDK Architecture Guidelines (.NET 10)
 

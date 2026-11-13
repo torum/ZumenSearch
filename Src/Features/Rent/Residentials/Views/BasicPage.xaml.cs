@@ -173,7 +173,7 @@ public sealed partial class BasicPage : Page
     private async Task TrackPasteAsync(Func<Task> paste)
     {
         if (ViewModel is not { } vm) return;
-        vm.BeginPicker();
+        //vm.BeginPicker();
         try
         {
             await paste();
@@ -186,7 +186,7 @@ public sealed partial class BasicPage : Page
         }
         finally
         {
-            vm.EndPicker();
+            //vm.EndPicker();
         }
     }
 

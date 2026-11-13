@@ -53,7 +53,7 @@ public sealed partial class PictureListPage : Page
         }
 
         button.IsEnabled = false;
-        ViewModel.BeginPicker();
+        //ViewModel.BeginPicker();
 
         try
         {
@@ -93,7 +93,7 @@ public sealed partial class PictureListPage : Page
         }
         finally
         {
-            ViewModel.EndPicker();
+            //ViewModel.EndPicker();
             button.IsEnabled = true;
         }
     }

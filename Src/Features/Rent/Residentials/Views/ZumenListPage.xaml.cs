@@ -33,7 +33,7 @@ public sealed partial class ZumenListPage : Page
         }
 
         button.IsEnabled = false;
-        ViewModel.BeginPicker();
+        //ViewModel.BeginPicker();
 
         try
         {
@@ -69,7 +69,7 @@ public sealed partial class ZumenListPage : Page
         }
         finally
         {
-            ViewModel.EndPicker();
+            //ViewModel.EndPicker();
             button.IsEnabled = true;
         }
     }

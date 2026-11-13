@@ -10,13 +10,10 @@ namespace ZumenSearch.Models.Rent.Residentials;
 // 部屋（編集用）
 public sealed partial class Listing : ListingBase
 {
-    public Listing(string id, EntityStatus status, string propertyId, EntityStatus propertyStatus, bool isPropertyUnitOwnership, string propertyName) : base(id, status, propertyId, propertyStatus, PropertyContextType.RentResidential)
+    public Listing(string id, EntityStatus status, string propertyId, EntityStatus propertyStatus, bool isPropertyUnitLevelOwnership, string propertyName) : base(id, status, propertyId, propertyStatus, PropertyContextType.RentResidential)
     {
-        //PropertyId = propertyId;
-        IsPropertyUnitOwnership = isPropertyUnitOwnership;
+        IsPropertyUnitLevelOwnership = isPropertyUnitLevelOwnership;
         PropertyName = propertyName;
-        //PropertyStatus = propertyStatus;
-        //PropertyChanged += (_, _) => SetIsModified(true);
         SetIsModified(false);
     }
 
@@ -28,7 +25,7 @@ public sealed partial class Listing : ListingBase
     }
 
     // 部屋が属する建物が区分所有化どうかをここでも保持（部屋を直接開いた際に必要）
-    public bool IsPropertyUnitOwnership { get; private set; }
+    public bool IsPropertyUnitLevelOwnership { get; private set; }
 
     #region == 部屋の基本情報 ==
 
@@ -423,9 +420,9 @@ public sealed partial class Listing : ListingBase
         PropertyName = propertyName;
     }
 
-    public void SetIsPropertyUnitOwnership(bool isUnitOwnership)
+    public void SetIsPropertyUnitLevelOwnership(bool isUnitLevelOwnership)
     {
-        IsPropertyUnitOwnership = isUnitOwnership;
+        IsPropertyUnitLevelOwnership = isUnitLevelOwnership;
     }
 
     public void SetFloorPlanTypeLabel(ListingFloorPlanTypeLabel floorPlan)

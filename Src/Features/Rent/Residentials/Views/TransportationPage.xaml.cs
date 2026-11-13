@@ -58,7 +58,7 @@ public sealed partial class TransportationPage : Page
             if (args.PropertyName == nameof(vm.SelectedTransportationIndex)) selectionChanged = true;
         }
         vm.PropertyChanged += OnPropertyChanged;
-        vm.BeginPicker();
+        //vm.BeginPicker();
         try
         {
             var clipboard = Clipboard.GetContent();
@@ -94,7 +94,7 @@ public sealed partial class TransportationPage : Page
         finally
         {
             vm.PropertyChanged -= OnPropertyChanged;
-            vm.EndPicker();
+            //vm.EndPicker();
         }
     }
 }

@@ -97,13 +97,13 @@
                     <NavigationViewItem Content="設備" Tag="ZumenSearch.Views.Rent.Residentials.FacilitiesPage" />
                     <NavigationViewItem Content="管理" Tag="ZumenSearch.Views.Rent.Residentials.KanriPage" />
                     <NavigationViewItem Content="写真" Tag="ZumenSearch.Views.Rent.Residentials.PictureListPage" />
-                    <NavigationViewItem Content="図面" Tag="ZumenSearch.Views.Rent.Residentials.ZumenListPage" Visibility="{x:Bind ViewModel.IsUnitOwnershipVisible, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"/>
-                    <NavigationViewItem Content="貸主" Tag="ZumenSearch.Views.Rent.Residentials.LessorListPage" Visibility="{x:Bind ViewModel.IsUnitOwnershipVisible, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"/>
-                    <NavigationViewItem Content="宅建業者" Tag="ZumenSearch.Views.Rent.Residentials.BrokerListPage" Visibility="{x:Bind ViewModel.IsUnitOwnershipVisible, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"/>
+                    <NavigationViewItem Content="図面" Tag="ZumenSearch.Views.Rent.Residentials.ZumenListPage" Visibility="{x:Bind ViewModel.IsNotUnitLevelOwnership, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"/>
+                    <NavigationViewItem Content="貸主" Tag="ZumenSearch.Views.Rent.Residentials.LessorListPage" Visibility="{x:Bind ViewModel.IsNotUnitLevelOwnership, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"/>
+                    <NavigationViewItem Content="宅建業者" Tag="ZumenSearch.Views.Rent.Residentials.BrokerListPage" Visibility="{x:Bind ViewModel.IsNotUnitLevelOwnership, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"/>
                 </NavigationView.MenuItems>
 
                 <NavigationView.FooterMenuItems>
-                    <NavigationViewItem Content="募集物件" Tag="ZumenSearch.Views.Rent.Residentials.RoomListPage"/>
+                    <NavigationViewItem Content="募集物件" Tag="ZumenSearch.Views.Rent.Residentials.ListingListPage"/>
                 </NavigationView.FooterMenuItems>
                 
             </NavigationView>
