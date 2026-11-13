@@ -34,7 +34,8 @@ public class WindowClosedMessage<TWindow>(TWindow value) : ValueChangedMessage<T
 {
 }
 
-public class PropertyIsUnitOwnershipChangedMessage(bool value) : ValueChangedMessage<bool>(value)
+public class PropertyIsUnitOwnershipChangedMessage(string propertyId, bool value) : ValueChangedMessage<bool>(value)
 {
+    public string PropertyId { get; } = propertyId;
 }
 

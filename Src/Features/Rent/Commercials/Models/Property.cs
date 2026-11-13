@@ -57,6 +57,11 @@ public sealed partial class Property : PropertyBase
         get;
         set
         {
+            if (value < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(value), value, "Must be at least 0.");
+            }
+
             field = value;
             IsModified = true;
         }
@@ -67,6 +72,11 @@ public sealed partial class Property : PropertyBase
         get;
         set
         {
+            if (value < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(value), value, "Must be at least 0.");
+            }
+
             field = value;
             IsModified = true;
         }
@@ -77,6 +87,11 @@ public sealed partial class Property : PropertyBase
         get;
         set
         {
+            if (value < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(value), value, "Must be at least 0.");
+            }
+
             field = value;
             IsModified = true;
         }
@@ -300,6 +315,77 @@ public sealed partial class Property : PropertyBase
 
     #region == 一般 ==
 
+    public bool HasPassengerElevator
+    {
+        get;
+        set { field = value; IsModified = true; }
+    }
+
+    public int? PassengerElevatorCount
+    {
+        get;
+        set
+        {
+            if (value < 0) throw new ArgumentOutOfRangeException(nameof(value));
+            field = value;
+            IsModified = true;
+        }
+    }
+
+    public bool HasFreightElevator
+    {
+        get;
+        set { field = value; IsModified = true; }
+    }
+
+    public string FreightElevatorDetails
+    {
+        get => field ?? string.Empty;
+        set { field = value; IsModified = true; }
+    }
+
+    public bool HasLoadingArea
+    {
+        get;
+        set { field = value; IsModified = true; }
+    }
+
+    public string LoadingAreaDetails
+    {
+        get => field ?? string.Empty;
+        set { field = value; IsModified = true; }
+    }
+
+    public bool HasSecurity
+    {
+        get;
+        set { field = value; IsModified = true; }
+    }
+
+    public bool HasMechanicalSecurity
+    {
+        get;
+        set { field = value; IsModified = true; }
+    }
+
+    public bool HasStaffedSecurity
+    {
+        get;
+        set { field = value; IsModified = true; }
+    }
+
+    public bool HasOtherSecurity
+    {
+        get;
+        set { field = value; IsModified = true; }
+    }
+
+    public string SecurityDetails
+    {
+        get => field ?? string.Empty;
+        set { field = value; IsModified = true; }
+    }
+
     public bool HasAutolock
     {
         get;
@@ -445,7 +531,26 @@ public sealed partial class Property : PropertyBase
         Unspecified, Jisya, Tasya, Kashinushi
     }
 
-    // TODO: more.
+    public EnumKanriShutai KanriShutai
+    {
+        get;
+        set
+        {
+            if (!Enum.IsDefined(value)) throw new ArgumentOutOfRangeException(nameof(value));
+            field = value;
+            IsModified = true;
+        }
+    }
+
+    public bool KanriIsMaintenanceManagementIfIsKanriJisya { get; set { field = value; IsModified = true; } }
+    public bool KanriIsTenantManagementIfIsKanriJisya { get; set { field = value; IsModified = true; } }
+    public bool KanriIsPaymentManagementIfIsKanriJisya { get; set { field = value; IsModified = true; } }
+    public bool KanriIsOtherManagementIfIsKanriJisya { get; set { field = value; IsModified = true; } }
+    public string KanriRemarkIfIsKanriJisya { get => field ?? string.Empty; set { field = value; IsModified = true; } }
+    public string KanriNameOfCompanyIfIsKanriTasya { get => field ?? string.Empty; set { field = value; IsModified = true; } }
+    public string KanriContactInfoOfCompanyIfIsKanriTasya { get => field ?? string.Empty; set { field = value; IsModified = true; } }
+    public string KanriRemarkIfIsKanriTasya { get => field ?? string.Empty; set { field = value; IsModified = true; } }
+    public string KanriRemarkIfIsKanriKashinushi { get => field ?? string.Empty; set { field = value; IsModified = true; } }
 
     #endregion
 
@@ -513,8 +618,7 @@ public sealed partial class Property : PropertyBase
 
     #region == Units ==
 
-    // 物件に属する区画のリスト
-    public ObservableCollection<Models.Rent.Commercials.Listing.Listing> Units
+    public ObservableCollection<string> ListingIds
     {
         get;
         set
@@ -523,10 +627,6 @@ public sealed partial class Property : PropertyBase
             IsModified = true;
         }
     } = [];
-
-    // DBへの更新時にDBから削除されるべき区画のIDリスト
-
-    public ObservableCollection<Models.Rent.Commercials.Listing.Listing> UnitsToBeDeleted { get; set; } = [];
 
     #endregion
 

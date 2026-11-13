@@ -78,14 +78,6 @@
         <Grid Grid.Row="0">
             <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Margin="0,0,0,0" HorizontalAlignment="Right">
                 <AppBarButton Name="AppBarButtonSelectLessor" Icon="AddFriend" Label="追加" Command="{x:Bind ViewModel.AddLessorCommand, Mode=OneWay}" />
-                <!-- Contact -->
-                <AppBarButton Icon="More" Label="その他">
-                    <AppBarButton.Flyout>
-                        <MenuFlyout Placement="Bottom">
-                            <MenuFlyoutItem Text="すべて削除" Icon="Delete"></MenuFlyoutItem>
-                        </MenuFlyout>
-                    </AppBarButton.Flyout>
-                </AppBarButton>
             </CommandBar>
         </Grid>
 

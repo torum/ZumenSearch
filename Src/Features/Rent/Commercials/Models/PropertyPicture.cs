@@ -12,6 +12,7 @@ public sealed partial class PropertyPicture : PictureBase
 
     public ObservableCollection<PropertyPictureTypeLabel> CommercialPictureTypes { get;} =
     [
+        new(PropertyPictureType.Unspecified),
         new(PropertyPictureType.Exterior),
         new(PropertyPictureType.Entrance),
         new(PropertyPictureType.Neighborhood),
@@ -91,25 +92,19 @@ public sealed partial class PropertyPicture : PictureBase
     public PropertyPicture(string id, string imageLocation, EntityStatus status) : base(id, status)
     {
         ImageFilename = imageLocation;
+        PictureType = CommercialPictureTypes[0];
 
         IsModified = false;
     }
 
     public PropertyPictureType? SetLabelFromString(string titleStr)
     {
-        if (Enum.TryParse<PropertyPictureType>(titleStr, out var result))
+        if (!Enum.TryParse<PropertyPictureType>(titleStr, out var result) || !Enum.IsDefined(result))
         {
-            //PictureType = new(result); // Not good for assigning to combobox. So select from CommercialPictureTypes.
-            PictureType = CommercialPictureTypes.FirstOrDefault<PropertyPictureTypeLabel>(x => x.Key == result) ?? new(PropertyPictureType.Unspecified);
-
-            //Debug.WriteLine($"SetLabelFromString: {titleStr} -> {PictureType.Label}");
-            return result;
+            throw new FormatException($"Invalid commercial property picture type: {titleStr}");
         }
-        else
-        {
-            PictureType = new(PropertyPictureType.Unspecified);
 
-            return PropertyPictureType.Unspecified;
-        }
+        PictureType = CommercialPictureTypes.First(item => item.Key == result);
+        return result;
     }
 };

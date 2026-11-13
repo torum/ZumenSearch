@@ -33,37 +33,34 @@ public sealed partial class ZumenListPage : Page
             return;
         }
 
-        if (sender is AppBarButton button)
+        if (sender is not AppBarButton button) return;
+
+        button.IsEnabled = false;
+        ViewModel.BeginPicker();
+        try
         {
-            button.IsEnabled = false;
-            var openPicker = new Microsoft.Windows.Storage.Pickers.FileOpenPicker(button.XamlRoot.ContentIslandEnvironment.AppWindowId);
-
-            // Set options for your file picker
-            openPicker.ViewMode = Microsoft.Windows.Storage.Pickers.PickerViewMode.List;
-            openPicker.SuggestedStartLocation = Microsoft.Windows.Storage.Pickers.PickerLocationId.Desktop;
+            var openPicker = new Microsoft.Windows.Storage.Pickers.FileOpenPicker(button.XamlRoot.ContentIslandEnvironment.AppWindowId)
+            {
+                ViewMode = Microsoft.Windows.Storage.Pickers.PickerViewMode.List,
+                SuggestedStartLocation = Microsoft.Windows.Storage.Pickers.PickerLocationId.Desktop
+            };
             openPicker.FileTypeFilter.Add(".pdf");
-
-            // Open the picker for the user to pick a file
             var files = await openPicker.PickMultipleFilesAsync();
-            if (files.Count > 0)
+            var paths = files.Select(file => file.Path).ToList();
+            if (paths.Count > 0 && ViewModel.AddNewRoomPdfsCommand.CanExecute(paths))
             {
-                List<string> list = [];
-                foreach (var file in files)
-                {
-                    list.Add(file.Path);
-                }
-
-                if (ViewModel.AddNewRoomPdfsCommand.CanExecute(list))
-                {
-                    await ViewModel.AddNewRoomPdfsCommand.ExecuteAsync(list);
-                    //await ViewModel.SetNewUnitPicturesAsync(list);
-                }
+                await ViewModel.AddNewRoomPdfsCommand.ExecuteAsync(paths);
             }
-            else
-            {
-                Debug.WriteLine("Operation cancelled.");
-            }
-
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Runtime.InteropServices.COMException or InvalidOperationException or ArgumentException)
+        {
+            Debug.WriteLine($"Failed to import listing PDFs: {ex}");
+            ViewModel.InfoBarErrorMessage = $"PDFを読み込めませんでした: {ex.Message}";
+            ViewModel.IsInfoBarErrorOpen = true;
+        }
+        finally
+        {
+            ViewModel.EndPicker();
             button.IsEnabled = true;
         }
     }

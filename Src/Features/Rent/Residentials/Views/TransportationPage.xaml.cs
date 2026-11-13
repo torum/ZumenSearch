@@ -3,7 +3,6 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using System.Diagnostics;
-using System.Text.RegularExpressions;
 using Windows.ApplicationModel.DataTransfer;
 
 namespace ZumenSearch.Views.Rent.Residentials;
@@ -28,182 +27,74 @@ public sealed partial class TransportationPage : Page
         base.OnNavigatedTo(e);
     }
 
-    private void TextBoxRailLine1_TextChanged(object sender, TextChangedEventArgs e)
-    {
-        if (string.IsNullOrEmpty(TextBoxRailLine1.Text))
-        {
-            TextBoxRailLine1.IsEnabled = false;
-        }
-        else
-        {
-            TextBoxRailLine1.IsEnabled = true;
-        }
-    }
-
-    private void TextBoxRailStation1_TextChanged(object sender, TextChangedEventArgs e)
-    {
-        if (string.IsNullOrEmpty(TextBoxRailStation1.Text))
-        {
-            TextBoxRailStation1.IsEnabled = false;
-        }
-        else
-        {
-            TextBoxRailStation1.IsEnabled = true;
-        }
-    }
-
-    private void TextBoxRailLine2_TextChanged(object sender, TextChangedEventArgs e)
-    {
-        if (string.IsNullOrEmpty(TextBoxRailLine2.Text))
-        {
-            TextBoxRailLine2.IsEnabled = false;
-        }
-        else
-        {
-            TextBoxRailLine2.IsEnabled = true;
-        }
-    }
-
-    private void TextBoxRailStation2_TextChanged(object sender, TextChangedEventArgs e)
-    {
-        if (string.IsNullOrEmpty(TextBoxRailStation2.Text))
-        {
-            TextBoxRailStation2.IsEnabled = false;
-        }
-        else
-        {
-            TextBoxRailStation2.IsEnabled = true;
-        }
-    }
-
-    private void TextBoxRailLine3_TextChanged(object sender, TextChangedEventArgs e)
-    {
-        if (string.IsNullOrEmpty(TextBoxRailLine3.Text))
-        {
-            TextBoxRailLine3.IsEnabled = false;
-        }
-        else
-        {
-            TextBoxRailLine3.IsEnabled = true;
-        }
-    }
-
-    private void TextBoxRailStation3_TextChanged(object sender, TextChangedEventArgs e)
-    {
-        if (string.IsNullOrEmpty(TextBoxRailStation3.Text))
-        {
-            TextBoxRailStation3.IsEnabled = false;
-        }
-        else
-        {
-            TextBoxRailStation3.IsEnabled = true;
-        }
-    }
-
-    private void TextBoxRailLine4_TextChanged(object sender, TextChangedEventArgs e)
-    {
-        if (string.IsNullOrEmpty(TextBoxRailLine4.Text))
-        {
-            TextBoxRailLine4.IsEnabled = false;
-        }
-        else
-        {
-            TextBoxRailLine4.IsEnabled = true;
-        }
-    }
-
-    private void TextBoxRailStation4_TextChanged(object sender, TextChangedEventArgs e)
-    {
-        if (string.IsNullOrEmpty(TextBoxRailStation4.Text))
-        {
-            TextBoxRailStation4.IsEnabled = false;
-        }
-        else
-        {
-            TextBoxRailStation4.IsEnabled = true;
-        }
-    }
-
-
 #pragma warning disable CA1822 // Mark members as static
     private void TextBox4DigitOrLess_TextChanging(TextBox sender, TextBoxTextChangingEventArgs args)
 #pragma warning restore CA1822 // Mark members as static
     {
-        var text = ((TextBox)sender).Text;
+        UpdateNumericBorder(sender);
+    }
 
-        if (string.IsNullOrEmpty(text))
-        {
-            ((TextBox)sender).BorderBrush = (App.Current.Resources["TextControlBorderBrush"] as Brush)!;
-            return;
-        }
+    private void TextBox4DigitOrLess_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        if (sender is TextBox textBox) UpdateNumericBorder(textBox);
+    }
 
-        var regex = new Regex(@"^(?:\d{5,})?$"); // 5 digit or more.
-        if (regex.IsMatch(text))
-        {
-            Debug.WriteLine("5 or more digits @TextBoxHalfWidth4DigitOrLess_TextChanging");
-            ((TextBox)sender).BorderBrush = new SolidColorBrush(Colors.Red);
-        }
-        else
-        {
-            regex = new Regex(@"^(?:\d{0,4})?$");//new Regex(@"^\d{0,4}$"); // 4 digit or less
-            if (regex.IsMatch(text))
-            {
-                ((TextBox)sender).BorderBrush = (App.Current.Resources["TextControlBorderBrush"] as Brush)!;
-            }
-            else
-            {
-                Debug.WriteLine("Not 4 digit or less @TextBoxHalfWidth4DigitOrLess_TextChanging");
-                ((TextBox)sender).BorderBrush = new SolidColorBrush(Colors.Red);
-            }
-        }
+    private static void UpdateNumericBorder(TextBox textBox)
+    {
+        var normalized = Helpers.Common.NormalizeFullWidthCharacters(textBox.Text.Trim());
+        textBox.BorderBrush = normalized.Length <= 4 && normalized.All(character => character >= '0' && character <= '9')
+            ? (App.Current.Resources["TextControlBorderBrush"] as Brush)!
+            : new SolidColorBrush(Colors.Red);
     }
 
     private async void TextBoxCleanNonDigitMax4_Paste(object sender, TextControlPasteEventArgs e)
     {
         e.Handled = true;
-
-        var textBox = sender as TextBox;
-        if (textBox == null) return;
-
-        var dataPackageView = Clipboard.GetContent();
-        if (dataPackageView.Contains(StandardDataFormats.Text))
+        if (ViewModel is not { } vm || sender is not TextBox textBox) return;
+        var selectedTransportationIndex = vm.SelectedTransportationIndex;
+        var selectionChanged = false;
+        void OnPropertyChanged(object? changedSender, System.ComponentModel.PropertyChangedEventArgs args)
         {
-            // Fetch text asynchronously
-            string originalText = await dataPackageView.GetTextAsync();
+            if (args.PropertyName == nameof(vm.SelectedTransportationIndex)) selectionChanged = true;
+        }
+        vm.PropertyChanged += OnPropertyChanged;
+        vm.BeginPicker();
+        try
+        {
+            var clipboard = Clipboard.GetContent();
+            if (!clipboard.Contains(StandardDataFormats.Text)) return;
 
-            string cleanedText = Helpers.Common.ReplaceZenkakuNumbers(originalText);
-
-            // Manually insert the manipulated text at the current cursor position
-            int selectionStart = textBox.SelectionStart;
-
-            // Remove any currently highlighted text before inserting
-            if (textBox.SelectionLength > 0)
+            var pastedText = Helpers.Common.NormalizeFullWidthCharacters(await clipboard.GetTextAsync());
+            if (selectionChanged || vm.SelectedTransportationIndex != selectedTransportationIndex)
             {
-                textBox.Text = textBox.Text.Remove(selectionStart, textBox.SelectionLength);
-            }
-
-            // Inject the text
-            textBox.Text = textBox.Text.Insert(selectionStart, cleanedText);
-
-            // Move the caret forward to the end of your newly pasted text
-            textBox.SelectionStart = selectionStart + cleanedText.Length;
-
-            string pattern = @"^\d{5,}$"; // 5 or more digits
-            if (Regex.IsMatch(textBox.Text, pattern))
-            {
-                ((TextBox)sender).BorderBrush = new SolidColorBrush(Colors.Red);
+                vm.InfoBarErrorMessage = "交通の選択が変更されたため、貼り付けを中止しました。";
+                vm.IsInfoBarErrorOpen = true;
                 return;
             }
 
-            var regex = new Regex(@"^(?:\d{0,4})?$");
-            if (!regex.IsMatch(textBox.Text))
+            var selectionStart = textBox.SelectionStart;
+            var candidate = textBox.Text.Remove(selectionStart, textBox.SelectionLength).Insert(selectionStart, pastedText);
+            var normalized = Helpers.Common.NormalizeFullWidthCharacters(candidate);
+            if (normalized.Length > textBox.MaxLength || normalized.Any(character => character < '0' || character > '9'))
             {
-                ((TextBox)sender).BorderBrush = new SolidColorBrush(Colors.Yellow);
+                vm.InfoBarErrorMessage = $"貼り付ける値は0以上の{textBox.MaxLength}桁以内の整数にしてください。";
+                vm.IsInfoBarErrorOpen = true;
+                return;
             }
-            else
-            {
-                ((TextBox)sender).BorderBrush = (App.Current.Resources["TextControlBorderBrush"] as Brush)!;
-            }
+
+            textBox.Text = candidate;
+            textBox.SelectionStart = selectionStart + pastedText.Length;
+        }
+        catch (Exception ex) when (ex is System.Runtime.InteropServices.COMException or InvalidOperationException)
+        {
+            Debug.WriteLine($"Failed to paste clipboard text: {ex}");
+            vm.InfoBarErrorMessage = $"貼り付けできませんでした: {ex.Message}";
+            vm.IsInfoBarErrorOpen = true;
+        }
+        finally
+        {
+            vm.PropertyChanged -= OnPropertyChanged;
+            vm.EndPicker();
         }
     }
 }

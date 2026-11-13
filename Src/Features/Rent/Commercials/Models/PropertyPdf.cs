@@ -12,6 +12,7 @@ public sealed partial class PropertyPdf : PdfBase
 
     public ObservableCollection<PropertyPdfTypeLabel> BuildingPdfTypes { get; } =
     [
+        new(PropertyPdfType.Unspecified),
         new(PropertyPdfType.Listing),
         new(PropertyPdfType.Architectural),
         new(PropertyPdfType.Registry),
@@ -92,23 +93,19 @@ public sealed partial class PropertyPdf : PdfBase
     {
         PdfFilename = pdfLocation;
         ThumbnailFilename = thumbnailLocation;
+        PdfType = BuildingPdfTypes[0];
 
         IsModified = false;
     }
 
     public PropertyPdfType? SetTypeFromString(string Str)
     {
-        if (Enum.TryParse<PropertyPdfType>(Str, out var result))
+        if (!Enum.TryParse<PropertyPdfType>(Str, out var result) || !Enum.IsDefined(result))
         {
-            PdfType = BuildingPdfTypes.FirstOrDefault<PropertyPdfTypeLabel>(x => x.Key == result) ?? new(PropertyPdfType.Unspecified);
-
-            return result;
+            throw new FormatException($"Invalid commercial property PDF type: {Str}");
         }
-        else
-        {
-            PdfType = new(PropertyPdfType.Unspecified);
 
-            return PropertyPdfType.Unspecified;
-        }
+        PdfType = BuildingPdfTypes.First(item => item.Key == result);
+        return result;
     }
 };

@@ -92,7 +92,7 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <NavigationView x:Name="NavView" Grid.Row="0" Margin="36,3,36,0" PaneDisplayMode="Top" Canvas.ZIndex="0" IsTitleBarAutoPaddingEnabled="True" SelectionFollowsFocus="Disabled" IsPaneToggleButtonVisible="False" IsSettingsVisible="False" IsBackButtonVisible="Collapsed" Loaded="NavView_Loaded" ItemInvoked="NavView_ItemInvoked" BackRequested="NavView_BackRequested">
+            <NavigationView x:Name="NavView" Grid.Row="0" Margin="36,3,36,0" PaneDisplayMode="Top" Canvas.ZIndex="0" IsTitleBarAutoPaddingEnabled="True" SelectionFollowsFocus="Disabled" IsPaneToggleButtonVisible="False" IsSettingsVisible="False" IsBackButtonVisible="Collapsed" IsEnabled="{x:Bind ViewModel.IsEditorEnabled, Mode=OneWay}" Loaded="NavView_Loaded" ItemInvoked="NavView_ItemInvoked" BackRequested="NavView_BackRequested">
                 <NavigationView.KeyboardAccelerators>
                     <KeyboardAccelerator Key="Left" Modifiers="Menu" Invoked="KeyboardAccelerator_Invoked" />
                 </NavigationView.KeyboardAccelerators>
@@ -112,6 +112,7 @@
             </NavigationView>
 
             <Frame x:Name="ContentFrame" Grid.Row="1" NavigationFailed="ContentFrame_NavigationFailed" Navigated="ContentFrame_Navigated"/>
+            <!--  IsEnabled="{x:Bind ViewModel.IsEditorEnabled, Mode=OneWay}" -->
 
         </Grid>
 

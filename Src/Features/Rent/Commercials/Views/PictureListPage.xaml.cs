@@ -53,6 +53,7 @@ public sealed partial class PictureListPage : Page
         }
 
         button.IsEnabled = false;
+        ViewModel.BeginPicker();
 
         try
         {
@@ -84,8 +85,15 @@ public sealed partial class PictureListPage : Page
                 await ViewModel.AddNewBuildingPicturesCommand.ExecuteAsync(paths);
             }
         }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Runtime.InteropServices.COMException or InvalidOperationException or ArgumentException)
+        {
+            Debug.WriteLine($"Failed to import commercial property pictures: {ex}");
+            ViewModel.InfoBarErrorMessage = $"画像を読み込めませんでした: {ex.Message}";
+            ViewModel.IsInfoBarErrorOpen = true;
+        }
         finally
         {
+            ViewModel.EndPicker();
             button.IsEnabled = true;
         }
     }

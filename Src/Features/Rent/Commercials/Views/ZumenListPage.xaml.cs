@@ -33,6 +33,7 @@ public sealed partial class ZumenListPage : Page
         }
 
         button.IsEnabled = false;
+        ViewModel.BeginPicker();
 
         try
         {
@@ -60,12 +61,15 @@ public sealed partial class ZumenListPage : Page
                 //await ViewModel.SetNewBuildingPdfsAsync(paths);
             }
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Runtime.InteropServices.COMException or InvalidOperationException or ArgumentException)
         {
-            Debug.WriteLine($"Error in AppBarButtonAddPdf_Click: {ex.Message}");
+            Debug.WriteLine($"Failed to import commercial property PDFs: {ex}");
+            ViewModel.InfoBarErrorMessage = $"PDFを読み込めませんでした: {ex.Message}";
+            ViewModel.IsInfoBarErrorOpen = true;
         }
         finally
         {
+            ViewModel.EndPicker();
             button.IsEnabled = true;
         }
     }

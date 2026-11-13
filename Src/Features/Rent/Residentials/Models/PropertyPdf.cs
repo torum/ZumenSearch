@@ -9,7 +9,7 @@ public sealed partial class PropertyPdf : PdfBase
 
     public ObservableCollection<PropertyPdfTypeLabel> BuildingPdfTypes { get;} =
         [
-        //new BuildingPictureType(EnumBuildingPictureType.Unspecified, "未指定"),
+        new PropertyPdfTypeLabel(Models.Rent.Residentials.PropertyPdfType.Unspecified),
         new PropertyPdfTypeLabel(Models.Rent.Residentials.PropertyPdfType.Maisoku),
         new PropertyPdfTypeLabel(Models.Rent.Residentials.PropertyPdfType.Architectural),
         new PropertyPdfTypeLabel(Models.Rent.Residentials.PropertyPdfType.Toukibo),
@@ -90,23 +90,19 @@ public sealed partial class PropertyPdf : PdfBase
     {
         PdfFilename = pdfLocation;
         ThumbnailFilename = thumbnailLocation;
+        PdfType = BuildingPdfTypes[0];
 
         IsModified = false;
     }
 
     public PropertyPdfType? SetTypeFromString(string Str)
     {
-        if (Enum.TryParse<PropertyPdfType>(Str, out var result))
+        if (!Enum.TryParse<PropertyPdfType>(Str, out var result) || !Enum.IsDefined(result))
         {
-            PdfType = BuildingPdfTypes.FirstOrDefault<PropertyPdfTypeLabel>(x => x.Key == result) ?? new(PropertyPdfType.Unspecified);
-
-            return result;
+            throw new FormatException($"Invalid residential property PDF type: {Str}");
         }
-        else
-        {
-            PdfType = new(PropertyPdfType.Unspecified);
 
-            return PropertyPdfType.Unspecified;
-        }
+        PdfType = BuildingPdfTypes.First(item => item.Key == result);
+        return result;
     }
 };

@@ -37,10 +37,92 @@ public partial class MainViewModel : ObservableRecipient,
     private const string BrokerSearchResultPagePath = "ZumenSearch.Views.BrokerSearchResultPage";
 
     private readonly CancellationTokenSource _cts = new();
+    private readonly HashSet<string> _commercialOperations = new(StringComparer.Ordinal);
+    private TaskCompletionSource? _commercialOperationsCompleted;
+    private readonly HashSet<string> _residentialOperations = new(StringComparer.Ordinal);
+    private TaskCompletionSource? _residentialOperationsCompleted;
 
     private Task? _initializationTask;
 
     public Task InitializeAsync() => _initializationTask ??= InitializeDatabase();
+
+    public bool TryBeginCommercialOperation(string propertyId)
+    {
+        if (!_commercialOperations.Add(propertyId)) return false;
+        _commercialOperationsCompleted ??= new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        foreach (var editor in RentCommercialEditorList.Where(editor => editor.Id == propertyId)) editor.ViewModel?.SetPropertyBusy(true);
+        foreach (var editor in RentCommercialListingEditorList.Where(editor => editor.PropertyId == propertyId)) editor.ViewModel?.SetPropertyBusy(true);
+        return true;
+    }
+
+    public void EndCommercialOperation(string propertyId)
+    {
+        if (!_commercialOperations.Contains(propertyId)) return;
+        foreach (var editor in RentCommercialEditorList.Where(editor => editor.Id == propertyId).ToList()) editor.ViewModel?.SetPropertyBusy(false);
+        foreach (var editor in RentCommercialListingEditorList.Where(editor => editor.PropertyId == propertyId).ToList()) editor.ViewModel?.SetPropertyBusy(false);
+        if (_commercialOperations.Remove(propertyId) && _commercialOperations.Count == 0)
+        {
+            _commercialOperationsCompleted?.TrySetResult();
+            _commercialOperationsCompleted = null;
+        }
+    }
+
+    public async Task WaitForCommercialOperationsAsync()
+    {
+        while (_commercialOperationsCompleted is not null)
+        {
+            await _commercialOperationsCompleted.Task;
+        }
+    }
+
+    public bool TryBeginResidentialOperation(string propertyId)
+    {
+        if (!_residentialOperations.Add(propertyId)) return false;
+        _residentialOperationsCompleted ??= new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        foreach (var editor in RentResidentialEditorList.Where(editor => editor.Id == propertyId)) editor.ViewModel?.SetPropertyBusy(true);
+        foreach (var editor in RentResidentialListingEditorList.Where(editor => editor.PropertyId == propertyId)) editor.ViewModel?.SetPropertyBusy(true);
+        return true;
+    }
+
+    public void EndResidentialOperation(string propertyId)
+    {
+        if (!_residentialOperations.Contains(propertyId)) return;
+        foreach (var editor in RentResidentialEditorList.Where(editor => editor.Id == propertyId).ToList()) editor.ViewModel?.SetPropertyBusy(false);
+        foreach (var editor in RentResidentialListingEditorList.Where(editor => editor.PropertyId == propertyId).ToList()) editor.ViewModel?.SetPropertyBusy(false);
+        _residentialOperations.Remove(propertyId);
+        if (_residentialOperations.Count == 0)
+        {
+            _residentialOperationsCompleted?.TrySetResult();
+            _residentialOperationsCompleted = null;
+        }
+    }
+
+    public async Task WaitForResidentialOperationsAsync()
+    {
+        while (_residentialOperationsCompleted is not null) await _residentialOperationsCompleted.Task;
+    }
+
+    private void ShowResidentialOperationBusy()
+    {
+        InfoBarErrorMessage = "関連する保存、削除または読み込みが完了してから、もう一度操作してください。";
+        IsInfoBarErrorOpen = true;
+    }
+
+    public void RemoveResidentialListingSearchResults(string propertyId, string listingId)
+    {
+        foreach (var result in RentResidentialListingSearchResult.Where(result => result.Id.Equals(listingId, StringComparison.Ordinal) && result.PropertyId.Equals(propertyId, StringComparison.Ordinal)).ToList())
+        {
+            RentResidentialListingSearchResult.Remove(result);
+        }
+    }
+
+    public void RemoveCommercialListingSearchResults(string propertyId, string listingId)
+    {
+        foreach (var result in RentCommercialListingSearchResult.Where(result => result.Id.Equals(listingId, StringComparison.Ordinal) && result.PropertyId.Equals(propertyId, StringComparison.Ordinal)).ToList())
+        {
+            RentCommercialListingSearchResult.Remove(result);
+        }
+    }
 
     #endregion
 
@@ -386,50 +468,32 @@ public partial class MainViewModel : ObservableRecipient,
 
     public void Receive(ListingUpdatedMessage listing)
     {
-        var room = listing.Value;
-        if (room is null)
+        var updated = listing.Value;
+        if (updated is null || updated.Status != EntityStatus.Saved) return;
+
+        ObservableCollection<ListingSearchResultItem> results;
+        switch (updated.PropertyContextType)
         {
-            return;
+            case PropertyContextType.RentResidential:
+                results = RentResidentialListingSearchResult;
+                break;
+            case PropertyContextType.RentCommercial:
+                results = RentCommercialListingSearchResult;
+                break;
+            default:
+                return;
         }
 
-        var isFound = false;
-
-        foreach (var item in RentResidentialListingSearchResult)
+        for (var i = 0; i < results.Count; i++)
         {
-            if (!item.Id.Equals(room.Id, StringComparison.Ordinal))
-            {
-                continue;
-            }
+            var item = results[i];
+            if (item.PropertyContextType != updated.PropertyContextType || !item.PropertyId.Equals(updated.PropertyId, StringComparison.Ordinal) || !item.Id.Equals(updated.Id, StringComparison.Ordinal)) continue;
 
-            item.SetName(room.Name);
-            isFound = true;
-            break;
+            var replacement = new ListingSearchResultItem(item.Id, item.PropertyId, item.PropertyContextType) { PropertyName = item.PropertyName };
+            replacement.SetName(updated.Name);
+            replacement.SetIsModified(false);
+            results[i] = replacement;
         }
-
-        if (isFound)
-        {
-            return;
-        }
-
-        foreach (var item in RentCommercialListingSearchResult)
-        {
-            if (!item.Id.Equals(room.Id, StringComparison.Ordinal))
-            {
-                continue;
-            }
-
-            item.SetName(room.Name);
-            isFound = true;
-            break;
-        }
-
-
-        if (isFound)
-        {
-            return;
-        }
-
-        // more
     }
 
     public void Receive(LessorUpdatedMessage lessor)
@@ -923,6 +987,23 @@ public partial class MainViewModel : ObservableRecipient,
             return;
         }
 
+        if (!TryBeginResidentialOperation(propertyId))
+        {
+            ShowResidentialOperationBusy();
+            return;
+        }
+        try
+        {
+            await EditRentResidentialFromIdCore(propertyId);
+        }
+        finally
+        {
+            EndResidentialOperation(propertyId);
+        }
+    }
+
+    private async Task EditRentResidentialFromIdCore(string propertyId)
+    {
         var isFound = false;
 
         // Check if the selected item is already being edited in another window.
@@ -982,6 +1063,7 @@ public partial class MainViewModel : ObservableRecipient,
         }
 
         var editorShell = _shellRentResidentialPropertyFactory.Create(res.Building);//_editorFactory.Create();
+        editorShell.ViewModel.SetListingSummaries(res.ListingSummaries);
 
         var editorWindow = editorShell.Window;
         if (editorWindow == null)
@@ -1111,60 +1193,39 @@ public partial class MainViewModel : ObservableRecipient,
         }
 
         var selectedId = selected.Id;
-
-        var isFound = false;
-
-        if (RentCommercialListingEditorList.Count > 0)
+        if (!TryBeginResidentialOperation(selectedId))
         {
-            foreach (var unitEditor in RentCommercialListingEditorList.ToList())
-            {
-                if (unitEditor.PropertyId != selectedId)
-                {
-                    continue;
-                }
-
-                if (unitEditor.ViewModel.IsDirty)
-                {
-                    unitEditor.Activate();
-                    isFound = true;
-                    return;
-                }
-
-                unitEditor.Close();
-            }
+            ShowResidentialOperationBusy();
+            return;
         }
-
-        if (isFound)
+        try
         {
-            // If the editor window for this item is already open, just return.
+            await DeleteRentResidentialCore(selected);
+        }
+        finally
+        {
+            EndResidentialOperation(selectedId);
+        }
+    }
+
+    private async Task DeleteRentResidentialCore(Models.SearchResult.PropertySearchResultItem selected)
+    {
+        var selectedId = selected.Id;
+        var listingEditor = RentResidentialListingEditorList.FirstOrDefault(editor => editor.PropertyId == selectedId);
+        if (listingEditor is not null)
+        {
+            InfoBarErrorMessage = "募集物件の編集画面を閉じてから、建物を削除してください。";
+            IsInfoBarErrorOpen = true;
+            listingEditor.Activate();
             return;
         }
 
-        // Check if the selected item is already being edited in editor window.
-        foreach (var editorWindow in RentResidentialEditorList.ToList())
+        var propertyEditor = RentResidentialEditorList.FirstOrDefault(editor => editor.Id == selectedId);
+        if (propertyEditor is not null)
         {
-            //Debug.WriteLine($"Checking editor window with Id: {editorWindow.Id} for selected item with Id: {selected.Id}");
-            if (editorWindow.Id == selectedId)
-            {
-                // If the editor window for this item is already open, activate it.
-                //Debug.WriteLine($"Editor window for {selected.Id} is already open. Closing if not IsDirty otherwise activating it.");
-                
-                if (editorWindow.ViewModel?.IsDirty == false)
-                {
-                    editorWindow.Close();
-                }
-                else
-                {
-                    isFound = true;
-                    editorWindow.Activate();
-                }
-                break;
-            }
-        }
-
-        if (isFound)
-        {
-            // If the editor window for this item is already open, just return.
+            InfoBarErrorMessage = "建物の編集画面を閉じてから、建物を削除してください。";
+            IsInfoBarErrorOpen = true;
+            propertyEditor.Activate();
             return;
         }
 
@@ -1205,8 +1266,16 @@ public partial class MainViewModel : ObservableRecipient,
             var propertyDataDirectoryPath = System.IO.Path.Combine(App.PropertyBlobDataFolder, selectedId);
             if (Directory.Exists(propertyDataDirectoryPath))
             {
-                Debug.WriteLine($"Deleting folder: {propertyDataDirectoryPath}");
-                Directory.Delete(propertyDataDirectoryPath, true);
+                try
+                {
+                    Directory.Delete(propertyDataDirectoryPath, true);
+                }
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+                {
+                    Debug.WriteLine($"Failed to delete property attachments '{propertyDataDirectoryPath}': {ex}");
+                    InfoBarErrorMessage = $"建物は削除されましたが、添付ファイルを削除できませんでした: {propertyDataDirectoryPath}。{ex.Message}";
+                    IsInfoBarErrorOpen = true;
+                }
             }
         }
     }
@@ -1226,6 +1295,7 @@ public partial class MainViewModel : ObservableRecipient,
         RentResidentialListingSearchResult.Clear();
 
         var searchCriteria = (criteria ?? new Models.Rent.Residentials.ListingSearchCriteria()).Clone();
+
         var res = await Task.Run(() => _dataAccessService.SelectRentResidentialListings(searchCriteria), _cts.Token);
 
         if (res.IsError)
@@ -1268,12 +1338,36 @@ public partial class MainViewModel : ObservableRecipient,
         var roomId = selected.Id;
         var buildingId = selected.PropertyId;
 
-        if (string.IsNullOrEmpty(roomId))
+        if (string.IsNullOrEmpty(roomId) || string.IsNullOrEmpty(buildingId))
         {
-            Debug.WriteLine("EditRentResidentialRoomCommand executed but room id is null or empty.");
+            Debug.WriteLine("EditRentResidentialRoomCommand executed without a listing or property id.");
             return;
         }
+        if (!TryBeginResidentialOperation(buildingId))
+        {
+            ShowResidentialOperationBusy();
+            return;
+        }
+        try
+        {
+            await EditRentResidentialRoomCore(selected);
+        }
+        finally
+        {
+            EndResidentialOperation(buildingId);
+        }
+    }
 
+    private async Task EditRentResidentialRoomCore(Models.SearchResult.ListingSearchResultItem selected)
+    {
+        var roomId = selected.Id;
+        var buildingId = selected.PropertyId;
+        if (RentResidentialEditorList.Any(editor => editor.Id == buildingId && editor.ViewModel?.IsListingPendingDeletion(roomId) == true))
+        {
+            InfoBarErrorMessage = "建物の編集画面で削除予定の募集物件は開けません。";
+            IsInfoBarErrorOpen = true;
+            return;
+        }
         //Debug.WriteLine($"EditRentResidentialRoomCommand executed for {selected.Id}");
 
         var isFound = false;
@@ -1335,6 +1429,8 @@ public partial class MainViewModel : ObservableRecipient,
         }
 
         var editorShell = _shellRentResidentialListingFactory.Create(res.Room);
+        var propertyEditor = RentResidentialEditorList.FirstOrDefault(editor => editor.Id == buildingId && editor.ViewModel is { IsActive: true });
+        if (propertyEditor?.ViewModel is { } propertyViewModel) editorShell.ViewModel.SetOwnershipVisibility(propertyViewModel.IsUnitOwnership);
         var editorWindow = editorShell.Window;
         if (editorWindow == null)
         {
@@ -1390,37 +1486,47 @@ public partial class MainViewModel : ObservableRecipient,
             return;
         }
 
+        var selectedPropertyId = selected.PropertyId;
+        if (string.IsNullOrWhiteSpace(selectedPropertyId))
+        {
+            InfoBarErrorMessage = "募集物件の建物IDがないため、削除できません。";
+            IsInfoBarErrorOpen = true;
+            return;
+        }
+        if (!TryBeginResidentialOperation(selectedPropertyId))
+        {
+            ShowResidentialOperationBusy();
+            return;
+        }
+        try
+        {
+            await DeleteRentResidentialRoomCore(selected);
+        }
+        finally
+        {
+            EndResidentialOperation(selectedPropertyId);
+        }
+    }
+
+    private async Task DeleteRentResidentialRoomCore(Models.SearchResult.ListingSearchResultItem selected)
+    {
         var selectedId = selected.Id;
         var selectedPropertyId = selected.PropertyId;
-
-        //Debug.WriteLine($"TODO: DeleteRentResidentialRoom executed for {selected.Id} (PropertyId = {selected.PropertyId})");
-
-        var isFound = false;
-
-        // Check if the selected item is already being edited in editor window.
-        foreach (var editorWindow in RentResidentialListingEditorList.ToList())
+        var listingEditor = RentResidentialListingEditorList.FirstOrDefault(editor => editor.Id == selectedId);
+        if (listingEditor is not null)
         {
-            //Debug.WriteLine($"Checking editor window with Id: {editorWindow.Id} for selected item with Id: {selected.Id}");
-            if (editorWindow.Id == selectedId)
-            {
-                // If the editor window for this item is already open, activate it.
-                //Debug.WriteLine($"Editor window for {selected.Id} is already open. Closing if not IsDirty otherwise activating it.");
-
-                if (editorWindow.ViewModel?.IsDirty == false)
-                {
-                    editorWindow.Close();
-                }
-                else
-                {
-                    isFound = true;
-                    editorWindow.Activate();
-                }
-                break;
-            }
+            InfoBarErrorMessage = "募集物件の編集画面を閉じてから削除してください。";
+            IsInfoBarErrorOpen = true;
+            listingEditor.Activate();
+            return;
         }
 
-        if (isFound)
+        var propertyEditor = RentResidentialEditorList.FirstOrDefault(editor => editor.Id == selectedPropertyId);
+        if (propertyEditor is not null)
         {
+            InfoBarErrorMessage = "建物の編集画面を閉じてから、募集物件を削除してください。";
+            IsInfoBarErrorOpen = true;
+            propertyEditor.Activate();
             return;
         }
 
@@ -1446,14 +1552,7 @@ public partial class MainViewModel : ObservableRecipient,
         }
         else
         {
-            if (RentResidentialListingSearchResult.Remove(selected))
-            {
-                // Successfully removed the selected item from the search result.
-            }
-            else
-            {
-                Debug.WriteLine($"Selected item {selectedId} not found in the search result or could not remove.");
-            }
+            RemoveResidentialListingSearchResults(selectedPropertyId, selectedId);
 
             Debug.WriteLine($"DeleteRentResidentialRoomCommand executed for {selectedId}");
 
@@ -1477,8 +1576,16 @@ public partial class MainViewModel : ObservableRecipient,
             var listingDataDirectoryPath = System.IO.Path.Combine(App.PropertyBlobDataFolder, selectedPropertyId, selectedId);
             if (Directory.Exists(listingDataDirectoryPath))
             {
-                Debug.WriteLine($"Deleting folder: {listingDataDirectoryPath}");
-                Directory.Delete(listingDataDirectoryPath, true);
+                try
+                {
+                    Directory.Delete(listingDataDirectoryPath, true);
+                }
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+                {
+                    Debug.WriteLine($"Failed to delete listing attachments '{listingDataDirectoryPath}': {ex}");
+                    InfoBarErrorMessage = $"募集物件は削除されましたが、添付ファイルを削除できませんでした: {listingDataDirectoryPath}。{ex.Message}";
+                    IsInfoBarErrorOpen = true;
+                }
             }
         }
     }
@@ -1555,6 +1662,24 @@ public partial class MainViewModel : ObservableRecipient,
             return;
         }
 
+        if (!TryBeginCommercialOperation(propertyId))
+        {
+            ShowCommercialOperationBusy();
+            return;
+        }
+
+        try
+        {
+            await EditRentCommercialFromIdCore(propertyId);
+        }
+        finally
+        {
+            EndCommercialOperation(propertyId);
+        }
+    }
+
+    private async Task EditRentCommercialFromIdCore(string propertyId)
+    {
         var isFound = false;
 
         // Check if the selected item is already being edited in another window.
@@ -1613,7 +1738,8 @@ public partial class MainViewModel : ObservableRecipient,
             return;
         }
 
-        var editorShell = _shellRentCommercialPropertyFactory.Create(res.Building);//_editorFactory.Create();
+        var editorShell = _shellRentCommercialPropertyFactory.Create(res.Building);
+        editorShell.ViewModel.SetListingSummaries(res.ListingSummaries);
 
         var editorWindow = editorShell.Window;
         if (editorWindow == null)
@@ -1660,7 +1786,25 @@ public partial class MainViewModel : ObservableRecipient,
         }
 
         var selectedId = selected.Id;
+        if (!TryBeginCommercialOperation(selectedId))
+        {
+            ShowCommercialOperationBusy();
+            return;
+        }
 
+        try
+        {
+            await DeleteRentCommercialCore(selected);
+        }
+        finally
+        {
+            EndCommercialOperation(selectedId);
+        }
+    }
+
+    private async Task DeleteRentCommercialCore(Models.SearchResult.PropertySearchResultItem selected)
+    {
+        var selectedId = selected.Id;
         if (RentCommercialListingEditorList.Count > 0)
         {
             foreach (var unitEditor in RentCommercialListingEditorList.ToList())
@@ -1670,13 +1814,14 @@ public partial class MainViewModel : ObservableRecipient,
                     continue;
                 }
 
-                if (unitEditor.ViewModel.IsDirty)
+                if (unitEditor.ViewModel.IsDirty || unitEditor.ViewModel.SaveCommand.IsRunning || unitEditor.ViewModel.HasPendingEditorOperations || unitEditor.ViewModel.IsDiscardPending || (unitEditor.Content is Views.Rent.Commercials.Listing.ShellPage listingShell && listingShell.IsClosePending))
                 {
                     unitEditor.Activate();
                     return;
                 }
 
                 unitEditor.Close();
+                if (RentCommercialListingEditorList.Contains(unitEditor)) return;
             }
         }
 
@@ -1687,16 +1832,15 @@ public partial class MainViewModel : ObservableRecipient,
                 continue;
             }
 
-            if (editorWindow.ViewModel?.IsDirty == false)
-            {
-                editorWindow.Close();
-            }
-            else
+            var editorViewModel = editorWindow.ViewModel;
+            if (editorViewModel is null || editorViewModel.IsDirty || editorViewModel.IsSaving || editorViewModel.IsClosing || editorViewModel.HasPendingEditorOperations || editorViewModel.UnsavedChildEditorList.Count > 0)
             {
                 editorWindow.Activate();
                 return;
             }
 
+            editorWindow.Close();
+            if (RentCommercialEditorList.Contains(editorWindow)) return;
             break;
         }
 
@@ -1758,7 +1902,7 @@ public partial class MainViewModel : ObservableRecipient,
 
         RentCommercialListingSearchResult.Clear();
 
-        var res = await Task.Run(() => _dataAccessService.SelectRentCommercialListings(), _cts.Token);
+        var res = await Task.Run(() => _dataAccessService.SelectRentCommercialListings(query), _cts.Token);
 
         if (res.IsError)
         {
@@ -1799,9 +1943,36 @@ public partial class MainViewModel : ObservableRecipient,
         var roomId = selected.Id;
         var buildingId = selected.PropertyId;
 
-        if (string.IsNullOrEmpty(roomId))
+        if (string.IsNullOrEmpty(roomId) || string.IsNullOrEmpty(buildingId))
         {
-            Debug.WriteLine("EditRentCommercialUnitCommand executed but room id is null or empty.");
+            Debug.WriteLine("EditRentCommercialUnitCommand executed without a listing or property id.");
+            return;
+        }
+
+        if (!TryBeginCommercialOperation(buildingId))
+        {
+            ShowCommercialOperationBusy();
+            return;
+        }
+
+        try
+        {
+            await EditRentCommercialListingCore(selected);
+        }
+        finally
+        {
+            EndCommercialOperation(buildingId);
+        }
+    }
+
+    private async Task EditRentCommercialListingCore(Models.SearchResult.ListingSearchResultItem selected)
+    {
+        var roomId = selected.Id;
+        var buildingId = selected.PropertyId;
+        if (RentCommercialEditorList.Any(editor => editor.Id == buildingId && editor.ViewModel?.IsListingPendingDeletion(roomId) == true))
+        {
+            InfoBarErrorMessage = "建物の編集画面で削除予定の募集物件は開けません。";
+            IsInfoBarErrorOpen = true;
             return;
         }
 
@@ -1866,6 +2037,8 @@ public partial class MainViewModel : ObservableRecipient,
         }
 
         var editorShell = _shellRentCommercialListingFactory.Create(res.Unit);
+        var propertyEditor = RentCommercialEditorList.FirstOrDefault(editor => editor.Id == buildingId && editor.ViewModel is { IsActive: true });
+        if (propertyEditor?.ViewModel is { } propertyViewModel) editorShell.ViewModel.SetOwnershipVisibility(propertyViewModel.IsUnitOwnership);
         var editorWindow = editorShell.Window;
         if (editorWindow == null)
         {
@@ -1916,8 +2089,73 @@ public partial class MainViewModel : ObservableRecipient,
 
         var selectedId = selected.Id;
         var selectedPropertyId = selected.PropertyId;
-        var isFound = false;
+        if (string.IsNullOrWhiteSpace(selectedPropertyId))
+        {
+            InfoBarErrorMessage = "募集物件の建物IDがないため、削除できません。";
+            IsInfoBarErrorOpen = true;
+            return;
+        }
+        if (!TryBeginCommercialOperation(selectedPropertyId))
+        {
+            ShowCommercialOperationBusy();
+            return;
+        }
 
+        try
+        {
+            await DeleteRentCommercialListingCore(selected);
+        }
+        finally
+        {
+            EndCommercialOperation(selectedPropertyId);
+        }
+    }
+
+    private async Task DeleteRentCommercialListingCore(Models.SearchResult.ListingSearchResultItem selected)
+    {
+        var selectedId = selected.Id;
+        var selectedPropertyId = selected.PropertyId;
+        var propertyEditor = RentCommercialEditorList.FirstOrDefault(editor => editor.Id == selectedPropertyId);
+        if (propertyEditor is not null)
+        {
+            InfoBarErrorMessage = "建物の編集画面を閉じてから、募集物件を削除してください。";
+            IsInfoBarErrorOpen = true;
+            propertyEditor.Activate();
+            return;
+        }
+
+        var mainWindow = App.GetService<Views.MainWindow>();
+        if (mainWindow.Content is not Microsoft.UI.Xaml.FrameworkElement { XamlRoot: { } xamlRoot })
+        {
+            InfoBarErrorMessage = "募集物件の削除を確認できませんでした。画面を開き直して再試行してください。";
+            IsInfoBarErrorOpen = true;
+            return;
+        }
+
+        try
+        {
+            var dialogService = App.GetService<IDialogGenericService>();
+            dialogService.Initialize(xamlRoot, mainWindow);
+            if (await dialogService.ShowDeleteConfirmationDialog("この募集物件を削除しますか？") != Microsoft.UI.Xaml.Controls.ContentDialogResult.Primary) return;
+        }
+        catch (Exception ex) when (ex is System.Runtime.InteropServices.COMException or InvalidOperationException)
+        {
+            Debug.WriteLine($"Failed to confirm commercial listing deletion: {ex}");
+            InfoBarErrorMessage = $"募集物件の削除を確認できませんでした: {ex.Message}";
+            IsInfoBarErrorOpen = true;
+            return;
+        }
+
+        propertyEditor = RentCommercialEditorList.FirstOrDefault(editor => editor.Id == selectedPropertyId);
+        if (propertyEditor is not null)
+        {
+            InfoBarErrorMessage = "建物の編集画面を閉じてから、募集物件を削除してください。";
+            IsInfoBarErrorOpen = true;
+            propertyEditor.Activate();
+            return;
+        }
+
+        var isFound = false;
         foreach (var editorWindow in RentCommercialListingEditorList.ToList())
         {
             if (editorWindow.Id != selectedId)
@@ -1925,9 +2163,10 @@ public partial class MainViewModel : ObservableRecipient,
                 continue;
             }
 
-            if (editorWindow.ViewModel?.IsDirty == false)
+            if (editorWindow.ViewModel?.IsDirty == false && !editorWindow.ViewModel.SaveCommand.IsRunning && !editorWindow.ViewModel.HasPendingEditorOperations && !editorWindow.ViewModel.IsDiscardPending && !(editorWindow.Content is Views.Rent.Commercials.Listing.ShellPage listingShell && listingShell.IsClosePending))
             {
                 editorWindow.Close();
+                isFound = RentCommercialListingEditorList.Contains(editorWindow);
             }
             else
             {
@@ -1940,6 +2179,8 @@ public partial class MainViewModel : ObservableRecipient,
 
         if (isFound)
         {
+            InfoBarErrorMessage = "募集物件の編集画面を閉じてから削除してください。";
+            IsInfoBarErrorOpen = true;
             return;
         }
 
@@ -1966,7 +2207,7 @@ public partial class MainViewModel : ObservableRecipient,
             return;
         }
 
-        RentCommercialListingSearchResult.Remove(selected);
+        RemoveCommercialListingSearchResults(selectedPropertyId, selectedId);
 
         foreach (var editorWindow in RentCommercialEditorList.ToList())
         {
@@ -1986,10 +2227,26 @@ public partial class MainViewModel : ObservableRecipient,
             selectedPropertyId,
             selectedId);
 
-        if (Directory.Exists(listingDataDirectoryPath))
+        try
         {
             Directory.Delete(listingDataDirectoryPath, true);
         }
+        catch (DirectoryNotFoundException)
+        {
+            // Listings without attachments have no directory to remove.
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            Debug.WriteLine($"Failed to delete commercial listing attachments '{listingDataDirectoryPath}': {ex}");
+            InfoBarErrorMessage = $"募集物件は削除されましたが、添付ファイルを削除できませんでした: {listingDataDirectoryPath}。{ex.Message}";
+            IsInfoBarErrorOpen = true;
+        }
+    }
+
+    private void ShowCommercialOperationBusy()
+    {
+        InfoBarErrorMessage = "関連する保存、削除、または読み込みが完了してから、もう一度操作してください。";
+        IsInfoBarErrorOpen = true;
     }
 
     private static bool DeleteRentCommercialListingCanExecute(Models.SearchResult.ListingSearchResultItem? selected)

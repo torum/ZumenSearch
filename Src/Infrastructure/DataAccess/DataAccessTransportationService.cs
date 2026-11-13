@@ -41,7 +41,7 @@ public class DataAccessTransportationService : IDataAccessTransportationService
         }
         */
 
-        query = EscapeSingleQuote(query.Trim());
+        query = query.Trim();
 
         _connectionStringBuilder.DataSource = railLineDbPath;//"rail_lines.db";
 
@@ -56,7 +56,8 @@ public class DataAccessTransportationService : IDataAccessTransportationService
         }
         else
         {
-            cmd.CommandText = string.Format(CultureInfo.InvariantCulture, "SELECT line_cd, line_name FROM rail_lines WHERE line_name LIKE '%{0}%' AND line_name NOT LIKE '%新幹線%'", query);
+            cmd.CommandText = "SELECT line_cd, line_name FROM rail_lines WHERE line_name LIKE @query AND line_name NOT LIKE '%新幹線%'";
+            cmd.Parameters.AddWithValue("@query", $"%{query}%");
         }
         using var reader = cmd.ExecuteReader();
         while (reader.Read())
@@ -83,7 +84,7 @@ public class DataAccessTransportationService : IDataAccessTransportationService
             return dataset;
         }
 
-        query = EscapeSingleQuote(query.Trim());
+        query = query.Trim();
 
         _connectionStringBuilder.DataSource = railStationDbPath;// = "rail_stations.db";
 
@@ -93,12 +94,14 @@ public class DataAccessTransportationService : IDataAccessTransportationService
 
         if (string.IsNullOrEmpty(query))
         {
-            cmd.CommandText = string.Format(CultureInfo.InvariantCulture, "SELECT station_cd, line_cd, station_name FROM rail_stations WHERE line_cd LIKE '{0}'", railLineCode);
+            cmd.CommandText = "SELECT station_cd, line_cd, station_name FROM rail_stations WHERE line_cd LIKE @railLineCode";
         }
         else
         {
-            cmd.CommandText = string.Format(CultureInfo.InvariantCulture, "SELECT station_cd, line_cd, station_name FROM rail_stations WHERE line_cd LIKE '{0}' AND station_name LIKE '%{1}%'", railLineCode, query);
+            cmd.CommandText = "SELECT station_cd, line_cd, station_name FROM rail_stations WHERE line_cd LIKE @railLineCode AND station_name LIKE @query";
+            cmd.Parameters.AddWithValue("@query", $"%{query}%");
         }
+        cmd.Parameters.AddWithValue("@railLineCode", railLineCode);
 
         using var reader = cmd.ExecuteReader();
         while (reader.Read())
@@ -128,11 +131,6 @@ public class DataAccessTransportationService : IDataAccessTransportationService
             }
         }
         return false; ;
-    }
-
-    private static string EscapeSingleQuote(string s)
-    {
-        return s is null ? string.Empty : s.Replace("'", "''");
     }
 
     private static string RestoreSingleQuote(string s)

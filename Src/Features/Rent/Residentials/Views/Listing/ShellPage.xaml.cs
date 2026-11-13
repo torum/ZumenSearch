@@ -19,6 +19,8 @@ namespace ZumenSearch.Views.Rent.Residentials.Listing;
 public sealed partial class ShellPage : Page
 {
     private bool _nvigated;
+    private bool _isConfirmingClose;
+    private bool _allowClose;
 
     private readonly List<(string Tag, string Label, Type? Page)> _pages =
     [
@@ -60,6 +62,7 @@ public sealed partial class ShellPage : Page
         InitializeComponent();
 
         _navigationlService.Initialize(this.ContentFrame, _pages);
+        ViewModel.PropertyChanged += ViewModel_PropertyChanged;
 
         this.Loaded += ShellPage_Loaded;
         this.BreadcrumbBar1.ItemClicked += BreadcrumbBar_ItemClicked;
@@ -79,39 +82,47 @@ public sealed partial class ShellPage : Page
 
     public async Task ShowEditorCloseConfirmationDialog()
     {
-        if (ViewModel == null)
+        if (_isConfirmingClose)
         {
             return;
         }
 
-        if (ViewModel.IsDirty)
+        _isConfirmingClose = true;
+        ViewModel.SetClosing(true);
+        try
         {
-            // show ConfirmationDialog
-            var result = await _dialogService.ShowEditorCloseConfirmationDialog();
+            if (!await ViewModel.WaitForEditorOperationsAsync()) return;
+            await App.GetService<ViewModels.MainViewModel>().WaitForResidentialOperationsAsync();
+            if (ViewModel.SaveCommand.IsRunning && ViewModel.SaveCommand.ExecutionTask is Task pendingSave) await pendingSave;
+            if (!ViewModel.CleanIncompleteAttachments()) return;
 
-            if (result == ContentDialogResult.Primary)
+            if (ViewModel.IsDiscardPending)
             {
-                if (ViewModel.IsDirty && ViewModel.SaveCommand.CanExecute(null))
+                if (!ViewModel.DiscardChanges()) return;
+            }
+            else if (ViewModel.IsDirty)
+            {
+                var result = await _dialogService.ShowEditorCloseConfirmationDialog();
+                await App.GetService<ViewModels.MainViewModel>().WaitForResidentialOperationsAsync();
+                if (result == ContentDialogResult.Primary)
                 {
-                    await ViewModel.SaveCommand.ExecuteAsync(null);
+                    if (ViewModel.IsDirty) await ViewModel.Save();
+                    if (ViewModel.IsDirty) return;
                 }
+                else if (result != ContentDialogResult.Secondary || !ViewModel.DiscardChanges())
+                {
+                    return;
+                }
+            }
 
-                if (ViewModel.IsDirty == false)
-                {
-                    Window.Close();
-                }
-            }
-            else if (result == ContentDialogResult.Secondary)
-            {
-                if (ViewModel.DiscardChanges())
-                {
-                    Window.Close();
-                }
-            }
-            else if (result == ContentDialogResult.None)
-            {
-                // Cancel.
-            }
+            _allowClose = true;
+            Window.Close();
+        }
+        finally
+        {
+            _allowClose = false;
+            _isConfirmingClose = false;
+            if (ViewModel.IsActive) ViewModel.SetClosing(false);
         }
     }
 
@@ -149,17 +160,9 @@ public sealed partial class ShellPage : Page
 
     private async void AppWindow_Closing(Microsoft.UI.Windowing.AppWindow sender, Microsoft.UI.Windowing.AppWindowClosingEventArgs args)
     {
-        if (ViewModel == null)
-        {
-            return;
-        }
-
-        if (ViewModel.IsDirty)
-        {
-            args.Cancel = true; // needs Cancel = true here in order to show dialog.
-
-            await ShowEditorCloseConfirmationDialog();
-        }
+        if (_allowClose) return;
+        args.Cancel = true;
+        await ShowEditorCloseConfirmationDialog();
     }
 
     private void Window_Closed(object sender, WindowEventArgs args)
@@ -172,6 +175,7 @@ public sealed partial class ShellPage : Page
         ewin.Activated -= Window_Activated;
         ewin.Closed -= Window_Closed;
         ewin.AppWindow.Closing -= AppWindow_Closing;
+        ViewModel.PropertyChanged -= ViewModel_PropertyChanged;
 
         var mainVM = App.GetService<ViewModels.MainViewModel>();
         // Save window size and position.
@@ -274,6 +278,23 @@ public sealed partial class ShellPage : Page
         }
     }
 
+    private void ViewModel_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName != nameof(ViewModel.IsPropertyUnitOwnership) || ViewModel.IsPropertyUnitOwnership) return;
+        PruneHiddenHistory();
+        NavView.IsBackEnabled = ContentFrame.CanGoBack;
+    }
+
+    private void PruneHiddenHistory()
+    {
+        if (ViewModel.IsPropertyUnitOwnership) return;
+        for (var index = ContentFrame.BackStack.Count - 1; index >= 0; index--)
+        {
+            var page = ContentFrame.BackStack[index].SourcePageType;
+            if (page == typeof(ZumenListPage) || page == typeof(LessorListPage) || page == typeof(BrokerListPage)) ContentFrame.BackStack.RemoveAt(index);
+        }
+    }
+
     private void NavView_BackRequested(NavigationView sender, NavigationViewBackRequestedEventArgs args)
     {
         if (this.ContentFrame.CanGoBack) this.ContentFrame.GoBack();
@@ -287,7 +308,13 @@ public sealed partial class ShellPage : Page
 
     private void ContentFrame_Navigated(object sender, NavigationEventArgs e)
     {
+        PruneHiddenHistory();
         this.NavView.IsBackEnabled = this.ContentFrame.CanGoBack;
+        var page = _pages.FirstOrDefault(item => item.Page == e.SourcePageType);
+        if (page.Page is not null && ViewModel.BreadcrumbItems.Count > 1)
+        {
+            ViewModel.BreadcrumbItems[^1] = new Breadcrumb { Name = page.Label, Page = page.Page.FullName! };
+        }
 
         if (this.ContentFrame.SourcePageType != null)
         {

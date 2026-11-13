@@ -30,9 +30,9 @@ public sealed partial class UnitListPage : Page
         }
 
         var container = FindParent<ItemContainer>(element);
-        if (container?.DataContext is Models.Rent.Commercials.Listing.Listing unit)
+        if (container?.DataContext is Models.Rent.Commercials.ListingSummary summary)
         {
-            EditUnit(unit);
+            EditUnit(summary);
         }
     }
 
@@ -64,17 +64,17 @@ public sealed partial class UnitListPage : Page
     {
         args.Handled = true;
 
-        if (args.Element is ItemContainer { DataContext: Models.Rent.Commercials.Listing.Listing unit })
+        if (args.Element is ItemContainer { DataContext: Models.Rent.Commercials.ListingSummary summary })
         {
-            EditUnit(unit);
+            EditUnit(summary);
         }
     }
 
-    private void EditUnit(Models.Rent.Commercials.Listing.Listing unit)
+    private void EditUnit(Models.Rent.Commercials.ListingSummary summary)
     {
-        if (ViewModel?.EditSelectedUnitCommand.CanExecute(unit) == true)
+        if (ViewModel?.EditSelectedUnitCommand.CanExecute(summary) == true)
         {
-            ViewModel.EditSelectedUnitCommand.Execute(unit);
+            ViewModel.EditSelectedUnitCommand.Execute(summary);
         }
     }
 

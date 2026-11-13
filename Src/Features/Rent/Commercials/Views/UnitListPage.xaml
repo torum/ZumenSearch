@@ -4,7 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:modresidentials="using:ZumenSearch.Models.Rent.Commercials.Listing"
+    xmlns:commercials="using:ZumenSearch.Models.Rent.Commercials"
     mc:Ignorable="d"
     NavigationCacheMode="Required">
 
@@ -66,7 +66,7 @@
                 </ItemsView.ContextFlyout>
 
                 <ItemsView.ItemTemplate>
-                    <DataTemplate x:DataType="modresidentials:Listing">
+                    <DataTemplate x:DataType="commercials:ListingSummary">
                         <ItemContainer
                 DataContext="{x:Bind}"
                 IsDoubleTapEnabled="True"
@@ -87,7 +87,7 @@
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
                                 <TextBlock
-                        Text="{x:Bind Name, Mode=OneWay}"
+                        Text="{x:Bind Name, Mode=OneTime}"
                         Style="{ThemeResource BodyTextBlockStyle}"
                         VerticalAlignment="Center" />
                                 <TextBlock

@@ -11,7 +11,7 @@ public interface IDataAccessService
     PropertySearchResultWrapper SelectPropertiesByKeyword(string keyword);
 
     // Rent Residential
-    ResultWrapper UpsertRentResidential(Models.Rent.Residentials.Property building);
+    ResultWrapper UpsertRentResidential(Models.Rent.Residentials.Property building, IReadOnlyCollection<Models.Rent.Residentials.ResidentialListingDraft> pendingListings, IReadOnlyCollection<string> deletedListingIds);
     Models.Rent.Residentials.PropertyResultWrapper SelectRentResidentialById(string id);
     ResultWrapper DeleteRentResidential(string propertyId);
     ResultWrapper UpsertRentResidentialListing(string propertyId, Models.Rent.Residentials.Listing room);
@@ -20,12 +20,12 @@ public interface IDataAccessService
     ResultWrapper DeleteRentResidentialListing(string roomId);
 
     // Rent Commercial
-    ResultWrapper UpsertRentCommercial(Models.Rent.Commercials.Property building);
+    ResultWrapper UpsertRentCommercial(Models.Rent.Commercials.Property building, IReadOnlyCollection<Models.Rent.Commercials.CommercialListingDraft> pendingListings, IReadOnlyCollection<string> deletedListingIds, bool? expectedCommittedUnitOwnership);
     //PropertiesResultWrapper SelectRentCommercialsByNameKeyword(string keyword);
     Models.Rent.Commercials.PropertyResultWrapper SelectRentCommercialById(string id);
     ResultWrapper DeleteRentCommercial(string commercialId);
     ResultWrapper UpsertRentCommercialListing(string commercialId,Models.Rent.Commercials.Listing.Listing room);
-    ListingSearchResultWrapper SelectRentCommercialListings();
+    ListingSearchResultWrapper SelectRentCommercialListings(string keyword);
     Models.Rent.Commercials.ListingResultWrapper SelectRentCommercialListingById(string commercialId,string roomId);
     ResultWrapper DeleteRentCommercialListing(string roomId);
 

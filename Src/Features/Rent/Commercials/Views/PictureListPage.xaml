@@ -19,27 +19,10 @@
         <Grid Grid.Row="0">
             <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Margin="0,0,0,0" HorizontalAlignment="Right">
                 <AppBarButton Name="AppBarButtonAddPicture" Icon="Add" Label="追加" Click="AppBarButtonAddPicture_Click"/>
-                <!--  Command="{x:Bind ViewModel.AddNewBuildingPicturesCommand}" -->
-                <!--
-                <AppBarButton Icon="OpenLocal" Label="開く" Command="{x:Bind ViewModel.OpenBuildingPictureDirectoryCommand}"/>
-                <AppBarButton Icon="Delete" Label="削除" Command="{x:Bind ViewModel.DeleteSelectedBuildingPictureCommand}"/>
-
                 <AppBarButton Icon="More" Label="その他">
                     <AppBarButton.Flyout>
                         <MenuFlyout Placement="Bottom">
-                            <ToggleMenuFlyoutItem Text="開く" Icon="OpenLocal" Command="{x:Bind ViewModel.OpenBuildingPictureDirectoryCommand, Mode=OneWay}"></ToggleMenuFlyoutItem>
-                            <MenuFlyoutSeparator/>
-                            <ToggleMenuFlyoutItem Text="削除" Icon="Delete" Command="{x:Bind ViewModel.DeleteSelectedBuildingPictureCommand, Mode=OneWay}"></ToggleMenuFlyoutItem>
-                        </MenuFlyout>
-                    </AppBarButton.Flyout>
-                </AppBarButton>
-                -->
-                <AppBarButton Icon="More" Label="その他">
-                    <AppBarButton.Flyout>
-                        <MenuFlyout Placement="Bottom">
-                            <MenuFlyoutItem Text="保存場所を開く" Icon="OpenLocal" Command="{x:Bind ViewModel.OpenBuildingBlobDirectoryCommand, Mode=OneWay}"></MenuFlyoutItem>
-                            <MenuFlyoutSeparator/>
-                            <MenuFlyoutItem Text="すべて削除" Icon="Delete"></MenuFlyoutItem>
+                            <MenuFlyoutItem Text="保存場所を開く" Icon="OpenLocal" Command="{x:Bind ViewModel.OpenBuildingBlobDirectoryCommand, Mode=OneWay}" />
                         </MenuFlyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>
@@ -84,6 +67,7 @@
                                             </StackPanel>
                                             <TextBox Header="説明" Margin="0,0,0,0" Text="{x:Bind Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
                                             <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Margin="0,0,0,0" HorizontalAlignment="Right">
+                                                <AppBarButton Icon="OpenFile" Label="開く" ToolTipService.ToolTip="写真を開く" Command="{x:Bind ParentViewModel.OpenBuildingPictureCommand, Mode=OneWay}" CommandParameter="{x:Bind}" />
                                                 <AppBarButton Icon="Delete" Label="削除" ToolTipService.ToolTip="写真を削除" Command="{x:Bind ParentViewModel.DeleteBuildingPictureCommand, Mode=OneWay}" CommandParameter="{x:Bind}"/>
                                             </CommandBar>
                                         </StackPanel>

@@ -19,9 +19,7 @@ public sealed partial class BrokerListPage : Page
         if (e.Parameter is ViewModels.Rent.Commercials.PropertyViewModel vm)
         {
             ViewModel = vm;
-
-            // comment out when x:Bind expressions is added.
-            //Bindings.Update();
+            Bindings.Update();
         }
 
         base.OnNavigatedTo(e);

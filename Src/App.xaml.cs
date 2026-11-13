@@ -145,7 +145,7 @@ public partial class App : Application
 
                 services.AddTransient<ViewModels.Rent.Commercials.ListingViewModel>();
                 services.AddTransient<Views.Rent.Commercials.Listing.ShellPage>(); 
-                services.AddGenericFactory<Models.Rent.Residentials.Listing, INavigationGenericService, IDialogGenericService, ViewModels.Rent.Commercials.ListingViewModel>();
+                services.AddGenericFactory<Models.Rent.Commercials.Listing.Listing, INavigationGenericService, IDialogGenericService, ViewModels.Rent.Commercials.ListingViewModel>();
                 services.AddGenericFactory<Models.Rent.Commercials.Listing.Listing, Views.Rent.Commercials.Listing.ShellPage>();
 
                 services.AddTransient<ViewModels.Rent.Lessors.LessorViewModel>();

@@ -106,7 +106,6 @@
             </ItemContainer>
         </DataTemplate>
 
-
         <!-- Instantiate the Selector and reference our DataTemplates -->
         <local:RecentPropertyTypeTemplateSelector x:Key="RecentPropertyTypeTemplateSelector"
             RecentRentResidentialTemplate="{StaticResource RentResidentialTemplate}"
@@ -206,13 +205,11 @@
                     </controls:Case>
                 </controls:SwitchPresenter>
 
-<!--                    <Border BorderThickness="0,1,0,0" BorderBrush="{ThemeResource NavigationViewItemSeparatorForeground}"></Border> -->
-
             </StackPanel>
 
             <Grid Grid.Row="1">
                 <StackPanel Margin="0,24,0,0">
-                    <TextBlock Text="最近更新された物件" FontWeight="SemiBold" FontSize="16"/>
+                    <TextBlock Text="最近更新された物件" Style="{ThemeResource SubtitleTextBlockStyle}" Margin="0,12,0,0"/>
                     <Border Margin="0,12,0,0" BorderThickness="0,1,0,0" BorderBrush="{ThemeResource NavigationViewItemSeparatorForeground}"></Border>
                 </StackPanel>
             </Grid>
@@ -232,10 +229,6 @@
                     </ItemsView.ContextFlyout>
                     <ItemsView.Layout>
                         <UniformGridLayout ItemsJustification="Start" MaximumRowsOrColumns="10" MinRowSpacing="24" MinColumnSpacing="24"/>
-                        <!--
-                        <LinedFlowLayout MinItemSpacing="24" LineSpacing="24"/>
-                        -->
-                        <!-- StackLayout -->
                     </ItemsView.Layout>
                 </ItemsView>
 

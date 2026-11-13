@@ -93,25 +93,21 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <NavigationView
-                x:Name="NavView"
-                Grid.Row="0"
-                Margin="36,3,36,0"
-                PaneDisplayMode="Top"
-                IsPaneToggleButtonVisible="False"
-                IsSettingsVisible="False"
-                IsBackButtonVisible="Collapsed"
-                Loaded="NavView_Loaded"
-                ItemInvoked="NavView_ItemInvoked">
+            <NavigationView x:Name="NavView" Grid.Row="0" Margin="36,3,36,0" PaneDisplayMode="Top" IsPaneToggleButtonVisible="False" IsSettingsVisible="False" IsBackButtonVisible="Collapsed" IsEnabled="{x:Bind ViewModel.IsEditorEnabled, Mode=OneWay}" Loaded="NavView_Loaded" ItemInvoked="NavView_ItemInvoked">
                 <NavigationView.MenuItems>
                     <NavigationViewItem Content="基本" Tag="ZumenSearch.Views.Rent.Commercials.Listing.BasicPage" />
+                    <NavigationViewItem Content="契約" Tag="ZumenSearch.Views.Rent.Commercials.Listing.ContractPage" />
+                    <NavigationViewItem Content="取引" Tag="ZumenSearch.Views.Rent.Commercials.Listing.TransactionPage" />
+                    <NavigationViewItem Content="設備・利用条件" Tag="ZumenSearch.Views.Rent.Commercials.Listing.FacilitiesPage" />
+                    <NavigationViewItem Content="写真" Tag="ZumenSearch.Views.Rent.Commercials.Listing.PictureListPage" />
+                    <NavigationViewItem Content="図面" Tag="ZumenSearch.Views.Rent.Commercials.Listing.DocumentListPage" Visibility="{x:Bind ViewModel.IsPropertyUnitOwnership, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}" />
+                    <NavigationViewItem Content="貸主" Tag="ZumenSearch.Views.Rent.Commercials.Listing.LessorListPage" Visibility="{x:Bind ViewModel.IsPropertyUnitOwnership, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}" />
+                    <NavigationViewItem Content="宅建業者" Tag="ZumenSearch.Views.Rent.Commercials.Listing.BrokerListPage" Visibility="{x:Bind ViewModel.IsPropertyUnitOwnership, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}" />
                 </NavigationView.MenuItems>
             </NavigationView>
 
-            <Frame
-                x:Name="ContentFrame"
-                Grid.Row="1"
-                NavigationFailed="ContentFrame_NavigationFailed" Navigated="ContentFrame_Navigated"/>
+            <Frame x:Name="ContentFrame" Grid.Row="1" NavigationFailed="ContentFrame_NavigationFailed" Navigated="ContentFrame_Navigated"/>
+            <!--  IsEnabled="{x:Bind ViewModel.IsEditorEnabled, Mode=OneWay}" -->
         </Grid>
     </Grid>
 </Page>

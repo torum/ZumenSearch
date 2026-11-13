@@ -86,19 +86,7 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <NavigationView
-                x:Name="NavView"
-                Grid.Row="0"
-                Margin="36,3,36,0"
-                PaneDisplayMode="Top"
-                IsTitleBarAutoPaddingEnabled="True"
-                SelectionFollowsFocus="Disabled"
-                IsPaneToggleButtonVisible="False"
-                IsSettingsVisible="False"
-                IsBackButtonVisible="Collapsed"
-                Loaded="NavView_Loaded"
-                ItemInvoked="NavView_ItemInvoked"
-                BackRequested="NavView_BackRequested">
+            <NavigationView x:Name="NavView" Grid.Row="0" Margin="36,3,36,0" PaneDisplayMode="Top" IsTitleBarAutoPaddingEnabled="True" SelectionFollowsFocus="Disabled" IsPaneToggleButtonVisible="False" IsSettingsVisible="False" IsBackButtonVisible="Collapsed" IsEnabled="{x:Bind ViewModel.IsEditorEnabled, Mode=OneWay}" Loaded="NavView_Loaded" ItemInvoked="NavView_ItemInvoked" BackRequested="NavView_BackRequested">
                 <NavigationView.MenuItems>
                     <NavigationViewItem
                         Content="基本"
@@ -118,16 +106,9 @@
                     <NavigationViewItem
     Content="写真"
     Tag="ZumenSearch.Views.Rent.Commercials.PictureListPage" />
-                    <NavigationViewItem
-    Content="図面"
-    Tag="ZumenSearch.Views.Rent.Commercials.ZumenListPage" />
-
-                    <NavigationViewItem
-    Content="貸主"
-    Tag="ZumenSearch.Views.Rent.Commercials.LessorListPage" />
-                    <NavigationViewItem
-    Content="宅建業者"
-    Tag="ZumenSearch.Views.Rent.Commercials.BrokerListPage" />
+                    <NavigationViewItem Content="図面" Tag="ZumenSearch.Views.Rent.Commercials.ZumenListPage" Visibility="{x:Bind ViewModel.IsUnitOwnershipVisible, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}" />
+                    <NavigationViewItem Content="貸主" Tag="ZumenSearch.Views.Rent.Commercials.LessorListPage" Visibility="{x:Bind ViewModel.IsUnitOwnershipVisible, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}" />
+                    <NavigationViewItem Content="宅建業者" Tag="ZumenSearch.Views.Rent.Commercials.BrokerListPage" Visibility="{x:Bind ViewModel.IsUnitOwnershipVisible, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}" />
 
                 </NavigationView.MenuItems>
                 <NavigationView.FooterMenuItems>
@@ -135,11 +116,8 @@
                 </NavigationView.FooterMenuItems>
             </NavigationView>
 
-            <Frame
-                x:Name="ContentFrame"
-                Grid.Row="1"
-                NavigationFailed="ContentFrame_NavigationFailed"
-                Navigated="ContentFrame_Navigated" />
+            <Frame x:Name="ContentFrame" Grid.Row="1" NavigationFailed="ContentFrame_NavigationFailed" Navigated="ContentFrame_Navigated" />
+            <!--  IsEnabled="{x:Bind ViewModel.IsEditorEnabled, Mode=OneWay}" -->
         </Grid>
     </Grid>
 

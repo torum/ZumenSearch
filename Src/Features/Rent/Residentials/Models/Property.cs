@@ -44,6 +44,8 @@ public sealed partial class Property : PropertyBase
         }
     }
 
+    internal string ThumbnailFilenameOnLastSave { get; set; } = string.Empty;
+
     // 建物構造
     public PropertyStructureTypeLabel PropertyStructure
     {
@@ -264,19 +266,7 @@ public sealed partial class Property : PropertyBase
 
     #region == 物件に属するリスト == 
 
-    // 物件に属する部屋のリスト
-    public ObservableCollection<Models.Rent.Residentials.Listing> Rooms
-    {
-        get;
-        set
-        {
-            field = value;
-            IsModified = true;
-        }
-    } = [];
-
-    // DBへの更新時にDBから削除されるべき部屋のIDリスト
-    public ObservableCollection<Models.Rent.Residentials.Listing> RoomsToBeDeleted { get; set; } = [];
+    public ObservableCollection<string> ListingIds { get; } = [];
 
     // 物件写真（建物）リスト
     public ObservableCollection<PropertyPicture> Pictures
@@ -545,8 +535,6 @@ public sealed partial class Property : PropertyBase
     public void SetPropertyElectricKind(EnumElectricType value) => PropertyElectricKind = value;
     public void SetElectricDetail(string value) => ElectricDetail = value;
 
-    public void SetRooms(ObservableCollection<Listing> value) => Rooms = value;
-    public void SetRoomsToBeDeleted(ObservableCollection<Listing> value) => RoomsToBeDeleted = value;
     public void SetPictures(ObservableCollection<PropertyPicture> value) => Pictures = value;
     public void SetPicturesToBeDeleted(ObservableCollection<PropertyPicture> value) => PicturesToBeDeleted = value;
     public void SetPdfs(ObservableCollection<PropertyPdf> value) => Pdfs = value;

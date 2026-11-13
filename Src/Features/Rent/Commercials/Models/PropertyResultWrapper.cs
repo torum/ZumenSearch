@@ -9,4 +9,5 @@ namespace ZumenSearch.Models.Rent.Commercials;
 public sealed class PropertyResultWrapper : ResultWrapperBase
 {
     public Models.Rent.Commercials.Property? Building { get; set; }
+    public List<ListingSummary> ListingSummaries { get; } = [];
 }

@@ -4,13 +4,40 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:modcommercials="using:ZumenSearch.Models.Rent.Commercials"
     mc:Ignorable="d"
     NavigationCacheMode="Required">
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled" Padding="36,0,36,24">
-        <Grid x:Name="ContentArea">
-            <StackPanel Spacing="12" Margin="0,24,0,0">
-
-            </StackPanel>
-        </Grid>
-    </ScrollViewer>
+    <Page.Resources>
+        <DataTemplate x:Key="BrokerTemplate" x:DataType="modcommercials:PersonWrapperForPropertyViewModel">
+            <Border Style="{StaticResource RoundCardBorderStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox Grid.Column="0" Header="会社名" IsReadOnly="True" Text="{x:Bind Person.Name, Mode=OneWay}"/>
+                    <CommandBar Grid.Column="1" Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" HorizontalAlignment="Right">
+                        <AppBarButton Icon="Edit" Label="編集" ToolTipService.ToolTip="宅建業者を編集" Command="{x:Bind ParentViewModel.EditBrokerCommand, Mode=OneWay}" CommandParameter="{x:Bind}"/>
+                        <AppBarButton Icon="Delete" Label="削除" ToolTipService.ToolTip="宅建業者を削除" Command="{x:Bind ParentViewModel.DeleteBrokerCommand, Mode=OneWay}" CommandParameter="{x:Bind}"/>
+                    </CommandBar>
+                </Grid>
+            </Border>
+        </DataTemplate>
+    </Page.Resources>
+    <Grid x:Name="ContentArea" Padding="36,0,36,24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <CommandBar Grid.Row="0" Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" HorizontalAlignment="Right">
+            <AppBarButton Icon="AddFriend" Label="追加" Command="{x:Bind ViewModel.AddBrokerCommand, Mode=OneWay}"/>
+        </CommandBar>
+        <ScrollViewer Grid.Row="1" HorizontalScrollMode="Disabled">
+            <ItemsRepeater ItemsSource="{x:Bind ViewModel.BrokersWrapper, Mode=OneWay}" ItemTemplate="{StaticResource BrokerTemplate}" MinWidth="300" MinHeight="225" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <ItemsRepeater.Layout>
+                    <StackLayout Orientation="Vertical" Spacing="12"/>
+                </ItemsRepeater.Layout>
+            </ItemsRepeater>
+        </ScrollViewer>
+    </Grid>
 </Page>

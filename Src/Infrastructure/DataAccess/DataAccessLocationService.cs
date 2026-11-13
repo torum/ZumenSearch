@@ -28,7 +28,8 @@ public class DataAccessLocationService : IDataAccessLocationService
         // TODO; Try catch for connection.Open() and log error if fails
         connection.Open();
         using var cmd = connection.CreateCommand();
-        cmd.CommandText = string.Format(CultureInfo.InvariantCulture, "SELECT machiaza_id, county, city FROM mt_town_all WHERE pref LIKE '{0}'", pref);
+        cmd.CommandText = "SELECT machiaza_id, county, city FROM mt_town_all WHERE pref LIKE @pref ESCAPE '\\'";
+        cmd.Parameters.AddWithValue("@pref", EscapeLikePattern(pref));
         using var reader = cmd.ExecuteReader();
         while (reader.Read())
         {
@@ -53,7 +54,10 @@ public class DataAccessLocationService : IDataAccessLocationService
         using var connection = new SqliteConnection(_connectionStringBuilder.ConnectionString);
         connection.Open();
         using var cmd = connection.CreateCommand();
-        cmd.CommandText = string.Format(CultureInfo.InvariantCulture, "SELECT machiaza_id, ward, oaza_cho FROM mt_town_all WHERE pref LIKE '{0}' AND county LIKE '{1}' AND city LIKE '{2}'", pref, county, city);
+        cmd.CommandText = "SELECT machiaza_id, ward, oaza_cho FROM mt_town_all WHERE pref LIKE @pref ESCAPE '\\' AND county LIKE @county ESCAPE '\\' AND city LIKE @city ESCAPE '\\'";
+        cmd.Parameters.AddWithValue("@pref", EscapeLikePattern(pref));
+        cmd.Parameters.AddWithValue("@county", EscapeLikePattern(county));
+        cmd.Parameters.AddWithValue("@city", EscapeLikePattern(city));
         using var reader = cmd.ExecuteReader();
         while (reader.Read())
         {
@@ -78,7 +82,12 @@ public class DataAccessLocationService : IDataAccessLocationService
         using var connection = new SqliteConnection(_connectionStringBuilder.ConnectionString);
         connection.Open();
         using var cmd = connection.CreateCommand();
-        cmd.CommandText = string.Format(CultureInfo.InvariantCulture, "SELECT machiaza_id, chome FROM mt_town_all WHERE pref LIKE '{0}' AND county LIKE '{1}' AND city LIKE '{2}' AND ward LIKE '{3}' AND oaza_cho LIKE '{4}'", pref, county, city, ward, oaza);
+        cmd.CommandText = "SELECT machiaza_id, chome FROM mt_town_all WHERE pref LIKE @pref ESCAPE '\\' AND county LIKE @county ESCAPE '\\' AND city LIKE @city ESCAPE '\\' AND ward LIKE @ward ESCAPE '\\' AND oaza_cho LIKE @oaza ESCAPE '\\'";
+        cmd.Parameters.AddWithValue("@pref", EscapeLikePattern(pref));
+        cmd.Parameters.AddWithValue("@county", EscapeLikePattern(county));
+        cmd.Parameters.AddWithValue("@city", EscapeLikePattern(city));
+        cmd.Parameters.AddWithValue("@ward", EscapeLikePattern(ward));
+        cmd.Parameters.AddWithValue("@oaza", EscapeLikePattern(oaza));
         using var reader = cmd.ExecuteReader();
         while (reader.Read())
         {
@@ -108,9 +117,9 @@ public class DataAccessLocationService : IDataAccessLocationService
         return false; ;
     }
 
-    private static string EscapeSingleQuote(string s)
+    private static string EscapeLikePattern(string value)
     {
-        return s is null ? string.Empty : s.Replace("'", "''");
+        return value.Replace("\\", "\\\\").Replace("%", "\\%").Replace("_", "\\_");
     }
 
     private static string RestoreSingleQuote(string s)

@@ -36,6 +36,7 @@ public sealed partial class ShellPage : Page
     ];
 
     private bool _isClosing;
+    private bool _allowClose;
     private Views.Rent.Residentials.Listing.EditorWindow? _closingWindow;
     private bool _nvigated;
 
@@ -67,6 +68,7 @@ public sealed partial class ShellPage : Page
 
         // Initialize the navigation service with the ContentFrame and pages.
         _navigationService.Initialize(this.ContentFrame, _pages);
+        ViewModel.PropertyChanged += ViewModel_PropertyChanged;
 
         this.Loaded += ShellPage_Loaded;
         this.BreadcrumbBar1.ItemClicked += BreadcrumbBar_ItemClicked;
@@ -84,39 +86,55 @@ public sealed partial class ShellPage : Page
 
     public async Task ShowEditorCloseConfirmationDialog()
     {
-        if (ViewModel == null)
+        if (_isClosing) return;
+        _isClosing = true;
+        ViewModel.SetClosing(true);
+        try
         {
-            return;
+            if (!await ViewModel.WaitForEditorOperationsAsync()) return;
+            var main = App.GetService<ViewModels.MainViewModel>();
+            await main.WaitForResidentialOperationsAsync();
+            if (ViewModel.SaveCommand.IsRunning && ViewModel.SaveCommand.ExecutionTask is Task pendingSave) await pendingSave;
+            if (!ViewModel.CleanIncompleteAttachments()) return;
+
+            foreach (var editor in ViewModel.UnsavedChildEditorList.ToList())
+            {
+                _closingWindow = editor;
+                editor.Activate();
+                if (editor.Content is not Views.Rent.Residentials.Listing.ShellPage shell) return;
+                await shell.ShowEditorCloseConfirmationDialog();
+                if (main.RentResidentialListingEditorList.Contains(editor)) return;
+            }
+            _closingWindow = null;
+
+            if (ViewModel.IsDiscardPending)
+            {
+                if (!ViewModel.DiscardChanges()) return;
+            }
+            else if (ViewModel.IsDirty)
+            {
+                var result = await _dialogService.ShowEditorCloseConfirmationDialog();
+                await main.WaitForResidentialOperationsAsync();
+                if (result == ContentDialogResult.Primary)
+                {
+                    if (ViewModel.IsDirty) await ViewModel.Save();
+                    if (ViewModel.IsDirty) return;
+                }
+                else if (result != ContentDialogResult.Secondary || !ViewModel.DiscardChanges())
+                {
+                    return;
+                }
+            }
+
+            _allowClose = true;
+            Window.Close();
         }
-
-        if (ViewModel.IsDirty)
+        finally
         {
-            // show ConfirmationDialog
-            var result = await _dialogService.ShowEditorCloseConfirmationDialog();
-
-            if (result == ContentDialogResult.Primary)
-            {
-                if (ViewModel.IsDirty)
-                {
-                    await ViewModel.Save();
-                }
-
-                if (ViewModel.IsDirty == false)
-                {
-                    Window.Close();
-                }
-            }
-            else if (result == ContentDialogResult.Secondary)
-            {
-                if (ViewModel.DiscardChanges())
-                {
-                    Window.Close();
-                }
-            }
-            else if (result == ContentDialogResult.None)
-            {
-                // Cancel.
-            }
+            _allowClose = false;
+            _closingWindow = null;
+            _isClosing = false;
+            if (ViewModel.IsActive) ViewModel.SetClosing(false);
         }
     }
 
@@ -160,122 +178,14 @@ public sealed partial class ShellPage : Page
 
     private async void AppWindow_Closing(Microsoft.UI.Windowing.AppWindow sender, Microsoft.UI.Windowing.AppWindowClosingEventArgs args)
     {
+        if (_allowClose) return;
+        args.Cancel = true;
         if (_isClosing)
         {
-            // Prevent re-entrancy if already in the process of closing.
-            try
-            {
-                if (_closingWindow is not null)
-                {
-                    IntPtr hWnd = WindowNative.GetWindowHandle(_closingWindow);
-                    NativeMethods.ShowWindow(hWnd, NativeMethods.SW_RESTORE); // Ensure it's not minimized
-                    NativeMethods.SetForegroundWindow(hWnd); // Attempt to set it as the foreground window
-
-                    // Activate the child editor window that is currently being closed.
-                    _closingWindow.Activate();
-                    _closingWindow.AppWindow.MoveInZOrderAtTop();
-
-                    args.Cancel = true;
-
-                    return;
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Failed to reactivate the child editor while closing its parent: {ex}");
-            }
-
-            args.Cancel = true;
+            _closingWindow?.Activate();
             return;
         }
-
-        _isClosing = true;
-        try
-        {
-            if (ViewModel == null)
-            {
-                _closingWindow = null;
-                _isClosing = false;
-                return;
-            }
-
-            var isCanceled = false;
-            var childEditors = ViewModel.UnsavedChildEditorList.ToList();
-
-            if (childEditors.Count > 0)
-            {
-                foreach (var editor in childEditors)
-                {
-                    if (editor.ViewModel is null)
-                    {
-                        Debug.WriteLine("AppWindow_Closing: editor.ViewModel is null");
-                        continue;
-                    }
-                    if (editor.ViewModel.IsDirty)
-                    {
-                        args.Cancel = true;
-                        isCanceled = true;
-
-                        try
-                        {
-                            IntPtr hWnd = WindowNative.GetWindowHandle(editor);
-                            NativeMethods.ShowWindow(hWnd, NativeMethods.SW_RESTORE); // Ensure it's not minimized
-                            NativeMethods.SetForegroundWindow(hWnd); // Attempt to set it as the foreground window
-
-                            editor.Activate();
-                            editor.AppWindow.MoveInZOrderAtTop();
-
-                            _closingWindow = editor;
-                            if (editor.Content is Views.Rent.Residentials.Listing.ShellPage shell)
-                            {
-                                // Show confirmation dialog to user to save changes or not.
-                                await shell.ShowEditorCloseConfirmationDialog();
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            Debug.WriteLine($"Failed to handle unsaved child editor during parent close: {ex}");
-                            args.Cancel = true;
-                            isCanceled = true;
-                            break;
-                        }
-                        finally
-                        {
-                            _closingWindow = null;
-                        }
-
-                        break;
-                    }
-                }
-
-                if (!isCanceled)
-                {
-                    // Close() may modify ChildEditorList through Closed handlers.
-                    // Enumerate the snapshot instead of the live List<T>.
-                    foreach (var editor in childEditors)
-                    {
-                        editor.Close();
-                    }
-                }
-            }
-
-            if (isCanceled)
-            {
-                args.Cancel = true;
-                return;
-            }
-
-            if (ViewModel.IsDirty)
-            {
-                args.Cancel = true; // needs Cancel = true here in order to show dialog.
-                await ShowEditorCloseConfirmationDialog();
-            }
-        }
-        finally
-        {
-            _closingWindow = null;
-            _isClosing = false;
-        }
+        await ShowEditorCloseConfirmationDialog();
     }
 
     private void Window_Closed(object sender, WindowEventArgs args)
@@ -288,6 +198,7 @@ public sealed partial class ShellPage : Page
         ewin.Activated -= Window_Activated;
         ewin.Closed -= Window_Closed;
         ewin.AppWindow.Closing -= AppWindow_Closing;
+        ViewModel.PropertyChanged -= ViewModel_PropertyChanged;
 
         var mainVM = App.GetService<ViewModels.MainViewModel>();
         // Save window size and position.
@@ -394,6 +305,27 @@ public sealed partial class ShellPage : Page
         }
     }
 
+    private void ViewModel_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName != nameof(ViewModel.IsUnitOwnership) || !ViewModel.IsUnitOwnership) return;
+        PruneHiddenHistory();
+        if (ContentFrame.SourcePageType == typeof(ZumenListPage) || ContentFrame.SourcePageType == typeof(LessorListPage) || ContentFrame.SourcePageType == typeof(BrokerListPage))
+        {
+            _navigationService.NavigateTo(typeof(BasicPage).FullName!, ViewModel);
+        }
+        NavView.IsBackEnabled = ContentFrame.CanGoBack;
+    }
+
+    private void PruneHiddenHistory()
+    {
+        if (!ViewModel.IsUnitOwnership) return;
+        for (var index = ContentFrame.BackStack.Count - 1; index >= 0; index--)
+        {
+            var page = ContentFrame.BackStack[index].SourcePageType;
+            if (page == typeof(ZumenListPage) || page == typeof(LessorListPage) || page == typeof(BrokerListPage)) ContentFrame.BackStack.RemoveAt(index);
+        }
+    }
+
     private void NavView_BackRequested(NavigationView sender, NavigationViewBackRequestedEventArgs args)
     {
         if (this.ContentFrame.CanGoBack) this.ContentFrame.GoBack();
@@ -407,7 +339,13 @@ public sealed partial class ShellPage : Page
 
     private void ContentFrame_Navigated(object sender, NavigationEventArgs e)
     {
+        PruneHiddenHistory();
         this.NavView.IsBackEnabled = this.ContentFrame.CanGoBack;
+        var page = _pages.FirstOrDefault(item => item.Page == e.SourcePageType);
+        if (page.Page is not null && ViewModel.BreadcrumbItems.Count > 1)
+        {
+            ViewModel.BreadcrumbItems[^1] = new Breadcrumb { Name = page.Label, Page = page.Page.FullName! };
+        }
 
         if (this.ContentFrame.SourcePageType != null)
         {
@@ -465,6 +403,7 @@ public sealed partial class ShellPage : Page
 
         // set this first.
         args.Handled = true;
+        if (!ViewModel.IsEditorEnabled) return;
 
         if (args.KeyboardAccelerator.Modifiers == Windows.System.VirtualKeyModifiers.Menu)
         {

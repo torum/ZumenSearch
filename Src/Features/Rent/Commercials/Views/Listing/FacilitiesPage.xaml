@@ -1,0 +1,43 @@
+<Page x:Class="ZumenSearch.Views.Rent.Commercials.Listing.FacilitiesPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:commercial="using:ZumenSearch.Models.Rent.Commercials" xmlns:listing="using:ZumenSearch.Models.Rent.Commercials.Listing" xmlns:controls="using:CommunityToolkit.WinUI.Controls" mc:Ignorable="d" NavigationCacheMode="Required">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled" Padding="36,0,36,24">
+        <StackPanel Spacing="12" Margin="0,24,0,0">
+            <Border Style="{StaticResource RoundCardBorderStyle}">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="区画の設備" Style="{ThemeResource SubtitleTextBlockStyle}" />
+                    <CheckBox Content="空調" IsChecked="{x:Bind ViewModel.HasAirConditioning, Mode=TwoWay}" />
+                    <CheckBox Content="専用トイレ" IsChecked="{x:Bind ViewModel.HasPrivateToilet, Mode=TwoWay}" />
+                    <CheckBox Content="給湯" IsChecked="{x:Bind ViewModel.HasHotWater, Mode=TwoWay}" />
+                    <CheckBox Content="厨房設備" IsChecked="{x:Bind ViewModel.HasKitchen, Mode=TwoWay}" />
+                    <CheckBox Content="換気設備" IsChecked="{x:Bind ViewModel.HasVentilation, Mode=TwoWay}" />
+                    <CheckBox Content="インターネット" IsChecked="{x:Bind ViewModel.HasInternet, Mode=TwoWay}" />
+                    <TextBox Header="設備詳細" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="80" Text="{x:Bind ViewModel.EquipmentDetails, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                </StackPanel>
+            </Border>
+            <Border Style="{StaticResource RoundCardBorderStyle}">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="区画の状態・利用条件" Style="{ThemeResource SubtitleTextBlockStyle}" />
+                    <ComboBox Header="区画の状態" HorizontalAlignment="Stretch" ItemsSource="{x:Bind ViewModel.UnitConditionOptions}" SelectedItem="{x:Bind ViewModel.SelectedUnitCondition, Mode=TwoWay}"><ComboBox.ItemTemplate><DataTemplate x:DataType="listing:ListingUnitConditionTypeLabel"><TextBlock Text="{x:Bind Label}" /></DataTemplate></ComboBox.ItemTemplate></ComboBox>
+                    <ComboBox Header="造作譲渡" HorizontalAlignment="Stretch" ItemsSource="{x:Bind ViewModel.FixtureTransferOptions}" SelectedItem="{x:Bind ViewModel.SelectedFixtureTransfer, Mode=TwoWay}"><ComboBox.ItemTemplate><DataTemplate x:DataType="listing:ListingFixtureTransferTypeLabel"><TextBlock Text="{x:Bind Label}" /></DataTemplate></ComboBox.ItemTemplate></ComboBox>
+                    <TextBox Header="営業時間の制限" AcceptsReturn="True" TextWrapping="Wrap" Text="{x:Bind ViewModel.BusinessHoursRestrictions, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox Header="利用条件" AcceptsReturn="True" TextWrapping="Wrap" Text="{x:Bind ViewModel.UseConditions, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                </StackPanel>
+            </Border>
+            <Border Style="{StaticResource RoundCardBorderStyle}">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="利用可能な業種（複数選択可）" Style="{ThemeResource SubtitleTextBlockStyle}" TextWrapping="Wrap" />
+                    <TextBlock Text="未選択は不可を意味せず、利用可能として登録されていない状態です。" TextWrapping="Wrap" />
+                    <controls:WrapPanel VerticalSpacing="8" HorizontalSpacing="12">
+                        <CheckBox Content="重飲食" IsChecked="{x:Bind ViewModel.PermitsHeavyFoodService, Mode=TwoWay}" />
+                        <CheckBox Content="軽飲食" IsChecked="{x:Bind ViewModel.PermitsLightFoodService, Mode=TwoWay}" />
+                        <CheckBox Content="小売" IsChecked="{x:Bind ViewModel.PermitsRetail, Mode=TwoWay}" />
+                        <CheckBox Content="サービス" IsChecked="{x:Bind ViewModel.PermitsServices, Mode=TwoWay}" />
+                        <CheckBox Content="事務所" IsChecked="{x:Bind ViewModel.PermitsOffice, Mode=TwoWay}" />
+                        <CheckBox Content="その他" IsChecked="{x:Bind ViewModel.PermitsOther, Mode=TwoWay}" />
+                    </controls:WrapPanel>
+                    <TextBox Header="業種の詳細・制限" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="80" Text="{x:Bind ViewModel.PermittedBusinessDetails, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox Header="設備・利用条件の備考" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="80" Text="{x:Bind ViewModel.FacilitiesRemarks, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

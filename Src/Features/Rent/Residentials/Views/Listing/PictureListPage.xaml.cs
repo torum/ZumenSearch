@@ -39,38 +39,36 @@ public sealed partial class PictureListPage : Page
         }
 
         button.IsEnabled = false;
-        var openPicker = new Microsoft.Windows.Storage.Pickers.FileOpenPicker(button.XamlRoot.ContentIslandEnvironment.AppWindowId);
-
-        // Set options for your file picker
-        openPicker.ViewMode = Microsoft.Windows.Storage.Pickers.PickerViewMode.List;
-        openPicker.SuggestedStartLocation = Microsoft.Windows.Storage.Pickers.PickerLocationId.PicturesLibrary;
-        openPicker.FileTypeFilter.Add(".jpg");
-        openPicker.FileTypeFilter.Add(".jpeg");
-        openPicker.FileTypeFilter.Add(".png");
-        openPicker.FileTypeFilter.Add(".gif");
-        openPicker.FileTypeFilter.Add(".webp");
-
-        // Open the picker for the user to pick a file
-        var files = await openPicker.PickMultipleFilesAsync();
-        if (files.Count > 0)
+        ViewModel.BeginPicker();
+        try
         {
-            List<string> list = [];
-            foreach (var file in files)
+            var openPicker = new Microsoft.Windows.Storage.Pickers.FileOpenPicker(button.XamlRoot.ContentIslandEnvironment.AppWindowId)
             {
-                list.Add(file.Path);
-            }
-
-            if (ViewModel.AddNewRoomPicturesCommand.CanExecute(list))
+                ViewMode = Microsoft.Windows.Storage.Pickers.PickerViewMode.List,
+                SuggestedStartLocation = Microsoft.Windows.Storage.Pickers.PickerLocationId.PicturesLibrary
+            };
+            openPicker.FileTypeFilter.Add(".jpg");
+            openPicker.FileTypeFilter.Add(".jpeg");
+            openPicker.FileTypeFilter.Add(".png");
+            openPicker.FileTypeFilter.Add(".gif");
+            openPicker.FileTypeFilter.Add(".webp");
+            var files = await openPicker.PickMultipleFilesAsync();
+            var paths = files.Select(file => file.Path).ToList();
+            if (paths.Count > 0 && ViewModel.AddNewRoomPicturesCommand.CanExecute(paths))
             {
-                await ViewModel.AddNewRoomPicturesCommand.ExecuteAsync(list);
-                //await ViewModel.SetNewUnitPicturesAsync(list);
+                await ViewModel.AddNewRoomPicturesCommand.ExecuteAsync(paths);
             }
         }
-        else
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Runtime.InteropServices.COMException or InvalidOperationException or ArgumentException)
         {
-            Debug.WriteLine("Operation cancelled.");
+            Debug.WriteLine($"Failed to import listing pictures: {ex}");
+            ViewModel.InfoBarErrorMessage = $"画像を読み込めませんでした: {ex.Message}";
+            ViewModel.IsInfoBarErrorOpen = true;
         }
-
-        button.IsEnabled = true;
+        finally
+        {
+            ViewModel.EndPicker();
+            button.IsEnabled = true;
+        }
     }
 }

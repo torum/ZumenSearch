@@ -13,248 +13,90 @@
         <Grid x:Name="ContentArea">
             <StackPanel Spacing="12" Margin="0,24,0,0">
 
-                <Expander Header="一般" Margin="0" Padding="24" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" IsExpanded="False">
-                    <controls:WrapPanel x:Name="HorizontalWrapPanel" Margin="0" VerticalSpacing="12" HorizontalSpacing="6">
-                        <CheckBox Margin="0,0,0,0" Content="エレベータ" IsChecked="{x:Bind ViewModel.HasElevator,Mode=TwoWay}"/>
-                        <CheckBox Margin="0,0,0,0" Content="オートロック" IsChecked="{x:Bind ViewModel.HasAutolock,Mode=TwoWay}"/>
-                        <CheckBox Margin="0,0,0,0" Content="防犯カメラ" IsChecked="{x:Bind ViewModel.HasSecurityCamera,Mode=TwoWay}"/>
-                        <CheckBox Margin="0,0,0,0" Content="宅配ボックス" IsChecked="{x:Bind ViewModel.HasParcelLocker,Mode=TwoWay}"/>
-                    </controls:WrapPanel>
-                </Expander>
-
-                <Expander Header="電気" Margin="0" Padding="24" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" IsExpanded="False">
-                    <StackPanel Spacing="12" VerticalAlignment="Bottom" HorizontalAlignment="Stretch">
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,0">
-                            <CheckBox Content="あり" Margin="0,0,0,0" IsChecked="{x:Bind ViewModel.HasElectric, Mode=TwoWay}"/>
-                        </StackPanel>
-                        <RadioButtons Header="種類" MaxColumns="3" Margin="0,0,0,0" ItemsSource="{x:Bind ViewModel.ElectricKinds}" SelectedItem="{x:Bind ViewModel.SelectedElectricKind, Mode=TwoWay}" >
-                            <RadioButtons.ItemTemplate>
-                                <DataTemplate x:DataType="modcommercials:PropertyElectricKind">
-                                    <TextBlock Text="{x:Bind Label, Mode=OneTime}" VerticalAlignment="Center"/>
-                                </DataTemplate>
-                            </RadioButtons.ItemTemplate>
-                        </RadioButtons>
-                        <TextBox Header="詳細（事業者、住所、電話連絡先、容量[*アンペア]、メーター[専用・子・割当・他]）" Text="{x:Bind ViewModel.ElectricDetail, Mode=TwoWay}" Margin="0,0,0,0" HorizontalAlignment="Stretch"/>
+                <Expander Header="エレベーター・荷捌き" Margin="0" Padding="24" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" IsExpanded="False">
+                    <StackPanel Spacing="12">
+                        <CheckBox Content="乗用エレベーターあり" IsChecked="{x:Bind ViewModel.HasPassengerElevator, Mode=TwoWay}" />
+                        <TextBox Header="乗用エレベーター台数（台）" InputScope="Number" Text="{x:Bind ViewModel.PassengerElevatorCount, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <CheckBox Content="荷物用エレベーターあり" IsChecked="{x:Bind ViewModel.HasFreightElevator, Mode=TwoWay}" />
+                        <TextBox Header="荷物用エレベーター詳細" PlaceholderText="容量、寸法、制限など" Text="{x:Bind ViewModel.FreightElevatorDetails, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <CheckBox Content="荷捌き場あり" IsChecked="{x:Bind ViewModel.HasLoadingArea, Mode=TwoWay}" />
+                        <TextBox Header="荷捌き場詳細" PlaceholderText="搬入経路、車両制限、利用条件など" Text="{x:Bind ViewModel.LoadingAreaDetails, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                 </Expander>
 
-                <Expander Header="ガス" Margin="0" Padding="24" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" IsExpanded="False">
-                    <StackPanel VerticalAlignment="Bottom">
-                        <StackPanel Margin="0,0,0,8" Orientation="Horizontal">
-                            <CheckBox Content="あり" Margin="0,0,0,0"/>
-                        </StackPanel>
-                        <StackPanel Margin="0,0,0,12" Orientation="Horizontal">
-                            <RadioButton
-                                                    Margin="0,0,0,0"
-                                                    Content="都市ガス"
-                                                    GroupName="GasKind" />
-                            <RadioButton
-                                                    Margin="12,0,0,0"
-                                                    Content="プロパンガス"
-                                                    GroupName="GasKind" />
-                            <RadioButton
-                                                    Margin="12,0,0,0"
-                                                    Content="指定なし"
-                                                    GroupName="GasKind"
-                                                    IsChecked="True" />
-                        </StackPanel>
-                        <TextBox Header="詳細（供給会社、住所、電話連絡先、[都市ガス・プロパン[個別・集中]]、メーター[専用・子・割当・他]）" Margin="0,0,0,0" HorizontalAlignment="Stretch"/>
+                <Expander Header="セキュリティ" Margin="0" Padding="24" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" IsExpanded="False">
+                    <StackPanel Spacing="12">
+                        <CheckBox Content="セキュリティ設備あり" IsChecked="{x:Bind ViewModel.HasSecurity, Mode=TwoWay}" />
+                        <TextBlock Text="種類（複数選択可）" />
+                        <controls:WrapPanel VerticalSpacing="8" HorizontalSpacing="12">
+                            <CheckBox Content="機械警備" IsChecked="{x:Bind ViewModel.HasMechanicalSecurity, Mode=TwoWay}" />
+                            <CheckBox Content="有人警備" IsChecked="{x:Bind ViewModel.HasStaffedSecurity, Mode=TwoWay}" />
+                            <CheckBox Content="オートロック" IsChecked="{x:Bind ViewModel.HasAutolock, Mode=TwoWay}" />
+                            <CheckBox Content="防犯カメラ" IsChecked="{x:Bind ViewModel.HasSecurityCamera, Mode=TwoWay}" />
+                            <CheckBox Content="その他" IsChecked="{x:Bind ViewModel.HasOtherSecurity, Mode=TwoWay}" />
+                        </controls:WrapPanel>
+                        <TextBox Header="セキュリティ詳細・備考" Text="{x:Bind ViewModel.SecurityDetails, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                 </Expander>
 
-                <Expander Header="水道" Margin="0" Padding="24" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" IsExpanded="False">
-                    <StackPanel Spacing="24">
-                        <StackPanel Margin="0" VerticalAlignment="Bottom">
-                            <TextBlock><Run Text="上水道" /></TextBlock>
-                            <StackPanel Margin="0,0,0,0" Orientation="Horizontal">
-                                <RadioButton
-                                                    Margin="0,8,0,0"
-                                                    Content="公営"
-                                                    GroupName="TapWaterKind" />
-                                <RadioButton
-                                                    Margin="12,8,0,0"
-                                                    Content="私営"
-                                                    GroupName="TapWaterKind" />
-                                <RadioButton
-                                                    Margin="12,8,0,0"
-                                                    Content="他"
-                                                    GroupName="TapWaterKind" />
-                                <RadioButton
-                                                    Margin="12,8,0,0"
-                                                    Content="指定なし"
-                                                    GroupName="TapWaterKind"
-                                                    IsChecked="True" />
-                            </StackPanel>
-                            <TextBox Header="詳細（[公営・私営・井戸・他]、メーター[専用・子・割当・他]）" Margin="0,8,0,0" />
-                        </StackPanel>
-                        <StackPanel Margin="0" VerticalAlignment="Bottom">
-                            <TextBlock><Run Text="下水道" /></TextBlock>
-                            <StackPanel Margin="0,0,0,0" Orientation="Horizontal">
-                                <RadioButton
-                                                    Margin="0,8,0,0"
-                                                    Content="公共下水"
-                                                    GroupName="SewerageKind" />
-                                <RadioButton
-                                                    Margin="12,8,0,0"
-                                                    Content="浄化槽"
-                                                    GroupName="SewerageKind" />
-                                <RadioButton
-                                                    Margin="12,8,0,0"
-                                                    Content="他"
-                                                    GroupName="SewerageKind" />
-                                <RadioButton
-                                                    Margin="12,8,0,0"
-                                                    Content="指定なし"
-                                                    GroupName="SewerageKind"
-                                                    IsChecked="True" />
-                            </StackPanel>
-                            <TextBox Header="詳細（[公共下水・浄化槽・汲取・側溝・他]）" Margin="0,8,0,0" />
-                        </StackPanel>
+                <Expander Header="電気" Padding="24" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                    <StackPanel Spacing="12">
+                        <CheckBox Content="電気供給あり" IsChecked="{x:Bind ViewModel.HasElectricity, Mode=TwoWay}" />
+                        <TextBox Header="電気詳細" PlaceholderText="容量、供給方法など" Text="{x:Bind ViewModel.ElectricityDetails, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                 </Expander>
-
-                <Expander Header="共聴設備" Margin="0" Padding="24" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" IsExpanded="False">
-                    <StackPanel Margin="0">
-                        <StackPanel Margin="0,0,0,0" VerticalAlignment="Bottom">
-                            <StackPanel Margin="0,0,0,8" Orientation="Horizontal">
-                                <CheckBox
-                                                    Name="TVKind_Desi"
-                                                    Margin="0,0,0,0"
-                                                    Content="地上デジタル" />
-                                <CheckBox
-                                                    Name="TVKind_BS"
-                                                    Margin="12,0,0,0"
-                                                    Content="BSアンテナ" />
-                                <CheckBox
-                                                    Name="TVKind_CS"
-                                                    Margin="12,0,0,0"
-                                                    Content="CSアンテナ" />
-                                <CheckBox
-                                                    Name="TVKind_CATV"
-                                                    Margin="12,0,0,0"
-                                                    Content="CATV" />
-                                <CheckBox
-                                                    Name="TVKind_USEN"
-                                                    Margin="12,0,0,0"
-                                                    Content="有線放送" />
-                            </StackPanel>
-                            <StackPanel Margin="0,0,0,0" Orientation="Horizontal">
-                                <CheckBox Margin="0,8,0,0" Content="インターネット" />
-                                <CheckBox Margin="12,8,0,0" Content="光ファイバー" />
-                                <CheckBox Margin="12,8,0,0" Content="インターネット無料" />
-                            </StackPanel>
-                            <TextBox Header="TV アンテナ [有り（[UHF・VHF・BS・CS]）・無し・その他]" Margin="0,12,0,0" />
-                            <TextBox Header="インターネット [設備有り・無し・その他]" Margin="0,12,0,0" />
-                        </StackPanel>
+                <Expander Header="ガス" Padding="24" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                    <StackPanel Spacing="12">
+                        <CheckBox Content="ガス供給あり" IsChecked="{x:Bind ViewModel.HasGas, Mode=TwoWay}" />
+                        <ComboBox Header="ガスの種類" HorizontalAlignment="Stretch" ItemsSource="{x:Bind ViewModel.GasTypeOptions}" SelectedItem="{x:Bind ViewModel.SelectedGasType, Mode=TwoWay}">
+                            <ComboBox.ItemTemplate><DataTemplate x:DataType="modcommercials:GasSupplyTypeLabel"><TextBlock Text="{x:Bind Label}" /></DataTemplate></ComboBox.ItemTemplate>
+                        </ComboBox>
+                        <TextBox Header="ガス詳細" Text="{x:Bind ViewModel.GasDetails, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                 </Expander>
-
-                <Expander Header="駐車場" Margin="0,0,0,0" Padding="24" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" IsExpanded="False">
-                    <StackPanel Margin="0" HorizontalAlignment="Stretch">
-                        <StackPanel Margin="0,0,0,0" Orientation="Horizontal">
-                            <CheckBox Margin="0,0,0,0" Content="あり" />
-                            <CheckBox Margin="12,0,0,0" Content="駐車場無料" />
-                        </StackPanel>
-                        <StackPanel Margin="0,0,0,12" Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Stretch">
-
-                            <ComboBox Header="契約形態" SelectedIndex="0" VerticalAlignment="Bottom">
-                                <ComboBoxItem>任意</ComboBoxItem>
-                                <ComboBoxItem>必須</ComboBoxItem>
-                            </ComboBox>
-
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom">
-                                <TextBox Header="料金（円・月額）" Width="180" Margin="12,0,0,0" />
-                                <ComboBox SelectedIndex="0" Margin="8,0,0,0" VerticalAlignment="Bottom">
-                                    <ComboBoxItem>税込み</ComboBoxItem>
-                                    <ComboBoxItem>税抜き</ComboBoxItem>
-                                </ComboBox>
-                            </StackPanel>
-
-                        </StackPanel>
-
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,12" HorizontalAlignment="Stretch">
-                            <ComboBox Header="現況" SelectedIndex="0">
-                                <ComboBoxItem>指定なし</ComboBoxItem>
-                                <ComboBoxItem>空き有り</ComboBoxItem>
-                                <ComboBoxItem>空き無し</ComboBoxItem>
-                                <ComboBoxItem>近隣</ComboBoxItem>
-                            </ComboBox>
-                            <StackPanel Width="100" Margin="12,0,0,0" HorizontalAlignment="Left">
-                                <TextBox Header="空き台数（台）" />
-                            </StackPanel>
-                            <StackPanel Width="80" Margin="12,0,0,0" HorizontalAlignment="Left">
-                                <TextBox Header="距離（m）" />
-                            </StackPanel>
-                        </StackPanel>
-                        <StackPanel Margin="0,0,0,0" HorizontalAlignment="Stretch">
-                            <TextBox Header="備考" HorizontalAlignment="Stretch"/>
-                        </StackPanel>
+                <Expander Header="水道・下水" Padding="24" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                    <StackPanel Spacing="12">
+                        <CheckBox Content="水道供給あり" IsChecked="{x:Bind ViewModel.HasWater, Mode=TwoWay}" />
+                        <ComboBox Header="水道の種類" HorizontalAlignment="Stretch" ItemsSource="{x:Bind ViewModel.WaterTypeOptions}" SelectedItem="{x:Bind ViewModel.SelectedWaterType, Mode=TwoWay}">
+                            <ComboBox.ItemTemplate><DataTemplate x:DataType="modcommercials:WaterSupplyTypeLabel"><TextBlock Text="{x:Bind Label}" /></DataTemplate></ComboBox.ItemTemplate>
+                        </ComboBox>
+                        <TextBox Header="水道詳細" Text="{x:Bind ViewModel.WaterDetails, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <ComboBox Header="下水の種類" HorizontalAlignment="Stretch" ItemsSource="{x:Bind ViewModel.SewerageTypeOptions}" SelectedItem="{x:Bind ViewModel.SelectedSewerageType, Mode=TwoWay}">
+                            <ComboBox.ItemTemplate><DataTemplate x:DataType="modcommercials:SewerageTypeLabel"><TextBlock Text="{x:Bind Label}" /></DataTemplate></ComboBox.ItemTemplate>
+                        </ComboBox>
+                        <TextBox Header="下水詳細" Text="{x:Bind ViewModel.SewerageDetails, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                 </Expander>
-
-                <Expander Header="駐輪場" Margin="0,0,0,0" Padding="24" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" IsExpanded="False">
-                    <StackPanel Margin="0" HorizontalAlignment="Stretch">
-                        <StackPanel Margin="0,0,0,12" Orientation="Horizontal">
-                            <CheckBox Margin="0,0,0,0" Content="あり" />
-                            <CheckBox Margin="12,0,0,0" Content="駐輪場無料" />
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,12" HorizontalAlignment="Stretch">
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                <ComboBox Header="現況" SelectedIndex="0">
-                                    <ComboBoxItem>指定なし</ComboBoxItem>
-                                    <ComboBoxItem>空き有り</ComboBoxItem>
-                                    <ComboBoxItem>空き無し</ComboBoxItem>
-                                    <ComboBoxItem>近隣</ComboBoxItem>
-                                </ComboBox>
-                                <StackPanel Orientation="Horizontal" Margin="12,0,0,0">
-                                    <TextBox Header="料金（月額・円）" Width="180" />
-                                    <ComboBox SelectedIndex="0" Margin="8,0,0,0" VerticalAlignment="Bottom">
-                                        <ComboBoxItem>税込み</ComboBoxItem>
-                                        <ComboBoxItem>税抜き</ComboBoxItem>
-                                    </ComboBox>
-                                </StackPanel>
-                            </StackPanel>
-                        </StackPanel>
-                        <StackPanel Margin="0,0,0,02" HorizontalAlignment="Stretch">
-                            <TextBox Header="備考" HorizontalAlignment="Stretch"/>
-                        </StackPanel>
+                <Expander Header="インターネット" Padding="24" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                    <StackPanel Spacing="12">
+                        <CheckBox Content="インターネット設備あり" IsChecked="{x:Bind ViewModel.HasInternet, Mode=TwoWay}" />
+                        <CheckBox Content="光ファイバーあり" IsChecked="{x:Bind ViewModel.HasFiber, Mode=TwoWay}" />
+                        <TextBox Header="インターネット詳細" Text="{x:Bind ViewModel.InternetDetails, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                 </Expander>
-
-                <Expander Header="バイク置き場" Margin="0,0,0,0" Padding="24" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" IsExpanded="False">
-                    <StackPanel Margin="0" HorizontalAlignment="Stretch">
-                        <StackPanel Margin="0,0,0,12" Orientation="Horizontal">
-                            <CheckBox Margin="0,0,0,0" Content="あり" />
-                            <CheckBox Margin="12,0,0,0" Content="バイク置き場無料" />
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,12" HorizontalAlignment="Stretch">
-
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Bottom">
-                                <ComboBox Header="現況" SelectedIndex="0">
-                                    <ComboBoxItem>指定なし</ComboBoxItem>
-                                    <ComboBoxItem>空き有り</ComboBoxItem>
-                                    <ComboBoxItem>空き無し</ComboBoxItem>
-                                    <ComboBoxItem>近隣</ComboBoxItem>
-                                </ComboBox>
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal" Margin="12,0,0,0">
-                                <TextBox Header="料金（月額・円）" Width="180" />
-                                <ComboBox SelectedIndex="0" Margin="8,0,0,0" VerticalAlignment="Bottom">
-                                    <ComboBoxItem>税込み</ComboBoxItem>
-                                    <ComboBoxItem>税抜き</ComboBoxItem>
-                                </ComboBox>
-                            </StackPanel>
-
-                        </StackPanel>
-
-                        <StackPanel Margin="0,0,0,0" HorizontalAlignment="Stretch">
-                            <TextBox Header="備考" HorizontalAlignment="Stretch"/>
-                        </StackPanel>
+                <Expander Header="消防設備" Padding="24" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                    <StackPanel Spacing="12">
+                        <CheckBox Content="消防設備あり" IsChecked="{x:Bind ViewModel.HasFireSafety, Mode=TwoWay}" />
+                        <TextBox Header="消防設備詳細・備考" Text="{x:Bind ViewModel.FireSafetyDetails, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                 </Expander>
-
+                <Expander Header="駐車場" Padding="24" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                    <StackPanel Spacing="12">
+                        <CheckBox Content="駐車場あり" IsChecked="{x:Bind ViewModel.HasParking, Mode=TwoWay}" />
+                        <ComboBox Header="空き状況" HorizontalAlignment="Stretch" ItemsSource="{x:Bind ViewModel.ParkingVacancyOptions}" SelectedItem="{x:Bind ViewModel.SelectedParkingVacancy, Mode=TwoWay}">
+                            <ComboBox.ItemTemplate><DataTemplate x:DataType="modcommercials:ParkingVacancyTypeLabel"><TextBlock Text="{x:Bind Label}" /></DataTemplate></ComboBox.ItemTemplate>
+                        </ComboBox>
+                        <TextBox Header="空き台数（台）" InputScope="Number" Text="{x:Bind ViewModel.ParkingSpaces, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <CheckBox Content="駐車場無料" IsChecked="{x:Bind ViewModel.IsParkingFree, Mode=TwoWay}" />
+                        <TextBlock Text="{x:Bind ViewModel.ParkingFreeDescription, Mode=OneWay}" />
+                        <TextBox Header="月額料金（円・無料選択時は保持）" InputScope="Number" IsEnabled="{x:Bind ViewModel.IsParkingFeeEnabled, Mode=OneWay}" Text="{x:Bind ViewModel.ParkingMonthlyFee, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <ComboBox Header="消費税" HorizontalAlignment="Stretch" ItemsSource="{x:Bind ViewModel.ParkingTaxOptions}" SelectedItem="{x:Bind ViewModel.SelectedParkingTax, Mode=TwoWay}">
+                            <ComboBox.ItemTemplate><DataTemplate x:DataType="modcommercials:ParkingTaxTypeLabel"><TextBlock Text="{x:Bind Label}" /></DataTemplate></ComboBox.ItemTemplate>
+                        </ComboBox>
+                        <TextBox Header="駐車場詳細・備考" Text="{x:Bind ViewModel.ParkingDetails, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                </Expander>
             </StackPanel>
-
         </Grid>
     </ScrollViewer>
 </Page>

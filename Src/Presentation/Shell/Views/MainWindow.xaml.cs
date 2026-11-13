@@ -278,6 +278,9 @@ public sealed partial class MainWindow : Window
         if (_isClosing) return;
         _isClosing = true;
 
+        await _viewModel.WaitForCommercialOperationsAsync();
+        await _viewModel.WaitForResidentialOperationsAsync();
+
         var isCancel = false;
 
         if (_viewModel.RentResidentialListingEditorList.Count > 0)
@@ -289,7 +292,7 @@ public sealed partial class MainWindow : Window
                     Debug.WriteLine("AppWindow_Closing: editor.ViewModel is null");
                     continue;
                 }
-                if (editor.ViewModel.IsDirty)
+                if (editor.ViewModel.IsDirty || editor.ViewModel.SaveCommand.IsRunning || editor.ViewModel.IsClosing || editor.ViewModel.IsPropertyBusy || editor.ViewModel.HasPendingEditorOperations)
                 {
                     args.Cancel = true;
                     isCancel = true;
@@ -339,7 +342,7 @@ public sealed partial class MainWindow : Window
             }
         }
 
-        if (isCancel)
+        if (isCancel || _viewModel.RentResidentialListingEditorList.Count > 0)
         {
             _isClosing = false;
             return;
@@ -354,7 +357,7 @@ public sealed partial class MainWindow : Window
                     Debug.WriteLine("AppWindow_Closing: editor.ViewModel is null");
                     continue;
                 }
-                if (editor.ViewModel.IsDirty)
+                if (editor.ViewModel.IsDirty || editor.ViewModel.IsSaving || editor.ViewModel.IsClosing || editor.ViewModel.IsPropertyBusy || editor.ViewModel.HasPendingEditorOperations || editor.ViewModel.UnsavedChildEditorList.Count > 0)
                 {
                     args.Cancel = true;
                     isCancel = true;
@@ -400,7 +403,7 @@ public sealed partial class MainWindow : Window
             }
         }
 
-        if (isCancel)
+        if (isCancel || _viewModel.RentResidentialEditorList.Count > 0)
         {
             _isClosing = false;
             return;
@@ -408,14 +411,14 @@ public sealed partial class MainWindow : Window
 
         if (_viewModel.RentCommercialListingEditorList.Count > 0)
         {
-            foreach (var editor in _viewModel.RentCommercialListingEditorList)
+            foreach (var editor in _viewModel.RentCommercialListingEditorList.ToList())
             {
                 if (editor.ViewModel is null)
                 {
                     Debug.WriteLine("AppWindow_Closing: editor.ViewModel is null");
                     continue;
                 }
-                if (editor.ViewModel.IsDirty)
+                if (editor.ViewModel.IsDirty || editor.ViewModel.SaveCommand.IsRunning || (editor.Content is Views.Rent.Commercials.Listing.ShellPage listingShell && listingShell.IsClosePending))
                 {
                     args.Cancel = true;
                     isCancel = true;
@@ -471,14 +474,14 @@ public sealed partial class MainWindow : Window
 
         if (_viewModel.RentCommercialEditorList.Count > 0)
         {
-            foreach (var editor in _viewModel.RentCommercialEditorList)
+            foreach (var editor in _viewModel.RentCommercialEditorList.ToList())
             {
                 if (editor.ViewModel is null)
                 {
                     Debug.WriteLine("AppWindow_Closing: editor.ViewModel is null");
                     continue;
                 }
-                if (editor.ViewModel.IsDirty)
+                if (editor.ViewModel.IsDirty || editor.ViewModel.IsSaving || editor.ViewModel.IsClosing || editor.ViewModel.HasPendingEditorOperations || editor.ViewModel.UnsavedChildEditorList.Count > 0)
                 {
                     args.Cancel = true;
                     isCancel = true;
@@ -661,6 +664,12 @@ public sealed partial class MainWindow : Window
 
         // Save window state and position, etc.
         await SaveSettingAsync();
+        await _viewModel.WaitForResidentialOperationsAsync();
+        if (_viewModel.RentResidentialEditorList.Count > 0 || _viewModel.RentResidentialListingEditorList.Count > 0)
+        {
+            _isClosing = false;
+            return;
+        }
 
         this.Close();
     }

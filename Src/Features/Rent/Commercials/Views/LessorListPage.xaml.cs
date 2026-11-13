@@ -15,7 +15,7 @@ public partial class PersonTemplateSelector : DataTemplateSelector
 
     protected override DataTemplate? SelectTemplateCore(object item)
     {
-        if (item is Models.Rent.Residentials.PersonWrapperForPropertyViewModel lessor)
+        if (item is Models.Rent.Commercials.PersonWrapperForPropertyViewModel lessor)
         {
             if (lessor.Person is Models.Person.NaturalPerson)
             {

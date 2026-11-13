@@ -134,98 +134,21 @@ public sealed partial class BasicPage : Page
     private async void TextBoxCleanNonDigitMax4_Paste(object sender, TextControlPasteEventArgs e)
     {
         e.Handled = true;
-
-        var textBox = sender as TextBox;
-        if (textBox == null) return;
-
-        var dataPackageView = Clipboard.GetContent();
-        if (dataPackageView.Contains(StandardDataFormats.Text))
-        {
-            // Fetch text asynchronously
-            string originalText = await dataPackageView.GetTextAsync();
-
-            string cleanedText = Helpers.Common.ReplaceZenkakuNumbers(originalText);
-
-            // Manually insert the manipulated text at the current cursor position
-            int selectionStart = textBox.SelectionStart;
-
-            // Remove any currently highlighted text before inserting
-            if (textBox.SelectionLength > 0)
-            {
-                textBox.Text = textBox.Text.Remove(selectionStart, textBox.SelectionLength);
-            }
-
-            // Inject the text
-            textBox.Text = textBox.Text.Insert(selectionStart, cleanedText);
-
-            // Move the caret forward to the end of your newly pasted text
-            textBox.SelectionStart = selectionStart + cleanedText.Length;
-
-            string pattern = @"^\d{5,}$"; // 5 or more digits
-            if (Regex.IsMatch(textBox.Text, pattern))
-            {
-                ((TextBox)sender).BorderBrush = new SolidColorBrush(Colors.Red);
-                return;
-            }
-
-            var regex = new Regex(@"^(?:\d{0,4})?$");
-            if (!regex.IsMatch(textBox.Text))
-            {
-                ((TextBox)sender).BorderBrush = new SolidColorBrush(Colors.Yellow);
-            }
-            else
-            {
-                ((TextBox)sender).BorderBrush = (App.Current.Resources["TextControlBorderBrush"] as Brush)!;
-            }
-        }
+        if (sender is TextBox textBox) await TrackPasteAsync(() => PasteNumericAsync(textBox));
     }
 
     private async void TextBoxCleanNonDigitMax5_Paste(object sender, TextControlPasteEventArgs e)
     {
         e.Handled = true;
+        if (sender is TextBox textBox) await TrackPasteAsync(() => PasteNumericAsync(textBox));
+    }
 
-        var textBox = sender as TextBox;
-        if (textBox == null) return;
-
-        var dataPackageView = Clipboard.GetContent();
-        if (dataPackageView.Contains(StandardDataFormats.Text))
+    private async Task PasteNumericAsync(TextBox textBox)
+    {
+        if (ViewModel is { } vm && !await Helpers.NumericPasteHelper.PasteAsync(textBox))
         {
-            // Fetch text asynchronously
-            string originalText = await dataPackageView.GetTextAsync();
-
-            string cleanedText = Helpers.Common.ReplaceZenkakuNumbers(originalText);
-
-            // Manually insert the manipulated text at the current cursor position
-            int selectionStart = textBox.SelectionStart;
-
-            // Remove any currently highlighted text before inserting
-            if (textBox.SelectionLength > 0)
-            {
-                textBox.Text = textBox.Text.Remove(selectionStart, textBox.SelectionLength);
-            }
-
-            // Inject the text
-            textBox.Text = textBox.Text.Insert(selectionStart, cleanedText);
-
-            // Move the caret forward to the end of your newly pasted text
-            textBox.SelectionStart = selectionStart + cleanedText.Length;
-
-            string pattern = @"^\d{6,}$"; // 6 or more digits
-            if (Regex.IsMatch(textBox.Text, pattern))
-            {
-                ((TextBox)sender).BorderBrush = new SolidColorBrush(Colors.Red);
-                return;
-            }
-
-            var regex = new Regex(@"^(?:\d{0,5})?$");
-            if (!regex.IsMatch(textBox.Text))
-            {
-                ((TextBox)sender).BorderBrush = new SolidColorBrush(Colors.Yellow);
-            }
-            else
-            {
-                ((TextBox)sender).BorderBrush = (App.Current.Resources["TextControlBorderBrush"] as Brush)!;
-            }
+            vm.InfoBarErrorMessage = $"貼り付ける値は0以上の{textBox.MaxLength}桁以内の整数にしてください。";
+            vm.IsInfoBarErrorOpen = true;
         }
     }
 
@@ -234,7 +157,7 @@ public sealed partial class BasicPage : Page
         e.Handled = true;
         if (sender is TextBox textBox)
         {
-            await PasteFudousanIdComponentAsync(textBox, allowLetters: true);
+            await TrackPasteAsync(() => PasteFudousanIdComponentAsync(textBox, allowLetters: true));
         }
     }
 
@@ -243,7 +166,27 @@ public sealed partial class BasicPage : Page
         e.Handled = true;
         if (sender is TextBox textBox)
         {
-            await PasteFudousanIdComponentAsync(textBox, allowLetters: false);
+            await TrackPasteAsync(() => PasteFudousanIdComponentAsync(textBox, allowLetters: false));
+        }
+    }
+
+    private async Task TrackPasteAsync(Func<Task> paste)
+    {
+        if (ViewModel is not { } vm) return;
+        vm.BeginPicker();
+        try
+        {
+            await paste();
+        }
+        catch (Exception ex) when (ex is System.Runtime.InteropServices.COMException or InvalidOperationException)
+        {
+            Debug.WriteLine($"Failed to paste clipboard text: {ex}");
+            vm.InfoBarErrorMessage = $"貼り付けできませんでした: {ex.Message}";
+            vm.IsInfoBarErrorOpen = true;
+        }
+        finally
+        {
+            vm.EndPicker();
         }
     }
 
@@ -289,7 +232,11 @@ public sealed partial class BasicPage : Page
     private async void TextBox_MaxLength_Paste(object sender, TextControlPasteEventArgs e)
     {
         e.Handled = true;
+        await TrackPasteAsync(() => PasteMaxLengthAsync(sender));
+    }
 
+    private static async Task PasteMaxLengthAsync(object sender)
+    {
         if (sender is TextBox textBox)
         {
             // 2. Grab the text payload from the clipboard
