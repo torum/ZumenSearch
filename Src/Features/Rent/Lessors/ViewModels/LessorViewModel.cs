@@ -362,7 +362,6 @@ public sealed partial class LessorViewModel : ObservableRecipient, IDisposable
             return;
         }
 
-
         Remarks = _lessorBase.Remarks;
     }
 
@@ -455,12 +454,7 @@ public sealed partial class LessorViewModel : ObservableRecipient, IDisposable
             legalPerson.NameCompanyTypePosition = NameCompanyTypePosition;
         }
 
-
         newLessor.Remarks = Remarks;
-
-        // TODO: Set other properties
-        // TODO: Don't forget to check if Helpers.Common.ReplaceZenkakuNumbers is needed.
-
 
         _lessorBase = newLessor;
     }

@@ -11,7 +11,7 @@ namespace ZumenSearch.Models.Base;
 // </remarks>
 public abstract class PictureBase : EntityBase
 {
-    protected PictureBase(string id, EntityStatus staus) : base(id, staus)
+    protected PictureBase(string id, EntityStatus status) : base(id, status)
     {
         //
     }
@@ -28,17 +28,25 @@ public abstract class PictureBase : EntityBase
 
     public string BasePath { get; set; } = string.Empty;
 
-    public string? ThumbImagePath => GetThumbImagePath();
-
-    private string? GetThumbImagePath()
+    public string? ThumbImagePath
     {
-        if (string.IsNullOrWhiteSpace(ImageFilename) || string.IsNullOrWhiteSpace(BasePath))
+        get
         {
-            return null;
-        }
+            if (string.IsNullOrWhiteSpace(ImageFilename) || string.IsNullOrWhiteSpace(BasePath))
+            {
+                field = null;
+                return field;
+            }
 
-        var imagePath = Path.Combine(BasePath, ImageFilename);
-        return Path.Exists(imagePath) ? imagePath : null;
+            var imagePath = Path.Combine(BasePath, ImageFilename);
+            field = Path.Exists(imagePath) ? imagePath : null;
+            return field;
+        }
+        set
+        {
+            field = value;
+            IsModified = true;
+        }
     }
 
 };

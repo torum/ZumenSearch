@@ -22,15 +22,7 @@ using ZumenSearch.Views.Services.Contracts;
 
 namespace ZumenSearch.ViewModels.Rent.Residentials;
 
-public sealed partial class PropertyViewModel : ObservableRecipient, 
-    IRecipient<ListingUpdatedMessage>, 
-    IRecipient<WindowClosedMessage<Microsoft.UI.Xaml.Window>>, 
-    IRecipient<ListingDeletedMessage>,
-    IRecipient<LessorUpdatedMessage>,
-    IRecipient<BrokerUpdatedMessage>,
-    IRecipient<LessorDeletedMessage>,
-    IRecipient<BrokerDeletedMessage>,
-    IDisposable
+public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<ListingUpdatedMessage>, IRecipient<WindowClosedMessage<Microsoft.UI.Xaml.Window>>, IRecipient<ListingDeletedMessage>, IRecipient<LessorUpdatedMessage>, IRecipient<BrokerUpdatedMessage>, IRecipient<LessorDeletedMessage>, IRecipient<BrokerDeletedMessage>, IDisposable
 {
     #region == Private variables and const ==
 
@@ -44,36 +36,18 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     private readonly string _propertyDataDirectoryPath = string.Empty;
 
-    // Keeps truck of "New" child window because it saves to the parent window/viewmodel.
-    public List<Views.Rent.Residentials.Listing.EditorWindow> UnsavedChildEditorList { get;} = [];
-
     // Tmp file list to hold unsaved picture files. (if entry is not saved, delete on close)
     private readonly List<string> _unsavedBuildingPictureFileList = [];
     private readonly List<string> _unsavedBuildingPdfFileList = [];
     private readonly List<string> _unsavedBuildingPdfThumbnailFileList = [];
+
     // Tmp listing list to hold unsaved listing where listing reside here while property is not yet saved. (if entry is not saved, delete on close)
     private readonly List<Listing> _unsavedListingList = [];
 
-    //private readonly List<string> _pendingBuildingPdfCleanupFiles = [];
-    // Failed listing file deletions remain with the property editor for retry.
-    //private readonly List<string> _pendingListingPdfCleanupFiles = [];
-    //private readonly Dictionary<string, ResidentialListingDraft> _pendingListingDrafts = new(StringComparer.Ordinal);
-    //private readonly Dictionary<string, ResidentialListingDraft> _committedListingDrafts = new(StringComparer.Ordinal);
-    //private readonly Dictionary<string, (List<ListingPicture> Pictures, List<ListingPdf> Pdfs, List<Models.Base.PersonBase> Lessors, List<Models.Base.PersonBase> Brokers)> _pendingListingObjects = new(StringComparer.Ordinal);
-    //private readonly Dictionary<string, HashSet<string>> _supersededDraftFiles = new(StringComparer.Ordinal);
-    //private readonly HashSet<string> _stagedListingDeletions = new(StringComparer.Ordinal);
-    //private readonly HashSet<string> _stagedPendingListingDeletions = new(StringComparer.Ordinal);
-    //private readonly HashSet<string> _pendingListingDirectoryCleanup = new(StringComparer.Ordinal);
-    //private readonly List<string> _incompleteAttachmentFiles = [];
-    //private List<Models.Rent.Residentials.PropertyPdf> _committedBuildingPdfs = [];
-    //private bool _hasPendingFileCleanupAfterSave;
     private bool _discardPending;
     private bool _isClosing;
     private bool _propertyBusy;
-    //private bool _committedUnitOwnership;
-    //private int _ownershipVersion;
-    //private int _pendingPickers;
-    //private TaskCompletionSource? _pickersCompleted;
+
     private readonly Queue<Action> _deferredMessages = new();
 
     private readonly CancellationTokenSource _cts = new();
@@ -92,14 +66,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     #endregion
 
-    public PropertyViewModel(
-        Models.Rent.Residentials.Property building, 
-        INavigationGenericService navigationService,
-        IDialogGenericService dialogService,
-        IAbstractFactory<Models.Rent.Residentials.Listing, Views.Rent.Residentials.Listing.ShellPage> shellFactory, 
-        IDispatcherService dispatcherService, 
-        IDataAccessService dataAccessService, 
-        IDataAccessLocationService dataAccessLocationService)
+    public PropertyViewModel(Models.Rent.Residentials.Property building, INavigationGenericService navigationService, IDialogGenericService dialogService, IAbstractFactory<Models.Rent.Residentials.Listing, Views.Rent.Residentials.Listing.ShellPage> shellFactory, IDispatcherService dispatcherService, IDataAccessService dataAccessService, IDataAccessLocationService dataAccessLocationService)
     {
         _building = building;
         _id = building.Id;
@@ -150,6 +117,19 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SaveCommand))]
     public partial bool IsDirty { get; private set; }
+
+    // Keeps truck of "New" child window because it saves to the parent window/viewmodel.
+    public List<Views.Rent.Residentials.Listing.EditorWindow> UnsavedChildEditorList { get; } = [];
+
+    // TODO: Need to review following properties. 
+    public bool IsSaving { get; private set; }
+    public bool IsClosing => _isClosing;
+    public bool IsPropertyBusy => _propertyBusy;
+    public bool IsDiscardPending => _discardPending;
+    public bool IsEditorEnabled => !IsSaving && !_isClosing && !_propertyBusy && !_discardPending;
+    //public bool HasPendingEditorOperations => _pendingPickers > 0 || PendingEditorTasks().Count > 0;
+    public bool HasPendingEditorOperations => IsEditorEnabled;//tmp
+
 
     #region == 画面表示関連 ==
 
@@ -2415,26 +2395,6 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     #region == Public Methods ==
 
-    public bool IsSaving { get; private set; }
-    public bool IsClosing => _isClosing;
-    public bool IsPropertyBusy => _propertyBusy;
-    public bool IsDiscardPending => _discardPending;
-    public bool IsEditorEnabled => !IsSaving && !_isClosing && !_propertyBusy && !_discardPending;
-    //public bool HasPendingEditorOperations => _pendingPickers > 0 || PendingEditorTasks().Count > 0;
-    public bool HasPendingEditorOperations => IsEditorEnabled;//tmp
-    //public bool HasUncommittedOwnershipChange => IsUnitLevelOwnership != _committedUnitOwnership;
-    //public bool IsListingPendingDeletion(string listingId) => _stagedListingDeletions.Contains(listingId) || _stagedPendingListingDeletions.Contains(listingId);
-    //public ResidentialListingDraft? GetPendingListingDraft(string listingId) => _pendingListingDrafts.GetValueOrDefault(listingId);
-    //public ResidentialListingDraft? GetCommittedListingDraft(string listingId) => _committedListingDrafts.GetValueOrDefault(listingId);
-
-    /*
-    public void SetListingSummaries(IEnumerable<ListingSummary> summaries)
-    {
-        Rooms = new ObservableCollection<ListingSummary>(summaries);
-        IsDirty = false;
-    }
-    */
-
     public void SetPropertyBusy(bool value)
     {
         _propertyBusy = value;
@@ -2506,20 +2466,16 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         _discardPending = true;
         OnPropertyChanged(nameof(IsEditorEnabled));
         SaveCommand.NotifyCanExecuteChanged();
-        /*
-        if (!DiscardUnsavedFiles())
-        {
-            ShowInputValidationError($"{InfoBarErrorMessage} 破棄を完了するには、もう一度画面を閉じてください。");
-            return false;
-        }
-        */
+
+        bool result = DiscardUnsavedFiles();
 
         // Need to restore the original values from unsaved _building because IsUnitLevelOwnership change is real-time not save-time update.
         WeakReferenceMessenger.Default.Send(new PropertyIsUnitOwnershipChangedMessage(_id, _building.IsUnitLevelOwnership));
 
         _discardPending = false;
         IsDirty = false;
-        return true;
+
+        return result;
     }
 
     public void Dispose()
@@ -2736,10 +2692,9 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         KanriRemarkIfIsKanriTasya = _building.KanriRemarkIfIsKanriTasya;
         KanriRemarkIfIsKanriKashinushi = _building.KanriRemarkIfIsKanriKashinushi;
 
-        // Pictures:
-
+        // Pictures:(don't use directly)
+        /*
         Pictures = new ObservableCollection<Models.Rent.Residentials.PropertyPicture>(_building.Pictures); // create a copy.
-
         foreach (var item in Pictures)
         {
             // Filename to actuall path.
@@ -2747,6 +2702,23 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             item.ParentViewModel = this;
             item.SetIsModified(false); // Needed this.
             item.PropertyChanged += OnBuildingPicturePropertyChanged;
+        }
+        */
+        Pictures.Clear();
+        foreach (var item in _building.Pictures)
+        {
+            var internalItem = new PropertyPicture(item.Id, item.ImageFilename, item.Status)
+            {
+                IsMain = item.IsMain,
+                PictureType = item.PictureType,
+                Description = item.Description,
+                ThumbImagePath = item.ThumbImagePath,
+                BasePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id),
+                ParentViewModel = this
+            };
+            internalItem.SetIsModified(false); // Needed this.
+            internalItem.PropertyChanged += OnBuildingPicturePropertyChanged;
+            Pictures.Add(internalItem);
         }
 
         Pictures.CollectionChanged += (s, e) =>
@@ -2777,8 +2749,52 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         };
 
         // PDFs
+        /*
         Pdfs = new ObservableCollection<Models.Rent.Residentials.PropertyPdf>(_building.Pdfs);
-        ConfigureBuildingPdfCollection(Pdfs);
+        foreach (var item in Pdfs)
+        {
+            item.BasePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id);
+            item.ParentViewModel = this;
+            item.SetIsModified(false);
+            item.PropertyChanged += OnBuildingPdfPropertyChanged;
+        }
+        */
+        Pdfs.Clear();
+        foreach (var item in _building.Pdfs)
+        {
+            var internalItem = new PropertyPdf(item.Id, item.PdfFilename, item.ThumbnailFilename, item.Status)
+            {
+                IsMain = item.IsMain,
+                PdfType = item.PdfType,
+                Description = item.Description,
+                BasePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id),
+                ParentViewModel = this
+            };
+            internalItem.SetIsModified(false);
+            internalItem.PropertyChanged += OnBuildingPdfPropertyChanged;
+            Pdfs.Add(internalItem);
+        }
+
+        Pdfs.CollectionChanged += (sender, args) =>
+        {
+            if (args.OldItems is not null)
+            {
+                foreach (Models.Rent.Residentials.PropertyPdf item in args.OldItems)
+                {
+                    IsDirty = true;
+                    item.PropertyChanged -= OnBuildingPdfPropertyChanged;
+                }
+            }
+
+            if (args.NewItems is not null)
+            {
+                foreach (Models.Rent.Residentials.PropertyPdf item in args.NewItems)
+                {
+                    IsDirty = true;
+                    item.PropertyChanged += OnBuildingPdfPropertyChanged;
+                }
+            }
+        };
 
         // Lessors
         LessorsWrapper = [];
@@ -2827,38 +2843,6 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                 }
             }
         }
-    }
-
-    private void ConfigureBuildingPdfCollection(ObservableCollection<Models.Rent.Residentials.PropertyPdf> pdfs)
-    {
-        foreach (var item in pdfs)
-        {
-            item.BasePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id);
-            item.ParentViewModel = this;
-            item.SetIsModified(false);
-            item.PropertyChanged += OnBuildingPdfPropertyChanged;
-        }
-
-        pdfs.CollectionChanged += (sender, args) =>
-        {
-            if (args.OldItems is not null)
-            {
-                foreach (Models.Rent.Residentials.PropertyPdf item in args.OldItems)
-                {
-                    IsDirty = true;
-                    item.PropertyChanged -= OnBuildingPdfPropertyChanged;
-                }
-            }
-
-            if (args.NewItems is not null)
-            {
-                foreach (Models.Rent.Residentials.PropertyPdf item in args.NewItems)
-                {
-                    IsDirty = true;
-                    item.PropertyChanged += OnBuildingPdfPropertyChanged;
-                }
-            }
-        };
     }
 
     private void OnBuildingPdfPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -3211,7 +3195,23 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         _building.BasePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id);
 
         // 写真
-        _building.Pictures = Pictures;
+        //_building.Pictures = Pictures;
+        _building.Pictures.Clear();
+        foreach (var item in Pictures)
+        {
+            var newItem = new PropertyPicture(item.Id, item.ImageFilename, item.Status)
+            {
+                IsMain = item.IsMain,
+                PictureType = item.PictureType,
+                Description = item.Description,
+                ThumbImagePath = item.ThumbImagePath,
+                BasePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id),
+                ParentViewModel = this
+            };
+            newItem.SetIsModified(item.IsModified); // Needed this.
+            _building.Pictures.Add(newItem);
+        }
+
         var thumbImg = Pictures.FirstOrDefault(i => i.IsMain == true);
         if (thumbImg is not null)
         {
@@ -3220,7 +3220,22 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         }
 
         // 図面
-        _building.Pdfs = Pdfs;
+        //_building.Pdfs = Pdfs;
+        _building.Pdfs.Clear();
+        foreach (var item in Pdfs)
+        {
+            var newItem = new PropertyPdf(item.Id, item.PdfFilename, item.ThumbnailFilename, item.Status)
+            {
+                IsMain = item.IsMain,
+                PdfType = item.PdfType,
+                Description = item.Description,
+                BasePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id),
+                ParentViewModel = this
+            };
+            newItem.SetIsModified(false);
+            _building.Pdfs.Add(newItem);
+        }
+
         if (string.IsNullOrWhiteSpace(_building.ThumbnailFilename))
         {
             var thumbPdf = Pdfs.FirstOrDefault(i => i.IsMain);
@@ -3238,13 +3253,13 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         foreach (var item in LessorsWrapper)
         {
             _building.Lessors.Add(item.Person);
-            foreach (var deleted in _building.LessorsToBeDeleted.Where(person => person.Id == item.Person.Id).ToList()) _building.LessorsToBeDeleted.Remove(deleted);
+            //foreach (var deleted in _building.LessorsToBeDeleted.Where(person => person.Id == item.Person.Id).ToList()) _building.LessorsToBeDeleted.Remove(deleted);
         }
         _building.Brokers.Clear();
         foreach (var item in BrokersWrapper)
         {
             _building.Brokers.Add(item.Person);
-            foreach (var deleted in _building.BrokersToBeDeleted.Where(person => person.Id == item.Person.Id).ToList()) _building.BrokersToBeDeleted.Remove(deleted);
+            //foreach (var deleted in _building.BrokersToBeDeleted.Where(person => person.Id == item.Person.Id).ToList()) _building.BrokersToBeDeleted.Remove(deleted);
         }
 
         _building.ListingsToBeSaved = _unsavedListingList;
@@ -3252,52 +3267,13 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         return true;
     }
 
-    /*
-    public bool CleanIncompleteAttachments()
-    {
-        var failures = new List<string>();
-        
-        var savedBuildingPdfPaths = _committedBuildingPdfs.SelectMany(pdf => new[]
-        {
-            Path.Combine(App.PropertyBlobDataFolder, _building.Id, pdf.PdfFilename),
-            Path.Combine(App.PropertyBlobDataFolder, _building.Id, pdf.ThumbnailFilename)
-        }).ToHashSet(StringComparer.OrdinalIgnoreCase);
-        
-        _pendingBuildingPdfCleanupFiles.RemoveAll(savedBuildingPdfPaths.Contains);
-        
-        DeleteTrackedFiles(_incompleteAttachmentFiles, failures);
-        DeleteTrackedFiles(_pendingBuildingPdfCleanupFiles, failures);
-        
-        if (failures.Count == 0) return true;
-        
-        ShowAttachmentError($"読み込みまたは破棄した図面ファイルを削除できませんでした: {string.Join(", ", failures)}");
-
-        return false;
-    }
-    */
-
-    /*
     private bool DiscardUnsavedFiles()
     {
-        if (!CleanIncompleteAttachments()) return false;
-        
         var failures = new List<string>();
-        
-        DeleteTrackedFiles(_unsavedBuildingPictureFileList, failures);
-        
-        var savedBuildingPdfPaths = _committedBuildingPdfs.SelectMany(pdf => new[]
-        {
-            Path.Combine(App.PropertyBlobDataFolder, _building.Id, pdf.PdfFilename),
-            Path.Combine(App.PropertyBlobDataFolder, _building.Id, pdf.ThumbnailFilename)
-        }).ToHashSet(StringComparer.OrdinalIgnoreCase);
-        
-        _unsavedBuildingPdfFileList.RemoveAll(savedBuildingPdfPaths.Contains);
-        _unsavedBuildingPdfThumbnailFileList.RemoveAll(savedBuildingPdfPaths.Contains);
-        _pendingBuildingPdfCleanupFiles.RemoveAll(savedBuildingPdfPaths.Contains);
 
+        DeleteTrackedFiles(_unsavedBuildingPictureFileList, failures);
         DeleteTrackedFiles(_unsavedBuildingPdfThumbnailFileList, failures);
         DeleteTrackedFiles(_unsavedBuildingPdfFileList, failures);
-        DeleteTrackedFiles(_pendingBuildingPdfCleanupFiles, failures);
 
         if (_building.Status == EntityStatus.New && Directory.Exists(_propertyDataDirectoryPath))
         {
@@ -3317,51 +3293,9 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             return true;
         }
 
-        ShowInputValidationError($"変更の破棄中にファイルを削除できませんでした。ファイルを閉じてから再試行してください: {string.Join(", ", failures)}");
+        ShowSimpleErrorInfoBar($"変更の破棄中に一時ファイルを削除できませんでした: {string.Join(", ", failures)}");
         return false;
     }
-    */
-
-    /*
-    private IEnumerable<string> GetDraftAttachmentFiles(ResidentialListingDraft draft)
-    {
-        var directory = Path.Combine(_propertyDataDirectoryPath, draft.Id);
-        return draft.Pictures.Concat(draft.PicturesToBeDeleted).Select(picture => Path.Combine(directory, picture.ImageFilename))
-            .Concat(draft.Pdfs.Concat(draft.PdfsToBeDeleted).SelectMany(pdf => new[] { Path.Combine(directory, pdf.PdfFilename), Path.Combine(directory, pdf.ThumbnailFilename) }));
-    }
-    */
-
-    /*
-    private void CleanupListingFiles(List<string> failures)
-    {
-        var editors = App.GetService<ViewModels.MainViewModel>().RentResidentialListingEditorList.Where(editor => editor.PropertyId == _id).ToList();
-        foreach (var file in _pendingListingPdfCleanupFiles.ToList())
-        {
-            if (editors.Any(editor => editor.ViewModel?.ReferencesAttachmentFile(file) == true)) continue;
-            if (TryDeleteFiles(new[] { file }, failures)) _pendingListingPdfCleanupFiles.Remove(file);
-        }
-    }
-    */
-
-    /*
-    private void CleanupListingDirectories(List<string> failures)
-    {
-        foreach (var listingId in _pendingListingDirectoryCleanup.ToList())
-        {
-            var path = Path.Combine(_propertyDataDirectoryPath, listingId);
-            try
-            {
-                if (Directory.Exists(path)) Directory.Delete(path, true);
-                _pendingListingDirectoryCleanup.Remove(listingId);
-            }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-            {
-                Debug.WriteLine($"Failed to delete listing directory '{path}': {ex}");
-                failures.Add(path);
-            }
-        }
-    }
-    */
 
     private static void DeleteTrackedFiles(List<string> trackedFiles, List<string> failures)
     {

@@ -272,9 +272,8 @@ public sealed partial class Property : PropertyBase
     // 物件リスト（建物）に属する募集物件（部屋）のサマリーリスト（一覧表示用）
     public ObservableCollection<ListingSummary> ListingSummaries { get; } = [];
 
-    // TODO: make it a just a List<>
     // DBへの更新時にDBから削除されるべき部屋のIDリスト
-    public ObservableCollection<string> ListingsToBeDeleted { get; set; } = [];
+    public List<string> ListingsToBeDeleted { get; set; } = [];
 
     // 物件写真（建物）リスト
     public ObservableCollection<PropertyPicture> Pictures
@@ -287,9 +286,8 @@ public sealed partial class Property : PropertyBase
         }
     } = [];
 
-    // TODO: make it a just a List<>
     // DBへの更新時にDBから削除されるべき物件写真（建物）のIDリスト
-    public ObservableCollection<PropertyPicture> PicturesToBeDeleted { get; set; } = [];
+    public List<PropertyPicture> PicturesToBeDeleted { get; set; } = [];
 
     // 図面（建物）リスト
     public ObservableCollection<PropertyPdf> Pdfs
@@ -302,9 +300,8 @@ public sealed partial class Property : PropertyBase
         }
     } = [];
 
-    // TODO: make it a just a List<>
     // DBへの更新時にDBから削除されるべき図面のIDリスト
-    public ObservableCollection<PropertyPdf> PdfsToBeDeleted { get; set; } = [];
+    public List<PropertyPdf> PdfsToBeDeleted { get; set; } = [];
 
     // 貸主のリスト
     public ObservableCollection<Models.Base.PersonBase> Lessors
@@ -317,9 +314,8 @@ public sealed partial class Property : PropertyBase
         }
     } = [];
 
-    // TODO: make it a just a List<>
     // DBへの更新時にDBから削除されるべき貸主のIDリスト
-    public ObservableCollection<Models.Base.PersonBase> LessorsToBeDeleted { get; set; } = [];
+    public List<Models.Base.PersonBase> LessorsToBeDeleted { get; set; } = [];
 
 
     // 宅建業者のリスト
@@ -333,9 +329,8 @@ public sealed partial class Property : PropertyBase
         }
     } = [];
 
-    // TODO: make it a just a List<>
     // DBへの更新時にDBから削除されるべき宅建業者のIDリスト
-    public ObservableCollection<Models.Base.PersonBase> BrokersToBeDeleted { get; set; } = [];
+    public List<Models.Base.PersonBase> BrokersToBeDeleted { get; set; } = [];
 
     #endregion
 
@@ -549,13 +544,13 @@ public sealed partial class Property : PropertyBase
     public void SetElectricDetail(string value) => ElectricDetail = value;
 
     public void SetPictures(ObservableCollection<PropertyPicture> value) => Pictures = value;
-    public void SetPicturesToBeDeleted(ObservableCollection<PropertyPicture> value) => PicturesToBeDeleted = value;
+    public void SetPicturesToBeDeleted(List<PropertyPicture> value) => PicturesToBeDeleted = value;
     public void SetPdfs(ObservableCollection<PropertyPdf> value) => Pdfs = value;
-    public void SetPdfsToBeDeleted(ObservableCollection<PropertyPdf> value) => PdfsToBeDeleted = value;
+    public void SetPdfsToBeDeleted(List<PropertyPdf> value) => PdfsToBeDeleted = value;
     public void SetLessors(ObservableCollection<PersonBase> value) => Lessors = value;
-    public void SetLessorsToBeDeleted(ObservableCollection<PersonBase> value) => LessorsToBeDeleted = value;
+    public void SetLessorsToBeDeleted(List<PersonBase> value) => LessorsToBeDeleted = value;
     public void SetBrokers(ObservableCollection<PersonBase> value) => Brokers = value;
-    public void SetBrokersToBeDeleted(ObservableCollection<PersonBase> value) => BrokersToBeDeleted = value;
+    public void SetBrokersToBeDeleted(List<PersonBase> value) => BrokersToBeDeleted = value;
 
     #endregion
 

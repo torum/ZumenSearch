@@ -16,22 +16,15 @@ using ZumenSearch.Views.Services.Contracts;
 
 namespace ZumenSearch.ViewModels.Rent.Residentials;
 
-public sealed partial class ListingViewModel : ObservableRecipient, 
-    IRecipient<PropertyUpdatedMessage>, 
-    IRecipient<PropertyIsUnitOwnershipChangedMessage>,
-    IRecipient<LessorUpdatedMessage>,
-    IRecipient<BrokerUpdatedMessage>,
-    IRecipient<LessorDeletedMessage>,
-    IRecipient<BrokerDeletedMessage>, 
-    IDisposable
+public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<PropertyUpdatedMessage>, IRecipient<PropertyIsUnitOwnershipChangedMessage>, IRecipient<LessorUpdatedMessage>, IRecipient<BrokerUpdatedMessage>, IRecipient<LessorDeletedMessage>, IRecipient<BrokerDeletedMessage>, IDisposable
 {
     #region == Private variables ==
 
     private const string BasicPageName = "ZumenSearch.Views.Rent.Residentials.Listing.BasicPage";
     private readonly string _id = string.Empty;
 
-    // This property holds the COPY of current entity being edited.
-    // Do not use it directly in the UI. Apply changes to this object in Save() to save the changes.
+    // This object is the actual entity being edited and sent to DataAccessService and other window.
+    // Populate values on Loading and apply changes to this object in Save().
     private readonly Models.Rent.Residentials.Listing _room;
 
     private readonly string _listingDataDirectoryPath = string.Empty;
@@ -40,16 +33,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
     private readonly List<string> _unsavedRoomPictureFileList = [];
     private readonly List<string> _unsavedRoomPdfFileList = [];
     private readonly List<string> _unsavedRoomPdfThumbnailFileList = [];
-    private readonly List<string> _pendingRoomPdfCleanupFiles = [];
-    private readonly List<string> _incompleteAttachmentFiles = [];
-    private readonly HashSet<string> _committedAttachmentPaths = new(StringComparer.OrdinalIgnoreCase);
-    private readonly List<Models.Base.PersonBase> _draftLessorDeletions = [];
-    private readonly List<Models.Base.PersonBase> _draftBrokerDeletions = [];
-    //private int _ownershipVersion;
-    //private bool _hasPendingFileCleanupAfterSave;
-    //private bool _discardPending;
-    //private bool _handedOffToNewParent;
-    //private bool _pendingHandoffReady;
+
     private bool _disposed;
     private bool _isClosing;
     private bool _propertyBusy;
@@ -70,18 +54,10 @@ public sealed partial class ListingViewModel : ObservableRecipient,
 
     #endregion
 
-    public ListingViewModel(
-        Models.Rent.Residentials.Listing room, 
-        INavigationGenericService navigationService,
-        IDialogGenericService dialogService,
-        IDispatcherService dispatcherService, 
-        IDataAccessService dataAccessService)
+    public ListingViewModel(Models.Rent.Residentials.Listing room, INavigationGenericService navigationService, IDialogGenericService dialogService, IDispatcherService dispatcherService, IDataAccessService dataAccessService)
     {
         _room = room;
         _id = room.Id;
-
-        //var parent = App.GetService<ViewModels.MainViewModel>().RentResidentialEditorList.FirstOrDefault(editor => editor.Id == room.PropertyId)?.ViewModel;
-        //_handedOffToNewParent = _room.Status == EntityStatus.New && parent?.GetPendingListingDraft(room.Id) is not null;
 
         _navigationService = navigationService; // _navigationService.NavigateTo("ZumenSearch.Views.Rent.Residentials.RoomListPage", this, new DrillInNavigationTransitionInfo());
         _dialogService = dialogService;
@@ -90,7 +66,6 @@ public sealed partial class ListingViewModel : ObservableRecipient,
         _dataAccessService = dataAccessService;
 
         _listingDataDirectoryPath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _room.PropertyId, _room.Id);
-        //if (_room.Status != EntityStatus.New) CaptureCommittedAttachments(ResidentialListingDraft.FromListing(_room));
 
         PopulateValues();
 
@@ -129,6 +104,15 @@ public sealed partial class ListingViewModel : ObservableRecipient,
             }
         }
     }
+
+    // TODO: Consider removing following properties. 
+    public bool IsSaving { get; private set; }
+    public bool IsClosing => _isClosing;
+    public bool IsPropertyBusy => _propertyBusy;
+    //public bool IsDiscardPending => _discardPending;
+    public bool IsEditorEnabled => !IsSaving && !_propertyBusy && !_isClosing;// && !_discardPending;
+    //public bool HasPendingEditorOperations => _pendingPickers > 0 || PendingEditorTasks().Count > 0;
+    public bool HasPendingEditorOperations => IsEditorEnabled;//tmp
 
     #endregion
 
@@ -604,6 +588,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
         _room.SetPropertyStatus(building.Status);
         _room.SetPropertyName(building.Name);
         SetOwnershipVisibility(building.IsUnitLevelOwnership);
+
         // Update window title with dummy string.
         WindowTitle = string.Empty;
 
@@ -686,14 +671,14 @@ public sealed partial class ListingViewModel : ObservableRecipient,
     public void Receive(PropertyIsUnitOwnershipChangedMessage isUnitOwnership)
     {
         if (!string.Equals(isUnitOwnership.PropertyId, _room.PropertyId, StringComparison.Ordinal)) return;
+
         if (DeferMessage(() => Receive(isUnitOwnership))) return;
+        
         SetOwnershipVisibility(isUnitOwnership.Value);
     }
 
     public void SetOwnershipVisibility(bool isUnitOwnership)
     {
-        var ownershipChanged = IsPropertyUnitLevelOwnership != isUnitOwnership;
-        //if (ownershipChanged) _ownershipVersion++;
         IsPropertyUnitLevelOwnership = isUnitOwnership;
         _room.SetIsPropertyUnitLevelOwnership(isUnitOwnership);
 
@@ -747,14 +732,6 @@ public sealed partial class ListingViewModel : ObservableRecipient,
     #endregion
 
     #region == Public Methods ==
-
-    public bool IsSaving { get; private set; }
-    public bool IsClosing => _isClosing;
-    public bool IsPropertyBusy => _propertyBusy;
-    //public bool IsDiscardPending => _discardPending;
-    public bool IsEditorEnabled => !IsSaving && !_propertyBusy && !_isClosing;// && !_discardPending;
-    //public bool HasPendingEditorOperations => _pendingPickers > 0 || PendingEditorTasks().Count > 0;
-    public bool HasPendingEditorOperations => IsEditorEnabled;//tmp
 
     /*
     public void BeginPicker()
@@ -886,39 +863,6 @@ public sealed partial class ListingViewModel : ObservableRecipient,
     #endregion
 
     #region == Private Methods ==
-
-    /*
-    private IEnumerable<string> AttachmentPaths(ResidentialListingDraft draft, bool includeDeleted)
-    {
-        var pictures = includeDeleted ? draft.Pictures.Concat(draft.PicturesToBeDeleted) : draft.Pictures;
-        var pdfs = includeDeleted ? draft.Pdfs.Concat(draft.PdfsToBeDeleted) : draft.Pdfs;
-        return pictures.Select(item => Path.Combine(_listingDataDirectoryPath, item.ImageFilename))
-            .Concat(pdfs.SelectMany(item => new[] { Path.Combine(_listingDataDirectoryPath, item.PdfFilename), Path.Combine(_listingDataDirectoryPath, item.ThumbnailFilename) }));
-    }
-
-    private void CaptureCommittedAttachments(ResidentialListingDraft draft)
-    {
-        _committedAttachmentPaths.Clear();
-        _committedAttachmentPaths.UnionWith(AttachmentPaths(draft, false));
-    }
-
-    private HashSet<string> ProtectedAttachmentPaths()
-    {
-        var paths = new HashSet<string>(_committedAttachmentPaths, StringComparer.OrdinalIgnoreCase);
-        var parent = App.GetService<ViewModels.MainViewModel>().RentResidentialEditorList.FirstOrDefault(editor => editor.Id == _room.PropertyId)?.ViewModel;
-        if (parent?.GetPendingListingDraft(_id) is { } pending) paths.UnionWith(AttachmentPaths(pending, true));
-        return paths;
-    }
-
-    public bool ReferencesAttachmentFile(string path)
-    {
-        if (string.IsNullOrWhiteSpace(path)) return false;
-        return Pictures.Any(item => Path.Combine(_listingDataDirectoryPath, item.ImageFilename).Equals(path, StringComparison.OrdinalIgnoreCase)) ||
-            Pdfs.Any(item => Path.Combine(_listingDataDirectoryPath, item.PdfFilename).Equals(path, StringComparison.OrdinalIgnoreCase) || Path.Combine(_listingDataDirectoryPath, item.ThumbnailFilename).Equals(path, StringComparison.OrdinalIgnoreCase)) ||
-            _unsavedRoomPictureFileList.Contains(path, StringComparer.OrdinalIgnoreCase) || _unsavedRoomPdfFileList.Contains(path, StringComparer.OrdinalIgnoreCase) ||
-            _unsavedRoomPdfThumbnailFileList.Contains(path, StringComparer.OrdinalIgnoreCase) || _incompleteAttachmentFiles.Contains(path, StringComparer.OrdinalIgnoreCase);
-    }
-    */
 
     private void SetContractValue<T>(ref T storage, T value, [System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
     {
@@ -1138,24 +1082,56 @@ public sealed partial class ListingViewModel : ObservableRecipient,
         _room.SetTenantBrokerCommissionUnitTypeLabel(SelectedTenantBrokerCommissionUnit);
         _room.SetTransactionRemarks(TransactionRemarks);
 
-        _room.Pictures = Pictures;
-        _room.Pdfs = Pdfs;
+        // Recreate the Pictures collection in _room to ensure it matches the current Pictures collection in the ViewModel.
+        //_room.Pictures = Pictures;
+        _room.Pictures.Clear();
+        foreach (var item in Pictures)
+        {
+            var newItem = new ListingPicture(item.Id, item.ImageFilename, item.Status)
+            {
+                IsMain = item.IsMain,
+                PictureType = item.PictureType,
+                Description = item.Description,
+                ThumbImagePath = item.ThumbImagePath,
+                BasePath = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(App.PropertyBlobDataFolder, _room.PropertyId), _room.Id)),
+                ParentViewModel = this
+            };
+            newItem.SetIsModified(item.IsModified); // Needed this.
+            _room.Pictures.Add(newItem);
+        }
+
+        // Recreate the Pdfs collection in _room to ensure it matches the current Pdfs collection in the ViewModel.
+        //_room.Pdfs = Pdfs;
+        _room.Pdfs.Clear();
+        foreach (var item in Pdfs)
+        {
+            var newItem = new ListingPdf(item.Id, item.PdfFilename, item.ThumbnailFilename, item.Status)
+            {
+                IsMain = item.IsMain,
+                PdfType = item.PdfType,
+                Description = item.Description,
+                BasePath = _listingDataDirectoryPath,
+                ParentViewModel = this
+            };
+            newItem.SetIsModified(false);
+            newItem.PropertyChanged += OnPdfPropertyChanged;
+            _room.Pdfs.Add(newItem);
+        }
 
         _room.Lessors.Clear();
-        _room.Brokers.Clear();
         foreach (var wrapper in LessorsWrapper)
         {
             _room.Lessors.Add(wrapper.Person);
-            foreach (var deleted in _room.LessorsToBeDeleted.Where(person => person.Id == wrapper.Person.Id).ToList()) _room.LessorsToBeDeleted.Remove(deleted);
+            //foreach (var deleted in _room.LessorsToBeDeleted.Where(person => person.Id == wrapper.Person.Id).ToList()) _room.LessorsToBeDeleted.Remove(deleted);
         }
+        _room.Brokers.Clear();
         foreach (var wrapper in BrokersWrapper)
         {
             _room.Brokers.Add(wrapper.Person);
-            foreach (var deleted in _room.BrokersToBeDeleted.Where(person => person.Id == wrapper.Person.Id).ToList()) _room.BrokersToBeDeleted.Remove(deleted);
+            //foreach (var deleted in _room.BrokersToBeDeleted.Where(person => person.Id == wrapper.Person.Id).ToList()) _room.BrokersToBeDeleted.Remove(deleted);
         }
-        foreach (var deleted in _draftLessorDeletions.Where(person => !_room.LessorsToBeDeleted.Any(item => item.Id == person.Id))) _room.LessorsToBeDeleted.Add(deleted);
-        foreach (var deleted in _draftBrokerDeletions.Where(person => !_room.BrokersToBeDeleted.Any(item => item.Id == person.Id))) _room.BrokersToBeDeleted.Add(deleted);
-
+        //foreach (var deleted in _draftLessorDeletions.Where(person => !_room.LessorsToBeDeleted.Any(item => item.Id == person.Id))) _room.LessorsToBeDeleted.Add(deleted);
+        //foreach (var deleted in _draftBrokerDeletions.Where(person => !_room.BrokersToBeDeleted.Any(item => item.Id == person.Id))) _room.BrokersToBeDeleted.Add(deleted);
     }
 
     private void PopulateValues()
@@ -1235,7 +1211,8 @@ public sealed partial class ListingViewModel : ObservableRecipient,
         SelectedTenantBrokerCommissionUnit = CommissionUnitTypes.First(x => x.Key == _room.TenantBrokerCommissionUnit.Key);
         TransactionRemarks = _room.TransactionRemarks;
 
-        // Pictures
+        // Pictures (don't use directly)
+        /*
         Pictures = _room.Pictures;
         foreach (var item in Pictures)
         {
@@ -1243,6 +1220,23 @@ public sealed partial class ListingViewModel : ObservableRecipient,
             item.ParentViewModel = this;
             item.SetIsModified(false); // Needed this.
             item.PropertyChanged += OnPicturePropertyChanged;
+        }
+        */
+        Pictures.Clear();
+        foreach (var item in _room.Pictures)
+        {
+            var internalItem = new ListingPicture(item.Id, item.ImageFilename, item.Status)
+            {
+                IsMain = item.IsMain,
+                PictureType = item.PictureType,
+                Description = item.Description,
+                ThumbImagePath = item.ThumbImagePath,
+                BasePath = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(App.PropertyBlobDataFolder, _room.PropertyId), _room.Id)),
+                ParentViewModel = this
+            };
+            internalItem.SetIsModified(false); // Needed this.
+            internalItem.PropertyChanged += OnPicturePropertyChanged;
+            Pictures.Add(internalItem);
         }
 
         Pictures.CollectionChanged += (s, e) =>
@@ -1272,12 +1266,71 @@ public sealed partial class ListingViewModel : ObservableRecipient,
             }
         };
 
-        // PDFs
+        // PDFs (don't use directly)
+        /*
         Pdfs = _room.Pdfs;
-        ConfigureRoomPdfCollection(Pdfs);
+        foreach (var item in Pdfs)
+        {
+            item.BasePath = _listingDataDirectoryPath;
+            item.ParentViewModel = this;
+            item.SetIsModified(false);
+            item.PropertyChanged += OnPdfPropertyChanged;
+        }
+        */
+        Pdfs.Clear();
+        foreach (var item in _room.Pdfs)
+        {
+            var internalItem = new ListingPdf(item.Id, item.PdfFilename, item.ThumbnailFilename, item.Status)
+            {
+                IsMain = item.IsMain,
+                PdfType = item.PdfType,
+                Description = item.Description,
+                BasePath = _listingDataDirectoryPath,
+                ParentViewModel = this
+            };
+            internalItem.SetIsModified(false);
+            internalItem.PropertyChanged += OnPdfPropertyChanged;
+            Pdfs.Add(internalItem);
+        }
 
-        LessorsWrapper = new ObservableCollection<Models.Rent.Residentials.PersonWrapperForListingViewModel>(_room.Lessors.Select(person => new Models.Rent.Residentials.PersonWrapperForListingViewModel(person, this)));
-        BrokersWrapper = new ObservableCollection<Models.Rent.Residentials.PersonWrapperForListingViewModel>(_room.Brokers.Select(person => new Models.Rent.Residentials.PersonWrapperForListingViewModel(person, this)));
+        Pdfs.CollectionChanged += (sender, args) =>
+        {
+            if (args.OldItems is not null)
+            {
+                foreach (Models.Rent.Residentials.ListingPdf item in args.OldItems)
+                {
+                    IsDirty = true;
+                    item.PropertyChanged -= OnPdfPropertyChanged;
+                }
+            }
+
+            if (args.NewItems is not null)
+            {
+                foreach (Models.Rent.Residentials.ListingPdf item in args.NewItems)
+                {
+                    IsDirty = true;
+                    item.PropertyChanged += OnPdfPropertyChanged;
+                }
+            }
+        };
+
+        // (It is OK to use directly)
+        //LessorsWrapper = new ObservableCollection<Models.Rent.Residentials.PersonWrapperForListingViewModel>(_room.Lessors.Select(person => new Models.Rent.Residentials.PersonWrapperForListingViewModel(person, this)));
+        LessorsWrapper.Clear();
+        foreach (var person in _room.Lessors)
+        {
+            var wrapper = new Models.Rent.Residentials.PersonWrapperForListingViewModel(person, this);
+            LessorsWrapper.Add(wrapper);
+        }
+
+        // (It is OK to use directly)
+        //BrokersWrapper = new ObservableCollection<Models.Rent.Residentials.PersonWrapperForListingViewModel>(_room.Brokers.Select(person => new Models.Rent.Residentials.PersonWrapperForListingViewModel(person, this)));
+        BrokersWrapper.Clear();
+        foreach (var person in _room.Brokers)
+        {
+            var wrapper = new Models.Rent.Residentials.PersonWrapperForListingViewModel(person, this);
+            BrokersWrapper.Add(wrapper);
+        }
 
         _room.SetIsModified(false);
         IsDirty = false;
@@ -1313,46 +1366,6 @@ public sealed partial class ListingViewModel : ObservableRecipient,
             }
         }
     }
-
-    private void ConfigureRoomPdfCollection(ObservableCollection<Models.Rent.Residentials.ListingPdf> pdfs)
-    {
-        foreach (var item in pdfs)
-        {
-            item.BasePath = _listingDataDirectoryPath;
-            item.ParentViewModel = this;
-            item.SetIsModified(false);
-            item.PropertyChanged += OnPdfPropertyChanged;
-        }
-
-        pdfs.CollectionChanged += (sender, args) =>
-        {
-            if (args.OldItems is not null)
-            {
-                foreach (Models.Rent.Residentials.ListingPdf item in args.OldItems)
-                {
-                    IsDirty = true;
-                    item.PropertyChanged -= OnPdfPropertyChanged;
-                }
-            }
-
-            if (args.NewItems is not null)
-            {
-                foreach (Models.Rent.Residentials.ListingPdf item in args.NewItems)
-                {
-                    IsDirty = true;
-                    item.PropertyChanged += OnPdfPropertyChanged;
-                }
-            }
-        };
-    }
-
-    /*
-    private void AddPendingPdfCleanupPath(string path)
-    {
-        if (string.IsNullOrWhiteSpace(path)) return;
-        if (!ProtectedAttachmentPaths().Contains(path) && !_pendingRoomPdfCleanupFiles.Contains(path, StringComparer.OrdinalIgnoreCase)) _pendingRoomPdfCleanupFiles.Add(path);
-    }
-    */
 
     private void OnPdfPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
@@ -1709,8 +1722,8 @@ public sealed partial class ListingViewModel : ObservableRecipient,
 
         if (saveResult)
         {
-            _draftLessorDeletions.Clear();
-            _draftBrokerDeletions.Clear();
+            //_draftLessorDeletions.Clear();
+            //_draftBrokerDeletions.Clear();
             IsDirty = false;
 
             // Clear error infobar.
@@ -1830,7 +1843,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
             //Debug.WriteLine($"{file} to {destFilePath}  @SetNewBuildingPicturesAsync()");
 
             using var destinationStream = new FileStream(destFilePath, FileMode.CreateNew, FileAccess.Write);
-            _incompleteAttachmentFiles.Add(destFilePath);
+            //_incompleteAttachmentFiles.Add(destFilePath);
             await sourceStream.CopyToAsync(destinationStream);
 
             var pic = new Models.Rent.Residentials.ListingPicture(newId, newFilename, EntityStatus.New)
@@ -1848,7 +1861,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
 
             // Keep track of unsaved files to delete them when discarding.
             _unsavedRoomPictureFileList.Add(destFilePath);
-            _incompleteAttachmentFiles.Remove(destFilePath);
+            //_incompleteAttachmentFiles.Remove(destFilePath);
         }
     }
     private static bool CanAddNewRoomPictures()
@@ -1949,7 +1962,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
 
                     using (var destinationStream = new FileStream(thumbnailDestFilePath, FileMode.CreateNew, FileAccess.Write))
                     {
-                        _incompleteAttachmentFiles.Add(thumbnailDestFilePath);
+                        //_incompleteAttachmentFiles.Add(thumbnailDestFilePath);
                         importedPaths.Add(thumbnailDestFilePath);
                         using var managedSourceStream = stream.AsStreamForRead();
                         await managedSourceStream.CopyToAsync(destinationStream);
@@ -1960,7 +1973,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
                     using (var pdfSource = File.OpenRead(filePath))
                     using (var pdfDestination = new FileStream(pdfDestFilePath, FileMode.CreateNew, FileAccess.Write))
                     {
-                        _incompleteAttachmentFiles.Add(pdfDestFilePath);
+                        //_incompleteAttachmentFiles.Add(pdfDestFilePath);
                         importedPaths.Add(pdfDestFilePath);
                         await pdfSource.CopyToAsync(pdfDestination);
                     }
@@ -1974,8 +1987,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
                     Pdfs.Add(pdf);
                     _unsavedRoomPdfThumbnailFileList.Add(thumbnailDestFilePath);
                     _unsavedRoomPdfFileList.Add(pdfDestFilePath);
-                    _incompleteAttachmentFiles.Remove(thumbnailDestFilePath);
-                    _incompleteAttachmentFiles.Remove(pdfDestFilePath);
+
                     OpenBlobDirectoryCommand.NotifyCanExecuteChanged();
                     DeleteRoomPdfCommand.NotifyCanExecuteChanged();
                     IsDirty = true;
@@ -2131,7 +2143,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
 
             var asdf = new Models.Rent.Residentials.PersonWrapperForListingViewModel(res.Person, this);
 
-            _draftLessorDeletions.RemoveAll(person => person.Id == res.Person.Id);
+            //_draftLessorDeletions.RemoveAll(person => person.Id == res.Person.Id);
             LessorsWrapper.Add(asdf);
 
             IsDirty = true;
@@ -2174,7 +2186,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
         if (LessorsWrapper.Remove(lessor))
         {
             IsDirty = true;
-            if (!_draftLessorDeletions.Any(person => person.Id == lessor.Person.Id)) _draftLessorDeletions.Add(lessor.Person);
+            //if (!_draftLessorDeletions.Any(person => person.Id == lessor.Person.Id)) _draftLessorDeletions.Add(lessor.Person);
         }
     }
     private static bool CanDeleteLessor(Models.Rent.Residentials.PersonWrapperForListingViewModel lessor)
@@ -2227,7 +2239,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
             return;
         }
 
-        _draftBrokerDeletions.RemoveAll(person => person.Id == result.Person.Id);
+        //_draftBrokerDeletions.RemoveAll(person => person.Id == result.Person.Id);
         BrokersWrapper.Add(
             new Models.Rent.Residentials.PersonWrapperForListingViewModel(
                 result.Person,
@@ -2270,7 +2282,7 @@ public sealed partial class ListingViewModel : ObservableRecipient,
         if (BrokersWrapper.Remove(broker))
         {
             _room.Brokers.Remove(broker.Person);
-            if (!_draftBrokerDeletions.Any(person => person.Id == broker.Person.Id)) _draftBrokerDeletions.Add(broker.Person);
+            //if (!_draftBrokerDeletions.Any(person => person.Id == broker.Person.Id)) _draftBrokerDeletions.Add(broker.Person);
             IsDirty = true;
         }
     }

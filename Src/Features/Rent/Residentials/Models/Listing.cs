@@ -367,7 +367,7 @@ public sealed partial class Listing : ListingBase
     } = [];
 
     // DBへの更新時にDBから削除されるべき部屋写真のIDリスト
-    public ObservableCollection<ListingPicture> PicturesToBeDeleted { get; set; } = [];
+    public List<ListingPicture> PicturesToBeDeleted { get; set; } = [];
 
     // 部屋図面リスト
     public ObservableCollection<ListingPdf> Pdfs
@@ -381,7 +381,7 @@ public sealed partial class Listing : ListingBase
     } = [];
 
     // DBへの更新時にDBから削除されるべき図面のIDリスト
-    public ObservableCollection<ListingPdf> PdfsToBeDeleted { get; set; } = [];
+    public List<ListingPdf> PdfsToBeDeleted { get; set; } = [];
 
     // 貸主のリスト
     public ObservableCollection<Models.Base.PersonBase> Lessors
@@ -395,7 +395,7 @@ public sealed partial class Listing : ListingBase
     } = [];
 
     // DBへの更新時にDBから削除されるべき貸主のIDリスト
-    public ObservableCollection<Models.Base.PersonBase> LessorsToBeDeleted { get; set; } = [];
+    public List<Models.Base.PersonBase> LessorsToBeDeleted { get; set; } = [];
 
     // 宅建業者のリスト
     public ObservableCollection<Models.Base.PersonBase> Brokers
@@ -409,7 +409,7 @@ public sealed partial class Listing : ListingBase
     } = [];
 
     // DBへの更新時にDBから削除されるべき宅建業者のIDリスト
-    public ObservableCollection<Models.Base.PersonBase> BrokersToBeDeleted { get; set; } = [];
+    public List<Models.Base.PersonBase> BrokersToBeDeleted { get; set; } = [];
 
     #endregion
 

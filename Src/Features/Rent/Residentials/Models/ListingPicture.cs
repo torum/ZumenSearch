@@ -54,7 +54,7 @@ public sealed partial class ListingPicture : PictureBase
         new ListingPictureTypeLabel(Models.Rent.Residentials.ListingPictureType.Other)
     ];
 
-    // Do not use SetProperty.
+    // Do not use SetProperty. PropertyChanged is being subscribed.
     public string Description
     {
         get;
@@ -79,7 +79,7 @@ public sealed partial class ListingPicture : PictureBase
         }
     } = string.Empty;
 
-    // Do not use SetProperty.
+    // Do not use SetProperty. PropertyChanged is being subscribed.
     public bool IsMain
     {
         get;
