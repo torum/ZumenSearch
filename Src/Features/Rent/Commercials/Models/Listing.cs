@@ -12,13 +12,15 @@ public sealed partial class Listing : ListingBase
         string propertyId,
         EntityStatus propertyStatus,
         bool isPropertyUnitOwnership,
-        string propertyName)
+        string propertyName,
+        string fudousanId)
         : base(
             id,
             status,
             propertyId,
             propertyStatus,
-            PropertyContextType.RentCommercial)
+            PropertyContextType.RentCommercial,
+            fudousanId)
     {
         IsPropertyUnitOwnership = isPropertyUnitOwnership;
         PropertyName = propertyName;
@@ -40,6 +42,17 @@ public sealed partial class Listing : ListingBase
         get => field ?? string.Empty;
         private set { field = value; IsModified = true; }
     }
+
+    // 特定コード（４桁）建物全体は0000
+    public string FudousanIdAdditionalCode
+    {
+        get => field ?? string.Empty; // keep non-null empty string.
+        private set
+        {
+            field = value;
+            IsModified = true;
+        }
+    } = "";
 
     public decimal Chinryou
     {

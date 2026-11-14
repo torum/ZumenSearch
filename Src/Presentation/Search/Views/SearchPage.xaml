@@ -165,14 +165,14 @@
             </Grid>
         </Grid>
 
-        <Grid Grid.Row="1" Padding="{StaticResource ContentPadding}">
+        <Grid Grid.Row="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <StackPanel Grid.Row="0" Margin="0,24,0,0" Spacing="24">
+            <StackPanel Grid.Row="0" Margin="0,24,0,0" Spacing="24" Padding="{StaticResource ContentPadding}">
 
                 <controls:Segmented x:Name="SegmentedControl" HorizontalAlignment="Center" SelectedIndex="{x:Bind ViewModel.SegIndex, Mode=TwoWay}" Visibility="Collapsed">
                     <controls:SegmentedItem Content="賃貸" Tag="one" />
@@ -207,7 +207,7 @@
 
             </StackPanel>
 
-            <Grid Grid.Row="1">
+            <Grid Grid.Row="1" Padding="{StaticResource ContentPadding}">
                 <StackPanel Margin="0,24,0,0">
                     <TextBlock Text="最近更新された物件" Style="{ThemeResource SubtitleTextBlockStyle}" Margin="0,12,0,0"/>
                     <Border Margin="0,12,0,0" BorderThickness="0,1,0,0" BorderBrush="{ThemeResource NavigationViewItemSeparatorForeground}"></Border>
@@ -215,7 +215,7 @@
             </Grid>
 
             <ScrollViewer Grid.Row="2" Margin="0,16,0,0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                <ItemsView x:Name="RecentItemsView" Margin="12,24,12,24" ItemTemplate="{StaticResource RecentPropertyTypeTemplateSelector}" ItemsSource="{x:Bind ViewModel.RecentProperties, Mode=OneWay}" AllowFocusOnInteraction="True" SelectionMode="Single" HorizontalAlignment="Stretch">
+                <ItemsView x:Name="RecentItemsView" Margin="12,24,12,24" Padding="{StaticResource ContentPadding}" ItemTemplate="{StaticResource RecentPropertyTypeTemplateSelector}" ItemsSource="{x:Bind ViewModel.RecentProperties, Mode=OneWay}" AllowFocusOnInteraction="True" SelectionMode="Single" HorizontalAlignment="Stretch">
                     <ItemsView.ContextFlyout>
                         <MenuFlyout>
                             <MenuFlyoutItem Text="編集" Icon="Edit" Command="{x:Bind ViewModel.EditPropertyCommand}" CommandParameter="{x:Bind RecentItemsView.SelectedItem, Mode=OneWay}">
@@ -231,7 +231,6 @@
                         <UniformGridLayout ItemsJustification="Start" MaximumRowsOrColumns="10" MinRowSpacing="24" MinColumnSpacing="24"/>
                     </ItemsView.Layout>
                 </ItemsView>
-
             </ScrollViewer>
 
         </Grid>

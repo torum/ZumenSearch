@@ -112,4 +112,20 @@ public sealed partial class PropertyPicture : PictureBase
             return PropertyPictureType.Unspecified;
         }
     }
+
+    public PropertyPicture Clone()
+    {
+        var clone = new PropertyPicture(Id, ImageFilename, Status)
+        {
+            BasePath = this.BasePath,
+            ThumbImagePath = this.ThumbImagePath,
+            Description = this.Description,
+            PictureType = ResidentialPictureTypes.FirstOrDefault(item => item.Key == this.PictureType.Key) ?? new PropertyPictureTypeLabel(this.PictureType.Key),
+            IsMain = this.IsMain
+        };
+
+        //clone.PictureType = ResidentialPictureTypes.FirstOrDefault(item => item.Key == this.PictureType.Key) ?? new PropertyPictureTypeLabel(this.PictureType.Key);
+        clone.SetIsModified(IsModified);
+        return clone;
+    }
 };

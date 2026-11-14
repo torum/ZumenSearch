@@ -10,7 +10,7 @@ namespace ZumenSearch.Models.Rent.Residentials;
 // 部屋（編集用）
 public sealed partial class Listing : ListingBase
 {
-    public Listing(string id, EntityStatus status, string propertyId, EntityStatus propertyStatus, bool isPropertyUnitLevelOwnership, string propertyName) : base(id, status, propertyId, propertyStatus, PropertyContextType.RentResidential)
+    public Listing(string id, EntityStatus status, string propertyId, EntityStatus propertyStatus, bool isPropertyUnitLevelOwnership, string propertyName, string fudousanId) : base(id, status, propertyId, propertyStatus, PropertyContextType.RentResidential, fudousanId)
     {
         IsPropertyUnitLevelOwnership = isPropertyUnitLevelOwnership;
         PropertyName = propertyName;
@@ -169,6 +169,47 @@ public sealed partial class Listing : ListingBase
         }
     }
 
+    // 特定コード（４桁）建物全体は0000
+    public string FudousanIdAdditionalCode
+    {
+        get => field ?? string.Empty; // keep non-null empty string.
+        private set
+        {
+            field = value;
+            IsModified = true;
+        }
+    } = "";
+
+    public string Remarks { get; private set; } = string.Empty;
+
+
+    #endregion
+
+    #region == other ==
+
+    // 賃料（円）
+    public decimal Chinryou
+    {
+        get;
+        private set
+        {
+            if (field == value)
+            {
+                return;
+            }
+
+            if (value > -1)
+            {
+                field = value;
+                //OnPropertyChanged();
+                IsModified = true;
+            }
+            else
+            {
+                throw new ArgumentOutOfRangeException(nameof(Chinryou), "Must be at least 0.");
+            }
+        }
+    }
 
     public string ManagementFee
     {
@@ -324,32 +365,6 @@ public sealed partial class Listing : ListingBase
     public bool HasWarmWaterToiletSeat { get; private set { field = value; IsModified = true; } }
     public string ApplianceRemarks { get => field ?? string.Empty; private set { field = value; IsModified = true; } }
 
-    public string Remarks { get; private set; } = string.Empty;
-
-    // 賃料（円）
-    public decimal Chinryou
-    {
-        get;
-        private set
-        {
-            if (field == value)
-            {
-                return;
-            }
-
-            if (value > -1)
-            {
-                field = value;
-                //OnPropertyChanged();
-                IsModified = true;
-            }
-            else
-            {
-                throw new ArgumentOutOfRangeException(nameof(Chinryou), "Must be at least 0.");
-            }
-        }
-    }
-
 
     #endregion
 
@@ -423,6 +438,11 @@ public sealed partial class Listing : ListingBase
     public void SetIsPropertyUnitLevelOwnership(bool isUnitLevelOwnership)
     {
         IsPropertyUnitLevelOwnership = isUnitLevelOwnership;
+    }
+
+    public void SetFudousanIdAdditionalCode(string fudousanIdAdditionalCode)
+    {
+        FudousanIdAdditionalCode = fudousanIdAdditionalCode;
     }
 
     public void SetFloorPlanTypeLabel(ListingFloorPlanTypeLabel floorPlan)

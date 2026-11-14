@@ -45,7 +45,7 @@
                                     <Grid Grid.Row="0" Grid.Column="1">
                                         <StackPanel Spacing="12" Margin="24,0,6,6" MinWidth="260">
                                             <StackPanel Orientation="Horizontal">
-                                                <ComboBox x:Name="ComboBoxKinds" Header="タイプ" PlaceholderText="選択" Width="200" ItemsSource="{x:Bind BuildingPdfTypes, Mode=OneWay}" SelectedItem="{x:Bind PdfType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                                <ComboBox x:Name="ComboBoxKinds" Header="タイプ" PlaceholderText="選択" Width="200" ItemsSource="{x:Bind ResidentialPdfTypes, Mode=OneWay}" SelectedItem="{x:Bind PdfType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                                                     <ComboBox.ItemTemplate>
                                                         <DataTemplate x:DataType="modresidencials:PropertyPdfTypeLabel">
                                                             <StackPanel Orientation="Horizontal">

@@ -5,6 +5,7 @@ using Microsoft.UI.Xaml.Data;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
+using System.Text.RegularExpressions;
 using Windows.Data.Pdf;
 using Windows.Storage;
 using Windows.Storage.Streams;
@@ -234,10 +235,25 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         get => field ?? new(FloorPlanType.Unspecified);
         set
         {
+            if (value is null) return;
+            if (SelectedFloorPlanType.Key == value.Key)
+            {
+                field = value;
+                return;
+            }
+
+            field = value;
+            OnPropertyChanged();
+            IsDirty = true;
+            /*
+             * DO not use SetProperty. These are reference types without value equality. 
+             * During Bindings.Update(), the ComboBox can write null or a different instance with the same key back to the view model. 
+             * SetProperty sees a reference change and sets IsDirty = true.
             if (SetProperty(ref field, value))
             {
                 IsDirty = true;
             }
+            */
         }
     }
 
@@ -248,10 +264,25 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         get => field ?? new(FloorPlanExtraType.Unspecified);
         set
         {
+            if (value is null) return;
+            if (SelectedFloorPlanExtraType.Key == value.Key)
+            {
+                field = value;
+                return;
+            }
+
+            field = value;
+            OnPropertyChanged();
+            IsDirty = true;
+            /*
+             * DO not use SetProperty. These are reference types without value equality. 
+             * During Bindings.Update(), the ComboBox can write null or a different instance with the same key back to the view model. 
+             * SetProperty sees a reference change and sets IsDirty = true.
             if (SetProperty(ref field, value))
             {
                 IsDirty = true;
             }
+            */
         }
     }
 
@@ -262,10 +293,25 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         get => field ?? new(FloorGroundType.AboveGround);
         set
         {
+            if (value is null) return;
+            if (SelectedFloorGroundType.Key == value.Key)
+            {
+                field = value;
+                return;
+            }
+
+            field = value;
+            OnPropertyChanged();
+            IsDirty = true;
+            /*
+             * DO not use SetProperty. These are reference types without value equality. 
+             * During Bindings.Update(), the ComboBox can write null or a different instance with the same key back to the view model. 
+             * SetProperty sees a reference change and sets IsDirty = true.
             if (SetProperty(ref field, value))
             {
                 IsDirty = true;
             }
+            */
         }
     }
 
@@ -312,10 +358,25 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         get => field ?? new(ExposureDirectionType.Unspecified);
         set
         {
+            if (value is null) return;
+            if (SelectedExposureDirectionType.Key == value.Key)
+            {
+                field = value;
+                return;
+            }
+
+            field = value;
+            OnPropertyChanged();
+            IsDirty = true;
+            /*
+             * DO not use SetProperty. These are reference types without value equality. 
+             * During Bindings.Update(), the ComboBox can write null or a different instance with the same key back to the view model. 
+             * SetProperty sees a reference change and sets IsDirty = true.
             if (SetProperty(ref field, value))
             {
                 IsDirty = true;
             }
+            */
         }
     }
 
@@ -326,10 +387,25 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         get => field ?? new(AvailabilityStatusType.Unspecified);
         set
         {
+            if (value is null) return;
+            if (SelectedAvailabilityStatusType.Key == value.Key)
+            {
+                field = value;
+                return;
+            }
+
+            field = value;
+            OnPropertyChanged();
+            IsDirty = true;
+            /*
+             * DO not use SetProperty. These are reference types without value equality. 
+             * During Bindings.Update(), the ComboBox can write null or a different instance with the same key back to the view model. 
+             * SetProperty sees a reference change and sets IsDirty = true.
             if (SetProperty(ref field, value))
             {
                 IsDirty = true;
             }
+            */
         }
     }
 
@@ -340,10 +416,25 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         get => field ?? new(AvailabilityMonthType.Unspecified);
         set
         {
+            if (value is null) return;
+            if (SelectedAvailabilityMonthType.Key == value.Key)
+            {
+                field = value;
+                return;
+            }
+
+            field = value;
+            OnPropertyChanged();
+            IsDirty = true;
+            /*
+             * DO not use SetProperty. These are reference types without value equality. 
+             * During Bindings.Update(), the ComboBox can write null or a different instance with the same key back to the view model. 
+             * SetProperty sees a reference change and sets IsDirty = true.
             if (SetProperty(ref field, value))
             {
                 IsDirty = true;
             }
+            */
         }
     }
 
@@ -354,10 +445,25 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         get => field ?? new(AvailabilityPeriodType.Unspecified);
         set
         {
+            if (value is null) return;
+            if (SelectedAvailabilityPeriodType.Key == value.Key)
+            {
+                field = value;
+                return;
+            }
+
+            field = value;
+            OnPropertyChanged();
+            IsDirty = true;
+            /*
+             * DO not use SetProperty. These are reference types without value equality. 
+             * During Bindings.Update(), the ComboBox can write null or a different instance with the same key back to the view model. 
+             * SetProperty sees a reference change and sets IsDirty = true.
             if (SetProperty(ref field, value))
             {
                 IsDirty = true;
             }
+            */
         }
     }
 
@@ -410,6 +516,42 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
             }
         }
     }
+
+    // 不動産番号 (13桁)
+    public string FudousanId
+    {
+        get => field ?? string.Empty;
+        private set
+        {
+            if (SetProperty(ref field, value))
+            {
+                // No dirty flag here. This is set from property level and not user editable.
+            }
+        }
+    }
+
+    // 特定コード（４桁）建物全体は0000
+    public string FudousanIdAdditionalCode
+    {
+        get => field ?? string.Empty;
+        set
+        {
+            if (value is null)
+            {
+                return;
+            }
+
+            var text = Helpers.Common.NormalizeFullWidthCharacters(value).Trim().ToUpperInvariant();
+            if (field == text || !Regex.IsMatch(text, @"\A[A-Z0-9]{0,4}\z"))
+            {
+                return;
+            }
+
+            field = text;
+            IsDirty = true;
+            OnPropertyChanged();
+        }
+    } = "";
 
     public string Remarks
     {
@@ -588,6 +730,9 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         _room.SetPropertyStatus(building.Status);
         _room.SetPropertyName(building.Name);
         SetOwnershipVisibility(building.IsUnitLevelOwnership);
+
+        FudousanId = building.FudousanId;
+        _room.SetFudousanId(building.FudousanId);
 
         // Update window title with dummy string.
         WindowTitle = string.Empty;
@@ -1087,15 +1232,9 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         _room.Pictures.Clear();
         foreach (var item in Pictures)
         {
-            var newItem = new ListingPicture(item.Id, item.ImageFilename, item.Status)
-            {
-                IsMain = item.IsMain,
-                PictureType = item.PictureType,
-                Description = item.Description,
-                ThumbImagePath = item.ThumbImagePath,
-                BasePath = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(App.PropertyBlobDataFolder, _room.PropertyId), _room.Id)),
-                ParentViewModel = this
-            };
+            var newItem = item.Clone();
+            newItem.BasePath = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(App.PropertyBlobDataFolder, _room.PropertyId), _room.Id));
+            newItem.ParentViewModel = this;
             newItem.SetIsModified(item.IsModified); // Needed this.
             _room.Pictures.Add(newItem);
         }
@@ -1105,14 +1244,9 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         _room.Pdfs.Clear();
         foreach (var item in Pdfs)
         {
-            var newItem = new ListingPdf(item.Id, item.PdfFilename, item.ThumbnailFilename, item.Status)
-            {
-                IsMain = item.IsMain,
-                PdfType = item.PdfType,
-                Description = item.Description,
-                BasePath = _listingDataDirectoryPath,
-                ParentViewModel = this
-            };
+            var newItem = item.Clone();
+            newItem.BasePath = _listingDataDirectoryPath;
+            newItem.ParentViewModel = this;
             newItem.SetIsModified(false);
             newItem.PropertyChanged += OnPdfPropertyChanged;
             _room.Pdfs.Add(newItem);
@@ -1225,15 +1359,9 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         Pictures.Clear();
         foreach (var item in _room.Pictures)
         {
-            var internalItem = new ListingPicture(item.Id, item.ImageFilename, item.Status)
-            {
-                IsMain = item.IsMain,
-                PictureType = item.PictureType,
-                Description = item.Description,
-                ThumbImagePath = item.ThumbImagePath,
-                BasePath = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(App.PropertyBlobDataFolder, _room.PropertyId), _room.Id)),
-                ParentViewModel = this
-            };
+            var internalItem = item.Clone();
+            internalItem.BasePath = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(App.PropertyBlobDataFolder, _room.PropertyId), _room.Id));
+            internalItem.ParentViewModel = this;
             internalItem.SetIsModified(false); // Needed this.
             internalItem.PropertyChanged += OnPicturePropertyChanged;
             Pictures.Add(internalItem);
@@ -1280,14 +1408,9 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         Pdfs.Clear();
         foreach (var item in _room.Pdfs)
         {
-            var internalItem = new ListingPdf(item.Id, item.PdfFilename, item.ThumbnailFilename, item.Status)
-            {
-                IsMain = item.IsMain,
-                PdfType = item.PdfType,
-                Description = item.Description,
-                BasePath = _listingDataDirectoryPath,
-                ParentViewModel = this
-            };
+            var internalItem = item.Clone();
+            internalItem.BasePath = _listingDataDirectoryPath;
+            internalItem.ParentViewModel = this;
             internalItem.SetIsModified(false);
             internalItem.PropertyChanged += OnPdfPropertyChanged;
             Pdfs.Add(internalItem);

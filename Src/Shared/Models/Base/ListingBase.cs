@@ -11,11 +11,12 @@ namespace ZumenSearch.Models.Base;
 // </remarks>
 public abstract class ListingBase : EntityAggregateBase
 {
-    protected ListingBase(string id, EntityStatus status, string propertyId, EntityStatus propertyStatus, PropertyContextType propertyKind) : base(id, status)
+    protected ListingBase(string id, EntityStatus status, string propertyId, EntityStatus propertyStatus, PropertyContextType propertyKind, string fudousanId) : base(id, status)
     {
         PropertyId = propertyId;
         PropertyStatus = propertyStatus;
         PropertyContextType = propertyKind;
+        FudousanId = fudousanId;
     }
 
     // Aggregate Root entity's ID.
@@ -28,8 +29,16 @@ public abstract class ListingBase : EntityAggregateBase
     // Aggregate Root entity's property kind.
     public PropertyContextType PropertyContextType { get; init; } = PropertyContextType.Unknown;
 
+    public string FudousanId { get; private set; }
+
     public void SetPropertyStatus(EntityStatus status)
     {
         PropertyStatus = status;
     }
+
+    public void SetFudousanId(string fudousanId)
+    {
+        FudousanId = fudousanId;
+    }
+
 };

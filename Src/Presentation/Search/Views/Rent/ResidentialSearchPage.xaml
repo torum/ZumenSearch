@@ -50,9 +50,9 @@
             </Grid>
         </Grid>
 
-        <Grid Grid.Row="1" Padding="{StaticResource ContentPadding}">
-            <ScrollViewer x:Name="BodyScrollViewer" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" HorizontalContentAlignment="Center" HorizontalAlignment="Stretch" Padding="0,0,24,0">
-                <StackPanel x:Name="BodyGrid" Width="{x:Bind BodyScrollViewer.ViewportWidth, Mode=OneWay}" MaxWidth="1100" HorizontalAlignment="Center" Spacing="12" Padding="0,24,0,24">
+        <Grid Grid.Row="1">
+            <ScrollViewer x:Name="BodyScrollViewer" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" HorizontalContentAlignment="Center" HorizontalAlignment="Stretch" Padding="0,0,0,0">
+                <StackPanel x:Name="BodyGrid" Width="{x:Bind BodyScrollViewer.ViewportWidth, Mode=OneWay}" MaxWidth="1100" HorizontalAlignment="Center" Spacing="12" Margin="0,24,0,24" Padding="{StaticResource ContentPadding}">
                     <TextBlock Text="基本条件" Style="{ThemeResource SubtitleTextBlockStyle}" Margin="0,12,0,0"/>
                     <Grid x:Name="BasicFieldsGrid" SizeChanged="BasicFieldsGrid_SizeChanged">
                         <Grid.ColumnDefinitions>

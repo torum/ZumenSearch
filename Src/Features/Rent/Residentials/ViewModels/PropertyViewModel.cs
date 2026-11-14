@@ -2211,6 +2211,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         }
         else
         {
+            // TODO: Let's not replace the existing summary object.
+            // Instead, we should update the existing summary's properties because it is bound to the UI and replacing it will deselect it in the UI.
             ListingSummaries[ListingSummaries.IndexOf(existingSummary)] = summary;
         }
 
@@ -2704,6 +2706,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             item.PropertyChanged += OnBuildingPicturePropertyChanged;
         }
         */
+        /*
         Pictures.Clear();
         foreach (var item in _building.Pictures)
         {
@@ -2720,6 +2723,18 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             internalItem.PropertyChanged += OnBuildingPicturePropertyChanged;
             Pictures.Add(internalItem);
         }
+        */
+        Pictures.Clear();
+        foreach (var item in _building.Pictures)
+        {
+            var internalItem = item.Clone();
+            internalItem.BasePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id);
+            internalItem.ParentViewModel = this;
+            internalItem.SetIsModified(false); // Needed this.
+            internalItem.PropertyChanged += OnBuildingPicturePropertyChanged;
+            Pictures.Add(internalItem);
+        }
+
 
         Pictures.CollectionChanged += (s, e) =>
         {
@@ -2762,14 +2777,9 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         Pdfs.Clear();
         foreach (var item in _building.Pdfs)
         {
-            var internalItem = new PropertyPdf(item.Id, item.PdfFilename, item.ThumbnailFilename, item.Status)
-            {
-                IsMain = item.IsMain,
-                PdfType = item.PdfType,
-                Description = item.Description,
-                BasePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id),
-                ParentViewModel = this
-            };
+            var internalItem = item.Clone();
+            internalItem.BasePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id);
+            internalItem.ParentViewModel = this;
             internalItem.SetIsModified(false);
             internalItem.PropertyChanged += OnBuildingPdfPropertyChanged;
             Pdfs.Add(internalItem);
@@ -3199,16 +3209,10 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         _building.Pictures.Clear();
         foreach (var item in Pictures)
         {
-            var newItem = new PropertyPicture(item.Id, item.ImageFilename, item.Status)
-            {
-                IsMain = item.IsMain,
-                PictureType = item.PictureType,
-                Description = item.Description,
-                ThumbImagePath = item.ThumbImagePath,
-                BasePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id),
-                ParentViewModel = this
-            };
-            newItem.SetIsModified(item.IsModified); // Needed this.
+            var newItem = item.Clone();
+            newItem.BasePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id);
+            newItem.ParentViewModel = this;
+            newItem.SetIsModified(item.IsModified);
             _building.Pictures.Add(newItem);
         }
 
@@ -3224,14 +3228,9 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         _building.Pdfs.Clear();
         foreach (var item in Pdfs)
         {
-            var newItem = new PropertyPdf(item.Id, item.PdfFilename, item.ThumbnailFilename, item.Status)
-            {
-                IsMain = item.IsMain,
-                PdfType = item.PdfType,
-                Description = item.Description,
-                BasePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id),
-                ParentViewModel = this
-            };
+            var newItem = item.Clone();
+            newItem.BasePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id);
+            newItem.ParentViewModel = this;
             newItem.SetIsModified(false);
             _building.Pdfs.Add(newItem);
         }
@@ -3999,7 +3998,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
     private void AddNewRoom() 
     {
         var newId = Guid.CreateVersion7().ToString("N");
-        var editorShell = _shellFactory.Create(new Models.Rent.Residentials.Listing(newId, EntityStatus.New, _building.Id, _building.Status, _building.IsUnitLevelOwnership, Name));
+        var editorShell = _shellFactory.Create(new Models.Rent.Residentials.Listing(newId, EntityStatus.New, _building.Id, _building.Status, _building.IsUnitLevelOwnership, Name, _building.FudousanId));
 
         // Apply the current IsUnitOwnership state because it may not be saved to the _room YET.
         //editorShell.ViewModel.SetIsPropertyUnitOwnership(this.IsUnitOwnership);

@@ -7,7 +7,7 @@ public sealed partial class PropertyPdf : PdfBase
 {
     public ViewModels.Rent.Residentials.PropertyViewModel? ParentViewModel { get; set; }
 
-    public ObservableCollection<PropertyPdfTypeLabel> BuildingPdfTypes { get;} =
+    public ObservableCollection<PropertyPdfTypeLabel> ResidentialPdfTypes { get;} =
         [
         new PropertyPdfTypeLabel(Models.Rent.Residentials.PropertyPdfType.Unspecified),
         new PropertyPdfTypeLabel(Models.Rent.Residentials.PropertyPdfType.Maisoku),
@@ -90,7 +90,7 @@ public sealed partial class PropertyPdf : PdfBase
     {
         PdfFilename = pdfLocation;
         ThumbnailFilename = thumbnailLocation;
-        PdfType = BuildingPdfTypes[0];
+        PdfType = ResidentialPdfTypes[0];
 
         IsModified = false;
     }
@@ -102,7 +102,22 @@ public sealed partial class PropertyPdf : PdfBase
             throw new FormatException($"Invalid residential property PDF type: {Str}");
         }
 
-        PdfType = BuildingPdfTypes.First(item => item.Key == result);
+        PdfType = ResidentialPdfTypes.First(item => item.Key == result);
         return result;
+    }
+
+    public PropertyPdf Clone()
+    {
+        var clone = new PropertyPdf(Id, PdfFilename, ThumbnailFilename, Status)
+        {
+            BasePath = BasePath,
+            Description = Description,
+            PdfType = ResidentialPdfTypes.FirstOrDefault(item => item.Key == PdfType.Key) ?? new PropertyPdfTypeLabel(PdfType.Key),
+            IsMain = IsMain
+        };
+
+        //clone.PdfType = clone.ResidentialPdfTypes.FirstOrDefault(item => item.Key == PdfType.Key) ?? new PropertyPdfTypeLabel(PdfType.Key);
+        clone.SetIsModified(IsModified);
+        return clone;
     }
 };

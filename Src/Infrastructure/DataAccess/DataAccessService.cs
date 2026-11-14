@@ -60,7 +60,11 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     "name TEXT NOT NULL DEFAULT ''," +
                     "thumbnail_filename TEXT NOT NULL DEFAULT ''," +
 
-                #region == Properties location ==
+                    "fudousan_id TEXT NOT NULL DEFAULT ''," +
+                    "fudousan_id_additional_code TEXT NOT NULL DEFAULT ''," +
+
+                    #region == Properties location ==
+
                     "location_machiaza_id TEXT NOT NULL DEFAULT ''," +
                     "location_prefecture_code TEXT NOT NULL DEFAULT ''," + // MunicipalityCode - rename it?
                     "location_prefecture TEXT NOT NULL DEFAULT ''," +
@@ -110,7 +114,8 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     "buss4_stop_name TEXT NOT NULL DEFAULT ''," +
                     "buss4_Jyousya INTEGER NOT NULL DEFAULT 0," +
                     "buss4_Toho INTEGER NOT NULL DEFAULT 0," +
-                #endregion
+
+                    #endregion
 
                     // TODO: add more columns.
 
@@ -132,9 +137,8 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     "floor_count_basement INTEGER NOT NULL DEFAULT 0," +
                     "total_unit_count INTEGER NOT NULL DEFAULT 0," +
                     "built_year_month TEXT NOT NULL DEFAULT ''," +
-                    "fudousan_id TEXT NOT NULL DEFAULT ''," +
-                    "fudousan_id_additional_code TEXT NOT NULL DEFAULT ''," +
                     "remarks TEXT NOT NULL DEFAULT ''," +
+
                     "kanri_shutai TEXT NOT NULL DEFAULT '" + nameof(Models.Rent.Residentials.Property.EnumKanriShutai.Unspecified) + "'," +
                     "kanri_is_maintenance_management INTEGER NOT NULL DEFAULT 0," +
                     "kanri_is_tenant_management INTEGER NOT NULL DEFAULT 0," +
@@ -231,6 +235,8 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     "is_property_unit_ownership INTEGER NOT NULL DEFAULT 0," +
                     "name TEXT NOT NULL DEFAULT ''," +
 
+                    "fudousan_id_additional_code TEXT NOT NULL DEFAULT ''," +
+
                     "floor_plan_type TEXT NOT NULL DEFAULT ''," +
                     "floor_plan_extra_type TEXT NOT NULL DEFAULT ''," +
                     "floor_area TEXT NOT NULL DEFAULT ''," +
@@ -245,6 +251,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     "available_from_period TEXT NOT NULL DEFAULT ''," +
                     "is_immediate_occupancy INTEGER NOT NULL DEFAULT 0," +
                     "current_status_checked_at TEXT NOT NULL DEFAULT ''," +
+                    "remarks TEXT NOT NULL DEFAULT ''," +
 
                     "management_fee TEXT NOT NULL DEFAULT ''," +
                     "management_fee_unit TEXT NOT NULL DEFAULT '" + nameof(Models.Rent.Residentials.FeeUnitType.Yen) + "'," +
@@ -294,8 +301,6 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     "has_separate_washbasin INTEGER NOT NULL DEFAULT 0," +
                     "has_warm_water_toilet_seat INTEGER NOT NULL DEFAULT 0," +
                     "appliance_remarks TEXT NOT NULL DEFAULT ''," +
-
-                    "remarks TEXT NOT NULL DEFAULT ''," +
 
                     "chinryou INTEGER NOT NULL DEFAULT 0," +
 
@@ -376,8 +381,6 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         floor_count_basement INTEGER NOT NULL DEFAULT 0,
         total_floor_area NUMERIC NOT NULL DEFAULT 0,
         built_year_month TEXT NOT NULL DEFAULT '',
-        fudousan_id TEXT NOT NULL DEFAULT '',
-        fudousan_id_additional_code TEXT NOT NULL DEFAULT '',
         remarks TEXT NOT NULL DEFAULT '',
         passenger_elevator_availability INTEGER NOT NULL DEFAULT 0,
         passenger_elevator_count INTEGER,
@@ -436,6 +439,9 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         property_id TEXT NOT NULL DEFAULT '',
         is_property_unit_ownership INTEGER NOT NULL DEFAULT 0,
         name TEXT NOT NULL DEFAULT '',
+    
+        fudousan_id_additional_code TEXT NOT NULL DEFAULT '',
+
         chinryou NUMERIC NOT NULL DEFAULT 0,
         rent_tax TEXT NOT NULL DEFAULT 'Unconfirmed',
         kyoueki_fee TEXT NOT NULL DEFAULT '0',
@@ -1336,28 +1342,17 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     throw new InvalidOperationException("The residential property was already created or no longer exists. Reload before saving.");
                 cmd.Parameters.Clear();
 
-                /*
-                var thumbnailFilename = building.Pictures.FirstOrDefault(picture => picture.IsMain)?.ImageFilename ?? string.Empty;
-                if (string.IsNullOrWhiteSpace(thumbnailFilename))
-                {
-                    thumbnailFilename = building.Pdfs.FirstOrDefault(pdf => pdf.IsMain)?.ThumbnailFilename ?? string.Empty;
-                }
-                */
-
                 // Main property table
                 cmd.CommandType = CommandType.Text;
                 cmd.Parameters.Clear();
-                // Insert
-                //cmd.CommandText = "INSERT INTO properties (property_id, name, property_kind, thumbnail_filename, location_prefecture_code, location_prefecture, location_machiaza_id, location_county, location_city, location_ward, location_oaza_cho, location_choume, location_edaban, location_full, updated_at) " +
-                //  "VALUES (@RentId, @Name, @PropertyContextType, @Thumb, @LocPrefId, @LocPrefecture, @LocMachiazaId, @LocCounty, @LocCity, @LocWard, @LocOazaCho, @LocChoume, @LocEdaban, @LocLocationFull, @updated_at)";
-                // Upsert
-                var sqlUpsert = "INSERT INTO properties (property_id, name, property_kind, thumbnail_filename, location_prefecture_code, location_prefecture, location_machiaza_id, location_county, location_city, location_ward, location_oaza_cho, location_choume, location_edaban, location_postal_code, location_full, location_latitude, location_longitude, " +
+
+                var sqlUpsert = "INSERT INTO properties (property_id, name, property_kind, thumbnail_filename, fudousan_id, fudousan_id_additional_code, location_prefecture_code, location_prefecture, location_machiaza_id, location_county, location_city, location_ward, location_oaza_cho, location_choume, location_edaban, location_postal_code, location_full, location_latitude, location_longitude, " +
                     "train1_line_code, train1_line_name, train1_station_code, train1_station_name, train1_ekitoho, buss1_stop_name, buss1_Jyousya, buss1_Toho, " +
                     "train2_line_code, train2_line_name, train2_station_code, train2_station_name, train2_ekitoho, buss2_stop_name, buss2_Jyousya, buss2_Toho, " +
                     "train3_line_code, train3_line_name, train3_station_code, train3_station_name, train3_ekitoho, buss3_stop_name, buss3_Jyousya, buss3_Toho, " +
                     "train4_line_code, train4_line_name, train4_station_code, train4_station_name, train4_ekitoho, buss4_stop_name, buss4_Jyousya, buss4_Toho, updated_at) ";
 
-                sqlUpsert += "VALUES (@propertyId, @name, @propertyKind, @thumbnailPath, @locPrefId, @locPrefecture, @locMachiazaId, @locCounty, @locCity, @locWard, @locOazaCho, @locChoume, @locEdaban, @locPostalCode, @locLocationFull, @locationLatitude, @locationLongitude, " +
+                sqlUpsert += "VALUES (@propertyId, @name, @propertyKind, @thumbnailPath, @fudousanId, @fudousanIdAdditionalCode, @locPrefId, @locPrefecture, @locMachiazaId, @locCounty, @locCity, @locWard, @locOazaCho, @locChoume, @locEdaban, @locPostalCode, @locLocationFull, @locationLatitude, @locationLongitude, " +
                     "@train1_line_code, @train1_line_name, @train1_station_code, @train1_station_name, @train1_ekitoho, @buss1_stop_name, @buss1_Jyousya, @buss1_Toho, " +
                     "@train2_line_code, @train2_line_name, @train2_station_code, @train2_station_name, @train2_ekitoho, @buss2_stop_name, @buss2_Jyousya, @buss2_Toho, " +
                     "@train3_line_code, @train3_line_name, @train3_station_code, @train3_station_name, @train3_ekitoho, @buss3_stop_name, @buss3_Jyousya, @buss3_Toho, " +
@@ -1365,6 +1360,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
                 sqlUpsert += "ON CONFLICT (property_id) DO UPDATE SET " +
                     "name = @name, property_kind = @propertyKind, thumbnail_filename = @thumbnailPath, " +
+                    "fudousan_id = @fudousanId, fudousan_id_additional_code = @fudousanIdAdditionalCode, " +
                     "location_prefecture_code = @locPrefId, location_prefecture = @locPrefecture, location_machiaza_id = @locMachiazaId, " +
                     "location_county = @locCounty, location_city = @locCity, location_ward = @locWard, location_oaza_cho = @locOazaCho, " +
                     "location_choume = @locChoume, location_edaban = @locEdaban, location_postal_code = @locPostalCode, location_full = @locLocationFull, " +
@@ -1381,6 +1377,10 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 cmd.Parameters.AddWithValue("@name", building.Name);
                 cmd.Parameters.AddWithValue("@propertyKind", building.PropertyContextType.ToString());
                 cmd.Parameters.AddWithValue("@thumbnailPath", building.ThumbnailFilename);
+
+                cmd.Parameters.AddWithValue("@fudousanId", building.FudousanId);
+                cmd.Parameters.AddWithValue("@fudousanIdAdditionalCode", building.FudousanIdAdditionalCode);
+
                 // Address/Location
                 cmd.Parameters.AddWithValue("@locPrefId", building.Address.Prefecture?.MunicipalityCode ?? string.Empty);
                 cmd.Parameters.AddWithValue("@locPrefecture", building.Address.Prefecture?.Name ?? string.Empty);
@@ -1444,11 +1444,8 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
                 // rent_residentials
                 cmd.Parameters.Clear();
-                // Insert
-                //cmd.CommandText = "INSERT INTO rent_residentials (property_id, property_type, is_unit_ownership, property_structure, floor_count_above_ground, floor_count_basement, total_unit_count, built_year_month, fudousan_id, fudousan_id_additional_code, remarks) " +
-                //    "VALUES (@RentId, @BuildingKind, @IsUnitOwnership, @PropertyStructure, @FloorCountAboveGround, @FloorCountBasement, @TotalUnitCount, @BuiltYearMonth, @FudousanId, @FudousanIdAdditionalCode, @Remarks)";
-                // Upsert
-                sqlUpsert = "INSERT INTO rent_residentials (property_id, property_type, is_unit_ownership, property_structure, floor_count_above_ground, floor_count_basement, total_unit_count, built_year_month, fudousan_id, fudousan_id_additional_code, remarks, " +
+
+                sqlUpsert = "INSERT INTO rent_residentials (property_id, property_type, is_unit_ownership, property_structure, floor_count_above_ground, floor_count_basement, total_unit_count, built_year_month, remarks, " +
                     "kanri_shutai, kanri_is_maintenance_management, kanri_is_tenant_management, kanri_is_payment_management, kanri_is_other_management, kanri_remark_jisya, kanri_name_of_company_tasya, kanri_contact_info_of_company_tasya, kanri_remark_tasya, kanri_remark_kashinushi, " +
                     "has_autolock, has_elevator, has_security_camera, has_parcel_locker, has_electric, " +
                     "property_electric_kind, electric_detail, has_gas, gas_type, gas_detail, " +
@@ -1459,7 +1456,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     "parking_spaces, parking_distance, parking_notes, has_bicycle_parking, bicycle_parking_availability, " +
                     "is_bicycle_parking_free, bicycle_parking_fee, bicycle_parking_fee_tax_type, bicycle_parking_notes, has_motorcycle_parking, " +
                     "motorcycle_parking_availability, is_motorcycle_parking_free, motorcycle_parking_fee, motorcycle_parking_fee_tax_type, motorcycle_parking_notes) ";
-                sqlUpsert += "VALUES (@propertyId, @buildingType, @isUnitOwnership, @buildingStructure, @floorCountAboveGround, @floorCountBasement, @totalUnitCount, @builtYearMonth, @fudousanId, @fudousanIdAdditionalCode, @remarks, " +
+                sqlUpsert += "VALUES (@propertyId, @buildingType, @isUnitOwnership, @buildingStructure, @floorCountAboveGround, @floorCountBasement, @totalUnitCount, @builtYearMonth, @remarks, " +
                     "@kanri_shutai, @kanri_is_maintenance_management, @kanri_is_tenant_management, @kanri_is_payment_management, @kanri_is_other_management, @kanri_remark_jisya, @kanri_name_of_company_tasya, @kanri_contact_info_of_company_tasya, @kanri_remark_tasya, @kanri_remark_kashinushi, " +
                     "@facility_has_autolock, @facility_has_elevator, @facility_has_security_camera, @facility_has_parcel_locker, @facility_has_electric, " +
                     "@facility_property_electric_kind, @facility_electric_detail, @facility_has_gas, @facility_gas_type, @facility_gas_detail, " +
@@ -1471,7 +1468,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     "@facility_is_bicycle_parking_free, @facility_bicycle_parking_fee, @facility_bicycle_parking_fee_tax_type, @facility_bicycle_parking_notes, @facility_has_motorcycle_parking, " +
                     "@facility_motorcycle_parking_availability, @facility_is_motorcycle_parking_free, @facility_motorcycle_parking_fee, @facility_motorcycle_parking_fee_tax_type, @facility_motorcycle_parking_notes) ";
                 sqlUpsert += "ON CONFLICT(property_id) ";
-                sqlUpsert += "DO UPDATE SET property_type = @buildingType, is_unit_ownership = @isUnitOwnership, property_structure = @buildingStructure, floor_count_above_ground = @floorCountAboveGround, floor_count_basement = @floorCountBasement, total_unit_count = @totalUnitCount, built_year_month = @builtYearMonth, fudousan_id = @fudousanId, fudousan_id_additional_code = @fudousanIdAdditionalCode, remarks = @remarks, " +
+                sqlUpsert += "DO UPDATE SET property_type = @buildingType, is_unit_ownership = @isUnitOwnership, property_structure = @buildingStructure, floor_count_above_ground = @floorCountAboveGround, floor_count_basement = @floorCountBasement, total_unit_count = @totalUnitCount, built_year_month = @builtYearMonth, remarks = @remarks, " +
                     "kanri_shutai = excluded.kanri_shutai, kanri_is_maintenance_management = excluded.kanri_is_maintenance_management, kanri_is_tenant_management = excluded.kanri_is_tenant_management, kanri_is_payment_management = excluded.kanri_is_payment_management, kanri_is_other_management = excluded.kanri_is_other_management, " +
                     "kanri_remark_jisya = excluded.kanri_remark_jisya, kanri_name_of_company_tasya = excluded.kanri_name_of_company_tasya, kanri_contact_info_of_company_tasya = excluded.kanri_contact_info_of_company_tasya, kanri_remark_tasya = excluded.kanri_remark_tasya, kanri_remark_kashinushi = excluded.kanri_remark_kashinushi, " +
                     "has_autolock = excluded.has_autolock, has_elevator = excluded.has_elevator, has_security_camera = excluded.has_security_camera, has_parcel_locker = excluded.has_parcel_locker, has_electric = excluded.has_electric, " +
@@ -1494,8 +1491,6 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 cmd.Parameters.AddWithValue("@floorCountBasement", building.FloorCountBasement);// int
                 cmd.Parameters.AddWithValue("@totalUnitCount", building.TotalUnitCount);// int
                 cmd.Parameters.AddWithValue("@builtYearMonth", building.BuiltYearAndMonth.ToString("s"));
-                cmd.Parameters.AddWithValue("@fudousanId", building.FudousanId);
-                cmd.Parameters.AddWithValue("@fudousanIdAdditionalCode", building.FudousanIdAdditionalCode);
                 cmd.Parameters.AddWithValue("@remarks", building.Remarks);
                 cmd.Parameters.AddWithValue("@kanri_shutai", building.KanriShutai.ToString());
                 cmd.Parameters.AddWithValue("@kanri_is_maintenance_management", building.KanriIsMaintenanceManagementIfIsKanriJisya ? 1 : 0);
@@ -1562,9 +1557,6 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 {
                     foreach (var pic in building.Pictures)
                     {
-                        //var sqlInsertIntoRentLivingPicture = "INSERT INTO rent_residential_pictures (picture_id, property_id, filename, type, description, is_main) " +
-                        //    "VALUES (@PicId, @RentId, @Path, @Type, @Desc, @Main)";
-
                         var sqlUpsertPicture = "INSERT INTO rent_residential_pictures (picture_id, property_id, filename, type, description, is_main) ";
                         sqlUpsertPicture += "VALUES (@pictureId, @propertyId, @filePath, @type, @description, @isMain) ";
                         sqlUpsertPicture += "ON CONFLICT (picture_id) ";
@@ -1630,8 +1622,6 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 {
                     foreach (var pic in building.Pdfs)
                     {
-                        //var sqlInsertIntoRentLivingPicture = "INSERT INTO rent_residential_pdfs (pdf_id, property_id, filename, thumbnail_filename, type, description, is_main) " +
-                        //    "VALUES (@PdfId, @RentId, @Path, @Thumb, @Type, @Desc, @Main)";
                         var sqlUpsertPdf = "INSERT INTO rent_residential_pdfs (pdf_id, property_id, filename, thumbnail_filename, type, description, is_main) ";
                         sqlUpsertPdf += "VALUES (@pdfId, @propertyId, @filePath, @thumbnailPath, @type, @description, @isMain) ";
                         sqlUpsertPdf += "ON CONFLICT (pdf_id) ";
@@ -1697,8 +1687,6 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 {
                     foreach (var psn in building.Lessors)
                     {
-                        //var sqlInsertInto = "INSERT INTO rent_lessors_properties_listings (lessor_id, property_id, property_kind, listing_id) " +
-                        //                "VALUES (@lessor_id, @property_id, @property_kind, @listing_id)";
                         var sqlUpsertLessor = "INSERT INTO rent_lessors_properties_listings (lessor_id, property_id, property_kind, listing_id) ";
                         sqlUpsertLessor += "VALUES (@lessor_id, @property_id, @property_kind, @listing_id) ";
                         sqlUpsertLessor += "ON CONFLICT (lessor_id, property_id, listing_id) ";
@@ -1817,49 +1805,6 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     // Let's not
                     //building.RoomsToBeDeleted.Clear();
                 }
-                /*
-                if (building.Status != EntityStatus.New && pendingListings.Count > 0)
-                {
-                    throw new InvalidOperationException("Only a new residential property can persist handed-off listing drafts.");
-                }
-                if (building.Status == EntityStatus.New && deletedListingIds.Count > 0)
-                {
-                    throw new InvalidOperationException("A new residential property cannot delete persisted listings.");
-                }
-
-                foreach (var listingId in deletedListingIds)
-                {
-                    if (string.IsNullOrWhiteSpace(listingId) || building.ListingIds.Contains(listingId, StringComparer.Ordinal))
-                        throw new InvalidOperationException("Invalid staged residential listing deletion.");
-                    cmd.Parameters.Clear();
-                    cmd.CommandText = "SELECT 1 FROM rent_residential_listings WHERE listing_id = @listingId AND property_id = @propertyId";
-                    cmd.Parameters.AddWithValue("@listingId", listingId);
-                    cmd.Parameters.AddWithValue("@propertyId", building.Id);
-                    if (cmd.ExecuteScalar() is null) throw new InvalidOperationException("The staged residential listing no longer belongs to this property.");
-                    cmd.CommandText = "DELETE FROM rent_residential_listing_pictures WHERE listing_id = @listingId AND property_id = @propertyId";
-                    cmd.ExecuteNonQuery();
-                    cmd.CommandText = "DELETE FROM rent_residential_listing_pdfs WHERE listing_id = @listingId AND property_id = @propertyId";
-                    cmd.ExecuteNonQuery();
-                    cmd.CommandText = "DELETE FROM rent_lessors_properties_listings WHERE listing_id = @listingId AND property_id = @propertyId AND property_kind = @propertyKind";
-                    cmd.Parameters.AddWithValue("@propertyKind", PropertyContextType.RentResidential.ToString());
-                    cmd.ExecuteNonQuery();
-                    cmd.CommandText = "DELETE FROM brokers_properties_listings WHERE listing_id = @listingId AND property_id = @propertyId AND property_kind = @propertyKind";
-                    cmd.ExecuteNonQuery();
-                    cmd.CommandText = "DELETE FROM rent_residential_listings WHERE listing_id = @listingId AND property_id = @propertyId";
-                    if (cmd.ExecuteNonQuery() != 1) throw new InvalidOperationException("The staged residential listing could not be deleted.");
-                }
-
-                foreach (var draft in pendingListings)
-                {
-                    if (draft.Status != EntityStatus.New || draft.PropertyStatus != EntityStatus.New || draft.PropertyId != building.Id || string.IsNullOrWhiteSpace(draft.Id) || !building.ListingIds.Contains(draft.Id, StringComparer.Ordinal))
-                        throw new InvalidOperationException("Invalid handed-off residential listing draft.");
-                    cmd.Parameters.Clear();
-                    cmd.CommandText = "SELECT 1 FROM rent_residential_listings WHERE listing_id = @listingId";
-                    cmd.Parameters.AddWithValue("@listingId", draft.Id);
-                    if (cmd.ExecuteScalar() is not null) throw new InvalidOperationException("A handed-off residential listing ID already exists.");
-                    _ = DoUpsertRentResidentialListing(cmd, building.Id, building.IsUnitLevelOwnership, draft);
-                }
-                */
 
                 // commit
                 cmd.Transaction.Commit();
@@ -1916,6 +1861,8 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             using var cmd = connection.CreateCommand();
             cmd.CommandText = "SELECT properties.name as propertyName, " +
                 "properties.property_kind as propertyKind, " +
+                "properties.fudousan_id as fudousanId, " +
+                "properties.fudousan_id_additional_code as fudousanIdAdditionalCode, " +
                 "properties.location_prefecture_code as locPrefId, " +
                 "properties.location_prefecture as locPrefecture, " +
                 "properties.location_machiaza_id as locMachiazaId, " +
@@ -1970,8 +1917,6 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 "rent_residentials.floor_count_basement as resiBasementFloorCount, " +
                 "rent_residentials.total_unit_count as resiTotalUnitCount, " +
                 "rent_residentials.built_year_month as resiBuiltYearMonth, " +
-                "rent_residentials.fudousan_id as resiFudousanId, " +
-                "rent_residentials.fudousan_id_additional_code as resiFudousanIdAdditionalCode, " +
                 "rent_residentials.remarks as resiRemarks, " +
                 "rent_residentials.has_autolock as has_autolock, " +
                 "rent_residentials.has_elevator as has_elevator, " +
@@ -2052,6 +1997,8 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     isFound = true;
 
                     property.SetName(Convert.ToString(reader["propertyName"], CultureInfo.InvariantCulture) ?? "");
+
+
                     // Address/Location
                     property.Address.SetMachiazaId(Convert.ToString(reader["locMachiazaId"], CultureInfo.InvariantCulture) ?? "");
                     property.Address.SetPrefectureByMunicipalityCode(Convert.ToString(reader["locPrefId"], CultureInfo.InvariantCulture) ?? "",
@@ -2072,12 +2019,6 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     //property.SetLocLocationFull(Convert.ToString(reader["locLocationFull"], CultureInfo.InvariantCulture) ?? "");
                     property.Address.SetLocationLatitude(Convert.ToString(reader["locationLatitude"], CultureInfo.InvariantCulture) ?? string.Empty);
                     property.Address.SetLocationLongitude(Convert.ToString(reader["locationLongitude"], CultureInfo.InvariantCulture) ?? string.Empty);
-
-                    //property.Train1.RailLine.SetLineCode(Convert.ToString(reader["train1LineCode"], CultureInfo.InvariantCulture) ?? string.Empty);
-                    //property.Train1.RailLine.SetLineName(Convert.ToString(reader["train1LineName"], CultureInfo.InvariantCulture) ?? string.Empty);
-                    //property.Train1.RailStation.SetLineCode(property.Train1.RailLine.LineCode);
-                    //property.Train1.RailStation.SetStationCode(Convert.ToString(reader["train1StationCode"], CultureInfo.InvariantCulture) ?? string.Empty);
-                    //property.Train1.RailStation.SetStationName(Convert.ToString(reader["train1StationName"], CultureInfo.InvariantCulture) ?? string.Empty);
 
                     property.Train1.SetRailLine(Convert.ToString(reader["train1LineCode"], CultureInfo.InvariantCulture) ?? "", Convert.ToString(reader["train1LineName"], CultureInfo.InvariantCulture) ?? "");
                     property.Train1.SetRailStation(property.Train1.RailLine.LineCode, Convert.ToString(reader["train1StationCode"], CultureInfo.InvariantCulture) ?? "", Convert.ToString(reader["train1StationName"], CultureInfo.InvariantCulture) ?? "");
@@ -2114,8 +2055,8 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     property.SetFloorCountBasement(Convert.ToInt32(reader["resiBasementFloorCount"], CultureInfo.InvariantCulture));
                     property.SetTotalUnitCount(Convert.ToInt32(reader["resiTotalUnitCount"], CultureInfo.InvariantCulture));
                     property.SetBuiltYearAndMonthFromString(Convert.ToString(reader["resiBuiltYearMonth"], CultureInfo.InvariantCulture) ?? "");
-                    property.SetFudousanId(Convert.ToString(reader["resiFudousanId"], CultureInfo.InvariantCulture) ?? "");
-                    property.SetFudousanIdAdditionalCode(Convert.ToString(reader["resiFudousanIdAdditionalCode"], CultureInfo.InvariantCulture) ?? "");
+                    property.SetFudousanId(Convert.ToString(reader["fudousanId"], CultureInfo.InvariantCulture) ?? "");
+                    property.SetFudousanIdAdditionalCode(Convert.ToString(reader["fudousanIdAdditionalCode"], CultureInfo.InvariantCulture) ?? "");
                     property.SetRemarks(Convert.ToString(reader["resiRemarks"], CultureInfo.InvariantCulture) ?? "");
                     property.SetKanriShutaiFromString(reader.GetString(reader.GetOrdinal("kanri_shutai")));
                     property.SetKanriIsMaintenanceManagementIfIsKanriJisya(Convert.ToInt32(reader["kanri_is_maintenance_management"], CultureInfo.InvariantCulture) != 0);
@@ -2480,7 +2421,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
     {
         cmd.CommandText = """
             INSERT INTO rent_residential_listings (
-                listing_id, property_id, is_property_unit_ownership, name,
+                listing_id, property_id, is_property_unit_ownership, name, fudousan_id_additional_code,
                 floor_plan_type, floor_plan_extra_type, floor_area, floor_type, floor_number,
                 is_corner_room, main_exposure_direction, availability_status, current_status,
                 is_recruiting, available_from_month, available_from_period,
@@ -2498,7 +2439,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 has_loft, has_indoor_washing_machine_space, has_bathroom_dryer, has_separate_bath_and_toilet,
                 has_separate_washbasin, has_warm_water_toilet_seat, appliance_remarks)
             VALUES (
-                @listing_id, @property_id, @is_property_unit_ownership, @name,
+                @listing_id, @property_id, @is_property_unit_ownership, @name, @fudousan_id_additional_code,
                 @floor_plan_type, @floor_plan_extra_type, @floor_area, @floor_type, @floor_number,
                 @is_corner_room, @main_exposure_direction, @availability_status, @current_status,
                 @is_recruiting, @available_from_month, @available_from_period,
@@ -2518,6 +2459,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             ON CONFLICT(listing_id) DO UPDATE SET
                 is_property_unit_ownership = @is_property_unit_ownership,
                 name = @name,
+                fudousan_id_additional_code = @fudousan_id_additional_code,
                 floor_plan_type = @floor_plan_type,
                 floor_plan_extra_type = @floor_plan_extra_type,
                 floor_area = @floor_area,
@@ -2591,6 +2533,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         cmd.Parameters.AddWithValue("@property_id", propertyId);
         cmd.Parameters.AddWithValue("@is_property_unit_ownership", room.IsPropertyUnitLevelOwnership ? 1 : 0); // bool to int
         cmd.Parameters.AddWithValue("@name", room.Name);
+        cmd.Parameters.AddWithValue("@fudousan_id_additional_code", room.FudousanIdAdditionalCode ?? string.Empty);
 
         cmd.Parameters.AddWithValue("@floor_plan_type", room.FloorPlan.ToString());
         cmd.Parameters.AddWithValue("@floor_plan_extra_type", room.FloorPlanExtra.ToString());
@@ -3023,6 +2966,276 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             using var cmd = connection.CreateCommand();
             var conditions = new List<string>();
 
+            // Text search
+            AddTextFilter(criteria.PropertyName, "p.name LIKE @propertyName ESCAPE '\\'", "propertyName");
+            AddTextFilter(criteria.Address, "p.location_full LIKE @address ESCAPE '\\'", "address");
+            AddTextFilter(
+                criteria.LessorName,
+                "EXISTS (SELECT 1 FROM rent_lessors_properties_listings AS relation " +
+                "INNER JOIN rent_lessors AS lessor ON lessor.lessor_id = relation.lessor_id " +
+                "WHERE relation.property_id = p.property_id " +
+                "AND ((r.is_unit_ownership = 0 AND relation.listing_id = '') " +
+                "OR (r.is_unit_ownership = 1 AND relation.listing_id = l.listing_id)) " +
+                "AND lessor.name LIKE @lessorName ESCAPE '\\')",
+                "lessorName");
+            AddTextFilter(criteria.FudousanId, "p.fudousan_id LIKE @fudousanId ESCAPE '\\'", "fudousanId");
+
+            // Rent and other numeric limits
+            AddNumberFilter(criteria.MinimumRent, "l.chinryou", "minimumRent", ">=");
+            AddNumberFilter(criteria.MaximumRent, "l.chinryou", "maximumRent", "<=");
+            AddNumberFilter(criteria.MaximumManagementFee, "CAST(REPLACE(l.management_fee, ',', '') AS REAL)", "maximumManagementFee", "<=");
+
+            if (criteria.NoSecurityDeposit)
+            {
+                conditions.Add("CAST(REPLACE(l.security_deposit, ',', '') AS REAL) = 0");
+            }
+
+            if (criteria.NoKeyMoney)
+            {
+                conditions.Add("CAST(REPLACE(l.key_money, ',', '') AS REAL) = 0");
+            }
+
+            // Station, line, and walking distance must match the same route.
+            var hasStationFilter = !string.IsNullOrWhiteSpace(criteria.Station);
+            var hasLineFilter = !string.IsNullOrWhiteSpace(criteria.Line);
+            var hasWalkFilter = double.IsFinite(criteria.MaximumStationWalkMinutes);
+
+            if (hasStationFilter || hasLineFilter || hasWalkFilter)
+            {
+                if (hasStationFilter)
+                {
+                    cmd.Parameters.AddWithValue("@station", "%" + EscapeLikeValue(criteria.Station) + "%");
+                }
+
+                if (hasLineFilter)
+                {
+                    cmd.Parameters.AddWithValue("@line", "%" + EscapeLikeValue(criteria.Line) + "%");
+                }
+
+                if (hasWalkFilter)
+                {
+                    cmd.Parameters.AddWithValue("@maximumWalk", criteria.MaximumStationWalkMinutes);
+                }
+
+                var matchingRoutes = new List<string>();
+
+                for (var routeNumber = 1; routeNumber <= 4; routeNumber++)
+                {
+                    var routeConditions = new List<string>();
+
+                    if (hasStationFilter)
+                    {
+                        routeConditions.Add($"p.train{routeNumber}_station_name LIKE @station ESCAPE '\\'");
+                    }
+
+                    if (hasLineFilter)
+                    {
+                        routeConditions.Add($"p.train{routeNumber}_line_name LIKE @line ESCAPE '\\'");
+                    }
+
+                    if (hasWalkFilter)
+                    {
+                        routeConditions.Add($"p.train{routeNumber}_ekitoho > 0 AND p.train{routeNumber}_ekitoho <= @maximumWalk");
+                    }
+
+                    matchingRoutes.Add("(" + string.Join(" AND ", routeConditions) + ")");
+                }
+
+                conditions.Add("(" + string.Join(" OR ", matchingRoutes) + ")");
+            }
+
+            // Property and room types, building age, and floor area
+            AddEnumFilter("r.property_type", criteria.PropertyKinds.Select(value => value.ToString()), "propertyKind");
+            AddEnumFilter("r.property_structure", criteria.PropertyStructures.Select(value => value.ToString()), "propertyStructure");
+            AddNumberFilter(DateTime.Now.Year - criteria.MaximumBuildingAgeYears, "CAST(substr(r.built_year_month, 1, 4) AS REAL)", "minimumBuiltYear", ">=");
+            AddEnumFilter("l.floor_plan_type", criteria.FloorPlans.Select(value => value.ToString()), "floorPlan");
+            AddNumberFilter(criteria.MinimumFloorArea, "CAST(REPLACE(l.floor_area, ',', '') AS REAL)", "minimumFloorArea", ">=");
+            AddNumberFilter(criteria.MaximumFloorArea, "CAST(REPLACE(l.floor_area, ',', '') AS REAL)", "maximumFloorArea", "<=");
+
+            // Room features
+            AddFlag(criteria.PetFriendly, "l.pet_friendly");
+            AddFlag(criteria.TwoPersonOccupancy, "l.two_person_occupancy");
+            AddFlag(criteria.NoGuarantorNeeded, "l.no_guarantor_needed");
+            AddFlag(criteria.OfficeUseAllowed, "l.office_use_allowed");
+
+            if (criteria.HandlingType is not null)
+            {
+                conditions.Add("l.handling_type = @handlingType");
+                cmd.Parameters.AddWithValue("@handlingType", criteria.HandlingType.Key.ToString());
+            }
+
+            if (criteria.TransactionType is not null)
+            {
+                conditions.Add("l.transaction_type = @transactionType");
+                cmd.Parameters.AddWithValue("@transactionType", criteria.TransactionType.Key.ToString());
+            }
+
+            // Commission limits and units
+            AddCommissionFilter(criteria.MaximumLessorCommission, criteria.LessorCommissionUnit, "l.lessor_commission", "l.lessor_commission_unit", "lessorCommission");
+            AddCommissionFilter(criteria.MaximumLesseeCommission, criteria.LesseeCommissionUnit, "l.lessee_commission", "l.lessee_commission_unit", "lesseeCommission");
+            AddCommissionFilter(criteria.MaximumListingBrokerCommission, criteria.ListingBrokerCommissionUnit, "l.listing_broker_commission", "l.listing_broker_commission_unit", "listingBrokerCommission");
+            AddCommissionFilter(criteria.MaximumTenantBrokerCommission, criteria.TenantBrokerCommissionUnit, "l.tenant_broker_commission", "l.tenant_broker_commission_unit", "tenantBrokerCommission");
+
+            // Listing and property features
+            AddFlag(criteria.IsRecruiting, "l.is_recruiting");
+            AddFlag(criteria.ImmediateOccupancy, "l.is_immediate_occupancy");
+            AddFlag(criteria.CornerRoom, "l.is_corner_room");
+            AddFlag(criteria.HasAutolock, "r.has_autolock");
+            AddFlag(criteria.HasElevator, "r.has_elevator");
+            AddFlag(criteria.HasParcelLocker, "r.has_parcel_locker");
+            AddFlag(criteria.HasFreeInternet, "r.internet_free");
+            AddFlag(criteria.HasAirConditioner, "l.has_air_conditioner");
+            AddFlag(criteria.HasSeparateBathAndToilet, "l.has_separate_bath_and_toilet");
+            AddFlag(criteria.HasParking, "r.has_parking");
+
+            // Build and execute the search query
+            var whereClause = conditions.Count == 0
+                ? string.Empty
+                : " WHERE " + string.Join(" AND ", conditions);
+
+            cmd.CommandText =
+                "SELECT p.name AS propertyName, l.name AS roomName, " +
+                "l.listing_id AS roomId, l.property_id AS propertyId, p.fudousan_id " +
+                "FROM rent_residential_listings AS l " +
+                "LEFT JOIN properties AS p USING (property_id) " +
+                "LEFT JOIN rent_residentials AS r USING (property_id)" +
+                whereClause +
+                " ORDER BY p.name, l.name";
+
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                var propertyId = Convert.ToString(reader["propertyId"], CultureInfo.InvariantCulture);
+                if (string.IsNullOrEmpty(propertyId))
+                {
+                    Debug.WriteLine("DataAccess::SelectRentResidentialListings: propertyId is null or empty for a rent residential.");
+                    continue;
+                }
+
+                var listingId = Convert.ToString(reader["roomId"], CultureInfo.InvariantCulture);
+                if (string.IsNullOrEmpty(listingId))
+                {
+                    Debug.WriteLine("DataAccess::SelectRentResidentialListings: roomId is null or empty for a rent residential room.");
+                    continue;
+                }
+
+                var resultItem = new Models.SearchResult.ListingSearchResultItem(
+                    listingId,
+                    propertyId,
+                    PropertyContextType.RentResidential,
+                    Convert.ToString(reader["fudousan_id"], CultureInfo.InvariantCulture) ?? string.Empty);
+
+                resultItem.SetName(Convert.ToString(reader["roomName"], CultureInfo.InvariantCulture) ?? string.Empty);
+
+                var propertyName = Convert.ToString(reader["propertyName"], CultureInfo.InvariantCulture);
+                if (!string.IsNullOrEmpty(propertyName))
+                {
+                    resultItem.PropertyName = propertyName;
+                }
+
+                resultItem.SetIsModified(false);
+                res.ListingSearchResult.Add(resultItem);
+            }
+
+            // Local filter builders keep parameter handling consistent without splitting the method.
+            string EscapeLikeValue(string value)
+            {
+                return value.Trim()
+                    .Replace("\\", "\\\\", StringComparison.Ordinal)
+                    .Replace("%", "\\%", StringComparison.Ordinal)
+                    .Replace("_", "\\_", StringComparison.Ordinal);
+            }
+
+            void AddTextFilter(string value, string condition, string parameterName)
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    return;
+                }
+
+                conditions.Add(condition);
+                cmd.Parameters.AddWithValue("@" + parameterName, "%" + EscapeLikeValue(value) + "%");
+            }
+
+            void AddNumberFilter(double value, string expression, string parameterName, string comparison)
+            {
+                if (!double.IsFinite(value))
+                {
+                    return;
+                }
+
+                conditions.Add($"{expression} {comparison} @{parameterName}");
+                cmd.Parameters.AddWithValue("@" + parameterName, value);
+            }
+
+            void AddEnumFilter(string column, IEnumerable<string> values, string parameterName)
+            {
+                var selectedValues = values.ToArray();
+                if (selectedValues.Length == 0)
+                {
+                    return;
+                }
+
+                var parameterNames = selectedValues
+                    .Select((_, index) => "@" + parameterName + index.ToString(CultureInfo.InvariantCulture))
+                    .ToArray();
+
+                conditions.Add(column + " IN (" + string.Join(", ", parameterNames) + ")");
+
+                for (var index = 0; index < selectedValues.Length; index++)
+                {
+                    cmd.Parameters.AddWithValue(parameterNames[index], selectedValues[index]);
+                }
+            }
+
+            void AddFlag(bool selected, string column)
+            {
+                if (selected)
+                {
+                    conditions.Add(column + " = 1");
+                }
+            }
+
+            void AddCommissionFilter(double maximum, Models.Rent.Residentials.ListingCommissionUnitTypeLabel? unit, string amountColumn, string unitColumn, string parameterName)
+            {
+                if (unit is not null)
+                {
+                    conditions.Add(unitColumn + " = @" + parameterName + "Unit");
+                    cmd.Parameters.AddWithValue("@" + parameterName + "Unit", unit.Key.ToString());
+                }
+
+                if (double.IsFinite(maximum))
+                {
+                    conditions.Add("CAST(REPLACE(" + amountColumn + ", ',', '') AS REAL) <= @" + parameterName);
+                    cmd.Parameters.AddWithValue("@" + parameterName, maximum);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            SetDatabaseError(res, ex, "connection.Open(), reader.Read()", "Failed to connect to or read a SQLite database file", nameof(SelectRentResidentialListings));
+        }
+        finally
+        {
+            _readerWriterLock.ExitReadLock();
+        }
+
+        return res;
+    }
+    /*
+    public ListingSearchResultWrapper SelectRentResidentialListings(Models.Rent.Residentials.ListingSearchCriteria criteria)
+    {
+        var res = new ListingSearchResultWrapper();
+
+        _readerWriterLock.EnterReadLock();
+        try
+        {
+            using var connection = new SqliteConnection(_connectionStringBuilder.ConnectionString);
+            connection.Open();
+
+            using var cmd = connection.CreateCommand();
+            var conditions = new List<string>();
+
             void AddTextFilter(string value, string expression, string parameterName)
             {
                 if (string.IsNullOrWhiteSpace(value))
@@ -3075,7 +3288,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             AddTextFilter(criteria.PropertyName, "p.name LIKE @value ESCAPE '\\'", "propertyName");
             AddTextFilter(criteria.Address, "p.location_full LIKE @value ESCAPE '\\'", "address");
             AddTextFilter(criteria.LessorName, "EXISTS (SELECT 1 FROM rent_lessors_properties_listings AS relation INNER JOIN rent_lessors AS lessor ON lessor.lessor_id = relation.lessor_id WHERE relation.property_id = p.property_id AND ((r.is_unit_ownership = 0 AND relation.listing_id = '') OR (r.is_unit_ownership = 1 AND relation.listing_id = l.listing_id)) AND lessor.name LIKE @value ESCAPE '\\')", "lessorName");
-            AddTextFilter(criteria.FudousanId, "r.fudousan_id LIKE @value ESCAPE '\\'", "fudousanId");
+            AddTextFilter(criteria.FudousanId, "p.fudousan_id LIKE @value ESCAPE '\\'", "fudousanId");
 
             AddNumberFilter(criteria.MinimumRent, "l.chinryou", "minimumRent", ">=");
             AddNumberFilter(criteria.MaximumRent, "l.chinryou", "maximumRent", "<=");
@@ -3180,8 +3393,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 }
             }
 
-            cmd.CommandText = "SELECT p.name AS propertyName, l.name AS roomName, l.listing_id AS roomId, l.property_id AS propertyId " +
-                "FROM rent_residential_listings AS l LEFT JOIN properties AS p USING (property_id) LEFT JOIN rent_residentials AS r USING (property_id)" +
+            cmd.CommandText = "SELECT p.name AS propertyName, l.name AS roomName, l.listing_id AS roomId, l.property_id AS propertyId, p.fudousan_id " + "FROM rent_residential_listings AS l LEFT JOIN properties AS p USING (property_id) LEFT JOIN rent_residentials AS r USING (property_id)" +
                 (conditions.Count == 0 ? string.Empty : " WHERE " + string.Join(" AND ", conditions)) +
                 " ORDER BY p.name, l.name";
 
@@ -3202,7 +3414,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     continue;
                 }
 
-                var unit = new Models.SearchResult.ListingSearchResultItem(rid, eid, PropertyContextType.RentResidential);
+                var unit = new Models.SearchResult.ListingSearchResultItem(rid, eid, PropertyContextType.RentResidential, Convert.ToString(reader["fudousan_id"], CultureInfo.InvariantCulture) ?? string.Empty);
                 unit.SetName(Convert.ToString(reader["roomName"], CultureInfo.InvariantCulture) ?? string.Empty);
 
                 var propertyName = Convert.ToString(reader["propertyName"], CultureInfo.InvariantCulture);
@@ -3226,8 +3438,9 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
         return res;
     }
+    */
 
-    private static Models.Rent.Residentials.Listing? GetRentResidentialListing(SqliteDataReader reader, string propertyId, string propertyName, bool isUnitOwnership)
+    private static Models.Rent.Residentials.Listing? GetRentResidentialListing(SqliteDataReader reader, string propertyId, string propertyName, bool isUnitOwnership, string fudousanId)
     {
         var listingId = reader.GetString(reader.GetOrdinal("listing_id")) ?? string.Empty;
         if (string.IsNullOrEmpty(listingId))
@@ -3244,7 +3457,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         }
 
         // Create listing.
-        var room = new Models.Rent.Residentials.Listing(listingId, EntityStatus.Saved, propertyId, EntityStatus.Saved, isUnitOwnership, propertyName);
+        var room = new Models.Rent.Residentials.Listing(listingId, EntityStatus.Saved, propertyId, EntityStatus.Saved, isUnitOwnership, propertyName, fudousanId);
         // try
         room.SetName(reader.GetString(reader.GetOrdinal("name")) ?? string.Empty);
         room.SetFloorPlanTypeLabelFromString(Convert.ToString(reader["floor_plan_type"], CultureInfo.InvariantCulture) ?? string.Empty);
@@ -3262,6 +3475,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         room.SetIsAvailableForImmediateMoveIn(Convert.ToInt32(reader["is_immediate_occupancy"], CultureInfo.InvariantCulture) != 0);
         room.SetOccupancyStatusCheckedAtFromString(Convert.ToString(reader["current_status_checked_at"], CultureInfo.InvariantCulture) ?? string.Empty);
 
+        room.SetFudousanIdAdditionalCode(Convert.ToString(reader["fudousan_id_additional_code"], CultureInfo.InvariantCulture) ?? string.Empty);
         room.SetRemarks(Convert.ToString(reader["remarks"], CultureInfo.InvariantCulture) ?? string.Empty);
         room.SetChinryouFromString(Convert.ToString(reader["chinryou"], CultureInfo.InvariantCulture) ?? string.Empty);
 
@@ -3490,8 +3704,9 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             var buildingName = string.Empty;
             var isFound = false;
             var isUnitOwnership = false;
+            var fudousanId = string.Empty;
 
-            cmd.CommandText = "SELECT p.name, r.is_unit_ownership FROM properties AS p INNER JOIN rent_residentials AS r ON r.property_id = p.property_id WHERE p.property_id = @propertyId";
+            cmd.CommandText = "SELECT p.name, p.fudousan_id, r.is_unit_ownership FROM properties AS p INNER JOIN rent_residentials AS r ON r.property_id = p.property_id WHERE p.property_id = @propertyId";
             cmd.Parameters.AddWithValue("@propertyId", propertyId);
             using (var reader = cmd.ExecuteReader())
             {
@@ -3499,6 +3714,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 {
                     buildingName = reader.GetString(reader.GetOrdinal("name"));
                     isUnitOwnership = Convert.ToInt32(reader["is_unit_ownership"], CultureInfo.InvariantCulture) != 0;
+                    fudousanId = reader.GetString(reader.GetOrdinal("fudousan_id"));
                     isFound = true;
                 }
             }
@@ -3511,7 +3727,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 {
                     while (reader.Read())
                     {
-                        res.Room = GetRentResidentialListing(reader, propertyId, buildingName, isUnitOwnership);
+                        res.Room = GetRentResidentialListing(reader, propertyId, buildingName, isUnitOwnership, fudousanId);
                     }
                 }
 
@@ -5534,6 +5750,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             command.CommandText = """
             SELECT
                 p.property_id,
+                p.fudousan_id,
                 p.name AS property_name,
                 u.listing_id,
                 u.name AS unit_name
@@ -5572,7 +5789,8 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 var item = new Models.SearchResult.ListingSearchResultItem(
                     listingId,
                     propertyId,
-                    PropertyContextType.RentCommercial)
+                    PropertyContextType.RentCommercial,
+                    Convert.ToString(reader["fudousan_id"], CultureInfo.InvariantCulture) ?? string.Empty)
                 {
                     PropertyName =
                         Convert.ToString(reader["property_name"], CultureInfo.InvariantCulture)
@@ -5626,6 +5844,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             command.CommandText = """
             SELECT
                 p.property_id,
+                p.fudousan_id,
                 p.name AS property_name,
                 u.listing_id,
                 c.is_unit_ownership AS is_property_unit_ownership,
@@ -5743,7 +5962,10 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 EntityStatus.Saved,
                 Convert.ToInt32(
                     reader["is_property_unit_ownership"], CultureInfo.InvariantCulture) != 0,
-                propertyName)/*
+                propertyName,
+                Convert.ToString(reader["fudousan_id"], CultureInfo.InvariantCulture) ?? string.Empty)
+                
+                /*
             {
                 Chinryou = Convert.ToDecimal(reader["chinryou"], CultureInfo.InvariantCulture),
                 KyouekiFee =
@@ -6877,6 +7099,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             command.CommandText = """
             SELECT
                 p.property_id,
+                p.fudousan_id,
                 p.name AS property_name,
                 u.listing_id,
                 u.name AS unit_name
@@ -6910,7 +7133,8 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 var item = new Models.SearchResult.ListingSearchResultItem(
                     listingId,
                     propertyId,
-                    PropertyContextType.SaleResidential)
+                    PropertyContextType.SaleResidential,
+                    Convert.ToString(reader["fudousan_id"], CultureInfo.InvariantCulture) ?? string.Empty)
                 {
                     PropertyName = Convert.ToString(reader["property_name"], CultureInfo.InvariantCulture)
                         ?? string.Empty
@@ -7004,6 +7228,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             command.CommandText = """
             SELECT
                 p.property_id,
+                p.fudousan_id,
                 p.name AS property_name,
                 u.listing_id,
                 u.is_property_unit_ownership,
@@ -7054,7 +7279,8 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 EntityStatus.Saved,
                 Convert.ToInt32(
                     reader["is_property_unit_ownership"], CultureInfo.InvariantCulture) != 0,
-                propertyName)/*
+                propertyName,
+                Convert.ToString(reader["fudousan_id"], CultureInfo.InvariantCulture) ?? string.Empty)/*
             {
                 SalePrice = Convert.ToDecimal(reader["sale_price"], CultureInfo.InvariantCulture),
                 ManagementFee =

@@ -2396,7 +2396,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             _building.Id,
             _building.Status,
             IsUnitOwnership,
-            Name);
+            Name,
+            "");
 
         var shellFactory = App.GetService<
             Services.Extensions.AbstractFactory.IAbstractFactory<

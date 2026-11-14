@@ -50,13 +50,15 @@ public sealed partial class Listing : ListingBase
         string propertyId,
         EntityStatus propertyStatus,
         bool isPropertyUnitOwnership,
-        string propertyName)
+        string propertyName,
+        string fudousanId)
         : base(
             id,
             status,
             propertyId,
             propertyStatus,
-            Models.PropertyContextType.SaleResidential)
+            Models.PropertyContextType.SaleResidential,
+            fudousanId)
     {
         IsPropertyUnitOwnership = isPropertyUnitOwnership;
         PropertyName = propertyName;

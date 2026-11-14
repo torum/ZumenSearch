@@ -198,6 +198,21 @@
                 </Border>
 
                 <Border Style="{StaticResource RoundCardBorderStyle}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*" MinWidth="320"></ColumnDefinition>
+                            <ColumnDefinition Width="1*" MinWidth="320"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <Grid Grid.Row="0" Grid.Column="0">
+                            <TextBox Header="不動産番号" IsReadOnly="True" MaxLength="13" InputScope="Number" Text="{x:Bind ViewModel.FudousanId, Mode=OneWay}"></TextBox>
+                        </Grid>
+                        <Grid Grid.Row="0" Grid.Column="1" Margin="12,0,0,0">
+                            <TextBox Header="特定コード" PlaceholderText="4桁の半角英数字（英字は大文字）" MaxLength="4" Text="{x:Bind ViewModel.FudousanIdAdditionalCode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
+                        </Grid>
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource RoundCardBorderStyle}">
                     <TextBox Header="備考" Text="{x:Bind ViewModel.Remarks, Mode=TwoWay}" MinHeight="100" HorizontalAlignment="Stretch" VerticalAlignment="Top" AcceptsReturn="True" ScrollViewer.VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" />
                 </Border>
                 

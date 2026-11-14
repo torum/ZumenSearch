@@ -104,6 +104,22 @@ public sealed partial class ListingPicture : PictureBase
         IsModified = false;
     }
 
+    public ListingPicture Clone()
+    {
+        var clone = new ListingPicture(Id, ImageFilename, Status)
+        {
+            BasePath = BasePath,
+            ThumbImagePath = ThumbImagePath,
+            Description = Description,
+            IsMain = IsMain
+        };
+
+        clone.PictureType = clone.RoomPictureTypes.FirstOrDefault(item => item.Key == PictureType.Key)
+            ?? new ListingPictureTypeLabel(PictureType.Key);
+        clone.SetIsModified(IsModified);
+        return clone;
+    }
+
     public ListingPictureType? SetLabelFromString(string titleStr)
     {
         if (Enum.TryParse<ListingPictureType>(titleStr, out var result))

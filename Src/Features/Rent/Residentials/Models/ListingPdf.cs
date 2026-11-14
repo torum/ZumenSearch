@@ -95,6 +95,21 @@ public sealed partial class ListingPdf : PdfBase
         IsModified = false;
     }
 
+    public ListingPdf Clone()
+    {
+        var clone = new ListingPdf(Id, PdfFilename, ThumbnailFilename, Status)
+        {
+            BasePath = BasePath,
+            Description = Description,
+            IsMain = IsMain
+        };
+
+        clone.PdfType = clone.RoomPdfTypes.FirstOrDefault(item => item.Key == PdfType.Key)
+            ?? new ListingPdfTypeLabel(PdfType.Key);
+        clone.SetIsModified(IsModified);
+        return clone;
+    }
+
     public ListingPdfType? SetTypeFromString(string Str)
     {
         if (!Enum.TryParse<ListingPdfType>(Str, out var result) || !Enum.IsDefined(result))

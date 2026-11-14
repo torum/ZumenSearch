@@ -381,7 +381,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
             var item = results[i];
             if (item.PropertyContextType != updated.PropertyContextType || !item.PropertyId.Equals(updated.PropertyId, StringComparison.Ordinal) || !item.Id.Equals(updated.Id, StringComparison.Ordinal)) continue;
 
-            var replacement = new ListingSearchResultItem(item.Id, item.PropertyId, item.PropertyContextType) { PropertyName = item.PropertyName };
+            var replacement = new ListingSearchResultItem(item.Id, item.PropertyId, item.PropertyContextType, item.FudousanId) { PropertyName = item.PropertyName };
             replacement.SetName(updated.Name);
             replacement.SetIsModified(false);
             results[i] = replacement;

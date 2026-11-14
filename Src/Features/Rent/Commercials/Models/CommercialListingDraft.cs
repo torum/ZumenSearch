@@ -182,7 +182,7 @@ public sealed class CommercialListingDraft
 
     public Listing.Listing ToEditorModel(IReadOnlyDictionary<string, ListingPicture> pictures, IReadOnlyDictionary<string, ListingPdf> pdfs)
     {
-        var listing = new Listing.Listing(Id, Status, PropertyId, PropertyStatus, IsPropertyUnitOwnership, PropertyName);
+        var listing = new Listing.Listing(Id, Status, PropertyId, PropertyStatus, IsPropertyUnitOwnership, PropertyName, "");
         listing.SetName(Name);
         listing.SetChinryou(Chinryou);
         listing.SetRentTaxTypeLabel(RentTax);
