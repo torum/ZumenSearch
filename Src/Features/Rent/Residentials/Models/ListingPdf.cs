@@ -7,7 +7,7 @@ public sealed partial class ListingPdf : PdfBase
 {
     public ViewModels.Rent.Residentials.ListingViewModel? ParentViewModel { get; set; }
 
-    public ObservableCollection<ListingPdfTypeLabel> RoomPdfTypes { get; set; } =
+    public ObservableCollection<ListingPdfTypeLabel> ListingPdfTypes { get; set; } =
         [
         new ListingPdfTypeLabel(Models.Rent.Residentials.ListingPdfType.Unspecified),
         new ListingPdfTypeLabel(Models.Rent.Residentials.ListingPdfType.Maisoku),
@@ -90,9 +90,24 @@ public sealed partial class ListingPdf : PdfBase
     {
         PdfFilename = pdfLocation;
         ThumbnailFilename = thumbnailLocation;
-        PdfType = RoomPdfTypes[0];
+        //PdfType = ListingPdfTypes[0];
+        PdfType = ListingPdfTypes.First(item => item.Key == ListingPdfType.Unspecified);
 
         IsModified = false;
+    }
+
+    public ListingPdfType SetTypeFromString(string Str)
+    {
+        if (!Enum.TryParse<ListingPdfType>(Str, out var result) || !Enum.IsDefined(result))
+        {
+            //throw new FormatException($"Invalid residential listing PDF type: {Str}");
+            Debug.WriteLine($"Invalid residential listing PDF type: {Str}. Defaulting to Unspecified.");
+            PdfType = ListingPdfTypes.First(item => item.Key == ListingPdfType.Unspecified);
+            return ListingPdfType.Unspecified;
+        }
+
+        PdfType = ListingPdfTypes.First(item => item.Key == result);
+        return result;
     }
 
     public ListingPdf Clone()
@@ -104,20 +119,10 @@ public sealed partial class ListingPdf : PdfBase
             IsMain = IsMain
         };
 
-        clone.PdfType = clone.RoomPdfTypes.FirstOrDefault(item => item.Key == PdfType.Key)
+        clone.PdfType = clone.ListingPdfTypes.FirstOrDefault(item => item.Key == PdfType.Key)
             ?? new ListingPdfTypeLabel(PdfType.Key);
         clone.SetIsModified(IsModified);
         return clone;
     }
 
-    public ListingPdfType? SetTypeFromString(string Str)
-    {
-        if (!Enum.TryParse<ListingPdfType>(Str, out var result) || !Enum.IsDefined(result))
-        {
-            throw new FormatException($"Invalid residential listing PDF type: {Str}");
-        }
-
-        PdfType = RoomPdfTypes.First(item => item.Key == result);
-        return result;
-    }
 };

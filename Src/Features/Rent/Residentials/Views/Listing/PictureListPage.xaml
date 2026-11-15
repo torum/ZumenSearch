@@ -55,7 +55,7 @@
                                     <Grid Grid.Row="0" Grid.Column="1">
                                         <StackPanel Spacing="12" Margin="24,0,6,6" MinWidth="260">
                                             <StackPanel Orientation="Horizontal">
-                                                <ComboBox x:Name="ComboBoxKinds" Header="タイプ" PlaceholderText="選択" Width="200" ItemsSource="{x:Bind RoomPictureTypes, Mode=OneWay}" SelectedItem="{x:Bind PictureType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                                <ComboBox x:Name="ComboBoxKinds" Header="タイプ" PlaceholderText="選択" Width="200" ItemsSource="{x:Bind ListingPictureTypes, Mode=OneWay}" SelectedItem="{x:Bind PictureType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                                                     <ComboBox.ItemTemplate>
                                                         <DataTemplate x:DataType="modresidentials:ListingPictureTypeLabel">
                                                             <StackPanel Orientation="Horizontal">

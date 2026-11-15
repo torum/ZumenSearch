@@ -1373,6 +1373,118 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         return true;
     }
 
+    // 部屋複製
+    [RelayCommand(CanExecute = nameof(DuplicateRentResidentialRoomCanExecute))]
+    private async Task DuplicateRentResidentialRoom(Models.SearchResult.ListingSearchResultItem? selected)
+    {
+        if (selected is null)
+        {
+            Debug.WriteLine("DuplicateRentResidentialRoom executed but no item is selected.");
+            return;
+        }
+
+        var roomId = selected.Id;
+        var buildingId = selected.PropertyId;
+
+        if (string.IsNullOrEmpty(roomId) || string.IsNullOrEmpty(buildingId))
+        {
+            Debug.WriteLine("DuplicateRentResidentialRoom executed without a listing or property id.");
+            return;
+        }
+        if (!TryBeginResidentialOperation(buildingId))
+        {
+            ShowResidentialOperationBusy();
+            return;
+        }
+        try
+        {
+            await DuplicateRentResidentialRoomCore(selected);
+        }
+        finally
+        {
+            EndResidentialOperation(buildingId);
+        }
+    }
+    private static async Task DuplicateRentResidentialRoomCore(Models.SearchResult.ListingSearchResultItem selected)
+    {
+        var roomId = selected.Id;
+        var buildingId = selected.PropertyId;
+
+        //Debug.WriteLine($"DuplicateRentResidentialRoomCore executed for {selected.Id}");
+        
+        /*
+        // Access Database to get the full entry data.
+        var res = await Task.Run(() => _dataAccessService.SelectRentResidentialListingById(buildingId, roomId), _cts.Token);
+        if (res.IsError)
+        {
+            Debug.WriteLine(
+                res.Error.Title + Environment.NewLine +
+                res.Error.Message + Environment.NewLine +
+                res.Error.Description + Environment.NewLine +
+                res.Error.Operation + Environment.NewLine +
+                res.Error.MethodName + Environment.NewLine +
+                res.Error.FullDump);
+
+            InfoBarErrorMessage =
+                res.Error.Title + Environment.NewLine +
+                res.Error.Message + Environment.NewLine +
+                res.Error.Description + Environment.NewLine +
+                res.Error.Operation + Environment.NewLine +
+                res.Error.MethodName;
+
+            IsInfoBarErrorOpen = true;
+            return;
+        }
+
+        if (res.Room is null)
+        {
+            Debug.WriteLine($"Room for {roomId} is null. Cannot open editor.");
+            return;
+        }
+
+        var editorShell = _shellRentResidentialListingFactory.Create(res.Room);
+        var propertyEditor = RentResidentialEditorList.FirstOrDefault(editor => editor.Id == buildingId && editor.ViewModel is { IsActive: true });
+        if (propertyEditor?.ViewModel is { } propertyViewModel) editorShell.ViewModel.SetOwnershipVisibility(propertyViewModel.IsUnitLevelOwnership);
+        var editorWindow = editorShell.Window;
+        if (editorWindow == null)
+        {
+            // EditorWin should be initialized in the EditorShell constructor.
+            Debug.WriteLine("EditorWin must be initialized in the EditorShell constructor");
+            return;
+        }
+
+        RentResidentialListingEditorList.Add(editorWindow);
+
+        editorWindow.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(RentResidentialListingEditorWinLeft, RentResidentialListingEditorWinTop, RentResidentialListingEditorWinWidth, RentResidentialListingEditorWinHeight));
+        if (editorWindow.AppWindow.Presenter is OverlappedPresenter presenter)
+        {
+            presenter.IsResizable = true;
+            presenter.IsModal = false;
+            presenter.IsAlwaysOnTop = false;
+            presenter.PreferredMinimumWidth = 1274;
+            presenter.PreferredMinimumHeight = 794;
+        }
+
+        editorWindow.AppWindow.Show();
+        editorWindow.Activate();
+
+        // Do I need this anymore?
+        //var mainWindow = App.GetService<MainWindow>();
+        //mainWindow?.AppWindow.MoveInZOrderBelow(editorWindow.AppWindow.Id);
+
+        editorWindow.AppWindow.MoveInZOrderAtTop();
+        */
+    }
+    private static bool DuplicateRentResidentialRoomCanExecute(Models.SearchResult.ListingSearchResultItem? selected)
+    {
+        if (selected is null)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
     // 部屋削除
     [RelayCommand(CanExecute = nameof(DeleteRentResidentialRoomCanExecute))]
     private async Task DeleteRentResidentialRoom(Models.SearchResult.ListingSearchResultItem? selected)

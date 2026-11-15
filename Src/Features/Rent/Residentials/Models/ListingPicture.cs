@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Data;
 using ZumenSearch.Models.Base;
 
 namespace ZumenSearch.Models.Rent.Residentials;
@@ -33,7 +34,7 @@ public sealed partial class ListingPicture : PictureBase
         }
     } = new(ListingPictureType.Unspecified);
 
-    public ObservableCollection<ListingPictureTypeLabel> RoomPictureTypes { get;} =
+    public ObservableCollection<ListingPictureTypeLabel> ListingPictureTypes { get;} =
     [
         new ListingPictureTypeLabel(Models.Rent.Residentials.ListingPictureType.Unspecified),
         new ListingPictureTypeLabel(Models.Rent.Residentials.ListingPictureType.Madori),
@@ -104,6 +105,20 @@ public sealed partial class ListingPicture : PictureBase
         IsModified = false;
     }
 
+    public ListingPictureType SetTypeFromString(string Str)
+    {
+        if (!Enum.TryParse<ListingPictureType>(Str, out var result) || !Enum.IsDefined(result))
+        {
+            //throw new FormatException($"Invalid residential listing PDF type: {Str}");
+            Debug.WriteLine($"Invalid residential listing PDF type: {Str}. Defaulting to Unspecified.");
+            PictureType = ListingPictureTypes.First(item => item.Key == ListingPictureType.Unspecified);
+            return ListingPictureType.Unspecified;
+        }
+
+        PictureType = ListingPictureTypes.First(item => item.Key == result);
+        return result;
+    }
+
     public ListingPicture Clone()
     {
         var clone = new ListingPicture(Id, ImageFilename, Status)
@@ -114,27 +129,10 @@ public sealed partial class ListingPicture : PictureBase
             IsMain = IsMain
         };
 
-        clone.PictureType = clone.RoomPictureTypes.FirstOrDefault(item => item.Key == PictureType.Key)
+        clone.PictureType = clone.ListingPictureTypes.FirstOrDefault(item => item.Key == PictureType.Key)
             ?? new ListingPictureTypeLabel(PictureType.Key);
         clone.SetIsModified(IsModified);
         return clone;
     }
 
-    public ListingPictureType? SetLabelFromString(string titleStr)
-    {
-        if (Enum.TryParse<ListingPictureType>(titleStr, out var result))
-        {
-            //PictureType = new(result); // Not good for assigning to combobox. So select from BuildingPictureTypes.
-            PictureType = RoomPictureTypes.FirstOrDefault<ListingPictureTypeLabel>(x => x.Key == result) ?? new(ListingPictureType.Unspecified);
-
-            //Debug.WriteLine($"SetLabelFromString: {titleStr} -> {PictureType.Label}");
-            return result;
-        }
-        else
-        {
-            PictureType = new(ListingPictureType.Unspecified);
-
-            return ListingPictureType.Unspecified;
-        }
-    }
 };

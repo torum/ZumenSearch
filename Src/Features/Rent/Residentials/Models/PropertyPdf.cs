@@ -90,16 +90,20 @@ public sealed partial class PropertyPdf : PdfBase
     {
         PdfFilename = pdfLocation;
         ThumbnailFilename = thumbnailLocation;
-        PdfType = ResidentialPdfTypes[0];
+        //PdfType = ResidentialPdfTypes[0];
+        PdfType = ResidentialPdfTypes.First(item => item.Key == PropertyPdfType.Unspecified);
 
         IsModified = false;
     }
 
-    public PropertyPdfType? SetTypeFromString(string Str)
+    public PropertyPdfType SetTypeFromString(string Str)
     {
         if (!Enum.TryParse<PropertyPdfType>(Str, out var result) || !Enum.IsDefined(result))
         {
-            throw new FormatException($"Invalid residential property PDF type: {Str}");
+            //throw new FormatException($"Invalid residential property PDF type: {Str}");
+            Debug.WriteLine($"Invalid residential property PDF type: {Str}. Defaulting to Unspecified.");
+            PdfType = ResidentialPdfTypes.First(item => item.Key == PropertyPdfType.Unspecified);
+            return PropertyPdfType.Unspecified;
         }
 
         PdfType = ResidentialPdfTypes.First(item => item.Key == result);

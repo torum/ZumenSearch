@@ -14,20 +14,20 @@ public interface IDataAccessService
     ResultWrapper UpsertRentResidential(Models.Rent.Residentials.Property building);//, IReadOnlyCollection<Models.Rent.Residentials.ResidentialListingDraft> pendingListings, IReadOnlyCollection<string> deletedListingIds
     Models.Rent.Residentials.PropertyResultWrapper SelectRentResidentialById(string id);
     ResultWrapper DeleteRentResidential(string propertyId);
-    ResultWrapper UpsertRentResidentialListing(string propertyId, Models.Rent.Residentials.Listing room);
+    ResultWrapper UpsertRentResidentialListing(string propertyId, Models.Rent.Residentials.Listing listing);
     ListingSearchResultWrapper SelectRentResidentialListings(Models.Rent.Residentials.ListingSearchCriteria criteria);
-    Models.Rent.Residentials.ListingResultWrapper SelectRentResidentialListingById(string propertyId, string roomId);
-    ResultWrapper DeleteRentResidentialListing(string roomId);
+    Models.Rent.Residentials.ListingResultWrapper SelectRentResidentialListingById(string propertyId, string listingId);
+    ResultWrapper DeleteRentResidentialListing(string listingId);
 
     // Rent Commercial
     ResultWrapper UpsertRentCommercial(Models.Rent.Commercials.Property building, IReadOnlyCollection<Models.Rent.Commercials.CommercialListingDraft> pendingListings, IReadOnlyCollection<string> deletedListingIds, bool? expectedCommittedUnitOwnership);
     //PropertiesResultWrapper SelectRentCommercialsByNameKeyword(string keyword);
     Models.Rent.Commercials.PropertyResultWrapper SelectRentCommercialById(string id);
     ResultWrapper DeleteRentCommercial(string commercialId);
-    ResultWrapper UpsertRentCommercialListing(string commercialId,Models.Rent.Commercials.Listing.Listing room);
+    ResultWrapper UpsertRentCommercialListing(string commercialId,Models.Rent.Commercials.Listing.Listing listing);
     ListingSearchResultWrapper SelectRentCommercialListings(string keyword);
-    Models.Rent.Commercials.ListingResultWrapper SelectRentCommercialListingById(string commercialId,string roomId);
-    ResultWrapper DeleteRentCommercialListing(string roomId);
+    Models.Rent.Commercials.ListingResultWrapper SelectRentCommercialListingById(string commercialId,string listingId);
+    ResultWrapper DeleteRentCommercialListing(string listingId);
 
     // Lessor
     ResultWrapper UpsertRentLessor(Models.Base.PersonBase lessor);

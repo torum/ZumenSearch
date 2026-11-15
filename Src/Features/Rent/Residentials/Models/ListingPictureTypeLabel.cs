@@ -12,7 +12,7 @@ public enum ListingPictureType
 
 public sealed class ListingPictureTypeLabel(ListingPictureType key)
 {
-    private Dictionary<ListingPictureType, string> RoomPictureTypeDictionary
+    private Dictionary<ListingPictureType, string> ListingPictureTypeDictionary
     {
         get;
     } = new Dictionary<ListingPictureType, string>()
@@ -36,7 +36,7 @@ public sealed class ListingPictureTypeLabel(ListingPictureType key)
                 {ListingPictureType.Other, "その他"},
             };
 
-    public string Label => RoomPictureTypeDictionary[Key];
+    public string Label => ListingPictureTypeDictionary[Key];
 
     public ListingPictureType Key => key;
 };

@@ -12,7 +12,7 @@ public sealed partial class PropertyPicture : PictureBase
 
     public ObservableCollection<PropertyPictureTypeLabel> ResidentialPictureTypes { get; } =
     [
-        //new PropertyPictureTypeLabel(EnumResidentialPictureType.Unspecified, "未指定"),
+        new PropertyPictureTypeLabel(Models.Rent.Residentials.PropertyPictureType.Unspecified),
         new PropertyPictureTypeLabel(Models.Rent.Residentials.PropertyPictureType.Gaikan),
         new PropertyPictureTypeLabel(Models.Rent.Residentials.PropertyPictureType.Entrance),
         new PropertyPictureTypeLabel(Models.Rent.Residentials.PropertyPictureType.Neighborhood),
@@ -95,22 +95,18 @@ public sealed partial class PropertyPicture : PictureBase
         IsModified = false;
     }
 
-    public PropertyPictureType? SetLabelFromString(string titleStr)
+    public PropertyPictureType SetTypeFromString(string Str)
     {
-        if (Enum.TryParse<PropertyPictureType>(titleStr, out var result))
+        if (!Enum.TryParse<PropertyPictureType>(Str, out var result) || !Enum.IsDefined(result))
         {
-            //PictureType = new(result); // Not good for assigning to combobox. So select from ResidentialPictureTypes.
-            PictureType = ResidentialPictureTypes.FirstOrDefault<PropertyPictureTypeLabel>(x => x.Key == result) ?? new(PropertyPictureType.Unspecified);
-
-            //Debug.WriteLine($"SetLabelFromString: {titleStr} -> {PictureType.Label}");
-            return result;
-        }
-        else
-        {
-            PictureType = new(PropertyPictureType.Unspecified);
-
+            //throw new FormatException($"Invalid residential property Picture type: {Str}");
+            Debug.WriteLine($"Invalid residential property Picture type: {Str}. Defaulting to Unspecified.");
+            PictureType = ResidentialPictureTypes.First(item => item.Key == PropertyPictureType.Unspecified);
             return PropertyPictureType.Unspecified;
         }
+
+        PictureType = ResidentialPictureTypes.First(item => item.Key == result);
+        return result;
     }
 
     public PropertyPicture Clone()
