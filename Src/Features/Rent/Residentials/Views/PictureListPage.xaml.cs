@@ -80,9 +80,9 @@ public sealed partial class PictureListPage : Page
                 .Select(file => file.Path)
                 .ToList();
 
-            if (ViewModel.AddNewBuildingPicturesCommand.CanExecute(paths))
+            if (ViewModel.AddNewPropertyPicturesCommand.CanExecute(paths))
             {
-                await ViewModel.AddNewBuildingPicturesCommand.ExecuteAsync(paths);
+                await ViewModel.AddNewPropertyPicturesCommand.ExecuteAsync(paths);
             }
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Runtime.InteropServices.COMException or InvalidOperationException or ArgumentException)

@@ -55,10 +55,10 @@ public sealed partial class ZumenListPage : Page
                 .Select(file => file.Path)
                 .ToList();
 
-            if (ViewModel.AddNewBuildingPdfsCommand.CanExecute(paths))
+            if (ViewModel.AddNewPropertyPdfsCommand.CanExecute(paths))
             {
-                await ViewModel.AddNewBuildingPdfsCommand.ExecuteAsync(paths);
-                //await ViewModel.SetNewBuildingPdfsAsync(paths);
+                await ViewModel.AddNewPropertyPdfsCommand.ExecuteAsync(paths);
+                //await ViewModel.SetNewPropertyPdfsAsync(paths);
             }
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Runtime.InteropServices.COMException or InvalidOperationException or ArgumentException)

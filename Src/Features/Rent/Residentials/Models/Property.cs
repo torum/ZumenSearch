@@ -338,9 +338,9 @@ public sealed partial class Property : PropertyBase
 
     #region == Methods ==
 
-    public void SetBuildingType(PropertyKindTypeLabel value) => PropertyKind = value;
+    public void SetPropertyKind(PropertyKindTypeLabel value) => PropertyKind = value;
 
-    public void SetPropertyTypeFromString(string Str)
+    public void SetPropertyKindFromString(string Str)
     {
         if (string.IsNullOrEmpty(Str))
         {
@@ -356,7 +356,7 @@ public sealed partial class Property : PropertyBase
 
     public void SetIsUnitLevelOwnership(bool value) => IsUnitLevelOwnership = value;
 
-    public void SetBuildingStructure(PropertyStructureTypeLabel value) => PropertyStructure = value;
+    public void SetPropertyStructure(PropertyStructureTypeLabel value) => PropertyStructure = value;
 
     public void SetStructureTypeFromString(string Str)
     {

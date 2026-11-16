@@ -1041,14 +1041,14 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
             return;
         }
 
-        if (res.Building is null)
+        if (res.Property is null)
         {
             // TODO: Show error message to user.
-            Debug.WriteLine($"Building for {propertyId} is null. Cannot open editor.");
+            Debug.WriteLine($"Property for {propertyId} is null. Cannot open editor.");
             return;
         }
 
-        var editorShell = _shellRentResidentialPropertyFactory.Create(res.Building);//_editorFactory.Create();
+        var editorShell = _shellRentResidentialPropertyFactory.Create(res.Property);//_editorFactory.Create();
         //editorShell.ViewModel.SetListingSummaries(res.ListingSummaries);
 
         var editorWindow = editorShell.Window;
@@ -1276,7 +1276,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
 
     private async Task EditRentResidentialRoomCore(Models.SearchResult.ListingSearchResultItem selected)
     {
-        var roomId = selected.Id;
+        var listingId = selected.Id;
         var buildingId = selected.PropertyId;
 
         //Debug.WriteLine($"EditRentResidentialRoomCommand executed for {selected.Id}");
@@ -1286,11 +1286,11 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         // Check if the selected item is already being edited in another window.
         RentResidentialListingEditorList.ForEach(editorWindow =>
         {
-            //Debug.WriteLine($"Checking editor window with Id: {editorWindow.Id} for selected item with Id: {roomId}");
-            if (editorWindow.Id == roomId)
+            //Debug.WriteLine($"Checking editor window with Id: {editorWindow.Id} for selected item with Id: {listingId}");
+            if (editorWindow.Id == listingId)
             {
                 // If the editor window for this item is already open, activate it.
-                //Debug.WriteLine($"Editor window for {roomId} is already open. Activating it.");
+                //Debug.WriteLine($"Editor window for {listingId} is already open. Activating it.");
                 isFound = true;
 
                 editorWindow.Activate();
@@ -1311,7 +1311,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         }
 
         // Access Database to get the full entry data.
-        var res = await Task.Run(() => _dataAccessService.SelectRentResidentialListingById(buildingId, roomId), _cts.Token);
+        var res = await Task.Run(() => _dataAccessService.SelectRentResidentialListingById(buildingId, listingId), _cts.Token);
         if (res.IsError)
         {
             Debug.WriteLine(
@@ -1333,13 +1333,13 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
             return;
         }
 
-        if (res.Room is null)
+        if (res.Listing is null)
         {
-            Debug.WriteLine($"Room for {roomId} is null. Cannot open editor.");
+            Debug.WriteLine($"Listing for {listingId} is null. Cannot open editor.");
             return;
         }
 
-        var editorShell = _shellRentResidentialListingFactory.Create(res.Room, false);
+        var editorShell = _shellRentResidentialListingFactory.Create(res.Listing, false);
         var propertyEditor = RentResidentialEditorList.FirstOrDefault(editor => editor.Id == buildingId && editor.ViewModel is { IsActive: true });
         if (propertyEditor?.ViewModel is { } propertyViewModel) editorShell.ViewModel.SetOwnershipVisibility(propertyViewModel.IsUnitLevelOwnership);
         var editorWindow = editorShell.Window;
@@ -1440,30 +1440,30 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
             return;
         }
 
-        if (res.Room is null)
+        if (res.Listing is null)
         {
-            Debug.WriteLine($"Room for {listingId} is null. Cannot open editor.");
+            Debug.WriteLine($"Listing for {listingId} is null. Cannot open editor.");
             return;
         }
 
-        // All the ids in the duplicated room and its attachments are already new,
+        // All the ids in the duplicated listing and its attachments are already new,
         // we just need to set the BasePath for the original pictures and PDFs to the source directory.
 
         // Set the BasePath for ORIGINAL pictures and PDFs to the source directory here.
-        // This is necessary because the duplicated room has a new ID, and we want to keep the original files in their original location
-        // so that we can copy them to the new location and also keep track of them as unsaved in the ListingViewModel when opens the duplicated room in the editor.
+        // This is necessary because the duplicated listing has a new ID, and we want to keep the original files in their original location
+        // so that we can copy them to the new location and also keep track of them as unsaved in the ListingViewModel when opens the duplicated listing in the editor.
         var sourceDirectory = Path.Combine(App.PropertyBlobDataFolder, buildingId, listingId);
-        foreach (var picture in res.Room.Pictures)
+        foreach (var picture in res.Listing.Pictures)
         {
             picture.BasePath = sourceDirectory;
         }
-        foreach (var pdf in res.Room.Pdfs)
+        foreach (var pdf in res.Listing.Pdfs)
         {
             pdf.BasePath = sourceDirectory;
         }
 
-        // use second parameter true to indicate this is a duplicated room, so that the editor can handle it accordingly.
-        var editorShell = _shellRentResidentialListingFactory.Create(res.Room, true);
+        // use second parameter true to indicate this is a duplicated listing, so that the editor can handle it accordingly.
+        var editorShell = _shellRentResidentialListingFactory.Create(res.Listing, true);
         var propertyEditor = RentResidentialEditorList.FirstOrDefault(editor => editor.Id == buildingId && editor.ViewModel is { IsActive: true });
         if (propertyEditor?.ViewModel is { } propertyViewModel) editorShell.ViewModel.SetOwnershipVisibility(propertyViewModel.IsUnitLevelOwnership);
         var editorWindow = editorShell.Window;
@@ -1595,10 +1595,10 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
                 Debug.WriteLine($"Checking editor window with Id: {editorWindow.Id} for selected item with Id: {selectedPropertyId}");
                 if (editorWindow.Id == selectedPropertyId)
                 {
-                    // If the editor window for this item is already open, remove the room.
-                    //Debug.WriteLine($"Editor window for {selected.PropertyId} is already open. Removing room.");
+                    // If the editor window for this item is already open, remove the listing.
+                    //Debug.WriteLine($"Editor window for {selected.PropertyId} is already open. Removing listing.");
 
-                    // remove room from the editor window's ViewModel if it exists.
+                    // remove listing from the editor window's ViewModel if it exists.
                     WeakReferenceMessenger.Default.Send(new Models.Messenger.ListingDeletedMessage(selectedId));
 
                     return;
@@ -1843,13 +1843,13 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
             return;
         }
 
-        if (res.Building is null)
+        if (res.Property is null)
         {
-            Debug.WriteLine($"Building for {propertyId} is null. Cannot open editor.");
+            Debug.WriteLine($"Property for {propertyId} is null. Cannot open editor.");
             return;
         }
 
-        var editorShell = _shellRentCommercialPropertyFactory.Create(res.Building);
+        var editorShell = _shellRentCommercialPropertyFactory.Create(res.Property);
         editorShell.ViewModel.SetListingSummaries(res.ListingSummaries);
 
         var editorWindow = editorShell.Window;
@@ -2078,9 +2078,9 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
 
     private async Task EditRentCommercialListingCore(Models.SearchResult.ListingSearchResultItem selected)
     {
-        var roomId = selected.Id;
+        var listingId = selected.Id;
         var buildingId = selected.PropertyId;
-        if (RentCommercialEditorList.Any(editor => editor.Id == buildingId && editor.ViewModel?.IsListingPendingDeletion(roomId) == true))
+        if (RentCommercialEditorList.Any(editor => editor.Id == buildingId && editor.ViewModel?.IsListingPendingDeletion(listingId) == true))
         {
             InfoBarErrorTitle = "編集画面が開いています";
             InfoBarErrorMessage = "建物の編集画面で削除予定の募集物件は開けません。";
@@ -2095,11 +2095,11 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         // Check if the selected item is already being edited in another window.
         RentCommercialListingEditorList.ForEach(editorWindow =>
         {
-            //Debug.WriteLine($"Checking editor window with Id: {editorWindow.Id} for selected item with Id: {roomId}");
-            if (editorWindow.Id == roomId)
+            //Debug.WriteLine($"Checking editor window with Id: {editorWindow.Id} for selected item with Id: {listingId}");
+            if (editorWindow.Id == buildingId)
             {
                 // If the editor window for this item is already open, activate it.
-                //Debug.WriteLine($"Editor window for {roomId} is already open. Activating it.");
+                //Debug.WriteLine($"Editor window for {listingId} is already open. Activating it.");
                 isFound = true;
 
                 editorWindow.Activate();
@@ -2120,7 +2120,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         }
 
         // Access Database to get the full entry data.
-        var res = await Task.Run(() => _dataAccessService.SelectRentCommercialListingById(buildingId, roomId), _cts.Token);
+        var res = await Task.Run(() => _dataAccessService.SelectRentCommercialListingById(buildingId, listingId), _cts.Token);
         if (res.IsError)
         {
             Debug.WriteLine(
@@ -2144,13 +2144,15 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
 
         if (res.Unit is null)
         {
-            Debug.WriteLine($"Room for {roomId} is null. Cannot open editor.");
+            Debug.WriteLine($"Listing for {listingId} is null. Cannot open editor.");
             return;
         }
 
         var editorShell = _shellRentCommercialListingFactory.Create(res.Unit);
-        var propertyEditor = RentCommercialEditorList.FirstOrDefault(editor => editor.Id == buildingId && editor.ViewModel is { IsActive: true });
-        if (propertyEditor?.ViewModel is { } propertyViewModel) editorShell.ViewModel.SetOwnershipVisibility(propertyViewModel.IsUnitOwnership);
+        
+        //var propertyEditor = RentCommercialEditorList.FirstOrDefault(editor => editor.Id == buildingId && editor.ViewModel is { IsActive: true });
+        //if (propertyEditor?.ViewModel is { } propertyViewModel) editorShell.ViewModel.SetOwnershipVisibility(propertyViewModel.IsUnitOwnership);
+
         var editorWindow = editorShell.Window;
         if (editorWindow == null)
         {
@@ -2199,7 +2201,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
             return;
         }
 
-        var selectedId = selected.Id;
+        //var selectedId = selected.Id;
         var selectedPropertyId = selected.PropertyId;
         if (string.IsNullOrWhiteSpace(selectedPropertyId))
         {

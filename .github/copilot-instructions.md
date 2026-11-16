@@ -3,33 +3,30 @@
 Strictly follow these boundaries:
 
 ## Change Approval
-- Do not edit code or change any repository file without the user's explicit consent.
+- Do not edit code or change any files in this repository without the user's explicit consent.
 - Before making any change, present a plan describing the intended edits and wait for the user's approval.
 
 ## General Guidelines
 - Follow .github/copilot-instructions.md
-- Follow the existing code style, design patterns and conventions strictly when make changes.
+- Follow and preserve the existing code, code style, design patterns and conventions strictly when making changes.
 - For the current database redesign, implement only the fresh database schema; do not add migration logic. The user will delete the existing database file and local cache.
 - Avoid presenting code changes as unified diff/patch blocks; use clear replacement code snippets with line numbers and file names and paths or concise prose instead.
 - Maintain the application as a single project for the foreseeable future, enforcing cleaner internal boundaries rather than splitting into multiple projects.
 
-
 ## Code Style
 
 ### XAML formatting
-- Keep each element's opening tag and all its attributes on a single line.
-- Do not wrap an element's attributes across multiple lines.
+- Single line makes code folding easier. Keep each element's opening tag and all its attributes on a single line. Do not wrap an element's attributes across multiple lines.
 
 ### C# formatting
-- Follow the existing style, patterns, and conventions. 
-- Priority is for human to understand and follow the code.
-- Do not extract methods or helpers unnecessarily. It will exponentially harder for a human to follow. Extract only if the code is actually used in multiple places.
-- Keep method, constructor, and lambda parameter lists on one line, even when the line is long. Keep argument lists on one line. Do not wrap argument lists. Do not put parameters on separate lines. Single line makes code folding easier.
+- Priority is for humans to understand the code and follow the logic and flow. The maintainability is important but secondary. Follow the existing style, patterns, and conventions. 
+- Do not extract methods or helpers unnecessarily. It will exponentially harder for a human to follow. Extract only if the same code is actually used in multiple places/methods/classes.
+- Single line makes code folding easier. Keep method, constructor, and lambda parameter lists on one line, even when the line is long. Keep argument lists on one line. Do not wrap argument lists. Do not put parameters on separate lines.
 - Avoiding hard-coded enum member-name strings in parsers; use enum member ToString() or generic enum parsing so enum renames do not require updating duplicated string constants.
 - For enum choices that need human-readable labels, use a model label type containing the enum Key and localized Label, following PropertyKindTypeLabel, instead of displaying enum member names.
 - Follow existing setter conventions: typed-label properties use matching `Set...TypeLabel`/`Set...Label` methods and should have `FromString` counterparts when applicable; preserve the existing parsing pattern.
 
-## WinUI 3 & Windows App SDK Architecture Guidelines (.NET 1)
+## WinUI 3 & Windows App SDK Architecture Guidelines (.NET 11)
 
 ### Core Ecosystem Rules
 - **Target Framework:** Only target `.NET 11.0` with the Windows-specific Target Framework Moniker (e.g., `net11.0-windows10.0.19041.0`).

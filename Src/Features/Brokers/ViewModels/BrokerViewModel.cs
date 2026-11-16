@@ -10,6 +10,11 @@ using ZumenSearch.Views.Services.Contracts;
 
 namespace ZumenSearch.ViewModels.Brokers;
 
+/*
+ * TODO: 
+ * Add ErrorInfoBar title.
+ */
+
 public sealed partial class BrokerViewModel : ObservableRecipient, IDisposable
 {
     #region == Private Variables ==

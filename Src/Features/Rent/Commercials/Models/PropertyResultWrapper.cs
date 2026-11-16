@@ -8,6 +8,6 @@ namespace ZumenSearch.Models.Rent.Commercials;
 // Rent Commercial
 public sealed class PropertyResultWrapper : ResultWrapperBase
 {
-    public Models.Rent.Commercials.Property? Building { get; set; }
+    public Models.Rent.Commercials.Property? Property { get; set; }
     public List<ListingSummary> ListingSummaries { get; } = [];
 }

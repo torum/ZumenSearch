@@ -10,6 +10,11 @@ using ZumenSearch.Views.Services.Contracts;
 
 namespace ZumenSearch.ViewModels.Rent.Lessors;
 
+/*
+ * TODO: 
+ * Add ErrorInfoBar title.
+ */
+
 public sealed partial class LessorViewModel : ObservableRecipient, IDisposable
 {
     #region == Private variables and const ==

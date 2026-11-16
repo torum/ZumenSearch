@@ -55,9 +55,9 @@ public sealed partial class ListingListPage : Page
             return;
         }
 
-        if (ViewModel.EditSelectedRoomCommand.CanExecute(room))
+        if (ViewModel.EditSelectedListingCommand.CanExecute(room))
         {
-            ViewModel.EditSelectedRoomCommand.Execute(room);
+            ViewModel.EditSelectedListingCommand.Execute(room);
         }
     }
 
@@ -146,9 +146,9 @@ public sealed partial class ListingListPage : Page
             Debug.WriteLine($"ViewModel is not null. {ViewModel.GetType().FullName} @ItemContainerKeyboardAccelerator_Invoked");
         }
 
-        if (ViewModel.EditSelectedRoomCommand.CanExecute(room))
+        if (ViewModel.EditSelectedListingCommand.CanExecute(room))
         {
-            ViewModel.EditSelectedRoomCommand.Execute(room);
+            ViewModel.EditSelectedListingCommand.Execute(room);
         }
         else
         {
