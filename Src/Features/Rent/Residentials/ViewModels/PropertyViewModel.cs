@@ -57,7 +57,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
     #region == Services ==
 
-    private readonly IAbstractFactory<Models.Rent.Residentials.Listing, Views.Rent.Residentials.Listing.ShellPage> _shellFactory;
+    private readonly IAbstractFactory<Models.Rent.Residentials.Listing, bool, Views.Rent.Residentials.Listing.ShellPage> _shellFactory;
     private readonly IDataAccessService _dataAccessService;
     private readonly IDataAccessLocationService _dataAccessLocationService;
     private readonly IDispatcherService _dispatcherService;
@@ -66,7 +66,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
     #endregion
 
-    public PropertyViewModel(Models.Rent.Residentials.Property building, INavigationGenericService navigationService, IDialogGenericService dialogService, IAbstractFactory<Models.Rent.Residentials.Listing, Views.Rent.Residentials.Listing.ShellPage> shellFactory, IDispatcherService dispatcherService, IDataAccessService dataAccessService, IDataAccessLocationService dataAccessLocationService)
+    public PropertyViewModel(Models.Rent.Residentials.Property building, INavigationGenericService navigationService, IDialogGenericService dialogService, IAbstractFactory<Models.Rent.Residentials.Listing, bool, Views.Rent.Residentials.Listing.ShellPage> shellFactory, IDispatcherService dispatcherService, IDataAccessService dataAccessService, IDataAccessLocationService dataAccessLocationService)
     {
         _building = building;
         _id = building.Id;
@@ -3210,10 +3210,12 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         foreach (var item in Pictures)
         {
             var newItem = item.Clone();
-            newItem.BasePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id);
-            newItem.ParentViewModel = this;
+            newItem.BasePath = item.BasePath;//System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id);
+            //newItem.ParentViewModel = this;
             newItem.SetIsModified(item.IsModified);
             _building.Pictures.Add(newItem);
+
+            item.PropertyChanged -= OnBuildingPicturePropertyChanged;
         }
 
         var thumbImg = Pictures.FirstOrDefault(i => i.IsMain == true);
@@ -3229,10 +3231,12 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         foreach (var item in Pdfs)
         {
             var newItem = item.Clone();
-            newItem.BasePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id);
-            newItem.ParentViewModel = this;
+            newItem.BasePath = item.BasePath;//System.IO.Path.Combine(App.PropertyBlobDataFolder, _building.Id);
+            //newItem.ParentViewModel = this;
             newItem.SetIsModified(false);
             _building.Pdfs.Add(newItem);
+
+            item.PropertyChanged -= OnBuildingPdfPropertyChanged;
         }
 
         if (string.IsNullOrWhiteSpace(_building.ThumbnailFilename))
@@ -3998,7 +4002,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
     private void AddNewRoom() 
     {
         var newId = Guid.CreateVersion7().ToString("N");
-        var editorShell = _shellFactory.Create(new Models.Rent.Residentials.Listing(newId, EntityStatus.New, _building.Id, _building.Status, _building.IsUnitLevelOwnership, Name, _building.FudousanId));
+        var editorShell = _shellFactory.Create(new Models.Rent.Residentials.Listing(newId, EntityStatus.New, _building.Id, _building.Status, _building.IsUnitLevelOwnership, Name, _building.FudousanId), false);
 
         // Apply the current IsUnitOwnership state because it may not be saved to the _room YET.
         //editorShell.ViewModel.SetIsPropertyUnitOwnership(this.IsUnitOwnership);
@@ -4134,7 +4138,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             return;
         }
         room = result.Room;
-        var editorShell = _shellFactory.Create(room);
+        var editorShell = _shellFactory.Create(room, false);
 
         // Apply the current IsUnitOwnership state because it may not be saved to the _room YET.
         //editorShell.ViewModel.SetIsPropertyUnitOwnership(this.IsUnitOwnership);

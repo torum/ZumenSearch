@@ -25,184 +25,53 @@ public class AbstractFactory<TParam, T> : IAbstractFactory<TParam, T>
     public T Create(TParam param) => _factory(param);
 }
 */
-public sealed partial class AbstractFactory<TParam, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T> : IAbstractFactory<TParam, T>, IDisposable
+public sealed partial class AbstractFactory<TParam, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T> : IAbstractFactory<TParam, T>
 {
     private readonly IServiceProvider _serviceProvider;
-
-    // Ownership tracking.
-    private readonly Lock _gate = new();
-    private readonly List<IDisposable> _instances = [];
-    private bool _disposed;
 
     public AbstractFactory(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
     }
 
-    public T Create(TParam param)
-    {
-        // The logic lives here instead of in the Program.cs registration
-        //return ActivatorUtilities.CreateInstance<T>(_serviceProvider, param!);
-
-        // Ownership tracking.
-        lock (_gate)
-        {
-            ObjectDisposedException.ThrowIf(_disposed, this);
-
-            var instance = ActivatorUtilities.CreateInstance<T>(_serviceProvider, param!);
-
-            if (instance is IDisposable disposable)
-            {
-                _instances.Add(disposable);
-            }
-
-            return instance;
-        }
-    }
-
-    public void Dispose()
-    {
-        IDisposable[] instances;
-
-        lock (_gate)
-        {
-            if (_disposed)
-            {
-                return;
-            }
-
-            _disposed = true;
-            instances = [.. _instances];
-            _instances.Clear();
-        }
-
-        foreach (var instance in instances)
-        {
-            instance.Dispose();
-        }
-
-        GC.SuppressFinalize(this);
-    }
+    public T Create(TParam param) => ActivatorUtilities.CreateInstance<T>(_serviceProvider, param!);
 }
 
-public partial class AbstractFactory<TParam1, TParam2, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TResult> : IAbstractFactory<TParam1, TParam2, TResult>, IDisposable
+public partial class AbstractFactory<TParam1, TParam2, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TResult> : IAbstractFactory<TParam1, TParam2, TResult>
     where TResult : class
 {
     private readonly IServiceProvider _serviceProvider;
 
-    // Ownership tracking.
-    private readonly Lock _gate = new();
-    private readonly List<IDisposable> _instances = [];
-    private bool _disposed;
-
     public AbstractFactory(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
     }
 
-    public TResult Create(TParam1 param1, TParam2 param2)
-    {
-        // ActivatorUtilities will match param1 and param2 by their types to the constructor
-        //return ActivatorUtilities.CreateInstance<TResult>(_serviceProvider, param1!, param2!);
-
-        // Ownership tracking.
-        lock (_gate)
-        {
-            ObjectDisposedException.ThrowIf(_disposed, this);
-
-            var instance = ActivatorUtilities.CreateInstance<TResult>(_serviceProvider, param1!, param2!);
-
-            if (instance is IDisposable disposable)
-            {
-                _instances.Add(disposable);
-            }
-
-            return instance;
-        }
-    }
-
-    public void Dispose()
-    {
-        IDisposable[] instances;
-
-        lock (_gate)
-        {
-            if (_disposed)
-            {
-                return;
-            }
-
-            _disposed = true;
-            instances = [.. _instances];
-            _instances.Clear();
-        }
-
-        foreach (var instance in instances)
-        {
-            instance.Dispose();
-        }
-
-        GC.SuppressFinalize(this);
-    }
+    public TResult Create(TParam1 param1, TParam2 param2) => ActivatorUtilities.CreateInstance<TResult>(_serviceProvider, param1!, param2!);
 }
 
-public partial class AbstractFactory<TParam1, TParam2, TParam3, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TResult> : IAbstractFactory<TParam1, TParam2, TParam3, TResult>, IDisposable
+public partial class AbstractFactory<TParam1, TParam2, TParam3, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TResult> : IAbstractFactory<TParam1, TParam2, TParam3, TResult>
     where TResult : class
 {
     private readonly IServiceProvider _serviceProvider;
 
-    // Ownership tracking.
-    private readonly Lock _gate = new();
-    private readonly List<IDisposable> _instances = [];
-    private bool _disposed;
+    public AbstractFactory(IServiceProvider serviceProvider)
+    {
+        _serviceProvider = serviceProvider;
+    }
+
+    public TResult Create(TParam1 param1, TParam2 param2, TParam3 param3) => ActivatorUtilities.CreateInstance<TResult>(_serviceProvider, param1!, param2!, param3!);
+}
+
+public partial class AbstractFactory<TParam1, TParam2, TParam3, TParam4, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TResult> : IAbstractFactory<TParam1, TParam2, TParam3, TParam4, TResult>
+    where TResult : class
+{
+    private readonly IServiceProvider _serviceProvider;
 
     public AbstractFactory(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
     }
 
-    public TResult Create(TParam1 param1, TParam2 param2, TParam3 param3)
-    {
-        // ActivatorUtilities will match param1 and param2 by their types to the constructor
-        //return ActivatorUtilities.CreateInstance<TResult>(_serviceProvider, param1!, param2!, param3!);
-
-        // Ownership tracking.
-        lock (_gate)
-        {
-            ObjectDisposedException.ThrowIf(_disposed, this);
-
-            var instance = ActivatorUtilities.CreateInstance<TResult>(_serviceProvider, param1!, param2!, param3!);
-
-            if (instance is IDisposable disposable)
-            {
-                _instances.Add(disposable);
-            }
-
-            return instance;
-        }
-    }
-
-    public void Dispose()
-    {
-        IDisposable[] instances;
-
-        lock (_gate)
-        {
-            if (_disposed)
-            {
-                return;
-            }
-
-            _disposed = true;
-            instances = [.. _instances];
-            _instances.Clear();
-        }
-
-        foreach (var instance in instances)
-        {
-            instance.Dispose();
-        }
-
-        GC.SuppressFinalize(this);
-    }
+    public TResult Create(TParam1 param1, TParam2 param2, TParam3 param3, TParam4 param4) => ActivatorUtilities.CreateInstance<TResult>(_serviceProvider, param1!, param2!, param3!, param4!);
 }

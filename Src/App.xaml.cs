@@ -71,7 +71,7 @@ public partial class App : Application
             var envDataFolder = Windows.Storage.ApplicationData.Current.LocalFolder.Path;
             AppDataFolder = System.IO.Path.Combine(envDataFolder, AppDeveloper, AppName);
             AppConfigFilePath = System.IO.Path.Combine(AppDataFolder, AppName + ".config");
-            PropertyBlobDataFolder = System.IO.Path.Combine(AppDataFolder, AppDeveloper, AppName, "BlobData");
+            PropertyBlobDataFolder = System.IO.Path.Combine(AppDataFolder, "BlobData");
         }
 
         try
@@ -135,8 +135,8 @@ public partial class App : Application
 
                 services.AddTransient<ViewModels.Rent.Residentials.ListingViewModel>();
                 services.AddTransient<Views.Rent.Residentials.Listing.ShellPage>();
-                services.AddGenericFactory<Models.Rent.Residentials.Listing, INavigationGenericService, IDialogGenericService, ViewModels.Rent.Residentials.ListingViewModel>();
-                services.AddGenericFactory<Models.Rent.Residentials.Listing, Views.Rent.Residentials.Listing.ShellPage>();
+                services.AddGenericFactory<Models.Rent.Residentials.Listing, bool, INavigationGenericService, IDialogGenericService, ViewModels.Rent.Residentials.ListingViewModel>();
+                services.AddGenericFactory<Models.Rent.Residentials.Listing, bool, Views.Rent.Residentials.Listing.ShellPage>();
 
                 services.AddTransient<ViewModels.Rent.Commercials.PropertyViewModel>();
                 services.AddTransient<Views.Rent.Commercials.ShellPage>();
@@ -262,7 +262,7 @@ public partial class App : Application
         finally
         {
             Host.Dispose();
-            Debug.WriteLine("AppHost disposed.");
+            Debug.WriteLine("AppHost Dispose().");
             SaveErrorLog();
         }
     }

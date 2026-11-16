@@ -92,7 +92,7 @@ public sealed class ConfigurationService : IConfigurationService
             return config;
         }
 
-        Debug.WriteLine($"LoadConfigurationAsync() {_configFilePath}");
+        Debug.WriteLine($"ConfigurationService LoadConfigurationAsync(): {_configFilePath}");
 
         try
         {
@@ -1067,7 +1067,7 @@ public sealed class ConfigurationService : IConfigurationService
             throw new InvalidOperationException("Configuration file path is not set.");
         }
 
-        Debug.WriteLine("SaveConfigurationAsync()");
+        Debug.WriteLine($"ConfigurationService SaveConfigurationAsync(): {_configFilePath}");
 
         // TODO: Load xdoc from global variable if exists, and apply changes to it, then save it back to file.
         //_xdoc

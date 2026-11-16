@@ -11,7 +11,6 @@ using ZumenSearch.Helpers;
 using ZumenSearch.Models;
 using ZumenSearch.Models.Messenger;
 using ZumenSearch.Models.SearchResult;
-using ZumenSearch.Services;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.Services.Extensions.AbstractFactory;
 using ZumenSearch.Views;
@@ -44,7 +43,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
     #region == Services ==
 
     private readonly IAbstractFactory<Models.Rent.Residentials.Property, Views.Rent.Residentials.ShellPage> _shellRentResidentialPropertyFactory;
-    private readonly IAbstractFactory<Models.Rent.Residentials.Listing, Views.Rent.Residentials.Listing.ShellPage> _shellRentResidentialListingFactory;
+    private readonly IAbstractFactory<Models.Rent.Residentials.Listing, bool, Views.Rent.Residentials.Listing.ShellPage> _shellRentResidentialListingFactory;
 
     private readonly IAbstractFactory<Models.Rent.Commercials.Property, Views.Rent.Commercials.ShellPage> _shellRentCommercialPropertyFactory;
     private readonly IAbstractFactory<Models.Rent.Commercials.Listing.Listing, Views.Rent.Commercials.Listing.ShellPage> _shellRentCommercialListingFactory;
@@ -61,7 +60,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
 
     #endregion
 
-    public MainViewModel(IAbstractFactory<Models.Rent.Residentials.Property, Views.Rent.Residentials.ShellPage> shellRentResidentialPropertyFactory, IAbstractFactory<Models.Rent.Residentials.Listing, Views.Rent.Residentials.Listing.ShellPage> shellRentResidentialListingFactory, IAbstractFactory<Models.Rent.Commercials.Property, Views.Rent.Commercials.ShellPage> shellRentCommercialPropertyFactory, IAbstractFactory<Models.Rent.Commercials.Listing.Listing, Views.Rent.Commercials.Listing.ShellPage> shellRentCommercialListingFactory, IAbstractFactory<Models.Base.PersonBase, Views.Rent.Lessors.ShellPage> shellRentLessorFactory, IAbstractFactory<Models.Sale.Residentials.Property, Views.Sale.Residentials.ShellPage> shellSaleResidentialPropertyFactory, IAbstractFactory<Models.Base.PersonBase, Views.Brokers.ShellPage> shellBrokerFactory, INavigationService navigationService, IDataAccessService dataAccessService, IDispatcherService dispatcherService, IConfigurationService configurationService, IDialogGenericService dialogService)
+    public MainViewModel(IAbstractFactory<Models.Rent.Residentials.Property, Views.Rent.Residentials.ShellPage> shellRentResidentialPropertyFactory, IAbstractFactory<Models.Rent.Residentials.Listing, bool, Views.Rent.Residentials.Listing.ShellPage> shellRentResidentialListingFactory, IAbstractFactory<Models.Rent.Commercials.Property, Views.Rent.Commercials.ShellPage> shellRentCommercialPropertyFactory, IAbstractFactory<Models.Rent.Commercials.Listing.Listing, Views.Rent.Commercials.Listing.ShellPage> shellRentCommercialListingFactory, IAbstractFactory<Models.Base.PersonBase, Views.Rent.Lessors.ShellPage> shellRentLessorFactory, IAbstractFactory<Models.Sale.Residentials.Property, Views.Sale.Residentials.ShellPage> shellSaleResidentialPropertyFactory, IAbstractFactory<Models.Base.PersonBase, Views.Brokers.ShellPage> shellBrokerFactory, INavigationService navigationService, IDataAccessService dataAccessService, IDispatcherService dispatcherService, IConfigurationService configurationService, IDialogGenericService dialogService)
     {
         _shellRentResidentialPropertyFactory = shellRentResidentialPropertyFactory;
         _shellRentResidentialListingFactory = shellRentResidentialListingFactory;
@@ -590,18 +589,18 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
 
     public void Dispose()
     {
+        Debug.WriteLine("MainViewModel Dispose().");
+
         // Unsubscribe
         //WeakReferenceMessenger.Default.UnregisterAll(this);
         //or
         //this.IsActive = false;
-        
+
         _cts?.Cancel();
         
         _cts?.Dispose();
 
         GC.SuppressFinalize(this);
-
-        Debug.WriteLine("MainViewModel disposed.");
     }
 
     #endregion
@@ -1190,8 +1189,9 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         return true;
     }
 
+    // 部屋検索
     [RelayCommand]
-    private async Task SearchRentResidentialListing(Models.Rent.Residentials.ListingSearchCriteria? criteria)
+    private async Task SearchRentResidentialListings(Models.Rent.Residentials.ListingSearchCriteria? criteria)
     {
         RentResidentialListingSearchResult.Clear();
 
@@ -1331,7 +1331,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
             return;
         }
 
-        var editorShell = _shellRentResidentialListingFactory.Create(res.Room);
+        var editorShell = _shellRentResidentialListingFactory.Create(res.Room, false);
         var propertyEditor = RentResidentialEditorList.FirstOrDefault(editor => editor.Id == buildingId && editor.ViewModel is { IsActive: true });
         if (propertyEditor?.ViewModel is { } propertyViewModel) editorShell.ViewModel.SetOwnershipVisibility(propertyViewModel.IsUnitLevelOwnership);
         var editorWindow = editorShell.Window;
@@ -1405,16 +1405,16 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
             EndResidentialOperation(buildingId);
         }
     }
-    private static async Task DuplicateRentResidentialRoomCore(Models.SearchResult.ListingSearchResultItem selected)
+
+    private async Task DuplicateRentResidentialRoomCore(Models.SearchResult.ListingSearchResultItem selected)
     {
-        var roomId = selected.Id;
+        var listingId = selected.Id;
         var buildingId = selected.PropertyId;
 
         //Debug.WriteLine($"DuplicateRentResidentialRoomCore executed for {selected.Id}");
         
-        /*
         // Access Database to get the full entry data.
-        var res = await Task.Run(() => _dataAccessService.SelectRentResidentialListingById(buildingId, roomId), _cts.Token);
+        var res = await Task.Run(() => _dataAccessService.SelectRentResidentialListingById(buildingId, listingId, true), _cts.Token);
         if (res.IsError)
         {
             Debug.WriteLine(
@@ -1438,11 +1438,24 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
 
         if (res.Room is null)
         {
-            Debug.WriteLine($"Room for {roomId} is null. Cannot open editor.");
+            Debug.WriteLine($"Room for {listingId} is null. Cannot open editor.");
             return;
         }
 
-        var editorShell = _shellRentResidentialListingFactory.Create(res.Room);
+        // Set the BasePath for ORIGINAL pictures and PDFs to the source directory.
+        // This is necessary because the duplicated room will have a new ID, and we want to keep the original files in their original location
+        // So that we can copy them to the new location and keep track of them as unsaved in the ListingViewModel when opens the duplicated room in the editor.
+        var sourceDirectory = Path.Combine(App.PropertyBlobDataFolder, buildingId, listingId);
+        foreach (var picture in res.Room.Pictures)
+        {
+            picture.BasePath = sourceDirectory;
+        }
+        foreach (var pdf in res.Room.Pdfs)
+        {
+            pdf.BasePath = sourceDirectory;
+        }
+
+        var editorShell = _shellRentResidentialListingFactory.Create(res.Room, true);
         var propertyEditor = RentResidentialEditorList.FirstOrDefault(editor => editor.Id == buildingId && editor.ViewModel is { IsActive: true });
         if (propertyEditor?.ViewModel is { } propertyViewModel) editorShell.ViewModel.SetOwnershipVisibility(propertyViewModel.IsUnitLevelOwnership);
         var editorWindow = editorShell.Window;
@@ -1473,7 +1486,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         //mainWindow?.AppWindow.MoveInZOrderBelow(editorWindow.AppWindow.Id);
 
         editorWindow.AppWindow.MoveInZOrderAtTop();
-        */
+        
     }
     private static bool DuplicateRentResidentialRoomCanExecute(Models.SearchResult.ListingSearchResultItem? selected)
     {

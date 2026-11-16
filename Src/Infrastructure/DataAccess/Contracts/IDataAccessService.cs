@@ -16,7 +16,7 @@ public interface IDataAccessService
     ResultWrapper DeleteRentResidential(string propertyId);
     ResultWrapper UpsertRentResidentialListing(string propertyId, Models.Rent.Residentials.Listing listing);
     ListingSearchResultWrapper SelectRentResidentialListings(Models.Rent.Residentials.ListingSearchCriteria criteria);
-    Models.Rent.Residentials.ListingResultWrapper SelectRentResidentialListingById(string propertyId, string listingId);
+    Models.Rent.Residentials.ListingResultWrapper SelectRentResidentialListingById(string propertyId, string listingId, bool duplicate = false);
     ResultWrapper DeleteRentResidentialListing(string listingId);
 
     // Rent Commercial

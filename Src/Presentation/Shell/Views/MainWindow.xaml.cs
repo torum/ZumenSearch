@@ -54,7 +54,7 @@ public sealed partial class MainWindow : Window
     {
         var config = _configurationService.CurrentConfiguration;
 
-        Debug.WriteLine($"LoadSetting: MainWindow: Width={config.MainWindow.Width}, Height={config.MainWindow.Height}, Top={config.MainWindow.Top}, Left={config.MainWindow.Left}, WindowState={config.MainWindow.WindowState}");
+        //Debug.WriteLine($"LoadSetting: MainWindow: Width={config.MainWindow.Width}, Height={config.MainWindow.Height}, Top={config.MainWindow.Top}, Left={config.MainWindow.Left}, WindowState={config.MainWindow.WindowState}");
 
         if (config.MainWindow.Width < 500)
         {
@@ -266,7 +266,7 @@ public sealed partial class MainWindow : Window
 
     private async void AppWindow_Closing(Microsoft.UI.Windowing.AppWindow sender, Microsoft.UI.Windowing.AppWindowClosingEventArgs args)
     {
-        Debug.WriteLine("AppWindow_Closing");
+        Debug.WriteLine("AppWindow_Closing().");
         
         args.Cancel = true;
         if (_isClosing) return;
@@ -681,7 +681,7 @@ public sealed partial class MainWindow : Window
 
     private void Window_Closed(object sender, WindowEventArgs args)
     {
-        Debug.WriteLine("MainWindow_Closed");
+        Debug.WriteLine("MainWindow_Closed().");
 
         this.AppWindow.Closing -= AppWindow_Closing;
         this.Closed -= Window_Closed;

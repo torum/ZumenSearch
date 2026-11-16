@@ -29,4 +29,12 @@ public static class ServiceExtensions
         // Just register the factory. It will handle the ActivatorUtilities internally.
         services.AddSingleton<IAbstractFactory<TParam1, TParam2, TParam3, T>, AbstractFactory<TParam1, TParam2, TParam3, T>>();
     }
+
+    // Four params
+    public static void AddGenericFactory<TParam1, TParam2, TParam3, TParam4, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>(this IServiceCollection services)
+    where T : class
+    {
+        // Just register the factory. It will handle the ActivatorUtilities internally.
+        services.AddSingleton<IAbstractFactory<TParam1, TParam2, TParam3, TParam4, T>, AbstractFactory<TParam1, TParam2, TParam3, TParam4, T>>();
+    }
 }

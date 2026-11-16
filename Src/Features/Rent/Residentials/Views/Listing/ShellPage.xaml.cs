@@ -21,6 +21,8 @@ public sealed partial class ShellPage : Page
     private bool _nvigated;
     private bool _isConfirmingClose;
     private bool _allowClose;
+   
+    private bool _isClosed;
 
     private readonly List<(string Tag, string Label, Type? Page)> _pages =
     [
@@ -40,8 +42,9 @@ public sealed partial class ShellPage : Page
     private readonly IDialogGenericService _dialogService;
 
     public ShellPage(
-        Models.Rent.Residentials.Listing room, 
-        IAbstractFactory<Models.Rent.Residentials.Listing, INavigationGenericService, IDialogGenericService, ViewModels.Rent.Residentials.ListingViewModel> vmFactory,
+        Models.Rent.Residentials.Listing room,
+        bool isDuplicate,
+        IAbstractFactory<Models.Rent.Residentials.Listing, bool, INavigationGenericService, IDialogGenericService, ViewModels.Rent.Residentials.ListingViewModel> vmFactory,
         INavigationGenericService navigationlService, 
         IDispatcherService dispatcherService,
         IDialogGenericService dialogService)
@@ -52,7 +55,7 @@ public sealed partial class ShellPage : Page
         _dispatcherService = dispatcherService;
         _dialogService = dialogService;
 
-        ViewModel = vmFactory.Create(room, _navigationlService, _dialogService);
+        ViewModel = vmFactory.Create(room, isDuplicate, _navigationlService, _dialogService);
 
         Window = new Views.Rent.Residentials.Listing.EditorWindow(room.Id, room.PropertyId, ViewModel)
         {
@@ -91,42 +94,22 @@ public sealed partial class ShellPage : Page
         ViewModel.SetClosing(true);
         try
         {
-            /*
-            if (!await ViewModel.WaitForEditorOperationsAsync()) return;
-            await App.GetService<ViewModels.MainViewModel>().WaitForResidentialOperationsAsync();
-            if (ViewModel.SaveCommand.IsRunning && ViewModel.SaveCommand.ExecutionTask is Task pendingSave) await pendingSave;
-            if (!ViewModel.CleanIncompleteAttachments()) return;
-
-            if (ViewModel.IsDiscardPending)
-            {
-                if (!ViewModel.DiscardChanges()) return;
-            }
-            else if (ViewModel.IsDirty)
-            {
-                var result = await _dialogService.ShowEditorCloseConfirmationDialog();
-                await App.GetService<ViewModels.MainViewModel>().WaitForResidentialOperationsAsync();
-                if (result == ContentDialogResult.Primary)
-                {
-                    if (ViewModel.IsDirty) await ViewModel.Save();
-                    if (ViewModel.IsDirty) return;
-                }
-                else if (result != ContentDialogResult.Secondary || !ViewModel.DiscardChanges())
-                {
-                    return;
-                }
-            }
-            */
-
             if (ViewModel.IsDirty)
             {
                 var result = await _dialogService.ShowEditorCloseConfirmationDialog();
-                await App.GetService<ViewModels.MainViewModel>().WaitForResidentialOperationsAsync();
+                
+                await App.GetService<ViewModels.MainViewModel>().WaitForResidentialOperationsAsync();//?
+
                 if (result == ContentDialogResult.Primary)
                 {
                     if (ViewModel.IsDirty) await ViewModel.Save();
                     if (ViewModel.IsDirty) return;
                 }
-                else if (result != ContentDialogResult.Secondary)
+                else if (result == ContentDialogResult.Secondary)
+                {
+                    ViewModel.DiscardChanges();
+                }
+                else
                 {
                     return;
                 }
@@ -139,7 +122,7 @@ public sealed partial class ShellPage : Page
         {
             _allowClose = false;
             _isConfirmingClose = false;
-            if (ViewModel.IsActive) ViewModel.SetClosing(false);
+            if (!_isClosed) ViewModel.SetClosing(false);
         }
     }
 
@@ -188,6 +171,8 @@ public sealed partial class ShellPage : Page
         {
             return;
         }
+
+        _isClosed = true;
 
         ewin.Activated -= Window_Activated;
         ewin.Closed -= Window_Closed;

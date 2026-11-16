@@ -3289,7 +3289,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         return res;
     }
 
-    public Models.Rent.Residentials.ListingResultWrapper SelectRentResidentialListingById(string propertyId, string listingId)
+    public Models.Rent.Residentials.ListingResultWrapper SelectRentResidentialListingById(string propertyId, string listingId, bool duplicate = false)
     {
         var res = new Models.Rent.Residentials.ListingResultWrapper();
 
@@ -3341,15 +3341,15 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 cmd.Parameters.AddWithValue("@listingId", listingId);
                 using (var reader = cmd.ExecuteReader())
                 {
-                    while (reader.Read())
+                    if (reader.Read()) //while
                     {
-                        res.Room = GetRentResidentialListing(reader, propertyId, buildingName, isUnitOwnership, fudousanId);
+                        res.Room = GetRentResidentialListing(reader, propertyId, buildingName, isUnitOwnership, fudousanId, duplicate);
                     }
                 }
 
                 if (res.Room is not null)
                 {
-                    SetRentResidentialListingChildValues(cmd, res.Room);
+                    SetRentResidentialListingChildValues(cmd, res.Room, listingId, duplicate);
                 }
             }
         }
@@ -3365,7 +3365,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         return res;
     }
 
-    private static Models.Rent.Residentials.Listing? GetRentResidentialListing(SqliteDataReader reader, string propertyId, string propertyName, bool isUnitOwnership, string fudousanId)
+    private static Models.Rent.Residentials.Listing? GetRentResidentialListing(SqliteDataReader reader, string propertyId, string propertyName, bool isUnitOwnership, string fudousanId, bool duplicate)
     {
         var listingId = reader.GetString(reader.GetOrdinal("listing_id")) ?? string.Empty;
         if (string.IsNullOrEmpty(listingId))
@@ -3381,9 +3381,14 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             return null;
         }
 
+        // If duplicate is true, generate a new listing ID; otherwise, use the existing one.
+        string id = duplicate ? Guid.CreateVersion7().ToString("N") : listingId;
+        EntityStatus status = duplicate ? EntityStatus.New : EntityStatus.Saved;
+
         // Create listing.
-        var room = new Models.Rent.Residentials.Listing(listingId, EntityStatus.Saved, propertyId, EntityStatus.Saved, isUnitOwnership, propertyName, fudousanId);
-        // try
+        var room = new Models.Rent.Residentials.Listing(id, status, propertyId, EntityStatus.Saved, isUnitOwnership, propertyName, fudousanId);
+
+        // try?
         room.SetName(reader.GetString(reader.GetOrdinal("name")) ?? string.Empty);
         room.SetFloorPlanTypeLabelFromString(Convert.ToString(reader["floor_plan_type"], CultureInfo.InvariantCulture) ?? string.Empty);
         room.SetFloorPlanExtraTypeLabelFromString(Convert.ToString(reader["floor_plan_extra_type"], CultureInfo.InvariantCulture) ?? string.Empty);
@@ -3452,24 +3457,29 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         room.SetHasWarmWaterToiletSeat(Convert.ToInt32(reader["has_warm_water_toilet_seat"], CultureInfo.InvariantCulture) != 0);
         room.SetApplianceRemarks(reader.GetString(reader.GetOrdinal("appliance_remarks")));
 
-        room.SetIsModified(false);
+        // If duplicate is true, mark the room as modified to indicate that it has unsaved changes.
+        room.SetIsModified(duplicate);
 
         //Debug.WriteLine($"Room ID: {room.Id}, Room Name: {room.RoomName}");
 
         return room;
     }
 
-    private static void SetRentResidentialListingChildValues(SqliteCommand cmd, Models.Rent.Residentials.Listing listing)
+    private static void SetRentResidentialListingChildValues(SqliteCommand cmd, Models.Rent.Residentials.Listing listing, string listingId, bool duplicate)
     {
+        // Use listingId, not listing.Id, because listing.Id may be a new ID if duplicate is true.
+
         // 部屋写真
         cmd.CommandText = "SELECT * FROM rent_residential_listing_pictures WHERE listing_id = @listingId";
         cmd.Parameters.Clear();
-        cmd.Parameters.AddWithValue("@listingId", listing.Id);
+        cmd.Parameters.AddWithValue("@listingId", listingId);
         using (var reader = cmd.ExecuteReader())
         {
             while (reader.Read())
             {
                 var picid = Convert.ToString(reader["picture_id"], CultureInfo.InvariantCulture) ?? string.Empty;
+                // If duplicate is true, generate a new picture ID; otherwise, use the existing one.
+                picid = duplicate ? Guid.CreateVersion7().ToString("N") : picid;
                 var picpath = Convert.ToString(reader["filename"], CultureInfo.InvariantCulture) ?? string.Empty;
                 if (!string.IsNullOrEmpty(picid) && !string.IsNullOrEmpty(picpath))
                 {
@@ -3489,7 +3499,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 }
                 else
                 {
-                    Debug.WriteLine("picture_id or filename is null/empty.");
+                    Debug.WriteLine("Residential listing picture has an empty ID or filename.");
                 }
             }
         }
@@ -3497,12 +3507,14 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         // 部屋PDF
         cmd.CommandText = "SELECT * FROM rent_residential_listing_pdfs WHERE listing_id = @listingId";
         cmd.Parameters.Clear();
-        cmd.Parameters.AddWithValue("@listingId", listing.Id);
+        cmd.Parameters.AddWithValue("@listingId", listingId);
         using (var reader = cmd.ExecuteReader())
         {
             while (reader.Read())
             {
                 var pdfid = Convert.ToString(reader["pdf_id"], CultureInfo.InvariantCulture) ?? string.Empty;
+                // If duplicate is true, generate a new picture ID; otherwise, use the existing one.
+                pdfid = duplicate ? Guid.CreateVersion7().ToString("N") : pdfid;
                 var pdfpath = Convert.ToString(reader["filename"], CultureInfo.InvariantCulture) ?? string.Empty;
                 var thumbpath = Convert.ToString(reader["thumbnail_filename"], CultureInfo.InvariantCulture) ?? string.Empty;
                 if (!string.IsNullOrWhiteSpace(pdfid) && !string.IsNullOrWhiteSpace(pdfpath) && !string.IsNullOrWhiteSpace(thumbpath))
@@ -3523,7 +3535,8 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 }
                 else
                 {
-                    throw new InvalidDataException("Residential listing PDF has an empty ID, filename or thumbnail filename.");
+                    //throw new InvalidDataException("Residential listing PDF has an empty ID, filename or thumbnail filename.");
+                    Debug.WriteLine("Residential listing PDF has an empty ID, filename or thumbnail filename.");
                 }
             }
         }
@@ -3532,7 +3545,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         var lessorIds = new List<string>();
         cmd.CommandText = "SELECT * FROM rent_lessors_properties_listings WHERE listing_id = @listingId";
         cmd.Parameters.Clear();
-        cmd.Parameters.AddWithValue("@listingId", listing.Id);
+        cmd.Parameters.AddWithValue("@listingId", listingId);
         using (var reader = cmd.ExecuteReader())
         {
             while (reader.Read())
@@ -3577,7 +3590,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             """;
         cmd.Parameters.Clear();
         cmd.Parameters.AddWithValue("@propertyId", listing.PropertyId);
-        cmd.Parameters.AddWithValue("@listingId", listing.Id);
+        cmd.Parameters.AddWithValue("@listingId", listingId);
 
         using (var reader = cmd.ExecuteReader())
         {
@@ -7561,10 +7574,10 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
     public void Dispose()
     {
+        Debug.WriteLine("DataAccessService Dispose().");
+
         _readerWriterLock?.Dispose();
 
         GC.SuppressFinalize(this);
-
-        Debug.WriteLine("DataAccessService disposed.");
     }
 }
