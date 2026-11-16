@@ -31,10 +31,6 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
     private const string BrokerSearchResultPagePath = "ZumenSearch.Views.BrokerSearchResultPage";
 
     private readonly CancellationTokenSource _cts = new();
-    private readonly HashSet<string> _commercialOperations = new(StringComparer.Ordinal);
-    private TaskCompletionSource? _commercialOperationsCompleted;
-    private readonly HashSet<string> _residentialOperations = new(StringComparer.Ordinal);
-    private TaskCompletionSource? _residentialOperationsCompleted;
 
     private Task? _initializationTask;
 
@@ -78,12 +74,13 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         VersionDescription = GetVersionDescription();
 
         // Ready to receive messages.
-#pragma warning disable IL3050 // Disable AOT dynamic code warning
-#pragma warning disable IL2026 // Disable Trimming unreferenced code warning
-        IsActive = true;
-        // Or WeakReferenceMessenger.Default.RegisterAll(this);
-#pragma warning restore IL2026
-#pragma warning restore IL3050
+        // Add matching unregistrations in Dispose().
+        WeakReferenceMessenger.Default.Register<PropertyUpdatedMessage>(this);
+        WeakReferenceMessenger.Default.Register<ListingUpdatedMessage>(this);
+        WeakReferenceMessenger.Default.Register<LessorUpdatedMessage>(this);
+        WeakReferenceMessenger.Default.Register<BrokerUpdatedMessage>(this);
+        WeakReferenceMessenger.Default.Register<WindowClosedMessage<Microsoft.UI.Xaml.Window>>(this);
+        WeakReferenceMessenger.Default.Register<ShowErrorInfoBarInMainWindowMessage>(this);
     }
 
     #region == Properties ==
@@ -459,46 +456,12 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
                 BrokerEditorList.Remove(bwin);
                 break;
         }
-
     }
 
     public void Receive(ShowErrorInfoBarInMainWindowMessage message)
     {
-        InfoBarErrorTitle = message.Title;
-        InfoBarErrorMessage = message.Message;
-        IsInfoBarErrorOpen = true;
+        ShowSimpleErrorInfoBar(message.Title, message.Message);
     }
-
-    /*
-    1. To be compatible with Native AOT, we need to manually register message handlers in OnActivated and unregister them in OnDeactivated. 
-    This is due to the fact that the source generator for CommunityToolkit.Mvvm does not currently support Native AOT, as discussed in the following GitHub issue:
-    https://github.com/CommunityToolkit/dotnet/issues/962
-
-    2. Even though we register manually, simple IsActive = true; cause issues in Native AOT.
-
-    // Add both attributes to perfectly match the base class signature
-    [RequiresUnreferencedCode("Manually registering messages to avoid trimming issues.")]
-    [RequiresDynamicCode("Manually registering messages to avoid Native AOT issues.")]
-    protected override void OnActivated()
-    {
-        // Explicitly register each message handler
-        Messenger.Register<PropertyUpdatedMessage>(this);
-        Messenger.Register<ListingUpdatedMessage>(this);
-        Messenger.Register<LessorUpdatedMessage>(this);
-        Messenger.Register<BrokerUpdatedMessage>(this);
-        Messenger.Register<WindowClosedMessage<Microsoft.UI.Xaml.Window>>(this);
-    }
-
-    protected override void OnDeactivated()
-    {
-        // Explicitly unregister to prevent memory leaks
-        Messenger.Unregister<PropertyUpdatedMessage>(this);
-        Messenger.Unregister<ListingUpdatedMessage>(this);
-        Messenger.Unregister<LessorUpdatedMessage>(this);
-        Messenger.Unregister<BrokerUpdatedMessage>(this);
-        Messenger.Unregister<WindowClosedMessage<Microsoft.UI.Xaml.Window>>(this);
-    }
-    */
 
     #endregion
 
@@ -510,69 +473,6 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
     }
 
     public Task InitializeAsync() => _initializationTask ??= InitializeDatabase();
-
-    public bool TryBeginCommercialOperation(string propertyId)
-    {
-        if (!_commercialOperations.Add(propertyId)) return false;
-        _commercialOperationsCompleted ??= new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-        foreach (var editor in RentCommercialEditorList.Where(editor => editor.Id == propertyId)) editor.ViewModel?.SetPropertyBusy(true);
-        foreach (var editor in RentCommercialListingEditorList.Where(editor => editor.PropertyId == propertyId)) editor.ViewModel?.SetPropertyBusy(true);
-        return true;
-    }
-
-    public void EndCommercialOperation(string propertyId)
-    {
-        if (!_commercialOperations.Contains(propertyId)) return;
-        foreach (var editor in RentCommercialEditorList.Where(editor => editor.Id == propertyId).ToList()) editor.ViewModel?.SetPropertyBusy(false);
-        foreach (var editor in RentCommercialListingEditorList.Where(editor => editor.PropertyId == propertyId).ToList()) editor.ViewModel?.SetPropertyBusy(false);
-        if (_commercialOperations.Remove(propertyId) && _commercialOperations.Count == 0)
-        {
-            _commercialOperationsCompleted?.TrySetResult();
-            _commercialOperationsCompleted = null;
-        }
-    }
-
-    public async Task WaitForCommercialOperationsAsync()
-    {
-        while (_commercialOperationsCompleted is not null)
-        {
-            await _commercialOperationsCompleted.Task;
-        }
-    }
-
-    public bool TryBeginResidentialOperation(string propertyId)
-    {
-        if (!_residentialOperations.Add(propertyId)) return false;
-        _residentialOperationsCompleted ??= new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-        foreach (var editor in RentResidentialEditorList.Where(editor => editor.Id == propertyId)) editor.ViewModel?.SetPropertyBusy(true);
-        foreach (var editor in RentResidentialListingEditorList.Where(editor => editor.PropertyId == propertyId)) editor.ViewModel?.SetPropertyBusy(true);
-        return true;
-    }
-
-    public void EndResidentialOperation(string propertyId)
-    {
-        if (!_residentialOperations.Contains(propertyId)) return;
-        foreach (var editor in RentResidentialEditorList.Where(editor => editor.Id == propertyId).ToList()) editor.ViewModel?.SetPropertyBusy(false);
-        foreach (var editor in RentResidentialListingEditorList.Where(editor => editor.PropertyId == propertyId).ToList()) editor.ViewModel?.SetPropertyBusy(false);
-        _residentialOperations.Remove(propertyId);
-        if (_residentialOperations.Count == 0)
-        {
-            _residentialOperationsCompleted?.TrySetResult();
-            _residentialOperationsCompleted = null;
-        }
-    }
-
-    public async Task WaitForResidentialOperationsAsync()
-    {
-        while (_residentialOperationsCompleted is not null) await _residentialOperationsCompleted.Task;
-    }
-
-    private void ShowResidentialOperationBusy()
-    {
-        InfoBarErrorTitle = "物件の保存、削除または読み込み中です。";
-        InfoBarErrorMessage = "関連する保存、削除または読み込みが完了してから、もう一度操作してください。";
-        IsInfoBarErrorOpen = true;
-    }
 
     public void RemoveResidentialListingSearchResults(string propertyId, string listingId)
     {
@@ -603,13 +503,15 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
     {
         Debug.WriteLine("MainViewModel Dispose().");
 
-        // Unsubscribe
-        //WeakReferenceMessenger.Default.UnregisterAll(this);
-        //or
-        //this.IsActive = false;
+        WeakReferenceMessenger.Default.Unregister<PropertyUpdatedMessage>(this);
+        WeakReferenceMessenger.Default.Unregister<ListingUpdatedMessage>(this);
+        WeakReferenceMessenger.Default.Unregister<LessorUpdatedMessage>(this);
+        WeakReferenceMessenger.Default.Unregister<BrokerUpdatedMessage>(this);
+        WeakReferenceMessenger.Default.Unregister<WindowClosedMessage<Microsoft.UI.Xaml.Window>>(this);
+        WeakReferenceMessenger.Default.Unregister<ShowErrorInfoBarInMainWindowMessage>(this);
 
         _cts?.Cancel();
-        
+
         _cts?.Dispose();
 
         GC.SuppressFinalize(this);
@@ -637,14 +539,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
                     res.Error.MethodName + Environment.NewLine +
                     res.Error.FullDump);
 
-                InfoBarErrorTitle = res.Error.Title;
-                InfoBarErrorMessage =
-                    res.Error.Message + Environment.NewLine +
-                    res.Error.Description + Environment.NewLine +
-                    res.Error.Operation + Environment.NewLine +
-                    res.Error.MethodName;
-
-                IsInfoBarErrorOpen = true;
+                ShowErrorInfoBar(res.Error);
 
                 return;
             }
@@ -679,6 +574,27 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         return $"{verName} - {version.Major}.{version.Minor}.{version.Build}.{version.Revision}";
     }
 
+    // TODO: Change sevirity to Error for simple error messages.
+    // Need to bind severity to InfoBar control in XAML to show error messages.
+    private void ShowSimpleErrorInfoBar(string title, string message)
+    {
+        InfoBarErrorTitle = title;
+        InfoBarErrorMessage = message;
+        IsInfoBarErrorOpen = true;
+    }
+
+    private void ShowErrorInfoBar(Models.ErrorInfo err, bool isShowBar = true)
+    {
+        InfoBarErrorTitle = err.Title;
+        InfoBarErrorMessage =
+            err.Message + Environment.NewLine +
+            err.Description + Environment.NewLine +
+            err.Operation + Environment.NewLine +
+            err.MethodName;
+
+        IsInfoBarErrorOpen = isShowBar;
+    }
+
     #endregion
 
     #region == Commands ==
@@ -702,14 +618,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
                 res.Error.MethodName + Environment.NewLine +
                 res.Error.FullDump);
 
-            InfoBarErrorTitle = res.Error.Title;
-            InfoBarErrorMessage =
-                res.Error.Message + Environment.NewLine +
-                res.Error.Description + Environment.NewLine +
-                res.Error.Operation + Environment.NewLine +
-                res.Error.MethodName;
-
-            IsInfoBarErrorOpen = true;
+            ShowErrorInfoBar(res.Error);
         }
         else
         {
@@ -758,14 +667,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
                 res.Error.MethodName + Environment.NewLine +
                 res.Error.FullDump);
 
-            InfoBarErrorTitle = res.Error.Title;
-            InfoBarErrorMessage =
-                res.Error.Message + Environment.NewLine +
-                res.Error.Description + Environment.NewLine +
-                res.Error.Operation + Environment.NewLine +
-                res.Error.MethodName;
-
-            IsInfoBarErrorOpen = true;
+            ShowErrorInfoBar(res.Error);
         }
         else
         {
@@ -971,20 +873,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
             return;
         }
 
-        // TODO:TryBeginResidentialOperation is dummy for now.
-        if (!TryBeginResidentialOperation(propertyId))
-        {
-            ShowResidentialOperationBusy();
-            return;
-        }
-        try
-        {
-            await EditRentResidentialFromIdCore(propertyId);
-        }
-        finally
-        {
-            EndResidentialOperation(propertyId);
-        }
+        await EditRentResidentialFromIdCore(propertyId);
     }
 
     private async Task EditRentResidentialFromIdCore(string propertyId)
@@ -1030,14 +919,8 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
                 res.Error.MethodName + Environment.NewLine +
                 res.Error.FullDump);
 
-            InfoBarErrorTitle = res.Error.Title;
-            InfoBarErrorMessage =
-                res.Error.Message + Environment.NewLine +
-                res.Error.Description + Environment.NewLine +
-                res.Error.Operation + Environment.NewLine +
-                res.Error.MethodName;
+            ShowErrorInfoBar(res.Error);
 
-            IsInfoBarErrorOpen = true;
             return;
         }
 
@@ -1102,20 +985,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
             return;
         }
 
-        var selectedId = selected.Id;
-        if (!TryBeginResidentialOperation(selectedId))
-        {
-            ShowResidentialOperationBusy();
-            return;
-        }
-        try
-        {
-            await DeleteRentResidentialCore(selected);
-        }
-        finally
-        {
-            EndResidentialOperation(selectedId);
-        }
+        await DeleteRentResidentialCore(selected);
     }
 
     private async Task DeleteRentResidentialCore(Models.SearchResult.PropertySearchResultItem selected)
@@ -1124,9 +994,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         var listingEditor = RentResidentialListingEditorList.FirstOrDefault(editor => editor.PropertyId == selectedId);
         if (listingEditor is not null)
         {
-            InfoBarErrorTitle = "編集画面が開いています";
-            InfoBarErrorMessage = "募集物件の編集画面を閉じてから、建物を削除してください。";
-            IsInfoBarErrorOpen = true;
+            ShowSimpleErrorInfoBar("編集画面が開いています", "募集物件の編集画面を閉じてから、建物を削除してください。");
             listingEditor.Activate();
             return;
         }
@@ -1134,9 +1002,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         var propertyEditor = RentResidentialEditorList.FirstOrDefault(editor => editor.Id == selectedId);
         if (propertyEditor is not null)
         {
-            InfoBarErrorTitle = "編集画面が開いています";
-            InfoBarErrorMessage = "建物の編集画面を閉じてから、建物を削除してください。";
-            IsInfoBarErrorOpen = true;
+            ShowSimpleErrorInfoBar("編集画面が開いています", "建物の編集画面を閉じてから、建物を削除してください。");
             propertyEditor.Activate();
             return;
         }
@@ -1154,14 +1020,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
                 res.Error.MethodName + Environment.NewLine +
                 res.Error.FullDump);
 
-            InfoBarErrorTitle = res.Error.Title;
-            InfoBarErrorMessage =
-                res.Error.Message + Environment.NewLine +
-                res.Error.Description + Environment.NewLine +
-                res.Error.Operation + Environment.NewLine +
-                res.Error.MethodName;
-
-            IsInfoBarErrorOpen = true;
+            ShowErrorInfoBar(res.Error);
         }
         else
         {
@@ -1187,9 +1046,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
                 catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
                 {
                     Debug.WriteLine($"Failed to delete property attachments '{propertyDataDirectoryPath}': {ex}");
-                    InfoBarErrorTitle = "添付ファイルの削除に失敗しました";
-                    InfoBarErrorMessage = $"建物は削除されましたが、添付ファイルを削除できませんでした: {propertyDataDirectoryPath}。{ex.Message}";
-                    IsInfoBarErrorOpen = true;
+                    ShowSimpleErrorInfoBar("添付ファイルの削除に失敗しました", $"建物は削除されましたが、添付ファイルを削除できませんでした: {propertyDataDirectoryPath}。{ex.Message}");
                 }
             }
         }
@@ -1224,14 +1081,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
                 res.Error.MethodName + Environment.NewLine +
                 res.Error.FullDump);
 
-            InfoBarErrorTitle = res.Error.Title;
-            InfoBarErrorMessage =
-                res.Error.Message + Environment.NewLine +
-                res.Error.Description + Environment.NewLine +
-                res.Error.Operation + Environment.NewLine +
-                res.Error.MethodName;
-
-            IsInfoBarErrorOpen = true;
+            ShowErrorInfoBar(res.Error);
         }
         else
         {
@@ -1259,19 +1109,8 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
             Debug.WriteLine("EditRentResidentialRoomCommand executed without a listing or property id.");
             return;
         }
-        if (!TryBeginResidentialOperation(buildingId))
-        {
-            ShowResidentialOperationBusy();
-            return;
-        }
-        try
-        {
-            await EditRentResidentialRoomCore(selected);
-        }
-        finally
-        {
-            EndResidentialOperation(buildingId);
-        }
+
+        await EditRentResidentialRoomCore(selected);
     }
 
     private async Task EditRentResidentialRoomCore(Models.SearchResult.ListingSearchResultItem selected)
@@ -1322,14 +1161,8 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
                 res.Error.MethodName + Environment.NewLine +
                 res.Error.FullDump);
 
-            InfoBarErrorTitle = res.Error.Title;
-            InfoBarErrorMessage =
-                res.Error.Message + Environment.NewLine +
-                res.Error.Description + Environment.NewLine +
-                res.Error.Operation + Environment.NewLine +
-                res.Error.MethodName;
+            ShowErrorInfoBar(res.Error);
 
-            IsInfoBarErrorOpen = true;
             return;
         }
 
@@ -1395,19 +1228,8 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
             Debug.WriteLine("DuplicateRentResidentialRoom executed without a listing or property id.");
             return;
         }
-        if (!TryBeginResidentialOperation(buildingId))
-        {
-            ShowResidentialOperationBusy();
-            return;
-        }
-        try
-        {
-            await DuplicateRentResidentialRoomCore(selected);
-        }
-        finally
-        {
-            EndResidentialOperation(buildingId);
-        }
+
+        await DuplicateRentResidentialRoomCore(selected);
     }
 
     private async Task DuplicateRentResidentialRoomCore(Models.SearchResult.ListingSearchResultItem selected)
@@ -1429,14 +1251,8 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
                 res.Error.MethodName + Environment.NewLine +
                 res.Error.FullDump);
 
-            InfoBarErrorTitle = res.Error.Title;
-            InfoBarErrorMessage =
-                res.Error.Message + Environment.NewLine +
-                res.Error.Description + Environment.NewLine +
-                res.Error.Operation + Environment.NewLine +
-                res.Error.MethodName;
+            ShowErrorInfoBar(res.Error);
 
-            IsInfoBarErrorOpen = true;
             return;
         }
 
@@ -1519,24 +1335,11 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         var selectedPropertyId = selected.PropertyId;
         if (string.IsNullOrWhiteSpace(selectedPropertyId))
         {
-            InfoBarErrorTitle = "エラー";
-            InfoBarErrorMessage = "募集物件の建物IDがないため、削除できません。";
-            IsInfoBarErrorOpen = true;
+            ShowSimpleErrorInfoBar("エラー", "募集物件の建物IDがないため、削除できません。");
             return;
         }
-        if (!TryBeginResidentialOperation(selectedPropertyId))
-        {
-            ShowResidentialOperationBusy();
-            return;
-        }
-        try
-        {
-            await DeleteRentResidentialRoomCore(selected);
-        }
-        finally
-        {
-            EndResidentialOperation(selectedPropertyId);
-        }
+
+        await DeleteRentResidentialRoomCore(selected);
     }
 
     private async Task DeleteRentResidentialRoomCore(Models.SearchResult.ListingSearchResultItem selected)
@@ -1546,9 +1349,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         var listingEditor = RentResidentialListingEditorList.FirstOrDefault(editor => editor.Id == selectedId);
         if (listingEditor is not null)
         {
-            InfoBarErrorTitle = "編集画面が開いています";
-            InfoBarErrorMessage = "募集物件の編集画面を閉じてから削除してください。";
-            IsInfoBarErrorOpen = true;
+            ShowSimpleErrorInfoBar("編集画面が開いています", "募集物件の編集画面を閉じてから削除してください。");
             listingEditor.Activate();
             return;
         }
@@ -1556,9 +1357,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         var propertyEditor = RentResidentialEditorList.FirstOrDefault(editor => editor.Id == selectedPropertyId);
         if (propertyEditor is not null)
         {
-            InfoBarErrorTitle = "編集画面が開いています";  
-            InfoBarErrorMessage = "建物の編集画面を閉じてから、募集物件を削除してください。";
-            IsInfoBarErrorOpen = true;
+            ShowSimpleErrorInfoBar("編集画面が開いています", "建物の編集画面を閉じてから、募集物件を削除してください。");
             propertyEditor.Activate();
             return;
         }
@@ -1574,14 +1373,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
                 res.Error.MethodName + Environment.NewLine +
                 res.Error.FullDump);
 
-            InfoBarErrorTitle = res.Error.Title;
-            InfoBarErrorMessage =
-                res.Error.Message + Environment.NewLine +
-                res.Error.Description + Environment.NewLine +
-                res.Error.Operation + Environment.NewLine +
-                res.Error.MethodName;
-
-            IsInfoBarErrorOpen = true;
+            ShowErrorInfoBar(res.Error);
         }
         else
         {
@@ -1616,9 +1408,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
                 catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
                 {
                     Debug.WriteLine($"Failed to delete listing attachments '{listingDataDirectoryPath}': {ex}");
-                    InfoBarErrorTitle = "添付ファイルの削除に失敗しました";
-                    InfoBarErrorMessage = $"募集物件は削除されましたが、添付ファイルを削除できませんでした: {listingDataDirectoryPath}。{ex.Message}";
-                    IsInfoBarErrorOpen = true;
+                    ShowSimpleErrorInfoBar("添付ファイルの削除に失敗しました", $"募集物件は削除されましたが、添付ファイルを削除できませんでした: {listingDataDirectoryPath}。{ex.Message}");
                 }
             }
         }
@@ -1663,14 +1453,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
                 res.Error.MethodName + Environment.NewLine +
                 res.Error.FullDump);
 
-            InfoBarErrorTitle = res.Error.Title;
-            InfoBarErrorMessage =
-                res.Error.Message + Environment.NewLine +
-                res.Error.Description + Environment.NewLine +
-                res.Error.Operation + Environment.NewLine +
-                res.Error.MethodName;
-
-            IsInfoBarErrorOpen = true;
+            ShowErrorInfoBar(res.Error);
         }
         else
         {
@@ -1773,20 +1556,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
             return;
         }
 
-        if (!TryBeginCommercialOperation(propertyId))
-        {
-            ShowCommercialOperationBusy();
-            return;
-        }
-
-        try
-        {
-            await EditRentCommercialFromIdCore(propertyId);
-        }
-        finally
-        {
-            EndCommercialOperation(propertyId);
-        }
+        await EditRentCommercialFromIdCore(propertyId);
     }
 
     private async Task EditRentCommercialFromIdCore(string propertyId)
@@ -1832,14 +1602,8 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
                 res.Error.MethodName + Environment.NewLine +
                 res.Error.FullDump);
 
-            InfoBarErrorTitle = res.Error.Title;
-            InfoBarErrorMessage =
-                res.Error.Message + Environment.NewLine +
-                res.Error.Description + Environment.NewLine +
-                res.Error.Operation + Environment.NewLine +
-                res.Error.MethodName;
+            ShowErrorInfoBar(res.Error);
 
-            IsInfoBarErrorOpen = true;
             return;
         }
 
@@ -1896,21 +1660,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
             return;
         }
 
-        var selectedId = selected.Id;
-        if (!TryBeginCommercialOperation(selectedId))
-        {
-            ShowCommercialOperationBusy();
-            return;
-        }
-
-        try
-        {
-            await DeleteRentCommercialCore(selected);
-        }
-        finally
-        {
-            EndCommercialOperation(selectedId);
-        }
+        await DeleteRentCommercialCore(selected);
     }
 
     private async Task DeleteRentCommercialCore(Models.SearchResult.PropertySearchResultItem selected)
@@ -1967,14 +1717,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
                 res.Error.MethodName + Environment.NewLine +
                 res.Error.FullDump);
 
-            InfoBarErrorTitle = res.Error.Title;
-            InfoBarErrorMessage =
-                res.Error.Message + Environment.NewLine +
-                res.Error.Description + Environment.NewLine +
-                res.Error.Operation + Environment.NewLine +
-                res.Error.MethodName;
-
-            IsInfoBarErrorOpen = true;
+            ShowErrorInfoBar(res.Error);
 
             return;
         }
@@ -2025,14 +1768,8 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
                 res.Error.MethodName + Environment.NewLine +
                 res.Error.FullDump);
 
-            InfoBarErrorTitle = res.Error.Title;
-            InfoBarErrorMessage =
-                res.Error.Message + Environment.NewLine +
-                res.Error.Description + Environment.NewLine +
-                res.Error.Operation + Environment.NewLine +
-                res.Error.MethodName;
+            ShowErrorInfoBar(res.Error);
 
-            IsInfoBarErrorOpen = true;
             return;
         }
 
@@ -2060,20 +1797,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
             return;
         }
 
-        if (!TryBeginCommercialOperation(buildingId))
-        {
-            ShowCommercialOperationBusy();
-            return;
-        }
-
-        try
-        {
-            await EditRentCommercialListingCore(selected);
-        }
-        finally
-        {
-            EndCommercialOperation(buildingId);
-        }
+        await EditRentCommercialListingCore(selected);
     }
 
     private async Task EditRentCommercialListingCore(Models.SearchResult.ListingSearchResultItem selected)
@@ -2082,9 +1806,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         var buildingId = selected.PropertyId;
         if (RentCommercialEditorList.Any(editor => editor.Id == buildingId && editor.ViewModel?.IsListingPendingDeletion(listingId) == true))
         {
-            InfoBarErrorTitle = "編集画面が開いています";
-            InfoBarErrorMessage = "建物の編集画面で削除予定の募集物件は開けません。";
-            IsInfoBarErrorOpen = true;
+            ShowSimpleErrorInfoBar("編集画面が開いています", "建物の編集画面で削除予定の募集物件は開けません。");
             return;
         }
 
@@ -2131,14 +1853,8 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
                 res.Error.MethodName + Environment.NewLine +
                 res.Error.FullDump);
 
-            InfoBarErrorTitle = res.Error.Title;
-            InfoBarErrorMessage =
-                res.Error.Message + Environment.NewLine +
-                res.Error.Description + Environment.NewLine +
-                res.Error.Operation + Environment.NewLine +
-                res.Error.MethodName;
+            ShowErrorInfoBar(res.Error);
 
-            IsInfoBarErrorOpen = true;
             return;
         }
 
@@ -2201,29 +1917,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
             return;
         }
 
-        //var selectedId = selected.Id;
-        var selectedPropertyId = selected.PropertyId;
-        if (string.IsNullOrWhiteSpace(selectedPropertyId))
-        {
-            InfoBarErrorTitle = "削除できません";
-            InfoBarErrorMessage = "募集物件の建物IDがないため、削除できません。";
-            IsInfoBarErrorOpen = true;
-            return;
-        }
-        if (!TryBeginCommercialOperation(selectedPropertyId))
-        {
-            ShowCommercialOperationBusy();
-            return;
-        }
-
-        try
-        {
-            await DeleteRentCommercialListingCore(selected);
-        }
-        finally
-        {
-            EndCommercialOperation(selectedPropertyId);
-        }
+        await DeleteRentCommercialListingCore(selected);
     }
 
     private async Task DeleteRentCommercialListingCore(Models.SearchResult.ListingSearchResultItem selected)
@@ -2233,9 +1927,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         var propertyEditor = RentCommercialEditorList.FirstOrDefault(editor => editor.Id == selectedPropertyId);
         if (propertyEditor is not null)
         {
-            InfoBarErrorTitle = "削除できません";
-            InfoBarErrorMessage = "建物の編集画面を閉じてから、募集物件を削除してください。";
-            IsInfoBarErrorOpen = true;
+            ShowSimpleErrorInfoBar("削除できません", "建物の編集画面を閉じてから、募集物件を削除してください。");
             propertyEditor.Activate();
             return;
         }
@@ -2243,9 +1935,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         var mainWindow = App.GetService<Views.MainWindow>();
         if (mainWindow.Content is not Microsoft.UI.Xaml.FrameworkElement { XamlRoot: { } xamlRoot })
         {
-            InfoBarErrorTitle = "削除できません";
-            InfoBarErrorMessage = "募集物件の削除を確認できませんでした。画面を開き直して再試行してください。";
-            IsInfoBarErrorOpen = true;
+            ShowSimpleErrorInfoBar("削除できません", "募集物件の削除を確認できませんでした。画面を開き直して再試行してください。");
             return;
         }
 
@@ -2258,18 +1948,14 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         catch (Exception ex) when (ex is System.Runtime.InteropServices.COMException or InvalidOperationException)
         {
             Debug.WriteLine($"Failed to confirm commercial listing deletion: {ex}");
-            InfoBarErrorTitle = "削除できません";
-            InfoBarErrorMessage = $"募集物件の削除を確認できませんでした: {ex.Message}";
-            IsInfoBarErrorOpen = true;
+            ShowSimpleErrorInfoBar("削除できません", $"募集物件の削除を確認できませんでした: {ex.Message}");
             return;
         }
 
         propertyEditor = RentCommercialEditorList.FirstOrDefault(editor => editor.Id == selectedPropertyId);
         if (propertyEditor is not null)
         {
-            InfoBarErrorTitle = "削除できません";  
-            InfoBarErrorMessage = "建物の編集画面を閉じてから、募集物件を削除してください。";
-            IsInfoBarErrorOpen = true;
+            ShowSimpleErrorInfoBar("削除できません", "建物の編集画面を閉じてから、募集物件を削除してください。");
             propertyEditor.Activate();
             return;
         }
@@ -2298,9 +1984,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
 
         if (isFound)
         {
-            InfoBarErrorTitle = "削除できません";
-            InfoBarErrorMessage = "募集物件の編集画面を閉じてから削除してください。";
-            IsInfoBarErrorOpen = true;
+            ShowSimpleErrorInfoBar("削除できません", "募集物件の編集画面を閉じてから削除してください。");
             return;
         }
 
@@ -2315,14 +1999,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
                 res.Error.MethodName + Environment.NewLine +
                 res.Error.FullDump);
 
-            InfoBarErrorTitle= res.Error.Title;
-            InfoBarErrorMessage =
-                res.Error.Message + Environment.NewLine +
-                res.Error.Description + Environment.NewLine +
-                res.Error.Operation + Environment.NewLine +
-                res.Error.MethodName;
-
-            IsInfoBarErrorOpen = true;
+            ShowErrorInfoBar(res.Error);
 
             return;
         }
@@ -2358,17 +2035,8 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
             Debug.WriteLine($"Failed to delete commercial listing attachments '{listingDataDirectoryPath}': {ex}");
-            InfoBarErrorTitle = "削除できません";
-            InfoBarErrorMessage = $"募集物件は削除されましたが、添付ファイルを削除できませんでした: {listingDataDirectoryPath}。{ex.Message}";
-            IsInfoBarErrorOpen = true;
+            ShowSimpleErrorInfoBar("削除できません", $"募集物件は削除されましたが、添付ファイルを削除できませんでした: {listingDataDirectoryPath}。{ex.Message}");
         }
-    }
-
-    private void ShowCommercialOperationBusy()
-    {
-        InfoBarErrorTitle = "操作中";
-        InfoBarErrorMessage = "関連する保存、削除、または読み込みが完了してから、もう一度操作してください。";
-        IsInfoBarErrorOpen = true;
     }
 
     private static bool DeleteRentCommercialListingCanExecute(Models.SearchResult.ListingSearchResultItem? selected)
@@ -2450,14 +2118,8 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
                 res.Error.MethodName + Environment.NewLine +
                 res.Error.FullDump);
 
-            InfoBarErrorTitle = res.Error.Title;
-            InfoBarErrorMessage =
-                res.Error.Message + Environment.NewLine +
-                res.Error.Description + Environment.NewLine +
-                res.Error.Operation + Environment.NewLine +
-                res.Error.MethodName;
+            ShowErrorInfoBar(res.Error);
 
-            IsInfoBarErrorOpen = true;
         }
         else
         {
@@ -2549,14 +2211,8 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
                 res.Error.MethodName + Environment.NewLine +
                 res.Error.FullDump);
 
-            InfoBarErrorTitle = res.Error.Title;
-            InfoBarErrorMessage =
-                res.Error.Message + Environment.NewLine +
-                res.Error.Description + Environment.NewLine +
-                res.Error.Operation + Environment.NewLine +
-                res.Error.MethodName;
+            ShowErrorInfoBar(res.Error);
 
-            IsInfoBarErrorOpen = true;
             return;
         }
 
@@ -2663,14 +2319,8 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
                 res.Error.MethodName + Environment.NewLine +
                 res.Error.FullDump);
 
-            InfoBarErrorTitle= res.Error.Title;
-            InfoBarErrorMessage =
-                res.Error.Message + Environment.NewLine +
-                res.Error.Description + Environment.NewLine +
-                res.Error.Operation + Environment.NewLine +
-                res.Error.MethodName;
+            ShowErrorInfoBar(res.Error);
 
-            IsInfoBarErrorOpen = true;
             return;
         }
         else
@@ -2763,14 +2413,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
                 res.Error.MethodName + Environment.NewLine +
                 res.Error.FullDump);
 
-            InfoBarErrorTitle = res.Error.Title;
-            InfoBarErrorMessage =
-                res.Error.Message + Environment.NewLine +
-                res.Error.Description + Environment.NewLine +
-                res.Error.Operation + Environment.NewLine +
-                res.Error.MethodName;
-
-            IsInfoBarErrorOpen = true;
+            ShowErrorInfoBar(res.Error);
 
             return;
         }
@@ -2812,14 +2455,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
                 res.Error.MethodName + Environment.NewLine +
                 res.Error.FullDump);
 
-            InfoBarErrorTitle = res.Error.Title;
-            InfoBarErrorMessage =
-                res.Error.Message + Environment.NewLine +
-                res.Error.Description + Environment.NewLine +
-                res.Error.Operation + Environment.NewLine +
-                res.Error.MethodName;
-
-            IsInfoBarErrorOpen = true;
+            ShowErrorInfoBar(res.Error);
 
             return;
         }
@@ -2876,14 +2512,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
                 res.Error.MethodName + Environment.NewLine +
                 res.Error.FullDump);
 
-            InfoBarErrorTitle = res.Error.Title;
-            InfoBarErrorMessage =
-                res.Error.Message + Environment.NewLine +
-                res.Error.Description + Environment.NewLine +
-                res.Error.Operation + Environment.NewLine +
-                res.Error.MethodName;
-
-            IsInfoBarErrorOpen = true;
+            ShowErrorInfoBar(res.Error);
 
             return;
         }
@@ -2955,14 +2584,8 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
                 res.Error.MethodName + Environment.NewLine +
                 res.Error.FullDump);
 
-            InfoBarErrorTitle = res.Error.Title;
-            InfoBarErrorMessage =
-                res.Error.Message + Environment.NewLine +
-                res.Error.Description + Environment.NewLine +
-                res.Error.Operation + Environment.NewLine +
-                res.Error.MethodName;
+            ShowErrorInfoBar(res.Error);
 
-            IsInfoBarErrorOpen = true;
         }
         else
         {
@@ -3026,14 +2649,8 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
                 res.Error.MethodName + Environment.NewLine +
                 res.Error.FullDump);
 
-            InfoBarErrorTitle = res.Error.Title;
-            InfoBarErrorMessage =
-                res.Error.Message + Environment.NewLine +
-                res.Error.Description + Environment.NewLine +
-                res.Error.Operation + Environment.NewLine +
-                res.Error.MethodName;
+            ShowErrorInfoBar(res.Error);
 
-            IsInfoBarErrorOpen = true;
             return;
         }
 
@@ -3140,14 +2757,8 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
                 res.Error.MethodName + Environment.NewLine +
                 res.Error.FullDump);
 
-            InfoBarErrorTitle = res.Error.Title;
-            InfoBarErrorMessage =
-                res.Error.Message + Environment.NewLine +
-                res.Error.Description + Environment.NewLine +
-                res.Error.Operation + Environment.NewLine +
-                res.Error.MethodName;
+            ShowErrorInfoBar(res.Error);
 
-            IsInfoBarErrorOpen = true;
             return;
         }
         else

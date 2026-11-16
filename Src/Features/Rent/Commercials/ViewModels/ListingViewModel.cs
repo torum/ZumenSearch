@@ -401,12 +401,6 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
             IsInfoBarErrorOpen = true;
             return;
         }
-        if (!mainViewModel.TryBeginCommercialOperation(_unit.PropertyId))
-        {
-            InfoBarErrorMessage = "建物または募集物件の保存・削除が完了してから、もう一度保存してください。";
-            IsInfoBarErrorOpen = true;
-            return;
-        }
 
         _isSaving = true;
         OnPropertyChanged(nameof(IsEditorEnabled));
@@ -418,7 +412,6 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         {
             _isSaving = false;
             OnPropertyChanged(nameof(IsEditorEnabled));
-            mainViewModel.EndCommercialOperation(_unit.PropertyId);
             if (!_propertyBusy) ApplyDeferredPropertyMessages();
         }
     }

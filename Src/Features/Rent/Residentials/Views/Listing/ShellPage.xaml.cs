@@ -97,8 +97,6 @@ public sealed partial class ShellPage : Page
             if (ViewModel.IsDirty)
             {
                 var result = await _dialogService.ShowEditorCloseConfirmationDialog();
-                
-                await App.GetService<ViewModels.MainViewModel>().WaitForResidentialOperationsAsync();//?
 
                 if (result == ContentDialogResult.Primary)
                 {

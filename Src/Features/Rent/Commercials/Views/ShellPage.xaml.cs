@@ -83,7 +83,6 @@ public sealed partial class ShellPage : Page
             }
 
             await ViewModel.WaitForEditorOperationsAsync();
-            if (ViewModel.IsPropertyBusy && (ViewModel.IsDirty || ViewModel.IsDiscardPending)) await App.GetService<ViewModels.MainViewModel>().WaitForCommercialOperationsAsync();
             if (!ViewModel.CleanupIncompleteImports()) return;
 
             foreach (var editor in ViewModel.UnsavedChildEditorList.ToList())
@@ -109,7 +108,6 @@ public sealed partial class ShellPage : Page
             else if (ViewModel.IsDirty)
             {
                 var result = await _dialogService.ShowEditorCloseConfirmationDialog();
-                if (ViewModel.IsPropertyBusy) await App.GetService<ViewModels.MainViewModel>().WaitForCommercialOperationsAsync();
                 if (result == ContentDialogResult.Primary)
                 {
                     await ViewModel.Save();

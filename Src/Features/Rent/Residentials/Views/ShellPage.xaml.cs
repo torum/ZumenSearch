@@ -91,7 +91,6 @@ public sealed partial class ShellPage : Page
         {
             //if (!await ViewModel.WaitForEditorOperationsAsync()) return;
             var main = App.GetService<ViewModels.MainViewModel>();
-            await main.WaitForResidentialOperationsAsync();
             if (ViewModel.SaveCommand.IsRunning && ViewModel.SaveCommand.ExecutionTask is Task pendingSave) await pendingSave;
             //if (!ViewModel.CleanIncompleteAttachments()) return;
 
@@ -112,7 +111,6 @@ public sealed partial class ShellPage : Page
             else if (ViewModel.IsDirty)
             {
                 var result = await _dialogService.ShowEditorCloseConfirmationDialog();
-                await main.WaitForResidentialOperationsAsync();
                 if (result == ContentDialogResult.Primary)
                 {
                     if (ViewModel.IsDirty) await ViewModel.Save();

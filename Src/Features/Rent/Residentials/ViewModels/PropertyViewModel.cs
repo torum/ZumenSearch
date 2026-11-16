@@ -119,11 +119,13 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         }
 
         // Ready to receive messages.
-#pragma warning disable IL3050 // Disable AOT dynamic code warning
-#pragma warning disable IL2026 // Disable Trimming unreferenced code warning
-        IsActive = true;
-#pragma warning restore IL2026
-#pragma warning restore IL3050
+        WeakReferenceMessenger.Default.Register<ListingUpdatedMessage>(this);
+        WeakReferenceMessenger.Default.Register<WindowClosedMessage<Microsoft.UI.Xaml.Window>>(this);
+        WeakReferenceMessenger.Default.Register<ListingDeletedMessage>(this);
+        WeakReferenceMessenger.Default.Register<LessorUpdatedMessage>(this);
+        WeakReferenceMessenger.Default.Register<BrokerUpdatedMessage>(this);
+        WeakReferenceMessenger.Default.Register<LessorDeletedMessage>(this);
+        WeakReferenceMessenger.Default.Register<BrokerDeletedMessage>(this);
     }
 
     #region == Properties ==
@@ -2413,14 +2415,13 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             entry.Dispose();
         }
 
-#pragma warning disable IL3050 // Disable AOT dynamic code warning
-#pragma warning disable IL2026 // Disable Trimming unreferenced code warning
-        IsActive = false;
-#pragma warning restore IL2026
-#pragma warning restore IL3050
-
-        // or Unsubscribe
-        //WeakReferenceMessenger.Default.UnregisterAll(this);
+        WeakReferenceMessenger.Default.Unregister<ListingUpdatedMessage>(this);
+        WeakReferenceMessenger.Default.Unregister<WindowClosedMessage<Microsoft.UI.Xaml.Window>>(this);
+        WeakReferenceMessenger.Default.Unregister<ListingDeletedMessage>(this);
+        WeakReferenceMessenger.Default.Unregister<LessorUpdatedMessage>(this);
+        WeakReferenceMessenger.Default.Unregister<BrokerUpdatedMessage>(this);
+        WeakReferenceMessenger.Default.Unregister<LessorDeletedMessage>(this);
+        WeakReferenceMessenger.Default.Unregister<BrokerDeletedMessage>(this);
 
         _cts?.Cancel();
         _cts?.Dispose();
@@ -3787,20 +3788,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
     private async Task EditSelectedListing(ListingSummary listingSummary)
     {
         if (listingSummary is null || !ListingSummaries.Contains(listingSummary) || !IsEditorEnabled) return;
-        var mainVM = App.GetService<ViewModels.MainViewModel>();
-        if (!mainVM.TryBeginResidentialOperation(_id))
-        {
-            ShowSimpleErrorInfoBar("エラー", "関連する保存、削除または読み込みが完了してから、もう一度操作してください。");
-            return;
-        }
-        try
-        {
-            await EditSelectedListingCore(listingSummary);
-        }
-        finally
-        {
-            mainVM.EndResidentialOperation(_id);
-        }
+
+        await EditSelectedListingCore(listingSummary);
     }
 
     private async Task EditSelectedListingCore(ListingSummary listingSummary)
@@ -3958,43 +3947,26 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             }
         }
 
-        if (!mainVM.TryBeginResidentialOperation(_id))
+        if (mainVM.RentResidentialListingEditorList.FirstOrDefault(editor => editor.Id == listingSummary.Id) is { } openedEditor)
         {
-            ShowSimpleErrorInfoBar("エラー", "関連する保存、削除または読み込みが完了してから、もう一度操作してください。");
+            ShowSimpleErrorInfoBar("編集画面が開いています", "募集物件の編集画面を閉じてから削除してください。");
+            openedEditor.Activate();
             return;
         }
-        try
-        {
-            if (await _dialogService.ShowDeleteConfirmationDialog("この募集物件を削除しますか？") != Microsoft.UI.Xaml.Controls.ContentDialogResult.Primary) return;
-            if (mainVM.RentResidentialListingEditorList.FirstOrDefault(editor => editor.Id == listingSummary.Id) is { } openedEditor)
-            {
-                ShowSimpleErrorInfoBar("編集画面が開いています", "募集物件の編集画面を閉じてから削除してください。");
-                openedEditor.Activate();
-                return;
-            }
 
-            if (ListingSummaries.Remove(listingSummary))
-            {
-                // Don't delete directly. Just mark it for deletion. It will be deleted when the property is saved.
-                //if (_property.Rooms.Remove(listing)) { }
-                _property.ListingsToBeDeleted.Add(listingSummary.Id);
+        if (await _dialogService.ShowDeleteConfirmationDialog("この募集物件を削除しますか？") != Microsoft.UI.Xaml.Controls.ContentDialogResult.Primary) return;
 
-                /*
-                if (listing.IsPendingDraft) _stagedPendingListingDeletions.Add(listing.Id);
-                else _stagedListingDeletions.Add(listing.Id);
-                */
-                _property.ListingSummaries.Remove(listingSummary);
-                /*
-                _pendingListingDrafts.Remove(listing.Id);
-                _pendingListingObjects.Remove(listing.Id);
-                _supersededDraftFiles.Remove(listing.Id);
-                */
-                IsDirty = true;
-            }
-        }
-        finally
+        if (ListingSummaries.Remove(listingSummary))
         {
-            mainVM.EndResidentialOperation(_id);
+            // Don't delete directly. Just mark it for deletion. It will be deleted when the property is saved.
+            //if (_property.Rooms.Remove(listing)) { }
+            _property.ListingsToBeDeleted.Add(listingSummary.Id);
+
+            _property.ListingSummaries.Remove(listingSummary);
+
+            Debug.WriteLine($"Marked listing {listingSummary.Id} for deletion.");
+
+            IsDirty = true;
         }
     }
     public static bool DeleteSelectedListingCanExecute(ListingSummary listingSummary)

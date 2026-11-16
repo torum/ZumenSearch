@@ -92,11 +92,13 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         IsDirty = isDuplicate;
 
         // Ready to receive messages.
-#pragma warning disable IL3050 // Disable AOT dynamic code warning
-#pragma warning disable IL2026 // Disable Trimming unreferenced code warning
-        IsActive = true;
-#pragma warning restore IL2026
-#pragma warning restore IL3050
+        // Add matching unregistrations in Dispose().
+        WeakReferenceMessenger.Default.Register<PropertyUpdatedMessage>(this);
+        WeakReferenceMessenger.Default.Register<PropertyIsUnitOwnershipChangedMessage>(this);
+        WeakReferenceMessenger.Default.Register<LessorUpdatedMessage>(this);
+        WeakReferenceMessenger.Default.Register<BrokerUpdatedMessage>(this);
+        WeakReferenceMessenger.Default.Register<LessorDeletedMessage>(this);
+        WeakReferenceMessenger.Default.Register<BrokerDeletedMessage>(this);
     }
 
     #region == Properties ==
@@ -997,11 +999,12 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
             pdf.PropertyChanged -= OnPdfPropertyChanged;
         }
 
-#pragma warning disable IL3050 // Disable AOT dynamic code warning
-#pragma warning disable IL2026 // Disable Trimming unreferenced code warning
-        IsActive = false;
-#pragma warning restore IL2026
-#pragma warning restore IL3050
+        WeakReferenceMessenger.Default.Unregister<PropertyUpdatedMessage>(this);
+        WeakReferenceMessenger.Default.Unregister<PropertyIsUnitOwnershipChangedMessage>(this);
+        WeakReferenceMessenger.Default.Unregister<LessorUpdatedMessage>(this);
+        WeakReferenceMessenger.Default.Unregister<BrokerUpdatedMessage>(this);
+        WeakReferenceMessenger.Default.Unregister<LessorDeletedMessage>(this);
+        WeakReferenceMessenger.Default.Unregister<BrokerDeletedMessage>(this);
 
         _cts.Cancel();
         _cts.Dispose();

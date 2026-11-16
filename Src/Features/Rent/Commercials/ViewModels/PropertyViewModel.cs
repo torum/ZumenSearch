@@ -3,7 +3,6 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Data.Sqlite;
 using Microsoft.UI.Windowing;
-using Microsoft.UI.Xaml.Data;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
@@ -12,10 +11,8 @@ using Windows.Data.Pdf;
 using Windows.Storage;
 using Windows.Storage.Streams;
 using ZumenSearch.Models;
-using ZumenSearch.Models.Base;
 using ZumenSearch.Models.Location;
 using ZumenSearch.Models.Messenger;
-using ZumenSearch.Models.Transportation;
 using ZumenSearch.Services.Contracts;
 using ZumenSearch.Views.Services.Contracts;
 
@@ -2164,12 +2161,6 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             IsInfoBarErrorOpen = true;
             return;
         }
-        if (!mainViewModel.TryBeginCommercialOperation(_building.Id))
-        {
-            InfoBarErrorMessage = "関連する保存または削除が完了してから、もう一度保存してください。";
-            IsInfoBarErrorOpen = true;
-            return;
-        }
 
         IsSaving = true;
         try
@@ -2179,7 +2170,6 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         finally
         {
             IsSaving = false;
-            mainViewModel.EndCommercialOperation(_building.Id);
             while (_deferredMessages.TryDequeue(out var message))
             {
                 message();
@@ -2435,22 +2425,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     {
         if (summary is null || !Units.Contains(summary) || !IsEditorEnabled) return;
 
-        var mainViewModel = App.GetService<ViewModels.MainViewModel>();
-        if (!mainViewModel.TryBeginCommercialOperation(_building.Id))
-        {
-            InfoBarErrorMessage = "関連する保存、削除または読み込みが完了してから、もう一度操作してください。";
-            IsInfoBarErrorOpen = true;
-            return;
-        }
-
-        try
-        {
-            await EditSelectedUnitCore(summary);
-        }
-        finally
-        {
-            mainViewModel.EndCommercialOperation(_building.Id);
-        }
+        await EditSelectedUnitCore(summary);
     }
 
     private async Task EditSelectedUnitCore(Models.Rent.Commercials.ListingSummary summary)
@@ -2580,12 +2555,6 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         if (summary is null || !Units.Contains(summary) || !IsEditorEnabled) return;
 
         var mainVM = App.GetService<ViewModels.MainViewModel>();
-        if (!mainVM.TryBeginCommercialOperation(_building.Id))
-        {
-            InfoBarErrorMessage = "関連する保存、削除または読み込みが完了してから、もう一度操作してください。";
-            IsInfoBarErrorOpen = true;
-            return;
-        }
 
         try
         {
@@ -2619,7 +2588,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         }
         finally
         {
-            mainVM.EndCommercialOperation(_building.Id);
+
         }
     }
     public static bool DeleteSelectedUnitCanExecute(Models.Rent.Commercials.ListingSummary summary) => summary is not null;
