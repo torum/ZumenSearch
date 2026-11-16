@@ -16,6 +16,13 @@ using ZumenSearch.Views.Services.Contracts;
 
 namespace ZumenSearch.ViewModels.Rent.Residentials;
 
+/*
+ * TODO: 
+ * Send message to the MainViewModel when some error occurs while closing the window. MainViewModel should show a infobar with the error message.
+ * Add try catch to async and file IO operations and show error message in infobar.
+ * Add IsBusy flag to disable the UI commands when some async or IO operations is in progress.
+ */
+
 public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<PropertyUpdatedMessage>, IRecipient<PropertyIsUnitOwnershipChangedMessage>, IRecipient<LessorUpdatedMessage>, IRecipient<BrokerUpdatedMessage>, IRecipient<LessorDeletedMessage>, IRecipient<BrokerDeletedMessage>, IDisposable
 {
     #region == Private variables ==
@@ -1864,6 +1871,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
                     pdf.SetIsModified(false);
                 }
                 //CaptureCommittedAttachments(ResidentialListingDraft.FromListing(roomToSave));
+                _unsavedRoomPictureFileList.Clear();
                 _unsavedRoomPdfFileList.Clear();
                 _unsavedRoomPdfThumbnailFileList.Clear();
 

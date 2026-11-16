@@ -1356,13 +1356,9 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
 
         editorWindow.AppWindow.Show();
         editorWindow.Activate();
-
-        // Do I need this anymore?
-        //var mainWindow = App.GetService<MainWindow>();
-        //mainWindow?.AppWindow.MoveInZOrderBelow(editorWindow.AppWindow.Id);
-
         editorWindow.AppWindow.MoveInZOrderAtTop();
     }
+
     private static bool EditRentResidentialRoomCanExecute(Models.SearchResult.ListingSearchResultItem? selected)
     {
         if (selected is null)
@@ -1442,9 +1438,12 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
             return;
         }
 
-        // Set the BasePath for ORIGINAL pictures and PDFs to the source directory.
-        // This is necessary because the duplicated room will have a new ID, and we want to keep the original files in their original location
-        // So that we can copy them to the new location and keep track of them as unsaved in the ListingViewModel when opens the duplicated room in the editor.
+        // All the ids in the duplicated room and its attachments are already new,
+        // we just need to set the BasePath for the original pictures and PDFs to the source directory.
+
+        // Set the BasePath for ORIGINAL pictures and PDFs to the source directory here.
+        // This is necessary because the duplicated room has a new ID, and we want to keep the original files in their original location
+        // so that we can copy them to the new location and also keep track of them as unsaved in the ListingViewModel when opens the duplicated room in the editor.
         var sourceDirectory = Path.Combine(App.PropertyBlobDataFolder, buildingId, listingId);
         foreach (var picture in res.Room.Pictures)
         {
@@ -1455,11 +1454,12 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
             pdf.BasePath = sourceDirectory;
         }
 
+        // use second parameter true to indicate this is a duplicated room, so that the editor can handle it accordingly.
         var editorShell = _shellRentResidentialListingFactory.Create(res.Room, true);
         var propertyEditor = RentResidentialEditorList.FirstOrDefault(editor => editor.Id == buildingId && editor.ViewModel is { IsActive: true });
         if (propertyEditor?.ViewModel is { } propertyViewModel) editorShell.ViewModel.SetOwnershipVisibility(propertyViewModel.IsUnitLevelOwnership);
         var editorWindow = editorShell.Window;
-        if (editorWindow == null)
+        if (editorWindow is null)
         {
             // EditorWin should be initialized in the EditorShell constructor.
             Debug.WriteLine("EditorWin must be initialized in the EditorShell constructor");
@@ -1480,13 +1480,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
 
         editorWindow.AppWindow.Show();
         editorWindow.Activate();
-
-        // Do I need this anymore?
-        //var mainWindow = App.GetService<MainWindow>();
-        //mainWindow?.AppWindow.MoveInZOrderBelow(editorWindow.AppWindow.Id);
-
         editorWindow.AppWindow.MoveInZOrderAtTop();
-        
     }
     private static bool DuplicateRentResidentialRoomCanExecute(Models.SearchResult.ListingSearchResultItem? selected)
     {

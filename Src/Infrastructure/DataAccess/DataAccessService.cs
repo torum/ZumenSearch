@@ -3341,7 +3341,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 cmd.Parameters.AddWithValue("@listingId", listingId);
                 using (var reader = cmd.ExecuteReader())
                 {
-                    if (reader.Read()) //while
+                    if (reader.Read())
                     {
                         res.Room = GetRentResidentialListing(reader, propertyId, buildingName, isUnitOwnership, fudousanId, duplicate);
                     }

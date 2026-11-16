@@ -34,9 +34,7 @@
         </Grid>
 
         <Border Grid.Row="1">
-            <InfoBar Severity="Error" 
-             IsOpen="{x:Bind ViewModel.IsInfoBarErrorOpen, Mode=TwoWay}" 
-             Message="{x:Bind ViewModel.InfoBarErrorMessage, Mode=OneWay}" />
+            <InfoBar Severity="Error" IsOpen="{x:Bind ViewModel.IsInfoBarErrorOpen, Mode=TwoWay}" Message="{x:Bind ViewModel.InfoBarErrorMessage, Mode=OneWay}" helpers:InfoBarExtensions.IsTextSelectionEnabled="True" />
         </Border>
         
         <Grid Grid.Row="2" Margin="36,0,36,0">

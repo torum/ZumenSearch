@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:ZumenSearch"
+    xmlns:helpers="using:ZumenSearch.Helpers"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     NavigationCacheMode="Required"
     KeyboardAcceleratorPlacementMode="Hidden"
@@ -164,7 +165,7 @@
                     <Frame x:Name="ContentFrame" Grid.Row="1" Navigated="NavigationViewControl_Navigated" Padding="0"></Frame>
 
                     <Border Grid.Row="2" Height="Auto">
-                        <InfoBar Severity="Error" IsOpen="{x:Bind ViewModel.IsInfoBarErrorOpen, Mode=TwoWay}" Message="{x:Bind ViewModel.InfoBarErrorMessage, Mode=OneWay}" />
+                        <InfoBar Severity="Error" IsOpen="{x:Bind ViewModel.IsInfoBarErrorOpen, Mode=TwoWay}" Message="{x:Bind ViewModel.InfoBarErrorMessage, Mode=OneWay}" helpers:InfoBarExtensions.IsTextSelectionEnabled="True"/>
                     </Border>
 
                 </Grid>
