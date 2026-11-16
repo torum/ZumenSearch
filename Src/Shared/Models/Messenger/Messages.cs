@@ -39,3 +39,4 @@ public class PropertyIsUnitOwnershipChangedMessage(string propertyId, bool value
     public string PropertyId { get; } = propertyId;
 }
 
+public record ShowErrorInfoBarInMainWindowMessage(string Title, string Message);

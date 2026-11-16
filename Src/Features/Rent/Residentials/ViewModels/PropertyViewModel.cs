@@ -192,6 +192,9 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
     public partial string InfoBarErrorMessage { get; set; } = string.Empty;
 
     [ObservableProperty]
+    public partial string InfoBarErrorTitle { get; set; } = string.Empty;
+
+    [ObservableProperty]
     public partial bool IsNameHasError { get; private set; }
 
     #endregion
@@ -2933,7 +2936,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
     {
         if (string.IsNullOrWhiteSpace(Name))
         {
-            InfoBarErrorMessage = "物件名（必須項目）が入力されていません。保存出来ませんでした。";
+            ShowSimpleErrorInfoBar("入力項目に誤りがあります","物件名（必須項目）が入力されていません。保存出来ませんでした。");
 
             IsNameHasError = true;
 
@@ -2948,7 +2951,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         var realLength = new StringInfo(Name).LengthInTextElements;
         if (realLength > 100)
         {
-            InfoBarErrorMessage = "物件名は100文字以内で入力してください。保存出来ませんでした。";
+            ShowSimpleErrorInfoBar("入力項目に誤りがあります","物件名は100文字以内で入力してください。保存出来ませんでした。");
 
             IsNameHasError = true;
 
@@ -2966,8 +2969,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
     private void ShowErrorInfoBar(Models.ErrorInfo err, bool isShowBar = true)
     {
+        InfoBarErrorTitle = err.Title;
         InfoBarErrorMessage =
-            err.Title + Environment.NewLine +
             err.Message + Environment.NewLine +
             err.Description + Environment.NewLine +
             err.Operation + Environment.NewLine +
@@ -2976,8 +2979,11 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         IsInfoBarErrorOpen = isShowBar;
     }
 
-    private void ShowSimpleErrorInfoBar(string message)
+    // TODO: Change sevirity to Error for simple error messages.
+    // Need to bind severity to InfoBar control in XAML to show error messages.
+    private void ShowSimpleErrorInfoBar(string title, string message)
     {
+        InfoBarErrorTitle = title;
         InfoBarErrorMessage = message;
         IsInfoBarErrorOpen = true;
     }
@@ -3001,7 +3007,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         {
             if (!IsValidOptionalDigits(value, maxLength))
             {
-                ShowSimpleErrorInfoBar($"{label}は0以上の{maxLength}桁以内の整数で入力してください。");
+                ShowSimpleErrorInfoBar("入力項目に誤りがあります", $"{label}は0以上の{maxLength}桁以内の整数で入力してください。");
                 if (!_navigationService.IsCurrentPageSameAs(BasicPageName)) _navigationService.NavigateTo(BasicPageName, this);
                 return false;
             }
@@ -3023,7 +3029,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             {
                 SelectedTransportationIndex = index / 3;
                 
-                ShowSimpleErrorInfoBar($"{label}は0以上の4桁以内の整数で入力してください。");
+                ShowSimpleErrorInfoBar("入力項目に誤りがあります", $"{label}は0以上の4桁以内の整数で入力してください。");
                 
                 const string pageName = "ZumenSearch.Views.Rent.Residentials.TransportationPage";
                 
@@ -3303,7 +3309,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             return true;
         }
 
-        ShowSimpleErrorInfoBar($"変更の破棄中に一時ファイルを削除できませんでした: {string.Join(", ", failures)}");
+        ShowSimpleErrorInfoBar("エラー", $"変更の破棄中に一時ファイルを削除できませんでした: {string.Join(", ", failures)}");
         return false;
     }
 
@@ -3355,7 +3361,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
     {
         if (_discardPending)
         {
-            ShowSimpleErrorInfoBar("変更の破棄が完了していないため保存できません。もう一度画面を閉じて再試行してください。");
+            ShowSimpleErrorInfoBar("エラー", "変更の破棄が完了していないため保存できません。もう一度画面を閉じて再試行してください。");
             return;
         }
         if (IsSaving || !IsDirty) return;
@@ -3363,18 +3369,18 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         var main = App.GetService<ViewModels.MainViewModel>();
         if (main.RentResidentialListingEditorList.Any(editor => editor.PropertyId == _id && editor.ViewModel is { IsDiscardPending: true }))
         {
-            ShowSimpleErrorInfoBar("募集物件の変更の破棄を完了してから、もう一度保存してください。");
+            ShowSimpleErrorInfoBar("エラー", "募集物件の変更の破棄を完了してから、もう一度保存してください。");
             return;
         }
         if (HasPendingEditorOperations || main.RentResidentialListingEditorList.Any(editor => editor.PropertyId == _id && editor.ViewModel is { } vm && (vm.HasPendingEditorOperations || vm.IsClosing)))
         {
-            ShowSimpleErrorInfoBar("関連する選択、ファイル処理または編集画面の終了が完了してから、もう一度保存してください。");
+            ShowSimpleErrorInfoBar("エラー", "関連する選択、ファイル処理または編集画面の終了が完了してから、もう一度保存してください。");
             return;
         }
         if (!CleanIncompleteAttachments()) return;
         if (!main.TryBeginResidentialOperation(_id))
         {
-            ShowSimpleErrorInfoBar("関連する保存、削除または読み込みが完了してから、もう一度保存してください。");
+            ShowSimpleErrorInfoBar("エラー", "関連する保存、削除または読み込みが完了してから、もう一度保存してください。");
             return;
         }
         */
@@ -3402,9 +3408,6 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         // Validate input.
         if (!ValidateName(true))
         {
-            //InfoBarErrorMessage = "入力項目に誤りがあります。保存出来ませんでした。";
-            //IsInfoBarErrorOpen = true;
-
             if (!_navigationService.IsCurrentPageSameAs(BasicPageName))
             {
                 _navigationService.NavigateTo(BasicPageName, this);
@@ -3420,7 +3423,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
         if (Pdfs.Count(pdf => pdf.IsMain) > 1)
         {
-            ShowSimpleErrorInfoBar("メインの図面は1枚だけ選択してください。");
+            ShowSimpleErrorInfoBar("エラー", "メインの図面は1枚だけ選択してください。");
             const string pageName = "ZumenSearch.Views.Rent.Residentials.ZumenListPage";
             if (!_navigationService.IsCurrentPageSameAs(pageName)) _navigationService.NavigateTo(pageName, this);
             return;
@@ -3737,7 +3740,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             string extension = Path.GetExtension(filePath);
             if (!IsSupportedImageExtension(extension))
             {
-                ShowSimpleErrorInfoBar($"画像形式に対応していません: {Path.GetFileName(filePath)}");
+                ShowSimpleErrorInfoBar("エラー", $"画像形式に対応していません: {Path.GetFileName(filePath)}");
                 continue;
             }
 
@@ -3837,7 +3840,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             string extension = Path.GetExtension(filePath);
             if (!extension.Equals(".pdf", StringComparison.OrdinalIgnoreCase))
             {
-                ShowSimpleErrorInfoBar($"PDFファイルを選択してください: {Path.GetFileName(filePath)}");
+                ShowSimpleErrorInfoBar("エラー", $"PDFファイルを選択してください: {Path.GetFileName(filePath)}");
                 continue;
             }
 
@@ -3899,7 +3902,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
                 }
                 else
                 {
-                    ShowSimpleErrorInfoBar($"PDFにページがありません: {Path.GetFileName(filePath)}");
+                    ShowSimpleErrorInfoBar("エラー", $"PDFにページがありません: {Path.GetFileName(filePath)}");
                 }
             }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or COMException or InvalidOperationException or ArgumentException)
@@ -3915,7 +3918,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
                 }
                 */
                 Debug.WriteLine($"Failed to import PDF '{filePath}': {ex}");
-                ShowSimpleErrorInfoBar($"PDFを読み込めませんでした: {Path.GetFileName(filePath)}。{ex.Message}");
+                ShowSimpleErrorInfoBar("エラー", $"PDFを読み込めませんでした: {Path.GetFileName(filePath)}。{ex.Message}");
             }
         }
     }
@@ -3940,13 +3943,13 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             var file = await StorageFile.GetFileFromPathAsync(Path.Combine(_propertyDataDirectoryPath, pdf.PdfFilename));
             if (!await Windows.System.Launcher.LaunchFileAsync(file))
             {
-                ShowSimpleErrorInfoBar("PDFを開けませんでした。PDFを開くアプリが設定されているか確認してください。");
+                ShowSimpleErrorInfoBar("エラー", "PDFを開けませんでした。PDFを開くアプリが設定されているか確認してください。");
             }
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or COMException or InvalidOperationException or ArgumentException)
         {
             Debug.WriteLine($"Failed to open residential property PDF: {ex}");
-            ShowSimpleErrorInfoBar($"PDFを開けませんでした: {ex.Message}");
+            ShowSimpleErrorInfoBar("エラー", $"PDFを開けませんでした: {ex.Message}");
         }
     }
 
@@ -3986,7 +3989,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             catch (Exception ex)
             {
                 Debug.WriteLine($"Error opening folder: {ex}");
-                ShowSimpleErrorInfoBar($"フォルダーを開けませんでした。{ex.Message}");
+                ShowSimpleErrorInfoBar("エラー", $"フォルダーを開けませんでした。{ex.Message}");
             }
         }
     }
@@ -4053,7 +4056,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         var mainVM = App.GetService<ViewModels.MainViewModel>();
         if (!mainVM.TryBeginResidentialOperation(_id))
         {
-            ShowSimpleErrorInfoBar("関連する保存、削除または読み込みが完了してから、もう一度操作してください。");
+            ShowSimpleErrorInfoBar("エラー", "関連する保存、削除または読み込みが完了してから、もう一度操作してください。");
             return;
         }
         try
@@ -4098,7 +4101,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             }
             catch (COMException)
             {
-                ShowSimpleErrorInfoBar("募集物件の編集画面を開けませんでした。既存の編集画面を確認してから再試行してください。");
+                ShowSimpleErrorInfoBar("エラー", "募集物件の編集画面を開けませんでした。既存の編集画面を確認してから再試行してください。");
 
                 WeakReferenceMessenger.Default.Send(new WindowClosedMessage<Microsoft.UI.Xaml.Window>(editWin));
 
@@ -4141,7 +4144,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         }
         if (result.Room is null)
         {
-            ShowSimpleErrorInfoBar("募集物件が見つかりませんでした。再読み込みしてください。");
+            ShowSimpleErrorInfoBar("エラー", "募集物件が見つかりませんでした。再読み込みしてください。");
             return;
         }
         room = result.Room;
@@ -4225,8 +4228,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
             try
             {
-                InfoBarErrorMessage = "募集物件の編集画面を閉じてから、建物を削除してください。";
-                IsInfoBarErrorOpen = true;
+                ShowSimpleErrorInfoBar("募集物件の編集画面が開いています","募集物件の編集画面を閉じてから、建物を削除してください。");
 
                 editWin.Activate();
 
@@ -4249,7 +4251,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
         if (!mainVM.TryBeginResidentialOperation(_id))
         {
-            ShowSimpleErrorInfoBar("関連する保存、削除または読み込みが完了してから、もう一度操作してください。");
+            ShowSimpleErrorInfoBar("エラー", "関連する保存、削除または読み込みが完了してから、もう一度操作してください。");
             return;
         }
         try
@@ -4257,7 +4259,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             if (await _dialogService.ShowDeleteConfirmationDialog("この募集物件を削除しますか？") != Microsoft.UI.Xaml.Controls.ContentDialogResult.Primary) return;
             if (mainVM.RentResidentialListingEditorList.FirstOrDefault(editor => editor.Id == room.Id) is { } openedEditor)
             {
-                ShowSimpleErrorInfoBar("募集物件の編集画面を閉じてから削除してください。");
+                ShowSimpleErrorInfoBar("編集画面が開いています", "募集物件の編集画面を閉じてから削除してください。");
                 openedEditor.Activate();
                 return;
             }
@@ -4560,10 +4562,9 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             if (res.Person is null)
             {
                 Debug.WriteLine($"{lessorId} is null. Cannot open editor.");
-                ShowSimpleErrorInfoBar("選択した貸主を読み込めませんでした。");
+                ShowSimpleErrorInfoBar("エラー", "選択した貸主を読み込めませんでした。");
                 return;
             }
-
 
             var asdf = new Models.Rent.Residentials.PersonWrapperForPropertyViewModel(res.Person, this);
 
@@ -4663,7 +4664,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             if (res.Person is null)
             {
                 Debug.WriteLine($"{brokerId} is null. Cannot open editor.");
-                ShowSimpleErrorInfoBar("選択した宅建業者を読み込めませんでした。");
+                ShowSimpleErrorInfoBar("エラー", "選択した宅建業者を読み込めませんでした。");
                 return;
             }
 

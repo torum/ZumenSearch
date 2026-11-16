@@ -1,0 +1,140 @@
+COMMERCIALS REIMPLEMENTATION - FOLLOW-UP REGISTER
+=================================================
+Last reconciled: 2026-11-13
+Source plan: Commercials-reimplementation-plan.txt
+
+Purpose
+-------
+This is the active register for work not yet complete, deferred decisions, concerns,
+and verification still needed. The source plan retains the approved design, implementation
+constraints, phase outline, and historical record of completed slices. Build success and
+source inspection do not establish runtime behavior.
+
+Next implementation slices
+--------------------------
+1. Full commercial search filters and result behavior, after their data and semantics are
+   ready. Commercial name search is implemented for property and unit names; do not imply
+   that the additional filters below already work.
+
+Ownership save semantics
+------------------------
+The user revised the ownership behavior: hidden PDF drafts are discarded on save, not
+on hide; saved PDF records and files remain. Hidden contact drafts need not be retained.
+A successful property save removes saved hidden-side contact links without deleting people.
+New-property listing handoff is not a database commit. Direct listing saves still use the
+committed property ownership. General listing PDF validation parity remains separate.
+
+Residential and Commercial property saves now save the visible ownership side in the same
+transaction, clear hidden contact drafts, and clean hidden unsaved PDFs after a successful
+save. Existing listing updates still use ListingUpdatedMessage. A listing save under a new
+property transfers its draft to the property editor; it does not commit it to the database.
+Residential listing save flags, hidden-contact state, and PDF editor tracking were removed from
+the listing model. PDF cleanup retries remain with the owning editor. Commercial listing models
+also do not carry that editor bookkeeping. Runtime verification remains outstanding, particularly
+for cleanup failures, repeated handoffs, and save/discard behavior.
+
+Deferred by user decision
+-------------------------
+- Keep the existing nonfunctional listing duplicate (複製) action unchanged until the
+  rest of Commercials is complete. Decide duplication semantics for listing fields,
+  associations, media, and ownership before implementing it. Residentials' equivalent
+  action is also unfinished; any work there is separate scope.
+- Implement the agreed commercial search filters only after their supporting data and
+  data-access semantics are in place: property/unit name; property type and listing use;
+  address, rail line, station and maximum walking time; rent and exclusive-area bounds;
+  recruiting status and availability date; unit condition; permitted business types.
+- No database migration or database/cache deletion is in scope. The user will remove old
+  database and cache files when ready. The fresh schema's two-state presence representation
+  is incompatible with prior three-state facility values; an existing database must not
+  be treated as compatible with the new schema.
+- Do not implement Commercials' listing lessor/broker relationships by merely reusing
+  property-level associations: listing contacts are independently owned associations.
+
+Open design decisions
+--------------------
+Resolve only when needed by a dependent approved slice; do not assume business rules:
+- Exact remaining dropdown choices and page-specific behavior.
+- Unknown versus false/zero semantics where not already settled by an implemented page.
+- Fee-specific units and tax treatment wherever not explicitly agreed by the existing
+  contract design; keep the agreed monthly-yen management fee and per-term units intact.
+- Search matching semantics for dates, permitted-business combinations, unit-condition
+  filters, address/rail/station constraints, and min/max boundaries.
+- Validation bounds for fields whose requirements do not already specify nonnegative,
+  optional, positive, or enumerated input.
+
+Verification still needed (not established by builds/source inspection)
+-----------------------------------------------------------------------
+No tests are to be discovered, created, or run for this Commercials effort, and no manual
+end-to-end pass is required. Record runtime verification as outstanding unless it has
+actually occurred. The implementation log records builds and source inspections per slice.
+
+Runtime verification remains outstanding for the implemented Commercials paths, including:
+- Fresh database initialization and representative create/update/reload/delete round-trips
+  for property, listing fields, listing-level lessor/broker associations, typed labels, contacts,
+  and media; transactional failure behavior and isolation from Residential records.
+- Actual editor construction/factory resolution, navigation, title/breadcrumb updates,
+  dirty tracking, validation, save/discard/cancel, failed-save retention, close/shutdown,
+  and repeated disposal. A reported crash opening a new unnamed listing has a source fix;
+  reopening and required-name save validation remain runtime-unverified after the fix.
+- Parent/child listing handoff, concurrent editor operations, serialization by property ID,
+  search refresh/deletion behavior, and error reporting.
+- Ownership-dependent building/listing menu visibility, live updates and initialization from
+  building and search, hidden-page history, deferred message ordering, hidden-side contact
+  removal, PDF cleanup on save and retry, new-property handoff, and save/failure/discard
+  synchronization.
+- Location selection, address lookup, coordinate validation and map launch; transportation
+  selection/paste/validation and save/reload; adaptive layouts, focus, keyboard use,
+  accessibility, and light/dark presentation.
+- Photo/PDF picker and rendering, opening, deletion confirmation, staged-file cleanup,
+  failure/retry, and parent/direct persistence paths. This includes the commercial listing
+  PDF gallery most recently added.
+- Packaged and unpackaged execution, Windows App SDK startup/configuration, and Native AOT
+  and trimming compatibility for the affected paths.
+
+Known findings and follow-up concerns
+-------------------------------------
+Commercials:
+- Listing duplication remains unfinished by user decision, as noted above.
+- Listing lessor/broker associations now support direct and parent-property persistence; runtime
+  verification remains outstanding.
+- Search beyond name matching is deferred.
+- After search deletion commits, failed attachment cleanup is reported but has no automatic
+  retry once the database record is gone; users may need to remove the reported leftover
+  directory themselves. Decide separately whether a retry mechanism is warranted.
+
+Shared / Residentials (separate from the current Commercials slices):
+- Shared location-master SQL queries interpolate names. Names with SQL-special characters
+  can fail lookup or produce unexpected matching. Parameterize in a separately approved
+  shared-infrastructure change; this affects Residentials as well as Commercials.
+- Residentials area filtering converts stored text after comma removal; full-width digits
+  or comma-decimal values may be interpreted incorrectly. Fixing numeric representation
+  and search behavior needs separate approval.
+- Residentials association recovery and cleanup safeguards were implemented in the logged
+  work, but their save-failure, retry, ownership-switching, and parent/child behavior are
+  still runtime-unverified.
+- Residentials ownership navigation separates draft and committed values, initializes
+  search-opened editors, restores visibility on discard, and prunes hidden history. Direct
+  listing saves use database ownership; runtime verification remains outstanding.
+- Residentials previously had an invalid-data recovery concern involving a saved listing
+  with multiple main PDFs. The new ownership save gates change that path, but its recovery
+  behavior remains runtime-unverified; broader listing PDF validation remains separate.
+
+After Commercials is otherwise complete
+---------------------------------------
+- Remind the user about the shared location-master SQL interpolation finding above and get
+  separate approval before changing shared code.
+- Revisit listing duplication only after the remaining Commercials work, and obtain approval
+  for its behavior and implementation scope.
+- Complete the final build/source-inspection handoff and clearly distinguish what was built
+  and inspected from runtime behavior that remains unverified.
+
+Working constraints carried forward
+-----------------------------------
+- Obtain explicit approval before each code change; approval of one slice does not approve
+  subsequent slices. Follow the Residentials pattern and repository-specific WinUI guidance.
+- Keep fresh-schema-only behavior: do not add migration logic or delete the user's database
+  or local cache. Preserve unpackaged deployment and Native AOT/trimming compatibility.
+- Keep the application a single project, use WinUI 3 and compiled x:Bind, and avoid unrelated
+  changes. Build and source-inspect affected integration paths after each approved slice.
+- Report Commercials, shared, and Residentials findings distinctly. Do not claim runtime
+  verification from a successful build or source inspection.
