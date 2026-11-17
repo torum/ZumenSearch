@@ -39,9 +39,9 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
     private readonly string _listingDataDirectoryPath = string.Empty;
 
     // Tmp file list to hold unsaved picture files. (if entry is not saved, delete on close)
-    private readonly List<string> _unsavedRoomPictureFileList = [];
-    private readonly List<string> _unsavedRoomPdfFileList = [];
-    private readonly List<string> _unsavedRoomPdfThumbnailFileList = [];
+    private readonly List<string> _unsavedListingPictureFileList = [];
+    private readonly List<string> _unsavedListingPdfFileList = [];
+    private readonly List<string> _unsavedListingPdfThumbnailFileList = [];
 
     private bool _disposed;
     private bool _isClosing;
@@ -1393,7 +1393,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
                 // The original item.BasePath should have been set in MainViewModel.
                 File.Copy(System.IO.Path.Combine(item.BasePath, item.ImageFilename), newFilePath, overwrite: true);
                 // Keep track of unsaved files to delete them when discarding.
-                _unsavedRoomPictureFileList.Add(newFilePath);
+                _unsavedListingPictureFileList.Add(newFilePath);
                 internalItem.SetIsModified(true);
             }
             else
@@ -1454,7 +1454,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
                 // The original item.BasePath should have been set in MainViewModel.
                 File.Copy(System.IO.Path.Combine(item.BasePath, item.PdfFilename), newFilePath, overwrite: true);
                 // Keep track of unsaved files to delete them when discarding.
-                _unsavedRoomPdfFileList.Add(newFilePath);
+                _unsavedListingPdfFileList.Add(newFilePath);
                 internalItem.SetIsModified(true);
 
                 // Copy the thumbnail file as well
@@ -1462,7 +1462,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
                 {
                     var thumbnailPath = Path.Combine(internalItem.BasePath, internalItem.ThumbnailFilename);
                     File.Copy(Path.Combine(item.BasePath, item.ThumbnailFilename), thumbnailPath, overwrite: true);
-                    _unsavedRoomPdfThumbnailFileList.Add(thumbnailPath);
+                    _unsavedListingPdfThumbnailFileList.Add(thumbnailPath);
                 }
             }
             else
@@ -1597,9 +1597,9 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
     {
         var failures = new List<string>();
 
-        DeleteTrackedFiles(_unsavedRoomPictureFileList, failures);
-        DeleteTrackedFiles(_unsavedRoomPdfFileList, failures);
-        DeleteTrackedFiles(_unsavedRoomPdfThumbnailFileList, failures);
+        DeleteTrackedFiles(_unsavedListingPictureFileList, failures);
+        DeleteTrackedFiles(_unsavedListingPdfFileList, failures);
+        DeleteTrackedFiles(_unsavedListingPdfThumbnailFileList, failures);
 
         if (_listing.Status == EntityStatus.New && Directory.Exists(_listingDataDirectoryPath))
         {
@@ -1852,9 +1852,9 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
                     pdf.SetIsModified(false);
                 }
                 //CaptureCommittedAttachments(ResidentialListingDraft.FromListing(roomToSave));
-                _unsavedRoomPictureFileList.Clear();
-                _unsavedRoomPdfFileList.Clear();
-                _unsavedRoomPdfThumbnailFileList.Clear();
+                _unsavedListingPictureFileList.Clear();
+                _unsavedListingPdfFileList.Clear();
+                _unsavedListingPdfThumbnailFileList.Clear();
 
                 _listing.SetIsModified(false);
                 WeakReferenceMessenger.Default.Send(new Models.Messenger.ListingUpdatedMessage(_listing));
@@ -1898,9 +1898,9 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
                 }
             }
 
-            _unsavedRoomPictureFileList.Clear();
-            _unsavedRoomPdfFileList.Clear();
-            _unsavedRoomPdfThumbnailFileList.Clear();
+            _unsavedListingPictureFileList.Clear();
+            _unsavedListingPdfFileList.Clear();
+            _unsavedListingPdfThumbnailFileList.Clear();
             /*
             _hasPendingFileCleanupAfterSave = cleanupFailures.Count > 0;
             if (_hasPendingFileCleanupAfterSave)
@@ -2004,7 +2004,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
             IsDirty = true;
 
             // Keep track of unsaved files to delete them when discarding.
-            _unsavedRoomPictureFileList.Add(destFilePath);
+            _unsavedListingPictureFileList.Add(destFilePath);
             //_incompleteAttachmentFiles.Remove(destFilePath);
         }
     }
@@ -2124,8 +2124,8 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
                     };
 
                     Pdfs.Add(pdf);
-                    _unsavedRoomPdfThumbnailFileList.Add(thumbnailDestFilePath);
-                    _unsavedRoomPdfFileList.Add(pdfDestFilePath);
+                    _unsavedListingPdfThumbnailFileList.Add(thumbnailDestFilePath);
+                    _unsavedListingPdfFileList.Add(pdfDestFilePath);
 
                     OpenBlobDirectoryCommand.NotifyCanExecuteChanged();
                     DeleteRoomPdfCommand.NotifyCanExecuteChanged();

@@ -76,7 +76,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
     #endregion
 
-    public PropertyViewModel(Models.Rent.Residentials.Property property, INavigationGenericService navigationService, IDialogGenericService dialogService, IAbstractFactory<Models.Rent.Residentials.Listing, bool, Views.Rent.Residentials.Listing.ShellPage> shellFactory, IDispatcherService dispatcherService, IDataAccessService dataAccessService, IDataAccessLocationService dataAccessLocationService)
+    public PropertyViewModel(Models.Rent.Residentials.Property property, bool isDuplicate, INavigationGenericService navigationService, IDialogGenericService dialogService, IAbstractFactory<Models.Rent.Residentials.Listing, bool, Views.Rent.Residentials.Listing.ShellPage> shellFactory, IDispatcherService dispatcherService, IDataAccessService dataAccessService, IDataAccessLocationService dataAccessLocationService)
     {
         _property = property;
         _id = property.Id;
@@ -104,7 +104,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
         try
         {
-            PopulateValues();
+            PopulateValues(isDuplicate);
             WeakReferenceMessenger.Default.Send(new PropertyIsUnitOwnershipChangedMessage(_id, IsUnitLevelOwnership));
 
             // Reset errors
@@ -116,7 +116,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         }
         finally
         {
-            IsDirty = false;
+            IsDirty = isDuplicate;
         }
 
         // Ready to receive messages.
@@ -2439,11 +2439,16 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
     #region == Private Methods ==
 
-    private void PopulateValues()
+    private void PopulateValues(bool isDuplicate)
     {
         // Basics
 
         Name = _property.Name;
+
+        if (isDuplicate)
+        {
+            _property.SetName($"複製_{_property.Name}");
+        }
 
         //SelectedKind = _property.PropertyKind;
         var propertyKindKey = PropertyKinds.FirstOrDefault(k => k.Key == _property.PropertyKind.Key);
@@ -2653,7 +2658,19 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             var internalItem = item.Clone();
             internalItem.BasePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _property.Id);
             internalItem.ParentViewModel = this;
-            internalItem.SetIsModified(false); // Needed this.
+            if (isDuplicate)
+            {
+                var newFilePath = System.IO.Path.Combine(internalItem.BasePath, internalItem.ImageFilename);
+                // The original item.BasePath should have been set in MainViewModel.
+                File.Copy(System.IO.Path.Combine(item.BasePath, item.ImageFilename), newFilePath, overwrite: true);
+                // Keep track of unsaved files to delete them when discarding.
+                _unsavedPropertyPictureFileList.Add(newFilePath);
+                internalItem.SetIsModified(true);
+            }
+            else
+            {
+                internalItem.SetIsModified(false);
+            }
             internalItem.PropertyChanged += OnPropertyPicturePropertyChanged;
             Pictures.Add(internalItem);
         }
@@ -2703,7 +2720,27 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             var internalItem = item.Clone();
             internalItem.BasePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _property.Id);
             internalItem.ParentViewModel = this;
-            internalItem.SetIsModified(false);
+            if (isDuplicate)
+            {
+                var newFilePath = System.IO.Path.Combine(internalItem.BasePath, internalItem.PdfFilename);
+                // The original item.BasePath should have been set in MainViewModel.
+                File.Copy(System.IO.Path.Combine(item.BasePath, item.PdfFilename), newFilePath, overwrite: true);
+                // Keep track of unsaved files to delete them when discarding.
+                _unsavedPropertyPdfFileList.Add(newFilePath);
+                internalItem.SetIsModified(true);
+
+                // Copy the thumbnail file as well
+                if (!string.IsNullOrEmpty(item.ThumbnailFilename))
+                {
+                    var thumbnailPath = Path.Combine(internalItem.BasePath, internalItem.ThumbnailFilename);
+                    File.Copy(Path.Combine(item.BasePath, item.ThumbnailFilename), thumbnailPath, overwrite: true);
+                    _unsavedPropertyPdfThumbnailFileList.Add(thumbnailPath);
+                }
+            }
+            else
+            {
+                internalItem.SetIsModified(false);
+            }
             internalItem.PropertyChanged += OnPropertyPdfPropertyChanged;
             Pdfs.Add(internalItem);
         }
@@ -2745,7 +2782,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
         ListingSummaries = new ObservableCollection<Models.Rent.Residentials.ListingSummary>(_property.ListingSummaries);
 
-        IsDirty = false;
+        IsDirty = isDuplicate;
     }
 
     private void OnPropertyPicturePropertyChanged(object? sender, PropertyChangedEventArgs e)

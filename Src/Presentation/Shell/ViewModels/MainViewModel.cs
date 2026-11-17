@@ -47,7 +47,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
 
     #region == Services ==
 
-    private readonly IAbstractFactory<Models.Rent.Residentials.Property, Views.Rent.Residentials.ShellPage> _shellRentResidentialPropertyFactory;
+    private readonly IAbstractFactory<Models.Rent.Residentials.Property, bool, Views.Rent.Residentials.ShellPage> _shellRentResidentialPropertyFactory;
     private readonly IAbstractFactory<Models.Rent.Residentials.Listing, bool, Views.Rent.Residentials.Listing.ShellPage> _shellRentResidentialListingFactory;
 
     private readonly IAbstractFactory<Models.Rent.Commercials.Property, Views.Rent.Commercials.ShellPage> _shellRentCommercialPropertyFactory;
@@ -65,7 +65,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
 
     #endregion
 
-    public MainViewModel(IAbstractFactory<Models.Rent.Residentials.Property, Views.Rent.Residentials.ShellPage> shellRentResidentialPropertyFactory, IAbstractFactory<Models.Rent.Residentials.Listing, bool, Views.Rent.Residentials.Listing.ShellPage> shellRentResidentialListingFactory, IAbstractFactory<Models.Rent.Commercials.Property, Views.Rent.Commercials.ShellPage> shellRentCommercialPropertyFactory, IAbstractFactory<Models.Rent.Commercials.Listing.Listing, Views.Rent.Commercials.Listing.ShellPage> shellRentCommercialListingFactory, IAbstractFactory<Models.Base.PersonBase, Views.Rent.Lessors.ShellPage> shellRentLessorFactory, IAbstractFactory<Models.Sale.Residentials.Property, Views.Sale.Residentials.ShellPage> shellSaleResidentialPropertyFactory, IAbstractFactory<Models.Base.PersonBase, Views.Brokers.ShellPage> shellBrokerFactory, INavigationService navigationService, IDataAccessService dataAccessService, IDispatcherService dispatcherService, IConfigurationService configurationService, IDialogGenericService dialogService)
+    public MainViewModel(IAbstractFactory<Models.Rent.Residentials.Property, bool, Views.Rent.Residentials.ShellPage> shellRentResidentialPropertyFactory, IAbstractFactory<Models.Rent.Residentials.Listing, bool, Views.Rent.Residentials.Listing.ShellPage> shellRentResidentialListingFactory, IAbstractFactory<Models.Rent.Commercials.Property, Views.Rent.Commercials.ShellPage> shellRentCommercialPropertyFactory, IAbstractFactory<Models.Rent.Commercials.Listing.Listing, Views.Rent.Commercials.Listing.ShellPage> shellRentCommercialListingFactory, IAbstractFactory<Models.Base.PersonBase, Views.Rent.Lessors.ShellPage> shellRentLessorFactory, IAbstractFactory<Models.Sale.Residentials.Property, Views.Sale.Residentials.ShellPage> shellSaleResidentialPropertyFactory, IAbstractFactory<Models.Base.PersonBase, Views.Brokers.ShellPage> shellBrokerFactory, INavigationService navigationService, IDataAccessService dataAccessService, IDispatcherService dispatcherService, IConfigurationService configurationService, IDialogGenericService dialogService)
     {
         _shellRentResidentialPropertyFactory = shellRentResidentialPropertyFactory;
         _shellRentResidentialListingFactory = shellRentResidentialListingFactory;
@@ -760,6 +760,61 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         return true;
     }
 
+    // 物件複製
+    [RelayCommand(CanExecute = nameof(DuplicatePropertyCanExecute))]
+    private async Task DuplicateProperty(Models.SearchResult.PropertySearchResultItem? selected)
+    {
+        if (selected is null)
+        {
+            return;
+        }
+
+        var propertyId = selected.Id;
+
+        if (string.IsNullOrEmpty(propertyId))
+        {
+            Debug.WriteLine("DuplicatePropertyCommand executed but no item is selected.");
+            return;
+        }
+
+        if (selected.PropertyContextType == PropertyContextType.RentResidential)
+        {
+            await DuplicateRentResidentialFromId(propertyId);
+        }
+        else if (selected.PropertyContextType == PropertyContextType.RentCommercial)
+        {
+            Debug.WriteLine("DuplicatePropertyCommand not yet implemented.");
+        }
+        else if (selected.PropertyContextType == PropertyContextType.RentParking)
+        {
+            Debug.WriteLine("DuplicatePropertyCommand not yet implemented.");
+        }
+        else if (selected.PropertyContextType == PropertyContextType.SaleResidential)
+        {
+            Debug.WriteLine("DuplicatePropertyCommand not yet implemented.");
+        }
+        else if (selected.PropertyContextType == PropertyContextType.SaleCommercial)
+        {
+            Debug.WriteLine("DuplicatePropertyCommand not yet implemented.");
+        }
+        else if (selected.PropertyContextType == PropertyContextType.SaleLand)
+        {
+            Debug.WriteLine("DuplicatePropertyCommand not yet implemented.");
+        }
+
+        // TODO lessor and broker
+    }
+    private static bool DuplicatePropertyCanExecute(Models.SearchResult.PropertySearchResultItem? selected)
+    {
+        if (selected is null)
+        //if (string.IsNullOrEmpty(rentId))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
     // 物件削除
     [RelayCommand(CanExecute = nameof(DeletePropertyCanExecute))]
     private async Task DeleteProperty(Models.SearchResult.PropertySearchResultItem? selected)
@@ -816,6 +871,77 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         return true;
     }
 
+    // クイック検索Box（建物）TODO:
+    [RelayCommand(CanExecute = nameof(SearchRentForAutoSuggestCanExecute))]
+    private async Task SearchRentForAutoSuggest(string? queryText)
+    {
+        if (string.IsNullOrWhiteSpace(queryText))
+        {
+            AutoSuggestList.Clear();
+            return;
+        }
+
+        // TODO: Residentials only for now.
+        Debug.WriteLine($"SearchRentForAutoSuggest {queryText}");
+
+        AutoSuggestList.Clear();
+
+        queryText = queryText.Trim();
+
+        var res = await Task.Run(() => _dataAccessService.SelectPropertiesByKeyword(queryText), _cts.Token);
+        //var res = _dataAccessService.SelectRentResidentialsByNameKeyword("*");
+
+        if (res.IsError)
+        {
+            Debug.WriteLine(
+                res.Error.Title + Environment.NewLine +
+                res.Error.Message + Environment.NewLine +
+                res.Error.Description + Environment.NewLine +
+                res.Error.Operation + Environment.NewLine +
+                res.Error.MethodName + Environment.NewLine +
+                res.Error.FullDump);
+
+            ShowErrorInfoBar(res.Error);
+        }
+        else
+        {
+            if (res.PropertySearchResult.Count > 0)
+            {
+                foreach (var item in res.PropertySearchResult)
+                {
+                    var autoSuggest = new Models.SearchResult.AutoSuggestItem
+                    {
+                        Name = item.Name,
+                        Id = item.Id
+                    };
+                    AutoSuggestList.Add(autoSuggest);
+                }
+            }
+            else
+            {
+                // TODO:
+                //Debug.WriteLine("result 0");
+                var autoSuggest = new Models.SearchResult.AutoSuggestItem
+                {
+                    Name = "Result 0",
+                    Id = ""
+                };
+                AutoSuggestList.Add(autoSuggest);
+            }
+        }
+    }
+    private static bool SearchRentForAutoSuggestCanExecute(string? queryText)
+    {
+        if (string.IsNullOrEmpty(queryText))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+
+
     #endregion
 
     #region == 賃貸住居用 ==
@@ -825,7 +951,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
     private void AddNewRentResidential()
     {
         var newId = Guid.CreateVersion7().ToString("N");
-        var shell = _shellRentResidentialPropertyFactory.Create(new Models.Rent.Residentials.Property(newId, EntityStatus.New));
+        var shell = _shellRentResidentialPropertyFactory.Create(new Models.Rent.Residentials.Property(newId, EntityStatus.New), false);
 
         RentResidentialEditorList.Add(shell.Window);
 
@@ -875,7 +1001,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
     }
 
     // 建物編集（IDから）
-    [RelayCommand(CanExecute = nameof(EditRentResidentialByIdCanExecute))]
+    [RelayCommand(CanExecute = nameof(EditRentResidentialFromIdCanExecute))]
     private async Task EditRentResidentialFromId(string propertyId)
     {
         if (string.IsNullOrEmpty(propertyId))
@@ -942,7 +1068,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
             return;
         }
 
-        var editorShell = _shellRentResidentialPropertyFactory.Create(res.Property);//_editorFactory.Create();
+        var editorShell = _shellRentResidentialPropertyFactory.Create(res.Property, false);//_editorFactory.Create();
         //editorShell.ViewModel.SetListingSummaries(res.ListingSummaries);
 
         var editorWindow = editorShell.Window;
@@ -970,7 +1096,100 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
 
         editorWindow.AppWindow.MoveInZOrderAtTop();
     }
-    private static bool EditRentResidentialByIdCanExecute(string propertyId)
+    private static bool EditRentResidentialFromIdCanExecute(string propertyId)
+    {
+        if (string.IsNullOrEmpty(propertyId))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    // 建物複製（IDから）
+    [RelayCommand(CanExecute = nameof(DuplicateRentResidentialFromIdCanExecute))]
+    private async Task DuplicateRentResidentialFromId(string propertyId)
+    {
+        if (string.IsNullOrEmpty(propertyId))
+        {
+            Debug.WriteLine("DuplicateRentResidential executed but no item is selected.");
+            return;
+        }
+
+        await DuplicateRentResidentialCore(propertyId);
+    }
+
+    private async Task DuplicateRentResidentialCore(string propertyId)
+    {
+        // Access Database to get the full entry data.
+        var res = await Task.Run(() => _dataAccessService.SelectRentResidentialById(propertyId, true), _cts.Token);
+        if (res.IsError)
+        {
+            Debug.WriteLine(
+                res.Error.Title + Environment.NewLine +
+                res.Error.Message + Environment.NewLine +
+                res.Error.Description + Environment.NewLine +
+                res.Error.Operation + Environment.NewLine +
+                res.Error.MethodName + Environment.NewLine +
+                res.Error.FullDump);
+
+            ShowErrorInfoBar(res.Error);
+
+            return;
+        }
+
+        if (res.Property is null)
+        {
+            // TODO: Show error message to user.
+            Debug.WriteLine($"Property for {propertyId} is null. Cannot open editor.");
+            return;
+        }
+
+        // All the ids in the duplicated property and its attachments are already new,
+        // we just need to set the BasePath for the original pictures and PDFs to the source directory.
+
+        // Set the BasePath for ORIGINAL pictures and PDFs to the source directory here.
+        // This is necessary because the duplicated property has a new ID, and we want to keep the original files in their original location
+        // so that we can copy them to the new location and also keep track of them as unsaved in the PropertyViewModel when opens the duplicated property in the editor.
+        var sourceDirectory = Path.Combine(App.PropertyBlobDataFolder, propertyId); // use the original propertyId to get the source directory for the original files.
+        foreach (var picture in res.Property.Pictures)
+        {
+            picture.BasePath = sourceDirectory;
+        }
+        foreach (var pdf in res.Property.Pdfs)
+        {
+            pdf.BasePath = sourceDirectory;
+        }
+
+        var editorShell = _shellRentResidentialPropertyFactory.Create(res.Property, true);
+        //editorShell.ViewModel.SetListingSummaries(res.ListingSummaries);
+
+        var editorWindow = editorShell.Window;
+        if (editorWindow == null)
+        {
+            // EditorWin should be initialized in the EditorShell constructor.
+            Debug.WriteLine("EditorWin must be initialized in the EditorShell constructor");
+            return;
+        }
+
+        RentResidentialEditorList.Add(editorWindow);
+
+        editorWindow.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(RentResidentialEditorWinLeft, RentResidentialEditorWinTop, RentResidentialEditorWinWidth, RentResidentialEditorWinHeight));
+        if (editorWindow.AppWindow.Presenter is OverlappedPresenter presenter)
+        {
+            presenter.IsResizable = true;
+            presenter.IsModal = false;
+            presenter.IsAlwaysOnTop = false;
+            presenter.PreferredMinimumWidth = 1274;
+            presenter.PreferredMinimumHeight = 794;
+        }
+
+        editorWindow.AppWindow.Show();
+        editorWindow.Activate();
+
+        editorWindow.AppWindow.MoveInZOrderAtTop();
+    }
+    private static bool DuplicateRentResidentialFromIdCanExecute(string propertyId)
     {
         if (string.IsNullOrEmpty(propertyId))
         {
@@ -1103,8 +1322,8 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
     }
 
     // 部屋編集
-    [RelayCommand(CanExecute = nameof(EditRentResidentialRoomCanExecute))]
-    private async Task EditRentResidentialRoom(Models.SearchResult.ListingSearchResultItem? selected)
+    [RelayCommand(CanExecute = nameof(EditRentResidentialListingCanExecute))]
+    private async Task EditRentResidentialListing(Models.SearchResult.ListingSearchResultItem? selected)
     {
         if (selected is null)
         {
@@ -1112,53 +1331,24 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
             return;
         }
 
-        var roomId = selected.Id;
+        var listingId = selected.Id;
         var buildingId = selected.PropertyId;
 
-        if (string.IsNullOrEmpty(roomId) || string.IsNullOrEmpty(buildingId))
+        if (string.IsNullOrEmpty(listingId) || string.IsNullOrEmpty(buildingId))
         {
-            Debug.WriteLine("EditRentResidentialRoomCommand executed without a listing or property id.");
+            Debug.WriteLine("EditRentResidentialListingCommand executed without a listing or property id.");
             return;
         }
 
-        await EditRentResidentialRoomCore(selected);
+        await EditRentResidentialListingCore(selected);
     }
 
-    private async Task EditRentResidentialRoomCore(Models.SearchResult.ListingSearchResultItem selected)
+    private async Task EditRentResidentialListingCore(Models.SearchResult.ListingSearchResultItem selected)
     {
         var listingId = selected.Id;
         var buildingId = selected.PropertyId;
 
         //Debug.WriteLine($"EditRentResidentialRoomCommand executed for {selected.Id}");
-
-        var isFound = false;
-
-        // Check if the selected item is already being edited in another window.
-        RentResidentialListingEditorList.ForEach(editorWindow =>
-        {
-            //Debug.WriteLine($"Checking editor window with Id: {editorWindow.Id} for selected item with Id: {listingId}");
-            if (editorWindow.Id == listingId)
-            {
-                // If the editor window for this item is already open, activate it.
-                //Debug.WriteLine($"Editor window for {listingId} is already open. Activating it.");
-                isFound = true;
-
-                editorWindow.Activate();
-
-                // Do I need this anymore?
-                //var mainWindow = App.GetService<MainWindow>();
-                //mainWindow?.AppWindow.MoveInZOrderBelow(editorWindow.AppWindow.Id);
-                editorWindow.AppWindow.MoveInZOrderAtTop();
-
-                return;
-            }
-        });
-
-        if (isFound)
-        {
-            // If the editor window for this item is already open, no need to create a new one.
-            return;
-        }
 
         // Access Database to get the full entry data.
         var res = await Task.Run(() => _dataAccessService.SelectRentResidentialListingById(buildingId, listingId), _cts.Token);
@@ -1211,7 +1401,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         editorWindow.AppWindow.MoveInZOrderAtTop();
     }
 
-    private static bool EditRentResidentialRoomCanExecute(Models.SearchResult.ListingSearchResultItem? selected)
+    private static bool EditRentResidentialListingCanExecute(Models.SearchResult.ListingSearchResultItem? selected)
     {
         if (selected is null)
         {
@@ -1222,8 +1412,8 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
     }
 
     // 部屋複製
-    [RelayCommand(CanExecute = nameof(DuplicateRentResidentialRoomCanExecute))]
-    private async Task DuplicateRentResidentialRoom(Models.SearchResult.ListingSearchResultItem? selected)
+    [RelayCommand(CanExecute = nameof(DuplicateRentResidentialListingCanExecute))]
+    private async Task DuplicateRentResidentialListing(Models.SearchResult.ListingSearchResultItem? selected)
     {
         if (selected is null)
         {
@@ -1240,16 +1430,16 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
             return;
         }
 
-        await DuplicateRentResidentialRoomCore(selected);
+        await DuplicateRentResidentialListingCore(selected);
     }
 
-    private async Task DuplicateRentResidentialRoomCore(Models.SearchResult.ListingSearchResultItem selected)
+    private async Task DuplicateRentResidentialListingCore(Models.SearchResult.ListingSearchResultItem selected)
     {
         var listingId = selected.Id;
         var buildingId = selected.PropertyId;
 
-        //Debug.WriteLine($"DuplicateRentResidentialRoomCore executed for {selected.Id}");
-        
+        //Debug.WriteLine($"DuplicateRentResidentialListingCore executed for {selected.Id}");
+
         // Access Database to get the full entry data.
         var res = await Task.Run(() => _dataAccessService.SelectRentResidentialListingById(buildingId, listingId, true), _cts.Token);
         if (res.IsError)
@@ -1317,7 +1507,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         editorWindow.Activate();
         editorWindow.AppWindow.MoveInZOrderAtTop();
     }
-    private static bool DuplicateRentResidentialRoomCanExecute(Models.SearchResult.ListingSearchResultItem? selected)
+    private static bool DuplicateRentResidentialListingCanExecute(Models.SearchResult.ListingSearchResultItem? selected)
     {
         if (selected is null)
         {
@@ -1328,18 +1518,18 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
     }
 
     // 部屋削除
-    [RelayCommand(CanExecute = nameof(DeleteRentResidentialRoomCanExecute))]
-    private async Task DeleteRentResidentialRoom(Models.SearchResult.ListingSearchResultItem? selected)
+    [RelayCommand(CanExecute = nameof(DeleteRentResidentialListingCanExecute))]
+    private async Task DeleteRentResidentialListing(Models.SearchResult.ListingSearchResultItem? selected)
     {
         if (selected is null)
         {
-            Debug.WriteLine("DeleteRentResidentialRoom executed but no item is selected.");
+            Debug.WriteLine("DeleteRentResidentialListing executed but no item is selected.");
             return;
         }
 
         if (string.IsNullOrEmpty(selected.Id))
         {
-            Debug.WriteLine("DeleteRentResidentialRoom executed but id is empty.");
+            Debug.WriteLine("DeleteRentResidentialListing executed but id is empty.");
             return;
         }
 
@@ -1350,10 +1540,10 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
             return;
         }
 
-        await DeleteRentResidentialRoomCore(selected);
+        await DeleteRentResidentialListingCore(selected);
     }
 
-    private async Task DeleteRentResidentialRoomCore(Models.SearchResult.ListingSearchResultItem selected)
+    private async Task DeleteRentResidentialListingCore(Models.SearchResult.ListingSearchResultItem selected)
     {
         var selectedId = selected.Id;
         var selectedPropertyId = selected.PropertyId;
@@ -1424,7 +1614,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
             }
         }
     }
-    private static bool DeleteRentResidentialRoomCanExecute(Models.SearchResult.ListingSearchResultItem? selected)
+    private static bool DeleteRentResidentialListingCanExecute(Models.SearchResult.ListingSearchResultItem? selected)
     {
         if (selected is null)
         {
@@ -1433,76 +1623,6 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
 
         return true;
     }
-
-    // クイック検索Box（建物）TODO:
-    [RelayCommand(CanExecute = nameof(SearchRentForAutoSuggestCanExecute))]
-    private async Task SearchRentForAutoSuggest(string? queryText)
-    {
-        if (string.IsNullOrWhiteSpace(queryText))
-        {
-            AutoSuggestList.Clear();
-            return;
-        }
-
-        // TODO: Residentials only for now.
-        Debug.WriteLine($"SearchRentForAutoSuggest {queryText}");
-
-        AutoSuggestList.Clear();
-
-        queryText = queryText.Trim();
-
-        var res = await Task.Run(() => _dataAccessService.SelectPropertiesByKeyword(queryText), _cts.Token);
-        //var res = _dataAccessService.SelectRentResidentialsByNameKeyword("*");
-
-        if (res.IsError)
-        {
-            Debug.WriteLine(
-                res.Error.Title + Environment.NewLine +
-                res.Error.Message + Environment.NewLine +
-                res.Error.Description + Environment.NewLine +
-                res.Error.Operation + Environment.NewLine +
-                res.Error.MethodName + Environment.NewLine +
-                res.Error.FullDump);
-
-            ShowErrorInfoBar(res.Error);
-        }
-        else
-        {
-            if (res.PropertySearchResult.Count > 0)
-            {
-                foreach (var item in res.PropertySearchResult)
-                {
-                    var autoSuggest = new Models.SearchResult.AutoSuggestItem
-                    {
-                        Name = item.Name,
-                        Id = item.Id
-                    };
-                    AutoSuggestList.Add(autoSuggest);
-                }
-            }
-            else
-            {
-                // TODO:
-                //Debug.WriteLine("result 0");
-                var autoSuggest = new Models.SearchResult.AutoSuggestItem
-                {
-                    Name = "Result 0",
-                    Id = ""
-                };
-                AutoSuggestList.Add(autoSuggest);
-            }
-        }
-    }
-    private static bool SearchRentForAutoSuggestCanExecute(string? queryText)
-    {
-        if (string.IsNullOrEmpty(queryText))
-        {
-            return false;
-        }
-
-        return true;
-    }
-
 
     #endregion
 

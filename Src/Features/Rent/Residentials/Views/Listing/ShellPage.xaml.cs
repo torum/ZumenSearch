@@ -42,7 +42,7 @@ public sealed partial class ShellPage : Page
     private readonly IDialogGenericService _dialogService;
 
     public ShellPage(
-        Models.Rent.Residentials.Listing room,
+        Models.Rent.Residentials.Listing listing,
         bool isDuplicate,
         IAbstractFactory<Models.Rent.Residentials.Listing, bool, INavigationGenericService, IDialogGenericService, ViewModels.Rent.Residentials.ListingViewModel> vmFactory,
         INavigationGenericService navigationlService, 
@@ -55,9 +55,9 @@ public sealed partial class ShellPage : Page
         _dispatcherService = dispatcherService;
         _dialogService = dialogService;
 
-        ViewModel = vmFactory.Create(room, isDuplicate, _navigationlService, _dialogService);
+        ViewModel = vmFactory.Create(listing, isDuplicate, _navigationlService, _dialogService);
 
-        Window = new Views.Rent.Residentials.Listing.EditorWindow(room.Id, room.PropertyId, ViewModel)
+        Window = new Views.Rent.Residentials.Listing.EditorWindow(listing.Id, listing.PropertyId, ViewModel)
         {
             Content = this
         };

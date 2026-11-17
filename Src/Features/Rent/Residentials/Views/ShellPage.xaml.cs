@@ -44,7 +44,8 @@ public sealed partial class ShellPage : Page
 
     public ShellPage(
         Models.Rent.Residentials.Property building,
-        IAbstractFactory<Models.Rent.Residentials.Property, INavigationGenericService, IDialogGenericService, ViewModels.Rent.Residentials.PropertyViewModel> vmFactory,
+        bool isDuplicate,
+        IAbstractFactory<Models.Rent.Residentials.Property, bool, INavigationGenericService, IDialogGenericService, ViewModels.Rent.Residentials.PropertyViewModel> vmFactory,
         INavigationGenericService navigationService, 
         IDispatcherService dispatcherService,
         IDialogGenericService dialogService)
@@ -55,7 +56,7 @@ public sealed partial class ShellPage : Page
         _dispatcherService = dispatcherService;
         _dialogService = dialogService;
 
-        ViewModel = vmFactory.Create(building, _navigationService, _dialogService);
+        ViewModel = vmFactory.Create(building, isDuplicate, _navigationService, _dialogService);
 
         Window = new Views.Rent.Residentials.EditorWindow(building.Id, ViewModel)
         {

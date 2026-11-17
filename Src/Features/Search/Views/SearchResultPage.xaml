@@ -169,7 +169,7 @@
                             </MenuFlyout>
                         </AppBarButton.Flyout>
                     </AppBarButton>
-                    <AppBarButton Icon="Copy" Label="複製" IsEnabled="False"/>
+                    <AppBarButton Icon="Copy" Label="複製" Command="{x:Bind ViewModel.DuplicatePropertyCommand}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}"/>
                     <AppBarButton Icon="Edit" Label="編集" Command="{x:Bind ViewModel.EditPropertyCommand}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}"/>
                 </CommandBar>
 
@@ -186,6 +186,7 @@
                                     <KeyboardAccelerator Key="Enter" />
                                 </MenuFlyoutItem.KeyboardAccelerators>
                             </MenuFlyoutItem>
+                            <MenuFlyoutItem Text="複製" Icon="Copy" Command="{x:Bind ViewModel.DuplicatePropertyCommand}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}"></MenuFlyoutItem>
                             <MenuFlyoutSeparator/>
                             <MenuFlyoutItem Text="削除" Icon="Delete" Command="{x:Bind ViewModel.DeletePropertyCommand}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}"></MenuFlyoutItem>
                         </MenuFlyout>

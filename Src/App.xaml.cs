@@ -130,8 +130,8 @@ public partial class App : Application
 
                 services.AddTransient<ViewModels.Rent.Residentials.PropertyViewModel>();
                 services.AddTransient<Views.Rent.Residentials.ShellPage>();
-                services.AddGenericFactory<Models.Rent.Residentials.Property, INavigationGenericService, IDialogGenericService, ViewModels.Rent.Residentials.PropertyViewModel>();
-                services.AddGenericFactory<Models.Rent.Residentials.Property, Views.Rent.Residentials.ShellPage>();
+                services.AddGenericFactory<Models.Rent.Residentials.Property, bool, INavigationGenericService, IDialogGenericService, ViewModels.Rent.Residentials.PropertyViewModel>();
+                services.AddGenericFactory<Models.Rent.Residentials.Property, bool, Views.Rent.Residentials.ShellPage>();
 
                 services.AddTransient<ViewModels.Rent.Residentials.ListingViewModel>();
                 services.AddTransient<Views.Rent.Residentials.Listing.ShellPage>();

@@ -1851,11 +1851,11 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
         if (duplicate)
         {
-            property = new Models.Rent.Residentials.Property(propertyId, EntityStatus.Saved);
+            property = new Models.Rent.Residentials.Property(Guid.CreateVersion7().ToString("N"), EntityStatus.New);
         }
         else
         {
-            property = new Models.Rent.Residentials.Property(Guid.CreateVersion7().ToString("N"), EntityStatus.New);
+            property = new Models.Rent.Residentials.Property(propertyId, EntityStatus.Saved);
         }
 
         _readerWriterLock.EnterReadLock();
@@ -2427,6 +2427,14 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             }
 
             // Reset property Isdirty flag.
+            if (duplicate)
+            {
+                property.SetStatus(EntityStatus.New);
+            }
+            else
+            {
+                property.SetStatus(EntityStatus.Saved);
+            }
             property.SetIsModified(duplicate);
 
             res.Property = property;

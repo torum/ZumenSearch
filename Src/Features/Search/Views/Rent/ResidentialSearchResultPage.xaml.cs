@@ -81,9 +81,9 @@ public sealed partial class ResidentialSearchResultPage : Page
             return;
         }
 
-        if (ViewModel.EditRentResidentialRoomCommand.CanExecute(searchresult))
+        if (ViewModel.EditRentResidentialListingCommand.CanExecute(searchresult))
         {
-            ViewModel.EditRentResidentialRoomCommand.Execute(searchresult);
+            ViewModel.EditRentResidentialListingCommand.Execute(searchresult);
         }
     }
 
@@ -167,9 +167,9 @@ public sealed partial class ResidentialSearchResultPage : Page
             return;
         }
 
-        if (ViewModel.EditRentResidentialRoomCommand.CanExecute(searchresult))
+        if (ViewModel.EditRentResidentialListingCommand.CanExecute(searchresult))
         {
-            ViewModel.EditRentResidentialRoomCommand.Execute(searchresult);
+            ViewModel.EditRentResidentialListingCommand.Execute(searchresult);
         }
     }
 
