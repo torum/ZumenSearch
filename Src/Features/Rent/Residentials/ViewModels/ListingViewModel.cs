@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.UI.Xaml.Controls;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
@@ -221,6 +222,9 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
 
     [ObservableProperty]
     public partial string InfoBarErrorTitle { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial InfoBarSeverity InfoBarSeverity { get; set; } = InfoBarSeverity.Warning;
 
     [ObservableProperty]
     public partial bool IsNameHasError { get; private set; }
@@ -1026,23 +1030,23 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         }
     }
 
-    private void ShowErrorInfoBar(Models.ErrorInfo error)
-    {
-        InfoBarErrorTitle = error.Title;
-        InfoBarErrorMessage =
-            error.Message + Environment.NewLine +
-            error.Description + Environment.NewLine +
-            error.Operation + Environment.NewLine +
-            error.MethodName;
-        IsInfoBarErrorOpen = true;
-    }
-
-    // TODO: Change sevirity to Error for simple error messages.
-    // Need to bind severity to InfoBar control in XAML to show error messages.
-    private void ShowSimpleErrorInfoBar(string title, string message)
+    private void ShowSimpleErrorInfoBar(string title, string message, InfoBarSeverity severity = InfoBarSeverity.Warning)
     {
         InfoBarErrorTitle = title;
         InfoBarErrorMessage = message;
+        InfoBarSeverity = severity;
+        IsInfoBarErrorOpen = true;
+    }
+
+    private void ShowErrorInfoBar(Models.ErrorInfo err)
+    {
+        InfoBarErrorTitle = err.Title;
+        InfoBarErrorMessage =
+            err.Message + Environment.NewLine +
+            err.Description + Environment.NewLine +
+            err.Operation + Environment.NewLine +
+            err.MethodName;
+        InfoBarSeverity = InfoBarSeverity.Error;
         IsInfoBarErrorOpen = true;
     }
 

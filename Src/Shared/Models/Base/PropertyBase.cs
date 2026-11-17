@@ -211,9 +211,6 @@ public abstract partial class PropertyBase : EntityAggregateBase
         }
     }
 
-    // Needs to fire property changed event when the value is set, so that the UI can update accordingly.
-    // TODO:
-    // Automatically generate a thumbnail image when the property is accessed, if it hasn't been set yet.
     public string? ThumbImagePath// => CreateThumbImagePath();
     {
         get

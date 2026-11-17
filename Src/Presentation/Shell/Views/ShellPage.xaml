@@ -165,7 +165,7 @@
                     <Frame x:Name="ContentFrame" Grid.Row="1" Navigated="NavigationViewControl_Navigated" Padding="0"></Frame>
 
                     <Border Grid.Row="2" Height="Auto">
-                        <InfoBar Severity="Error" IsOpen="{x:Bind ViewModel.IsInfoBarErrorOpen, Mode=TwoWay}" Title="{x:Bind ViewModel.InfoBarErrorTitle, Mode=OneWay}" Message="{x:Bind ViewModel.InfoBarErrorMessage, Mode=OneWay}" helpers:InfoBarExtensions.IsTextSelectionEnabled="True"/>
+                        <InfoBar Severity="{x:Bind ViewModel.InfoBarSeverity, Mode=OneWay}" IsOpen="{x:Bind ViewModel.IsInfoBarErrorOpen, Mode=TwoWay}" Title="{x:Bind ViewModel.InfoBarErrorTitle, Mode=OneWay}" Message="{x:Bind ViewModel.InfoBarErrorMessage, Mode=OneWay}" helpers:InfoBarExtensions.IsTextSelectionEnabled="True"/>
                     </Border>
 
                 </Grid>

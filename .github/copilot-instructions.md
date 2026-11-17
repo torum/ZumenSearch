@@ -22,7 +22,7 @@ Strictly follow these boundaries:
 - Priority is for humans to understand the code and follow the logic and flow. The maintainability is important but secondary. Follow the existing style, patterns, and conventions. 
 - Do not extract methods or helpers unnecessarily. It will exponentially harder for a human to follow. Extract only if the same code is actually used in multiple places/methods/classes.
 - Single line makes code folding easier. Keep method, constructor, and lambda parameter lists on one line, even when the line is long. Keep argument lists on one line. Do not wrap argument lists. Do not put parameters on separate lines.
-- Avoiding hard-coded enum member-name strings in parsers; use enum member ToString() or generic enum parsing so enum renames do not require updating duplicated string constants.
+- Avoiding hard-coded enum member-name strings in parsers; use generic enum parsing so enum renames do not require updating duplicated string constants.
 - For enum choices that need human-readable labels, use a model label type containing the enum Key and localized Label, following PropertyKindTypeLabel, instead of displaying enum member names.
 - Follow existing setter conventions: typed-label properties use matching `Set...TypeLabel`/`Set...Label` methods and should have `FromString` counterparts when applicable; preserve the existing parsing pattern.
 

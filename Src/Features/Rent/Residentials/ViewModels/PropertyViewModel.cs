@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI.Windowing;
+using Microsoft.UI.Xaml.Controls;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
@@ -202,6 +203,9 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
     [ObservableProperty]
     public partial string InfoBarErrorTitle { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial InfoBarSeverity InfoBarSeverity { get; set; } = InfoBarSeverity.Warning;
 
     [ObservableProperty]
     public partial bool IsNameHasError { get; private set; }
@@ -2843,7 +2847,15 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         return true;
     }
 
-    private void ShowErrorInfoBar(Models.ErrorInfo err, bool isShowBar = true)
+    private void ShowSimpleErrorInfoBar(string title, string message, InfoBarSeverity severity = InfoBarSeverity.Warning)
+    {
+        InfoBarErrorTitle = title;
+        InfoBarErrorMessage = message;
+        InfoBarSeverity = severity;
+        IsInfoBarErrorOpen = true;
+    }
+
+    private void ShowErrorInfoBar(Models.ErrorInfo err)
     {
         InfoBarErrorTitle = err.Title;
         InfoBarErrorMessage =
@@ -2851,16 +2863,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             err.Description + Environment.NewLine +
             err.Operation + Environment.NewLine +
             err.MethodName;
-
-        IsInfoBarErrorOpen = isShowBar;
-    }
-
-    // TODO: Change sevirity to Error for simple error messages.
-    // Need to bind severity to InfoBar control in XAML to show error messages.
-    private void ShowSimpleErrorInfoBar(string title, string message)
-    {
-        InfoBarErrorTitle = title;
-        InfoBarErrorMessage = message;
+        InfoBarSeverity = InfoBarSeverity.Error;
         IsInfoBarErrorOpen = true;
     }
 
@@ -3083,7 +3086,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
                 OccuredAt = DateTime.Now
             };
 
-            ShowErrorInfoBar(err,true);
+            ShowErrorInfoBar(err);
 
             return false;
         }
@@ -3327,7 +3330,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
                 resInsert.Error.MethodName + Environment.NewLine +
                 resInsert.Error.FullDump);
 
-            ShowErrorInfoBar(resInsert.Error, true);
+            ShowErrorInfoBar(resInsert.Error);
 
             return;
         }
@@ -3837,7 +3840,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         var result = await Task.Run(() => _dataAccessService.SelectRentResidentialListingById(_id, unitId), _cts.Token);
         if (result.IsError)
         {
-            ShowErrorInfoBar(result.Error, true);
+            ShowErrorInfoBar(result.Error);
             return;
         }
         if (result.Listing is null)

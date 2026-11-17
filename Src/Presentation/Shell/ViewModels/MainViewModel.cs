@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Animation;
 using System.Collections.ObjectModel;
 using System.Reflection;
@@ -17,6 +18,11 @@ using ZumenSearch.Views;
 using ZumenSearch.Views.Services.Contracts;
 
 namespace ZumenSearch.ViewModels;
+
+/*
+ * TODO: 
+ * Add Duplicate Rent Residential Property Command
+ */
 
 public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpdatedMessage>, IRecipient<ListingUpdatedMessage>, IRecipient<LessorUpdatedMessage>, IRecipient<BrokerUpdatedMessage>, IRecipient<WindowClosedMessage<Microsoft.UI.Xaml.Window>>, IRecipient<ShowErrorInfoBarInMainWindowMessage>, IDisposable
 {
@@ -90,7 +96,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
 
     #region == エラー関連 ==
 
-    // InfoBarError is researved only for unsavable error.
+    // Change sevirity to Error for simple error messages.
     [ObservableProperty]
     public partial bool IsInfoBarErrorOpen { get; set; }
 
@@ -99,6 +105,9 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
 
     [ObservableProperty]
     public partial string InfoBarErrorTitle { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial InfoBarSeverity InfoBarSeverity { get; set; } = InfoBarSeverity.Warning;
 
     #endregion
 
@@ -549,8 +558,9 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         }
         catch (Exception ex)
         {
-            // TODO: Show error message to user.
             Debug.WriteLine($"InitializeDatabase: {ex}");
+
+            ShowSimpleErrorInfoBar("データベース初期化エラー", $"データベースの初期化中に予期しないエラーが発生しました。{Environment.NewLine}{ex.Message}", InfoBarSeverity.Error);
         }
     }
 
@@ -574,16 +584,15 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         return $"{verName} - {version.Major}.{version.Minor}.{version.Build}.{version.Revision}";
     }
 
-    // TODO: Change sevirity to Error for simple error messages.
-    // Need to bind severity to InfoBar control in XAML to show error messages.
-    private void ShowSimpleErrorInfoBar(string title, string message)
+    private void ShowSimpleErrorInfoBar(string title, string message, InfoBarSeverity severity = InfoBarSeverity.Warning)
     {
         InfoBarErrorTitle = title;
         InfoBarErrorMessage = message;
+        InfoBarSeverity = severity;
         IsInfoBarErrorOpen = true;
     }
 
-    private void ShowErrorInfoBar(Models.ErrorInfo err, bool isShowBar = true)
+    private void ShowErrorInfoBar(Models.ErrorInfo err)
     {
         InfoBarErrorTitle = err.Title;
         InfoBarErrorMessage =
@@ -591,8 +600,8 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
             err.Description + Environment.NewLine +
             err.Operation + Environment.NewLine +
             err.MethodName;
-
-        IsInfoBarErrorOpen = isShowBar;
+        InfoBarSeverity = InfoBarSeverity.Error;
+        IsInfoBarErrorOpen = true;
     }
 
     #endregion
@@ -622,6 +631,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         }
         else
         {
+            // Set the BasePath for each property in the search result to show thumbnails.
             foreach (var item in res.PropertySearchResult)
             {
                 item.BasePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, item.Id);
@@ -802,8 +812,6 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
 
         return true;
     }
-
-
 
     #endregion
 
@@ -2812,6 +2820,5 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
     #endregion
 
     #endregion
-
 
 }
