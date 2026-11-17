@@ -6,6 +6,13 @@ namespace ZumenSearch.Models.Rent.Residentials;
 
 public sealed partial class ListingPicture : PictureBase
 {
+    public ListingPicture(string id, string imageLocation, EntityStatus status) : base(id, status)
+    {
+        ImageFilename = imageLocation;
+
+        IsModified = false;
+    }
+
     public ViewModels.Rent.Residentials.ListingViewModel? ParentViewModel { get; set; }
 
     // Do not use SetProperty. PropertyChanged is being subscribed.
@@ -96,13 +103,6 @@ public sealed partial class ListingPicture : PictureBase
 
             OnPropertyChanged();
         }
-    }
-
-    public ListingPicture(string id, string imageLocation, EntityStatus status) : base(id, status)
-    {
-        ImageFilename = imageLocation;
-
-        IsModified = false;
     }
 
     public ListingPictureType SetTypeFromString(string Str)

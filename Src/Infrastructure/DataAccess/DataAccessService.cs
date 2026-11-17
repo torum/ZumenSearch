@@ -1836,17 +1836,26 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         return res;
     }
 
-    public Models.Rent.Residentials.PropertyResultWrapper SelectRentResidentialById(string propertyId)
+    public Models.Rent.Residentials.PropertyResultWrapper SelectRentResidentialById(string propertyId, bool duplicate = false)
     {
         var res = new Models.Rent.Residentials.PropertyResultWrapper();
-
-        var property = new Models.Rent.Residentials.Property(propertyId, EntityStatus.Saved);
 
         if (string.IsNullOrEmpty(propertyId))
         {
             res.IsError = true;
             // TODO:
             return res;
+        }
+
+        Models.Rent.Residentials.Property property;
+
+        if (duplicate)
+        {
+            property = new Models.Rent.Residentials.Property(propertyId, EntityStatus.Saved);
+        }
+        else
+        {
+            property = new Models.Rent.Residentials.Property(Guid.CreateVersion7().ToString("N"), EntityStatus.New);
         }
 
         _readerWriterLock.EnterReadLock();
@@ -2223,6 +2232,10 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 while (reader.Read())
                 {
                     var picid = Convert.ToString(reader["picture_id"], CultureInfo.InvariantCulture) ?? string.Empty;
+
+                    // If duplicate is true, generate a new picture ID; otherwise, use the existing one.
+                    picid = duplicate ? Guid.CreateVersion7().ToString("N") : picid;
+
                     var picpath = Convert.ToString(reader["filename"], CultureInfo.InvariantCulture) ?? string.Empty;
                     if (!string.IsNullOrEmpty(picid) && !string.IsNullOrEmpty(picpath))
                     {
@@ -2256,6 +2269,10 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 while (reader.Read())
                 {
                     var pdfid = Convert.ToString(reader["pdf_id"], CultureInfo.InvariantCulture) ?? string.Empty;
+
+                    // If duplicate is true, generate a new PDF ID; otherwise, use the existing one.
+                    pdfid = duplicate ? Guid.CreateVersion7().ToString("N") : pdfid;
+
                     var pdfpath = Convert.ToString(reader["filename"], CultureInfo.InvariantCulture) ?? string.Empty;
                     var thumbpath = Convert.ToString(reader["thumbnail_filename"], CultureInfo.InvariantCulture) ?? string.Empty;
                     if (!string.IsNullOrWhiteSpace(pdfid) && !string.IsNullOrWhiteSpace(pdfpath) && !string.IsNullOrWhiteSpace(thumbpath))
@@ -2389,25 +2406,28 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 }
             }
 
-            // 部屋
-            cmd.CommandText = "SELECT listing_id, name FROM rent_residential_listings WHERE property_id = @propertyId";
-            cmd.Parameters.Clear();
-            cmd.Parameters.AddWithValue("@propertyId", propertyId);
-            using (var reader = cmd.ExecuteReader())
+            // Do not duplicate the listings if this is a duplicate operation; otherwise, retrieve the listings for the property.
+            if (!duplicate)
             {
-                while (reader.Read())
+                // 部屋
+                cmd.CommandText = "SELECT listing_id, name FROM rent_residential_listings WHERE property_id = @propertyId";
+                cmd.Parameters.Clear();
+                cmd.Parameters.AddWithValue("@propertyId", propertyId);
+                using (var reader = cmd.ExecuteReader())
                 {
-                    var listingId = reader.GetString(reader.GetOrdinal("listing_id"));
-                    var listingName = reader.GetString(reader.GetOrdinal("name"));
-                    if (string.IsNullOrWhiteSpace(listingId)) throw new InvalidOperationException("Residential listing ID is empty.");
-                    property.ListingSummaries.Add(new Models.Rent.Residentials.ListingSummary(listingId, listingName));
-                    //res.ListingSummaries.Add(new Models.Rent.Residentials.ListingSummary(listingId, listingName, false));
+                    while (reader.Read())
+                    {
+                        var listingId = reader.GetString(reader.GetOrdinal("listing_id"));
+                        var listingName = reader.GetString(reader.GetOrdinal("name"));
+                        if (string.IsNullOrWhiteSpace(listingId)) throw new InvalidOperationException("Residential listing ID is empty.");
+                        property.ListingSummaries.Add(new Models.Rent.Residentials.ListingSummary(listingId, listingName));
+                        //res.ListingSummaries.Add(new Models.Rent.Residentials.ListingSummary(listingId, listingName, false));
+                    }
                 }
             }
 
             // Reset property Isdirty flag.
-            property.SetStatus(EntityStatus.Saved);
-            property.SetIsModified(false);
+            property.SetIsModified(duplicate);
 
             res.Property = property;
         }
@@ -3378,6 +3398,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
         // If duplicate is true, generate a new listing ID; otherwise, use the existing one.
         string id = duplicate ? Guid.CreateVersion7().ToString("N") : listingId;
+        // Set the status based on whether it's a duplicate or not.
         EntityStatus status = duplicate ? EntityStatus.New : EntityStatus.Saved;
 
         // Create listing.
@@ -3473,8 +3494,10 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             while (reader.Read())
             {
                 var picid = Convert.ToString(reader["picture_id"], CultureInfo.InvariantCulture) ?? string.Empty;
+                
                 // If duplicate is true, generate a new picture ID; otherwise, use the existing one.
                 picid = duplicate ? Guid.CreateVersion7().ToString("N") : picid;
+
                 var picpath = Convert.ToString(reader["filename"], CultureInfo.InvariantCulture) ?? string.Empty;
                 if (!string.IsNullOrEmpty(picid) && !string.IsNullOrEmpty(picpath))
                 {
@@ -3508,8 +3531,10 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             while (reader.Read())
             {
                 var pdfid = Convert.ToString(reader["pdf_id"], CultureInfo.InvariantCulture) ?? string.Empty;
+
                 // If duplicate is true, generate a new picture ID; otherwise, use the existing one.
                 pdfid = duplicate ? Guid.CreateVersion7().ToString("N") : pdfid;
+
                 var pdfpath = Convert.ToString(reader["filename"], CultureInfo.InvariantCulture) ?? string.Empty;
                 var thumbpath = Convert.ToString(reader["thumbnail_filename"], CultureInfo.InvariantCulture) ?? string.Empty;
                 if (!string.IsNullOrWhiteSpace(pdfid) && !string.IsNullOrWhiteSpace(pdfpath) && !string.IsNullOrWhiteSpace(thumbpath))

@@ -5,6 +5,16 @@ namespace ZumenSearch.Models.Rent.Residentials;
 
 public sealed partial class PropertyPdf : PdfBase
 {
+    public PropertyPdf(string id, string pdfLocation, string thumbnailLocation, EntityStatus status) : base(id, status)
+    {
+        PdfFilename = pdfLocation;
+        ThumbnailFilename = thumbnailLocation;
+        //PdfType = ResidentialPdfTypes[0];
+        PdfType = ResidentialPdfTypes.First(item => item.Key == PropertyPdfType.Unspecified);
+
+        IsModified = false;
+    }
+
     public ViewModels.Rent.Residentials.PropertyViewModel? ParentViewModel { get; set; }
 
     public ObservableCollection<PropertyPdfTypeLabel> ResidentialPdfTypes { get;} =
@@ -84,16 +94,6 @@ public sealed partial class PropertyPdf : PdfBase
 
             OnPropertyChanged();
         }
-    }
-
-    public PropertyPdf(string id, string pdfLocation, string thumbnailLocation, EntityStatus status) : base(id, status)
-    {
-        PdfFilename = pdfLocation;
-        ThumbnailFilename = thumbnailLocation;
-        //PdfType = ResidentialPdfTypes[0];
-        PdfType = ResidentialPdfTypes.First(item => item.Key == PropertyPdfType.Unspecified);
-
-        IsModified = false;
     }
 
     public PropertyPdfType SetTypeFromString(string Str)

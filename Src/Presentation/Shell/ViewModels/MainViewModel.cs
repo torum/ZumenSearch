@@ -22,6 +22,9 @@ namespace ZumenSearch.ViewModels;
 /*
  * TODO: 
  * Add Duplicate Rent Residential Property Command
+ * Add Sort Rent Residential Property Command
+ * Add Sort Properties Command
+ * Add Inport / Export Rent Residential Property Command
  */
 
 public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpdatedMessage>, IRecipient<ListingUpdatedMessage>, IRecipient<LessorUpdatedMessage>, IRecipient<BrokerUpdatedMessage>, IRecipient<WindowClosedMessage<Microsoft.UI.Xaml.Window>>, IRecipient<ShowErrorInfoBarInMainWindowMessage>, IDisposable

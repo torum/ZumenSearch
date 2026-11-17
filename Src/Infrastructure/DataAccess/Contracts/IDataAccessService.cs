@@ -14,7 +14,7 @@ public interface IDataAccessService
 
     // Rent Residential
     Models.SearchResult.ResultWrapper UpsertRentResidential(Models.Rent.Residentials.Property property);
-    Models.Rent.Residentials.PropertyResultWrapper SelectRentResidentialById(string propertyId);
+    Models.Rent.Residentials.PropertyResultWrapper SelectRentResidentialById(string propertyId, bool duplicate = false);
     Models.SearchResult.ResultWrapper DeleteRentResidential(string propertyId);
     Models.SearchResult.ResultWrapper UpsertRentResidentialListing(string propertyId, Models.Rent.Residentials.Listing listing);
     Models.SearchResult.ListingSearchResultWrapper SelectRentResidentialListings(Models.Rent.Residentials.ListingSearchCriteria criteria);

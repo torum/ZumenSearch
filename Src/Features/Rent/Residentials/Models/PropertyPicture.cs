@@ -8,6 +8,13 @@ namespace ZumenSearch.Models.Rent.Residentials;
 
 public sealed partial class PropertyPicture : PictureBase
 {
+    public PropertyPicture(string id, string imageLocation, EntityStatus status) : base(id, status)
+    {
+        ImageFilename = imageLocation;
+
+        IsModified = false;
+    }
+
     public ViewModels.Rent.Residentials.PropertyViewModel? ParentViewModel { get; set; }
 
     public ObservableCollection<PropertyPictureTypeLabel> ResidentialPictureTypes { get; } =
@@ -86,13 +93,6 @@ public sealed partial class PropertyPicture : PictureBase
 
             OnPropertyChanged();
         }
-    }
-
-    public PropertyPicture(string id, string imageLocation, EntityStatus status) : base(id, status)
-    {
-        ImageFilename = imageLocation;
-
-        IsModified = false;
     }
 
     public PropertyPictureType SetTypeFromString(string Str)
