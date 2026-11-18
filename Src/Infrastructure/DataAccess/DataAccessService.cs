@@ -17,7 +17,7 @@ namespace ZumenSearch.Services;
 // </summary>
 
 // TODO:
-// * 
+// * Translate error messages to Japanese for user-facing errors.
 
 public sealed partial class DataAccessService : IDataAccessService, IDisposable
 {

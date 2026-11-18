@@ -28,11 +28,16 @@ namespace ZumenSearch.ViewModels.Rent.Residentials;
  * TODO: 
  * Use IsBusy to disable the editor commands and show progress ring when saving or loading data.
  * Add try catch to async, file IO, and other operations. Show error message in infobar if exception occurs.
-1.	done.
-2.	Failed attachment imports can leave incomplete files. Residential picture imports track destination files only after copying succeeds (Src\Features\Rent\Residentials\ViewModels\PropertyViewModel.cs#L3490, Src\Features\Rent\Residentials\ViewModels\ListingViewModel.cs#L1850). Their picker callers already catch common errors and show an InfoBar, but a failed copy can leave an untracked partial file. PDF imports show an InfoBar too, but their recorded importedPaths are not cleaned up on failure (Src\Features\Rent\Residentials\ViewModels\PropertyViewModel.cs#L3591, Src\Features\Rent\Residentials\ViewModels\ListingViewModel.cs#L1970).
-3.	Post-save cleanup failures are hidden. In Src\Features\Rent\Residentials\ViewModels\PropertyViewModel.cs#L3350, failed attachment and directory deletions are only debug-logged, and the deletion lists are cleared. The database save has already succeeded, so a warning should say that saving succeeded but cleanup did not; failed paths should remain available for retry or other explicit handling.
-4.	Lessor and broker selection can silently hide database errors. Their initial loads and searches check only whether a result is null, not its error status (Src\Shared\Dialogs\ViewModels\LessorSelectViewModel.cs#L70, Src\Shared\Dialogs\ViewModels\BrokerSelectViewModel.cs#L70). The data service returns errors in result wrappers, so a database failure can appear as an empty list. These dialogs need visible error feedback. Their async void initialization also needs a deliberate exception and cancellation boundary.
-5.	Unexpected save failures lack a local recovery boundary. Residential property and listing saves use finally to reset busy state and report database result errors, but unexpected exceptions from the awaited operation are not handled there (Src\Features\Rent\Residentials\ViewModels\PropertyViewModel.cs#L3281, Src\Features\Rent\Residentials\ViewModels\ListingViewModel.cs#L1622). Handle expected recoverable failures at the appropriate command boundary, distinguish cancellation from failure, and avoid reporting “save failed” after a commit has already succeeded.
+1.	Done.
+2.	Failed attachment imports can leave incomplete files. 
+    Residential picture imports track destination files only after copying succeeds (Src\Features\Rent\Residentials\ViewModels\PropertyViewModel.cs#L3490, Src\Features\Rent\Residentials\ViewModels\ListingViewModel.cs#L1850). 
+    Their picker callers already catch common errors and show an InfoBar, but a failed copy can leave an untracked partial file. 
+    PDF imports show an InfoBar too, but their recorded importedPaths are not cleaned up on failure (Src\Features\Rent\Residentials\ViewModels\PropertyViewModel.cs#L3591, Src\Features\Rent\Residentials\ViewModels\ListingViewModel.cs#L1970).
+3.	Done.
+4.	Lessor and broker selection can silently hide database errors. 
+    Their initial loads and searches check only whether a result is null, not its error status (Src\Shared\Dialogs\ViewModels\LessorSelectViewModel.cs#L70, Src\Shared\Dialogs\ViewModels\BrokerSelectViewModel.cs#L70). 
+    The data service returns errors in result wrappers, so a database failure can appear as an empty list. 
+    These dialogs need visible error feedback. Their async void initialization also needs a deliberate exception and cancellation boundary.
  * 
  */
 
@@ -50,12 +55,12 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
     private readonly string _propertyDataDirectoryPath = string.Empty;
 
-    // Tmp file list to hold unsaved picture files. (if entry is not saved, delete on close)
+    // Tmp file list to hold unsaved picture files. (if entry is discarded without saving, delete on close)
     private readonly List<string> _unsavedPropertyPictureFileList = [];
     private readonly List<string> _unsavedPropertyPdfFileList = [];
     private readonly List<string> _unsavedPropertyPdfThumbnailFileList = [];
 
-    // Tmp listing list to hold unsaved listing where listing reside here while property is not yet saved. (if entry is not saved, delete on close)
+    // Tmp listing list to hold unsaved listing where listing reside here while property is not yet saved. (if entry is discarded without saving, delete on close)
     private readonly List<Listing> _unsavedListingList = [];
 
     private bool _isBusy;
@@ -92,6 +97,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         IsUnitLevelOwnership = property.IsUnitLevelOwnership;
         WeakReferenceMessenger.Default.Send(new PropertyIsUnitOwnershipChangedMessage(_id, IsUnitLevelOwnership));
 
+        // Create the data folder for this property. This is where the pictures and pdfs will be stored.
         _propertyDataDirectoryPath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _id);
 
         try
@@ -118,9 +124,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             ShowErrorInfoBar(err);
         }
 
-        // Update title with dummy value.
-        WindowTitle = string.Empty;
-
+        // Initialize the transportation entries for the four transportation slots.
         _transportationEntries = [new(this, 0), new(this, 1), new(this, 2), new(this, 3)];
 
         // Populate the view model with the property values.
@@ -128,10 +132,13 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
         // Reset errors
         IsNameHasError = false;
+
         // Reset IsDirty to false after PopulateValues() because PopulateValues() automatically sets IsDirty = true when it copies values from the property to the view model.
+        _property.SetIsModified(isDuplicate);
         IsDirty = isDuplicate;
 
         // Ready to receive messages.
+        // Make sure to add matching unregistrations in Dispose().
         WeakReferenceMessenger.Default.Register<ListingUpdatedMessage>(this);
         WeakReferenceMessenger.Default.Register<WindowClosedMessage<Microsoft.UI.Xaml.Window>>(this);
         WeakReferenceMessenger.Default.Register<ListingDeletedMessage>(this);
@@ -2376,19 +2383,19 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
     #region == Public Methods ==
 
-    public bool DiscardChanges()
+    public void DiscardChanges()
     {
-        if (IsBusy) return false;
+        if (IsBusy) return;
         IsBusy = true;
+
         try
         {
-            bool result = DiscardUnsavedFiles();
+            DiscardUnsavedFiles();
 
             // Need to restore the original values from unsaved _property because IsUnitLevelOwnership change is real-time not save-time update.
             WeakReferenceMessenger.Default.Send(new PropertyIsUnitOwnershipChangedMessage(_id, _property.IsUnitLevelOwnership));
 
             IsDirty = false;
-            return result;
         }
         finally
         {
@@ -3214,7 +3221,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
     }
 
-    private bool DiscardUnsavedFiles()
+    private void DiscardUnsavedFiles()
     {
         var failures = new List<string>();
 
@@ -3235,13 +3242,10 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             }
         }
 
-        if (failures.Count == 0)
+        if (failures.Count > 0)
         {
-            return true;
+            ShowSimpleErrorInfoBar("エラー", $"変更の破棄中に一時ファイルを削除できませんでした: {string.Join(", ", failures)}");
         }
-
-        ShowSimpleErrorInfoBar("エラー", $"変更の破棄中に一時ファイルを削除できませんでした: {string.Join(", ", failures)}");
-        return false;
     }
 
     private static void DeleteTrackedFiles(List<string> trackedFiles, List<string> failures)
@@ -3252,7 +3256,6 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             {
                 File.Delete(file);
                 trackedFiles.Remove(file);
-
                 Debug.WriteLine($"Deleted tracked file '{file}'");
             }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
@@ -3263,7 +3266,6 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         }
     }
 
-    // TODO: Consider removing.
     private static bool TryDeleteFiles(IEnumerable<string> filePaths, List<string> failures)
     {
         var succeeded = true;
@@ -3301,27 +3303,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
     [RelayCommand(CanExecute = nameof(CanSave))]
     public async Task Save()
     {
-
         if (IsSaving || IsBusy || !IsDirty) return;
-        /*
-        var main = App.GetService<ViewModels.MainViewModel>();
-        if (main.RentResidentialListingEditorList.Any(editor => editor.PropertyId == _id && editor.ViewModel is { IsDiscardPending: true }))
-        {
-            ShowSimpleErrorInfoBar("エラー", "募集物件の変更の破棄を完了してから、もう一度保存してください。");
-            return;
-        }
-        if (HasPendingEditorOperations || main.RentResidentialListingEditorList.Any(editor => editor.PropertyId == _id && editor.ViewModel is { } vm && (vm.HasPendingEditorOperations || vm.IsClosing)))
-        {
-            ShowSimpleErrorInfoBar("エラー", "関連する選択、ファイル処理または編集画面の終了が完了してから、もう一度保存してください。");
-            return;
-        }
-        if (!CleanIncompleteAttachments()) return;
-        if (!main.TryBeginResidentialOperation(_id))
-        {
-            ShowSimpleErrorInfoBar("エラー", "関連する保存、削除または読み込みが完了してから、もう一度保存してください。");
-            return;
-        }
-        */
 
         IsSaving = true;
         IsBusy = true;
@@ -3332,10 +3314,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         finally
         {
             IsSaving = false;
-            //main.EndResidentialOperation(_id);
             IsBusy = false;
-            //while (_deferredMessages.TryDequeue(out var message)) message();
-            //foreach (var editor in main.RentResidentialListingEditorList.Where(editor => editor.PropertyId == _id).ToList()) editor.ViewModel?.ApplyDeferredMessages();
         }
     }
 
@@ -3351,22 +3330,32 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             return;
         }
 
-        var saveResult = false;
-        Models.SearchResult.ResultWrapper resInsert;
-        resInsert = await Task.Run(() => _dataAccessService.UpsertRentResidential(_property), _cts.Token);
-        saveResult = !resInsert.IsError;
+        var isSaved = false;
+        Models.SearchResult.ResultWrapper resUpsert;
+        try
+        {
+            resUpsert = await Task.Run(() => _dataAccessService.UpsertRentResidential(_property), _cts.Token);
+        }
+        catch (OperationCanceledException) when (_cts.Token.IsCancellationRequested)
+        {
+            Debug.WriteLine("Save operation was canceled.");
+            // The queued operation did not start. Do not report a database failure.
+            return;
+        }
 
-        if (!saveResult)
+        isSaved = !resUpsert.IsError;
+
+        if (!isSaved)
         {
             Debug.WriteLine(
-                resInsert.Error.Title + Environment.NewLine +
-                resInsert.Error.Message + Environment.NewLine +
-                resInsert.Error.Description + Environment.NewLine +
-                resInsert.Error.Operation + Environment.NewLine +
-                resInsert.Error.MethodName + Environment.NewLine +
-                resInsert.Error.FullDump);
+                resUpsert.Error.Title + Environment.NewLine +
+                resUpsert.Error.Message + Environment.NewLine +
+                resUpsert.Error.Description + Environment.NewLine +
+                resUpsert.Error.Operation + Environment.NewLine +
+                resUpsert.Error.MethodName + Environment.NewLine +
+                resUpsert.Error.FullDump);
 
-            ShowErrorInfoBar(resInsert.Error);
+            ShowErrorInfoBar(resUpsert.Error);
 
             return;
         }
@@ -3375,123 +3364,144 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             Debug.WriteLine("No errors on update.");
         }
 
-        if (saveResult)
+        if (isSaved)
         {
-            IsDirty = false;
-
-            _property.SetIsModified(false);
-            _property.SetStatus(EntityStatus.Saved);
-
-            // Update title with dummy value.
-            WindowTitle = string.Empty;
-
-            // Clear error infobar.
-            IsInfoBarErrorOpen = false;
-
-            // Clean up deleted picture file.
-            if (_property.PicturesToBeDeleted.Count > 0)
+            try
             {
-                foreach (var file in _property.PicturesToBeDeleted)
+                // Update title with dummy value.
+                WindowTitle = string.Empty;
+
+                // Clear error infobar.
+                IsInfoBarErrorOpen = false;
+
+                var cleanupFailures = new List<string>();
+
+                // Clean up deleted picture file.
+                if (_property.PicturesToBeDeleted.Count > 0)
                 {
-                    var delFilePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _property.Id, file.ImageFilename);
-                    try
+                    foreach (var file in _property.PicturesToBeDeleted.ToList())
                     {
-                        File.Delete(delFilePath);
-                        Debug.WriteLine($"Deleted tracked file '{delFilePath}'");
+                        var delFilePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _property.Id, file.ImageFilename);
+                        if (TryDeleteFiles(new[] { delFilePath }, cleanupFailures))
+                        {
+                            _property.PicturesToBeDeleted.Remove(file);// no need.
+                        }
                     }
-                    catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-                    {
-                        Debug.WriteLine($"Failed to delete file '{delFilePath}': {ex}");
-                    }
+                    _property.PicturesToBeDeleted.Clear();
                 }
-                _property.PicturesToBeDeleted.Clear();
-            }
 
-            // Clean up deleted PDF and thumb file.
-            if (_property.PdfsToBeDeleted.Count > 0)
-            {
-                foreach (var file in _property.PdfsToBeDeleted)
+                // Clean up deleted PDF and thumb file.
+                if (_property.PdfsToBeDeleted.Count > 0)
                 {
-                    var delFilePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _property.Id, file.PdfFilename);
-                    if (File.Exists(delFilePath))
+                    foreach (var file in _property.PdfsToBeDeleted.ToList())
                     {
-                        try
+                        var delFilePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _property.Id, file.PdfFilename);
+                        var thumbFilePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _property.Id, file.ThumbnailFilename);
+                        if (TryDeleteFiles(new[] { delFilePath, thumbFilePath }, cleanupFailures))
                         {
-                            File.Delete(delFilePath);
-                            Debug.WriteLine($"Deleted tracked file '{delFilePath}'");
+                            _property.PdfsToBeDeleted.Remove(file);//no need
                         }
-                        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-                        {
-                            Debug.WriteLine($"Failed to delete file '{delFilePath}': {ex}");
-                        }
+
                     }
-                    var thumbFilePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _property.Id, file.ThumbnailFilename);
-                    if (File.Exists(thumbFilePath))
-                    {
-                        try
-                        {
-                            File.Delete(thumbFilePath);
-                            Debug.WriteLine($"Deleted tracked file '{thumbFilePath}'");
-                        }
-                        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-                        {
-                            Debug.WriteLine($"Failed to delete file '{thumbFilePath}': {ex}");
-                        }
-                    }
+                    _property.PdfsToBeDeleted.Clear();
                 }
-                _property.PdfsToBeDeleted.Clear();
-            }
 
-            // Just in case clear LessorsToBeDeleted, BrokersToBeDeleted
-            _property.LessorsToBeDeleted.Clear();
-            _property.BrokersToBeDeleted.Clear();
+                // Just in case clear LessorsToBeDeleted, BrokersToBeDeleted
+                _property.LessorsToBeDeleted.Clear();
+                _property.BrokersToBeDeleted.Clear();
 
-            // Clear rooms, pic and pdfs and lessors
+                // Clear rooms, pic and pdfs and lessors
 
-            if (_property.ListingsToBeDeleted.Count > 0)
-            {
-                // Clean up deleted listing files and directories
-                foreach (var listing in _property.ListingsToBeDeleted)
+                if (_property.ListingsToBeDeleted.Count > 0)
                 {
-                    var delFolderPath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _property.Id, listing);
-                    if (Directory.Exists(delFolderPath))
+                    // Clean up deleted listing files and directories
+                    foreach (var listing in _property.ListingsToBeDeleted.ToList())
                     {
-                        try
+                        var delFolderPath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _property.Id, listing);
+                        if (Directory.Exists(delFolderPath))
                         {
-                            Directory.Delete(delFolderPath, true);
-                            Debug.WriteLine($"Deleted tracked directory '{delFolderPath}'");
-                        }
-                        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-                        {
-                            Debug.WriteLine($"Failed to delete directory '{delFolderPath}': {ex}");
+                            try
+                            {
+                                Directory.Delete(delFolderPath, true);
+                                Debug.WriteLine($"Deleted tracked directory '{delFolderPath}'");
+                            }
+                            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+                            {
+                                Debug.WriteLine($"Failed to delete directory '{delFolderPath}': {ex}");
+                                cleanupFailures.Add(delFolderPath);
+                            }
                         }
                     }
+                    _property.ListingsToBeDeleted.Clear();
                 }
-                _property.ListingsToBeDeleted.Clear();
+
+                // Clear unsaved files list since they are now saved.
+                _unsavedPropertyPictureFileList.Clear();
+                _unsavedPropertyPdfThumbnailFileList.Clear();
+                _unsavedPropertyPdfFileList.Clear();
+
+                //
+                foreach (var picture in Pictures.Where(picture => _property.Pictures.Any(saved => saved.Id == picture.Id)))
+                {
+                    picture.SetStatus(EntityStatus.Saved);
+                    picture.SetIsModified(false);
+                }
+                foreach (var pdf in Pdfs.Where(pdf => _property.Pdfs.Any(saved => saved.Id == pdf.Id)))
+                {
+                    pdf.SetStatus(EntityStatus.Saved);
+                    pdf.SetIsModified(false);
+                }
+
+                // Clear unsaved listings and set status to saved.
+                foreach (var listing in _unsavedListingList)
+                {
+                    // TODO: PicturesToBeDeleted, PdfsToBeDeleted are cleaned up in ListingViewModel.
+                    // LessorsToBeDeleted, BrokersToBeDeleted
+
+                    listing.SetPropertyName(Name);
+                    listing.SetPropertyStatus(EntityStatus.Saved);
+                    listing.SetStatus(EntityStatus.Saved);
+                    listing.SetIsModified(false);
+                }
+                _unsavedListingList.Clear();
+
+                // Clear unsaved child editors and quit tracking them.
+                UnsavedChildEditorList.Clear();
+
+                // 
+                _property.SetStatus(EntityStatus.Saved);
+                _property.SetIsModified(false);
+
+                // Notify listing windows that the property has been updated.
+                WeakReferenceMessenger.Default.Send(new Models.Messenger.PropertyUpdatedMessage(_property as Models.Base.PropertyBase));
+
+                // TODO: this may not be viewed if window as closing.
+                if (cleanupFailures.Count > 0)
+                {
+                    ShowSimpleErrorInfoBar("保存しましたが、一部の削除済みファイルをクリーンアップできませんでした", $"{string.Join(", ", cleanupFailures)}");
+                }
+
             }
-
-            _unsavedPropertyPictureFileList.Clear();
-            _unsavedPropertyPdfThumbnailFileList.Clear();
-            _unsavedPropertyPdfFileList.Clear();
-
-            // Just in case.
-            _property.SetStatus(EntityStatus.Saved);
-            _property.SetIsModified(false);
-
-            // Clear unsaved listings and set status to saved.
-            foreach (var listing in _unsavedListingList)
+            catch (Exception ex)
             {
-                listing.SetPropertyName(Name);
-                listing.SetPropertyStatus(EntityStatus.Saved);
-                listing.SetStatus(EntityStatus.Saved);
-                listing.SetIsModified(false);
+                Debug.WriteLine($"Save() failed: {ex}");
+                var err = new Models.ErrorInfo
+                {
+                    Title = "募集物件の保存中に予期しないエラーが発生しました。",
+                    Type = Models.ErrorInfo.ErrType.Other,
+                    Code = "",
+                    Message = "",
+                    Description = $"{ex}",
+                    Operation = "SaveCore",
+                    MethodName = nameof(Save),
+                    OccuredAt = DateTime.Now
+                };
+                ShowErrorInfoBar(err);
             }
-            _unsavedListingList.Clear();
-
-            // Clear unsaved child editors and quit tracking them.
-            UnsavedChildEditorList.Clear();
-
-            WeakReferenceMessenger.Default.Send(new Models.Messenger.PropertyUpdatedMessage(_property as Models.Base.PropertyBase));
+            finally
+            {
+                IsDirty = false;
+            }
         }
     }
     private bool CanSave()
@@ -4350,50 +4360,52 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
         if (!IsEditorEnabled) return;
         IsBusy = true;
+
+        // TODO:
         try
         {
-        var lessor = await _dialogService.ShowLessorSelectDialog(new ViewModels.Dialogs.LessorSelectViewModel(_dataAccessService, _cts));
+            var lessor = await _dialogService.ShowLessorSelectDialog(new ViewModels.Dialogs.LessorSelectViewModel(_dataAccessService, _cts));
 
-        if (lessor is not null)
-        {
-            var lessorId = lessor.Id;
-
-            // Check if already exists
-            var match = LessorsWrapper.FirstOrDefault(x => x.Person.Id.Equals(lessorId, StringComparison.Ordinal));
-            if (match is not null)
+            if (lessor is not null)
             {
-                Debug.WriteLine($"lessor {lessor.Name} already in the list.");
-                return;
+                var lessorId = lessor.Id;
+
+                // Check if already exists
+                var match = LessorsWrapper.FirstOrDefault(x => x.Person.Id.Equals(lessorId, StringComparison.Ordinal));
+                if (match is not null)
+                {
+                    Debug.WriteLine($"lessor {lessor.Name} already in the list.");
+                    return;
+                }
+
+                var res = await Task.Run(() => _dataAccessService.SelectRentLessorById(lessorId), _cts.Token);
+                if (res.IsError)
+                {
+                    Debug.WriteLine(
+                        res.Error.Title + Environment.NewLine +
+                        res.Error.Message + Environment.NewLine +
+                        res.Error.Description + Environment.NewLine +
+                        res.Error.Operation + Environment.NewLine +
+                        res.Error.MethodName + Environment.NewLine +
+                        res.Error.FullDump);
+                    ShowErrorInfoBar(res.Error);
+                    return;
+                }
+
+                if (res.Person is null)
+                {
+                    Debug.WriteLine($"{lessorId} is null. Cannot open editor.");
+                    ShowSimpleErrorInfoBar("エラー", "選択した貸主を読み込めませんでした。");
+                    return;
+                }
+
+                var asdf = new Models.Rent.Residentials.PersonWrapperForPropertyViewModel(res.Person, this);
+
+                foreach (var deleted in _property.LessorsToBeDeleted.Where(person => person.Id == res.Person.Id).ToList()) _property.LessorsToBeDeleted.Remove(deleted);
+                LessorsWrapper.Add(asdf);
+
+                IsDirty = true;
             }
-
-            var res = await Task.Run(() => _dataAccessService.SelectRentLessorById(lessorId), _cts.Token);
-            if (res.IsError)
-            {
-                Debug.WriteLine(
-                    res.Error.Title + Environment.NewLine +
-                    res.Error.Message + Environment.NewLine +
-                    res.Error.Description + Environment.NewLine +
-                    res.Error.Operation + Environment.NewLine +
-                    res.Error.MethodName + Environment.NewLine +
-                    res.Error.FullDump);
-                ShowErrorInfoBar(res.Error);
-                return;
-            }
-
-            if (res.Person is null)
-            {
-                Debug.WriteLine($"{lessorId} is null. Cannot open editor.");
-                ShowSimpleErrorInfoBar("エラー", "選択した貸主を読み込めませんでした。");
-                return;
-            }
-
-            var asdf = new Models.Rent.Residentials.PersonWrapperForPropertyViewModel(res.Person, this);
-
-            foreach (var deleted in _property.LessorsToBeDeleted.Where(person => person.Id == res.Person.Id).ToList()) _property.LessorsToBeDeleted.Remove(deleted);
-            LessorsWrapper.Add(asdf);
-
-            IsDirty = true;
-        }
         }
         finally
         {
@@ -4459,51 +4471,53 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
         if (!IsEditorEnabled) return;
         IsBusy = true;
+
+        // TODO:
         try
         {
-        var broker = await _dialogService.ShowBrokerSelectDialog(new ViewModels.Dialogs.BrokerSelectViewModel(_dataAccessService, _cts));
+            var broker = await _dialogService.ShowBrokerSelectDialog(new ViewModels.Dialogs.BrokerSelectViewModel(_dataAccessService, _cts));
 
-        if (broker is not null)
-        {
-            var brokerId = broker.Id;
-
-            // Check if already exists
-            var match = BrokersWrapper.FirstOrDefault(x => x.Person.Id.Equals(brokerId, StringComparison.Ordinal));
-            if (match is not null)
+            if (broker is not null)
             {
-                Debug.WriteLine($"broker {broker.Name} already in the list.");
-                return;
+                var brokerId = broker.Id;
+
+                // Check if already exists
+                var match = BrokersWrapper.FirstOrDefault(x => x.Person.Id.Equals(brokerId, StringComparison.Ordinal));
+                if (match is not null)
+                {
+                    Debug.WriteLine($"broker {broker.Name} already in the list.");
+                    return;
+                }
+
+                var res = await Task.Run(() => _dataAccessService.SelectBrokerById(brokerId), _cts.Token);
+                if (res.IsError)
+                {
+                    Debug.WriteLine(
+                        res.Error.Title + Environment.NewLine +
+                        res.Error.Message + Environment.NewLine +
+                        res.Error.Description + Environment.NewLine +
+                        res.Error.Operation + Environment.NewLine +
+                        res.Error.MethodName + Environment.NewLine +
+                        res.Error.FullDump);
+
+                    ShowErrorInfoBar(res.Error);
+                    return;
+                }
+
+                if (res.Person is null)
+                {
+                    Debug.WriteLine($"{brokerId} is null. Cannot open editor.");
+                    ShowSimpleErrorInfoBar("エラー", "選択した宅建業者を読み込めませんでした。");
+                    return;
+                }
+
+                var wrapper = new Models.Rent.Residentials.PersonWrapperForPropertyViewModel(res.Person, this);
+
+                foreach (var deleted in _property.BrokersToBeDeleted.Where(person => person.Id == res.Person.Id).ToList()) _property.BrokersToBeDeleted.Remove(deleted);
+                BrokersWrapper.Add(wrapper);
+
+                IsDirty = true;
             }
-
-            var res = await Task.Run(() => _dataAccessService.SelectBrokerById(brokerId), _cts.Token);
-            if (res.IsError)
-            {
-                Debug.WriteLine(
-                    res.Error.Title + Environment.NewLine +
-                    res.Error.Message + Environment.NewLine +
-                    res.Error.Description + Environment.NewLine +
-                    res.Error.Operation + Environment.NewLine +
-                    res.Error.MethodName + Environment.NewLine +
-                    res.Error.FullDump);
-
-                ShowErrorInfoBar(res.Error);
-                return;
-            }
-
-            if (res.Person is null)
-            {
-                Debug.WriteLine($"{brokerId} is null. Cannot open editor.");
-                ShowSimpleErrorInfoBar("エラー", "選択した宅建業者を読み込めませんでした。");
-                return;
-            }
-
-            var wrapper = new Models.Rent.Residentials.PersonWrapperForPropertyViewModel(res.Person, this);
-
-            foreach (var deleted in _property.BrokersToBeDeleted.Where(person => person.Id == res.Person.Id).ToList()) _property.BrokersToBeDeleted.Remove(deleted);
-            BrokersWrapper.Add(wrapper);
-
-            IsDirty = true;
-        }
         }
         finally
         {

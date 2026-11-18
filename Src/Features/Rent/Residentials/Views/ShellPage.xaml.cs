@@ -87,12 +87,11 @@ public sealed partial class ShellPage : Page
     {
         if (_isClosing) return;
         _isClosing = true;
+
         try
         {
-            //if (!await ViewModel.WaitForEditorOperationsAsync()) return;
             var main = App.GetService<ViewModels.MainViewModel>();
             if (ViewModel.SaveCommand.IsRunning && ViewModel.SaveCommand.ExecutionTask is Task pendingSave) await pendingSave;
-            //if (!ViewModel.CleanIncompleteAttachments()) return;
 
             foreach (var editor in ViewModel.UnsavedChildEditorList.ToList())
             {
@@ -112,7 +111,11 @@ public sealed partial class ShellPage : Page
                     if (ViewModel.IsDirty) await ViewModel.Save();
                     if (ViewModel.IsDirty) return;
                 }
-                else if (result != ContentDialogResult.Secondary || !ViewModel.DiscardChanges())
+                else if (result == ContentDialogResult.Secondary)
+                {
+                    ViewModel.DiscardChanges();
+                }
+                else
                 {
                     return;
                 }
