@@ -1112,6 +1112,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
             _listing.SetIsAvailableForImmediateMoveIn(IsAvailableForImmediateMoveIn);
             _listing.SetIsAvailableForRentNow(IsAvailableForRentNow);
             _listing.SetOccupancyStatusCheckedAt(OccupancyStatusCheckedAt);
+            _listing.SetFudousanIdAdditionalCode(FudousanIdAdditionalCode);
             _listing.SetRemarks(Remarks);
             _listing.SetHasAirConditioner(HasAirConditioner);
             _listing.SetHasWoodFlooring(HasWoodFlooring);
@@ -1259,8 +1260,9 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
             IsAvailableForImmediateMoveIn = _listing.IsAvailableForImmediateMoveIn;
             IsAvailableForRentNow = _listing.IsAvailableForRentNow;
             OccupancyStatusCheckedAt = _listing.OccupancyStatusCheckedAt;
-
+            FudousanIdAdditionalCode = _listing.FudousanIdAdditionalCode;
             Remarks = _listing.Remarks;
+
             HasAirConditioner = _listing.HasAirConditioner;
             HasWoodFlooring = _listing.HasWoodFlooring;
             HasVideoIntercom = _listing.HasVideoIntercom;

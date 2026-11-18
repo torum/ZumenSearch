@@ -16,22 +16,25 @@
                 <ItemContainer.KeyboardAccelerators>
                     <KeyboardAccelerator Key="Enter" Modifiers="None" Invoked="ItemsViewKeyboardAccelerator_Invoked" />
                 </ItemContainer.KeyboardAccelerators>
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <Ellipse x:Name="Ellipse" Grid.RowSpan="2" Width ="32" Height="32" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center" Fill="{ThemeResource SystemControlBackgroundBaseMediumBrush}"/>
-
-                    <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Margin="12,6,0,0">
-                        <TextBlock Text="{x:Bind Name, Mode=OneWay}" Style="{ThemeResource BaseTextBlockStyle}"/>
-                        <TextBlock Text="（賃貸住居用）" Style="{ThemeResource BaseTextBlockStyle}"/>
-                    </StackPanel>
-                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{x:Bind Id, Mode=OneTime}" x:Phase="2" Style="{ThemeResource BodyTextBlockStyle}" Margin="12,0,0,6"/>
+                <Grid Height="180">
+                    <TextBlock Text="画像・図面登録なし" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    <Rectangle RadiusX="3" RadiusY="3">
+                        <Rectangle.Fill>
+                            <ImageBrush ImageSource="{x:Bind ThumbImagePath, Converter={StaticResource ImagePathToImageSourceConverter}, TargetNullValue={x:Null}, Mode=OneWay}" Stretch="UniformToFill" />
+                        </Rectangle.Fill>
+                    </Rectangle>
+                    <Border HorizontalAlignment="Left" VerticalAlignment="Top" Margin="8" Padding="8,4" CornerRadius="4" Background="{ThemeResource AcrylicInAppFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
+                        <TextBlock Text="賃貸住居用" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                    </Border>
+                    <Border VerticalAlignment="Bottom" Padding="10,8" CornerRadius="0,0,3,3" Background="{ThemeResource AcrylicInAppFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,1,0,0">
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="{x:Bind Name, Mode=OneWay}" FontSize="15" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" MaxLines="2" />
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <TextBlock Text="更新:" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                <TextBlock Text="{x:Bind UpdatedAt, Mode=OneWay}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
                 </Grid>
             </ItemContainer>
         </DataTemplate>
@@ -42,22 +45,25 @@
                 <ItemContainer.KeyboardAccelerators>
                     <KeyboardAccelerator Key="Enter" Modifiers="None" Invoked="ItemsViewKeyboardAccelerator_Invoked" />
                 </ItemContainer.KeyboardAccelerators>
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <Ellipse x:Name="Ellipse" Grid.RowSpan="2" Width ="32" Height="32" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center" Fill="{ThemeResource SystemControlBackgroundBaseMediumBrush}"/>
-
-                    <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Margin="12,6,0,0">
-                        <TextBlock Text="{x:Bind Name, Mode=OneWay}" Style="{ThemeResource BaseTextBlockStyle}"/>
-                        <TextBlock Text="（賃貸事業用）" Style="{ThemeResource BaseTextBlockStyle}"/>
-                    </StackPanel>
-                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{x:Bind Id, Mode=OneTime}" x:Phase="2" Style="{ThemeResource BodyTextBlockStyle}" Margin="12,0,0,6"/>
+                <Grid Height="180">
+                    <TextBlock Text="画像・図面登録なし" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    <Rectangle RadiusX="3" RadiusY="3">
+                        <Rectangle.Fill>
+                            <ImageBrush ImageSource="{x:Bind ThumbImagePath, Converter={StaticResource ImagePathToImageSourceConverter}, TargetNullValue={x:Null}, Mode=OneWay}" Stretch="UniformToFill" />
+                        </Rectangle.Fill>
+                    </Rectangle>
+                    <Border HorizontalAlignment="Left" VerticalAlignment="Top" Margin="8" Padding="8,4" CornerRadius="4" Background="{ThemeResource AcrylicInAppFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
+                        <TextBlock Text="賃貸事業用" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                    </Border>
+                    <Border VerticalAlignment="Bottom" Padding="10,8" CornerRadius="0,0,3,3" Background="{ThemeResource AcrylicInAppFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,1,0,0">
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="{x:Bind Name, Mode=OneWay}" FontSize="15" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" MaxLines="2" />
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <TextBlock Text="更新:" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                <TextBlock Text="{x:Bind UpdatedAt, Mode=OneWay}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
                 </Grid>
             </ItemContainer>
         </DataTemplate>
@@ -68,22 +74,25 @@
                 <ItemContainer.KeyboardAccelerators>
                     <KeyboardAccelerator Key="Enter" Modifiers="None" Invoked="ItemsViewKeyboardAccelerator_Invoked" />
                 </ItemContainer.KeyboardAccelerators>
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <Ellipse x:Name="Ellipse" Grid.RowSpan="2" Width ="32" Height="32" Margin="6" VerticalAlignment="Center" HorizontalAlignment="Center" Fill="{ThemeResource SystemControlBackgroundBaseMediumBrush}"/>
-
-                    <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Margin="12,6,0,0">
-                        <TextBlock Text="{x:Bind Name, Mode=OneWay}" Style="{ThemeResource BaseTextBlockStyle}"/>
-                        <TextBlock Text="（売買住居用）" Style="{ThemeResource BaseTextBlockStyle}"/>
-                    </StackPanel>
-                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{x:Bind Id, Mode=OneTime}" x:Phase="2" Style="{ThemeResource BodyTextBlockStyle}" Margin="12,0,0,6"/>
+                <Grid Height="180">
+                    <TextBlock Text="画像・図面登録なし" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    <Rectangle RadiusX="3" RadiusY="3">
+                        <Rectangle.Fill>
+                            <ImageBrush ImageSource="{x:Bind ThumbImagePath, Converter={StaticResource ImagePathToImageSourceConverter}, TargetNullValue={x:Null}, Mode=OneWay}" Stretch="UniformToFill" />
+                        </Rectangle.Fill>
+                    </Rectangle>
+                    <Border HorizontalAlignment="Left" VerticalAlignment="Top" Margin="8" Padding="8,4" CornerRadius="4" Background="{ThemeResource AcrylicInAppFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
+                        <TextBlock Text="売買住居用" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                    </Border>
+                    <Border VerticalAlignment="Bottom" Padding="10,8" CornerRadius="0,0,3,3" Background="{ThemeResource AcrylicInAppFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,1,0,0">
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="{x:Bind Name, Mode=OneWay}" FontSize="15" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" MaxLines="2" />
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <TextBlock Text="更新:" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                <TextBlock Text="{x:Bind UpdatedAt, Mode=OneWay}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
                 </Grid>
             </ItemContainer>
         </DataTemplate>
@@ -129,9 +138,6 @@
                 <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,0,3,0">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                         <AppBarButton Icon="Back" Label="戻る" Command="{x:Bind ViewModel.GoBackCommand}"/>
-                        <!--
-                        <AppBarButton Icon="Add" Label="新規" Command="{x:Bind ViewModel.AddNewRentResidentialCommand}"/>
-                        -->
                         <AppBarButton Icon="Add" Label="新規">
                             <AppBarButton.Flyout>
                                 <MenuFlyout Placement="Bottom">
@@ -160,12 +166,18 @@
 
                 <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Margin="0,0,24,0" HorizontalAlignment="Right">
                     <AppBarButton Icon="Delete" Label="削除" Command="{x:Bind ViewModel.DeletePropertyCommand}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}"/>
-                    <AppBarButton Icon="Sort" IsCompact="True" ToolTipService.ToolTip="Sort" Label="並べ替え" IsEnabled="False">
+                    <AppBarButton Icon="Sort" IsCompact="True" ToolTipService.ToolTip="Sort" Label="並べ替え">
                         <AppBarButton.Flyout>
-                            <MenuFlyout>
-                                <MenuFlyoutItem Text="名前順" Tag="name"/>
-                                <MenuFlyoutItem Text="By match" Tag="match"/>
-                                <MenuFlyoutItem Text="By distance" Tag="distance"/>
+                            <MenuFlyout Placement="Bottom">
+                                <MenuFlyoutItem Text="物件名" Tag="name"/>
+                                <MenuFlyoutItem Text="物件種別" Tag="type"/>
+                                <MenuFlyoutItem Text="更新日" Tag="updated"/>
+                                <MenuFlyoutItem Text="作成日" Tag="created"/>
+                                <MenuFlyoutSeparator />
+                                <MenuFlyoutSubItem Text="順序" Tag="order">
+                                    <MenuFlyoutItem Text="昇順" Tag="asc" />
+                                    <MenuFlyoutItem Text="降順" Tag="desc" />
+                                </MenuFlyoutSubItem>
                             </MenuFlyout>
                         </AppBarButton.Flyout>
                     </AppBarButton>

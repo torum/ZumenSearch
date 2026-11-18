@@ -159,11 +159,11 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
 
     public ObservableCollection<Breadcrumb> BreadcrumbItemsRent { get; set; } =
     [
-        new() { Name = "総合検索", Page = typeof(Views.SearchPage).FullName! }
+        new() { Name = "総合物件検索", Page = typeof(Views.SearchPage).FullName! }
     ];
     public ObservableCollection<Breadcrumb> BreadcrumbItemsRentSearchResult { get; set; } =
     [
-        new() { Name = "総合検索", Page = typeof(Views.SearchPage).FullName! },
+        new() { Name = "総合物件検索", Page = typeof(Views.SearchPage).FullName! },
         new() { Name = "検索結果", Page = typeof(Views.SearchResultPage).FullName! },
     ];
 

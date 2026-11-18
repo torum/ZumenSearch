@@ -1924,6 +1924,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 "rent_residentials.total_unit_count as resiTotalUnitCount, " +
                 "rent_residentials.built_year_month as resiBuiltYearMonth, " +
                 "rent_residentials.remarks as resiRemarks, " +
+
                 "rent_residentials.has_autolock as has_autolock, " +
                 "rent_residentials.has_elevator as has_elevator, " +
                 "rent_residentials.has_security_camera as has_security_camera, " +
@@ -1990,14 +1991,14 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
             using (var reader = cmd.ExecuteReader())
             {
-                while (reader.Read())
+                if (reader.Read())
                 {
                     var pId = Convert.ToString(reader["propertyId"], CultureInfo.InvariantCulture);
 
                     if (!propertyId.Equals(pId, StringComparison.Ordinal))
                     {
                         Debug.WriteLine("DataAccess::SelectRentResidentialsById: propertyId is null or empty for a rent residential entry.");
-                        continue;
+                        //continue;
                     }
 
                     isFound = true;
@@ -2006,21 +2007,10 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
                     // Address/Location
                     property.Address.SetMachiazaId(Convert.ToString(reader["locMachiazaId"], CultureInfo.InvariantCulture) ?? "");
-
-                    property.Address.SetPrefectureByMunicipalityCode(Convert.ToString(reader["locPrefId"], CultureInfo.InvariantCulture) ?? "",
-                        Convert.ToString(reader["locPrefecture"], CultureInfo.InvariantCulture) ?? "");
-
-                    property.Address.SetCountyAndCity(property.Address.MachiazaId,
-                        Convert.ToString(reader["locCounty"], CultureInfo.InvariantCulture) ?? "",
-                        Convert.ToString(reader["locCity"], CultureInfo.InvariantCulture) ?? "");
-
-                    property.Address.SetWardAndOaza(property.Address.MachiazaId,
-                        Convert.ToString(reader["locWard"], CultureInfo.InvariantCulture) ?? "",
-                        Convert.ToString(reader["locOazaCho"], CultureInfo.InvariantCulture) ?? "");
-
-                    property.Address.SetChoume(property.Address.MachiazaId,
-                        Convert.ToString(reader["locChoume"], CultureInfo.InvariantCulture) ?? "");
-
+                    property.Address.SetPrefectureByMunicipalityCode(Convert.ToString(reader["locPrefId"], CultureInfo.InvariantCulture) ?? "", Convert.ToString(reader["locPrefecture"], CultureInfo.InvariantCulture) ?? "");
+                    property.Address.SetCountyAndCity(property.Address.MachiazaId, Convert.ToString(reader["locCounty"], CultureInfo.InvariantCulture) ?? "", Convert.ToString(reader["locCity"], CultureInfo.InvariantCulture) ?? "");
+                    property.Address.SetWardAndOaza(property.Address.MachiazaId, Convert.ToString(reader["locWard"], CultureInfo.InvariantCulture) ?? "", Convert.ToString(reader["locOazaCho"], CultureInfo.InvariantCulture) ?? "");
+                    property.Address.SetChoume(property.Address.MachiazaId, Convert.ToString(reader["locChoume"], CultureInfo.InvariantCulture) ?? "");
                     property.Address.SetEdaban(Convert.ToString(reader["locEdaban"], CultureInfo.InvariantCulture) ?? "");
                     property.Address.SetPostalCode(Convert.ToString(reader["locPostalCode"], CultureInfo.InvariantCulture) ?? string.Empty);
                     property.Address.SetLocationLatitude(Convert.ToString(reader["locationLatitude"], CultureInfo.InvariantCulture) ?? string.Empty);
@@ -2625,7 +2615,6 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         cmd.Parameters.AddWithValue("@property_id", propertyId);
         cmd.Parameters.AddWithValue("@is_property_unit_ownership", listing.IsPropertyUnitLevelOwnership ? 1 : 0); // bool to int
         cmd.Parameters.AddWithValue("@name", listing.Name);
-        cmd.Parameters.AddWithValue("@fudousan_id_additional_code", listing.FudousanIdAdditionalCode ?? string.Empty);
 
         cmd.Parameters.AddWithValue("@floor_plan_type", listing.FloorPlan.ToString());
         cmd.Parameters.AddWithValue("@floor_plan_extra_type", listing.FloorPlanExtra.ToString());
@@ -2642,8 +2631,8 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         cmd.Parameters.AddWithValue("@is_immediate_occupancy", listing.IsAvailableForImmediateMoveIn ? 1 : 0);
         cmd.Parameters.AddWithValue("@current_status_checked_at", listing.OccupancyStatusCheckedAt?.ToString("O", CultureInfo.InvariantCulture) ?? "");
 
+        cmd.Parameters.AddWithValue("@fudousan_id_additional_code", listing.FudousanIdAdditionalCode ?? string.Empty);
         cmd.Parameters.AddWithValue("@remarks", listing.Remarks ?? string.Empty);
-
 
         cmd.Parameters.AddWithValue("@chinryou", listing.Chinryou);
 
@@ -3875,8 +3864,6 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 floor_count_basement,
                 total_floor_area,
                 built_year_month,
-                fudousan_id,
-                fudousan_id_additional_code,
                 remarks,
                 passenger_elevator_availability,
                 passenger_elevator_count,
@@ -3910,8 +3897,6 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 @floorCountBasement,
                 @totalFloorArea,
                 @builtYearMonth,
-                @fudousanId,
-                @fudousanIdAdditionalCode,
                 @remarks,
                 @passengerElevatorAvailability,
                 @passengerElevatorCount,
@@ -3946,9 +3931,6 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     excluded.floor_count_basement,
                 total_floor_area = excluded.total_floor_area,
                 built_year_month = excluded.built_year_month,
-                fudousan_id = excluded.fudousan_id,
-                fudousan_id_additional_code =
-                    excluded.fudousan_id_additional_code,
                 remarks = excluded.remarks,
                 passenger_elevator_availability = excluded.passenger_elevator_availability,
                 passenger_elevator_count = excluded.passenger_elevator_count,
@@ -4390,8 +4372,6 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 c.floor_count_basement,
                 c.total_floor_area,
                 c.built_year_month,
-                c.fudousan_id,
-                c.fudousan_id_additional_code,
                 c.remarks,
                 c.passenger_elevator_availability,
                 c.passenger_elevator_count,
