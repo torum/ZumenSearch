@@ -1469,7 +1469,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         // Set the BasePath for ORIGINAL pictures and PDFs to the source directory here.
         // This is necessary because the duplicated listing has a new ID, and we want to keep the original files in their original location
         // so that we can copy them to the new location and also keep track of them as unsaved in the ListingViewModel when opens the duplicated listing in the editor.
-        var sourceDirectory = Path.Combine(App.PropertyBlobDataFolder, buildingId, listingId);
+        var sourceDirectory = Path.Combine(App.PropertyBlobDataFolder, buildingId, listingId); // use the original propertyId and listingId to get the source directory for the original files.
         foreach (var picture in res.Listing.Pictures)
         {
             picture.BasePath = sourceDirectory;

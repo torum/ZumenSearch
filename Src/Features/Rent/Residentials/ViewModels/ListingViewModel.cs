@@ -19,6 +19,7 @@ namespace ZumenSearch.ViewModels.Rent.Residentials;
 
 /*
  * TODO: 
+ * DeferMessage: Review the DeferMessage() usage.
  * Gather validation logic in one place. Currently, validation is scattered across various methods. Make sure it is consistent with PropertyViewModel.
  * Change sevirity to Error for simple error messages.
  * Add try catch to async and file IO operations and show error message in infobar.
@@ -71,7 +72,6 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
 
         _navigationService = navigationService;
         _dialogService = dialogService;
-
         _dispatcherService = dispatcherService;
         _dataAccessService = dataAccessService;
 
@@ -758,52 +758,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
 
         // Update window title with dummy string.
         WindowTitle = string.Empty;
-
-        /*
-        if (property.Value is not Models.Rent.Residentials.Property residential || !residential.Id.Equals(_listing.PropertyId, StringComparison.Ordinal)) return;
-        var status = residential.Status;
-        var name = residential.Name;
-        var ownership = residential.IsUnitLevelOwnership;
-        var parent = App.GetService<ViewModels.MainViewModel>().RentResidentialEditorList.FirstOrDefault(editor => editor.Id == _listing.PropertyId)?.ViewModel;
-        var committed = status == EntityStatus.Saved && residential.ListingIds.Contains(_id, StringComparer.Ordinal) ? parent?.GetCommittedListingDraft(_id) : null;
-        if (DeferMessage(() => ApplyPropertyUpdate(status, name, ownership, committed))) return;
-        ApplyPropertyUpdate(status, name, ownership, committed);
-        */
     }
-
-    /*
-    private void ApplyPropertyUpdate(EntityStatus status, string name, bool ownership, ResidentialListingDraft? committed)
-    {
-        _listing.SetPropertyStatus(status);
-        _listing.SetPropertyName(name);
-        SetOwnershipVisibility(ownership);
-
-        if (_handedOffToNewParent && status == EntityStatus.Saved && committed is not null)
-        {
-            _handedOffToNewParent = false;
-            _listing.SetStatus(EntityStatus.Saved);
-            CaptureCommittedAttachments(committed);
-            _unsavedRoomPictureFileList.RemoveAll(_committedAttachmentPaths.Contains);
-            _unsavedRoomPdfFileList.RemoveAll(_committedAttachmentPaths.Contains);
-            _unsavedRoomPdfThumbnailFileList.RemoveAll(_committedAttachmentPaths.Contains);
-
-            var pictureIds = committed.Pictures.Select(item => item.Id).ToHashSet(StringComparer.Ordinal);
-            var pdfIds = committed.Pdfs.Select(item => item.Id).ToHashSet(StringComparer.Ordinal);
-            foreach (var picture in Pictures.Concat(_listing.PicturesToBeDeleted).Where(item => pictureIds.Contains(item.Id))) picture.SetStatus(EntityStatus.Saved);
-            foreach (var pdf in Pdfs.Concat(_listing.PdfsToBeDeleted).Where(item => pdfIds.Contains(item.Id))) pdf.SetStatus(EntityStatus.Saved);
-            foreach (var deleted in _listing.PicturesToBeDeleted.Where(item => committed.PicturesToBeDeleted.Any(saved => saved.Id == item.Id && saved.ImageFilename == item.ImageFilename)).ToList()) _listing.PicturesToBeDeleted.Remove(deleted);
-            foreach (var deleted in _listing.PdfsToBeDeleted.Where(item => committed.PdfsToBeDeleted.Any(saved => saved.Id == item.Id && saved.PdfFilename == item.PdfFilename && saved.ThumbnailFilename == item.ThumbnailFilename)).ToList()) _listing.PdfsToBeDeleted.Remove(deleted);
-            foreach (var deleted in _listing.LessorsToBeDeleted.Where(item => committed.LessorsToBeDeleted.Contains(item.Id, StringComparer.Ordinal)).ToList()) _listing.LessorsToBeDeleted.Remove(deleted);
-            foreach (var deleted in _listing.BrokersToBeDeleted.Where(item => committed.BrokersToBeDeleted.Contains(item.Id, StringComparer.Ordinal)).ToList()) _listing.BrokersToBeDeleted.Remove(deleted);
-        }
-        else if (_handedOffToNewParent && status == EntityStatus.Saved)
-        {
-            IsDirty = true;
-            ShowAttachmentError("建物の保存に募集物件が含まれていません。内容を確認してから募集物件を保存してください。");
-        }
-        WindowTitle = string.Empty;
-    }
-    */
 
     public void Receive(LessorUpdatedMessage person)
     {

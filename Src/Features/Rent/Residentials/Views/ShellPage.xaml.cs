@@ -105,11 +105,7 @@ public sealed partial class ShellPage : Page
             }
             _closingWindow = null;
 
-            if (ViewModel.IsDiscardPending)
-            {
-                if (!ViewModel.DiscardChanges()) return;
-            }
-            else if (ViewModel.IsDirty)
+            if (ViewModel.IsDirty)
             {
                 var result = await _dialogService.ShowEditorCloseConfirmationDialog();
                 if (result == ContentDialogResult.Primary)

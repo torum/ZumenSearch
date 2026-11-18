@@ -56,9 +56,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
     private bool _discardPending;
     private bool _isClosing;
-    private bool _propertyBusy;
-
-    private readonly Queue<Action> _deferredMessages = new();
+    private bool _isBusy;
 
     private readonly CancellationTokenSource _cts = new();
     private bool _disposed;
@@ -141,11 +139,9 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
     // TODO: Need to review following properties. 
     public bool IsSaving { get; private set; }
     public bool IsClosing => _isClosing;
-    public bool IsPropertyBusy => _propertyBusy;
+    public bool IsBusy => _isBusy;
     public bool IsDiscardPending => _discardPending;
-    public bool IsEditorEnabled => !IsSaving && !_isClosing && !_propertyBusy && !_discardPending;
-    //public bool HasPendingEditorOperations => _pendingPickers > 0 || PendingEditorTasks().Count > 0;
-    public bool HasPendingEditorOperations => IsEditorEnabled;//tmp
+    public bool IsEditorEnabled => !IsSaving && !_isClosing && !_isBusy && !_discardPending;
 
 
     #region == 画面表示関連 ==
@@ -2212,7 +2208,6 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
     public void Receive(ListingUpdatedMessage message)
     {
-        if (DeferMessage(() => Receive(message))) return;
         var something = message.Value;
         if (something is null)
         {
@@ -2270,7 +2265,6 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
     public void Receive(LessorUpdatedMessage message)
     {
-        if (DeferMessage(() => Receive(message))) return;
         var lessor = message.Value;
         if (lessor is null)
         {
@@ -2285,7 +2279,6 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
     public void Receive(BrokerUpdatedMessage message)
     {
-        if (DeferMessage(() => Receive(message))) return;
         var broker = message.Value;
         if (broker is null)
         {
@@ -2300,7 +2293,6 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
     public void Receive(ListingDeletedMessage message)
     {
-        if (DeferMessage(() => Receive(message))) return;
         var listingId = message.Value;
         if (string.IsNullOrEmpty(listingId))
         {
@@ -2316,7 +2308,6 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
     public void Receive(LessorDeletedMessage message)
     {
-        if (DeferMessage(() => Receive(message))) return;
         var lessorId = message.Value;
         if (string.IsNullOrEmpty(lessorId))
         {
@@ -2332,7 +2323,6 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
     public void Receive(BrokerDeletedMessage message)
     {
-        if (DeferMessage(() => Receive(message))) return;
         var brokerId = message.Value;
         if (string.IsNullOrEmpty(brokerId))
         {
@@ -2365,26 +2355,11 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
     #region == Public Methods ==
 
-    public void SetPropertyBusy(bool value)
-    {
-        _propertyBusy = value;
-        OnPropertyChanged(nameof(IsEditorEnabled));
-        SaveCommand.NotifyCanExecuteChanged();
-        if (!value && !IsSaving) while (_deferredMessages.TryDequeue(out var message)) message();
-    }
-
     public void SetClosing(bool value)
     {
         _isClosing = value;
         OnPropertyChanged(nameof(IsEditorEnabled));
         SaveCommand.NotifyCanExecuteChanged();
-    }
-
-    private bool DeferMessage(Action action)
-    {
-        if (!IsSaving && !_propertyBusy) return false;
-        _deferredMessages.Enqueue(action);
-        return true;
     }
 
     public bool DiscardChanges()
@@ -3497,7 +3472,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
     }
     private bool CanSave()
     {
-        return IsDirty && !IsSaving && !_isClosing && !_propertyBusy && !_discardPending;
+        return IsDirty && !IsSaving && !_isClosing && !_isBusy && !_discardPending;
     }
 
     #endregion
