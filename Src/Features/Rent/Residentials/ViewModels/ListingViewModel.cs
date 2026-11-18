@@ -70,9 +70,28 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
 
         _listingDataDirectoryPath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _listing.PropertyId, _listing.Id);
 
-        if (!Directory.Exists(_listingDataDirectoryPath))
+        try
         {
-            Directory.CreateDirectory(_listingDataDirectoryPath);
+            if (!Directory.Exists(_listingDataDirectoryPath))
+            {
+                Directory.CreateDirectory(_listingDataDirectoryPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            var err = new Models.ErrorInfo
+            {
+                Title = "予期しないエラーが発生しました。",
+                Type = Models.ErrorInfo.ErrType.Other,
+                Code = "",
+                Message = $"募集物件のデータフォルダを作成できませんでした。写真や図面を保存出来ません。",
+                Description = $"{ex}",
+                Operation = "Directory.CreateDirectory",
+                MethodName = nameof(ListingViewModel),
+                OccuredAt = DateTime.Now
+            };
+
+            ShowErrorInfoBar(err);
         }
 
         PopulateValues(isDuplicate);
@@ -1219,218 +1238,263 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
             _listing.SetName($"複製_{_listing.Name}");
         }
 
-        Name = _listing.Name; // Set the value to trigger the setter logic if needed.
-
-        // This toggles the visibility of certain fields based on the ownership level of the property.
-        IsPropertyUnitLevelOwnership = _listing.IsPropertyUnitLevelOwnership;
-
-        SelectedFloorPlanType = _listing.FloorPlan;
-        SelectedFloorPlanExtraType = _listing.FloorPlanExtra;
-        SelectedFloorGroundType = _listing.FloorGround;
-        FloorExclusiveAreaSqm = _listing.FloorExclusiveAreaSqm;
-        FloorNumber = _listing.FloorNumber;
-        IsCornerRoom = _listing.IsCornerRoom;
-        SelectedExposureDirectionType = _listing.SelectedExposureDirectionType;
-        SelectedAvailabilityStatusType = _listing.SelectedAvailabilityStatusType;
-        SelectedAvailabilityMonthType = _listing.SelectedAvailabilityMonthType;
-        SelectedAvailabilityPeriodType = _listing.SelectedAvailabilityPeriodType;
-        SelectedOccupancyStatus = _listing.SelectedOccupancyStatus;
-        IsAvailableForImmediateMoveIn = _listing.IsAvailableForImmediateMoveIn;
-        IsAvailableForRentNow = _listing.IsAvailableForRentNow;
-        OccupancyStatusCheckedAt = _listing.OccupancyStatusCheckedAt;
-
-        Remarks = _listing.Remarks;
-        HasAirConditioner = _listing.HasAirConditioner;
-        HasWoodFlooring = _listing.HasWoodFlooring;
-        HasVideoIntercom = _listing.HasVideoIntercom;
-        HasBathReheating = _listing.HasBathReheating;
-        HasGasStove = _listing.HasGasStove;
-        HasInductionCooktop = _listing.HasInductionCooktop;
-        HasMultipleBurners = _listing.HasMultipleBurners;
-        HasSystemKitchen = _listing.HasSystemKitchen;
-        HasLoft = _listing.HasLoft;
-        HasIndoorWashingMachineSpace = _listing.HasIndoorWashingMachineSpace;
-        HasBathroomDryer = _listing.HasBathroomDryer;
-        HasSeparateBathAndToilet = _listing.HasSeparateBathAndToilet;
-        HasSeparateWashbasin = _listing.HasSeparateWashbasin;
-        HasWarmWaterToiletSeat = _listing.HasWarmWaterToiletSeat;
-        ApplianceRemarks = _listing.ApplianceRemarks;
-
-        Chinryou = _listing.Chinryou == 0 ? string.Empty : _listing.Chinryou.ToString(CultureInfo.InvariantCulture);
-        ManagementFee = _listing.ManagementFee;
-        SecurityDeposit = _listing.SecurityDeposit;
-        KeyMoney = _listing.KeyMoney;
-        RenewalFee = _listing.RenewalFee;
-        RecontractFee = _listing.RecontractFee;
-        ContractPeriodYears = _listing.ContractPeriodYears;
-        SelectedManagementFeeUnit = FeeUnitTypes.First(x => x.Key == _listing.ManagementFeeUnit.Key);
-        SelectedSecurityDepositUnit = FeeUnitTypes.First(x => x.Key == _listing.SecurityDepositUnit.Key);
-        SelectedKeyMoneyUnit = FeeUnitTypes.First(x => x.Key == _listing.KeyMoneyUnit.Key);
-        SelectedRenewalFeeUnit = FeeUnitTypes.First(x => x.Key == _listing.RenewalFeeUnit.Key);
-        SelectedRecontractFeeUnit = FeeUnitTypes.First(x => x.Key == _listing.RecontractFeeUnit.Key);
-        SelectedContractType = ContractTypes.First(x => x.Key == _listing.ContractType.Key);
-        GuarantorCompany = _listing.GuarantorCompany;
-        HousingInsurance = _listing.HousingInsurance;
-        OtherFees = _listing.OtherFees;
-        PetFriendly = _listing.PetFriendly;
-        TwoPersonOccupancy = _listing.TwoPersonOccupancy;
-        NoGuarantorNeeded = _listing.NoGuarantorNeeded;
-        OfficeUseAllowed = _listing.OfficeUseAllowed;
-        OtherConditions = _listing.OtherConditions;
-        ContractRemarks = _listing.ContractRemarks;
-        SelectedHandlingType = HandlingTypes.First(x => x.Key == _listing.HandlingType.Key);
-        SelectedTransactionType = TransactionTypes.First(x => x.Key == _listing.TransactionType.Key);
-        LessorCommission = _listing.LessorCommission;
-        LesseeCommission = _listing.LesseeCommission;
-        ListingBrokerCommission = _listing.ListingBrokerCommission;
-        TenantBrokerCommission = _listing.TenantBrokerCommission;
-        SelectedLessorCommissionUnit = CommissionUnitTypes.First(x => x.Key == _listing.LessorCommissionUnit.Key);
-        SelectedLesseeCommissionUnit = CommissionUnitTypes.First(x => x.Key == _listing.LesseeCommissionUnit.Key);
-        SelectedListingBrokerCommissionUnit = CommissionUnitTypes.First(x => x.Key == _listing.ListingBrokerCommissionUnit.Key);
-        SelectedTenantBrokerCommissionUnit = CommissionUnitTypes.First(x => x.Key == _listing.TenantBrokerCommissionUnit.Key);
-        TransactionRemarks = _listing.TransactionRemarks;
-
-        // Pictures (don't use directly)
-        /*
-        Pictures = _listing.Pictures;
-        foreach (var item in Pictures)
+        try
         {
-            item.BasePath = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(App.PropertyBlobDataFolder, _listing.PropertyId), _listing.Id));
-            item.ParentViewModel = this;
-            item.SetIsModified(false); // Needed this.
-            item.PropertyChanged += OnPicturePropertyChanged;
-        }
-        */
-        Pictures.Clear();
-        foreach (var item in _listing.Pictures)
-        {
-            var internalItem = item.Clone();
-            internalItem.BasePath = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(App.PropertyBlobDataFolder, _listing.PropertyId), _listing.Id));
-            internalItem.ParentViewModel = this;
-            if (isDuplicate)
+
+            Name = _listing.Name; // Set the value to trigger the setter logic if needed.
+
+            // This toggles the visibility of certain fields based on the ownership level of the property.
+            IsPropertyUnitLevelOwnership = _listing.IsPropertyUnitLevelOwnership;
+
+            SelectedFloorPlanType = _listing.FloorPlan;
+            SelectedFloorPlanExtraType = _listing.FloorPlanExtra;
+            SelectedFloorGroundType = _listing.FloorGround;
+            FloorExclusiveAreaSqm = _listing.FloorExclusiveAreaSqm;
+            FloorNumber = _listing.FloorNumber;
+            IsCornerRoom = _listing.IsCornerRoom;
+            SelectedExposureDirectionType = _listing.SelectedExposureDirectionType;
+            SelectedAvailabilityStatusType = _listing.SelectedAvailabilityStatusType;
+            SelectedAvailabilityMonthType = _listing.SelectedAvailabilityMonthType;
+            SelectedAvailabilityPeriodType = _listing.SelectedAvailabilityPeriodType;
+            SelectedOccupancyStatus = _listing.SelectedOccupancyStatus;
+            IsAvailableForImmediateMoveIn = _listing.IsAvailableForImmediateMoveIn;
+            IsAvailableForRentNow = _listing.IsAvailableForRentNow;
+            OccupancyStatusCheckedAt = _listing.OccupancyStatusCheckedAt;
+
+            Remarks = _listing.Remarks;
+            HasAirConditioner = _listing.HasAirConditioner;
+            HasWoodFlooring = _listing.HasWoodFlooring;
+            HasVideoIntercom = _listing.HasVideoIntercom;
+            HasBathReheating = _listing.HasBathReheating;
+            HasGasStove = _listing.HasGasStove;
+            HasInductionCooktop = _listing.HasInductionCooktop;
+            HasMultipleBurners = _listing.HasMultipleBurners;
+            HasSystemKitchen = _listing.HasSystemKitchen;
+            HasLoft = _listing.HasLoft;
+            HasIndoorWashingMachineSpace = _listing.HasIndoorWashingMachineSpace;
+            HasBathroomDryer = _listing.HasBathroomDryer;
+            HasSeparateBathAndToilet = _listing.HasSeparateBathAndToilet;
+            HasSeparateWashbasin = _listing.HasSeparateWashbasin;
+            HasWarmWaterToiletSeat = _listing.HasWarmWaterToiletSeat;
+            ApplianceRemarks = _listing.ApplianceRemarks;
+
+            Chinryou = _listing.Chinryou == 0 ? string.Empty : _listing.Chinryou.ToString(CultureInfo.InvariantCulture);
+            ManagementFee = _listing.ManagementFee;
+            SecurityDeposit = _listing.SecurityDeposit;
+            KeyMoney = _listing.KeyMoney;
+            RenewalFee = _listing.RenewalFee;
+            RecontractFee = _listing.RecontractFee;
+            ContractPeriodYears = _listing.ContractPeriodYears;
+            SelectedManagementFeeUnit = FeeUnitTypes.First(x => x.Key == _listing.ManagementFeeUnit.Key);
+            SelectedSecurityDepositUnit = FeeUnitTypes.First(x => x.Key == _listing.SecurityDepositUnit.Key);
+            SelectedKeyMoneyUnit = FeeUnitTypes.First(x => x.Key == _listing.KeyMoneyUnit.Key);
+            SelectedRenewalFeeUnit = FeeUnitTypes.First(x => x.Key == _listing.RenewalFeeUnit.Key);
+            SelectedRecontractFeeUnit = FeeUnitTypes.First(x => x.Key == _listing.RecontractFeeUnit.Key);
+            SelectedContractType = ContractTypes.First(x => x.Key == _listing.ContractType.Key);
+            GuarantorCompany = _listing.GuarantorCompany;
+            HousingInsurance = _listing.HousingInsurance;
+            OtherFees = _listing.OtherFees;
+            PetFriendly = _listing.PetFriendly;
+            TwoPersonOccupancy = _listing.TwoPersonOccupancy;
+            NoGuarantorNeeded = _listing.NoGuarantorNeeded;
+            OfficeUseAllowed = _listing.OfficeUseAllowed;
+            OtherConditions = _listing.OtherConditions;
+            ContractRemarks = _listing.ContractRemarks;
+            SelectedHandlingType = HandlingTypes.First(x => x.Key == _listing.HandlingType.Key);
+            SelectedTransactionType = TransactionTypes.First(x => x.Key == _listing.TransactionType.Key);
+            LessorCommission = _listing.LessorCommission;
+            LesseeCommission = _listing.LesseeCommission;
+            ListingBrokerCommission = _listing.ListingBrokerCommission;
+            TenantBrokerCommission = _listing.TenantBrokerCommission;
+            SelectedLessorCommissionUnit = CommissionUnitTypes.First(x => x.Key == _listing.LessorCommissionUnit.Key);
+            SelectedLesseeCommissionUnit = CommissionUnitTypes.First(x => x.Key == _listing.LesseeCommissionUnit.Key);
+            SelectedListingBrokerCommissionUnit = CommissionUnitTypes.First(x => x.Key == _listing.ListingBrokerCommissionUnit.Key);
+            SelectedTenantBrokerCommissionUnit = CommissionUnitTypes.First(x => x.Key == _listing.TenantBrokerCommissionUnit.Key);
+            TransactionRemarks = _listing.TransactionRemarks;
+
+            // Pictures (don't use directly)
+            /*
+            Pictures = _listing.Pictures;
+            foreach (var item in Pictures)
             {
-                var newFilePath = System.IO.Path.Combine(internalItem.BasePath, internalItem.ImageFilename);
-                // The original item.BasePath should have been set in MainViewModel.
-                File.Copy(System.IO.Path.Combine(item.BasePath, item.ImageFilename), newFilePath, overwrite: true);
-                // Keep track of unsaved files to delete them when discarding.
-                _unsavedListingPictureFileList.Add(newFilePath);
-                internalItem.SetIsModified(true);
+                item.BasePath = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(App.PropertyBlobDataFolder, _listing.PropertyId), _listing.Id));
+                item.ParentViewModel = this;
+                item.SetIsModified(false); // Needed this.
+                item.PropertyChanged += OnPicturePropertyChanged;
             }
-            else
+            */
+            Pictures.Clear();
+            foreach (var item in _listing.Pictures)
             {
-                internalItem.SetIsModified(false);
-            }
-            internalItem.PropertyChanged += OnPicturePropertyChanged;
-            Pictures.Add(internalItem);
-        }
-
-        Pictures.CollectionChanged += (s, e) =>
-        {
-            // Unsubscribe from removed items
-            if (e.OldItems != null)
-            {
-                foreach (Models.Rent.Residentials.ListingPicture item in e.OldItems)
+                var internalItem = item.Clone();
+                internalItem.BasePath = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(App.PropertyBlobDataFolder, _listing.PropertyId), _listing.Id));
+                internalItem.ParentViewModel = this;
+                if (isDuplicate)
                 {
-                    Debug.WriteLine($"Item {item.Id} Removed from Pictures");
-                    IsDirty = true;
+                    try
+                    {
+                        var newFilePath = System.IO.Path.Combine(internalItem.BasePath, internalItem.ImageFilename);
+                        // The original item.BasePath should have been set in MainViewModel.
+                        File.Copy(System.IO.Path.Combine(item.BasePath, item.ImageFilename), newFilePath, overwrite: true);
+                        // Keep track of unsaved files to delete them when discarding.
+                        _unsavedListingPictureFileList.Add(newFilePath);
 
-                    item.PropertyChanged -= OnPicturePropertyChanged;
+                        internalItem.SetIsModified(true);
+                        internalItem.PropertyChanged += OnPicturePropertyChanged;
+                        Pictures.Add(internalItem);
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"Error while copying picture file: {ex}");
+
+                        ShowSimpleErrorInfoBar("写真ファイルのコピー中に予期しないエラーが発生しました。", $"{ex}");
+                    }
+                }
+                else
+                {
+                    internalItem.SetIsModified(false);
+                    internalItem.PropertyChanged += OnPicturePropertyChanged;
+                    Pictures.Add(internalItem);
                 }
             }
 
-            // Subscribe to PropertyChanged.
-            if (e.NewItems != null)
+            Pictures.CollectionChanged += (s, e) =>
             {
-                foreach (Models.Rent.Residentials.ListingPicture item in e.NewItems)
+                // Unsubscribe from removed items
+                if (e.OldItems != null)
                 {
-                    Debug.WriteLine($"Item {item.Id} Added to Pictures");
-                    IsDirty = true;
+                    foreach (Models.Rent.Residentials.ListingPicture item in e.OldItems)
+                    {
+                        Debug.WriteLine($"Item {item.Id} Removed from Pictures");
+                        IsDirty = true;
 
-                    item.PropertyChanged += OnPicturePropertyChanged;
+                        item.PropertyChanged -= OnPicturePropertyChanged;
+                    }
+                }
+
+                // Subscribe to PropertyChanged.
+                if (e.NewItems != null)
+                {
+                    foreach (Models.Rent.Residentials.ListingPicture item in e.NewItems)
+                    {
+                        Debug.WriteLine($"Item {item.Id} Added to Pictures");
+                        IsDirty = true;
+
+                        item.PropertyChanged += OnPicturePropertyChanged;
+                    }
+                }
+            };
+
+            // PDFs (don't use directly)
+            /*
+            Pdfs = _listing.Pdfs;
+            foreach (var item in Pdfs)
+            {
+                item.BasePath = _listingDataDirectoryPath;
+                item.ParentViewModel = this;
+                item.SetIsModified(false);
+                item.PropertyChanged += OnPdfPropertyChanged;
+            }
+            */
+            Pdfs.Clear();
+            foreach (var item in _listing.Pdfs)
+            {
+                var internalItem = item.Clone();
+                internalItem.BasePath = _listingDataDirectoryPath;
+                internalItem.ParentViewModel = this;
+                if (isDuplicate)
+                {
+                    try
+                    {
+                        var newFilePath = System.IO.Path.Combine(internalItem.BasePath, internalItem.PdfFilename);
+                        // The original item.BasePath should have been set in MainViewModel.
+                        File.Copy(System.IO.Path.Combine(item.BasePath, item.PdfFilename), newFilePath, overwrite: true);
+                        // Keep track of unsaved files to delete them when discarding.
+                        _unsavedListingPdfFileList.Add(newFilePath);
+
+                        // Copy the thumbnail file as well
+                        if (!string.IsNullOrEmpty(item.ThumbnailFilename))
+                        {
+                            var thumbnailPath = Path.Combine(internalItem.BasePath, internalItem.ThumbnailFilename);
+                            File.Copy(Path.Combine(item.BasePath, item.ThumbnailFilename), thumbnailPath, overwrite: true);
+                            _unsavedListingPdfThumbnailFileList.Add(thumbnailPath);
+                        }
+
+                        internalItem.SetIsModified(true);
+                        internalItem.PropertyChanged += OnPdfPropertyChanged;
+                        Pdfs.Add(internalItem);
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"Error while copying PDF file: {ex}");
+
+                        ShowSimpleErrorInfoBar("PDFファイルのコピー中に予期しないエラーが発生しました。", $"{ex}");
+                    }
+                }
+                else
+                {
+                    internalItem.SetIsModified(false);
+                    internalItem.PropertyChanged += OnPdfPropertyChanged;
+                    Pdfs.Add(internalItem);
                 }
             }
-        };
 
-        // PDFs (don't use directly)
-        /*
-        Pdfs = _listing.Pdfs;
-        foreach (var item in Pdfs)
-        {
-            item.BasePath = _listingDataDirectoryPath;
-            item.ParentViewModel = this;
-            item.SetIsModified(false);
-            item.PropertyChanged += OnPdfPropertyChanged;
+            Pdfs.CollectionChanged += (sender, args) =>
+            {
+                if (args.OldItems is not null)
+                {
+                    foreach (Models.Rent.Residentials.ListingPdf item in args.OldItems)
+                    {
+                        IsDirty = true;
+                        item.PropertyChanged -= OnPdfPropertyChanged;
+                    }
+                }
+
+                if (args.NewItems is not null)
+                {
+                    foreach (Models.Rent.Residentials.ListingPdf item in args.NewItems)
+                    {
+                        IsDirty = true;
+                        item.PropertyChanged += OnPdfPropertyChanged;
+                    }
+                }
+            };
+
+            // (It is OK to use directly)
+            //LessorsWrapper = new ObservableCollection<Models.Rent.Residentials.PersonWrapperForListingViewModel>(_listing.Lessors.Select(person => new Models.Rent.Residentials.PersonWrapperForListingViewModel(person, this)));
+            LessorsWrapper.Clear();
+            foreach (var person in _listing.Lessors)
+            {
+                var wrapper = new Models.Rent.Residentials.PersonWrapperForListingViewModel(person, this);
+                LessorsWrapper.Add(wrapper);
+            }
+
+            // (It is OK to use directly)
+            //BrokersWrapper = new ObservableCollection<Models.Rent.Residentials.PersonWrapperForListingViewModel>(_listing.Brokers.Select(person => new Models.Rent.Residentials.PersonWrapperForListingViewModel(person, this)));
+            BrokersWrapper.Clear();
+            foreach (var person in _listing.Brokers)
+            {
+                var wrapper = new Models.Rent.Residentials.PersonWrapperForListingViewModel(person, this);
+                BrokersWrapper.Add(wrapper);
+            }
         }
-        */
-        Pdfs.Clear();
-        foreach (var item in _listing.Pdfs)
+        catch (Exception ex)
         {
-            var internalItem = item.Clone();
-            internalItem.BasePath = _listingDataDirectoryPath;
-            internalItem.ParentViewModel = this;
-            if (isDuplicate)
+            Debug.WriteLine($"PopulateValues() failed: {ex}");
+
+            var err = new Models.ErrorInfo
             {
-                var newFilePath = System.IO.Path.Combine(internalItem.BasePath, internalItem.PdfFilename);
-                // The original item.BasePath should have been set in MainViewModel.
-                File.Copy(System.IO.Path.Combine(item.BasePath, item.PdfFilename), newFilePath, overwrite: true);
-                // Keep track of unsaved files to delete them when discarding.
-                _unsavedListingPdfFileList.Add(newFilePath);
-                internalItem.SetIsModified(true);
+                Title = "募集物件のデータの取得中に予期しないエラーが発生しました。",
+                Type = Models.ErrorInfo.ErrType.Other,
+                Code = "",
+                Message = $"このまま保存するとデータに欠損が生じる可能性があります。",
+                Description = $"{ex}",
+                Operation = "Value Populatation",
+                MethodName = nameof(PopulateValues),
+                OccuredAt = DateTime.Now
+            };
 
-                // Copy the thumbnail file as well
-                if (!string.IsNullOrEmpty(item.ThumbnailFilename))
-                {
-                    var thumbnailPath = Path.Combine(internalItem.BasePath, internalItem.ThumbnailFilename);
-                    File.Copy(Path.Combine(item.BasePath, item.ThumbnailFilename), thumbnailPath, overwrite: true);
-                    _unsavedListingPdfThumbnailFileList.Add(thumbnailPath);
-                }
-            }
-            else
-            {
-                internalItem.SetIsModified(false);
-            }
-            internalItem.PropertyChanged += OnPdfPropertyChanged;
-            Pdfs.Add(internalItem);
-        }
-
-
-        Pdfs.CollectionChanged += (sender, args) =>
-        {
-            if (args.OldItems is not null)
-            {
-                foreach (Models.Rent.Residentials.ListingPdf item in args.OldItems)
-                {
-                    IsDirty = true;
-                    item.PropertyChanged -= OnPdfPropertyChanged;
-                }
-            }
-
-            if (args.NewItems is not null)
-            {
-                foreach (Models.Rent.Residentials.ListingPdf item in args.NewItems)
-                {
-                    IsDirty = true;
-                    item.PropertyChanged += OnPdfPropertyChanged;
-                }
-            }
-        };
-
-        // (It is OK to use directly)
-        //LessorsWrapper = new ObservableCollection<Models.Rent.Residentials.PersonWrapperForListingViewModel>(_listing.Lessors.Select(person => new Models.Rent.Residentials.PersonWrapperForListingViewModel(person, this)));
-        LessorsWrapper.Clear();
-        foreach (var person in _listing.Lessors)
-        {
-            var wrapper = new Models.Rent.Residentials.PersonWrapperForListingViewModel(person, this);
-            LessorsWrapper.Add(wrapper);
-        }
-
-        // (It is OK to use directly)
-        //BrokersWrapper = new ObservableCollection<Models.Rent.Residentials.PersonWrapperForListingViewModel>(_listing.Brokers.Select(person => new Models.Rent.Residentials.PersonWrapperForListingViewModel(person, this)));
-        BrokersWrapper.Clear();
-        foreach (var person in _listing.Brokers)
-        {
-            var wrapper = new Models.Rent.Residentials.PersonWrapperForListingViewModel(person, this);
-            BrokersWrapper.Add(wrapper);
+            ShowErrorInfoBar(err);
         }
 
         _listing.SetIsModified(isDuplicate);
@@ -1653,9 +1717,10 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
             return;
         }
 
-        if (_listing.PropertyStatus == EntityStatus.New && !App.GetService<ViewModels.MainViewModel>().RentResidentialEditorList.Any(editor => editor.Id == _listing.PropertyId && editor.ViewModel is { IsActive: true }))
+        // This shouldn't happen, but just in case, we check if the parent property editor is open for new listings.
+        if (_listing.PropertyStatus == EntityStatus.New && !App.GetService<ViewModels.MainViewModel>().RentResidentialEditorList.Any(editor => editor.Id == _listing.PropertyId))
         {
-            ShowSimpleErrorInfoBar("入力項目に誤りがあります", "建物の編集画面が開いていないため、募集物件を保存できません。");
+            ShowSimpleErrorInfoBar("予期しないエラーが発生しました", "建物の編集画面が開いていないため、募集物件を保存できません。",InfoBarSeverity.Error);
             return;
         }
 
@@ -2366,6 +2431,5 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
     }
 
     #endregion
-
 
 }

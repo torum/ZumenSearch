@@ -7,6 +7,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Text.RegularExpressions;
 using Windows.Data.Pdf;
 using Windows.Storage;
@@ -27,6 +28,12 @@ namespace ZumenSearch.ViewModels.Rent.Residentials;
  * TODO: 
  * Use IsBusy to disable the editor commands and show progress ring when saving or loading data.
  * Add try catch to async, file IO, and other operations. Show error message in infobar if exception occurs.
+1.	done.
+2.	Failed attachment imports can leave incomplete files. Residential picture imports track destination files only after copying succeeds (Src\Features\Rent\Residentials\ViewModels\PropertyViewModel.cs#L3490, Src\Features\Rent\Residentials\ViewModels\ListingViewModel.cs#L1850). Their picker callers already catch common errors and show an InfoBar, but a failed copy can leave an untracked partial file. PDF imports show an InfoBar too, but their recorded importedPaths are not cleaned up on failure (Src\Features\Rent\Residentials\ViewModels\PropertyViewModel.cs#L3591, Src\Features\Rent\Residentials\ViewModels\ListingViewModel.cs#L1970).
+3.	Post-save cleanup failures are hidden. In Src\Features\Rent\Residentials\ViewModels\PropertyViewModel.cs#L3350, failed attachment and directory deletions are only debug-logged, and the deletion lists are cleared. The database save has already succeeded, so a warning should say that saving succeeded but cleanup did not; failed paths should remain available for retry or other explicit handling.
+4.	Lessor and broker selection can silently hide database errors. Their initial loads and searches check only whether a result is null, not its error status (Src\Shared\Dialogs\ViewModels\LessorSelectViewModel.cs#L70, Src\Shared\Dialogs\ViewModels\BrokerSelectViewModel.cs#L70). The data service returns errors in result wrappers, so a database failure can appear as an empty list. These dialogs need visible error feedback. Their async void initialization also needs a deliberate exception and cancellation boundary.
+5.	Unexpected save failures lack a local recovery boundary. Residential property and listing saves use finally to reset busy state and report database result errors, but unexpected exceptions from the awaited operation are not handled there (Src\Features\Rent\Residentials\ViewModels\PropertyViewModel.cs#L3281, Src\Features\Rent\Residentials\ViewModels\ListingViewModel.cs#L1622). Handle expected recoverable failures at the appropriate command boundary, distinguish cancellation from failure, and avoid reporting “save failed” after a commit has already succeeded.
+ * 
  */
 
 public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<ListingUpdatedMessage>, IRecipient<WindowClosedMessage<Microsoft.UI.Xaml.Window>>, IRecipient<ListingDeletedMessage>, IRecipient<LessorUpdatedMessage>, IRecipient<BrokerUpdatedMessage>, IRecipient<LessorDeletedMessage>, IRecipient<BrokerDeletedMessage>, IDisposable
@@ -81,36 +88,48 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         _dataAccessService = dataAccessService;
         _dataAccessLocationService = dataAccessLocationService;
 
+        // 
         IsUnitLevelOwnership = property.IsUnitLevelOwnership;
-
-        _transportationEntries = [new(this, 0), new(this, 1), new(this, 2), new(this, 3)];
+        WeakReferenceMessenger.Default.Send(new PropertyIsUnitOwnershipChangedMessage(_id, IsUnitLevelOwnership));
 
         _propertyDataDirectoryPath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _id);
 
-        if (!Directory.Exists(_propertyDataDirectoryPath))
+        try
         {
-            Directory.CreateDirectory(_propertyDataDirectoryPath);
+            if (!Directory.Exists(_propertyDataDirectoryPath))
+            {
+                Directory.CreateDirectory(_propertyDataDirectoryPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            var err = new Models.ErrorInfo
+            {
+                Title = "予期しないエラーが発生しました。",
+                Type = Models.ErrorInfo.ErrType.Other,
+                Code = "",
+                Message = $"建物のデータフォルダを作成できませんでした。写真や図面を保存出来ません。",
+                Description = $"{ex}",
+                Operation = "Directory.CreateDirectory",
+                MethodName = nameof(PropertyViewModel),
+                OccuredAt = DateTime.Now
+            };
+
+            ShowErrorInfoBar(err);
         }
 
         // Update title with dummy value.
         WindowTitle = string.Empty;
 
-        try
-        {
-            PopulateValues(isDuplicate);
-            WeakReferenceMessenger.Default.Send(new PropertyIsUnitOwnershipChangedMessage(_id, IsUnitLevelOwnership));
+        _transportationEntries = [new(this, 0), new(this, 1), new(this, 2), new(this, 3)];
 
-            // Reset errors
-            IsNameHasError = false;
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"PropertyViewModel: {ex}");
-        }
-        finally
-        {
-            IsDirty = isDuplicate;
-        }
+        // Populate the view model with the property values.
+        PopulateValues(isDuplicate);
+
+        // Reset errors
+        IsNameHasError = false;
+        // Reset IsDirty to false after PopulateValues() because PopulateValues() automatically sets IsDirty = true when it copies values from the property to the view model.
+        IsDirty = isDuplicate;
 
         // Ready to receive messages.
         WeakReferenceMessenger.Default.Register<ListingUpdatedMessage>(this);
@@ -2414,347 +2433,353 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
     private void PopulateValues(bool isDuplicate)
     {
-        // Basics
-
-        Name = _property.Name;
-
-        if (isDuplicate)
+        try
         {
-            _property.SetName($"複製_{_property.Name}");
-        }
+            // Basics
+            Name = _property.Name;
 
-        //SelectedKind = _property.PropertyKind;
-        var propertyKindKey = PropertyKinds.FirstOrDefault(k => k.Key == _property.PropertyKind.Key);
-        SelectedPropertyKind = propertyKindKey is null ? new(Models.Rent.Residentials.PropertyKindType.Unspecified) : propertyKindKey;
-        IsUnitLevelOwnership = _property.IsUnitLevelOwnership;
-        var structureKey = StructureTypes.FirstOrDefault(k => k.Key == _property.PropertyStructure.Key);
-        SelectedStructureType = structureKey is null ? new(Models.Rent.Residentials.StructureType.Unspecified) : structureKey;
-
-        FloorCountAboveGround = _property.FloorCountAboveGround == 0 ? string.Empty : _property.FloorCountAboveGround.ToString(CultureInfo.InvariantCulture);
-        FloorCountBasement = _property.FloorCountBasement == 0 ? string.Empty : _property.FloorCountBasement.ToString(CultureInfo.InvariantCulture);
-        TotalUnitCount = _property.TotalUnitCount == 0 ? string.Empty : _property.TotalUnitCount.ToString(CultureInfo.InvariantCulture);
-        BuiltYearAndMonth = _property.BuiltYearAndMonth.Year != 1900 ? _property.BuiltYearAndMonth : null;
-        FudousanId = _property.FudousanId;
-        FudousanIdAdditionalCode = _property.FudousanIdAdditionalCode;
-        Remarks = _property.Remarks;
-
-        // Location
-        if (!string.IsNullOrEmpty(_property.Address.Prefecture?.MunicipalityCode))
-        {
-            var hoge = Prefectures.FirstOrDefault<Prefecture>(p => p.MunicipalityCode.Equals(_property.Address.Prefecture.MunicipalityCode, StringComparison.Ordinal));
-            if (hoge is not null)
+            if (isDuplicate)
             {
-                SelectedPrefecture = hoge;
+                _property.SetName($"複製_{_property.Name}");
             }
-        }
-        if ((Cities is not null) && ((!string.IsNullOrEmpty(_property.Address.CountyAndCity?.County)) || (!string.IsNullOrEmpty(_property.Address.CountyAndCity?.City))))
-        {
-            foreach (var cty in Cities)
+
+            //SelectedKind = _property.PropertyKind;
+            var propertyKindKey = PropertyKinds.FirstOrDefault(k => k.Key == _property.PropertyKind.Key);
+            SelectedPropertyKind = propertyKindKey is null ? new(Models.Rent.Residentials.PropertyKindType.Unspecified) : propertyKindKey;
+            IsUnitLevelOwnership = _property.IsUnitLevelOwnership;
+            var structureKey = StructureTypes.FirstOrDefault(k => k.Key == _property.PropertyStructure.Key);
+            SelectedStructureType = structureKey is null ? new(Models.Rent.Residentials.StructureType.Unspecified) : structureKey;
+
+            FloorCountAboveGround = _property.FloorCountAboveGround == 0 ? string.Empty : _property.FloorCountAboveGround.ToString(CultureInfo.InvariantCulture);
+            FloorCountBasement = _property.FloorCountBasement == 0 ? string.Empty : _property.FloorCountBasement.ToString(CultureInfo.InvariantCulture);
+            TotalUnitCount = _property.TotalUnitCount == 0 ? string.Empty : _property.TotalUnitCount.ToString(CultureInfo.InvariantCulture);
+            BuiltYearAndMonth = _property.BuiltYearAndMonth.Year != 1900 ? _property.BuiltYearAndMonth : null;
+            FudousanId = _property.FudousanId;
+            FudousanIdAdditionalCode = _property.FudousanIdAdditionalCode;
+            Remarks = _property.Remarks;
+
+            // Location
+            if (!string.IsNullOrEmpty(_property.Address.Prefecture?.MunicipalityCode))
             {
-                if (cty.County.Equals(_property.Address.CountyAndCity.County, StringComparison.Ordinal) && cty.City.Equals(_property.Address.CountyAndCity.City, StringComparison.Ordinal))
+                var hoge = Prefectures.FirstOrDefault<Prefecture>(p => p.MunicipalityCode.Equals(_property.Address.Prefecture.MunicipalityCode, StringComparison.Ordinal));
+                if (hoge is not null)
                 {
-                    SelectedCity = cty;
-                    break;
+                    SelectedPrefecture = hoge;
                 }
             }
-        }
-        if ((Towns is not null) && ((!string.IsNullOrEmpty(_property.Address.WardAndOaza?.Ward)) || (!string.IsNullOrEmpty(_property.Address.WardAndOaza?.Oaza))))
-        {
-            foreach (var twn in Towns)
+            if ((Cities is not null) && ((!string.IsNullOrEmpty(_property.Address.CountyAndCity?.County)) || (!string.IsNullOrEmpty(_property.Address.CountyAndCity?.City))))
             {
-                if (twn.Ward.Equals(_property.Address.WardAndOaza.Ward, StringComparison.Ordinal) && twn.Oaza.Equals(_property.Address.WardAndOaza.Oaza, StringComparison.Ordinal))
+                foreach (var cty in Cities)
                 {
-                    SelectedTown = twn;
-                    break;
+                    if (cty.County.Equals(_property.Address.CountyAndCity.County, StringComparison.Ordinal) && cty.City.Equals(_property.Address.CountyAndCity.City, StringComparison.Ordinal))
+                    {
+                        SelectedCity = cty;
+                        break;
+                    }
                 }
             }
-        }
-        if (Chous is not null) // Allow an empty string. //&& (!string.IsNullOrEmpty(_property.LocChoume))
-        {
-            var hoge = Chous.FirstOrDefault<Choume>(p => p.Chou.Equals(_property.Address.Choume?.Chou, StringComparison.Ordinal));
-            if (hoge is not null)
+            if ((Towns is not null) && ((!string.IsNullOrEmpty(_property.Address.WardAndOaza?.Ward)) || (!string.IsNullOrEmpty(_property.Address.WardAndOaza?.Oaza))))
             {
-                SelectedChou = hoge;
+                foreach (var twn in Towns)
+                {
+                    if (twn.Ward.Equals(_property.Address.WardAndOaza.Ward, StringComparison.Ordinal) && twn.Oaza.Equals(_property.Address.WardAndOaza.Oaza, StringComparison.Ordinal))
+                    {
+                        SelectedTown = twn;
+                        break;
+                    }
+                }
             }
-        }
-        Edaban = _property.Address.Edaban;
-        PostalCode = _property.Address.PostalCode;
-        MachiazaId = _property.Address.MachiazaId; // Must be at the end of the location properties, because it is set and cleared by the other properties.
-        LocationLatitude = _property.Address.LocationLatitude;
-        LocationLongitude = _property.Address.LocationLongitude;
-
-        // 交通
-        SelectedRailLine1.SetLineCode(_property.Train1.RailLine?.LineCode ?? "");
-        SelectedRailLine1.SetLineName(_property.Train1.RailLine?.LineName ?? "");
-        if (SelectedRailLine1.LineCode.Equals(_property.Train1.RailStation?.LineCode ?? "", StringComparison.Ordinal))
-        {
-            SelectedRailStation1.SetLineCode(_property.Train1.RailStation?.LineCode ?? "");
-            SelectedRailStation1.SetStationCode(_property.Train1.RailStation?.StationCode ?? "");
-            SelectedRailStation1.SetStationName(_property.Train1.RailStation?.StationName ?? "");
-        }
-        EkiToho1 = _property.Train1.EkiToho <= 0 ? "" : _property.Train1.EkiToho.ToString(CultureInfo.InvariantCulture);
-        BusStop1 = _property.BusStop1;
-        BusJyousya1 = _property.BusJyousya1 == 0 ? string.Empty : _property.BusJyousya1.ToString(CultureInfo.InvariantCulture);
-        BusStopToho1 = _property.BusStopToho1 == 0 ? string.Empty : _property.BusStopToho1.ToString(CultureInfo.InvariantCulture);
-
-        SelectedRailLine2.SetLineCode(_property.Train2.RailLine?.LineCode ?? "");
-        SelectedRailLine2.SetLineName(_property.Train2.RailLine?.LineName ?? "");
-        if (SelectedRailLine2.LineCode.Equals(_property.Train2.RailStation?.LineCode ?? "", StringComparison.Ordinal))
-        {
-            SelectedRailStation2.SetLineCode(_property.Train2.RailStation?.LineCode ?? "");
-            SelectedRailStation2.SetStationCode(_property.Train2.RailStation?.StationCode ?? "");
-            SelectedRailStation2.SetStationName(_property.Train2.RailStation?.StationName ?? "");
-        }
-        EkiToho2 = _property.Train2.EkiToho <= 0 ? "" : _property.Train2.EkiToho.ToString(CultureInfo.InvariantCulture);
-        BusStop2 = _property.BusStop2;
-        BusJyousya2 = _property.BusJyousya2 == 0 ? string.Empty : _property.BusJyousya2.ToString(CultureInfo.InvariantCulture);
-        BusStopToho2 = _property.BusStopToho2 == 0 ? string.Empty : _property.BusStopToho2.ToString(CultureInfo.InvariantCulture);
-
-        SelectedRailLine3.SetLineCode(_property.Train3.RailLine?.LineCode ?? "");
-        SelectedRailLine3.SetLineName(_property.Train3.RailLine?.LineName ?? "");
-        if (SelectedRailLine3.LineCode.Equals(_property.Train3.RailStation?.LineCode ?? "", StringComparison.Ordinal))
-        {
-            SelectedRailStation3.SetLineCode(_property.Train3.RailStation?.LineCode ?? "");
-            SelectedRailStation3.SetStationCode(_property.Train3.RailStation?.StationCode ?? "");
-            SelectedRailStation3.SetStationName(_property.Train3.RailStation?.StationName ?? "");
-        }
-        EkiToho3 = _property.Train3.EkiToho <= 0 ? "" : _property.Train3.EkiToho.ToString(CultureInfo.InvariantCulture);
-        BusStop3 = _property.BusStop3;
-        BusJyousya3 = _property.BusJyousya3 == 0 ? string.Empty : _property.BusJyousya3.ToString(CultureInfo.InvariantCulture);
-        BusStopToho3 = _property.BusStopToho3 == 0 ? string.Empty : _property.BusStopToho3.ToString(CultureInfo.InvariantCulture);
-
-        SelectedRailLine4.SetLineCode(_property.Train4.RailLine?.LineCode ?? "");
-        SelectedRailLine4.SetLineName(_property.Train4.RailLine?.LineName ?? "");
-        if (SelectedRailLine4.LineCode.Equals(_property.Train4.RailStation?.LineCode ?? "", StringComparison.Ordinal))
-        {
-            SelectedRailStation4.SetLineCode(_property.Train4.RailStation?.LineCode ?? "");
-            SelectedRailStation4.SetStationCode(_property.Train4.RailStation?.StationCode ?? "");
-            SelectedRailStation4.SetStationName(_property.Train4.RailStation?.StationName ?? "");
-        }
-        EkiToho4 = _property.Train4.EkiToho <= 0 ? "" : _property.Train4.EkiToho.ToString(CultureInfo.InvariantCulture);
-        BusStop4 = _property.BusStop4;
-        BusJyousya4 = _property.BusJyousya4 == 0 ? string.Empty : _property.BusJyousya4.ToString(CultureInfo.InvariantCulture);
-        BusStopToho4 = _property.BusStopToho4 == 0 ? string.Empty : _property.BusStopToho4.ToString(CultureInfo.InvariantCulture);
-
-        // Facilities
-        HasAutolock = _property.HasAutolock;
-        HasElevator = _property.HasElevator;
-        HasSecurityCamera = _property.HasSecurityCamera;
-        HasParcelLocker = _property.HasParcelLocker;
-        HasElectric = _property.HasElectric;
-        var electricKind = ElectricKinds.FirstOrDefault(item => item.Key == _property.PropertyElectricKind);
-        if (electricKind is not null) SelectedElectricKind = electricKind;
-        ElectricDetail = _property.ElectricDetail;
-        HasGas = _property.HasGas;
-        GasDetail = _property.GasDetail;
-        SelectedGasType = GasTypes.First(item => item.Key == _property.GasType);
-        TapWaterDetail = _property.TapWaterDetail;
-        SelectedTapWaterType = TapWaterTypes.First(item => item.Key == _property.TapWaterType);
-        SewerageDetail = _property.SewerageDetail;
-        SelectedSewerageType = SewerageTypes.First(item => item.Key == _property.SewerageType);
-        GroundDigital = _property.GroundDigital;
-        BsAntenna = _property.BsAntenna;
-        CsAntenna = _property.CsAntenna;
-        Catv = _property.Catv;
-        Usen = _property.Usen;
-        Internet = _property.Internet;
-        Fiber = _property.Fiber;
-        InternetFree = _property.InternetFree;
-        TvAntennaDetail = _property.TvAntennaDetail;
-        InternetDetail = _property.InternetDetail;
-        HasParking = _property.HasParking;
-        IsParkingFree = _property.IsParkingFree;
-        SelectedParkingContractType = ParkingContractTypes.First(item => item.Key == _property.ParkingContractType);
-        ParkingFee = _property.ParkingFee;
-        SelectedParkingFeeTaxType = TaxTypes.First(item => item.Key == _property.ParkingFeeTaxType);
-        SelectedParkingAvailability = AvailabilityTypes.First(item => item.Key == _property.ParkingAvailability);
-        ParkingSpaces = _property.ParkingSpaces;
-        ParkingDistance = _property.ParkingDistance;
-        ParkingNotes = _property.ParkingNotes;
-        HasBicycleParking = _property.HasBicycleParking;
-        IsBicycleParkingFree = _property.IsBicycleParkingFree;
-        SelectedBicycleParkingAvailability = AvailabilityTypes.First(item => item.Key == _property.BicycleParkingAvailability);
-        BicycleParkingFee = _property.BicycleParkingFee;
-        SelectedBicycleParkingFeeTaxType = TaxTypes.First(item => item.Key == _property.BicycleParkingFeeTaxType);
-        BicycleParkingNotes = _property.BicycleParkingNotes;
-        HasMotorcycleParking = _property.HasMotorcycleParking;
-        IsMotorcycleParkingFree = _property.IsMotorcycleParkingFree;
-        SelectedMotorcycleParkingAvailability = AvailabilityTypes.First(item => item.Key == _property.MotorcycleParkingAvailability);
-        MotorcycleParkingFee = _property.MotorcycleParkingFee;
-        SelectedMotorcycleParkingFeeTaxType = TaxTypes.First(item => item.Key == _property.MotorcycleParkingFeeTaxType);
-        MotorcycleParkingNotes = _property.MotorcycleParkingNotes;
-
-        SelectedKanriShutai = KanriShutais.First(item => item.Key == _property.KanriShutai);
-        KanriIsMaintenanceManagementIfIsKanriJisya = _property.KanriIsMaintenanceManagementIfIsKanriJisya;
-        KanriIsTenantManagementIfIsKanriJisya = _property.KanriIsTenantManagementIfIsKanriJisya;
-        KanriIsPaymentManagementIfIsKanriJisya = _property.KanriIsPaymentManagementIfIsKanriJisya;
-        KanriIsOtherManagementIfIsKanriJisya = _property.KanriIsOtherManagementIfIsKanriJisya;
-        KanriRemarkIfIsKanriJisya = _property.KanriRemarkIfIsKanriJisya;
-        KanriNameOfCompanyIfIsKanriTasya = _property.KanriNameOfCompanyIfIsKanriTasya;
-        KanriContactInfoOfCompanyIfIsKanriTasya = _property.KanriContactInfoOfCompanyIfIsKanriTasya;
-        KanriRemarkIfIsKanriTasya = _property.KanriRemarkIfIsKanriTasya;
-        KanriRemarkIfIsKanriKashinushi = _property.KanriRemarkIfIsKanriKashinushi;
-
-        // Pictures:(don't use directly)
-        /*
-        Pictures = new ObservableCollection<Models.Rent.Residentials.PropertyPicture>(_property.Pictures); // create a copy.
-        foreach (var item in Pictures)
-        {
-            // Filename to actuall path.
-            item.BasePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _property.Id);
-            item.ParentViewModel = this;
-            item.SetIsModified(false); // Needed this.
-            item.PropertyChanged += OnPropertyPicturePropertyChanged;
-        }
-        */
-        /*
-        Pictures.Clear();
-        foreach (var item in _property.Pictures)
-        {
-            var internalItem = new PropertyPicture(item.Id, item.ImageFilename, item.Status)
+            if (Chous is not null) // Allow an empty string. //&& (!string.IsNullOrEmpty(_property.LocChoume))
             {
-                IsMain = item.IsMain,
-                PictureType = item.PictureType,
-                Description = item.Description,
-                ThumbImagePath = item.ThumbImagePath,
-                BasePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _property.Id),
-                ParentViewModel = this
+                var hoge = Chous.FirstOrDefault<Choume>(p => p.Chou.Equals(_property.Address.Choume?.Chou, StringComparison.Ordinal));
+                if (hoge is not null)
+                {
+                    SelectedChou = hoge;
+                }
+            }
+            Edaban = _property.Address.Edaban;
+            PostalCode = _property.Address.PostalCode;
+            MachiazaId = _property.Address.MachiazaId; // Must be at the end of the location properties, because it is set and cleared by the other properties.
+            LocationLatitude = _property.Address.LocationLatitude;
+            LocationLongitude = _property.Address.LocationLongitude;
+
+            // 交通
+            SelectedRailLine1.SetLineCode(_property.Train1.RailLine?.LineCode ?? "");
+            SelectedRailLine1.SetLineName(_property.Train1.RailLine?.LineName ?? "");
+            if (SelectedRailLine1.LineCode.Equals(_property.Train1.RailStation?.LineCode ?? "", StringComparison.Ordinal))
+            {
+                SelectedRailStation1.SetLineCode(_property.Train1.RailStation?.LineCode ?? "");
+                SelectedRailStation1.SetStationCode(_property.Train1.RailStation?.StationCode ?? "");
+                SelectedRailStation1.SetStationName(_property.Train1.RailStation?.StationName ?? "");
+            }
+            EkiToho1 = _property.Train1.EkiToho <= 0 ? "" : _property.Train1.EkiToho.ToString(CultureInfo.InvariantCulture);
+            BusStop1 = _property.BusStop1;
+            BusJyousya1 = _property.BusJyousya1 == 0 ? string.Empty : _property.BusJyousya1.ToString(CultureInfo.InvariantCulture);
+            BusStopToho1 = _property.BusStopToho1 == 0 ? string.Empty : _property.BusStopToho1.ToString(CultureInfo.InvariantCulture);
+
+            SelectedRailLine2.SetLineCode(_property.Train2.RailLine?.LineCode ?? "");
+            SelectedRailLine2.SetLineName(_property.Train2.RailLine?.LineName ?? "");
+            if (SelectedRailLine2.LineCode.Equals(_property.Train2.RailStation?.LineCode ?? "", StringComparison.Ordinal))
+            {
+                SelectedRailStation2.SetLineCode(_property.Train2.RailStation?.LineCode ?? "");
+                SelectedRailStation2.SetStationCode(_property.Train2.RailStation?.StationCode ?? "");
+                SelectedRailStation2.SetStationName(_property.Train2.RailStation?.StationName ?? "");
+            }
+            EkiToho2 = _property.Train2.EkiToho <= 0 ? "" : _property.Train2.EkiToho.ToString(CultureInfo.InvariantCulture);
+            BusStop2 = _property.BusStop2;
+            BusJyousya2 = _property.BusJyousya2 == 0 ? string.Empty : _property.BusJyousya2.ToString(CultureInfo.InvariantCulture);
+            BusStopToho2 = _property.BusStopToho2 == 0 ? string.Empty : _property.BusStopToho2.ToString(CultureInfo.InvariantCulture);
+
+            SelectedRailLine3.SetLineCode(_property.Train3.RailLine?.LineCode ?? "");
+            SelectedRailLine3.SetLineName(_property.Train3.RailLine?.LineName ?? "");
+            if (SelectedRailLine3.LineCode.Equals(_property.Train3.RailStation?.LineCode ?? "", StringComparison.Ordinal))
+            {
+                SelectedRailStation3.SetLineCode(_property.Train3.RailStation?.LineCode ?? "");
+                SelectedRailStation3.SetStationCode(_property.Train3.RailStation?.StationCode ?? "");
+                SelectedRailStation3.SetStationName(_property.Train3.RailStation?.StationName ?? "");
+            }
+            EkiToho3 = _property.Train3.EkiToho <= 0 ? "" : _property.Train3.EkiToho.ToString(CultureInfo.InvariantCulture);
+            BusStop3 = _property.BusStop3;
+            BusJyousya3 = _property.BusJyousya3 == 0 ? string.Empty : _property.BusJyousya3.ToString(CultureInfo.InvariantCulture);
+            BusStopToho3 = _property.BusStopToho3 == 0 ? string.Empty : _property.BusStopToho3.ToString(CultureInfo.InvariantCulture);
+
+            SelectedRailLine4.SetLineCode(_property.Train4.RailLine?.LineCode ?? "");
+            SelectedRailLine4.SetLineName(_property.Train4.RailLine?.LineName ?? "");
+            if (SelectedRailLine4.LineCode.Equals(_property.Train4.RailStation?.LineCode ?? "", StringComparison.Ordinal))
+            {
+                SelectedRailStation4.SetLineCode(_property.Train4.RailStation?.LineCode ?? "");
+                SelectedRailStation4.SetStationCode(_property.Train4.RailStation?.StationCode ?? "");
+                SelectedRailStation4.SetStationName(_property.Train4.RailStation?.StationName ?? "");
+            }
+            EkiToho4 = _property.Train4.EkiToho <= 0 ? "" : _property.Train4.EkiToho.ToString(CultureInfo.InvariantCulture);
+            BusStop4 = _property.BusStop4;
+            BusJyousya4 = _property.BusJyousya4 == 0 ? string.Empty : _property.BusJyousya4.ToString(CultureInfo.InvariantCulture);
+            BusStopToho4 = _property.BusStopToho4 == 0 ? string.Empty : _property.BusStopToho4.ToString(CultureInfo.InvariantCulture);
+
+            // Facilities
+            HasAutolock = _property.HasAutolock;
+            HasElevator = _property.HasElevator;
+            HasSecurityCamera = _property.HasSecurityCamera;
+            HasParcelLocker = _property.HasParcelLocker;
+            HasElectric = _property.HasElectric;
+            var electricKind = ElectricKinds.FirstOrDefault(item => item.Key == _property.PropertyElectricKind);
+            if (electricKind is not null) SelectedElectricKind = electricKind;
+            ElectricDetail = _property.ElectricDetail;
+            HasGas = _property.HasGas;
+            GasDetail = _property.GasDetail;
+            SelectedGasType = GasTypes.First(item => item.Key == _property.GasType);
+            TapWaterDetail = _property.TapWaterDetail;
+            SelectedTapWaterType = TapWaterTypes.First(item => item.Key == _property.TapWaterType);
+            SewerageDetail = _property.SewerageDetail;
+            SelectedSewerageType = SewerageTypes.First(item => item.Key == _property.SewerageType);
+            GroundDigital = _property.GroundDigital;
+            BsAntenna = _property.BsAntenna;
+            CsAntenna = _property.CsAntenna;
+            Catv = _property.Catv;
+            Usen = _property.Usen;
+            Internet = _property.Internet;
+            Fiber = _property.Fiber;
+            InternetFree = _property.InternetFree;
+            TvAntennaDetail = _property.TvAntennaDetail;
+            InternetDetail = _property.InternetDetail;
+            HasParking = _property.HasParking;
+            IsParkingFree = _property.IsParkingFree;
+            SelectedParkingContractType = ParkingContractTypes.First(item => item.Key == _property.ParkingContractType);
+            ParkingFee = _property.ParkingFee;
+            SelectedParkingFeeTaxType = TaxTypes.First(item => item.Key == _property.ParkingFeeTaxType);
+            SelectedParkingAvailability = AvailabilityTypes.First(item => item.Key == _property.ParkingAvailability);
+            ParkingSpaces = _property.ParkingSpaces;
+            ParkingDistance = _property.ParkingDistance;
+            ParkingNotes = _property.ParkingNotes;
+            HasBicycleParking = _property.HasBicycleParking;
+            IsBicycleParkingFree = _property.IsBicycleParkingFree;
+            SelectedBicycleParkingAvailability = AvailabilityTypes.First(item => item.Key == _property.BicycleParkingAvailability);
+            BicycleParkingFee = _property.BicycleParkingFee;
+            SelectedBicycleParkingFeeTaxType = TaxTypes.First(item => item.Key == _property.BicycleParkingFeeTaxType);
+            BicycleParkingNotes = _property.BicycleParkingNotes;
+            HasMotorcycleParking = _property.HasMotorcycleParking;
+            IsMotorcycleParkingFree = _property.IsMotorcycleParkingFree;
+            SelectedMotorcycleParkingAvailability = AvailabilityTypes.First(item => item.Key == _property.MotorcycleParkingAvailability);
+            MotorcycleParkingFee = _property.MotorcycleParkingFee;
+            SelectedMotorcycleParkingFeeTaxType = TaxTypes.First(item => item.Key == _property.MotorcycleParkingFeeTaxType);
+            MotorcycleParkingNotes = _property.MotorcycleParkingNotes;
+
+            SelectedKanriShutai = KanriShutais.First(item => item.Key == _property.KanriShutai);
+            KanriIsMaintenanceManagementIfIsKanriJisya = _property.KanriIsMaintenanceManagementIfIsKanriJisya;
+            KanriIsTenantManagementIfIsKanriJisya = _property.KanriIsTenantManagementIfIsKanriJisya;
+            KanriIsPaymentManagementIfIsKanriJisya = _property.KanriIsPaymentManagementIfIsKanriJisya;
+            KanriIsOtherManagementIfIsKanriJisya = _property.KanriIsOtherManagementIfIsKanriJisya;
+            KanriRemarkIfIsKanriJisya = _property.KanriRemarkIfIsKanriJisya;
+            KanriNameOfCompanyIfIsKanriTasya = _property.KanriNameOfCompanyIfIsKanriTasya;
+            KanriContactInfoOfCompanyIfIsKanriTasya = _property.KanriContactInfoOfCompanyIfIsKanriTasya;
+            KanriRemarkIfIsKanriTasya = _property.KanriRemarkIfIsKanriTasya;
+            KanriRemarkIfIsKanriKashinushi = _property.KanriRemarkIfIsKanriKashinushi;
+
+            // Pictures (don't use directly)
+            Pictures.Clear();
+            foreach (var item in _property.Pictures)
+            {
+                var internalItem = item.Clone();
+                internalItem.BasePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _property.Id);
+                internalItem.ParentViewModel = this;
+                if (isDuplicate)
+                {
+                    try
+                    {
+                        var newFilePath = System.IO.Path.Combine(internalItem.BasePath, internalItem.ImageFilename);
+                        // The original item.BasePath should have been set in MainViewModel.
+                        File.Copy(System.IO.Path.Combine(item.BasePath, item.ImageFilename), newFilePath, overwrite: true);
+                        // Keep track of unsaved files to delete them when discarding.
+                        _unsavedPropertyPictureFileList.Add(newFilePath);
+
+                        internalItem.SetIsModified(true);
+                        internalItem.PropertyChanged += OnPropertyPicturePropertyChanged;
+                        Pictures.Add(internalItem);
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"Error while copying picture file: {ex}");
+
+                        ShowSimpleErrorInfoBar("写真ファイルのコピー中に予期しないエラーが発生しました。", $"{ex}");
+                    }
+                }
+                else
+                {
+                    internalItem.SetIsModified(false);
+                    internalItem.PropertyChanged += OnPropertyPicturePropertyChanged;
+                    Pictures.Add(internalItem);
+                }
+            }
+
+            Pictures.CollectionChanged += (s, e) =>
+            {
+                // Unsubscribe from removed items
+                if (e.OldItems != null)
+                {
+                    foreach (Models.Rent.Residentials.PropertyPicture item in e.OldItems)
+                    {
+                        Debug.WriteLine($"Item {item.Id} Removed from Pictures. @CollectionChanged in PopulateValues of PropertyViewModel");
+                        IsDirty = true;
+
+                        item.PropertyChanged -= OnPropertyPicturePropertyChanged;
+                    }
+                }
+
+                // Subscribe to PropertyChanged.
+                if (e.NewItems != null)
+                {
+                    foreach (Models.Rent.Residentials.PropertyPicture item in e.NewItems)
+                    {
+                        Debug.WriteLine($"Item {item.Id} Added to Pictures. @CollectionChanged in PopulateValues of PropertyViewModel");
+                        IsDirty = true;
+
+                        item.PropertyChanged += OnPropertyPicturePropertyChanged;
+                    }
+                }
             };
-            internalItem.SetIsModified(false); // Needed this.
-            internalItem.PropertyChanged += OnPropertyPicturePropertyChanged;
-            Pictures.Add(internalItem);
-        }
-        */
-        Pictures.Clear();
-        foreach (var item in _property.Pictures)
-        {
-            var internalItem = item.Clone();
-            internalItem.BasePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _property.Id);
-            internalItem.ParentViewModel = this;
-            if (isDuplicate)
-            {
-                var newFilePath = System.IO.Path.Combine(internalItem.BasePath, internalItem.ImageFilename);
-                // The original item.BasePath should have been set in MainViewModel.
-                File.Copy(System.IO.Path.Combine(item.BasePath, item.ImageFilename), newFilePath, overwrite: true);
-                // Keep track of unsaved files to delete them when discarding.
-                _unsavedPropertyPictureFileList.Add(newFilePath);
-                internalItem.SetIsModified(true);
-            }
-            else
-            {
-                internalItem.SetIsModified(false);
-            }
-            internalItem.PropertyChanged += OnPropertyPicturePropertyChanged;
-            Pictures.Add(internalItem);
-        }
 
-
-        Pictures.CollectionChanged += (s, e) =>
-        {
-            // Unsubscribe from removed items
-            if (e.OldItems != null)
+            // PDFs (don't use directly)
+            Pdfs.Clear();
+            foreach (var item in _property.Pdfs)
             {
-                foreach (Models.Rent.Residentials.PropertyPicture item in e.OldItems)
+                var internalItem = item.Clone();
+                internalItem.BasePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _property.Id);
+                internalItem.ParentViewModel = this;
+                if (isDuplicate)
                 {
-                    Debug.WriteLine($"Item {item.Id} Removed from Pictures. @CollectionChanged in PopulateValues of PropertyViewModel");
-                    IsDirty = true;
+                    try
+                    {
+                        var newFilePath = System.IO.Path.Combine(internalItem.BasePath, internalItem.PdfFilename);
+                        // The original item.BasePath should have been set in MainViewModel.
+                        File.Copy(System.IO.Path.Combine(item.BasePath, item.PdfFilename), newFilePath, overwrite: true);
+                        // Keep track of unsaved files to delete them when discarding.
+                        _unsavedPropertyPdfFileList.Add(newFilePath);
 
-                    item.PropertyChanged -= OnPropertyPicturePropertyChanged;
+                        // Copy the thumbnail file as well
+                        if (!string.IsNullOrEmpty(item.ThumbnailFilename))
+                        {
+                            var thumbnailPath = Path.Combine(internalItem.BasePath, internalItem.ThumbnailFilename);
+                            File.Copy(Path.Combine(item.BasePath, item.ThumbnailFilename), thumbnailPath, overwrite: true);
+                            _unsavedPropertyPdfThumbnailFileList.Add(thumbnailPath);
+                        }
+
+                        internalItem.SetIsModified(true);
+                        internalItem.PropertyChanged += OnPropertyPdfPropertyChanged;
+                        Pdfs.Add(internalItem);
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"Error while copying PDF file: {ex}");
+
+                        ShowSimpleErrorInfoBar("PDFファイルのコピー中に予期しないエラーが発生しました。", $"{ex}");
+                    }
+                }
+                else
+                {
+                    internalItem.SetIsModified(false);
+                    internalItem.PropertyChanged += OnPropertyPdfPropertyChanged;
+                    Pdfs.Add(internalItem);
                 }
             }
 
-            // Subscribe to PropertyChanged.
-            if (e.NewItems != null)
+            Pdfs.CollectionChanged += (sender, args) =>
             {
-                foreach (Models.Rent.Residentials.PropertyPicture item in e.NewItems)
+                if (args.OldItems is not null)
                 {
-                    Debug.WriteLine($"Item {item.Id} Added to Pictures. @CollectionChanged in PopulateValues of PropertyViewModel");
-                    IsDirty = true;
-
-                    item.PropertyChanged += OnPropertyPicturePropertyChanged;
+                    foreach (Models.Rent.Residentials.PropertyPdf item in args.OldItems)
+                    {
+                        IsDirty = true;
+                        item.PropertyChanged -= OnPropertyPdfPropertyChanged;
+                    }
                 }
-            }
-        };
 
-        // PDFs
-        /*
-        Pdfs = new ObservableCollection<Models.Rent.Residentials.PropertyPdf>(_property.Pdfs);
-        foreach (var item in Pdfs)
-        {
-            item.BasePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _property.Id);
-            item.ParentViewModel = this;
-            item.SetIsModified(false);
-            item.PropertyChanged += OnPropertyPdfPropertyChanged;
+                if (args.NewItems is not null)
+                {
+                    foreach (Models.Rent.Residentials.PropertyPdf item in args.NewItems)
+                    {
+                        IsDirty = true;
+                        item.PropertyChanged += OnPropertyPdfPropertyChanged;
+                    }
+                }
+            };
+
+            // Lessors
+            LessorsWrapper = [];
+            foreach (var item in _property.Lessors)
+            {
+                LessorsWrapper.Add(new Models.Rent.Residentials.PersonWrapperForPropertyViewModel(item, this));
+            }
+
+            // Brokers
+            BrokersWrapper = [];
+            foreach (var item in _property.Brokers)
+            {
+                BrokersWrapper.Add(new Models.Rent.Residentials.PersonWrapperForPropertyViewModel(item, this));
+            }
+
+            ListingSummaries = new ObservableCollection<Models.Rent.Residentials.ListingSummary>(_property.ListingSummaries);
+
         }
-        */
-        Pdfs.Clear();
-        foreach (var item in _property.Pdfs)
+        catch (Exception ex)
         {
-            var internalItem = item.Clone();
-            internalItem.BasePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _property.Id);
-            internalItem.ParentViewModel = this;
-            if (isDuplicate)
-            {
-                var newFilePath = System.IO.Path.Combine(internalItem.BasePath, internalItem.PdfFilename);
-                // The original item.BasePath should have been set in MainViewModel.
-                File.Copy(System.IO.Path.Combine(item.BasePath, item.PdfFilename), newFilePath, overwrite: true);
-                // Keep track of unsaved files to delete them when discarding.
-                _unsavedPropertyPdfFileList.Add(newFilePath);
-                internalItem.SetIsModified(true);
+            Debug.WriteLine($"PopulateValues() failed: {ex}");
 
-                // Copy the thumbnail file as well
-                if (!string.IsNullOrEmpty(item.ThumbnailFilename))
-                {
-                    var thumbnailPath = Path.Combine(internalItem.BasePath, internalItem.ThumbnailFilename);
-                    File.Copy(Path.Combine(item.BasePath, item.ThumbnailFilename), thumbnailPath, overwrite: true);
-                    _unsavedPropertyPdfThumbnailFileList.Add(thumbnailPath);
-                }
-            }
-            else
+            var err = new Models.ErrorInfo
             {
-                internalItem.SetIsModified(false);
-            }
-            internalItem.PropertyChanged += OnPropertyPdfPropertyChanged;
-            Pdfs.Add(internalItem);
-        }
+                Title = "建物のデータの取得中に予期しないエラーが発生しました。",
+                Type = Models.ErrorInfo.ErrType.Other,
+                Code = "",
+                Message = $"このまま保存するとデータに欠損が生じる可能性があります。",
+                Description = $"{ex}",
+                Operation = "Value Populatation",
+                MethodName = nameof(PopulateValues),
+                OccuredAt = DateTime.Now
+            };
 
-        Pdfs.CollectionChanged += (sender, args) =>
-        {
-            if (args.OldItems is not null)
-            {
-                foreach (Models.Rent.Residentials.PropertyPdf item in args.OldItems)
-                {
-                    IsDirty = true;
-                    item.PropertyChanged -= OnPropertyPdfPropertyChanged;
-                }
-            }
-
-            if (args.NewItems is not null)
-            {
-                foreach (Models.Rent.Residentials.PropertyPdf item in args.NewItems)
-                {
-                    IsDirty = true;
-                    item.PropertyChanged += OnPropertyPdfPropertyChanged;
-                }
-            }
-        };
-
-        // Lessors
-        LessorsWrapper = [];
-        foreach (var item in _property.Lessors)
-        {
-            LessorsWrapper.Add(new Models.Rent.Residentials.PersonWrapperForPropertyViewModel(item,this));
+            ShowErrorInfoBar(err);
         }
 
-        // Brokers
-        BrokersWrapper = [];
-        foreach (var item in _property.Brokers)
-        {
-            BrokersWrapper.Add(new Models.Rent.Residentials.PersonWrapperForPropertyViewModel(item, this));
-        }
-
-        ListingSummaries = new ObservableCollection<Models.Rent.Residentials.ListingSummary>(_property.ListingSummaries);
-
+        _property.SetIsModified(isDuplicate);
         IsDirty = isDuplicate;
     }
 
@@ -3079,6 +3104,78 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             _property.SetKanriContactInfoOfCompanyIfIsKanriTasya(KanriContactInfoOfCompanyIfIsKanriTasya);
             _property.SetKanriRemarkIfIsKanriTasya(KanriRemarkIfIsKanriTasya);
             _property.SetKanriRemarkIfIsKanriKashinushi(KanriRemarkIfIsKanriKashinushi);
+
+
+            // Reset main ThumbnailImageFilePath here.
+            _property.ThumbnailFilename = string.Empty;
+            // Base dir for the thumbnail
+            _property.BasePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _property.Id);
+
+            // 写真
+            //_property.Pictures = Pictures;
+            _property.Pictures.Clear();
+            foreach (var item in Pictures)
+            {
+                var newItem = item.Clone();
+                newItem.BasePath = item.BasePath;//System.IO.Path.Combine(App.PropertyBlobDataFolder, _property.Id);
+                                                 //newItem.ParentViewModel = this;
+                newItem.SetIsModified(item.IsModified);
+                _property.Pictures.Add(newItem);
+
+                item.PropertyChanged -= OnPropertyPicturePropertyChanged;
+            }
+
+            var thumbImg = Pictures.FirstOrDefault(i => i.IsMain == true);
+            if (thumbImg is not null)
+            {
+                // 物件写真サムネイルに指定
+                _property.ThumbnailFilename = thumbImg.ImageFilename;
+            }
+
+            // 図面
+            //_property.Pdfs = Pdfs;
+            _property.Pdfs.Clear();
+            foreach (var item in Pdfs)
+            {
+                var newItem = item.Clone();
+                newItem.BasePath = item.BasePath;//System.IO.Path.Combine(App.PropertyBlobDataFolder, _property.Id);
+                                                 //newItem.ParentViewModel = this;
+                newItem.SetIsModified(false);
+                _property.Pdfs.Add(newItem);
+
+                item.PropertyChanged -= OnPropertyPdfPropertyChanged;
+            }
+
+            if (string.IsNullOrWhiteSpace(_property.ThumbnailFilename))
+            {
+                var thumbPdf = Pdfs.FirstOrDefault(i => i.IsMain);
+                if (thumbPdf is not null)
+                {
+                    if (!IsUnitLevelOwnership)
+                    {
+                        // 物件写真サムネイルに指定
+                        _property.ThumbnailFilename = thumbPdf.ThumbnailFilename;
+                    }
+                }
+            }
+
+            _property.Lessors.Clear();
+            foreach (var item in LessorsWrapper)
+            {
+                _property.Lessors.Add(item.Person);
+                //foreach (var deleted in _property.LessorsToBeDeleted.Where(person => person.Id == item.Person.Id).ToList()) _property.LessorsToBeDeleted.Remove(deleted);
+            }
+            _property.Brokers.Clear();
+            foreach (var item in BrokersWrapper)
+            {
+                _property.Brokers.Add(item.Person);
+                //foreach (var deleted in _property.BrokersToBeDeleted.Where(person => person.Id == item.Person.Id).ToList()) _property.BrokersToBeDeleted.Remove(deleted);
+            }
+
+            _property.ListingsToBeSaved = _unsavedListingList;
+
+            return true;
+
         }
         catch (ArgumentException ex)
         {
@@ -3098,76 +3195,23 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
             return false;
         }
-
-        // Reset main ThumbnailImageFilePath here.
-        _property.ThumbnailFilename = string.Empty;
-        // Base dir for the thumbnail
-        _property.BasePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _property.Id);
-
-        // 写真
-        //_property.Pictures = Pictures;
-        _property.Pictures.Clear();
-        foreach (var item in Pictures)
+        catch (Exception ex)
         {
-            var newItem = item.Clone();
-            newItem.BasePath = item.BasePath;//System.IO.Path.Combine(App.PropertyBlobDataFolder, _property.Id);
-            //newItem.ParentViewModel = this;
-            newItem.SetIsModified(item.IsModified);
-            _property.Pictures.Add(newItem);
-
-            item.PropertyChanged -= OnPropertyPicturePropertyChanged;
-        }
-
-        var thumbImg = Pictures.FirstOrDefault(i => i.IsMain == true);
-        if (thumbImg is not null)
-        {
-            // 物件写真サムネイルに指定
-            _property.ThumbnailFilename = thumbImg.ImageFilename;
-        }
-
-        // 図面
-        //_property.Pdfs = Pdfs;
-        _property.Pdfs.Clear();
-        foreach (var item in Pdfs)
-        {
-            var newItem = item.Clone();
-            newItem.BasePath = item.BasePath;//System.IO.Path.Combine(App.PropertyBlobDataFolder, _property.Id);
-            //newItem.ParentViewModel = this;
-            newItem.SetIsModified(false);
-            _property.Pdfs.Add(newItem);
-
-            item.PropertyChanged -= OnPropertyPdfPropertyChanged;
-        }
-
-        if (string.IsNullOrWhiteSpace(_property.ThumbnailFilename))
-        {
-            var thumbPdf = Pdfs.FirstOrDefault(i => i.IsMain);
-            if (thumbPdf is not null)
+            var err = new Models.ErrorInfo
             {
-                if (!IsUnitLevelOwnership)
-                {
-                    // 物件写真サムネイルに指定
-                    _property.ThumbnailFilename = thumbPdf.ThumbnailFilename;
-                }
-            }
+                Title = "予期しないエラーが発生しました。",
+                Type = Models.ErrorInfo.ErrType.Other,
+                Code = "",
+                Message = ex.Message,
+                Description = $"{ex}",
+                Operation = "Input Validation",
+                MethodName = nameof(SetValues),
+                OccuredAt = DateTime.Now
+            };
+            ShowErrorInfoBar(err);
+            return false;
         }
 
-        _property.Lessors.Clear();
-        foreach (var item in LessorsWrapper)
-        {
-            _property.Lessors.Add(item.Person);
-            //foreach (var deleted in _property.LessorsToBeDeleted.Where(person => person.Id == item.Person.Id).ToList()) _property.LessorsToBeDeleted.Remove(deleted);
-        }
-        _property.Brokers.Clear();
-        foreach (var item in BrokersWrapper)
-        {
-            _property.Brokers.Add(item.Person);
-            //foreach (var deleted in _property.BrokersToBeDeleted.Where(person => person.Id == item.Person.Id).ToList()) _property.BrokersToBeDeleted.Remove(deleted);
-        }
-
-        _property.ListingsToBeSaved = _unsavedListingList;
-
-        return true;
     }
 
     private bool DiscardUnsavedFiles()
@@ -3219,6 +3263,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         }
     }
 
+    // TODO: Consider removing.
     private static bool TryDeleteFiles(IEnumerable<string> filePaths, List<string> failures)
     {
         var succeeded = true;
