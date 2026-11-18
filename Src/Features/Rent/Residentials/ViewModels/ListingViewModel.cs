@@ -19,11 +19,8 @@ namespace ZumenSearch.ViewModels.Rent.Residentials;
 
 /*
  * TODO: 
- * DeferMessage: Review the DeferMessage() usage.
- * Gather validation logic in one place. Currently, validation is scattered across various methods. Make sure it is consistent with PropertyViewModel.
- * Change sevirity to Error for simple error messages.
- * Add try catch to async and file IO operations and show error message in infobar.
- * Add IsBusy flag to disable the UI commands when some async or IO operations is in progress.
+ * Use IsBusy to disable the editor commands and show progress ring when saving or loading data.
+ * Add try catch to async, file IO, and other operations. Show error message in infobar if exception occurs.
  */
 
 public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<PropertyUpdatedMessage>, IRecipient<PropertyIsUnitOwnershipChangedMessage>, IRecipient<LessorUpdatedMessage>, IRecipient<BrokerUpdatedMessage>, IRecipient<LessorDeletedMessage>, IRecipient<BrokerDeletedMessage>, IDisposable
@@ -45,11 +42,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
     private readonly List<string> _unsavedListingPdfThumbnailFileList = [];
 
     private bool _disposed;
-    private bool _isClosing;
-    private bool _propertyBusy;
-    //private bool _isBusyFileOperation;
-    //private int _pendingPickers;
-    //private TaskCompletionSource? _pickersCompleted;
+
     private readonly Queue<Action> _deferredMessages = new();
 
     private readonly CancellationTokenSource _cts = new();
@@ -122,13 +115,23 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         }
     }
 
-    // TODO: Consider removing following properties. 
     public bool IsSaving { get; private set; }
-    public bool IsClosing => _isClosing;
-    public bool IsPropertyBusy => _propertyBusy;
-    //public bool IsDiscardPending => _discardPending;
-    public bool IsEditorEnabled => !IsSaving && !_propertyBusy && !_isClosing;// && !_discardPending;
-    //public bool HasPendingEditorOperations => _pendingPickers > 0 || PendingEditorTasks().Count > 0;
+
+    public bool IsBusy
+    {
+        get;
+        private set
+        {
+            if (SetProperty(ref field, value))
+            {
+                OnPropertyChanged(nameof(IsEditorEnabled));
+                SaveCommand.NotifyCanExecuteChanged();
+            }
+        }
+    }
+
+    public bool IsEditorEnabled => !IsSaving && !IsBusy;
+
     public bool HasPendingEditorOperations => IsEditorEnabled;//tmp
 
     #endregion
@@ -241,8 +244,6 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
             if (SetProperty(ref field, value.Trim()))
             {
                 IsDirty = true;
-
-                //ValidateName();
 
                 // Update title with dummy value.
                 WindowTitle = string.Empty;
@@ -762,7 +763,6 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
 
     public void Receive(LessorUpdatedMessage person)
     {
-        if (DeferMessage(() => Receive(person))) return;
         var lessor = person.Value;
         if (lessor is null)
         {
@@ -777,7 +777,6 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
 
     public void Receive(BrokerUpdatedMessage corp)
     {
-        if (DeferMessage(() => Receive(corp))) return;
         var broker = corp.Value;
         if (broker is null)
         {
@@ -794,8 +793,6 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
     {
         if (!string.Equals(isUnitOwnership.PropertyId, _listing.PropertyId, StringComparison.Ordinal)) return;
 
-        if (DeferMessage(() => Receive(isUnitOwnership))) return;
-        
         SetOwnershipVisibility(isUnitOwnership.Value);
     }
 
@@ -825,7 +822,6 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
 
     public void Receive(LessorDeletedMessage lessorId)
     {
-        if (DeferMessage(() => Receive(lessorId))) return;
         var id = lessorId.Value;
         if (string.IsNullOrEmpty(id))
         {
@@ -839,7 +835,6 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
 
     public void Receive(BrokerDeletedMessage lessorId)
     {
-        if (DeferMessage(() => Receive(lessorId))) return;
         var id = lessorId.Value;
         if (string.IsNullOrEmpty(id))
         {
@@ -855,88 +850,19 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
 
     #region == Public Methods ==
 
-    /*
-    public void BeginPicker()
-    {
-        if (_pendingPickers++ == 0) _pickersCompleted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-    }
-
-    public void EndPicker()
-    {
-        if (--_pendingPickers == 0)
-        {
-            _pickersCompleted?.TrySetResult();
-            _pickersCompleted = null;
-        }
-    }
-    */
-
-    public void SetPropertyBusy(bool value)
-    {
-        _propertyBusy = value;
-        OnPropertyChanged(nameof(IsEditorEnabled));
-        SaveCommand.NotifyCanExecuteChanged();
-        if (!value && !IsSaving) ApplyDeferredMessages();
-    }
-
-    public void SetClosing(bool value)
-    {
-        _isClosing = value;
-        OnPropertyChanged(nameof(IsEditorEnabled));
-        SaveCommand.NotifyCanExecuteChanged();
-    }
-
-    /*
-    public async Task<bool> WaitForEditorOperationsAsync()
-    {
-        while (true)
-        {
-            var tasks = PendingEditorTasks();
-            if (_pickersCompleted is not null) tasks.Add(_pickersCompleted.Task);
-            if (tasks.Count == 0) return true;
-            try
-            {
-                await Task.WhenAll(tasks);
-            }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Runtime.InteropServices.COMException or InvalidOperationException or ArgumentException)
-            {
-                Debug.WriteLine($"Failed to complete listing editor operation: {ex}");
-                ShowAttachmentError($"編集中の処理を完了できませんでした: {ex.Message}");
-                return false;
-            }
-        }
-    }
-    */
-
-    private List<Task> PendingEditorTasks()
-    {
-        IAsyncRelayCommand[] commands = [AddNewRoomPicturesCommand, AddNewRoomPdfsCommand, OpenRoomPdfCommand, DeleteRoomPictureCommand, DeleteRoomPdfCommand, AddLessorCommand, DeleteLessorCommand, AddBrokerCommand];
-        return commands.Where(command => command.ExecutionTask is { IsCompleted: false }).Select(command => command.ExecutionTask!).ToList();
-    }
-
-    private bool DeferMessage(Action action)
-    {
-        if (!IsSaving && !_propertyBusy) return false;
-        _deferredMessages.Enqueue(action);
-        return true;
-    }
-
-    public void ApplyDeferredMessages()
-    {
-        while (_deferredMessages.TryDequeue(out var message)) message();
-    }
-
     public void DiscardChanges()
     {
-        //_isBusyFileOperation = true;
-        OnPropertyChanged(nameof(IsEditorEnabled));
-        SaveCommand.NotifyCanExecuteChanged();
-
-        DiscardUnsavedFiles();
-
-        //_isBusyFileOperation = false;
-        IsDirty = false;
-        return;
+        var wasBusy = IsBusy;
+        IsBusy = true;
+        try
+        {
+            DiscardUnsavedFiles();
+            IsDirty = false;
+        }
+        finally
+        {
+            IsBusy = wasBusy;
+        }
     }
 
     public void Dispose()
@@ -1005,63 +931,6 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         IsInfoBarErrorOpen = true;
     }
 
-    private bool ValidateContractNumericValues()
-    {
-        (string Label, string Value)[] values =
-        [
-            ("共益費・管理費", ManagementFee),
-            ("敷金", SecurityDeposit),
-            ("礼金", KeyMoney),
-            ("更新料", RenewalFee),
-            ("再契約手数料", RecontractFee),
-            ("契約期間", ContractPeriodYears)
-        ];
-
-        return ValidateNonNegativeNumericValues(values);
-    }
-
-    private bool ValidateChinryou()
-    {
-        var text = Helpers.Common.NormalizeFullWidthCharacters(Chinryou.Trim());
-        if (string.IsNullOrEmpty(text))
-        {
-            return true;
-        }
-
-        if (text.Contains(',', StringComparison.Ordinal))
-        {
-            if (!long.TryParse(text, NumberStyles.AllowThousands, CultureInfo.InvariantCulture, out var parsedWithSeparators) ||
-                !string.Equals(parsedWithSeparators.ToString("N0", CultureInfo.InvariantCulture), text, StringComparison.Ordinal))
-            {
-                ShowSimpleErrorInfoBar("入力項目に誤りがあります","賃料は0以上の整数で入力してください。");
-                return false;
-            }
-
-            return true;
-        }
-
-        if (!long.TryParse(text, NumberStyles.None, CultureInfo.InvariantCulture, out _))
-        {
-            ShowSimpleErrorInfoBar("入力項目に誤りがあります","賃料は0以上の整数で入力してください。");
-            return false;
-        }
-
-        return true;
-    }
-
-    private bool ValidateTransactionNumericValues()
-    {
-        (string Label, string Value)[] values =
-        [
-            ("貸主手数料", LessorCommission),
-            ("借主手数料", LesseeCommission),
-            ("元付手数料", ListingBrokerCommission),
-            ("客付け手数料", TenantBrokerCommission)
-        ];
-
-        return ValidateNonNegativeNumericValues(values);
-    }
-
     private bool ValidateNonNegativeNumericValues((string Label, string Value)[] values)
     {
         foreach (var (label, value) in values)
@@ -1077,169 +946,265 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         return true;
     }
 
-    private bool ValidateName()
+    private bool ValidateInput()
     {
+        var basicValid = true;
         if (string.IsNullOrWhiteSpace(Name))
         {
             ShowSimpleErrorInfoBar("入力項目に誤りがあります","部屋名（必須項目）が入力されていません。保存出来ませんでした。");
             IsNameHasError = true;
-
-            return false;
+            basicValid = false;
         }
-
-        IsNameHasError = false;
-        return true;
-    }
-
-    private bool TryParseBasicNumericValues(out decimal floorArea, out int? floorNumber)
-    {
-        floorArea = 0;
-        floorNumber = null;
-
-        var areaText = Helpers.Common.NormalizeFullWidthCharacters(FloorExclusiveAreaSqm.Trim());
-        if (!string.IsNullOrEmpty(areaText) &&
-            (!decimal.TryParse(areaText, NumberStyles.Number, CultureInfo.CurrentCulture, out floorArea) || floorArea < 0))
+        else
         {
-            ShowSimpleErrorInfoBar("入力項目に誤りがあります","専有面積は0以上の数値で入力してください。");
-            return false;
-        }
-
-        var floorText = Helpers.Common.NormalizeFullWidthCharacters(FloorNumber.Trim());
-        if (!string.IsNullOrEmpty(floorText))
-        {
-            if (!int.TryParse(floorText, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsedFloor) || parsedFloor <= 0)
+            IsNameHasError = false;
+            var areaText = Helpers.Common.NormalizeFullWidthCharacters(FloorExclusiveAreaSqm.Trim());
+            if (!string.IsNullOrEmpty(areaText) && (!decimal.TryParse(areaText, NumberStyles.Number, CultureInfo.CurrentCulture, out var floorArea) || floorArea < 0))
             {
-                ShowSimpleErrorInfoBar("入力項目に誤りがあります","所在階は1以上の整数で入力してください。");
-                return false;
+                ShowSimpleErrorInfoBar("入力項目に誤りがあります","専有面積は0以上の数値で入力してください。");
+                basicValid = false;
+            }
+            else
+            {
+                var floorText = Helpers.Common.NormalizeFullWidthCharacters(FloorNumber.Trim());
+                if (!string.IsNullOrEmpty(floorText) && (!int.TryParse(floorText, NumberStyles.Integer, CultureInfo.InvariantCulture, out var floorNumber) || floorNumber <= 0))
+                {
+                    ShowSimpleErrorInfoBar("入力項目に誤りがあります","所在階は1以上の整数で入力してください。");
+                    basicValid = false;
+                }
+            }
+        }
+
+        if (!basicValid)
+        {
+            ShowSimpleErrorInfoBar("入力項目に誤りがあります", "入力項目に誤りがあります。保存出来ませんでした。");
+            if (!_navigationService.IsCurrentPageSameAs(BasicPageName))
+            {
+                _navigationService.NavigateTo(BasicPageName, this);
             }
 
-            floorNumber = parsedFloor;
+            return false;
+        }
+
+        (string Label, string Value)[] contractValues =
+        [
+            ("共益費・管理費", ManagementFee),
+            ("敷金", SecurityDeposit),
+            ("礼金", KeyMoney),
+            ("更新料", RenewalFee),
+            ("再契約手数料", RecontractFee),
+            ("契約期間", ContractPeriodYears)
+        ];
+
+        var contractValid = ValidateNonNegativeNumericValues(contractValues);
+        if (contractValid)
+        {
+            var text = Helpers.Common.NormalizeFullWidthCharacters(Chinryou.Trim());
+            if (!string.IsNullOrEmpty(text))
+            {
+                if (text.Contains(',', StringComparison.Ordinal))
+                {
+                    contractValid = long.TryParse(text, NumberStyles.AllowThousands, CultureInfo.InvariantCulture, out var parsedWithSeparators) &&
+                        string.Equals(parsedWithSeparators.ToString("N0", CultureInfo.InvariantCulture), text, StringComparison.Ordinal);
+                }
+                else
+                {
+                    contractValid = long.TryParse(text, NumberStyles.None, CultureInfo.InvariantCulture, out _);
+                }
+
+                if (!contractValid)
+                {
+                    ShowSimpleErrorInfoBar("入力項目に誤りがあります","賃料は0以上の整数で入力してください。");
+                }
+            }
+        }
+
+        if (!contractValid)
+        {
+            IsInfoBarErrorOpen = true;
+            const string contractPageName = "ZumenSearch.Views.Rent.Residentials.Listing.ContractPage";
+            if (!_navigationService.IsCurrentPageSameAs(contractPageName))
+            {
+                _navigationService.NavigateTo(contractPageName, this);
+            }
+
+            return false;
+        }
+
+        (string Label, string Value)[] transactionValues =
+        [
+            ("貸主手数料", LessorCommission),
+            ("借主手数料", LesseeCommission),
+            ("元付手数料", ListingBrokerCommission),
+            ("客付け手数料", TenantBrokerCommission)
+        ];
+
+        if (!ValidateNonNegativeNumericValues(transactionValues))
+        {
+            IsInfoBarErrorOpen = true;
+            const string transactionPageName = "ZumenSearch.Views.Rent.Residentials.Listing.TransactionPage";
+            if (!_navigationService.IsCurrentPageSameAs(transactionPageName))
+            {
+                _navigationService.NavigateTo(transactionPageName, this);
+            }
+
+            return false;
+        }
+
+        if (Pdfs.Count(pdf => pdf.IsMain) > 1)
+        {
+            ShowSimpleErrorInfoBar("入力項目に誤りがあります", "メインの図面は1枚だけ選択してください。");
+            const string pageName = "ZumenSearch.Views.Rent.Residentials.Listing.ZumenListPage";
+            if (IsPropertyUnitLevelOwnership && !_navigationService.IsCurrentPageSameAs(pageName)) _navigationService.NavigateTo(pageName, this);
+            return false;
         }
 
         return true;
     }
 
-    private void SetValues()
+    private bool SetValues()
     {
         if (!IsDirty)
         {
-            return;
+            return false;
         }
 
         if (_listing is null)
         {
             Debug.WriteLine("_listing is null. Can't set room.");
-            return;
+            return false;
         }
 
-        _listing.SetName(Name);
-
-        _listing.SetFloorPlanTypeLabel(SelectedFloorPlanType);
-        _listing.SetFloorPlanExtraTypeLabel(SelectedFloorPlanExtraType);
-        _listing.SetFloorGroundTypeLabel(SelectedFloorGroundType);
-        _listing.SetFloorExclusiveAreaSqm(FloorExclusiveAreaSqm);
-        _listing.SetFloorNumber(FloorNumber);
-        _listing.SetIsCornerRoom(IsCornerRoom);
-        _listing.SetExposureDirectionTypeLabel(SelectedExposureDirectionType);
-        _listing.SetAvailabilityStatusTypeLabel(SelectedAvailabilityStatusType);
-        _listing.SetAvailabilityMonthTypeLabel(SelectedAvailabilityMonthType);
-        _listing.SetAvailabilityPeriodTypeLabel(SelectedAvailabilityPeriodType);
-        _listing.SetOccupancyStatusLabel(SelectedOccupancyStatus);
-        _listing.SetIsAvailableForImmediateMoveIn(IsAvailableForImmediateMoveIn);
-        _listing.SetIsAvailableForRentNow(IsAvailableForRentNow);
-        _listing.SetOccupancyStatusCheckedAt(OccupancyStatusCheckedAt);
-        _listing.SetRemarks(Remarks);
-        _listing.SetHasAirConditioner(HasAirConditioner);
-        _listing.SetHasWoodFlooring(HasWoodFlooring);
-        _listing.SetHasVideoIntercom(HasVideoIntercom);
-        _listing.SetHasBathReheating(HasBathReheating);
-        _listing.SetHasGasStove(HasGasStove);
-        _listing.SetHasInductionCooktop(HasInductionCooktop);
-        _listing.SetHasMultipleBurners(HasMultipleBurners);
-        _listing.SetHasSystemKitchen(HasSystemKitchen);
-        _listing.SetHasLoft(HasLoft);
-        _listing.SetHasIndoorWashingMachineSpace(HasIndoorWashingMachineSpace);
-        _listing.SetHasBathroomDryer(HasBathroomDryer);
-        _listing.SetHasSeparateBathAndToilet(HasSeparateBathAndToilet);
-        _listing.SetHasSeparateWashbasin(HasSeparateWashbasin);
-        _listing.SetHasWarmWaterToiletSeat(HasWarmWaterToiletSeat);
-        _listing.SetApplianceRemarks(ApplianceRemarks);
-        _listing.SetChinryouFromString(Chinryou);
-        _listing.SetManagementFee(ManagementFee);
-        _listing.SetSecurityDeposit(SecurityDeposit);
-        _listing.SetKeyMoney(KeyMoney);
-        _listing.SetRenewalFee(RenewalFee);
-        _listing.SetRecontractFee(RecontractFee);
-        _listing.SetContractPeriodYears(ContractPeriodYears);
-        _listing.SetManagementFeeUnitTypeLabel(SelectedManagementFeeUnit);
-        _listing.SetSecurityDepositUnitTypeLabel(SelectedSecurityDepositUnit);
-        _listing.SetKeyMoneyUnitTypeLabel(SelectedKeyMoneyUnit);
-        _listing.SetRenewalFeeUnitTypeLabel(SelectedRenewalFeeUnit);
-        _listing.SetRecontractFeeUnitTypeLabel(SelectedRecontractFeeUnit);
-        _listing.SetContractTypeLabel(SelectedContractType);
-        _listing.SetGuarantorCompany(GuarantorCompany);
-        _listing.SetHousingInsurance(HousingInsurance);
-        _listing.SetOtherFees(OtherFees);
-        _listing.SetPetFriendly(PetFriendly);
-        _listing.SetTwoPersonOccupancy(TwoPersonOccupancy);
-        _listing.SetNoGuarantorNeeded(NoGuarantorNeeded);
-        _listing.SetOfficeUseAllowed(OfficeUseAllowed);
-        _listing.SetOtherConditions(OtherConditions);
-        _listing.SetContractRemarks(ContractRemarks);
-        _listing.SetHandlingTypeLabel(SelectedHandlingType);
-        _listing.SetTransactionTypeLabel(SelectedTransactionType);
-        _listing.SetLessorCommission(LessorCommission);
-        _listing.SetLesseeCommission(LesseeCommission);
-        _listing.SetListingBrokerCommission(ListingBrokerCommission);
-        _listing.SetTenantBrokerCommission(TenantBrokerCommission);
-        _listing.SetLessorCommissionUnitTypeLabel(SelectedLessorCommissionUnit);
-        _listing.SetLesseeCommissionUnitTypeLabel(SelectedLesseeCommissionUnit);
-        _listing.SetListingBrokerCommissionUnitTypeLabel(SelectedListingBrokerCommissionUnit);
-        _listing.SetTenantBrokerCommissionUnitTypeLabel(SelectedTenantBrokerCommissionUnit);
-        _listing.SetTransactionRemarks(TransactionRemarks);
-
-        // Recreate the Pictures collection in _listing to ensure it matches the current Pictures collection in the ViewModel.
-        //_listing.Pictures = Pictures;
-        _listing.Pictures.Clear();
-        foreach (var item in Pictures)
+        try
         {
-            var newItem = item.Clone();
-            newItem.BasePath = item.BasePath;//System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(App.PropertyBlobDataFolder, _listing.PropertyId), _listing.Id));
-            //newItem.ParentViewModel = this;
-            newItem.SetIsModified(item.IsModified); // Needed this.
-            _listing.Pictures.Add(newItem);
 
-            item.PropertyChanged -= OnPicturePropertyChanged;
+            _listing.SetName(Name);
+
+            _listing.SetFloorPlanTypeLabel(SelectedFloorPlanType);
+            _listing.SetFloorPlanExtraTypeLabel(SelectedFloorPlanExtraType);
+            _listing.SetFloorGroundTypeLabel(SelectedFloorGroundType);
+            _listing.SetFloorExclusiveAreaSqm(FloorExclusiveAreaSqm);
+            _listing.SetFloorNumber(FloorNumber);
+            _listing.SetIsCornerRoom(IsCornerRoom);
+            _listing.SetExposureDirectionTypeLabel(SelectedExposureDirectionType);
+            _listing.SetAvailabilityStatusTypeLabel(SelectedAvailabilityStatusType);
+            _listing.SetAvailabilityMonthTypeLabel(SelectedAvailabilityMonthType);
+            _listing.SetAvailabilityPeriodTypeLabel(SelectedAvailabilityPeriodType);
+            _listing.SetOccupancyStatusLabel(SelectedOccupancyStatus);
+            _listing.SetIsAvailableForImmediateMoveIn(IsAvailableForImmediateMoveIn);
+            _listing.SetIsAvailableForRentNow(IsAvailableForRentNow);
+            _listing.SetOccupancyStatusCheckedAt(OccupancyStatusCheckedAt);
+            _listing.SetRemarks(Remarks);
+            _listing.SetHasAirConditioner(HasAirConditioner);
+            _listing.SetHasWoodFlooring(HasWoodFlooring);
+            _listing.SetHasVideoIntercom(HasVideoIntercom);
+            _listing.SetHasBathReheating(HasBathReheating);
+            _listing.SetHasGasStove(HasGasStove);
+            _listing.SetHasInductionCooktop(HasInductionCooktop);
+            _listing.SetHasMultipleBurners(HasMultipleBurners);
+            _listing.SetHasSystemKitchen(HasSystemKitchen);
+            _listing.SetHasLoft(HasLoft);
+            _listing.SetHasIndoorWashingMachineSpace(HasIndoorWashingMachineSpace);
+            _listing.SetHasBathroomDryer(HasBathroomDryer);
+            _listing.SetHasSeparateBathAndToilet(HasSeparateBathAndToilet);
+            _listing.SetHasSeparateWashbasin(HasSeparateWashbasin);
+            _listing.SetHasWarmWaterToiletSeat(HasWarmWaterToiletSeat);
+            _listing.SetApplianceRemarks(ApplianceRemarks);
+            _listing.SetChinryouFromString(Chinryou);
+            _listing.SetManagementFee(ManagementFee);
+            _listing.SetSecurityDeposit(SecurityDeposit);
+            _listing.SetKeyMoney(KeyMoney);
+            _listing.SetRenewalFee(RenewalFee);
+            _listing.SetRecontractFee(RecontractFee);
+            _listing.SetContractPeriodYears(ContractPeriodYears);
+            _listing.SetManagementFeeUnitTypeLabel(SelectedManagementFeeUnit);
+            _listing.SetSecurityDepositUnitTypeLabel(SelectedSecurityDepositUnit);
+            _listing.SetKeyMoneyUnitTypeLabel(SelectedKeyMoneyUnit);
+            _listing.SetRenewalFeeUnitTypeLabel(SelectedRenewalFeeUnit);
+            _listing.SetRecontractFeeUnitTypeLabel(SelectedRecontractFeeUnit);
+            _listing.SetContractTypeLabel(SelectedContractType);
+            _listing.SetGuarantorCompany(GuarantorCompany);
+            _listing.SetHousingInsurance(HousingInsurance);
+            _listing.SetOtherFees(OtherFees);
+            _listing.SetPetFriendly(PetFriendly);
+            _listing.SetTwoPersonOccupancy(TwoPersonOccupancy);
+            _listing.SetNoGuarantorNeeded(NoGuarantorNeeded);
+            _listing.SetOfficeUseAllowed(OfficeUseAllowed);
+            _listing.SetOtherConditions(OtherConditions);
+            _listing.SetContractRemarks(ContractRemarks);
+            _listing.SetHandlingTypeLabel(SelectedHandlingType);
+            _listing.SetTransactionTypeLabel(SelectedTransactionType);
+            _listing.SetLessorCommission(LessorCommission);
+            _listing.SetLesseeCommission(LesseeCommission);
+            _listing.SetListingBrokerCommission(ListingBrokerCommission);
+            _listing.SetTenantBrokerCommission(TenantBrokerCommission);
+            _listing.SetLessorCommissionUnitTypeLabel(SelectedLessorCommissionUnit);
+            _listing.SetLesseeCommissionUnitTypeLabel(SelectedLesseeCommissionUnit);
+            _listing.SetListingBrokerCommissionUnitTypeLabel(SelectedListingBrokerCommissionUnit);
+            _listing.SetTenantBrokerCommissionUnitTypeLabel(SelectedTenantBrokerCommissionUnit);
+            _listing.SetTransactionRemarks(TransactionRemarks);
+
+            // Recreate the Pictures collection in _listing to ensure it matches the current Pictures collection in the ViewModel.
+            //_listing.Pictures = Pictures;
+            _listing.Pictures.Clear();
+            foreach (var item in Pictures)
+            {
+                var newItem = item.Clone();
+                newItem.BasePath = item.BasePath;//System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(App.PropertyBlobDataFolder, _listing.PropertyId), _listing.Id));
+                                                 //newItem.ParentViewModel = this;
+                newItem.SetIsModified(item.IsModified); // Needed this.
+                _listing.Pictures.Add(newItem);
+
+                item.PropertyChanged -= OnPicturePropertyChanged;
+            }
+
+            // Recreate the Pdfs collection in _listing to ensure it matches the current Pdfs collection in the ViewModel.
+            //_listing.Pdfs = Pdfs;
+            _listing.Pdfs.Clear();
+            foreach (var item in Pdfs)
+            {
+                var newItem = item.Clone();
+                newItem.BasePath = item.BasePath;//_listingDataDirectoryPath;
+                                                 //newItem.ParentViewModel = this;
+                newItem.SetIsModified(item.IsModified);
+                _listing.Pdfs.Add(newItem);
+
+                item.PropertyChanged -= OnPdfPropertyChanged;
+            }
+
+            _listing.Lessors.Clear();
+            foreach (var wrapper in LessorsWrapper)
+            {
+                _listing.Lessors.Add(wrapper.Person);
+                //foreach (var deleted in _listing.LessorsToBeDeleted.Where(person => person.Id == wrapper.Person.Id).ToList()) _listing.LessorsToBeDeleted.Remove(deleted);
+            }
+            _listing.Brokers.Clear();
+            foreach (var wrapper in BrokersWrapper)
+            {
+                _listing.Brokers.Add(wrapper.Person);
+                //foreach (var deleted in _listing.BrokersToBeDeleted.Where(person => person.Id == wrapper.Person.Id).ToList()) _listing.BrokersToBeDeleted.Remove(deleted);
+            }
+
+            return true;
         }
-
-        // Recreate the Pdfs collection in _listing to ensure it matches the current Pdfs collection in the ViewModel.
-        //_listing.Pdfs = Pdfs;
-        _listing.Pdfs.Clear();
-        foreach (var item in Pdfs)
+        catch (ArgumentException ex)
         {
-            var newItem = item.Clone();
-            newItem.BasePath = item.BasePath;//_listingDataDirectoryPath;
-            //newItem.ParentViewModel = this;
-            newItem.SetIsModified(item.IsModified);
-            _listing.Pdfs.Add(newItem);
+            var err = new Models.ErrorInfo
+            {
+                Title = "入力値にエラーがあります。物件情報の保存が出来ませんでした。",
+                Type = Models.ErrorInfo.ErrType.UserInput,
+                Code = "",
+                Message = ex.Message,
+                Description = ex.StackTrace ?? string.Empty,
+                Operation = "Input Validation",
+                MethodName = nameof(SetValues),
+                OccuredAt = DateTime.Now
+            };
 
-            item.PropertyChanged -= OnPdfPropertyChanged;
-        }
+            ShowErrorInfoBar(err);
 
-        _listing.Lessors.Clear();
-        foreach (var wrapper in LessorsWrapper)
-        {
-            _listing.Lessors.Add(wrapper.Person);
-            //foreach (var deleted in _listing.LessorsToBeDeleted.Where(person => person.Id == wrapper.Person.Id).ToList()) _listing.LessorsToBeDeleted.Remove(deleted);
+            return false;
         }
-        _listing.Brokers.Clear();
-        foreach (var wrapper in BrokersWrapper)
-        {
-            _listing.Brokers.Add(wrapper.Person);
-            //foreach (var deleted in _listing.BrokersToBeDeleted.Where(person => person.Id == wrapper.Person.Id).ToList()) _listing.BrokersToBeDeleted.Remove(deleted);
-        }
-        //foreach (var deleted in _draftLessorDeletions.Where(person => !_listing.LessorsToBeDeleted.Any(item => item.Id == person.Id))) _listing.LessorsToBeDeleted.Add(deleted);
-        //foreach (var deleted in _draftBrokerDeletions.Where(person => !_listing.BrokersToBeDeleted.Any(item => item.Id == person.Id))) _listing.BrokersToBeDeleted.Add(deleted);
     }
 
     private void PopulateValues(bool isDuplicate)
@@ -1534,20 +1499,6 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         }
     }
 
-    /*
-    public bool CleanIncompleteAttachments()
-    {
-        var failures = new List<string>();
-        var savedPaths = ProtectedAttachmentPaths();
-        _pendingRoomPdfCleanupFiles.RemoveAll(savedPaths.Contains);
-        DeleteTrackedFiles(_incompleteAttachmentFiles, failures);
-        DeleteTrackedFiles(_pendingRoomPdfCleanupFiles, failures);
-        if (failures.Count == 0) return true;
-        ShowAttachmentError($"読み込みまたは破棄した図面ファイルを削除できませんでした: {string.Join(", ", failures)}");
-        return false;
-    }
-    */
-
     private void DiscardUnsavedFiles()
     {
         var failures = new List<string>();
@@ -1635,7 +1586,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
             return;
         }
         */
-        if (IsSaving || !IsDirty) return;
+        if (IsSaving || IsBusy || !IsDirty) return;
         /*
         if (HasPendingEditorOperations)
         {
@@ -1669,8 +1620,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         */
 
         IsSaving = true;
-        OnPropertyChanged(nameof(IsEditorEnabled));
-        SaveCommand.NotifyCanExecuteChanged();
+        IsBusy = true;
         try
         {
             await SaveCore();
@@ -1685,9 +1635,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
             finally
             {
                 IsSaving = false;
-                OnPropertyChanged(nameof(IsEditorEnabled));
-                SaveCommand.NotifyCanExecuteChanged();
-                ApplyDeferredMessages();
+                IsBusy = false;
             }
         }
     }
@@ -1700,48 +1648,8 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
             return;
         }
 
-        // Validate input.
-        if (!ValidateName() || !TryParseBasicNumericValues(out _, out _))
+        if (!ValidateInput())
         {
-            ShowSimpleErrorInfoBar("入力項目に誤りがあります","入力項目に誤りがあります。保存出来ませんでした。");
-
-            if (!_navigationService.IsCurrentPageSameAs(BasicPageName))
-            {
-                _navigationService.NavigateTo(BasicPageName, this);
-            }
-
-            return;
-        }
-
-        if (!ValidateContractNumericValues() || !ValidateChinryou())
-        {
-            IsInfoBarErrorOpen = true;
-            const string contractPageName = "ZumenSearch.Views.Rent.Residentials.Listing.ContractPage";
-            if (!_navigationService.IsCurrentPageSameAs(contractPageName))
-            {
-                _navigationService.NavigateTo(contractPageName, this);
-            }
-
-            return;
-        }
-
-        if (!ValidateTransactionNumericValues())
-        {
-            IsInfoBarErrorOpen = true;
-            const string transactionPageName = "ZumenSearch.Views.Rent.Residentials.Listing.TransactionPage";
-            if (!_navigationService.IsCurrentPageSameAs(transactionPageName))
-            {
-                _navigationService.NavigateTo(transactionPageName, this);
-            }
-
-            return;
-        }
-
-        if (Pdfs.Count(pdf => pdf.IsMain) > 1)
-        {
-            ShowSimpleErrorInfoBar("入力項目に誤りがあります", "メインの図面は1枚だけ選択してください。");
-            const string pageName = "ZumenSearch.Views.Rent.Residentials.Listing.ZumenListPage";
-            if (IsPropertyUnitLevelOwnership && !_navigationService.IsCurrentPageSameAs(pageName)) _navigationService.NavigateTo(pageName, this);
             return;
         }
 
@@ -1751,8 +1659,10 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
             return;
         }
 
-
-        SetValues();
+        if (!SetValues())
+        {
+            return;
+        }
 
         bool saveResult;
         if (_listing.PropertyStatus == EntityStatus.New)
@@ -1903,7 +1813,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
 
     private bool CanSave()
     {
-        return IsDirty && !IsSaving && !_propertyBusy && !_isClosing;// && !_discardPending;
+        return IsDirty && !IsSaving && !IsBusy;// && !_discardPending;
     }
 
     #endregion
@@ -1914,53 +1824,61 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
     public async Task AddNewRoomPictures(List<string> filePathList)
     {
         if (filePathList is null) return;
-        if (filePathList.Count == 0) return;
+        if (filePathList.Count == 0 || !IsEditorEnabled) return;
 
-        Debug.WriteLine($"destDirectory={_listingDataDirectoryPath}  @AddNewRoomPictures()");
-
-        //List<string> list = [];
-
-        foreach (var filePath in filePathList)
+        IsBusy = true;
+        try
         {
-            if (string.IsNullOrEmpty(filePath.Trim()))
+            Debug.WriteLine($"destDirectory={_listingDataDirectoryPath}  @AddNewRoomPictures()");
+
+            //List<string> list = [];
+
+            foreach (var filePath in filePathList)
             {
-                continue;
+                if (string.IsNullOrEmpty(filePath.Trim()))
+                {
+                    continue;
+                }
+
+                string extension = Path.GetExtension(filePath);
+                if (!IsSupportedImageExtension(extension))
+                {
+                    ShowSimpleErrorInfoBar("エラー", $"画像形式に対応していません: {Path.GetFileName(filePath)}");
+                    continue;
+                }
+
+                using var sourceStream = File.Open(filePath, FileMode.Open);
+
+                string newId = Guid.CreateVersion7().ToString("N");
+                string newFilename = newId + extension;
+                var destFilePath = Path.Combine(_listingDataDirectoryPath, newFilename);
+                //Debug.WriteLine($"{file} to {destFilePath}  @SetNewBuildingPicturesAsync()");
+
+                using var destinationStream = new FileStream(destFilePath, FileMode.CreateNew, FileAccess.Write);
+                //_incompleteAttachmentFiles.Add(destFilePath);
+                await sourceStream.CopyToAsync(destinationStream);
+
+                var pic = new Models.Rent.Residentials.ListingPicture(newId, newFilename, EntityStatus.New)
+                {
+                    BasePath = _listingDataDirectoryPath,
+                    ParentViewModel = this
+                };
+
+                Pictures.Add(pic);
+
+                OpenBlobDirectoryCommand.NotifyCanExecuteChanged();
+                DeleteRoomPictureCommand.NotifyCanExecuteChanged();
+
+                IsDirty = true;
+
+                // Keep track of unsaved files to delete them when discarding.
+                _unsavedListingPictureFileList.Add(destFilePath);
+                //_incompleteAttachmentFiles.Remove(destFilePath);
             }
-
-            string extension = Path.GetExtension(filePath);
-            if (!IsSupportedImageExtension(extension))
-            {
-                ShowSimpleErrorInfoBar("エラー", $"画像形式に対応していません: {Path.GetFileName(filePath)}");
-                continue;
-            }
-
-            using var sourceStream = File.Open(filePath, FileMode.Open);
-
-            string newId = Guid.CreateVersion7().ToString("N");
-            string newFilename = newId + extension;
-            var destFilePath = Path.Combine(_listingDataDirectoryPath, newFilename);
-            //Debug.WriteLine($"{file} to {destFilePath}  @SetNewBuildingPicturesAsync()");
-
-            using var destinationStream = new FileStream(destFilePath, FileMode.CreateNew, FileAccess.Write);
-            //_incompleteAttachmentFiles.Add(destFilePath);
-            await sourceStream.CopyToAsync(destinationStream);
-
-            var pic = new Models.Rent.Residentials.ListingPicture(newId, newFilename, EntityStatus.New)
-            {
-                BasePath = _listingDataDirectoryPath,
-                ParentViewModel = this
-            };
-
-            Pictures.Add(pic);
-
-            OpenBlobDirectoryCommand.NotifyCanExecuteChanged();
-            DeleteRoomPictureCommand.NotifyCanExecuteChanged();
-
-            IsDirty = true;
-
-            // Keep track of unsaved files to delete them when discarding.
-            _unsavedListingPictureFileList.Add(destFilePath);
-            //_incompleteAttachmentFiles.Remove(destFilePath);
+        }
+        finally
+        {
+            IsBusy = false;
         }
     }
     private static bool CanAddNewRoomPictures()
@@ -1988,22 +1906,31 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
             return;
         }
 
-        if (_dialogService is null || await _dialogService.ShowDeleteConfirmationDialog("この募集物件の写真を削除しますか？") != Microsoft.UI.Xaml.Controls.ContentDialogResult.Primary)
+        if (!IsEditorEnabled) return;
+        IsBusy = true;
+        try
         {
-            return;
-        }
-
-        if (Pictures.Remove(picUnit))
-        {
-            // TODO: should I? Prob no.
-            /*
-            if (_listing.Pictures.Remove(picUnit))
+            if (_dialogService is null || await _dialogService.ShowDeleteConfirmationDialog("この募集物件の写真を削除しますか？") != Microsoft.UI.Xaml.Controls.ContentDialogResult.Primary)
             {
-                
+                return;
             }
-            */
-            _listing.PicturesToBeDeleted.Add(picUnit);
-            IsDirty = true;
+
+            if (Pictures.Remove(picUnit))
+            {
+                // TODO: should I? Prob no.
+                /*
+                if (_listing.Pictures.Remove(picUnit))
+                {
+
+                }
+                */
+                _listing.PicturesToBeDeleted.Add(picUnit);
+                IsDirty = true;
+            }
+        }
+        finally
+        {
+            IsBusy = false;
         }
     }
     private static bool CanDeleteRoomPicture(Models.Rent.Residentials.ListingPicture picUnit)
@@ -2015,97 +1942,105 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
     public async Task AddNewRoomPdfs(List<string> filePathList)
     {
         if (filePathList is null) return;
-        if (filePathList.Count == 0 || !IsPropertyUnitLevelOwnership) return;
-        //var ownershipVersion = _ownershipVersion;
-
-        Debug.WriteLine($"destDirectory={_listingDataDirectoryPath}  @AddNewRoomPdfs()");
-
-        //List<string> list = [];
-
-        foreach (var filePath in filePathList)
+        if (filePathList.Count == 0 || !IsPropertyUnitLevelOwnership || !IsEditorEnabled) return;
+        IsBusy = true;
+        try
         {
-            if (string.IsNullOrEmpty(filePath.Trim()))
+            //var ownershipVersion = _ownershipVersion;
+
+            Debug.WriteLine($"destDirectory={_listingDataDirectoryPath}  @AddNewRoomPdfs()");
+
+            //List<string> list = [];
+
+            foreach (var filePath in filePathList)
             {
-                continue;
-            }
-
-
-            string extension = Path.GetExtension(filePath);
-            if (!extension.Equals(".pdf", StringComparison.OrdinalIgnoreCase))
-            {
-                ShowSimpleErrorInfoBar("エラー", $"PDFファイルを選択してください: {Path.GetFileName(filePath)}");
-                continue;
-            }
-
-            var importedPaths = new List<string>();
-            try
-            {
-                StorageFile sfile = await StorageFile.GetFileFromPathAsync(filePath);
-                PdfDocument pdfDocument = await PdfDocument.LoadFromFileAsync(sfile);
-
-                if (pdfDocument.PageCount > 0)
+                if (string.IsNullOrEmpty(filePath.Trim()))
                 {
-                    using PdfPage pdfPage = pdfDocument.GetPage(0);
-                    using var stream = new InMemoryRandomAccessStream();
-                    var options = new PdfPageRenderOptions { DestinationWidth = 512 };
-                    await pdfPage.RenderToStreamAsync(stream, options);
-
-                    string newId = Guid.CreateVersion7().ToString("N");
-                    string newThumbnailFilename = newId + ".bmp";
-                    var thumbnailDestFilePath = Path.Combine(_listingDataDirectoryPath, newThumbnailFilename);
-
-                    using (var destinationStream = new FileStream(thumbnailDestFilePath, FileMode.CreateNew, FileAccess.Write))
-                    {
-                        //_incompleteAttachmentFiles.Add(thumbnailDestFilePath);
-                        importedPaths.Add(thumbnailDestFilePath);
-                        using var managedSourceStream = stream.AsStreamForRead();
-                        await managedSourceStream.CopyToAsync(destinationStream);
-                    }
-
-                    string newFilename = newId + extension;
-                    var pdfDestFilePath = Path.Combine(_listingDataDirectoryPath, newFilename);
-                    using (var pdfSource = File.OpenRead(filePath))
-                    using (var pdfDestination = new FileStream(pdfDestFilePath, FileMode.CreateNew, FileAccess.Write))
-                    {
-                        //_incompleteAttachmentFiles.Add(pdfDestFilePath);
-                        importedPaths.Add(pdfDestFilePath);
-                        await pdfSource.CopyToAsync(pdfDestination);
-                    }
-
-                    var pdf = new Models.Rent.Residentials.ListingPdf(newId, newFilename, newThumbnailFilename, EntityStatus.New)
-                    {
-                        BasePath = _listingDataDirectoryPath,
-                        ParentViewModel = this
-                    };
-
-                    Pdfs.Add(pdf);
-                    _unsavedListingPdfThumbnailFileList.Add(thumbnailDestFilePath);
-                    _unsavedListingPdfFileList.Add(pdfDestFilePath);
-
-                    OpenBlobDirectoryCommand.NotifyCanExecuteChanged();
-                    DeleteRoomPdfCommand.NotifyCanExecuteChanged();
-                    IsDirty = true;
+                    continue;
                 }
-                else
+
+
+                string extension = Path.GetExtension(filePath);
+                if (!extension.Equals(".pdf", StringComparison.OrdinalIgnoreCase))
                 {
-                    ShowSimpleErrorInfoBar("エラー", $"PDFにページがありません: {Path.GetFileName(filePath)}");
+                    ShowSimpleErrorInfoBar("エラー", $"PDFファイルを選択してください: {Path.GetFileName(filePath)}");
+                    continue;
                 }
-            }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Runtime.InteropServices.COMException or InvalidOperationException or ArgumentException)
-            {
-                /*
-                if (ownershipVersion != _ownershipVersion || !IsPropertyUnitLevelOwnership)
+
+                var importedPaths = new List<string>();
+                try
                 {
-                    foreach (var path in importedPaths)
+                    StorageFile sfile = await StorageFile.GetFileFromPathAsync(filePath);
+                    PdfDocument pdfDocument = await PdfDocument.LoadFromFileAsync(sfile);
+
+                    if (pdfDocument.PageCount > 0)
                     {
-                        AddPendingPdfCleanupPath(path);
-                        _incompleteAttachmentFiles.Remove(path);
+                        using PdfPage pdfPage = pdfDocument.GetPage(0);
+                        using var stream = new InMemoryRandomAccessStream();
+                        var options = new PdfPageRenderOptions { DestinationWidth = 512 };
+                        await pdfPage.RenderToStreamAsync(stream, options);
+
+                        string newId = Guid.CreateVersion7().ToString("N");
+                        string newThumbnailFilename = newId + ".bmp";
+                        var thumbnailDestFilePath = Path.Combine(_listingDataDirectoryPath, newThumbnailFilename);
+
+                        using (var destinationStream = new FileStream(thumbnailDestFilePath, FileMode.CreateNew, FileAccess.Write))
+                        {
+                            //_incompleteAttachmentFiles.Add(thumbnailDestFilePath);
+                            importedPaths.Add(thumbnailDestFilePath);
+                            using var managedSourceStream = stream.AsStreamForRead();
+                            await managedSourceStream.CopyToAsync(destinationStream);
+                        }
+
+                        string newFilename = newId + extension;
+                        var pdfDestFilePath = Path.Combine(_listingDataDirectoryPath, newFilename);
+                        using (var pdfSource = File.OpenRead(filePath))
+                        using (var pdfDestination = new FileStream(pdfDestFilePath, FileMode.CreateNew, FileAccess.Write))
+                        {
+                            //_incompleteAttachmentFiles.Add(pdfDestFilePath);
+                            importedPaths.Add(pdfDestFilePath);
+                            await pdfSource.CopyToAsync(pdfDestination);
+                        }
+
+                        var pdf = new Models.Rent.Residentials.ListingPdf(newId, newFilename, newThumbnailFilename, EntityStatus.New)
+                        {
+                            BasePath = _listingDataDirectoryPath,
+                            ParentViewModel = this
+                        };
+
+                        Pdfs.Add(pdf);
+                        _unsavedListingPdfThumbnailFileList.Add(thumbnailDestFilePath);
+                        _unsavedListingPdfFileList.Add(pdfDestFilePath);
+
+                        OpenBlobDirectoryCommand.NotifyCanExecuteChanged();
+                        DeleteRoomPdfCommand.NotifyCanExecuteChanged();
+                        IsDirty = true;
+                    }
+                    else
+                    {
+                        ShowSimpleErrorInfoBar("エラー", $"PDFにページがありません: {Path.GetFileName(filePath)}");
                     }
                 }
-                */
-                Debug.WriteLine($"Failed to import PDF '{filePath}': {ex}");
-                ShowSimpleErrorInfoBar("エラー", $"PDFを読み込めませんでした: {Path.GetFileName(filePath)}。{ex.Message}");
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Runtime.InteropServices.COMException or InvalidOperationException or ArgumentException)
+                {
+                    /*
+                    if (ownershipVersion != _ownershipVersion || !IsPropertyUnitLevelOwnership)
+                    {
+                        foreach (var path in importedPaths)
+                        {
+                            AddPendingPdfCleanupPath(path);
+                            _incompleteAttachmentFiles.Remove(path);
+                        }
+                    }
+                    */
+                    Debug.WriteLine($"Failed to import PDF '{filePath}': {ex}");
+                    ShowSimpleErrorInfoBar("エラー", $"PDFを読み込めませんでした: {Path.GetFileName(filePath)}。{ex.Message}");
+                }
             }
+        }
+        finally
+        {
+            IsBusy = false;
         }
     }
 
@@ -2119,6 +2054,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
     {
         if (pdf is null || !Pdfs.Contains(pdf) || !IsEditorEnabled) return;
 
+        IsBusy = true;
         try
         {
             var file = await StorageFile.GetFileFromPathAsync(Path.Combine(_listingDataDirectoryPath, pdf.PdfFilename));
@@ -2132,6 +2068,10 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
             Debug.WriteLine($"Failed to open residential listing PDF: {ex}");
             ShowSimpleErrorInfoBar("エラー", $"PDFを開けませんでした: {ex.Message}");
         }
+        finally
+        {
+            IsBusy = false;
+        }
     }
 
     [RelayCommand(CanExecute = nameof(CanDeleteRoomPdf))]
@@ -2142,15 +2082,24 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
             return;
         }
 
-        if (_dialogService is null || await _dialogService.ShowDeleteConfirmationDialog("この募集物件の図面を削除しますか？") != Microsoft.UI.Xaml.Controls.ContentDialogResult.Primary)
+        if (!IsEditorEnabled) return;
+        IsBusy = true;
+        try
         {
-            return;
-        }
+            if (_dialogService is null || await _dialogService.ShowDeleteConfirmationDialog("この募集物件の図面を削除しますか？") != Microsoft.UI.Xaml.Controls.ContentDialogResult.Primary)
+            {
+                return;
+            }
 
-        if (Pdfs.Remove(pdf))
+            if (Pdfs.Remove(pdf))
+            {
+                _listing.PdfsToBeDeleted.Add(pdf);
+                IsDirty = true;
+            }
+        }
+        finally
         {
-            _listing.PdfsToBeDeleted.Add(pdf);
-            IsDirty = true;
+            IsBusy = false;
         }
     }
     private static bool CanDeleteRoomPdf(Models.Rent.Residentials.ListingPdf pdf)
@@ -2197,50 +2146,58 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
             return;
         }
 
-        var lessor = await _dialogService.ShowLessorSelectDialog(new ViewModels.Dialogs.LessorSelectViewModel(_dataAccessService, _cts));
-
-        if (lessor is not null)
+        if (!IsEditorEnabled) return;
+        IsBusy = true;
+        try
         {
-            var lessorId = lessor.Id;
+            var lessor = await _dialogService.ShowLessorSelectDialog(new ViewModels.Dialogs.LessorSelectViewModel(_dataAccessService, _cts));
 
-            // Check if already exists
-            var match = LessorsWrapper.FirstOrDefault(x => x.Person.Id.Equals(lessorId, StringComparison.Ordinal));
-            if (match is not null)
+            if (lessor is not null)
             {
-                Debug.WriteLine($"lessor {lessor.Name} already in the list.");
-                return;
+                var lessorId = lessor.Id;
+
+                // Check if already exists
+                var match = LessorsWrapper.FirstOrDefault(x => x.Person.Id.Equals(lessorId, StringComparison.Ordinal));
+                if (match is not null)
+                {
+                    Debug.WriteLine($"lessor {lessor.Name} already in the list.");
+                    return;
+                }
+
+                var res = await Task.Run(() => _dataAccessService.SelectRentLessorById(lessorId), _cts.Token);
+                if (res.IsError)
+                {
+                    Debug.WriteLine(
+                        res.Error.Title + Environment.NewLine +
+                        res.Error.Message + Environment.NewLine +
+                        res.Error.Description + Environment.NewLine +
+                        res.Error.Operation + Environment.NewLine +
+                        res.Error.MethodName + Environment.NewLine +
+                        res.Error.FullDump);
+                    ShowErrorInfoBar(res.Error);
+                    return;
+                }
+
+                if (res.Person is null)
+                {
+                    Debug.WriteLine($"{lessorId} is null. Cannot open editor.");
+                    ShowSimpleErrorInfoBar("選択した貸主を読み込めませんでした",$"ID {lessorId}　がありません。");
+                    return;
+                }
+
+
+                var asdf = new Models.Rent.Residentials.PersonWrapperForListingViewModel(res.Person, this);
+
+                //_draftLessorDeletions.RemoveAll(person => person.Id == res.Person.Id);
+                LessorsWrapper.Add(asdf);
+
+                IsDirty = true;
             }
-
-            var res = await Task.Run(() => _dataAccessService.SelectRentLessorById(lessorId), _cts.Token);
-            if (res.IsError)
-            {
-                Debug.WriteLine(
-                    res.Error.Title + Environment.NewLine +
-                    res.Error.Message + Environment.NewLine +
-                    res.Error.Description + Environment.NewLine +
-                    res.Error.Operation + Environment.NewLine +
-                    res.Error.MethodName + Environment.NewLine +
-                    res.Error.FullDump);
-                ShowErrorInfoBar(res.Error);
-                return;
-            }
-
-            if (res.Person is null)
-            {
-                Debug.WriteLine($"{lessorId} is null. Cannot open editor.");
-                ShowSimpleErrorInfoBar("選択した貸主を読み込めませんでした",$"ID {lessorId}　がありません。");
-                return;
-            }
-
-
-            var asdf = new Models.Rent.Residentials.PersonWrapperForListingViewModel(res.Person, this);
-
-            //_draftLessorDeletions.RemoveAll(person => person.Id == res.Person.Id);
-            LessorsWrapper.Add(asdf);
-
-            IsDirty = true;
         }
-
+        finally
+        {
+            IsBusy = false;
+        }
     }
 
     [RelayCommand(CanExecute = nameof(CanEditLessor))]
@@ -2300,43 +2257,52 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
             return;
         }
 
-        var selectedBroker = await _dialogService.ShowBrokerSelectDialog(
-            new ViewModels.Dialogs.BrokerSelectViewModel(_dataAccessService, _cts));
-
-        if (selectedBroker is null ||
-            BrokersWrapper.Any(item => item.Person.Id == selectedBroker.Id))
+        if (!IsEditorEnabled) return;
+        IsBusy = true;
+        try
         {
-            return;
-        }
+            var selectedBroker = await _dialogService.ShowBrokerSelectDialog(
+                new ViewModels.Dialogs.BrokerSelectViewModel(_dataAccessService, _cts));
 
-        var result = await Task.Run(() => _dataAccessService.SelectBrokerById(selectedBroker.Id), _cts.Token);
-        if (result.IsError)
+            if (selectedBroker is null ||
+                BrokersWrapper.Any(item => item.Person.Id == selectedBroker.Id))
+            {
+                return;
+            }
+
+            var result = await Task.Run(() => _dataAccessService.SelectBrokerById(selectedBroker.Id), _cts.Token);
+            if (result.IsError)
+            {
+                Debug.WriteLine(
+                    result.Error.Title + Environment.NewLine +
+                    result.Error.Message + Environment.NewLine +
+                    result.Error.Description + Environment.NewLine +
+                    result.Error.Operation + Environment.NewLine +
+                    result.Error.MethodName + Environment.NewLine +
+                    result.Error.FullDump);
+                ShowErrorInfoBar(result.Error);
+                return;
+            }
+
+            if (result.Person is null)
+            {
+                Debug.WriteLine($"Could not load broker '{selectedBroker.Id}'.");
+                ShowSimpleErrorInfoBar("選択した宅建業者を読み込めませんでした",$"ID {selectedBroker.Id}　がありません。");
+                return;
+            }
+
+            //_draftBrokerDeletions.RemoveAll(person => person.Id == result.Person.Id);
+            BrokersWrapper.Add(
+                new Models.Rent.Residentials.PersonWrapperForListingViewModel(
+                    result.Person,
+                    this));
+
+            IsDirty = true;
+        }
+        finally
         {
-            Debug.WriteLine(
-                result.Error.Title + Environment.NewLine +
-                result.Error.Message + Environment.NewLine +
-                result.Error.Description + Environment.NewLine +
-                result.Error.Operation + Environment.NewLine +
-                result.Error.MethodName + Environment.NewLine +
-                result.Error.FullDump);
-            ShowErrorInfoBar(result.Error);
-            return;
+            IsBusy = false;
         }
-
-        if (result.Person is null)
-        {
-            Debug.WriteLine($"Could not load broker '{selectedBroker.Id}'.");
-            ShowSimpleErrorInfoBar("選択した宅建業者を読み込めませんでした",$"ID {selectedBroker.Id}　がありません。");
-            return;
-        }
-
-        //_draftBrokerDeletions.RemoveAll(person => person.Id == result.Person.Id);
-        BrokersWrapper.Add(
-            new Models.Rent.Residentials.PersonWrapperForListingViewModel(
-                result.Person,
-                this));
-
-        IsDirty = true;
     }
 
     [RelayCommand(CanExecute = nameof(CanEditBroker))]

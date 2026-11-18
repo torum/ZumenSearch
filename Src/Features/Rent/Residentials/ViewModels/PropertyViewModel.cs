@@ -25,11 +25,8 @@ namespace ZumenSearch.ViewModels.Rent.Residentials;
 
 /*
  * TODO: 
- * Gather validation logic in one place. Currently, validation is scattered across various methods. Make sure it is consistent with ListingViewModel.
- * Send message to the MainViewModel when some error occurs while closing the window. MainViewModel should show a infobar with the error message.
- * Change sevirity to Error for simple error messages.
- * Add try catch to async and file IO operations and show error message in infobar.
- * Add IsBusy flag to disable the UI commands when some async or IO operations is in progress.
+ * Use IsBusy to disable the editor commands and show progress ring when saving or loading data.
+ * Add try catch to async, file IO, and other operations. Show error message in infobar if exception occurs.
  */
 
 public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<ListingUpdatedMessage>, IRecipient<WindowClosedMessage<Microsoft.UI.Xaml.Window>>, IRecipient<ListingDeletedMessage>, IRecipient<LessorUpdatedMessage>, IRecipient<BrokerUpdatedMessage>, IRecipient<LessorDeletedMessage>, IRecipient<BrokerDeletedMessage>, IDisposable
@@ -54,8 +51,6 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
     // Tmp listing list to hold unsaved listing where listing reside here while property is not yet saved. (if entry is not saved, delete on close)
     private readonly List<Listing> _unsavedListingList = [];
 
-    private bool _discardPending;
-    private bool _isClosing;
     private bool _isBusy;
 
     private readonly CancellationTokenSource _cts = new();
@@ -136,12 +131,21 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
     // Keeps truck of "New" child window because it saves to the parent window/viewmodel.
     public List<Views.Rent.Residentials.Listing.EditorWindow> UnsavedChildEditorList { get; } = [];
 
-    // TODO: Need to review following properties. 
     public bool IsSaving { get; private set; }
-    public bool IsClosing => _isClosing;
-    public bool IsBusy => _isBusy;
-    public bool IsDiscardPending => _discardPending;
-    public bool IsEditorEnabled => !IsSaving && !_isClosing && !_isBusy && !_discardPending;
+    public bool IsBusy
+    {
+        get => _isBusy;
+        private set
+        {
+            if (SetProperty(ref _isBusy, value))
+            {
+                OnPropertyChanged(nameof(IsEditorEnabled));
+                SaveCommand.NotifyCanExecuteChanged();
+            }
+        }
+    }
+
+    public bool IsEditorEnabled => !IsSaving && !_isBusy;
 
 
     #region == 画面表示関連 ==
@@ -219,8 +223,6 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             if (SetProperty(ref field, value.Trim()))
             {
                 IsDirty = true;
-
-                //ValidateName(false);
 
                 // Update title with dummy value.
                 WindowTitle = string.Empty;
@@ -2355,28 +2357,24 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
     #region == Public Methods ==
 
-    public void SetClosing(bool value)
-    {
-        _isClosing = value;
-        OnPropertyChanged(nameof(IsEditorEnabled));
-        SaveCommand.NotifyCanExecuteChanged();
-    }
-
     public bool DiscardChanges()
     {
-        _discardPending = true;
-        OnPropertyChanged(nameof(IsEditorEnabled));
-        SaveCommand.NotifyCanExecuteChanged();
+        if (IsBusy) return false;
+        IsBusy = true;
+        try
+        {
+            bool result = DiscardUnsavedFiles();
 
-        bool result = DiscardUnsavedFiles();
+            // Need to restore the original values from unsaved _property because IsUnitLevelOwnership change is real-time not save-time update.
+            WeakReferenceMessenger.Default.Send(new PropertyIsUnitOwnershipChangedMessage(_id, _property.IsUnitLevelOwnership));
 
-        // Need to restore the original values from unsaved _property because IsUnitLevelOwnership change is real-time not save-time update.
-        WeakReferenceMessenger.Default.Send(new PropertyIsUnitOwnershipChangedMessage(_id, _property.IsUnitLevelOwnership));
-
-        _discardPending = false;
-        IsDirty = false;
-
-        return result;
+            IsDirty = false;
+            return result;
+        }
+        finally
+        {
+            IsBusy = false;
+        }
     }
 
     public void Dispose()
@@ -2824,41 +2822,6 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         }
     }
 
-    private bool ValidateName(bool isShowError = true)
-    {
-        if (string.IsNullOrWhiteSpace(Name))
-        {
-            ShowSimpleErrorInfoBar("入力項目に誤りがあります","物件名（必須項目）が入力されていません。保存出来ませんでした。");
-
-            IsNameHasError = true;
-
-            if (isShowError)
-            {
-                IsInfoBarErrorOpen = true;
-            }
-
-            return false;
-        }
-
-        var realLength = new StringInfo(Name).LengthInTextElements;
-        if (realLength > 100)
-        {
-            ShowSimpleErrorInfoBar("入力項目に誤りがあります","物件名は100文字以内で入力してください。保存出来ませんでした。");
-
-            IsNameHasError = true;
-
-            if (isShowError)
-            {
-                IsInfoBarErrorOpen = true;
-            }
-
-            return false;
-        }
-
-        IsNameHasError = false;
-        return true;
-    }
-
     private void ShowSimpleErrorInfoBar(string title, string message, InfoBarSeverity severity = InfoBarSeverity.Warning)
     {
         InfoBarErrorTitle = title;
@@ -2885,8 +2848,35 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         return normalized.Length <= maxLength && normalized.All(character => character >= '0' && character <= '9');
     }
 
-    private bool ValidatePropertyNumericValues()
+    private bool ValidateInput()
     {
+        if (string.IsNullOrWhiteSpace(Name))
+        {
+            ShowSimpleErrorInfoBar("入力項目に誤りがあります","物件名（必須項目）が入力されていません。保存出来ませんでした。");
+            IsNameHasError = true;
+            if (!_navigationService.IsCurrentPageSameAs(BasicPageName))
+            {
+                _navigationService.NavigateTo(BasicPageName, this);
+            }
+
+            return false;
+        }
+
+        var realLength = new StringInfo(Name).LengthInTextElements;
+        if (realLength > 100)
+        {
+            ShowSimpleErrorInfoBar("入力項目に誤りがあります","物件名は100文字以内で入力してください。保存出来ませんでした。");
+            IsNameHasError = true;
+            if (!_navigationService.IsCurrentPageSameAs(BasicPageName))
+            {
+                _navigationService.NavigateTo(BasicPageName, this);
+            }
+
+            return false;
+        }
+
+        IsNameHasError = false;
+
         (string Label, string Value, int MaxLength)[] basicValues =
         [
             ("地上階数", FloorCountAboveGround, 4),
@@ -2938,6 +2928,12 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         if (!IsDirty)
         {
             return true;
+        }
+
+        if (_property is null)
+        {
+            Debug.WriteLine("_property is null. Can't set room.");
+            return false;
         }
 
         try
@@ -3260,12 +3256,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
     [RelayCommand(CanExecute = nameof(CanSave))]
     public async Task Save()
     {
-        if (_discardPending)
-        {
-            ShowSimpleErrorInfoBar("エラー", "変更の破棄が完了していないため保存できません。もう一度画面を閉じて再試行してください。");
-            return;
-        }
-        if (IsSaving || !IsDirty) return;
+
+        if (IsSaving || IsBusy || !IsDirty) return;
         /*
         var main = App.GetService<ViewModels.MainViewModel>();
         if (main.RentResidentialListingEditorList.Any(editor => editor.PropertyId == _id && editor.ViewModel is { IsDiscardPending: true }))
@@ -3287,8 +3279,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         */
 
         IsSaving = true;
-        OnPropertyChanged(nameof(IsEditorEnabled));
-        SaveCommand.NotifyCanExecuteChanged();
+        IsBusy = true;
         try
         {
             await SaveCore();
@@ -3297,8 +3288,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         {
             IsSaving = false;
             //main.EndResidentialOperation(_id);
-            OnPropertyChanged(nameof(IsEditorEnabled));
-            SaveCommand.NotifyCanExecuteChanged();
+            IsBusy = false;
             //while (_deferredMessages.TryDequeue(out var message)) message();
             //foreach (var editor in main.RentResidentialListingEditorList.Where(editor => editor.PropertyId == _id).ToList()) editor.ViewModel?.ApplyDeferredMessages();
         }
@@ -3306,18 +3296,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
     private async Task SaveCore()
     {
-        // Validate input.
-        if (!ValidateName(true))
-        {
-            if (!_navigationService.IsCurrentPageSameAs(BasicPageName))
-            {
-                _navigationService.NavigateTo(BasicPageName, this);
-            }
-
-            return;
-        }
-
-        if (!ValidatePropertyNumericValues())
+        if (!ValidateInput())
         {
             return;
         }
@@ -3472,7 +3451,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
     }
     private bool CanSave()
     {
-        return IsDirty && !IsSaving && !_isClosing && !_isBusy && !_discardPending;
+        return IsDirty && !IsSaving && !_isBusy;
     }
 
     #endregion
@@ -3485,8 +3464,11 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         // File open is handleed in the code behind since this ViewModel does not know about the Window which is required for the Picker.
 
         if (filePathList is null) return;
-        if (filePathList.Count == 0) return;
+        if (filePathList.Count == 0 || IsBusy || IsSaving) return;
 
+        IsBusy = true;
+        try
+        {
         //Debug.WriteLine($"destDirectory={_property.PropertyDataDirectoryPath}  @SetNewPropertyPicturesAsync()");
 
         //List<string> list = [];
@@ -3532,6 +3514,11 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             // Keep track of unsaved files to delete them when discarding.
             _unsavedPropertyPictureFileList.Add(destFilePath);
         }
+        }
+        finally
+        {
+            IsBusy = false;
+        }
     }
     private static bool CanAddNewPropertyPictures(List<string> filePathList)
     {
@@ -3551,15 +3538,21 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             return;
         }
 
-        if (await _dialogService.ShowDeleteConfirmationDialog("この物件写真を削除しますか？") != Microsoft.UI.Xaml.Controls.ContentDialogResult.Primary)
+        if (!IsEditorEnabled) return;
+        IsBusy = true;
+        try
         {
-            return;
-        }
+            if (await _dialogService.ShowDeleteConfirmationDialog("この物件写真を削除しますか？") != Microsoft.UI.Xaml.Controls.ContentDialogResult.Primary) return;
 
-        if (Pictures.Remove(picProp))
+            if (Pictures.Remove(picProp))
+            {
+                _property.PicturesToBeDeleted.Add(picProp);
+                IsDirty = true;
+            }
+        }
+        finally
         {
-            _property.PicturesToBeDeleted.Add(picProp);
-            IsDirty = true;
+            IsBusy = false;
         }
     }
     private static bool CanDeletePropertyPicture(Models.Rent.Residentials.PropertyPicture picProp)
@@ -3571,7 +3564,10 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
     private async Task AddNewPropertyPdfs(List<string> filePathList)
     {
         if (filePathList is null) return;
-        if (filePathList.Count == 0 || IsUnitLevelOwnership) return;
+        if (filePathList.Count == 0 || IsUnitLevelOwnership || IsBusy || IsSaving) return;
+        IsBusy = true;
+        try
+        {
         //var ownershipVersion = _ownershipVersion;
 
         Debug.WriteLine($"destDirectory={_propertyDataDirectoryPath}  @AddNewPropertyPdfs()");
@@ -3671,6 +3667,11 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
                 ShowSimpleErrorInfoBar("エラー", $"PDFを読み込めませんでした: {Path.GetFileName(filePath)}。{ex.Message}");
             }
         }
+        }
+        finally
+        {
+            IsBusy = false;
+        }
     }
 
     private static bool CanAddNewPropertyPdfs(List<string> filePathList)
@@ -3688,6 +3689,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
     {
         if (pdf is null || !Pdfs.Contains(pdf) || !IsEditorEnabled) return;
 
+        IsBusy = true;
         try
         {
             var file = await StorageFile.GetFileFromPathAsync(Path.Combine(_propertyDataDirectoryPath, pdf.PdfFilename));
@@ -3701,6 +3703,10 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             Debug.WriteLine($"Failed to open residential property PDF: {ex}");
             ShowSimpleErrorInfoBar("エラー", $"PDFを開けませんでした: {ex.Message}");
         }
+        finally
+        {
+            IsBusy = false;
+        }
     }
 
     [RelayCommand(CanExecute = nameof(CanDeletePropertyPdf))]
@@ -3711,15 +3717,21 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             return;
         }
 
-        if (await _dialogService.ShowDeleteConfirmationDialog("この建物図面を削除しますか？") != Microsoft.UI.Xaml.Controls.ContentDialogResult.Primary)
+        if (!IsEditorEnabled) return;
+        IsBusy = true;
+        try
         {
-            return;
-        }
+            if (await _dialogService.ShowDeleteConfirmationDialog("この建物図面を削除しますか？") != Microsoft.UI.Xaml.Controls.ContentDialogResult.Primary) return;
 
-        if (Pdfs.Remove(pdfProp))
+            if (Pdfs.Remove(pdfProp))
+            {
+                _property.PdfsToBeDeleted.Add(pdfProp);
+                IsDirty = true;
+            }
+        }
+        finally
         {
-            _property.PdfsToBeDeleted.Add(pdfProp);
-            IsDirty = true;
+            IsBusy = false;
         }
     }
     private static bool CanDeletePropertyPdf(Models.Rent.Residentials.PropertyPdf pdfProp)
@@ -3804,7 +3816,15 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
     {
         if (listingSummary is null || !ListingSummaries.Contains(listingSummary) || !IsEditorEnabled) return;
 
-        await EditSelectedListingCore(listingSummary);
+        IsBusy = true;
+        try
+        {
+            await EditSelectedListingCore(listingSummary);
+        }
+        finally
+        {
+            IsBusy = false;
+        }
     }
 
     private async Task EditSelectedListingCore(ListingSummary listingSummary)
@@ -3969,6 +3989,10 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             return;
         }
 
+        if (!IsEditorEnabled) return;
+        IsBusy = true;
+        try
+        {
         if (await _dialogService.ShowDeleteConfirmationDialog("この募集物件を削除しますか？") != Microsoft.UI.Xaml.Controls.ContentDialogResult.Primary) return;
 
         if (ListingSummaries.Remove(listingSummary))
@@ -3982,6 +4006,11 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             Debug.WriteLine($"Marked listing {listingSummary.Id} for deletion.");
 
             IsDirty = true;
+        }
+        }
+        finally
+        {
+            IsBusy = false;
         }
     }
     public static bool DeleteSelectedListingCanExecute(ListingSummary listingSummary)
@@ -4002,9 +4031,17 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             return;
         }
 
-        var uriGoogleMaps = new Uri($"https://maps.google.co.jp/?q={LocationLatitude},{LocationLongitude}");
-        await Launcher.LaunchUriAsync(uriGoogleMaps);
-
+        if (!IsEditorEnabled) return;
+        IsBusy = true;
+        try
+        {
+            var uriGoogleMaps = new Uri($"https://maps.google.co.jp/?q={LocationLatitude},{LocationLongitude}");
+            await Launcher.LaunchUriAsync(uriGoogleMaps);
+        }
+        finally
+        {
+            IsBusy = false;
+        }
     }
     private bool CanShowGoogleMaps()
     {
@@ -4029,11 +4066,16 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             return;
         }
 
-        var railLine = await _dialogService.ShowRailLineSelectDialog();
-
-        if (railLine is not null && !string.Equals(SelectedRailLine1.LineCode, railLine.LineCode, StringComparison.Ordinal))
+        if (!IsEditorEnabled) return;
+        IsBusy = true;
+        try
         {
-            SelectedRailLine1 = railLine;
+            var railLine = await _dialogService.ShowRailLineSelectDialog();
+            if (railLine is not null && !string.Equals(SelectedRailLine1.LineCode, railLine.LineCode, StringComparison.Ordinal)) SelectedRailLine1 = railLine;
+        }
+        finally
+        {
+            IsBusy = false;
         }
     }
 
@@ -4050,12 +4092,17 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             return;
         }
 
-        var lineCode = SelectedRailLine1.LineCode;
-        var railStation = await _dialogService.ShowRailStationSelectDialog(lineCode);
-
-        if (railStation is not null && string.Equals(SelectedRailLine1.LineCode, lineCode, StringComparison.Ordinal) && string.Equals(railStation.LineCode, lineCode, StringComparison.Ordinal))
+        if (!IsEditorEnabled) return;
+        IsBusy = true;
+        try
         {
-            SelectedRailStation1 = railStation;
+            var lineCode = SelectedRailLine1.LineCode;
+            var railStation = await _dialogService.ShowRailStationSelectDialog(lineCode);
+            if (railStation is not null && string.Equals(SelectedRailLine1.LineCode, lineCode, StringComparison.Ordinal) && string.Equals(railStation.LineCode, lineCode, StringComparison.Ordinal)) SelectedRailStation1 = railStation;
+        }
+        finally
+        {
+            IsBusy = false;
         }
     }
     private bool CanShowRailStationSelect1()
@@ -4077,11 +4124,16 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             return;
         }
 
-        var railLine = await _dialogService.ShowRailLineSelectDialog();
-
-        if (railLine is not null && !string.Equals(SelectedRailLine2.LineCode, railLine.LineCode, StringComparison.Ordinal))
+        if (!IsEditorEnabled) return;
+        IsBusy = true;
+        try
         {
-            SelectedRailLine2 = railLine;
+            var railLine = await _dialogService.ShowRailLineSelectDialog();
+            if (railLine is not null && !string.Equals(SelectedRailLine2.LineCode, railLine.LineCode, StringComparison.Ordinal)) SelectedRailLine2 = railLine;
+        }
+        finally
+        {
+            IsBusy = false;
         }
     }
 
@@ -4098,12 +4150,17 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             return;
         }
 
-        var lineCode = SelectedRailLine2.LineCode;
-        var railStation = await _dialogService.ShowRailStationSelectDialog(lineCode);
-
-        if (railStation is not null && string.Equals(SelectedRailLine2.LineCode, lineCode, StringComparison.Ordinal) && string.Equals(railStation.LineCode, lineCode, StringComparison.Ordinal))
+        if (!IsEditorEnabled) return;
+        IsBusy = true;
+        try
         {
-            SelectedRailStation2 = railStation;
+            var lineCode = SelectedRailLine2.LineCode;
+            var railStation = await _dialogService.ShowRailStationSelectDialog(lineCode);
+            if (railStation is not null && string.Equals(SelectedRailLine2.LineCode, lineCode, StringComparison.Ordinal) && string.Equals(railStation.LineCode, lineCode, StringComparison.Ordinal)) SelectedRailStation2 = railStation;
+        }
+        finally
+        {
+            IsBusy = false;
         }
     }
     private bool CanShowRailStationSelect2()
@@ -4125,11 +4182,16 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             return;
         }
 
-        var railLine = await _dialogService.ShowRailLineSelectDialog();
-
-        if (railLine is not null && !string.Equals(SelectedRailLine3.LineCode, railLine.LineCode, StringComparison.Ordinal))
+        if (!IsEditorEnabled) return;
+        IsBusy = true;
+        try
         {
-            SelectedRailLine3 = railLine;
+            var railLine = await _dialogService.ShowRailLineSelectDialog();
+            if (railLine is not null && !string.Equals(SelectedRailLine3.LineCode, railLine.LineCode, StringComparison.Ordinal)) SelectedRailLine3 = railLine;
+        }
+        finally
+        {
+            IsBusy = false;
         }
     }
 
@@ -4146,12 +4208,17 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             return;
         }
 
-        var lineCode = SelectedRailLine3.LineCode;
-        var railStation = await _dialogService.ShowRailStationSelectDialog(lineCode);
-
-        if (railStation is not null && string.Equals(SelectedRailLine3.LineCode, lineCode, StringComparison.Ordinal) && string.Equals(railStation.LineCode, lineCode, StringComparison.Ordinal))
+        if (!IsEditorEnabled) return;
+        IsBusy = true;
+        try
         {
-            SelectedRailStation3 = railStation;
+            var lineCode = SelectedRailLine3.LineCode;
+            var railStation = await _dialogService.ShowRailStationSelectDialog(lineCode);
+            if (railStation is not null && string.Equals(SelectedRailLine3.LineCode, lineCode, StringComparison.Ordinal) && string.Equals(railStation.LineCode, lineCode, StringComparison.Ordinal)) SelectedRailStation3 = railStation;
+        }
+        finally
+        {
+            IsBusy = false;
         }
     }
     private bool CanShowRailStationSelect3()
@@ -4173,11 +4240,16 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             return;
         }
 
-        var railLine = await _dialogService.ShowRailLineSelectDialog();
-
-        if (railLine is not null && !string.Equals(SelectedRailLine4.LineCode, railLine.LineCode, StringComparison.Ordinal))
+        if (!IsEditorEnabled) return;
+        IsBusy = true;
+        try
         {
-            SelectedRailLine4 = railLine;
+            var railLine = await _dialogService.ShowRailLineSelectDialog();
+            if (railLine is not null && !string.Equals(SelectedRailLine4.LineCode, railLine.LineCode, StringComparison.Ordinal)) SelectedRailLine4 = railLine;
+        }
+        finally
+        {
+            IsBusy = false;
         }
     }
 
@@ -4194,12 +4266,17 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             return;
         }
 
-        var lineCode = SelectedRailLine4.LineCode;
-        var railStation = await _dialogService.ShowRailStationSelectDialog(lineCode);
-
-        if (railStation is not null && string.Equals(SelectedRailLine4.LineCode, lineCode, StringComparison.Ordinal) && string.Equals(railStation.LineCode, lineCode, StringComparison.Ordinal))
+        if (!IsEditorEnabled) return;
+        IsBusy = true;
+        try
         {
-            SelectedRailStation4 = railStation;
+            var lineCode = SelectedRailLine4.LineCode;
+            var railStation = await _dialogService.ShowRailStationSelectDialog(lineCode);
+            if (railStation is not null && string.Equals(SelectedRailLine4.LineCode, lineCode, StringComparison.Ordinal) && string.Equals(railStation.LineCode, lineCode, StringComparison.Ordinal)) SelectedRailStation4 = railStation;
+        }
+        finally
+        {
+            IsBusy = false;
         }
     }
     private bool CanShowRailStationSelect4()
@@ -4226,6 +4303,10 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             return;
         }
 
+        if (!IsEditorEnabled) return;
+        IsBusy = true;
+        try
+        {
         var lessor = await _dialogService.ShowLessorSelectDialog(new ViewModels.Dialogs.LessorSelectViewModel(_dataAccessService, _cts));
 
         if (lessor is not null)
@@ -4268,7 +4349,11 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
             IsDirty = true;
         }
-
+        }
+        finally
+        {
+            IsBusy = false;
+        }
     }
 
     [RelayCommand(CanExecute = nameof(CanEditLessor))]
@@ -4327,6 +4412,10 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             return;
         }
 
+        if (!IsEditorEnabled) return;
+        IsBusy = true;
+        try
+        {
         var broker = await _dialogService.ShowBrokerSelectDialog(new ViewModels.Dialogs.BrokerSelectViewModel(_dataAccessService, _cts));
 
         if (broker is not null)
@@ -4369,6 +4458,11 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             BrokersWrapper.Add(wrapper);
 
             IsDirty = true;
+        }
+        }
+        finally
+        {
+            IsBusy = false;
         }
     }
 

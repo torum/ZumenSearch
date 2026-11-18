@@ -22,8 +22,6 @@ public sealed partial class ShellPage : Page
     private bool _isConfirmingClose;
     private bool _allowClose;
    
-    private bool _isClosed;
-
     private readonly List<(string Tag, string Label, Type? Page)> _pages =
     [
         ("room", "", null),
@@ -91,7 +89,6 @@ public sealed partial class ShellPage : Page
         }
 
         _isConfirmingClose = true;
-        ViewModel.SetClosing(true);
         try
         {
             if (ViewModel.IsDirty)
@@ -120,7 +117,6 @@ public sealed partial class ShellPage : Page
         {
             _allowClose = false;
             _isConfirmingClose = false;
-            if (!_isClosed) ViewModel.SetClosing(false);
         }
     }
 
@@ -169,8 +165,6 @@ public sealed partial class ShellPage : Page
         {
             return;
         }
-
-        _isClosed = true;
 
         ewin.Activated -= Window_Activated;
         ewin.Closed -= Window_Closed;

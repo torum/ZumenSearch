@@ -87,7 +87,6 @@ public sealed partial class ShellPage : Page
     {
         if (_isClosing) return;
         _isClosing = true;
-        ViewModel.SetClosing(true);
         try
         {
             //if (!await ViewModel.WaitForEditorOperationsAsync()) return;
@@ -127,7 +126,6 @@ public sealed partial class ShellPage : Page
             _allowClose = false;
             _closingWindow = null;
             _isClosing = false;
-            if (ViewModel.IsActive) ViewModel.SetClosing(false);
         }
     }
 
