@@ -39,7 +39,6 @@ public sealed partial class PictureListPage : Page
         }
 
         button.IsEnabled = false;
-        //ViewModel.BeginPicker();
         try
         {
             var openPicker = new Microsoft.Windows.Storage.Pickers.FileOpenPicker(button.XamlRoot.ContentIslandEnvironment.AppWindowId)
@@ -54,9 +53,9 @@ public sealed partial class PictureListPage : Page
             openPicker.FileTypeFilter.Add(".webp");
             var files = await openPicker.PickMultipleFilesAsync();
             var paths = files.Select(file => file.Path).ToList();
-            if (paths.Count > 0 && ViewModel.AddNewRoomPicturesCommand.CanExecute(paths))
+            if (paths.Count > 0 && ViewModel.AddNewListingPicturesCommand.CanExecute(paths))
             {
-                await ViewModel.AddNewRoomPicturesCommand.ExecuteAsync(paths);
+                await ViewModel.AddNewListingPicturesCommand.ExecuteAsync(paths);
             }
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Runtime.InteropServices.COMException or InvalidOperationException or ArgumentException)
@@ -67,7 +66,6 @@ public sealed partial class PictureListPage : Page
         }
         finally
         {
-            //ViewModel.EndPicker();
             button.IsEnabled = true;
         }
     }

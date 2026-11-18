@@ -12,7 +12,7 @@ Strictly follow these boundaries:
 - For the current database redesign, implement only the fresh database schema; do not add migration logic. The user will delete the existing database file and local cache.
 - Avoid presenting code changes as unified diff/patch blocks; use clear replacement code snippets with line numbers and file names and paths or concise prose instead.
 - Maintain the application as a single project for the foreseeable future, enforcing cleaner internal boundaries rather than splitting into multiple projects.
-- Always preserve CRLF (\r\n) line endings when editing files.
+- Always preserve CRLF (\r\n) line endings especially at the end of files when editing files.
 
 ## Code Style
 

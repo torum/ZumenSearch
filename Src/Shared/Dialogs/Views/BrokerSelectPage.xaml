@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:ZumenSearch.Views.Dialogs"
     xmlns:mod="using:ZumenSearch.Models"
+    xmlns:helpers="using:ZumenSearch.Helpers"
     xmlns:modsearchresult="using:ZumenSearch.Models.SearchResult"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -14,6 +15,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
         
@@ -49,5 +51,9 @@
         <Grid Grid.Row="2" Margin="0,6,0,0">
             <Button Content="新規に追加" Command="{x:Bind ViewModel.AddNewBrokerCommand}" HorizontalAlignment="Right"></Button>
         </Grid>
+
+        <Border Grid.Row="3">
+            <InfoBar Severity="{x:Bind ViewModel.InfoBarSeverity, Mode=OneWay}" IsOpen="{x:Bind ViewModel.IsInfoBarErrorOpen, Mode=TwoWay}" Title="{x:Bind ViewModel.InfoBarErrorTitle, Mode=OneWay}" Message="{x:Bind ViewModel.InfoBarErrorMessage, Mode=OneWay}" helpers:InfoBarExtensions.IsTextSelectionEnabled="True" />
+        </Border>
     </Grid>
 </Page>

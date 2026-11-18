@@ -10,13 +10,9 @@ namespace ZumenSearch.Views.Services;
 public class DialogGenericService : IDialogGenericService
 {
     private XamlRoot? _xamlRoot;
-
     private Window? _window;
-
     private bool _isDialogOpened;
     private bool _isInitialized;
-
-    //private readonly List<Window> _ownerWindowList; // I made the service transient, so this won't be needed. But needs to be checked lator.
 
     public DialogGenericService()
     {
@@ -33,10 +29,10 @@ public class DialogGenericService : IDialogGenericService
 
     public async Task<ContentDialogResult> ShowEditorCloseConfirmationDialog()
     {
-        if (_isDialogOpened)// && (_ownerWindowList.IndexOf(win) > -1)
+        if (_isDialogOpened)
         {
-            Debug.WriteLine("DialogGenericService: _isDialogOpened @ShowEditorCloseConfirmationDialog");
             // Prevents COM exepction causing by attempt to show multiple dialogs. (Window's close button is enabled even tho dialog is shown)
+            Debug.WriteLine("DialogGenericService: _isDialogOpened @ShowEditorCloseConfirmationDialog");
             return ContentDialogResult.None;
         }
 
@@ -59,10 +55,7 @@ public class DialogGenericService : IDialogGenericService
             Content = "編集画面の変更内容が保存されていません。"
         };
 
-        //Debug.WriteLine("await dialog.ShowAsync()");
-
         _isDialogOpened = true;
-        //_ownerWindowList.Add(win);
         try
         {
             return await dialog.ShowAsync();
@@ -77,6 +70,7 @@ public class DialogGenericService : IDialogGenericService
     {
         if (_isDialogOpened || _xamlRoot is null || !_isInitialized)
         {
+            Debug.WriteLine("DialogGenericService: _isDialogOpened or _xamlRoot is null or not initialized @ShowDeleteConfirmationDialog");
             return ContentDialogResult.None;
         }
 
@@ -112,7 +106,7 @@ public class DialogGenericService : IDialogGenericService
 
         if (_xamlRoot is null || !_isInitialized)
         {
-            System.Diagnostics.Debug.WriteLine("_xamlRoot is null or not initialized @ShowLessorSelectDialog");
+            Debug.WriteLine("_xamlRoot is null or not initialized @ShowLessorSelectDialog");
             return null;
         }
 
@@ -137,19 +131,23 @@ public class DialogGenericService : IDialogGenericService
         {
             if ((e is not null) && (e is Models.SearchResult.PersonSearchResultItem rl))
             {
-                //dialogContent.ViewModel.SelectedRailLine
                 dialog.IsPrimaryButtonEnabled = true;
             }
         };
 
         _isDialogOpened = true;
-        //_ownerWindowList.Add(win);
-        var result = await dialog.ShowAsync();
-        _isDialogOpened = false;
-        //_ownerWindowList.Remove(win);
-        if (result == ContentDialogResult.Primary)
+        try
         {
-            return dialogContent.ViewModel.SelectedLessor;
+            var result = await dialog.ShowAsync();
+
+            if (result == ContentDialogResult.Primary)
+            {
+                return dialogContent.ViewModel.SelectedLessor;
+            }
+        }
+        finally
+        {
+            _isDialogOpened = false;
         }
 
         return null;
@@ -165,7 +163,7 @@ public class DialogGenericService : IDialogGenericService
 
         if (_xamlRoot is null || !_isInitialized)
         {
-            System.Diagnostics.Debug.WriteLine("_xamlRoot is null or not initialized @ShowBrokerSelectDialog");
+            Debug.WriteLine("_xamlRoot is null or not initialized @ShowBrokerSelectDialog");
             return null;
         }
 
@@ -195,12 +193,19 @@ public class DialogGenericService : IDialogGenericService
         };
 
         _isDialogOpened = true;
-        var result = await dialog.ShowAsync();
-        _isDialogOpened = false;
-
-        if (result == ContentDialogResult.Primary)
+        try
         {
-            return dialogContent.ViewModel.SelectedBroker;
+            var result = await dialog.ShowAsync();
+            _isDialogOpened = false;
+
+            if (result == ContentDialogResult.Primary)
+            {
+                return dialogContent.ViewModel.SelectedBroker;
+            }
+        }
+        finally
+        {
+            _isDialogOpened = false;
         }
 
         return null;
@@ -242,28 +247,23 @@ public class DialogGenericService : IDialogGenericService
         {
             if ((e is not null) && (e is RailLine rl))
             {
-                //dialogContent.ViewModel.SelectedRailLine
                 dialog.IsPrimaryButtonEnabled = true;
             }
         };
-        /*
-        dialogContent.SelectionList.SelectionChanged += (s, e) =>
-        {
-            if (dialogContent.SelectionList.SelectedItem is RailLine)
-            {
-                dialog.IsPrimaryButtonEnabled = true;
-            }
-        };
-        */
+
         _isDialogOpened = true;
-        //_ownerWindowList.Add(win);
-        var result = await dialog.ShowAsync();
-        _isDialogOpened = false;
-        //_ownerWindowList.Remove(win);
-        if (result == ContentDialogResult.Primary)
+        try
         {
-            //
-            return dialogContent.ViewModel.SelectedRailLine;
+            var result = await dialog.ShowAsync();
+            _isDialogOpened = false;
+            if (result == ContentDialogResult.Primary)
+            {
+                return dialogContent.ViewModel.SelectedRailLine;
+            }
+        }
+        finally
+        {
+            _isDialogOpened = false;
         }
 
         return null;
@@ -271,15 +271,16 @@ public class DialogGenericService : IDialogGenericService
 
     public async Task<RailStation?> ShowRailStationSelectDialog(string railLineCode)
     {
-        if (_isDialogOpened)// && (_ownerWindowList.IndexOf(win) > -1)
+        if (_isDialogOpened)
         {
             // Prevents COM exepction causing by attempt to show multiple dialogs. (Window's close button is enabled even tho dialog is shown)
+            Debug.WriteLine("DialogGenericService: _isDialogOpened @ShowRailStationSelectDialog");
             return null;
         }
 
         if (_xamlRoot is null || !_isInitialized)
         {
-            System.Diagnostics.Debug.WriteLine("_xamlRoot is null or not initialized @ShowRailStationSelectDialog");
+            Debug.WriteLine("_xamlRoot is null or not initialized @ShowRailStationSelectDialog");
             return null;
         }
 
@@ -304,25 +305,26 @@ public class DialogGenericService : IDialogGenericService
         {
             if (e is not null and RailStation rs)
             {
-                //dialogContent.ViewModel.SelectedRailStation
                 dialog.IsPrimaryButtonEnabled = true;
             }
         };
 
         _isDialogOpened = true;
-        //_ownerWindowList.Add(win);
-        var result = await dialog.ShowAsync();
-        //_ownerWindowList.Remove(win);
-        _isDialogOpened = false;
-
-        if (result == ContentDialogResult.Primary)
+        try
         {
-            //
-            return dialogContent.ViewModel.SelectedRailStation;
+            var result = await dialog.ShowAsync();
+            _isDialogOpened = false;
+
+            if (result == ContentDialogResult.Primary)
+            {
+                return dialogContent.ViewModel.SelectedRailStation;
+            }
+        }
+        finally
+        {
+            _isDialogOpened = false;
         }
 
         return null;
     }
-
-
 }

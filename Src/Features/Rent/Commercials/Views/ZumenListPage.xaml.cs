@@ -48,7 +48,7 @@ public sealed partial class ZumenListPage : Page
             var files = await openPicker.PickMultipleFilesAsync();
             if (files.Count <= 0)
             {
-                Debug.WriteLine("Operation cancelled.");
+                Debug.WriteLine("PickMultipleFilesAsync: Operation cancelled. @AppBarButtonAddPdf_Click");
                 return;
             }
             var paths = files

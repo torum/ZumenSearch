@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.UI.Xaml.Controls;
 using System.Collections.ObjectModel;
 using ZumenSearch.Services.Contracts;
 
@@ -16,19 +17,61 @@ public partial class BrokerSelectViewModel : ObservableObject
         _dataAccessService = dataAccessService;
         _cts = cts;
 
+        // Fire and forget.
         InitLoad();
     }
 
     private async void InitLoad()
     {
-        // TODO:
-        var res = await Task.Run(() => _dataAccessService.SelectBrokersByKeyword("*"), _cts.Token);
-
-        if (res is not null)
+        try
         {
-            SuggestedBrokers = new(res.PersonSearchResult);
+            var res = await Task.Run(() => _dataAccessService.SelectBrokersByKeyword("*"), _cts.Token);
+            if (res.IsError)
+            {
+                Debug.WriteLine(
+                    res.Error.Title + Environment.NewLine +
+                    res.Error.Message + Environment.NewLine +
+                    res.Error.Description + Environment.NewLine +
+                    res.Error.Operation + Environment.NewLine +
+                    res.Error.MethodName + Environment.NewLine +
+                    res.Error.FullDump);
+
+                ShowErrorInfoBar(res.Error);
+            }
+            else
+            {
+                SuggestedBrokers = new(res.PersonSearchResult);
+            }
+        }
+        catch (OperationCanceledException) when (_cts.Token.IsCancellationRequested)
+        {
+            return;
         }
     }
+
+    private void ShowErrorInfoBar(Models.ErrorInfo err)
+    {
+        InfoBarErrorTitle = err.Title;
+        InfoBarErrorMessage =
+            err.Message + Environment.NewLine +
+            err.Description + Environment.NewLine +
+            err.Operation + Environment.NewLine +
+            err.MethodName;
+        InfoBarSeverity = InfoBarSeverity.Error;
+        IsInfoBarErrorOpen = true;
+    }
+
+    [ObservableProperty]
+    public partial bool IsInfoBarErrorOpen { get; set; }
+
+    [ObservableProperty]
+    public partial string InfoBarErrorMessage { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string InfoBarErrorTitle { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial InfoBarSeverity InfoBarSeverity { get; set; } = InfoBarSeverity.Warning;
 
     public string Query
     {
@@ -93,9 +136,21 @@ public partial class BrokerSelectViewModel : ObservableObject
             searchText = Query;
         }
 
+        // TODO: Catch and ignore catch (OperationCanceledException) when (_cts.Token.IsCancellationRequested). This may not be necessary...but.
         var res = await Task.Run(() => _dataAccessService.SelectBrokersByKeyword(searchText), _cts.Token);
-        // TODO:
-        if (res is not null)
+        if (res.IsError)
+        {
+            Debug.WriteLine(
+                res.Error.Title + Environment.NewLine +
+                res.Error.Message + Environment.NewLine +
+                res.Error.Description + Environment.NewLine +
+                res.Error.Operation + Environment.NewLine +
+                res.Error.MethodName + Environment.NewLine +
+                res.Error.FullDump);
+
+            ShowErrorInfoBar(res.Error);
+        }
+        else
         {
             SuggestedBrokers = new(res.PersonSearchResult);
         }

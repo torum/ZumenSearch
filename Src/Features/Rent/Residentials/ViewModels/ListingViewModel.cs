@@ -5,6 +5,7 @@ using Microsoft.UI.Xaml.Controls;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using Windows.Data.Pdf;
 using Windows.Storage;
@@ -20,7 +21,6 @@ namespace ZumenSearch.ViewModels.Rent.Residentials;
 /*
  * TODO: 
  * Use IsBusy to disable the editor commands and show progress ring when saving or loading data.
- * Add try catch to async, file IO, and other operations. Show error message in infobar if exception occurs.
  */
 
 public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<PropertyUpdatedMessage>, IRecipient<PropertyIsUnitOwnershipChangedMessage>, IRecipient<LessorUpdatedMessage>, IRecipient<BrokerUpdatedMessage>, IRecipient<LessorDeletedMessage>, IRecipient<BrokerDeletedMessage>, IDisposable
@@ -1837,8 +1837,8 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
 
     #region == Pics and Pdfs ==
 
-    [RelayCommand(CanExecute = nameof(CanAddNewRoomPictures))]
-    public async Task AddNewRoomPictures(List<string> filePathList)
+    [RelayCommand(CanExecute = nameof(CanAddNewListingPictures))]
+    public async Task AddNewListingPictures(List<string> filePathList)
     {
         if (filePathList is null) return;
         if (filePathList.Count == 0 || !IsEditorEnabled) return;
@@ -1846,9 +1846,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         IsBusy = true;
         try
         {
-            Debug.WriteLine($"destDirectory={_listingDataDirectoryPath}  @AddNewRoomPictures()");
-
-            //List<string> list = [];
+            Debug.WriteLine($"destDirectory={_listingDataDirectoryPath}  @AddNewListingPictures()");
 
             foreach (var filePath in filePathList)
             {
@@ -1864,16 +1862,37 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
                     continue;
                 }
 
-                using var sourceStream = File.Open(filePath, FileMode.Open);
-
                 string newId = Guid.CreateVersion7().ToString("N");
                 string newFilename = newId + extension;
                 var destFilePath = Path.Combine(_listingDataDirectoryPath, newFilename);
-                //Debug.WriteLine($"{file} to {destFilePath}  @SetNewBuildingPicturesAsync()");
+                bool destinationCreated = false;
 
-                using var destinationStream = new FileStream(destFilePath, FileMode.CreateNew, FileAccess.Write);
-                //_incompleteAttachmentFiles.Add(destFilePath);
-                await sourceStream.CopyToAsync(destinationStream);
+                try
+                {
+                    using var sourceStream = File.Open(filePath, FileMode.Open);
+
+                    using var destinationStream = new FileStream(destFilePath, FileMode.CreateNew, FileAccess.Write);
+                    await sourceStream.CopyToAsync(destinationStream);
+                }
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or COMException or InvalidOperationException or ArgumentException)
+                {
+                    Debug.WriteLine($"Failed to import image '{filePath}': {ex}");
+                    ShowSimpleErrorInfoBar("エラー", $"画像を取り込めませんでした: {Path.GetFileName(filePath)}。{ex.Message}");
+
+                    if (File.Exists(destFilePath) && destinationCreated)
+                    {
+                        try
+                        {
+                            File.Delete(destFilePath);
+                        }
+                        catch (Exception deleteEx) when (deleteEx is IOException or UnauthorizedAccessException)
+                        {
+                            Debug.WriteLine($"Failed to delete destination file '{destFilePath}' after failed import: {deleteEx}");
+                        }
+                    }
+
+                    continue;
+                }
 
                 var pic = new Models.Rent.Residentials.ListingPicture(newId, newFilename, EntityStatus.New)
                 {
@@ -1884,13 +1903,12 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
                 Pictures.Add(pic);
 
                 OpenBlobDirectoryCommand.NotifyCanExecuteChanged();
-                DeleteRoomPictureCommand.NotifyCanExecuteChanged();
+                DeleteListingPictureCommand.NotifyCanExecuteChanged();
 
                 IsDirty = true;
 
                 // Keep track of unsaved files to delete them when discarding.
                 _unsavedListingPictureFileList.Add(destFilePath);
-                //_incompleteAttachmentFiles.Remove(destFilePath);
             }
         }
         finally
@@ -1898,7 +1916,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
             IsBusy = false;
         }
     }
-    private static bool CanAddNewRoomPictures()
+    private static bool CanAddNewListingPictures()
     {
         return true;
     }
@@ -1910,8 +1928,8 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         extension.Equals(".gif", StringComparison.OrdinalIgnoreCase) ||
         extension.Equals(".webp", StringComparison.OrdinalIgnoreCase);
 
-    [RelayCommand(CanExecute = nameof(CanDeleteRoomPicture))]
-    private async Task DeleteRoomPicture(Models.Rent.Residentials.ListingPicture picUnit)
+    [RelayCommand(CanExecute = nameof(CanDeleteListingPicture))]
+    private async Task DeleteListingPicture(Models.Rent.Residentials.ListingPicture picUnit)
     {
         if (_listing is null)
         {
@@ -1950,22 +1968,20 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
             IsBusy = false;
         }
     }
-    private static bool CanDeleteRoomPicture(Models.Rent.Residentials.ListingPicture picUnit)
+    private static bool CanDeleteListingPicture(Models.Rent.Residentials.ListingPicture picUnit)
     {
         return picUnit is not null;
     }
 
-    [RelayCommand(CanExecute = nameof(CanAddNewRoomPdfs))]
-    public async Task AddNewRoomPdfs(List<string> filePathList)
+    [RelayCommand(CanExecute = nameof(CanAddNewListingPdfs))]
+    public async Task AddNewListingPdfs(List<string> filePathList)
     {
         if (filePathList is null) return;
         if (filePathList.Count == 0 || !IsPropertyUnitLevelOwnership || !IsEditorEnabled) return;
         IsBusy = true;
         try
         {
-            //var ownershipVersion = _ownershipVersion;
-
-            Debug.WriteLine($"destDirectory={_listingDataDirectoryPath}  @AddNewRoomPdfs()");
+            Debug.WriteLine($"destDirectory={_listingDataDirectoryPath}  @AddNewListingPdfs()");
 
             //List<string> list = [];
 
@@ -1976,7 +1992,6 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
                     continue;
                 }
 
-
                 string extension = Path.GetExtension(filePath);
                 if (!extension.Equals(".pdf", StringComparison.OrdinalIgnoreCase))
                 {
@@ -1984,7 +1999,17 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
                     continue;
                 }
 
-                var importedPaths = new List<string>();
+                //var importedPaths = new List<string>();
+
+                string newId = Guid.CreateVersion7().ToString("N");
+                string newThumbnailFilename = newId + ".bmp";
+                var thumbnailDestFilePath = Path.Combine(_listingDataDirectoryPath, newThumbnailFilename);
+                bool thumbnailDestinationCreated = false;
+
+                string newFilename = newId + extension;
+                var destFilePath = Path.Combine(_listingDataDirectoryPath, newFilename);
+                bool destinationCreated = false;
+
                 try
                 {
                     StorageFile sfile = await StorageFile.GetFileFromPathAsync(filePath);
@@ -1997,62 +2022,73 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
                         var options = new PdfPageRenderOptions { DestinationWidth = 512 };
                         await pdfPage.RenderToStreamAsync(stream, options);
 
-                        string newId = Guid.CreateVersion7().ToString("N");
-                        string newThumbnailFilename = newId + ".bmp";
-                        var thumbnailDestFilePath = Path.Combine(_listingDataDirectoryPath, newThumbnailFilename);
-
                         using (var destinationStream = new FileStream(thumbnailDestFilePath, FileMode.CreateNew, FileAccess.Write))
                         {
-                            //_incompleteAttachmentFiles.Add(thumbnailDestFilePath);
-                            importedPaths.Add(thumbnailDestFilePath);
+                            thumbnailDestinationCreated = true;
+                            //importedPaths.Add(thumbnailDestFilePath);
                             using var managedSourceStream = stream.AsStreamForRead();
                             await managedSourceStream.CopyToAsync(destinationStream);
                         }
 
-                        string newFilename = newId + extension;
-                        var pdfDestFilePath = Path.Combine(_listingDataDirectoryPath, newFilename);
                         using (var pdfSource = File.OpenRead(filePath))
-                        using (var pdfDestination = new FileStream(pdfDestFilePath, FileMode.CreateNew, FileAccess.Write))
+                        using (var pdfDestination = new FileStream(destFilePath, FileMode.CreateNew, FileAccess.Write))
                         {
-                            //_incompleteAttachmentFiles.Add(pdfDestFilePath);
-                            importedPaths.Add(pdfDestFilePath);
+                            destinationCreated = true;
+                            //importedPaths.Add(destFilePath);
                             await pdfSource.CopyToAsync(pdfDestination);
                         }
-
-                        var pdf = new Models.Rent.Residentials.ListingPdf(newId, newFilename, newThumbnailFilename, EntityStatus.New)
-                        {
-                            BasePath = _listingDataDirectoryPath,
-                            ParentViewModel = this
-                        };
-
-                        Pdfs.Add(pdf);
-                        _unsavedListingPdfThumbnailFileList.Add(thumbnailDestFilePath);
-                        _unsavedListingPdfFileList.Add(pdfDestFilePath);
-
-                        OpenBlobDirectoryCommand.NotifyCanExecuteChanged();
-                        DeleteRoomPdfCommand.NotifyCanExecuteChanged();
-                        IsDirty = true;
                     }
                     else
                     {
                         ShowSimpleErrorInfoBar("エラー", $"PDFにページがありません: {Path.GetFileName(filePath)}");
+                        continue;
                     }
                 }
                 catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Runtime.InteropServices.COMException or InvalidOperationException or ArgumentException)
                 {
-                    /*
-                    if (ownershipVersion != _ownershipVersion || !IsPropertyUnitLevelOwnership)
+                    Debug.WriteLine($"Failed to import PDF '{filePath}': {ex}");
+                    ShowSimpleErrorInfoBar("エラー", $"PDFを取り込めませんでした: {Path.GetFileName(filePath)}。{ex.Message}");
+
+                    if (File.Exists(destFilePath) && destinationCreated)
                     {
-                        foreach (var path in importedPaths)
+                        try
                         {
-                            AddPendingPdfCleanupPath(path);
-                            _incompleteAttachmentFiles.Remove(path);
+                            File.Delete(destFilePath);
+                        }
+                        catch (Exception deleteEx) when (deleteEx is IOException or UnauthorizedAccessException)
+                        {
+                            Debug.WriteLine($"Failed to delete destination file '{destFilePath}' after failed import: {deleteEx}");
                         }
                     }
-                    */
-                    Debug.WriteLine($"Failed to import PDF '{filePath}': {ex}");
-                    ShowSimpleErrorInfoBar("エラー", $"PDFを読み込めませんでした: {Path.GetFileName(filePath)}。{ex.Message}");
+
+                    if (File.Exists(thumbnailDestFilePath) && thumbnailDestinationCreated)
+                    {
+                        try
+                        {
+                            File.Delete(thumbnailDestFilePath);
+                        }
+                        catch (Exception deleteEx) when (deleteEx is IOException or UnauthorizedAccessException)
+                        {
+                            Debug.WriteLine($"Failed to delete destination file '{thumbnailDestFilePath}' after failed import: {deleteEx}");
+                        }
+                    }
+
+                    continue;
                 }
+
+                var pdf = new Models.Rent.Residentials.ListingPdf(newId, newFilename, newThumbnailFilename, EntityStatus.New)
+                {
+                    BasePath = _listingDataDirectoryPath,
+                    ParentViewModel = this
+                };
+
+                Pdfs.Add(pdf);
+                _unsavedListingPdfThumbnailFileList.Add(thumbnailDestFilePath);
+                _unsavedListingPdfFileList.Add(destFilePath);
+
+                OpenBlobDirectoryCommand.NotifyCanExecuteChanged();
+                DeleteListingPdfCommand.NotifyCanExecuteChanged();
+                IsDirty = true;
             }
         }
         finally
@@ -2061,13 +2097,13 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         }
     }
 
-    private static bool CanAddNewRoomPdfs()
+    private static bool CanAddNewListingPdfs()
     {
         return true;
     }
 
     [RelayCommand]
-    private async Task OpenRoomPdf(Models.Rent.Residentials.ListingPdf pdf)
+    private async Task OpenListingPdf(Models.Rent.Residentials.ListingPdf pdf)
     {
         if (pdf is null || !Pdfs.Contains(pdf) || !IsEditorEnabled) return;
 
@@ -2091,8 +2127,8 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         }
     }
 
-    [RelayCommand(CanExecute = nameof(CanDeleteRoomPdf))]
-    private async Task DeleteRoomPdf(Models.Rent.Residentials.ListingPdf pdf)
+    [RelayCommand(CanExecute = nameof(CanDeleteListingPdf))]
+    private async Task DeleteListingPdf(Models.Rent.Residentials.ListingPdf pdf)
     {
         if (pdf is null)
         {
@@ -2119,7 +2155,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
             IsBusy = false;
         }
     }
-    private static bool CanDeleteRoomPdf(Models.Rent.Residentials.ListingPdf pdf)
+    private static bool CanDeleteListingPdf(Models.Rent.Residentials.ListingPdf pdf)
     {
         return pdf is not null;
     }
@@ -2166,51 +2202,55 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         if (!IsEditorEnabled) return;
         IsBusy = true;
 
-        // TODO:
         try
         {
-            var lessor = await _dialogService.ShowLessorSelectDialog(new ViewModels.Dialogs.LessorSelectViewModel(_dataAccessService, _cts));
+            Models.SearchResult.PersonSearchResultItem? lessorItem;
+            lessorItem = await _dialogService.ShowLessorSelectDialog(new ViewModels.Dialogs.LessorSelectViewModel(_dataAccessService, _cts));
 
-            if (lessor is not null)
+            if (lessorItem is null)
             {
-                var lessorId = lessor.Id;
-
-                // Check if already exists
-                var match = LessorsWrapper.FirstOrDefault(x => x.Person.Id.Equals(lessorId, StringComparison.Ordinal));
-                if (match is not null)
-                {
-                    Debug.WriteLine($"lessor {lessor.Name} already in the list.");
-                    return;
-                }
-
-                var res = await Task.Run(() => _dataAccessService.SelectRentLessorById(lessorId), _cts.Token);
-                if (res.IsError)
-                {
-                    Debug.WriteLine(
-                        res.Error.Title + Environment.NewLine +
-                        res.Error.Message + Environment.NewLine +
-                        res.Error.Description + Environment.NewLine +
-                        res.Error.Operation + Environment.NewLine +
-                        res.Error.MethodName + Environment.NewLine +
-                        res.Error.FullDump);
-                    ShowErrorInfoBar(res.Error);
-                    return;
-                }
-
-                if (res.Person is null)
-                {
-                    Debug.WriteLine($"{lessorId} is null. Cannot open editor.");
-                    ShowSimpleErrorInfoBar("選択した貸主を読み込めませんでした",$"ID {lessorId}　がありません。");
-                    return;
-                }
-
-                var asdf = new Models.Rent.Residentials.PersonWrapperForListingViewModel(res.Person, this);
-
-                //_draftLessorDeletions.RemoveAll(person => person.Id == res.Person.Id);
-                LessorsWrapper.Add(asdf);
-
-                IsDirty = true;
+                Debug.WriteLine("lessorItem is null. User cancelled the dialog.");
+                return;
             }
+
+            var lessorId = lessorItem.Id;
+
+            // Check if already exists
+            var match = LessorsWrapper.FirstOrDefault(x => x.Person.Id.Equals(lessorId, StringComparison.Ordinal));
+            if (match is not null)
+            {
+                Debug.WriteLine($"lessor {lessorItem.Name} already in the list.");
+                return;
+            }
+
+            // TODO: Catch and ignore catch (OperationCanceledException) when (_cts.Token.IsCancellationRequested). This may not be necessary...but.
+            var res = await Task.Run(() => _dataAccessService.SelectRentLessorById(lessorId), _cts.Token);
+            if (res.IsError)
+            {
+                Debug.WriteLine(
+                    res.Error.Title + Environment.NewLine +
+                    res.Error.Message + Environment.NewLine +
+                    res.Error.Description + Environment.NewLine +
+                    res.Error.Operation + Environment.NewLine +
+                    res.Error.MethodName + Environment.NewLine +
+                    res.Error.FullDump);
+                ShowErrorInfoBar(res.Error);
+                return;
+            }
+
+            if (res.Person is null)
+            {
+                Debug.WriteLine($"{lessorId} is null. Cannot open editor.");
+                ShowSimpleErrorInfoBar("予期しないエラーが発生しました", "選択した貸主を読み込めませんでした。");
+                return;
+            }
+
+            foreach (var deleted in _listing.LessorsToBeDeleted.Where(person => person.Id == res.Person.Id).ToList()) _listing.LessorsToBeDeleted.Remove(deleted);
+
+            var lessorWrapper = new Models.Rent.Residentials.PersonWrapperForListingViewModel(res.Person, this);
+            LessorsWrapper.Add(lessorWrapper);
+
+            IsDirty = true;
         }
         finally
         {
@@ -2238,8 +2278,6 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
     [RelayCommand(CanExecute = nameof(CanDeleteLessor))]
     public async Task DeleteLessor(Models.Rent.Residentials.PersonWrapperForListingViewModel lessor)
     {
-        Debug.WriteLine($"DeleteLessorCommand {lessor.Person.Name}");
-
         if (lessor is null)
         {
             return;
@@ -2253,7 +2291,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         if (LessorsWrapper.Remove(lessor))
         {
             IsDirty = true;
-            //if (!_draftLessorDeletions.Any(person => person.Id == lessor.Person.Id)) _draftLessorDeletions.Add(lessor.Person);
+            if (!_listing.LessorsToBeDeleted.Any(person => person.Id == lessor.Person.Id)) _listing.LessorsToBeDeleted.Add(lessor.Person);
         }
     }
     private static bool CanDeleteLessor(Models.Rent.Residentials.PersonWrapperForListingViewModel lessor)
@@ -2277,44 +2315,40 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         if (!IsEditorEnabled) return;
         IsBusy = true;
 
-        // TODO:
         try
         {
-            var selectedBroker = await _dialogService.ShowBrokerSelectDialog(
-                new ViewModels.Dialogs.BrokerSelectViewModel(_dataAccessService, _cts));
+            var selectedBroker = await _dialogService.ShowBrokerSelectDialog(new ViewModels.Dialogs.BrokerSelectViewModel(_dataAccessService, _cts));
 
-            if (selectedBroker is null ||
-                BrokersWrapper.Any(item => item.Person.Id == selectedBroker.Id))
+            if (selectedBroker is null || BrokersWrapper.Any(item => item.Person.Id == selectedBroker.Id))
             {
                 return;
             }
 
-            var result = await Task.Run(() => _dataAccessService.SelectBrokerById(selectedBroker.Id), _cts.Token);
-            if (result.IsError)
+            // TODO: Catch and ignore catch (OperationCanceledException) when (_cts.Token.IsCancellationRequested). This may not be necessary...but.
+            var res = await Task.Run(() => _dataAccessService.SelectBrokerById(selectedBroker.Id), _cts.Token);
+            if (res.IsError)
             {
                 Debug.WriteLine(
-                    result.Error.Title + Environment.NewLine +
-                    result.Error.Message + Environment.NewLine +
-                    result.Error.Description + Environment.NewLine +
-                    result.Error.Operation + Environment.NewLine +
-                    result.Error.MethodName + Environment.NewLine +
-                    result.Error.FullDump);
-                ShowErrorInfoBar(result.Error);
+                    res.Error.Title + Environment.NewLine +
+                    res.Error.Message + Environment.NewLine +
+                    res.Error.Description + Environment.NewLine +
+                    res.Error.Operation + Environment.NewLine +
+                    res.Error.MethodName + Environment.NewLine +
+                    res.Error.FullDump);
+                ShowErrorInfoBar(res.Error);
                 return;
             }
 
-            if (result.Person is null)
+            if (res.Person is null)
             {
                 Debug.WriteLine($"Could not load broker '{selectedBroker.Id}'.");
-                ShowSimpleErrorInfoBar("選択した宅建業者を読み込めませんでした",$"ID {selectedBroker.Id}　がありません。");
+                ShowSimpleErrorInfoBar("予期しないエラーが発生しました", $"選択した宅建業者を読み込めませんでした。");
                 return;
             }
 
-            //_draftBrokerDeletions.RemoveAll(person => person.Id == result.Person.Id);
-            BrokersWrapper.Add(
-                new Models.Rent.Residentials.PersonWrapperForListingViewModel(
-                    result.Person,
-                    this));
+            foreach (var deleted in _listing.BrokersToBeDeleted.Where(person => person.Id == res.Person.Id).ToList()) _listing.BrokersToBeDeleted.Remove(deleted);
+
+            BrokersWrapper.Add(new Models.Rent.Residentials.PersonWrapperForListingViewModel(res.Person, this));
 
             IsDirty = true;
         }
@@ -2355,6 +2389,8 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         if (BrokersWrapper.Remove(broker))
         {
             _listing.Brokers.Remove(broker.Person);
+            if (!_listing.BrokersToBeDeleted.Any(person => person.Id == broker.Person.Id)) _listing.BrokersToBeDeleted.Add(broker.Person);
+
             IsDirty = true;
         }
     }
@@ -2364,17 +2400,14 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         return broker?.Person is not null;
     }
 
-
     #endregion
 
     [RelayCommand]
     private void OpenPropertyEditorWindow()
     {
         var vm = App.GetService<ViewModels.MainViewModel>();
-
         if (vm.EditRentResidentialFromIdCommand.CanExecute(_listing.PropertyId))
         {
-            //await vm.EditRentResidentialFromIdCommand(_listing.PropertyId);
             vm.EditRentResidentialFromIdCommand.Execute(_listing.PropertyId);
         }
     }

@@ -68,7 +68,7 @@
                                             </StackPanel>
                                             <TextBox Header="説明" Margin="0,0,0,0" Text="{x:Bind Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
                                             <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Margin="0,0,0,0" HorizontalAlignment="Right">
-                                                <AppBarButton Icon="Delete" Label="削除" ToolTipService.ToolTip="写真を削除" Command="{x:Bind ParentViewModel.DeleteRoomPictureCommand, Mode=OneWay}" CommandParameter="{x:Bind}"/>
+                                                <AppBarButton Icon="Delete" Label="削除" ToolTipService.ToolTip="写真を削除" Command="{x:Bind ParentViewModel.DeleteListingPictureCommand, Mode=OneWay}" CommandParameter="{x:Bind}"/>
                                             </CommandBar>
                                         </StackPanel>
                                     </Grid>

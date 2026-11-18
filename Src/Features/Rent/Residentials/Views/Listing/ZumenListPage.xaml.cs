@@ -47,9 +47,9 @@ public sealed partial class ZumenListPage : Page
             openPicker.FileTypeFilter.Add(".pdf");
             var files = await openPicker.PickMultipleFilesAsync();
             var paths = files.Select(file => file.Path).ToList();
-            if (paths.Count > 0 && ViewModel.AddNewRoomPdfsCommand.CanExecute(paths))
+            if (paths.Count > 0 && ViewModel.AddNewListingPdfsCommand.CanExecute(paths))
             {
-                await ViewModel.AddNewRoomPdfsCommand.ExecuteAsync(paths);
+                await ViewModel.AddNewListingPdfsCommand.ExecuteAsync(paths);
             }
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Runtime.InteropServices.COMException or InvalidOperationException or ArgumentException)
