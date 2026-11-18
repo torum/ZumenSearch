@@ -1650,7 +1650,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         IsBusy = true;
         try
         {
-            await SaveCore();
+            await SaveCoreAsync();
         }
         finally
         {
@@ -1659,7 +1659,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         }
     }
 
-    private async Task SaveCore()
+    private async Task SaveCoreAsync()
     {
         if (_listing is null)
         {
@@ -1684,7 +1684,6 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
             return;
         }
 
-        bool isSaved;
         bool isHandedOffToParentEditor;
         if (_listing.PropertyStatus == EntityStatus.New)
         {
@@ -1694,14 +1693,13 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
             // This should also update the selected search result's values such as name if it exists. Also, it should update building window's rooms list.
             WeakReferenceMessenger.Default.Send(new Models.Messenger.ListingUpdatedMessage(_listing));
             isHandedOffToParentEditor = true;
-            isSaved = true;
         }
         else
         {
-            Models.SearchResult.ResultWrapper resInsert;
+            Models.SearchResult.ResultWrapper resUpsert;
             try
             {
-                resInsert = await Task.Run(() => _dataAccessService.UpsertRentResidentialListing(_listing.PropertyId, _listing), _cts.Token);
+                resUpsert = await Task.Run(() => _dataAccessService.UpsertRentResidentialListing(_listing.PropertyId, _listing), _cts.Token);
             }
             catch (OperationCanceledException) when (_cts.Token.IsCancellationRequested)
             {
@@ -1710,122 +1708,125 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
                 return;
             }
 
-            if (resInsert.IsError)
+            if (resUpsert.IsError)
             {
                 Debug.WriteLine(
-                    resInsert.Error.Title + Environment.NewLine +
-                    resInsert.Error.Message + Environment.NewLine +
-                    resInsert.Error.Description + Environment.NewLine +
-                    resInsert.Error.Operation + Environment.NewLine +
-                    resInsert.Error.MethodName + Environment.NewLine +
-                    resInsert.Error.FullDump);
+                    resUpsert.Error.Title + Environment.NewLine +
+                    resUpsert.Error.Message + Environment.NewLine +
+                    resUpsert.Error.Description + Environment.NewLine +
+                    resUpsert.Error.Operation + Environment.NewLine +
+                    resUpsert.Error.MethodName + Environment.NewLine +
+                    resUpsert.Error.FullDump);
 
-                ShowErrorInfoBar(resInsert.Error);
-
-                return;
+                ShowErrorInfoBar(resUpsert.Error);
             }
             else
             {
                 Debug.WriteLine("No errors on update.");
-                isHandedOffToParentEditor = false;
-                isSaved = true;
-            }
-        }
 
-        if (isSaved)
-        {
-            try
-            {
-                // Clear error infobar.
-                IsInfoBarErrorOpen = false;
-
-                // Update title with dummy value.
-                WindowTitle = string.Empty;
-
-                foreach (var picture in Pictures.Where(picture => _listing.Pictures.Any(saved => saved.Id == picture.Id)))
-                {
-                    picture.SetStatus(EntityStatus.Saved);
-                    picture.SetIsModified(false);
-                }
-
-                foreach (var pdf in Pdfs.Where(pdf => _listing.Pdfs.Any(saved => saved.Id == pdf.Id)))
-                {
-                    pdf.SetStatus(EntityStatus.Saved);
-                    pdf.SetIsModified(false);
-                }
-
-                var cleanupFailures = new List<string>();
-
-                if (_listing.PropertyStatus != EntityStatus.New || !isHandedOffToParentEditor)
-                {
-                    foreach (var file in _listing.PicturesToBeDeleted.ToList())
-                    {
-                        var picturePath = Path.Combine(App.PropertyBlobDataFolder, _listing.PropertyId, _listing.Id, file.ImageFilename);
-                        if (TryDeleteFiles(new[] { picturePath }, cleanupFailures))
-                        {
-                            _listing.PicturesToBeDeleted.Remove(file);
-                        }
-                    }
-                    _listing.PicturesToBeDeleted.Clear();
-                }
-
-                if (_listing.PropertyStatus != EntityStatus.New || !isHandedOffToParentEditor)
-                {
-                    foreach (var file in _listing.PdfsToBeDeleted.ToList())
-                    {
-                        var pdfPath = Path.Combine(App.PropertyBlobDataFolder, _listing.PropertyId, _listing.Id, file.PdfFilename);
-                        var thumbnailPath = Path.Combine(App.PropertyBlobDataFolder, _listing.PropertyId, _listing.Id, file.ThumbnailFilename);
-                        if (TryDeleteFiles(new[] { pdfPath, thumbnailPath }, cleanupFailures))
-                        {
-                            _listing.PdfsToBeDeleted.Remove(file);
-                        }
-                    }
-                    _listing.PdfsToBeDeleted.Clear();
-                }
-
-                _unsavedListingPictureFileList.Clear();
-                _unsavedListingPdfFileList.Clear();
-                _unsavedListingPdfThumbnailFileList.Clear();
-
-                //
-                if (_listing.PropertyStatus != EntityStatus.New || !isHandedOffToParentEditor)
-                {
-                    _listing.SetStatus(EntityStatus.Saved);
-                    _listing.SetIsModified(false);
-                }
-
-                //
-                WeakReferenceMessenger.Default.Send(new Models.Messenger.ListingUpdatedMessage(_listing));
-
-                // TODO: this may not be viewed if window as closing.
-                if (cleanupFailures.Count > 0)
-                {
-                    ShowSimpleErrorInfoBar("保存しましたが、一部の削除済みファイルをクリーンアップできませんでした", $"{string.Join(", ", cleanupFailures)}");
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Cleanup() failed: {ex}");
-
-                var err = new Models.ErrorInfo
-                {
-                    Title = "募集物件の保存後のクリーンアップ中に予期しないエラーが発生しました。",
-                    Type = Models.ErrorInfo.ErrType.Other,
-                    Code = "",
-                    Message = "",
-                    Description = $"{ex}",
-                    Operation = "Cleanup",
-                    MethodName = nameof(SaveCore),
-                    OccuredAt = DateTime.Now
-                };
-                ShowErrorInfoBar(err);
-            }
-            finally
-            {
                 IsDirty = false;
+
+                isHandedOffToParentEditor = false;
+                await PostSaveCleanupAsync(isHandedOffToParentEditor);
             }
         }
     }   
+
+    private async Task PostSaveCleanupAsync(bool isHandedOffToParentEditor)
+    {
+        try
+        {
+            // Clear error infobar.
+            IsInfoBarErrorOpen = false;
+
+            // Update title with dummy value.
+            WindowTitle = string.Empty;
+
+            foreach (var picture in Pictures.Where(picture => _listing.Pictures.Any(saved => saved.Id == picture.Id)))
+            {
+                picture.SetStatus(EntityStatus.Saved);
+                picture.SetIsModified(false);
+            }
+
+            foreach (var pdf in Pdfs.Where(pdf => _listing.Pdfs.Any(saved => saved.Id == pdf.Id)))
+            {
+                pdf.SetStatus(EntityStatus.Saved);
+                pdf.SetIsModified(false);
+            }
+
+            var cleanupFailures = new List<string>();
+
+            // It is ok to clear the PicturesToBeDeleted and PdfsToBeDeleted lists as well after handed off to parent
+            // when EntityStatus.New || isHandedOffToParentEditor,
+            // because these are used to delete existing db records which New listings do not have.
+            foreach (var file in _listing.PicturesToBeDeleted.ToList())
+            {
+                var picturePath = Path.Combine(App.PropertyBlobDataFolder, _listing.PropertyId, _listing.Id, file.ImageFilename);
+                if (TryDeleteFiles(new[] { picturePath }, cleanupFailures))
+                {
+                    _listing.PicturesToBeDeleted.Remove(file);
+                }
+            }
+            _listing.PicturesToBeDeleted.Clear();
+
+            foreach (var file in _listing.PdfsToBeDeleted.ToList())
+            {
+                var pdfPath = Path.Combine(App.PropertyBlobDataFolder, _listing.PropertyId, _listing.Id, file.PdfFilename);
+                var thumbnailPath = Path.Combine(App.PropertyBlobDataFolder, _listing.PropertyId, _listing.Id, file.ThumbnailFilename);
+                if (TryDeleteFiles(new[] { pdfPath, thumbnailPath }, cleanupFailures))
+                {
+                    _listing.PdfsToBeDeleted.Remove(file);
+                }
+            }
+            _listing.PdfsToBeDeleted.Clear();
+
+            // Clear the LessorsToBeDeleted and BrokersToBeDeleted lists after successful save.
+            _listing.LessorsToBeDeleted.Clear();
+            _listing.BrokersToBeDeleted.Clear();
+
+            // Clear the unsaved file lists after successful save.
+            _unsavedListingPictureFileList.Clear();
+            _unsavedListingPdfFileList.Clear();
+            _unsavedListingPdfThumbnailFileList.Clear();
+
+            //
+            if (_listing.PropertyStatus != EntityStatus.New || !isHandedOffToParentEditor)
+            {
+                _listing.SetStatus(EntityStatus.Saved);
+                _listing.SetIsModified(false);
+            }
+
+            //
+            WeakReferenceMessenger.Default.Send(new Models.Messenger.ListingUpdatedMessage(_listing));
+
+            // TODO: this may not be viewed if window as closing.
+            if (cleanupFailures.Count > 0)
+            {
+                ShowSimpleErrorInfoBar("保存しましたが、一部の削除済みファイルをクリーンアップできませんでした", $"{string.Join(", ", cleanupFailures)}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Cleanup() failed: {ex}");
+
+            var err = new Models.ErrorInfo
+            {
+                Title = "募集物件の保存後のクリーンアップ中に予期しないエラーが発生しました。",
+                Type = Models.ErrorInfo.ErrType.Other,
+                Code = "",
+                Message = "",
+                Description = $"{ex}",
+                Operation = "Cleanup",
+                MethodName = nameof(PostSaveCleanupAsync),
+                OccuredAt = DateTime.Now
+            };
+            ShowErrorInfoBar(err);
+        }
+        finally
+        {
+            IsDirty = false;
+        }
+    }
 
     private bool CanSave()
     {
@@ -2164,6 +2165,8 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
 
         if (!IsEditorEnabled) return;
         IsBusy = true;
+
+        // TODO:
         try
         {
             var lessor = await _dialogService.ShowLessorSelectDialog(new ViewModels.Dialogs.LessorSelectViewModel(_dataAccessService, _cts));
@@ -2200,7 +2203,6 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
                     ShowSimpleErrorInfoBar("選択した貸主を読み込めませんでした",$"ID {lessorId}　がありません。");
                     return;
                 }
-
 
                 var asdf = new Models.Rent.Residentials.PersonWrapperForListingViewModel(res.Person, this);
 
@@ -2259,10 +2261,9 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         return lessor is not null;
     }
 
-
     #endregion
 
-    #region = Broker ==
+    #region == Broker ==
 
     [RelayCommand]
     public async Task AddBroker()
@@ -2275,6 +2276,8 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
 
         if (!IsEditorEnabled) return;
         IsBusy = true;
+
+        // TODO:
         try
         {
             var selectedBroker = await _dialogService.ShowBrokerSelectDialog(
@@ -2322,8 +2325,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
     }
 
     [RelayCommand(CanExecute = nameof(CanEditBroker))]
-    private void EditBroker(
-        Models.Rent.Residentials.PersonWrapperForListingViewModel? broker)
+    private void EditBroker(Models.Rent.Residentials.PersonWrapperForListingViewModel? broker)
     {
         if (broker?.Person is null)
         {
@@ -2337,15 +2339,13 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         }
     }
 
-    private static bool CanEditBroker(
-        Models.Rent.Residentials.PersonWrapperForListingViewModel? broker)
+    private static bool CanEditBroker(Models.Rent.Residentials.PersonWrapperForListingViewModel? broker)
     {
         return broker?.Person is not null;
     }
 
     [RelayCommand(CanExecute = nameof(CanDeleteBroker))]
-    private void DeleteBroker(
-        Models.Rent.Residentials.PersonWrapperForListingViewModel? broker)
+    private void DeleteBroker(Models.Rent.Residentials.PersonWrapperForListingViewModel? broker)
     {
         if (broker?.Person is null)
         {
@@ -2355,13 +2355,11 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         if (BrokersWrapper.Remove(broker))
         {
             _listing.Brokers.Remove(broker.Person);
-            //if (!_draftBrokerDeletions.Any(person => person.Id == broker.Person.Id)) _draftBrokerDeletions.Add(broker.Person);
             IsDirty = true;
         }
     }
 
-    private static bool CanDeleteBroker(
-        Models.Rent.Residentials.PersonWrapperForListingViewModel? broker)
+    private static bool CanDeleteBroker(Models.Rent.Residentials.PersonWrapperForListingViewModel? broker)
     {
         return broker?.Person is not null;
     }

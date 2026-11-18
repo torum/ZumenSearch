@@ -5,10 +5,31 @@ using ZumenSearch.Services.Contracts;
 
 namespace ZumenSearch.ViewModels.Dialogs;
 
-// TODO: pass _cts as a parameter and make cancelable.
-
 public partial class BrokerSelectViewModel : ObservableObject
 {
+    private readonly IDataAccessService _dataAccessService;
+
+    private readonly CancellationTokenSource _cts;
+
+    public BrokerSelectViewModel(IDataAccessService dataAccessService, CancellationTokenSource cts)
+    {
+        _dataAccessService = dataAccessService;
+        _cts = cts;
+
+        InitLoad();
+    }
+
+    private async void InitLoad()
+    {
+        // TODO:
+        var res = await Task.Run(() => _dataAccessService.SelectBrokersByKeyword("*"), _cts.Token);
+
+        if (res is not null)
+        {
+            SuggestedBrokers = new(res.PersonSearchResult);
+        }
+    }
+
     public string Query
     {
         get;
@@ -55,28 +76,6 @@ public partial class BrokerSelectViewModel : ObservableObject
 
     public event EventHandler<Models.SearchResult.PersonSearchResultItem>? SelectionChanged; // TODO:
 
-    private readonly IDataAccessService _dataAccessService;
-
-    private readonly CancellationTokenSource _cts;
-
-    public BrokerSelectViewModel(IDataAccessService dataAccessService, CancellationTokenSource cts)
-    {
-        _dataAccessService = dataAccessService;
-        _cts = cts;
-
-        InitLoad();
-    }
-
-    private async void InitLoad()
-    {
-        var res = await Task.Run(() => _dataAccessService.SelectBrokersByKeyword("*"), _cts.Token);
-        //var res = _dataAccessService.SelectLessorByKeyword("*");
-        if (res is not null)
-        {
-            SuggestedBrokers = new(res.PersonSearchResult);
-        }
-    }
-
     [RelayCommand(CanExecute = nameof(CanSearch))]
     public async Task Search()
     {
@@ -95,7 +94,7 @@ public partial class BrokerSelectViewModel : ObservableObject
         }
 
         var res = await Task.Run(() => _dataAccessService.SelectBrokersByKeyword(searchText), _cts.Token);
-        //var res = _dataAccessService.SelectRentLessorByKeyword(Query);
+        // TODO:
         if (res is not null)
         {
             SuggestedBrokers = new(res.PersonSearchResult);

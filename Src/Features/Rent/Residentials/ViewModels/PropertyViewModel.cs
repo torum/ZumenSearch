@@ -7,7 +7,6 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Text.RegularExpressions;
 using Windows.Data.Pdf;
 using Windows.Storage;
@@ -3309,7 +3308,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         IsBusy = true;
         try
         {
-            await SaveCore();
+            await SaveCoreAsync();
         }
         finally
         {
@@ -3318,7 +3317,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         }
     }
 
-    private async Task SaveCore()
+    private async Task SaveCoreAsync()
     {
         if (!ValidateInput())
         {
@@ -3330,7 +3329,6 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             return;
         }
 
-        var isSaved = false;
         Models.SearchResult.ResultWrapper resUpsert;
         try
         {
@@ -3340,12 +3338,11 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         {
             Debug.WriteLine("Save operation was canceled.");
             // The queued operation did not start. Do not report a database failure.
+
             return;
         }
 
-        isSaved = !resUpsert.IsError;
-
-        if (!isSaved)
+        if (resUpsert.IsError)
         {
             Debug.WriteLine(
                 resUpsert.Error.Title + Environment.NewLine +
@@ -3362,148 +3359,153 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         else
         {
             Debug.WriteLine("No errors on update.");
-        }
 
-        if (isSaved)
-        {
-            try
-            {
-                // Update title with dummy value.
-                WindowTitle = string.Empty;
+            IsDirty = false;
 
-                // Clear error infobar.
-                IsInfoBarErrorOpen = false;
-
-                var cleanupFailures = new List<string>();
-
-                // Clean up deleted picture file.
-                if (_property.PicturesToBeDeleted.Count > 0)
-                {
-                    foreach (var file in _property.PicturesToBeDeleted.ToList())
-                    {
-                        var delFilePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _property.Id, file.ImageFilename);
-                        if (TryDeleteFiles(new[] { delFilePath }, cleanupFailures))
-                        {
-                            _property.PicturesToBeDeleted.Remove(file);// no need.
-                        }
-                    }
-                    _property.PicturesToBeDeleted.Clear();
-                }
-
-                // Clean up deleted PDF and thumb file.
-                if (_property.PdfsToBeDeleted.Count > 0)
-                {
-                    foreach (var file in _property.PdfsToBeDeleted.ToList())
-                    {
-                        var delFilePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _property.Id, file.PdfFilename);
-                        var thumbFilePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _property.Id, file.ThumbnailFilename);
-                        if (TryDeleteFiles(new[] { delFilePath, thumbFilePath }, cleanupFailures))
-                        {
-                            _property.PdfsToBeDeleted.Remove(file);//no need
-                        }
-
-                    }
-                    _property.PdfsToBeDeleted.Clear();
-                }
-
-                // Just in case clear LessorsToBeDeleted, BrokersToBeDeleted
-                _property.LessorsToBeDeleted.Clear();
-                _property.BrokersToBeDeleted.Clear();
-
-                // Clear rooms, pic and pdfs and lessors
-
-                if (_property.ListingsToBeDeleted.Count > 0)
-                {
-                    // Clean up deleted listing files and directories
-                    foreach (var listing in _property.ListingsToBeDeleted.ToList())
-                    {
-                        var delFolderPath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _property.Id, listing);
-                        if (Directory.Exists(delFolderPath))
-                        {
-                            try
-                            {
-                                Directory.Delete(delFolderPath, true);
-                                Debug.WriteLine($"Deleted tracked directory '{delFolderPath}'");
-                            }
-                            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-                            {
-                                Debug.WriteLine($"Failed to delete directory '{delFolderPath}': {ex}");
-                                cleanupFailures.Add(delFolderPath);
-                            }
-                        }
-                    }
-                    _property.ListingsToBeDeleted.Clear();
-                }
-
-                // Clear unsaved files list since they are now saved.
-                _unsavedPropertyPictureFileList.Clear();
-                _unsavedPropertyPdfThumbnailFileList.Clear();
-                _unsavedPropertyPdfFileList.Clear();
-
-                //
-                foreach (var picture in Pictures.Where(picture => _property.Pictures.Any(saved => saved.Id == picture.Id)))
-                {
-                    picture.SetStatus(EntityStatus.Saved);
-                    picture.SetIsModified(false);
-                }
-                foreach (var pdf in Pdfs.Where(pdf => _property.Pdfs.Any(saved => saved.Id == pdf.Id)))
-                {
-                    pdf.SetStatus(EntityStatus.Saved);
-                    pdf.SetIsModified(false);
-                }
-
-                // Clear unsaved listings and set status to saved.
-                foreach (var listing in _unsavedListingList)
-                {
-                    // TODO: PicturesToBeDeleted, PdfsToBeDeleted are cleaned up in ListingViewModel.
-                    // LessorsToBeDeleted, BrokersToBeDeleted
-
-                    listing.SetPropertyName(Name);
-                    listing.SetPropertyStatus(EntityStatus.Saved);
-                    listing.SetStatus(EntityStatus.Saved);
-                    listing.SetIsModified(false);
-                }
-                _unsavedListingList.Clear();
-
-                // Clear unsaved child editors and quit tracking them.
-                UnsavedChildEditorList.Clear();
-
-                // 
-                _property.SetStatus(EntityStatus.Saved);
-                _property.SetIsModified(false);
-
-                // Notify listing windows that the property has been updated.
-                WeakReferenceMessenger.Default.Send(new Models.Messenger.PropertyUpdatedMessage(_property as Models.Base.PropertyBase));
-
-                // TODO: this may not be viewed if window as closing.
-                if (cleanupFailures.Count > 0)
-                {
-                    ShowSimpleErrorInfoBar("保存しましたが、一部の削除済みファイルをクリーンアップできませんでした", $"{string.Join(", ", cleanupFailures)}");
-                }
-
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Save() failed: {ex}");
-                var err = new Models.ErrorInfo
-                {
-                    Title = "募集物件の保存中に予期しないエラーが発生しました。",
-                    Type = Models.ErrorInfo.ErrType.Other,
-                    Code = "",
-                    Message = "",
-                    Description = $"{ex}",
-                    Operation = "SaveCore",
-                    MethodName = nameof(Save),
-                    OccuredAt = DateTime.Now
-                };
-                ShowErrorInfoBar(err);
-            }
-            finally
-            {
-                IsDirty = false;
-            }
+            await PostSaveCleanupAsync();
         }
     }
+
+    private async Task PostSaveCleanupAsync()
+    {
+        try
+        {
+            // Update title with dummy value.
+            WindowTitle = string.Empty;
+
+            // Clear error infobar.
+            IsInfoBarErrorOpen = false;
+
+            var cleanupFailures = new List<string>();
+
+            // Clean up deleted picture file.
+            if (_property.PicturesToBeDeleted.Count > 0)
+            {
+                foreach (var file in _property.PicturesToBeDeleted.ToList())
+                {
+                    var delFilePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _property.Id, file.ImageFilename);
+                    if (TryDeleteFiles(new[] { delFilePath }, cleanupFailures))
+                    {
+                        _property.PicturesToBeDeleted.Remove(file);// no need.
+                    }
+                }
+                _property.PicturesToBeDeleted.Clear();
+            }
+
+            // Clean up deleted PDF and thumb file.
+            if (_property.PdfsToBeDeleted.Count > 0)
+            {
+                foreach (var file in _property.PdfsToBeDeleted.ToList())
+                {
+                    var delFilePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _property.Id, file.PdfFilename);
+                    var thumbFilePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _property.Id, file.ThumbnailFilename);
+                    if (TryDeleteFiles(new[] { delFilePath, thumbFilePath }, cleanupFailures))
+                    {
+                        _property.PdfsToBeDeleted.Remove(file);//no need
+                    }
+
+                }
+                _property.PdfsToBeDeleted.Clear();
+            }
+
+            // Just in case clear LessorsToBeDeleted, BrokersToBeDeleted
+            _property.LessorsToBeDeleted.Clear();
+            _property.BrokersToBeDeleted.Clear();
+
+            // Clear rooms, pic and pdfs and lessors
+
+            if (_property.ListingsToBeDeleted.Count > 0)
+            {
+                // Clean up deleted listing files and directories
+                foreach (var listing in _property.ListingsToBeDeleted.ToList())
+                {
+                    var delFolderPath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _property.Id, listing);
+                    if (Directory.Exists(delFolderPath))
+                    {
+                        try
+                        {
+                            Directory.Delete(delFolderPath, true);
+                            Debug.WriteLine($"Deleted tracked directory '{delFolderPath}'");
+                        }
+                        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+                        {
+                            Debug.WriteLine($"Failed to delete directory '{delFolderPath}': {ex}");
+                            cleanupFailures.Add(delFolderPath);
+                        }
+                    }
+                }
+                _property.ListingsToBeDeleted.Clear();
+            }
+
+            // Clear unsaved files list since they are now saved.
+            _unsavedPropertyPictureFileList.Clear();
+            _unsavedPropertyPdfThumbnailFileList.Clear();
+            _unsavedPropertyPdfFileList.Clear();
+
+            //
+            foreach (var picture in Pictures.Where(picture => _property.Pictures.Any(saved => saved.Id == picture.Id)))
+            {
+                picture.SetStatus(EntityStatus.Saved);
+                picture.SetIsModified(false);
+            }
+            foreach (var pdf in Pdfs.Where(pdf => _property.Pdfs.Any(saved => saved.Id == pdf.Id)))
+            {
+                pdf.SetStatus(EntityStatus.Saved);
+                pdf.SetIsModified(false);
+            }
+
+            // Clear unsaved listings and set status to saved.
+            // These listings are handed off to the property when the property is New and the listings are new as well.
+            foreach (var listing in _unsavedListingList)
+            {
+                // PicturesToBeDeleted, PdfsToBeDeleted, LessorsToBeDeleted, BrokersToBeDeleted are cleaned up in ListingViewModel.
+
+                listing.SetPropertyName(Name);
+                listing.SetPropertyStatus(EntityStatus.Saved);
+                listing.SetStatus(EntityStatus.Saved);
+                listing.SetIsModified(false);
+            }
+            _unsavedListingList.Clear();
+
+            // Clear unsaved child editors and quit tracking them.
+            UnsavedChildEditorList.Clear();
+
+            // 
+            _property.SetStatus(EntityStatus.Saved);
+            _property.SetIsModified(false);
+
+            // Notify listing windows that the property has been updated.
+            WeakReferenceMessenger.Default.Send(new Models.Messenger.PropertyUpdatedMessage(_property as Models.Base.PropertyBase));
+
+            // TODO: this may not be viewed if window as closing.
+            if (cleanupFailures.Count > 0)
+            {
+                ShowSimpleErrorInfoBar("保存しましたが、一部の削除済みファイルをクリーンアップできませんでした", $"{string.Join(", ", cleanupFailures)}");
+            }
+
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Save() failed: {ex}");
+            var err = new Models.ErrorInfo
+            {
+                Title = "募集物件の保存中に予期しないエラーが発生しました。",
+                Type = Models.ErrorInfo.ErrType.Other,
+                Code = "",
+                Message = "",
+                Description = $"{ex}",
+                Operation = "SaveCore",
+                MethodName = nameof(PostSaveCleanupAsync),
+                OccuredAt = DateTime.Now
+            };
+            ShowErrorInfoBar(err);
+        }
+        finally
+        {
+            IsDirty = false;
+        }
+    }
+
     private bool CanSave()
     {
         return IsDirty && !IsSaving && !_isBusy;
