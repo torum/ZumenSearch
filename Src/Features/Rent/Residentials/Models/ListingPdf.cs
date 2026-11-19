@@ -119,8 +119,7 @@ public sealed partial class ListingPdf : PdfBase
             IsMain = IsMain
         };
 
-        clone.PdfType = clone.ListingPdfTypes.FirstOrDefault(item => item.Key == PdfType.Key)
-            ?? new ListingPdfTypeLabel(PdfType.Key);
+        clone.PdfType = clone.ListingPdfTypes.FirstOrDefault(item => item.Key == PdfType.Key) ?? new ListingPdfTypeLabel(PdfType.Key);
         clone.SetIsModified(IsModified);
         return clone;
     }

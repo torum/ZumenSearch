@@ -13,7 +13,6 @@ public sealed partial class PersonWrapperForPropertyViewModel : ObservableObject
 {
     public ViewModels.Rent.Residentials.PropertyViewModel ParentViewModel { get; }
 
-
     public Models.Base.PersonBase Person
     {
         get;

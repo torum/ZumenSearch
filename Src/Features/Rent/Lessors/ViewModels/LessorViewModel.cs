@@ -39,12 +39,7 @@ public sealed partial class LessorViewModel : ObservableRecipient, IDisposable
 
     #endregion
 
-    public LessorViewModel(Models.Base.PersonBase lessorBase,
-        INavigationGenericService navigationService,
-        IDialogGenericService dialogService,
-        IDispatcherService dispatcherService,
-        IDataAccessService dataAccessService,
-        IDataAccessLocationService dataAccessLocationService)
+    public LessorViewModel(Models.Base.PersonBase lessorBase, INavigationGenericService navigationService, IDialogGenericService dialogService, IDispatcherService dispatcherService, IDataAccessService dataAccessService, IDataAccessLocationService dataAccessLocationService)
     {
         _lessorBase = lessorBase;
         _id = lessorBase.Id;

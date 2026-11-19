@@ -51,7 +51,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
 
     private readonly IDataAccessService _dataAccessService;
     private readonly IDispatcherService _dispatcherService;
-    private readonly IDialogGenericService? _dialogService;
+    private readonly IDialogGenericService _dialogService;
     private readonly INavigationGenericService _navigationService;
 
     #endregion
@@ -2290,6 +2290,9 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
             return;
         }
 
+        if (await _dialogService.ShowDeleteConfirmationDialog("この貸主を削除しますか？") != Microsoft.UI.Xaml.Controls.ContentDialogResult.Primary) return;
+
+
         if (LessorsWrapper.Remove(lessor))
         {
             IsDirty = true;
@@ -2381,12 +2384,14 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
     }
 
     [RelayCommand(CanExecute = nameof(CanDeleteBroker))]
-    private void DeleteBroker(Models.Rent.Residentials.PersonWrapperForListingViewModel? broker)
+    private async Task DeleteBroker(Models.Rent.Residentials.PersonWrapperForListingViewModel? broker)
     {
         if (broker?.Person is null)
         {
             return;
         }
+
+        if (await _dialogService.ShowDeleteConfirmationDialog("この宅建業者を削除しますか？") != Microsoft.UI.Xaml.Controls.ContentDialogResult.Primary) return;
 
         if (BrokersWrapper.Remove(broker))
         {

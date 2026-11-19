@@ -4463,6 +4463,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             return;
         }
 
+        if (await _dialogService.ShowDeleteConfirmationDialog("この貸主を削除しますか？") != Microsoft.UI.Xaml.Controls.ContentDialogResult.Primary) return;
+
         if (LessorsWrapper.Remove(lessor))
         {
             IsDirty = true;
@@ -4573,6 +4575,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         {
             return;
         }
+
+        if (await _dialogService.ShowDeleteConfirmationDialog("この宅建業者を削除しますか？") != Microsoft.UI.Xaml.Controls.ContentDialogResult.Primary) return;
 
         Debug.WriteLine($"DeleteBrokerCommand {broker.Person.Name}");
 

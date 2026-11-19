@@ -11,9 +11,7 @@ public sealed partial class PictureListPage : Page
     public PictureListPage()
     {
         InitializeComponent();
-
     }
-
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {

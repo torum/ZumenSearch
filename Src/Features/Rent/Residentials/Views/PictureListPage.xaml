@@ -19,21 +19,6 @@
         <Grid Grid.Row="0">
             <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Margin="0,0,0,0" HorizontalAlignment="Right">
                 <AppBarButton Name="AppBarButtonAddPicture" Icon="Add" Label="追加" Click="AppBarButtonAddPicture_Click"/>
-                <!--  Command="{x:Bind ViewModel.AddNewBuildingPicturesCommand}" -->
-                <!--
-                <AppBarButton Icon="OpenLocal" Label="開く" Command="{x:Bind ViewModel.OpenBuildingPictureDirectoryCommand}"/>
-                <AppBarButton Icon="Delete" Label="削除" Command="{x:Bind ViewModel.DeleteSelectedBuildingPictureCommand}"/>
-
-                <AppBarButton Icon="More" Label="その他">
-                    <AppBarButton.Flyout>
-                        <MenuFlyout Placement="Bottom">
-                            <ToggleMenuFlyoutItem Text="開く" Icon="OpenLocal" Command="{x:Bind ViewModel.OpenBuildingPictureDirectoryCommand, Mode=OneWay}"></ToggleMenuFlyoutItem>
-                            <MenuFlyoutSeparator/>
-                            <ToggleMenuFlyoutItem Text="削除" Icon="Delete" Command="{x:Bind ViewModel.DeleteSelectedBuildingPictureCommand, Mode=OneWay}"></ToggleMenuFlyoutItem>
-                        </MenuFlyout>
-                    </AppBarButton.Flyout>
-                </AppBarButton>
-                -->
                 <AppBarButton Icon="More" Label="その他">
                     <AppBarButton.Flyout>
                         <MenuFlyout Placement="Bottom">

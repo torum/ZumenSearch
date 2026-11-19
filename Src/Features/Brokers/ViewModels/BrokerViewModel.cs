@@ -38,12 +38,7 @@ public sealed partial class BrokerViewModel : ObservableRecipient, IDisposable
 
     #endregion
 
-    public BrokerViewModel(Models.Base.PersonBase broker,
-        INavigationGenericService navigationService,
-        IDialogGenericService dialogService,
-        IDispatcherService dispatcherService,
-        IDataAccessService dataAccessService,
-        IDataAccessLocationService dataAccessLocationService)
+    public BrokerViewModel(Models.Base.PersonBase broker, INavigationGenericService navigationService, IDialogGenericService dialogService, IDispatcherService dispatcherService, IDataAccessService dataAccessService, IDataAccessLocationService dataAccessLocationService)
     {
         _broker = broker;
         _id = broker.Id;
