@@ -1,12 +1,12 @@
 ﻿using System.Threading.Tasks;
 
-namespace ZumenSearch.Services.Contracts;
+namespace ZumenSearch.Infrastructure.Configuration.Contracts;
 
 public interface IConfigurationService
 {
     void Initialize(string configFilePath);
-    Task<Models.Configuration> LoadConfigurationAsync();
+    Task<ZumenSearch.Application.Configuration.AppSettings> LoadConfigurationAsync();
     Task SaveConfigurationAsync();
-    Models.Configuration CurrentConfiguration { get; }
+    ZumenSearch.Application.Configuration.AppSettings CurrentConfiguration { get; }
     string ConfigFilePath { get; }
 }

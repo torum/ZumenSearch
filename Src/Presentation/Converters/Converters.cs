@@ -1,0 +1,105 @@
+﻿using Microsoft.UI;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Data;
+using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Media.Imaging;
+using System.Globalization;
+using System.IO;
+
+namespace ZumenSearch.Presentation.Converters;
+
+public partial class ImagePathToImageSourceConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, string language)
+    {
+        if (value is not string imagePath || string.IsNullOrWhiteSpace(imagePath) || !File.Exists(imagePath))
+        {
+            return null!;
+        }
+
+        var bitmapImage = new BitmapImage
+        {
+            DecodePixelWidth = 280,
+            UriSource = new Uri(imagePath)
+        };
+
+        return bitmapImage;
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, string language)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+// not used for now.
+public partial class ThemeEnumToBooleanConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, string language)
+    {
+        if (parameter is string enumString)
+        {
+            if (!Enum.IsDefined(typeof(ElementTheme), value))
+            {
+                throw new ArgumentException("ExceptionEnumToBooleanConverterValueMustBeAnEnum");
+            }
+
+            var enumValue = Enum.Parse<ElementTheme>(enumString);
+
+            return enumValue.Equals(value);
+        }
+
+        throw new ArgumentException("ExceptionEnumToBooleanConverterParameterMustBeAnEnumName");
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, string language)
+    {
+        if (parameter is string enumString)
+        {
+            return Enum.Parse<ElementTheme>(enumString);
+        }
+
+        throw new ArgumentException("ExceptionEnumToBooleanConverterParameterMustBeAnEnumName");
+    }
+}
+
+// not really used.
+// BorderBrush="{x:Bind ViewModel.HasNameErrors, Mode=OneWay, Converter={StaticResource ErrorBrushConverter}}"
+public partial class ErrorToBorderBrushConverter : IValueConverter
+{
+    public object? Convert(object value, Type targetType, object parameter, string language)
+    {
+        bool hasError = value is bool v && v;
+
+        // Return Red brush if there is an error, otherwise rely on the default Theme Brush
+        return hasError
+            ? new SolidColorBrush(Colors.Red)
+            : null;
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, string language)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+public partial class ValidationToBrushConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, string language)
+    {
+        // Example condition: If an 'IsValid' boolean property is false, turn the border red
+        if (value is bool hasError && hasError)
+        {
+            return new SolidColorBrush(Colors.Red);
+        }
+
+        // Default fallback color (corresponds to system default theme brush)
+        //return App.Current.Resources["TextControlBorderBrush"] as Brush;
+        return (App.Current.Resources["TextControlBorderBrush"] as Brush)!;
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, string language)
+    {
+        throw new NotImplementedException();
+    }
+}

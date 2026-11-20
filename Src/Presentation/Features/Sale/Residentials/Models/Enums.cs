@@ -1,0 +1,39 @@
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using System.Collections.ObjectModel;
+
+namespace ZumenSearch.Presentation.Features.Sale.Residentials.Models;
+
+#pragma warning disable IDE0290 // Use primary constructor
+
+// Remove Enux suffix it is considered bad practice.
+
+public enum PropertyKindType
+{
+    Unspecified,
+    Apartment,
+    Mansion,
+    House,
+    TerraceHouse,
+    TownHouse,
+    ShareHouse,
+    Dormitory
+}
+
+
+public enum StructureType
+{
+    Unspecified,
+    Wood,
+    Block,
+    LightSteel,
+    Steel,
+    RC,
+    SRC,
+    ALC,
+    PC,
+    HPC,
+    RB,
+    CFT,
+    Other
+}
+

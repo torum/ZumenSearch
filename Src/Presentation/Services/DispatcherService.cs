@@ -1,10 +1,9 @@
 ﻿using CommunityToolkit.WinUI;
-using ZumenSearch.Views.Services.Contracts;
-
+using ZumenSearch.Presentation.Services.Contracts;
 #pragma warning disable IDE0079 // Remove unnecessary suppression
 #pragma warning disable IDE0290 // Use primary constructor
 
-namespace ZumenSearch.Views.Services;
+namespace ZumenSearch.Presentation.Services;
 
 public class DispatcherService : IDispatcherService
 {

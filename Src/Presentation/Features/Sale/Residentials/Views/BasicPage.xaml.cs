@@ -1,0 +1,31 @@
+﻿using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Data;
+using Microsoft.UI.Xaml.Navigation;
+
+namespace ZumenSearch.Presentation.Features.Sale.Residentials.Views;
+
+public sealed partial class BasicPage : Page
+{
+    public ZumenSearch.Presentation.Features.Sale.Residentials.ViewModels.PropertyViewModel? ViewModel
+    {
+        get;
+        private set;
+    }
+
+    public BasicPage()
+    {
+        InitializeComponent();
+    }
+
+    protected override void OnNavigatedTo(
+        NavigationEventArgs e)
+    {
+        if (e.Parameter is ZumenSearch.Presentation.Features.Sale.Residentials.ViewModels.PropertyViewModel vm)
+        {
+            ViewModel = vm;
+            Bindings.Update();
+        }
+
+        base.OnNavigatedTo(e);
+    }
+}

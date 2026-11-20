@@ -7,16 +7,21 @@ using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Text;
 using WinRT.Interop;
-using ZumenSearch.Helpers;
-using ZumenSearch.Services;
-using ZumenSearch.Services.Contracts;
-using ZumenSearch.Services.Extensions;
-using ZumenSearch.Views.Services;
-using ZumenSearch.Views.Services.Contracts;
+using ZumenSearch.Presentation.Helpers;
+using ZumenSearch.Presentation.Utilities;
+using ZumenSearch.Infrastructure.Platform;
+using ZumenSearch.Infrastructure.Configuration;
+using ZumenSearch.Infrastructure.DataAccess;
+using ZumenSearch.Presentation.Services;
+using ZumenSearch.Infrastructure.Configuration.Contracts;
+using ZumenSearch.Infrastructure.DataAccess.Contracts;
+using ZumenSearch.Presentation.Services.Contracts;
+using ZumenSearch.Presentation.Factories;
+
 
 namespace ZumenSearch;
 
-public partial class App : Application
+public partial class App : Microsoft.UI.Xaml.Application
 {
     // App basic info
     public const string AppName = "ZumenSearch";
@@ -124,44 +129,44 @@ public partial class App : Application
                 services.AddSingleton<IConfigurationService>(new ConfigurationService(AppendErrorLog));
 
                 // Views and ViewModels
-                services.AddSingleton<ViewModels.MainViewModel>();
-                services.AddSingleton<Views.MainWindow>();
-                services.AddSingleton<Views.ShellPage>();
+                services.AddSingleton<ZumenSearch.Presentation.Shell.ViewModels.MainViewModel>();
+                services.AddSingleton<ZumenSearch.Presentation.Shell.Views.MainWindow>();
+                services.AddSingleton<ZumenSearch.Presentation.Shell.Views.ShellPage>();
 
-                services.AddTransient<ViewModels.Rent.Residentials.PropertyViewModel>();
-                services.AddTransient<Views.Rent.Residentials.ShellPage>();
-                services.AddGenericFactory<Models.Rent.Residentials.Property, bool, INavigationGenericService, IDialogGenericService, ViewModels.Rent.Residentials.PropertyViewModel>();
-                services.AddGenericFactory<Models.Rent.Residentials.Property, bool, Views.Rent.Residentials.ShellPage>();
+                services.AddTransient<ZumenSearch.Presentation.Features.Rent.Residentials.ViewModels.PropertyViewModel>();
+                services.AddTransient<ZumenSearch.Presentation.Features.Rent.Residentials.Views.ShellPage>();
+                services.AddGenericFactory<ZumenSearch.Domain.Entities.Rent.Residentials.Property, bool, INavigationGenericService, IDialogGenericService, ZumenSearch.Presentation.Features.Rent.Residentials.ViewModels.PropertyViewModel>();
+                services.AddGenericFactory<ZumenSearch.Domain.Entities.Rent.Residentials.Property, bool, ZumenSearch.Presentation.Features.Rent.Residentials.Views.ShellPage>();
 
-                services.AddTransient<ViewModels.Rent.Residentials.ListingViewModel>();
-                services.AddTransient<Views.Rent.Residentials.Listing.ShellPage>();
-                services.AddGenericFactory<Models.Rent.Residentials.Listing, bool, INavigationGenericService, IDialogGenericService, ViewModels.Rent.Residentials.ListingViewModel>();
-                services.AddGenericFactory<Models.Rent.Residentials.Listing, bool, Views.Rent.Residentials.Listing.ShellPage>();
+                services.AddTransient<ZumenSearch.Presentation.Features.Rent.Residentials.ViewModels.ListingViewModel>();
+                services.AddTransient<ZumenSearch.Presentation.Features.Rent.Residentials.Views.Listing.ShellPage>();
+                services.AddGenericFactory<ZumenSearch.Domain.Entities.Rent.Residentials.Listing, bool, INavigationGenericService, IDialogGenericService, ZumenSearch.Presentation.Features.Rent.Residentials.ViewModels.ListingViewModel>();
+                services.AddGenericFactory<ZumenSearch.Domain.Entities.Rent.Residentials.Listing, bool, ZumenSearch.Presentation.Features.Rent.Residentials.Views.Listing.ShellPage>();
 
-                services.AddTransient<ViewModels.Rent.Commercials.PropertyViewModel>();
-                services.AddTransient<Views.Rent.Commercials.ShellPage>();
-                services.AddGenericFactory<Models.Rent.Commercials.Property, INavigationGenericService, IDialogGenericService, ViewModels.Rent.Commercials.PropertyViewModel>();
-                services.AddGenericFactory<Models.Rent.Commercials.Property, Views.Rent.Commercials.ShellPage>();
+                services.AddTransient<ZumenSearch.Presentation.Features.Rent.Commercials.ViewModels.PropertyViewModel>();
+                services.AddTransient<ZumenSearch.Presentation.Features.Rent.Commercials.Views.ShellPage>();
+                services.AddGenericFactory<ZumenSearch.Domain.Entities.Rent.Commercials.Property, INavigationGenericService, IDialogGenericService, ZumenSearch.Presentation.Features.Rent.Commercials.ViewModels.PropertyViewModel>();
+                services.AddGenericFactory<ZumenSearch.Domain.Entities.Rent.Commercials.Property, ZumenSearch.Presentation.Features.Rent.Commercials.Views.ShellPage>();
 
-                services.AddTransient<ViewModels.Rent.Commercials.ListingViewModel>();
-                services.AddTransient<Views.Rent.Commercials.Listing.ShellPage>(); 
-                services.AddGenericFactory<Models.Rent.Commercials.Listing.Listing, INavigationGenericService, IDialogGenericService, ViewModels.Rent.Commercials.ListingViewModel>();
-                services.AddGenericFactory<Models.Rent.Commercials.Listing.Listing, Views.Rent.Commercials.Listing.ShellPage>();
+                services.AddTransient<ZumenSearch.Presentation.Features.Rent.Commercials.ViewModels.ListingViewModel>();
+                services.AddTransient<ZumenSearch.Presentation.Features.Rent.Commercials.Views.Listing.ShellPage>();
+                services.AddGenericFactory<ZumenSearch.Domain.Entities.Rent.Commercials.Listing.Listing, INavigationGenericService, IDialogGenericService, ZumenSearch.Presentation.Features.Rent.Commercials.ViewModels.ListingViewModel>();
+                services.AddGenericFactory<ZumenSearch.Domain.Entities.Rent.Commercials.Listing.Listing, ZumenSearch.Presentation.Features.Rent.Commercials.Views.Listing.ShellPage>();
 
-                services.AddTransient<ViewModels.Rent.Lessors.LessorViewModel>();
-                services.AddTransient<Views.Rent.Lessors.ShellPage>();
-                services.AddGenericFactory<Models.Base.PersonBase, INavigationGenericService, IDialogGenericService, ViewModels.Rent.Lessors.LessorViewModel>();
-                services.AddGenericFactory<Models.Base.PersonBase, Views.Rent.Lessors.ShellPage>();
+                services.AddTransient<ZumenSearch.Presentation.Features.Rent.Lessors.ViewModels.LessorViewModel>();
+                services.AddTransient<ZumenSearch.Presentation.Features.Rent.Lessors.Views.ShellPage>();
+                services.AddGenericFactory<ZumenSearch.Domain.Entities.Base.PersonBase, INavigationGenericService, IDialogGenericService, ZumenSearch.Presentation.Features.Rent.Lessors.ViewModels.LessorViewModel>();
+                services.AddGenericFactory<ZumenSearch.Domain.Entities.Base.PersonBase, ZumenSearch.Presentation.Features.Rent.Lessors.Views.ShellPage>();
 
-                services.AddTransient<ViewModels.Sale.Residentials.PropertyViewModel>();
-                services.AddTransient<Views.Sale.Residentials.ShellPage>();
-                services.AddGenericFactory<Models.Sale.Residentials.Property, INavigationGenericService, IDialogGenericService, ViewModels.Sale.Residentials.PropertyViewModel>();
-                services.AddGenericFactory<Models.Sale.Residentials.Property, Views.Sale.Residentials.ShellPage>();
+                services.AddTransient<ZumenSearch.Presentation.Features.Sale.Residentials.ViewModels.PropertyViewModel>();
+                services.AddTransient<ZumenSearch.Presentation.Features.Sale.Residentials.Views.ShellPage>();
+                services.AddGenericFactory<ZumenSearch.Domain.Entities.Sale.Residentials.Property, INavigationGenericService, IDialogGenericService, ZumenSearch.Presentation.Features.Sale.Residentials.ViewModels.PropertyViewModel>();
+                services.AddGenericFactory<ZumenSearch.Domain.Entities.Sale.Residentials.Property, ZumenSearch.Presentation.Features.Sale.Residentials.Views.ShellPage>();
 
-                services.AddTransient<ViewModels.Brokers.BrokerViewModel>();
-                services.AddTransient<Views.Brokers.ShellPage>();
-                services.AddGenericFactory<Models.Base.PersonBase, INavigationGenericService, IDialogGenericService, ViewModels.Brokers.BrokerViewModel>();
-                services.AddGenericFactory<Models.Base.PersonBase, Views.Brokers.ShellPage>();
+                services.AddTransient<ZumenSearch.Presentation.Features.Brokers.ViewModels.BrokerViewModel>();
+                services.AddTransient<ZumenSearch.Presentation.Features.Brokers.Views.ShellPage>();
+                services.AddGenericFactory<ZumenSearch.Domain.Entities.Base.PersonBase, INavigationGenericService, IDialogGenericService, ZumenSearch.Presentation.Features.Brokers.ViewModels.BrokerViewModel>();
+                services.AddGenericFactory<ZumenSearch.Domain.Entities.Base.PersonBase, ZumenSearch.Presentation.Features.Brokers.Views.ShellPage>();
 
                 // Instead of AddEditorFactory for each, typeof.. <,> registers all.
                 //services.AddSingleton(typeof(IAbstractFactory<,>), typeof(AbstractFactory<,>)); 
@@ -210,7 +215,7 @@ public partial class App : Application
             await configurationService.LoadConfigurationAsync();
 
             _appHostStartTask = StartAppHostAsync();
-            var shell = GetService<Views.ShellPage>();
+            var shell = GetService<ZumenSearch.Presentation.Shell.Views.ShellPage>();
             shell.MainWindow.Closed += (sender, e) =>
             {
                 _appHostStopTask = StopAppHostAsync();
@@ -272,7 +277,7 @@ public partial class App : Application
     {
         CurrentDispatcherQueue?.TryEnqueue(() =>
         {
-            var main = App.GetService<Views.MainWindow>();
+            var main = App.GetService<ZumenSearch.Presentation.Shell.Views.MainWindow>();
 
             main?.Activate();
             //main?.AppWindow.Show(true);

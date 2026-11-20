@@ -7,40 +7,43 @@ using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
 using System.ComponentModel;
 using System.Diagnostics;
-using ZumenSearch.Services;
-using ZumenSearch.Services.Contracts;
-using ZumenSearch.Views.Services.Contracts;
+using ZumenSearch.Infrastructure.Configuration;
+using ZumenSearch.Infrastructure.DataAccess;
+using ZumenSearch.Presentation.Services;
+using ZumenSearch.Infrastructure.Configuration.Contracts;
+using ZumenSearch.Infrastructure.DataAccess.Contracts;
+using ZumenSearch.Presentation.Services.Contracts;
 
-namespace ZumenSearch.Views;
+namespace ZumenSearch.Presentation.Shell.Views;
 
 public sealed partial class ShellPage : Page
 {
     private readonly Dictionary<string, Type> _pageMap = new()
         {
-            { "ZumenSearch.Views.SearchPage", typeof(Views.SearchPage) },
-            { "ZumenSearch.Views.SearchResultPage", typeof(Views.SearchResultPage) },
-            { "ZumenSearch.Views.Rent.ResidentialSearchPage", typeof(Views.Rent.ResidentialSearchPage) },
-            { "ZumenSearch.Views.Rent.ResidentialSearchResultPage", typeof(Views.Rent.ResidentialSearchResultPage) },
-            { "ZumenSearch.Views.Rent.CommercialSearchPage", typeof(Views.Rent.CommercialSearchPage) },
-            { "ZumenSearch.Views.Rent.CommercialSearchResultPage", typeof(Views.Rent.CommercialSearchResultPage) },
-            { "ZumenSearch.Views.Rent.ParkingSearchPage", typeof(Views.Rent.ParkingSearchPage) },
-            { "ZumenSearch.Views.Rent.ParkingSearchResultPage", typeof(Views.Rent.ParkingSearchResultPage) },
-            { "ZumenSearch.Views.Rent.LessorSearchPage", typeof(Views.Rent.LessorSearchPage) },
-            { "ZumenSearch.Views.Rent.LessorSearchResultPage", typeof(Views.Rent.LessorSearchResultPage) },
-            { "ZumenSearch.Views.Sale.ResidentialSearchPage", typeof(Views.Sale.ResidentialSearchPage) },
-            { "ZumenSearch.Views.Sale.ResidentialSearchResultPage", typeof(Views.Sale.ResidentialSearchResultPage) },
-            { "ZumenSearch.Views.Sale.CommercialSearchPage", typeof(Views.Sale.CommercialSearchPage) },
-            { "ZumenSearch.Views.Sale.CommercialSearchResultPage", typeof(Views.Sale.CommercialSearchResultPage) },
-            { "ZumenSearch.Views.BrokerSearchPage", typeof(Views.BrokerSearchPage) },
-            { "ZumenSearch.Views.BrokerSearchResultPage", typeof(Views.BrokerSearchResultPage) },
-            { "ZumenSearch.Views.SettingsPage", typeof(Views.SettingsPage) }
+            { NavigationKeys.Search, typeof(ZumenSearch.Presentation.Search.Views.SearchPage) },
+            { NavigationKeys.SearchResult, typeof(ZumenSearch.Presentation.Search.Views.SearchResultPage) },
+            { NavigationKeys.RentResidentialSearch, typeof(ZumenSearch.Presentation.Search.Views.Rent.ResidentialSearchPage) },
+            { NavigationKeys.RentResidentialSearchResult, typeof(ZumenSearch.Presentation.Search.Views.Rent.ResidentialSearchResultPage) },
+            { NavigationKeys.RentCommercialSearch, typeof(ZumenSearch.Presentation.Search.Views.Rent.CommercialSearchPage) },
+            { NavigationKeys.RentCommercialSearchResult, typeof(ZumenSearch.Presentation.Search.Views.Rent.CommercialSearchResultPage) },
+            { NavigationKeys.RentParkingSearch, typeof(ZumenSearch.Presentation.Search.Views.Rent.ParkingSearchPage) },
+            { NavigationKeys.RentParkingSearchResult, typeof(ZumenSearch.Presentation.Search.Views.Rent.ParkingSearchResultPage) },
+            { NavigationKeys.RentLessorSearch, typeof(ZumenSearch.Presentation.Search.Views.Rent.LessorSearchPage) },
+            { NavigationKeys.RentLessorSearchResult, typeof(ZumenSearch.Presentation.Search.Views.Rent.LessorSearchResultPage) },
+            { NavigationKeys.SaleResidentialSearch, typeof(ZumenSearch.Presentation.Search.Views.Sale.ResidentialSearchPage) },
+            { NavigationKeys.SaleResidentialSearchResult, typeof(ZumenSearch.Presentation.Search.Views.Sale.ResidentialSearchResultPage) },
+            { NavigationKeys.SaleCommercialSearch, typeof(ZumenSearch.Presentation.Search.Views.Sale.CommercialSearchPage) },
+            { NavigationKeys.SaleCommercialSearchResult, typeof(ZumenSearch.Presentation.Search.Views.Sale.CommercialSearchResultPage) },
+            { NavigationKeys.BrokerSearch, typeof(ZumenSearch.Presentation.Search.Views.BrokerSearchPage) },
+            { NavigationKeys.BrokerSearchResult, typeof(ZumenSearch.Presentation.Search.Views.BrokerSearchResultPage) },
+            { NavigationKeys.Settings, typeof(ZumenSearch.Presentation.Shell.Views.SettingsPage) }
         };
 
     private readonly INavigationService _navigationService;
 
-    public ShellPage(Views.MainWindow win, ViewModels.MainViewModel viewModel, INavigationService navigationService)
+    public ShellPage(ZumenSearch.Presentation.Shell.Views.MainWindow win, ZumenSearch.Presentation.Shell.ViewModels.MainViewModel viewModel, INavigationService navigationService)
     {
-        MainWindow = win;// App.GetService<Views.MainWindow>();
+        MainWindow = win;// App.GetService<ZumenSearch.Presentation.Shell.Views.MainWindow>();
         MainWindow.Content = this;
 
         ViewModel = viewModel;
@@ -57,7 +60,7 @@ public sealed partial class ShellPage : Page
         this.Loaded += Page_Loaded;
     }
 
-    public ViewModels.MainViewModel ViewModel { get; }
+    public ZumenSearch.Presentation.Shell.ViewModels.MainViewModel ViewModel { get; }
 
     //public Frame NavigationFrame => this.ContentFrame;
 
@@ -78,7 +81,7 @@ public sealed partial class ShellPage : Page
         await ViewModel.InitializeAsync();
         ViewModel.Initialize(this.XamlRoot, MainWindow);
 
-        if (this.ContentFrame.Navigate(typeof(ZumenSearch.Views.SearchPage), null, new Microsoft.UI.Xaml.Media.Animation.EntranceNavigationTransitionInfo()))
+        if (this.ContentFrame.Navigate(typeof(ZumenSearch.Presentation.Search.Views.SearchPage), null, new Microsoft.UI.Xaml.Media.Animation.EntranceNavigationTransitionInfo()))
         {
             SetRegionsForCustomTitleBar("Page_Loaded");
         }
@@ -166,7 +169,7 @@ public sealed partial class ShellPage : Page
     {
         if (args.IsSettingsInvoked == true)
         {
-            _navigationService.NavigateTo("ZumenSearch.Views.SettingsPage", SlideNavigationTransitionEffect.FromBottom);
+            _navigationService.NavigateTo(NavigationKeys.Settings, SlideNavigationTransitionEffect.FromBottom);
         }
         else if (args.InvokedItemContainer != null && (args.InvokedItemContainer.Tag != null))
         {
@@ -182,7 +185,7 @@ public sealed partial class ShellPage : Page
     {
         this.NavigationViewControl.IsBackEnabled = this.ContentFrame.CanGoBack;
 
-        if (this.ContentFrame.SourcePageType == typeof(Views.SettingsPage))
+        if (this.ContentFrame.SourcePageType == typeof(ZumenSearch.Presentation.Shell.Views.SettingsPage))
         {
             // SettingsItem is not part of NavView.MenuItems, and doesn't have a Tag.
             this.NavigationViewControl.SelectedItem = (NavigationViewItem)this.NavigationViewControl.SettingsItem;
@@ -193,7 +196,8 @@ public sealed partial class ShellPage : Page
         }
         else if (this.ContentFrame.SourcePageType != null)
         {
-            var selectedItem = FindNavigationViewItemWithTag(this.ContentFrame.SourcePageType.FullName!);
+            var routeKey = _pageMap.FirstOrDefault(page => page.Value == this.ContentFrame.SourcePageType).Key;
+            var selectedItem = FindNavigationViewItemWithTag(routeKey);
             if (selectedItem != null)
             {
                 this.NavigationViewControl.SelectedItem = selectedItem;
@@ -204,7 +208,7 @@ public sealed partial class ShellPage : Page
                 //Debug.WriteLine("No menu item with tag matching the current page found in NavView. Current page: " + ContentFrame.SourcePageType.FullName);
             }
 
-            if (ContentFrame.SourcePageType == typeof(Views.SearchPage))
+            if (ContentFrame.SourcePageType == typeof(ZumenSearch.Presentation.Search.Views.SearchPage))
             {
                 // Hide SearchBox
                 //SearchBox.Visibility = Visibility.Collapsed;
@@ -212,7 +216,7 @@ public sealed partial class ShellPage : Page
 
 
             }
-            else if (ContentFrame.SourcePageType == typeof(Views.SearchResultPage))
+            else if (ContentFrame.SourcePageType == typeof(ZumenSearch.Presentation.Search.Views.SearchResultPage))
             {
                 /*
                 var options = new FindNextElementOptions

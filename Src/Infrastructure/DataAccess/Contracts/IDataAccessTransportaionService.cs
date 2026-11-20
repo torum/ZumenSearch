@@ -1,7 +1,6 @@
 ﻿using System.Collections.ObjectModel;
-using ZumenSearch.Models.Transportation;
-
-namespace ZumenSearch.Services.Contracts;
+using ZumenSearch.Domain.ValueObjects.Transportation;
+namespace ZumenSearch.Infrastructure.DataAccess.Contracts;
 
 public interface IDataAccessTransportationService
 {

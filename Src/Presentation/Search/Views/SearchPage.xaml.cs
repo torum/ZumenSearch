@@ -1,0 +1,220 @@
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
+using ZumenSearch.Infrastructure.Configuration.Contracts;
+using ZumenSearch.Infrastructure.DataAccess.Contracts;
+using ZumenSearch.Presentation.Services.Contracts;
+using ZumenSearch.Presentation.Shell.ViewModels;
+using ZumenSearch.Domain.Enums;
+using ZumenSearch.Application.Configuration;
+using ZumenSearch.Application.Results;
+using ZumenSearch.Presentation.Shell.Models;
+
+namespace ZumenSearch.Presentation.Search.Views;
+
+public partial class RecentPropertyTypeTemplateSelector : DataTemplateSelector
+{
+    public DataTemplate? RecentRentResidentialTemplate { get; set; }
+    public DataTemplate? RecentRentCommercialTemplate { get; set; }
+    public DataTemplate? RecentSaleResidentialTemplate { get; set; }
+
+    protected override DataTemplate? SelectTemplateCore(object item)
+    {
+        if (item is ZumenSearch.Application.SearchResults.PropertySearchResultItem searchResultItem)
+        {
+            if (searchResultItem.PropertyContextType == PropertyContextType.RentResidential)
+            {
+                return RecentRentResidentialTemplate;
+            }
+            else if (searchResultItem.PropertyContextType == PropertyContextType.RentCommercial)
+            {
+                return RecentRentCommercialTemplate;
+            }
+            else if (searchResultItem.PropertyContextType == PropertyContextType.SaleResidential)
+            {
+                return RecentSaleResidentialTemplate;
+            }
+            else
+            {
+                // TODO:
+                Debug.WriteLine("Not yet implemented PropertyTypeTemplateSelector @SearchPage.xaml.cs");
+            }
+        }
+
+        return base.SelectTemplateCore(item);
+    }
+}
+
+public sealed partial class SearchPage : Page
+{
+    public ZumenSearch.Presentation.Shell.ViewModels.MainViewModel ViewModel { get;}
+
+    private readonly INavigationService _navigationService;
+
+    public SearchPage()
+    {
+        ViewModel = App.GetService<MainViewModel>();
+        _navigationService = App.GetService<INavigationService>();
+
+        InitializeComponent();
+
+        this.Loaded += Page_Loaded;
+
+        //BreadcrumbBarMain.ItemsSource = new string[] { "��������" };
+        /*
+        BreadcrumbBarMain.ItemsSource = new ObservableCollection<Breadcrumb>{
+        new() { Name = "��������", Page = typeof(IntegratedSearchPage).FullName!},
+    };
+        */
+    }
+
+    private void Page_Loaded(object sender, RoutedEventArgs e)
+    {
+        this.SearchAutoSuggestBox.Focus(Microsoft.UI.Xaml.FocusState.Programmatic);
+    }
+
+    private void AutoSuggestBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
+    {
+        if (ViewModel.SearchPropertiesCommand.CanExecute(args.QueryText))
+        {
+            ViewModel.SearchPropertiesCommand.Execute(args.QueryText);
+        }
+    }
+
+    private void Image_ImageFailed(object sender, ExceptionRoutedEventArgs e)
+    {
+        if (sender is Microsoft.UI.Xaml.Controls.Image img)
+        {
+            System.Diagnostics.Debug.WriteLine($"Image failed to load: {img.Source}"); 
+            /*
+            img.Source = new Microsoft.UI.Xaml.Media.Imaging.BitmapImage(
+                new Uri("ms-appx:///Assets/FallbackPlaceholder.png")
+            );
+            */
+        }
+    }
+
+    private static T? FindParent<T>(DependencyObject child) where T : DependencyObject
+    {
+        DependencyObject parent = VisualTreeHelper.GetParent(child);
+        while (parent != null && parent is not T)
+        {
+            parent = VisualTreeHelper.GetParent(parent);
+        }
+
+        if (parent is not null)
+        {
+            return parent as T;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    private void ItemContainer_DoubleTapped(object sender, Microsoft.UI.Xaml.Input.DoubleTappedRoutedEventArgs e)
+    {
+        e.Handled = true;
+        // WinUI3 can't handle double click properly, so we handle it manually.
+
+        // OriginalSource is the specific element (e.g., TextBlock or Grid) that was tapped
+        if (e.OriginalSource is not FrameworkElement element)
+        {
+            return;
+        }
+
+        var container = FindParent<Microsoft.UI.Xaml.Controls.ItemContainer>(element);
+        if (container is null)
+        {
+            return;
+        }
+
+        if (container.DataContext is not ZumenSearch.Application.SearchResults.PropertySearchResultItem searchresult)
+        {
+            Debug.WriteLine($"Not PropertySearchResult. {container.DataContext?.GetType().FullName} @ItemContainer_DoubleTapped");
+            return;
+        }
+
+        if (ViewModel is null)
+        {
+            return;
+        }
+
+        if (ViewModel.EditPropertyCommand.CanExecute(searchresult))
+        {
+            ViewModel.EditPropertyCommand.Execute(searchresult);
+        }
+
+    }
+
+    private void ItemContainer_PointerPressed(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
+    {
+        // WinUI3 can't handle double click properly.
+        // This prevents newly created window goes behind the main window.
+        e.Handled = true;
+    }
+
+    private void ItemContainer_PointerReleased(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
+    {
+        // WinUI3 can't handle double click properly.
+        // This prevents newly created window goes behind the main window.
+        e.Handled = true;
+    }
+
+    private void ItemContainer_RightTapped(object sender, Microsoft.UI.Xaml.Input.RightTappedRoutedEventArgs e)
+    {
+        if (e.OriginalSource is not FrameworkElement element)
+        {
+            return;
+        }
+
+        var container = FindParent<Microsoft.UI.Xaml.Controls.ItemContainer>(element);
+        if (container is null)
+        {
+            return;
+        }
+
+        if (container.DataContext is not ZumenSearch.Application.SearchResults.PropertySearchResultItem)
+        {
+            Debug.WriteLine($"Not PropertySearchResult. {container.DataContext?.GetType().FullName} @ItemContainer_RightTapped");
+            return;
+        }
+
+        container.IsSelected = true;
+    }
+
+    private void ItemsViewKeyboardAccelerator_Invoked(Microsoft.UI.Xaml.Input.KeyboardAccelerator sender, Microsoft.UI.Xaml.Input.KeyboardAcceleratorInvokedEventArgs args)
+    {
+        args.Handled = true;
+
+        if (args.Element is not FrameworkElement)
+        {
+            return;
+        }
+
+        if (args.Element is not Microsoft.UI.Xaml.Controls.ItemContainer element)
+        {
+            return;
+        }
+
+        if (element.DataContext is not ZumenSearch.Application.SearchResults.PropertySearchResultItem searchresult)
+        {
+            Debug.WriteLine($"Not PropertySearchResult. {element.DataContext?.GetType().FullName} @ItemContainerKeyboardAccelerator_Invoked");
+            return;
+        }
+
+        if (ViewModel is null)
+        {
+            return;
+        }
+
+
+        Debug.WriteLine($"ItemContainerKeyboardAccelerator_Invoked");
+        /*
+        if (ViewModel.EditRentResidentialBldgCommand.CanExecute(searchresult))
+        {
+            ViewModel.EditRentResidentialBldgCommand.Execute(searchresult);
+        }
+        */
+    }
+}

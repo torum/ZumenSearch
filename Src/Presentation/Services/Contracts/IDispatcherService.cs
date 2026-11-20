@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 
-namespace ZumenSearch.Views.Services.Contracts;
+namespace ZumenSearch.Presentation.Services.Contracts;
 
 public interface IDispatcherService
 {

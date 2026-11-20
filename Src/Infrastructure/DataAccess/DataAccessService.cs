@@ -1,14 +1,23 @@
 using Microsoft.Data.Sqlite;
 using System.Data;
 using System.Globalization;
-using ZumenSearch.Helpers;
-using ZumenSearch.Models;
-using ZumenSearch.Models.Base;
-using ZumenSearch.Models.SearchResult;
-using ZumenSearch.Services.Contracts;
+using ZumenSearch.Presentation.Helpers;
+using ZumenSearch.Presentation.Utilities;
+using ZumenSearch.Infrastructure.Platform;
+using ZumenSearch.Domain.Enums;
+using ZumenSearch.Application.Configuration;
+using ZumenSearch.Application.Results;
+using ZumenSearch.Presentation.Shell.Models;
+using ZumenSearch.Domain.Entities.Base;
+
+using ZumenSearch.Application.SearchResults;
+using ZumenSearch.Presentation.Search;
+using ZumenSearch.Infrastructure.Configuration.Contracts;
+using ZumenSearch.Infrastructure.DataAccess.Contracts;
+using ZumenSearch.Presentation.Services.Contracts;
 using System.Diagnostics.CodeAnalysis;
 
-namespace ZumenSearch.Services;
+namespace ZumenSearch.Infrastructure.DataAccess;
 
 // Repository
 
@@ -139,7 +148,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     "built_year_month TEXT NOT NULL DEFAULT ''," +
                     "remarks TEXT NOT NULL DEFAULT ''," +
 
-                    "kanri_shutai TEXT NOT NULL DEFAULT '" + nameof(Models.Rent.Residentials.Property.EnumKanriShutai.Unspecified) + "'," +
+                    "kanri_shutai TEXT NOT NULL DEFAULT '" + nameof(ZumenSearch.Domain.Entities.Rent.Residentials.Property.EnumKanriShutai.Unspecified) + "'," +
                     "kanri_is_maintenance_management INTEGER NOT NULL DEFAULT 0," +
                     "kanri_is_tenant_management INTEGER NOT NULL DEFAULT 0," +
                     "kanri_is_payment_management INTEGER NOT NULL DEFAULT 0," +
@@ -154,14 +163,14 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     "has_security_camera INTEGER NOT NULL DEFAULT 0," +
                     "has_parcel_locker INTEGER NOT NULL DEFAULT 0," +
                     "has_electric INTEGER NOT NULL DEFAULT 0," +
-                    "property_electric_kind TEXT NOT NULL DEFAULT '" + nameof(Models.Rent.Residentials.Property.EnumElectricType.Unspecified) + "'," +
+                    "property_electric_kind TEXT NOT NULL DEFAULT '" + nameof(ZumenSearch.Domain.Entities.Rent.Residentials.Property.EnumElectricType.Unspecified) + "'," +
                     "electric_detail TEXT NOT NULL DEFAULT ''," +
                     "has_gas INTEGER NOT NULL DEFAULT 0," +
-                    "gas_type TEXT NOT NULL DEFAULT '" + nameof(Models.Rent.Residentials.FacilityGasType.Unspecified) + "'," +
+                    "gas_type TEXT NOT NULL DEFAULT '" + nameof(ZumenSearch.Domain.Entities.Rent.Residentials.FacilityGasType.Unspecified) + "'," +
                     "gas_detail TEXT NOT NULL DEFAULT ''," +
-                    "tap_water_type TEXT NOT NULL DEFAULT '" + nameof(Models.Rent.Residentials.FacilityTapWaterType.Unspecified) + "'," +
+                    "tap_water_type TEXT NOT NULL DEFAULT '" + nameof(ZumenSearch.Domain.Entities.Rent.Residentials.FacilityTapWaterType.Unspecified) + "'," +
                     "tap_water_detail TEXT NOT NULL DEFAULT ''," +
-                    "sewerage_type TEXT NOT NULL DEFAULT '" + nameof(Models.Rent.Residentials.FacilitySewerageType.Unspecified) + "'," +
+                    "sewerage_type TEXT NOT NULL DEFAULT '" + nameof(ZumenSearch.Domain.Entities.Rent.Residentials.FacilitySewerageType.Unspecified) + "'," +
                     "sewerage_detail TEXT NOT NULL DEFAULT ''," +
                     "ground_digital INTEGER NOT NULL DEFAULT 0," +
                     "bs_antenna INTEGER NOT NULL DEFAULT 0," +
@@ -174,25 +183,25 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     "tv_antenna_detail TEXT NOT NULL DEFAULT ''," +
                     "internet_detail TEXT NOT NULL DEFAULT ''," +
                     "has_parking INTEGER NOT NULL DEFAULT 0," +
-                    "parking_contract_type TEXT NOT NULL DEFAULT '" + nameof(Models.Rent.Residentials.FacilityParkingContractType.Optional) + "'," +
-                    "parking_availability TEXT NOT NULL DEFAULT '" + nameof(Models.Rent.Residentials.FacilityAvailabilityType.Unspecified) + "'," +
+                    "parking_contract_type TEXT NOT NULL DEFAULT '" + nameof(ZumenSearch.Domain.Entities.Rent.Residentials.FacilityParkingContractType.Optional) + "'," +
+                    "parking_availability TEXT NOT NULL DEFAULT '" + nameof(ZumenSearch.Domain.Entities.Rent.Residentials.FacilityAvailabilityType.Unspecified) + "'," +
                     "is_parking_free INTEGER NOT NULL DEFAULT 0," +
                     "parking_fee TEXT NOT NULL DEFAULT ''," +
-                    "parking_fee_tax_type TEXT NOT NULL DEFAULT '" + nameof(Models.Rent.Residentials.FacilityTaxType.Included) + "'," +
+                    "parking_fee_tax_type TEXT NOT NULL DEFAULT '" + nameof(ZumenSearch.Domain.Entities.Rent.Residentials.FacilityTaxType.Included) + "'," +
                     "parking_spaces TEXT NOT NULL DEFAULT ''," +
                     "parking_distance TEXT NOT NULL DEFAULT ''," +
                     "parking_notes TEXT NOT NULL DEFAULT ''," +
                     "has_bicycle_parking INTEGER NOT NULL DEFAULT 0," +
-                    "bicycle_parking_availability TEXT NOT NULL DEFAULT '" + nameof(Models.Rent.Residentials.FacilityAvailabilityType.Unspecified) + "'," +
+                    "bicycle_parking_availability TEXT NOT NULL DEFAULT '" + nameof(ZumenSearch.Domain.Entities.Rent.Residentials.FacilityAvailabilityType.Unspecified) + "'," +
                     "is_bicycle_parking_free INTEGER NOT NULL DEFAULT 0," +
                     "bicycle_parking_fee TEXT NOT NULL DEFAULT ''," +
-                    "bicycle_parking_fee_tax_type TEXT NOT NULL DEFAULT '" + nameof(Models.Rent.Residentials.FacilityTaxType.Included) + "'," +
+                    "bicycle_parking_fee_tax_type TEXT NOT NULL DEFAULT '" + nameof(ZumenSearch.Domain.Entities.Rent.Residentials.FacilityTaxType.Included) + "'," +
                     "bicycle_parking_notes TEXT NOT NULL DEFAULT ''," +
                     "has_motorcycle_parking INTEGER NOT NULL DEFAULT 0," +
-                    "motorcycle_parking_availability TEXT NOT NULL DEFAULT '" + nameof(Models.Rent.Residentials.FacilityAvailabilityType.Unspecified) + "'," +
+                    "motorcycle_parking_availability TEXT NOT NULL DEFAULT '" + nameof(ZumenSearch.Domain.Entities.Rent.Residentials.FacilityAvailabilityType.Unspecified) + "'," +
                     "is_motorcycle_parking_free INTEGER NOT NULL DEFAULT 0," +
                     "motorcycle_parking_fee TEXT NOT NULL DEFAULT ''," +
-                    "motorcycle_parking_fee_tax_type TEXT NOT NULL DEFAULT '" + nameof(Models.Rent.Residentials.FacilityTaxType.Included) + "'," +
+                    "motorcycle_parking_fee_tax_type TEXT NOT NULL DEFAULT '" + nameof(ZumenSearch.Domain.Entities.Rent.Residentials.FacilityTaxType.Included) + "'," +
                     "motorcycle_parking_notes TEXT NOT NULL DEFAULT ''," +
 
 
@@ -254,17 +263,17 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     "remarks TEXT NOT NULL DEFAULT ''," +
 
                     "management_fee TEXT NOT NULL DEFAULT ''," +
-                    "management_fee_unit TEXT NOT NULL DEFAULT '" + nameof(Models.Rent.Residentials.FeeUnitType.Yen) + "'," +
+                    "management_fee_unit TEXT NOT NULL DEFAULT '" + nameof(ZumenSearch.Presentation.Features.Rent.Residentials.Models.FeeUnitType.Yen) + "'," +
                     "security_deposit TEXT NOT NULL DEFAULT ''," +
-                    "security_deposit_unit TEXT NOT NULL DEFAULT '" + nameof(Models.Rent.Residentials.FeeUnitType.Months) + "'," +
+                    "security_deposit_unit TEXT NOT NULL DEFAULT '" + nameof(ZumenSearch.Presentation.Features.Rent.Residentials.Models.FeeUnitType.Months) + "'," +
                     "key_money TEXT NOT NULL DEFAULT ''," +
-                    "key_money_unit TEXT NOT NULL DEFAULT '" + nameof(Models.Rent.Residentials.FeeUnitType.Months) + "'," +
-                    "contract_type TEXT NOT NULL DEFAULT '" + nameof(Models.Rent.Residentials.ContractType.Unspecified) + "'," +
+                    "key_money_unit TEXT NOT NULL DEFAULT '" + nameof(ZumenSearch.Presentation.Features.Rent.Residentials.Models.FeeUnitType.Months) + "'," +
+                    "contract_type TEXT NOT NULL DEFAULT '" + nameof(ZumenSearch.Presentation.Features.Rent.Residentials.Models.ContractType.Unspecified) + "'," +
                     "contract_period_years TEXT NOT NULL DEFAULT ''," +
                     "renewal_fee TEXT NOT NULL DEFAULT ''," +
-                    "renewal_fee_unit TEXT NOT NULL DEFAULT '" + nameof(Models.Rent.Residentials.FeeUnitType.Months) + "'," +
+                    "renewal_fee_unit TEXT NOT NULL DEFAULT '" + nameof(ZumenSearch.Presentation.Features.Rent.Residentials.Models.FeeUnitType.Months) + "'," +
                     "recontract_fee TEXT NOT NULL DEFAULT ''," +
-                    "recontract_fee_unit TEXT NOT NULL DEFAULT '" + nameof(Models.Rent.Residentials.FeeUnitType.Yen) + "'," +
+                    "recontract_fee_unit TEXT NOT NULL DEFAULT '" + nameof(ZumenSearch.Presentation.Features.Rent.Residentials.Models.FeeUnitType.Yen) + "'," +
                     "guarantor_company TEXT NOT NULL DEFAULT ''," +
                     "housing_insurance TEXT NOT NULL DEFAULT ''," +
                     "other_fees TEXT NOT NULL DEFAULT ''," +
@@ -274,16 +283,16 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     "office_use_allowed INTEGER NOT NULL DEFAULT 0," +
                     "other_conditions TEXT NOT NULL DEFAULT ''," +
                     "contract_remarks TEXT NOT NULL DEFAULT ''," +
-                    "handling_type TEXT NOT NULL DEFAULT '" + nameof(Models.Rent.Residentials.ListingHandlingType.Unspecified) + "'," +
-                    "transaction_type TEXT NOT NULL DEFAULT '" + nameof(Models.Rent.Residentials.ListingTransactionType.Unspecified) + "'," +
+                    "handling_type TEXT NOT NULL DEFAULT '" + nameof(ZumenSearch.Presentation.Features.Rent.Residentials.Models.ListingHandlingType.Unspecified) + "'," +
+                    "transaction_type TEXT NOT NULL DEFAULT '" + nameof(ZumenSearch.Presentation.Features.Rent.Residentials.Models.ListingTransactionType.Unspecified) + "'," +
                     "lessor_commission TEXT NOT NULL DEFAULT ''," +
-                    "lessor_commission_unit TEXT NOT NULL DEFAULT '" + nameof(Models.Rent.Residentials.ListingCommissionUnitType.Percent) + "'," +
+                    "lessor_commission_unit TEXT NOT NULL DEFAULT '" + nameof(ZumenSearch.Presentation.Features.Rent.Residentials.Models.ListingCommissionUnitType.Percent) + "'," +
                     "lessee_commission TEXT NOT NULL DEFAULT ''," +
-                    "lessee_commission_unit TEXT NOT NULL DEFAULT '" + nameof(Models.Rent.Residentials.ListingCommissionUnitType.Percent) + "'," +
+                    "lessee_commission_unit TEXT NOT NULL DEFAULT '" + nameof(ZumenSearch.Presentation.Features.Rent.Residentials.Models.ListingCommissionUnitType.Percent) + "'," +
                     "listing_broker_commission TEXT NOT NULL DEFAULT ''," +
-                    "listing_broker_commission_unit TEXT NOT NULL DEFAULT '" + nameof(Models.Rent.Residentials.ListingCommissionUnitType.Percent) + "'," +
+                    "listing_broker_commission_unit TEXT NOT NULL DEFAULT '" + nameof(ZumenSearch.Presentation.Features.Rent.Residentials.Models.ListingCommissionUnitType.Percent) + "'," +
                     "tenant_broker_commission TEXT NOT NULL DEFAULT ''," +
-                    "tenant_broker_commission_unit TEXT NOT NULL DEFAULT '" + nameof(Models.Rent.Residentials.ListingCommissionUnitType.Percent) + "'," +
+                    "tenant_broker_commission_unit TEXT NOT NULL DEFAULT '" + nameof(ZumenSearch.Presentation.Features.Rent.Residentials.Models.ListingCommissionUnitType.Percent) + "'," +
                     "transaction_remarks TEXT NOT NULL DEFAULT ''," +
 
                     "has_air_conditioner INTEGER NOT NULL DEFAULT 0," +
@@ -1168,7 +1177,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
     #region == Properties ==
 
-    public Models.SearchResult.PropertySearchResultWrapper SelectRecentProperties()
+    public ZumenSearch.Application.Results.PropertySearchResultWrapper SelectRecentProperties()
     {
         var res = new PropertySearchResultWrapper();
 
@@ -1204,7 +1213,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     }
                 }
 
-                var item = new Models.SearchResult.PropertySearchResultItem(id, enumKind);
+                var item = new ZumenSearch.Application.SearchResults.PropertySearchResultItem(id, enumKind);
 
                 var name = reader.GetString(reader.GetOrdinal("name")) ?? string.Empty;//Convert.ToString(reader["name"]) ?? "";
                 item.SetName(name);
@@ -1234,7 +1243,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         return res;
     }
 
-    public Models.SearchResult.PropertySearchResultWrapper SelectPropertiesByKeyword(string keyword) // TODO: add what type of keyword eg. name/adderss/lessor.
+    public ZumenSearch.Application.Results.PropertySearchResultWrapper SelectPropertiesByKeyword(string keyword) // TODO: add what type of keyword eg. name/adderss/lessor.
     {
         var res = new PropertySearchResultWrapper();
 
@@ -1279,7 +1288,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     }
                 }
 
-                var item = new Models.SearchResult.PropertySearchResultItem(s, enumKind);
+                var item = new ZumenSearch.Application.SearchResults.PropertySearchResultItem(s, enumKind);
                 // try...
                 item.SetName(reader.GetString(reader.GetOrdinal("name")) ?? string.Empty);
 
@@ -1309,7 +1318,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
     #region == Rent Residential ==
 
-    public Models.SearchResult.ResultWrapper UpsertRentResidential(Models.Rent.Residentials.Property property)
+    public ZumenSearch.Application.Results.ResultWrapper UpsertRentResidential(ZumenSearch.Domain.Entities.Rent.Residentials.Property property)
     {
         var res = new ResultWrapper();
 
@@ -1836,9 +1845,9 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         return res;
     }
 
-    public Models.Rent.Residentials.PropertyResultWrapper SelectRentResidentialById(string propertyId, bool duplicate = false)
+    public ZumenSearch.Presentation.Features.Rent.Residentials.Models.PropertyResultWrapper SelectRentResidentialById(string propertyId, bool duplicate = false)
     {
-        var res = new Models.Rent.Residentials.PropertyResultWrapper();
+        var res = new ZumenSearch.Presentation.Features.Rent.Residentials.Models.PropertyResultWrapper();
 
         if (string.IsNullOrEmpty(propertyId))
         {
@@ -1847,15 +1856,15 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             return res;
         }
 
-        Models.Rent.Residentials.Property property;
+        ZumenSearch.Domain.Entities.Rent.Residentials.Property property;
 
         if (duplicate)
         {
-            property = new Models.Rent.Residentials.Property(Guid.CreateVersion7().ToString("N"), EntityStatus.New);
+            property = new ZumenSearch.Domain.Entities.Rent.Residentials.Property(Guid.CreateVersion7().ToString("N"), EntityStatus.New);
         }
         else
         {
-            property = new Models.Rent.Residentials.Property(propertyId, EntityStatus.Saved);
+            property = new ZumenSearch.Domain.Entities.Rent.Residentials.Property(propertyId, EntityStatus.Saved);
         }
 
         _readerWriterLock.EnterReadLock();
@@ -2071,7 +2080,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     property.HasParcelLocker = Convert.ToInt32(reader["has_parcel_locker"], CultureInfo.InvariantCulture) != 0;
                     property.HasElectric = Convert.ToInt32(reader["has_electric"], CultureInfo.InvariantCulture) != 0;
                     var electricKindValue = reader["property_electric_kind"];
-                    if (electricKindValue is string electricKindText && Enum.TryParse<Models.Rent.Residentials.Property.EnumElectricType>(electricKindText, out var electricKind) && Enum.IsDefined(electricKind))
+                    if (electricKindValue is string electricKindText && Enum.TryParse<ZumenSearch.Domain.Entities.Rent.Residentials.Property.EnumElectricType>(electricKindText, out var electricKind) && Enum.IsDefined(electricKind))
                     {
                         property.PropertyElectricKind = electricKind;
                     }
@@ -2082,7 +2091,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     property.ElectricDetail = reader.GetString(reader.GetOrdinal("electric_detail"));
                     property.HasGas = Convert.ToInt32(reader["has_gas"], CultureInfo.InvariantCulture) != 0;
                     var gasTypeValue = reader["gas_type"];
-                    if (gasTypeValue is string gasTypeText && Enum.TryParse<Models.Rent.Residentials.FacilityGasType>(gasTypeText, out var gasType) && Enum.IsDefined(gasType))
+                    if (gasTypeValue is string gasTypeText && Enum.TryParse<ZumenSearch.Domain.Entities.Rent.Residentials.FacilityGasType>(gasTypeText, out var gasType) && Enum.IsDefined(gasType))
                     {
                         property.GasType = gasType;
                     }
@@ -2092,7 +2101,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     }
                     property.GasDetail = reader.GetString(reader.GetOrdinal("gas_detail"));
                     var tapWaterTypeValue = reader["tap_water_type"];
-                    if (tapWaterTypeValue is string tapWaterTypeText && Enum.TryParse<Models.Rent.Residentials.FacilityTapWaterType>(tapWaterTypeText, out var tapWaterType) && Enum.IsDefined(tapWaterType))
+                    if (tapWaterTypeValue is string tapWaterTypeText && Enum.TryParse<ZumenSearch.Domain.Entities.Rent.Residentials.FacilityTapWaterType>(tapWaterTypeText, out var tapWaterType) && Enum.IsDefined(tapWaterType))
                     {
                         property.TapWaterType = tapWaterType;
                     }
@@ -2102,7 +2111,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     }
                     property.TapWaterDetail = reader.GetString(reader.GetOrdinal("tap_water_detail"));
                     var sewerageTypeValue = reader["sewerage_type"];
-                    if (sewerageTypeValue is string sewerageTypeText && Enum.TryParse<Models.Rent.Residentials.FacilitySewerageType>(sewerageTypeText, out var sewerageType) && Enum.IsDefined(sewerageType))
+                    if (sewerageTypeValue is string sewerageTypeText && Enum.TryParse<ZumenSearch.Domain.Entities.Rent.Residentials.FacilitySewerageType>(sewerageTypeText, out var sewerageType) && Enum.IsDefined(sewerageType))
                     {
                         property.SewerageType = sewerageType;
                     }
@@ -2123,7 +2132,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     property.InternetDetail = reader.GetString(reader.GetOrdinal("internet_detail"));
                     property.HasParking = Convert.ToInt32(reader["has_parking"], CultureInfo.InvariantCulture) != 0;
                     var parkingContractValue = reader["parking_contract_type"];
-                    if (parkingContractValue is string parkingContractText && Enum.TryParse<Models.Rent.Residentials.FacilityParkingContractType>(parkingContractText, out var parkingContractType) && Enum.IsDefined(parkingContractType))
+                    if (parkingContractValue is string parkingContractText && Enum.TryParse<ZumenSearch.Domain.Entities.Rent.Residentials.FacilityParkingContractType>(parkingContractText, out var parkingContractType) && Enum.IsDefined(parkingContractType))
                     {
                         property.ParkingContractType = parkingContractType;
                     }
@@ -2132,7 +2141,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                         Debug.WriteLine($"Invalid parking_contract_type value: {(parkingContractValue is DBNull ? "<NULL>" : parkingContractValue)}");
                     }
                     var parkingAvailabilityValue = reader["parking_availability"];
-                    if (parkingAvailabilityValue is string parkingAvailabilityText && Enum.TryParse<Models.Rent.Residentials.FacilityAvailabilityType>(parkingAvailabilityText, out var parkingAvailability) && Enum.IsDefined(parkingAvailability))
+                    if (parkingAvailabilityValue is string parkingAvailabilityText && Enum.TryParse<ZumenSearch.Domain.Entities.Rent.Residentials.FacilityAvailabilityType>(parkingAvailabilityText, out var parkingAvailability) && Enum.IsDefined(parkingAvailability))
                     {
                         property.ParkingAvailability = parkingAvailability;
                     }
@@ -2143,7 +2152,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     property.IsParkingFree = Convert.ToInt32(reader["is_parking_free"], CultureInfo.InvariantCulture) != 0;
                     property.ParkingFee = reader.GetString(reader.GetOrdinal("parking_fee"));
                     var parkingFeeTaxValue = reader["parking_fee_tax_type"];
-                    if (parkingFeeTaxValue is string parkingFeeTaxText && Enum.TryParse<Models.Rent.Residentials.FacilityTaxType>(parkingFeeTaxText, out var parkingFeeTaxType) && Enum.IsDefined(parkingFeeTaxType))
+                    if (parkingFeeTaxValue is string parkingFeeTaxText && Enum.TryParse<ZumenSearch.Domain.Entities.Rent.Residentials.FacilityTaxType>(parkingFeeTaxText, out var parkingFeeTaxType) && Enum.IsDefined(parkingFeeTaxType))
                     {
                         property.ParkingFeeTaxType = parkingFeeTaxType;
                     }
@@ -2156,7 +2165,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     property.ParkingNotes = reader.GetString(reader.GetOrdinal("parking_notes"));
                     property.HasBicycleParking = Convert.ToInt32(reader["has_bicycle_parking"], CultureInfo.InvariantCulture) != 0;
                     var bicycleParkingAvailabilityValue = reader["bicycle_parking_availability"];
-                    if (bicycleParkingAvailabilityValue is string bicycleParkingAvailabilityText && Enum.TryParse<Models.Rent.Residentials.FacilityAvailabilityType>(bicycleParkingAvailabilityText, out var bicycleParkingAvailability) && Enum.IsDefined(bicycleParkingAvailability))
+                    if (bicycleParkingAvailabilityValue is string bicycleParkingAvailabilityText && Enum.TryParse<ZumenSearch.Domain.Entities.Rent.Residentials.FacilityAvailabilityType>(bicycleParkingAvailabilityText, out var bicycleParkingAvailability) && Enum.IsDefined(bicycleParkingAvailability))
                     {
                         property.BicycleParkingAvailability = bicycleParkingAvailability;
                     }
@@ -2167,7 +2176,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     property.IsBicycleParkingFree = Convert.ToInt32(reader["is_bicycle_parking_free"], CultureInfo.InvariantCulture) != 0;
                     property.BicycleParkingFee = reader.GetString(reader.GetOrdinal("bicycle_parking_fee"));
                     var bicycleParkingFeeTaxValue = reader["bicycle_parking_fee_tax_type"];
-                    if (bicycleParkingFeeTaxValue is string bicycleParkingFeeTaxText && Enum.TryParse<Models.Rent.Residentials.FacilityTaxType>(bicycleParkingFeeTaxText, out var bicycleParkingFeeTaxType) && Enum.IsDefined(bicycleParkingFeeTaxType))
+                    if (bicycleParkingFeeTaxValue is string bicycleParkingFeeTaxText && Enum.TryParse<ZumenSearch.Domain.Entities.Rent.Residentials.FacilityTaxType>(bicycleParkingFeeTaxText, out var bicycleParkingFeeTaxType) && Enum.IsDefined(bicycleParkingFeeTaxType))
                     {
                         property.BicycleParkingFeeTaxType = bicycleParkingFeeTaxType;
                     }
@@ -2178,7 +2187,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     property.BicycleParkingNotes = reader.GetString(reader.GetOrdinal("bicycle_parking_notes"));
                     property.HasMotorcycleParking = Convert.ToInt32(reader["has_motorcycle_parking"], CultureInfo.InvariantCulture) != 0;
                     var motorcycleParkingAvailabilityValue = reader["motorcycle_parking_availability"];
-                    if (motorcycleParkingAvailabilityValue is string motorcycleParkingAvailabilityText && Enum.TryParse<Models.Rent.Residentials.FacilityAvailabilityType>(motorcycleParkingAvailabilityText, out var motorcycleParkingAvailability) && Enum.IsDefined(motorcycleParkingAvailability))
+                    if (motorcycleParkingAvailabilityValue is string motorcycleParkingAvailabilityText && Enum.TryParse<ZumenSearch.Domain.Entities.Rent.Residentials.FacilityAvailabilityType>(motorcycleParkingAvailabilityText, out var motorcycleParkingAvailability) && Enum.IsDefined(motorcycleParkingAvailability))
                     {
                         property.MotorcycleParkingAvailability = motorcycleParkingAvailability;
                     }
@@ -2189,7 +2198,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     property.IsMotorcycleParkingFree = Convert.ToInt32(reader["is_motorcycle_parking_free"], CultureInfo.InvariantCulture) != 0;
                     property.MotorcycleParkingFee = reader.GetString(reader.GetOrdinal("motorcycle_parking_fee"));
                     var motorcycleParkingFeeTaxValue = reader["motorcycle_parking_fee_tax_type"];
-                    if (motorcycleParkingFeeTaxValue is string motorcycleParkingFeeTaxText && Enum.TryParse<Models.Rent.Residentials.FacilityTaxType>(motorcycleParkingFeeTaxText, out var motorcycleParkingFeeTaxType) && Enum.IsDefined(motorcycleParkingFeeTaxType))
+                    if (motorcycleParkingFeeTaxValue is string motorcycleParkingFeeTaxText && Enum.TryParse<ZumenSearch.Domain.Entities.Rent.Residentials.FacilityTaxType>(motorcycleParkingFeeTaxText, out var motorcycleParkingFeeTaxType) && Enum.IsDefined(motorcycleParkingFeeTaxType))
                     {
                         property.MotorcycleParkingFeeTaxType = motorcycleParkingFeeTaxType;
                     }
@@ -2229,7 +2238,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     var picpath = Convert.ToString(reader["filename"], CultureInfo.InvariantCulture) ?? string.Empty;
                     if (!string.IsNullOrEmpty(picid) && !string.IsNullOrEmpty(picpath))
                     {
-                        var rlpic = new Models.Rent.Residentials.PropertyPicture(picid, picpath, EntityStatus.Saved)
+                        var rlpic = new ZumenSearch.Domain.Entities.Rent.Residentials.PropertyPicture(picid, picpath, EntityStatus.Saved)
                         {
                             Description = Convert.ToString(reader["description"], CultureInfo.InvariantCulture) ?? string.Empty,
                         };
@@ -2267,7 +2276,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     var thumbpath = Convert.ToString(reader["thumbnail_filename"], CultureInfo.InvariantCulture) ?? string.Empty;
                     if (!string.IsNullOrWhiteSpace(pdfid) && !string.IsNullOrWhiteSpace(pdfpath) && !string.IsNullOrWhiteSpace(thumbpath))
                     {
-                        var rlpdf = new Models.Rent.Residentials.PropertyPdf(pdfid, pdfpath, thumbpath, EntityStatus.Saved)
+                        var rlpdf = new ZumenSearch.Domain.Entities.Rent.Residentials.PropertyPdf(pdfid, pdfpath, thumbpath, EntityStatus.Saved)
                         {
                             Description = Convert.ToString(reader["description"], CultureInfo.InvariantCulture) ?? string.Empty
                         };
@@ -2410,8 +2419,8 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                         var listingId = reader.GetString(reader.GetOrdinal("listing_id"));
                         var listingName = reader.GetString(reader.GetOrdinal("name"));
                         if (string.IsNullOrWhiteSpace(listingId)) throw new InvalidOperationException("Residential listing ID is empty.");
-                        property.ListingSummaries.Add(new Models.Rent.Residentials.ListingSummary(listingId, listingName));
-                        //res.ListingSummaries.Add(new Models.Rent.Residentials.ListingSummary(listingId, listingName, false));
+                        property.ListingSummaries.Add(new ZumenSearch.Presentation.Features.Rent.Residentials.Models.ListingSummary(listingId, listingName));
+                        //res.ListingSummaries.Add(new ZumenSearch.Presentation.Features.Rent.Residentials.Models.ListingSummary(listingId, listingName, false));
                     }
                 }
             }
@@ -2441,7 +2450,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         return res;
     }
 
-    public Models.SearchResult.ResultWrapper DeleteRentResidential(string propertyId)
+    public ZumenSearch.Application.Results.ResultWrapper DeleteRentResidential(string propertyId)
     {
         var res = new ResultWrapper();
 
@@ -2499,7 +2508,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
     #region == Rent Residential Listing ==
 
-    private static int DoUpsertRentResidentialListing(SqliteCommand cmd, string propertyId, Models.Rent.Residentials.Listing listing)
+    private static int DoUpsertRentResidentialListing(SqliteCommand cmd, string propertyId, ZumenSearch.Domain.Entities.Rent.Residentials.Listing listing)
     {
         cmd.CommandText = """
             INSERT INTO rent_residential_listings (
@@ -2892,7 +2901,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         return result;
     }
 
-    private static void MarkRentResidentialListingSaved(Models.Rent.Residentials.Listing listing)
+    private static void MarkRentResidentialListingSaved(ZumenSearch.Domain.Entities.Rent.Residentials.Listing listing)
     {
         listing.SetIsModified(false);
         listing.SetStatus(EntityStatus.Saved);
@@ -2909,7 +2918,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         }
     }
 
-    public Models.SearchResult.ResultWrapper UpsertRentResidentialListing(string propertyId, Models.Rent.Residentials.Listing listing)
+    public ZumenSearch.Application.Results.ResultWrapper UpsertRentResidentialListing(string propertyId, ZumenSearch.Domain.Entities.Rent.Residentials.Listing listing)
     {
         var res = new ResultWrapper();
 
@@ -2992,7 +3001,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     throw new InvalidOperationException("Residential listing belongs to a different property.");
                 if ((room.Status == EntityStatus.New) == (existingPropertyId is not null))
                     throw new InvalidOperationException("Residential listing was already created or no longer exists. Reload before saving.");
-                var draft = Models.Rent.Residentials.ResidentialListingDraft.FromListing(room);
+                var draft = ZumenSearch.Presentation.Features.Rent.Residentials.Models.ResidentialListingDraft.FromListing(room);
                 res.AffectedCount = DoUpsertRentResidentialListing(cmd, propertyId, persistedUnitOwnership, draft);
                 */
                 res.AffectedCount = DoUpsertRentResidentialListing(cmd, propertyId, listing);
@@ -3030,7 +3039,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         return res;
     }
 
-    public Models.SearchResult.ListingSearchResultWrapper SelectRentResidentialListings(Models.Rent.Residentials.ListingSearchCriteria criteria)
+    public ZumenSearch.Application.Results.ListingSearchResultWrapper SelectRentResidentialListings(ZumenSearch.Presentation.Features.Rent.Residentials.Models.ListingSearchCriteria criteria)
     {
         var res = new ListingSearchResultWrapper();
 
@@ -3196,7 +3205,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     continue;
                 }
 
-                var resultItem = new Models.SearchResult.ListingSearchResultItem(
+                var resultItem = new ZumenSearch.Application.SearchResults.ListingSearchResultItem(
                     listingId,
                     propertyId,
                     PropertyContextType.RentResidential,
@@ -3273,7 +3282,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 }
             }
 
-            void AddCommissionFilter(double maximum, Models.Rent.Residentials.ListingCommissionUnitTypeLabel? unit, string amountColumn, string unitColumn, string parameterName)
+            void AddCommissionFilter(double maximum, ZumenSearch.Presentation.Features.Rent.Residentials.Models.ListingCommissionUnitTypeLabel? unit, string amountColumn, string unitColumn, string parameterName)
             {
                 if (unit is not null)
                 {
@@ -3300,9 +3309,9 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         return res;
     }
 
-    public Models.Rent.Residentials.ListingResultWrapper SelectRentResidentialListingById(string propertyId, string listingId, bool duplicate = false)
+    public ZumenSearch.Presentation.Features.Rent.Residentials.Models.ListingResultWrapper SelectRentResidentialListingById(string propertyId, string listingId, bool duplicate = false)
     {
-        var res = new Models.Rent.Residentials.ListingResultWrapper();
+        var res = new ZumenSearch.Presentation.Features.Rent.Residentials.Models.ListingResultWrapper();
 
         if (string.IsNullOrEmpty(listingId))
         {
@@ -3377,7 +3386,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         return res;
     }
 
-    private static Models.Rent.Residentials.Listing? GetRentResidentialListing(SqliteDataReader reader, string propertyId, string propertyName, bool isUnitOwnership, string fudousanId, bool duplicate)
+    private static ZumenSearch.Domain.Entities.Rent.Residentials.Listing? GetRentResidentialListing(SqliteDataReader reader, string propertyId, string propertyName, bool isUnitOwnership, string fudousanId, bool duplicate)
     {
         var listingId = reader.GetString(reader.GetOrdinal("listing_id")) ?? string.Empty;
         if (string.IsNullOrEmpty(listingId))
@@ -3399,7 +3408,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         EntityStatus status = duplicate ? EntityStatus.New : EntityStatus.Saved;
 
         // Create listing.
-        var room = new Models.Rent.Residentials.Listing(id, status, propertyId, EntityStatus.Saved, isUnitOwnership, propertyName, fudousanId);
+        var room = new ZumenSearch.Domain.Entities.Rent.Residentials.Listing(id, status, propertyId, EntityStatus.Saved, isUnitOwnership, propertyName, fudousanId);
 
         // try?
         room.SetName(reader.GetString(reader.GetOrdinal("name")) ?? string.Empty);
@@ -3478,7 +3487,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         return room;
     }
 
-    private static void SetRentResidentialListingChildValues(SqliteCommand cmd, Models.Rent.Residentials.Listing listing, string listingId, bool duplicate)
+    private static void SetRentResidentialListingChildValues(SqliteCommand cmd, ZumenSearch.Domain.Entities.Rent.Residentials.Listing listing, string listingId, bool duplicate)
     {
         // Use listingId, not listing.Id, because listing.Id may be a new ID if duplicate is true.
 
@@ -3498,7 +3507,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 var picpath = Convert.ToString(reader["filename"], CultureInfo.InvariantCulture) ?? string.Empty;
                 if (!string.IsNullOrEmpty(picid) && !string.IsNullOrEmpty(picpath))
                 {
-                    var rlpic = new Models.Rent.Residentials.ListingPicture(picid, picpath, EntityStatus.Saved)
+                    var rlpic = new ZumenSearch.Domain.Entities.Rent.Residentials.ListingPicture(picid, picpath, EntityStatus.Saved)
                     {
                         Description = Convert.ToString(reader["description"], CultureInfo.InvariantCulture) ?? string.Empty
                     };
@@ -3536,7 +3545,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 var thumbpath = Convert.ToString(reader["thumbnail_filename"], CultureInfo.InvariantCulture) ?? string.Empty;
                 if (!string.IsNullOrWhiteSpace(pdfid) && !string.IsNullOrWhiteSpace(pdfpath) && !string.IsNullOrWhiteSpace(thumbpath))
                 {
-                    var rlpdf = new Models.Rent.Residentials.ListingPdf(pdfid, pdfpath, thumbpath, EntityStatus.Saved)
+                    var rlpdf = new ZumenSearch.Domain.Entities.Rent.Residentials.ListingPdf(pdfid, pdfpath, thumbpath, EntityStatus.Saved)
                     {
                         Description = Convert.ToString(reader["description"], CultureInfo.InvariantCulture) ?? string.Empty
                     };
@@ -3630,7 +3639,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         cmd.Parameters.Clear();
     }
 
-    public Models.SearchResult.ResultWrapper DeleteRentResidentialListing(string listingId)
+    public ZumenSearch.Application.Results.ResultWrapper DeleteRentResidentialListing(string listingId)
     {
         var res = new ResultWrapper();
 
@@ -3687,7 +3696,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
     #region == Rent Commercial ==
 
-    private static void SaveCommercialTransportation(SqliteCommand command, Models.Rent.Commercials.Property property)
+    private static void SaveCommercialTransportation(SqliteCommand command, ZumenSearch.Domain.Entities.Rent.Commercials.Property property)
     {
         var trains = new[] { property.Train1, property.Train2, property.Train3, property.Train4 };
         var stops = new[] { property.BusStop1, property.BusStop2, property.BusStop3, property.BusStop4 };
@@ -3712,7 +3721,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         }
     }
 
-    private static void LoadCommercialTransportation(SqliteDataReader reader, Models.Rent.Commercials.Property property)
+    private static void LoadCommercialTransportation(SqliteDataReader reader, ZumenSearch.Domain.Entities.Rent.Commercials.Property property)
     {
         var trains = new[] { property.Train1, property.Train2, property.Train3, property.Train4 };
         Action<string>[] stops = [property.SetBusStop1, property.SetBusStop2, property.SetBusStop3, property.SetBusStop4];
@@ -3733,7 +3742,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         }
     }
 
-    public ResultWrapper UpsertRentCommercial(Models.Rent.Commercials.Property property, IReadOnlyCollection<Models.Rent.Commercials.CommercialListingDraft> pendingListings, IReadOnlyCollection<string> deletedListingIds, bool? expectedCommittedUnitOwnership)
+    public ResultWrapper UpsertRentCommercial(ZumenSearch.Domain.Entities.Rent.Commercials.Property property, IReadOnlyCollection<ZumenSearch.Presentation.Features.Rent.Commercials.Models.CommercialListingDraft> pendingListings, IReadOnlyCollection<string> deletedListingIds, bool? expectedCommittedUnitOwnership)
     {
         var result = new ResultWrapper();
 
@@ -4242,7 +4251,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         return result;
     }
 
-    private static void SaveRentCommercialMedia(SqliteCommand command, Models.Rent.Commercials.Property property)
+    private static void SaveRentCommercialMedia(SqliteCommand command, ZumenSearch.Domain.Entities.Rent.Commercials.Property property)
     {
         foreach (var picture in property.Pictures)
         {
@@ -4340,9 +4349,9 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         command.Parameters.Clear();
     }
 
-    public Models.Rent.Commercials.PropertyResultWrapper SelectRentCommercialById(string propertyId)
+    public ZumenSearch.Presentation.Features.Rent.Commercials.Models.PropertyResultWrapper SelectRentCommercialById(string propertyId)
     {
-        var result = new Models.Rent.Commercials.PropertyResultWrapper();
+        var result = new ZumenSearch.Presentation.Features.Rent.Commercials.Models.PropertyResultWrapper();
 
         if (string.IsNullOrWhiteSpace(propertyId))
         {
@@ -4413,7 +4422,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 return result;
             }
 
-            var property = new Models.Rent.Commercials.Property(Convert.ToString(reader["property_id"], CultureInfo.InvariantCulture)!, EntityStatus.Saved)
+            var property = new ZumenSearch.Domain.Entities.Rent.Commercials.Property(Convert.ToString(reader["property_id"], CultureInfo.InvariantCulture)!, EntityStatus.Saved)
             {
                 ThumbnailFilename = Convert.ToString(reader["thumbnail_filename"], CultureInfo.InvariantCulture) ?? string.Empty,
 
@@ -4449,12 +4458,12 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 HasElectricity = Convert.ToInt32(reader["electricity_availability"], CultureInfo.InvariantCulture) != 0,
                 ElectricityDetails = Convert.ToString(reader["electricity_details"], CultureInfo.InvariantCulture) ?? string.Empty,
                 HasGas = Convert.ToInt32(reader["gas_availability"], CultureInfo.InvariantCulture) != 0,
-                GasType = (Models.Rent.Commercials.GasSupplyType)Convert.ToInt32(reader["gas_type"], CultureInfo.InvariantCulture),
+                GasType = (ZumenSearch.Presentation.Features.Rent.Commercials.Models.GasSupplyType)Convert.ToInt32(reader["gas_type"], CultureInfo.InvariantCulture),
                 GasDetails = Convert.ToString(reader["gas_details"], CultureInfo.InvariantCulture) ?? string.Empty,
                 HasWater = Convert.ToInt32(reader["water_availability"], CultureInfo.InvariantCulture) != 0,
-                WaterType = (Models.Rent.Commercials.WaterSupplyType)Convert.ToInt32(reader["water_type"], CultureInfo.InvariantCulture),
+                WaterType = (ZumenSearch.Presentation.Features.Rent.Commercials.Models.WaterSupplyType)Convert.ToInt32(reader["water_type"], CultureInfo.InvariantCulture),
                 WaterDetails = Convert.ToString(reader["water_details"], CultureInfo.InvariantCulture) ?? string.Empty,
-                SewerageType = (Models.Rent.Commercials.SewerageType)Convert.ToInt32(reader["sewerage_type"], CultureInfo.InvariantCulture),
+                SewerageType = (ZumenSearch.Presentation.Features.Rent.Commercials.Models.SewerageType)Convert.ToInt32(reader["sewerage_type"], CultureInfo.InvariantCulture),
                 SewerageDetails = Convert.ToString(reader["sewerage_details"], CultureInfo.InvariantCulture) ?? string.Empty,
                 HasInternet = Convert.ToInt32(reader["internet_availability"], CultureInfo.InvariantCulture) != 0,
                 HasFiber = Convert.ToInt32(reader["fiber_availability"], CultureInfo.InvariantCulture) != 0,
@@ -4462,13 +4471,13 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 HasFireSafety = Convert.ToInt32(reader["fire_safety_availability"], CultureInfo.InvariantCulture) != 0,
                 FireSafetyDetails = Convert.ToString(reader["fire_safety_details"], CultureInfo.InvariantCulture) ?? string.Empty,
                 HasParking = Convert.ToInt32(reader["parking_availability"], CultureInfo.InvariantCulture) != 0,
-                ParkingVacancy = (Models.Rent.Commercials.ParkingVacancyType)Convert.ToInt32(reader["parking_vacancy"], CultureInfo.InvariantCulture),
+                ParkingVacancy = (ZumenSearch.Presentation.Features.Rent.Commercials.Models.ParkingVacancyType)Convert.ToInt32(reader["parking_vacancy"], CultureInfo.InvariantCulture),
                 ParkingSpaces = reader.IsDBNull(reader.GetOrdinal("parking_spaces")) ? null : Convert.ToInt32(reader["parking_spaces"], CultureInfo.InvariantCulture),
                 ParkingMonthlyFee = reader.IsDBNull(reader.GetOrdinal("parking_monthly_fee")) ? null : decimal.Parse(reader.GetString(reader.GetOrdinal("parking_monthly_fee")), CultureInfo.InvariantCulture),
-                ParkingTax = (Models.Rent.Commercials.ParkingTaxType)Convert.ToInt32(reader["parking_tax"], CultureInfo.InvariantCulture),
+                ParkingTax = (ZumenSearch.Presentation.Features.Rent.Commercials.Models.ParkingTaxType)Convert.ToInt32(reader["parking_tax"], CultureInfo.InvariantCulture),
                 IsParkingFree = Convert.ToInt32(reader["parking_free"], CultureInfo.InvariantCulture) != 0,
                 ParkingDetails = Convert.ToString(reader["parking_details"], CultureInfo.InvariantCulture) ?? string.Empty,
-                KanriShutai = (Models.Rent.Commercials.Property.EnumKanriShutai)Convert.ToInt32(reader["management_type"], CultureInfo.InvariantCulture),
+                KanriShutai = (ZumenSearch.Domain.Entities.Rent.Commercials.Property.EnumKanriShutai)Convert.ToInt32(reader["management_type"], CultureInfo.InvariantCulture),
                 KanriIsMaintenanceManagementIfIsKanriJisya = Convert.ToInt32(reader["management_maintenance"], CultureInfo.InvariantCulture) != 0,
                 KanriIsTenantManagementIfIsKanriJisya = Convert.ToInt32(reader["management_tenant"], CultureInfo.InvariantCulture) != 0,
                 KanriIsPaymentManagementIfIsKanriJisya = Convert.ToInt32(reader["management_payment"], CultureInfo.InvariantCulture) != 0,
@@ -4650,7 +4659,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         return result;
     }
 
-    private static void LoadRentCommercialMedia(SqliteCommand command, Models.Rent.Commercials.Property property)
+    private static void LoadRentCommercialMedia(SqliteCommand command, ZumenSearch.Domain.Entities.Rent.Commercials.Property property)
     {
         command.Parameters.Clear();
         command.CommandText = """
@@ -4674,7 +4683,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     throw new InvalidDataException("Commercial property picture has an empty ID or filename.");
                 }
 
-                var picture = new Models.Rent.Commercials.PropertyPicture(id, filename, EntityStatus.Saved)
+                var picture = new ZumenSearch.Domain.Entities.Rent.Commercials.PropertyPicture(id, filename, EntityStatus.Saved)
                 {
                     Description =
                         Convert.ToString(reader["description"], CultureInfo.InvariantCulture) ?? string.Empty,
@@ -4716,7 +4725,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     throw new InvalidDataException("Commercial property PDF has an empty ID, filename or thumbnail filename.");
                 }
 
-                var pdf = new Models.Rent.Commercials.PropertyPdf(
+                var pdf = new ZumenSearch.Domain.Entities.Rent.Commercials.PropertyPdf(
                     id,
                     filename,
                     thumbnailFilename, EntityStatus.Saved)
@@ -4808,7 +4817,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         return result;
     }
 
-    private static void ReadCommercialListingBasic(SqliteDataReader reader, Models.Rent.Commercials.Listing.Listing unit)
+    private static void ReadCommercialListingBasic(SqliteDataReader reader, ZumenSearch.Domain.Entities.Rent.Commercials.Listing.Listing unit)
     {
         unit.SetFloorGroundTypeLabelFromString(Convert.ToString(reader["floor_ground"], CultureInfo.InvariantCulture) ?? string.Empty);
         unit.SetFloorNumber(reader["floor_number"] is DBNull ? null : Convert.ToInt32(reader["floor_number"], CultureInfo.InvariantCulture));
@@ -4822,7 +4831,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         unit.SetIsAvailableForImmediateMoveIn(Convert.ToInt32(reader["is_available_immediately"], CultureInfo.InvariantCulture) != 0);
     }
 
-    private static void ReadCommercialListingContract(SqliteDataReader reader, Models.Rent.Commercials.Listing.Listing unit)
+    private static void ReadCommercialListingContract(SqliteDataReader reader, ZumenSearch.Domain.Entities.Rent.Commercials.Listing.Listing unit)
     {
         unit.SetRentTaxTypeLabelFromString(reader.GetString(reader.GetOrdinal("rent_tax")));
         unit.SetManagementFee(Convert.ToDecimal(reader["kyoueki_fee"], CultureInfo.InvariantCulture));
@@ -4850,7 +4859,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         unit.SetContractRemarks(reader.GetString(reader.GetOrdinal("contract_remarks")));
     }
 
-    private static void ReadCommercialListingTransaction(SqliteDataReader reader, Models.Rent.Commercials.Listing.Listing unit)
+    private static void ReadCommercialListingTransaction(SqliteDataReader reader, ZumenSearch.Domain.Entities.Rent.Commercials.Listing.Listing unit)
     {
         unit.SetHandlingTypeLabelFromString(reader.GetString(reader.GetOrdinal("handling_type")));
         unit.SetTransactionTypeLabelFromString(reader.GetString(reader.GetOrdinal("transaction_type")));
@@ -4865,7 +4874,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         unit.SetTransactionRemarks(reader.GetString(reader.GetOrdinal("transaction_remarks")));
     }
 
-    private static void ReadCommercialListingFacilities(SqliteDataReader reader, Models.Rent.Commercials.Listing.Listing unit)
+    private static void ReadCommercialListingFacilities(SqliteDataReader reader, ZumenSearch.Domain.Entities.Rent.Commercials.Listing.Listing unit)
     {
         unit.SetHasAirConditioning(Convert.ToInt32(reader["air_conditioning"], CultureInfo.InvariantCulture) != 0);
         unit.SetHasPrivateToilet(Convert.ToInt32(reader["private_toilet"], CultureInfo.InvariantCulture) != 0);
@@ -4888,7 +4897,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         unit.SetFacilitiesRemarks(reader.GetString(reader.GetOrdinal("facilities_remarks")));
     }
 
-    private static int UpsertCommercialUnit(SqliteCommand command, string propertyId, Models.Rent.Commercials.CommercialListingDraft unit)
+    private static int UpsertCommercialUnit(SqliteCommand command, string propertyId, ZumenSearch.Presentation.Features.Rent.Commercials.Models.CommercialListingDraft unit)
     {
         if (!string.Equals(propertyId, unit.PropertyId, StringComparison.Ordinal))
         {
@@ -5052,7 +5061,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         return affected;
     }
 
-    private static void SaveCommercialListingAssociations(SqliteCommand command, string propertyId, Models.Rent.Commercials.CommercialListingDraft listing)
+    private static void SaveCommercialListingAssociations(SqliteCommand command, string propertyId, ZumenSearch.Presentation.Features.Rent.Commercials.Models.CommercialListingDraft listing)
     {
         var propertyKind = PropertyContextType.RentCommercial.ToString();
         foreach (var lessorId in listing.LessorIds)
@@ -5116,7 +5125,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         }
     }
 
-    private static void LoadCommercialListingAssociations(SqliteCommand command, Models.Rent.Commercials.Listing.Listing listing)
+    private static void LoadCommercialListingAssociations(SqliteCommand command, ZumenSearch.Domain.Entities.Rent.Commercials.Listing.Listing listing)
     {
         var propertyKind = PropertyContextType.RentCommercial.ToString();
         command.Parameters.Clear();
@@ -5196,7 +5205,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         command.ExecuteNonQuery();
     }
 
-    private static void SaveCommercialListingPictures(SqliteCommand command, string propertyId, Models.Rent.Commercials.CommercialListingDraft listing)
+    private static void SaveCommercialListingPictures(SqliteCommand command, string propertyId, ZumenSearch.Presentation.Features.Rent.Commercials.Models.CommercialListingDraft listing)
     {
         if (!string.Equals(propertyId, listing.PropertyId, StringComparison.Ordinal))
         {
@@ -5272,7 +5281,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         command.Parameters.Clear();
     }
 
-    private static void LoadRentCommercialListingPictures(SqliteCommand command, Models.Rent.Commercials.Listing.Listing listing)
+    private static void LoadRentCommercialListingPictures(SqliteCommand command, ZumenSearch.Domain.Entities.Rent.Commercials.Listing.Listing listing)
     {
         command.Parameters.Clear();
         command.CommandText = """
@@ -5294,7 +5303,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 throw new InvalidDataException("Commercial listing photo has an empty ID or filename.");
             }
 
-            var picture = new Models.Rent.Commercials.Listing.ListingPicture(id, filename, EntityStatus.Saved)
+            var picture = new ZumenSearch.Domain.Entities.Rent.Commercials.Listing.ListingPicture(id, filename, EntityStatus.Saved)
             {
                 Description = Convert.ToString(reader["description"], CultureInfo.InvariantCulture) ?? string.Empty,
                 IsMain = Convert.ToInt32(reader["is_main"], CultureInfo.InvariantCulture) != 0
@@ -5308,7 +5317,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         command.Parameters.Clear();
     }
 
-    private static void SaveCommercialListingPdfs(SqliteCommand command, string propertyId, Models.Rent.Commercials.CommercialListingDraft listing)
+    private static void SaveCommercialListingPdfs(SqliteCommand command, string propertyId, ZumenSearch.Presentation.Features.Rent.Commercials.Models.CommercialListingDraft listing)
     {
         if (!string.Equals(propertyId, listing.PropertyId, StringComparison.Ordinal))
         {
@@ -5387,7 +5396,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         command.Parameters.Clear();
     }
 
-    private static void LoadRentCommercialListingPdfs(SqliteCommand command, Models.Rent.Commercials.Listing.Listing listing)
+    private static void LoadRentCommercialListingPdfs(SqliteCommand command, ZumenSearch.Domain.Entities.Rent.Commercials.Listing.Listing listing)
     {
         command.Parameters.Clear();
         command.CommandText = """
@@ -5410,7 +5419,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 throw new InvalidDataException("Commercial listing PDF has an empty ID, filename, or thumbnail filename.");
             }
 
-            var pdf = new Models.Rent.Commercials.Listing.ListingPdf(id, filename, thumbnailFilename, EntityStatus.Saved)
+            var pdf = new ZumenSearch.Domain.Entities.Rent.Commercials.Listing.ListingPdf(id, filename, thumbnailFilename, EntityStatus.Saved)
             {
                 Description = Convert.ToString(reader["description"], CultureInfo.InvariantCulture) ?? string.Empty,
                 IsMain = Convert.ToInt32(reader["is_main"], CultureInfo.InvariantCulture) != 0
@@ -5424,7 +5433,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         command.Parameters.Clear();
     }
 
-    public ResultWrapper UpsertRentCommercialListing(string propertyId, Models.Rent.Commercials.Listing.Listing listing)
+    public ResultWrapper UpsertRentCommercialListing(string propertyId, ZumenSearch.Domain.Entities.Rent.Commercials.Listing.Listing listing)
     {
         var result = new ResultWrapper();
         var originalOwnership = listing.IsPropertyUnitOwnership;
@@ -5470,7 +5479,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             var ownership = command.ExecuteScalar();
             if (ownership is null or DBNull) throw new InvalidOperationException("Commercial property ownership was not found.");
             listing.IsPropertyUnitOwnership = Convert.ToInt32(ownership, CultureInfo.InvariantCulture) != 0;
-            var listingDraft = Models.Rent.Commercials.CommercialListingDraft.FromListing(listing);
+            var listingDraft = ZumenSearch.Presentation.Features.Rent.Commercials.Models.CommercialListingDraft.FromListing(listing);
 
             result.AffectedCount = UpsertCommercialUnit(command, propertyId, listingDraft);
             SaveCommercialListingPictures(command, propertyId, listingDraft);
@@ -5567,7 +5576,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     continue;
                 }
 
-                var item = new Models.SearchResult.ListingSearchResultItem(
+                var item = new ZumenSearch.Application.SearchResults.ListingSearchResultItem(
                     listingId,
                     propertyId,
                     PropertyContextType.RentCommercial,
@@ -5598,9 +5607,9 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         return result;
     }
 
-    public Models.Rent.Commercials.ListingResultWrapper SelectRentCommercialListingById(string propertyId, string listingId)
+    public ZumenSearch.Presentation.Features.Rent.Commercials.Models.ListingResultWrapper SelectRentCommercialListingById(string propertyId, string listingId)
     {
-        var result = new Models.Rent.Commercials.ListingResultWrapper();
+        var result = new ZumenSearch.Presentation.Features.Rent.Commercials.Models.ListingResultWrapper();
 
         if (string.IsNullOrWhiteSpace(propertyId) ||
             string.IsNullOrWhiteSpace(listingId))
@@ -5738,7 +5747,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 Convert.ToString(reader["property_name"], CultureInfo.InvariantCulture)
                 ?? string.Empty;
 
-            var room = new Models.Rent.Commercials.Listing.Listing(
+            var room = new ZumenSearch.Domain.Entities.Rent.Commercials.Listing.Listing(
                 listingId,
                 EntityStatus.Saved,
                 propertyId,
@@ -5885,7 +5894,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
     #region == Rent Lessor ==
 
-    public ResultWrapper UpsertRentLessor(Models.Base.PersonBase lessor)
+    public ResultWrapper UpsertRentLessor(ZumenSearch.Domain.Entities.Base.PersonBase lessor)
     {
         var res = new ResultWrapper();
 
@@ -5919,7 +5928,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 cmd.Parameters.AddWithValue("@name", lessor.Name);
                 cmd.Parameters.AddWithValue("@personKind", lessor.PersonKind.ToString());
 
-                if (lessor is Models.Person.NaturalPerson naturalPerson)
+                if (lessor is ZumenSearch.Domain.Entities.Person.NaturalPerson naturalPerson)
                 {
                     cmd.Parameters.AddWithValue("@name_last", naturalPerson.NameLast);
                     cmd.Parameters.AddWithValue("@name_first", naturalPerson.NameFirst);
@@ -5929,7 +5938,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     // TODO: check if int is ok
                     cmd.Parameters.AddWithValue("@name_company_type_position", 0);
                 }
-                else if (lessor is Models.Person.LegalPerson legalPerson)
+                else if (lessor is ZumenSearch.Domain.Entities.Person.LegalPerson legalPerson)
                 {
                     // Clear naturalPerson values
                     cmd.Parameters.AddWithValue("@name_last", string.Empty);
@@ -6016,11 +6025,11 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     continue;
                 }
 
-                Models.Person.PersonKindType? enumKind = null;
+                ZumenSearch.Domain.Enums.PersonKindType? enumKind = null;
                 var kind = reader.GetString(reader.GetOrdinal("person_kind")) ?? string.Empty;
                 if (!string.IsNullOrEmpty(kind))
                 {
-                    if (Enum.TryParse<Models.Person.PersonKindType>(kind, out var parsedKind))
+                    if (Enum.TryParse<ZumenSearch.Domain.Enums.PersonKindType>(kind, out var parsedKind))
                     {
                         enumKind = parsedKind;
                     }
@@ -6032,14 +6041,14 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     continue;
                 }
 
-                Models.SearchResult.PersonSearchResultItem item;
-                if (enumKind == Models.Person.PersonKindType.Natural)
+                ZumenSearch.Application.SearchResults.PersonSearchResultItem item;
+                if (enumKind == ZumenSearch.Domain.Enums.PersonKindType.Natural)
                 {
-                    item = new Models.SearchResult.PersonSearchResultItem(s, Models.Person.PersonKindType.Natural);
+                    item = new ZumenSearch.Application.SearchResults.PersonSearchResultItem(s, ZumenSearch.Domain.Enums.PersonKindType.Natural);
                 }
-                else if (enumKind == Models.Person.PersonKindType.Legal)
+                else if (enumKind == ZumenSearch.Domain.Enums.PersonKindType.Legal)
                 {
-                    item = new Models.SearchResult.PersonSearchResultItem(s, Models.Person.PersonKindType.Legal);
+                    item = new ZumenSearch.Application.SearchResults.PersonSearchResultItem(s, ZumenSearch.Domain.Enums.PersonKindType.Legal);
                 }
                 else
                 {
@@ -6073,11 +6082,11 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         return res;
     }
 
-    public Models.Person.ResultWrapper SelectRentLessorById(string lessorId)
+    public ZumenSearch.Application.Results.PersonResultWrapper SelectRentLessorById(string lessorId)
     {
-        var res = new Models.Person.ResultWrapper();
+        var res = new ZumenSearch.Application.Results.PersonResultWrapper();
 
-        Models.Base.PersonBase? person = null; //new Models.Base.PersonBase(lessorId, EnumEntityStatus.Saved);
+        ZumenSearch.Domain.Entities.Base.PersonBase? person = null; //new ZumenSearch.Domain.Entities.Base.PersonBase(lessorId, EnumEntityStatus.Saved);
 
         if (string.IsNullOrEmpty(lessorId))
         {
@@ -6136,17 +6145,17 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         return res;
     }
 
-    private static Models.Base.PersonBase? GetPerson(SqliteDataReader reader, string personId)
+    private static ZumenSearch.Domain.Entities.Base.PersonBase? GetPerson(SqliteDataReader reader, string personId)
     {
         // Do not try to access reader["person_id"] here because it may not be present in the SELECT query. Use the provided personId parameter instead.
 
-        Models.Base.PersonBase? person = null;
+        ZumenSearch.Domain.Entities.Base.PersonBase? person = null;
 
-        Models.Person.PersonKindType? enumKind = null;
+        ZumenSearch.Domain.Enums.PersonKindType? enumKind = null;
         var kind = reader.GetString(reader.GetOrdinal("person_kind")) ?? string.Empty;
         if (!string.IsNullOrEmpty(kind))
         {
-            if (Enum.TryParse<Models.Person.PersonKindType>(kind, out var parsedKind))
+            if (Enum.TryParse<ZumenSearch.Domain.Enums.PersonKindType>(kind, out var parsedKind))
             {
                 enumKind = parsedKind;
             }
@@ -6158,13 +6167,13 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             return null;
         }
 
-        if (enumKind == Models.Person.PersonKindType.Natural)
+        if (enumKind == ZumenSearch.Domain.Enums.PersonKindType.Natural)
         {
-            person = new Models.Person.NaturalPerson(personId, EntityStatus.Saved);
+            person = new ZumenSearch.Domain.Entities.Person.NaturalPerson(personId, EntityStatus.Saved);
         }
-        else if (enumKind == Models.Person.PersonKindType.Legal)
+        else if (enumKind == ZumenSearch.Domain.Enums.PersonKindType.Legal)
         {
-            person = new Models.Person.LegalPerson(personId, EntityStatus.Saved);
+            person = new ZumenSearch.Domain.Entities.Person.LegalPerson(personId, EntityStatus.Saved);
         }
 
         if (person is null)
@@ -6175,13 +6184,13 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         //s = Convert.ToString(reader["name"]) ?? "";
         person.SetName(reader.GetString(reader.GetOrdinal("name")) ?? string.Empty);
 
-        if (person is Models.Person.NaturalPerson naturalPerson)
+        if (person is ZumenSearch.Domain.Entities.Person.NaturalPerson naturalPerson)
         {
             naturalPerson.NameLast = Convert.ToString(reader["name_last"], CultureInfo.InvariantCulture) ?? "";
             naturalPerson.NameFirst = Convert.ToString(reader["name_first"], CultureInfo.InvariantCulture) ?? "";
 
         }
-        else if (person is Models.Person.LegalPerson legalPerson)
+        else if (person is ZumenSearch.Domain.Entities.Person.LegalPerson legalPerson)
         {
             legalPerson.NameCompany = Convert.ToString(reader["name_company"], CultureInfo.InvariantCulture) ?? "";
             legalPerson.NameCompanyType = Convert.ToString(reader["name_company_type"], CultureInfo.InvariantCulture) ?? "";
@@ -6256,7 +6265,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
     #region == Sale Residential ==
 
-    public ResultWrapper UpsertSaleResidential(Models.Sale.Residentials.Property property)
+    public ResultWrapper UpsertSaleResidential(ZumenSearch.Domain.Entities.Sale.Residentials.Property property)
     {
         var res = new ResultWrapper();
 
@@ -6522,7 +6531,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     continue;
                 }
 
-                var item = new Models.SearchResult.PropertySearchResultItem(
+                var item = new ZumenSearch.Application.SearchResults.PropertySearchResultItem(
                     propertyId,
                     PropertyContextType.SaleResidential)
                 {
@@ -6545,9 +6554,9 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         return result;
     }
 
-    public Models.Sale.Residentials.PropertyResultWrapper SelectSaleResidentialById(string id)
+    public ZumenSearch.Presentation.Features.Sale.Residentials.Models.PropertyResultWrapper SelectSaleResidentialById(string id)
     {
-        var res = new Models.Sale.Residentials.PropertyResultWrapper();
+        var res = new ZumenSearch.Presentation.Features.Sale.Residentials.Models.PropertyResultWrapper();
 
         if (string.IsNullOrWhiteSpace(id))
         {
@@ -6610,7 +6619,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             }
 
             var building =
-                new Models.Sale.Residentials.Property(
+                new ZumenSearch.Domain.Entities.Sale.Residentials.Property(
                     Convert.ToString(reader["property_id"], CultureInfo.InvariantCulture)!,
                     EntityStatus.Saved)
                 {
@@ -6735,7 +6744,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         return res;
     }
 
-    public ResultWrapper UpsertSaleResidentialListing(string saleId, Models.Sale.Residentials.Listing room)
+    public ResultWrapper UpsertSaleResidentialListing(string saleId, ZumenSearch.Domain.Entities.Sale.Residentials.Listing room)
     {
         var res = new ResultWrapper();
 
@@ -6913,7 +6922,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     continue;
                 }
 
-                var item = new Models.SearchResult.ListingSearchResultItem(
+                var item = new ZumenSearch.Application.SearchResults.ListingSearchResultItem(
                     listingId,
                     propertyId,
                     PropertyContextType.SaleResidential,
@@ -6985,9 +6994,9 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         return res;
     }
 
-    public Models.Sale.Residentials.ListingResultWrapper SelectSaleResidentialListingById(string saleId, string roomId)
+    public ZumenSearch.Presentation.Features.Sale.Residentials.Models.ListingResultWrapper SelectSaleResidentialListingById(string saleId, string roomId)
     {
-        var res = new Models.Sale.Residentials.ListingResultWrapper();
+        var res = new ZumenSearch.Presentation.Features.Sale.Residentials.Models.ListingResultWrapper();
 
         if (string.IsNullOrWhiteSpace(saleId) ||
             string.IsNullOrWhiteSpace(roomId))
@@ -7055,7 +7064,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             var propertyName =
                 Convert.ToString(reader["property_name"], CultureInfo.InvariantCulture) ?? string.Empty;
 
-            var room = new Models.Sale.Residentials.Listing(
+            var room = new ZumenSearch.Domain.Entities.Sale.Residentials.Listing(
                 listingId,
                 EntityStatus.Saved,
                 propertyId,
@@ -7108,7 +7117,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
     #region == Broker ==
 
-    public ResultWrapper UpsertBroker(Models.Base.PersonBase broker)
+    public ResultWrapper UpsertBroker(ZumenSearch.Domain.Entities.Base.PersonBase broker)
     {
         var res = new ResultWrapper();
 
@@ -7175,7 +7184,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             command.Parameters.AddWithValue("@remarks", broker.Remarks);
             command.Parameters.AddWithValue("@updatedAt", DateTimeOffset.UtcNow.ToString("s"));
 
-            if (broker is Models.Person.NaturalPerson natural)
+            if (broker is ZumenSearch.Domain.Entities.Person.NaturalPerson natural)
             {
                 command.Parameters.AddWithValue("@nameLast", natural.NameLast);
                 command.Parameters.AddWithValue("@nameFirst", natural.NameFirst);
@@ -7183,7 +7192,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 command.Parameters.AddWithValue("@nameCompanyType", string.Empty);
                 command.Parameters.AddWithValue("@nameCompanyTypePosition", 0);
             }
-            else if (broker is Models.Person.LegalPerson legal)
+            else if (broker is ZumenSearch.Domain.Entities.Person.LegalPerson legal)
             {
                 command.Parameters.AddWithValue("@nameLast", string.Empty);
                 command.Parameters.AddWithValue("@nameFirst", string.Empty);
@@ -7278,15 +7287,15 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 var personKindText =
                     Convert.ToString(reader["person_kind"], CultureInfo.InvariantCulture) ?? string.Empty;
 
-                if (!Enum.TryParse<Models.Person.PersonKindType>(
+                if (!Enum.TryParse<ZumenSearch.Domain.Enums.PersonKindType>(
                         personKindText,
                         out var personKind) ||
-                    personKind == Models.Person.PersonKindType.Undetermined)
+                    personKind == ZumenSearch.Domain.Enums.PersonKindType.Undetermined)
                 {
                     continue;
                 }
 
-                var item = new Models.SearchResult.PersonSearchResultItem(
+                var item = new ZumenSearch.Application.SearchResults.PersonSearchResultItem(
                     brokerId,
                     personKind)
                 {
@@ -7316,9 +7325,9 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         return res;
     }
 
-    public Models.Person.ResultWrapper SelectBrokerById(string brokerId)
+    public ZumenSearch.Application.Results.PersonResultWrapper SelectBrokerById(string brokerId)
     {
-        var res = new Models.Person.ResultWrapper();
+        var res = new ZumenSearch.Application.Results.PersonResultWrapper();
 
         if (string.IsNullOrWhiteSpace(brokerId))
         {

@@ -1,10 +1,11 @@
 ﻿using Microsoft.Data.Sqlite;
 using System.Data;
 using System.Globalization;
-using ZumenSearch.Models.Location;
-using ZumenSearch.Services.Contracts;
-
-namespace ZumenSearch.Services;
+using ZumenSearch.Domain.ValueObjects.Location;
+using ZumenSearch.Infrastructure.Configuration.Contracts;
+using ZumenSearch.Infrastructure.DataAccess.Contracts;
+using ZumenSearch.Presentation.Services.Contracts;
+namespace ZumenSearch.Infrastructure.DataAccess;
 
 // Repositories
 

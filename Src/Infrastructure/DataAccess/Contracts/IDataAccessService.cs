@@ -1,62 +1,63 @@
-﻿using ZumenSearch.Models.SearchResult;
-
-namespace ZumenSearch.Services.Contracts;
+﻿using ZumenSearch.Application.Results;
+using ZumenSearch.Application.SearchResults;
+using ZumenSearch.Presentation.Search;
+namespace ZumenSearch.Infrastructure.DataAccess.Contracts;
 
 [System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "CA1716:Identifiers should not match keywords", Justification = "Required for clarity. And I don't care about Visual Basic Keywords.")]
 
 public interface IDataAccessService
 {
-    Models.SearchResult.ResultWrapper InitializeDatabase(string dataBaseFilePath);
+    ZumenSearch.Application.Results.ResultWrapper InitializeDatabase(string dataBaseFilePath);
 
     // All Properties
-    Models.SearchResult.PropertySearchResultWrapper SelectRecentProperties();
-    Models.SearchResult.PropertySearchResultWrapper SelectPropertiesByKeyword(string keyword);
+    ZumenSearch.Application.Results.PropertySearchResultWrapper SelectRecentProperties();
+    ZumenSearch.Application.Results.PropertySearchResultWrapper SelectPropertiesByKeyword(string keyword);
 
     // Rent Residential
-    Models.SearchResult.ResultWrapper UpsertRentResidential(Models.Rent.Residentials.Property property);
-    Models.Rent.Residentials.PropertyResultWrapper SelectRentResidentialById(string propertyId, bool duplicate = false);
-    Models.SearchResult.ResultWrapper DeleteRentResidential(string propertyId);
-    Models.SearchResult.ResultWrapper UpsertRentResidentialListing(string propertyId, Models.Rent.Residentials.Listing listing);
-    Models.SearchResult.ListingSearchResultWrapper SelectRentResidentialListings(Models.Rent.Residentials.ListingSearchCriteria criteria);
-    Models.Rent.Residentials.ListingResultWrapper SelectRentResidentialListingById(string propertyId, string listingId, bool duplicate = false);
-    Models.SearchResult.ResultWrapper DeleteRentResidentialListing(string listingId);
+    ZumenSearch.Application.Results.ResultWrapper UpsertRentResidential(ZumenSearch.Domain.Entities.Rent.Residentials.Property property);
+    ZumenSearch.Presentation.Features.Rent.Residentials.Models.PropertyResultWrapper SelectRentResidentialById(string propertyId, bool duplicate = false);
+    ZumenSearch.Application.Results.ResultWrapper DeleteRentResidential(string propertyId);
+    ZumenSearch.Application.Results.ResultWrapper UpsertRentResidentialListing(string propertyId, ZumenSearch.Domain.Entities.Rent.Residentials.Listing listing);
+    ZumenSearch.Application.Results.ListingSearchResultWrapper SelectRentResidentialListings(ZumenSearch.Presentation.Features.Rent.Residentials.Models.ListingSearchCriteria criteria);
+    ZumenSearch.Presentation.Features.Rent.Residentials.Models.ListingResultWrapper SelectRentResidentialListingById(string propertyId, string listingId, bool duplicate = false);
+    ZumenSearch.Application.Results.ResultWrapper DeleteRentResidentialListing(string listingId);
 
     // Rent Commercial
-    Models.SearchResult.ResultWrapper UpsertRentCommercial(Models.Rent.Commercials.Property property, IReadOnlyCollection<Models.Rent.Commercials.CommercialListingDraft> pendingListings, IReadOnlyCollection<string> deletedListingIds, bool? expectedCommittedUnitOwnership);
-    Models.Rent.Commercials.PropertyResultWrapper SelectRentCommercialById(string propertyId);
-    Models.SearchResult.ResultWrapper DeleteRentCommercial(string propertyId);
-    Models.SearchResult.ResultWrapper UpsertRentCommercialListing(string propertyId,Models.Rent.Commercials.Listing.Listing listing);
-    Models.SearchResult.ListingSearchResultWrapper SelectRentCommercialListings(string keyword);
-    Models.Rent.Commercials.ListingResultWrapper SelectRentCommercialListingById(string propertyId, string listingId);
-    Models.SearchResult.ResultWrapper DeleteRentCommercialListing(string listingId);
+    ZumenSearch.Application.Results.ResultWrapper UpsertRentCommercial(ZumenSearch.Domain.Entities.Rent.Commercials.Property property, IReadOnlyCollection<ZumenSearch.Presentation.Features.Rent.Commercials.Models.CommercialListingDraft> pendingListings, IReadOnlyCollection<string> deletedListingIds, bool? expectedCommittedUnitOwnership);
+    ZumenSearch.Presentation.Features.Rent.Commercials.Models.PropertyResultWrapper SelectRentCommercialById(string propertyId);
+    ZumenSearch.Application.Results.ResultWrapper DeleteRentCommercial(string propertyId);
+    ZumenSearch.Application.Results.ResultWrapper UpsertRentCommercialListing(string propertyId,ZumenSearch.Domain.Entities.Rent.Commercials.Listing.Listing listing);
+    ZumenSearch.Application.Results.ListingSearchResultWrapper SelectRentCommercialListings(string keyword);
+    ZumenSearch.Presentation.Features.Rent.Commercials.Models.ListingResultWrapper SelectRentCommercialListingById(string propertyId, string listingId);
+    ZumenSearch.Application.Results.ResultWrapper DeleteRentCommercialListing(string listingId);
 
     // Lessor
-    Models.SearchResult.ResultWrapper UpsertRentLessor(Models.Base.PersonBase lessor);
-    Models.SearchResult.PersonsSearchResultWrapper SelectRentLessorsByKeyword(string keyword);
-    Models.Person.ResultWrapper SelectRentLessorById(string lessorId);
-    Models.SearchResult.ResultWrapper DeleteRentLessor(string lessorId);
+    ZumenSearch.Application.Results.ResultWrapper UpsertRentLessor(ZumenSearch.Domain.Entities.Base.PersonBase lessor);
+    ZumenSearch.Application.Results.PersonsSearchResultWrapper SelectRentLessorsByKeyword(string keyword);
+    ZumenSearch.Application.Results.PersonResultWrapper SelectRentLessorById(string lessorId);
+    ZumenSearch.Application.Results.ResultWrapper DeleteRentLessor(string lessorId);
 
     // Sales
-    Models.SearchResult.ResultWrapper UpsertSaleResidential(Models.Sale.Residentials.Property property);
+    ZumenSearch.Application.Results.ResultWrapper UpsertSaleResidential(ZumenSearch.Domain.Entities.Sale.Residentials.Property property);
 
     PropertySearchResultWrapper SelectSaleResidentialsByNameKeyword(string keyword);
 
-    Models.Sale.Residentials.PropertyResultWrapper SelectSaleResidentialById(string id);
+    ZumenSearch.Presentation.Features.Sale.Residentials.Models.PropertyResultWrapper SelectSaleResidentialById(string id);
 
-    Models.SearchResult.ResultWrapper DeleteSaleResidential(string saleId);
+    ZumenSearch.Application.Results.ResultWrapper DeleteSaleResidential(string saleId);
 
-    Models.SearchResult.ResultWrapper UpsertSaleResidentialListing(string saleId,Models.Sale.Residentials.Listing room);
+    ZumenSearch.Application.Results.ResultWrapper UpsertSaleResidentialListing(string saleId,ZumenSearch.Domain.Entities.Sale.Residentials.Listing room);
 
-    Models.SearchResult.ListingSearchResultWrapper SelectSaleResidentialListings();
+    ZumenSearch.Application.Results.ListingSearchResultWrapper SelectSaleResidentialListings();
 
-    Models.Sale.Residentials.ListingResultWrapper SelectSaleResidentialListingById(string saleId,string roomId);
+    ZumenSearch.Presentation.Features.Sale.Residentials.Models.ListingResultWrapper SelectSaleResidentialListingById(string saleId,string roomId);
 
-    Models.SearchResult.ResultWrapper DeleteSaleResidentialListing(string roomId);
+    ZumenSearch.Application.Results.ResultWrapper DeleteSaleResidentialListing(string roomId);
 
     // Brokers
-    Models.SearchResult.ResultWrapper UpsertBroker(Models.Base.PersonBase broker);
-    Models.SearchResult.PersonsSearchResultWrapper SelectBrokersByKeyword(string keyword);
-    Models.Person.ResultWrapper SelectBrokerById(string brokerId);
-    Models.SearchResult.ResultWrapper DeleteBroker(string brokerId);
+    ZumenSearch.Application.Results.ResultWrapper UpsertBroker(ZumenSearch.Domain.Entities.Base.PersonBase broker);
+    ZumenSearch.Application.Results.PersonsSearchResultWrapper SelectBrokersByKeyword(string keyword);
+    ZumenSearch.Application.Results.PersonResultWrapper SelectBrokerById(string brokerId);
+    ZumenSearch.Application.Results.ResultWrapper DeleteBroker(string brokerId);
 
 }

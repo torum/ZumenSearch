@@ -1,8 +1,7 @@
 ﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using ZumenSearch.Models.Transportation;
-
-namespace ZumenSearch.Views.Services.Contracts;
+using ZumenSearch.Domain.ValueObjects.Transportation;
+namespace ZumenSearch.Presentation.Services.Contracts;
 
 public interface IDialogGenericService
 {
@@ -12,9 +11,9 @@ public interface IDialogGenericService
 
     Task<ContentDialogResult> ShowDeleteConfirmationDialog(string message);
 
-    Task<Models.SearchResult.PersonSearchResultItem?> ShowLessorSelectDialog(ViewModels.Dialogs.LessorSelectViewModel viewModel);
+    Task<ZumenSearch.Application.SearchResults.PersonSearchResultItem?> ShowLessorSelectDialog(ZumenSearch.Presentation.Dialogs.ViewModels.LessorSelectViewModel viewModel);
 
-    Task<Models.SearchResult.PersonSearchResultItem?> ShowBrokerSelectDialog(ViewModels.Dialogs.BrokerSelectViewModel viewModel);
+    Task<ZumenSearch.Application.SearchResults.PersonSearchResultItem?> ShowBrokerSelectDialog(ZumenSearch.Presentation.Dialogs.ViewModels.BrokerSelectViewModel viewModel);
 
     Task<RailLine?> ShowRailLineSelectDialog();
 

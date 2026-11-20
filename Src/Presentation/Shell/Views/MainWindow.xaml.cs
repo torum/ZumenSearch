@@ -3,11 +3,15 @@ using Microsoft.UI.Xaml;
 using System.Runtime.InteropServices;
 using WinRT;
 using WinRT.Interop;
-using ZumenSearch.Models;
-using ZumenSearch.Services.Contracts;
-using ZumenSearch.Views.Services.Contracts;
+using ZumenSearch.Domain.Enums;
+using ZumenSearch.Application.Configuration;
+using ZumenSearch.Application.Results;
+using ZumenSearch.Presentation.Shell.Models;
+using ZumenSearch.Infrastructure.Configuration.Contracts;
+using ZumenSearch.Infrastructure.DataAccess.Contracts;
+using ZumenSearch.Presentation.Services.Contracts;
 
-namespace ZumenSearch.Views;
+namespace ZumenSearch.Presentation.Shell.Views;
 
 public sealed partial class MainWindow : Window
 {
@@ -18,11 +22,11 @@ public sealed partial class MainWindow : Window
 
     private bool _isClosing;
 
-    private readonly ViewModels.MainViewModel _viewModel;
+    private readonly ZumenSearch.Presentation.Shell.ViewModels.MainViewModel _viewModel;
     private readonly IDispatcherService _dispatcherService;
     private readonly IConfigurationService _configurationService;
 
-    public MainWindow(ViewModels.MainViewModel viewModel, IDispatcherService dispatcherService, IConfigurationService configurationService)
+    public MainWindow(ZumenSearch.Presentation.Shell.ViewModels.MainViewModel viewModel, IDispatcherService dispatcherService, IConfigurationService configurationService)
     {
         _viewModel = viewModel;
         _dispatcherService = dispatcherService;
@@ -302,7 +306,7 @@ public sealed partial class MainWindow : Window
                         editor.AppWindow.MoveInZOrderAtTop();
 
                         // Show comfirmation dialog to user to save changes or not.
-                        if (editor.Content is Views.Rent.Residentials.Listing.ShellPage shell)
+                        if (editor.Content is ZumenSearch.Presentation.Features.Rent.Residentials.Views.Listing.ShellPage shell)
                         {
                             await shell.ShowEditorCloseConfirmationDialog();
                         }
@@ -370,7 +374,7 @@ public sealed partial class MainWindow : Window
                         editor.AppWindow.MoveInZOrderAtTop();
 
                         // Show comfirmation dialog to user to save changes or not.
-                        if (editor.Content is Views.Rent.Residentials.ShellPage shell)
+                        if (editor.Content is ZumenSearch.Presentation.Features.Rent.Residentials.Views.ShellPage shell)
                         {
                             await shell.ShowEditorCloseConfirmationDialog();
                         }
@@ -419,7 +423,7 @@ public sealed partial class MainWindow : Window
                     continue;
                 }
                 if (editor.ViewModel.IsDirty)
-                    //|| editor.ViewModel.SaveCommand.IsRunning || (editor.Content is Views.Rent.Commercials.Listing.ShellPage listingShell && listingShell.IsClosePending))
+                    //|| editor.ViewModel.SaveCommand.IsRunning || (editor.Content is ZumenSearch.Presentation.Features.Rent.Commercials.Views.Listing.ShellPage listingShell && listingShell.IsClosePending))
                 {
                     args.Cancel = true;
                     isCancel = true;
@@ -434,7 +438,7 @@ public sealed partial class MainWindow : Window
                         editor.AppWindow.MoveInZOrderAtTop();
 
                         // Show comfirmation dialog to user to save changes or not.
-                        if (editor.Content is Views.Rent.Commercials.Listing.ShellPage shell)
+                        if (editor.Content is ZumenSearch.Presentation.Features.Rent.Commercials.Views.Listing.ShellPage shell)
                         {
                             await shell.ShowEditorCloseConfirmationDialog();
                         }
@@ -499,7 +503,7 @@ public sealed partial class MainWindow : Window
                         editor.AppWindow.MoveInZOrderAtTop();
 
                         // Show comfirmation dialog to user to save changes or not.
-                        if (editor.Content is Views.Rent.Commercials.ShellPage shell)
+                        if (editor.Content is ZumenSearch.Presentation.Features.Rent.Commercials.Views.ShellPage shell)
                         {
                             await shell.ShowEditorCloseConfirmationDialog();
                         }
@@ -562,7 +566,7 @@ public sealed partial class MainWindow : Window
                         editor.AppWindow.MoveInZOrderAtTop();
 
                         // Show comfirmation dialog to user to save changes or not.
-                        if (editor.Content is Views.Rent.Lessors.ShellPage shell)
+                        if (editor.Content is ZumenSearch.Presentation.Features.Rent.Lessors.Views.ShellPage shell)
                         {
                             await shell.ShowEditorCloseConfirmationDialog();
                         }
@@ -623,7 +627,7 @@ public sealed partial class MainWindow : Window
                         editor.AppWindow.MoveInZOrderAtTop();
 
                         // Show comfirmation dialog to user to save changes or not.
-                        if (editor.Content is Views.Brokers.ShellPage shell)
+                        if (editor.Content is ZumenSearch.Presentation.Features.Brokers.Views.ShellPage shell)
                         {
                             await shell.ShowEditorCloseConfirmationDialog();
                         }
@@ -741,8 +745,8 @@ public sealed partial class MainWindow : Window
             }
             catch (Exception ex)
             {
-                (Application.Current as App)?.AppendErrorLog("AOT Error@SaveSettings", $"{ex}");
-                (Application.Current as App)?.SaveErrorLog();
+                (Microsoft.UI.Xaml.Application.Current as App)?.AppendErrorLog("AOT Error@SaveSettings", $"{ex}");
+                (Microsoft.UI.Xaml.Application.Current as App)?.SaveErrorLog();
             }
 
         }

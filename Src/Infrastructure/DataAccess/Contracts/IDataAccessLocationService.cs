@@ -1,6 +1,5 @@
-﻿using ZumenSearch.Models.Location;
-
-namespace ZumenSearch.Services.Contracts;
+﻿using ZumenSearch.Domain.ValueObjects.Location;
+namespace ZumenSearch.Infrastructure.DataAccess.Contracts;
 
 public interface IDataAccessLocationService
 {

@@ -1,0 +1,24 @@
+﻿using ZumenSearch.Domain.Entities.Base;
+using ZumenSearch.Domain.Entities.Person;
+using ZumenSearch.Domain.Enums;
+using ZumenSearch.Application.Results;
+#pragma warning disable IDE0079 // Remove unnecessary suppression
+#pragma warning disable IDE0290 // Use primary constructor
+
+namespace ZumenSearch.Application.SearchResults;
+
+// 貸主検索結果一覧表示用 
+public sealed partial class PersonSearchResultItem : PersonBase
+{
+    public PersonSearchResultItem(string id, PersonKindType personKind) : base(id, EntityStatus.Saved, personKind)
+    {
+        //
+    }
+
+
+    // TODO: more
+
+    public string CreatedAt { get; set; } = string.Empty;
+    public string UpdatedAt { get; set; } = string.Empty;
+
+}

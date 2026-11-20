@@ -2,10 +2,11 @@
 using System.Collections.ObjectModel;
 using System.Data;
 using System.Globalization;
-using ZumenSearch.Models.Transportation;
-using ZumenSearch.Services.Contracts;
-
-namespace ZumenSearch.Services;
+using ZumenSearch.Domain.ValueObjects.Transportation;
+using ZumenSearch.Infrastructure.Configuration.Contracts;
+using ZumenSearch.Infrastructure.DataAccess.Contracts;
+using ZumenSearch.Presentation.Services.Contracts;
+namespace ZumenSearch.Infrastructure.DataAccess;
 
 // Repositories
 

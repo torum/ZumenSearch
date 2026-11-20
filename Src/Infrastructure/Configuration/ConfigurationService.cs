@@ -1,5 +1,10 @@
-﻿using ZumenSearch.Models;
-using ZumenSearch.Services.Contracts;
+﻿using ZumenSearch.Domain.Enums;
+using ZumenSearch.Application.Configuration;
+using ZumenSearch.Application.Results;
+using ZumenSearch.Presentation.Shell.Models;
+using ZumenSearch.Infrastructure.Configuration.Contracts;
+using ZumenSearch.Infrastructure.DataAccess.Contracts;
+using ZumenSearch.Presentation.Services.Contracts;
 using System;
 using System.Diagnostics;
 using System.Globalization;
@@ -11,7 +16,7 @@ using System.Xml.Linq;
 #pragma warning disable IDE0079 // Remove unnecessary suppression
 #pragma warning disable IDE0290 // Use primary constructor
 
-namespace ZumenSearch.Services;
+namespace ZumenSearch.Infrastructure.Configuration;
 
 /*
  * WinUI3/AvaloniaUI does not provide a way to get the restore bounds of a window like WPF does when it is maximized or minimized.
@@ -40,17 +45,17 @@ public sealed class ConfigurationService : IConfigurationService
         _appendErrorLog = appendErrorLog;
 
         _isConfigLoaded = false;
-        CurrentConfiguration = new Models.Configuration();
+        CurrentConfiguration = new ZumenSearch.Application.Configuration.AppSettings();
     }
 
-    public Models.Configuration CurrentConfiguration { get; private set; }
+    public ZumenSearch.Application.Configuration.AppSettings CurrentConfiguration { get; private set; }
     public string ConfigFilePath => _configFilePath ?? string.Empty;
 
     public void Initialize(string configFilePath)
     {
         _configFilePath = configFilePath;
         _isConfigLoaded = false;
-        CurrentConfiguration = new Models.Configuration();
+        CurrentConfiguration = new ZumenSearch.Application.Configuration.AppSettings();
         _xdoc = null;
         _isInitialized = true;
 
@@ -65,14 +70,14 @@ public sealed class ConfigurationService : IConfigurationService
         }
     }
 
-    public async Task<Models.Configuration> LoadConfigurationAsync()
+    public async Task<ZumenSearch.Application.Configuration.AppSettings> LoadConfigurationAsync()
     {
         if (!_isInitialized)
         {
             throw new InvalidOperationException("ConfigurationService is not initialized.");
         }
 
-        var config = new Models.Configuration();
+        var config = new ZumenSearch.Application.Configuration.AppSettings();
 
         if (_isConfigLoaded)
         {

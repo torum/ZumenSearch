@@ -1,8 +1,7 @@
 ﻿using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Animation;
-using ZumenSearch.Views.Services.Contracts;
-
-namespace ZumenSearch.Views.Services;
+using ZumenSearch.Presentation.Services.Contracts;
+namespace ZumenSearch.Presentation.Services;
 
 public class NavigationService : INavigationService
 {

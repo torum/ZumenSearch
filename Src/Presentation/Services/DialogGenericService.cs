@@ -1,11 +1,12 @@
 ﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using ZumenSearch.Models.Transportation;
-using ZumenSearch.Services;
-using ZumenSearch.Views.Services.Contracts;
-using ZumenSearch.Views.Dialogs;
-
-namespace ZumenSearch.Views.Services;
+using ZumenSearch.Domain.ValueObjects.Transportation;
+using ZumenSearch.Infrastructure.Configuration;
+using ZumenSearch.Infrastructure.DataAccess;
+using ZumenSearch.Presentation.Services;
+using ZumenSearch.Presentation.Services.Contracts;
+using ZumenSearch.Presentation.Dialogs.Views;
+namespace ZumenSearch.Presentation.Services;
 
 public class DialogGenericService : IDialogGenericService
 {
@@ -95,7 +96,7 @@ public class DialogGenericService : IDialogGenericService
         }
     }
 
-    public async Task<Models.SearchResult.PersonSearchResultItem?> ShowLessorSelectDialog(ViewModels.Dialogs.LessorSelectViewModel viewModel)
+    public async Task<ZumenSearch.Application.SearchResults.PersonSearchResultItem?> ShowLessorSelectDialog(ZumenSearch.Presentation.Dialogs.ViewModels.LessorSelectViewModel viewModel)
     {
         if (_isDialogOpened)
         {
@@ -119,7 +120,7 @@ public class DialogGenericService : IDialogGenericService
             DefaultButton = ContentDialogButton.Primary,
             IsSecondaryButtonEnabled = false,
             CloseButtonText = "キャンセル",
-            Content = new Views.Dialogs.LessorSelectPage(viewModel)
+            Content = new ZumenSearch.Presentation.Dialogs.Views.LessorSelectPage(viewModel)
         };
 
         if (dialog.Content is not LessorSelectPage dialogContent)
@@ -129,7 +130,7 @@ public class DialogGenericService : IDialogGenericService
 
         dialogContent.ViewModel.SelectionChanged += (sender, e) =>
         {
-            if ((e is not null) && (e is Models.SearchResult.PersonSearchResultItem rl))
+            if ((e is not null) && (e is ZumenSearch.Application.SearchResults.PersonSearchResultItem rl))
             {
                 dialog.IsPrimaryButtonEnabled = true;
             }
@@ -153,7 +154,7 @@ public class DialogGenericService : IDialogGenericService
         return null;
     }
 
-    public async Task<Models.SearchResult.PersonSearchResultItem?> ShowBrokerSelectDialog(ViewModels.Dialogs.BrokerSelectViewModel viewModel)
+    public async Task<ZumenSearch.Application.SearchResults.PersonSearchResultItem?> ShowBrokerSelectDialog(ZumenSearch.Presentation.Dialogs.ViewModels.BrokerSelectViewModel viewModel)
     {
         if (_isDialogOpened)
         {
@@ -176,7 +177,7 @@ public class DialogGenericService : IDialogGenericService
             DefaultButton = ContentDialogButton.Primary,
             IsSecondaryButtonEnabled = false,
             CloseButtonText = "キャンセル",
-            Content = new Views.Dialogs.BrokerSelectPage(viewModel)
+            Content = new ZumenSearch.Presentation.Dialogs.Views.BrokerSelectPage(viewModel)
         };
 
         if (dialog.Content is not BrokerSelectPage dialogContent)
@@ -186,7 +187,7 @@ public class DialogGenericService : IDialogGenericService
 
         dialogContent.ViewModel.SelectionChanged += (sender, e) =>
         {
-            if ((e is not null) && (e is Models.SearchResult.PersonSearchResultItem))
+            if ((e is not null) && (e is ZumenSearch.Application.SearchResults.PersonSearchResultItem))
             {
                 dialog.IsPrimaryButtonEnabled = true;
             }
@@ -235,7 +236,7 @@ public class DialogGenericService : IDialogGenericService
             DefaultButton = ContentDialogButton.Primary,
             IsSecondaryButtonEnabled = false,
             CloseButtonText = "キャンセル",
-            Content = new Views.Dialogs.RailLineSelectPage(new ViewModels.Dialogs.RailLineSelectViewModel(new DataAccessTransportationService()))
+            Content = new ZumenSearch.Presentation.Dialogs.Views.RailLineSelectPage(new ZumenSearch.Presentation.Dialogs.ViewModels.RailLineSelectViewModel(new DataAccessTransportationService()))
         };
 
         if (dialog.Content is not RailLineSelectPage dialogContent)
@@ -293,7 +294,7 @@ public class DialogGenericService : IDialogGenericService
             DefaultButton = ContentDialogButton.Primary,
             IsSecondaryButtonEnabled = false,
             CloseButtonText = "キャンセル",
-            Content = new Views.Dialogs.RailStationSelectPage(new ViewModels.Dialogs.RailStationSelectViewModel(new DataAccessTransportationService(), railLineCode))
+            Content = new ZumenSearch.Presentation.Dialogs.Views.RailStationSelectPage(new ZumenSearch.Presentation.Dialogs.ViewModels.RailStationSelectViewModel(new DataAccessTransportationService(), railLineCode))
         };
 
         if (dialog.Content is not RailStationSelectPage dialogContent)
