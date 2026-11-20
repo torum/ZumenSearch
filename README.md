@@ -20,15 +20,16 @@
 
 * Windows App SDK（WinUI3）を使ったモダンUI。
 * MVVM (Model-View-ViewModel) アーキテクチャ設計パターンを使い、XAMLのUIレイヤーとドメインロジックの分離・疎結合化。
-* Generic Hostを使用してインフラストラクチャーを構成し、ライフサイクル管理とDependency Injection（依存関係注入）を行う。
+* Generic Hostによるライフサイクル管理とDependency Injection（依存関係注入）。
 * RDBMSとしてはSQLiteを利用し、将来的にWebAPIを介してのクライアント・サーバー3層構成に移行する際はローカルキャシュとして扱う。
 * DDD (Domain-Driven Design：ドメイン駆動設計) を現実的な限り適用。
+* Clean Architecture に基づく責務分離を意識したレイヤー構成。
 * Native AOTによるコンパイルを可能とし、起動速度の高速化とメモリフットプリントの最小化を図る。また、単体実行形式に加え、MSIX等のストア公開可能なパッケージ形式にも対応する。
 * 住所・所在地等はデジタル庁が提供する「アドレス・ベースレジストリ」のデータを活用し、ドリルダウン形式で選択して住所を登録することで原理的に表記揺れが起きないようにする。
 
 ### プロジェクト構成
 
-`Src` 以下は単一の WinUI プロジェクト。Clean Architecture を目指して内部の責務を整理中。レイヤー間の依存関係も今後整理。落ち着いたらTestも整備予定。
+`Src` 以下は現状単一の WinUI プロジェクト。Clean Architecture を目指して内部の責務を整理中。レイヤー間の依存関係も今後整理。落ち着いたらTestも整備予定。
 
 * `Application`：アプリケーション設定、検索結果、処理結果に関するモデル。
 * `Domain`：業務上のエンティティ、列挙型、値オブジェクト。物件や募集情報などのエンティティは `Entities` 以下に業務分野別に配置。
@@ -59,3 +60,5 @@
 * **売買（Sales）**：未実装。
 * データベースは新しいスキーマでの初期作成を対象としており、開発中で未確定の項目が多いためマイグレーション処理は現在のところ実装していない。
 
+### TODO:
+* Move UI-independent contracts and data shapes into Application, have ViewModels depend on application use cases, and keep Infrastructure responsible for implementing those contracts.
