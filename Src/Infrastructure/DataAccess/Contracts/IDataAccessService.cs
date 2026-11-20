@@ -15,11 +15,11 @@ public interface IDataAccessService
 
     // Rent Residential
     ZumenSearch.Application.Results.ResultWrapper UpsertRentResidential(ZumenSearch.Domain.Entities.Rent.Residentials.Property property);
-    ZumenSearch.Presentation.Features.Rent.Residentials.Models.PropertyResultWrapper SelectRentResidentialById(string propertyId, bool duplicate = false);
+    RentResidentialPropertyResultWrapper SelectRentResidentialById(string propertyId, bool duplicate = false);
     ZumenSearch.Application.Results.ResultWrapper DeleteRentResidential(string propertyId);
     ZumenSearch.Application.Results.ResultWrapper UpsertRentResidentialListing(string propertyId, ZumenSearch.Domain.Entities.Rent.Residentials.Listing listing);
-    ZumenSearch.Application.Results.ListingSearchResultWrapper SelectRentResidentialListings(ZumenSearch.Presentation.Features.Rent.Residentials.Models.ListingSearchCriteria criteria);
-    ZumenSearch.Presentation.Features.Rent.Residentials.Models.ListingResultWrapper SelectRentResidentialListingById(string propertyId, string listingId, bool duplicate = false);
+    ZumenSearch.Application.Results.ListingSearchResultWrapper SelectRentResidentialListings(RentResidentialListingSearchCriteria criteria);
+    RentResidentialListingResultWrapper SelectRentResidentialListingById(string propertyId, string listingId, bool duplicate = false);
     ZumenSearch.Application.Results.ResultWrapper DeleteRentResidentialListing(string listingId);
 
     // Rent Commercial

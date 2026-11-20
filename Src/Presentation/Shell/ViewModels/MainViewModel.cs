@@ -1,3 +1,5 @@
+using System.Collections.ObjectModel;
+using System.Reflection;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -5,25 +7,21 @@ using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Animation;
-using System.Collections.ObjectModel;
-using System.Reflection;
 using Windows.ApplicationModel;
-using ZumenSearch.Presentation.Helpers;
-using ZumenSearch.Presentation.Utilities;
-using ZumenSearch.Infrastructure.Platform;
-using ZumenSearch.Domain.Enums;
-using ZumenSearch.Application.Configuration;
-using ZumenSearch.Application.Results;
-using ZumenSearch.Presentation.Shell.Models;
-using ZumenSearch.Presentation.Messaging;
 using ZumenSearch.Application.SearchResults;
-using ZumenSearch.Presentation.Search;
+using ZumenSearch.Application.Services;
+using ZumenSearch.Application.Services.Rent.Residentials;
+using ZumenSearch.Domain.Enums;
 using ZumenSearch.Infrastructure.Configuration.Contracts;
 using ZumenSearch.Infrastructure.DataAccess.Contracts;
-using ZumenSearch.Presentation.Services.Contracts;
+using ZumenSearch.Infrastructure.Platform;
 using ZumenSearch.Presentation.Factories.AbstractFactory;
-using ZumenSearch.Presentation.Shell.Views;
+using ZumenSearch.Presentation.Messaging;
+using ZumenSearch.Presentation.Search;
 using ZumenSearch.Presentation.Search.ViewModels;
+using ZumenSearch.Presentation.Services.Contracts;
+using ZumenSearch.Presentation.Shell.Models;
+using ZumenSearch.Presentation.Shell.Views;
 
 namespace ZumenSearch.Presentation.Shell.ViewModels;
 
@@ -66,6 +64,10 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
     private readonly IAbstractFactory<ZumenSearch.Domain.Entities.Sale.Residentials.Property, ZumenSearch.Presentation.Features.Sale.Residentials.Views.ShellPage> _shellSaleResidentialPropertyFactory;
 
     private readonly IDataAccessService _dataAccessService;
+    private readonly PropertySearchService _propertySearchService;
+    private readonly RentResidentialPropertyService _rentResidentialPropertyService;
+    private readonly RentResidentialListingService _rentResidentialListingService;
+    private readonly RentPersonService _rentPersonService;
     private readonly INavigationService _navigationService;
     private readonly IDispatcherService _dispatcherService;
     private readonly IConfigurationService _configurationService;
@@ -73,7 +75,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
 
     #endregion
 
-    public MainViewModel(IAbstractFactory<ZumenSearch.Domain.Entities.Rent.Residentials.Property, bool, ZumenSearch.Presentation.Features.Rent.Residentials.Views.ShellPage> shellRentResidentialPropertyFactory, IAbstractFactory<ZumenSearch.Domain.Entities.Rent.Residentials.Listing, bool, ZumenSearch.Presentation.Features.Rent.Residentials.Views.Listing.ShellPage> shellRentResidentialListingFactory, IAbstractFactory<ZumenSearch.Domain.Entities.Rent.Commercials.Property, ZumenSearch.Presentation.Features.Rent.Commercials.Views.ShellPage> shellRentCommercialPropertyFactory, IAbstractFactory<ZumenSearch.Domain.Entities.Rent.Commercials.Listing.Listing, ZumenSearch.Presentation.Features.Rent.Commercials.Views.Listing.ShellPage> shellRentCommercialListingFactory, IAbstractFactory<ZumenSearch.Domain.Entities.Base.PersonBase, ZumenSearch.Presentation.Features.Rent.Lessors.Views.ShellPage> shellRentLessorFactory, IAbstractFactory<ZumenSearch.Domain.Entities.Sale.Residentials.Property, ZumenSearch.Presentation.Features.Sale.Residentials.Views.ShellPage> shellSaleResidentialPropertyFactory, IAbstractFactory<ZumenSearch.Domain.Entities.Base.PersonBase, ZumenSearch.Presentation.Features.Brokers.Views.ShellPage> shellBrokerFactory, INavigationService navigationService, IDataAccessService dataAccessService, IDispatcherService dispatcherService, IConfigurationService configurationService, IDialogGenericService dialogService)
+    public MainViewModel(IAbstractFactory<ZumenSearch.Domain.Entities.Rent.Residentials.Property, bool, ZumenSearch.Presentation.Features.Rent.Residentials.Views.ShellPage> shellRentResidentialPropertyFactory, IAbstractFactory<ZumenSearch.Domain.Entities.Rent.Residentials.Listing, bool, ZumenSearch.Presentation.Features.Rent.Residentials.Views.Listing.ShellPage> shellRentResidentialListingFactory, IAbstractFactory<ZumenSearch.Domain.Entities.Rent.Commercials.Property, ZumenSearch.Presentation.Features.Rent.Commercials.Views.ShellPage> shellRentCommercialPropertyFactory, IAbstractFactory<ZumenSearch.Domain.Entities.Rent.Commercials.Listing.Listing, ZumenSearch.Presentation.Features.Rent.Commercials.Views.Listing.ShellPage> shellRentCommercialListingFactory, IAbstractFactory<ZumenSearch.Domain.Entities.Base.PersonBase, ZumenSearch.Presentation.Features.Rent.Lessors.Views.ShellPage> shellRentLessorFactory, IAbstractFactory<ZumenSearch.Domain.Entities.Sale.Residentials.Property, ZumenSearch.Presentation.Features.Sale.Residentials.Views.ShellPage> shellSaleResidentialPropertyFactory, IAbstractFactory<ZumenSearch.Domain.Entities.Base.PersonBase, ZumenSearch.Presentation.Features.Brokers.Views.ShellPage> shellBrokerFactory, INavigationService navigationService, IDataAccessService dataAccessService, PropertySearchService propertySearchService, RentResidentialPropertyService rentResidentialPropertyService, RentResidentialListingService rentResidentialListingService, RentPersonService rentPersonService, IDispatcherService dispatcherService, IConfigurationService configurationService, IDialogGenericService dialogService)
     {
         _shellRentResidentialPropertyFactory = shellRentResidentialPropertyFactory;
         _shellRentResidentialListingFactory = shellRentResidentialListingFactory;
@@ -84,6 +86,10 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         _shellBrokerFactory = shellBrokerFactory;
         _navigationService = navigationService;
         _dataAccessService = dataAccessService;
+        _propertySearchService = propertySearchService;
+        _rentResidentialPropertyService = rentResidentialPropertyService;
+        _rentResidentialListingService = rentResidentialListingService;
+        _rentPersonService = rentPersonService;
         _configurationService = configurationService;
         _dispatcherService = dispatcherService;
         _dialogService = dialogService;
@@ -638,7 +644,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
     {
         RecentProperties.Clear();
 
-        var res = await Task.Run(() => _dataAccessService.SelectRecentProperties(), _cts.Token);
+        var res = await Task.Run(() => _propertySearchService.GetRecent(), _cts.Token);
 
         if (res.IsError)
         {
@@ -688,7 +694,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
 
         PropertySearchResult.Clear();
 
-        var res = await Task.Run(() => _dataAccessService.SelectPropertiesByKeyword(query, SelectedPropertySearchTarget), _cts.Token);
+        var res = await Task.Run(() => _propertySearchService.Search(query, SelectedPropertySearchTarget), _cts.Token);
 
         if (res.IsError)
         {
@@ -908,7 +914,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
 
         queryText = queryText.Trim();
 
-        var res = await Task.Run(() => _dataAccessService.SelectPropertiesByKeyword(queryText), _cts.Token);
+        var res = await Task.Run(() => _propertySearchService.Search(queryText), _cts.Token);
         //var res = _dataAccessService.SelectRentResidentialsByNameKeyword("*");
 
         if (res.IsError)
@@ -1065,7 +1071,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         }
 
         // Access Database to get the full entry data.
-        var res = await Task.Run(() => _dataAccessService.SelectRentResidentialById(propertyId), _cts.Token);
+        var res = await Task.Run(() => _rentResidentialPropertyService.GetById(propertyId), _cts.Token);
         if (res.IsError)
         {
             Debug.WriteLine(
@@ -1142,7 +1148,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
     private async Task DuplicateRentResidentialCore(string propertyId)
     {
         // Access Database to get the full entry data.
-        var res = await Task.Run(() => _dataAccessService.SelectRentResidentialById(propertyId, true), _cts.Token);
+        var res = await Task.Run(() => _rentResidentialPropertyService.GetById(propertyId, true), _cts.Token);
         if (res.IsError)
         {
             Debug.WriteLine(
@@ -1259,7 +1265,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
 
         if (await _dialogService.ShowDeleteConfirmationDialog("この募集物件を削除しますか？") != Microsoft.UI.Xaml.Controls.ContentDialogResult.Primary) return;
 
-        var res = await Task.Run(() => _dataAccessService.DeleteRentResidential(selectedId), _cts.Token);
+        var res = await Task.Run(() => _rentResidentialPropertyService.Delete(selectedId), _cts.Token);
         if (res.IsError)
         {
             Debug.WriteLine(
@@ -1320,9 +1326,9 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
     {
         RentResidentialListingSearchResult.Clear();
 
-        var searchCriteria = (criteria ?? new ZumenSearch.Presentation.Features.Rent.Residentials.Models.ListingSearchCriteria()).Clone();
+        var searchCriteria = (criteria ?? new ZumenSearch.Presentation.Features.Rent.Residentials.Models.ListingSearchCriteria()).Clone().ToApplicationQuery();
 
-        var res = await Task.Run(() => _dataAccessService.SelectRentResidentialListings(searchCriteria), _cts.Token);
+                var res = await Task.Run(() => _rentResidentialListingService.Search(searchCriteria), _cts.Token);
 
         if (res.IsError)
         {
@@ -1374,7 +1380,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         //Debug.WriteLine($"EditRentResidentialRoomCommand executed for {selected.Id}");
 
         // Access Database to get the full entry data.
-        var res = await Task.Run(() => _dataAccessService.SelectRentResidentialListingById(buildingId, listingId), _cts.Token);
+        var res = await Task.Run(() => _rentResidentialListingService.GetById(buildingId, listingId), _cts.Token);
         if (res.IsError)
         {
             Debug.WriteLine(
@@ -1464,7 +1470,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         //Debug.WriteLine($"DuplicateRentResidentialListingCore executed for {selected.Id}");
 
         // Access Database to get the full entry data.
-        var res = await Task.Run(() => _dataAccessService.SelectRentResidentialListingById(buildingId, listingId, true), _cts.Token);
+        var res = await Task.Run(() => _rentResidentialListingService.GetById(buildingId, listingId, true), _cts.Token);
         if (res.IsError)
         {
             Debug.WriteLine(
@@ -1586,7 +1592,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
             return;
         }
 
-        var res = await Task.Run(() => _dataAccessService.DeleteRentResidentialListing(selectedId), _cts.Token);
+        var res = await Task.Run(() => _rentResidentialListingService.Delete(selectedId), _cts.Token);
         if (res.IsError)
         {
             Debug.WriteLine(
@@ -2260,7 +2266,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
 
         RentLessorSearchResult.Clear();
 
-        var res = await Task.Run(() => _dataAccessService.SelectRentLessorsByKeyword(queryText), _cts.Token);
+        var res = await Task.Run(() => _rentPersonService.SearchLessors(queryText), _cts.Token);
 
         if (res.IsError)
         {
@@ -2368,7 +2374,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         }
 
         // 
-        var res = await Task.Run(() => _dataAccessService.SelectRentLessorById(lessorId), _cts.Token);
+        var res = await Task.Run(() => _rentPersonService.GetLessorById(lessorId), _cts.Token);
         if (res.IsError)
         {
             Debug.WriteLine(
@@ -2476,7 +2482,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         }
 
         // 
-        var res = await Task.Run(() => _dataAccessService.DeleteRentLessor(lessorId), _cts.Token);
+        var res = await Task.Run(() => _rentPersonService.DeleteLessor(lessorId), _cts.Token);
         if (res.IsError)
         {
             Debug.WriteLine(
@@ -2748,7 +2754,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
 
         BrokerSearchResult.Clear();
 
-        var res = await Task.Run(() => _dataAccessService.SelectBrokersByKeyword(queryText), _cts.Token);
+        var res = await Task.Run(() => _rentPersonService.SearchBrokers(queryText), _cts.Token);
 
         if (res.IsError)
         {
@@ -2826,7 +2832,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         }
 
         // 
-        var res = await Task.Run(() => _dataAccessService.SelectBrokerById(lessorId), _cts.Token);
+        var res = await Task.Run(() => _rentPersonService.GetBrokerById(lessorId), _cts.Token);
         if (res.IsError)
         {
             Debug.WriteLine(
@@ -2934,7 +2940,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         }
 
         // 
-        var res = await Task.Run(() => _dataAccessService.DeleteBroker(lessorId), _cts.Token);
+        var res = await Task.Run(() => _rentPersonService.DeleteBroker(lessorId), _cts.Token);
         if (res.IsError)
         {
             Debug.WriteLine(

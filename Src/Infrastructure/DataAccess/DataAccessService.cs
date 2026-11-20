@@ -1,21 +1,12 @@
-using Microsoft.Data.Sqlite;
 using System.Data;
 using System.Globalization;
-using ZumenSearch.Presentation.Helpers;
-using ZumenSearch.Presentation.Utilities;
-using ZumenSearch.Infrastructure.Platform;
-using ZumenSearch.Domain.Enums;
-using ZumenSearch.Application.Configuration;
+using Microsoft.Data.Sqlite;
+using ZumenSearch.Application.Contracts;
 using ZumenSearch.Application.Results;
-using ZumenSearch.Presentation.Shell.Models;
-using ZumenSearch.Domain.Entities.Base;
-
 using ZumenSearch.Application.SearchResults;
-using ZumenSearch.Presentation.Search;
-using ZumenSearch.Infrastructure.Configuration.Contracts;
+using ZumenSearch.Domain.Enums;
 using ZumenSearch.Infrastructure.DataAccess.Contracts;
-using ZumenSearch.Presentation.Services.Contracts;
-using System.Diagnostics.CodeAnalysis;
+using ZumenSearch.Infrastructure.Platform;
 
 namespace ZumenSearch.Infrastructure.DataAccess;
 
@@ -28,7 +19,7 @@ namespace ZumenSearch.Infrastructure.DataAccess;
 // TODO:
 // * Translate error messages to Japanese for user-facing errors.
 
-public sealed partial class DataAccessService : IDataAccessService, IDisposable
+public sealed partial class DataAccessService : IDataAccessService, IPropertySearchRepository, IRentResidentialPropertyRepository, IRentResidentialPersonRepository, IRentResidentialListingRepository, IDisposable
 {
     private SqliteConnectionStringBuilder _connectionStringBuilder = [];
 
@@ -1327,17 +1318,35 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         return res;
     }
 
-    private static string EscapeLikeValue(string value)
-    {
-        return value.Trim()
-            .Replace("\\", "\\\\", StringComparison.Ordinal)
-            .Replace("%", "\\%", StringComparison.Ordinal)
-            .Replace("_", "\\_", StringComparison.Ordinal);
-    }
-
     #endregion
 
     #region == Rent Residential ==
+
+    ResultWrapper IRentResidentialPropertyRepository.Upsert(ZumenSearch.Domain.Entities.Rent.Residentials.Property residentialProperty) => UpsertRentResidential(residentialProperty);
+
+    RentResidentialPropertyResultWrapper IRentResidentialPropertyRepository.SelectById(string propertyId, bool duplicate) => SelectRentResidentialById(propertyId, duplicate);
+
+    ResultWrapper IRentResidentialPropertyRepository.Delete(string propertyId) => DeleteRentResidential(propertyId);
+
+    ResultWrapper IRentResidentialListingRepository.Upsert(string propertyId, ZumenSearch.Domain.Entities.Rent.Residentials.Listing listing) => UpsertRentResidentialListing(propertyId, listing);
+
+    ZumenSearch.Application.Results.ListingSearchResultWrapper IRentResidentialListingRepository.Search(ZumenSearch.Application.SearchResults.RentResidentialListingSearchCriteria criteria) => SelectRentResidentialListings(criteria);
+
+    ZumenSearch.Application.Results.PersonsSearchResultWrapper IRentResidentialPersonRepository.SelectLessorsByKeyword(string keyword) => SelectRentLessorsByKeyword(keyword);
+
+    ZumenSearch.Application.Results.PersonResultWrapper IRentResidentialPersonRepository.SelectLessorById(string lessorId) => SelectRentLessorById(lessorId);
+
+    ResultWrapper IRentResidentialPersonRepository.DeleteLessor(string lessorId) => DeleteRentLessor(lessorId);
+
+    ZumenSearch.Application.Results.PersonsSearchResultWrapper IRentResidentialPersonRepository.SelectBrokersByKeyword(string keyword) => SelectBrokersByKeyword(keyword);
+
+    ZumenSearch.Application.Results.PersonResultWrapper IRentResidentialPersonRepository.SelectBrokerById(string brokerId) => SelectBrokerById(brokerId);
+
+    ResultWrapper IRentResidentialPersonRepository.DeleteBroker(string brokerId) => DeleteBroker(brokerId);
+
+    ResultWrapper IRentResidentialListingRepository.Delete(string listingId) => DeleteRentResidentialListing(listingId);
+
+    RentResidentialListingResultWrapper IRentResidentialListingRepository.SelectById(string propertyId, string listingId, bool duplicate) => SelectRentResidentialListingById(propertyId, listingId, duplicate);
 
     public ZumenSearch.Application.Results.ResultWrapper UpsertRentResidential(ZumenSearch.Domain.Entities.Rent.Residentials.Property property)
     {
@@ -1866,9 +1875,9 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         return res;
     }
 
-    public ZumenSearch.Presentation.Features.Rent.Residentials.Models.PropertyResultWrapper SelectRentResidentialById(string propertyId, bool duplicate = false)
+    public RentResidentialPropertyResultWrapper SelectRentResidentialById(string propertyId, bool duplicate = false)
     {
-        var res = new ZumenSearch.Presentation.Features.Rent.Residentials.Models.PropertyResultWrapper();
+        var res = new RentResidentialPropertyResultWrapper();
 
         if (string.IsNullOrEmpty(propertyId))
         {
@@ -3013,28 +3022,10 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
 
                 */
                 cmd.Parameters.Clear();
-                /*
-                cmd.CommandText = "SELECT is_unit_ownership FROM rent_residentials WHERE property_id = @propertyId;";
-                cmd.Parameters.AddWithValue("@propertyId", propertyId);
-                var ownership = cmd.ExecuteScalar();
-                if (ownership is null or DBNull) throw new InvalidOperationException("Residential property ownership was not found.");
-                var persistedUnitOwnership = Convert.ToInt32(ownership, CultureInfo.InvariantCulture) != 0;
-                cmd.Parameters.Clear();
-                cmd.CommandText = "SELECT property_id FROM rent_residential_listings WHERE listing_id = @listingId";
-                cmd.Parameters.AddWithValue("@listingId", room.Id);
-                var existingPropertyId = cmd.ExecuteScalar() as string;
-                if (existingPropertyId is not null && !string.Equals(existingPropertyId, propertyId, StringComparison.Ordinal))
-                    throw new InvalidOperationException("Residential listing belongs to a different property.");
-                if ((room.Status == EntityStatus.New) == (existingPropertyId is not null))
-                    throw new InvalidOperationException("Residential listing was already created or no longer exists. Reload before saving.");
-                var draft = ZumenSearch.Presentation.Features.Rent.Residentials.Models.ResidentialListingDraft.FromListing(room);
-                res.AffectedCount = DoUpsertRentResidentialListing(cmd, propertyId, persistedUnitOwnership, draft);
-                */
                 res.AffectedCount = DoUpsertRentResidentialListing(cmd, propertyId, listing);
 
                 // Commit
                 cmd.Transaction.Commit();
-                //listing.SetIsPropertyUnitLevelOwnership(persistedUnitOwnership);
                 MarkRentResidentialListingSaved(listing);
 
                 // Clear deletion queues only after the commit succeeds.
@@ -3065,7 +3056,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         return res;
     }
 
-    public ZumenSearch.Application.Results.ListingSearchResultWrapper SelectRentResidentialListings(ZumenSearch.Presentation.Features.Rent.Residentials.Models.ListingSearchCriteria criteria)
+    public ZumenSearch.Application.Results.ListingSearchResultWrapper SelectRentResidentialListings(RentResidentialListingSearchCriteria criteria)
     {
         var res = new ListingSearchResultWrapper();
 
@@ -3170,16 +3161,16 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             AddFlag(criteria.NoGuarantorNeeded, "l.no_guarantor_needed");
             AddFlag(criteria.OfficeUseAllowed, "l.office_use_allowed");
 
-            if (criteria.HandlingType is not null)
+            if (criteria.HandlingType is { } handlingType)
             {
                 conditions.Add("l.handling_type = @handlingType");
-                cmd.Parameters.AddWithValue("@handlingType", criteria.HandlingType.Key.ToString());
+                cmd.Parameters.AddWithValue("@handlingType", handlingType.ToString());
             }
 
-            if (criteria.TransactionType is not null)
+            if (criteria.TransactionType is { } transactionType)
             {
                 conditions.Add("l.transaction_type = @transactionType");
-                cmd.Parameters.AddWithValue("@transactionType", criteria.TransactionType.Key.ToString());
+                cmd.Parameters.AddWithValue("@transactionType", transactionType.ToString());
             }
 
             // Commission limits and units
@@ -3300,12 +3291,12 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 }
             }
 
-            void AddCommissionFilter(double maximum, ZumenSearch.Presentation.Features.Rent.Residentials.Models.ListingCommissionUnitTypeLabel? unit, string amountColumn, string unitColumn, string parameterName)
+            void AddCommissionFilter(double maximum, ZumenSearch.Domain.Entities.Rent.Residentials.ListingCommissionUnitType? unit, string amountColumn, string unitColumn, string parameterName)
             {
-                if (unit is not null)
+                if (unit is { } commissionUnit)
                 {
                     conditions.Add(unitColumn + " = @" + parameterName + "Unit");
-                    cmd.Parameters.AddWithValue("@" + parameterName + "Unit", unit.Key.ToString());
+                    cmd.Parameters.AddWithValue("@" + parameterName + "Unit", commissionUnit.ToString());
                 }
 
                 if (double.IsFinite(maximum))
@@ -3327,9 +3318,9 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         return res;
     }
 
-    public ZumenSearch.Presentation.Features.Rent.Residentials.Models.ListingResultWrapper SelectRentResidentialListingById(string propertyId, string listingId, bool duplicate = false)
+    public RentResidentialListingResultWrapper SelectRentResidentialListingById(string propertyId, string listingId, bool duplicate = false)
     {
-        var res = new ZumenSearch.Presentation.Features.Rent.Residentials.Models.ListingResultWrapper();
+        var res = new RentResidentialListingResultWrapper();
 
         if (string.IsNullOrEmpty(listingId))
         {
@@ -7522,6 +7513,14 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
     }
 
     #endregion
+
+    private static string EscapeLikeValue(string value)
+    {
+        return value.Trim()
+            .Replace("\\", "\\\\", StringComparison.Ordinal)
+            .Replace("%", "\\%", StringComparison.Ordinal)
+            .Replace("_", "\\_", StringComparison.Ordinal);
+    }
 
     public void Dispose()
     {

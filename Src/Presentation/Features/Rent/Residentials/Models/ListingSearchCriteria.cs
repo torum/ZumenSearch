@@ -60,4 +60,50 @@ public sealed class ListingSearchCriteria
         clone.FloorPlans = [.. FloorPlans];
         return clone;
     }
+
+    public ZumenSearch.Application.SearchResults.RentResidentialListingSearchCriteria ToApplicationQuery() => new()
+    {
+        PropertyName = PropertyName,
+        Address = Address,
+        Station = Station,
+        Line = Line,
+        LessorName = LessorName,
+        FudousanId = FudousanId,
+        MinimumRent = MinimumRent,
+        MaximumRent = MaximumRent,
+        MaximumManagementFee = MaximumManagementFee,
+        NoSecurityDeposit = NoSecurityDeposit,
+        NoKeyMoney = NoKeyMoney,
+        MaximumStationWalkMinutes = MaximumStationWalkMinutes,
+        PropertyKinds = [.. PropertyKinds],
+        PropertyStructures = [.. PropertyStructures],
+        MaximumBuildingAgeYears = MaximumBuildingAgeYears,
+        FloorPlans = [.. FloorPlans],
+        MinimumFloorArea = MinimumFloorArea,
+        MaximumFloorArea = MaximumFloorArea,
+        PetFriendly = PetFriendly,
+        TwoPersonOccupancy = TwoPersonOccupancy,
+        NoGuarantorNeeded = NoGuarantorNeeded,
+        OfficeUseAllowed = OfficeUseAllowed,
+        HandlingType = HandlingType?.Key,
+        TransactionType = TransactionType?.Key,
+        MaximumLessorCommission = MaximumLessorCommission,
+        LessorCommissionUnit = LessorCommissionUnit?.Key,
+        MaximumLesseeCommission = MaximumLesseeCommission,
+        LesseeCommissionUnit = LesseeCommissionUnit?.Key,
+        MaximumListingBrokerCommission = MaximumListingBrokerCommission,
+        ListingBrokerCommissionUnit = ListingBrokerCommissionUnit?.Key,
+        MaximumTenantBrokerCommission = MaximumTenantBrokerCommission,
+        TenantBrokerCommissionUnit = TenantBrokerCommissionUnit?.Key,
+        IsRecruiting = IsRecruiting,
+        ImmediateOccupancy = ImmediateOccupancy,
+        CornerRoom = CornerRoom,
+        HasAutolock = HasAutolock,
+        HasElevator = HasElevator,
+        HasParcelLocker = HasParcelLocker,
+        HasFreeInternet = HasFreeInternet,
+        HasAirConditioner = HasAirConditioner,
+        HasSeparateBathAndToilet = HasSeparateBathAndToilet,
+        HasParking = HasParking
+    };
 }

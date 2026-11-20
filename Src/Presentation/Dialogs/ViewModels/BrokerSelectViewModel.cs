@@ -2,21 +2,20 @@
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Xaml.Controls;
 using System.Collections.ObjectModel;
-using ZumenSearch.Infrastructure.Configuration.Contracts;
-using ZumenSearch.Infrastructure.DataAccess.Contracts;
+using ZumenSearch.Application.Services.Rent.Residentials;
 using ZumenSearch.Presentation.Services.Contracts;
 using ZumenSearch.Presentation.Shell.ViewModels;
 namespace ZumenSearch.Presentation.Dialogs.ViewModels;
 
 public partial class BrokerSelectViewModel : ObservableObject
 {
-    private readonly IDataAccessService _dataAccessService;
+    private readonly RentPersonService _rentPersonService;
 
     private readonly CancellationTokenSource _cts;
 
-    public BrokerSelectViewModel(IDataAccessService dataAccessService, CancellationTokenSource cts)
+    public BrokerSelectViewModel(RentPersonService rentPersonService, CancellationTokenSource cts)
     {
-        _dataAccessService = dataAccessService;
+        _rentPersonService = rentPersonService;
         _cts = cts;
 
         // Fire and forget.
@@ -27,7 +26,7 @@ public partial class BrokerSelectViewModel : ObservableObject
     {
         try
         {
-            var res = await Task.Run(() => _dataAccessService.SelectBrokersByKeyword("*"), _cts.Token);
+            var res = await Task.Run(() => _rentPersonService.SearchBrokers("*"), _cts.Token);
             if (res.IsError)
             {
                 Debug.WriteLine(
@@ -139,7 +138,7 @@ public partial class BrokerSelectViewModel : ObservableObject
         }
 
         // TODO: Catch and ignore catch (OperationCanceledException) when (_cts.Token.IsCancellationRequested). This may not be necessary...but.
-        var res = await Task.Run(() => _dataAccessService.SelectBrokersByKeyword(searchText), _cts.Token);
+        var res = await Task.Run(() => _rentPersonService.SearchBrokers(searchText), _cts.Token);
         if (res.IsError)
         {
             Debug.WriteLine(

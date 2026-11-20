@@ -2944,7 +2944,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     {
         if (!IsEditorEnabled) return;
         using var cts = new CancellationTokenSource();
-        var selected = await _dialogService.ShowLessorSelectDialog(new ZumenSearch.Presentation.Dialogs.ViewModels.LessorSelectViewModel(_dataAccessService, cts));
+        var selected = await _dialogService.ShowLessorSelectDialog(new ZumenSearch.Presentation.Dialogs.ViewModels.LessorSelectViewModel(App.GetService<ZumenSearch.Application.Services.Rent.Residentials.RentPersonService>(), cts));
         if (selected is null || LessorsWrapper.Any(item => item.Person.Id == selected.Id)) return;
 
         _pendingLessorId = selected.Id;
@@ -3020,7 +3020,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     {
         if (!IsEditorEnabled) return;
         using var cts = new CancellationTokenSource();
-        var selected = await _dialogService.ShowBrokerSelectDialog(new ZumenSearch.Presentation.Dialogs.ViewModels.BrokerSelectViewModel(_dataAccessService, cts));
+        var selected = await _dialogService.ShowBrokerSelectDialog(new ZumenSearch.Presentation.Dialogs.ViewModels.BrokerSelectViewModel(App.GetService<ZumenSearch.Application.Services.Rent.Residentials.RentPersonService>(), cts));
         if (selected is null || BrokersWrapper.Any(item => item.Person.Id == selected.Id)) return;
 
         _pendingBrokerId = selected.Id;

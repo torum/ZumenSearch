@@ -1,22 +1,21 @@
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.UI.Xaml;
-using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Text;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using WinRT.Interop;
-using ZumenSearch.Presentation.Helpers;
-using ZumenSearch.Presentation.Utilities;
-using ZumenSearch.Infrastructure.Platform;
+using ZumenSearch.Application.Contracts;
+using ZumenSearch.Application.Services;
+using ZumenSearch.Application.Services.Rent.Residentials;
 using ZumenSearch.Infrastructure.Configuration;
-using ZumenSearch.Infrastructure.DataAccess;
-using ZumenSearch.Presentation.Services;
 using ZumenSearch.Infrastructure.Configuration.Contracts;
+using ZumenSearch.Infrastructure.DataAccess;
 using ZumenSearch.Infrastructure.DataAccess.Contracts;
-using ZumenSearch.Presentation.Services.Contracts;
+using ZumenSearch.Infrastructure.Platform;
 using ZumenSearch.Presentation.Factories;
+using ZumenSearch.Presentation.Services;
+using ZumenSearch.Presentation.Services.Contracts;
 
 
 namespace ZumenSearch;
@@ -120,11 +119,21 @@ public partial class App : Microsoft.UI.Xaml.Application
             {
                 // Services
                 services.AddSingleton<IDispatcherService>(new DispatcherService(CurrentDispatcherQueue));
-                services.AddSingleton<IDataAccessService, DataAccessService>();
+                services.AddSingleton<DataAccessService>();
+                services.AddSingleton<IDataAccessService>(provider => provider.GetRequiredService<DataAccessService>());
+                services.AddSingleton<IPropertySearchRepository>(provider => provider.GetRequiredService<DataAccessService>());
+                services.AddSingleton<IRentResidentialPropertyRepository>(provider => provider.GetRequiredService<DataAccessService>());
+                services.AddSingleton<IRentResidentialPersonRepository>(provider => provider.GetRequiredService<DataAccessService>());
+                services.AddSingleton<IRentResidentialListingRepository>(provider => provider.GetRequiredService<DataAccessService>());
+                services.AddTransient<PropertySearchService>();
+                services.AddTransient<RentResidentialPropertyService>();
+                services.AddTransient<RentResidentialListingService>();
+                services.AddTransient<RentPersonService>();
                 services.AddSingleton<INavigationService, NavigationService>();
                 services.AddTransient<INavigationGenericService, NavigationGenericService>();
                 services.AddTransient<IDialogGenericService, DialogGenericService>();
                 services.AddTransient<IDataAccessLocationService, DataAccessLocationService>();
+                services.AddTransient<ILocationRepository, DataAccessLocationService>();
                 services.AddTransient<IDataAccessTransportationService, DataAccessTransportationService>();
                 services.AddSingleton<IConfigurationService>(new ConfigurationService(AppendErrorLog));
 

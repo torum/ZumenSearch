@@ -16,7 +16,8 @@ using ZumenSearch.Domain.Entities.Rent.Residentials;
 using ZumenSearch.Domain.Enums;
 using ZumenSearch.Domain.ValueObjects.Location;
 using ZumenSearch.Domain.ValueObjects.Transportation;
-using ZumenSearch.Infrastructure.DataAccess.Contracts;
+using ZumenSearch.Application.Contracts;
+using ZumenSearch.Application.Services.Rent.Residentials;
 using ZumenSearch.Presentation.Factories.AbstractFactory;
 using ZumenSearch.Presentation.Features.Rent.Residentials.Models;
 using ZumenSearch.Presentation.Messaging;
@@ -63,15 +64,17 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
     #region == Services ==
 
     private readonly IAbstractFactory<ZumenSearch.Domain.Entities.Rent.Residentials.Listing, bool, ZumenSearch.Presentation.Features.Rent.Residentials.Views.Listing.ShellPage> _shellFactory;
-    private readonly IDataAccessService _dataAccessService;
-    private readonly IDataAccessLocationService _dataAccessLocationService;
+    private readonly RentResidentialPropertyService _rentResidentialPropertyService;
+    private readonly RentResidentialListingService _rentResidentialListingService;
+    private readonly RentPersonService _rentPersonService;
+    private readonly ILocationRepository _locationRepository;
     private readonly IDispatcherService _dispatcherService;
     private readonly IDialogGenericService _dialogService;
     private readonly INavigationGenericService _navigationService;
 
     #endregion
 
-    public PropertyViewModel(ZumenSearch.Domain.Entities.Rent.Residentials.Property property, bool isDuplicate, INavigationGenericService navigationService, IDialogGenericService dialogService, IAbstractFactory<ZumenSearch.Domain.Entities.Rent.Residentials.Listing, bool, ZumenSearch.Presentation.Features.Rent.Residentials.Views.Listing.ShellPage> shellFactory, IDispatcherService dispatcherService, IDataAccessService dataAccessService, IDataAccessLocationService dataAccessLocationService)
+    public PropertyViewModel(ZumenSearch.Domain.Entities.Rent.Residentials.Property property, bool isDuplicate, INavigationGenericService navigationService, IDialogGenericService dialogService, IAbstractFactory<ZumenSearch.Domain.Entities.Rent.Residentials.Listing, bool, ZumenSearch.Presentation.Features.Rent.Residentials.Views.Listing.ShellPage> shellFactory, IDispatcherService dispatcherService, RentResidentialPropertyService rentResidentialPropertyService, RentResidentialListingService rentResidentialListingService, RentPersonService rentPersonService, ILocationRepository locationRepository)
     {
         _property = property;
         _id = property.Id;
@@ -80,10 +83,12 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         _dialogService = dialogService;
         _shellFactory = shellFactory;
         _dispatcherService = dispatcherService;
-        _dataAccessService = dataAccessService;
-        _dataAccessLocationService = dataAccessLocationService;
+        _rentResidentialPropertyService = rentResidentialPropertyService;
+        _rentResidentialListingService = rentResidentialListingService;
+        _rentPersonService = rentPersonService;
+        _locationRepository = locationRepository;
 
-        // 
+        //
         IsUnitLevelOwnership = property.IsUnitLevelOwnership;
         WeakReferenceMessenger.Default.Send(new PropertyIsUnitOwnershipChangedMessage(_id, IsUnitLevelOwnership));
 
@@ -536,7 +541,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
                 var dataset = new List<CountyAndCity>();
 
-                dataset = _dataAccessLocationService.GetCountyAndCityByPref(field.Name);
+                dataset = _locationRepository.GetCountyAndCityByPref(field.Name);
 
                 Cities = [.. dataset.DistinctBy(p => p.Combined)];
 
@@ -585,7 +590,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
                 var dataset = new List<WardAndOaza>();
 
-                dataset = _dataAccessLocationService.GetWardAndOazaByPrefCountyCity(SelectedPrefecture.Name, field.County, field.City);
+                dataset = _locationRepository.GetWardAndOazaByPrefCountyCity(SelectedPrefecture.Name, field.County, field.City);
 
                 Towns = [.. dataset.DistinctBy(p => p.Combined)];
             }
@@ -640,7 +645,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
                 var dataset = new List<Choume>();
 
-                dataset = _dataAccessLocationService.GetChoumeByPrefCountyCityWardOaza(SelectedPrefecture.Name, SelectedCity.County, SelectedCity.City, field.Ward, field.Oaza);
+                dataset = _locationRepository.GetChoumeByPrefCountyCityWardOaza(SelectedPrefecture.Name, SelectedCity.County, SelectedCity.City, field.Ward, field.Oaza);
 
                 Chous = [.. dataset.DistinctBy(p => p.Chou)];
             }
@@ -3309,7 +3314,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         ZumenSearch.Application.Results.ResultWrapper resUpsert;
         try
         {
-            resUpsert = await Task.Run(() => _dataAccessService.UpsertRentResidential(_property), _cts.Token);
+            resUpsert = await Task.Run(() => _rentResidentialPropertyService.Save(_property), _cts.Token);
         }
         catch (OperationCanceledException) when (_cts.Token.IsCancellationRequested)
         {
@@ -3927,7 +3932,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
         ZumenSearch.Domain.Entities.Rent.Residentials.Listing listing;
 
-        var result = await Task.Run(() => _dataAccessService.SelectRentResidentialListingById(_id, unitId), _cts.Token);
+        var result = await Task.Run(() => _rentResidentialListingService.GetById(_id, unitId), _cts.Token);
         if (result.IsError)
         {
             ShowErrorInfoBar(result.Error);
@@ -4367,7 +4372,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         try
         {
             ZumenSearch.Application.SearchResults.PersonSearchResultItem? lessorItem;
-            lessorItem = await _dialogService.ShowLessorSelectDialog(new ZumenSearch.Presentation.Dialogs.ViewModels.LessorSelectViewModel(_dataAccessService, _cts));
+            lessorItem = await _dialogService.ShowLessorSelectDialog(new ZumenSearch.Presentation.Dialogs.ViewModels.LessorSelectViewModel(_rentPersonService, _cts));
 
             if (lessorItem is null)
             {
@@ -4386,7 +4391,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             }
 
             // TODO: Catch and ignore catch (OperationCanceledException) when (_cts.Token.IsCancellationRequested). This may not be necessary...but.
-            var res = await Task.Run(() => _dataAccessService.SelectRentLessorById(lessorId), _cts.Token);
+            var res = await Task.Run(() => _rentPersonService.GetLessorById(lessorId), _cts.Token);
             if (res.IsError)
             {
                 Debug.WriteLine(
@@ -4481,7 +4486,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
         try
         {
-            var broker = await _dialogService.ShowBrokerSelectDialog(new ZumenSearch.Presentation.Dialogs.ViewModels.BrokerSelectViewModel(_dataAccessService, _cts));
+            var broker = await _dialogService.ShowBrokerSelectDialog(new ZumenSearch.Presentation.Dialogs.ViewModels.BrokerSelectViewModel(_rentPersonService, _cts));
 
             if (broker is null)
             {
@@ -4499,7 +4504,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             }
 
             // TODO: Catch and ignore catch (OperationCanceledException) when (_cts.Token.IsCancellationRequested). This may not be necessary...but.
-            var res = await Task.Run(() => _dataAccessService.SelectBrokerById(brokerId), _cts.Token);
+            var res = await Task.Run(() => _rentPersonService.GetBrokerById(brokerId), _cts.Token);
             if (res.IsError)
             {
                 Debug.WriteLine(
