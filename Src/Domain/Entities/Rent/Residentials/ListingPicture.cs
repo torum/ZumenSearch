@@ -1,124 +1,62 @@
-﻿using System.Collections.ObjectModel;
-using System.Data;
-using ZumenSearch.Domain.Entities.Base;
-using ZumenSearch.Presentation.Features.Rent.Residentials.Models;
+﻿using ZumenSearch.Domain.Entities.Base;
 using ZumenSearch.Domain.Enums;
+using ZumenSearch.Domain.Enums.Rent.Residentials;
 
 namespace ZumenSearch.Domain.Entities.Rent.Residentials;
 
-public sealed partial class ListingPicture : PictureBase
+public sealed class ListingPicture : EntityBase
 {
     public ListingPicture(string id, string imageLocation, EntityStatus status) : base(id, status)
     {
         ImageFilename = imageLocation;
-
         IsModified = false;
     }
 
-    public ZumenSearch.Presentation.Features.Rent.Residentials.ViewModels.ListingViewModel? ParentViewModel { get; set; }
-
-    // Do not use SetProperty. PropertyChanged is being subscribed.
-    public ListingPictureTypeLabel PictureType
+    public string ImageFilename
     {
         get;
         set
         {
             if (field == value) return;
-
-            if (value is not null)
-            {
-                // Set this before raize PropertyChanged.
-                IsModified = true;
-
-                // Raize PropertyChanged event here.
-                field = value;
-            }
-            else
-            {
-                // DO NOT DO THIS. This raize unneccesary property changed events that triggers IsDirty.
-                //field = new(EnumUnitPictureType.Unspecified);
-            }
-
-            OnPropertyChanged();
+            field = value;
+            IsModified = true;
         }
-    } = new(ListingPictureType.Unspecified);
+    } = string.Empty;
 
-    public ObservableCollection<ListingPictureTypeLabel> ListingPictureTypes { get;} =
-    [
-        new ListingPictureTypeLabel(ZumenSearch.Presentation.Features.Rent.Residentials.Models.ListingPictureType.Unspecified),
-        new ListingPictureTypeLabel(ZumenSearch.Presentation.Features.Rent.Residentials.Models.ListingPictureType.Madori),
-        //new UnitPictureType(ZumenSearch.Presentation.Features.Rent.Residentials.Models.EnumUnitPictureType.Gaikan),
-        new ListingPictureTypeLabel(ZumenSearch.Presentation.Features.Rent.Residentials.Models.ListingPictureType.Situnai),
-        new ListingPictureTypeLabel(ZumenSearch.Presentation.Features.Rent.Residentials.Models.ListingPictureType.LivingDining),
-        new ListingPictureTypeLabel(ZumenSearch.Presentation.Features.Rent.Residentials.Models.ListingPictureType.Bedroom),
-        new ListingPictureTypeLabel(ZumenSearch.Presentation.Features.Rent.Residentials.Models.ListingPictureType.Kitchen),
-        new ListingPictureTypeLabel(ZumenSearch.Presentation.Features.Rent.Residentials.Models.ListingPictureType.Bathroom),
-        new ListingPictureTypeLabel(ZumenSearch.Presentation.Features.Rent.Residentials.Models.ListingPictureType.Restroom),
-        new ListingPictureTypeLabel(ZumenSearch.Presentation.Features.Rent.Residentials.Models.ListingPictureType.Washroom),
-        new ListingPictureTypeLabel(ZumenSearch.Presentation.Features.Rent.Residentials.Models.ListingPictureType.StorageSpace),
-        new ListingPictureTypeLabel(ZumenSearch.Presentation.Features.Rent.Residentials.Models.ListingPictureType.Appliance),
-        new ListingPictureTypeLabel(ZumenSearch.Presentation.Features.Rent.Residentials.Models.ListingPictureType.FrontDoor),
-        new ListingPictureTypeLabel(ZumenSearch.Presentation.Features.Rent.Residentials.Models.ListingPictureType.Balcony),
-        //new UnitPictureType(ZumenSearch.Presentation.Features.Rent.Residentials.Models.EnumUnitPictureType.Entrance),
-        //new UnitPictureType(ZumenSearch.Presentation.Features.Rent.Residentials.Models.EnumUnitPictureType.Neighborhood),
-        new ListingPictureTypeLabel(ZumenSearch.Presentation.Features.Rent.Residentials.Models.ListingPictureType.Other)
-    ];
+    public string BasePath { get; set; } = string.Empty;
 
-    // Do not use SetProperty. PropertyChanged is being subscribed.
+    public ListingPictureType PictureType
+    {
+        get;
+        set
+        {
+            if (field == value) return;
+            field = value;
+            IsModified = true;
+        }
+    } = ListingPictureType.Unspecified;
+
     public string Description
     {
         get;
         set
         {
+            value ??= string.Empty;
             if (field == value) return;
-
-            if (value is not null)
-            {
-                // Set this before raize PropertyChanged.
-                IsModified = true;
-
-                // Raize PropertyChanged event here.
-                field = value;
-            }
-            else
-            {
-                field = string.Empty;
-            }
-
-            OnPropertyChanged();
+            field = value;
+            IsModified = true;
         }
     } = string.Empty;
 
-    // Do not use SetProperty. PropertyChanged is being subscribed.
     public bool IsMain
     {
         get;
         set
         {
             if (field == value) return;
-
-            // Set this before raize PropertyChanged.
-            IsModified = true;
-
-            // Raize PropertyChanged event here.
             field = value;
-
-            OnPropertyChanged();
+            IsModified = true;
         }
-    }
-
-    public ListingPictureType SetTypeFromString(string Str)
-    {
-        if (!Enum.TryParse<ListingPictureType>(Str, out var result) || !Enum.IsDefined(result))
-        {
-            //throw new FormatException($"Invalid residential listing PDF type: {Str}");
-            Debug.WriteLine($"Invalid residential listing PDF type: {Str}. Defaulting to Unspecified.");
-            PictureType = ListingPictureTypes.First(item => item.Key == ListingPictureType.Unspecified);
-            return ListingPictureType.Unspecified;
-        }
-
-        PictureType = ListingPictureTypes.First(item => item.Key == result);
-        return result;
     }
 
     public ListingPicture Clone()
@@ -126,15 +64,12 @@ public sealed partial class ListingPicture : PictureBase
         var clone = new ListingPicture(Id, ImageFilename, Status)
         {
             BasePath = BasePath,
-            ThumbImagePath = ThumbImagePath,
             Description = Description,
+            PictureType = PictureType,
             IsMain = IsMain
         };
 
-        clone.PictureType = clone.ListingPictureTypes.FirstOrDefault(item => item.Key == PictureType.Key)
-            ?? new ListingPictureTypeLabel(PictureType.Key);
         clone.SetIsModified(IsModified);
         return clone;
     }
-
-};
+}

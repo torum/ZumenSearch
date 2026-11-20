@@ -1,15 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using ZumenSearch.Domain.Entities.Rent.Residentials;
 
 namespace ZumenSearch.Presentation.Features.Rent.Residentials.Models;
 
 // Structure: 建物構造
-public enum StructureType
-{
-    Unspecified, Wood, Block, LightSteel, Steel, RC, SRC, ALC, PC, HPC, RB, CFT, Other
-}
-
 public sealed class PropertyStructureTypeLabel(StructureType key)
 {
     private Dictionary<StructureType, string> PropertyStructureTypeDictionary { get; } = new()

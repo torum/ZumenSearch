@@ -1,14 +1,6 @@
-namespace ZumenSearch.Presentation.Features.Rent.Residentials.Models;
+using ZumenSearch.Domain.Entities.Rent.Residentials;
 
-public enum ListingTransactionType
-{
-    Unspecified,
-    GeneralBrokerage,
-    ExclusiveBrokerage,
-    ExclusiveAgencyBrokerage,
-    Agency,
-    Lessor
-}
+namespace ZumenSearch.Presentation.Features.Rent.Residentials.Models;
 
 public sealed class ListingTransactionTypeLabel(ListingTransactionType key)
 {

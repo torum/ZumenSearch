@@ -1,115 +1,74 @@
-﻿using System.Collections.ObjectModel;
-using ZumenSearch.Domain.Entities.Base;
-using ZumenSearch.Presentation.Features.Rent.Residentials.Models;
+﻿using ZumenSearch.Domain.Entities.Base;
 using ZumenSearch.Domain.Enums;
+using ZumenSearch.Domain.Enums.Rent.Residentials;
 
 namespace ZumenSearch.Domain.Entities.Rent.Residentials;
 
-public sealed partial class ListingPdf : PdfBase
+public sealed class ListingPdf : EntityBase
 {
     public ListingPdf(string id, string pdfLocation, string thumbnailLocation, EntityStatus status) : base(id, status)
     {
         PdfFilename = pdfLocation;
         ThumbnailFilename = thumbnailLocation;
-        //PdfType = ListingPdfTypes[0];
-        PdfType = ListingPdfTypes.First(item => item.Key == ListingPdfType.Unspecified);
-
         IsModified = false;
     }
 
-    public ZumenSearch.Presentation.Features.Rent.Residentials.ViewModels.ListingViewModel? ParentViewModel { get; set; }
-
-    public ObservableCollection<ListingPdfTypeLabel> ListingPdfTypes { get; set; } =
-        [
-        new ListingPdfTypeLabel(ZumenSearch.Presentation.Features.Rent.Residentials.Models.ListingPdfType.Unspecified),
-        new ListingPdfTypeLabel(ZumenSearch.Presentation.Features.Rent.Residentials.Models.ListingPdfType.Maisoku),
-        new ListingPdfTypeLabel(ZumenSearch.Presentation.Features.Rent.Residentials.Models.ListingPdfType.Architectural),
-        new ListingPdfTypeLabel(ZumenSearch.Presentation.Features.Rent.Residentials.Models.ListingPdfType.Toukibo),
-        new ListingPdfTypeLabel(ZumenSearch.Presentation.Features.Rent.Residentials.Models.ListingPdfType.Kouzu),
-        new ListingPdfTypeLabel(ZumenSearch.Presentation.Features.Rent.Residentials.Models.ListingPdfType.Other)
-        ];
-
-    // Do not use SetProperty. PropertyChanged is being subscribed.
-    public ListingPdfTypeLabel PdfType
+    public string PdfFilename
     {
         get;
         set
         {
             if (field == value) return;
-
-            if (value is not null)
-            {
-                // Set this before raize PropertyChanged.
-                IsModified = true;
-
-                // Raize PropertyChanged event here.
-                field = value;
-            }
-            else
-            {
-                // DO NOT DO THIS. This raize unneccesary property changed events that triggers IsDirty.
-                //field = new(EnumBuildingPdfType.Unspecified);
-            }
-
-            OnPropertyChanged();
+            field = value;
+            IsModified = true;
         }
-    } = new(ListingPdfType.Unspecified);
+    } = string.Empty;
 
-    // Do not use SetProperty. PropertyChanged is being subscribed.
+    public string BasePath { get; set; } = string.Empty;
+
+    public string ThumbnailFilename
+    {
+        get;
+        set
+        {
+            if (field == value) return;
+            field = value;
+            IsModified = true;
+        }
+    } = string.Empty;
+
+    public ListingPdfType PdfType
+    {
+        get;
+        set
+        {
+            if (field == value) return;
+            field = value;
+            IsModified = true;
+        }
+    } = ListingPdfType.Unspecified;
+
     public string Description
     {
         get;
         set
         {
+            value ??= string.Empty;
             if (field == value) return;
-
-            if (value is not null)
-            {
-                // Set this before raize PropertyChanged.
-                IsModified = true;
-
-                // Raize PropertyChanged event here.
-                field = value;
-            }
-            else
-            {
-                field = string.Empty;
-            }
-
-            OnPropertyChanged();
+            field = value;
+            IsModified = true;
         }
     } = string.Empty;
 
-    // Do not use SetProperty.
     public bool IsMain
     {
         get;
         set
         {
             if (field == value) return;
-
-            // Set this before raize PropertyChanged.
-            IsModified = true;
-
-            // Raize PropertyChanged event here.
             field = value;
-
-            OnPropertyChanged();
+            IsModified = true;
         }
-    }
-
-    public ListingPdfType SetTypeFromString(string Str)
-    {
-        if (!Enum.TryParse<ListingPdfType>(Str, out var result) || !Enum.IsDefined(result))
-        {
-            //throw new FormatException($"Invalid residential listing PDF type: {Str}");
-            Debug.WriteLine($"Invalid residential listing PDF type: {Str}. Defaulting to Unspecified.");
-            PdfType = ListingPdfTypes.First(item => item.Key == ListingPdfType.Unspecified);
-            return ListingPdfType.Unspecified;
-        }
-
-        PdfType = ListingPdfTypes.First(item => item.Key == result);
-        return result;
     }
 
     public ListingPdf Clone()
@@ -118,12 +77,11 @@ public sealed partial class ListingPdf : PdfBase
         {
             BasePath = BasePath,
             Description = Description,
+            PdfType = PdfType,
             IsMain = IsMain
         };
 
-        clone.PdfType = clone.ListingPdfTypes.FirstOrDefault(item => item.Key == PdfType.Key) ?? new ListingPdfTypeLabel(PdfType.Key);
         clone.SetIsModified(IsModified);
         return clone;
     }
-
-};
+}

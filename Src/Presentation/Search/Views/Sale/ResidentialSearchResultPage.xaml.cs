@@ -38,7 +38,7 @@ public sealed partial class ResidentialSearchResultPage : Page
     DoubleTappedRoutedEventArgs e)
     {
         if (ResultList.SelectedItem
-            is ZumenSearch.Application.SearchResults.PropertySearchResultItem selected &&
+            is ZumenSearch.Presentation.Search.PropertySearchResultItemViewModel selected &&
             ViewModel.EditSaleResidentialCommand.CanExecute(selected))
         {
             ViewModel.EditSaleResidentialCommand.Execute(selected);

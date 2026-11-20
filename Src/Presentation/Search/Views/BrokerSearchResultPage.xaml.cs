@@ -74,9 +74,9 @@ public sealed partial class BrokerSearchResultPage : Page
             return;
         }
 
-        if (container.DataContext is not ZumenSearch.Application.SearchResults.PersonSearchResultItem searchresult)
+        if (container.DataContext is not PersonSearchResultItemViewModel searchresult)
         {
-            Debug.WriteLine($"Not PersonSearchResultItem. {container.DataContext?.GetType().FullName} @SearchResult_DoubleTapped");
+            Debug.WriteLine($"Not PersonSearchResultItemViewModel. {container.DataContext?.GetType().FullName} @SearchResult_DoubleTapped");
             return;
         }
 
@@ -85,9 +85,9 @@ public sealed partial class BrokerSearchResultPage : Page
             return;
         }
 
-        if (ViewModel.EditBrokerCommand.CanExecute(searchresult))
+        if (ViewModel.EditBrokerSearchResultCommand.CanExecute(searchresult))
         {
-            ViewModel.EditBrokerCommand.Execute(searchresult);
+            ViewModel.EditBrokerSearchResultCommand.Execute(searchresult);
         }
     }
 
@@ -136,9 +136,9 @@ public sealed partial class BrokerSearchResultPage : Page
             return;
         }
 
-        if (container.DataContext is not ZumenSearch.Application.SearchResults.ListingSearchResultItem)
+        if (container.DataContext is not PersonSearchResultItemViewModel)
         {
-            Debug.WriteLine($"Not ListingSearchResultItem. {container.DataContext?.GetType().FullName} @ItemContainer_RightTapped");
+            Debug.WriteLine($"Not PersonSearchResultItemViewModel. {container.DataContext?.GetType().FullName} @ItemContainer_RightTapped");
             return;
         }
 
@@ -160,9 +160,9 @@ public sealed partial class BrokerSearchResultPage : Page
             return;
         }
 
-        if (element.DataContext is not ZumenSearch.Application.SearchResults.PersonSearchResultItem searchresult)
+        if (element.DataContext is not PersonSearchResultItemViewModel searchresult)
         {
-            Debug.WriteLine($"Not LessorSearchResultItem. {element.DataContext?.GetType().FullName} @ItemContainerKeyboardAccelerator_Invoked");
+            Debug.WriteLine($"Not PersonSearchResultItemViewModel. {element.DataContext?.GetType().FullName} @ItemContainerKeyboardAccelerator_Invoked");
             return;
         }
 
@@ -171,9 +171,9 @@ public sealed partial class BrokerSearchResultPage : Page
             return;
         }
 
-        if (ViewModel.EditRentLessorCommand.CanExecute(searchresult))
+        if (ViewModel.EditBrokerSearchResultCommand.CanExecute(searchresult))
         {
-            ViewModel.EditRentLessorCommand.Execute(searchresult);
+            ViewModel.EditBrokerSearchResultCommand.Execute(searchresult);
         }
     }
 

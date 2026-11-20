@@ -3,7 +3,6 @@
 
 using ZumenSearch.Domain.Enums;
 
-
 namespace ZumenSearch.Domain.Entities.Base;
 
 // <summary>

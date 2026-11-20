@@ -1,21 +1,18 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-
-#pragma warning disable IDE0079 // Remove unnecessary suppression
+﻿#pragma warning disable IDE0079 // Remove unnecessary suppression
 #pragma warning disable IDE0290 // Use primary constructor
 
+using CommunityToolkit.Mvvm.ComponentModel;
 using ZumenSearch.Domain.Enums;
-
 
 namespace ZumenSearch.Domain.Entities.Base;
 
 // <summary>
-// Base class for all entities like properties, listings, persons, pictures, and PDFs that are going to be saved in the database independently .
+// Base class for all entities like properties, listings, persons, pictures, and PDFs that are going to be saved in the database independently with their own IDs.
 // Provides common properties and methods for managing entity state.
 // </summary>
 // <remarks>
-// 
 // </remarks>
-public abstract class EntityBase : ObservableObject
+public abstract class EntityBase
 {
     protected EntityBase(string id, EntityStatus status)
     {

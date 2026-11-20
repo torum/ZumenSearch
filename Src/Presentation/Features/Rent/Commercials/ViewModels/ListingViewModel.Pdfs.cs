@@ -43,7 +43,7 @@ public sealed partial class ListingViewModel
         {
             pdf.BasePath = _listingDataDirectoryPath;
             pdf.ParentViewModel = this;
-            pdf.PropertyChanged += OnListingPdfChanged;
+            //pdf.PropertyChanged += OnListingPdfChanged;
             Pdfs.Add(pdf);
         }
         _unit.Pdfs = Pdfs;
@@ -124,7 +124,7 @@ public sealed partial class ListingViewModel
                     BasePath = _listingDataDirectoryPath,
                     ParentViewModel = this
                 };
-                pdf.PropertyChanged += OnListingPdfChanged;
+                //pdf.PropertyChanged += OnListingPdfChanged;
                 Pdfs.Add(pdf);
                 _unsavedUnitPdfThumbnailFileList.Add(thumbnailPath);
                 _unsavedUnitPdfFileList.Add(pdfPath);
@@ -170,7 +170,7 @@ public sealed partial class ListingViewModel
             if (await _dialogService.ShowDeleteConfirmationDialog("この募集物件の図面を削除しますか？") != Microsoft.UI.Xaml.Controls.ContentDialogResult.Primary) return;
             if (!Pdfs.Remove(pdf)) return;
 
-            pdf.PropertyChanged -= OnListingPdfChanged;
+            //pdf.PropertyChanged -= OnListingPdfChanged;
             pdf.ParentViewModel = null;
             _unit.PdfsToBeDeleted.Add(pdf);
             MarkPdfEdited();

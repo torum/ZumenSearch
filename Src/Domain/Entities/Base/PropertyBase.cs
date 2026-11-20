@@ -1,11 +1,10 @@
-﻿using System.Globalization;
-using ZumenSearch.Domain.ValueObjects.Location;
-using ZumenSearch.Domain.ValueObjects.Transportation;
-#pragma warning disable IDE0290 // Use primary constructor
+﻿#pragma warning disable IDE0290 // Use primary constructor
 #pragma warning disable IDE0079 // Remove unnecessary suppression
 
+using System.Globalization;
+using ZumenSearch.Domain.ValueObjects.Location;
+using ZumenSearch.Domain.ValueObjects.Transportation;
 using ZumenSearch.Domain.Enums;
-
 
 namespace ZumenSearch.Domain.Entities.Base;
 
@@ -205,11 +204,8 @@ public abstract partial class PropertyBase : EntityAggregateBase
         get => field ?? string.Empty; // Ensure a non-null value is returned
         set
         {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-                OnPropertyChanged(nameof(ThumbImagePath)); // Notify that ThumbImagePath has changed
-            }
+            field = value;
+            IsModified = true;
         }
     }
 
@@ -229,16 +225,13 @@ public abstract partial class PropertyBase : EntityAggregateBase
                 return field;
             }
 
-            var imagePath = Path.Combine(BasePath, ThumbnailFilename);
+            string imagePath = Path.Combine(BasePath, ThumbnailFilename);
             field = Path.Exists(imagePath) ? imagePath : null;
             return field;
         }
         private set
         {
-            if (SetProperty(ref field, value))
-            {
-                //
-            }
+            field = value;
         }
     }
 
@@ -256,7 +249,7 @@ public abstract partial class PropertyBase : EntityAggregateBase
             return;
         }
 
-        if (!int.TryParse(value.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var result))
+        if (!int.TryParse(value.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out int result))
         {
             throw new ArgumentException("バス乗車時間（分）の値が不正です。整数に変換出来ませんでした。", nameof(value));
         }
@@ -276,7 +269,7 @@ public abstract partial class PropertyBase : EntityAggregateBase
             BusStopToho1 = 0;
             return;
         }
-        if (!int.TryParse(value.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var result))
+        if (!int.TryParse(value.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out int result))
         {
             throw new ArgumentException("バス停から徒歩（分）の値が不正です。整数に変換出来ませんでした。", nameof(value));
         }
@@ -297,7 +290,7 @@ public abstract partial class PropertyBase : EntityAggregateBase
             return;
         }
 
-        if (!int.TryParse(value.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var result))
+        if (!int.TryParse(value.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out int result))
         {
             throw new ArgumentException("バス乗車時間（分）の値が不正です。整数に変換出来ませんでした。", nameof(value));
         }
@@ -317,7 +310,7 @@ public abstract partial class PropertyBase : EntityAggregateBase
             BusStopToho2 = 0;
             return;
         }
-        if (!int.TryParse(value.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var result))
+        if (!int.TryParse(value.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out int result))
         {
             throw new ArgumentException("バス停から徒歩（分）の値が不正です。整数に変換出来ませんでした。", nameof(value));
         }
@@ -338,7 +331,7 @@ public abstract partial class PropertyBase : EntityAggregateBase
             return;
         }
 
-        if (!int.TryParse(value.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var result))
+        if (!int.TryParse(value.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out int result))
         {
             throw new ArgumentException("バス乗車時間（分）の値が不正です。整数に変換出来ませんでした。", nameof(value));
         }
@@ -358,7 +351,7 @@ public abstract partial class PropertyBase : EntityAggregateBase
             BusStopToho3 = 0;
             return;
         }
-        if (!int.TryParse(value.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var result))
+        if (!int.TryParse(value.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out int result))
         {
             throw new ArgumentException("バス停から徒歩（分）の値が不正です。整数に変換出来ませんでした。", nameof(value));
         }
@@ -379,7 +372,7 @@ public abstract partial class PropertyBase : EntityAggregateBase
             return;
         }
 
-        if (!int.TryParse(value.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var result))
+        if (!int.TryParse(value.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out int result))
         {
             throw new ArgumentException("バス乗車時間（分）の値が不正です。整数に変換出来ませんでした。", nameof(value));
         }
@@ -399,7 +392,7 @@ public abstract partial class PropertyBase : EntityAggregateBase
             BusStopToho4 = 0;
             return;
         }
-        if (!int.TryParse(value.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var result))
+        if (!int.TryParse(value.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out int result))
         {
             throw new ArgumentException("バス停から徒歩（分）の値が不正です。整数に変換出来ませんでした。", nameof(value));
         }

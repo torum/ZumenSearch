@@ -263,17 +263,17 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     "remarks TEXT NOT NULL DEFAULT ''," +
 
                     "management_fee TEXT NOT NULL DEFAULT ''," +
-                    "management_fee_unit TEXT NOT NULL DEFAULT '" + nameof(ZumenSearch.Presentation.Features.Rent.Residentials.Models.FeeUnitType.Yen) + "'," +
+                    "management_fee_unit TEXT NOT NULL DEFAULT '" + nameof(ZumenSearch.Domain.Entities.Rent.Residentials.FeeUnitType.Yen) + "'," +
                     "security_deposit TEXT NOT NULL DEFAULT ''," +
-                    "security_deposit_unit TEXT NOT NULL DEFAULT '" + nameof(ZumenSearch.Presentation.Features.Rent.Residentials.Models.FeeUnitType.Months) + "'," +
+                    "security_deposit_unit TEXT NOT NULL DEFAULT '" + nameof(ZumenSearch.Domain.Entities.Rent.Residentials.FeeUnitType.Months) + "'," +
                     "key_money TEXT NOT NULL DEFAULT ''," +
-                    "key_money_unit TEXT NOT NULL DEFAULT '" + nameof(ZumenSearch.Presentation.Features.Rent.Residentials.Models.FeeUnitType.Months) + "'," +
-                    "contract_type TEXT NOT NULL DEFAULT '" + nameof(ZumenSearch.Presentation.Features.Rent.Residentials.Models.ContractType.Unspecified) + "'," +
+                    "key_money_unit TEXT NOT NULL DEFAULT '" + nameof(ZumenSearch.Domain.Entities.Rent.Residentials.FeeUnitType.Months) + "'," +
+                    "contract_type TEXT NOT NULL DEFAULT '" + nameof(ZumenSearch.Domain.Entities.Rent.Residentials.ContractType.Unspecified) + "'," +
                     "contract_period_years TEXT NOT NULL DEFAULT ''," +
                     "renewal_fee TEXT NOT NULL DEFAULT ''," +
-                    "renewal_fee_unit TEXT NOT NULL DEFAULT '" + nameof(ZumenSearch.Presentation.Features.Rent.Residentials.Models.FeeUnitType.Months) + "'," +
+                    "renewal_fee_unit TEXT NOT NULL DEFAULT '" + nameof(ZumenSearch.Domain.Entities.Rent.Residentials.FeeUnitType.Months) + "'," +
                     "recontract_fee TEXT NOT NULL DEFAULT ''," +
-                    "recontract_fee_unit TEXT NOT NULL DEFAULT '" + nameof(ZumenSearch.Presentation.Features.Rent.Residentials.Models.FeeUnitType.Yen) + "'," +
+                    "recontract_fee_unit TEXT NOT NULL DEFAULT '" + nameof(ZumenSearch.Domain.Entities.Rent.Residentials.FeeUnitType.Yen) + "'," +
                     "guarantor_company TEXT NOT NULL DEFAULT ''," +
                     "housing_insurance TEXT NOT NULL DEFAULT ''," +
                     "other_fees TEXT NOT NULL DEFAULT ''," +
@@ -283,16 +283,16 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                     "office_use_allowed INTEGER NOT NULL DEFAULT 0," +
                     "other_conditions TEXT NOT NULL DEFAULT ''," +
                     "contract_remarks TEXT NOT NULL DEFAULT ''," +
-                    "handling_type TEXT NOT NULL DEFAULT '" + nameof(ZumenSearch.Presentation.Features.Rent.Residentials.Models.ListingHandlingType.Unspecified) + "'," +
-                    "transaction_type TEXT NOT NULL DEFAULT '" + nameof(ZumenSearch.Presentation.Features.Rent.Residentials.Models.ListingTransactionType.Unspecified) + "'," +
+                    "handling_type TEXT NOT NULL DEFAULT '" + nameof(ZumenSearch.Domain.Entities.Rent.Residentials.ListingHandlingType.Unspecified) + "'," +
+                    "transaction_type TEXT NOT NULL DEFAULT '" + nameof(ZumenSearch.Domain.Entities.Rent.Residentials.ListingTransactionType.Unspecified) + "'," +
                     "lessor_commission TEXT NOT NULL DEFAULT ''," +
-                    "lessor_commission_unit TEXT NOT NULL DEFAULT '" + nameof(ZumenSearch.Presentation.Features.Rent.Residentials.Models.ListingCommissionUnitType.Percent) + "'," +
+                    "lessor_commission_unit TEXT NOT NULL DEFAULT '" + nameof(ZumenSearch.Domain.Entities.Rent.Residentials.ListingCommissionUnitType.Percent) + "'," +
                     "lessee_commission TEXT NOT NULL DEFAULT ''," +
-                    "lessee_commission_unit TEXT NOT NULL DEFAULT '" + nameof(ZumenSearch.Presentation.Features.Rent.Residentials.Models.ListingCommissionUnitType.Percent) + "'," +
+                    "lessee_commission_unit TEXT NOT NULL DEFAULT '" + nameof(ZumenSearch.Domain.Entities.Rent.Residentials.ListingCommissionUnitType.Percent) + "'," +
                     "listing_broker_commission TEXT NOT NULL DEFAULT ''," +
-                    "listing_broker_commission_unit TEXT NOT NULL DEFAULT '" + nameof(ZumenSearch.Presentation.Features.Rent.Residentials.Models.ListingCommissionUnitType.Percent) + "'," +
+                    "listing_broker_commission_unit TEXT NOT NULL DEFAULT '" + nameof(ZumenSearch.Domain.Entities.Rent.Residentials.ListingCommissionUnitType.Percent) + "'," +
                     "tenant_broker_commission TEXT NOT NULL DEFAULT ''," +
-                    "tenant_broker_commission_unit TEXT NOT NULL DEFAULT '" + nameof(ZumenSearch.Presentation.Features.Rent.Residentials.Models.ListingCommissionUnitType.Percent) + "'," +
+                    "tenant_broker_commission_unit TEXT NOT NULL DEFAULT '" + nameof(ZumenSearch.Domain.Entities.Rent.Residentials.ListingCommissionUnitType.Percent) + "'," +
                     "transaction_remarks TEXT NOT NULL DEFAULT ''," +
 
                     "has_air_conditioner INTEGER NOT NULL DEFAULT 0," +
@@ -1491,9 +1491,9 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                 cmd.CommandText = sqlUpsert;
 
                 cmd.Parameters.AddWithValue("@propertyId", property.Id);
-                cmd.Parameters.AddWithValue("@propertyKind", property.PropertyKind.Key.ToString());
+                cmd.Parameters.AddWithValue("@propertyKind", property.PropertyKind.ToString());
                 cmd.Parameters.AddWithValue("@isUnitOwnership", property.IsUnitLevelOwnership ? 1 : 0); // bool to int
-                cmd.Parameters.AddWithValue("@propertyStructure", property.PropertyStructure.Key.ToString());
+                cmd.Parameters.AddWithValue("@propertyStructure", property.PropertyStructure.ToString());
                 cmd.Parameters.AddWithValue("@floorCountAboveGround", property.FloorCountAboveGround);// int
                 cmd.Parameters.AddWithValue("@floorCountBasement", property.FloorCountBasement);// int
                 cmd.Parameters.AddWithValue("@totalUnitCount", property.TotalUnitCount);// int
@@ -1577,7 +1577,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                         cmd.Parameters.AddWithValue("@pictureId", pic.Id);
                         cmd.Parameters.AddWithValue("@propertyId", property.Id);
                         cmd.Parameters.AddWithValue("@filePath", pic.ImageFilename);
-                        cmd.Parameters.AddWithValue("@type", pic.PictureType.Key.ToString());
+                        cmd.Parameters.AddWithValue("@type", pic.PictureType.ToString());
                         cmd.Parameters.AddWithValue("@description", pic.Description);
 
                         //Debug.WriteLine($"Inserting picture: {pic.ImageLocation}, {pic.Id}, isMain: {pic.IsMain} @DataAccess::InsertRentResidential");
@@ -1642,7 +1642,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                         cmd.Parameters.AddWithValue("@propertyId", property.Id);
                         cmd.Parameters.AddWithValue("@filePath", pic.PdfFilename);
                         cmd.Parameters.AddWithValue("@thumbnailPath", pic.ThumbnailFilename);
-                        cmd.Parameters.AddWithValue("@type", pic.PdfType.Key.ToString());
+                        cmd.Parameters.AddWithValue("@type", pic.PdfType.ToString());
                         cmd.Parameters.AddWithValue("@description", pic.Description);
 
                         //Debug.WriteLine($"Inserting picture: {pic.ImageLocation}, {pic.Id}, isMain: {pic.IsMain} @DataAccess::InsertRentResidential");
@@ -2243,12 +2243,15 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                             Description = Convert.ToString(reader["description"], CultureInfo.InvariantCulture) ?? string.Empty,
                         };
 
-                        rlpic.SetIsModified(false);
-
                         var strType = Convert.ToString(reader["type"], CultureInfo.InvariantCulture) ?? string.Empty;
-                        rlpic.SetTypeFromString(strType);
-
+                        if (!Enum.TryParse<ZumenSearch.Domain.Enums.Rent.Residentials.PropertyPictureType>(strType, out var pictureType) || !Enum.IsDefined(pictureType))
+                        {
+                            Debug.WriteLine($"Invalid residential property Picture type: {strType}. Defaulting to Unspecified.");
+                            pictureType = ZumenSearch.Domain.Enums.Rent.Residentials.PropertyPictureType.Unspecified;
+                        }
+                        rlpic.PictureType = pictureType;
                         rlpic.IsMain = Convert.ToInt32(reader["is_main"], CultureInfo.InvariantCulture) != 0; // int to bool
+                        rlpic.SetIsModified(false);
 
                         property.Pictures.Add(rlpic);
                     }
@@ -2281,12 +2284,15 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                             Description = Convert.ToString(reader["description"], CultureInfo.InvariantCulture) ?? string.Empty
                         };
 
-                        rlpdf.SetIsModified(false);
-
                         var strType = Convert.ToString(reader["type"], CultureInfo.InvariantCulture) ?? string.Empty;
-                        rlpdf.SetTypeFromString(strType);
-
+                        if (!Enum.TryParse<ZumenSearch.Domain.Enums.Rent.Residentials.PropertyPdfType>(strType, out var pdfType) || !Enum.IsDefined(pdfType))
+                        {
+                            Debug.WriteLine($"Invalid residential property PDF type: {strType}. Defaulting to Unspecified.");
+                            pdfType = ZumenSearch.Domain.Enums.Rent.Residentials.PropertyPdfType.Unspecified;
+                        }
+                        rlpdf.PdfType = pdfType;
                         rlpdf.IsMain = Convert.ToInt32(reader["is_main"], CultureInfo.InvariantCulture) != 0; // int to bool
+                        rlpdf.SetIsModified(false);
 
                         property.Pdfs.Add(rlpdf);
                     }
@@ -2419,8 +2425,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                         var listingId = reader.GetString(reader.GetOrdinal("listing_id"));
                         var listingName = reader.GetString(reader.GetOrdinal("name"));
                         if (string.IsNullOrWhiteSpace(listingId)) throw new InvalidOperationException("Residential listing ID is empty.");
-                        property.ListingSummaries.Add(new ZumenSearch.Presentation.Features.Rent.Residentials.Models.ListingSummary(listingId, listingName));
-                        //res.ListingSummaries.Add(new ZumenSearch.Presentation.Features.Rent.Residentials.Models.ListingSummary(listingId, listingName, false));
+                        property.ListingSummaries.Add(new ZumenSearch.Domain.Entities.Rent.Residentials.ListingSummary(listingId, listingName));
                     }
                 }
             }
@@ -2631,12 +2636,12 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         cmd.Parameters.AddWithValue("@floor_type", listing.FloorGround.ToString());
         cmd.Parameters.AddWithValue("@floor_number", listing.FloorNumber);
         cmd.Parameters.AddWithValue("@is_corner_room", listing.IsCornerRoom ? 1 : 0);
-        cmd.Parameters.AddWithValue("@main_exposure_direction", listing.SelectedExposureDirectionType.Key);//listing.ExposureDirection.ToString());
-        cmd.Parameters.AddWithValue("@availability_status", listing.SelectedAvailabilityStatusType.Key);
-        cmd.Parameters.AddWithValue("@current_status", listing.SelectedOccupancyStatus.Key);
+        cmd.Parameters.AddWithValue("@main_exposure_direction", listing.SelectedExposureDirectionType.ToString());//listing.ExposureDirection.ToString());
+        cmd.Parameters.AddWithValue("@availability_status", listing.SelectedAvailabilityStatusType.ToString());
+        cmd.Parameters.AddWithValue("@current_status", listing.SelectedOccupancyStatus.ToString());
         cmd.Parameters.AddWithValue("@is_recruiting", listing.IsAvailableForRentNow ? 1 : 0);
-        cmd.Parameters.AddWithValue("@available_from_month", listing.SelectedAvailabilityMonthType.Key);
-        cmd.Parameters.AddWithValue("@available_from_period", listing.SelectedAvailabilityPeriodType.Key);
+        cmd.Parameters.AddWithValue("@available_from_month", listing.SelectedAvailabilityMonthType.ToString());
+        cmd.Parameters.AddWithValue("@available_from_period", listing.SelectedAvailabilityPeriodType.ToString());
         cmd.Parameters.AddWithValue("@is_immediate_occupancy", listing.IsAvailableForImmediateMoveIn ? 1 : 0);
         cmd.Parameters.AddWithValue("@current_status_checked_at", listing.OccupancyStatusCheckedAt?.ToString("O", CultureInfo.InvariantCulture) ?? "");
 
@@ -2646,17 +2651,17 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         cmd.Parameters.AddWithValue("@chinryou", listing.Chinryou);
 
         cmd.Parameters.AddWithValue("@management_fee", listing.ManagementFee);
-        cmd.Parameters.AddWithValue("@management_fee_unit", listing.ManagementFeeUnit.Key.ToString());
+        cmd.Parameters.AddWithValue("@management_fee_unit", listing.ManagementFeeUnit.ToString());
         cmd.Parameters.AddWithValue("@security_deposit", listing.SecurityDeposit);
-        cmd.Parameters.AddWithValue("@security_deposit_unit", listing.SecurityDepositUnit.Key.ToString());
+        cmd.Parameters.AddWithValue("@security_deposit_unit", listing.SecurityDepositUnit.ToString());
         cmd.Parameters.AddWithValue("@key_money", listing.KeyMoney);
-        cmd.Parameters.AddWithValue("@key_money_unit", listing.KeyMoneyUnit.Key.ToString());
-        cmd.Parameters.AddWithValue("@contract_type", listing.ContractType.Key.ToString());
+        cmd.Parameters.AddWithValue("@key_money_unit", listing.KeyMoneyUnit.ToString());
+        cmd.Parameters.AddWithValue("@contract_type", listing.ContractType.ToString());
         cmd.Parameters.AddWithValue("@contract_period_years", listing.ContractPeriodYears);
         cmd.Parameters.AddWithValue("@renewal_fee", listing.RenewalFee);
-        cmd.Parameters.AddWithValue("@renewal_fee_unit", listing.RenewalFeeUnit.Key.ToString());
+        cmd.Parameters.AddWithValue("@renewal_fee_unit", listing.RenewalFeeUnit.ToString());
         cmd.Parameters.AddWithValue("@recontract_fee", listing.RecontractFee);
-        cmd.Parameters.AddWithValue("@recontract_fee_unit", listing.RecontractFeeUnit.Key.ToString());
+        cmd.Parameters.AddWithValue("@recontract_fee_unit", listing.RecontractFeeUnit.ToString());
         cmd.Parameters.AddWithValue("@guarantor_company", listing.GuarantorCompany);
         cmd.Parameters.AddWithValue("@housing_insurance", listing.HousingInsurance);
         cmd.Parameters.AddWithValue("@other_fees", listing.OtherFees);
@@ -2666,16 +2671,16 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         cmd.Parameters.AddWithValue("@office_use_allowed", listing.OfficeUseAllowed ? 1 : 0);
         cmd.Parameters.AddWithValue("@other_conditions", listing.OtherConditions);
         cmd.Parameters.AddWithValue("@contract_remarks", listing.ContractRemarks);
-        cmd.Parameters.AddWithValue("@handling_type", listing.HandlingType.Key.ToString());
-        cmd.Parameters.AddWithValue("@transaction_type", listing.TransactionType.Key.ToString());
+        cmd.Parameters.AddWithValue("@handling_type", listing.HandlingType.ToString());
+        cmd.Parameters.AddWithValue("@transaction_type", listing.TransactionType.ToString());
         cmd.Parameters.AddWithValue("@lessor_commission", listing.LessorCommission);
-        cmd.Parameters.AddWithValue("@lessor_commission_unit", listing.LessorCommissionUnit.Key.ToString());
+        cmd.Parameters.AddWithValue("@lessor_commission_unit", listing.LessorCommissionUnit.ToString());
         cmd.Parameters.AddWithValue("@lessee_commission", listing.LesseeCommission);
-        cmd.Parameters.AddWithValue("@lessee_commission_unit", listing.LesseeCommissionUnit.Key.ToString());
+        cmd.Parameters.AddWithValue("@lessee_commission_unit", listing.LesseeCommissionUnit.ToString());
         cmd.Parameters.AddWithValue("@listing_broker_commission", listing.ListingBrokerCommission);
-        cmd.Parameters.AddWithValue("@listing_broker_commission_unit", listing.ListingBrokerCommissionUnit.Key.ToString());
+        cmd.Parameters.AddWithValue("@listing_broker_commission_unit", listing.ListingBrokerCommissionUnit.ToString());
         cmd.Parameters.AddWithValue("@tenant_broker_commission", listing.TenantBrokerCommission);
-        cmd.Parameters.AddWithValue("@tenant_broker_commission_unit", listing.TenantBrokerCommissionUnit.Key.ToString());
+        cmd.Parameters.AddWithValue("@tenant_broker_commission_unit", listing.TenantBrokerCommissionUnit.ToString());
         cmd.Parameters.AddWithValue("@transaction_remarks", listing.TransactionRemarks);
         cmd.Parameters.AddWithValue("@has_air_conditioner", listing.HasAirConditioner ? 1 : 0);
         cmd.Parameters.AddWithValue("@has_wood_flooring", listing.HasWoodFlooring ? 1 : 0);
@@ -3512,12 +3517,15 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                         Description = Convert.ToString(reader["description"], CultureInfo.InvariantCulture) ?? string.Empty
                     };
 
-                    rlpic.SetIsModified(false);
-
                     var strType = Convert.ToString(reader["type"], CultureInfo.InvariantCulture) ?? string.Empty;
-                    rlpic.SetTypeFromString(strType);
-
+                    if (!Enum.TryParse<ZumenSearch.Domain.Enums.Rent.Residentials.ListingPictureType>(strType, out var pictureType) || !Enum.IsDefined(pictureType))
+                    {
+                        Debug.WriteLine($"Invalid residential listing picture type: {strType}. Defaulting to Unspecified.");
+                        pictureType = ZumenSearch.Domain.Enums.Rent.Residentials.ListingPictureType.Unspecified;
+                    }
+                    rlpic.PictureType = pictureType;
                     rlpic.IsMain = Convert.ToInt32(reader["is_main"], CultureInfo.InvariantCulture) != 0; // int to bool
+                    rlpic.SetIsModified(false);
 
                     listing.Pictures.Add(rlpic);
                 }
@@ -3550,12 +3558,15 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
                         Description = Convert.ToString(reader["description"], CultureInfo.InvariantCulture) ?? string.Empty
                     };
 
-                    rlpdf.SetIsModified(false);
-
                     var strType = Convert.ToString(reader["type"], CultureInfo.InvariantCulture) ?? string.Empty;
-                    rlpdf.SetTypeFromString(strType);
-
+                    if (!Enum.TryParse<ZumenSearch.Domain.Enums.Rent.Residentials.ListingPdfType>(strType, out var pdfType) || !Enum.IsDefined(pdfType))
+                    {
+                        Debug.WriteLine($"Invalid residential listing PDF type: {strType}. Defaulting to Unspecified.");
+                        pdfType = ZumenSearch.Domain.Enums.Rent.Residentials.ListingPdfType.Unspecified;
+                    }
+                    rlpdf.PdfType = pdfType;
                     rlpdf.IsMain = Convert.ToInt32(reader["is_main"], CultureInfo.InvariantCulture) != 0; // int to bool
+                    rlpdf.SetIsModified(false);
 
                     listing.Pdfs.Add(rlpdf);
                 }

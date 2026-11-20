@@ -1,39 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using ZumenSearch.Domain.Entities.Rent.Residentials;
 
 namespace ZumenSearch.Presentation.Features.Rent.Residentials.Models;
-
-public enum OccupancyStatus
-{
-    Unspecified,
-    // 即入居系
-    AvailableNow,        // 即入居可
-    Vacant,              // 空室
-    VacantSoon,          // 空室予定
-
-    // 入居可能日指定系
-    AvailableFromDate,   // ○月○日入居可（具体日付は別プロパティで管理）
-    NegotiableMoveIn,    // 入居可能日相談
-
-    // 入居中・募集停止系
-    Occupied,            // 居住中
-    ScheduledToVacate,   // 退去予定
-    ApplicationPending,  // 申込あり
-    UnderScreening,      // 審査中
-    TemporarilyUnavailable, // 募集中止
-    TemporarilyReserved, // 仮予約
-
-    // 物件状態系
-    UnderRenovation,     // リフォーム中
-    UnderRemodeling,     // リノベーション中
-    UnderConstruction,   // 建築中
-    NewlyBuilt,          // 新築（未入居）
-
-    // その他
-    Negotiable,          // 要相談
-    Contracted           // 成約済み
-}
 
 public sealed class ListingOccupancyStatusLabel(OccupancyStatus key)
 {

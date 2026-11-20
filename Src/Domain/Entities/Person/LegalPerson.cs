@@ -1,10 +1,10 @@
-﻿using ZumenSearch.Domain.Entities.Base;
+﻿#pragma warning disable IDE0079 // Remove unnecessary suppression
+#pragma warning disable IDE0290 // Use primary constructor
+
+using ZumenSearch.Domain.Entities.Base;
 using ZumenSearch.Domain.Enums;
 
 namespace ZumenSearch.Domain.Entities.Person;
-
-#pragma warning disable IDE0079 // Remove unnecessary suppression
-#pragma warning disable IDE0290 // Use primary constructor
 
 // Entity
 

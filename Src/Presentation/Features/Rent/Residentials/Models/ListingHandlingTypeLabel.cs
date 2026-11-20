@@ -1,13 +1,6 @@
-namespace ZumenSearch.Presentation.Features.Rent.Residentials.Models;
+using ZumenSearch.Domain.Entities.Rent.Residentials;
 
-public enum ListingHandlingType
-{
-    Unspecified,
-    OtherCompanyListing,
-    OwnCompanyBrokerage,
-    OwnCompanyManagement,
-    OwnCompanyOwnership
-}
+namespace ZumenSearch.Presentation.Features.Rent.Residentials.Models;
 
 public sealed class ListingHandlingTypeLabel(ListingHandlingType key)
 {

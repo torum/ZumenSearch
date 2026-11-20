@@ -74,9 +74,9 @@ public sealed partial class ResidentialSearchResultPage : Page
             return;
         }
 
-        if (container.DataContext is not ZumenSearch.Application.SearchResults.ListingSearchResultItem searchresult)
+        if (container.DataContext is not ListingSearchResultItemViewModel searchresult)
         {
-            Debug.WriteLine($"Not ListingSearchResultItem. {container.DataContext?.GetType().FullName} @SearchResult_DoubleTapped");
+            Debug.WriteLine($"Not ListingSearchResultItemViewModel. {container.DataContext?.GetType().FullName} @SearchResult_DoubleTapped");
             return;
         }
 
@@ -136,9 +136,9 @@ public sealed partial class ResidentialSearchResultPage : Page
             return;
         }
 
-        if (container.DataContext is not ZumenSearch.Application.SearchResults.ListingSearchResultItem)
+        if (container.DataContext is not ListingSearchResultItemViewModel)
         {
-            Debug.WriteLine($"Not ListingSearchResultItem. {container.DataContext?.GetType().FullName} @ItemContainer_RightTapped");
+            Debug.WriteLine($"Not ListingSearchResultItemViewModel. {container.DataContext?.GetType().FullName} @ItemContainer_RightTapped");
             return;
         }
 
@@ -160,9 +160,9 @@ public sealed partial class ResidentialSearchResultPage : Page
             return;
         }
 
-        if (element.DataContext is not ZumenSearch.Application.SearchResults.ListingSearchResultItem searchresult)
+        if (element.DataContext is not ListingSearchResultItemViewModel searchresult)
         {
-            Debug.WriteLine($"Not ListingSearchResultItem. {element.DataContext?.GetType().FullName} @ItemContainerKeyboardAccelerator_Invoked");
+            Debug.WriteLine($"Not ListingSearchResultItemViewModel. {element.DataContext?.GetType().FullName} @ItemContainerKeyboardAccelerator_Invoked");
             return;
         }
 

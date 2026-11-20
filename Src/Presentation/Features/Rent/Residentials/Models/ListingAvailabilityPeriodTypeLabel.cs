@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using ZumenSearch.Domain.Entities.Rent.Residentials;
 
 namespace ZumenSearch.Presentation.Features.Rent.Residentials.Models;
-
-public enum AvailabilityPeriodType { Unspecified, Early, Middle, Late }
 
 public sealed class ListingAvailabilityPeriodTypeLabel(AvailabilityPeriodType key)
 {

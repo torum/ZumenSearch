@@ -1,32 +1,29 @@
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using CommunityToolkit.Mvvm.Messaging;
-using Microsoft.UI.Windowing;
-using Microsoft.UI.Xaml.Controls;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.UI.Windowing;
+using Microsoft.UI.Xaml.Controls;
 using Windows.Data.Pdf;
 using Windows.Storage;
 using Windows.Storage.Streams;
 using Windows.System;
-using ZumenSearch.Domain.Enums;
-using ZumenSearch.Application.Configuration;
-using ZumenSearch.Application.Results;
-using ZumenSearch.Presentation.Shell.Models;
-using ZumenSearch.Domain.ValueObjects.Location;
-using ZumenSearch.Presentation.Messaging;
 using ZumenSearch.Domain.Entities.Rent.Residentials;
-using ZumenSearch.Presentation.Features.Rent.Residentials.Models;
+using ZumenSearch.Domain.Enums;
+using ZumenSearch.Domain.ValueObjects.Location;
 using ZumenSearch.Domain.ValueObjects.Transportation;
-using ZumenSearch.Infrastructure.Configuration.Contracts;
 using ZumenSearch.Infrastructure.DataAccess.Contracts;
-using ZumenSearch.Presentation.Services.Contracts;
 using ZumenSearch.Presentation.Factories.AbstractFactory;
-
+using ZumenSearch.Presentation.Features.Rent.Residentials.Models;
+using ZumenSearch.Presentation.Messaging;
+using ZumenSearch.Presentation.Services.Contracts;
+using ZumenSearch.Presentation.Shell.Models;
 using ZumenSearch.Presentation.Shell.ViewModels;
+
 namespace ZumenSearch.Presentation.Features.Rent.Residentials.ViewModels;
 
 /*
@@ -268,7 +265,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
     public ZumenSearch.Presentation.Features.Rent.Residentials.Models.PropertyKindTypeLabel SelectedPropertyKind
     {
-        get => field ?? new(ZumenSearch.Presentation.Features.Rent.Residentials.Models.PropertyKindType.Unspecified);
+        get => field ?? new(PropertyKindType.Unspecified);
         set
         {
             if (value is null || field?.Key == value.Key)
@@ -342,7 +339,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
     public ZumenSearch.Presentation.Features.Rent.Residentials.Models.PropertyStructureTypeLabel SelectedStructureType
     {
-        get => field ?? new(ZumenSearch.Presentation.Features.Rent.Residentials.Models.StructureType.Unspecified);
+        get => field ?? new(StructureType.Unspecified);
         set
         {
             if (value is null || field?.Key == value.Key)
@@ -2135,7 +2132,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
     #region == 写真プロパティ ==
 
-    public ObservableCollection<ZumenSearch.Domain.Entities.Rent.Residentials.PropertyPicture> Pictures
+    public ObservableCollection<PropertyPictureViewModel> Pictures
     {
         get;
         set
@@ -2153,7 +2150,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
     #region == PDFプロパティ ==
 
-    public ObservableCollection<ZumenSearch.Domain.Entities.Rent.Residentials.PropertyPdf> Pdfs
+    public ObservableCollection<PropertyPdfViewModel> Pdfs
     {
         get;
         set
@@ -2444,11 +2441,11 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             }
 
             //SelectedKind = _property.PropertyKind;
-            var propertyKindKey = PropertyKinds.FirstOrDefault(k => k.Key == _property.PropertyKind.Key);
-            SelectedPropertyKind = propertyKindKey is null ? new(ZumenSearch.Presentation.Features.Rent.Residentials.Models.PropertyKindType.Unspecified) : propertyKindKey;
+            var propertyKindKey = PropertyKinds.FirstOrDefault(k => k.Key == _property.PropertyKind);
+            SelectedPropertyKind = propertyKindKey is null ? new(PropertyKindType.Unspecified) : propertyKindKey;
             IsUnitLevelOwnership = _property.IsUnitLevelOwnership;
-            var structureKey = StructureTypes.FirstOrDefault(k => k.Key == _property.PropertyStructure.Key);
-            SelectedStructureType = structureKey is null ? new(ZumenSearch.Presentation.Features.Rent.Residentials.Models.StructureType.Unspecified) : structureKey;
+            var structureKey = StructureTypes.FirstOrDefault(k => k.Key == _property.PropertyStructure);
+            SelectedStructureType = structureKey is null ? new(StructureType.Unspecified) : structureKey;
 
             FloorCountAboveGround = _property.FloorCountAboveGround == 0 ? string.Empty : _property.FloorCountAboveGround.ToString(CultureInfo.InvariantCulture);
             FloorCountBasement = _property.FloorCountBasement == 0 ? string.Empty : _property.FloorCountBasement.ToString(CultureInfo.InvariantCulture);
@@ -2621,7 +2618,6 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             {
                 var internalItem = item.Clone();
                 internalItem.BasePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _property.Id);
-                internalItem.ParentViewModel = this;
                 if (isDuplicate)
                 {
                     try
@@ -2633,22 +2629,23 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
                         _unsavedPropertyPictureFileList.Add(newFilePath);
 
                         internalItem.SetIsModified(true);
-                        internalItem.PropertyChanged += OnPropertyPicturePropertyChanged;
-                        Pictures.Add(internalItem);
                     }
                     catch (Exception ex)
                     {
                         Debug.WriteLine($"Error while copying picture file: {ex}");
 
                         ShowSimpleErrorInfoBar("写真ファイルのコピー中に予期しないエラーが発生しました。", $"{ex}");
+                        continue;
                     }
                 }
                 else
                 {
                     internalItem.SetIsModified(false);
-                    internalItem.PropertyChanged += OnPropertyPicturePropertyChanged;
-                    Pictures.Add(internalItem);
                 }
+
+                var pictureViewModel = new PropertyPictureViewModel(internalItem, this);
+                pictureViewModel.PropertyChanged += OnPropertyPicturePropertyChanged;
+                Pictures.Add(pictureViewModel);
             }
 
             Pictures.CollectionChanged += (s, e) =>
@@ -2656,7 +2653,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
                 // Unsubscribe from removed items
                 if (e.OldItems != null)
                 {
-                    foreach (ZumenSearch.Domain.Entities.Rent.Residentials.PropertyPicture item in e.OldItems)
+                    foreach (PropertyPictureViewModel item in e.OldItems)
                     {
                         Debug.WriteLine($"Item {item.Id} Removed from Pictures. @CollectionChanged in PopulateValues of PropertyViewModel");
                         IsDirty = true;
@@ -2668,7 +2665,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
                 // Subscribe to PropertyChanged.
                 if (e.NewItems != null)
                 {
-                    foreach (ZumenSearch.Domain.Entities.Rent.Residentials.PropertyPicture item in e.NewItems)
+                    foreach (PropertyPictureViewModel item in e.NewItems)
                     {
                         Debug.WriteLine($"Item {item.Id} Added to Pictures. @CollectionChanged in PopulateValues of PropertyViewModel");
                         IsDirty = true;
@@ -2684,7 +2681,6 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             {
                 var internalItem = item.Clone();
                 internalItem.BasePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _property.Id);
-                internalItem.ParentViewModel = this;
                 if (isDuplicate)
                 {
                     try
@@ -2704,29 +2700,30 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
                         }
 
                         internalItem.SetIsModified(true);
-                        internalItem.PropertyChanged += OnPropertyPdfPropertyChanged;
-                        Pdfs.Add(internalItem);
                     }
                     catch (Exception ex)
                     {
                         Debug.WriteLine($"Error while copying PDF file: {ex}");
 
                         ShowSimpleErrorInfoBar("PDFファイルのコピー中に予期しないエラーが発生しました。", $"{ex}");
+                        continue;
                     }
                 }
                 else
                 {
                     internalItem.SetIsModified(false);
-                    internalItem.PropertyChanged += OnPropertyPdfPropertyChanged;
-                    Pdfs.Add(internalItem);
                 }
+
+                var pdfViewModel = new PropertyPdfViewModel(internalItem, this);
+                pdfViewModel.PropertyChanged += OnPropertyPdfPropertyChanged;
+                Pdfs.Add(pdfViewModel);
             }
 
             Pdfs.CollectionChanged += (sender, args) =>
             {
                 if (args.OldItems is not null)
                 {
-                    foreach (ZumenSearch.Domain.Entities.Rent.Residentials.PropertyPdf item in args.OldItems)
+                    foreach (PropertyPdfViewModel item in args.OldItems)
                     {
                         IsDirty = true;
                         item.PropertyChanged -= OnPropertyPdfPropertyChanged;
@@ -2735,7 +2732,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
                 if (args.NewItems is not null)
                 {
-                    foreach (ZumenSearch.Domain.Entities.Rent.Residentials.PropertyPdf item in args.NewItems)
+                    foreach (PropertyPdfViewModel item in args.NewItems)
                     {
                         IsDirty = true;
                         item.PropertyChanged += OnPropertyPdfPropertyChanged;
@@ -2757,7 +2754,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
                 BrokersWrapper.Add(new ZumenSearch.Presentation.Features.Rent.Residentials.Models.PersonWrapperForPropertyViewModel(item, this));
             }
 
-            ListingSummaries = new ObservableCollection<ZumenSearch.Presentation.Features.Rent.Residentials.Models.ListingSummary>(_property.ListingSummaries);
+            ListingSummaries = new ObservableCollection<ListingSummary>(_property.ListingSummaries);
 
         }
         catch (Exception ex)
@@ -2785,7 +2782,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
     private void OnPropertyPicturePropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (sender is not ZumenSearch.Domain.Entities.Rent.Residentials.PropertyPicture picBldg)
+        if (sender is not PropertyPictureViewModel picBldg)
         {
             Debug.WriteLine("OnPropertyPicturePropertyChanged returned non PictureBldg.");
             return;
@@ -2817,7 +2814,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
     private void OnPropertyPdfPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (sender is not ZumenSearch.Domain.Entities.Rent.Residentials.PropertyPdf pdfBldg)
+        if (sender is not PropertyPdfViewModel pdfBldg)
         {
             Debug.WriteLine("OnPropertyPdfPropertyChanged returned non PdfBldg.");
             return;
@@ -2966,9 +2963,9 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             // 物件名
             _property.SetName(Name);
 
-            _property.SetPropertyKind(SelectedPropertyKind);
+            _property.SetPropertyKind(SelectedPropertyKind.Key);
             _property.SetIsUnitLevelOwnership(IsUnitLevelOwnership);
-            _property.SetPropertyStructure(SelectedStructureType);
+            _property.SetPropertyStructure(SelectedStructureType.Key);
 
             _property.SetFloorCountAboveGroundFromString(ZumenSearch.Presentation.Utilities.Common.NormalizeFullWidthCharacters(FloorCountAboveGround));
             _property.SetFloorCountBasementFromString(ZumenSearch.Presentation.Utilities.Common.NormalizeFullWidthCharacters(FloorCountBasement));
@@ -3112,17 +3109,10 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             _property.BasePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _property.Id);
 
             // 写真
-            //_property.Pictures = Pictures;
             _property.Pictures.Clear();
             foreach (var item in Pictures)
             {
-                var newItem = item.Clone();
-                newItem.BasePath = item.BasePath;//System.IO.Path.Combine(App.PropertyBlobDataFolder, _property.Id);
-                                                 //newItem.ParentViewModel = this;
-                newItem.SetIsModified(item.IsModified);
-                _property.Pictures.Add(newItem);
-
-                item.PropertyChanged -= OnPropertyPicturePropertyChanged;
+                _property.Pictures.Add(item.Model.Clone());
             }
 
             var thumbImg = Pictures.FirstOrDefault(i => i.IsMain == true);
@@ -3133,17 +3123,10 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             }
 
             // 図面
-            //_property.Pdfs = Pdfs;
             _property.Pdfs.Clear();
             foreach (var item in Pdfs)
             {
-                var newItem = item.Clone();
-                newItem.BasePath = item.BasePath;//System.IO.Path.Combine(App.PropertyBlobDataFolder, _property.Id);
-                                                 //newItem.ParentViewModel = this;
-                newItem.SetIsModified(false);
-                _property.Pdfs.Add(newItem);
-
-                item.PropertyChanged -= OnPropertyPdfPropertyChanged;
+                _property.Pdfs.Add(item.Model.Clone());
             }
 
             if (string.IsNullOrWhiteSpace(_property.ThumbnailFilename))
@@ -3439,13 +3422,13 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             //
             foreach (var picture in Pictures.Where(picture => _property.Pictures.Any(saved => saved.Id == picture.Id)))
             {
-                picture.SetStatus(EntityStatus.Saved);
-                picture.SetIsModified(false);
+                picture.Model.SetStatus(EntityStatus.Saved);
+                picture.Model.SetIsModified(false);
             }
             foreach (var pdf in Pdfs.Where(pdf => _property.Pdfs.Any(saved => saved.Id == pdf.Id)))
             {
-                pdf.SetStatus(EntityStatus.Saved);
-                pdf.SetIsModified(false);
+                pdf.Model.SetStatus(EntityStatus.Saved);
+                pdf.Model.SetIsModified(false);
             }
 
             // Clear unsaved listings and set status to saved.
@@ -3571,11 +3554,10 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
                 var pic = new ZumenSearch.Domain.Entities.Rent.Residentials.PropertyPicture(newId, newFilename, EntityStatus.New)
                 {
-                    BasePath = _propertyDataDirectoryPath,
-                    ParentViewModel = this
+                    BasePath = _propertyDataDirectoryPath
                 };
 
-                Pictures.Add(pic);
+                Pictures.Add(new PropertyPictureViewModel(pic, this));
 
                 OpenPropertyBlobDirectoryCommand.NotifyCanExecuteChanged();
                 DeletePropertyPictureCommand.NotifyCanExecuteChanged();
@@ -3602,7 +3584,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
     }
 
     [RelayCommand(CanExecute = nameof(CanDeletePropertyPicture))]
-    private async Task DeletePropertyPicture(ZumenSearch.Domain.Entities.Rent.Residentials.PropertyPicture picProp)
+    private async Task DeletePropertyPicture(PropertyPictureViewModel picProp)
     {
         if (picProp is null)
         {
@@ -3617,7 +3599,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
             if (Pictures.Remove(picProp))
             {
-                _property.PicturesToBeDeleted.Add(picProp);
+                _property.PicturesToBeDeleted.Add(picProp.Model);
                 IsDirty = true;
             }
         }
@@ -3626,7 +3608,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             IsBusy = false;
         }
     }
-    private static bool CanDeletePropertyPicture(ZumenSearch.Domain.Entities.Rent.Residentials.PropertyPicture picProp)
+    private static bool CanDeletePropertyPicture(PropertyPictureViewModel picProp)
     {
         return picProp is not null;
     }
@@ -3732,11 +3714,10 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
                 var pdf = new ZumenSearch.Domain.Entities.Rent.Residentials.PropertyPdf(newId, newFilename, newThumbnailFilename, EntityStatus.New)
                 {
-                    BasePath = _propertyDataDirectoryPath,
-                    ParentViewModel = this
+                    BasePath = _propertyDataDirectoryPath
                 };
 
-                Pdfs.Add(pdf);
+                Pdfs.Add(new PropertyPdfViewModel(pdf, this));
                 _unsavedPropertyPdfThumbnailFileList.Add(thumbnailDestFilePath);
                 _unsavedPropertyPdfFileList.Add(destFilePath);
 
@@ -3762,7 +3743,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
     }
 
     [RelayCommand]
-    private async Task OpenPropertyPdf(ZumenSearch.Domain.Entities.Rent.Residentials.PropertyPdf pdf)
+    private async Task OpenPropertyPdf(PropertyPdfViewModel pdf)
     {
         if (pdf is null || !Pdfs.Contains(pdf) || !IsEditorEnabled) return;
 
@@ -3787,7 +3768,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
     }
 
     [RelayCommand(CanExecute = nameof(CanDeletePropertyPdf))]
-    private async Task DeletePropertyPdf(ZumenSearch.Domain.Entities.Rent.Residentials.PropertyPdf pdfProp)
+    private async Task DeletePropertyPdf(PropertyPdfViewModel pdfProp)
     {
         if (pdfProp is null)
         {
@@ -3802,7 +3783,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
             if (Pdfs.Remove(pdfProp))
             {
-                _property.PdfsToBeDeleted.Add(pdfProp);
+                _property.PdfsToBeDeleted.Add(pdfProp.Model);
                 IsDirty = true;
             }
         }
@@ -3811,7 +3792,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             IsBusy = false;
         }
     }
-    private static bool CanDeletePropertyPdf(ZumenSearch.Domain.Entities.Rent.Residentials.PropertyPdf pdfProp)
+    private static bool CanDeletePropertyPdf(PropertyPdfViewModel pdfProp)
     {
         return pdfProp is not null;
     }

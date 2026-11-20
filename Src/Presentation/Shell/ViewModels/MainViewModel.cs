@@ -229,7 +229,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
 
     #region == RecentProperties ==
 
-    public ObservableCollection<ZumenSearch.Application.SearchResults.PropertySearchResultItem> RecentProperties
+    public ObservableCollection<PropertySearchResultItemViewModel> RecentProperties
     {
         get; set
         {
@@ -251,7 +251,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
     [ObservableProperty]
     public partial string SearchQuery { get; set; } = string.Empty;
 
-    public ObservableCollection<ZumenSearch.Application.SearchResults.PropertySearchResultItem> PropertySearchResult
+    public ObservableCollection<PropertySearchResultItemViewModel> PropertySearchResult
     {
         get; set
         {
@@ -262,7 +262,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         }
     } = [];
 
-    public ObservableCollection<ZumenSearch.Application.SearchResults.ListingSearchResultItem> RentResidentialListingSearchResult
+    public ObservableCollection<ListingSearchResultItemViewModel> RentResidentialListingSearchResult
     {
         get; set
         {
@@ -273,7 +273,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         }
     } = [];
 
-    public ObservableCollection<ZumenSearch.Application.SearchResults.ListingSearchResultItem> RentCommercialListingSearchResult
+    public ObservableCollection<ListingSearchResultItemViewModel> RentCommercialListingSearchResult
     {
         get; set
         {
@@ -284,7 +284,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         }
     } = [];
 
-    public ObservableCollection<ZumenSearch.Application.SearchResults.PersonSearchResultItem> RentLessorSearchResult
+    public ObservableCollection<PersonSearchResultItemViewModel> RentLessorSearchResult
     {
         get; set
         {
@@ -295,7 +295,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         }
     } = [];
 
-    public ObservableCollection<ZumenSearch.Application.SearchResults.PersonSearchResultItem> BrokerSearchResult
+    public ObservableCollection<PersonSearchResultItemViewModel> BrokerSearchResult
     {
         get; set
         {
@@ -306,7 +306,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         }
     } = [];
 
-    public ObservableCollection<ZumenSearch.Application.SearchResults.PropertySearchResultItem> SaleResidentialSearchResult
+    public ObservableCollection<PropertySearchResultItemViewModel> SaleResidentialSearchResult
     {
         get;
         private set
@@ -376,6 +376,13 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
             item.ThumbnailFilename = building.ThumbnailFilename;
         }
 
+        foreach (var item in SaleResidentialSearchResult)
+        {
+            if (!item.Id.Equals(building.Id, StringComparison.Ordinal)) continue;
+
+            item.SetName(building.Name);
+            item.ThumbnailFilename = building.ThumbnailFilename;
+        }
     }
 
     public void Receive(ListingUpdatedMessage listing)
@@ -383,7 +390,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         var updated = listing.Value;
         if (updated is null || updated.Status != EntityStatus.Saved) return;
 
-        ObservableCollection<ListingSearchResultItem> results;
+        ObservableCollection<ListingSearchResultItemViewModel> results;
         switch (updated.PropertyContextType)
         {
             case PropertyContextType.RentResidential:
@@ -396,15 +403,11 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
                 return;
         }
 
-        for (var i = 0; i < results.Count; i++)
+        foreach (var item in results)
         {
-            var item = results[i];
             if (item.PropertyContextType != updated.PropertyContextType || !item.PropertyId.Equals(updated.PropertyId, StringComparison.Ordinal) || !item.Id.Equals(updated.Id, StringComparison.Ordinal)) continue;
 
-            var replacement = new ListingSearchResultItem(item.Id, item.PropertyId, item.PropertyContextType, item.FudousanId) { PropertyName = item.PropertyName };
-            replacement.SetName(updated.Name);
-            replacement.SetIsModified(false);
-            results[i] = replacement;
+            item.SetName(updated.Name);
         }
     }
 
@@ -648,7 +651,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
                 item.BasePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, item.Id);
             }
 
-            RecentProperties = new(res.PropertySearchResult);
+            RecentProperties = new(res.PropertySearchResult.Select(item => new PropertySearchResultItemViewModel(item)));
         }
     }
 
@@ -697,7 +700,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
                 item.BasePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, item.Id);
             }
 
-            PropertySearchResult = new(res.PropertySearchResult);
+            PropertySearchResult = new(res.PropertySearchResult.Select(item => new PropertySearchResultItemViewModel(item)));
 
             _navigationService.NavigateTo(SearchResultPagePath, SlideNavigationTransitionEffect.FromLeft);//Navigate(typeof(ZumenSearch.Presentation.Search.Views.SearchResultPage), null, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });
         }
@@ -715,7 +718,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
 
     // 物件編集
     [RelayCommand(CanExecute = nameof(EditPropertyCanExecute))]
-    private async Task EditProperty(ZumenSearch.Application.SearchResults.PropertySearchResultItem? selected)
+    private async Task EditProperty(PropertySearchResultItemViewModel? selected)
     {
         if (selected is null)
         {
@@ -757,7 +760,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
 
         // TODO lessor and broker
     }
-    private static bool EditPropertyCanExecute(ZumenSearch.Application.SearchResults.PropertySearchResultItem? selected)
+    private static bool EditPropertyCanExecute(PropertySearchResultItemViewModel? selected)
     {
         if (selected is null)
         //if (string.IsNullOrEmpty(rentId))
@@ -770,7 +773,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
 
     // 物件複製
     [RelayCommand(CanExecute = nameof(DuplicatePropertyCanExecute))]
-    private async Task DuplicateProperty(ZumenSearch.Application.SearchResults.PropertySearchResultItem? selected)
+    private async Task DuplicateProperty(PropertySearchResultItemViewModel? selected)
     {
         if (selected is null)
         {
@@ -812,7 +815,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
 
         // TODO lessor and broker
     }
-    private static bool DuplicatePropertyCanExecute(ZumenSearch.Application.SearchResults.PropertySearchResultItem? selected)
+    private static bool DuplicatePropertyCanExecute(PropertySearchResultItemViewModel? selected)
     {
         if (selected is null)
         //if (string.IsNullOrEmpty(rentId))
@@ -825,7 +828,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
 
     // 物件削除
     [RelayCommand(CanExecute = nameof(DeletePropertyCanExecute))]
-    private async Task DeleteProperty(ZumenSearch.Application.SearchResults.PropertySearchResultItem? selected)
+    private async Task DeleteProperty(PropertySearchResultItemViewModel? selected)
     {
         if (selected is null)
         {
@@ -868,7 +871,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
 
         // TODO lessor and broker
     }
-    private static bool DeletePropertyCanExecute(ZumenSearch.Application.SearchResults.PropertySearchResultItem? selected)
+    private static bool DeletePropertyCanExecute(PropertySearchResultItemViewModel? selected)
     {
         if (selected is null)
         //if (string.IsNullOrEmpty(rentId))
@@ -985,7 +988,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
 
     // 建物編集（検索結果から）
     [RelayCommand(CanExecute = nameof(EditRentResidentialCanExecute))]
-    private async Task EditRentResidential(ZumenSearch.Application.SearchResults.PropertySearchResultItem? selected)
+    private async Task EditRentResidential(PropertySearchResultItemViewModel? selected)
     {
         var propertyId = selected?.Id;
 
@@ -997,7 +1000,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
 
         await EditRentResidentialFromId(propertyId);
     }
-    private static bool EditRentResidentialCanExecute(ZumenSearch.Application.SearchResults.PropertySearchResultItem? selected)
+    private static bool EditRentResidentialCanExecute(PropertySearchResultItemViewModel? selected)
     {
         if (selected is null)
         //if (string.IsNullOrEmpty(rentId))
@@ -1209,7 +1212,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
 
     // 物件削除
     [RelayCommand(CanExecute = nameof(DeleteRentResidentialCanExecute))]
-    private async Task DeleteRentResidential(ZumenSearch.Application.SearchResults.PropertySearchResultItem? selected)
+    private async Task DeleteRentResidential(PropertySearchResultItemViewModel? selected)
     {
         if (selected is null)
         {
@@ -1226,7 +1229,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         await DeleteRentResidentialCore(selected);
     }
 
-    private async Task DeleteRentResidentialCore(ZumenSearch.Application.SearchResults.PropertySearchResultItem selected)
+    private async Task DeleteRentResidentialCore(PropertySearchResultItemViewModel selected)
     {
         var selectedId = selected.Id;
         var listingEditor = RentResidentialListingEditorList.FirstOrDefault(editor => editor.PropertyId == selectedId);
@@ -1262,13 +1265,16 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         }
         else
         {
-            if (PropertySearchResult.Remove(selected))
+            var searchItem = PropertySearchResult.FirstOrDefault(item => item.Id == selectedId);
+            if (searchItem is not null)
             {
-                // Successfully removed the selected item from the search result.
+                PropertySearchResult.Remove(searchItem);
             }
-            else
+
+            var recentItem = RecentProperties.FirstOrDefault(item => item.Id == selectedId);
+            if (recentItem is not null)
             {
-                Debug.WriteLine($"Selected item {selectedId} not found in the search result or could not remove.");
+                RecentProperties.Remove(recentItem);
             }
 
             Debug.WriteLine($"DeleteRentResidentialCommand executed for {selectedId}");
@@ -1289,7 +1295,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
             }
         }
     }
-    private static bool DeleteRentResidentialCanExecute(ZumenSearch.Application.SearchResults.PropertySearchResultItem? selected)
+    private static bool DeleteRentResidentialCanExecute(PropertySearchResultItemViewModel? selected)
     {
         if (selected is null)
         {
@@ -1323,7 +1329,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         }
         else
         {
-            RentResidentialListingSearchResult = new(res.ListingSearchResult);
+            RentResidentialListingSearchResult = new(res.ListingSearchResult.Select(item => new ListingSearchResultItemViewModel(item)));
 
             _navigationService.NavigateTo(RentResidentialSearchResultPagePath, SlideNavigationTransitionEffect.FromLeft);//Navigate(typeof(ZumenSearch.Presentation.Search.Views.SearchResultPage), null, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });
         }
@@ -1331,7 +1337,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
 
     // 部屋編集
     [RelayCommand(CanExecute = nameof(EditRentResidentialListingCanExecute))]
-    private async Task EditRentResidentialListing(ZumenSearch.Application.SearchResults.ListingSearchResultItem? selected)
+    private async Task EditRentResidentialListing(ListingSearchResultItemViewModel? selected)
     {
         if (selected is null)
         {
@@ -1351,7 +1357,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         await EditRentResidentialListingCore(selected);
     }
 
-    private async Task EditRentResidentialListingCore(ZumenSearch.Application.SearchResults.ListingSearchResultItem selected)
+    private async Task EditRentResidentialListingCore(ListingSearchResultItemViewModel selected)
     {
         var listingId = selected.Id;
         var buildingId = selected.PropertyId;
@@ -1409,7 +1415,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         editorWindow.AppWindow.MoveInZOrderAtTop();
     }
 
-    private static bool EditRentResidentialListingCanExecute(ZumenSearch.Application.SearchResults.ListingSearchResultItem? selected)
+    private static bool EditRentResidentialListingCanExecute(ListingSearchResultItemViewModel? selected)
     {
         if (selected is null)
         {
@@ -1421,7 +1427,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
 
     // 部屋複製
     [RelayCommand(CanExecute = nameof(DuplicateRentResidentialListingCanExecute))]
-    private async Task DuplicateRentResidentialListing(ZumenSearch.Application.SearchResults.ListingSearchResultItem? selected)
+    private async Task DuplicateRentResidentialListing(ListingSearchResultItemViewModel? selected)
     {
         if (selected is null)
         {
@@ -1441,7 +1447,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         await DuplicateRentResidentialListingCore(selected);
     }
 
-    private async Task DuplicateRentResidentialListingCore(ZumenSearch.Application.SearchResults.ListingSearchResultItem selected)
+    private async Task DuplicateRentResidentialListingCore(ListingSearchResultItemViewModel selected)
     {
         var listingId = selected.Id;
         var buildingId = selected.PropertyId;
@@ -1515,7 +1521,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         editorWindow.Activate();
         editorWindow.AppWindow.MoveInZOrderAtTop();
     }
-    private static bool DuplicateRentResidentialListingCanExecute(ZumenSearch.Application.SearchResults.ListingSearchResultItem? selected)
+    private static bool DuplicateRentResidentialListingCanExecute(ListingSearchResultItemViewModel? selected)
     {
         if (selected is null)
         {
@@ -1527,7 +1533,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
 
     // 部屋削除
     [RelayCommand(CanExecute = nameof(DeleteRentResidentialListingCanExecute))]
-    private async Task DeleteRentResidentialListing(ZumenSearch.Application.SearchResults.ListingSearchResultItem? selected)
+    private async Task DeleteRentResidentialListing(ListingSearchResultItemViewModel? selected)
     {
         if (selected is null)
         {
@@ -1551,7 +1557,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         await DeleteRentResidentialListingCore(selected);
     }
 
-    private async Task DeleteRentResidentialListingCore(ZumenSearch.Application.SearchResults.ListingSearchResultItem selected)
+    private async Task DeleteRentResidentialListingCore(ListingSearchResultItemViewModel selected)
     {
         var selectedId = selected.Id;
         var selectedPropertyId = selected.PropertyId;
@@ -1622,7 +1628,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
             }
         }
     }
-    private static bool DeleteRentResidentialListingCanExecute(ZumenSearch.Application.SearchResults.ListingSearchResultItem? selected)
+    private static bool DeleteRentResidentialListingCanExecute(ListingSearchResultItemViewModel? selected)
     {
         if (selected is null)
         {
@@ -1667,7 +1673,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
 
     // 建物編集（検索結果から）
     [RelayCommand(CanExecute = nameof(EditRentCommercialCanExecute))]
-    private async Task EditRentCommercial(ZumenSearch.Application.SearchResults.ListingSearchResultItem? selected)
+    private async Task EditRentCommercial(ListingSearchResultItemViewModel? selected)
     {
         var propertyId = selected?.Id;
 
@@ -1679,7 +1685,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
 
         await EditRentCommercialFromId(propertyId);
     }
-    private static bool EditRentCommercialCanExecute(ZumenSearch.Application.SearchResults.ListingSearchResultItem? selected)
+    private static bool EditRentCommercialCanExecute(ListingSearchResultItemViewModel? selected)
     {
         return selected is not null &&
                !string.IsNullOrWhiteSpace(selected.Id);
@@ -1792,7 +1798,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
 
     // 建物削除
     [RelayCommand(CanExecute = nameof(DeleteRentCommercialCanExecute))]
-    private async Task DeleteRentCommercial(ZumenSearch.Application.SearchResults.PropertySearchResultItem? selected)
+    private async Task DeleteRentCommercial(PropertySearchResultItemViewModel? selected)
     {
         if (selected is null || string.IsNullOrWhiteSpace(selected.Id))
         {
@@ -1802,7 +1808,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         await DeleteRentCommercialCore(selected);
     }
 
-    private async Task DeleteRentCommercialCore(ZumenSearch.Application.SearchResults.PropertySearchResultItem selected)
+    private async Task DeleteRentCommercialCore(PropertySearchResultItemViewModel selected)
     {
         var selectedId = selected.Id;
         if (RentCommercialListingEditorList.Count > 0)
@@ -1881,7 +1887,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         }
 
     }
-    private static bool DeleteRentCommercialCanExecute(ZumenSearch.Application.SearchResults.PropertySearchResultItem? selected)
+    private static bool DeleteRentCommercialCanExecute(PropertySearchResultItemViewModel? selected)
     {
         return selected is not null &&
                !string.IsNullOrWhiteSpace(selected.Id);
@@ -1912,14 +1918,14 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
             return;
         }
 
-        RentCommercialListingSearchResult = new(res.ListingSearchResult);
+        RentCommercialListingSearchResult = new(res.ListingSearchResult.Select(item => new ListingSearchResultItemViewModel(item)));
 
         _navigationService.NavigateTo(RentCommercialSearchResultPagePath, SlideNavigationTransitionEffect.FromLeft);
     }
 
     // 区画編集
     [RelayCommand(CanExecute = nameof(EditRentCommercialListingCanExecute))]
-    private async Task EditRentCommercialListing(ZumenSearch.Application.SearchResults.ListingSearchResultItem? selected)
+    private async Task EditRentCommercialListing(ListingSearchResultItemViewModel? selected)
     {
         if (selected is null)
         {
@@ -1939,7 +1945,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         await EditRentCommercialListingCore(selected);
     }
 
-    private async Task EditRentCommercialListingCore(ZumenSearch.Application.SearchResults.ListingSearchResultItem selected)
+    private async Task EditRentCommercialListingCore(ListingSearchResultItemViewModel selected)
     {
         var listingId = selected.Id;
         var buildingId = selected.PropertyId;
@@ -2037,7 +2043,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
 
         editorWindow.AppWindow.MoveInZOrderAtTop();
     }
-    private static bool EditRentCommercialListingCanExecute(ZumenSearch.Application.SearchResults.ListingSearchResultItem? selected)
+    private static bool EditRentCommercialListingCanExecute(ListingSearchResultItemViewModel? selected)
     {
         if (selected is null)
         {
@@ -2049,7 +2055,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
 
     // 区画削除
     [RelayCommand(CanExecute = nameof(DeleteRentCommercialListingCanExecute))]
-    private async Task DeleteRentCommercialListing(ZumenSearch.Application.SearchResults.ListingSearchResultItem? selected)
+    private async Task DeleteRentCommercialListing(ListingSearchResultItemViewModel? selected)
     {
         if (selected is null || string.IsNullOrWhiteSpace(selected.Id))
         {
@@ -2059,7 +2065,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         await DeleteRentCommercialListingCore(selected);
     }
 
-    private async Task DeleteRentCommercialListingCore(ZumenSearch.Application.SearchResults.ListingSearchResultItem selected)
+    private async Task DeleteRentCommercialListingCore(ListingSearchResultItemViewModel selected)
     {
         var selectedId = selected.Id;
         var selectedPropertyId = selected.PropertyId;
@@ -2178,7 +2184,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         }
     }
 
-    private static bool DeleteRentCommercialListingCanExecute(ZumenSearch.Application.SearchResults.ListingSearchResultItem? selected)
+    private static bool DeleteRentCommercialListingCanExecute(ListingSearchResultItemViewModel? selected)
     {
         return selected is not null &&
                !string.IsNullOrWhiteSpace(selected.Id);
@@ -2262,7 +2268,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         }
         else
         {
-            RentLessorSearchResult = new(res.PersonSearchResult);
+            RentLessorSearchResult = new(res.PersonSearchResult.Select(item => new PersonSearchResultItemViewModel(item)));
 
             _navigationService.NavigateTo(RentLessorSearchResultPagePath, SlideNavigationTransitionEffect.FromLeft);
         }
@@ -2295,6 +2301,20 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         shell.Window.Activate();
         shell.Window.AppWindow.MoveInZOrderAtTop();
     }
+
+    [RelayCommand(CanExecute = nameof(CanExecutePersonSearchResult))]
+    private async Task EditRentLessorSearchResult(PersonSearchResultItemViewModel? selected)
+    {
+        if (selected is not null) await EditRentLessorCommand.ExecuteAsync(selected.Model);
+    }
+
+    [RelayCommand(CanExecute = nameof(CanExecutePersonSearchResult))]
+    private async Task DeleteRentLessorSearchResult(PersonSearchResultItemViewModel? selected)
+    {
+        if (selected is not null) await DeleteRentLessorCommand.ExecuteAsync(selected.Model);
+    }
+
+    private static bool CanExecutePersonSearchResult(PersonSearchResultItemViewModel? selected) => selected is not null;
 
     [RelayCommand(CanExecute = nameof(EditRentLessorCanExecute))]
     public async Task EditRentLessor(ZumenSearch.Domain.Entities.Base.PersonBase selected) //ZumenSearch.Application.SearchResults.PersonSearchResultItem
@@ -2565,15 +2585,14 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         }
 
         SaleResidentialSearchResult =
-            new(res.PropertySearchResult);
+            new(res.PropertySearchResult.Select(item => new PropertySearchResultItemViewModel(item)));
 
         _navigationService.NavigateTo(SaleResidentialSearchResultPagePath,
             SlideNavigationTransitionEffect.FromLeft);
     }
 
     [RelayCommand(CanExecute = nameof(EditSaleResidentialCanExecute))]
-    private async Task EditSaleResidential(
-    ZumenSearch.Application.SearchResults.PropertySearchResultItem? selected)
+    private async Task EditSaleResidential(PropertySearchResultItemViewModel? selected)
     {
         if (selected is null || string.IsNullOrWhiteSpace(selected.Id))
         {
@@ -2622,16 +2641,14 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         shell.Window.Activate();
         shell.Window.AppWindow.MoveInZOrderAtTop();
     }
-    private static bool EditSaleResidentialCanExecute(
-        ZumenSearch.Application.SearchResults.PropertySearchResultItem? selected)
+    private static bool EditSaleResidentialCanExecute(PropertySearchResultItemViewModel? selected)
     {
         return selected is not null &&
                !string.IsNullOrWhiteSpace(selected.Id);
     }
 
     [RelayCommand(CanExecute = nameof(DeleteSaleResidentialCanExecute))]
-    private async Task DeleteSaleResidential(
-    ZumenSearch.Application.SearchResults.PropertySearchResultItem? selected)
+    private async Task DeleteSaleResidential(PropertySearchResultItemViewModel? selected)
     {
         if (selected is null || string.IsNullOrWhiteSpace(selected.Id))
         {
@@ -2657,10 +2674,21 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         }
 
         SaleResidentialSearchResult.Remove(selected);
+
+        var searchItem = PropertySearchResult.FirstOrDefault(item => item.Id == selected.Id);
+        if (searchItem is not null)
+        {
+            PropertySearchResult.Remove(searchItem);
+        }
+
+        var recentItem = RecentProperties.FirstOrDefault(item => item.Id == selected.Id);
+        if (recentItem is not null)
+        {
+            RecentProperties.Remove(recentItem);
+        }
     }
 
-    private static bool DeleteSaleResidentialCanExecute(
-        ZumenSearch.Application.SearchResults.PropertySearchResultItem? selected)
+    private static bool DeleteSaleResidentialCanExecute(PropertySearchResultItemViewModel? selected)
     {
         return selected is not null &&
                !string.IsNullOrWhiteSpace(selected.Id);
@@ -2728,10 +2756,22 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         }
         else
         {
-            BrokerSearchResult = new(res.PersonSearchResult);
+            BrokerSearchResult = new(res.PersonSearchResult.Select(item => new PersonSearchResultItemViewModel(item)));
 
             _navigationService.NavigateTo(BrokerSearchResultPagePath, SlideNavigationTransitionEffect.FromLeft);
         }
+    }
+
+    [RelayCommand(CanExecute = nameof(CanExecutePersonSearchResult))]
+    private async Task EditBrokerSearchResult(PersonSearchResultItemViewModel? selected)
+    {
+        if (selected is not null) await EditBrokerCommand.ExecuteAsync(selected.Model);
+    }
+
+    [RelayCommand(CanExecute = nameof(CanExecutePersonSearchResult))]
+    private async Task DeleteBrokerSearchResult(PersonSearchResultItemViewModel? selected)
+    {
+        if (selected is not null) await DeleteBrokerCommand.ExecuteAsync(selected.Model);
     }
 
     [RelayCommand(CanExecute = nameof(EditBrokerCanExecute))]

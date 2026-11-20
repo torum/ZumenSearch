@@ -1639,8 +1639,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     {
         picture.BasePath = _propertyDataDirectoryPath;
         picture.ParentViewModel = this;
-        picture.PropertyChanged -= OnBuildingMediaPropertyChanged;
-        picture.PropertyChanged += OnBuildingMediaPropertyChanged;
+        //picture.PropertyChanged -= OnBuildingMediaPropertyChanged;
+        //picture.PropertyChanged += OnBuildingMediaPropertyChanged;
         picture.SetIsModified(false);
     }
 
@@ -1648,8 +1648,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     {
         pdf.BasePath = _propertyDataDirectoryPath;
         pdf.ParentViewModel = this;
-        pdf.PropertyChanged -= OnBuildingMediaPropertyChanged;
-        pdf.PropertyChanged += OnBuildingMediaPropertyChanged;
+        //pdf.PropertyChanged -= OnBuildingMediaPropertyChanged;
+        //pdf.PropertyChanged += OnBuildingMediaPropertyChanged;
         pdf.SetIsModified(false);
     }
 
@@ -2766,7 +2766,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             if (await _dialogService.ShowDeleteConfirmationDialog("この建物写真を削除しますか？") != Microsoft.UI.Xaml.Controls.ContentDialogResult.Primary) return;
             if (!Pictures.Remove(picture)) return;
 
-            picture.PropertyChanged -= OnBuildingMediaPropertyChanged;
+            //picture.PropertyChanged -= OnBuildingMediaPropertyChanged;
             picture.ParentViewModel = null;
             _building.PicturesToBeDeleted.Add(picture);
             IsDirty = true;
@@ -2885,7 +2885,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             if (await _dialogService.ShowDeleteConfirmationDialog("この建物図面を削除しますか？") != Microsoft.UI.Xaml.Controls.ContentDialogResult.Primary) return;
             if (!Pdfs.Remove(pdf)) return;
 
-            pdf.PropertyChanged -= OnBuildingMediaPropertyChanged;
+            //pdf.PropertyChanged -= OnBuildingMediaPropertyChanged;
             pdf.ParentViewModel = null;
             _building.PdfsToBeDeleted.Add(pdf);
             IsDirty = true;

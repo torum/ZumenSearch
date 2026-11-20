@@ -1,4 +1,3 @@
-using ZumenSearch.Presentation.Features.Rent.Residentials.Models;
 using ZumenSearch.Domain.Enums;
 
 namespace ZumenSearch.Domain.Entities.Rent.Residentials;

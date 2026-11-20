@@ -1,11 +1,6 @@
-namespace ZumenSearch.Presentation.Features.Rent.Residentials.Models;
+using ZumenSearch.Domain.Entities.Rent.Residentials;
 
-public enum ContractType
-{
-    Unspecified,
-    Ordinary,
-    FixedTerm
-}
+namespace ZumenSearch.Presentation.Features.Rent.Residentials.Models;
 
 public sealed class ListingContractTypeLabel(ContractType key)
 {

@@ -1,11 +1,10 @@
-﻿using System.Collections.ObjectModel;
+﻿#pragma warning disable IDE0079 // Remove unnecessary suppression
+#pragma warning disable IDE0290 // Use primary constructor
+
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using ZumenSearch.Domain.Entities.Base;
-#pragma warning disable IDE0079 // Remove unnecessary suppression
-#pragma warning disable IDE0290 // Use primary constructor
-
-using ZumenSearch.Presentation.Features.Rent.Residentials.Models;
 using ZumenSearch.Domain.Enums;
 
 namespace ZumenSearch.Domain.Entities.Rent.Residentials;
@@ -25,9 +24,9 @@ public sealed partial class Property : PropertyBase
     #region == 建物の基本情報 ==
 
     // 物件種別
-    public PropertyKindTypeLabel PropertyKind
+    public PropertyKindType PropertyKind
     {
-        get => field ?? new(PropertyKindType.Unspecified);
+        get;
         private set
         {
             field = value;
@@ -49,9 +48,9 @@ public sealed partial class Property : PropertyBase
     //internal string ThumbnailFilenameOnLastSave { get; set; } = string.Empty;
 
     // 建物構造
-    public PropertyStructureTypeLabel PropertyStructure
+    public StructureType PropertyStructure
     {
-        get => field ?? new(StructureType.Unspecified);
+        get;
         private set
         {
             field = value;
@@ -272,13 +271,13 @@ public sealed partial class Property : PropertyBase
     public List<Listing> ListingsToBeSaved { get; set; } = [];
 
     // 物件リスト（建物）に属する募集物件（部屋）のサマリーリスト（一覧表示用）
-    public ObservableCollection<ListingSummary> ListingSummaries { get; } = [];
+    public List<ListingSummary> ListingSummaries { get; } = [];
 
     // DBへの更新時にDBから削除されるべき部屋のIDリスト
     public List<string> ListingsToBeDeleted { get; set; } = [];
 
     // 物件写真（建物）リスト
-    public ObservableCollection<PropertyPicture> Pictures
+    public List<PropertyPicture> Pictures
     {
         get;
         set
@@ -292,7 +291,7 @@ public sealed partial class Property : PropertyBase
     public List<PropertyPicture> PicturesToBeDeleted { get; set; } = [];
 
     // 図面（建物）リスト
-    public ObservableCollection<PropertyPdf> Pdfs
+    public List<PropertyPdf> Pdfs
     {
         get;
         set
@@ -306,7 +305,7 @@ public sealed partial class Property : PropertyBase
     public List<PropertyPdf> PdfsToBeDeleted { get; set; } = [];
 
     // 貸主のリスト
-    public ObservableCollection<ZumenSearch.Domain.Entities.Base.PersonBase> Lessors
+    public List<ZumenSearch.Domain.Entities.Base.PersonBase> Lessors
     {
         get;
         set
@@ -321,7 +320,7 @@ public sealed partial class Property : PropertyBase
 
 
     // 宅建業者のリスト
-    public ObservableCollection<ZumenSearch.Domain.Entities.Base.PersonBase> Brokers
+    public List<ZumenSearch.Domain.Entities.Base.PersonBase> Brokers
     {
         get;
         set
@@ -340,37 +339,37 @@ public sealed partial class Property : PropertyBase
 
     #region == Methods ==
 
-    public void SetPropertyKind(PropertyKindTypeLabel value) => PropertyKind = value;
+    public void SetPropertyKind(PropertyKindType value) => PropertyKind = value;
 
     public void SetPropertyKindFromString(string Str)
     {
         if (string.IsNullOrEmpty(Str))
         {
-            PropertyKind = new PropertyKindTypeLabel(PropertyKindType.Unspecified);
+            PropertyKind = PropertyKindType.Unspecified;
             return;
         }
 
         if (Enum.TryParse<PropertyKindType>(Str, out var result))
         {
-            PropertyKind = new PropertyKindTypeLabel(result);
+            PropertyKind = result;
         }
     }
 
     public void SetIsUnitLevelOwnership(bool value) => IsUnitLevelOwnership = value;
 
-    public void SetPropertyStructure(PropertyStructureTypeLabel value) => PropertyStructure = value;
+    public void SetPropertyStructure(StructureType value) => PropertyStructure = value;
 
     public void SetStructureTypeFromString(string Str)
     {
         if (string.IsNullOrEmpty(Str))
         {
-            PropertyStructure = new PropertyStructureTypeLabel(StructureType.Unspecified);
+            PropertyStructure = StructureType.Unspecified;
             return;
         }
 
         if (Enum.TryParse<StructureType>(Str, out var result))
         {
-            PropertyStructure = new PropertyStructureTypeLabel(result);
+            PropertyStructure = result;
         }
     }
 
@@ -477,7 +476,7 @@ public sealed partial class Property : PropertyBase
     {
         ArgumentNullException.ThrowIfNull(value);
 
-        var normalizedValue = ZumenSearch.Presentation.Utilities.Common.NormalizeFullWidthCharacters(value).Trim();
+        var normalizedValue = value.Normalize(System.Text.NormalizationForm.FormKC).Trim();
         ValidateFudousanId(normalizedValue);
         FudousanId = normalizedValue;
     }
@@ -494,7 +493,7 @@ public sealed partial class Property : PropertyBase
     {
         ArgumentNullException.ThrowIfNull(value);
 
-        var normalizedValue = ZumenSearch.Presentation.Utilities.Common.NormalizeFullWidthCharacters(value).Trim().ToUpperInvariant();
+        var normalizedValue = value.Normalize(System.Text.NormalizationForm.FormKC).Trim().ToUpperInvariant();
         ValidateFudousanIdAdditionalCode(normalizedValue);
         FudousanIdAdditionalCode = normalizedValue;
     }
@@ -545,13 +544,13 @@ public sealed partial class Property : PropertyBase
     public void SetPropertyElectricKind(EnumElectricType value) => PropertyElectricKind = value;
     public void SetElectricDetail(string value) => ElectricDetail = value;
 
-    public void SetPictures(ObservableCollection<PropertyPicture> value) => Pictures = value;
+    public void SetPictures(List<PropertyPicture> value) => Pictures = value;
     public void SetPicturesToBeDeleted(List<PropertyPicture> value) => PicturesToBeDeleted = value;
-    public void SetPdfs(ObservableCollection<PropertyPdf> value) => Pdfs = value;
+    public void SetPdfs(List<PropertyPdf> value) => Pdfs = value;
     public void SetPdfsToBeDeleted(List<PropertyPdf> value) => PdfsToBeDeleted = value;
-    public void SetLessors(ObservableCollection<PersonBase> value) => Lessors = value;
+    public void SetLessors(List<PersonBase> value) => Lessors = value;
     public void SetLessorsToBeDeleted(List<PersonBase> value) => LessorsToBeDeleted = value;
-    public void SetBrokers(ObservableCollection<PersonBase> value) => Brokers = value;
+    public void SetBrokers(List<PersonBase> value) => Brokers = value;
     public void SetBrokersToBeDeleted(List<PersonBase> value) => BrokersToBeDeleted = value;
 
     #endregion

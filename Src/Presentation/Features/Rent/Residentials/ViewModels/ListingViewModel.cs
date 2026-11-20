@@ -1,26 +1,22 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using CommunityToolkit.Mvvm.Messaging;
-using Microsoft.UI.Xaml.Controls;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.UI.Xaml.Controls;
 using Windows.Data.Pdf;
 using Windows.Storage;
 using Windows.Storage.Streams;
-using ZumenSearch.Domain.Enums;
-using ZumenSearch.Application.Configuration;
-using ZumenSearch.Application.Results;
-using ZumenSearch.Presentation.Shell.Models;
-using ZumenSearch.Presentation.Messaging;
 using ZumenSearch.Domain.Entities.Rent.Residentials;
-using ZumenSearch.Presentation.Features.Rent.Residentials.Models;
-using ZumenSearch.Infrastructure.Configuration.Contracts;
+using ZumenSearch.Domain.Enums;
 using ZumenSearch.Infrastructure.DataAccess.Contracts;
+using ZumenSearch.Presentation.Features.Rent.Residentials.Models;
+using ZumenSearch.Presentation.Messaging;
 using ZumenSearch.Presentation.Services.Contracts;
-
+using ZumenSearch.Presentation.Shell.Models;
 using ZumenSearch.Presentation.Shell.ViewModels;
 namespace ZumenSearch.Presentation.Features.Rent.Residentials.ViewModels;
 
@@ -704,7 +700,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
 
     #region == 写真 & PDFプロパティ ==
 
-    public ObservableCollection<ZumenSearch.Domain.Entities.Rent.Residentials.ListingPicture> Pictures
+    public ObservableCollection<ListingPictureViewModel> Pictures
     {
         get;
         set
@@ -718,7 +714,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         }
     } = [];
 
-    public ObservableCollection<ZumenSearch.Domain.Entities.Rent.Residentials.ListingPdf> Pdfs
+    public ObservableCollection<ListingPdfViewModel> Pdfs
     {
         get;
         set
@@ -1104,17 +1100,17 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
 
             _listing.SetName(Name);
 
-            _listing.SetFloorPlanTypeLabel(SelectedFloorPlanType);
-            _listing.SetFloorPlanExtraTypeLabel(SelectedFloorPlanExtraType);
-            _listing.SetFloorGroundTypeLabel(SelectedFloorGroundType);
+            _listing.SetFloorPlanTypeLabel(SelectedFloorPlanType.Key);
+            _listing.SetFloorPlanExtraTypeLabel(SelectedFloorPlanExtraType.Key);
+            _listing.SetFloorGroundTypeLabel(SelectedFloorGroundType.Key);
             _listing.SetFloorExclusiveAreaSqm(FloorExclusiveAreaSqm);
             _listing.SetFloorNumber(FloorNumber);
             _listing.SetIsCornerRoom(IsCornerRoom);
-            _listing.SetExposureDirectionTypeLabel(SelectedExposureDirectionType);
-            _listing.SetAvailabilityStatusTypeLabel(SelectedAvailabilityStatusType);
-            _listing.SetAvailabilityMonthTypeLabel(SelectedAvailabilityMonthType);
-            _listing.SetAvailabilityPeriodTypeLabel(SelectedAvailabilityPeriodType);
-            _listing.SetOccupancyStatusLabel(SelectedOccupancyStatus);
+            _listing.SetExposureDirectionTypeLabel(SelectedExposureDirectionType.Key);
+            _listing.SetAvailabilityStatusTypeLabel(SelectedAvailabilityStatusType.Key);
+            _listing.SetAvailabilityMonthTypeLabel(SelectedAvailabilityMonthType.Key);
+            _listing.SetAvailabilityPeriodTypeLabel(SelectedAvailabilityPeriodType.Key);
+            _listing.SetOccupancyStatusLabel(SelectedOccupancyStatus.Key);
             _listing.SetIsAvailableForImmediateMoveIn(IsAvailableForImmediateMoveIn);
             _listing.SetIsAvailableForRentNow(IsAvailableForRentNow);
             _listing.SetOccupancyStatusCheckedAt(OccupancyStatusCheckedAt);
@@ -1142,12 +1138,12 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
             _listing.SetRenewalFee(RenewalFee);
             _listing.SetRecontractFee(RecontractFee);
             _listing.SetContractPeriodYears(ContractPeriodYears);
-            _listing.SetManagementFeeUnitTypeLabel(SelectedManagementFeeUnit);
-            _listing.SetSecurityDepositUnitTypeLabel(SelectedSecurityDepositUnit);
-            _listing.SetKeyMoneyUnitTypeLabel(SelectedKeyMoneyUnit);
-            _listing.SetRenewalFeeUnitTypeLabel(SelectedRenewalFeeUnit);
-            _listing.SetRecontractFeeUnitTypeLabel(SelectedRecontractFeeUnit);
-            _listing.SetContractTypeLabel(SelectedContractType);
+            _listing.SetManagementFeeUnitTypeLabel(SelectedManagementFeeUnit.Key);
+            _listing.SetSecurityDepositUnitTypeLabel(SelectedSecurityDepositUnit.Key);
+            _listing.SetKeyMoneyUnitTypeLabel(SelectedKeyMoneyUnit.Key);
+            _listing.SetRenewalFeeUnitTypeLabel(SelectedRenewalFeeUnit.Key);
+            _listing.SetRecontractFeeUnitTypeLabel(SelectedRecontractFeeUnit.Key);
+            _listing.SetContractTypeLabel(SelectedContractType.Key);
             _listing.SetGuarantorCompany(GuarantorCompany);
             _listing.SetHousingInsurance(HousingInsurance);
             _listing.SetOtherFees(OtherFees);
@@ -1157,44 +1153,30 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
             _listing.SetOfficeUseAllowed(OfficeUseAllowed);
             _listing.SetOtherConditions(OtherConditions);
             _listing.SetContractRemarks(ContractRemarks);
-            _listing.SetHandlingTypeLabel(SelectedHandlingType);
-            _listing.SetTransactionTypeLabel(SelectedTransactionType);
+            _listing.SetHandlingTypeLabel(SelectedHandlingType.Key);
+            _listing.SetTransactionTypeLabel(SelectedTransactionType.Key);
             _listing.SetLessorCommission(LessorCommission);
             _listing.SetLesseeCommission(LesseeCommission);
             _listing.SetListingBrokerCommission(ListingBrokerCommission);
             _listing.SetTenantBrokerCommission(TenantBrokerCommission);
-            _listing.SetLessorCommissionUnitTypeLabel(SelectedLessorCommissionUnit);
-            _listing.SetLesseeCommissionUnitTypeLabel(SelectedLesseeCommissionUnit);
-            _listing.SetListingBrokerCommissionUnitTypeLabel(SelectedListingBrokerCommissionUnit);
-            _listing.SetTenantBrokerCommissionUnitTypeLabel(SelectedTenantBrokerCommissionUnit);
+            _listing.SetLessorCommissionUnitTypeLabel(SelectedLessorCommissionUnit.Key);
+            _listing.SetLesseeCommissionUnitTypeLabel(SelectedLesseeCommissionUnit.Key);
+            _listing.SetListingBrokerCommissionUnitTypeLabel(SelectedListingBrokerCommissionUnit.Key);
+            _listing.SetTenantBrokerCommissionUnitTypeLabel(SelectedTenantBrokerCommissionUnit.Key);
             _listing.SetTransactionRemarks(TransactionRemarks);
 
             // Recreate the Pictures collection in _listing to ensure it matches the current Pictures collection in the ViewModel.
-            //_listing.Pictures = Pictures;
             _listing.Pictures.Clear();
             foreach (var item in Pictures)
             {
-                var newItem = item.Clone();
-                newItem.BasePath = item.BasePath;//System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(App.PropertyBlobDataFolder, _listing.PropertyId), _listing.Id));
-                                                 //newItem.ParentViewModel = this;
-                newItem.SetIsModified(item.IsModified); // Needed this.
-                _listing.Pictures.Add(newItem);
-
-                item.PropertyChanged -= OnPicturePropertyChanged;
+                _listing.Pictures.Add(item.Model.Clone());
             }
 
             // Recreate the Pdfs collection in _listing to ensure it matches the current Pdfs collection in the ViewModel.
-            //_listing.Pdfs = Pdfs;
             _listing.Pdfs.Clear();
             foreach (var item in Pdfs)
             {
-                var newItem = item.Clone();
-                newItem.BasePath = item.BasePath;//_listingDataDirectoryPath;
-                                                 //newItem.ParentViewModel = this;
-                newItem.SetIsModified(item.IsModified);
-                _listing.Pdfs.Add(newItem);
-
-                item.PropertyChanged -= OnPdfPropertyChanged;
+                _listing.Pdfs.Add(item.Model.Clone());
             }
 
             _listing.Lessors.Clear();
@@ -1252,17 +1234,17 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
             // This toggles the visibility of certain fields based on the ownership level of the property.
             IsPropertyUnitLevelOwnership = _listing.IsPropertyUnitLevelOwnership;
 
-            SelectedFloorPlanType = _listing.FloorPlan;
-            SelectedFloorPlanExtraType = _listing.FloorPlanExtra;
-            SelectedFloorGroundType = _listing.FloorGround;
+            SelectedFloorPlanType = FloorPlanTypes.First(item => item.Key == _listing.FloorPlan);
+            SelectedFloorPlanExtraType = FloorPlanExtraTypes.First(item => item.Key == _listing.FloorPlanExtra);
+            SelectedFloorGroundType = FloorGroundTypes.First(item => item.Key == _listing.FloorGround);
             FloorExclusiveAreaSqm = _listing.FloorExclusiveAreaSqm;
             FloorNumber = _listing.FloorNumber;
             IsCornerRoom = _listing.IsCornerRoom;
-            SelectedExposureDirectionType = _listing.SelectedExposureDirectionType;
-            SelectedAvailabilityStatusType = _listing.SelectedAvailabilityStatusType;
-            SelectedAvailabilityMonthType = _listing.SelectedAvailabilityMonthType;
-            SelectedAvailabilityPeriodType = _listing.SelectedAvailabilityPeriodType;
-            SelectedOccupancyStatus = _listing.SelectedOccupancyStatus;
+            SelectedExposureDirectionType = ExposureDirectionTypes.First(item => item.Key == _listing.SelectedExposureDirectionType);
+            SelectedAvailabilityStatusType = AvailabilityStatusTypes.First(item => item.Key == _listing.SelectedAvailabilityStatusType);
+            SelectedAvailabilityMonthType = AvailabilityMonthTypes.First(item => item.Key == _listing.SelectedAvailabilityMonthType);
+            SelectedAvailabilityPeriodType = AvailabilityPeriodTypes.First(item => item.Key == _listing.SelectedAvailabilityPeriodType);
+            SelectedOccupancyStatus = OccupancyStatusTypes.First(item => item.Key == _listing.SelectedOccupancyStatus);
             IsAvailableForImmediateMoveIn = _listing.IsAvailableForImmediateMoveIn;
             IsAvailableForRentNow = _listing.IsAvailableForRentNow;
             OccupancyStatusCheckedAt = _listing.OccupancyStatusCheckedAt;
@@ -1292,12 +1274,12 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
             RenewalFee = _listing.RenewalFee;
             RecontractFee = _listing.RecontractFee;
             ContractPeriodYears = _listing.ContractPeriodYears;
-            SelectedManagementFeeUnit = FeeUnitTypes.First(x => x.Key == _listing.ManagementFeeUnit.Key);
-            SelectedSecurityDepositUnit = FeeUnitTypes.First(x => x.Key == _listing.SecurityDepositUnit.Key);
-            SelectedKeyMoneyUnit = FeeUnitTypes.First(x => x.Key == _listing.KeyMoneyUnit.Key);
-            SelectedRenewalFeeUnit = FeeUnitTypes.First(x => x.Key == _listing.RenewalFeeUnit.Key);
-            SelectedRecontractFeeUnit = FeeUnitTypes.First(x => x.Key == _listing.RecontractFeeUnit.Key);
-            SelectedContractType = ContractTypes.First(x => x.Key == _listing.ContractType.Key);
+            SelectedManagementFeeUnit = FeeUnitTypes.First(x => x.Key == _listing.ManagementFeeUnit);
+            SelectedSecurityDepositUnit = FeeUnitTypes.First(x => x.Key == _listing.SecurityDepositUnit);
+            SelectedKeyMoneyUnit = FeeUnitTypes.First(x => x.Key == _listing.KeyMoneyUnit);
+            SelectedRenewalFeeUnit = FeeUnitTypes.First(x => x.Key == _listing.RenewalFeeUnit);
+            SelectedRecontractFeeUnit = FeeUnitTypes.First(x => x.Key == _listing.RecontractFeeUnit);
+            SelectedContractType = ContractTypes.First(x => x.Key == _listing.ContractType);
             GuarantorCompany = _listing.GuarantorCompany;
             HousingInsurance = _listing.HousingInsurance;
             OtherFees = _listing.OtherFees;
@@ -1307,35 +1289,24 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
             OfficeUseAllowed = _listing.OfficeUseAllowed;
             OtherConditions = _listing.OtherConditions;
             ContractRemarks = _listing.ContractRemarks;
-            SelectedHandlingType = HandlingTypes.First(x => x.Key == _listing.HandlingType.Key);
-            SelectedTransactionType = TransactionTypes.First(x => x.Key == _listing.TransactionType.Key);
+            SelectedHandlingType = HandlingTypes.First(x => x.Key == _listing.HandlingType);
+            SelectedTransactionType = TransactionTypes.First(x => x.Key == _listing.TransactionType);
             LessorCommission = _listing.LessorCommission;
             LesseeCommission = _listing.LesseeCommission;
             ListingBrokerCommission = _listing.ListingBrokerCommission;
             TenantBrokerCommission = _listing.TenantBrokerCommission;
-            SelectedLessorCommissionUnit = CommissionUnitTypes.First(x => x.Key == _listing.LessorCommissionUnit.Key);
-            SelectedLesseeCommissionUnit = CommissionUnitTypes.First(x => x.Key == _listing.LesseeCommissionUnit.Key);
-            SelectedListingBrokerCommissionUnit = CommissionUnitTypes.First(x => x.Key == _listing.ListingBrokerCommissionUnit.Key);
-            SelectedTenantBrokerCommissionUnit = CommissionUnitTypes.First(x => x.Key == _listing.TenantBrokerCommissionUnit.Key);
+            SelectedLessorCommissionUnit = CommissionUnitTypes.First(x => x.Key == _listing.LessorCommissionUnit);
+            SelectedLesseeCommissionUnit = CommissionUnitTypes.First(x => x.Key == _listing.LesseeCommissionUnit);
+            SelectedListingBrokerCommissionUnit = CommissionUnitTypes.First(x => x.Key == _listing.ListingBrokerCommissionUnit);
+            SelectedTenantBrokerCommissionUnit = CommissionUnitTypes.First(x => x.Key == _listing.TenantBrokerCommissionUnit);
             TransactionRemarks = _listing.TransactionRemarks;
 
             // Pictures (don't use directly)
-            /*
-            Pictures = _listing.Pictures;
-            foreach (var item in Pictures)
-            {
-                item.BasePath = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(App.PropertyBlobDataFolder, _listing.PropertyId), _listing.Id));
-                item.ParentViewModel = this;
-                item.SetIsModified(false); // Needed this.
-                item.PropertyChanged += OnPicturePropertyChanged;
-            }
-            */
             Pictures.Clear();
             foreach (var item in _listing.Pictures)
             {
                 var internalItem = item.Clone();
                 internalItem.BasePath = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Path.Combine(App.PropertyBlobDataFolder, _listing.PropertyId), _listing.Id));
-                internalItem.ParentViewModel = this;
                 if (isDuplicate)
                 {
                     try
@@ -1347,22 +1318,23 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
                         _unsavedListingPictureFileList.Add(newFilePath);
 
                         internalItem.SetIsModified(true);
-                        internalItem.PropertyChanged += OnPicturePropertyChanged;
-                        Pictures.Add(internalItem);
                     }
                     catch (Exception ex)
                     {
                         Debug.WriteLine($"Error while copying picture file: {ex}");
 
                         ShowSimpleErrorInfoBar("写真ファイルのコピー中に予期しないエラーが発生しました。", $"{ex}");
+                        continue;
                     }
                 }
                 else
                 {
                     internalItem.SetIsModified(false);
-                    internalItem.PropertyChanged += OnPicturePropertyChanged;
-                    Pictures.Add(internalItem);
                 }
+
+                var pictureViewModel = new ListingPictureViewModel(internalItem, this);
+                pictureViewModel.PropertyChanged += OnPicturePropertyChanged;
+                Pictures.Add(pictureViewModel);
             }
 
             Pictures.CollectionChanged += (s, e) =>
@@ -1370,7 +1342,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
                 // Unsubscribe from removed items
                 if (e.OldItems != null)
                 {
-                    foreach (ZumenSearch.Domain.Entities.Rent.Residentials.ListingPicture item in e.OldItems)
+                    foreach (ListingPictureViewModel item in e.OldItems)
                     {
                         Debug.WriteLine($"Item {item.Id} Removed from Pictures");
                         IsDirty = true;
@@ -1382,7 +1354,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
                 // Subscribe to PropertyChanged.
                 if (e.NewItems != null)
                 {
-                    foreach (ZumenSearch.Domain.Entities.Rent.Residentials.ListingPicture item in e.NewItems)
+                    foreach (ListingPictureViewModel item in e.NewItems)
                     {
                         Debug.WriteLine($"Item {item.Id} Added to Pictures");
                         IsDirty = true;
@@ -1393,22 +1365,11 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
             };
 
             // PDFs (don't use directly)
-            /*
-            Pdfs = _listing.Pdfs;
-            foreach (var item in Pdfs)
-            {
-                item.BasePath = _listingDataDirectoryPath;
-                item.ParentViewModel = this;
-                item.SetIsModified(false);
-                item.PropertyChanged += OnPdfPropertyChanged;
-            }
-            */
             Pdfs.Clear();
             foreach (var item in _listing.Pdfs)
             {
                 var internalItem = item.Clone();
                 internalItem.BasePath = _listingDataDirectoryPath;
-                internalItem.ParentViewModel = this;
                 if (isDuplicate)
                 {
                     try
@@ -1428,29 +1389,30 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
                         }
 
                         internalItem.SetIsModified(true);
-                        internalItem.PropertyChanged += OnPdfPropertyChanged;
-                        Pdfs.Add(internalItem);
                     }
                     catch (Exception ex)
                     {
                         Debug.WriteLine($"Error while copying PDF file: {ex}");
 
                         ShowSimpleErrorInfoBar("PDFファイルのコピー中に予期しないエラーが発生しました。", $"{ex}");
+                        continue;
                     }
                 }
                 else
                 {
                     internalItem.SetIsModified(false);
-                    internalItem.PropertyChanged += OnPdfPropertyChanged;
-                    Pdfs.Add(internalItem);
                 }
+
+                var pdfViewModel = new ListingPdfViewModel(internalItem, this);
+                pdfViewModel.PropertyChanged += OnPdfPropertyChanged;
+                Pdfs.Add(pdfViewModel);
             }
 
             Pdfs.CollectionChanged += (sender, args) =>
             {
                 if (args.OldItems is not null)
                 {
-                    foreach (ZumenSearch.Domain.Entities.Rent.Residentials.ListingPdf item in args.OldItems)
+                    foreach (ListingPdfViewModel item in args.OldItems)
                     {
                         IsDirty = true;
                         item.PropertyChanged -= OnPdfPropertyChanged;
@@ -1459,7 +1421,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
 
                 if (args.NewItems is not null)
                 {
-                    foreach (ZumenSearch.Domain.Entities.Rent.Residentials.ListingPdf item in args.NewItems)
+                    foreach (ListingPdfViewModel item in args.NewItems)
                     {
                         IsDirty = true;
                         item.PropertyChanged += OnPdfPropertyChanged;
@@ -1510,7 +1472,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
 
     private void OnPicturePropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (sender is not ZumenSearch.Domain.Entities.Rent.Residentials.ListingPicture picUnit)
+        if (sender is not ListingPictureViewModel picUnit)
         {
             Debug.WriteLine("OnPicturePropertyChanged returned non PictureUnit.");
             return;
@@ -1541,7 +1503,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
 
     private void OnPdfPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (sender is not ZumenSearch.Domain.Entities.Rent.Residentials.ListingPdf pdfUnit)
+        if (sender is not ListingPdfViewModel pdfUnit)
         {
             Debug.WriteLine("OnPdfPropertyChanged returned non PdfUnit.");
             return;
@@ -1752,14 +1714,14 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
 
             foreach (var picture in Pictures.Where(picture => _listing.Pictures.Any(saved => saved.Id == picture.Id)))
             {
-                picture.SetStatus(EntityStatus.Saved);
-                picture.SetIsModified(false);
+                picture.Model.SetStatus(EntityStatus.Saved);
+                picture.Model.SetIsModified(false);
             }
 
             foreach (var pdf in Pdfs.Where(pdf => _listing.Pdfs.Any(saved => saved.Id == pdf.Id)))
             {
-                pdf.SetStatus(EntityStatus.Saved);
-                pdf.SetIsModified(false);
+                pdf.Model.SetStatus(EntityStatus.Saved);
+                pdf.Model.SetIsModified(false);
             }
 
             var cleanupFailures = new List<string>();
@@ -1904,11 +1866,10 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
 
                 var pic = new ZumenSearch.Domain.Entities.Rent.Residentials.ListingPicture(newId, newFilename, EntityStatus.New)
                 {
-                    BasePath = _listingDataDirectoryPath,
-                    ParentViewModel = this
+                    BasePath = _listingDataDirectoryPath
                 };
 
-                Pictures.Add(pic);
+                Pictures.Add(new ListingPictureViewModel(pic, this));
 
                 OpenBlobDirectoryCommand.NotifyCanExecuteChanged();
                 DeleteListingPictureCommand.NotifyCanExecuteChanged();
@@ -1937,7 +1898,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         extension.Equals(".webp", StringComparison.OrdinalIgnoreCase);
 
     [RelayCommand(CanExecute = nameof(CanDeleteListingPicture))]
-    private async Task DeleteListingPicture(ZumenSearch.Domain.Entities.Rent.Residentials.ListingPicture picUnit)
+    private async Task DeleteListingPicture(ListingPictureViewModel picUnit)
     {
         if (_listing is null)
         {
@@ -1960,14 +1921,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
 
             if (Pictures.Remove(picUnit))
             {
-                // TODO: should I? Prob no.
-                /*
-                if (_listing.Pictures.Remove(picUnit))
-                {
-
-                }
-                */
-                _listing.PicturesToBeDeleted.Add(picUnit);
+                _listing.PicturesToBeDeleted.Add(picUnit.Model);
                 IsDirty = true;
             }
         }
@@ -1976,7 +1930,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
             IsBusy = false;
         }
     }
-    private static bool CanDeleteListingPicture(ZumenSearch.Domain.Entities.Rent.Residentials.ListingPicture picUnit)
+    private static bool CanDeleteListingPicture(ListingPictureViewModel picUnit)
     {
         return picUnit is not null;
     }
@@ -2086,11 +2040,10 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
 
                 var pdf = new ZumenSearch.Domain.Entities.Rent.Residentials.ListingPdf(newId, newFilename, newThumbnailFilename, EntityStatus.New)
                 {
-                    BasePath = _listingDataDirectoryPath,
-                    ParentViewModel = this
+                    BasePath = _listingDataDirectoryPath
                 };
 
-                Pdfs.Add(pdf);
+                Pdfs.Add(new ListingPdfViewModel(pdf, this));
                 _unsavedListingPdfThumbnailFileList.Add(thumbnailDestFilePath);
                 _unsavedListingPdfFileList.Add(destFilePath);
 
@@ -2111,7 +2064,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
     }
 
     [RelayCommand]
-    private async Task OpenListingPdf(ZumenSearch.Domain.Entities.Rent.Residentials.ListingPdf pdf)
+    private async Task OpenListingPdf(ListingPdfViewModel pdf)
     {
         if (pdf is null || !Pdfs.Contains(pdf) || !IsEditorEnabled) return;
 
@@ -2136,7 +2089,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
     }
 
     [RelayCommand(CanExecute = nameof(CanDeleteListingPdf))]
-    private async Task DeleteListingPdf(ZumenSearch.Domain.Entities.Rent.Residentials.ListingPdf pdf)
+    private async Task DeleteListingPdf(ListingPdfViewModel pdf)
     {
         if (pdf is null)
         {
@@ -2154,7 +2107,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
 
             if (Pdfs.Remove(pdf))
             {
-                _listing.PdfsToBeDeleted.Add(pdf);
+                _listing.PdfsToBeDeleted.Add(pdf.Model);
                 IsDirty = true;
             }
         }
@@ -2163,7 +2116,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
             IsBusy = false;
         }
     }
-    private static bool CanDeleteListingPdf(ZumenSearch.Domain.Entities.Rent.Residentials.ListingPdf pdf)
+    private static bool CanDeleteListingPdf(ListingPdfViewModel pdf)
     {
         return pdf is not null;
     }

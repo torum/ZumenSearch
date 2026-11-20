@@ -32,7 +32,7 @@ public sealed class ListingPdf : PdfBase
             if (value is null || field == value) return;
             field = value;
             IsModified = true;
-            OnPropertyChanged();
+            //OnPropertyChanged();
         }
     } = new(ListingPdfType.Unspecified);
 
@@ -45,7 +45,7 @@ public sealed class ListingPdf : PdfBase
             if (field == description) return;
             field = description;
             IsModified = true;
-            OnPropertyChanged();
+            //OnPropertyChanged();
         }
     } = string.Empty;
 
@@ -57,7 +57,7 @@ public sealed class ListingPdf : PdfBase
             if (field == value) return;
             field = value;
             IsModified = true;
-            OnPropertyChanged();
+            //OnPropertyChanged();
         }
     }
 

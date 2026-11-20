@@ -97,7 +97,6 @@
 		<Folder Include="Domain\Entities\Rent\Lessors\" />
 		<Folder Include="Domain\Entities\Rent\Commercials\" />
 		<Folder Include="Domain\Entities\Rent\Parkings\" />
-		<Folder Include="Domain\Entities\Rent\Residentials\" />
 		<Folder Include="Domain\Entities\Sale\Commercials\" />
 		<Folder Include="Domain\Entities\Sale\Residentials\" />
 		<Folder Include="Presentation\Features\Sale\Commercials\" />

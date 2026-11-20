@@ -44,7 +44,7 @@ public sealed partial class ListingListPage : Page
             return;
         }
 
-        if (container.DataContext is not ZumenSearch.Presentation.Features.Rent.Residentials.Models.ListingSummary room)
+        if (container.DataContext is not ZumenSearch.Domain.Entities.Rent.Residentials.ListingSummary room)
         {
             Debug.WriteLine($"Not Room. {container.DataContext?.GetType().FullName} @ItemContainer_DoubleTapped");
             return;
@@ -106,7 +106,7 @@ public sealed partial class ListingListPage : Page
             return;
         }
 
-        if (container.DataContext is not ZumenSearch.Presentation.Features.Rent.Residentials.Models.ListingSummary room)
+        if (container.DataContext is not ZumenSearch.Domain.Entities.Rent.Residentials.ListingSummary room)
         {
             Debug.WriteLine($"Not Room. {container.DataContext?.GetType().FullName} @ItemContainer_RightTapped");
             return;
@@ -131,7 +131,7 @@ public sealed partial class ListingListPage : Page
             return;
         }
 
-        if (element.DataContext is not ZumenSearch.Presentation.Features.Rent.Residentials.Models.ListingSummary room)
+        if (element.DataContext is not ZumenSearch.Domain.Entities.Rent.Residentials.ListingSummary room)
         {
             Debug.WriteLine($"Not Room. {element.DataContext?.GetType().FullName} @ItemContainerKeyboardAccelerator_Invoked");
             return;

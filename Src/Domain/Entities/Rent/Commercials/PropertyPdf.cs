@@ -44,7 +44,7 @@ public sealed partial class PropertyPdf : PdfBase
                 //field = new(EnumBuildingPdfType.Unspecified);
             }
 
-            OnPropertyChanged();
+            //OnPropertyChanged();
         }
     } = new(PropertyPdfType.Unspecified);
 
@@ -69,7 +69,7 @@ public sealed partial class PropertyPdf : PdfBase
                 field = string.Empty;
             }
 
-            OnPropertyChanged();
+            //OnPropertyChanged();
         }
     } = string.Empty;
 
@@ -87,7 +87,7 @@ public sealed partial class PropertyPdf : PdfBase
             // Raize PropertyChanged event here.
             field = value;
 
-            OnPropertyChanged();
+            //OnPropertyChanged();
         }
     }
 

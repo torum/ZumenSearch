@@ -1,20 +1,14 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.Collections.ObjectModel;
+using System.Globalization;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
-using System.Collections.ObjectModel;
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using ZumenSearch.Domain.Enums;
-using ZumenSearch.Application.Configuration;
-using ZumenSearch.Application.Results;
-using ZumenSearch.Presentation.Shell.Models;
-using ZumenSearch.Domain.Entities.Base;
-using ZumenSearch.Presentation.Messaging;
-using ZumenSearch.Domain.Entities.Rent.Commercials.Listing;
-using ZumenSearch.Presentation.Features.Rent.Commercials.Models.Listing;
-using ZumenSearch.Infrastructure.Configuration.Contracts;
 using ZumenSearch.Infrastructure.DataAccess.Contracts;
+using ZumenSearch.Presentation.Features.Rent.Commercials.Models.Listing;
+using ZumenSearch.Presentation.Messaging;
 using ZumenSearch.Presentation.Services.Contracts;
+using ZumenSearch.Presentation.Shell.Models;
 
 namespace ZumenSearch.Presentation.Features.Rent.Commercials.ViewModels;
 
@@ -285,8 +279,8 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         }
 
         _disposed = true;
-        foreach (var picture in Pictures) picture.PropertyChanged -= OnListingPictureChanged;
-        foreach (var pdf in Pdfs) pdf.PropertyChanged -= OnListingPdfChanged;
+        //foreach (var picture in Pictures) picture.PropertyChanged -= OnListingPictureChanged;
+        //foreach (var pdf in Pdfs) pdf.PropertyChanged -= OnListingPdfChanged;
 
 #pragma warning disable IL3050 // Disable AOT dynamic code warning
 #pragma warning disable IL2026 // Disable Trimming unreferenced code warning

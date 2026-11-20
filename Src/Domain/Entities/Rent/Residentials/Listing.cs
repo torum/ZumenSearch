@@ -1,10 +1,10 @@
-﻿using System.Collections.ObjectModel;
-using System.Globalization;
-using ZumenSearch.Domain.Entities.Base;
-#pragma warning disable IDE0079 // Remove unnecessary suppression
+﻿#pragma warning disable IDE0079 // Remove unnecessary suppression
 #pragma warning disable IDE0290 // Use primary constructor
 
-using ZumenSearch.Presentation.Features.Rent.Residentials.Models;
+using System.Collections.ObjectModel;
+using System.Globalization;
+using System.Text.RegularExpressions;
+using ZumenSearch.Domain.Entities.Base;
 using ZumenSearch.Domain.Enums;
 
 namespace ZumenSearch.Domain.Entities.Rent.Residentials;
@@ -31,34 +31,22 @@ public sealed partial class Listing : ListingBase
 
     #region == 部屋の基本情報 ==
 
-    public ListingFloorPlanTypeLabel FloorPlan
+    public FloorPlanType FloorPlan
     {
-        get => field ?? new(FloorPlanType.Unspecified);
-        private set
-        {
-            field = value;
-            IsModified = true;
-        }
+        get;
+        private set { field = value; IsModified = true; }
     }
 
-    public ListingFloorPlanExtraTypeLabel FloorPlanExtra
+    public FloorPlanExtraType FloorPlanExtra
     {
-        get => field ?? new(FloorPlanExtraType.Unspecified);
-        private set
-        {
-            field = value;
-            IsModified = true;
-        }
+        get;
+        private set { field = value; IsModified = true; }
     }
 
-    public ListingFloorGroundTypeLabel FloorGround
+    public FloorGroundType FloorGround
     {
-        get => field ?? new(FloorGroundType.AboveGround);
-        private set
-        {
-            field = value;
-            IsModified = true;
-        }
+        get;
+        private set { field = value; IsModified = true; }
     }
 
     public string FloorExclusiveAreaSqm
@@ -91,54 +79,34 @@ public sealed partial class Listing : ListingBase
         }
     }
 
-    public ListingExposureDirectionTypeLabel SelectedExposureDirectionType
+    public ExposureDirectionType SelectedExposureDirectionType
     {
-        get => field ?? new(ExposureDirectionType.Unspecified);
-        private set
-        {
-            field = value;
-            IsModified = true;
-        }
+        get;
+        private set { field = value; IsModified = true; }
     }
 
-    public ListingAvailabilityStatusTypeLabel SelectedAvailabilityStatusType
+    public AvailabilityStatusType SelectedAvailabilityStatusType
     {
-        get => field ?? new(AvailabilityStatusType.Unspecified);
-        private set
-        {
-            field = value;
-            IsModified = true;
-        }
+        get;
+        private set { field = value; IsModified = true; }
     }
 
-    public ListingAvailabilityMonthTypeLabel SelectedAvailabilityMonthType
+    public AvailabilityMonthType SelectedAvailabilityMonthType
     {
-        get => field ?? new(AvailabilityMonthType.Unspecified);
-        private set
-        {
-            field = value;
-            IsModified = true;
-        }
+        get;
+        private set { field = value; IsModified = true; }
     }
 
-    public ListingAvailabilityPeriodTypeLabel SelectedAvailabilityPeriodType
+    public AvailabilityPeriodType SelectedAvailabilityPeriodType
     {
-        get => field ?? new(AvailabilityPeriodType.Unspecified);
-        private set
-        {
-            field = value;
-            IsModified = true;
-        }
+        get;
+        private set { field = value; IsModified = true; }
     }
 
-    public ListingOccupancyStatusLabel SelectedOccupancyStatus
+    public OccupancyStatus SelectedOccupancyStatus
     {
-        get => field ?? new(OccupancyStatus.Unspecified);
-        private set
-        {
-            field = value;
-            IsModified = true;
-        }
+        get;
+        private set { field = value; IsModified = true; }
     }
 
     public bool IsAvailableForImmediateMoveIn
@@ -219,11 +187,11 @@ public sealed partial class Listing : ListingBase
         private set { field = value; IsModified = true; }
     }
 
-    public ListingFeeUnitTypeLabel ManagementFeeUnit
+    public FeeUnitType ManagementFeeUnit
     {
-        get => field ?? new(FeeUnitType.Yen);
+        get;
         private set { field = value; IsModified = true; }
-    }
+    } = FeeUnitType.Yen;
 
     public string SecurityDeposit
     {
@@ -231,9 +199,9 @@ public sealed partial class Listing : ListingBase
         private set { field = value; IsModified = true; }
     }
 
-    public ListingFeeUnitTypeLabel SecurityDepositUnit
+    public FeeUnitType SecurityDepositUnit
     {
-        get => field ?? new(FeeUnitType.Months);
+        get;
         private set { field = value; IsModified = true; }
     }
 
@@ -243,15 +211,15 @@ public sealed partial class Listing : ListingBase
         private set { field = value; IsModified = true; }
     }
 
-    public ListingFeeUnitTypeLabel KeyMoneyUnit
+    public FeeUnitType KeyMoneyUnit
     {
-        get => field ?? new(FeeUnitType.Months);
+        get;
         private set { field = value; IsModified = true; }
     }
 
-    public ListingContractTypeLabel ContractType
+    public ContractType ContractType
     {
-        get => field ?? new(global::ZumenSearch.Presentation.Features.Rent.Residentials.Models.ContractType.Unspecified);
+        get;
         private set { field = value; IsModified = true; }
     }
 
@@ -267,9 +235,9 @@ public sealed partial class Listing : ListingBase
         private set { field = value; IsModified = true; }
     }
 
-    public ListingFeeUnitTypeLabel RenewalFeeUnit
+    public FeeUnitType RenewalFeeUnit
     {
-        get => field ?? new(FeeUnitType.Months);
+        get;
         private set { field = value; IsModified = true; }
     }
 
@@ -279,11 +247,11 @@ public sealed partial class Listing : ListingBase
         private set { field = value; IsModified = true; }
     }
 
-    public ListingFeeUnitTypeLabel RecontractFeeUnit
+    public FeeUnitType RecontractFeeUnit
     {
-        get => field ?? new(FeeUnitType.Yen);
+        get;
         private set { field = value; IsModified = true; }
-    }
+    } = FeeUnitType.Yen;
 
     public string GuarantorCompany
     {
@@ -339,16 +307,16 @@ public sealed partial class Listing : ListingBase
         private set { field = value; IsModified = true; }
     }
 
-    public ListingHandlingTypeLabel HandlingType { get => field ?? new(ListingHandlingType.Unspecified); private set { field = value; IsModified = true; } }
-    public ListingTransactionTypeLabel TransactionType { get => field ?? new(ListingTransactionType.Unspecified); private set { field = value; IsModified = true; } }
+    public ListingHandlingType HandlingType { get; private set { field = value; IsModified = true; } }
+    public ListingTransactionType TransactionType { get; private set { field = value; IsModified = true; } }
     public string LessorCommission { get => field ?? string.Empty; private set { field = value; IsModified = true; } }
     public string LesseeCommission { get => field ?? string.Empty; private set { field = value; IsModified = true; } }
     public string ListingBrokerCommission { get => field ?? string.Empty; private set { field = value; IsModified = true; } }
     public string TenantBrokerCommission { get => field ?? string.Empty; private set { field = value; IsModified = true; } }
-    public ListingCommissionUnitTypeLabel LessorCommissionUnit { get => field ?? new(ListingCommissionUnitType.Percent); private set { field = value; IsModified = true; } }
-    public ListingCommissionUnitTypeLabel LesseeCommissionUnit { get => field ?? new(ListingCommissionUnitType.Percent); private set { field = value; IsModified = true; } }
-    public ListingCommissionUnitTypeLabel ListingBrokerCommissionUnit { get => field ?? new(ListingCommissionUnitType.Percent); private set { field = value; IsModified = true; } }
-    public ListingCommissionUnitTypeLabel TenantBrokerCommissionUnit { get => field ?? new(ListingCommissionUnitType.Percent); private set { field = value; IsModified = true; } }
+    public ListingCommissionUnitType LessorCommissionUnit { get; private set { field = value; IsModified = true; } }
+    public ListingCommissionUnitType LesseeCommissionUnit { get; private set { field = value; IsModified = true; } }
+    public ListingCommissionUnitType ListingBrokerCommissionUnit { get; private set { field = value; IsModified = true; } }
+    public ListingCommissionUnitType TenantBrokerCommissionUnit { get; private set { field = value; IsModified = true; } }
     public string TransactionRemarks { get => field ?? string.Empty; private set { field = value; IsModified = true; } }
 
     public bool HasAirConditioner { get; private set { field = value; IsModified = true; } }
@@ -373,7 +341,7 @@ public sealed partial class Listing : ListingBase
     #region == 部屋に属するリスト ==
 
     // 部屋写真リスト
-    public ObservableCollection<ListingPicture> Pictures
+    public List<ListingPicture> Pictures
     {
         get;
         set
@@ -387,7 +355,7 @@ public sealed partial class Listing : ListingBase
     public List<ListingPicture> PicturesToBeDeleted { get; set; } = [];
 
     // 部屋図面リスト
-    public ObservableCollection<ListingPdf> Pdfs
+    public List<ListingPdf> Pdfs
     {
         get;
         set
@@ -401,7 +369,7 @@ public sealed partial class Listing : ListingBase
     public List<ListingPdf> PdfsToBeDeleted { get; set; } = [];
 
     // 貸主のリスト
-    public ObservableCollection<ZumenSearch.Domain.Entities.Base.PersonBase> Lessors
+    public List<ZumenSearch.Domain.Entities.Base.PersonBase> Lessors
     {
         get;
         set
@@ -415,7 +383,7 @@ public sealed partial class Listing : ListingBase
     public List<ZumenSearch.Domain.Entities.Base.PersonBase> LessorsToBeDeleted { get; set; } = [];
 
     // 宅建業者のリスト
-    public ObservableCollection<ZumenSearch.Domain.Entities.Base.PersonBase> Brokers
+    public List<ZumenSearch.Domain.Entities.Base.PersonBase> Brokers
     {
         get;
         set
@@ -447,7 +415,7 @@ public sealed partial class Listing : ListingBase
         FudousanIdAdditionalCode = fudousanIdAdditionalCode;
     }
 
-    public void SetFloorPlanTypeLabel(ListingFloorPlanTypeLabel floorPlan)
+    public void SetFloorPlanTypeLabel(FloorPlanType floorPlan)
     {
         FloorPlan = floorPlan;
     }
@@ -455,17 +423,17 @@ public sealed partial class Listing : ListingBase
     {
         if (string.IsNullOrEmpty(Str))
         {
-            FloorPlan = new ListingFloorPlanTypeLabel(FloorPlanType.Unspecified);
+            FloorPlan = FloorPlanType.Unspecified;
             return;
         }
 
         if (Enum.TryParse<FloorPlanType>(Str, out var result))
         {
-            FloorPlan = new ListingFloorPlanTypeLabel(result);
+            FloorPlan = result;
         }
     }
 
-    public void SetFloorPlanExtraTypeLabel(ListingFloorPlanExtraTypeLabel floorPlanExtra)
+    public void SetFloorPlanExtraTypeLabel(FloorPlanExtraType floorPlanExtra)
     {
         FloorPlanExtra = floorPlanExtra;
     }
@@ -473,17 +441,17 @@ public sealed partial class Listing : ListingBase
     {
         if (string.IsNullOrEmpty(Str))
         {
-            FloorPlanExtra = new ListingFloorPlanExtraTypeLabel(FloorPlanExtraType.Unspecified);
+            FloorPlanExtra = FloorPlanExtraType.Unspecified;
             return;
         }
 
         if (Enum.TryParse<FloorPlanExtraType>(Str, out var result))
         {
-            FloorPlanExtra = new ListingFloorPlanExtraTypeLabel(result);
+            FloorPlanExtra = result;
         }
     }
 
-    public void SetFloorGroundTypeLabel(ListingFloorGroundTypeLabel floorGround)
+    public void SetFloorGroundTypeLabel(FloorGroundType floorGround)
     {
         FloorGround = floorGround;
     }
@@ -492,13 +460,13 @@ public sealed partial class Listing : ListingBase
     {
         if (string.IsNullOrEmpty(Str))
         {
-            FloorGround = new ListingFloorGroundTypeLabel(FloorGroundType.AboveGround);
+            FloorGround = FloorGroundType.AboveGround;
             return;
         }
 
         if (Enum.TryParse<FloorGroundType>(Str, out var result))
         {
-            FloorGround = new ListingFloorGroundTypeLabel(result);
+            FloorGround = result;
         }
     }
 
@@ -517,7 +485,7 @@ public sealed partial class Listing : ListingBase
         IsCornerRoom = isCornerRoom;
     }
 
-    public void SetExposureDirectionTypeLabel(ListingExposureDirectionTypeLabel exposureDirectionType)
+    public void SetExposureDirectionTypeLabel(ExposureDirectionType exposureDirectionType)
     {
         SelectedExposureDirectionType = exposureDirectionType;
     }
@@ -526,17 +494,17 @@ public sealed partial class Listing : ListingBase
     {
         if (string.IsNullOrEmpty(Str))
         {
-            SelectedExposureDirectionType = new ListingExposureDirectionTypeLabel(ExposureDirectionType.Unspecified);
+            SelectedExposureDirectionType = ExposureDirectionType.Unspecified;
             return;
         }
 
         if (Enum.TryParse<ExposureDirectionType>(Str, out var result))
         {
-            SelectedExposureDirectionType = new ListingExposureDirectionTypeLabel(result);
+            SelectedExposureDirectionType = result;
         }
     }
 
-    public void SetAvailabilityStatusTypeLabel(ListingAvailabilityStatusTypeLabel availabilityStatusType)
+    public void SetAvailabilityStatusTypeLabel(AvailabilityStatusType availabilityStatusType)
     {
         SelectedAvailabilityStatusType = availabilityStatusType;
     }
@@ -545,17 +513,17 @@ public sealed partial class Listing : ListingBase
     {
         if (string.IsNullOrEmpty(Str))
         {
-            SelectedAvailabilityStatusType = new ListingAvailabilityStatusTypeLabel(AvailabilityStatusType.Unspecified);
+            SelectedAvailabilityStatusType = AvailabilityStatusType.Unspecified;
             return;
         }
 
         if (Enum.TryParse<AvailabilityStatusType>(Str, out var result))
         {
-            SelectedAvailabilityStatusType = new ListingAvailabilityStatusTypeLabel(result);
+            SelectedAvailabilityStatusType = result;
         }
     }
 
-    public void SetAvailabilityMonthTypeLabel(ListingAvailabilityMonthTypeLabel availabilityMonthType)
+    public void SetAvailabilityMonthTypeLabel(AvailabilityMonthType availabilityMonthType)
     {
         SelectedAvailabilityMonthType = availabilityMonthType;
     }
@@ -564,17 +532,17 @@ public sealed partial class Listing : ListingBase
     {
         if (string.IsNullOrEmpty(Str))
         {
-            SelectedAvailabilityMonthType = new ListingAvailabilityMonthTypeLabel(AvailabilityMonthType.Unspecified);
+            SelectedAvailabilityMonthType = AvailabilityMonthType.Unspecified;
             return;
         }
 
         if (Enum.TryParse<AvailabilityMonthType>(Str, out var result))
         {
-            SelectedAvailabilityMonthType = new ListingAvailabilityMonthTypeLabel(result);
+            SelectedAvailabilityMonthType = result;
         }
     }
 
-    public void SetAvailabilityPeriodTypeLabel(ListingAvailabilityPeriodTypeLabel availabilityPeriodType)
+    public void SetAvailabilityPeriodTypeLabel(AvailabilityPeriodType availabilityPeriodType)
     {
         SelectedAvailabilityPeriodType = availabilityPeriodType;
     }
@@ -583,17 +551,17 @@ public sealed partial class Listing : ListingBase
     {
         if (string.IsNullOrEmpty(Str))
         {
-            SelectedAvailabilityPeriodType = new ListingAvailabilityPeriodTypeLabel(AvailabilityPeriodType.Unspecified);
+            SelectedAvailabilityPeriodType = AvailabilityPeriodType.Unspecified;
             return;
         }
 
         if (Enum.TryParse<AvailabilityPeriodType>(Str, out var result))
         {
-            SelectedAvailabilityPeriodType = new ListingAvailabilityPeriodTypeLabel(result);
+            SelectedAvailabilityPeriodType = result;
         }
     }
 
-    public void SetOccupancyStatusLabel(ListingOccupancyStatusLabel occupancyStatus)
+    public void SetOccupancyStatusLabel(OccupancyStatus occupancyStatus)
     {
         SelectedOccupancyStatus = occupancyStatus;
     }
@@ -602,13 +570,13 @@ public sealed partial class Listing : ListingBase
     {
         if (string.IsNullOrEmpty(Str))
         {
-            SelectedOccupancyStatus = new ListingOccupancyStatusLabel(OccupancyStatus.Unspecified);
+            SelectedOccupancyStatus = OccupancyStatus.Unspecified;
             return;
         }
 
         if (Enum.TryParse<OccupancyStatus>(Str, out var result))
         {
-            SelectedOccupancyStatus = new ListingOccupancyStatusLabel(result);
+            SelectedOccupancyStatus = result;
         }
     }
 
@@ -652,24 +620,24 @@ public sealed partial class Listing : ListingBase
     public void SetOtherFees(string value) { OtherFees = value; }
     public void SetOtherConditions(string value) { OtherConditions = value; }
     public void SetContractRemarks(string value) { ContractRemarks = value; }
-    public void SetHandlingTypeLabel(ListingHandlingTypeLabel value) { HandlingType = value; }
-    public void SetTransactionTypeLabel(ListingTransactionTypeLabel value) { TransactionType = value; }
+    public void SetHandlingTypeLabel(ListingHandlingType value) { HandlingType = value; }
+    public void SetTransactionTypeLabel(ListingTransactionType value) { TransactionType = value; }
     public void SetLessorCommission(string value) { LessorCommission = value; }
     public void SetLesseeCommission(string value) { LesseeCommission = value; }
     public void SetListingBrokerCommission(string value) { ListingBrokerCommission = value; }
     public void SetTenantBrokerCommission(string value) { TenantBrokerCommission = value; }
-    public void SetLessorCommissionUnitTypeLabel(ListingCommissionUnitTypeLabel value) { LessorCommissionUnit = value; }
-    public void SetLesseeCommissionUnitTypeLabel(ListingCommissionUnitTypeLabel value) { LesseeCommissionUnit = value; }
-    public void SetListingBrokerCommissionUnitTypeLabel(ListingCommissionUnitTypeLabel value) { ListingBrokerCommissionUnit = value; }
-    public void SetTenantBrokerCommissionUnitTypeLabel(ListingCommissionUnitTypeLabel value) { TenantBrokerCommissionUnit = value; }
+    public void SetLessorCommissionUnitTypeLabel(ListingCommissionUnitType value) { LessorCommissionUnit = value; }
+    public void SetLesseeCommissionUnitTypeLabel(ListingCommissionUnitType value) { LesseeCommissionUnit = value; }
+    public void SetListingBrokerCommissionUnitTypeLabel(ListingCommissionUnitType value) { ListingBrokerCommissionUnit = value; }
+    public void SetTenantBrokerCommissionUnitTypeLabel(ListingCommissionUnitType value) { TenantBrokerCommissionUnit = value; }
     public void SetTransactionRemarks(string value) { TransactionRemarks = value; }
-    public void SetHandlingTypeLabelFromString(string value) { if (Enum.TryParse<ListingHandlingType>(value, out var result) && Enum.IsDefined(result)) SetHandlingTypeLabel(new(result)); else throw new FormatException($"Invalid listing handling type: {value}"); }
-    public void SetTransactionTypeLabelFromString(string value) { if (Enum.TryParse<ListingTransactionType>(value, out var result) && Enum.IsDefined(result)) SetTransactionTypeLabel(new(result)); else throw new FormatException($"Invalid listing transaction type: {value}"); }
+    public void SetHandlingTypeLabelFromString(string value) { if (Enum.TryParse<ListingHandlingType>(value, out var result) && Enum.IsDefined(result)) SetHandlingTypeLabel(result); else throw new FormatException($"Invalid listing handling type: {value}"); }
+    public void SetTransactionTypeLabelFromString(string value) { if (Enum.TryParse<ListingTransactionType>(value, out var result) && Enum.IsDefined(result)) SetTransactionTypeLabel(result); else throw new FormatException($"Invalid listing transaction type: {value}"); }
     public void SetLessorCommissionUnitTypeLabelFromString(string value) { SetLessorCommissionUnitTypeLabel(ParseCommissionUnit(value)); }
     public void SetLesseeCommissionUnitTypeLabelFromString(string value) { SetLesseeCommissionUnitTypeLabel(ParseCommissionUnit(value)); }
     public void SetListingBrokerCommissionUnitTypeLabelFromString(string value) { SetListingBrokerCommissionUnitTypeLabel(ParseCommissionUnit(value)); }
     public void SetTenantBrokerCommissionUnitTypeLabelFromString(string value) { SetTenantBrokerCommissionUnitTypeLabel(ParseCommissionUnit(value)); }
-    private static ListingCommissionUnitTypeLabel ParseCommissionUnit(string value) => Enum.TryParse<ListingCommissionUnitType>(value, out var result) && Enum.IsDefined(result) ? new(result) : throw new FormatException($"Invalid commission unit: {value}");
+    private static ListingCommissionUnitType ParseCommissionUnit(string value) => Enum.TryParse<ListingCommissionUnitType>(value, out var result) && Enum.IsDefined(result) ? result : throw new FormatException($"Invalid commission unit: {value}");
     public void SetPetFriendly(bool value) { PetFriendly = value; }
     public void SetTwoPersonOccupancy(bool value) { TwoPersonOccupancy = value; }
     public void SetNoGuarantorNeeded(bool value) { NoGuarantorNeeded = value; }
@@ -691,22 +659,22 @@ public sealed partial class Listing : ListingBase
     public void SetHasWarmWaterToiletSeat(bool value) { HasWarmWaterToiletSeat = value; }
     public void SetApplianceRemarks(string value) { ApplianceRemarks = value; }
 
-    public void SetManagementFeeUnitTypeLabel(ListingFeeUnitTypeLabel value) { ManagementFeeUnit = value; }
-    public void SetSecurityDepositUnitTypeLabel(ListingFeeUnitTypeLabel value) { SecurityDepositUnit = value; }
-    public void SetKeyMoneyUnitTypeLabel(ListingFeeUnitTypeLabel value) { KeyMoneyUnit = value; }
-    public void SetRenewalFeeUnitTypeLabel(ListingFeeUnitTypeLabel value) { RenewalFeeUnit = value; }
-    public void SetRecontractFeeUnitTypeLabel(ListingFeeUnitTypeLabel value) { RecontractFeeUnit = value; }
-    public void SetContractTypeLabel(ListingContractTypeLabel value) { ContractType = value; }
+    public void SetManagementFeeUnitTypeLabel(FeeUnitType value) { ManagementFeeUnit = value; }
+    public void SetSecurityDepositUnitTypeLabel(FeeUnitType value) { SecurityDepositUnit = value; }
+    public void SetKeyMoneyUnitTypeLabel(FeeUnitType value) { KeyMoneyUnit = value; }
+    public void SetRenewalFeeUnitTypeLabel(FeeUnitType value) { RenewalFeeUnit = value; }
+    public void SetRecontractFeeUnitTypeLabel(FeeUnitType value) { RecontractFeeUnit = value; }
+    public void SetContractTypeLabel(ContractType value) { ContractType = value; }
 
     public void SetManagementFeeUnitTypeLabelFromString(string value)
     {
         if (string.IsNullOrEmpty(value))
         {
-            ManagementFeeUnit = new ListingFeeUnitTypeLabel(FeeUnitType.Yen);
+            ManagementFeeUnit = FeeUnitType.Yen;
         }
         else if (Enum.TryParse<FeeUnitType>(value, out var result) && Enum.IsDefined(result))
         {
-            ManagementFeeUnit = new ListingFeeUnitTypeLabel(result);
+            ManagementFeeUnit = result;
         }
     }
 
@@ -714,11 +682,11 @@ public sealed partial class Listing : ListingBase
     {
         if (string.IsNullOrEmpty(value))
         {
-            SecurityDepositUnit = new ListingFeeUnitTypeLabel(FeeUnitType.Months);
+            SecurityDepositUnit = FeeUnitType.Months;
         }
         else if (Enum.TryParse<FeeUnitType>(value, out var result) && Enum.IsDefined(result))
         {
-            SecurityDepositUnit = new ListingFeeUnitTypeLabel(result);
+            SecurityDepositUnit = result;
         }
     }
 
@@ -726,11 +694,11 @@ public sealed partial class Listing : ListingBase
     {
         if (string.IsNullOrEmpty(value))
         {
-            KeyMoneyUnit = new ListingFeeUnitTypeLabel(FeeUnitType.Months);
+            KeyMoneyUnit = FeeUnitType.Months;
         }
         else if (Enum.TryParse<FeeUnitType>(value, out var result) && Enum.IsDefined(result))
         {
-            KeyMoneyUnit = new ListingFeeUnitTypeLabel(result);
+            KeyMoneyUnit = result;
         }
     }
 
@@ -738,11 +706,11 @@ public sealed partial class Listing : ListingBase
     {
         if (string.IsNullOrEmpty(value))
         {
-            RenewalFeeUnit = new ListingFeeUnitTypeLabel(FeeUnitType.Months);
+            RenewalFeeUnit = FeeUnitType.Months;
         }
         else if (Enum.TryParse<FeeUnitType>(value, out var result) && Enum.IsDefined(result))
         {
-            RenewalFeeUnit = new ListingFeeUnitTypeLabel(result);
+            RenewalFeeUnit = result;
         }
     }
 
@@ -750,11 +718,11 @@ public sealed partial class Listing : ListingBase
     {
         if (string.IsNullOrEmpty(value))
         {
-            RecontractFeeUnit = new ListingFeeUnitTypeLabel(FeeUnitType.Yen);
+            RecontractFeeUnit = FeeUnitType.Yen;
         }
         else if (Enum.TryParse<FeeUnitType>(value, out var result) && Enum.IsDefined(result))
         {
-            RecontractFeeUnit = new ListingFeeUnitTypeLabel(result);
+            RecontractFeeUnit = result;
         }
     }
 
@@ -762,11 +730,11 @@ public sealed partial class Listing : ListingBase
     {
         if (string.IsNullOrEmpty(value))
         {
-            ContractType = new ListingContractTypeLabel(global::ZumenSearch.Presentation.Features.Rent.Residentials.Models.ContractType.Unspecified);
+            ContractType = ContractType.Unspecified;
         }
-        else if (Enum.TryParse<global::ZumenSearch.Presentation.Features.Rent.Residentials.Models.ContractType>(value, out var result) && Enum.IsDefined(result))
+        else if (Enum.TryParse<ContractType>(value, out var result) && Enum.IsDefined(result))
         {
-            ContractType = new ListingContractTypeLabel(result);
+            ContractType = result;
         }
     }
 
@@ -788,9 +756,9 @@ public sealed partial class Listing : ListingBase
             return;
         }
 
-        var text = ZumenSearch.Presentation.Utilities.Common.ReplaceZenkakuNumbers(Str.Trim());
-        if (ZumenSearch.Presentation.Utilities.Common.CanConvertToPositiveNumber(text) &&
-            long.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var result))
+        var convertedText = Regex.Replace(Str.Trim(), "[０-９]", match => ((char)(match.Value[0] - '０' + '0')).ToString());
+        var text = Regex.Replace(convertedText, "[^0-9]", string.Empty);
+        if (long.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var result) && result >= 0)
         {
             SetChinryou(result);
         }

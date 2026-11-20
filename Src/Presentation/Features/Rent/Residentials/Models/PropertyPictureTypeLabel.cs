@@ -1,14 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using ZumenSearch.Domain.Enums.Rent.Residentials;
 
 namespace ZumenSearch.Presentation.Features.Rent.Residentials.Models;
-
-public enum PropertyPictureType
-{
-    //Unspecified, Madori, Gaikan, Situnai, LivingDining, Bedroom, Kitchen, Bathroom, Restroom, Washroom, StorageSpace, Appliance, FrontDoor, Balcony, Entrance, Neighborhood, Other
-    Unspecified, Gaikan, Entrance, Neighborhood, Other
-}
 
 public sealed class PropertyPictureTypeLabel(PropertyPictureType key)
 {

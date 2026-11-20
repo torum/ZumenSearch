@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using ZumenSearch.Domain.Entities.Rent.Residentials;
 
 namespace ZumenSearch.Presentation.Features.Rent.Residentials.Models;
-
-public enum AvailabilityStatusType { Unspecified, ScheduledVacating, Vacant, ApplicationSubmitted, ContractedAndOccupied, OtherOrUnknown }
 
 public sealed class ListingAvailabilityStatusTypeLabel(AvailabilityStatusType key)
 {

@@ -44,7 +44,7 @@ public sealed partial class PropertyPicture : PictureBase
                 //field = new(EnumBuildingPictureType.Unspecified);
             }
 
-            OnPropertyChanged();
+            //OnPropertyChanged();
         }
     } = new(PropertyPictureType.Unspecified);
 
@@ -69,7 +69,7 @@ public sealed partial class PropertyPicture : PictureBase
                 field = string.Empty;
             }
 
-            OnPropertyChanged();
+            //OnPropertyChanged();
         }
     } = string.Empty;
 
@@ -87,7 +87,7 @@ public sealed partial class PropertyPicture : PictureBase
             // Raize PropertyChanged event here.
             field = value;
 
-            OnPropertyChanged();
+            //OnPropertyChanged();
         }
     }
 

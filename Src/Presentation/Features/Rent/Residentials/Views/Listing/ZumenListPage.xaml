@@ -6,7 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:mod="using:ZumenSearch.Presentation.Shell.Models"
     xmlns:modresidentials="using:ZumenSearch.Presentation.Features.Rent.Residentials.Models"
-    xmlns:entities="using:ZumenSearch.Domain.Entities.Rent.Residentials"
+    xmlns:viewmodels="using:ZumenSearch.Presentation.Features.Rent.Residentials.ViewModels"
     xmlns:local="using:ZumenSearch.Presentation.Features.Rent.Residentials.Views.Listing"
     mc:Ignorable="d"
     NavigationCacheMode="Required">
@@ -35,7 +35,7 @@
                 <ItemsRepeater x:Name="ItemsView" ItemsSource="{x:Bind ViewModel.Pdfs, Mode=TwoWay}" MinWidth="300" MinHeight="225" ScrollViewer.HorizontalScrollMode="Disabled" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <!--  SelectionChanged="ItemsView_SelectionChanged" SelectionMode="Single" IsItemInvokedEnabled="False"  -->
                     <ItemsRepeater.ItemTemplate>
-                        <DataTemplate x:DataType="entities:ListingPdf">
+                        <DataTemplate x:DataType="viewmodels:ListingPdfViewModel">
                             <Border Style="{StaticResource RoundCardBorderStyle}">
                                 <Grid>
                                     <Grid.ColumnDefinitions>

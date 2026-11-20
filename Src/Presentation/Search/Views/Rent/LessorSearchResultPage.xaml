@@ -5,13 +5,13 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:mod="using:ZumenSearch.Presentation.Shell.Models"
-    xmlns:modsearchresult="using:ZumenSearch.Application.SearchResults"
+    xmlns:modsearchresult="using:ZumenSearch.Presentation.Search"
     xmlns:local="using:ZumenSearch.Presentation.Search.Views.Rent"
     mc:Ignorable="d"
     NavigationCacheMode="Required">
     <Page.Resources>
         <!-- DataTemplate for NaturalPerson -->
-        <DataTemplate x:Key="NaturalPersonTemplate" x:DataType="modsearchresult:PersonSearchResultItem">
+        <DataTemplate x:Key="NaturalPersonTemplate" x:DataType="modsearchresult:PersonSearchResultItemViewModel">
             <ItemContainer DataContext="{x:Bind}" IsDoubleTapEnabled="True" DoubleTapped="SearchResult_DoubleTapped" PointerPressed="ItemContainer_PointerPressed" PointerReleased="ItemContainer_PointerReleased" RightTapped="ItemContainer_RightTapped">
                 <ItemContainer.KeyboardAccelerators>
                     <KeyboardAccelerator Key="Enter" Modifiers="None" Invoked="ItemsViewKeyboardAccelerator_Invoked" />
@@ -36,7 +36,7 @@
         </DataTemplate>
 
         <!-- DataTemplate for LegalPerson -->
-        <DataTemplate x:Key="LegalPersonTemplate" x:DataType="modsearchresult:PersonSearchResultItem">
+        <DataTemplate x:Key="LegalPersonTemplate" x:DataType="modsearchresult:PersonSearchResultItemViewModel">
             <ItemContainer DataContext="{x:Bind}" IsDoubleTapEnabled="True" DoubleTapped="SearchResult_DoubleTapped" PointerPressed="ItemContainer_PointerPressed" PointerReleased="ItemContainer_PointerReleased" RightTapped="ItemContainer_RightTapped">
                 <ItemContainer.KeyboardAccelerators>
                     <KeyboardAccelerator Key="Enter" Modifiers="None" Invoked="ItemsViewKeyboardAccelerator_Invoked" />
@@ -118,7 +118,7 @@
             <StackPanel Grid.Row="0" Padding="{StaticResource ContentPadding}">
 
                 <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Margin="0,0,24,0" HorizontalAlignment="Right">
-                    <AppBarButton Icon="Delete" Label="削除" Command="{x:Bind ViewModel.DeleteRentLessorCommand, Mode=OneWay}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}"/>
+                    <AppBarButton Icon="Delete" Label="削除" Command="{x:Bind ViewModel.DeleteRentLessorSearchResultCommand, Mode=OneWay}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}"/>
                     <AppBarButton Icon="Sort" IsCompact="True" ToolTipService.ToolTip="Sort" Label="並べ替え" AutomationProperties.Name="Sort" IsEnabled="False">
                         <AppBarButton.Flyout>
                             <MenuFlyout>
@@ -129,7 +129,7 @@
                         </AppBarButton.Flyout>
                     </AppBarButton>
                     <AppBarButton Icon="Copy" Label="複製" IsEnabled="False"/>
-                    <AppBarButton Icon="Edit" Label="編集" Command="{x:Bind ViewModel.EditRentLessorCommand}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}"/>
+                    <AppBarButton Icon="Edit" Label="編集" Command="{x:Bind ViewModel.EditRentLessorSearchResultCommand}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}"/>
                 </CommandBar>
 
                 <Border BorderThickness="0,1,0,0" BorderBrush="{ThemeResource NavigationViewItemSeparatorForeground}"></Border>
@@ -141,14 +141,14 @@
                 <ItemsView x:Name="SearchResultListView" ItemTemplate="{StaticResource PersonTypeSelector}" Margin="0,12,0,0" ItemsSource="{x:Bind ViewModel.RentLessorSearchResult, Mode=OneWay}" AllowFocusOnInteraction="False" SelectionMode="Single">
                     <ItemsView.ContextFlyout>
                         <MenuFlyout>
-                            <MenuFlyoutItem Text="編集" Icon="Edit" Command="{x:Bind ViewModel.EditRentLessorCommand, Mode=OneWay}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}">
+                            <MenuFlyoutItem Text="編集" Icon="Edit" Command="{x:Bind ViewModel.EditRentLessorSearchResultCommand, Mode=OneWay}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}">
                                 <MenuFlyoutItem.KeyboardAccelerators>
                                     <KeyboardAccelerator Key="Enter" />
                                 </MenuFlyoutItem.KeyboardAccelerators>
                             </MenuFlyoutItem>
                             <MenuFlyoutItem Text="複製" Icon="Copy"></MenuFlyoutItem>
                             <MenuFlyoutSeparator/>
-                            <MenuFlyoutItem Text="削除" Icon="Delete" Command="{x:Bind ViewModel.DeleteRentLessorCommand, Mode=OneWay}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}"></MenuFlyoutItem>
+                            <MenuFlyoutItem Text="削除" Icon="Delete" Command="{x:Bind ViewModel.DeleteRentLessorSearchResultCommand, Mode=OneWay}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}"></MenuFlyoutItem>
                         </MenuFlyout>
                     </ItemsView.ContextFlyout>
                 </ItemsView>

@@ -6,7 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     xmlns:mod="using:ZumenSearch.Presentation.Shell.Models"
-    xmlns:modresidentials="using:ZumenSearch.Presentation.Features.Rent.Residentials.Models"
+    xmlns:modresidentials="using:ZumenSearch.Domain.Entities.Rent.Residentials"
     NavigationCacheMode="Required">
 
     <Grid x:Name="ContentArea" Padding="36,0,36,24">

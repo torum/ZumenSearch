@@ -3,16 +3,16 @@
 
 using ZumenSearch.Domain.Enums;
 
-
 namespace ZumenSearch.Domain.Entities.Base;
+
 // Aggregate Root entity.
 
 // <summary>
-// Base class for Aggregate Root entities that coincidentaly all have name properties such as properties, listings, and persons.
-// Provides common properties and methods for managing entity state.
+// Base class for Aggregate Root entities that coincidentally all have name properties such as properties, listings, and persons.
 // </summary>
 // <remarks>
 // </remarks>
+
 public abstract class EntityAggregateBase : EntityBase
 {
     protected EntityAggregateBase(string id, EntityStatus staus) : base(id, staus)

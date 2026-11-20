@@ -1,10 +1,7 @@
 ﻿#pragma warning disable IDE0079 // Remove unnecessary suppression
 #pragma warning disable IDE0290 // Use primary constructor
-using ZumenSearch.Domain.Entities.Person;
+
 using ZumenSearch.Domain.Enums;
-using ZumenSearch.Application.Results;
-
-
 
 namespace ZumenSearch.Domain.Entities.Base;
 

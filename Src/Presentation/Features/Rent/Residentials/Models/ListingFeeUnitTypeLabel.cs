@@ -1,10 +1,6 @@
-namespace ZumenSearch.Presentation.Features.Rent.Residentials.Models;
+using ZumenSearch.Domain.Entities.Rent.Residentials;
 
-public enum FeeUnitType
-{
-    Months,
-    Yen
-}
+namespace ZumenSearch.Presentation.Features.Rent.Residentials.Models;
 
 public sealed class ListingFeeUnitTypeLabel(FeeUnitType key)
 {

@@ -1,10 +1,6 @@
-namespace ZumenSearch.Presentation.Features.Rent.Residentials.Models;
+using ZumenSearch.Domain.Entities.Rent.Residentials;
 
-public enum ListingCommissionUnitType
-{
-    Percent,
-    Yen
-}
+namespace ZumenSearch.Presentation.Features.Rent.Residentials.Models;
 
 public sealed class ListingCommissionUnitTypeLabel(ListingCommissionUnitType key)
 {

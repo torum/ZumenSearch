@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using ZumenSearch.Domain.Entities.Rent.Residentials;
 
 namespace ZumenSearch.Presentation.Features.Rent.Residentials.Models;
-
-public enum ExposureDirectionType { Unspecified, North, Northeast, East, Southeast, South, Southwest, West, Northwest }
 
 public sealed class ListingExposureDirectionTypeLabel(ExposureDirectionType key)
 {

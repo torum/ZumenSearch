@@ -70,7 +70,7 @@ public sealed partial class ListingViewModel
         {
             picture.BasePath = _listingDataDirectoryPath;
             picture.ParentViewModel = this;
-            picture.PropertyChanged += OnListingPictureChanged;
+            //picture.PropertyChanged += OnListingPictureChanged;
             Pictures.Add(picture);
         }
         _unit.Pictures = Pictures;
@@ -252,7 +252,7 @@ public sealed partial class ListingViewModel
                 await source.CopyToAsync(target);
             }
             var picture = new ListingPicture(id, filename, EntityStatus.New) { BasePath = _listingDataDirectoryPath, ParentViewModel = this };
-            picture.PropertyChanged += OnListingPictureChanged;
+            //picture.PropertyChanged += OnListingPictureChanged;
             Pictures.Add(picture);
             _unsavedUnitPictureFileList.Add(destination);
             _incompletePictureFiles.Remove(destination);
@@ -268,7 +268,7 @@ public sealed partial class ListingViewModel
         {
             if (await _dialogService.ShowDeleteConfirmationDialog("この募集物件の写真を削除しますか？") != Microsoft.UI.Xaml.Controls.ContentDialogResult.Primary) return;
             if (!Pictures.Remove(picture)) return;
-            picture.PropertyChanged -= OnListingPictureChanged;
+            //picture.PropertyChanged -= OnListingPictureChanged;
             picture.ParentViewModel = null;
             _unit.PicturesToBeDeleted.Add(picture);
             MarkEdited();

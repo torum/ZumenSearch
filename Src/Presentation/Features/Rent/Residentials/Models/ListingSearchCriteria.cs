@@ -1,3 +1,5 @@
+using ZumenSearch.Domain.Entities.Rent.Residentials;
+
 namespace ZumenSearch.Presentation.Features.Rent.Residentials.Models;
 
 public sealed class ListingSearchCriteria

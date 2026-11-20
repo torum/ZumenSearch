@@ -1,33 +1,6 @@
+using ZumenSearch.Domain.Entities.Rent.Residentials;
+
 namespace ZumenSearch.Presentation.Features.Rent.Residentials.Models;
-
-public enum FloorPlanType
-{
-    Unspecified,
-    // 単身向け
-    OneR,       // 1R（ワンルーム）
-    OneK,       // 1K
-    OneDK,      // 1DK
-    OneLDK,     // 1LDK
-
-    // 二人暮らし〜小世帯向け
-    TwoK,       // 2K
-    TwoDK,      // 2DK
-    TwoLDK,     // 2LDK
-
-    // ファミリー向け
-    ThreeK,     // 3K
-    ThreeDK,    // 3DK
-    ThreeLDK,   // 3LDK
-    FourLDK,    // 4LDK
-    FiveLDK,    // 5LDK
-    SixLDK,     // 6LDK
-
-    // S（サービスルーム）付き
-    OneSLDK,    // 1SLDK
-    TwoSLDK,    // 2SLDK
-    ThreeSLDK,  // 3SLDK
-    FourSLDK,   // 4SLDK
-}
 
 public sealed class ListingFloorPlanTypeLabel(FloorPlanType key)
 {

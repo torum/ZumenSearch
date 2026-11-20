@@ -20,7 +20,7 @@ public partial class RecentPropertyTypeTemplateSelector : DataTemplateSelector
 
     protected override DataTemplate? SelectTemplateCore(object item)
     {
-        if (item is ZumenSearch.Application.SearchResults.PropertySearchResultItem searchResultItem)
+        if (item is ZumenSearch.Presentation.Search.PropertySearchResultItemViewModel searchResultItem)
         {
             if (searchResultItem.PropertyContextType == PropertyContextType.RentResidential)
             {
@@ -129,7 +129,7 @@ public sealed partial class SearchPage : Page
             return;
         }
 
-        if (container.DataContext is not ZumenSearch.Application.SearchResults.PropertySearchResultItem searchresult)
+        if (container.DataContext is not ZumenSearch.Presentation.Search.PropertySearchResultItemViewModel searchresult)
         {
             Debug.WriteLine($"Not PropertySearchResult. {container.DataContext?.GetType().FullName} @ItemContainer_DoubleTapped");
             return;
@@ -174,7 +174,7 @@ public sealed partial class SearchPage : Page
             return;
         }
 
-        if (container.DataContext is not ZumenSearch.Application.SearchResults.PropertySearchResultItem)
+        if (container.DataContext is not ZumenSearch.Presentation.Search.PropertySearchResultItemViewModel)
         {
             Debug.WriteLine($"Not PropertySearchResult. {container.DataContext?.GetType().FullName} @ItemContainer_RightTapped");
             return;
@@ -197,7 +197,7 @@ public sealed partial class SearchPage : Page
             return;
         }
 
-        if (element.DataContext is not ZumenSearch.Application.SearchResults.PropertySearchResultItem searchresult)
+        if (element.DataContext is not ZumenSearch.Presentation.Search.PropertySearchResultItemViewModel searchresult)
         {
             Debug.WriteLine($"Not PropertySearchResult. {element.DataContext?.GetType().FullName} @ItemContainerKeyboardAccelerator_Invoked");
             return;

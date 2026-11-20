@@ -53,7 +53,7 @@ public sealed class ListingPicture : PictureBase
             {
                 field = value;
                 IsModified = true;
-                OnPropertyChanged();
+                //OnPropertyChanged();
             }
         }
     } = new(ListingPictureType.Unspecified);
@@ -68,7 +68,7 @@ public sealed class ListingPicture : PictureBase
             {
                 field = description;
                 IsModified = true;
-                OnPropertyChanged();
+                //OnPropertyChanged();
             }
         }
     } = string.Empty;
@@ -82,7 +82,7 @@ public sealed class ListingPicture : PictureBase
             {
                 field = value;
                 IsModified = true;
-                OnPropertyChanged();
+                //OnPropertyChanged();
             }
         }
     }

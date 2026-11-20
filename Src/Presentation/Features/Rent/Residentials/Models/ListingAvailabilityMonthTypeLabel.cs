@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using ZumenSearch.Domain.Entities.Rent.Residentials;
 
 namespace ZumenSearch.Presentation.Features.Rent.Residentials.Models;
-
-public enum AvailabilityMonthType { Unspecified, January, February, March, April, May, June, July, August, September, October, November, December }
 
 public sealed class ListingAvailabilityMonthTypeLabel(AvailabilityMonthType key)
 {

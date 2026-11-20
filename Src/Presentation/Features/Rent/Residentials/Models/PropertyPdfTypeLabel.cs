@@ -1,18 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using ZumenSearch.Domain.Enums.Rent.Residentials;
 
 namespace ZumenSearch.Presentation.Features.Rent.Residentials.Models;
-
-public enum PropertyPdfType
-{
-    Unspecified,
-    Maisoku,
-    Architectural,
-    Toukibo,
-    Kouzu,
-    Other
-}
 
 public sealed class PropertyPdfTypeLabel(PropertyPdfType key)
 {

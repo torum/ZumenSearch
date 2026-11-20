@@ -3,7 +3,6 @@
 
 using ZumenSearch.Domain.Enums;
 
-
 namespace ZumenSearch.Domain.Entities.Base;
 
 // <summary>
@@ -41,7 +40,7 @@ public abstract class PictureBase : EntityBase
                 return field;
             }
 
-            var imagePath = Path.Combine(BasePath, ImageFilename);
+            string imagePath = Path.Combine(BasePath, ImageFilename);
             field = Path.Exists(imagePath) ? imagePath : null;
             return field;
         }

@@ -36,7 +36,7 @@ public partial class PersonTemplateSelector : DataTemplateSelector
                 return LegalTemplate;
             }
         }
-        else if (item is ZumenSearch.Application.SearchResults.PersonSearchResultItem searchResultItem)
+        else if (item is PersonSearchResultItemViewModel searchResultItem)
         {
             if (searchResultItem.PersonKind == PersonKindType.Natural)
             {
@@ -125,9 +125,9 @@ public sealed partial class LessorSearchResultPage : Page
             return;
         }
 
-        if (container.DataContext is not ZumenSearch.Application.SearchResults.PersonSearchResultItem searchresult)
+        if (container.DataContext is not PersonSearchResultItemViewModel searchresult)
         {
-            Debug.WriteLine($"Not LessorSearchResultItem. {container.DataContext?.GetType().FullName} @SearchResult_DoubleTapped");
+            Debug.WriteLine($"Not PersonSearchResultItemViewModel. {container.DataContext?.GetType().FullName} @SearchResult_DoubleTapped");
             return;
         }
 
@@ -136,9 +136,9 @@ public sealed partial class LessorSearchResultPage : Page
             return;
         }
 
-        if (ViewModel.EditRentLessorCommand.CanExecute(searchresult))
+        if (ViewModel.EditRentLessorSearchResultCommand.CanExecute(searchresult))
         {
-            ViewModel.EditRentLessorCommand.Execute(searchresult);
+            ViewModel.EditRentLessorSearchResultCommand.Execute(searchresult);
         }
     }
 
@@ -187,9 +187,9 @@ public sealed partial class LessorSearchResultPage : Page
             return;
         }
 
-        if (container.DataContext is not ZumenSearch.Application.SearchResults.ListingSearchResultItem)
+        if (container.DataContext is not PersonSearchResultItemViewModel)
         {
-            Debug.WriteLine($"Not ListingSearchResultItem. {container.DataContext?.GetType().FullName} @ItemContainer_RightTapped");
+            Debug.WriteLine($"Not PersonSearchResultItemViewModel. {container.DataContext?.GetType().FullName} @ItemContainer_RightTapped");
             return;
         }
 
@@ -211,9 +211,9 @@ public sealed partial class LessorSearchResultPage : Page
             return;
         }
 
-        if (element.DataContext is not ZumenSearch.Application.SearchResults.PersonSearchResultItem searchresult)
+        if (element.DataContext is not PersonSearchResultItemViewModel searchresult)
         {
-            Debug.WriteLine($"Not LessorSearchResultItem. {element.DataContext?.GetType().FullName} @ItemContainerKeyboardAccelerator_Invoked");
+            Debug.WriteLine($"Not PersonSearchResultItemViewModel. {element.DataContext?.GetType().FullName} @ItemContainerKeyboardAccelerator_Invoked");
             return;
         }
 
@@ -222,9 +222,9 @@ public sealed partial class LessorSearchResultPage : Page
             return;
         }
 
-        if (ViewModel.EditRentLessorCommand.CanExecute(searchresult))
+        if (ViewModel.EditRentLessorSearchResultCommand.CanExecute(searchresult))
         {
-            ViewModel.EditRentLessorCommand.Execute(searchresult);
+            ViewModel.EditRentLessorSearchResultCommand.Execute(searchresult);
         }
     }
 
