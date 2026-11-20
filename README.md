@@ -29,7 +29,7 @@
 
 ### プロジェクト構成
 
-`Src` 以下は現状単一の WinUI プロジェクト。Clean Architecture を目指して内部の責務を整理中。レイヤー間の依存関係も今後整理。落ち着いたらTestも整備予定。
+`Src` 以下は現状単一の WinUI プロジェクト。Clean Architecture ベースの構成。
 
 * `Application`：アプリケーション設定、検索結果、処理結果に関するモデル。
 * `Domain`：業務上のエンティティ、列挙型、値オブジェクト。物件や募集情報などのエンティティは `Entities` 以下に業務分野別に配置。
@@ -60,5 +60,3 @@
 * **売買（Sales）**：未実装。
 * データベースは新しいスキーマでの初期作成を対象としており、開発中で未確定の項目が多いためマイグレーション処理は現在のところ実装していない。
 
-### TODO:
-* Move UI-independent contracts and data shapes into Application, have ViewModels depend on application use cases, and keep Infrastructure responsible for implementing those contracts.

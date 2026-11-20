@@ -25,7 +25,7 @@
 		<WindowsPackageType>None</WindowsPackageType>
 
 		<!-- Runtimes -->
-		<SelfContained>false</SelfContained>
+		<SelfContained>true</SelfContained>
 		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
 
 		<!-- AoT -->
@@ -93,7 +93,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Folder Include="Application\UseCases\Rent\Residentials\" />
 		<Folder Include="Domain\Entities\Brokers\" />
 		<Folder Include="Domain\Entities\Rent\Lessors\" />
 		<Folder Include="Domain\Entities\Rent\Commercials\" />
