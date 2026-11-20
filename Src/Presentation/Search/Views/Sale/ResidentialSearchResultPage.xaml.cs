@@ -13,6 +13,7 @@ using ZumenSearch.Infrastructure.Configuration.Contracts;
 using ZumenSearch.Infrastructure.DataAccess.Contracts;
 using ZumenSearch.Presentation.Services.Contracts;
 using ZumenSearch.Presentation.Shell.ViewModels;
+using ZumenSearch.Presentation.Search.ViewModels;
 
 namespace ZumenSearch.Presentation.Search.Views.Sale;
 
@@ -38,7 +39,7 @@ public sealed partial class ResidentialSearchResultPage : Page
     DoubleTappedRoutedEventArgs e)
     {
         if (ResultList.SelectedItem
-            is ZumenSearch.Presentation.Search.PropertySearchResultItemViewModel selected &&
+            is PropertySearchResultItemViewModel selected &&
             ViewModel.EditSaleResidentialCommand.CanExecute(selected))
         {
             ViewModel.EditSaleResidentialCommand.Execute(selected);

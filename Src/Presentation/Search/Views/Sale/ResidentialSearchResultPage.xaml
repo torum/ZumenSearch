@@ -5,7 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:mod="using:ZumenSearch.Presentation.Shell.Models"
-    xmlns:modsearchresult="using:ZumenSearch.Presentation.Search"
+    xmlns:searchresultviewmodel="using:ZumenSearch.Presentation.Search.ViewModels"
     mc:Ignorable="d"
     NavigationCacheMode="Required">
 
@@ -29,7 +29,7 @@
             DoubleTapped="ResultList_DoubleTapped">
 
             <ListView.ItemTemplate>
-                <DataTemplate x:DataType="modsearchresult:PropertySearchResultItemViewModel">
+                <DataTemplate x:DataType="searchresultviewmodel:PropertySearchResultItemViewModel">
                     <Grid Padding="12">
                         <TextBlock
                             Text="{x:Bind Name, Mode=OneWay}"

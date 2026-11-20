@@ -2,7 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using ZumenSearch.Application.SearchResults;
 using ZumenSearch.Domain.Enums;
 
-namespace ZumenSearch.Presentation.Search;
+namespace ZumenSearch.Presentation.Search.ViewModels;
 
 public sealed class ListingSearchResultItemViewModel : ObservableObject
 {

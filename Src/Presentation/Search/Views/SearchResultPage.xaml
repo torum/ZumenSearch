@@ -6,12 +6,12 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:local="using:ZumenSearch.Presentation.Search.Views"
     xmlns:mod="using:ZumenSearch.Presentation.Shell.Models"
-    xmlns:modsearchresult="using:ZumenSearch.Presentation.Search"
+    xmlns:searchresultviewmodel="using:ZumenSearch.Presentation.Search.ViewModels"
     mc:Ignorable="d"
     NavigationCacheMode="Required">
     <Page.Resources>
         <!-- DataTemplate for Rent Residential -->
-        <DataTemplate x:Key="RentResidentialTemplate" x:DataType="modsearchresult:PropertySearchResultItemViewModel">
+        <DataTemplate x:Key="RentResidentialTemplate" x:DataType="searchresultviewmodel:PropertySearchResultItemViewModel">
             <ItemContainer DataContext="{x:Bind}" IsDoubleTapEnabled="True" AllowFocusOnInteraction="False" DoubleTapped="SearchResult_DoubleTapped" PointerPressed="ItemContainer_PointerPressed" PointerReleased="ItemContainer_PointerReleased" RightTapped="ItemContainer_RightTapped">
                 <ItemContainer.KeyboardAccelerators>
                     <KeyboardAccelerator Key="Enter" Modifiers="None" Invoked="ItemsViewKeyboardAccelerator_Invoked" />
@@ -40,7 +40,7 @@
         </DataTemplate>
 
         <!-- DataTemplate for Rent Commercial -->
-        <DataTemplate x:Key="RentCommercialTemplate" x:DataType="modsearchresult:PropertySearchResultItemViewModel">
+        <DataTemplate x:Key="RentCommercialTemplate" x:DataType="searchresultviewmodel:PropertySearchResultItemViewModel">
             <ItemContainer DataContext="{x:Bind}" IsDoubleTapEnabled="True" AllowFocusOnInteraction="False" DoubleTapped="SearchResult_DoubleTapped" PointerPressed="ItemContainer_PointerPressed" PointerReleased="ItemContainer_PointerReleased" RightTapped="ItemContainer_RightTapped">
                 <ItemContainer.KeyboardAccelerators>
                     <KeyboardAccelerator Key="Enter" Modifiers="None" Invoked="ItemsViewKeyboardAccelerator_Invoked" />
@@ -69,7 +69,7 @@
         </DataTemplate>
 
         <!-- DataTemplate for Sale Residential -->
-        <DataTemplate x:Key="SaleResidentialTemplate" x:DataType="modsearchresult:PropertySearchResultItemViewModel">
+        <DataTemplate x:Key="SaleResidentialTemplate" x:DataType="searchresultviewmodel:PropertySearchResultItemViewModel">
             <ItemContainer DataContext="{x:Bind}" IsDoubleTapEnabled="True" AllowFocusOnInteraction="False" DoubleTapped="SearchResult_DoubleTapped" PointerPressed="ItemContainer_PointerPressed" PointerReleased="ItemContainer_PointerReleased" RightTapped="ItemContainer_RightTapped">
                 <ItemContainer.KeyboardAccelerators>
                     <KeyboardAccelerator Key="Enter" Modifiers="None" Invoked="ItemsViewKeyboardAccelerator_Invoked" />

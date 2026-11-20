@@ -11,6 +11,7 @@ using ZumenSearch.Infrastructure.Configuration.Contracts;
 using ZumenSearch.Infrastructure.DataAccess.Contracts;
 using ZumenSearch.Presentation.Services.Contracts;
 using ZumenSearch.Presentation.Shell.ViewModels;
+using ZumenSearch.Presentation.Search.ViewModels;
 
 namespace ZumenSearch.Presentation.Search.Views;
 
@@ -22,7 +23,7 @@ public partial class PropertyTypeTemplateSelector : DataTemplateSelector
 
     protected override DataTemplate? SelectTemplateCore(object item)
     {
-        if (item is ZumenSearch.Presentation.Search.PropertySearchResultItemViewModel searchResultItem)
+        if (item is PropertySearchResultItemViewModel searchResultItem)
         {
             if (searchResultItem.PropertyContextType == PropertyContextType.RentResidential)
             {
@@ -105,7 +106,7 @@ public sealed partial class SearchResultPage : Page
             return;
         }
 
-        if (container.DataContext is not ZumenSearch.Presentation.Search.PropertySearchResultItemViewModel searchresult)
+        if (container.DataContext is not PropertySearchResultItemViewModel searchresult)
         {
             Debug.WriteLine($"Not PropertySearchResult. {container.DataContext?.GetType().FullName} @SearchResult_DoubleTapped");
             return;
@@ -167,7 +168,7 @@ public sealed partial class SearchResultPage : Page
             return;
         }
 
-        if (container.DataContext is not ZumenSearch.Presentation.Search.PropertySearchResultItemViewModel)
+        if (container.DataContext is not PropertySearchResultItemViewModel)
         {
             Debug.WriteLine($"Not PropertySearchResult. {container.DataContext?.GetType().FullName} @ItemContainer_RightTapped");
             return;
@@ -192,7 +193,7 @@ public sealed partial class SearchResultPage : Page
             return;
         }
 
-        if (element.DataContext is not ZumenSearch.Presentation.Search.PropertySearchResultItemViewModel searchresult)
+        if (element.DataContext is not PropertySearchResultItemViewModel searchresult)
         {
             Debug.WriteLine($"Not PropertySearchResult. {element.DataContext?.GetType().FullName} @ItemContainerKeyboardAccelerator_Invoked");
             return;

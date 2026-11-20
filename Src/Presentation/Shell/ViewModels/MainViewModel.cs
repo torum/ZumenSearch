@@ -24,6 +24,7 @@ using ZumenSearch.Infrastructure.DataAccess.Contracts;
 using ZumenSearch.Presentation.Services.Contracts;
 using ZumenSearch.Presentation.Factories.AbstractFactory;
 using ZumenSearch.Presentation.Shell.Views;
+using ZumenSearch.Presentation.Search.ViewModels;
 
 namespace ZumenSearch.Presentation.Shell.ViewModels;
 

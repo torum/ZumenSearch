@@ -5,13 +5,13 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:mod="using:ZumenSearch.Presentation.Shell.Models"
-    xmlns:modsearchresult="using:ZumenSearch.Presentation.Search"
+    xmlns:searchresultviewmodel="using:ZumenSearch.Presentation.Search.ViewModels"
     xmlns:local="using:ZumenSearch.Presentation.Search.Views.Rent"
     mc:Ignorable="d"
     NavigationCacheMode="Required">
     <Page.Resources>
         <!-- DataTemplate for NaturalPerson -->
-        <DataTemplate x:Key="NaturalPersonTemplate" x:DataType="modsearchresult:PersonSearchResultItemViewModel">
+        <DataTemplate x:Key="NaturalPersonTemplate" x:DataType="searchresultviewmodel:PersonSearchResultItemViewModel">
             <ItemContainer DataContext="{x:Bind}" IsDoubleTapEnabled="True" DoubleTapped="SearchResult_DoubleTapped" PointerPressed="ItemContainer_PointerPressed" PointerReleased="ItemContainer_PointerReleased" RightTapped="ItemContainer_RightTapped">
                 <ItemContainer.KeyboardAccelerators>
                     <KeyboardAccelerator Key="Enter" Modifiers="None" Invoked="ItemsViewKeyboardAccelerator_Invoked" />
@@ -36,7 +36,7 @@
         </DataTemplate>
 
         <!-- DataTemplate for LegalPerson -->
-        <DataTemplate x:Key="LegalPersonTemplate" x:DataType="modsearchresult:PersonSearchResultItemViewModel">
+        <DataTemplate x:Key="LegalPersonTemplate" x:DataType="searchresultviewmodel:PersonSearchResultItemViewModel">
             <ItemContainer DataContext="{x:Bind}" IsDoubleTapEnabled="True" DoubleTapped="SearchResult_DoubleTapped" PointerPressed="ItemContainer_PointerPressed" PointerReleased="ItemContainer_PointerReleased" RightTapped="ItemContainer_RightTapped">
                 <ItemContainer.KeyboardAccelerators>
                     <KeyboardAccelerator Key="Enter" Modifiers="None" Invoked="ItemsViewKeyboardAccelerator_Invoked" />
