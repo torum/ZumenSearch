@@ -8,6 +8,7 @@
     xmlns:local="using:ZumenSearch.Presentation.Search.Views"
     xmlns:mod="using:ZumenSearch.Presentation.Shell.Models"
     xmlns:searchresultviewmodel="using:ZumenSearch.Presentation.Search.ViewModels"
+    xmlns:searchresults="using:ZumenSearch.Application.SearchResults"
     xmlns:controls="using:CommunityToolkit.WinUI.Controls"
     xmlns:framework="using:Microsoft.UI.Xaml"
     mc:Ignorable="d"
@@ -181,30 +182,16 @@
 
                 <AutoSuggestBox x:Name="SearchAutoSuggestBox" TabIndex="0" PlaceholderText="検索キーワードを入力" Text="{x:Bind ViewModel.SearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" QueryIcon="Find" MaxWidth="500" QuerySubmitted="AutoSuggestBox_QuerySubmitted"/>
 
-                <controls:SwitchPresenter Value="{x:Bind ((framework:FrameworkElement)SegmentedControl.SelectedItem).Tag, Mode=OneWay}">
-                    <controls:Case Value="one">
-                        <VariableSizedWrapGrid x:Name="RentSearchTarget" Orientation="Horizontal" HorizontalAlignment="Center" MaximumRowsOrColumns="4">
-                            <RadioButton Content="物件名" GroupName="RentMainSearchText" IsChecked="True" Margin="0,0,12,6"/>
-                            <RadioButton Content="所在地" GroupName="RentMainSearchText"/>
-                            <RadioButton Content="最寄り駅" GroupName="RentMainSearchText"/>
-                            <RadioButton Content="沿線名" GroupName="RentMainSearchText"/>
-                            <RadioButton Content="不動産ID" GroupName="RentMainSearchText"/>
-                            <RadioButton Content="宅建業者名" GroupName="RentMainSearchText"/>
-                            <RadioButton Content="貸主名" GroupName="RentMainSearchText"/>
-                        </VariableSizedWrapGrid>
-                    </controls:Case>
-                    <controls:Case Value="two">
-                        <VariableSizedWrapGrid x:Name="BuySellSearchTarget" Orientation="Horizontal" HorizontalAlignment="Center" MaximumRowsOrColumns="4">
-                            <RadioButton Content="物件名" GroupName="BuySellMainSearchText" IsChecked="True" Margin="0,0,12,6"/>
-                            <RadioButton Content="所在地" GroupName="BuySellMainSearchText"/>
-                            <RadioButton Content="最寄り駅" GroupName="BuySellMainSearchText"/>
-                            <RadioButton Content="沿線名" GroupName="BuySellMainSearchText"/>
-                            <RadioButton Content="不動産ID" GroupName="BuySellMainSearchText"/>
-                            <RadioButton Content="宅建業者名" GroupName="RentMainSearchText"/>
-                        </VariableSizedWrapGrid>
-                    </controls:Case>
-                </controls:SwitchPresenter>
-
+                <VariableSizedWrapGrid x:Name="RentSearchTarget" Orientation="Horizontal" HorizontalAlignment="Center" MaximumRowsOrColumns="4">
+                    <RadioButton Content="物件名" GroupName="MainSearchText" IsChecked="True" Command="{x:Bind ViewModel.SetPropertySearchTargetCommand}" CommandParameter="{x:Bind searchresults:PropertySearchTarget.PropertyName}" Margin="0,0,12,6"/>
+                    <RadioButton Content="所在地" GroupName="MainSearchText" Command="{x:Bind ViewModel.SetPropertySearchTargetCommand}" CommandParameter="{x:Bind searchresults:PropertySearchTarget.Address}"/>
+                    <RadioButton Content="最寄り駅" GroupName="MainSearchText" Command="{x:Bind ViewModel.SetPropertySearchTargetCommand}" CommandParameter="{x:Bind searchresults:PropertySearchTarget.Station}"/>
+                    <RadioButton Content="沿線名" GroupName="MainSearchText" Command="{x:Bind ViewModel.SetPropertySearchTargetCommand}" CommandParameter="{x:Bind searchresults:PropertySearchTarget.RailLine}"/>
+                    <RadioButton Content="不動産ID" GroupName="MainSearchText" Command="{x:Bind ViewModel.SetPropertySearchTargetCommand}" CommandParameter="{x:Bind searchresults:PropertySearchTarget.FudousanId}"/>
+                    <RadioButton Content="宅建業者名" GroupName="MainSearchText" Command="{x:Bind ViewModel.SetPropertySearchTargetCommand}" CommandParameter="{x:Bind searchresults:PropertySearchTarget.BrokerName}"/>
+                    <RadioButton Content="貸主名" GroupName="MainSearchText" Command="{x:Bind ViewModel.SetPropertySearchTargetCommand}" CommandParameter="{x:Bind searchresults:PropertySearchTarget.LessorName}"/>
+                </VariableSizedWrapGrid>
+                
             </StackPanel>
 
             <Grid Grid.Row="1" Padding="{StaticResource ContentPadding}">

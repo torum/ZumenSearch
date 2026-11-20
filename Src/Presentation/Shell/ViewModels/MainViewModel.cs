@@ -16,7 +16,6 @@ using ZumenSearch.Application.Configuration;
 using ZumenSearch.Application.Results;
 using ZumenSearch.Presentation.Shell.Models;
 using ZumenSearch.Presentation.Messaging;
-
 using ZumenSearch.Application.SearchResults;
 using ZumenSearch.Presentation.Search;
 using ZumenSearch.Infrastructure.Configuration.Contracts;
@@ -245,12 +244,21 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
 
     #region == Search ==
 
-    // Rent or BuySell
+    // Rent or Sale
     [ObservableProperty]
     public partial int SegIndex { get; set; } = 0;
 
     [ObservableProperty]
     public partial string SearchQuery { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial PropertySearchTarget SelectedPropertySearchTarget { get; set; }
+
+    [RelayCommand]
+    private void SetPropertySearchTarget(PropertySearchTarget searchTarget)
+    {
+        SelectedPropertySearchTarget = searchTarget;
+    }
 
     public ObservableCollection<PropertySearchResultItemViewModel> PropertySearchResult
     {
@@ -680,7 +688,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
 
         PropertySearchResult.Clear();
 
-        var res = await Task.Run(() => _dataAccessService.SelectPropertiesByKeyword(query), _cts.Token);
+        var res = await Task.Run(() => _dataAccessService.SelectPropertiesByKeyword(query, SelectedPropertySearchTarget), _cts.Token);
 
         if (res.IsError)
         {

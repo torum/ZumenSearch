@@ -11,7 +11,7 @@ public interface IDataAccessService
 
     // All Properties
     ZumenSearch.Application.Results.PropertySearchResultWrapper SelectRecentProperties();
-    ZumenSearch.Application.Results.PropertySearchResultWrapper SelectPropertiesByKeyword(string keyword);
+    ZumenSearch.Application.Results.PropertySearchResultWrapper SelectPropertiesByKeyword(string keyword, PropertySearchTarget searchTarget = PropertySearchTarget.PropertyName);
 
     // Rent Residential
     ZumenSearch.Application.Results.ResultWrapper UpsertRentResidential(ZumenSearch.Domain.Entities.Rent.Residentials.Property property);

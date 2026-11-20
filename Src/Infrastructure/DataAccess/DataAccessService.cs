@@ -1243,7 +1243,7 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         return res;
     }
 
-    public ZumenSearch.Application.Results.PropertySearchResultWrapper SelectPropertiesByKeyword(string keyword) // TODO: add what type of keyword eg. name/adderss/lessor.
+    public ZumenSearch.Application.Results.PropertySearchResultWrapper SelectPropertiesByKeyword(string keyword, PropertySearchTarget searchTarget = PropertySearchTarget.PropertyName)
     {
         var res = new PropertySearchResultWrapper();
 
@@ -1251,6 +1251,18 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         {
             keyword = "*";
         }
+
+        var whereClause = searchTarget switch
+        {
+            PropertySearchTarget.PropertyName => "p.name LIKE @keyword ESCAPE '\\'",
+            PropertySearchTarget.Address => "p.location_full LIKE @keyword ESCAPE '\\'",
+            PropertySearchTarget.Station => "(p.train1_station_name LIKE @keyword ESCAPE '\\' OR p.train2_station_name LIKE @keyword ESCAPE '\\' OR p.train3_station_name LIKE @keyword ESCAPE '\\' OR p.train4_station_name LIKE @keyword ESCAPE '\\')",
+            PropertySearchTarget.RailLine => "(p.train1_line_name LIKE @keyword ESCAPE '\\' OR p.train2_line_name LIKE @keyword ESCAPE '\\' OR p.train3_line_name LIKE @keyword ESCAPE '\\' OR p.train4_line_name LIKE @keyword ESCAPE '\\')",
+            PropertySearchTarget.FudousanId => "p.fudousan_id LIKE @keyword ESCAPE '\\'",
+            PropertySearchTarget.BrokerName => "EXISTS (SELECT 1 FROM brokers_properties_listings AS relation INNER JOIN brokers AS broker ON broker.broker_id = relation.broker_id WHERE relation.property_id = p.property_id AND broker.name LIKE @keyword ESCAPE '\\')",
+            PropertySearchTarget.LessorName => "EXISTS (SELECT 1 FROM rent_lessors_properties_listings AS relation INNER JOIN rent_lessors AS lessor ON lessor.lessor_id = relation.lessor_id WHERE relation.property_id = p.property_id AND lessor.name LIKE @keyword ESCAPE '\\')",
+            _ => throw new ArgumentOutOfRangeException(nameof(searchTarget), searchTarget, null)
+        };
 
         _readerWriterLock.EnterReadLock();
         try
@@ -1265,7 +1277,8 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             }
             else
             {
-                cmd.CommandText = $"SELECT * FROM properties WHERE name LIKE '%{keyword}%' ORDER BY updated_at DESC";
+                cmd.CommandText = $"SELECT * FROM properties AS p WHERE {whereClause} ORDER BY p.updated_at DESC";
+                cmd.Parameters.AddWithValue("@keyword", "%" + EscapeLikeValue(keyword) + "%");
             }
 
             using var reader = cmd.ExecuteReader();
@@ -1312,6 +1325,14 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
         }
 
         return res;
+    }
+
+    private static string EscapeLikeValue(string value)
+    {
+        return value.Trim()
+            .Replace("\\", "\\\\", StringComparison.Ordinal)
+            .Replace("%", "\\%", StringComparison.Ordinal)
+            .Replace("_", "\\_", StringComparison.Ordinal);
     }
 
     #endregion
@@ -3229,14 +3250,6 @@ public sealed partial class DataAccessService : IDataAccessService, IDisposable
             }
 
             // Local filter builders keep parameter handling consistent without splitting the method.
-            string EscapeLikeValue(string value)
-            {
-                return value.Trim()
-                    .Replace("\\", "\\\\", StringComparison.Ordinal)
-                    .Replace("%", "\\%", StringComparison.Ordinal)
-                    .Replace("_", "\\_", StringComparison.Ordinal);
-            }
-
             void AddTextFilter(string value, string condition, string parameterName)
             {
                 if (string.IsNullOrWhiteSpace(value))
