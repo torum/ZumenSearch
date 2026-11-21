@@ -30,7 +30,14 @@ public sealed partial class BasicPage : Page
 
         _initialized = true;
 
-        this.TextBox_NameCompany.Focus(Microsoft.UI.Xaml.FocusState.Programmatic);
+        if (ViewModel?.PersonKindIndex == 0)
+        {
+            this.TextBox_NameLast.Focus(Microsoft.UI.Xaml.FocusState.Programmatic);
+        }
+        else
+        {
+            this.TextBox_NameCompany.Focus(Microsoft.UI.Xaml.FocusState.Programmatic);
+        }
     }
 
     protected override void OnNavigatedTo(NavigationEventArgs e)

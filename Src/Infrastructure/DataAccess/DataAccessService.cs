@@ -4,6 +4,7 @@ using Microsoft.Data.Sqlite;
 using ZumenSearch.Application.Contracts;
 using ZumenSearch.Application.Results;
 using ZumenSearch.Application.SearchResults;
+using ZumenSearch.Domain.Entities.Person;
 using ZumenSearch.Domain.Enums;
 using ZumenSearch.Infrastructure.DataAccess.Contracts;
 using ZumenSearch.Infrastructure.Platform;
@@ -605,8 +606,11 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
                     "name_company_type TEXT NOT NULL DEFAULT ''," +
                     "name_company_type_position INTEGER NOT NULL DEFAULT 0," +
 
-                    // Phone numbers
-                    // Address
+                    "phone_number TEXT NOT NULL DEFAULT ''," +
+                    "mobile_phone_number TEXT NOT NULL DEFAULT ''," +
+                    "contact_name TEXT NOT NULL DEFAULT ''," +
+                    "postal_code TEXT NOT NULL DEFAULT ''," +
+                    "address TEXT NOT NULL DEFAULT ''," +
                     "remarks TEXT NOT NULL DEFAULT ''," +
 
                     "updated_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc'))," +
@@ -786,6 +790,11 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
                         name_company TEXT NOT NULL DEFAULT '',
                         name_company_type TEXT NOT NULL DEFAULT '',
                         name_company_type_position INTEGER NOT NULL DEFAULT 0,
+                        phone_number TEXT NOT NULL DEFAULT '',
+                        mobile_phone_number TEXT NOT NULL DEFAULT '',
+                        contact_name TEXT NOT NULL DEFAULT '',
+                        postal_code TEXT NOT NULL DEFAULT '',
+                        address TEXT NOT NULL DEFAULT '',
                         remarks TEXT NOT NULL DEFAULT '',
                         updated_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc')),
                         created_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc'))
@@ -2360,7 +2369,7 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
                 foreach (var lessId in lessorIdList)
                 {
                     // Get actuall lessors
-                    cmd.CommandText = "SELECT lessor_id, name, person_kind, name_last, name_first, name_company, name_company_type, name_company_type_position, remarks FROM rent_lessors WHERE lessor_id = @lessorId";
+                    cmd.CommandText = "SELECT lessor_id, name, person_kind, name_last, name_first, name_company, name_company_type, name_company_type_position, phone_number, mobile_phone_number, contact_name, postal_code, address, remarks FROM rent_lessors WHERE lessor_id = @lessorId";
                     cmd.Parameters.Clear();
                     cmd.Parameters.AddWithValue("@lessorId", lessId);
 #pragma warning disable IDE0063 // Use simple 'using' statement
@@ -2414,7 +2423,7 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
                 foreach (var brokerId in brokerIdList)
                 {
                     // Get actuall brokers
-                    cmd.CommandText = "SELECT broker_id, name, person_kind, name_last, name_first, name_company, name_company_type, name_company_type_position, remarks FROM brokers WHERE broker_id = @brokerId";
+                    cmd.CommandText = "SELECT broker_id, name, person_kind, name_last, name_first, name_company, name_company_type, name_company_type_position, phone_number, mobile_phone_number, contact_name, postal_code, address, remarks FROM brokers WHERE broker_id = @brokerId";
                     cmd.Parameters.Clear();
                     cmd.Parameters.AddWithValue("@brokerId", brokerId);
 #pragma warning disable IDE0063 // Use simple 'using' statement
@@ -3608,7 +3617,7 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
         {
             foreach (var lessId in lessorIds)
             {
-                cmd.CommandText = "SELECT lessor_id, name, person_kind, name_last, name_first, name_company, name_company_type, name_company_type_position, remarks FROM rent_lessors WHERE lessor_id = @lessorId";
+                cmd.CommandText = "SELECT lessor_id, name, person_kind, name_last, name_first, name_company, name_company_type, name_company_type_position, phone_number, mobile_phone_number, contact_name, postal_code, address, remarks FROM rent_lessors WHERE lessor_id = @lessorId";
                 cmd.Parameters.Clear();
                 cmd.Parameters.AddWithValue("@lessorId", lessId);
 #pragma warning disable IDE0063 // Use simple 'using' statement
@@ -3626,7 +3635,7 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
 
         // 宅建業者（部屋）
         cmd.CommandText = """
-            SELECT b.broker_id, b.name, b.person_kind, b.name_last, b.name_first, b.name_company, b.name_company_type, b.name_company_type_position, b.remarks
+            SELECT b.broker_id, b.name, b.person_kind, b.name_last, b.name_first, b.name_company, b.name_company_type, b.name_company_type_position, b.phone_number, b.mobile_phone_number, b.contact_name, b.postal_code, b.address, b.remarks
             FROM brokers_properties_listings AS association
             INNER JOIN brokers AS b ON b.broker_id = association.broker_id
             WHERE association.property_id = @propertyId AND association.listing_id = @listingId;
@@ -4559,6 +4568,11 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
         l.name_company,
         l.name_company_type,
         l.name_company_type_position,
+        l.phone_number,
+        l.mobile_phone_number,
+        l.contact_name,
+        l.postal_code,
+        l.address,
         l.remarks
     FROM rent_lessors_properties_listings AS r
     INNER JOIN rent_lessors AS l
@@ -4609,6 +4623,11 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
         b.name_company,
         b.name_company_type,
         b.name_company_type_position,
+        b.phone_number,
+        b.mobile_phone_number,
+        b.contact_name,
+        b.postal_code,
+        b.address,
         b.remarks
     FROM brokers_properties_listings AS r
     INNER JOIN brokers AS b
@@ -5148,7 +5167,8 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
         command.Parameters.Clear();
         command.CommandText = """
             SELECT l.lessor_id, l.name, l.person_kind, l.name_last, l.name_first,
-                   l.name_company, l.name_company_type, l.name_company_type_position, l.remarks
+                   l.name_company, l.name_company_type, l.name_company_type_position,
+                   l.phone_number, l.mobile_phone_number, l.contact_name, l.postal_code, l.address, l.remarks
             FROM rent_lessors_properties_listings AS association
             INNER JOIN rent_lessors AS l ON l.lessor_id = association.lessor_id
             WHERE association.property_id = @propertyId
@@ -5172,7 +5192,8 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
         command.Parameters.Clear();
         command.CommandText = """
             SELECT b.broker_id, b.name, b.person_kind, b.name_last, b.name_first,
-                   b.name_company, b.name_company_type, b.name_company_type_position, b.remarks
+                   b.name_company, b.name_company_type, b.name_company_type_position,
+                   b.phone_number, b.mobile_phone_number, b.contact_name, b.postal_code, b.address, b.remarks
             FROM brokers_properties_listings AS association
             INNER JOIN brokers AS b ON b.broker_id = association.broker_id
             WHERE association.property_id = @propertyId
@@ -5935,9 +5956,9 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
                 cmd.CommandType = CommandType.Text;
 
                 // Upsert into rent_lessor
-                var sqlInsertIntoRentLivingRoom = "INSERT INTO rent_lessors (lessor_id, name, person_kind, name_last, name_first, name_company, name_company_type, name_company_type_position, remarks) VALUES (@lessor_id, @name, @personKind, @name_last, @name_first, @name_company, @name_company_type, @name_company_type_position, @remarks) ";
+                var sqlInsertIntoRentLivingRoom = "INSERT INTO rent_lessors (lessor_id, name, person_kind, name_last, name_first, name_company, name_company_type, name_company_type_position, phone_number, mobile_phone_number, contact_name, postal_code, address, remarks) VALUES (@lessor_id, @name, @personKind, @name_last, @name_first, @name_company, @name_company_type, @name_company_type_position, @phone_number, @mobile_phone_number, @contact_name, @postal_code, @address, @remarks) ";
                 sqlInsertIntoRentLivingRoom += "ON CONFLICT(lessor_id) ";
-                sqlInsertIntoRentLivingRoom += "DO UPDATE SET name = @name, person_kind = @personKind, name_last = @name_last, name_first = @name_first, name_company = @name_company, name_company_type = @name_company_type, name_company_type_position = @name_company_type_position, remarks = @remarks, updated_at = @updated_at";
+                sqlInsertIntoRentLivingRoom += "DO UPDATE SET name = @name, person_kind = @personKind, name_last = @name_last, name_first = @name_first, name_company = @name_company, name_company_type = @name_company_type, name_company_type_position = @name_company_type_position, phone_number = @phone_number, mobile_phone_number = @mobile_phone_number, contact_name = @contact_name, postal_code = @postal_code, address = @address, remarks = @remarks, updated_at = @updated_at";
 
                 cmd.CommandText = sqlInsertIntoRentLivingRoom;
 
@@ -5954,6 +5975,9 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
                     cmd.Parameters.AddWithValue("@name_company_type", string.Empty);
                     // TODO: check if int is ok
                     cmd.Parameters.AddWithValue("@name_company_type_position", 0);
+
+                    cmd.Parameters.AddWithValue("@mobile_phone_number", naturalPerson.MobilePhoneNumber);
+                    cmd.Parameters.AddWithValue("@contact_name", string.Empty);
                 }
                 else if (lessor is ZumenSearch.Domain.Entities.Person.PersonLegal legalPerson)
                 {
@@ -5965,7 +5989,14 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
                     cmd.Parameters.AddWithValue("@name_company_type", legalPerson.NameCompanyType);
                     // TODO: check if int is ok
                     cmd.Parameters.AddWithValue("@name_company_type_position", legalPerson.NameCompanyTypePosition);
+
+                    cmd.Parameters.AddWithValue("@mobile_phone_number", string.Empty);
+                    cmd.Parameters.AddWithValue("@contact_name", legalPerson.ContactName);
                 }
+
+                cmd.Parameters.AddWithValue("@phone_number", lessor.PhoneNumber);
+                cmd.Parameters.AddWithValue("@postal_code", lessor.PostalCode);
+                cmd.Parameters.AddWithValue("@address", lessor.Address);
                 cmd.Parameters.AddWithValue("@remarks", lessor.Remarks);
                 cmd.Parameters.AddWithValue("@updated_at", DateTimeOffset.UtcNow.ToString("s"));
 
@@ -6120,7 +6151,8 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
 
             using var cmd = connection.CreateCommand();
 
-            cmd.CommandText = $"SELECT lessor_id, name, person_kind, name_last, name_first, name_company, name_company_type, name_company_type_position, remarks FROM rent_lessors WHERE lessor_id = '{lessorId}'";
+            cmd.CommandText = "SELECT lessor_id, name, person_kind, name_last, name_first, name_company, name_company_type, name_company_type_position, phone_number, mobile_phone_number, contact_name, postal_code, address, remarks FROM rent_lessors WHERE lessor_id = @lessorId";
+            cmd.Parameters.AddWithValue("@lessorId", lessorId);
 
             using (var reader = cmd.ExecuteReader())
             {
@@ -6206,6 +6238,7 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
             naturalPerson.NameLast = Convert.ToString(reader["name_last"], CultureInfo.InvariantCulture) ?? "";
             naturalPerson.NameFirst = Convert.ToString(reader["name_first"], CultureInfo.InvariantCulture) ?? "";
 
+            naturalPerson.MobilePhoneNumber = reader.GetString(reader.GetOrdinal("mobile_phone_number"));
         }
         else if (person is ZumenSearch.Domain.Entities.Person.PersonLegal legalPerson)
         {
@@ -6213,12 +6246,14 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
             legalPerson.NameCompanyType = Convert.ToString(reader["name_company_type"], CultureInfo.InvariantCulture) ?? "";
             legalPerson.NameCompanyTypePosition = Convert.ToInt32(reader["name_company_type_position"], CultureInfo.InvariantCulture);// int
 
+            legalPerson.ContactName = reader.GetString(reader.GetOrdinal("contact_name"));
         }
 
+        person.PhoneNumber = reader.GetString(reader.GetOrdinal("phone_number"));
+        person.PostalCode = reader.GetString(reader.GetOrdinal("postal_code"));
+        person.Address = reader.GetString(reader.GetOrdinal("address"));
 
         person.Remarks = Convert.ToString(reader["remarks"], CultureInfo.InvariantCulture) ?? "";
-
-        // TODO: more.
 
         return person;
     }
@@ -7168,6 +7203,11 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
                     name_company,
                     name_company_type,
                     name_company_type_position,
+                    phone_number,
+                    mobile_phone_number,
+                    contact_name,
+                    postal_code,
+                    address,
                     remarks,
                     updated_at
                 )
@@ -7180,6 +7220,11 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
                     @nameCompany,
                     @nameCompanyType,
                     @nameCompanyTypePosition,
+                    @phoneNumber,
+                    @mobilePhoneNumber,
+                    @contactName,
+                    @postalCode,
+                    @address,
                     @remarks,
                     @updatedAt
                 )
@@ -7191,6 +7236,11 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
                     name_company = excluded.name_company,
                     name_company_type = excluded.name_company_type,
                     name_company_type_position = excluded.name_company_type_position,
+                    phone_number = excluded.phone_number,
+                    mobile_phone_number = excluded.mobile_phone_number,
+                    contact_name = excluded.contact_name,
+                    postal_code = excluded.postal_code,
+                    address = excluded.address,
                     remarks = excluded.remarks,
                     updated_at = excluded.updated_at;
                 """;
@@ -7198,6 +7248,11 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
             command.Parameters.AddWithValue("@brokerId", broker.Id);
             command.Parameters.AddWithValue("@name", broker.Name);
             command.Parameters.AddWithValue("@personKind", broker.PersonKind.ToString());
+            command.Parameters.AddWithValue("@phoneNumber", broker.PhoneNumber);
+            command.Parameters.AddWithValue("@mobilePhoneNumber", broker is PersonNatural naturalPerson ? naturalPerson.MobilePhoneNumber : string.Empty);
+            command.Parameters.AddWithValue("@contactName", broker is PersonLegal legalPerson ? legalPerson.ContactName : string.Empty);
+            command.Parameters.AddWithValue("@postalCode", broker.PostalCode);
+            command.Parameters.AddWithValue("@address", broker.Address);
             command.Parameters.AddWithValue("@remarks", broker.Remarks);
             command.Parameters.AddWithValue("@updatedAt", DateTimeOffset.UtcNow.ToString("s"));
 
@@ -7215,9 +7270,7 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
                 command.Parameters.AddWithValue("@nameFirst", string.Empty);
                 command.Parameters.AddWithValue("@nameCompany", legal.NameCompany);
                 command.Parameters.AddWithValue("@nameCompanyType", legal.NameCompanyType);
-                command.Parameters.AddWithValue(
-                    "@nameCompanyTypePosition",
-                    legal.NameCompanyTypePosition);
+                command.Parameters.AddWithValue("@nameCompanyTypePosition",legal.NameCompanyTypePosition);
             }
             else
             {
@@ -7255,15 +7308,13 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
     public PersonsSearchResultWrapper SelectBrokersByKeyword(string keyword)
     {
         var res = new PersonsSearchResultWrapper();
-        var searchAll = string.IsNullOrWhiteSpace(keyword) ||
-                        keyword.Trim() == "*";
+        var searchAll = string.IsNullOrWhiteSpace(keyword) || keyword.Trim() == "*";
 
         _readerWriterLock.EnterReadLock();
 
         try
         {
-            using var connection =
-                new SqliteConnection(_connectionStringBuilder.ConnectionString);
+            using var connection = new SqliteConnection(_connectionStringBuilder.ConnectionString);
 
             connection.Open();
 
@@ -7285,9 +7336,7 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
 
             if (!searchAll)
             {
-                command.Parameters.AddWithValue(
-                    "@keyword",
-                    $"%{keyword.Trim()}%");
+                command.Parameters.AddWithValue("@keyword", $"%{keyword.Trim()}%");
             }
 
             using var reader = command.ExecuteReader();
@@ -7301,20 +7350,14 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
                     continue;
                 }
 
-                var personKindText =
-                    Convert.ToString(reader["person_kind"], CultureInfo.InvariantCulture) ?? string.Empty;
+                var personKindText = Convert.ToString(reader["person_kind"], CultureInfo.InvariantCulture) ?? string.Empty;
 
-                if (!Enum.TryParse<ZumenSearch.Domain.Enums.PersonKindType>(
-                        personKindText,
-                        out var personKind) ||
-                    personKind == ZumenSearch.Domain.Enums.PersonKindType.Undetermined)
+                if (!Enum.TryParse<ZumenSearch.Domain.Enums.PersonKindType>(personKindText, out var personKind) || personKind == ZumenSearch.Domain.Enums.PersonKindType.Undetermined)
                 {
                     continue;
                 }
 
-                var item = new ZumenSearch.Application.SearchResults.PersonSearchResultItem(
-                    brokerId,
-                    personKind)
+                var item = new ZumenSearch.Application.SearchResults.PersonSearchResultItem(brokerId, personKind)
                 {
                     Remarks = Convert.ToString(reader["remarks"], CultureInfo.InvariantCulture) ?? string.Empty
                 };
@@ -7327,12 +7370,7 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
         }
         catch (Exception ex)
         {
-            SetDatabaseError(
-                res,
-                ex,
-                "connection.Open(), reader.Read()",
-                "Failed to read brokers.",
-                nameof(SelectBrokersByKeyword));
+            SetDatabaseError(res, ex, "connection.Open(), reader.Read()", "Failed to read brokers.", nameof(SelectBrokersByKeyword));
         }
         finally
         {
@@ -7357,8 +7395,7 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
 
         try
         {
-            using var connection =
-                new SqliteConnection(_connectionStringBuilder.ConnectionString);
+            using var connection = new SqliteConnection(_connectionStringBuilder.ConnectionString);
 
             connection.Open();
 
@@ -7374,6 +7411,11 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
             name_company,
             name_company_type,
             name_company_type_position,
+            phone_number,
+            mobile_phone_number,
+            contact_name,
+            postal_code,
+            address,
             remarks
         FROM brokers
         WHERE broker_id = @brokerId;
@@ -7396,12 +7438,7 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
         }
         catch (Exception ex)
         {
-            SetDatabaseError(
-                res,
-                ex,
-                "connection.Open(), reader.Read()",
-                "Failed to read broker.",
-                nameof(SelectBrokerById));
+            SetDatabaseError(res, ex, "connection.Open(), reader.Read()", "Failed to read broker.", nameof(SelectBrokerById));
         }
         finally
         {
@@ -7426,16 +7463,15 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
 
         try
         {
-            using var connection =
-                new SqliteConnection(_connectionStringBuilder.ConnectionString);
+            using var connection = new SqliteConnection(_connectionStringBuilder.ConnectionString);
 
             connection.Open();
 
             using var command = connection.CreateCommand();
             command.CommandText = """
-        DELETE FROM brokers
-        WHERE broker_id = @brokerId;
-        """;
+                DELETE FROM brokers
+                WHERE broker_id = @brokerId;
+                """;
 
             command.Parameters.AddWithValue("@brokerId", brokerId);
 
@@ -7443,12 +7479,7 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
         }
         catch (Exception ex)
         {
-            SetDatabaseError(
-                res,
-                ex,
-                "command.ExecuteNonQuery()",
-                "Failed to delete broker.",
-                nameof(DeleteBroker));
+            SetDatabaseError(res, ex, "command.ExecuteNonQuery()", "Failed to delete broker.", nameof(DeleteBroker));
         }
         finally
         {

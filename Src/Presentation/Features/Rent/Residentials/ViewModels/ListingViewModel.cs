@@ -795,7 +795,14 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         var psn = LessorsWrapper.FirstOrDefault(r => r.Person.Id.Equals(lessor.Id, StringComparison.Ordinal));
         if (psn is null) return;
 
-        psn.Person = lessor;
+        if (psn.Person.GetType() != lessor.GetType())
+        {
+            LessorsWrapper[LessorsWrapper.IndexOf(psn)] = new ZumenSearch.Presentation.Features.Rent.Residentials.Models.PersonWrapperForListingViewModel(lessor, this);
+        }
+        else
+        {
+            psn.Person = lessor;
+        }
     }
 
     public void Receive(BrokerUpdatedMessage corp)
@@ -809,7 +816,14 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         var psn = BrokersWrapper.FirstOrDefault(r => r.Person.Id.Equals(broker.Id, StringComparison.Ordinal));
         if (psn is null) return;
 
-        psn.Person = broker; //= new PersonWrapperForPropertyViewModel(lessor, this);
+        if (psn.Person.GetType() != broker.GetType())
+        {
+            BrokersWrapper[BrokersWrapper.IndexOf(psn)] = new ZumenSearch.Presentation.Features.Rent.Residentials.Models.PersonWrapperForListingViewModel(broker, this);
+        }
+        else
+        {
+            psn.Person = broker;
+        }
     }
 
     public void Receive(PropertyIsUnitOwnershipChangedMessage isUnitOwnership)

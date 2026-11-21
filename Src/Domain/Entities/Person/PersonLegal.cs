@@ -106,4 +106,15 @@ public partial class PersonLegal : PersonBase
         }
     }
 
+    public string ContactName
+    {
+        get;
+        set
+        {
+            if (field == value) return;
+            field = value;
+            IsModified = true;
+        }
+    } = string.Empty;
+
 };

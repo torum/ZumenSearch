@@ -39,48 +39,42 @@
                     <ItemsRepeater.ItemTemplate>
                         <DataTemplate x:DataType="viewmodels:PropertyPictureViewModel">
                             <Border Style="{StaticResource RoundCardBorderStyle}">
-                                <Grid>
+                                <Grid ColumnSpacing="24">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="{StaticResource DetailThumbnailColumnWidth}"/>
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
-                                    <Grid Grid.Row="0" Grid.Column="0" VerticalAlignment="Top">
-                                        <Rectangle RadiusX="3" RadiusY="3" Width="{StaticResource DetailThumbnailWidth}" Height="{StaticResource DetailThumbnailHeight}">
-                                            <Rectangle.Fill>
-                                                <ImageBrush ImageSource="{x:Bind ThumbImagePath, Converter={StaticResource ImagePathToImageSourceConverter}, TargetNullValue={x:Null}, Mode=OneWay}" Stretch="UniformToFill" />
-                                            </Rectangle.Fill>
-                                        </Rectangle>
-<!--
-                                        <Image Source="{x:Bind ThumbImagePath, Converter={StaticResource ImagePathToImageSourceConverter}, Mode=OneWay}" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="280" MaxWidth="280" MaxHeight="190" MinHeight="190"/>
--->
-                                        <StackPanel Orientation="Vertical" Height="50" VerticalAlignment="Bottom" Padding="6" Margin="0,0,0,0" CornerRadius="0,0,4,4" Background="{ThemeResource SystemControlBackgroundBaseMediumBrush}" Opacity=".75">
-                                            <TextBlock Text="{x:Bind PictureType.Label, Mode=OneWay}" Style="{StaticResource BodyStrongTextBlockStyle}" Foreground="{ThemeResource SystemControlForegroundAltHighBrush}"/>
-                                            <StackPanel Orientation="Horizontal">
-                                                <TextBlock Text="{x:Bind Description, Mode=OneWay}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" Style="{ThemeResource CaptionTextBlockStyle}" Foreground="{ThemeResource SystemControlForegroundAltHighBrush}"/>
+                                    <Viewbox MaxWidth="{StaticResource DetailThumbnailWidth}" HorizontalAlignment="Left" VerticalAlignment="Top" Stretch="Uniform" StretchDirection="DownOnly">
+                                        <Grid Width="{StaticResource DetailThumbnailWidth}" Height="{StaticResource DetailThumbnailHeight}">
+                                            <Rectangle RadiusX="3" RadiusY="3">
+                                                <Rectangle.Fill>
+                                                    <ImageBrush ImageSource="{x:Bind ThumbImagePath, Converter={StaticResource ImagePathToImageSourceConverter}, TargetNullValue={x:Null}, Mode=OneWay}" Stretch="UniformToFill" />
+                                                </Rectangle.Fill>
+                                            </Rectangle>
+                                            <StackPanel VerticalAlignment="Bottom" Padding="8,6" CornerRadius="0,0,4,4" Background="{ThemeResource LayerFillColorDefaultBrush}">
+                                                <TextBlock Text="{x:Bind PictureType.Label, Mode=OneWay}" Style="{ThemeResource BodyStrongTextBlockStyle}" TextTrimming="CharacterEllipsis"/>
+                                                <TextBlock Text="{x:Bind Description, Mode=OneWay}" Style="{ThemeResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis"/>
                                             </StackPanel>
-                                        </StackPanel>
-                                    </Grid>
-                                    <Grid Grid.Row="0" Grid.Column="1">
-                                        <StackPanel Spacing="12" Margin="24,0,6,0" MinWidth="260">
-                                            <StackPanel Orientation="Horizontal">
-                                                <ComboBox x:Name="ComboBoxKinds" Header="タイプ" PlaceholderText="選択" Width="200" ItemsSource="{x:Bind ResidentialPictureTypes, Mode=OneWay}" SelectedItem="{x:Bind PictureType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                                                    <ComboBox.ItemTemplate>
-                                                        <DataTemplate x:DataType="modresidencial:PropertyPictureTypeLabel">
-                                                            <StackPanel Orientation="Horizontal">
-                                                                <TextBlock Text="{x:Bind Label}" Margin="0,0,5,0"/>
-                                                            </StackPanel>
-                                                        </DataTemplate>
-                                                    </ComboBox.ItemTemplate>
-                                                </ComboBox>
-                                                <CheckBox Content="メインの写真" Margin="12,0,0,0" VerticalAlignment="Bottom" IsChecked="{x:Bind IsMain, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
-                                            </StackPanel>
-                                            <TextBox Header="説明" Margin="0,0,0,0" Text="{x:Bind Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
-                                            <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Margin="0,0,0,0" HorizontalAlignment="Right">
-                                                <AppBarButton Icon="OpenFile" Label="開く" ToolTipService.ToolTip="写真を開く" Command="{x:Bind ParentViewModel.OpenPropertyPictureCommand, Mode=OneWay}" CommandParameter="{x:Bind}" />
-                                                <AppBarButton Icon="Delete" Label="削除" ToolTipService.ToolTip="写真を削除" Command="{x:Bind ParentViewModel.DeletePropertyPictureCommand, Mode=OneWay}" CommandParameter="{x:Bind}"/>
-                                            </CommandBar>
-                                        </StackPanel>
-                                    </Grid>
+                                        </Grid>
+                                    </Viewbox>
+                                    <StackPanel Grid.Column="1" Spacing="8">
+                                        <Grid ColumnSpacing="12">
+                                            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                            <ComboBox x:Name="ComboBoxKinds" Header="タイプ" PlaceholderText="選択" Width="200" HorizontalAlignment="Left" ItemsSource="{x:Bind ResidentialPictureTypes, Mode=OneWay}" SelectedItem="{x:Bind PictureType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                                <ComboBox.ItemTemplate>
+                                                    <DataTemplate x:DataType="modresidencial:PropertyPictureTypeLabel">
+                                                        <TextBlock Text="{x:Bind Label}"/>
+                                                    </DataTemplate>
+                                                </ComboBox.ItemTemplate>
+                                            </ComboBox>
+                                            <CheckBox Grid.Column="1" Content="メインの写真" VerticalAlignment="Bottom" IsChecked="{x:Bind IsMain, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                        </Grid>
+                                        <TextBox Header="説明" Text="{x:Bind Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch"/>
+                                        <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" HorizontalAlignment="Right">
+                                            <AppBarButton Icon="OpenFile" Label="開く" ToolTipService.ToolTip="写真を開く" Command="{x:Bind ParentViewModel.OpenPropertyPictureCommand, Mode=OneWay}" CommandParameter="{x:Bind}" />
+                                            <AppBarButton Icon="Delete" Label="削除" ToolTipService.ToolTip="写真を削除" Command="{x:Bind ParentViewModel.DeletePropertyPictureCommand, Mode=OneWay}" CommandParameter="{x:Bind}"/>
+                                        </CommandBar>
+                                    </StackPanel>
                                 </Grid>
                             </Border>
                         </DataTemplate>

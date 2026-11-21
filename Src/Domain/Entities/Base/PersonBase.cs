@@ -9,7 +9,7 @@ namespace ZumenSearch.Domain.Entities.Base;
 
 // <summary>
 // Base class for all Person entities such as lessors(landlords), and real estate agents.
-// Use LegalPerson for legal entities such as corporations, and NaturalPersonClass for natural persons unless abstract PersonBase is needed.
+// Use PersonLegal for legal entities such as corporations, and PersonNatural for natural persons unless abstract PersonBase is needed.
 // </summary>
 // <remarks>
 // 
@@ -23,7 +23,40 @@ public abstract class PersonBase : EntityAggregateBase
 
     public PersonKindType PersonKind { get; set; }
 
-    // Do not use SetProperty.
+    public string PhoneNumber
+    {
+        get;
+        set
+        {
+            if (field == value) return;
+            field = value;
+            IsModified = true;
+        }
+    } = string.Empty;
+
+
+    public string PostalCode
+    {
+        get;
+        set
+        {
+            if (field == value) return;
+            field = value;
+            IsModified = true;
+        }
+    } = string.Empty;
+
+    public string Address
+    {
+        get;
+        set
+        {
+            if (field == value) return;
+            field = value;
+            IsModified = true;
+        }
+    } = string.Empty;
+
     public string Remarks
     {
         get;
@@ -33,10 +66,8 @@ public abstract class PersonBase : EntityAggregateBase
 
             if (value is not null)
             {
-                // Set this before raize PropertyChanged.
                 IsModified = true;
 
-                // Raize PropertyChanged event here.
                 field = value;
             }
             else

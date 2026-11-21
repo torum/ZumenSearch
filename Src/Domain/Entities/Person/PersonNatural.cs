@@ -62,4 +62,15 @@ public partial class PersonNatural : PersonBase
         }
     }
 
+    public string MobilePhoneNumber
+    {
+        get;
+        set
+        {
+            if (field == value) return;
+            field = value;
+            IsModified = true;
+        }
+    } = string.Empty;
+
 };

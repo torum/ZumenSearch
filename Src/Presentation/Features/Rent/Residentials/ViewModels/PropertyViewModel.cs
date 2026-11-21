@@ -2298,7 +2298,14 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         var psn = LessorsWrapper.FirstOrDefault(r => r.Person.Id.Equals(lessor.Id, StringComparison.Ordinal));
         if (psn is null) return;
 
-        psn.Person = lessor; //= new PersonWrapperForPropertyViewModel(lessor, this);
+        if (psn.Person.GetType() != lessor.GetType())
+        {
+            LessorsWrapper[LessorsWrapper.IndexOf(psn)] = new PersonWrapperForPropertyViewModel(lessor, this);
+        }
+        else
+        {
+            psn.Person = lessor;
+        }
     }
 
     public void Receive(BrokerUpdatedMessage message)
@@ -2312,7 +2319,14 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         var psn = BrokersWrapper.FirstOrDefault(r => r.Person.Id.Equals(broker.Id, StringComparison.Ordinal));
         if (psn is null) return;
 
-        psn.Person = broker; //= new PersonWrapperForPropertyViewModel(lessor, this);
+        if (psn.Person.GetType() != broker.GetType())
+        {
+            BrokersWrapper[BrokersWrapper.IndexOf(psn)] = new PersonWrapperForPropertyViewModel(broker, this);
+        }
+        else
+        {
+            psn.Person = broker;
+        }
     }
 
     public void Receive(ListingDeletedMessage message)

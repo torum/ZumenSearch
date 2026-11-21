@@ -298,6 +298,51 @@ public sealed partial class LessorViewModel : ObservableRecipient, IDisposable
     }
 
 
+    public string PhoneNumber
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value)) IsDirty = true;
+        }
+    } = string.Empty;
+
+    public string MobilePhoneNumber
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value)) IsDirty = true;
+        }
+    } = string.Empty;
+
+    public string ContactName
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value)) IsDirty = true;
+        }
+    } = string.Empty;
+
+    public string PostalCode
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value)) IsDirty = true;
+        }
+    } = string.Empty;
+
+    public string Address
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value)) IsDirty = true;
+        }
+    } = string.Empty;
+
     // 備考
     public string Remarks
     {
@@ -348,6 +393,8 @@ public sealed partial class LessorViewModel : ObservableRecipient, IDisposable
 
             NameFirst = naturalPerson.NameFirst;
             NameLast = naturalPerson.NameLast;
+
+            MobilePhoneNumber = naturalPerson.MobilePhoneNumber;
         }
         else if (_lessorBase is ZumenSearch.Domain.Entities.Person.PersonLegal legalPerson)
         {
@@ -361,6 +408,8 @@ public sealed partial class LessorViewModel : ObservableRecipient, IDisposable
             NameCompany = legalPerson.NameCompany;
             NameCompanyType = legalPerson.NameCompanyType;
             NameCompanyTypePosition = legalPerson.NameCompanyTypePosition;
+
+            ContactName = legalPerson.ContactName;
         }
         else
         {
@@ -368,6 +417,9 @@ public sealed partial class LessorViewModel : ObservableRecipient, IDisposable
             return;
         }
 
+        PhoneNumber = _lessorBase.PhoneNumber;
+        PostalCode = _lessorBase.PostalCode;
+        Address = _lessorBase.Address;
         Remarks = _lessorBase.Remarks;
     }
 
@@ -450,16 +502,23 @@ public sealed partial class LessorViewModel : ObservableRecipient, IDisposable
 
         if (newLessor is ZumenSearch.Domain.Entities.Person.PersonNatural naturalPerson)
         {
-             naturalPerson.NameFirst = NameFirst;
-             naturalPerson.NameLast = NameLast;
+            naturalPerson.NameFirst = NameFirst;
+            naturalPerson.NameLast = NameLast;
+
+            naturalPerson.MobilePhoneNumber = MobilePhoneNumber;
         }
         else if (newLessor is ZumenSearch.Domain.Entities.Person.PersonLegal legalPerson)
         {
             legalPerson.NameCompany = NameCompany;
             legalPerson.NameCompanyType = NameCompanyType;
             legalPerson.NameCompanyTypePosition = NameCompanyTypePosition;
+
+            legalPerson.ContactName = ContactName;
         }
 
+        newLessor.PhoneNumber = PhoneNumber;
+        newLessor.PostalCode = PostalCode;
+        newLessor.Address = Address;
         newLessor.Remarks = Remarks;
 
         _lessorBase = newLessor;

@@ -5,10 +5,126 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:mod="using:ZumenSearch.Presentation.Shell.Models"
+    xmlns:modperson="using:ZumenSearch.Domain.Entities.Person"
     xmlns:modresidencial="using:ZumenSearch.Presentation.Features.Rent.Residentials.Models"
+    xmlns:local="using:ZumenSearch.Presentation.Features.Rent.Residentials.Views"
     mc:Ignorable="d"
     NavigationCacheMode="Required">
-    
+    <Page.Resources>
+        <Style x:Key="LessorDetailLabelStyle" TargetType="TextBlock" BasedOn="{StaticResource CaptionTextBlockStyle}">
+            <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}"/>
+        </Style>
+        <Style x:Key="LessorDetailValueStyle" TargetType="TextBlock" BasedOn="{StaticResource BodyTextBlockStyle}">
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="IsTextSelectionEnabled" Value="True"/>
+            <Setter Property="MinHeight" Value="20"/>
+        </Style>
+
+        <DataTemplate x:Key="NaturalPersonTemplate" x:DataType="modresidencial:PersonWrapperForListingViewModel">
+            <Border Style="{StaticResource RoundCardBorderStyle}">
+                <Grid RowSpacing="16">
+                    <VisualStateManager.VisualStateGroups>
+                        <VisualStateGroup>
+                            <VisualState x:Name="NaturalWide">
+                                <VisualState.StateTriggers><AdaptiveTrigger MinWindowWidth="900"/></VisualState.StateTriggers>
+                                <VisualState.Setters>
+                                    <Setter Target="NaturalSecondColumn.Width" Value="*"/>
+                                    <Setter Target="NaturalMobile.(Grid.Row)" Value="0"/>
+                                    <Setter Target="NaturalMobile.(Grid.Column)" Value="1"/>
+                                    <Setter Target="NaturalPostal.(Grid.Row)" Value="1"/>
+                                    <Setter Target="NaturalAddress.(Grid.Row)" Value="1"/>
+                                    <Setter Target="NaturalAddress.(Grid.Column)" Value="1"/>
+                                </VisualState.Setters>
+                            </VisualState>
+                        </VisualStateGroup>
+                    </VisualStateManager.VisualStateGroups>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid ColumnSpacing="12">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                        <StackPanel Spacing="4" VerticalAlignment="Center">
+                            <TextBlock Text="個人" Style="{StaticResource LessorDetailLabelStyle}"/>
+                            <TextBlock Text="{x:Bind Person.Name, Mode=OneWay}" Style="{ThemeResource SubtitleTextBlockStyle}" TextWrapping="Wrap" IsTextSelectionEnabled="True"/>
+                        </StackPanel>
+                        <CommandBar Grid.Column="1" Background="Transparent" IsOpen="False" DefaultLabelPosition="Collapsed" HorizontalAlignment="Right" VerticalAlignment="Top">
+                            <AppBarButton Icon="Edit" Label="編集" ToolTipService.ToolTip="貸主を編集" Command="{x:Bind ParentViewModel.EditLessorCommand, Mode=OneWay}" CommandParameter="{x:Bind}"/>
+                            <AppBarButton Icon="Delete" Label="削除" ToolTipService.ToolTip="貸主との関連付けを削除" Command="{x:Bind ParentViewModel.DeleteLessorCommand, Mode=OneWay}" CommandParameter="{x:Bind}"/>
+                        </CommandBar>
+                    </Grid>
+                    <Grid Grid.Row="1" RowSpacing="12" ColumnSpacing="24">
+                        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition x:Name="NaturalSecondColumn" Width="0"/></Grid.ColumnDefinitions>
+                        <StackPanel Spacing="2"><TextBlock Text="固定電話番号" Style="{StaticResource LessorDetailLabelStyle}"/><TextBlock Text="{x:Bind Person.PhoneNumber, Mode=OneWay}" Style="{StaticResource LessorDetailValueStyle}"/></StackPanel>
+                        <StackPanel x:Name="NaturalMobile" Grid.Row="1" Spacing="2"><TextBlock Text="携帯電話番号" Style="{StaticResource LessorDetailLabelStyle}"/><TextBlock Text="{x:Bind ((modperson:PersonNatural)Person).MobilePhoneNumber, Mode=OneWay}" Style="{StaticResource LessorDetailValueStyle}"/></StackPanel>
+                        <StackPanel x:Name="NaturalPostal" Grid.Row="2" Spacing="2"><TextBlock Text="郵便番号" Style="{StaticResource LessorDetailLabelStyle}"/><TextBlock Text="{x:Bind Person.PostalCode, Mode=OneWay}" Style="{StaticResource LessorDetailValueStyle}"/></StackPanel>
+                        <StackPanel x:Name="NaturalAddress" Grid.Row="3" Spacing="2"><TextBlock Text="住所・所在地" Style="{StaticResource LessorDetailLabelStyle}"/><TextBlock Text="{x:Bind Person.Address, Mode=OneWay}" Style="{StaticResource LessorDetailValueStyle}"/></StackPanel>
+                    </Grid>
+                    <StackPanel Grid.Row="2" Spacing="4">
+                        <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,1,0,0" Margin="0,0,0,8"/>
+                        <TextBlock Text="備考" Style="{StaticResource LessorDetailLabelStyle}"/>
+                        <TextBlock Text="{x:Bind Person.Remarks, Mode=OneWay}" Style="{StaticResource LessorDetailValueStyle}"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="LegalPersonTemplate" x:DataType="modresidencial:PersonWrapperForListingViewModel">
+            <Border Style="{StaticResource RoundCardBorderStyle}">
+                <Grid RowSpacing="16">
+                    <VisualStateManager.VisualStateGroups>
+                        <VisualStateGroup>
+                            <VisualState x:Name="LegalWide">
+                                <VisualState.StateTriggers><AdaptiveTrigger MinWindowWidth="900"/></VisualState.StateTriggers>
+                                <VisualState.Setters>
+                                    <Setter Target="LegalSecondColumn.Width" Value="*"/>
+                                    <Setter Target="LegalContact.(Grid.Row)" Value="0"/>
+                                    <Setter Target="LegalContact.(Grid.Column)" Value="1"/>
+                                    <Setter Target="LegalPostal.(Grid.Row)" Value="1"/>
+                                    <Setter Target="LegalAddress.(Grid.Row)" Value="1"/>
+                                    <Setter Target="LegalAddress.(Grid.Column)" Value="1"/>
+                                </VisualState.Setters>
+                            </VisualState>
+                        </VisualStateGroup>
+                    </VisualStateManager.VisualStateGroups>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid ColumnSpacing="12">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                        <StackPanel Spacing="4" VerticalAlignment="Center">
+                            <TextBlock Text="法人" Style="{StaticResource LessorDetailLabelStyle}"/>
+                            <TextBlock Text="{x:Bind Person.Name, Mode=OneWay}" Style="{ThemeResource SubtitleTextBlockStyle}" TextWrapping="Wrap" IsTextSelectionEnabled="True"/>
+                        </StackPanel>
+                        <CommandBar Grid.Column="1" Background="Transparent" IsOpen="False" DefaultLabelPosition="Collapsed" HorizontalAlignment="Right" VerticalAlignment="Top">
+                            <AppBarButton Icon="Edit" Label="編集" ToolTipService.ToolTip="貸主を編集" Command="{x:Bind ParentViewModel.EditLessorCommand, Mode=OneWay}" CommandParameter="{x:Bind}"/>
+                            <AppBarButton Icon="Delete" Label="削除" ToolTipService.ToolTip="貸主との関連付けを削除" Command="{x:Bind ParentViewModel.DeleteLessorCommand, Mode=OneWay}" CommandParameter="{x:Bind}"/>
+                        </CommandBar>
+                    </Grid>
+                    <Grid Grid.Row="1" RowSpacing="12" ColumnSpacing="24">
+                        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition x:Name="LegalSecondColumn" Width="0"/></Grid.ColumnDefinitions>
+                        <StackPanel Spacing="2"><TextBlock Text="固定電話番号" Style="{StaticResource LessorDetailLabelStyle}"/><TextBlock Text="{x:Bind Person.PhoneNumber, Mode=OneWay}" Style="{StaticResource LessorDetailValueStyle}"/></StackPanel>
+                        <StackPanel x:Name="LegalContact" Grid.Row="1" Spacing="2"><TextBlock Text="担当者名" Style="{StaticResource LessorDetailLabelStyle}"/><TextBlock Text="{x:Bind ((modperson:PersonLegal)Person).ContactName, Mode=OneWay}" Style="{StaticResource LessorDetailValueStyle}"/></StackPanel>
+                        <StackPanel x:Name="LegalPostal" Grid.Row="2" Spacing="2"><TextBlock Text="郵便番号" Style="{StaticResource LessorDetailLabelStyle}"/><TextBlock Text="{x:Bind Person.PostalCode, Mode=OneWay}" Style="{StaticResource LessorDetailValueStyle}"/></StackPanel>
+                        <StackPanel x:Name="LegalAddress" Grid.Row="3" Spacing="2"><TextBlock Text="住所・所在地" Style="{StaticResource LessorDetailLabelStyle}"/><TextBlock Text="{x:Bind Person.Address, Mode=OneWay}" Style="{StaticResource LessorDetailValueStyle}"/></StackPanel>
+                    </Grid>
+                    <StackPanel Grid.Row="2" Spacing="4">
+                        <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,1,0,0" Margin="0,0,0,8"/>
+                        <TextBlock Text="備考" Style="{StaticResource LessorDetailLabelStyle}"/>
+                        <TextBlock Text="{x:Bind Person.Remarks, Mode=OneWay}" Style="{StaticResource LessorDetailValueStyle}"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </DataTemplate>
+
+        <local:PersonTemplateSelector x:Key="PersonTypeSelector" NaturalTemplate="{StaticResource NaturalPersonTemplate}" LegalTemplate="{StaticResource LegalPersonTemplate}"/>
+    </Page.Resources>
+
     <Grid x:Name="ContentArea" Padding="36,0,36,24">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -18,50 +134,23 @@
         <Grid Grid.Row="0">
             <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Margin="0,0,0,0" HorizontalAlignment="Right">
                 <AppBarButton Name="AppBarButtonSelectLessor" Icon="AddFriend"  Label="追加" Command="{x:Bind ViewModel.AddLessorCommand, Mode=OneWay}" />
-
+                <!--
                 <AppBarButton Icon="More" Label="その他">
                     <AppBarButton.Flyout>
                         <MenuFlyout Placement="Bottom">
                             <MenuFlyoutItem Text="すべて削除" Icon="Delete"></MenuFlyoutItem>
                         </MenuFlyout>
                     </AppBarButton.Flyout>
-                </AppBarButton>
+                </AppBarButton>-->
             </CommandBar>
         </Grid>
 
         <Grid Grid.Row="1">
             <ScrollViewer HorizontalScrollMode="Disabled">
 
-                <ItemsRepeater x:Name="ItemsView" ItemsSource="{x:Bind ViewModel.LessorsWrapper, Mode=TwoWay}" MinWidth="300" MinHeight="225" ScrollViewer.HorizontalScrollMode="Disabled" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-                    <!--  SelectionChanged="ItemsView_SelectionChanged" SelectionMode="Single" IsItemInvokedEnabled="False"  -->
-                    <ItemsRepeater.ItemTemplate>
-                        <DataTemplate x:DataType="modresidencial:PersonWrapperForListingViewModel">
-                            <Border Style="{StaticResource RoundCardBorderStyle}">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Grid Grid.Row="0" Grid.Column="0">
-                                        <TextBox Header="名前" IsReadOnly="True" Margin="0,0,0,0" Text="{x:Bind Person.Name, Mode=OneWay}"></TextBox>
-
-                                    </Grid>
-                                    <Grid Grid.Row="0" Grid.Column="1">
-                                        <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Margin="0,0,0,0" HorizontalAlignment="Right">
-                                            <AppBarButton Icon="Edit" Label="編集" ToolTipService.ToolTip="貸主を編集" Command="{x:Bind ParentViewModel.EditLessorCommand, Mode=OneWay}" CommandParameter="{x:Bind}"/>
-                                            <AppBarButton Icon="Delete" Label="削除" ToolTipService.ToolTip="貸主との関連付けを削除" Command="{x:Bind ParentViewModel.DeleteLessorCommand, Mode=OneWay}" CommandParameter="{x:Bind}"/>
-                                            <!--  -->
-                                        </CommandBar>
-                                    </Grid>
-                                </Grid>
-                            </Border>
-                        </DataTemplate>
-                    </ItemsRepeater.ItemTemplate>
+                <ItemsRepeater x:Name="ItemsView" ItemsSource="{x:Bind ViewModel.LessorsWrapper, Mode=TwoWay}" ItemTemplate="{StaticResource PersonTypeSelector}" ScrollViewer.HorizontalScrollMode="Disabled" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <ItemsRepeater.Layout>
                         <StackLayout Orientation="Vertical" Spacing="12" />
-                        <!--
-                    <UniformGridLayout MinRowSpacing="18" MinColumnSpacing="18" ItemsJustification="SpaceEvenly"/>
-                    -->
                     </ItemsRepeater.Layout>
                 </ItemsRepeater>
 

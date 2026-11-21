@@ -167,6 +167,52 @@ public sealed partial class BrokerViewModel : ObservableRecipient, IDisposable
         }
     }
 
+    public int PersonKindIndex
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                if (value == 0)
+                {
+                    Name = string.IsNullOrWhiteSpace(NameFirst) ? NameLast : $"{NameLast} {NameFirst}".Trim();
+                }
+                else if (value == 1)
+                {
+                    Name = NameCompanyTypePosition == 0 ? $"{NameCompanyType}{NameCompany}" : $"{NameCompany}{NameCompanyType}";
+                }
+                IsDirty = true;
+            }
+        }
+    } = 1;
+
+    public string NameFirst
+    {
+        get => field ?? string.Empty;
+        set
+        {
+            if (SetProperty(ref field, value.Trim()))
+            {
+                if (PersonKindIndex == 0) Name = string.IsNullOrWhiteSpace(NameFirst) ? NameLast : $"{NameLast} {NameFirst}".Trim();
+                IsDirty = true;
+            }
+        }
+    }
+
+    public string NameLast
+    {
+        get => field ?? string.Empty;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                if (PersonKindIndex == 0) Name = string.IsNullOrWhiteSpace(NameFirst) ? NameLast : $"{NameLast} {NameFirst}".Trim();
+                IsDirty = true;
+            }
+        }
+    }
+
     [ObservableProperty]
     public partial bool IsNameLastHasError { get; private set; }
 
@@ -177,13 +223,9 @@ public sealed partial class BrokerViewModel : ObservableRecipient, IDisposable
         {
             if (SetProperty(ref field, value.Trim()))
             {
-                if (NameCompanyTypePosition == 0)
+                if (PersonKindIndex == 1)
                 {
-                    Name = $"{NameCompanyType}{NameCompany}";
-                }
-                else
-                {
-                    Name = $"{NameCompany}{NameCompanyType}";
+                    Name = NameCompanyTypePosition == 0 ? $"{NameCompanyType}{NameCompany}" : $"{NameCompany}{NameCompanyType}";
                 }
                 IsDirty = true;
             }
@@ -200,13 +242,9 @@ public sealed partial class BrokerViewModel : ObservableRecipient, IDisposable
         {
             if (SetProperty(ref field, value.Trim()))
             {
-                if (NameCompanyTypePosition == 0)
+                if (PersonKindIndex == 1)
                 {
-                    Name = $"{NameCompanyType}{NameCompany}";
-                }
-                else
-                {
-                    Name = $"{NameCompany}{NameCompanyType}";
+                    Name = NameCompanyTypePosition == 0 ? $"{NameCompanyType}{NameCompany}" : $"{NameCompany}{NameCompanyType}";
                 }
                 IsDirty = true;
             }
@@ -221,19 +259,45 @@ public sealed partial class BrokerViewModel : ObservableRecipient, IDisposable
         {
             if (SetProperty(ref field, value))
             {
-                if (value == 0)
+                if (PersonKindIndex == 1)
                 {
-                    Name = $"{NameCompanyType}{NameCompany}";
-                }
-                else
-                {
-                    Name = $"{NameCompany}{NameCompanyType}";
+                    Name = value == 0 ? $"{NameCompanyType}{NameCompany}" : $"{NameCompany}{NameCompanyType}";
                 }
                 IsDirty = true;
             }
         }
     }
 
+
+    public string PhoneNumber
+    {
+        get;
+        set { if (SetProperty(ref field, value)) IsDirty = true; }
+    } = string.Empty;
+
+    public string MobilePhoneNumber
+    {
+        get;
+        set { if (SetProperty(ref field, value)) IsDirty = true; }
+    } = string.Empty;
+
+    public string ContactName
+    {
+        get;
+        set { if (SetProperty(ref field, value)) IsDirty = true; }
+    } = string.Empty;
+
+    public string PostalCode
+    {
+        get;
+        set { if (SetProperty(ref field, value)) IsDirty = true; }
+    } = string.Empty;
+
+    public string Address
+    {
+        get;
+        set { if (SetProperty(ref field, value)) IsDirty = true; }
+    } = string.Empty;
 
     // 備考
     public string Remarks
@@ -267,57 +331,52 @@ public sealed partial class BrokerViewModel : ObservableRecipient, IDisposable
     {
         Name = _broker.Name;
 
-        if (_broker is ZumenSearch.Domain.Entities.Person.PersonLegal legalPerson)
+        if (_broker is PersonNatural naturalPerson)
         {
-            if (_broker.PersonKind != PersonKindType.Legal)
-            {
-                // Something is wrong.
-            }
-
+            PersonKindIndex = 0;
+            NameFirst = naturalPerson.NameFirst;
+            NameLast = naturalPerson.NameLast;
+            MobilePhoneNumber = naturalPerson.MobilePhoneNumber;
+        }
+        else if (_broker is PersonLegal legalPerson)
+        {
+            PersonKindIndex = 1;
             NameCompany = legalPerson.NameCompany;
             NameCompanyType = legalPerson.NameCompanyType;
             NameCompanyTypePosition = legalPerson.NameCompanyTypePosition;
+            ContactName = legalPerson.ContactName;
         }
         else
         {
-            // TODO: Raise Error
-            return;
+            throw new InvalidOperationException("Unsupported broker person type.");
         }
 
+        PhoneNumber = _broker.PhoneNumber;
+        PostalCode = _broker.PostalCode;
+        Address = _broker.Address;
         Remarks = _broker.Remarks;
     }
 
     private bool ValidateName()
     {
-        if (string.IsNullOrWhiteSpace(Name))
+        IsNameLastHasError = PersonKindIndex == 0 && string.IsNullOrWhiteSpace(NameLast);
+        IsNameCompanyHasError = PersonKindIndex == 1 && string.IsNullOrWhiteSpace(NameCompany);
+
+        if (IsNameLastHasError)
+        {
+            InfoBarErrorMessage = "姓（必須項目）が入力されていません。保存出来ませんでした。";
+            return false;
+        }
+        if (IsNameCompanyHasError)
         {
             InfoBarErrorMessage = "会社名（必須項目）が入力されていません。保存出来ませんでした。";
-
-            IsNameHasError = true;
-
-            //HasErrors = true;
-
             return false;
         }
-
-
-        /*
-
-
-        var realLength = new StringInfo(Name).LengthInTextElements;
-        if (realLength > 100)
+        if (PersonKindIndex != 0 && PersonKindIndex != 1)
         {
-            InfoBarErrorMessage = "物件名は100文字以内で入力してください。保存出来ませんでした。";
-
-            IsNameHasError = true;
-
-            //HasErrors = true;
-
+            InfoBarErrorMessage = "個人または法人を選択してください。保存出来ませんでした。";
             return false;
         }
-        */
-        IsNameHasError = false;
-
         return true;
     }
 
@@ -328,22 +387,31 @@ public sealed partial class BrokerViewModel : ObservableRecipient, IDisposable
             return;
         }
 
-        // TODO: Create LegalPerson and set it.
+        PersonBase newBroker;
+        if (PersonKindIndex == 0)
+        {
+            newBroker = new PersonNatural(_broker.Id, _broker.Status)
+            {
+                NameLast = NameLast,
+                NameFirst = NameFirst,
+                MobilePhoneNumber = MobilePhoneNumber
+            };
+        }
+        else
+        {
+            newBroker = new PersonLegal(_broker.Id, _broker.Status)
+            {
+                NameCompany = NameCompany,
+                NameCompanyType = NameCompanyType,
+                NameCompanyTypePosition = NameCompanyTypePosition,
+                ContactName = ContactName
+            };
+        }
 
-        var newBroker = new ZumenSearch.Domain.Entities.Person.PersonLegal(_broker.Id, _broker.Status);
-
-        newBroker.SetName(Name);
-
-        newBroker.PersonKind = PersonKindType.Legal;
-
-        newBroker.NameCompany = NameCompany;
-        newBroker.NameCompanyType = NameCompanyType;
-        newBroker.NameCompanyTypePosition = NameCompanyTypePosition;
+        newBroker.PhoneNumber = PhoneNumber;
+        newBroker.PostalCode = PostalCode;
+        newBroker.Address = Address;
         newBroker.Remarks = Remarks;
-        // TODO: Set other properties
-        // TODO: Don't forget to check if ZumenSearch.Presentation.Utilities.Common.ReplaceZenkakuNumbers is needed.
-
-
         _broker = newBroker;
     }
 
