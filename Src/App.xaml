@@ -25,6 +25,16 @@
             </ResourceDictionary.MergedDictionaries>
             <!-- Other app resources here -->
 
+            <!-- Thumbnail sizes -->
+            <x:Double x:Key="SearchThumbnailWidth">240</x:Double>
+            <GridLength x:Key="SearchThumbnailColumnWidth">240</GridLength>
+            <x:Double x:Key="SearchThumbnailHeight">160</x:Double>
+            <!-- If the width is 240, the height is 160 for a 3:2 ratio and 180 for a 4:3 ratio. -->
+            <x:Double x:Key="DetailThumbnailWidth">280</x:Double>
+            <GridLength x:Key="DetailThumbnailColumnWidth">280</GridLength>
+            <!-- If the width is 280, the height is 186.67 (typically rounded to 187) for a 3:2 ratio and 210 for a 4:3 ratio. -->
+            <x:Double x:Key="DetailThumbnailHeight">187</x:Double>
+
             <!-- Converters -->
             <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
             <myconverters:ErrorToBorderBrushConverter x:Key="ErrorBrushConverter"/>

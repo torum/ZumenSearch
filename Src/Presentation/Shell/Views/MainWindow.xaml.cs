@@ -56,7 +56,7 @@ public sealed partial class MainWindow : Window
 
     private void LoadSetting()
     {
-        var config = _configurationService.CurrentConfiguration;
+        var config = _configurationService.CurrentAppSettings;
 
         //Debug.WriteLine($"LoadSetting: MainWindow: Width={config.MainWindow.Width}, Height={config.MainWindow.Height}, Top={config.MainWindow.Top}, Left={config.MainWindow.Left}, WindowState={config.MainWindow.WindowState}");
 
@@ -696,7 +696,7 @@ public sealed partial class MainWindow : Window
 
     private async Task SaveSettingAsync()
     {
-        var config = _configurationService.CurrentConfiguration;
+        var config = _configurationService.CurrentAppSettings;
 
         OverlappedPresenterState? winState = null; // For AOT workaround, don't set default.  = OverlappedPresenterState.Restored;
 

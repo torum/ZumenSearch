@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Media.Animation;
 using Windows.ApplicationModel;
 using ZumenSearch.Application.SearchResults;
@@ -362,6 +363,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
             return;
         }
 
+        // PropertySearchResult
         foreach (var item in PropertySearchResult)
         {
             if (!item.Id.Equals(building.Id, StringComparison.Ordinal))
@@ -375,8 +377,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
             item.ThumbnailFilename = building.ThumbnailFilename;
         }
 
-        //RecentProperties
-        //GetRecentPropertiesCommand.Execute(null);
+        // RecentProperties
         foreach (var item in RecentProperties)
         {
             if (!item.Id.Equals(building.Id, StringComparison.Ordinal))
@@ -391,6 +392,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
             item.ThumbnailFilename = building.ThumbnailFilename;
         }
 
+        // ?
         foreach (var item in SaleResidentialSearchResult)
         {
             if (!item.Id.Equals(building.Id, StringComparison.Ordinal)) continue;
@@ -400,9 +402,9 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         }
     }
 
-    public void Receive(ListingUpdatedMessage listing)
+    public void Receive(ListingUpdatedMessage message)
     {
-        var updated = listing.Value;
+        var updated = message.Value;
         if (updated is null || updated.Status != EntityStatus.Saved) return;
 
         ObservableCollection<ListingSearchResultItemViewModel> results;
@@ -531,7 +533,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
     public void UpdateSettings()
     {
         // Update settings logic here
-        var config = _configurationService.CurrentConfiguration;
+        var config = _configurationService.CurrentAppSettings;
         //config.IsNavigationViewMenuOpen = IsNavigationViewMenuOpen;
         //config.Theme = Theme;
         //config.SystemBackdrop = Material;
@@ -713,11 +715,13 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
             foreach (var item in res.PropertySearchResult)
             {
                 item.BasePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, item.Id);
+
+                Debug.WriteLine($"SearchProperties: Name: {item.Name}, BasePath: {item.BasePath}, Thumbnail: {item.ThumbImagePath}, ThumbnailFilename: {item.ThumbnailFilename}");
             }
 
             PropertySearchResult = new(res.PropertySearchResult.Select(item => new PropertySearchResultItemViewModel(item)));
 
-            _navigationService.NavigateTo(SearchResultPagePath, SlideNavigationTransitionEffect.FromLeft);//Navigate(typeof(ZumenSearch.Presentation.Search.Views.SearchResultPage), null, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });
+            _navigationService.NavigateTo(SearchResultPagePath, SlideNavigationTransitionEffect.FromLeft);
         }
     }
     private static bool SearchPropertiesCanExecute(string? queryText)
@@ -2293,7 +2297,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
     private void AddNewRentLessor()
     {
         var newId = Guid.CreateVersion7().ToString("N");
-        var shell = _shellRentLessorFactory.Create(new ZumenSearch.Domain.Entities.Person.NaturalPerson(newId, EntityStatus.New));
+        var shell = _shellRentLessorFactory.Create(new ZumenSearch.Domain.Entities.Person.PersonNatural(newId, EntityStatus.New));
         
         LessorEditorList.Add(shell.Window);
 
@@ -2718,7 +2722,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
     private void AddNewBroker()
     {
         var newId = Guid.CreateVersion7().ToString("N");
-        var shell = _shellBrokerFactory.Create(new ZumenSearch.Domain.Entities.Person.LegalPerson(newId, EntityStatus.New));
+        var shell = _shellBrokerFactory.Create(new ZumenSearch.Domain.Entities.Person.PersonLegal(newId, EntityStatus.New));
 
         BrokerEditorList.Add(shell.Window);
 

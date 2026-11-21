@@ -12,10 +12,20 @@ public partial class ImagePathToImageSourceConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, string language)
     {
-        if (value is not string imagePath || string.IsNullOrWhiteSpace(imagePath) || !File.Exists(imagePath))
+        if (value is not string imagePath || string.IsNullOrWhiteSpace(imagePath))
         {
             return null!;
         }
+
+        //Debug.WriteLine($"ImagePathToImageSourceConverter: Received image path: {imagePath}.");
+
+        if (!File.Exists(imagePath))
+        {
+            Debug.WriteLine($"ImagePathToImageSourceConverter: Image file does not exist at path: {imagePath}.");
+            return null!;
+        }
+
+        //Debug.WriteLine($"ImagePathToImageSourceConverter: Converting image path to BitmapImage: {imagePath}.");
 
         var bitmapImage = new BitmapImage
         {

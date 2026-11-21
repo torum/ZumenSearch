@@ -267,7 +267,7 @@ public sealed partial class BrokerViewModel : ObservableRecipient, IDisposable
     {
         Name = _broker.Name;
 
-        if (_broker is ZumenSearch.Domain.Entities.Person.LegalPerson legalPerson)
+        if (_broker is ZumenSearch.Domain.Entities.Person.PersonLegal legalPerson)
         {
             if (_broker.PersonKind != PersonKindType.Legal)
             {
@@ -330,7 +330,7 @@ public sealed partial class BrokerViewModel : ObservableRecipient, IDisposable
 
         // TODO: Create LegalPerson and set it.
 
-        var newBroker = new ZumenSearch.Domain.Entities.Person.LegalPerson(_broker.Id, _broker.Status);
+        var newBroker = new ZumenSearch.Domain.Entities.Person.PersonLegal(_broker.Id, _broker.Status);
 
         newBroker.SetName(Name);
 

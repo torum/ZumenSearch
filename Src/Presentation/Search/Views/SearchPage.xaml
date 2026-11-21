@@ -20,8 +20,8 @@
                 <ItemContainer.KeyboardAccelerators>
                     <KeyboardAccelerator Key="Enter" Modifiers="None" Invoked="ItemsViewKeyboardAccelerator_Invoked" />
                 </ItemContainer.KeyboardAccelerators>
-                <Border Width="240" CornerRadius="4" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
-                    <Grid Height="180">
+                <Border Width="{StaticResource SearchThumbnailWidth}" CornerRadius="4" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
+                    <Grid Height="{StaticResource SearchThumbnailHeight}">
                         <TextBlock Text="画像・図面登録なし" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                         <Rectangle RadiusX="3" RadiusY="3">
                             <Rectangle.Fill>
@@ -51,8 +51,8 @@
                 <ItemContainer.KeyboardAccelerators>
                     <KeyboardAccelerator Key="Enter" Modifiers="None" Invoked="ItemsViewKeyboardAccelerator_Invoked" />
                 </ItemContainer.KeyboardAccelerators>
-                <Border Width="240" CornerRadius="4" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
-                    <Grid Height="180">
+                <Border Width="{StaticResource SearchThumbnailWidth}" CornerRadius="4" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
+                    <Grid Height="{StaticResource SearchThumbnailHeight}">
                         <TextBlock Text="画像・図面登録なし" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                         <Rectangle RadiusX="3" RadiusY="3">
                             <Rectangle.Fill>
@@ -82,8 +82,8 @@
                 <ItemContainer.KeyboardAccelerators>
                     <KeyboardAccelerator Key="Enter" Modifiers="None" Invoked="ItemsViewKeyboardAccelerator_Invoked" />
                 </ItemContainer.KeyboardAccelerators>
-                <Border Width="240" CornerRadius="4" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
-                    <Grid Height="180">
+                <Border Width="{StaticResource SearchThumbnailWidth}" CornerRadius="4" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
+                    <Grid Height="{StaticResource SearchThumbnailHeight}">
                         <TextBlock Text="画像・図面登録なし" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                         <Rectangle RadiusX="3" RadiusY="3">
                             <Rectangle.Fill>

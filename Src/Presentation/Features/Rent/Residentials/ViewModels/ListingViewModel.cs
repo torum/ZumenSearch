@@ -14,6 +14,7 @@ using ZumenSearch.Application.Services.Rent.Residentials;
 using ZumenSearch.Domain.Entities.Rent.Residentials;
 using ZumenSearch.Domain.Enums;
 using ZumenSearch.Presentation.Features.Rent.Residentials.Models;
+using ZumenSearch.Presentation.Helpers;
 using ZumenSearch.Presentation.Messaging;
 using ZumenSearch.Presentation.Services.Contracts;
 using ZumenSearch.Presentation.Shell.Models;
@@ -1828,7 +1829,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
                 }
 
                 string extension = Path.GetExtension(filePath);
-                if (!IsSupportedImageExtension(extension))
+                if (!ImageFileHelper.IsSupportedImageExtension(extension))
                 {
                     ShowSimpleErrorInfoBar("エラー", $"画像形式に対応していません: {Path.GetFileName(filePath)}");
                     continue;
@@ -1892,22 +1893,40 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         return true;
     }
 
-    private static bool IsSupportedImageExtension(string extension) =>
-        extension.Equals(".jpg", StringComparison.OrdinalIgnoreCase) ||
-        extension.Equals(".jpeg", StringComparison.OrdinalIgnoreCase) ||
-        extension.Equals(".png", StringComparison.OrdinalIgnoreCase) ||
-        extension.Equals(".gif", StringComparison.OrdinalIgnoreCase) ||
-        extension.Equals(".webp", StringComparison.OrdinalIgnoreCase);
+    [RelayCommand]
+    private async Task OpenListingPicture(ListingPictureViewModel picListing)
+    {
+        if (picListing is null || !Pictures.Contains(picListing) || !IsEditorEnabled) return;
+
+        IsBusy = true;
+        try
+        {
+            var file = await StorageFile.GetFileFromPathAsync(Path.Combine(_listingDataDirectoryPath, picListing.ImageFilename));
+            if (!await Windows.System.Launcher.LaunchFileAsync(file))
+            {
+                ShowSimpleErrorInfoBar("エラー", "写真を開けませんでした。写真を開くアプリが設定されているか確認してください。");
+            }
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or COMException or InvalidOperationException or ArgumentException)
+        {
+            Debug.WriteLine($"Failed to open residential property image: {ex}");
+            ShowSimpleErrorInfoBar("エラー", $"写真を開けませんでした: {ex.Message}");
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
 
     [RelayCommand(CanExecute = nameof(CanDeleteListingPicture))]
-    private async Task DeleteListingPicture(ListingPictureViewModel picUnit)
+    private async Task DeleteListingPicture(ListingPictureViewModel picListing)
     {
         if (_listing is null)
         {
             return;
         }
 
-        if (picUnit is null)
+        if (picListing is null)
         {
             return;
         }
@@ -1921,9 +1940,9 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
                 return;
             }
 
-            if (Pictures.Remove(picUnit))
+            if (Pictures.Remove(picListing))
             {
-                _listing.PicturesToBeDeleted.Add(picUnit.Model);
+                _listing.PicturesToBeDeleted.Add(picListing.Model);
                 IsDirty = true;
             }
         }
@@ -1932,9 +1951,38 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
             IsBusy = false;
         }
     }
-    private static bool CanDeleteListingPicture(ListingPictureViewModel picUnit)
+    private static bool CanDeleteListingPicture(ListingPictureViewModel picListing)
     {
-        return picUnit is not null;
+        return picListing is not null;
+    }
+
+
+    [RelayCommand(CanExecute = nameof(CanDeleteAllListingPictures))]
+    private async Task ListingPictureDeleteAll()
+    {
+        if (!IsEditorEnabled) return;
+        IsBusy = true;
+        try
+        {
+            if (await _dialogService.ShowDeleteConfirmationDialog("この物件写真を全て削除しますか？") != Microsoft.UI.Xaml.Controls.ContentDialogResult.Primary) return;
+            foreach (var picListing in Pictures.ToList())
+            {
+                if (Pictures.Remove(picListing))
+                {
+                    _listing.PicturesToBeDeleted.Add(picListing.Model);
+                    IsDirty = true;
+                }
+            }
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+    private bool CanDeleteAllListingPictures()
+    {
+        if (Pictures.Count == 0) return false;
+        return true;
     }
 
     [RelayCommand(CanExecute = nameof(CanAddNewListingPdfs))]
@@ -2121,6 +2169,34 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
     private static bool CanDeleteListingPdf(ListingPdfViewModel pdf)
     {
         return pdf is not null;
+    }
+
+    [RelayCommand(CanExecute = nameof(CanDeleteAllListingPdfs))]
+    private async Task ListingPdfDeleteAll()
+    {
+        if (!IsEditorEnabled) return;
+        IsBusy = true;
+        try
+        {
+            if (await _dialogService.ShowDeleteConfirmationDialog("この物件PDFを全て削除しますか？") != Microsoft.UI.Xaml.Controls.ContentDialogResult.Primary) return;
+            foreach (var pdfProp in Pdfs.ToList())
+            {
+                if (Pdfs.Remove(pdfProp))
+                {
+                    _listing.PdfsToBeDeleted.Add(pdfProp.Model);
+                    IsDirty = true;
+                }
+            }
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+    private bool CanDeleteAllListingPdfs()
+    {
+        if (Pdfs.Count == 0) return false;
+        return true;
     }
 
     [RelayCommand(CanExecute = nameof(CanOpenBlobDirectory))]

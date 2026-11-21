@@ -6,18 +6,11 @@ namespace ZumenSearch.Presentation.Helpers;
 
 public static class InfoBarExtensions
 {
-    public static readonly DependencyProperty IsTextSelectionEnabledProperty =
-        DependencyProperty.RegisterAttached(
-            "IsTextSelectionEnabled",
-            typeof(bool),
-            typeof(InfoBarExtensions),
-            new PropertyMetadata(false, OnIsTextSelectionEnabledChanged));
+    public static readonly DependencyProperty IsTextSelectionEnabledProperty = DependencyProperty.RegisterAttached("IsTextSelectionEnabled", typeof(bool), typeof(InfoBarExtensions), new PropertyMetadata(false, OnIsTextSelectionEnabledChanged));
 
-    public static bool GetIsTextSelectionEnabled(DependencyObject obj) =>
-        (bool)obj.GetValue(IsTextSelectionEnabledProperty);
+    public static bool GetIsTextSelectionEnabled(DependencyObject obj) => (bool)obj.GetValue(IsTextSelectionEnabledProperty);
 
-    public static void SetIsTextSelectionEnabled(DependencyObject obj, bool value) =>
-        obj.SetValue(IsTextSelectionEnabledProperty, value);
+    public static void SetIsTextSelectionEnabled(DependencyObject obj, bool value) => obj.SetValue(IsTextSelectionEnabledProperty, value);
 
     private static void OnIsTextSelectionEnabledChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {

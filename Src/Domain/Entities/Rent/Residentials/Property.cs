@@ -10,6 +10,7 @@ using ZumenSearch.Domain.Enums;
 namespace ZumenSearch.Domain.Entities.Rent.Residentials;
 
 // Aggregate Root entity.
+// 賃貸住居用：物件（建物）を表すエンティティ
 
 [System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "CA1716:Identifiers should not match keywords", Justification = "Required for clarity. And I don't care about Visual Basic Keywords.")]
 public sealed partial class Property : PropertyBase

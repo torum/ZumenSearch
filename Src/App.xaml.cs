@@ -221,7 +221,7 @@ public partial class App : Microsoft.UI.Xaml.Application
 
             var configurationService = GetService<IConfigurationService>();
             configurationService.Initialize(AppConfigFilePath);
-            await configurationService.LoadConfigurationAsync();
+            await configurationService.LoadAppSettingsAsync();
 
             _appHostStartTask = StartAppHostAsync();
             var shell = GetService<ZumenSearch.Presentation.Shell.Views.ShellPage>();

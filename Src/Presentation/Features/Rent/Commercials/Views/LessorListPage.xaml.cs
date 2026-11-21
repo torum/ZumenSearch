@@ -17,20 +17,20 @@ public partial class PersonTemplateSelector : DataTemplateSelector
     {
         if (item is ZumenSearch.Presentation.Features.Rent.Commercials.Models.PersonWrapperForPropertyViewModel lessor)
         {
-            if (lessor.Person is ZumenSearch.Domain.Entities.Person.NaturalPerson)
+            if (lessor.Person is ZumenSearch.Domain.Entities.Person.PersonNatural)
             {
                 return NaturalTemplate;
             }
-            else if (lessor.Person is ZumenSearch.Domain.Entities.Person.LegalPerson)
+            else if (lessor.Person is ZumenSearch.Domain.Entities.Person.PersonLegal)
             {
                 return LegalTemplate;
             }
         }
-        else if (item is ZumenSearch.Domain.Entities.Person.NaturalPerson)
+        else if (item is ZumenSearch.Domain.Entities.Person.PersonNatural)
         {
             return NaturalTemplate;
         }
-        else if (item is ZumenSearch.Domain.Entities.Person.LegalPerson)
+        else if (item is ZumenSearch.Domain.Entities.Person.PersonLegal)
         {
             return LegalTemplate;
         }

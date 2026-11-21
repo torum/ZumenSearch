@@ -337,7 +337,7 @@ public sealed partial class LessorViewModel : ObservableRecipient, IDisposable
     {
         Name = _lessorBase.Name;
 
-        if (_lessorBase is ZumenSearch.Domain.Entities.Person.NaturalPerson naturalPerson)
+        if (_lessorBase is ZumenSearch.Domain.Entities.Person.PersonNatural naturalPerson)
         {
             if (_lessorBase.PersonKind != PersonKindType.Natural)
             {
@@ -349,7 +349,7 @@ public sealed partial class LessorViewModel : ObservableRecipient, IDisposable
             NameFirst = naturalPerson.NameFirst;
             NameLast = naturalPerson.NameLast;
         }
-        else if (_lessorBase is ZumenSearch.Domain.Entities.Person.LegalPerson legalPerson)
+        else if (_lessorBase is ZumenSearch.Domain.Entities.Person.PersonLegal legalPerson)
         {
             if (_lessorBase.PersonKind != PersonKindType.Legal)
             {
@@ -433,12 +433,12 @@ public sealed partial class LessorViewModel : ObservableRecipient, IDisposable
         //if (_personKind == EnumPersonKind.Natural)
         if (PersonKindIndex == 0)
         {
-            newLessor = new ZumenSearch.Domain.Entities.Person.NaturalPerson(_lessorBase.Id, _lessorBase.Status);
+            newLessor = new ZumenSearch.Domain.Entities.Person.PersonNatural(_lessorBase.Id, _lessorBase.Status);
         }
         //else if (_personKind == EnumPersonKind.Legal)
         else if (PersonKindIndex == 1)
         {
-            newLessor = new ZumenSearch.Domain.Entities.Person.LegalPerson(_lessorBase.Id, _lessorBase.Status);
+            newLessor = new ZumenSearch.Domain.Entities.Person.PersonLegal(_lessorBase.Id, _lessorBase.Status);
         }
         else
         {
@@ -448,12 +448,12 @@ public sealed partial class LessorViewModel : ObservableRecipient, IDisposable
 
         //_lessorBase.Name = Name;
 
-        if (newLessor is ZumenSearch.Domain.Entities.Person.NaturalPerson naturalPerson)
+        if (newLessor is ZumenSearch.Domain.Entities.Person.PersonNatural naturalPerson)
         {
              naturalPerson.NameFirst = NameFirst;
              naturalPerson.NameLast = NameLast;
         }
-        else if (newLessor is ZumenSearch.Domain.Entities.Person.LegalPerson legalPerson)
+        else if (newLessor is ZumenSearch.Domain.Entities.Person.PersonLegal legalPerson)
         {
             legalPerson.NameCompany = NameCompany;
             legalPerson.NameCompanyType = NameCompanyType;

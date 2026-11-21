@@ -6,13 +6,14 @@ using ZumenSearch.Domain.Enums;
 
 namespace ZumenSearch.Domain.Entities.Person;
 
-// Entity
+// Aggregate Root entity.
+// 自然人を表すエンティティ
 
-public partial class NaturalPerson : PersonBase
+public partial class PersonNatural : PersonBase
 {
     private string? _nameField;
 
-    public NaturalPerson(string id, EntityStatus status) : base(id, status, PersonKindType.Natural)
+    public PersonNatural(string id, EntityStatus status) : base(id, status, PersonKindType.Natural)
     {
         //
     }

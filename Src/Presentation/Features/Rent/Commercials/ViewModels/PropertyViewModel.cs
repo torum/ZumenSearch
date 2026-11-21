@@ -1201,7 +1201,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         var wrapper = LessorsWrapper.FirstOrDefault(item => item.Person.Id == lessor.Id);
         if (wrapper is null) return;
 
-        if ((wrapper.Person is ZumenSearch.Domain.Entities.Person.LegalPerson) != (lessor is ZumenSearch.Domain.Entities.Person.LegalPerson))
+        if ((wrapper.Person is ZumenSearch.Domain.Entities.Person.PersonLegal) != (lessor is ZumenSearch.Domain.Entities.Person.PersonLegal))
         {
             LessorsWrapper[LessorsWrapper.IndexOf(wrapper)] = new ZumenSearch.Presentation.Features.Rent.Commercials.Models.PersonWrapperForPropertyViewModel(lessor, this);
         }

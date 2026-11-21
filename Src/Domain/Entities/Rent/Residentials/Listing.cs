@@ -1,7 +1,6 @@
 ﻿#pragma warning disable IDE0079 // Remove unnecessary suppression
 #pragma warning disable IDE0290 // Use primary constructor
 
-using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using ZumenSearch.Domain.Entities.Base;
@@ -9,7 +8,9 @@ using ZumenSearch.Domain.Enums;
 
 namespace ZumenSearch.Domain.Entities.Rent.Residentials;
 
-// 部屋（編集用）
+// Aggregate Root entity.
+// 賃貸住居用：募集物件（部屋）を表すエンティティ
+
 public sealed partial class Listing : ListingBase
 {
     public Listing(string id, EntityStatus status, string propertyId, EntityStatus propertyStatus, bool isPropertyUnitLevelOwnership, string propertyName, string fudousanId) : base(id, status, propertyId, propertyStatus, PropertyContextType.RentResidential, fudousanId)

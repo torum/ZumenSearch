@@ -1,7 +1,7 @@
 using Microsoft.UI.Xaml.Controls;
 using Windows.ApplicationModel.DataTransfer;
-
 using ZumenSearch.Presentation.Utilities;
+
 namespace ZumenSearch.Presentation.Helpers;
 
 internal static class NumericPasteHelper

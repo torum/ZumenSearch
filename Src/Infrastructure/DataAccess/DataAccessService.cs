@@ -1209,13 +1209,10 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
                 var name = reader.GetString(reader.GetOrdinal("name")) ?? string.Empty;//Convert.ToString(reader["name"]) ?? "";
                 item.SetName(name);
 
-                var thumb = reader.GetString(reader.GetOrdinal("thumbnail_filename")) ?? string.Empty;
-                item.ThumbnailFilename = thumb;
-
-                var createdAt = reader.GetString(reader.GetOrdinal("created_at")) ?? string.Empty;//Convert.ToString(reader["created_at"]) ?? string.Empty;
-                item.CreatedAt = createdAt;
-                var updatedAt = reader.GetString(reader.GetOrdinal("updated_at")) ?? string.Empty;//Convert.ToString(reader["updated_at"]) ?? string.Empty;
-                item.UpdatedAt = updatedAt;
+                item.ThumbnailFilename = reader.GetString(reader.GetOrdinal("thumbnail_filename")) ?? string.Empty;
+ 
+                item.CreatedAt = reader.GetString(reader.GetOrdinal("created_at")) ?? string.Empty;//Convert.ToString(reader["created_at"]) ?? string.Empty;
+                item.UpdatedAt = reader.GetString(reader.GetOrdinal("updated_at")) ?? string.Empty;//Convert.ToString(reader["updated_at"]) ?? string.Empty;
 
                 //res.AffectedCount++;
 
@@ -1293,10 +1290,15 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
                 }
 
                 var item = new ZumenSearch.Application.SearchResults.PropertySearchResultItem(s, enumKind);
-                // try...
+
                 item.SetName(reader.GetString(reader.GetOrdinal("name")) ?? string.Empty);
 
-                //Debug.WriteLine($"Found item: {item.Name} @SelectPropertiesByKeyword() in DataAccessService");
+                item.ThumbnailFilename = reader.GetString(reader.GetOrdinal("thumbnail_filename")) ?? string.Empty;
+                item.CreatedAt = reader.GetString(reader.GetOrdinal("created_at")) ?? string.Empty;//Convert.ToString(reader["created_at"]) ?? string.Empty;
+                item.UpdatedAt = reader.GetString(reader.GetOrdinal("updated_at")) ?? string.Empty;//Convert.ToString(reader["updated_at"]) ?? string.Empty;
+
+                // TODO: More properties should be added here as needed.
+
 
                 // Reset item Isdirty flag.
                 item.SetIsModified(false);
@@ -5943,7 +5945,7 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
                 cmd.Parameters.AddWithValue("@name", lessor.Name);
                 cmd.Parameters.AddWithValue("@personKind", lessor.PersonKind.ToString());
 
-                if (lessor is ZumenSearch.Domain.Entities.Person.NaturalPerson naturalPerson)
+                if (lessor is ZumenSearch.Domain.Entities.Person.PersonNatural naturalPerson)
                 {
                     cmd.Parameters.AddWithValue("@name_last", naturalPerson.NameLast);
                     cmd.Parameters.AddWithValue("@name_first", naturalPerson.NameFirst);
@@ -5953,7 +5955,7 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
                     // TODO: check if int is ok
                     cmd.Parameters.AddWithValue("@name_company_type_position", 0);
                 }
-                else if (lessor is ZumenSearch.Domain.Entities.Person.LegalPerson legalPerson)
+                else if (lessor is ZumenSearch.Domain.Entities.Person.PersonLegal legalPerson)
                 {
                     // Clear naturalPerson values
                     cmd.Parameters.AddWithValue("@name_last", string.Empty);
@@ -6184,11 +6186,11 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
 
         if (enumKind == ZumenSearch.Domain.Enums.PersonKindType.Natural)
         {
-            person = new ZumenSearch.Domain.Entities.Person.NaturalPerson(personId, EntityStatus.Saved);
+            person = new ZumenSearch.Domain.Entities.Person.PersonNatural(personId, EntityStatus.Saved);
         }
         else if (enumKind == ZumenSearch.Domain.Enums.PersonKindType.Legal)
         {
-            person = new ZumenSearch.Domain.Entities.Person.LegalPerson(personId, EntityStatus.Saved);
+            person = new ZumenSearch.Domain.Entities.Person.PersonLegal(personId, EntityStatus.Saved);
         }
 
         if (person is null)
@@ -6199,13 +6201,13 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
         //s = Convert.ToString(reader["name"]) ?? "";
         person.SetName(reader.GetString(reader.GetOrdinal("name")) ?? string.Empty);
 
-        if (person is ZumenSearch.Domain.Entities.Person.NaturalPerson naturalPerson)
+        if (person is ZumenSearch.Domain.Entities.Person.PersonNatural naturalPerson)
         {
             naturalPerson.NameLast = Convert.ToString(reader["name_last"], CultureInfo.InvariantCulture) ?? "";
             naturalPerson.NameFirst = Convert.ToString(reader["name_first"], CultureInfo.InvariantCulture) ?? "";
 
         }
-        else if (person is ZumenSearch.Domain.Entities.Person.LegalPerson legalPerson)
+        else if (person is ZumenSearch.Domain.Entities.Person.PersonLegal legalPerson)
         {
             legalPerson.NameCompany = Convert.ToString(reader["name_company"], CultureInfo.InvariantCulture) ?? "";
             legalPerson.NameCompanyType = Convert.ToString(reader["name_company_type"], CultureInfo.InvariantCulture) ?? "";
@@ -7199,7 +7201,7 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
             command.Parameters.AddWithValue("@remarks", broker.Remarks);
             command.Parameters.AddWithValue("@updatedAt", DateTimeOffset.UtcNow.ToString("s"));
 
-            if (broker is ZumenSearch.Domain.Entities.Person.NaturalPerson natural)
+            if (broker is ZumenSearch.Domain.Entities.Person.PersonNatural natural)
             {
                 command.Parameters.AddWithValue("@nameLast", natural.NameLast);
                 command.Parameters.AddWithValue("@nameFirst", natural.NameFirst);
@@ -7207,7 +7209,7 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
                 command.Parameters.AddWithValue("@nameCompanyType", string.Empty);
                 command.Parameters.AddWithValue("@nameCompanyTypePosition", 0);
             }
-            else if (broker is ZumenSearch.Domain.Entities.Person.LegalPerson legal)
+            else if (broker is ZumenSearch.Domain.Entities.Person.PersonLegal legal)
             {
                 command.Parameters.AddWithValue("@nameLast", string.Empty);
                 command.Parameters.AddWithValue("@nameFirst", string.Empty);

@@ -20,6 +20,7 @@ using ZumenSearch.Application.Contracts;
 using ZumenSearch.Application.Services.Rent.Residentials;
 using ZumenSearch.Presentation.Factories.AbstractFactory;
 using ZumenSearch.Presentation.Features.Rent.Residentials.Models;
+using ZumenSearch.Presentation.Helpers;
 using ZumenSearch.Presentation.Messaging;
 using ZumenSearch.Presentation.Services.Contracts;
 using ZumenSearch.Presentation.Shell.Models;
@@ -2231,13 +2232,13 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
     public void Receive(ListingUpdatedMessage message)
     {
-        var something = message.Value;
-        if (something is null)
+        var updated = message.Value;
+        if (updated is null)
         {
             return;
         }
 
-        if (something is not ZumenSearch.Domain.Entities.Rent.Residentials.Listing listing || !listing.PropertyId.Equals(_id, StringComparison.Ordinal))
+        if (updated is not ZumenSearch.Domain.Entities.Rent.Residentials.Listing listing || !listing.PropertyId.Equals(_id, StringComparison.Ordinal))
         {
             return;
         }
@@ -3268,13 +3269,6 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         return succeeded;
     }
 
-    private static bool IsSupportedImageExtension(string extension) =>
-        extension.Equals(".jpg", StringComparison.OrdinalIgnoreCase) ||
-        extension.Equals(".jpeg", StringComparison.OrdinalIgnoreCase) ||
-        extension.Equals(".png", StringComparison.OrdinalIgnoreCase) ||
-        extension.Equals(".gif", StringComparison.OrdinalIgnoreCase) ||
-        extension.Equals(".webp", StringComparison.OrdinalIgnoreCase);
-
     #endregion
 
     #region == Commands ==
@@ -3518,7 +3512,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
                 }
 
                 string extension = Path.GetExtension(filePath);
-                if (!IsSupportedImageExtension(extension))
+                if (!ImageFileHelper.IsSupportedImageExtension(extension))
                 {
                     ShowSimpleErrorInfoBar("エラー", $"画像形式に対応していません: {Path.GetFileName(filePath)}");
                     continue;
@@ -3588,6 +3582,31 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         return true;
     }
 
+    [RelayCommand]
+    private async Task OpenPropertyPicture(PropertyPictureViewModel picProp)
+    {
+        if (picProp is null || !Pictures.Contains(picProp) || !IsEditorEnabled) return;
+
+        IsBusy = true;
+        try
+        {
+            var file = await StorageFile.GetFileFromPathAsync(Path.Combine(_propertyDataDirectoryPath, picProp.ImageFilename));
+            if (!await Windows.System.Launcher.LaunchFileAsync(file))
+            {
+                ShowSimpleErrorInfoBar("エラー", "写真を開けませんでした。写真を開くアプリが設定されているか確認してください。");
+            }
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or COMException or InvalidOperationException or ArgumentException)
+        {
+            Debug.WriteLine($"Failed to open residential property image: {ex}");
+            ShowSimpleErrorInfoBar("エラー", $"写真を開けませんでした: {ex.Message}");
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
     [RelayCommand(CanExecute = nameof(CanDeletePropertyPicture))]
     private async Task DeletePropertyPicture(PropertyPictureViewModel picProp)
     {
@@ -3616,6 +3635,34 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
     private static bool CanDeletePropertyPicture(PropertyPictureViewModel picProp)
     {
         return picProp is not null;
+    }
+
+    [RelayCommand(CanExecute = nameof(CanDeleteAllPropertyPictures))]
+    private async Task PropertyPictureDeleteAll()
+    {
+        if (!IsEditorEnabled) return;
+        IsBusy = true;
+        try
+        {
+            if (await _dialogService.ShowDeleteConfirmationDialog("この物件写真を全て削除しますか？") != Microsoft.UI.Xaml.Controls.ContentDialogResult.Primary) return;
+            foreach (var picProp in Pictures.ToList())
+            {
+                if (Pictures.Remove(picProp))
+                {
+                    _property.PicturesToBeDeleted.Add(picProp.Model);
+                    IsDirty = true;
+                }
+            }
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+    private bool CanDeleteAllPropertyPictures()
+    {
+        if (Pictures.Count == 0) return false;
+        return true;
     }
 
     [RelayCommand(CanExecute = nameof(CanAddNewPropertyPdfs))]
@@ -3748,14 +3795,14 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
     }
 
     [RelayCommand]
-    private async Task OpenPropertyPdf(PropertyPdfViewModel pdf)
+    private async Task OpenPropertyPdf(PropertyPdfViewModel pdfProp)
     {
-        if (pdf is null || !Pdfs.Contains(pdf) || !IsEditorEnabled) return;
+        if (pdfProp is null || !Pdfs.Contains(pdfProp) || !IsEditorEnabled) return;
 
         IsBusy = true;
         try
         {
-            var file = await StorageFile.GetFileFromPathAsync(Path.Combine(_propertyDataDirectoryPath, pdf.PdfFilename));
+            var file = await StorageFile.GetFileFromPathAsync(Path.Combine(_propertyDataDirectoryPath, pdfProp.PdfFilename));
             if (!await Windows.System.Launcher.LaunchFileAsync(file))
             {
                 ShowSimpleErrorInfoBar("エラー", "PDFを開けませんでした。PDFを開くアプリが設定されているか確認してください。");
@@ -3800,6 +3847,34 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
     private static bool CanDeletePropertyPdf(PropertyPdfViewModel pdfProp)
     {
         return pdfProp is not null;
+    }
+
+    [RelayCommand(CanExecute = nameof(CanDeleteAllPropertyPdfs))]
+    private async Task PropertyPdfDeleteAll()
+    {
+        if (!IsEditorEnabled) return;
+        IsBusy = true;
+        try
+        {
+            if (await _dialogService.ShowDeleteConfirmationDialog("この物件PDFを全て削除しますか？") != Microsoft.UI.Xaml.Controls.ContentDialogResult.Primary) return;
+            foreach (var pdfProp in Pdfs.ToList())
+            {
+                if (Pdfs.Remove(pdfProp))
+                {
+                    _property.PdfsToBeDeleted.Add(pdfProp.Model);
+                    IsDirty = true;
+                }
+            }
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+    private bool CanDeleteAllPropertyPdfs()
+    {
+        if (Pdfs.Count == 0) return false;
+        return true;
     }
 
     [RelayCommand(CanExecute = nameof(CanOpenPropertyBlobDirectory))]

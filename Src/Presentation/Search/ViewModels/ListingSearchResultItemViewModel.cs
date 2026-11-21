@@ -1,10 +1,12 @@
+#pragma warning disable IDE0079 // Remove unnecessary suppression
+#pragma warning disable IDE0290 // Use primary constructor
 using CommunityToolkit.Mvvm.ComponentModel;
 using ZumenSearch.Application.SearchResults;
 using ZumenSearch.Domain.Enums;
 
 namespace ZumenSearch.Presentation.Search.ViewModels;
 
-public sealed class ListingSearchResultItemViewModel : ObservableObject
+public sealed partial class ListingSearchResultItemViewModel : ObservableObject
 {
     private readonly ListingSearchResultItem _model;
 

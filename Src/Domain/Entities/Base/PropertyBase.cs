@@ -194,6 +194,16 @@ public abstract partial class PropertyBase : EntityAggregateBase
         }
     }
 
+    public string CreatedAt { get; set; } = string.Empty;
+    public string UpdatedAt { get; set; } = string.Empty;
+    public string CreatedAtFormatted => DateTime.TryParse(CreatedAt, out var createdAt)
+    ? createdAt.ToString("G", CultureInfo.CurrentCulture)
+    : CreatedAt;
+
+    public string UpdatedAtFormatted => DateTime.TryParse(UpdatedAt, out var updatedAt)
+        ? updatedAt.ToString("G", CultureInfo.CurrentCulture)
+        : UpdatedAt;
+
     // TODO: Create a nested class for ThumbImage so that BasePath is always set along with ThumbnailFilename as parameters.
     #region == Thumb Image ==
 

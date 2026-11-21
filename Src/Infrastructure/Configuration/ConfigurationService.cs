@@ -1,17 +1,8 @@
-﻿using ZumenSearch.Domain.Enums;
-using ZumenSearch.Application.Configuration;
-using ZumenSearch.Application.Results;
-using ZumenSearch.Presentation.Shell.Models;
-using ZumenSearch.Infrastructure.Configuration.Contracts;
-using ZumenSearch.Infrastructure.DataAccess.Contracts;
-using ZumenSearch.Presentation.Services.Contracts;
-using System;
-using System.Diagnostics;
-using System.Globalization;
-using System.IO;
-using System.Threading.Tasks;
+﻿using System.Globalization;
 using System.Xml;
 using System.Xml.Linq;
+using ZumenSearch.Application.Configuration;
+using ZumenSearch.Infrastructure.Configuration.Contracts;
 
 #pragma warning disable IDE0079 // Remove unnecessary suppression
 #pragma warning disable IDE0290 // Use primary constructor
@@ -45,17 +36,17 @@ public sealed class ConfigurationService : IConfigurationService
         _appendErrorLog = appendErrorLog;
 
         _isConfigLoaded = false;
-        CurrentConfiguration = new ZumenSearch.Application.Configuration.AppSettings();
+        CurrentAppSettings = new ZumenSearch.Application.Configuration.AppSettings();
     }
 
-    public ZumenSearch.Application.Configuration.AppSettings CurrentConfiguration { get; private set; }
+    public ZumenSearch.Application.Configuration.AppSettings CurrentAppSettings { get; private set; }
     public string ConfigFilePath => _configFilePath ?? string.Empty;
 
     public void Initialize(string configFilePath)
     {
         _configFilePath = configFilePath;
         _isConfigLoaded = false;
-        CurrentConfiguration = new ZumenSearch.Application.Configuration.AppSettings();
+        CurrentAppSettings = new ZumenSearch.Application.Configuration.AppSettings();
         _xdoc = null;
         _isInitialized = true;
 
@@ -70,7 +61,7 @@ public sealed class ConfigurationService : IConfigurationService
         }
     }
 
-    public async Task<ZumenSearch.Application.Configuration.AppSettings> LoadConfigurationAsync()
+    public async Task<ZumenSearch.Application.Configuration.AppSettings> LoadAppSettingsAsync()
     {
         if (!_isInitialized)
         {
@@ -81,8 +72,8 @@ public sealed class ConfigurationService : IConfigurationService
 
         if (_isConfigLoaded)
         {
-            Debug.WriteLine("LoadConfigurationAsync() - Already loaded, returning current configuration.");
-            return CurrentConfiguration ?? config;
+            Debug.WriteLine("LoadAppSettingsAsync() - Already loaded, returning current AppSettings.");
+            return CurrentAppSettings ?? config;
         }
 
         if (string.IsNullOrEmpty(_configFilePath))
@@ -1049,9 +1040,9 @@ public sealed class ConfigurationService : IConfigurationService
             _appendErrorLog("Error loading configuration", ex.ToString());
         }
 
-        CurrentConfiguration = config;
+        CurrentAppSettings = config;
 
-        return CurrentConfiguration;
+        return CurrentAppSettings;
     }
 
     public async Task SaveConfigurationAsync()
@@ -1077,7 +1068,7 @@ public sealed class ConfigurationService : IConfigurationService
         // TODO: Load xdoc from global variable if exists, and apply changes to it, then save it back to file.
         //_xdoc
 
-        var config = CurrentConfiguration;
+        var config = CurrentAppSettings;
 
         XmlDocument doc = new();
         XmlDeclaration xmlDeclaration = doc.CreateXmlDeclaration("1.0", "UTF-8", null);
