@@ -1,11 +1,6 @@
-﻿using Microsoft.UI;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media;
+﻿using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
-using System.Diagnostics;
-using System.Text.RegularExpressions;
 using Windows.ApplicationModel.DataTransfer;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace ZumenSearch.Presentation.Features.Brokers.Views;
 
@@ -28,6 +23,8 @@ public sealed partial class BasicPage : Page
     {
         if (_initialized) return;
 
+        Debug.WriteLine("ZumenSearch.Presentation.Features.Brokers.Views.BasicPage Init()");
+
         _initialized = true;
 
         if (ViewModel?.PersonKindIndex == 0)
@@ -38,18 +35,24 @@ public sealed partial class BasicPage : Page
         {
             this.TextBox_NameCompany.Focus(Microsoft.UI.Xaml.FocusState.Programmatic);
         }
+
+        // Segmented.SelectedIndex binds two-way to PersonKindIndex, and that setter marks the VM dirty whenever the index changes.
+        // The initial control-binding update is being treated as a user edit, so we need to reset IsDirty here.
+        ViewModel?.ResetIsDirtyState();
     }
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
-        if ((e.Parameter is ZumenSearch.Presentation.Features.Brokers.ViewModels.BrokerViewModel vm) && (e.Parameter != null))
+        if (e.Parameter is ZumenSearch.Presentation.Features.Brokers.ViewModels.BrokerViewModel vm)
         {
             ViewModel = vm;
             Bindings.Update();
+            /*
             if (!_initialized)
             {
-                //Init();
+                Init();
             }
+            */
         }
         
         base.OnNavigatedTo(e);
@@ -58,6 +61,21 @@ public sealed partial class BasicPage : Page
     private void Page_Loaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
         Init();
+    }
+
+    private void ComboBoxPref_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        ComboBoxCountyAndCity.IsEnabled = ComboBoxPref.SelectedIndex > -1;
+    }
+
+    private void ComboBoxCountyAndCity_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        ComboBoxWardAndOaza.IsEnabled = ComboBoxCountyAndCity.SelectedIndex > -1;
+    }
+
+    private void ComboBoxWardAndOaza_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        ComboBoxChoume.IsEnabled = ComboBoxWardAndOaza.SelectedIndex > -1;
     }
 
     private async void TextBox_MaxLength_Paste(object sender, TextControlPasteEventArgs e)

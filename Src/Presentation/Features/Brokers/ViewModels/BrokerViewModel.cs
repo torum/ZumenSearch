@@ -8,6 +8,7 @@ using ZumenSearch.Application.Results;
 using ZumenSearch.Presentation.Shell.Models;
 using ZumenSearch.Domain.Entities.Base;
 using ZumenSearch.Domain.Entities.Person;
+using ZumenSearch.Domain.ValueObjects.Location;
 
 
 using ZumenSearch.Infrastructure.Configuration.Contracts;
@@ -75,17 +76,14 @@ public sealed partial class BrokerViewModel : ObservableRecipient, IDisposable
         finally
         {
             IsDirty = false;
+            _broker.SetIsModified(IsDirty);
         }
 
         // Ready to receive messages.
         //this.IsActive = true;
     }
 
-
     #region == Public Properties ==
-
-    // TODO: Do I need this?
-    //public string Id => _id;
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SaveCommand))]
@@ -296,8 +294,120 @@ public sealed partial class BrokerViewModel : ObservableRecipient, IDisposable
     public string Address
     {
         get;
-        set { if (SetProperty(ref field, value)) IsDirty = true; }
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+                OnPropertyChanged(nameof(AddressPreview));
+            }
+        }
     } = string.Empty;
+
+    public ObservableCollection<Prefecture> Prefectures { get; init; } = new(PrefectureMaster.Prefectures);
+
+    public Prefecture? SelectedPrefecture
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+                SelectedCity = null;
+                Cities = value is null ? [] : [.. _dataAccessLocationService.GetCountyAndCityByPref(value.Name).DistinctBy(p => p.Combined)];
+                OnPropertyChanged(nameof(AddressPreview));
+            }
+        }
+    }
+
+    public ObservableCollection<CountyAndCity> Cities
+    {
+        get;
+        private set { SetProperty(ref field, value); }
+    } = [];
+
+    public CountyAndCity? SelectedCity
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+                SelectedTown = null;
+                Towns = value is null || SelectedPrefecture is null ? [] : [.. _dataAccessLocationService.GetWardAndOazaByPrefCountyCity(SelectedPrefecture.Name, value.County, value.City).DistinctBy(p => p.Combined)];
+                OnPropertyChanged(nameof(AddressPreview));
+            }
+        }
+    }
+
+    public ObservableCollection<WardAndOaza> Towns
+    {
+        get;
+        private set { SetProperty(ref field, value); }
+    } = [];
+
+    public WardAndOaza? SelectedTown
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+                SelectedChou = null;
+                Chous = value is null || SelectedPrefecture is null || SelectedCity is null ? [] : [.. _dataAccessLocationService.GetChoumeByPrefCountyCityWardOaza(SelectedPrefecture.Name, SelectedCity.County, SelectedCity.City, value.Ward, value.Oaza).DistinctBy(p => p.Chou)];
+                OnPropertyChanged(nameof(AddressPreview));
+            }
+        }
+    }
+
+    public ObservableCollection<Choume> Chous
+    {
+        get;
+        private set { SetProperty(ref field, value); }
+    } = [];
+
+    public Choume? SelectedChou
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+                OnPropertyChanged(nameof(AddressPreview));
+            }
+        }
+    }
+
+    public string Edaban
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+                OnPropertyChanged(nameof(AddressPreview));
+            }
+        }
+    } = string.Empty;
+
+    public string AddressPreview
+    {
+        get
+        {
+            if (SelectedPrefecture is null)
+            {
+                return Address;
+            }
+
+            var edaban = string.IsNullOrEmpty(Edaban) ? string.Empty : $"-{Edaban}";
+            return $"{SelectedPrefecture.Name}{SelectedCity?.Combined}{SelectedTown?.Combined}{SelectedChou?.Chou}{edaban}";
+        }
+    }
 
     // 備考
     public string Remarks
@@ -320,6 +430,18 @@ public sealed partial class BrokerViewModel : ObservableRecipient, IDisposable
     {
         //DiscardUnsavedFiles();
 
+        IsDirty = false;
+    }
+
+    public void Dispose()
+    {
+        _cts?.Dispose();
+
+        GC.SuppressFinalize(this);
+    }
+
+    public void ResetIsDirtyState()
+    {
         IsDirty = false;
     }
 
@@ -354,7 +476,26 @@ public sealed partial class BrokerViewModel : ObservableRecipient, IDisposable
         PhoneNumber = _broker.PhoneNumber;
         PostalCode = _broker.PostalCode;
         Address = _broker.Address;
+
+        var location = _broker.AddressLocation;
+        SelectedPrefecture = PrefectureMaster.Prefectures.FirstOrDefault(p => p.Name == location.Prefecture?.Name);
+        if (SelectedPrefecture is not null)
+        {
+            SelectedCity = Cities.FirstOrDefault(p => p.County == location.CountyAndCity?.County && p.City == location.CountyAndCity?.City);
+            if (SelectedCity is not null)
+            {
+                SelectedTown = Towns.FirstOrDefault(p => p.Ward == location.WardAndOaza?.Ward && p.Oaza == location.WardAndOaza?.Oaza);
+                if (SelectedTown is not null)
+                {
+                    SelectedChou = Chous.FirstOrDefault(p => p.Chou == location.Choume?.Chou);
+                }
+            }
+        }
+        Edaban = location.Edaban;
+
         Remarks = _broker.Remarks;
+
+        IsDirty = false;
     }
 
     private bool ValidateName()
@@ -410,7 +551,14 @@ public sealed partial class BrokerViewModel : ObservableRecipient, IDisposable
 
         newBroker.PhoneNumber = PhoneNumber;
         newBroker.PostalCode = PostalCode;
-        newBroker.Address = Address;
+        newBroker.Address = AddressPreview;
+        newBroker.AddressLocation.SetMachiazaId(SelectedChou?.MachiazaId ?? SelectedTown?.MachiazaId ?? SelectedCity?.MachiazaId ?? string.Empty);
+        newBroker.AddressLocation.SetPrefecture(SelectedPrefecture);
+        newBroker.AddressLocation.SetCountyAndCity(SelectedCity);
+        newBroker.AddressLocation.SetWardAndOaza(SelectedTown);
+        newBroker.AddressLocation.SetChoume(SelectedChou);
+        newBroker.AddressLocation.SetEdaban(Edaban);
+        newBroker.AddressLocation.SetPostalCode(PostalCode);
         newBroker.Remarks = Remarks;
         _broker = newBroker;
     }
@@ -491,10 +639,4 @@ public sealed partial class BrokerViewModel : ObservableRecipient, IDisposable
 
     #endregion
 
-    public void Dispose()
-    {
-        _cts?.Dispose();
-
-        GC.SuppressFinalize(this);
-    }
 }

@@ -2,6 +2,7 @@
 #pragma warning disable IDE0290 // Use primary constructor
 
 using ZumenSearch.Domain.Enums;
+using ZumenSearch.Domain.ValueObjects.Location;
 
 namespace ZumenSearch.Domain.Entities.Base;
 
@@ -56,6 +57,8 @@ public abstract class PersonBase : EntityAggregateBase
             IsModified = true;
         }
     } = string.Empty;
+
+    public Address AddressLocation { get; } = new Address();
 
     public string Remarks
     {

@@ -1,18 +1,12 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.Collections.ObjectModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
-using System.Collections.ObjectModel;
 using ZumenSearch.Domain.Enums;
-using ZumenSearch.Application.Configuration;
-using ZumenSearch.Application.Results;
-using ZumenSearch.Presentation.Shell.Models;
-using ZumenSearch.Domain.Entities.Base;
-using ZumenSearch.Domain.Entities.Person;
-
-
-using ZumenSearch.Infrastructure.Configuration.Contracts;
+using ZumenSearch.Domain.ValueObjects.Location;
 using ZumenSearch.Infrastructure.DataAccess.Contracts;
 using ZumenSearch.Presentation.Services.Contracts;
+using ZumenSearch.Presentation.Shell.Models;
 
 namespace ZumenSearch.Presentation.Features.Rent.Lessors.ViewModels;
 
@@ -31,7 +25,7 @@ public sealed partial class LessorViewModel : ObservableRecipient, IDisposable
 
     // This property holds the COPY of current entity being edited.
     // Do not use it directly in the UI. Apply changes to this object in Save() to save the changes.
-    private ZumenSearch.Domain.Entities.Base.PersonBase _lessorBase;
+    private ZumenSearch.Domain.Entities.Base.PersonBase _lessor;
 
     #endregion
 
@@ -47,7 +41,7 @@ public sealed partial class LessorViewModel : ObservableRecipient, IDisposable
 
     public LessorViewModel(ZumenSearch.Domain.Entities.Base.PersonBase lessorBase, INavigationGenericService navigationService, IDialogGenericService dialogService, IDispatcherService dispatcherService, IDataAccessService dataAccessService, IDataAccessLocationService dataAccessLocationService)
     {
-        _lessorBase = lessorBase;
+        _lessor = lessorBase;
         _id = lessorBase.Id;
 
         _navigationService = navigationService; 
@@ -59,11 +53,11 @@ public sealed partial class LessorViewModel : ObservableRecipient, IDisposable
         // Update title with dummy value.
         WindowTitle = string.Empty;
 
-        if (_lessorBase.PersonKind == PersonKindType.Natural)
+        if (_lessor.PersonKind == PersonKindType.Natural)
         {
             PersonKindIndex = 0;
         }
-        else if (_lessorBase.PersonKind == PersonKindType.Legal)
+        else if (_lessor.PersonKind == PersonKindType.Legal)
         {
             PersonKindIndex = 1;
         }
@@ -88,6 +82,7 @@ public sealed partial class LessorViewModel : ObservableRecipient, IDisposable
         finally
         {
             IsDirty = false;
+            _lessor.SetIsModified(IsDirty);
         }
 
         // Ready to receive messages.
@@ -117,7 +112,7 @@ public sealed partial class LessorViewModel : ObservableRecipient, IDisposable
                 Debug.WriteLine(Name);
             }
 
-            if (_lessorBase.Status == EntityStatus.New)
+            if (_lessor.Status == EntityStatus.New)
             {
                 str = $"{str}：新規";
             }
@@ -297,7 +292,6 @@ public sealed partial class LessorViewModel : ObservableRecipient, IDisposable
         }
     }
 
-
     public string PhoneNumber
     {
         get;
@@ -339,9 +333,118 @@ public sealed partial class LessorViewModel : ObservableRecipient, IDisposable
         get;
         set
         {
-            if (SetProperty(ref field, value)) IsDirty = true;
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+                OnPropertyChanged(nameof(AddressPreview));
+            }
         }
     } = string.Empty;
+
+    public ObservableCollection<Prefecture> Prefectures { get; init; } = new(PrefectureMaster.Prefectures);
+
+    public Prefecture? SelectedPrefecture
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+                SelectedCity = null;
+                Cities = value is null ? [] : [.. _dataAccessLocationService.GetCountyAndCityByPref(value.Name).DistinctBy(p => p.Combined)];
+                OnPropertyChanged(nameof(AddressPreview));
+            }
+        }
+    }
+
+    public ObservableCollection<CountyAndCity> Cities
+    {
+        get;
+        private set { SetProperty(ref field, value); }
+    } = [];
+
+    public CountyAndCity? SelectedCity
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+                SelectedTown = null;
+                Towns = value is null || SelectedPrefecture is null ? [] : [.. _dataAccessLocationService.GetWardAndOazaByPrefCountyCity(SelectedPrefecture.Name, value.County, value.City).DistinctBy(p => p.Combined)];
+                OnPropertyChanged(nameof(AddressPreview));
+            }
+        }
+    }
+
+    public ObservableCollection<WardAndOaza> Towns
+    {
+        get;
+        private set { SetProperty(ref field, value); }
+    } = [];
+
+    public WardAndOaza? SelectedTown
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+                SelectedChou = null;
+                Chous = value is null || SelectedPrefecture is null || SelectedCity is null ? [] : [.. _dataAccessLocationService.GetChoumeByPrefCountyCityWardOaza(SelectedPrefecture.Name, SelectedCity.County, SelectedCity.City, value.Ward, value.Oaza).DistinctBy(p => p.Chou)];
+                OnPropertyChanged(nameof(AddressPreview));
+            }
+        }
+    }
+
+    public ObservableCollection<Choume> Chous
+    {
+        get;
+        private set { SetProperty(ref field, value); }
+    } = [];
+
+    public Choume? SelectedChou
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+                OnPropertyChanged(nameof(AddressPreview));
+            }
+        }
+    }
+
+    public string Edaban
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                IsDirty = true;
+                OnPropertyChanged(nameof(AddressPreview));
+            }
+        }
+    } = string.Empty;
+
+    public string AddressPreview
+    {
+        get
+        {
+            if (SelectedPrefecture is null)
+            {
+                return Address;
+            }
+
+            var edaban = string.IsNullOrEmpty(Edaban) ? string.Empty : $"-{Edaban}";
+            return $"{SelectedPrefecture.Name}{SelectedCity?.Combined}{SelectedTown?.Combined}{SelectedChou?.Chou}{edaban}";
+        }
+    }
 
     // 備考
     public string Remarks
@@ -367,6 +470,11 @@ public sealed partial class LessorViewModel : ObservableRecipient, IDisposable
         IsDirty = false;
     }
 
+    public void ResetIsDirtyState()
+    {
+        IsDirty = false;
+    }
+
     public void Dispose()
     {
         _cts?.Dispose();
@@ -380,11 +488,11 @@ public sealed partial class LessorViewModel : ObservableRecipient, IDisposable
 
     private void PopulateValues()
     {
-        Name = _lessorBase.Name;
+        Name = _lessor.Name;
 
-        if (_lessorBase is ZumenSearch.Domain.Entities.Person.PersonNatural naturalPerson)
+        if (_lessor is ZumenSearch.Domain.Entities.Person.PersonNatural naturalPerson)
         {
-            if (_lessorBase.PersonKind != PersonKindType.Natural)
+            if (_lessor.PersonKind != PersonKindType.Natural)
             {
                 // Something is wrong.
             }
@@ -396,9 +504,9 @@ public sealed partial class LessorViewModel : ObservableRecipient, IDisposable
 
             MobilePhoneNumber = naturalPerson.MobilePhoneNumber;
         }
-        else if (_lessorBase is ZumenSearch.Domain.Entities.Person.PersonLegal legalPerson)
+        else if (_lessor is ZumenSearch.Domain.Entities.Person.PersonLegal legalPerson)
         {
-            if (_lessorBase.PersonKind != PersonKindType.Legal)
+            if (_lessor.PersonKind != PersonKindType.Legal)
             {
                 // Something is wrong.
             }
@@ -417,10 +525,27 @@ public sealed partial class LessorViewModel : ObservableRecipient, IDisposable
             return;
         }
 
-        PhoneNumber = _lessorBase.PhoneNumber;
-        PostalCode = _lessorBase.PostalCode;
-        Address = _lessorBase.Address;
-        Remarks = _lessorBase.Remarks;
+        PhoneNumber = _lessor.PhoneNumber;
+        PostalCode = _lessor.PostalCode;
+        Address = _lessor.Address;
+
+        var location = _lessor.AddressLocation;
+        SelectedPrefecture = PrefectureMaster.Prefectures.FirstOrDefault(p => p.Name == location.Prefecture?.Name);
+        if (SelectedPrefecture is not null)
+        {
+            SelectedCity = Cities.FirstOrDefault(p => p.County == location.CountyAndCity?.County && p.City == location.CountyAndCity?.City);
+            if (SelectedCity is not null)
+            {
+                SelectedTown = Towns.FirstOrDefault(p => p.Ward == location.WardAndOaza?.Ward && p.Oaza == location.WardAndOaza?.Oaza);
+                if (SelectedTown is not null)
+                {
+                    SelectedChou = Chous.FirstOrDefault(p => p.Chou == location.Choume?.Chou);
+                }
+            }
+        }
+        Edaban = location.Edaban;
+
+        Remarks = _lessor.Remarks;
     }
 
     private bool ValidateName()
@@ -485,12 +610,12 @@ public sealed partial class LessorViewModel : ObservableRecipient, IDisposable
         //if (_personKind == EnumPersonKind.Natural)
         if (PersonKindIndex == 0)
         {
-            newLessor = new ZumenSearch.Domain.Entities.Person.PersonNatural(_lessorBase.Id, _lessorBase.Status);
+            newLessor = new ZumenSearch.Domain.Entities.Person.PersonNatural(_lessor.Id, _lessor.Status);
         }
         //else if (_personKind == EnumPersonKind.Legal)
         else if (PersonKindIndex == 1)
         {
-            newLessor = new ZumenSearch.Domain.Entities.Person.PersonLegal(_lessorBase.Id, _lessorBase.Status);
+            newLessor = new ZumenSearch.Domain.Entities.Person.PersonLegal(_lessor.Id, _lessor.Status);
         }
         else
         {
@@ -498,7 +623,7 @@ public sealed partial class LessorViewModel : ObservableRecipient, IDisposable
             return;
         }
 
-        //_lessorBase.Name = Name;
+        //_lessor.Name = Name;
 
         if (newLessor is ZumenSearch.Domain.Entities.Person.PersonNatural naturalPerson)
         {
@@ -518,10 +643,17 @@ public sealed partial class LessorViewModel : ObservableRecipient, IDisposable
 
         newLessor.PhoneNumber = PhoneNumber;
         newLessor.PostalCode = PostalCode;
-        newLessor.Address = Address;
+        newLessor.Address = AddressPreview;
+        newLessor.AddressLocation.SetMachiazaId(SelectedChou?.MachiazaId ?? SelectedTown?.MachiazaId ?? SelectedCity?.MachiazaId ?? string.Empty);
+        newLessor.AddressLocation.SetPrefecture(SelectedPrefecture);
+        newLessor.AddressLocation.SetCountyAndCity(SelectedCity);
+        newLessor.AddressLocation.SetWardAndOaza(SelectedTown);
+        newLessor.AddressLocation.SetChoume(SelectedChou);
+        newLessor.AddressLocation.SetEdaban(Edaban);
+        newLessor.AddressLocation.SetPostalCode(PostalCode);
         newLessor.Remarks = Remarks;
 
-        _lessorBase = newLessor;
+        _lessor = newLessor;
     }
 
     #endregion
@@ -549,7 +681,7 @@ public sealed partial class LessorViewModel : ObservableRecipient, IDisposable
 
         SetValues();
 
-        var resInsert = await Task.Run(() => _dataAccessService.UpsertRentLessor(_lessorBase), _cts.Token);
+        var resInsert = await Task.Run(() => _dataAccessService.UpsertRentLessor(_lessor), _cts.Token);
         if (resInsert.IsError)
         {
             Debug.WriteLine(
@@ -575,8 +707,8 @@ public sealed partial class LessorViewModel : ObservableRecipient, IDisposable
 
             IsDirty = false;
 
-            _lessorBase.SetStatus(EntityStatus.Saved);
-            _lessorBase.SetIsModified(false);
+            _lessor.SetStatus(EntityStatus.Saved);
+            _lessor.SetIsModified(false);
 
             // Update title with dummy value.
             WindowTitle = string.Empty;
@@ -584,7 +716,7 @@ public sealed partial class LessorViewModel : ObservableRecipient, IDisposable
             // Clear error infobar.
             IsInfoBarErrorOpen = false;
 
-            WeakReferenceMessenger.Default.Send(new ZumenSearch.Presentation.Messaging.LessorUpdatedMessage(_lessorBase));
+            WeakReferenceMessenger.Default.Send(new ZumenSearch.Presentation.Messaging.LessorUpdatedMessage(_lessor));
         }
 
     }

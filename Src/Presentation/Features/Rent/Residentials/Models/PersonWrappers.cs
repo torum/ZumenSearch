@@ -1,7 +1,4 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
-using ZumenSearch.Domain.Entities.Base;
 namespace ZumenSearch.Presentation.Features.Rent.Residentials.Models;
 
 #pragma warning disable IDE0079 // Remove unnecessary suppression

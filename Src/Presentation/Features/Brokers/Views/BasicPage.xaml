@@ -10,6 +10,7 @@
     xmlns:ui="using:CommunityToolkit.WinUI"
     xmlns:mod="using:ZumenSearch.Presentation.Shell.Models"
     xmlns:modbroker="using:ZumenSearch.Presentation.Features.Brokers.ViewModels"
+    xmlns:modlocation="using:ZumenSearch.Domain.ValueObjects.Location"
     NavigationCacheMode="Required">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled" Padding="36,0,36,24">
@@ -71,14 +72,35 @@
                 </Border>
 
                 <Border Style="{StaticResource RoundCardBorderStyle}">
-                    <Grid ColumnSpacing="12">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"></ColumnDefinition>
-                            <ColumnDefinition Width="*"></ColumnDefinition>
-                        </Grid.ColumnDefinitions>
-                        <TextBox Grid.Column="0" Header="郵便番号" Width="160" MaxLength="8" Paste="TextBox_MaxLength_Paste" Text="{x:Bind ViewModel.PostalCode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                        <TextBox Grid.Column="1" Header="住所・所在地" MaxLength="500" Paste="TextBox_MaxLength_Paste" Text="{x:Bind ViewModel.Address, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" />
-                    </Grid>
+                    <StackPanel>
+                        <TextBox Header="郵便番号" Width="160" MaxLength="8" Paste="TextBox_MaxLength_Paste" Text="{x:Bind ViewModel.PostalCode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" />
+                        <Grid Margin="0,12,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="1*" MinWidth="320" />
+                                <ColumnDefinition Width="1*" MinWidth="320" />
+                            </Grid.ColumnDefinitions>
+                            <ComboBox x:Name="ComboBoxPref" Grid.Column="0" Header="都道府県" PlaceholderText="選択" SelectionChanged="ComboBoxPref_SelectionChanged" SelectedIndex="-1" ItemsSource="{x:Bind ViewModel.Prefectures, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.SelectedPrefecture, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch">
+                                <ComboBox.ItemTemplate><DataTemplate x:DataType="modlocation:Prefecture"><TextBlock Text="{x:Bind Name}" /></DataTemplate></ComboBox.ItemTemplate>
+                            </ComboBox>
+                            <ComboBox x:Name="ComboBoxCountyAndCity" Grid.Column="1" Margin="12,0,0,0" Header="郡+市区町村" PlaceholderText="選択" SelectionChanged="ComboBoxCountyAndCity_SelectionChanged" IsEnabled="False" SelectedIndex="-1" ItemsSource="{x:Bind ViewModel.Cities, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.SelectedCity, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch">
+                                <ComboBox.ItemTemplate><DataTemplate x:DataType="modlocation:CountyAndCity"><TextBlock Text="{x:Bind Combined}" /></DataTemplate></ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </Grid>
+                        <Grid Margin="0,12,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="1*" MinWidth="320" />
+                                <ColumnDefinition Width="1*" MinWidth="320" />
+                            </Grid.ColumnDefinitions>
+                            <ComboBox x:Name="ComboBoxWardAndOaza" Grid.Column="0" Header="政令市区+大字・町名" PlaceholderText="選択" SelectionChanged="ComboBoxWardAndOaza_SelectionChanged" IsEnabled="False" SelectedIndex="-1" ItemsSource="{x:Bind ViewModel.Towns, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.SelectedTown, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch">
+                                <ComboBox.ItemTemplate><DataTemplate x:DataType="modlocation:WardAndOaza"><TextBlock Text="{x:Bind Combined}" /></DataTemplate></ComboBox.ItemTemplate>
+                            </ComboBox>
+                            <ComboBox x:Name="ComboBoxChoume" Grid.Column="1" Margin="12,0,0,0" Header="丁目" PlaceholderText="選択" IsEnabled="False" SelectedIndex="-1" ItemsSource="{x:Bind ViewModel.Chous, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.SelectedChou, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch">
+                                <ComboBox.ItemTemplate><DataTemplate x:DataType="modlocation:Choume"><TextBlock Text="{x:Bind Chou}" /></DataTemplate></ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </Grid>
+                        <TextBox Margin="0,12,0,0" Header="小字・番地以下" Text="{x:Bind ViewModel.Edaban, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" />
+                        <TextBox Margin="0,12,0,0" Header="住所プレビュー" Text="{x:Bind ViewModel.AddressPreview, Mode=OneWay}" IsReadOnly="True" HorizontalAlignment="Stretch" />
+                    </StackPanel>
                 </Border>
 
                 <Border Style="{StaticResource RoundCardBorderStyle}">

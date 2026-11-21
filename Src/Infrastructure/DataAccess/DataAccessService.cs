@@ -6,6 +6,7 @@ using ZumenSearch.Application.Results;
 using ZumenSearch.Application.SearchResults;
 using ZumenSearch.Domain.Entities.Person;
 using ZumenSearch.Domain.Enums;
+using ZumenSearch.Domain.ValueObjects.Location;
 using ZumenSearch.Infrastructure.DataAccess.Contracts;
 using ZumenSearch.Infrastructure.Platform;
 
@@ -609,8 +610,16 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
                     "phone_number TEXT NOT NULL DEFAULT ''," +
                     "mobile_phone_number TEXT NOT NULL DEFAULT ''," +
                     "contact_name TEXT NOT NULL DEFAULT ''," +
-                    "postal_code TEXT NOT NULL DEFAULT ''," +
-                    "address TEXT NOT NULL DEFAULT ''," +
+                    "location_postal_code TEXT NOT NULL DEFAULT ''," +
+                    "location_full TEXT NOT NULL DEFAULT ''," +
+                    "location_machiaza_id TEXT NOT NULL DEFAULT ''," +
+                    "location_prefecture TEXT NOT NULL DEFAULT ''," +
+                    "location_county TEXT NOT NULL DEFAULT ''," +
+                    "location_city TEXT NOT NULL DEFAULT ''," +
+                    "location_ward TEXT NOT NULL DEFAULT ''," +
+                    "location_oaza TEXT NOT NULL DEFAULT ''," +
+                    "location_choume TEXT NOT NULL DEFAULT ''," +
+                    "location_edaban TEXT NOT NULL DEFAULT ''," +
                     "remarks TEXT NOT NULL DEFAULT ''," +
 
                     "updated_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc'))," +
@@ -793,8 +802,16 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
                         phone_number TEXT NOT NULL DEFAULT '',
                         mobile_phone_number TEXT NOT NULL DEFAULT '',
                         contact_name TEXT NOT NULL DEFAULT '',
-                        postal_code TEXT NOT NULL DEFAULT '',
-                        address TEXT NOT NULL DEFAULT '',
+                        location_postal_code TEXT NOT NULL DEFAULT '',
+                        location_full TEXT NOT NULL DEFAULT '',
+                        location_machiaza_id TEXT NOT NULL DEFAULT '',
+                        location_prefecture TEXT NOT NULL DEFAULT '',
+                        location_county TEXT NOT NULL DEFAULT '',
+                        location_city TEXT NOT NULL DEFAULT '',
+                        location_ward TEXT NOT NULL DEFAULT '',
+                        location_oaza TEXT NOT NULL DEFAULT '',
+                        location_choume TEXT NOT NULL DEFAULT '',
+                        location_edaban TEXT NOT NULL DEFAULT '',
                         remarks TEXT NOT NULL DEFAULT '',
                         updated_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc')),
                         created_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc'))
@@ -2369,7 +2386,7 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
                 foreach (var lessId in lessorIdList)
                 {
                     // Get actuall lessors
-                    cmd.CommandText = "SELECT lessor_id, name, person_kind, name_last, name_first, name_company, name_company_type, name_company_type_position, phone_number, mobile_phone_number, contact_name, postal_code, address, remarks FROM rent_lessors WHERE lessor_id = @lessorId";
+                    cmd.CommandText = "SELECT lessor_id, name, person_kind, name_last, name_first, name_company, name_company_type, name_company_type_position, phone_number, mobile_phone_number, contact_name, location_postal_code, location_full, location_machiaza_id, location_prefecture, location_county, location_city, location_ward, location_oaza, location_choume, location_edaban, remarks FROM rent_lessors WHERE lessor_id = @lessorId";
                     cmd.Parameters.Clear();
                     cmd.Parameters.AddWithValue("@lessorId", lessId);
 #pragma warning disable IDE0063 // Use simple 'using' statement
@@ -2423,7 +2440,7 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
                 foreach (var brokerId in brokerIdList)
                 {
                     // Get actuall brokers
-                    cmd.CommandText = "SELECT broker_id, name, person_kind, name_last, name_first, name_company, name_company_type, name_company_type_position, phone_number, mobile_phone_number, contact_name, postal_code, address, remarks FROM brokers WHERE broker_id = @brokerId";
+                    cmd.CommandText = "SELECT broker_id, name, person_kind, name_last, name_first, name_company, name_company_type, name_company_type_position, phone_number, mobile_phone_number, contact_name, location_postal_code, location_full, location_machiaza_id, location_prefecture, location_county, location_city, location_ward, location_oaza, location_choume, location_edaban, remarks FROM brokers WHERE broker_id = @brokerId";
                     cmd.Parameters.Clear();
                     cmd.Parameters.AddWithValue("@brokerId", brokerId);
 #pragma warning disable IDE0063 // Use simple 'using' statement
@@ -3617,7 +3634,7 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
         {
             foreach (var lessId in lessorIds)
             {
-                cmd.CommandText = "SELECT lessor_id, name, person_kind, name_last, name_first, name_company, name_company_type, name_company_type_position, phone_number, mobile_phone_number, contact_name, postal_code, address, remarks FROM rent_lessors WHERE lessor_id = @lessorId";
+                cmd.CommandText = "SELECT lessor_id, name, person_kind, name_last, name_first, name_company, name_company_type, name_company_type_position, phone_number, mobile_phone_number, contact_name, location_postal_code, location_full, location_machiaza_id, location_prefecture, location_county, location_city, location_ward, location_oaza, location_choume, location_edaban, remarks FROM rent_lessors WHERE lessor_id = @lessorId";
                 cmd.Parameters.Clear();
                 cmd.Parameters.AddWithValue("@lessorId", lessId);
 #pragma warning disable IDE0063 // Use simple 'using' statement
@@ -3635,7 +3652,7 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
 
         // 宅建業者（部屋）
         cmd.CommandText = """
-            SELECT b.broker_id, b.name, b.person_kind, b.name_last, b.name_first, b.name_company, b.name_company_type, b.name_company_type_position, b.phone_number, b.mobile_phone_number, b.contact_name, b.postal_code, b.address, b.remarks
+            SELECT b.broker_id, b.name, b.person_kind, b.name_last, b.name_first, b.name_company, b.name_company_type, b.name_company_type_position, b.phone_number, b.mobile_phone_number, b.contact_name, b.location_postal_code, b.location_full, b.location_machiaza_id, b.location_prefecture, b.location_county, b.location_city, b.location_ward, b.location_oaza, b.location_choume, b.location_edaban, b.remarks
             FROM brokers_properties_listings AS association
             INNER JOIN brokers AS b ON b.broker_id = association.broker_id
             WHERE association.property_id = @propertyId AND association.listing_id = @listingId;
@@ -4571,8 +4588,16 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
         l.phone_number,
         l.mobile_phone_number,
         l.contact_name,
-        l.postal_code,
-        l.address,
+        l.location_postal_code,
+        l.location_full,
+        l.location_machiaza_id,
+        l.location_prefecture,
+        l.location_county,
+        l.location_city,
+        l.location_ward,
+        l.location_oaza,
+        l.location_choume,
+        l.location_edaban,
         l.remarks
     FROM rent_lessors_properties_listings AS r
     INNER JOIN rent_lessors AS l
@@ -4626,8 +4651,16 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
         b.phone_number,
         b.mobile_phone_number,
         b.contact_name,
-        b.postal_code,
-        b.address,
+        b.location_postal_code,
+        b.location_full,
+        b.location_machiaza_id,
+        b.location_prefecture,
+        b.location_county,
+        b.location_city,
+        b.location_ward,
+        b.location_oaza,
+        b.location_choume,
+        b.location_edaban,
         b.remarks
     FROM brokers_properties_listings AS r
     INNER JOIN brokers AS b
@@ -5168,7 +5201,7 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
         command.CommandText = """
             SELECT l.lessor_id, l.name, l.person_kind, l.name_last, l.name_first,
                    l.name_company, l.name_company_type, l.name_company_type_position,
-                   l.phone_number, l.mobile_phone_number, l.contact_name, l.postal_code, l.address, l.remarks
+                   l.phone_number, l.mobile_phone_number, l.contact_name, l.location_postal_code, l.location_full, l.location_machiaza_id, l.location_prefecture, l.location_county, l.location_city, l.location_ward, l.location_oaza, l.location_choume, l.location_edaban, l.remarks
             FROM rent_lessors_properties_listings AS association
             INNER JOIN rent_lessors AS l ON l.lessor_id = association.lessor_id
             WHERE association.property_id = @propertyId
@@ -5193,7 +5226,7 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
         command.CommandText = """
             SELECT b.broker_id, b.name, b.person_kind, b.name_last, b.name_first,
                    b.name_company, b.name_company_type, b.name_company_type_position,
-                   b.phone_number, b.mobile_phone_number, b.contact_name, b.postal_code, b.address, b.remarks
+                   b.phone_number, b.mobile_phone_number, b.contact_name, b.location_postal_code, b.location_full, b.location_machiaza_id, b.location_prefecture, b.location_county, b.location_city, b.location_ward, b.location_oaza, b.location_choume, b.location_edaban, b.remarks                   b.phone_number, b.mobile_phone_number, b.contact_name, b.location_postal_code, b.location_full, b.location_machiaza_id, b.location_prefecture, b.location_county, b.location_city, b.location_ward, b.location_oaza, b.location_choume, b.location_edaban, b.remarks
             FROM brokers_properties_listings AS association
             INNER JOIN brokers AS b ON b.broker_id = association.broker_id
             WHERE association.property_id = @propertyId
@@ -5956,9 +5989,9 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
                 cmd.CommandType = CommandType.Text;
 
                 // Upsert into rent_lessor
-                var sqlInsertIntoRentLivingRoom = "INSERT INTO rent_lessors (lessor_id, name, person_kind, name_last, name_first, name_company, name_company_type, name_company_type_position, phone_number, mobile_phone_number, contact_name, postal_code, address, remarks) VALUES (@lessor_id, @name, @personKind, @name_last, @name_first, @name_company, @name_company_type, @name_company_type_position, @phone_number, @mobile_phone_number, @contact_name, @postal_code, @address, @remarks) ";
+                var sqlInsertIntoRentLivingRoom = "INSERT INTO rent_lessors (lessor_id, name, person_kind, name_last, name_first, name_company, name_company_type, name_company_type_position, phone_number, mobile_phone_number, contact_name, location_postal_code, location_full, location_machiaza_id, location_prefecture, location_county, location_city, location_ward, location_oaza, location_choume, location_edaban, remarks) VALUES (@lessor_id, @name, @personKind, @name_last, @name_first, @name_company, @name_company_type, @name_company_type_position, @phone_number, @mobile_phone_number, @contact_name, @location_postal_code, @location_full, @location_machiaza_id, @location_prefecture, @location_county, @location_city, @location_ward, @location_oaza, @location_choume, @location_edaban, @remarks) ";
                 sqlInsertIntoRentLivingRoom += "ON CONFLICT(lessor_id) ";
-                sqlInsertIntoRentLivingRoom += "DO UPDATE SET name = @name, person_kind = @personKind, name_last = @name_last, name_first = @name_first, name_company = @name_company, name_company_type = @name_company_type, name_company_type_position = @name_company_type_position, phone_number = @phone_number, mobile_phone_number = @mobile_phone_number, contact_name = @contact_name, postal_code = @postal_code, address = @address, remarks = @remarks, updated_at = @updated_at";
+                sqlInsertIntoRentLivingRoom += "DO UPDATE SET name = @name, person_kind = @personKind, name_last = @name_last, name_first = @name_first, name_company = @name_company, name_company_type = @name_company_type, name_company_type_position = @name_company_type_position, phone_number = @phone_number, mobile_phone_number = @mobile_phone_number, contact_name = @contact_name, location_postal_code = @location_postal_code, location_full = @location_full, location_machiaza_id = @location_machiaza_id, location_prefecture = @location_prefecture, location_county = @location_county, location_city = @location_city, location_ward = @location_ward, location_oaza = @location_oaza, location_choume = @location_choume, location_edaban = @location_edaban, remarks = @remarks, updated_at = @updated_at";
 
                 cmd.CommandText = sqlInsertIntoRentLivingRoom;
 
@@ -5995,8 +6028,16 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
                 }
 
                 cmd.Parameters.AddWithValue("@phone_number", lessor.PhoneNumber);
-                cmd.Parameters.AddWithValue("@postal_code", lessor.PostalCode);
-                cmd.Parameters.AddWithValue("@address", lessor.Address);
+                cmd.Parameters.AddWithValue("@location_postal_code", lessor.PostalCode);
+                cmd.Parameters.AddWithValue("@location_full", lessor.Address);
+                cmd.Parameters.AddWithValue("@location_machiaza_id", lessor.AddressLocation.MachiazaId);
+                cmd.Parameters.AddWithValue("@location_prefecture", lessor.AddressLocation.Prefecture?.Name ?? string.Empty);
+                cmd.Parameters.AddWithValue("@location_county", lessor.AddressLocation.CountyAndCity?.County ?? string.Empty);
+                cmd.Parameters.AddWithValue("@location_city", lessor.AddressLocation.CountyAndCity?.City ?? string.Empty);
+                cmd.Parameters.AddWithValue("@location_ward", lessor.AddressLocation.WardAndOaza?.Ward ?? string.Empty);
+                cmd.Parameters.AddWithValue("@location_oaza", lessor.AddressLocation.WardAndOaza?.Oaza ?? string.Empty);
+                cmd.Parameters.AddWithValue("@location_choume", lessor.AddressLocation.Choume?.Chou ?? string.Empty);
+                cmd.Parameters.AddWithValue("@location_edaban", lessor.AddressLocation.Edaban);
                 cmd.Parameters.AddWithValue("@remarks", lessor.Remarks);
                 cmd.Parameters.AddWithValue("@updated_at", DateTimeOffset.UtcNow.ToString("s"));
 
@@ -6151,7 +6192,7 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
 
             using var cmd = connection.CreateCommand();
 
-            cmd.CommandText = "SELECT lessor_id, name, person_kind, name_last, name_first, name_company, name_company_type, name_company_type_position, phone_number, mobile_phone_number, contact_name, postal_code, address, remarks FROM rent_lessors WHERE lessor_id = @lessorId";
+            cmd.CommandText = "SELECT lessor_id, name, person_kind, name_last, name_first, name_company, name_company_type, name_company_type_position, phone_number, mobile_phone_number, contact_name, location_postal_code, location_full, location_machiaza_id, location_prefecture, location_county, location_city, location_ward, location_oaza, location_choume, location_edaban, remarks FROM rent_lessors WHERE lessor_id = @lessorId";
             cmd.Parameters.AddWithValue("@lessorId", lessorId);
 
             using (var reader = cmd.ExecuteReader())
@@ -6192,6 +6233,19 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
         }
 
         return res;
+    }
+
+    private static string GetOptionalString(SqliteDataReader reader, string columnName)
+    {
+        try
+        {
+            var ordinal = reader.GetOrdinal(columnName);
+            return ordinal >= 0 && !reader.IsDBNull(ordinal) ? Convert.ToString(reader.GetValue(ordinal), CultureInfo.InvariantCulture) ?? string.Empty : string.Empty;
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            return string.Empty;
+        }
     }
 
     private static ZumenSearch.Domain.Entities.Base.PersonBase? GetPerson(SqliteDataReader reader, string personId)
@@ -6250,8 +6304,23 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
         }
 
         person.PhoneNumber = reader.GetString(reader.GetOrdinal("phone_number"));
-        person.PostalCode = reader.GetString(reader.GetOrdinal("postal_code"));
-        person.Address = reader.GetString(reader.GetOrdinal("address"));
+        person.PostalCode = reader.GetString(reader.GetOrdinal("location_postal_code"));
+        person.Address = reader.GetString(reader.GetOrdinal("location_full"));
+
+        var machiazaId = GetOptionalString(reader, "location_machiaza_id");
+        var prefectureName = GetOptionalString(reader, "location_prefecture");
+        var county = GetOptionalString(reader, "location_county");
+        var city = GetOptionalString(reader, "location_city");
+        var ward = GetOptionalString(reader, "location_ward");
+        var oaza = GetOptionalString(reader, "location_oaza");
+        var choume = GetOptionalString(reader, "location_choume");
+
+        person.AddressLocation.SetMachiazaId(machiazaId);
+        person.AddressLocation.SetPrefecture(PrefectureMaster.Prefectures.FirstOrDefault(p => p.Name == prefectureName));
+        person.AddressLocation.SetCountyAndCity(string.IsNullOrEmpty(county) && string.IsNullOrEmpty(city) ? null : new CountyAndCity(machiazaId, county, city));
+        person.AddressLocation.SetWardAndOaza(string.IsNullOrEmpty(ward) && string.IsNullOrEmpty(oaza) ? null : new WardAndOaza(machiazaId, ward, oaza));
+        person.AddressLocation.SetChoume(string.IsNullOrEmpty(choume) ? null : new Choume(machiazaId, choume));
+        person.AddressLocation.SetEdaban(GetOptionalString(reader, "location_edaban"));
 
         person.Remarks = Convert.ToString(reader["remarks"], CultureInfo.InvariantCulture) ?? "";
 
@@ -7206,8 +7275,16 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
                     phone_number,
                     mobile_phone_number,
                     contact_name,
-                    postal_code,
-                    address,
+                    location_postal_code,
+                    location_full,
+                    location_machiaza_id,
+                    location_prefecture,
+                    location_county,
+                    location_city,
+                    location_ward,
+                    location_oaza,
+                    location_choume,
+                    location_edaban,
                     remarks,
                     updated_at
                 )
@@ -7223,8 +7300,16 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
                     @phoneNumber,
                     @mobilePhoneNumber,
                     @contactName,
-                    @postalCode,
-                    @address,
+                    @locationPostalCode,
+                    @locationFull,
+                    @locationMachiazaId,
+                    @locationPrefecture,
+                    @locationCounty,
+                    @locationCity,
+                    @locationWard,
+                    @locationOaza,
+                    @locationChoume,
+                    @locationEdaban,
                     @remarks,
                     @updatedAt
                 )
@@ -7239,8 +7324,16 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
                     phone_number = excluded.phone_number,
                     mobile_phone_number = excluded.mobile_phone_number,
                     contact_name = excluded.contact_name,
-                    postal_code = excluded.postal_code,
-                    address = excluded.address,
+                    location_postal_code = excluded.location_postal_code,
+                    location_full = excluded.location_full,
+                    location_machiaza_id = excluded.location_machiaza_id,
+                    location_prefecture = excluded.location_prefecture,
+                    location_county = excluded.location_county,
+                    location_city = excluded.location_city,
+                    location_ward = excluded.location_ward,
+                    location_oaza = excluded.location_oaza,
+                    location_choume = excluded.location_choume,
+                    location_edaban = excluded.location_edaban,
                     remarks = excluded.remarks,
                     updated_at = excluded.updated_at;
                 """;
@@ -7251,8 +7344,16 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
             command.Parameters.AddWithValue("@phoneNumber", broker.PhoneNumber);
             command.Parameters.AddWithValue("@mobilePhoneNumber", broker is PersonNatural naturalPerson ? naturalPerson.MobilePhoneNumber : string.Empty);
             command.Parameters.AddWithValue("@contactName", broker is PersonLegal legalPerson ? legalPerson.ContactName : string.Empty);
-            command.Parameters.AddWithValue("@postalCode", broker.PostalCode);
-            command.Parameters.AddWithValue("@address", broker.Address);
+            command.Parameters.AddWithValue("@locationPostalCode", broker.PostalCode);
+            command.Parameters.AddWithValue("@locationFull", broker.Address);
+            command.Parameters.AddWithValue("@locationMachiazaId", broker.AddressLocation.MachiazaId);
+            command.Parameters.AddWithValue("@locationPrefecture", broker.AddressLocation.Prefecture?.Name ?? string.Empty);
+            command.Parameters.AddWithValue("@locationCounty", broker.AddressLocation.CountyAndCity?.County ?? string.Empty);
+            command.Parameters.AddWithValue("@locationCity", broker.AddressLocation.CountyAndCity?.City ?? string.Empty);
+            command.Parameters.AddWithValue("@locationWard", broker.AddressLocation.WardAndOaza?.Ward ?? string.Empty);
+            command.Parameters.AddWithValue("@locationOaza", broker.AddressLocation.WardAndOaza?.Oaza ?? string.Empty);
+            command.Parameters.AddWithValue("@locationChoume", broker.AddressLocation.Choume?.Chou ?? string.Empty);
+            command.Parameters.AddWithValue("@locationEdaban", broker.AddressLocation.Edaban);
             command.Parameters.AddWithValue("@remarks", broker.Remarks);
             command.Parameters.AddWithValue("@updatedAt", DateTimeOffset.UtcNow.ToString("s"));
 
@@ -7414,8 +7515,16 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
             phone_number,
             mobile_phone_number,
             contact_name,
-            postal_code,
-            address,
+            location_postal_code,
+            location_full,
+            location_machiaza_id,
+            location_prefecture,
+            location_county,
+            location_city,
+            location_ward,
+            location_oaza,
+            location_choume,
+            location_edaban,
             remarks
         FROM brokers
         WHERE broker_id = @brokerId;
