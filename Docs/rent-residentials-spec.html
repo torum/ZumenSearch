@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rent Residentials — input and database specification</title>
+  <style>
+    :root { color-scheme: light dark; --background: #ffffff; --text: #20252b; --link: #0053a6; --border: #b9c2ca; --heading-background: #eaf0f5; --notice-background: #fff6e5; --notice-border: #a86500; }
+    body { font-family: system-ui, sans-serif; line-height: 1.5; max-width: 90rem; margin: 0 auto; padding: 1.5rem; color: var(--text); background: var(--background); }
+    h1, h2, h3 { line-height: 1.25; }
+    a { color: var(--link); }
+    nav ul { display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; padding-left: 1.25rem; }
+    .notice { padding: .8rem 1rem; border-left: .3rem solid var(--notice-border); background: var(--notice-background); }
+    .table-wrap { overflow-x: auto; }
+    table { border-collapse: collapse; width: 100%; margin: .75rem 0 1.5rem; }
+    th, td { border: 1px solid var(--border); text-align: left; vertical-align: top; padding: .4rem .6rem; }
+    th { background: var(--heading-background); }
+    td:first-child { min-width: 12rem; }
+    code { overflow-wrap: anywhere; }
+    @media screen and (prefers-color-scheme: dark) { :root { --background: #181c20; --text: #e7ecf0; --link: #8fc5ff; --border: #73808b; --heading-background: #303b45; --notice-background: #42331d; --notice-border: #f0b858; } }
+    @media print { :root { color-scheme: light; } body { max-width: none; padding: 0; } nav { display: none; } tr { break-inside: avoid; } }
+  </style>
+</head>
+<body>
+  <nav aria-label="Index"><a href="index.html">Back to index</a></nav>
+  <h1>Rent Residentials: input and database specification</h1>
+  <p class="notice"><strong>Draft — implementation snapshot, not an approved schema.</strong> This sheet documents the current residential rental property and listing editors and fresh SQLite schema as of 2026-11-22. Field labels are the Japanese labels shown in the UI; descriptions are in English. A database column is not a guarantee of validation or a finalized design.</p>
+  <p>Columns are qualified as <code>table.column</code>. Paired columns represent separate inputs, such as a value and its unit. Display-only or indirectly stored values are identified explicitly. System IDs, timestamps, and unrelated standalone contact-editor fields are not an exhaustive schema inventory. Attachments are represented by metadata and filenames, not document contents.</p>
+  <p>See also the <a href="common-property-spec.html">common property specification</a> for shared property fields and implementation differences.</p>
+  <nav aria-label="Contents"><ul><li><a href="#property-basic">Property</a></li><li><a href="#management">Management</a></li><li><a href="#facilities">Building facilities</a></li><li><a href="#listing-basic">Listing</a></li><li><a href="#contract">Contract</a></li><li><a href="#transaction">Transaction</a></li><li><a href="#appliances">Unit appliances</a></li><li><a href="#linked">Location, transport and linked records</a></li><li><a href="#notes">Review notes and sources</a></li></ul></nav>
+
+  <h2 id="property-basic">Property — basic information</h2>
+  <p>For 物件名, 不動産番号, and the property-level 特定コード, see <a href="common-property-spec.html#basic">common property identification</a>.</p>
+  <div class="table-wrap"><table><thead><tr><th scope="col">Input field</th><th scope="col">Description</th><th scope="col">Database column(s)</th></tr></thead><tbody>
+    <tr><td>物件種目</td><td>Residential property kind.</td><td><code>rent_residentials.property_kind</code></td></tr>
+    <tr><td>区分所有</td><td>Whether ownership is at unit level.</td><td><code>rent_residentials.is_unit_ownership</code></td></tr>
+    <tr><td>構造</td><td>Building structure.</td><td><code>rent_residentials.property_structure</code></td></tr>
+    <tr><td>地上（階建て）</td><td>Number of above-ground floors.</td><td><code>rent_residentials.floor_count_above_ground</code></td></tr>
+    <tr><td>地下（階建て）</td><td>Number of basement floors.</td><td><code>rent_residentials.floor_count_basement</code></td></tr>
+    <tr><td>総戸数（戸）</td><td>Total units in the building.</td><td><code>rent_residentials.total_unit_count</code></td></tr>
+    <tr><td>築年月（西暦）</td><td>Year and month built.</td><td><code>rent_residentials.built_year_month</code></td></tr>
+    <tr><td>築年月（和暦プレビュー）</td><td>Read-only Japanese-era preview of the build date.</td><td>No separate column; derived from <code>rent_residentials.built_year_month</code>.</td></tr>
+    <tr><td>備考</td><td>General property remarks.</td><td><code>rent_residentials.remarks</code></td></tr>
+  </tbody></table></div>
+
+  <h2 id="management">Property — building management</h2>
+  <div class="table-wrap"><table><thead><tr><th scope="col">Input field</th><th scope="col">Description</th><th scope="col">Database column(s)</th></tr></thead><tbody>
+    <tr><td>建物管理区分</td><td>Party responsible for management; controls which details are shown.</td><td><code>rent_residentials.kanri_shutai</code></td></tr>
+    <tr><td>建物維持管理</td><td>In-house building maintenance management.</td><td><code>rent_residentials.kanri_is_maintenance_management</code></td></tr>
+    <tr><td>入居者管理</td><td>In-house tenant management.</td><td><code>rent_residentials.kanri_is_tenant_management</code></td></tr>
+    <tr><td>家賃入金管理</td><td>In-house rent payment management.</td><td><code>rent_residentials.kanri_is_payment_management</code></td></tr>
+    <tr><td>その他（管理内容）</td><td>Other in-house management.</td><td><code>rent_residentials.kanri_is_other_management</code></td></tr>
+    <tr><td>備考（自社管理）</td><td>In-house management remarks.</td><td><code>rent_residentials.kanri_remark_jisya</code></td></tr>
+    <tr><td>管理会社名</td><td>External management company name.</td><td><code>rent_residentials.kanri_name_of_company_tasya</code></td></tr>
+    <tr><td>連絡先</td><td>External management company contact details.</td><td><code>rent_residentials.kanri_contact_info_of_company_tasya</code></td></tr>
+    <tr><td>備考（他社管理）</td><td>External management remarks.</td><td><code>rent_residentials.kanri_remark_tasya</code></td></tr>
+    <tr><td>備考（貸主管理）</td><td>Lessor management remarks.</td><td><code>rent_residentials.kanri_remark_kashinushi</code></td></tr>
+  </tbody></table></div>
+
+  <h2 id="facilities">Property — building facilities</h2>
+  <div class="table-wrap"><table><thead><tr><th scope="col">Input field</th><th scope="col">Description</th><th scope="col">Database column(s)</th></tr></thead><tbody>
+    <tr><td>エレベータ</td><td>Elevator present.</td><td><code>rent_residentials.has_elevator</code></td></tr>
+    <tr><td>オートロック</td><td>Automatic entrance lock present.</td><td><code>rent_residentials.has_autolock</code></td></tr>
+    <tr><td>防犯カメラ</td><td>Security camera present.</td><td><code>rent_residentials.has_security_camera</code></td></tr>
+    <tr><td>宅配ボックス</td><td>Parcel locker present.</td><td><code>rent_residentials.has_parcel_locker</code></td></tr>
+    <tr><td>電気：あり</td><td>Electricity available.</td><td><code>rent_residentials.has_electric</code></td></tr>
+    <tr><td>電気：種類</td><td>Electricity type.</td><td><code>rent_residentials.property_electric_kind</code></td></tr>
+    <tr><td>電気：詳細</td><td>Provider, contact, capacity and meter details.</td><td><code>rent_residentials.electric_detail</code></td></tr>
+    <tr><td>ガス：あり</td><td>Gas available.</td><td><code>rent_residentials.has_gas</code></td></tr>
+    <tr><td>ガス：種類</td><td>Gas type.</td><td><code>rent_residentials.gas_type</code></td></tr>
+    <tr><td>ガス：詳細</td><td>Supplier and meter details.</td><td><code>rent_residentials.gas_detail</code></td></tr>
+    <tr><td>上水道</td><td>Water supply type.</td><td><code>rent_residentials.tap_water_type</code></td></tr>
+    <tr><td>上水道：詳細</td><td>Water supply and meter details.</td><td><code>rent_residentials.tap_water_detail</code></td></tr>
+    <tr><td>下水道</td><td>Sewerage type.</td><td><code>rent_residentials.sewerage_type</code></td></tr>
+    <tr><td>下水道：詳細</td><td>Sewerage details.</td><td><code>rent_residentials.sewerage_detail</code></td></tr>
+    <tr><td>地上デジタル</td><td>Terrestrial digital television.</td><td><code>rent_residentials.ground_digital</code></td></tr>
+    <tr><td>BSアンテナ</td><td>BS antenna.</td><td><code>rent_residentials.bs_antenna</code></td></tr>
+    <tr><td>CSアンテナ</td><td>CS antenna.</td><td><code>rent_residentials.cs_antenna</code></td></tr>
+    <tr><td>CATV</td><td>Cable television.</td><td><code>rent_residentials.catv</code></td></tr>
+    <tr><td>有線放送</td><td>Wired broadcasting.</td><td><code>rent_residentials.usen</code></td></tr>
+    <tr><td>インターネット</td><td>Internet facility.</td><td><code>rent_residentials.internet</code></td></tr>
+    <tr><td>光ファイバー</td><td>Fiber-optic connection.</td><td><code>rent_residentials.fiber</code></td></tr>
+    <tr><td>インターネット無料</td><td>Internet included free of charge.</td><td><code>rent_residentials.internet_free</code></td></tr>
+    <tr><td>TV アンテナ</td><td>Antenna details.</td><td><code>rent_residentials.tv_antenna_detail</code></td></tr>
+    <tr><td>インターネット（詳細）</td><td>Internet facility details.</td><td><code>rent_residentials.internet_detail</code></td></tr>
+    <tr><td>駐車場：あり</td><td>Car parking available.</td><td><code>rent_residentials.has_parking</code></td></tr>
+    <tr><td>駐車場無料</td><td>Car parking is free.</td><td><code>rent_residentials.is_parking_free</code></td></tr>
+    <tr><td>駐車場：契約形態</td><td>Car parking contract type.</td><td><code>rent_residentials.parking_contract_type</code></td></tr>
+    <tr><td>駐車場：料金（円・月額）</td><td>Monthly car parking fee.</td><td><code>rent_residentials.parking_fee</code></td></tr>
+    <tr><td>駐車場：税区分</td><td>Tax treatment of car parking fee.</td><td><code>rent_residentials.parking_fee_tax_type</code></td></tr>
+    <tr><td>駐車場：現況</td><td>Car parking availability.</td><td><code>rent_residentials.parking_availability</code></td></tr>
+    <tr><td>駐車場：空き台数（台）</td><td>Available car parking spaces.</td><td><code>rent_residentials.parking_spaces</code></td></tr>
+    <tr><td>駐車場：距離（m）</td><td>Distance to car parking.</td><td><code>rent_residentials.parking_distance</code></td></tr>
+    <tr><td>駐車場：備考</td><td>Car parking remarks.</td><td><code>rent_residentials.parking_notes</code></td></tr>
+    <tr><td>駐輪場：あり</td><td>Bicycle parking available.</td><td><code>rent_residentials.has_bicycle_parking</code></td></tr>
+    <tr><td>駐輪場無料</td><td>Bicycle parking is free.</td><td><code>rent_residentials.is_bicycle_parking_free</code></td></tr>
+    <tr><td>駐輪場：現況</td><td>Bicycle parking availability.</td><td><code>rent_residentials.bicycle_parking_availability</code></td></tr>
+    <tr><td>駐輪場：料金（月額・円）</td><td>Monthly bicycle parking fee.</td><td><code>rent_residentials.bicycle_parking_fee</code></td></tr>
+    <tr><td>駐輪場：税区分</td><td>Tax treatment of bicycle parking fee.</td><td><code>rent_residentials.bicycle_parking_fee_tax_type</code></td></tr>
+    <tr><td>駐輪場：備考</td><td>Bicycle parking remarks.</td><td><code>rent_residentials.bicycle_parking_notes</code></td></tr>
+    <tr><td>バイク置き場：あり</td><td>Motorcycle parking available.</td><td><code>rent_residentials.has_motorcycle_parking</code></td></tr>
+    <tr><td>バイク置き場無料</td><td>Motorcycle parking is free.</td><td><code>rent_residentials.is_motorcycle_parking_free</code></td></tr>
+    <tr><td>バイク置き場：現況</td><td>Motorcycle parking availability.</td><td><code>rent_residentials.motorcycle_parking_availability</code></td></tr>
+    <tr><td>バイク置き場：料金（月額・円）</td><td>Monthly motorcycle parking fee.</td><td><code>rent_residentials.motorcycle_parking_fee</code></td></tr>
+    <tr><td>バイク置き場：税区分</td><td>Tax treatment of motorcycle parking fee.</td><td><code>rent_residentials.motorcycle_parking_fee_tax_type</code></td></tr>
+    <tr><td>バイク置き場：備考</td><td>Motorcycle parking remarks.</td><td><code>rent_residentials.motorcycle_parking_notes</code></td></tr>
+  </tbody></table></div>
+
+  <h2 id="listing-basic">Listing — basic information</h2>
+  <div class="table-wrap"><table><thead><tr><th scope="col">Input field</th><th scope="col">Description</th><th scope="col">Database column(s)</th></tr></thead><tbody>
+    <tr><td>部屋番号</td><td>Unit or listing name; marked required in the editor.</td><td><code>rent_residential_listings.name</code></td></tr>
+    <tr><td>間取り</td><td>Floor plan and additional floor-plan type.</td><td><code>rent_residential_listings.floor_plan_type</code>, <code>rent_residential_listings.floor_plan_extra_type</code></td></tr>
+    <tr><td>専有面積（平米）</td><td>Exclusive floor area in square metres.</td><td><code>rent_residential_listings.floor_area</code></td></tr>
+    <tr><td>所在階</td><td>Above/below-ground type and floor number.</td><td><code>rent_residential_listings.floor_type</code>, <code>rent_residential_listings.floor_number</code></td></tr>
+    <tr><td>主要採光面</td><td>Main exposure direction.</td><td><code>rent_residential_listings.main_exposure_direction</code></td></tr>
+    <tr><td>角部屋</td><td>Whether the unit is a corner room.</td><td><code>rent_residential_listings.is_corner_room</code></td></tr>
+    <tr><td>現況</td><td>Listing availability status.</td><td><code>rent_residential_listings.availability_status</code></td></tr>
+    <tr><td>募集中</td><td>Whether currently recruiting tenants.</td><td><code>rent_residential_listings.is_recruiting</code></td></tr>
+    <tr><td>現況確認日</td><td>Date the status was checked.</td><td><code>rent_residential_listings.current_status_checked_at</code></td></tr>
+    <tr><td>入居可能日</td><td>Available month and period within the month.</td><td><code>rent_residential_listings.available_from_month</code>, <code>rent_residential_listings.available_from_period</code></td></tr>
+    <tr><td>即入居可</td><td>Immediate occupancy available.</td><td><code>rent_residential_listings.is_immediate_occupancy</code></td></tr>
+    <tr><td>不動産番号</td><td>Read-only parent property identifier.</td><td><code>properties.fudousan_id</code>; no separate listing column.</td></tr>
+    <tr><td>特定コード</td><td>Listing-specific additional identifier code.</td><td><code>rent_residential_listings.fudousan_id_additional_code</code></td></tr>
+    <tr><td>備考</td><td>General listing remarks.</td><td><code>rent_residential_listings.remarks</code></td></tr>
+  </tbody></table></div>
+
+  <h2 id="contract">Listing — rent and contract</h2>
+  <div class="table-wrap"><table><thead><tr><th scope="col">Input field</th><th scope="col">Description</th><th scope="col">Database column(s)</th></tr></thead><tbody>
+    <tr><td>賃料（円）</td><td>Rent amount in yen.</td><td><code>rent_residential_listings.chinryou</code></td></tr>
+    <tr><td>共益費・管理費</td><td>Management/common fee and unit.</td><td><code>rent_residential_listings.management_fee</code>, <code>rent_residential_listings.management_fee_unit</code></td></tr>
+    <tr><td>敷金</td><td>Security deposit and unit.</td><td><code>rent_residential_listings.security_deposit</code>, <code>rent_residential_listings.security_deposit_unit</code></td></tr>
+    <tr><td>礼金</td><td>Key money and unit.</td><td><code>rent_residential_listings.key_money</code>, <code>rent_residential_listings.key_money_unit</code></td></tr>
+    <tr><td>更新料</td><td>Renewal fee and unit.</td><td><code>rent_residential_listings.renewal_fee</code>, <code>rent_residential_listings.renewal_fee_unit</code></td></tr>
+    <tr><td>再契約手数料</td><td>Recontract fee and unit.</td><td><code>rent_residential_listings.recontract_fee</code>, <code>rent_residential_listings.recontract_fee_unit</code></td></tr>
+    <tr><td>契約種別</td><td>Lease contract type.</td><td><code>rent_residential_listings.contract_type</code></td></tr>
+    <tr><td>契約期間（年）</td><td>Contract term in years.</td><td><code>rent_residential_listings.contract_period_years</code></td></tr>
+    <tr><td>保証会社</td><td>Guarantor company information.</td><td><code>rent_residential_listings.guarantor_company</code></td></tr>
+    <tr><td>住宅保険</td><td>Housing insurance information.</td><td><code>rent_residential_listings.housing_insurance</code></td></tr>
+    <tr><td>その他（費用）</td><td>Other fees.</td><td><code>rent_residential_listings.other_fees</code></td></tr>
+    <tr><td>ペット相談</td><td>Pets negotiable.</td><td><code>rent_residential_listings.pet_friendly</code></td></tr>
+    <tr><td>2人入居可</td><td>Two-person occupancy permitted.</td><td><code>rent_residential_listings.two_person_occupancy</code></td></tr>
+    <tr><td>保証人不要</td><td>No guarantor required.</td><td><code>rent_residential_listings.no_guarantor_needed</code></td></tr>
+    <tr><td>事務所使用相談</td><td>Office use negotiable.</td><td><code>rent_residential_listings.office_use_allowed</code></td></tr>
+    <tr><td>その他（条件）</td><td>Other occupancy conditions.</td><td><code>rent_residential_listings.other_conditions</code></td></tr>
+    <tr><td>備考</td><td>Contract remarks.</td><td><code>rent_residential_listings.contract_remarks</code></td></tr>
+  </tbody></table></div>
+
+  <h2 id="transaction">Listing — transaction</h2>
+  <div class="table-wrap"><table><thead><tr><th scope="col">Input field</th><th scope="col">Description</th><th scope="col">Database column(s)</th></tr></thead><tbody>
+    <tr><td>物件の取扱区分</td><td>Listing handling type.</td><td><code>rent_residential_listings.handling_type</code></td></tr>
+    <tr><td>取引態様</td><td>Transaction type.</td><td><code>rent_residential_listings.transaction_type</code></td></tr>
+    <tr><td>手数料：貸主</td><td>Lessor commission and unit.</td><td><code>rent_residential_listings.lessor_commission</code>, <code>rent_residential_listings.lessor_commission_unit</code></td></tr>
+    <tr><td>手数料：借主</td><td>Lessee commission and unit.</td><td><code>rent_residential_listings.lessee_commission</code>, <code>rent_residential_listings.lessee_commission_unit</code></td></tr>
+    <tr><td>手数料：元付</td><td>Listing broker commission and unit.</td><td><code>rent_residential_listings.listing_broker_commission</code>, <code>rent_residential_listings.listing_broker_commission_unit</code></td></tr>
+    <tr><td>手数料：客付け</td><td>Tenant broker commission and unit.</td><td><code>rent_residential_listings.tenant_broker_commission</code>, <code>rent_residential_listings.tenant_broker_commission_unit</code></td></tr>
+    <tr><td>備考</td><td>Transaction remarks.</td><td><code>rent_residential_listings.transaction_remarks</code></td></tr>
+  </tbody></table></div>
+
+  <h2 id="appliances">Listing — unit appliances</h2>
+  <div class="table-wrap"><table><thead><tr><th scope="col">Input field</th><th scope="col">Description</th><th scope="col">Database column(s)</th></tr></thead><tbody>
+    <tr><td>エアコン</td><td>Air conditioner.</td><td><code>rent_residential_listings.has_air_conditioner</code></td></tr>
+    <tr><td>フローリング</td><td>Wood flooring.</td><td><code>rent_residential_listings.has_wood_flooring</code></td></tr>
+    <tr><td>モニター付きインターホン</td><td>Video intercom.</td><td><code>rent_residential_listings.has_video_intercom</code></td></tr>
+    <tr><td>追い焚き</td><td>Bath reheating.</td><td><code>rent_residential_listings.has_bath_reheating</code></td></tr>
+    <tr><td>ガスコンロ</td><td>Gas stove.</td><td><code>rent_residential_listings.has_gas_stove</code></td></tr>
+    <tr><td>IH</td><td>Induction cooktop.</td><td><code>rent_residential_listings.has_induction_cooktop</code></td></tr>
+    <tr><td>コンロ２口以上</td><td>Two or more burners.</td><td><code>rent_residential_listings.has_multiple_burners</code></td></tr>
+    <tr><td>システムキッチン</td><td>System kitchen.</td><td><code>rent_residential_listings.has_system_kitchen</code></td></tr>
+    <tr><td>ロフト</td><td>Loft.</td><td><code>rent_residential_listings.has_loft</code></td></tr>
+    <tr><td>室内洗濯機置き場</td><td>Indoor washing-machine space.</td><td><code>rent_residential_listings.has_indoor_washing_machine_space</code></td></tr>
+    <tr><td>浴室乾燥機</td><td>Bathroom dryer.</td><td><code>rent_residential_listings.has_bathroom_dryer</code></td></tr>
+    <tr><td>バストイレ別</td><td>Separate bath and toilet.</td><td><code>rent_residential_listings.has_separate_bath_and_toilet</code></td></tr>
+    <tr><td>独立洗面台</td><td>Separate washbasin.</td><td><code>rent_residential_listings.has_separate_washbasin</code></td></tr>
+    <tr><td>温水洗浄便座</td><td>Warm-water toilet seat.</td><td><code>rent_residential_listings.has_warm_water_toilet_seat</code></td></tr>
+    <tr><td>備考</td><td>Unit appliance remarks.</td><td><code>rent_residential_listings.appliance_remarks</code></td></tr>
+  </tbody></table></div>
+
+  <h2 id="linked">Location, transport and linked records</h2>
+  <p>Property <a href="common-property-spec.html#location">location</a> and <a href="common-property-spec.html#transport">transportation</a> fields are documented in the common property specification.</p>
+
+  <h3>Property and listing — lessor and broker links</h3>
+  <p>The editor associates separately stored contacts with the property or listing. See the <a href="rent-lessors-spec.html#links">貸主 association</a> and <a href="brokers-spec.html#links">宅建業者 association</a> specifications, and the <a href="common-person-spec.html">common person fields</a>.</p>
+
+  <h3>Property and listing — pictures and PDFs</h3>
+  <p>Each row below applies to both the property and listing editor. Importing a file stores its filename in the appropriate metadata table; the file contents and storage path are not database columns. IDs and owner IDs are used to associate each record.</p>
+  <div class="table-wrap"><table><thead><tr><th scope="col">Input field</th><th scope="col">Description</th><th scope="col">Database column(s)</th></tr></thead><tbody>
+    <tr><td>写真ファイル</td><td>Imported picture filename.</td><td><code>rent_residential_pictures.filename</code>; listing: <code>rent_residential_listing_pictures.filename</code></td></tr>
+    <tr><td>タイプ（写真）</td><td>Picture category; the displayed label represents the stored type.</td><td><code>rent_residential_pictures.type</code>; listing: <code>rent_residential_listing_pictures.type</code></td></tr>
+    <tr><td>説明（写真）</td><td>Picture description.</td><td><code>rent_residential_pictures.description</code>; listing: <code>rent_residential_listing_pictures.description</code></td></tr>
+    <tr><td>メインの写真</td><td>Marks the main picture.</td><td><code>rent_residential_pictures.is_main</code>; listing: <code>rent_residential_listing_pictures.is_main</code></td></tr>
+    <tr><td>図面ファイル</td><td>Imported PDF filename; a thumbnail filename is stored separately.</td><td><code>rent_residential_pdfs.filename</code>, <code>rent_residential_pdfs.thumbnail_filename</code>; listing: <code>rent_residential_listing_pdfs.filename</code>, <code>rent_residential_listing_pdfs.thumbnail_filename</code></td></tr>
+    <tr><td>タイプ（図面）</td><td>PDF category; the displayed label represents the stored type.</td><td><code>rent_residential_pdfs.type</code>; listing: <code>rent_residential_listing_pdfs.type</code></td></tr>
+    <tr><td>説明（図面）</td><td>PDF description.</td><td><code>rent_residential_pdfs.description</code>; listing: <code>rent_residential_listing_pdfs.description</code></td></tr>
+    <tr><td>メインの図面</td><td>Marks the main PDF.</td><td><code>rent_residential_pdfs.is_main</code>; listing: <code>rent_residential_listing_pdfs.is_main</code></td></tr>
+  </tbody></table></div>
+
+  <h2 id="notes">Review notes and sources</h2>
+  <ul>
+    <li><code>rent_residential_listings.current_status</code> is persisted from a separate occupancy-status model property; the current basic editor's visible <strong>現況</strong> selector maps to <code>availability_status</code>, not <code>current_status</code>. The separate occupancy-status selector is not present on that page.</li>
+    <li><code>rent_residential_listings.is_property_unit_ownership</code> is listing-side parent-property context, not a separate input on the listing basic page.</li>
+    <li>Sources: <code>Src\Presentation\Features\Rent\Residentials\Views</code> and <code>Views\Listing</code> XAML and view models; <code>Src\Infrastructure\DataAccess\DataAccessService.cs</code> fresh table definitions and save/load operations.</li>
+    <li>Screen labels may be qualified by section above to distinguish repeated labels such as 備考 and あり. This document does not prescribe migrations or change the database.</li>
+  </ul>
+</body>
+</html>

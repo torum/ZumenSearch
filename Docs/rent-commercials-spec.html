@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rent Commercials — pre-rewrite specification</title>
+  <style>
+    :root { color-scheme: light dark; --background: #ffffff; --text: #20252b; --link: #0053a6; --border: #b9c2ca; --heading-background: #eaf0f5; --notice-background: #fff6e5; --notice-border: #a86500; }
+    body { font-family: system-ui, sans-serif; line-height: 1.5; max-width: 90rem; margin: 0 auto; padding: 1.5rem; color: var(--text); background: var(--background); }
+    h1, h2, h3 { line-height: 1.25; }
+    a { color: var(--link); }
+    nav ul { display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; padding-left: 1.25rem; }
+    .notice { padding: .8rem 1rem; border-left: .3rem solid var(--notice-border); background: var(--notice-background); }
+    .table-wrap { overflow-x: auto; }
+    table { border-collapse: collapse; width: 100%; margin: .75rem 0 1.5rem; }
+    th, td { border: 1px solid var(--border); text-align: left; vertical-align: top; padding: .4rem .6rem; }
+    th { background: var(--heading-background); }
+    td:first-child { min-width: 12rem; }
+    code { overflow-wrap: anywhere; }
+    @media screen and (prefers-color-scheme: dark) { :root { --background: #181c20; --text: #e7ecf0; --link: #8fc5ff; --border: #73808b; --heading-background: #303b45; --notice-background: #42331d; --notice-border: #f0b858; } }
+    @media print { :root { color-scheme: light; } body { max-width: none; padding: 0; } nav { display: none; } tr { break-inside: avoid; } }
+  </style>
+</head>
+<body>
+  <nav aria-label="Index"><a href="index.html">Back to index</a></nav>
+  <h1>Rent Commercials: pre-rewrite specification</h1>
+  <p class="notice"><strong>Draft — pre-rewrite implementation snapshot, not an approved schema.</strong> The existing UI and fresh SQLite schema are recorded as of 2026-11-22 to inform reconstruction. This is not a requirement to retain current defects or design choices.</p>
+  <p>Japanese labels come from the current editors; descriptions are in English. A schema column alone does not establish that an input is saved or reloaded. Shared <a href="common-property-spec.html">property fields</a> and <a href="common-person-spec.html">person fields</a> are documented separately.</p>
+  <nav aria-label="Contents"><ul><li><a href="#property">Property</a></li><li><a href="#listing">Listing</a></li><li><a href="#linked">Contacts and media</a></li><li><a href="#schema">Schema and persistence notes</a></li><li><a href="#sources">Sources</a></li></ul></nav>
+
+  <h2 id="property">Property fields</h2>
+  <p>For 物件名, 不動産番号, 特定コード, location and transportation, see the <a href="common-property-spec.html">common property specification</a>. The commercial property save currently omits both identifier columns; see <a href="#schema">persistence notes</a>.</p>
+  <h3>Basic information</h3>
+  <div class="table-wrap"><table><thead><tr><th scope="col">Input field</th><th scope="col">Description</th><th scope="col">Database column(s)</th></tr></thead><tbody>
+    <tr><td>物件種目</td><td>Commercial property kind.</td><td><code>rent_commercials.commercial_kind</code></td></tr>
+    <tr><td>区分所有</td><td>Unit-level ownership.</td><td><code>rent_commercials.is_unit_ownership</code></td></tr>
+    <tr><td>建物構造</td><td>Building structure.</td><td><code>rent_commercials.property_structure</code></td></tr>
+    <tr><td>地上階数（階）</td><td>Above-ground floors.</td><td><code>rent_commercials.floor_count_above_ground</code></td></tr>
+    <tr><td>地下階数（階）</td><td>Basement floors.</td><td><code>rent_commercials.floor_count_basement</code></td></tr>
+    <tr><td>延床面積（㎡）</td><td>Total floor area.</td><td><code>rent_commercials.total_floor_area</code></td></tr>
+    <tr><td>築年月</td><td>Year and month built.</td><td><code>rent_commercials.built_year_month</code></td></tr>
+    <tr><td>備考</td><td>Property remarks.</td><td><code>rent_commercials.remarks</code></td></tr>
+  </tbody></table></div>
+  <h3>Building management</h3>
+  <div class="table-wrap"><table><thead><tr><th scope="col">Input field</th><th scope="col">Description</th><th scope="col">Database column(s)</th></tr></thead><tbody>
+    <tr><td>建物管理主体</td><td>Management party.</td><td><code>rent_commercials.management_type</code></td></tr>
+    <tr><td>建物維持管理</td><td>In-house maintenance management.</td><td><code>rent_commercials.management_maintenance</code></td></tr>
+    <tr><td>入居者管理</td><td>In-house tenant management.</td><td><code>rent_commercials.management_tenant</code></td></tr>
+    <tr><td>家賃入金管理</td><td>In-house rent payment management.</td><td><code>rent_commercials.management_payment</code></td></tr>
+    <tr><td>その他（管理内容）</td><td>Other in-house management.</td><td><code>rent_commercials.management_other</code></td></tr>
+    <tr><td>備考（自主管理）</td><td>In-house management remarks.</td><td><code>rent_commercials.management_company_remarks</code></td></tr>
+    <tr><td>管理会社名</td><td>External management company.</td><td><code>rent_commercials.management_external_name</code></td></tr>
+    <tr><td>連絡先</td><td>External management contact.</td><td><code>rent_commercials.management_external_contact</code></td></tr>
+    <tr><td>備考（管理会社）</td><td>External management remarks.</td><td><code>rent_commercials.management_external_remarks</code></td></tr>
+    <tr><td>備考（家主管理）</td><td>Lessor management remarks.</td><td><code>rent_commercials.management_lessor_remarks</code></td></tr>
+  </tbody></table></div>
+  <h3>Building facilities</h3>
+  <div class="table-wrap"><table><thead><tr><th scope="col">Input field</th><th scope="col">Description</th><th scope="col">Database column(s)</th></tr></thead><tbody>
+    <tr><td>乗用エレベーターあり</td><td>Passenger elevator available.</td><td><code>rent_commercials.passenger_elevator_availability</code></td></tr>
+    <tr><td>乗用エレベーター台数（台）</td><td>Passenger elevator count.</td><td><code>rent_commercials.passenger_elevator_count</code></td></tr>
+    <tr><td>荷物用エレベーターあり</td><td>Freight elevator available.</td><td><code>rent_commercials.freight_elevator_availability</code></td></tr>
+    <tr><td>荷物用エレベーター詳細</td><td>Freight elevator details.</td><td><code>rent_commercials.freight_elevator_details</code></td></tr>
+    <tr><td>荷捌き場あり</td><td>Loading area available.</td><td><code>rent_commercials.loading_area_availability</code></td></tr>
+    <tr><td>荷捌き場詳細</td><td>Loading area details.</td><td><code>rent_commercials.loading_area_details</code></td></tr>
+    <tr><td>セキュリティ設備あり</td><td>Security facilities available.</td><td><code>rent_commercials.security_availability</code></td></tr>
+    <tr><td>機械警備</td><td>Mechanical security.</td><td><code>rent_commercials.security_mechanical</code></td></tr>
+    <tr><td>有人警備</td><td>Staffed security.</td><td><code>rent_commercials.security_staffed</code></td></tr>
+    <tr><td>オートロック</td><td>Automatic lock.</td><td><code>rent_commercials.security_autolock</code></td></tr>
+    <tr><td>防犯カメラ</td><td>Security camera.</td><td><code>rent_commercials.security_camera</code></td></tr>
+    <tr><td>その他（セキュリティ）</td><td>Other security.</td><td><code>rent_commercials.security_other</code></td></tr>
+    <tr><td>セキュリティ詳細・備考</td><td>Security details.</td><td><code>rent_commercials.security_details</code></td></tr>
+    <tr><td>電気供給あり</td><td>Electricity available.</td><td><code>rent_commercials.electricity_availability</code></td></tr>
+    <tr><td>電気詳細</td><td>Electricity details.</td><td><code>rent_commercials.electricity_details</code></td></tr>
+    <tr><td>ガス供給あり</td><td>Gas available.</td><td><code>rent_commercials.gas_availability</code></td></tr>
+    <tr><td>ガスの種類</td><td>Gas type.</td><td><code>rent_commercials.gas_type</code></td></tr>
+    <tr><td>ガス詳細</td><td>Gas details.</td><td><code>rent_commercials.gas_details</code></td></tr>
+    <tr><td>水道供給あり</td><td>Water available.</td><td><code>rent_commercials.water_availability</code></td></tr>
+    <tr><td>水道の種類</td><td>Water type.</td><td><code>rent_commercials.water_type</code></td></tr>
+    <tr><td>水道詳細</td><td>Water details.</td><td><code>rent_commercials.water_details</code></td></tr>
+    <tr><td>下水の種類</td><td>Sewerage type.</td><td><code>rent_commercials.sewerage_type</code></td></tr>
+    <tr><td>下水詳細</td><td>Sewerage details.</td><td><code>rent_commercials.sewerage_details</code></td></tr>
+    <tr><td>インターネット設備あり</td><td>Internet available.</td><td><code>rent_commercials.internet_availability</code></td></tr>
+    <tr><td>光ファイバーあり</td><td>Fiber available.</td><td><code>rent_commercials.fiber_availability</code></td></tr>
+    <tr><td>インターネット詳細</td><td>Internet details.</td><td><code>rent_commercials.internet_details</code></td></tr>
+    <tr><td>消防設備あり</td><td>Fire safety equipment available.</td><td><code>rent_commercials.fire_safety_availability</code></td></tr>
+    <tr><td>消防設備詳細・備考</td><td>Fire safety details.</td><td><code>rent_commercials.fire_safety_details</code></td></tr>
+    <tr><td>駐車場あり</td><td>Parking available.</td><td><code>rent_commercials.parking_availability</code></td></tr>
+    <tr><td>空き状況</td><td>Parking vacancy.</td><td><code>rent_commercials.parking_vacancy</code></td></tr>
+    <tr><td>空き台数（台）</td><td>Available parking spaces.</td><td><code>rent_commercials.parking_spaces</code></td></tr>
+    <tr><td>駐車場無料</td><td>Parking is free.</td><td><code>rent_commercials.parking_free</code></td></tr>
+    <tr><td>月額料金（円・無料選択時は保持）</td><td>Monthly parking fee.</td><td><code>rent_commercials.parking_monthly_fee</code></td></tr>
+    <tr><td>消費税</td><td>Parking fee tax treatment.</td><td><code>rent_commercials.parking_tax</code></td></tr>
+    <tr><td>駐車場詳細・備考</td><td>Parking details.</td><td><code>rent_commercials.parking_details</code></td></tr>
+  </tbody></table></div>
+
+  <h2 id="listing">Listing fields</h2>
+  <p>All columns in this section belong to <code>rent_commercial_units</code>. Paired value and unit controls are shown together.</p>
+  <h3>Basic information</h3>
+  <div class="table-wrap"><table><thead><tr><th scope="col">Input field</th><th scope="col">Description</th><th scope="col">Database column(s)</th></tr></thead><tbody>
+    <tr><td>区画名</td><td>Unit name.</td><td><code>rent_commercial_units.name</code></td></tr>
+    <tr><td>所在階 / 階数</td><td>Floor direction and number.</td><td><code>rent_commercial_units.floor_ground</code>, <code>rent_commercial_units.floor_number</code></td></tr>
+    <tr><td>専有面積（平米）</td><td>Exclusive floor area.</td><td><code>rent_commercial_units.floor_area</code></td></tr>
+    <tr><td>用途</td><td>Unit use.</td><td><code>rent_commercial_units.usage</code></td></tr>
+    <tr><td>用途の詳細</td><td>Use details.</td><td><code>rent_commercial_units.use_details</code></td></tr>
+    <tr><td>現況</td><td>Availability status.</td><td><code>rent_commercial_units.availability_status</code></td></tr>
+    <tr><td>募集中</td><td>Currently available for rent.</td><td><code>rent_commercial_units.is_available_for_rent</code></td></tr>
+    <tr><td>入居可能月 / 入居可能時期</td><td>Available month and period.</td><td><code>rent_commercial_units.availability_month</code>, <code>rent_commercial_units.availability_period</code></td></tr>
+    <tr><td>即入居可</td><td>Immediate occupancy.</td><td><code>rent_commercial_units.is_available_immediately</code></td></tr>
+    <tr><td>備考</td><td>General listing remarks.</td><td><code>rent_commercial_units.remarks</code></td></tr>
+  </tbody></table></div>
+  <h3>Rent and contract</h3>
+  <div class="table-wrap"><table><thead><tr><th scope="col">Input field</th><th scope="col">Description</th><th scope="col">Database column(s)</th></tr></thead><tbody>
+    <tr><td>賃料（月額・円） / 賃料の消費税</td><td>Rent and tax treatment.</td><td><code>rent_commercial_units.chinryou</code>, <code>rent_commercial_units.rent_tax</code></td></tr>
+    <tr><td>共益費・管理費（月額・円） / 消費税</td><td>Management fee and tax treatment.</td><td><code>rent_commercial_units.kyoueki_fee</code>, <code>rent_commercial_units.management_fee_tax</code></td></tr>
+    <tr><td>敷金</td><td>Security deposit and unit.</td><td><code>rent_commercial_units.shikikin</code>, <code>rent_commercial_units.shikikin_unit</code></td></tr>
+    <tr><td>保証金</td><td>Guarantee deposit and unit.</td><td><code>rent_commercial_units.guarantee_deposit</code>, <code>rent_commercial_units.guarantee_deposit_unit</code></td></tr>
+    <tr><td>礼金</td><td>Key money and unit.</td><td><code>rent_commercial_units.reikin</code>, <code>rent_commercial_units.reikin_unit</code></td></tr>
+    <tr><td>権利金</td><td>Rights money and unit.</td><td><code>rent_commercial_units.rights_money</code>, <code>rent_commercial_units.rights_money_unit</code></td></tr>
+    <tr><td>敷引・償却金</td><td>Deposit deduction and unit.</td><td><code>rent_commercial_units.deposit_deduction</code>, <code>rent_commercial_units.deposit_deduction_unit</code></td></tr>
+    <tr><td>契約種別</td><td>Contract type.</td><td><code>rent_commercial_units.contract_type</code></td></tr>
+    <tr><td>契約期間（年）</td><td>Contract duration.</td><td><code>rent_commercial_units.contract_period_years</code></td></tr>
+    <tr><td>更新料</td><td>Renewal fee and unit.</td><td><code>rent_commercial_units.renewal_fee</code>, <code>rent_commercial_units.renewal_fee_unit</code></td></tr>
+    <tr><td>再契約手数料</td><td>Recontract fee and unit.</td><td><code>rent_commercial_units.recontract_fee</code>, <code>rent_commercial_units.recontract_fee_unit</code></td></tr>
+    <tr><td>保証会社</td><td>Guarantor company.</td><td><code>rent_commercial_units.guarantor_company</code></td></tr>
+    <tr><td>保険</td><td>Insurance.</td><td><code>rent_commercial_units.insurance</code></td></tr>
+    <tr><td>その他費用</td><td>Other fees.</td><td><code>rent_commercial_units.other_fees</code></td></tr>
+    <tr><td>その他条件</td><td>Other contract conditions.</td><td><code>rent_commercial_units.contract_conditions</code></td></tr>
+    <tr><td>契約備考</td><td>Contract remarks.</td><td><code>rent_commercial_units.contract_remarks</code></td></tr>
+  </tbody></table></div>
+  <h3>Transaction</h3>
+  <div class="table-wrap"><table><thead><tr><th scope="col">Input field</th><th scope="col">Description</th><th scope="col">Database column(s)</th></tr></thead><tbody>
+    <tr><td>物件の取扱区分</td><td>Handling type.</td><td><code>rent_commercial_units.handling_type</code></td></tr>
+    <tr><td>取引態様</td><td>Transaction type.</td><td><code>rent_commercial_units.transaction_type</code></td></tr>
+    <tr><td>貸主手数料</td><td>Lessor commission and unit.</td><td><code>rent_commercial_units.lessor_commission</code>, <code>rent_commercial_units.lessor_commission_unit</code></td></tr>
+    <tr><td>借主手数料</td><td>Lessee commission and unit.</td><td><code>rent_commercial_units.lessee_commission</code>, <code>rent_commercial_units.lessee_commission_unit</code></td></tr>
+    <tr><td>元付手数料</td><td>Listing broker commission and unit.</td><td><code>rent_commercial_units.listing_broker_commission</code>, <code>rent_commercial_units.listing_broker_commission_unit</code></td></tr>
+    <tr><td>客付け手数料</td><td>Tenant broker commission and unit.</td><td><code>rent_commercial_units.tenant_broker_commission</code>, <code>rent_commercial_units.tenant_broker_commission_unit</code></td></tr>
+    <tr><td>備考</td><td>Transaction remarks.</td><td><code>rent_commercial_units.transaction_remarks</code></td></tr>
+  </tbody></table></div>
+  <h3>Facilities and permitted use</h3>
+  <div class="table-wrap"><table><thead><tr><th scope="col">Input field</th><th scope="col">Description</th><th scope="col">Database column(s)</th></tr></thead><tbody>
+    <tr><td>空調</td><td>Air conditioning.</td><td><code>rent_commercial_units.air_conditioning</code></td></tr>
+    <tr><td>専用トイレ</td><td>Private toilet.</td><td><code>rent_commercial_units.private_toilet</code></td></tr>
+    <tr><td>給湯</td><td>Hot water.</td><td><code>rent_commercial_units.hot_water</code></td></tr>
+    <tr><td>厨房設備</td><td>Kitchen facilities.</td><td><code>rent_commercial_units.kitchen</code></td></tr>
+    <tr><td>換気設備</td><td>Ventilation.</td><td><code>rent_commercial_units.ventilation</code></td></tr>
+    <tr><td>インターネット</td><td>Unit internet.</td><td><code>rent_commercial_units.unit_internet</code></td></tr>
+    <tr><td>設備詳細</td><td>Equipment details.</td><td><code>rent_commercial_units.equipment_details</code></td></tr>
+    <tr><td>区画の状態</td><td>Unit condition.</td><td><code>rent_commercial_units.unit_condition</code></td></tr>
+    <tr><td>造作譲渡</td><td>Fixture transfer.</td><td><code>rent_commercial_units.fixture_transfer</code></td></tr>
+    <tr><td>営業時間の制限</td><td>Business-hour restrictions.</td><td><code>rent_commercial_units.business_hours</code></td></tr>
+    <tr><td>利用条件</td><td>Use conditions.</td><td><code>rent_commercial_units.other_conditions</code></td></tr>
+    <tr><td>重飲食</td><td>Heavy food service permitted.</td><td><code>rent_commercial_units.permits_heavy_food</code></td></tr>
+    <tr><td>軽飲食</td><td>Light food service permitted.</td><td><code>rent_commercial_units.permits_light_food</code></td></tr>
+    <tr><td>小売</td><td>Retail permitted.</td><td><code>rent_commercial_units.permits_retail</code></td></tr>
+    <tr><td>サービス</td><td>Service business permitted.</td><td><code>rent_commercial_units.permits_services</code></td></tr>
+    <tr><td>事務所</td><td>Office use permitted.</td><td><code>rent_commercial_units.permits_office</code></td></tr>
+    <tr><td>その他（業種）</td><td>Other business permitted.</td><td><code>rent_commercial_units.permits_other</code></td></tr>
+    <tr><td>業種の詳細・制限</td><td>Permitted business details and restrictions.</td><td><code>rent_commercial_units.permitted_business_details</code></td></tr>
+    <tr><td>設備・利用条件の備考</td><td>Facilities and use remarks.</td><td><code>rent_commercial_units.facilities_remarks</code></td></tr>
+  </tbody></table></div>
+
+  <h2 id="linked">Contacts and media</h2>
+  <p>See <a href="rent-lessors-spec.html#links">lessor associations</a> and <a href="brokers-spec.html#links">broker associations</a>. Commercial property links use an empty listing ID; listing links use the actual listing ID and the <code>RentCommercial</code> property context. Person details are stored separately.</p>
+  <div class="table-wrap"><table><thead><tr><th scope="col">Input field</th><th scope="col">Description</th><th scope="col">Database columns</th></tr></thead><tbody>
+    <tr><td>写真ファイル</td><td>Imported picture filename.</td><td><code>rent_commercial_pictures.filename</code>; listing: <code>rent_commercial_listing_pictures.filename</code></td></tr>
+    <tr><td>タイプ（写真）</td><td>Picture category.</td><td><code>rent_commercial_pictures.type</code>; listing: <code>rent_commercial_listing_pictures.type</code></td></tr>
+    <tr><td>説明（写真）</td><td>Picture description.</td><td><code>rent_commercial_pictures.description</code>; listing: <code>rent_commercial_listing_pictures.description</code></td></tr>
+    <tr><td>メインの写真</td><td>Main picture indicator.</td><td><code>rent_commercial_pictures.is_main</code>; listing: <code>rent_commercial_listing_pictures.is_main</code></td></tr>
+    <tr><td>図面ファイル</td><td>Imported PDF filename and generated thumbnail filename.</td><td><code>rent_commercial_pdfs.filename</code>, <code>rent_commercial_pdfs.thumbnail_filename</code>; listing: <code>rent_commercial_listing_pdfs.filename</code>, <code>rent_commercial_listing_pdfs.thumbnail_filename</code></td></tr>
+    <tr><td>タイプ（図面）</td><td>PDF category.</td><td><code>rent_commercial_pdfs.type</code>; listing: <code>rent_commercial_listing_pdfs.type</code></td></tr>
+    <tr><td>説明（図面）</td><td>PDF description.</td><td><code>rent_commercial_pdfs.description</code>; listing: <code>rent_commercial_listing_pdfs.description</code></td></tr>
+    <tr><td>メインの図面</td><td>Main PDF indicator.</td><td><code>rent_commercial_pdfs.is_main</code>; listing: <code>rent_commercial_listing_pdfs.is_main</code></td></tr>
+  </tbody></table></div>
+  <p>Media tables also store record IDs and owner IDs; files themselves are stored outside the database. Listing media tables have partial unique indexes allowing at most one main picture and one main PDF per listing; their save paths also check that constraint. Property PDF records additionally have creation/update timestamps.</p>
+
+  <h2 id="schema">Schema and persistence notes</h2>
+  <ul>
+    <li><strong>Property identifiers:</strong> the commercial property editor accepts 不動産番号 and 特定コード, and load reads <code>properties.fudousan_id</code> and <code>properties.fudousan_id_additional_code</code>, but its property upsert omits them. Changes to these fields are not written by that save path. The property upsert also omits <code>properties.location_postal_code</code>.</li>
+    <li><strong>Listing identifier:</strong> <code>rent_commercial_units.fudousan_id_additional_code</code> exists in the schema but has no listing editor input and is omitted from the listing upsert and active listing load. The loaded property identifier is a separate value from <code>properties.fudousan_id</code>.</li>
+    <li><strong>Schema-only parking:</strong> <code>rent_commercial_units.parking_available</code> has no listing editor input and is omitted from the listing upsert and active editor load.</li>
+    <li>Property <code>rent_commercials.property_id</code> links to the shared property row; <code>rent_commercials.created_at</code> and <code>rent_commercials.updated_at</code> are timestamps. Listing <code>rent_commercial_units.listing_id</code>, <code>rent_commercial_units.property_id</code>, <code>rent_commercial_units.is_property_unit_ownership</code>, <code>rent_commercial_units.created_at</code> and <code>rent_commercial_units.updated_at</code> are identifiers, parent context or timestamps, not separate listing inputs.</li>
+    <li>SQLite storage types are not uniform: for example, listing <code>chinryou</code> is NUMERIC while several other fee values are TEXT; nullable columns and default values should be reviewed in the schema rather than inferred from the UI.</li>
+    <li>The parking-free explanatory text on the property facilities page is display-only, not a separate stored input. Property- and unit-ownership modes can affect which details are saved; inspect the current save path when reconstructing that behavior.</li>
+  </ul>
+
+  <h2 id="sources">Sources</h2>
+  <ul><li><code>Src\Presentation\Features\Rent\Commercials\Views</code> and <code>Views\Listing</code>: property and listing editors; corresponding view models and domain entities.</li><li><code>Src\Infrastructure\DataAccess\DataAccessService.cs</code>: fresh schema and commercial save/load operations.</li></ul>
+</body>
+</html>

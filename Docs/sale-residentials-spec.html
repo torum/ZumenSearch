@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sale Residentials — early implementation specification</title>
+  <style>
+    :root { color-scheme: light dark; --background: #ffffff; --text: #20252b; --link: #0053a6; --border: #b9c2ca; --heading-background: #eaf0f5; --notice-background: #fff6e5; --notice-border: #a86500; }
+    body { font-family: system-ui, sans-serif; line-height: 1.5; max-width: 90rem; margin: 0 auto; padding: 1.5rem; color: var(--text); background: var(--background); }
+    h1, h2, h3 { line-height: 1.25; }
+    a { color: var(--link); }
+    nav ul { display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; padding-left: 1.25rem; }
+    .notice { padding: .8rem 1rem; border-left: .3rem solid var(--notice-border); background: var(--notice-background); }
+    .table-wrap { overflow-x: auto; }
+    table { border-collapse: collapse; width: 100%; margin: .75rem 0 1.5rem; }
+    th, td { border: 1px solid var(--border); text-align: left; vertical-align: top; padding: .4rem .6rem; }
+    th { background: var(--heading-background); }
+    td:first-child { min-width: 12rem; }
+    code { overflow-wrap: anywhere; }
+    @media screen and (prefers-color-scheme: dark) { :root { --background: #181c20; --text: #e7ecf0; --link: #8fc5ff; --border: #73808b; --heading-background: #303b45; --notice-background: #42331d; --notice-border: #f0b858; } }
+    @media print { :root { color-scheme: light; } body { max-width: none; padding: 0; } nav { display: none; } tr { break-inside: avoid; } }
+  </style>
+</head>
+<body>
+  <nav aria-label="Index"><a href="index.html">Back to index</a></nav>
+  <h1>Sale Residentials: early implementation snapshot</h1>
+  <p class="notice"><strong>Draft — incomplete implementation, not a finalized schema.</strong> This snapshot records the current editor and fresh SQLite schema as of 2026-11-22. Some mappings below describe intended save columns, not working persistence; see the caveats before using them.</p>
+  <p>Japanese labels are from the current UI. Shared concepts are described in the <a href="common-property-spec.html">common property specification</a>, but this feature does not currently implement all shared inputs or use all shared columns in the same way.</p>
+  <nav aria-label="Contents"><ul><li><a href="#property">Property editor</a></li><li><a href="#listing">Listing schema</a></li><li><a href="#media">Media schema</a></li><li><a href="#caveats">Implementation caveats</a></li><li><a href="#sources">Sources</a></li></ul></nav>
+
+  <h2 id="property">Property editor</h2>
+  <p>The editor currently exposes one basic page. The column mapping below is the intended destination based on the fresh schema and save code, except where explicitly noted.</p>
+  <div class="table-wrap"><table><thead><tr><th scope="col">Input field</th><th scope="col">Description</th><th scope="col">Database column(s) / status</th></tr></thead><tbody>
+    <tr><td>物件名</td><td>Property name; marked required.</td><td><code>properties.name</code>; see <a href="common-property-spec.html#basic">common identification</a>.</td></tr>
+    <tr><td>物件種目</td><td>Property kind.</td><td>Fresh schema: <code>sale_residentials.property_kind</code>; save/load incorrectly reference <code>property_type</code>.</td></tr>
+    <tr><td>区分所有</td><td>Unit-level ownership.</td><td><code>sale_residentials.is_unit_ownership</code></td></tr>
+    <tr><td>建物構造</td><td>Building structure.</td><td><code>sale_residentials.property_structure</code></td></tr>
+    <tr><td>地上階数</td><td>Above-ground floors.</td><td><code>sale_residentials.floor_count_above_ground</code></td></tr>
+    <tr><td>地下階数</td><td>Basement floors.</td><td><code>sale_residentials.floor_count_basement</code></td></tr>
+    <tr><td>総戸数</td><td>Total units.</td><td><code>sale_residentials.total_unit_count</code></td></tr>
+    <tr><td>築年月</td><td>Year and month built.</td><td><code>sale_residentials.built_year_month</code>; the date picker is not bound to the view model.</td></tr>
+    <tr><td>不動産番号</td><td>Real-estate identifier.</td><td><code>sale_residentials.fudousan_id</code> in this feature's save/load path; not written to <code>properties.fudousan_id</code>.</td></tr>
+    <tr><td>不動産番号追加コード</td><td>Additional identifier code.</td><td><code>sale_residentials.fudousan_id_additional_code</code> in this feature's save/load path; not written to <code>properties.fudousan_id_additional_code</code>.</td></tr>
+    <tr><td>備考</td><td>Property remarks.</td><td><code>sale_residentials.remarks</code></td></tr>
+  </tbody></table></div>
+  <p>Internal keys and timestamps: <code>sale_residentials.property_id</code> references <code>properties.property_id</code>; <code>sale_residentials.created_at</code> and <code>sale_residentials.updated_at</code> are system timestamps.</p>
+
+  <h2 id="listing">Listing schema — no listing editor</h2>
+  <p>The following columns exist in <code>sale_residential_units</code>, but there is no corresponding listing editor in the current feature. These are schema fields, not verified usable inputs.</p>
+  <div class="table-wrap"><table><thead><tr><th scope="col">Schema field</th><th scope="col">Description</th><th scope="col">Database column</th></tr></thead><tbody>
+    <tr><td>Listing ID</td><td>Listing primary key.</td><td><code>sale_residential_units.listing_id</code></td></tr>
+    <tr><td>Property ID</td><td>Parent property.</td><td><code>sale_residential_units.property_id</code></td></tr>
+    <tr><td>Unit ownership</td><td>Parent ownership context.</td><td><code>sale_residential_units.is_property_unit_ownership</code></td></tr>
+    <tr><td>Listing name</td><td>Listing or unit name.</td><td><code>sale_residential_units.name</code></td></tr>
+    <tr><td>Sale price</td><td>Sale price.</td><td><code>sale_residential_units.sale_price</code></td></tr>
+    <tr><td>Management fee</td><td>Management fee.</td><td><code>sale_residential_units.management_fee</code></td></tr>
+    <tr><td>Repair reserve fund</td><td>Repair reserve amount.</td><td><code>sale_residential_units.repair_reserve_fund</code></td></tr>
+    <tr><td>Ownership type</td><td>Ownership classification.</td><td><code>sale_residential_units.ownership_type</code></td></tr>
+    <tr><td>Occupancy status</td><td>Occupancy classification.</td><td><code>sale_residential_units.occupancy_status</code></td></tr>
+    <tr><td>Delivery timing</td><td>Delivery timing.</td><td><code>sale_residential_units.delivery_timing</code></td></tr>
+    <tr><td>Remarks</td><td>Listing remarks.</td><td><code>sale_residential_units.remarks</code></td></tr>
+    <tr><td>Created / updated</td><td>System timestamps.</td><td><code>sale_residential_units.created_at</code>, <code>sale_residential_units.updated_at</code></td></tr>
+  </tbody></table></div>
+
+  <h2 id="media">Media schema — no media editor in this feature</h2>
+  <p>The fresh schema defines property and listing media tables. No corresponding media editor is present in the Sale Residentials feature; column presence does not establish a working import/save flow.</p>
+  <div class="table-wrap"><table><thead><tr><th scope="col">Record</th><th scope="col">Description</th><th scope="col">Tables and fields</th></tr></thead><tbody>
+    <tr><td>Property picture</td><td>Picture metadata associated with a property.</td><td><code>sale_residential_pictures</code>: <code>picture_id</code>, <code>property_id</code>, <code>filename</code>, <code>type</code>, <code>description</code>, <code>is_main</code>, <code>created_at</code>, <code>updated_at</code>.</td></tr>
+    <tr><td>Property PDF</td><td>PDF metadata and thumbnail filename.</td><td><code>sale_residential_pdfs</code>: <code>pdf_id</code>, <code>property_id</code>, <code>filename</code>, <code>thumbnail_filename</code>, <code>type</code>, <code>description</code>, <code>is_main</code>, <code>created_at</code>, <code>updated_at</code>.</td></tr>
+    <tr><td>Listing picture</td><td>Picture metadata associated with a listing and property.</td><td><code>sale_residential_unit_pictures</code>: <code>picture_id</code>, <code>listing_id</code>, <code>property_id</code>, <code>filename</code>, <code>type</code>, <code>description</code>, <code>is_main</code>, <code>created_at</code>, <code>updated_at</code>.</td></tr>
+    <tr><td>Listing PDF</td><td>Listing PDF metadata and thumbnail filename.</td><td><code>sale_residential_unit_pdfs</code>: <code>pdf_id</code>, <code>listing_id</code>, <code>property_id</code>, <code>filename</code>, <code>thumbnail_filename</code>, <code>type</code>, <code>description</code>, <code>is_main</code>, <code>created_at</code>, <code>updated_at</code>.</td></tr>
+  </tbody></table></div>
+
+  <h2 id="caveats">Implementation caveats</h2>
+  <ul>
+    <li><strong>Property save/load mismatch:</strong> the fresh schema defines <code>property_kind</code>, but the property upsert and lookup query reference <code>property_type</code>. Against that schema these operations cannot complete normally; the upsert is transactional.</li>
+    <li><strong>Address load:</strong> the property lookup selects location column names without the <code>loc...</code> aliases later used to read them; the latitude/longitude reader names also differ from the selected names. This is a separate load-path mismatch.</li>
+    <li><strong>Build date:</strong> the date picker has no active binding. The view model uses a 1900-01-01 fallback when its value is unset.</li>
+    <li><strong>Listing save:</strong> SQL expects price, management fee, reserve, ownership, occupancy and delivery parameters, but their parameter bindings and corresponding domain fields are commented out. The listing save path is incomplete.</li>
+    <li><strong>Common property data:</strong> there are no location or transportation inputs on the current basic page. The property upsert writes address components from the model but omits the shared identifier columns, postal code, coordinates and transportation; it does not establish that these data are editable in this feature.</li>
+  </ul>
+
+  <h2 id="sources">Sources</h2>
+  <ul><li><code>Src\Presentation\Features\Sale\Residentials\Views\BasicPage.xaml</code>, <code>ShellPage.xaml.cs</code> and <code>ViewModels\PropertyViewModel.cs</code>.</li><li><code>Src\Domain\Entities\Sale\Residentials\Property.cs</code> and <code>Listing.cs</code>.</li><li><code>Src\Infrastructure\DataAccess\DataAccessService.cs</code>: fresh Sale Residentials schema and save/load operations.</li></ul>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Common property — input and database specification</title>
+  <style>
+    :root { color-scheme: light dark; --background: #ffffff; --text: #20252b; --link: #0053a6; --border: #b9c2ca; --heading-background: #eaf0f5; --notice-background: #fff6e5; --notice-border: #a86500; }
+    body { font-family: system-ui, sans-serif; line-height: 1.5; max-width: 90rem; margin: 0 auto; padding: 1.5rem; color: var(--text); background: var(--background); }
+    h1, h2, h3 { line-height: 1.25; }
+    a { color: var(--link); }
+    nav ul { display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; padding-left: 1.25rem; }
+    .notice { padding: .8rem 1rem; border-left: .3rem solid var(--notice-border); background: var(--notice-background); }
+    .table-wrap { overflow-x: auto; }
+    table { border-collapse: collapse; width: 100%; margin: .75rem 0 1.5rem; }
+    th, td { border: 1px solid var(--border); text-align: left; vertical-align: top; padding: .4rem .6rem; }
+    th { background: var(--heading-background); }
+    td:first-child { min-width: 12rem; }
+    code { overflow-wrap: anywhere; }
+    @media screen and (prefers-color-scheme: dark) { :root { --background: #181c20; --text: #e7ecf0; --link: #8fc5ff; --border: #73808b; --heading-background: #303b45; --notice-background: #42331d; --notice-border: #f0b858; } }
+    @media print { :root { color-scheme: light; } body { max-width: none; padding: 0; } nav { display: none; } tr { break-inside: avoid; } }
+  </style>
+</head>
+<body>
+  <nav aria-label="Index"><a href="index.html">Back to index</a></nav>
+  <h1>Common property: input and database specification</h1>
+  <p class="notice"><strong>Draft — implementation snapshot, not an approved schema.</strong> This sheet documents the shared <code>properties</code> table and the current rental residential and commercial property editors as of 2026-11-22. Other property types may be incomplete or use different persistence; their behavior has not been verified here.</p>
+  <p>Labels are taken from the Japanese UI; descriptions are in English. A column's presence does not guarantee that every editor saves it. See <a href="rent-residentials-spec.html">Rent Residentials specification</a> for residential-specific fields and related records.</p>
+  <nav aria-label="Contents"><ul><li><a href="#basic">Identification</a></li><li><a href="#location">Location</a></li><li><a href="#transport">Transportation</a></li><li><a href="#system">System-managed fields</a></li><li><a href="#differences">Implementation differences</a></li><li><a href="#sources">Sources</a></li></ul></nav>
+
+  <h2 id="basic">Property identification</h2>
+  <div class="table-wrap"><table><thead><tr><th scope="col">Input field</th><th scope="col">Description</th><th scope="col">Database column(s)</th></tr></thead><tbody>
+    <tr><td>物件名</td><td>Property name; marked required in both rental property editors.</td><td><code>properties.name</code></td></tr>
+    <tr><td>不動産番号</td><td>Real-estate identifier. The residential editor saves this value; see the commercial persistence caveat below.</td><td><code>properties.fudousan_id</code></td></tr>
+    <tr><td>特定コード</td><td>Additional code for the property identifier. The residential editor saves this value; see the commercial persistence caveat below.</td><td><code>properties.fudousan_id_additional_code</code></td></tr>
+  </tbody></table></div>
+
+  <h2 id="location">Location</h2>
+  <p>Residential and commercial rental editors expose the same location labels. Address selections provide component names and, where applicable, the shared machiaza ID; the prefecture selection also provides a municipality code.</p>
+  <div class="table-wrap"><table><thead><tr><th scope="col">Input field</th><th scope="col">Description</th><th scope="col">Database column(s)</th></tr></thead><tbody>
+    <tr><td>都道府県</td><td>Selected prefecture name and municipality code.</td><td><code>properties.location_prefecture</code>, <code>properties.location_prefecture_code</code></td></tr>
+    <tr><td>郡+市区町村</td><td>Selected county and city or municipality.</td><td><code>properties.location_county</code>, <code>properties.location_city</code>, <code>properties.location_machiaza_id</code></td></tr>
+    <tr><td>政令市区+大字・町名</td><td>Selected ward and town area.</td><td><code>properties.location_ward</code>, <code>properties.location_oaza_cho</code>, <code>properties.location_machiaza_id</code></td></tr>
+    <tr><td>丁目</td><td>Selected chōme.</td><td><code>properties.location_choume</code>, <code>properties.location_machiaza_id</code></td></tr>
+    <tr><td>小字・番地以下</td><td>Remaining address, such as block and building numbers.</td><td><code>properties.location_edaban</code></td></tr>
+    <tr><td>住所プレビュー</td><td>Read-only address assembled from the selected components and remaining address.</td><td>No directly bound column. <code>properties.location_full</code> is separately saved from the address model's assembled value.</td></tr>
+    <tr><td>緯度</td><td>Latitude.</td><td><code>properties.location_latitude</code></td></tr>
+    <tr><td>経度</td><td>Longitude.</td><td><code>properties.location_longitude</code></td></tr>
+    <tr><td>Postal code (no input on these pages)</td><td>Address model's postal code; the residential save writes it, but the commercial save omits it.</td><td><code>properties.location_postal_code</code></td></tr>
+  </tbody></table></div>
+  <p><code>location_machiaza_id</code> is one shared column for the selected address hierarchy, not a separate ID for each selection. <code>location_prefecture_code</code> stores the selected prefecture object's municipality code.</p>
+
+  <h2 id="transport">Transportation</h2>
+  <p>Both rental editors offer four entries, selected with 交通１–交通４. The selector is UI-only. In the table, <code>N</code> means 1, 2, 3 or 4: for example, <code>properties.train1_line_code</code>. The <code>buss</code> spelling and capital letters are the current schema names.</p>
+  <div class="table-wrap"><table><thead><tr><th scope="col">Input field</th><th scope="col">Description</th><th scope="col">Database column(s)</th></tr></thead><tbody>
+    <tr><td>路線</td><td>Rail line selected through a picker; code and name are saved.</td><td><code>properties.trainN_line_code</code>, <code>properties.trainN_line_name</code></td></tr>
+    <tr><td>駅名</td><td>Station selected through a picker; code and name are saved.</td><td><code>properties.trainN_station_code</code>, <code>properties.trainN_station_name</code></td></tr>
+    <tr><td>駅から徒歩（分）</td><td>Walk from station, in minutes.</td><td><code>properties.trainN_ekitoho</code></td></tr>
+    <tr><td>バス停名</td><td>Bus stop name.</td><td><code>properties.bussN_stop_name</code></td></tr>
+    <tr><td>バス乗車時間（分）</td><td>Bus ride, in minutes.</td><td><code>properties.bussN_Jyousya</code></td></tr>
+    <tr><td>バス停から徒歩（分）</td><td>Walk from bus stop, in minutes.</td><td><code>properties.bussN_Toho</code></td></tr>
+  </tbody></table></div>
+
+  <h2 id="system">System-managed fields</h2>
+  <div class="table-wrap"><table><thead><tr><th scope="col">Field</th><th scope="col">Description</th><th scope="col">Database column(s)</th></tr></thead><tbody>
+    <tr><td>Property ID</td><td>Internal primary key identifying the property; not the real-estate identifier entered above.</td><td><code>properties.property_id</code></td></tr>
+    <tr><td>Property context type</td><td>Application property context, such as residential or commercial rental; distinct from a property-kind input.</td><td><code>properties.property_context_type</code></td></tr>
+    <tr><td>Thumbnail filename</td><td>Stored thumbnail filename; the image path is resolved from the filename and base path rather than stored as a separate path column.</td><td><code>properties.thumbnail_filename</code></td></tr>
+    <tr><td>Full address</td><td>Address assembled from the model when saved; not an independently editable field.</td><td><code>properties.location_full</code></td></tr>
+    <tr><td>Created at</td><td>Creation timestamp; the schema supplies a default.</td><td><code>properties.created_at</code></td></tr>
+    <tr><td>Updated at</td><td>Last update timestamp; the schema supplies a default and application save operations also write it.</td><td><code>properties.updated_at</code></td></tr>
+  </tbody></table></div>
+  <p>In the fresh schema these columns are <code>NOT NULL</code>: transport times are <code>INTEGER</code> with default 0; other shared values are <code>TEXT</code>, generally defaulting to an empty string. The primary key has no default, and timestamp defaults are SQLite date-time expressions. These storage defaults do not imply that fields are optional or valid in the UI.</p>
+
+  <h2 id="differences">Implementation differences to review</h2>
+  <ul>
+    <li><strong>Commercial identifiers:</strong> the commercial editor accepts 不動産番号 and 特定コード and its load reads the shared columns, but the commercial property upsert omits both columns. Changes to these inputs therefore are not written by that save path. The residential upsert writes both.</li>
+    <li><strong>Postal code:</strong> neither location page has a postal-code input. The residential upsert writes the address model's postal code; the commercial upsert omits that column.</li>
+    <li><strong>Transportation validation:</strong> the residential controls have digit-cleaning handlers; the commercial controls use numeric input scopes and length limits without those same XAML handlers. Do not assume identical input behavior solely from the shared columns.</li>
+    <li>Property-specific fields, listing fields, contact associations and attachment metadata are outside the shared <code>properties</code> table; see the residential sheet for that editor's mappings.</li>
+  </ul>
+
+  <h2 id="sources">Sources</h2>
+  <ul>
+    <li><code>Src\Infrastructure\DataAccess\DataAccessService.cs</code> — fresh <code>properties</code> schema and residential/commercial property save and load operations.</li>
+    <li><code>Src\Presentation\Features\Rent\Residentials\Views</code> and <code>Src\Presentation\Features\Rent\Commercials\Views</code> — basic, location and transportation pages; corresponding property and transportation view models.</li>
+    <li><code>Src\Domain\Entities\Base\PropertyBase.cs</code> and <code>Src\Domain\ValueObjects\Location\Address.cs</code> — shared domain values and assembled address.</li>
+  </ul>
+</body>
+</html>

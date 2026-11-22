@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Brokers — input and database specification</title>
+  <style>
+    :root { color-scheme: light dark; --background: #ffffff; --text: #20252b; --link: #0053a6; --border: #b9c2ca; --heading-background: #eaf0f5; --notice-background: #fff6e5; --notice-border: #a86500; }
+    body { font-family: system-ui, sans-serif; line-height: 1.5; max-width: 90rem; margin: 0 auto; padding: 1.5rem; color: var(--text); background: var(--background); }
+    h1, h2, h3 { line-height: 1.25; }
+    a { color: var(--link); }
+    nav ul { display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; padding-left: 1.25rem; }
+    .notice { padding: .8rem 1rem; border-left: .3rem solid var(--notice-border); background: var(--notice-background); }
+    .table-wrap { overflow-x: auto; }
+    table { border-collapse: collapse; width: 100%; margin: .75rem 0 1.5rem; }
+    th, td { border: 1px solid var(--border); text-align: left; vertical-align: top; padding: .4rem .6rem; }
+    th { background: var(--heading-background); }
+    td:first-child { min-width: 12rem; }
+    code { overflow-wrap: anywhere; }
+    @media screen and (prefers-color-scheme: dark) { :root { --background: #181c20; --text: #e7ecf0; --link: #8fc5ff; --border: #73808b; --heading-background: #303b45; --notice-background: #42331d; --notice-border: #f0b858; } }
+    @media print { :root { color-scheme: light; } body { max-width: none; padding: 0; } nav { display: none; } tr { break-inside: avoid; } }
+  </style>
+</head>
+<body>
+  <nav aria-label="Index"><a href="index.html">Back to index</a></nav>
+  <h1>Brokers: input and database specification</h1>
+  <p class="notice"><strong>Draft — implementation snapshot, not an approved schema.</strong> This sheet documents broker records and their property/listing associations as of 2026-11-22.</p>
+  <p>The editor's person kind, name, contact, address and remarks inputs are documented in the <a href="common-person-spec.html">common person specification</a>. Their broker columns are in <code>brokers</code>. See also <a href="rent-lessors-spec.html">Rent Lessors</a> and <a href="rent-residentials-spec.html#linked">Rent Residentials linked records</a>.</p>
+  <nav aria-label="Contents"><ul><li><a href="#record">Broker record</a></li><li><a href="#links">Property and listing associations</a></li><li><a href="#notes">Notes and sources</a></li></ul></nav>
+
+  <h2 id="record">Broker record</h2>
+  <div class="table-wrap"><table><thead><tr><th scope="col">Field</th><th scope="col">Description</th><th scope="col">Database column</th></tr></thead><tbody>
+    <tr><td>Broker ID</td><td>Internal primary key for the broker; not an editor input.</td><td><code>brokers.broker_id</code></td></tr>
+    <tr><td>Shared person fields</td><td>Natural/legal name, contact details, address and remarks.</td><td>See <a href="common-person-spec.html#name">name</a>, <a href="common-person-spec.html#contact">contact</a>, <a href="common-person-spec.html#address">address</a> and <a href="common-person-spec.html#remarks">remarks and stored values</a>.</td></tr>
+  </tbody></table></div>
+
+  <h2 id="links">Property and listing associations</h2>
+  <p>The association table links a broker to a property or a particular listing. In the residential editor, an empty listing ID denotes a property-level link; an actual listing ID denotes a listing-level link. The same broker can have distinct links at both levels.</p>
+  <div class="table-wrap"><table><thead><tr><th scope="col">Field</th><th scope="col">Description</th><th scope="col">Database column</th></tr></thead><tbody>
+    <tr><td>Broker</td><td>Linked broker ID.</td><td><code>brokers_properties_listings.broker_id</code></td></tr>
+    <tr><td>Property</td><td>Linked property ID.</td><td><code>brokers_properties_listings.property_id</code></td></tr>
+    <tr><td>Property context</td><td>Context of the linked property.</td><td><code>brokers_properties_listings.property_context_type</code></td></tr>
+    <tr><td>Listing</td><td>Linked listing ID, or empty for a property-level link.</td><td><code>brokers_properties_listings.listing_id</code></td></tr>
+  </tbody></table></div>
+  <p>The composite primary key is <code>(broker_id, property_id, listing_id)</code>. The schema declares a cascading foreign key to the broker table; it does not declare property or listing foreign keys.</p>
+
+  <h2 id="notes">Notes and sources</h2>
+  <ul>
+    <li>The broker upsert writes an application timestamp to <code>updated_at</code> on both insert and update; the lessor upsert uses the schema default on insert.</li>
+    <li>Sources: <code>Src\Presentation\Features\Brokers</code>; <code>Src\Infrastructure\DataAccess\DataAccessService.cs</code> broker and association schema and save/load operations.</li>
+  </ul>
+</body>
+</html>

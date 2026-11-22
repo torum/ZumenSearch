@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Common person — input and database specification</title>
+  <style>
+    :root { color-scheme: light dark; --background: #ffffff; --text: #20252b; --link: #0053a6; --border: #b9c2ca; --heading-background: #eaf0f5; --notice-background: #fff6e5; --notice-border: #a86500; }
+    body { font-family: system-ui, sans-serif; line-height: 1.5; max-width: 90rem; margin: 0 auto; padding: 1.5rem; color: var(--text); background: var(--background); }
+    h1, h2, h3 { line-height: 1.25; }
+    a { color: var(--link); }
+    nav ul { display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; padding-left: 1.25rem; }
+    .notice { padding: .8rem 1rem; border-left: .3rem solid var(--notice-border); background: var(--notice-background); }
+    .table-wrap { overflow-x: auto; }
+    table { border-collapse: collapse; width: 100%; margin: .75rem 0 1.5rem; }
+    th, td { border: 1px solid var(--border); text-align: left; vertical-align: top; padding: .4rem .6rem; }
+    th { background: var(--heading-background); }
+    td:first-child { min-width: 12rem; }
+    code { overflow-wrap: anywhere; }
+    @media screen and (prefers-color-scheme: dark) { :root { --background: #181c20; --text: #e7ecf0; --link: #8fc5ff; --border: #73808b; --heading-background: #303b45; --notice-background: #42331d; --notice-border: #f0b858; } }
+    @media print { :root { color-scheme: light; } body { max-width: none; padding: 0; } nav { display: none; } tr { break-inside: avoid; } }
+  </style>
+</head>
+<body>
+  <nav aria-label="Index"><a href="index.html">Back to index</a></nav>
+  <h1>Common person: input and database specification</h1>
+  <p class="notice"><strong>Draft — implementation snapshot, not an approved schema.</strong> This sheet documents the fields shared by the rental lessor and broker editors as of 2026-11-22. Japanese labels are taken from the UI; descriptions are in English. No generalization to other person types is implied.</p>
+  <p>Each row identifies columns in two separate tables. A lessor is stored in <code>rent_lessors</code>; a broker is stored in <code>brokers</code>. These are not a shared database row. See the <a href="rent-lessors-spec.html">lessor</a> and <a href="brokers-spec.html">broker</a> sheets for IDs and associations.</p>
+  <nav aria-label="Contents"><ul><li><a href="#name">Person and name</a></li><li><a href="#contact">Contact</a></li><li><a href="#address">Address</a></li><li><a href="#remarks">Remarks and stored values</a></li><li><a href="#notes">Notes and sources</a></li></ul></nav>
+
+  <h2 id="name">Person and name</h2>
+  <div class="table-wrap"><table><thead><tr><th scope="col">Input field</th><th scope="col">Description</th><th scope="col">Database columns (lessor; broker)</th></tr></thead><tbody>
+    <tr><td>個人 / 法人</td><td>Choose a natural person or legal entity; determines which name and contact inputs are shown.</td><td><code>rent_lessors.person_kind</code>; <code>brokers.person_kind</code></td></tr>
+    <tr><td>姓</td><td>Natural person's family name; marked required.</td><td><code>rent_lessors.name_last</code>; <code>brokers.name_last</code></td></tr>
+    <tr><td>名</td><td>Natural person's given name.</td><td><code>rent_lessors.name_first</code>; <code>brokers.name_first</code></td></tr>
+    <tr><td>会社名</td><td>Legal entity's company name; marked required.</td><td><code>rent_lessors.name_company</code>; <code>brokers.name_company</code></td></tr>
+    <tr><td>法人格</td><td>Company legal form, for example 株式会社.</td><td><code>rent_lessors.name_company_type</code>; <code>brokers.name_company_type</code></td></tr>
+    <tr><td>法人格の位置</td><td>Legal form before or after the company name: 前付け / 後付け.</td><td><code>rent_lessors.name_company_type_position</code>; <code>brokers.name_company_type_position</code></td></tr>
+    <tr><td>Display name (derived)</td><td>Combined name assembled from the selected person type's name inputs; not a separate input.</td><td><code>rent_lessors.name</code>; <code>brokers.name</code></td></tr>
+  </tbody></table></div>
+  <p>On save, each path clears the fields belonging to the other person type, including mobile number for legal entities and contact name for natural persons. The position control uses selected index 0 for 前付け and 1 for 後付け.</p>
+
+  <h2 id="contact">Contact</h2>
+  <div class="table-wrap"><table><thead><tr><th scope="col">Input field</th><th scope="col">Description</th><th scope="col">Database columns (lessor; broker)</th></tr></thead><tbody>
+    <tr><td>固定電話番号</td><td>Landline number.</td><td><code>rent_lessors.phone_number</code>; <code>brokers.phone_number</code></td></tr>
+    <tr><td>携帯電話番号</td><td>Mobile number; shown for a natural person.</td><td><code>rent_lessors.mobile_phone_number</code>; <code>brokers.mobile_phone_number</code></td></tr>
+    <tr><td>担当者名</td><td>Contact person's name; shown for a legal entity.</td><td><code>rent_lessors.contact_name</code>; <code>brokers.contact_name</code></td></tr>
+  </tbody></table></div>
+
+  <h2 id="address">Address</h2>
+  <p>These are person addresses, not property addresses: their table columns and persistence are separate from the <a href="common-property-spec.html#location">common property location</a>.</p>
+  <div class="table-wrap"><table><thead><tr><th scope="col">Input field</th><th scope="col">Description</th><th scope="col">Database columns (lessor; broker)</th></tr></thead><tbody>
+    <tr><td>郵便番号</td><td>Postal code.</td><td><code>rent_lessors.location_postal_code</code>; <code>brokers.location_postal_code</code></td></tr>
+    <tr><td>都道府県</td><td>Selected prefecture name.</td><td><code>rent_lessors.location_prefecture</code>; <code>brokers.location_prefecture</code></td></tr>
+    <tr><td>郡+市区町村</td><td>Selected county and city.</td><td><code>rent_lessors.location_county</code>, <code>rent_lessors.location_city</code>; <code>brokers.location_county</code>, <code>brokers.location_city</code></td></tr>
+    <tr><td>政令市区+大字・町名</td><td>Selected ward and town area.</td><td><code>rent_lessors.location_ward</code>, <code>rent_lessors.location_oaza</code>; <code>brokers.location_ward</code>, <code>brokers.location_oaza</code></td></tr>
+    <tr><td>丁目</td><td>Selected chōme.</td><td><code>rent_lessors.location_choume</code>; <code>brokers.location_choume</code></td></tr>
+    <tr><td>小字・番地以下</td><td>Remaining address, such as block and building numbers.</td><td><code>rent_lessors.location_edaban</code>; <code>brokers.location_edaban</code></td></tr>
+    <tr><td>住所プレビュー</td><td>Read-only address assembled from selected parts; the editor copies the preview to the person address when saving.</td><td><code>rent_lessors.location_full</code>; <code>brokers.location_full</code></td></tr>
+    <tr><td>Machiaza ID (derived)</td><td>Selected chōme, town or city ID, in that priority order; not a separate input.</td><td><code>rent_lessors.location_machiaza_id</code>; <code>brokers.location_machiaza_id</code></td></tr>
+  </tbody></table></div>
+
+  <h2 id="remarks">Remarks and stored values</h2>
+  <div class="table-wrap"><table><thead><tr><th scope="col">Field</th><th scope="col">Description</th><th scope="col">Database columns (lessor; broker)</th></tr></thead><tbody>
+    <tr><td>備考</td><td>Free-text remarks.</td><td><code>rent_lessors.remarks</code>; <code>brokers.remarks</code></td></tr>
+    <tr><td>Created at</td><td>System-managed creation timestamp; supplied by the schema on insert.</td><td><code>rent_lessors.created_at</code>; <code>brokers.created_at</code></td></tr>
+    <tr><td>Updated at</td><td>System-managed update timestamp; see the role-specific sheets for save-path differences.</td><td><code>rent_lessors.updated_at</code>; <code>brokers.updated_at</code></td></tr>
+  </tbody></table></div>
+
+  <h2 id="notes">Notes and sources</h2>
+  <ul>
+    <li>Person kind is stored as enum text; legal-form position is stored as an integer. Names and addresses have both component columns and assembled display values.</li>
+    <li>Fields in the fresh schema are <code>NOT NULL</code>; column defaults are storage defaults, not a statement of UI validation. The broker <code>person_kind</code> column has no default, unlike the lessor column.</li>
+    <li>Sources: <code>Src\Presentation\Features\Rent\Lessors\Views\BasicPage.xaml</code>, <code>Src\Presentation\Features\Brokers\Views\BasicPage.xaml</code> and their view models; <code>Src\Infrastructure\DataAccess\DataAccessService.cs</code> schema and person save/load paths.</li>
+  </ul>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ZumenSearch specifications</title>
+  <style>
+    :root { color-scheme: light dark; --background: #ffffff; --text: #20252b; --link: #0053a6; --notice-background: #fff6e5; --notice-border: #a86500; }
+    body { font-family: system-ui, sans-serif; line-height: 1.5; max-width: 90rem; margin: 0 auto; padding: 1.5rem; color: var(--text); background: var(--background); }
+    h1, h2 { line-height: 1.25; }
+    a { color: var(--link); }
+    .notice { padding: .8rem 1rem; border-left: .3rem solid var(--notice-border); background: var(--notice-background); }
+    li { margin: .5rem 0; }
+    @media screen and (prefers-color-scheme: dark) { :root { --background: #181c20; --text: #e7ecf0; --link: #8fc5ff; --notice-background: #42331d; --notice-border: #f0b858; } }
+    @media print { :root { color-scheme: light; } body { max-width: none; padding: 0; } }
+  </style>
+</head>
+<body>
+  <h1>ZumenSearch specifications</h1>
+  <p class="notice"><strong>Drafts.</strong> These sheets describe the current implementation and are not finalized database schemas.</p>
+  <h2>Common specifications</h2>
+  <ul>
+    <li><a href="common-property-spec.html">Common property</a> — shared identification, location, transportation and system fields.</li>
+    <li><a href="common-person-spec.html">Common person</a> — name, contact and address fields shared by lessors and brokers.</li>
+  </ul>
+  <h2>Feature specifications</h2>
+  <ul>
+    <li><a href="rent-residentials-spec.html">Rent Residentials</a> — property and listing fields, facilities and linked records.</li>
+    <li><a href="rent-commercials-spec.html">Rent Commercials</a> — pre-rewrite snapshot of property and listing fields.</li>
+    <li><a href="rent-parkings-spec.html">Rent Parkings</a> — planned specification placeholder.</li>
+    <li><a href="rent-lessors-spec.html">Rent Lessors</a> — lessor records and property/listing associations.</li>
+    <li><a href="sale-residentials-spec.html">Sale Residentials</a> — early implementation and schema snapshot.</li>
+    <li><a href="sale-commercials-spec.html">Sale Commercials</a> — planned specification placeholder.</li>
+    <li><a href="brokers-spec.html">Brokers</a> — broker records and property/listing associations.</li>
+  </ul>
+</body>
+</html>
