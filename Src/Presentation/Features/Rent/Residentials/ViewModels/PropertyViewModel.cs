@@ -2174,7 +2174,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
     #region == 貸主プロパティ ==
 
-    public ObservableCollection<ZumenSearch.Presentation.Features.Rent.Residentials.Models.PersonWrapperForPropertyViewModel> LessorsWrapper
+    public ObservableCollection<ZumenSearch.Presentation.Features.Rent.Residentials.ViewModels.PropertyPersonViewModel> LessorsWrapper
     {
         get;
         set
@@ -2190,7 +2190,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
     #region == 宅建業者プロパティ ==
 
-    public ObservableCollection<ZumenSearch.Presentation.Features.Rent.Residentials.Models.PersonWrapperForPropertyViewModel> BrokersWrapper
+    public ObservableCollection<ZumenSearch.Presentation.Features.Rent.Residentials.ViewModels.PropertyPersonViewModel> BrokersWrapper
     {
         get;
         set
@@ -2300,7 +2300,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
         if (psn.Person.GetType() != lessor.GetType())
         {
-            LessorsWrapper[LessorsWrapper.IndexOf(psn)] = new PersonWrapperForPropertyViewModel(lessor, this);
+            LessorsWrapper[LessorsWrapper.IndexOf(psn)] = new PropertyPersonViewModel(lessor, this);
         }
         else
         {
@@ -2321,7 +2321,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
         if (psn.Person.GetType() != broker.GetType())
         {
-            BrokersWrapper[BrokersWrapper.IndexOf(psn)] = new PersonWrapperForPropertyViewModel(broker, this);
+            BrokersWrapper[BrokersWrapper.IndexOf(psn)] = new PropertyPersonViewModel(broker, this);
         }
         else
         {
@@ -2764,14 +2764,14 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             LessorsWrapper = [];
             foreach (var item in _property.Lessors)
             {
-                LessorsWrapper.Add(new ZumenSearch.Presentation.Features.Rent.Residentials.Models.PersonWrapperForPropertyViewModel(item, this));
+                LessorsWrapper.Add(new ZumenSearch.Presentation.Features.Rent.Residentials.ViewModels.PropertyPersonViewModel(item, this));
             }
 
             // Brokers
             BrokersWrapper = [];
             foreach (var item in _property.Brokers)
             {
-                BrokersWrapper.Add(new ZumenSearch.Presentation.Features.Rent.Residentials.Models.PersonWrapperForPropertyViewModel(item, this));
+                BrokersWrapper.Add(new ZumenSearch.Presentation.Features.Rent.Residentials.ViewModels.PropertyPersonViewModel(item, this));
             }
 
             ListingSummaries = new ObservableCollection<ListingSummary>(_property.ListingSummaries);
@@ -4503,7 +4503,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
             foreach (var deleted in _property.LessorsToBeDeleted.Where(person => person.Id == res.Person.Id).ToList()) _property.LessorsToBeDeleted.Remove(deleted);
 
-            var lessorWrapper = new ZumenSearch.Presentation.Features.Rent.Residentials.Models.PersonWrapperForPropertyViewModel(res.Person, this);
+            var lessorWrapper = new ZumenSearch.Presentation.Features.Rent.Residentials.ViewModels.PropertyPersonViewModel(res.Person, this);
             LessorsWrapper.Add(lessorWrapper);
 
             IsDirty = true;
@@ -4515,7 +4515,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
     }
 
     [RelayCommand(CanExecute = nameof(CanEditLessor))]
-    private void EditLessor(ZumenSearch.Presentation.Features.Rent.Residentials.Models.PersonWrapperForPropertyViewModel lessor)
+    private void EditLessor(ZumenSearch.Presentation.Features.Rent.Residentials.ViewModels.PropertyPersonViewModel lessor)
     {
         if (lessor.Person is not null)
         {
@@ -4526,13 +4526,13 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             }
         }
     }
-    private static bool CanEditLessor(ZumenSearch.Presentation.Features.Rent.Residentials.Models.PersonWrapperForPropertyViewModel lessor)
+    private static bool CanEditLessor(ZumenSearch.Presentation.Features.Rent.Residentials.ViewModels.PropertyPersonViewModel lessor)
     {
         return lessor is not null;
     }
 
     [RelayCommand(CanExecute = nameof(CanDeleteLessor))]
-    public async Task DeleteLessor(ZumenSearch.Presentation.Features.Rent.Residentials.Models.PersonWrapperForPropertyViewModel lessor)
+    public async Task DeleteLessor(ZumenSearch.Presentation.Features.Rent.Residentials.ViewModels.PropertyPersonViewModel lessor)
     {
         if (lessor is null)
         {
@@ -4552,7 +4552,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             if (!_property.LessorsToBeDeleted.Any(person => person.Id == lessor.Person.Id)) _property.LessorsToBeDeleted.Add(lessor.Person);
         }
     }
-    private static bool CanDeleteLessor(ZumenSearch.Presentation.Features.Rent.Residentials.Models.PersonWrapperForPropertyViewModel lessor)
+    private static bool CanDeleteLessor(ZumenSearch.Presentation.Features.Rent.Residentials.ViewModels.PropertyPersonViewModel lessor)
     {
         return lessor is not null;
     }
@@ -4617,7 +4617,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
             foreach (var deleted in _property.BrokersToBeDeleted.Where(person => person.Id == res.Person.Id).ToList()) _property.BrokersToBeDeleted.Remove(deleted);
 
-            BrokersWrapper.Add(new ZumenSearch.Presentation.Features.Rent.Residentials.Models.PersonWrapperForPropertyViewModel(res.Person, this));
+            BrokersWrapper.Add(new ZumenSearch.Presentation.Features.Rent.Residentials.ViewModels.PropertyPersonViewModel(res.Person, this));
 
             IsDirty = true;
         }
@@ -4628,7 +4628,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
     }
 
     [RelayCommand(CanExecute = nameof(CanEditBroker))]
-    private void EditBroker(ZumenSearch.Presentation.Features.Rent.Residentials.Models.PersonWrapperForPropertyViewModel broker)
+    private void EditBroker(ZumenSearch.Presentation.Features.Rent.Residentials.ViewModels.PropertyPersonViewModel broker)
     {
         if (broker.Person is not null)
         {
@@ -4639,13 +4639,13 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             }
         }
     }
-    private static bool CanEditBroker(ZumenSearch.Presentation.Features.Rent.Residentials.Models.PersonWrapperForPropertyViewModel broker)
+    private static bool CanEditBroker(ZumenSearch.Presentation.Features.Rent.Residentials.ViewModels.PropertyPersonViewModel broker)
     {
         return broker is not null;
     }
 
     [RelayCommand(CanExecute = nameof(CanDeleteBroker))]
-    public async Task DeleteBroker(ZumenSearch.Presentation.Features.Rent.Residentials.Models.PersonWrapperForPropertyViewModel broker)
+    public async Task DeleteBroker(ZumenSearch.Presentation.Features.Rent.Residentials.ViewModels.PropertyPersonViewModel broker)
     {
         if (broker is null)
         {
@@ -4667,7 +4667,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             if (!_property.BrokersToBeDeleted.Any(person => person.Id == broker.Person.Id)) _property.BrokersToBeDeleted.Add(broker.Person);
         }
     }
-    private static bool CanDeleteBroker(ZumenSearch.Presentation.Features.Rent.Residentials.Models.PersonWrapperForPropertyViewModel broker)
+    private static bool CanDeleteBroker(ZumenSearch.Presentation.Features.Rent.Residentials.ViewModels.PropertyPersonViewModel broker)
     {
         return broker is not null;
     }

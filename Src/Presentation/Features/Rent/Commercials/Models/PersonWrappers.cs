@@ -47,7 +47,7 @@ public sealed partial class Person : PersonBase
 */
 
 // WinUI3 workaround. (to access viewmodel from inside itemrepeater's DataTemplate)
-public sealed partial class PersonWrapperForPropertyViewModel : ObservableObject // needs to be Observable in order to update Person value.
+public sealed partial class PropertyPersonViewModel : ObservableObject // needs to be Observable in order to update Person value.
 {
     public ZumenSearch.Presentation.Features.Rent.Commercials.ViewModels.PropertyViewModel ParentViewModel { get;  }
 
@@ -58,12 +58,12 @@ public sealed partial class PersonWrapperForPropertyViewModel : ObservableObject
         {
             if (SetProperty(ref field, value))
             {
-                //Debug.WriteLine("PersonWrapperForPropertyViewModel's Person updated");
+                //Debug.WriteLine("PropertyPersonViewModel's Person updated");
             }
         }
     }
 
-    public PersonWrapperForPropertyViewModel(ZumenSearch.Domain.Entities.Base.PersonBase person, ZumenSearch.Presentation.Features.Rent.Commercials.ViewModels.PropertyViewModel parentPropertyViewModel)
+    public PropertyPersonViewModel(ZumenSearch.Domain.Entities.Base.PersonBase person, ZumenSearch.Presentation.Features.Rent.Commercials.ViewModels.PropertyViewModel parentPropertyViewModel)
     {
         Person = person;
         ParentViewModel = parentPropertyViewModel;
@@ -71,7 +71,7 @@ public sealed partial class PersonWrapperForPropertyViewModel : ObservableObject
 }
 
 // WinUI3 workaround. (to access viewmodel from inside itemrepeater's DataTemplate)
-public sealed partial class PersonWrapperForListingViewModel : ObservableObject // needs to be Observable in order to update Person value.
+public sealed partial class ListingPersonViewModel : ObservableObject // needs to be Observable in order to update Person value.
 {
     public ZumenSearch.Presentation.Features.Rent.Commercials.ViewModels.ListingViewModel ParentViewModel { get; }
 
@@ -82,12 +82,12 @@ public sealed partial class PersonWrapperForListingViewModel : ObservableObject 
         {
             if (SetProperty(ref field, value))
             {
-                //Debug.WriteLine("PersonWrapperForListingViewModel's Person updated");
+                //Debug.WriteLine("ListingPersonViewModel's Person updated");
             }
         }
     }
 
-    public PersonWrapperForListingViewModel(ZumenSearch.Domain.Entities.Base.PersonBase person, ZumenSearch.Presentation.Features.Rent.Commercials.ViewModels.ListingViewModel parentListingViewModel)
+    public ListingPersonViewModel(ZumenSearch.Domain.Entities.Base.PersonBase person, ZumenSearch.Presentation.Features.Rent.Commercials.ViewModels.ListingViewModel parentListingViewModel)
     {
         Person = person;
         ParentViewModel = parentListingViewModel;

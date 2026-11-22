@@ -14,8 +14,8 @@ public sealed partial class ListingViewModel
     private readonly List<ZumenSearch.Domain.Entities.Base.PersonBase> _draftLessorDeletions = [];
     private readonly List<ZumenSearch.Domain.Entities.Base.PersonBase> _draftBrokerDeletions = [];
 
-    public ObservableCollection<ZumenSearch.Presentation.Features.Rent.Commercials.Models.PersonWrapperForListingViewModel> LessorsWrapper { get; } = [];
-    public ObservableCollection<ZumenSearch.Presentation.Features.Rent.Commercials.Models.PersonWrapperForListingViewModel> BrokersWrapper { get; } = [];
+    public ObservableCollection<ZumenSearch.Presentation.Features.Rent.Commercials.Models.ListingPersonViewModel> LessorsWrapper { get; } = [];
+    public ObservableCollection<ZumenSearch.Presentation.Features.Rent.Commercials.Models.ListingPersonViewModel> BrokersWrapper { get; } = [];
 
     private bool HasPendingAssociationEdits()
     {
@@ -57,13 +57,13 @@ public sealed partial class ListingViewModel
         LessorsWrapper.Clear();
         foreach (var lessor in _unit.Lessors)
         {
-            LessorsWrapper.Add(new ZumenSearch.Presentation.Features.Rent.Commercials.Models.PersonWrapperForListingViewModel(lessor, this));
+            LessorsWrapper.Add(new ZumenSearch.Presentation.Features.Rent.Commercials.Models.ListingPersonViewModel(lessor, this));
         }
 
         BrokersWrapper.Clear();
         foreach (var broker in _unit.Brokers)
         {
-            BrokersWrapper.Add(new ZumenSearch.Presentation.Features.Rent.Commercials.Models.PersonWrapperForListingViewModel(broker, this));
+            BrokersWrapper.Add(new ZumenSearch.Presentation.Features.Rent.Commercials.Models.ListingPersonViewModel(broker, this));
         }
     }
 
@@ -140,7 +140,7 @@ public sealed partial class ListingViewModel
             if (LessorsWrapper.Any(item => item.Person.Id.Equals(lessor.Id, StringComparison.Ordinal))) return;
 
             _draftLessorDeletions.RemoveAll(person => person.Id.Equals(lessor.Id, StringComparison.Ordinal));
-            LessorsWrapper.Add(new ZumenSearch.Presentation.Features.Rent.Commercials.Models.PersonWrapperForListingViewModel(lessor, this));
+            LessorsWrapper.Add(new ZumenSearch.Presentation.Features.Rent.Commercials.Models.ListingPersonViewModel(lessor, this));
             MarkEdited();
         }
         finally
@@ -152,16 +152,16 @@ public sealed partial class ListingViewModel
     }
 
     [RelayCommand(CanExecute = nameof(CanEditLessor))]
-    private async Task EditLessor(ZumenSearch.Presentation.Features.Rent.Commercials.Models.PersonWrapperForListingViewModel? wrapper)
+    private async Task EditLessor(ZumenSearch.Presentation.Features.Rent.Commercials.Models.ListingPersonViewModel? wrapper)
     {
         if (wrapper?.Person is null || !IsEditorEnabled) return;
         await App.GetService<ZumenSearch.Presentation.Shell.ViewModels.MainViewModel>().EditRentLessorCommand.ExecuteAsync(wrapper.Person);
     }
 
-    private static bool CanEditLessor(ZumenSearch.Presentation.Features.Rent.Commercials.Models.PersonWrapperForListingViewModel? wrapper) => wrapper?.Person is not null;
+    private static bool CanEditLessor(ZumenSearch.Presentation.Features.Rent.Commercials.Models.ListingPersonViewModel? wrapper) => wrapper?.Person is not null;
 
     [RelayCommand]
-    private void DeleteLessor(ZumenSearch.Presentation.Features.Rent.Commercials.Models.PersonWrapperForListingViewModel? wrapper)
+    private void DeleteLessor(ZumenSearch.Presentation.Features.Rent.Commercials.Models.ListingPersonViewModel? wrapper)
     {
         if (wrapper?.Person is not { } lessor || !IsEditorEnabled || !LessorsWrapper.Remove(wrapper)) return;
         if (!_draftLessorDeletions.Any(person => person.Id.Equals(lessor.Id, StringComparison.Ordinal))) _draftLessorDeletions.Add(lessor);
@@ -197,7 +197,7 @@ public sealed partial class ListingViewModel
             if (BrokersWrapper.Any(item => item.Person.Id.Equals(broker.Id, StringComparison.Ordinal))) return;
 
             _draftBrokerDeletions.RemoveAll(person => person.Id.Equals(broker.Id, StringComparison.Ordinal));
-            BrokersWrapper.Add(new ZumenSearch.Presentation.Features.Rent.Commercials.Models.PersonWrapperForListingViewModel(broker, this));
+            BrokersWrapper.Add(new ZumenSearch.Presentation.Features.Rent.Commercials.Models.ListingPersonViewModel(broker, this));
             MarkEdited();
         }
         finally
@@ -209,16 +209,16 @@ public sealed partial class ListingViewModel
     }
 
     [RelayCommand(CanExecute = nameof(CanEditBroker))]
-    private async Task EditBroker(ZumenSearch.Presentation.Features.Rent.Commercials.Models.PersonWrapperForListingViewModel? wrapper)
+    private async Task EditBroker(ZumenSearch.Presentation.Features.Rent.Commercials.Models.ListingPersonViewModel? wrapper)
     {
         if (wrapper?.Person is null || !IsEditorEnabled) return;
         await App.GetService<ZumenSearch.Presentation.Shell.ViewModels.MainViewModel>().EditBrokerCommand.ExecuteAsync(wrapper.Person);
     }
 
-    private static bool CanEditBroker(ZumenSearch.Presentation.Features.Rent.Commercials.Models.PersonWrapperForListingViewModel? wrapper) => wrapper?.Person is not null;
+    private static bool CanEditBroker(ZumenSearch.Presentation.Features.Rent.Commercials.Models.ListingPersonViewModel? wrapper) => wrapper?.Person is not null;
 
     [RelayCommand]
-    private void DeleteBroker(ZumenSearch.Presentation.Features.Rent.Commercials.Models.PersonWrapperForListingViewModel? wrapper)
+    private void DeleteBroker(ZumenSearch.Presentation.Features.Rent.Commercials.Models.ListingPersonViewModel? wrapper)
     {
         if (wrapper?.Person is not { } broker || !IsEditorEnabled || !BrokersWrapper.Remove(wrapper)) return;
         if (!_draftBrokerDeletions.Any(person => person.Id.Equals(broker.Id, StringComparison.Ordinal))) _draftBrokerDeletions.Add(broker);

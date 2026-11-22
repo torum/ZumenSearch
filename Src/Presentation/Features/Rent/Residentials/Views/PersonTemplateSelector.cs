@@ -10,7 +10,7 @@ public partial class PersonTemplateSelector : DataTemplateSelector
 
     protected override DataTemplate? SelectTemplateCore(object item)
     {
-        if (item is ZumenSearch.Presentation.Features.Rent.Residentials.Models.PersonWrapperForPropertyViewModel lessor)
+        if (item is ZumenSearch.Presentation.Features.Rent.Residentials.ViewModels.PropertyPersonViewModel lessor)
         {
             if (lessor.Person is ZumenSearch.Domain.Entities.Person.PersonNatural)
             {
@@ -21,7 +21,7 @@ public partial class PersonTemplateSelector : DataTemplateSelector
                 return LegalTemplate;
             }
         }
-        else if (item is ZumenSearch.Presentation.Features.Rent.Residentials.Models.PersonWrapperForListingViewModel listingPerson)
+        else if (item is ZumenSearch.Presentation.Features.Rent.Residentials.ViewModels.ListingPersonViewModel listingPerson)
         {
             if (listingPerson.Person is ZumenSearch.Domain.Entities.Person.PersonNatural)
             {

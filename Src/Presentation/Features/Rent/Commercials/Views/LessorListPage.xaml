@@ -12,7 +12,7 @@
     NavigationCacheMode="Required">
     <Page.Resources>
         <!-- DataTemplate for NaturalPerson -->
-        <DataTemplate x:Key="NaturalPersonTemplate" x:DataType="modcommercials:PersonWrapperForPropertyViewModel">
+        <DataTemplate x:Key="NaturalPersonTemplate" x:DataType="modcommercials:PropertyPersonViewModel">
             <Border Style="{StaticResource RoundCardBorderStyle}">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -37,7 +37,7 @@
         </DataTemplate>
 
         <!-- DataTemplate for LegalPerson -->
-        <DataTemplate x:Key="LegalPersonTemplate" x:DataType="modcommercials:PersonWrapperForPropertyViewModel">
+        <DataTemplate x:Key="LegalPersonTemplate" x:DataType="modcommercials:PropertyPersonViewModel">
             <Border Style="{StaticResource RoundCardBorderStyle}">
                 <Grid>
                     <Grid.ColumnDefinitions>

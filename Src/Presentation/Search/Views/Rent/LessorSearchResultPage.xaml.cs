@@ -3,19 +3,11 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
-using System.Diagnostics;
 using ZumenSearch.Domain.Enums;
-using ZumenSearch.Application.Configuration;
-using ZumenSearch.Application.Results;
-using ZumenSearch.Presentation.Shell.Models;
-using ZumenSearch.Domain.Entities.Person;
-
-
-using ZumenSearch.Infrastructure.Configuration.Contracts;
-using ZumenSearch.Infrastructure.DataAccess.Contracts;
-using ZumenSearch.Presentation.Services.Contracts;
-using ZumenSearch.Presentation.Shell.ViewModels;
 using ZumenSearch.Presentation.Search.ViewModels;
+using ZumenSearch.Presentation.Services.Contracts;
+using ZumenSearch.Presentation.Shell.Models;
+using ZumenSearch.Presentation.Shell.ViewModels;
 
 namespace ZumenSearch.Presentation.Search.Views.Rent;
 
@@ -26,7 +18,7 @@ public partial class PersonTemplateSelector : DataTemplateSelector
 
     protected override DataTemplate? SelectTemplateCore(object item)
     {
-        if (item is ZumenSearch.Presentation.Features.Rent.Residentials.Models.PersonWrapperForPropertyViewModel lessor)
+        if (item is ZumenSearch.Presentation.Features.Rent.Residentials.ViewModels.PropertyPersonViewModel lessor)
         {
             if (lessor.Person is ZumenSearch.Domain.Entities.Person.PersonNatural)
             {

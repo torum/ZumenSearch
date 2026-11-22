@@ -6,7 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:mod="using:ZumenSearch.Presentation.Shell.Models"
     xmlns:modperson="using:ZumenSearch.Domain.Entities.Person"
-    xmlns:modresidencial="using:ZumenSearch.Presentation.Features.Rent.Residentials.Models"
+    xmlns:modresidencial="using:ZumenSearch.Presentation.Features.Rent.Residentials.ViewModels"
     xmlns:local="using:ZumenSearch.Presentation.Features.Rent.Residentials.Views"
     mc:Ignorable="d"
     NavigationCacheMode="Required">
@@ -20,7 +20,7 @@
             <Setter Property="MinHeight" Value="20"/>
         </Style>
 
-        <DataTemplate x:Key="NaturalBrokerTemplate" x:DataType="modresidencial:PersonWrapperForPropertyViewModel">
+        <DataTemplate x:Key="NaturalBrokerTemplate" x:DataType="modresidencial:PropertyPersonViewModel">
             <Border Style="{StaticResource RoundCardBorderStyle}">
                 <Grid RowSpacing="16">
                     <VisualStateManager.VisualStateGroups>
@@ -71,7 +71,7 @@
             </Border>
         </DataTemplate>
 
-        <DataTemplate x:Key="LegalBrokerTemplate" x:DataType="modresidencial:PersonWrapperForPropertyViewModel">
+        <DataTemplate x:Key="LegalBrokerTemplate" x:DataType="modresidencial:PropertyPersonViewModel">
             <Border Style="{StaticResource RoundCardBorderStyle}">
                 <Grid RowSpacing="16">
                     <VisualStateManager.VisualStateGroups>

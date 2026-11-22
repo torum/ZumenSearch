@@ -15,7 +15,7 @@ public partial class PersonTemplateSelector : DataTemplateSelector
 
     protected override DataTemplate? SelectTemplateCore(object item)
     {
-        if (item is ZumenSearch.Presentation.Features.Rent.Commercials.Models.PersonWrapperForPropertyViewModel lessor)
+        if (item is ZumenSearch.Presentation.Features.Rent.Commercials.Models.PropertyPersonViewModel lessor)
         {
             if (lessor.Person is ZumenSearch.Domain.Entities.Person.PersonNatural)
             {

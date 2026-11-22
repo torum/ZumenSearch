@@ -10,7 +10,7 @@
         <ScrollViewer Grid.Row="1" HorizontalScrollMode="Disabled">
             <ItemsRepeater ItemsSource="{x:Bind ViewModel.LessorsWrapper, Mode=OneWay}" MinWidth="300" MinHeight="225" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                 <ItemsRepeater.ItemTemplate>
-                    <DataTemplate x:DataType="models:PersonWrapperForListingViewModel">
+                    <DataTemplate x:DataType="models:ListingPersonViewModel">
                         <Border Style="{StaticResource RoundCardBorderStyle}">
                             <Grid>
                                 <Grid.ColumnDefinitions>

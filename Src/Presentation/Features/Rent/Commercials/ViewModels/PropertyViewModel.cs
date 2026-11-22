@@ -1060,7 +1060,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     #region == lessors ==
 
-    public ObservableCollection<ZumenSearch.Presentation.Features.Rent.Commercials.Models.PersonWrapperForPropertyViewModel> LessorsWrapper
+    public ObservableCollection<ZumenSearch.Presentation.Features.Rent.Commercials.Models.PropertyPersonViewModel> LessorsWrapper
     {
         get;
         set
@@ -1076,7 +1076,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     #region == brokers ==
 
-    public ObservableCollection<ZumenSearch.Presentation.Features.Rent.Commercials.Models.PersonWrapperForPropertyViewModel> BrokersWrapper
+    public ObservableCollection<ZumenSearch.Presentation.Features.Rent.Commercials.Models.PropertyPersonViewModel> BrokersWrapper
     {
         get;
         set
@@ -1203,7 +1203,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
         if ((wrapper.Person is ZumenSearch.Domain.Entities.Person.PersonLegal) != (lessor is ZumenSearch.Domain.Entities.Person.PersonLegal))
         {
-            LessorsWrapper[LessorsWrapper.IndexOf(wrapper)] = new ZumenSearch.Presentation.Features.Rent.Commercials.Models.PersonWrapperForPropertyViewModel(lessor, this);
+            LessorsWrapper[LessorsWrapper.IndexOf(wrapper)] = new ZumenSearch.Presentation.Features.Rent.Commercials.Models.PropertyPersonViewModel(lessor, this);
         }
         else
         {
@@ -1617,7 +1617,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         foreach (var person in _building.Lessors)
         {
             LessorsWrapper.Add(
-                new ZumenSearch.Presentation.Features.Rent.Commercials.Models.PersonWrapperForPropertyViewModel(
+                new ZumenSearch.Presentation.Features.Rent.Commercials.Models.PropertyPersonViewModel(
                     person,
                     this));
         }
@@ -1627,7 +1627,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         foreach (var person in _building.Brokers)
         {
             BrokersWrapper.Add(
-                new ZumenSearch.Presentation.Features.Rent.Commercials.Models.PersonWrapperForPropertyViewModel(
+                new ZumenSearch.Presentation.Features.Rent.Commercials.Models.PropertyPersonViewModel(
                     person,
                     this));
         }
@@ -2968,7 +2968,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             if (LessorsWrapper.Any(item => item.Person.Id == person.Id)) return;
 
             foreach (var removed in _building.LessorsToBeDeleted.Where(item => item.Id == person.Id).ToList()) _building.LessorsToBeDeleted.Remove(removed);
-            LessorsWrapper.Add(new ZumenSearch.Presentation.Features.Rent.Commercials.Models.PersonWrapperForPropertyViewModel(person, this));
+            LessorsWrapper.Add(new ZumenSearch.Presentation.Features.Rent.Commercials.Models.PropertyPersonViewModel(person, this));
             IsDirty = true;
         }
         finally
@@ -2980,7 +2980,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     }
 
     [RelayCommand]
-    private void DeleteLessor(ZumenSearch.Presentation.Features.Rent.Commercials.Models.PersonWrapperForPropertyViewModel wrapper)
+    private void DeleteLessor(ZumenSearch.Presentation.Features.Rent.Commercials.Models.PropertyPersonViewModel wrapper)
     {
         if (wrapper is null || !IsEditorEnabled) return;
 
@@ -2992,7 +2992,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     }
 
     [RelayCommand(CanExecute = nameof(CanEditLessor))]
-    private async Task EditLessor(ZumenSearch.Presentation.Features.Rent.Commercials.Models.PersonWrapperForPropertyViewModel wrapper)
+    private async Task EditLessor(ZumenSearch.Presentation.Features.Rent.Commercials.Models.PropertyPersonViewModel wrapper)
     {
         if (wrapper?.Person is null)
         {
@@ -3005,7 +3005,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             .ExecuteAsync(wrapper.Person);
     }
 
-    private static bool CanEditLessor(ZumenSearch.Presentation.Features.Rent.Commercials.Models.PersonWrapperForPropertyViewModel? wrapper)
+    private static bool CanEditLessor(ZumenSearch.Presentation.Features.Rent.Commercials.Models.PropertyPersonViewModel? wrapper)
     {
         return wrapper?.Person is not null;
     }
@@ -3044,7 +3044,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             if (BrokersWrapper.Any(item => item.Person.Id == person.Id)) return;
 
             foreach (var removed in _building.BrokersToBeDeleted.Where(item => item.Id == person.Id).ToList()) _building.BrokersToBeDeleted.Remove(removed);
-            BrokersWrapper.Add(new ZumenSearch.Presentation.Features.Rent.Commercials.Models.PersonWrapperForPropertyViewModel(person, this));
+            BrokersWrapper.Add(new ZumenSearch.Presentation.Features.Rent.Commercials.Models.PropertyPersonViewModel(person, this));
             IsDirty = true;
         }
         finally
@@ -3056,7 +3056,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     }
 
     [RelayCommand(CanExecute = nameof(CanEditBroker))]
-    private async Task EditBroker(ZumenSearch.Presentation.Features.Rent.Commercials.Models.PersonWrapperForPropertyViewModel wrapper)
+    private async Task EditBroker(ZumenSearch.Presentation.Features.Rent.Commercials.Models.PropertyPersonViewModel wrapper)
     {
         if (wrapper?.Person is null)
         {
@@ -3069,13 +3069,13 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             .ExecuteAsync(wrapper.Person);
     }
 
-    private static bool CanEditBroker(ZumenSearch.Presentation.Features.Rent.Commercials.Models.PersonWrapperForPropertyViewModel? wrapper)
+    private static bool CanEditBroker(ZumenSearch.Presentation.Features.Rent.Commercials.Models.PropertyPersonViewModel? wrapper)
     {
         return wrapper?.Person is not null;
     }
 
     [RelayCommand(CanExecute = nameof(CanDeleteBroker))]
-    private void DeleteBroker(ZumenSearch.Presentation.Features.Rent.Commercials.Models.PersonWrapperForPropertyViewModel wrapper)
+    private void DeleteBroker(ZumenSearch.Presentation.Features.Rent.Commercials.Models.PropertyPersonViewModel wrapper)
     {
         if (wrapper?.Person is not { } person || !IsEditorEnabled) return;
 
@@ -3086,7 +3086,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         }
     }
 
-    private static bool CanDeleteBroker(ZumenSearch.Presentation.Features.Rent.Commercials.Models.PersonWrapperForPropertyViewModel? wrapper)
+    private static bool CanDeleteBroker(ZumenSearch.Presentation.Features.Rent.Commercials.Models.PropertyPersonViewModel? wrapper)
     {
         return wrapper?.Person is not null;
     }
