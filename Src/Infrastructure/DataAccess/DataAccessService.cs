@@ -1664,9 +1664,9 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
                     foreach (var delp in property.PicturesToBeDeleted)
                     {
                         // 削除
-                        var sqlDeleteRentLivingPicture = string.Format(CultureInfo.InvariantCulture, "DELETE FROM rent_residential_pictures WHERE picture_id = '{0}'", delp.Id);
-
-                        cmd.CommandText = sqlDeleteRentLivingPicture;
+                        cmd.Parameters.Clear();
+                        cmd.CommandText = "DELETE FROM rent_residential_pictures WHERE picture_id = @pictureId";
+                        cmd.Parameters.AddWithValue("@pictureId", delp.Id);
                         var DelRentLivingPicResult = cmd.ExecuteNonQuery();
                         if (DelRentLivingPicResult > 0)
                         {
@@ -1729,9 +1729,9 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
                     foreach (var delp in property.PdfsToBeDeleted)
                     {
                         // 削除
-                        var sqlDeleteRentLivingPdf = string.Format(CultureInfo.InvariantCulture, "DELETE FROM rent_residential_pdfs WHERE pdf_id = '{0}'", delp.Id);
-
-                        cmd.CommandText = sqlDeleteRentLivingPdf;
+                        cmd.Parameters.Clear();
+                        cmd.CommandText = "DELETE FROM rent_residential_pdfs WHERE pdf_id = @pdfId";
+                        cmd.Parameters.AddWithValue("@pdfId", delp.Id);
                         var DelRentLivingPdfResult = cmd.ExecuteNonQuery();
                         if (DelRentLivingPdfResult > 0)
                         {
@@ -1778,9 +1778,11 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
                     foreach (var psn in property.LessorsToBeDeleted)
                     {
                         // 削除
-                        var sqlDelete = ($"DELETE FROM rent_lessors_properties_listings WHERE lessor_id = '{psn.Id}' AND property_id = '{property.Id}' AND listing_id = '{string.Empty}'");
-
-                        cmd.CommandText = sqlDelete;
+                        cmd.Parameters.Clear();
+                        cmd.CommandText = "DELETE FROM rent_lessors_properties_listings WHERE lessor_id = @lessorId AND property_id = @propertyId AND listing_id = @listingId";
+                        cmd.Parameters.AddWithValue("@lessorId", psn.Id);
+                        cmd.Parameters.AddWithValue("@propertyId", property.Id);
+                        cmd.Parameters.AddWithValue("@listingId", string.Empty);
                         var sqlResult = cmd.ExecuteNonQuery();
                         if (sqlResult > 0)
                         {
@@ -1824,9 +1826,11 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
                     foreach (var psn in property.BrokersToBeDeleted)
                     {
                         // 削除
-                        var sqlDelete = ($"DELETE FROM brokers_properties_listings WHERE broker_id = '{psn.Id}' AND property_id = '{property.Id}' AND listing_id = '{string.Empty}'");
-
-                        cmd.CommandText = sqlDelete;
+                        cmd.Parameters.Clear();
+                        cmd.CommandText = "DELETE FROM brokers_properties_listings WHERE broker_id = @brokerId AND property_id = @propertyId AND listing_id = @listingId";
+                        cmd.Parameters.AddWithValue("@brokerId", psn.Id);
+                        cmd.Parameters.AddWithValue("@propertyId", property.Id);
+                        cmd.Parameters.AddWithValue("@listingId", string.Empty);
                         var sqlResult = cmd.ExecuteNonQuery();
                         if (sqlResult > 0)
                         {
@@ -1856,9 +1860,9 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
                     foreach (var delr in property.ListingsToBeDeleted)
                     {
                         // 削除
-                        var sqlDeleteRentLivingRoom = string.Format(CultureInfo.InvariantCulture, "DELETE FROM rent_residential_listings WHERE listing_id = '{0}'", delr);
-
-                        cmd.CommandText = sqlDeleteRentLivingRoom;
+                        cmd.Parameters.Clear();
+                        cmd.CommandText = "DELETE FROM rent_residential_listings WHERE listing_id = @listingId";
+                        cmd.Parameters.AddWithValue("@listingId", delr);
                         var delRentLivingRoomResult = cmd.ExecuteNonQuery();
                         if (delRentLivingRoomResult > 0)
                         {
@@ -2538,7 +2542,8 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
             cmd.Transaction = connection.BeginTransaction();
             try
             {
-                cmd.CommandText = string.Format(CultureInfo.InvariantCulture, "DELETE FROM properties WHERE property_id = '{0}';", propertyId);
+                cmd.CommandText = "DELETE FROM properties WHERE property_id = @propertyId;";
+                cmd.Parameters.AddWithValue("@propertyId", propertyId);
                 res.AffectedCount = cmd.ExecuteNonQuery();
 
                 cmd.Transaction.Commit();
@@ -3707,7 +3712,8 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
             cmd.Transaction = connection.BeginTransaction();
             try
             {
-                cmd.CommandText = string.Format(CultureInfo.InvariantCulture, "DELETE FROM rent_residential_listings WHERE listing_id = '{0}';", listingId);
+                cmd.CommandText = "DELETE FROM rent_residential_listings WHERE listing_id = @listingId;";
+                cmd.Parameters.AddWithValue("@listingId", listingId);
                 res.AffectedCount = cmd.ExecuteNonQuery();
 
                 cmd.Transaction.Commit();
