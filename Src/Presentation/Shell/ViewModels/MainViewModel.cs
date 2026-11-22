@@ -1254,7 +1254,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         var listingEditor = RentResidentialListingEditorList.FirstOrDefault(editor => editor.PropertyId == selectedId);
         if (listingEditor is not null)
         {
-            ShowSimpleErrorInfoBar("編集画面が開いています", "募集物件の編集画面を閉じてから、建物を削除してください。");
+            ShowSimpleErrorInfoBar("編集画面が開いています", "物件の編集画面を閉じてから削除してください。");
             listingEditor.Activate();
             return;
         }
@@ -1262,12 +1262,12 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         var propertyEditor = RentResidentialEditorList.FirstOrDefault(editor => editor.Id == selectedId);
         if (propertyEditor is not null)
         {
-            ShowSimpleErrorInfoBar("編集画面が開いています", "建物の編集画面を閉じてから、建物を削除してください。");
+            ShowSimpleErrorInfoBar("編集画面が開いています", "物件の編集画面を閉じてから削除してください。");
             propertyEditor.Activate();
             return;
         }
 
-        if (await _dialogService.ShowDeleteConfirmationDialog("この募集物件を削除しますか？") != Microsoft.UI.Xaml.Controls.ContentDialogResult.Primary) return;
+        if (await _dialogService.ShowDeleteConfirmationDialog("この物件を削除しますか？") != Microsoft.UI.Xaml.Controls.ContentDialogResult.Primary) return;
 
         var res = await Task.Run(() => _rentResidentialPropertyService.Delete(selectedId), _cts.Token);
         if (res.IsError)
@@ -1309,7 +1309,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
                 catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
                 {
                     Debug.WriteLine($"Failed to delete property attachments '{propertyDataDirectoryPath}': {ex}");
-                    ShowSimpleErrorInfoBar("添付ファイルの削除に失敗しました", $"建物は削除されましたが、添付ファイルを削除できませんでした: {propertyDataDirectoryPath}。{ex.Message}");
+                    ShowSimpleErrorInfoBar("添付ファイルの削除に失敗しました", $"物件は削除されましたが、添付ファイルを削除できませんでした: {propertyDataDirectoryPath}。{ex.Message}");
                 }
             }
         }
@@ -1585,14 +1585,6 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         {
             ShowSimpleErrorInfoBar("編集画面が開いています", "募集物件の編集画面を閉じてから削除してください。");
             listingEditor.Activate();
-            return;
-        }
-
-        var propertyEditor = RentResidentialEditorList.FirstOrDefault(editor => editor.Id == selectedPropertyId);
-        if (propertyEditor is not null)
-        {
-            ShowSimpleErrorInfoBar("編集画面が開いています", "建物の編集画面を閉じてから、募集物件を削除してください。");
-            propertyEditor.Activate();
             return;
         }
 
