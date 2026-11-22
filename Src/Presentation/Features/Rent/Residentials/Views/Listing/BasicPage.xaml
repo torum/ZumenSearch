@@ -127,9 +127,9 @@
                                 <ColumnDefinition Width="*"></ColumnDefinition>
                             </Grid.ColumnDefinitions>
                             <Grid Grid.Row="0" Grid.Column="0">
-                                <ComboBox Header="現況" Width="170" ItemsSource="{x:Bind ViewModel.AvailabilityStatusTypes, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.SelectedAvailabilityStatusType, Mode=TwoWay}" Margin="0" VerticalAlignment="Bottom" >
+                                <ComboBox Header="現況" Width="170" ItemsSource="{x:Bind ViewModel.CurrentStatusTypes, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.SelectedCurrentStatusType, Mode=TwoWay}" Margin="0" VerticalAlignment="Bottom" >
                                     <ComboBox.ItemTemplate>
-                                        <DataTemplate x:DataType="modresidencial:ListingAvailabilityStatusTypeLabel">
+                                        <DataTemplate x:DataType="modresidencial:ListingCurrentStatusTypeLabel">
                                             <TextBlock Text="{x:Bind Label}" />
                                         </DataTemplate>
                                     </ComboBox.ItemTemplate>

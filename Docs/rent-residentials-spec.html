@@ -114,8 +114,8 @@
     <tr><td>所在階</td><td>Above/below-ground type and floor number.</td><td><code>rent_residential_listings.floor_type</code>, <code>rent_residential_listings.floor_number</code></td></tr>
     <tr><td>主要採光面</td><td>Main exposure direction.</td><td><code>rent_residential_listings.main_exposure_direction</code></td></tr>
     <tr><td>角部屋</td><td>Whether the unit is a corner room.</td><td><code>rent_residential_listings.is_corner_room</code></td></tr>
-    <tr><td>現況</td><td>Listing availability status.</td><td><code>rent_residential_listings.availability_status</code></td></tr>
-    <tr><td>募集中</td><td>Whether currently recruiting tenants.</td><td><code>rent_residential_listings.is_recruiting</code></td></tr>
+    <tr><td>現況</td><td>Listing availability status.</td><td><code>rent_residential_listings.current_status</code></td></tr>
+    <tr><td>募集中</td><td>Currently available for rent.</td><td><code>rent_residential_listings.is_available_for_rent</code></td></tr>
     <tr><td>現況確認日</td><td>Date the status was checked.</td><td><code>rent_residential_listings.current_status_checked_at</code></td></tr>
     <tr><td>入居可能日</td><td>Available month and period within the month.</td><td><code>rent_residential_listings.available_from_month</code>, <code>rent_residential_listings.available_from_period</code></td></tr>
     <tr><td>即入居可</td><td>Immediate occupancy available.</td><td><code>rent_residential_listings.is_immediate_occupancy</code></td></tr>
@@ -196,7 +196,6 @@
 
   <h2 id="notes">Review notes and sources</h2>
   <ul>
-    <li><code>rent_residential_listings.current_status</code> is persisted from a separate occupancy-status model property; the current basic editor's visible <strong>現況</strong> selector maps to <code>availability_status</code>, not <code>current_status</code>. The separate occupancy-status selector is not present on that page.</li>
     <li><code>rent_residential_listings.is_property_unit_ownership</code> is listing-side parent-property context, not a separate input on the listing basic page.</li>
     <li>Sources: <code>Src\Presentation\Features\Rent\Residentials\Views</code> and <code>Views\Listing</code> XAML and view models; <code>Src\Infrastructure\DataAccess\DataAccessService.cs</code> fresh table definitions and save/load operations.</li>
     <li>Screen labels may be qualified by section above to distinguish repeated labels such as 備考 and あり. This document does not prescribe migrations or change the database.</li>

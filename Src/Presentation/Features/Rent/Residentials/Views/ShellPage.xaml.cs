@@ -110,8 +110,15 @@ public sealed partial class ShellPage : Page
                 var result = await _dialogService.ShowEditorCloseConfirmationDialog();
                 if (result == ContentDialogResult.Primary)
                 {
-                    if (ViewModel.IsDirty) await ViewModel.Save();
-                    if (ViewModel.IsDirty) return;
+                    if (ViewModel.IsDirty)
+                    {
+                        await ViewModel.Save();
+                        if (ViewModel.IsDirty) return;
+                        if (ViewModel.CleanupFailures.Count > 0)
+                        {
+                            WeakReferenceMessenger.Default.Send(new ZumenSearch.Presentation.Messaging.ShowErrorInfoBarInMainWindowMessage("保存しましたが、一部の削除済みファイルをクリーンアップできませんでした", string.Join(", ", ViewModel.CleanupFailures)));
+                        }
+                    }
                 }
                 else if (result == ContentDialogResult.Secondary)
                 {

@@ -156,6 +156,32 @@ public sealed class RentResidentialWorkflowTests
     }
 
     [TestMethod]
+    public void Search_AvailableForRentFiltersListings()
+    {
+        using var db = new TestDatabase();
+        var property = NewProperty("property-a", "Building A");
+        Assert.IsFalse(db.Access.UpsertRentResidential(property).IsError);
+        var available = NewListing(property, "listing-a", "101");
+        available.SetIsAvailableForRentNow(true);
+        available.SetIsAvailableForImmediateMoveIn(false);
+        Assert.IsFalse(db.Access.UpsertRentResidentialListing(property.Id, available).IsError);
+        var unavailable = NewListing(property, "listing-b", "102");
+        unavailable.SetIsAvailableForRentNow(false);
+        unavailable.SetIsAvailableForImmediateMoveIn(true);
+        Assert.IsFalse(db.Access.UpsertRentResidentialListing(property.Id, unavailable).IsError);
+
+        var criteria = new RentResidentialListingSearchCriteria { IsRecruiting = true };
+        var filtered = db.Access.SelectRentResidentialListings(criteria);
+        Assert.IsFalse(filtered.IsError);
+        Assert.AreEqual(1, filtered.ListingSearchResult.Count);
+        Assert.AreEqual(available.Id, filtered.ListingSearchResult[0].Id);
+        criteria.IsRecruiting = false;
+        var unfiltered = db.Access.SelectRentResidentialListings(criteria);
+        Assert.IsFalse(unfiltered.IsError);
+        Assert.AreEqual(2, unfiltered.ListingSearchResult.Count);
+    }
+
+    [TestMethod]
     public void Search_AddressAndTransportRequireSameMatchingRoute()
     {
         using var db = new TestDatabase();

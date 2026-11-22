@@ -246,9 +246,8 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
                     "floor_number TEXT NOT NULL DEFAULT ''," +
                     "is_corner_room INTEGER NOT NULL DEFAULT 0," +
                     "main_exposure_direction TEXT NOT NULL DEFAULT ''," +
-                    "availability_status TEXT NOT NULL DEFAULT ''," +
                     "current_status TEXT NOT NULL DEFAULT ''," +
-                    "is_recruiting INTEGER NOT NULL DEFAULT 0," +
+                    "is_available_for_rent INTEGER NOT NULL DEFAULT 0," +
                     "available_from_month TEXT NOT NULL DEFAULT ''," +
                     "available_from_period TEXT NOT NULL DEFAULT ''," +
                     "is_immediate_occupancy INTEGER NOT NULL DEFAULT 0," +
@@ -2582,8 +2581,8 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
             INSERT INTO rent_residential_listings (
                 listing_id, property_id, is_property_unit_ownership, name, fudousan_id_additional_code,
                 floor_plan_type, floor_plan_extra_type, floor_area, floor_type, floor_number,
-                is_corner_room, main_exposure_direction, availability_status, current_status,
-                is_recruiting, available_from_month, available_from_period,
+                is_corner_room, main_exposure_direction, current_status,
+                is_available_for_rent, available_from_month, available_from_period,
                 is_immediate_occupancy, current_status_checked_at, remarks, chinryou,
                 management_fee, management_fee_unit, security_deposit, security_deposit_unit,
                 key_money, key_money_unit, contract_type, contract_period_years,
@@ -2600,8 +2599,8 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
             VALUES (
                 @listing_id, @property_id, @is_property_unit_ownership, @name, @fudousan_id_additional_code,
                 @floor_plan_type, @floor_plan_extra_type, @floor_area, @floor_type, @floor_number,
-                @is_corner_room, @main_exposure_direction, @availability_status, @current_status,
-                @is_recruiting, @available_from_month, @available_from_period,
+                @is_corner_room, @main_exposure_direction, @current_status,
+                @is_available_for_rent, @available_from_month, @available_from_period,
                 @is_immediate_occupancy, @current_status_checked_at, @remarks, @chinryou,
                 @management_fee, @management_fee_unit, @security_deposit, @security_deposit_unit,
                 @key_money, @key_money_unit, @contract_type, @contract_period_years,
@@ -2626,9 +2625,8 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
                 floor_number = @floor_number,
                 is_corner_room = @is_corner_room,
                 main_exposure_direction = @main_exposure_direction,
-                availability_status = @availability_status,
                 current_status = @current_status,
-                is_recruiting = @is_recruiting,
+                is_available_for_rent = @is_available_for_rent,
                 available_from_month = @available_from_month,
                 available_from_period = @available_from_period,
                 is_immediate_occupancy = @is_immediate_occupancy,
@@ -2700,9 +2698,8 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
         cmd.Parameters.AddWithValue("@floor_number", listing.FloorNumber);
         cmd.Parameters.AddWithValue("@is_corner_room", listing.IsCornerRoom ? 1 : 0);
         cmd.Parameters.AddWithValue("@main_exposure_direction", listing.SelectedExposureDirectionType.ToString());//listing.ExposureDirection.ToString());
-        cmd.Parameters.AddWithValue("@availability_status", listing.SelectedAvailabilityStatusType.ToString());
-        cmd.Parameters.AddWithValue("@current_status", listing.SelectedOccupancyStatus.ToString());
-        cmd.Parameters.AddWithValue("@is_recruiting", listing.IsAvailableForRentNow ? 1 : 0);
+        cmd.Parameters.AddWithValue("@current_status", listing.SelectedCurrentStatusType.ToString());
+        cmd.Parameters.AddWithValue("@is_available_for_rent", listing.IsAvailableForRentNow ? 1 : 0);
         cmd.Parameters.AddWithValue("@available_from_month", listing.SelectedAvailabilityMonthType.ToString());
         cmd.Parameters.AddWithValue("@available_from_period", listing.SelectedAvailabilityPeriodType.ToString());
         cmd.Parameters.AddWithValue("@is_immediate_occupancy", listing.IsAvailableForImmediateMoveIn ? 1 : 0);
@@ -3021,13 +3018,13 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
                     INSERT INTO rent_residential_listings (
                         listing_id, property_id, is_property_unit_ownership, name, chinryou,
                         room_count, floor_plan_type, floor_plan_extra_type, floor_area, floor_type, floor_number,
-                        is_corner_room, main_exposure_direction, current_status, is_recruiting,
+                        is_corner_room, main_exposure_direction, current_status, is_available_for_rent,
                         available_from_month, available_from_period, is_immediate_occupancy,
                         current_status_checked_at, remarks)
                     VALUES (
                         @listing_id, @property_id, @is_property_unit_ownership, @name, @chinryou,
                         @room_count, @floor_plan_type, @floor_plan_extra_type, @floor_area, @floor_type, @floor_number,
-                        @is_corner_room, @main_exposure_direction, @current_status, @is_recruiting,
+                        @is_corner_room, @main_exposure_direction, @current_status, @is_available_for_rent,
                         @available_from_month, @available_from_period, @is_immediate_occupancy,
                         @current_status_checked_at, @remarks)
                     ON CONFLICT(listing_id) DO UPDATE SET
@@ -3043,7 +3040,7 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
                         is_corner_room = @is_corner_room,
                         main_exposure_direction = @main_exposure_direction,
                         current_status = @current_status,
-                        is_recruiting = @is_recruiting,
+                        is_available_for_rent = @is_available_for_rent,
                         available_from_month = @available_from_month,
                         available_from_period = @available_from_period,
                         is_immediate_occupancy = @is_immediate_occupancy,
@@ -3213,7 +3210,7 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
             AddCommissionFilter(criteria.MaximumTenantBrokerCommission, criteria.TenantBrokerCommissionUnit, "l.tenant_broker_commission", "l.tenant_broker_commission_unit", "tenantBrokerCommission");
 
             // Listing and property features
-            AddFlag(criteria.IsRecruiting, "l.is_recruiting");
+            AddFlag(criteria.IsRecruiting, "l.is_available_for_rent");
             AddFlag(criteria.ImmediateOccupancy, "l.is_immediate_occupancy");
             AddFlag(criteria.CornerRoom, "l.is_corner_room");
             AddFlag(criteria.HasAutolock, "r.has_autolock");
@@ -3461,9 +3458,8 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
         room.SetFloorNumber(Convert.ToString(reader["floor_number"], CultureInfo.InvariantCulture) ?? string.Empty);
         room.SetIsCornerRoom(Convert.ToInt32(reader["is_corner_room"], CultureInfo.InvariantCulture) != 0);
         room.SetExposureDirectionTypeLabelFromString(Convert.ToString(reader["main_exposure_direction"], CultureInfo.InvariantCulture) ?? string.Empty);
-        room.SetAvailabilityStatusTypeLabelFromString(Convert.ToString(reader["availability_status"], CultureInfo.InvariantCulture) ?? string.Empty);
-        room.SetOccupancyStatusLabelFromString(Convert.ToString(reader["current_status"], CultureInfo.InvariantCulture) ?? string.Empty);
-        room.SetIsAvailableForRentNow(Convert.ToInt32(reader["is_recruiting"], CultureInfo.InvariantCulture) != 0);
+        room.SetAvailabilityStatusTypeLabelFromString(Convert.ToString(reader["current_status"], CultureInfo.InvariantCulture) ?? string.Empty);
+        room.SetIsAvailableForRentNow(Convert.ToInt32(reader["is_available_for_rent"], CultureInfo.InvariantCulture) != 0);
         room.SetAvailabilityMonthTypeLabelFromString(Convert.ToString(reader["available_from_month"], CultureInfo.InvariantCulture) ?? string.Empty);
         room.SetAvailabilityPeriodTypeLabelFromString(Convert.ToString(reader["available_from_period"], CultureInfo.InvariantCulture) ?? string.Empty);
         room.SetIsAvailableForImmediateMoveIn(Convert.ToInt32(reader["is_immediate_occupancy"], CultureInfo.InvariantCulture) != 0);

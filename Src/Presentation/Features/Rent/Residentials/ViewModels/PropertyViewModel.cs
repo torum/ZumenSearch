@@ -51,6 +51,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
     private readonly List<string> _unsavedPropertyPictureFileList = [];
     private readonly List<string> _unsavedPropertyPdfFileList = [];
     private readonly List<string> _unsavedPropertyPdfThumbnailFileList = [];
+    private readonly List<string> _cleanupFailures = [];
 
     // Tmp listing list to hold unsaved listing where listing reside here while property is not yet saved. (if entry is discarded without saving, delete on close)
     private readonly List<Listing> _unsavedListingList = [];
@@ -3238,10 +3239,22 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             }
         }
 
+        /*
         if (failures.Count > 0)
         {
             ShowSimpleErrorInfoBar("エラー", $"変更の破棄中に一時ファイルを削除できませんでした: {string.Join(", ", failures)}");
         }
+        */
+        if (failures.Count == 0)
+        {
+            return;
+        }
+
+        // We are closing the window. No use showing an error message here,
+        // because the user is discarding changes and we don't want to interrupt that process with an error message.
+        // Instead, we show a message in the main window's info bar.
+        WeakReferenceMessenger.Default.Send(new ShowErrorInfoBarInMainWindowMessage("変更の破棄中に一時ファイルを削除できませんでした", $"{string.Join(", ", failures)}"));
+
     }
 
     private static void DeleteTrackedFiles(List<string> trackedFiles, List<string> failures)
@@ -3289,11 +3302,14 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
     #region == Save related commands ==
 
+    public IReadOnlyList<string> CleanupFailures => _cleanupFailures;
+
     [RelayCommand(CanExecute = nameof(CanSave))]
     public async Task Save()
     {
         if (IsSaving || IsBusy || !IsDirty) return;
 
+        _cleanupFailures.Clear();
         IsSaving = true;
         IsBusy = true;
         try
@@ -3366,15 +3382,13 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             // Clear error infobar.
             IsInfoBarErrorOpen = false;
 
-            var cleanupFailures = new List<string>();
-
             // Clean up deleted picture file.
             if (_property.PicturesToBeDeleted.Count > 0)
             {
                 foreach (var file in _property.PicturesToBeDeleted.ToList())
                 {
                     var delFilePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _property.Id, file.ImageFilename);
-                    if (TryDeleteFiles(new[] { delFilePath }, cleanupFailures))
+                    if (TryDeleteFiles(new[] { delFilePath }, _cleanupFailures))
                     {
                         _property.PicturesToBeDeleted.Remove(file);// no need.
                     }
@@ -3389,7 +3403,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
                 {
                     var delFilePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _property.Id, file.PdfFilename);
                     var thumbFilePath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _property.Id, file.ThumbnailFilename);
-                    if (TryDeleteFiles(new[] { delFilePath, thumbFilePath }, cleanupFailures))
+                    if (TryDeleteFiles(new[] { delFilePath, thumbFilePath }, _cleanupFailures))
                     {
                         _property.PdfsToBeDeleted.Remove(file);//no need
                     }
@@ -3420,7 +3434,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
                         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
                         {
                             Debug.WriteLine($"Failed to delete directory '{delFolderPath}': {ex}");
-                            cleanupFailures.Add(delFolderPath);
+                            _cleanupFailures.Add(delFolderPath);
                         }
                     }
                 }
@@ -3467,12 +3481,10 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             // Notify listing windows that the property has been updated.
             WeakReferenceMessenger.Default.Send(new ZumenSearch.Presentation.Messaging.PropertyUpdatedMessage(_property as ZumenSearch.Domain.Entities.Base.PropertyBase));
 
-            // TODO: this may not be viewed if window as closing.
-            if (cleanupFailures.Count > 0)
+            if (_cleanupFailures.Count > 0)
             {
-                ShowSimpleErrorInfoBar("保存しましたが、一部の削除済みファイルをクリーンアップできませんでした", $"{string.Join(", ", cleanupFailures)}");
+                ShowSimpleErrorInfoBar("保存しましたが、一部の削除済みファイルをクリーンアップできませんでした", $"{string.Join(", ", _cleanupFailures)}");
             }
-
         }
         catch (Exception ex)
         {
@@ -3559,6 +3571,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
                         catch (Exception deleteEx) when (deleteEx is IOException or UnauthorizedAccessException)
                         {
                             Debug.WriteLine($"Failed to delete destination file '{destFilePath}' after failed import: {deleteEx}");
+
+                            ShowSimpleErrorInfoBar("エラー", $"画像を取り込めませんでした。さらに一時ファイル削除にも失敗しました: {Path.GetFileName(destFilePath)}。{deleteEx.Message}");
                         }
                     }
 

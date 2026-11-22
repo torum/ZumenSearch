@@ -41,6 +41,8 @@ public sealed class RentResidentialListingPersistenceTests
             listing.SetAvailabilityPeriodTypeLabel(AvailabilityPeriodType.Middle);
             listing.SetIsAvailableForRentNow(true);
             listing.SetIsAvailableForImmediateMoveIn(true);
+            var statusCheckedAt = new DateTimeOffset(2026, 11, 22, 0, 0, 0, TimeSpan.FromHours(9));
+            listing.SetOccupancyStatusCheckedAt(statusCheckedAt);
             listing.SetFudousanIdAdditionalCode("2030");
             listing.SetRemarks("Listing remarks");
             listing.SetChinryou(125000);
@@ -84,6 +86,7 @@ public sealed class RentResidentialListingPersistenceTests
             Assert.AreEqual(AvailabilityStatusType.Vacant, loadedListing.SelectedAvailabilityStatusType);
             Assert.IsTrue(loadedListing.IsAvailableForRentNow);
             Assert.IsTrue(loadedListing.IsAvailableForImmediateMoveIn);
+            Assert.AreEqual(statusCheckedAt, loadedListing.OccupancyStatusCheckedAt);
             Assert.AreEqual("2030", loadedListing.FudousanIdAdditionalCode);
             Assert.AreEqual("Listing remarks", loadedListing.Remarks);
             Assert.AreEqual(125000m, loadedListing.Chinryou);
@@ -101,6 +104,37 @@ public sealed class RentResidentialListingPersistenceTests
             Assert.IsTrue(loadedListing.HasAirConditioner);
             Assert.IsTrue(loadedListing.HasSeparateBathAndToilet);
             Assert.AreEqual("Appliance remarks", loadedListing.ApplianceRemarks);
+
+            using var connection = new SqliteConnection($"Data Source={databasePath}");
+            connection.Open();
+            using var command = connection.CreateCommand();
+            command.CommandText = "SELECT COUNT(*) FROM pragma_table_info('rent_residential_listings') WHERE name IN ('availability_status', 'is_recruiting')";
+            Assert.AreEqual(0L, (long)command.ExecuteScalar()!);
+            command.CommandText = "SELECT is_available_for_rent FROM rent_residential_listings WHERE listing_id = @listing_id";
+            command.Parameters.AddWithValue("@listing_id", listingId);
+            Assert.AreEqual(1L, (long)command.ExecuteScalar()!);
+            listing.SetIsAvailableForRentNow(false);
+            Assert.IsFalse(dataAccess.UpsertRentResidentialListing(propertyId, listing).IsError);
+            Assert.AreEqual(0L, (long)command.ExecuteScalar()!);
+            var unavailable = dataAccess.SelectRentResidentialListingById(propertyId, listingId);
+            Assert.IsFalse(unavailable.IsError);
+            Assert.IsNotNull(unavailable.Listing);
+            Assert.IsFalse(unavailable.Listing.IsAvailableForRentNow);
+            Assert.IsTrue(unavailable.Listing.IsAvailableForImmediateMoveIn);
+            command.CommandText = "SELECT current_status FROM rent_residential_listings WHERE listing_id = @listing_id";
+            Assert.AreEqual(nameof(AvailabilityStatusType.Vacant), command.ExecuteScalar());
+
+            foreach (var status in Enum.GetValues<AvailabilityStatusType>())
+            {
+                listing.SetAvailabilityStatusTypeLabel(status);
+                Assert.IsFalse(dataAccess.UpsertRentResidentialListing(propertyId, listing).IsError);
+                Assert.AreEqual(status.ToString(), command.ExecuteScalar());
+                var updated = dataAccess.SelectRentResidentialListingById(propertyId, listingId);
+                Assert.IsFalse(updated.IsError);
+                Assert.IsNotNull(updated.Listing);
+                Assert.AreEqual(status, updated.Listing.SelectedAvailabilityStatusType);
+                Assert.AreEqual(statusCheckedAt, updated.Listing.OccupancyStatusCheckedAt);
+            }
         }
         finally
         {

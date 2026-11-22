@@ -43,6 +43,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
     private readonly List<string> _unsavedListingPictureFileList = [];
     private readonly List<string> _unsavedListingPdfFileList = [];
     private readonly List<string> _unsavedListingPdfThumbnailFileList = [];
+    private readonly List<string> _cleanupFailures = [];
 
     private bool _disposed;
 
@@ -426,15 +427,15 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         }
     }
 
-    public IReadOnlyList<ListingAvailabilityStatusTypeLabel> AvailabilityStatusTypes { get; } = ListingAvailabilityStatusTypeLabel.GetAll();
+    public IReadOnlyList<ListingCurrentStatusTypeLabel> CurrentStatusTypes { get; } = ListingCurrentStatusTypeLabel.GetAll();
 
-    public ListingAvailabilityStatusTypeLabel SelectedAvailabilityStatusType
+    public ListingCurrentStatusTypeLabel SelectedCurrentStatusType
     {
-        get => field ?? new(AvailabilityStatusType.Unspecified);
+        get => field ?? new(CurrentStatusType.Unspecified);
         set
         {
             if (value is null) return;
-            if (SelectedAvailabilityStatusType.Key == value.Key)
+            if (SelectedCurrentStatusType.Key == value.Key)
             {
                 field = value;
                 return;
@@ -510,20 +511,6 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
                 IsDirty = true;
             }
             */
-        }
-    }
-
-    public IReadOnlyList<ListingOccupancyStatusLabel> OccupancyStatusTypes { get; } = ListingOccupancyStatusLabel.GetAll();
-
-    public ListingOccupancyStatusLabel SelectedOccupancyStatus
-    {
-        get => field ?? new(OccupancyStatus.Unspecified);
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-                IsDirty = true;
-            }
         }
     }
 
@@ -1124,10 +1111,9 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
             _listing.SetFloorNumber(FloorNumber);
             _listing.SetIsCornerRoom(IsCornerRoom);
             _listing.SetExposureDirectionTypeLabel(SelectedExposureDirectionType.Key);
-            _listing.SetAvailabilityStatusTypeLabel(SelectedAvailabilityStatusType.Key);
+            _listing.SetCurrentStatusTypeLabel(SelectedCurrentStatusType.Key);
             _listing.SetAvailabilityMonthTypeLabel(SelectedAvailabilityMonthType.Key);
             _listing.SetAvailabilityPeriodTypeLabel(SelectedAvailabilityPeriodType.Key);
-            _listing.SetOccupancyStatusLabel(SelectedOccupancyStatus.Key);
             _listing.SetIsAvailableForImmediateMoveIn(IsAvailableForImmediateMoveIn);
             _listing.SetIsAvailableForRentNow(IsAvailableForRentNow);
             _listing.SetOccupancyStatusCheckedAt(OccupancyStatusCheckedAt);
@@ -1258,10 +1244,9 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
             FloorNumber = _listing.FloorNumber;
             IsCornerRoom = _listing.IsCornerRoom;
             SelectedExposureDirectionType = ExposureDirectionTypes.First(item => item.Key == _listing.SelectedExposureDirectionType);
-            SelectedAvailabilityStatusType = AvailabilityStatusTypes.First(item => item.Key == _listing.SelectedAvailabilityStatusType);
+            SelectedCurrentStatusType = CurrentStatusTypes.First(item => item.Key == _listing.SelectedCurrentStatusType);
             SelectedAvailabilityMonthType = AvailabilityMonthTypes.First(item => item.Key == _listing.SelectedAvailabilityMonthType);
             SelectedAvailabilityPeriodType = AvailabilityPeriodTypes.First(item => item.Key == _listing.SelectedAvailabilityPeriodType);
-            SelectedOccupancyStatus = OccupancyStatusTypes.First(item => item.Key == _listing.SelectedOccupancyStatus);
             IsAvailableForImmediateMoveIn = _listing.IsAvailableForImmediateMoveIn;
             IsAvailableForRentNow = _listing.IsAvailableForRentNow;
             OccupancyStatusCheckedAt = _listing.OccupancyStatusCheckedAt;
@@ -1628,11 +1613,14 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
 
     #region == Save ==
 
+    public IReadOnlyList<string> CleanupFailures => _cleanupFailures;
+
     [RelayCommand(CanExecute = nameof(CanSave))]
     public async Task Save()
     {
         if (IsSaving || IsBusy || !IsDirty) return;
 
+        _cleanupFailures.Clear();
         IsSaving = true;
         IsBusy = true;
         try
@@ -1741,15 +1729,13 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
                 pdf.Model.SetIsModified(false);
             }
 
-            var cleanupFailures = new List<string>();
-
             // It is ok to clear the PicturesToBeDeleted and PdfsToBeDeleted lists as well after handed off to parent
             // when EntityStatus.New || isHandedOffToParentEditor,
             // because these are used to delete existing db records which New listings do not have.
             foreach (var file in _listing.PicturesToBeDeleted.ToList())
             {
                 var picturePath = Path.Combine(App.PropertyBlobDataFolder, _listing.PropertyId, _listing.Id, file.ImageFilename);
-                if (TryDeleteFiles(new[] { picturePath }, cleanupFailures))
+                if (TryDeleteFiles(new[] { picturePath }, _cleanupFailures))
                 {
                     _listing.PicturesToBeDeleted.Remove(file);
                 }
@@ -1760,7 +1746,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
             {
                 var pdfPath = Path.Combine(App.PropertyBlobDataFolder, _listing.PropertyId, _listing.Id, file.PdfFilename);
                 var thumbnailPath = Path.Combine(App.PropertyBlobDataFolder, _listing.PropertyId, _listing.Id, file.ThumbnailFilename);
-                if (TryDeleteFiles(new[] { pdfPath, thumbnailPath }, cleanupFailures))
+                if (TryDeleteFiles(new[] { pdfPath, thumbnailPath }, _cleanupFailures))
                 {
                     _listing.PdfsToBeDeleted.Remove(file);
                 }
@@ -1786,10 +1772,9 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
             //
             WeakReferenceMessenger.Default.Send(new ZumenSearch.Presentation.Messaging.ListingUpdatedMessage(_listing));
 
-            // TODO: this may not be viewed if window as closing.
-            if (cleanupFailures.Count > 0)
+            if (_cleanupFailures.Count > 0)
             {
-                ShowSimpleErrorInfoBar("保存しましたが、一部の削除済みファイルをクリーンアップできませんでした", $"{string.Join(", ", cleanupFailures)}");
+                ShowSimpleErrorInfoBar("保存しましたが、一部の削除済みファイルをクリーンアップできませんでした", $"{string.Join(", ", _cleanupFailures)}");
             }
         }
         catch (Exception ex)
@@ -1859,6 +1844,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
                     using var sourceStream = File.Open(filePath, FileMode.Open);
 
                     using var destinationStream = new FileStream(destFilePath, FileMode.CreateNew, FileAccess.Write);
+                    destinationCreated = true;
                     await sourceStream.CopyToAsync(destinationStream);
                 }
                 catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or COMException or InvalidOperationException or ArgumentException)
@@ -1875,6 +1861,8 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
                         catch (Exception deleteEx) when (deleteEx is IOException or UnauthorizedAccessException)
                         {
                             Debug.WriteLine($"Failed to delete destination file '{destFilePath}' after failed import: {deleteEx}");
+
+                            ShowSimpleErrorInfoBar("エラー", $"画像を取り込めませんでした。さらに一時ファイル削除にも失敗しました: {Path.GetFileName(destFilePath)}。{deleteEx.Message}");
                         }
                     }
 

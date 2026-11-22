@@ -32,33 +32,11 @@ public enum FloorGroundType { AboveGround, BelowGround }
 
 public enum ExposureDirectionType { Unspecified, North, Northeast, East, Southeast, South, Southwest, West, Northwest }
 
-public enum AvailabilityStatusType { Unspecified, ScheduledVacating, Vacant, ApplicationSubmitted, ContractedAndOccupied, OtherOrUnknown }
+public enum CurrentStatusType { Unspecified, ScheduledVacating, Vacant, ApplicationSubmitted, ContractedAndOccupied, OtherOrUnknown }
 
 public enum AvailabilityMonthType { Unspecified, January, February, March, April, May, June, July, August, September, October, November, December }
 
 public enum AvailabilityPeriodType { Unspecified, Early, Middle, Late }
-
-public enum OccupancyStatus
-{
-    Unspecified,
-    AvailableNow,
-    Vacant,
-    VacantSoon,
-    AvailableFromDate,
-    NegotiableMoveIn,
-    Occupied,
-    ScheduledToVacate,
-    ApplicationPending,
-    UnderScreening,
-    TemporarilyUnavailable,
-    TemporarilyReserved,
-    UnderRenovation,
-    UnderRemodeling,
-    UnderConstruction,
-    NewlyBuilt,
-    Negotiable,
-    Contracted
-}
 
 public enum FeeUnitType { Months, Yen }
 

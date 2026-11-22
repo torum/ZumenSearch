@@ -86,7 +86,7 @@ public sealed partial class Listing : ListingBase
         private set { field = value; IsModified = true; }
     }
 
-    public AvailabilityStatusType SelectedAvailabilityStatusType
+    public CurrentStatusType SelectedCurrentStatusType
     {
         get;
         private set { field = value; IsModified = true; }
@@ -99,12 +99,6 @@ public sealed partial class Listing : ListingBase
     }
 
     public AvailabilityPeriodType SelectedAvailabilityPeriodType
-    {
-        get;
-        private set { field = value; IsModified = true; }
-    }
-
-    public OccupancyStatus SelectedOccupancyStatus
     {
         get;
         private set { field = value; IsModified = true; }
@@ -505,22 +499,22 @@ public sealed partial class Listing : ListingBase
         }
     }
 
-    public void SetAvailabilityStatusTypeLabel(AvailabilityStatusType availabilityStatusType)
+    public void SetCurrentStatusTypeLabel(CurrentStatusType currentStatusType)
     {
-        SelectedAvailabilityStatusType = availabilityStatusType;
+        SelectedCurrentStatusType = currentStatusType;
     }
 
     public void SetAvailabilityStatusTypeLabelFromString(string Str)
     {
         if (string.IsNullOrEmpty(Str))
         {
-            SelectedAvailabilityStatusType = AvailabilityStatusType.Unspecified;
+            SelectedCurrentStatusType = CurrentStatusType.Unspecified;
             return;
         }
 
-        if (Enum.TryParse<AvailabilityStatusType>(Str, out var result))
+        if (Enum.TryParse<CurrentStatusType>(Str, out var result))
         {
-            SelectedAvailabilityStatusType = result;
+            SelectedCurrentStatusType = result;
         }
     }
 
@@ -559,25 +553,6 @@ public sealed partial class Listing : ListingBase
         if (Enum.TryParse<AvailabilityPeriodType>(Str, out var result))
         {
             SelectedAvailabilityPeriodType = result;
-        }
-    }
-
-    public void SetOccupancyStatusLabel(OccupancyStatus occupancyStatus)
-    {
-        SelectedOccupancyStatus = occupancyStatus;
-    }
-
-    public void SetOccupancyStatusLabelFromString(string Str)
-    {
-        if (string.IsNullOrEmpty(Str))
-        {
-            SelectedOccupancyStatus = OccupancyStatus.Unspecified;
-            return;
-        }
-
-        if (Enum.TryParse<OccupancyStatus>(Str, out var result))
-        {
-            SelectedOccupancyStatus = result;
         }
     }
 
