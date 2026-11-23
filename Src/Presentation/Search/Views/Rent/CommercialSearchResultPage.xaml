@@ -6,7 +6,6 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:mod="using:ZumenSearch.Presentation.Shell.Models"
     xmlns:searchresultviewmodel="using:ZumenSearch.Presentation.Search.ViewModels"
-    xmlns:local="using:ZumenSearch.Presentation.Search.Views.Rent"
     mc:Ignorable="d"
     NavigationCacheMode="Required">
 
@@ -27,7 +26,7 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <BreadcrumbBar x:Name="BreadcrumbBar1" ItemsSource="{x:Bind ViewModel.BreadcrumbItemsCommercialSearchResult, Mode=OneWay}" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center">
+                <BreadcrumbBar x:Name="BreadcrumbBar1" Grid.Row="0" Grid.Column="0" ItemsSource="{x:Bind ViewModel.BreadcrumbItemsCommercialSearchResult, Mode=OneWay}" VerticalAlignment="Center">
                     <BreadcrumbBar.ItemTemplate>
                         <DataTemplate x:DataType="mod:Breadcrumb">
                             <BreadcrumbBarItem>
@@ -43,8 +42,8 @@
 
                 <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,0,3,0">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                        <AppBarButton Icon="Back" Label="戻る" Command="{x:Bind ViewModel.GoBackCommand, Mode=OneWay}"/>
-                        <AppBarButton Icon="Add" Label="新規" Command="{x:Bind ViewModel.AddNewRentCommercialCommand, Mode=OneWay}"/>
+                        <AppBarButton Icon="Back" Label="戻る" Command="{x:Bind ViewModel.GoBackCommand}"/>
+                        <AppBarButton Icon="Add" Label="新規" Command="{x:Bind ViewModel.AddNewRentCommercialCommand}"/>
                     </StackPanel>
                 </StackPanel>
 
@@ -60,7 +59,7 @@
             <StackPanel Grid.Row="0" Padding="{StaticResource ContentPadding}">
 
                 <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" Margin="0,0,24,0" HorizontalAlignment="Right">
-                    <AppBarButton Icon="Delete" Label="削除" Command="{x:Bind ViewModel.DeleteRentCommercialListingCommand, Mode=OneWay}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}"/>
+                    <AppBarButton Icon="Delete" Label="削除" Command="{x:Bind ViewModel.DeleteRentCommercialListingCommand}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}"/>
                     <AppBarButton Icon="Sort" IsCompact="True" ToolTipService.ToolTip="Sort" Label="並べ替え" AutomationProperties.Name="Sort" IsEnabled="False">
                         <AppBarButton.Flyout>
                             <MenuFlyout>
@@ -70,7 +69,7 @@
                             </MenuFlyout>
                         </AppBarButton.Flyout>
                     </AppBarButton>
-                    <AppBarButton Icon="Copy" Label="複製" IsEnabled="False"/>
+                    <AppBarButton Icon="Copy" Label="複製" Command="{x:Bind ViewModel.DuplicateRentCommercialListingCommand}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}"/>
                     <AppBarButton Icon="Edit" Label="編集" Command="{x:Bind ViewModel.EditRentCommercialListingCommand}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}"/>
                 </CommandBar>
 
@@ -78,22 +77,21 @@
 
             </StackPanel>
 
-            <ScrollViewer Grid.Row="1" Padding="{StaticResource ContentPadding}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
 
-                <ItemsView x:Name="SearchResultListView" ItemsSource="{x:Bind ViewModel.RentCommercialListingSearchResult, Mode=OneWay}" Margin="0,12,0,0" AllowFocusOnInteraction="False" SelectionMode="Single">
+                <ItemsView x:Name="SearchResultListView" Margin="0,12,0,0" ItemsSource="{x:Bind ViewModel.RentCommercialListingSearchResult, Mode=OneWay}" AllowFocusOnInteraction="False" SelectionMode="Single" Padding="{StaticResource ContentPadding}">
                     <ItemsView.ContextFlyout>
                         <MenuFlyout>
-                            <MenuFlyoutItem Text="編集" Icon="Edit" Command="{x:Bind ViewModel.EditRentCommercialListingCommand, Mode=OneWay}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}">
+                            <MenuFlyoutItem Text="編集" Icon="Edit" Command="{x:Bind ViewModel.EditRentCommercialListingCommand}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}">
                                 <MenuFlyoutItem.KeyboardAccelerators>
                                     <KeyboardAccelerator Key="Enter" />
                                 </MenuFlyoutItem.KeyboardAccelerators>
                             </MenuFlyoutItem>
-                            <MenuFlyoutItem Text="複製" Icon="Copy"></MenuFlyoutItem>
+                            <MenuFlyoutItem Text="複製" Icon="Copy" Command="{x:Bind ViewModel.DuplicateRentCommercialListingCommand, Mode=OneWay}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}"></MenuFlyoutItem>
                             <MenuFlyoutSeparator/>
                             <MenuFlyoutItem Text="削除" Icon="Delete" Command="{x:Bind ViewModel.DeleteRentCommercialListingCommand, Mode=OneWay}" CommandParameter="{x:Bind SearchResultListView.SelectedItem, Mode=OneWay}"></MenuFlyoutItem>
                         </MenuFlyout>
                     </ItemsView.ContextFlyout>
-
                     <ItemsView.ItemTemplate>
                         <DataTemplate x:DataType="searchresultviewmodel:ListingSearchResultItemViewModel">
                             <ItemContainer DataContext="{x:Bind}" IsDoubleTapEnabled="True" DoubleTapped="SearchResult_DoubleTapped" PointerPressed="ItemContainer_PointerPressed" PointerReleased="ItemContainer_PointerReleased" RightTapped="ItemContainer_RightTapped">
@@ -122,7 +120,6 @@
                             </ItemContainer>
                         </DataTemplate>
                     </ItemsView.ItemTemplate>
-                    
                 </ItemsView>
 
             </ScrollViewer>

@@ -14,6 +14,7 @@ using ZumenSearch.Application.Results;
 using ZumenSearch.Presentation.Shell.Models;
 using ZumenSearch.Presentation.Factories.AbstractFactory;
 using ZumenSearch.Presentation.Services.Contracts;
+using ZumenSearch.Presentation.Navigation;
 namespace ZumenSearch.Presentation.Features.Rent.Residentials.Views;
 
 public sealed partial class ShellPage : Page

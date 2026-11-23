@@ -24,25 +24,6 @@ public sealed partial class PictureListPage : Page
         base.OnNavigatedTo(e);
     }
 
-    /*
-    private void ItemsView_SelectionChanged(ItemsView sender, ItemsViewSelectionChangedEventArgs args)
-    {
-        if (ViewModel is null)
-        {
-            return;
-        }
-
-        if (sender.SelectedItem is not ZumenSearch.Presentation.Features.Rent.Residentials.Models.PictureBldg picbldg)
-        {
-            return;
-        }
-
-        //Debug.WriteLine($"PictureListPage ItemsView_SelectionChanged SelectedItem Changed to {picbldg.PictureType.Label}");
-
-        ViewModel?.Bldg.SelectedBuildingPicture = picbldg;//sender.SelectedItem as ZumenSearch.Presentation.Features.Rent.Residentials.Models.PictureBuilding;
-    }
-    */
-
     private async void AppBarButtonAddPicture_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
         if (ViewModel is null || sender is not AppBarButton button)
@@ -51,7 +32,6 @@ public sealed partial class PictureListPage : Page
         }
 
         button.IsEnabled = false;
-        //ViewModel.BeginPicker();
 
         try
         {
@@ -91,7 +71,6 @@ public sealed partial class PictureListPage : Page
         }
         finally
         {
-            //ViewModel.EndPicker();
             button.IsEnabled = true;
         }
     }

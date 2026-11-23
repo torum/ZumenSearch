@@ -10,6 +10,7 @@ using ZumenSearch.Presentation.Shell.Models;
 using ZumenSearch.Domain.Entities.Base;
 using ZumenSearch.Infrastructure.Configuration.Contracts;
 using ZumenSearch.Infrastructure.DataAccess.Contracts;
+using ZumenSearch.Presentation.Navigation;
 using ZumenSearch.Presentation.Services.Contracts;
 
 namespace ZumenSearch.Presentation.Features.Sale.Residentials.ViewModels;

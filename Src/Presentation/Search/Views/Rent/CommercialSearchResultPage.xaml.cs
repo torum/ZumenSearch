@@ -75,7 +75,6 @@ public sealed partial class CommercialSearchResultPage : Page
             return;
         }
 
-        // TODO:::
         if (container.DataContext is not ListingSearchResultItemViewModel searchresult)
         {
             Debug.WriteLine($"Not ListingSearchResultItemViewModel. {container.DataContext?.GetType().FullName} @SearchResult_DoubleTapped");

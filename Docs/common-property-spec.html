@@ -31,8 +31,8 @@
   <h2 id="basic">Property identification</h2>
   <div class="table-wrap"><table><thead><tr><th scope="col">Input field</th><th scope="col">Description</th><th scope="col">Database column(s)</th></tr></thead><tbody>
     <tr><td>物件名</td><td>Property name; marked required in both rental property editors.</td><td><code>properties.name</code></td></tr>
-    <tr><td>不動産番号</td><td>Real-estate identifier. The residential editor saves this value; see the commercial persistence caveat below.</td><td><code>properties.fudousan_id</code></td></tr>
-    <tr><td>特定コード</td><td>Additional code for the property identifier. The residential editor saves this value; see the commercial persistence caveat below.</td><td><code>properties.fudousan_id_additional_code</code></td></tr>
+    <tr><td>不動産番号</td><td>Real-estate identifier; saved by both rental property editors.</td><td><code>properties.fudousan_id</code></td></tr>
+    <tr><td>特定コード</td><td>Additional code for the property identifier; saved by both rental property editors. New rental properties default to <code>0000</code>; saved values are loaded as stored.</td><td><code>properties.fudousan_id_additional_code</code></td></tr>
   </tbody></table></div>
 
   <h2 id="location">Location</h2>
@@ -46,7 +46,7 @@
     <tr><td>住所プレビュー</td><td>Read-only address assembled from the selected components and remaining address.</td><td>No directly bound column. <code>properties.location_full</code> is separately saved from the address model's assembled value.</td></tr>
     <tr><td>緯度</td><td>Latitude.</td><td><code>properties.location_latitude</code></td></tr>
     <tr><td>経度</td><td>Longitude.</td><td><code>properties.location_longitude</code></td></tr>
-    <tr><td>Postal code (no input on these pages)</td><td>Address model's postal code; the residential save writes it, but the commercial save omits it.</td><td><code>properties.location_postal_code</code></td></tr>
+    <tr><td>Postal code (no input on these pages)</td><td>Address model's postal code; both rental property save paths write it.</td><td><code>properties.location_postal_code</code></td></tr>
   </tbody></table></div>
   <p><code>location_machiaza_id</code> is one shared column for the selected address hierarchy, not a separate ID for each selection. <code>location_prefecture_code</code> stores the selected prefecture object's municipality code.</p>
 
@@ -74,9 +74,8 @@
 
   <h2 id="differences">Implementation differences to review</h2>
   <ul>
-    <li><strong>Commercial identifiers:</strong> the commercial editor accepts 不動産番号 and 特定コード and its load reads the shared columns, but the commercial property upsert omits both columns. Changes to these inputs therefore are not written by that save path. The residential upsert writes both.</li>
-    <li><strong>Postal code:</strong> neither location page has a postal-code input. The residential upsert writes the address model's postal code; the commercial upsert omits that column.</li>
-    <li><strong>Transportation validation:</strong> the residential controls have digit-cleaning handlers; the commercial controls use numeric input scopes and length limits without those same XAML handlers. Do not assume identical input behavior solely from the shared columns.</li>
+    <li><strong>Postal code:</strong> neither rental location page has a postal-code input; both save paths write the address model's postal code.</li>
+    <li><strong>Transportation validation:</strong> both rental editors use the same named paste and text-change handlers for transportation times, along with numeric input scopes and four-character limits.</li>
     <li>Property-specific fields, listing fields, contact associations and attachment metadata are outside the shared <code>properties</code> table; see the residential sheet for that editor's mappings.</li>
   </ul>
 

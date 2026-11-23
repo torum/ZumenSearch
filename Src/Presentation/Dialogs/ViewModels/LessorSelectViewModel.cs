@@ -2,20 +2,20 @@
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Xaml.Controls;
 using System.Collections.ObjectModel;
-using ZumenSearch.Application.Services.Rent.Residentials;
+using ZumenSearch.Application.Services.Persons;
 using ZumenSearch.Presentation.Services.Contracts;
 using ZumenSearch.Presentation.Shell.ViewModels;
 namespace ZumenSearch.Presentation.Dialogs.ViewModels;
 
 public partial class LessorSelectViewModel : ObservableObject
 {
-    private readonly RentPersonService _rentPersonService;
+    private readonly PersonService _personService;
 
     private readonly CancellationTokenSource _cts;
 
-    public LessorSelectViewModel(RentPersonService rentPersonService, CancellationTokenSource cts)
+    public LessorSelectViewModel(PersonService personService, CancellationTokenSource cts)
     {
-        _rentPersonService = rentPersonService;
+        _personService = personService;
         _cts = cts;
 
         // Fire and forget.
@@ -26,7 +26,7 @@ public partial class LessorSelectViewModel : ObservableObject
     {
         try
         {
-            var res = await Task.Run(() => _rentPersonService.SearchLessors("*"), _cts.Token);
+            var res = await Task.Run(() => _personService.SearchRentLessors("*"), _cts.Token);
             if (res.IsError)
             {
                 Debug.WriteLine(
@@ -138,7 +138,7 @@ public partial class LessorSelectViewModel : ObservableObject
         }
 
         // TODO: Catch and ignore catch (OperationCanceledException) when (_cts.Token.IsCancellationRequested). This may not be necessary...but.
-        var res = await Task.Run(() => _rentPersonService.SearchLessors(searchText), _cts.Token);
+        var res = await Task.Run(() => _personService.SearchRentLessors(searchText), _cts.Token);
         if (res.IsError)
         {
             Debug.WriteLine(

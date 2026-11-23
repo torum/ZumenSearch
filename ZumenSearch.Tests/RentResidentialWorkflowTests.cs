@@ -285,10 +285,10 @@ public sealed class RentResidentialWorkflowTests
         var picture2 = new PropertyPicture("picture'2", "two.jpg", EntityStatus.New);
         var pdf1 = new PropertyPdf("pdf'1", "one.pdf", "one.png", EntityStatus.New);
         var pdf2 = new PropertyPdf("pdf'2", "two.pdf", "two.png", EntityStatus.New);
-        property.Pictures.AddRange([picture1, picture2]);
-        property.Pdfs.AddRange([pdf1, pdf2]);
-        property.Lessors.AddRange([lessor1, lessor2]);
-        property.Brokers.AddRange([broker1, broker2]);
+        property.Pictures.AddRange(new[] { picture1, picture2 });
+        property.Pdfs.AddRange(new[] { pdf1, pdf2 });
+        property.Lessors.AddRange(new[] { lessor1, lessor2 });
+        property.Brokers.AddRange(new[] { broker1, broker2 });
         other.Lessors.Add(lessor1);
         other.Brokers.Add(broker1);
         Assert.IsFalse(db.Access.UpsertRentResidential(property).IsError);
@@ -299,14 +299,14 @@ public sealed class RentResidentialWorkflowTests
         Assert.IsFalse(db.Access.UpsertRentResidentialListing(property.Id, listing2).IsError);
 
         property.Pictures.Clear();
-        property.PicturesToBeDeleted.AddRange([picture1, picture2]);
+        property.PicturesToBeDeleted.AddRange(new[] { picture1, picture2 });
         property.Pdfs.Clear();
-        property.PdfsToBeDeleted.AddRange([pdf1, pdf2]);
+        property.PdfsToBeDeleted.AddRange(new[] { pdf1, pdf2 });
         property.Lessors.Clear();
-        property.LessorsToBeDeleted.AddRange([lessor1, lessor2]);
+        property.LessorsToBeDeleted.AddRange(new[] { lessor1, lessor2 });
         property.Brokers.Clear();
-        property.BrokersToBeDeleted.AddRange([broker1, broker2]);
-        property.ListingsToBeDeleted.AddRange([listing1.Id, listing2.Id]);
+        property.BrokersToBeDeleted.AddRange(new[] { broker1, broker2 });
+        property.ListingsToBeDeleted.AddRange(new[] { listing1.Id, listing2.Id });
         var result = db.Access.UpsertRentResidential(property);
         Assert.IsFalse(result.IsError);
 

@@ -10,12 +10,14 @@ using Microsoft.UI.Xaml.Controls;
 using Windows.Data.Pdf;
 using Windows.Storage;
 using Windows.Storage.Streams;
+using ZumenSearch.Application.Services.Persons;
 using ZumenSearch.Application.Services.Rent.Residentials;
 using ZumenSearch.Domain.Entities.Rent.Residentials;
 using ZumenSearch.Domain.Enums;
 using ZumenSearch.Presentation.Features.Rent.Residentials.Models;
 using ZumenSearch.Presentation.Helpers;
 using ZumenSearch.Presentation.Messaging;
+using ZumenSearch.Presentation.Navigation;
 using ZumenSearch.Presentation.Services.Contracts;
 using ZumenSearch.Presentation.Shell.Models;
 using ZumenSearch.Presentation.Shell.ViewModels;
@@ -54,14 +56,14 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
     #region == Services ==
 
     private readonly RentResidentialListingService _rentResidentialListingService;
-    private readonly RentPersonService _rentPersonService;
+    private readonly PersonService _personService;
     private readonly IDispatcherService _dispatcherService;
     private readonly IDialogGenericService _dialogService;
     private readonly INavigationGenericService _navigationService;
 
     #endregion
 
-    public ListingViewModel(ZumenSearch.Domain.Entities.Rent.Residentials.Listing listing, bool isDuplicate, INavigationGenericService navigationService, IDialogGenericService dialogService, IDispatcherService dispatcherService, RentResidentialListingService rentResidentialListingService, RentPersonService rentPersonService)
+    public ListingViewModel(ZumenSearch.Domain.Entities.Rent.Residentials.Listing listing, bool isDuplicate, INavigationGenericService navigationService, IDialogGenericService dialogService, IDispatcherService dispatcherService, RentResidentialListingService rentResidentialListingService, PersonService personService)
     {
         _listing = listing;
         _id = listing.Id;
@@ -70,7 +72,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         _dialogService = dialogService;
         _dispatcherService = dispatcherService;
         _rentResidentialListingService = rentResidentialListingService;
-        _rentPersonService = rentPersonService;
+        _personService = personService;
 
         // Create the data folder for this listing. This is where the pictures and pdfs will be stored.
         _listingDataDirectoryPath = System.IO.Path.Combine(App.PropertyBlobDataFolder, _listing.PropertyId, _listing.Id);
@@ -2246,7 +2248,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         try
         {
             ZumenSearch.Application.SearchResults.PersonSearchResultItem? lessorItem;
-            lessorItem = await _dialogService.ShowLessorSelectDialog(new ZumenSearch.Presentation.Dialogs.ViewModels.LessorSelectViewModel(_rentPersonService, _cts));
+            lessorItem = await _dialogService.ShowLessorSelectDialog(new ZumenSearch.Presentation.Dialogs.ViewModels.LessorSelectViewModel(_personService, _cts));
 
             if (lessorItem is null)
             {
@@ -2265,7 +2267,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
             }
 
             // TODO: Catch and ignore catch (OperationCanceledException) when (_cts.Token.IsCancellationRequested). This may not be necessary...but.
-            var res = await Task.Run(() => _rentPersonService.GetLessorById(lessorId), _cts.Token);
+            var res = await Task.Run(() => _personService.GetRentLessorById(lessorId), _cts.Token);
             if (res.IsError)
             {
                 Debug.WriteLine(
@@ -2361,7 +2363,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
 
         try
         {
-            var selectedBroker = await _dialogService.ShowBrokerSelectDialog(new ZumenSearch.Presentation.Dialogs.ViewModels.BrokerSelectViewModel(_rentPersonService, _cts));
+            var selectedBroker = await _dialogService.ShowBrokerSelectDialog(new ZumenSearch.Presentation.Dialogs.ViewModels.BrokerSelectViewModel(_personService, _cts));
 
             if (selectedBroker is null || BrokersWrapper.Any(item => item.Person.Id == selectedBroker.Id))
             {
@@ -2369,7 +2371,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
             }
 
             // TODO: Catch and ignore catch (OperationCanceledException) when (_cts.Token.IsCancellationRequested). This may not be necessary...but.
-            var res = await Task.Run(() => _rentPersonService.GetBrokerById(selectedBroker.Id), _cts.Token);
+            var res = await Task.Run(() => _personService.GetBrokerById(selectedBroker.Id), _cts.Token);
             if (res.IsError)
             {
                 Debug.WriteLine(

@@ -5,14 +5,14 @@ namespace ZumenSearch.Presentation.Features.Rent.Commercials.Views;
 
 public sealed partial class LocationPage : Page
 {
+    public ZumenSearch.Presentation.Features.Rent.Commercials.ViewModels.PropertyViewModel? ViewModel { get; private set; }
+
     public LocationPage()
     {
         //ViewModel = new LocationViewModel();//App.GetService<RentLivingEditLocationViewModel>();
         InitializeComponent();
 
     }
-
-    public ZumenSearch.Presentation.Features.Rent.Commercials.ViewModels.PropertyViewModel? ViewModel { get; private set; }
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
@@ -27,31 +27,38 @@ public sealed partial class LocationPage : Page
 
     private void ComboBoxPref_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        ComboBoxCountyAndCity.IsEnabled =
-            ComboBoxPref.SelectedIndex > -1;
-
-        if (ComboBoxPref.SelectedIndex < 0)
+        if (ComboBoxPref.SelectedIndex > -1)
         {
-            ComboBoxWardAndOaza.IsEnabled = false;
-            ComboBoxChoume.IsEnabled = false;
+            ComboBoxCountyAndCity.IsEnabled = true;
+        }
+        else
+        {
+            ComboBoxCountyAndCity.IsEnabled = false;
         }
     }
 
     private void ComboBoxCountyAndCity_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        ComboBoxWardAndOaza.IsEnabled =
-            ComboBoxCountyAndCity.SelectedIndex > -1;
-
-        if (ComboBoxCountyAndCity.SelectedIndex < 0)
+        if (ComboBoxCountyAndCity.SelectedIndex > -1)
         {
-            ComboBoxChoume.IsEnabled = false;
+            ComboBoxWardAndOaza.IsEnabled = true;
+        }
+        else
+        {
+            ComboBoxWardAndOaza.IsEnabled = false;
         }
     }
 
     private void ComboBoxWardAndOaza_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        ComboBoxChoume.IsEnabled =
-                    ComboBoxWardAndOaza.SelectedIndex > -1;
+        if (ComboBoxWardAndOaza.SelectedIndex > -1)
+        {
+            ComboBoxChoume.IsEnabled = true;
+        }
+        else
+        {
+            ComboBoxChoume.IsEnabled = false;
+        }
     }
 
 }

@@ -17,11 +17,13 @@ using ZumenSearch.Domain.Enums;
 using ZumenSearch.Domain.ValueObjects.Location;
 using ZumenSearch.Domain.ValueObjects.Transportation;
 using ZumenSearch.Application.Contracts;
+using ZumenSearch.Application.Services.Persons;
 using ZumenSearch.Application.Services.Rent.Residentials;
 using ZumenSearch.Presentation.Factories.AbstractFactory;
 using ZumenSearch.Presentation.Features.Rent.Residentials.Models;
 using ZumenSearch.Presentation.Helpers;
 using ZumenSearch.Presentation.Messaging;
+using ZumenSearch.Presentation.Navigation;
 using ZumenSearch.Presentation.Services.Contracts;
 using ZumenSearch.Presentation.Shell.Models;
 using ZumenSearch.Presentation.Shell.ViewModels;
@@ -68,7 +70,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
     private readonly IAbstractFactory<ZumenSearch.Domain.Entities.Rent.Residentials.Listing, bool, ZumenSearch.Presentation.Features.Rent.Residentials.Views.Listing.ShellPage> _shellFactory;
     private readonly RentResidentialPropertyService _rentResidentialPropertyService;
     private readonly RentResidentialListingService _rentResidentialListingService;
-    private readonly RentPersonService _rentPersonService;
+    private readonly PersonService _personService;
     private readonly ILocationRepository _locationRepository;
     private readonly IDispatcherService _dispatcherService;
     private readonly IDialogGenericService _dialogService;
@@ -76,7 +78,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
     #endregion
 
-    public PropertyViewModel(ZumenSearch.Domain.Entities.Rent.Residentials.Property property, bool isDuplicate, INavigationGenericService navigationService, IDialogGenericService dialogService, IAbstractFactory<ZumenSearch.Domain.Entities.Rent.Residentials.Listing, bool, ZumenSearch.Presentation.Features.Rent.Residentials.Views.Listing.ShellPage> shellFactory, IDispatcherService dispatcherService, RentResidentialPropertyService rentResidentialPropertyService, RentResidentialListingService rentResidentialListingService, RentPersonService rentPersonService, ILocationRepository locationRepository)
+    public PropertyViewModel(ZumenSearch.Domain.Entities.Rent.Residentials.Property property, bool isDuplicate, INavigationGenericService navigationService, IDialogGenericService dialogService, IAbstractFactory<ZumenSearch.Domain.Entities.Rent.Residentials.Listing, bool, ZumenSearch.Presentation.Features.Rent.Residentials.Views.Listing.ShellPage> shellFactory, IDispatcherService dispatcherService, RentResidentialPropertyService rentResidentialPropertyService, RentResidentialListingService rentResidentialListingService, PersonService personService, ILocationRepository locationRepository)
     {
         _property = property;
         _id = property.Id;
@@ -87,7 +89,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         _dispatcherService = dispatcherService;
         _rentResidentialPropertyService = rentResidentialPropertyService;
         _rentResidentialListingService = rentResidentialListingService;
-        _rentPersonService = rentPersonService;
+        _personService = personService;
         _locationRepository = locationRepository;
 
         //
@@ -4475,7 +4477,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         try
         {
             ZumenSearch.Application.SearchResults.PersonSearchResultItem? lessorItem;
-            lessorItem = await _dialogService.ShowLessorSelectDialog(new ZumenSearch.Presentation.Dialogs.ViewModels.LessorSelectViewModel(_rentPersonService, _cts));
+            lessorItem = await _dialogService.ShowLessorSelectDialog(new ZumenSearch.Presentation.Dialogs.ViewModels.LessorSelectViewModel(_personService, _cts));
 
             if (lessorItem is null)
             {
@@ -4494,7 +4496,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             }
 
             // TODO: Catch and ignore catch (OperationCanceledException) when (_cts.Token.IsCancellationRequested). This may not be necessary...but.
-            var res = await Task.Run(() => _rentPersonService.GetLessorById(lessorId), _cts.Token);
+            var res = await Task.Run(() => _personService.GetRentLessorById(lessorId), _cts.Token);
             if (res.IsError)
             {
                 Debug.WriteLine(
@@ -4589,7 +4591,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
         try
         {
-            var broker = await _dialogService.ShowBrokerSelectDialog(new ZumenSearch.Presentation.Dialogs.ViewModels.BrokerSelectViewModel(_rentPersonService, _cts));
+            var broker = await _dialogService.ShowBrokerSelectDialog(new ZumenSearch.Presentation.Dialogs.ViewModels.BrokerSelectViewModel(_personService, _cts));
 
             if (broker is null)
             {
@@ -4607,7 +4609,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             }
 
             // TODO: Catch and ignore catch (OperationCanceledException) when (_cts.Token.IsCancellationRequested). This may not be necessary...but.
-            var res = await Task.Run(() => _rentPersonService.GetBrokerById(brokerId), _cts.Token);
+            var res = await Task.Run(() => _personService.GetBrokerById(brokerId), _cts.Token);
             if (res.IsError)
             {
                 Debug.WriteLine(

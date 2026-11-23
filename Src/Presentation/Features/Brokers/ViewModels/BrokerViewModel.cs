@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using ZumenSearch.Domain.Enums;
 using ZumenSearch.Application.Configuration;
 using ZumenSearch.Application.Results;
+using ZumenSearch.Application.Services.Persons;
 using ZumenSearch.Presentation.Shell.Models;
 using ZumenSearch.Domain.Entities.Base;
 using ZumenSearch.Domain.Entities.Person;
@@ -13,6 +14,7 @@ using ZumenSearch.Domain.ValueObjects.Location;
 
 using ZumenSearch.Infrastructure.Configuration.Contracts;
 using ZumenSearch.Infrastructure.DataAccess.Contracts;
+using ZumenSearch.Presentation.Navigation;
 using ZumenSearch.Presentation.Services.Contracts;
 
 namespace ZumenSearch.Presentation.Features.Brokers.ViewModels;
@@ -37,7 +39,7 @@ public sealed partial class BrokerViewModel : ObservableRecipient, IDisposable
 
     #region == Services ==
 
-    private readonly IDataAccessService _dataAccessService;
+    private readonly PersonService _personService;
     private readonly IDataAccessLocationService _dataAccessLocationService;
     private readonly IDispatcherService _dispatcherService;
     private readonly IDialogGenericService _dialogService;
@@ -45,7 +47,7 @@ public sealed partial class BrokerViewModel : ObservableRecipient, IDisposable
 
     #endregion
 
-    public BrokerViewModel(ZumenSearch.Domain.Entities.Base.PersonBase broker, INavigationGenericService navigationService, IDialogGenericService dialogService, IDispatcherService dispatcherService, IDataAccessService dataAccessService, IDataAccessLocationService dataAccessLocationService)
+    public BrokerViewModel(ZumenSearch.Domain.Entities.Base.PersonBase broker, INavigationGenericService navigationService, IDialogGenericService dialogService, IDispatcherService dispatcherService, PersonService personService, IDataAccessLocationService dataAccessLocationService)
     {
         _broker = broker;
         _id = broker.Id;
@@ -53,7 +55,7 @@ public sealed partial class BrokerViewModel : ObservableRecipient, IDisposable
         _navigationService = navigationService; 
         _dialogService = dialogService;
         _dispatcherService = dispatcherService;
-        _dataAccessService = dataAccessService;
+        _personService = personService;
         _dataAccessLocationService = dataAccessLocationService;
 
         // Update title with dummy value.
@@ -588,7 +590,7 @@ public sealed partial class BrokerViewModel : ObservableRecipient, IDisposable
 
         SetValues();
 
-        var resInsert = await Task.Run(() => _dataAccessService.UpsertBroker(_broker), _cts.Token);
+        var resInsert = await Task.Run(() => _personService.UpsertBroker(_broker), _cts.Token);
         if (resInsert.IsError)
         {
             Debug.WriteLine(

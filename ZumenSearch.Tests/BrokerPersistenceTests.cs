@@ -1,5 +1,6 @@
 using Microsoft.Data.Sqlite;
 using Microsoft.UI.Xaml.Controls;
+using ZumenSearch.Application.Services.Persons;
 using ZumenSearch.Domain.Entities.Person;
 using ZumenSearch.Domain.Entities.Rent.Residentials;
 using ZumenSearch.Domain.Enums;
@@ -22,7 +23,8 @@ public sealed class BrokerPersistenceTests
         {
             using var dataAccess = new DataAccessService();
             Assert.IsFalse(dataAccess.InitializeDatabase(databasePath).IsError);
-            using var editor = new BrokerViewModel(new PersonLegal("broker-editor", EntityStatus.New), new NavigationStub(), null!, null!, dataAccess, null!);
+            var personService = new PersonService(dataAccess);
+            using var editor = new BrokerViewModel(new PersonLegal("broker-editor", EntityStatus.New), new NavigationStub(), null!, null!, personService, null!);
             Assert.AreEqual(1, editor.PersonKindIndex);
             editor.NameCompany = "不動産";
             editor.NameCompanyType = "株式会社";
@@ -73,7 +75,7 @@ public sealed class BrokerPersistenceTests
                 Assert.AreEqual(string.Empty, command.ExecuteScalar());
             }
 
-            using var reopened = new BrokerViewModel(natural, new NavigationStub(), null!, null!, dataAccess, null!);
+            using var reopened = new BrokerViewModel(natural, new NavigationStub(), null!, null!, personService, null!);
             Assert.AreEqual(0, reopened.PersonKindIndex);
             Assert.AreEqual("090-1111-2222", reopened.MobilePhoneNumber);
             Assert.IsFalse(reopened.IsDirty);
@@ -109,7 +111,8 @@ public sealed class BrokerPersistenceTests
         {
             using var dataAccess = new DataAccessService();
             Assert.IsFalse(dataAccess.InitializeDatabase(databasePath).IsError);
-            using var editor = new BrokerViewModel(new PersonLegal("broker-validation", EntityStatus.New), new NavigationStub(), null!, null!, dataAccess, null!);
+            var personService = new PersonService(dataAccess);
+            using var editor = new BrokerViewModel(new PersonLegal("broker-validation", EntityStatus.New), new NavigationStub(), null!, null!, personService, null!);
             editor.NameCompanyType = "株式会社";
             await editor.Save();
             Assert.IsTrue(editor.IsNameCompanyHasError);
@@ -152,7 +155,7 @@ public sealed class BrokerPersistenceTests
             var commercial = new CommercialProperty("commercial-associated", EntityStatus.New);
             commercial.SetName("事業用");
             commercial.Brokers.Add(broker);
-            Assert.IsFalse(dataAccess.UpsertRentCommercial(commercial, [], [], null).IsError);
+            Assert.IsFalse(dataAccess.UpsertRentCommercial(commercial).IsError);
             var commercialListing = new CommercialListing("commercial-listing", EntityStatus.New, commercial.Id, EntityStatus.Saved, false, commercial.Name, string.Empty);
             commercialListing.SetName("事業用部屋");
             commercialListing.Brokers.Add(broker);
@@ -184,11 +187,11 @@ public sealed class BrokerPersistenceTests
 
             var commercialListingResult = dataAccess.SelectRentCommercialListingById(commercial.Id, commercialListing.Id);
             Assert.IsFalse(commercialListingResult.IsError);
-            Assert.IsNotNull(commercialListingResult.Unit);
-            Assert.AreEqual(1, commercialListingResult.Unit.Brokers.Count);
-            Assert.IsInstanceOfType<PersonLegal>(commercialListingResult.Unit.Brokers[0]);
-            Assert.AreEqual("担当者", ((PersonLegal)commercialListingResult.Unit.Brokers[0]).ContactName);
-            Assert.AreEqual("東京都千代田区", commercialListingResult.Unit.Brokers[0].Address);
+            Assert.IsNotNull(commercialListingResult.Listing);
+            Assert.AreEqual(1, commercialListingResult.Listing.Brokers.Count);
+            Assert.IsInstanceOfType<PersonLegal>(commercialListingResult.Listing.Brokers[0]);
+            Assert.AreEqual("担当者", ((PersonLegal)commercialListingResult.Listing.Brokers[0]).ContactName);
+            Assert.AreEqual("東京都千代田区", commercialListingResult.Listing.Brokers[0].Address);
         }
         finally
         {

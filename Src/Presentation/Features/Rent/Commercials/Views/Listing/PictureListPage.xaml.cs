@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
+using System.Diagnostics;
 
 namespace ZumenSearch.Presentation.Features.Rent.Commercials.Views.Listing;
 
@@ -9,6 +10,7 @@ public sealed partial class PictureListPage : Page
 
     public PictureListPage()
     {
+        //ViewModel = new ViewZumenSearch.Presentation.Features.Rent.Commercials.Models.Editor.Modal.PictureViewModel();
         InitializeComponent();
     }
 
@@ -16,42 +18,54 @@ public sealed partial class PictureListPage : Page
     {
         if (e.Parameter is ZumenSearch.Presentation.Features.Rent.Commercials.ViewModels.ListingViewModel vm)
         {
+            //_editorShell = e.Parameter as ZumenSearch.Presentation.Features.Rent.Commercials.Views.Editor.EditorShell;
             ViewModel = vm;
             Bindings.Update();
         }
+
         base.OnNavigatedTo(e);
     }
 
     private async void AppBarButtonAddPicture_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
-        if (ViewModel is null || sender is not AppBarButton button) return;
+        if (ViewModel is null)
+        {
+            return;
+        }
+
+        if (sender is not AppBarButton button)
+        {
+            return;
+        }
+
         button.IsEnabled = false;
-        ViewModel.BeginPicker();
         try
         {
-            var picker = new Microsoft.Windows.Storage.Pickers.FileOpenPicker(button.XamlRoot.ContentIslandEnvironment.AppWindowId)
+            var openPicker = new Microsoft.Windows.Storage.Pickers.FileOpenPicker(button.XamlRoot.ContentIslandEnvironment.AppWindowId)
             {
                 ViewMode = Microsoft.Windows.Storage.Pickers.PickerViewMode.List,
                 SuggestedStartLocation = Microsoft.Windows.Storage.Pickers.PickerLocationId.PicturesLibrary
             };
-            picker.FileTypeFilter.Add(".jpg");
-            picker.FileTypeFilter.Add(".jpeg");
-            picker.FileTypeFilter.Add(".png");
-            picker.FileTypeFilter.Add(".gif");
-            picker.FileTypeFilter.Add(".webp");
-            var files = await picker.PickMultipleFilesAsync();
+            openPicker.FileTypeFilter.Add(".jpg");
+            openPicker.FileTypeFilter.Add(".jpeg");
+            openPicker.FileTypeFilter.Add(".png");
+            openPicker.FileTypeFilter.Add(".gif");
+            openPicker.FileTypeFilter.Add(".webp");
+            var files = await openPicker.PickMultipleFilesAsync();
             var paths = files.Select(file => file.Path).ToList();
-            if (paths.Count > 0 && ViewModel.AddNewRoomPicturesCommand.CanExecute(paths)) await ViewModel.AddNewRoomPicturesCommand.ExecuteAsync(paths);
+            if (paths.Count > 0 && ViewModel.AddNewListingPicturesCommand.CanExecute(paths))
+            {
+                await ViewModel.AddNewListingPicturesCommand.ExecuteAsync(paths);
+            }
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Runtime.InteropServices.COMException or InvalidOperationException or ArgumentException)
         {
-            Debug.WriteLine($"Failed to import commercial listing pictures: {ex}");
+            Debug.WriteLine($"Failed to import listing pictures: {ex}");
             ViewModel.InfoBarErrorMessage = $"画像を読み込めませんでした: {ex.Message}";
             ViewModel.IsInfoBarErrorOpen = true;
         }
         finally
         {
-            ViewModel.EndPicker();
             button.IsEnabled = true;
         }
     }

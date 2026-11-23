@@ -17,7 +17,7 @@ Strictly follow these boundaries:
 ## Code Style
 
 ### XAML formatting
-- Single line makes code folding easier. Keep each element's opening tag and all its attributes on a single line. Do not wrap an element's attributes across multiple lines.
+- Single line makes code folding easier. Keep each element's opening tag and all its attributes on a single line. Do not wrap an element's attributes across multiple lines. <Page> tags are exception.
 
 ### C# formatting
 - Priority is for humans to understand the code and follow the logic and flow. The maintainability is important but secondary. Follow the existing style, patterns, and conventions. 

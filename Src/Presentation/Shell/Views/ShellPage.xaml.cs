@@ -13,6 +13,7 @@ using ZumenSearch.Presentation.Services;
 using ZumenSearch.Infrastructure.Configuration.Contracts;
 using ZumenSearch.Infrastructure.DataAccess.Contracts;
 using ZumenSearch.Presentation.Services.Contracts;
+using ZumenSearch.Presentation.Navigation;
 
 namespace ZumenSearch.Presentation.Shell.Views;
 

@@ -4,30 +4,28 @@ namespace ZumenSearch.Presentation.Features.Rent.Commercials.Views;
 
 public sealed partial class EditorWindow : Window
 {
-    public string Id { get; }
+    public string? Id { get; private set; } = string.Empty;
 
-    public ZumenSearch.Presentation.Features.Rent.Commercials.ViewModels.PropertyViewModel ViewModel
-    {
-        get;
-    }
+    public ZumenSearch.Presentation.Features.Rent.Commercials.ViewModels.PropertyViewModel? ViewModel { get; private set; }
 
-    public EditorWindow(
-        string id,
-        ZumenSearch.Presentation.Features.Rent.Commercials.ViewModels.PropertyViewModel viewModel)
+    //public EditorWindow(){  }
+
+    public EditorWindow(string id, ZumenSearch.Presentation.Features.Rent.Commercials.ViewModels.PropertyViewModel vm)
     {
-        if (string.IsNullOrWhiteSpace(id))
+        if (string.IsNullOrEmpty(id))
         {
-            throw new ArgumentException(
-                "The commercial property ID cannot be empty.",
-                nameof(id));
+            throw new ArgumentNullException(nameof(id));
         }
 
         Id = id;
-        ViewModel = viewModel;
+        ViewModel = vm;
 
         InitializeComponent();
 
         ExtendsContentIntoTitleBar = true;
-        AppWindow.SetIcon("Assets/App.ico");
+
+        //this.AppWindow.SetIcon(Path.Combine(AppContext.BaseDirectory, "Assets\\App.ico"));
+        this.AppWindow.SetIcon("Assets/App.ico");
     }
+
 }

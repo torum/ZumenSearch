@@ -9,16 +9,19 @@ public sealed partial class ContractPage : Page
 
     public ContractPage()
     {
+        //ViewModel = new ViewZumenSearch.Presentation.Features.Rent.Commercials.Models.Editor.Modal.ContractViewModel();
         InitializeComponent();
     }
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
-        if (e.Parameter is ZumenSearch.Presentation.Features.Rent.Commercials.ViewModels.ListingViewModel viewModel)
+        if (e.Parameter is ZumenSearch.Presentation.Features.Rent.Commercials.ViewModels.ListingViewModel vm)
         {
-            ViewModel = viewModel;
+            //_editorShell = e.Parameter as ZumenSearch.Presentation.Features.Rent.Commercials.Views.Editor.EditorShell;
+            ViewModel = vm;
             Bindings.Update();
         }
+
         base.OnNavigatedTo(e);
     }
 }

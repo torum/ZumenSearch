@@ -1,32 +1,236 @@
-﻿using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Data;
+﻿using Microsoft.UI;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
+using System.Text.RegularExpressions;
+using Windows.ApplicationModel.DataTransfer;
 
 namespace ZumenSearch.Presentation.Features.Rent.Commercials.Views;
 
 public sealed partial class BasicPage : Page
 {
-    public ZumenSearch.Presentation.Features.Rent.Commercials.ViewModels.PropertyViewModel? ViewModel
-    {
-        get;
-        private set;
-    }
+    public ZumenSearch.Presentation.Features.Rent.Commercials.ViewModels.PropertyViewModel? ViewModel { get; private set; }
+
+    private bool _initialized;
 
     public BasicPage()
     {
+        //Debug.WriteLine("ZumenSearch.Presentation.Features.Rent.Commercials.Views.Editor.BasicPage init!");
+
         InitializeComponent();
+
+        Loaded += Page_Loaded;
     }
 
-    protected override void OnNavigatedTo(
-        NavigationEventArgs e)
+    private void Init()
     {
-        if (e.Parameter
-            is ZumenSearch.Presentation.Features.Rent.Commercials.ViewModels.PropertyViewModel vm)
+        if (_initialized) return;
+
+        _initialized = true;
+
+        this.TextBox_Name.Focus(Microsoft.UI.Xaml.FocusState.Programmatic);
+    }
+
+    protected override void OnNavigatedTo(NavigationEventArgs e)
+    {
+        if (e.Parameter is ZumenSearch.Presentation.Features.Rent.Commercials.ViewModels.PropertyViewModel vm)
         {
             ViewModel = vm;
             Bindings.Update();
+            if (!_initialized)
+            {
+                //Init();
+            }
         }
 
         base.OnNavigatedTo(e);
+    }
+
+    private void Page_Loaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    {
+        Init();
+    }
+
+#pragma warning disable CA1822 // Mark members as static
+    private void TextBox4DigitOrLess_TextChanging(TextBox sender, TextBoxTextChangingEventArgs args)
+#pragma warning restore CA1822 // Mark members as static
+    {
+        var text = ((TextBox)sender).Text;
+
+        if (string.IsNullOrEmpty(text))
+        {
+            ((TextBox)sender).BorderBrush = (App.Current.Resources["TextControlBorderBrush"] as Brush)!;
+            return;
+        }
+
+        var regex = new Regex(@"^(?:\d{5,})?$"); // 5 digit or more.
+        if (regex.IsMatch(text))
+        {
+            Debug.WriteLine("5 or more digits @TextBoxHalfWidth4DigitOrLess_TextChanging");
+            ((TextBox)sender).BorderBrush = new SolidColorBrush(Colors.Red);
+        }
+        else
+        {
+            regex = new Regex(@"^(?:\d{0,4})?$");//new Regex(@"^\d{0,4}$"); // 4 digit or less
+            if (regex.IsMatch(text))
+            {
+                ((TextBox)sender).BorderBrush = (App.Current.Resources["TextControlBorderBrush"] as Brush)!;
+            }
+            else
+            {
+                Debug.WriteLine("Not 4 digit or less @TextBoxHalfWidth4DigitOrLess_TextChanging");
+                ((TextBox)sender).BorderBrush = new SolidColorBrush(Colors.Red);
+            }
+        }
+
+    }
+
+#pragma warning disable CA1822 // Mark members as static
+    private void TextBox4DigitOnly_TextChanging(TextBox sender, TextBoxTextChangingEventArgs args)
+#pragma warning restore CA1822 // Mark members as static
+    {
+        UpdateFudousanIdComponentBorder(sender, 4, allowLetters: true);
+    }
+
+#pragma warning disable CA1822 // Mark members as static
+    private void TextBox13DigitOnly_TextChanging(TextBox sender, TextBoxTextChangingEventArgs args)
+#pragma warning restore CA1822 // Mark members as static
+    {
+        UpdateFudousanIdComponentBorder(sender, 13, allowLetters: false);
+    }
+
+    private async void TextBoxCleanNonDigitMax4_Paste(object sender, TextControlPasteEventArgs e)
+    {
+        e.Handled = true;
+        if (sender is TextBox textBox) await TrackPasteAsync(() => PasteNumericAsync(textBox));
+    }
+
+    private async Task PasteNumericAsync(TextBox textBox)
+    {
+        if (ViewModel is { } vm && !await Helpers.NumericPasteHelper.PasteAsync(textBox))
+        {
+            vm.InfoBarErrorMessage = $"貼り付ける値は0以上の{textBox.MaxLength}桁以内の整数にしてください。";
+            vm.IsInfoBarErrorOpen = true;
+        }
+    }
+
+    private async void TextBoxCleanNonDigitExact4_Paste(object sender, TextControlPasteEventArgs e)
+    {
+        e.Handled = true;
+        if (sender is TextBox textBox)
+        {
+            await TrackPasteAsync(() => PasteFudousanIdComponentAsync(textBox, allowLetters: true));
+        }
+    }
+
+    private async void TextBoxCleanNonDigitExact13_Paste(object sender, TextControlPasteEventArgs e)
+    {
+        e.Handled = true;
+        if (sender is TextBox textBox)
+        {
+            await TrackPasteAsync(() => PasteFudousanIdComponentAsync(textBox, allowLetters: false));
+        }
+    }
+
+    private async Task TrackPasteAsync(Func<Task> paste)
+    {
+        if (ViewModel is not { } vm) return;
+        //vm.BeginPicker();
+        try
+        {
+            await paste();
+        }
+        catch (Exception ex) when (ex is System.Runtime.InteropServices.COMException or InvalidOperationException)
+        {
+            Debug.WriteLine($"Failed to paste clipboard text: {ex}");
+            vm.InfoBarErrorMessage = $"貼り付けできませんでした: {ex.Message}";
+            vm.IsInfoBarErrorOpen = true;
+        }
+        finally
+        {
+            //vm.EndPicker();
+        }
+    }
+
+    private static void UpdateFudousanIdComponentBorder(TextBox textBox, int expectedLength, bool allowLetters)
+    {
+        var text = ZumenSearch.Presentation.Utilities.Common.NormalizeFullWidthCharacters(textBox.Text).ToUpperInvariant();
+        var pattern = allowLetters ? @"\A[A-Z0-9]{0," + expectedLength + @"}\z" : @"\A[0-9]{0," + expectedLength + @"}\z";
+
+        if (!Regex.IsMatch(text, pattern))
+        {
+            textBox.BorderBrush = new SolidColorBrush(Colors.Red);
+        }
+        else if (text.Length > 0 && text.Length < expectedLength)
+        {
+            textBox.BorderBrush = new SolidColorBrush(Colors.Yellow);
+        }
+        else
+        {
+            textBox.BorderBrush = (App.Current.Resources["TextControlBorderBrush"] as Brush)!;
+        }
+    }
+
+    private static async Task PasteFudousanIdComponentAsync(TextBox textBox, bool allowLetters)
+    {
+        var dataPackageView = Clipboard.GetContent();
+        if (!dataPackageView.Contains(StandardDataFormats.Text))
+        {
+            return;
+        }
+
+        var pastedText = ZumenSearch.Presentation.Utilities.Common.NormalizeFullWidthCharacters(await dataPackageView.GetTextAsync());
+        if (allowLetters)
+        {
+            pastedText = pastedText.ToUpperInvariant();
+        }
+
+        var selectionStart = textBox.SelectionStart;
+        textBox.Text = textBox.Text.Remove(selectionStart, textBox.SelectionLength).Insert(selectionStart, pastedText);
+        textBox.SelectionStart = Math.Min(selectionStart + pastedText.Length, textBox.Text.Length);
+        UpdateFudousanIdComponentBorder(textBox, allowLetters ? 4 : 13, allowLetters);
+    }
+
+    private async void TextBox_MaxLength_Paste(object sender, TextControlPasteEventArgs e)
+    {
+        e.Handled = true;
+        await TrackPasteAsync(() => PasteMaxLengthAsync(sender));
+    }
+
+    private static async Task PasteMaxLengthAsync(object sender)
+    {
+        if (sender is TextBox textBox)
+        {
+            // 2. Grab the text payload from the clipboard
+            var dataPackageView = Clipboard.GetContent();
+            if (dataPackageView.Contains(StandardDataFormats.Text))
+            {
+                string pasteText = await dataPackageView.GetTextAsync();
+
+                // 3. Determine how many characters are allowed to be added
+                // (Takes into account any text the user currently has highlighted/selected for replacement)
+                int currentLengthWithoutSelection = textBox.Text.Length - textBox.SelectionLength;
+                int allowedRemainingChars = textBox.MaxLength - currentLengthWithoutSelection;
+
+                if (allowedRemainingChars > 0)
+                {
+                    // Truncate the text if it exceeds the remaining allowed space
+                    if (pasteText.Length > allowedRemainingChars)
+                    {
+                        pasteText = pasteText.Substring(0, allowedRemainingChars);
+                    }
+
+                    // 4. Insert the allowed text at the current cursor position
+                    int selectionStart = textBox.SelectionStart;
+
+                    // Replace selected text or insert at cursor
+                    string newText = textBox.Text.Remove(selectionStart, textBox.SelectionLength);
+                    textBox.Text = newText.Insert(selectionStart, pasteText);
+
+                    // 5. Restore the cursor position to the end of the newly pasted text
+                    textBox.SelectionStart = selectionStart + pasteText.Length;
+                }
+            }
+        }
     }
 }

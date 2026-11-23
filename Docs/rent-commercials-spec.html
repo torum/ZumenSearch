@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Rent Commercials — pre-rewrite specification</title>
+  <title>Rent Commercials — draft specification</title>
   <style>
     :root { color-scheme: light dark; --background: #ffffff; --text: #20252b; --link: #0053a6; --border: #b9c2ca; --heading-background: #eaf0f5; --notice-background: #fff6e5; --notice-border: #a86500; }
     body { font-family: system-ui, sans-serif; line-height: 1.5; max-width: 90rem; margin: 0 auto; padding: 1.5rem; color: var(--text); background: var(--background); }
@@ -23,21 +23,21 @@
 </head>
 <body>
   <nav aria-label="Index"><a href="index.html">Back to index</a></nav>
-  <h1>Rent Commercials: pre-rewrite specification</h1>
-  <p class="notice"><strong>Draft — pre-rewrite implementation snapshot, not an approved schema.</strong> The existing UI and fresh SQLite schema are recorded as of 2026-11-22 to inform reconstruction. This is not a requirement to retain current defects or design choices.</p>
+  <h1>Rent Commercials: draft specification</h1>
+  <p class="notice"><strong>Draft — rewrite in progress, not an approved schema.</strong> The field inventory originates from the pre-rewrite implementation snapshot of 2026-11-22. Persistence notes have been updated where the implementation has changed; the complete rewrite and verification are still pending.</p>
   <p>Japanese labels come from the current editors; descriptions are in English. A schema column alone does not establish that an input is saved or reloaded. Shared <a href="common-property-spec.html">property fields</a> and <a href="common-person-spec.html">person fields</a> are documented separately.</p>
   <nav aria-label="Contents"><ul><li><a href="#property">Property</a></li><li><a href="#listing">Listing</a></li><li><a href="#linked">Contacts and media</a></li><li><a href="#schema">Schema and persistence notes</a></li><li><a href="#sources">Sources</a></li></ul></nav>
 
   <h2 id="property">Property fields</h2>
-  <p>For 物件名, 不動産番号, 特定コード, location and transportation, see the <a href="common-property-spec.html">common property specification</a>. The commercial property save currently omits both identifier columns; see <a href="#schema">persistence notes</a>.</p>
+  <p>For 物件名, 不動産番号, 特定コード, location and transportation, see the <a href="common-property-spec.html">common property specification</a>. Commercial property persistence writes both identifiers and the postal code to the shared properties row.</p>
   <h3>Basic information</h3>
   <div class="table-wrap"><table><thead><tr><th scope="col">Input field</th><th scope="col">Description</th><th scope="col">Database column(s)</th></tr></thead><tbody>
     <tr><td>物件種目</td><td>Commercial property kind.</td><td><code>rent_commercials.commercial_kind</code></td></tr>
     <tr><td>区分所有</td><td>Unit-level ownership.</td><td><code>rent_commercials.is_unit_ownership</code></td></tr>
-    <tr><td>建物構造</td><td>Building structure.</td><td><code>rent_commercials.property_structure</code></td></tr>
+    <tr><td>建物構造</td><td>Building structure, including reinforced block (RB) and concrete-filled steel tube (CFT).</td><td><code>rent_commercials.property_structure</code></td></tr>
     <tr><td>地上階数（階）</td><td>Above-ground floors.</td><td><code>rent_commercials.floor_count_above_ground</code></td></tr>
     <tr><td>地下階数（階）</td><td>Basement floors.</td><td><code>rent_commercials.floor_count_basement</code></td></tr>
-    <tr><td>延床面積（㎡）</td><td>Total floor area.</td><td><code>rent_commercials.total_floor_area</code></td></tr>
+    <tr><td>延床面積（㎡）</td><td>Total floor area, stored as invariant decimal text to preserve precision.</td><td><code>rent_commercials.total_floor_area</code> (TEXT NOT NULL DEFAULT '0')</td></tr>
     <tr><td>築年月</td><td>Year and month built.</td><td><code>rent_commercials.built_year_month</code></td></tr>
     <tr><td>備考</td><td>Property remarks.</td><td><code>rent_commercials.remarks</code></td></tr>
   </tbody></table></div>
@@ -94,7 +94,7 @@
   </tbody></table></div>
 
   <h2 id="listing">Listing fields</h2>
-  <p>All columns in this section belong to <code>rent_commercial_units</code>. Paired value and unit controls are shown together.</p>
+  <p>Columns in this section belong to <code>rent_commercial_units</code> unless otherwise noted. Paired value and unit controls are shown together.</p>
   <h3>Basic information</h3>
   <div class="table-wrap"><table><thead><tr><th scope="col">Input field</th><th scope="col">Description</th><th scope="col">Database column(s)</th></tr></thead><tbody>
     <tr><td>区画名</td><td>Unit name.</td><td><code>rent_commercial_units.name</code></td></tr>
@@ -104,8 +104,11 @@
     <tr><td>用途の詳細</td><td>Use details.</td><td><code>rent_commercial_units.use_details</code></td></tr>
     <tr><td>現況</td><td>Availability status.</td><td><code>rent_commercial_units.availability_status</code></td></tr>
     <tr><td>募集中</td><td>Currently available for rent.</td><td><code>rent_commercial_units.is_available_for_rent</code></td></tr>
-    <tr><td>入居可能月 / 入居可能時期</td><td>Available month and period.</td><td><code>rent_commercial_units.availability_month</code>, <code>rent_commercial_units.availability_period</code></td></tr>
+    <tr><td>現況確認日</td><td>Date the status was checked.</td><td><code>rent_commercial_units.current_status_checked_at</code></td></tr>
+    <tr><td>入居可能日</td><td>Available month and period.</td><td><code>rent_commercial_units.availability_month</code>, <code>rent_commercial_units.availability_period</code></td></tr>
     <tr><td>即入居可</td><td>Immediate occupancy.</td><td><code>rent_commercial_units.is_available_immediately</code></td></tr>
+    <tr><td>不動産番号</td><td>Read-only identifier inherited from the property.</td><td><code>properties.fudousan_id</code></td></tr>
+    <tr><td>特定コード</td><td>Listing-specific code, up to four uppercase alphanumeric characters.</td><td><code>rent_commercial_units.fudousan_id_additional_code</code></td></tr>
     <tr><td>備考</td><td>General listing remarks.</td><td><code>rent_commercial_units.remarks</code></td></tr>
   </tbody></table></div>
   <h3>Rent and contract</h3>
@@ -172,15 +175,16 @@
     <tr><td>説明（図面）</td><td>PDF description.</td><td><code>rent_commercial_pdfs.description</code>; listing: <code>rent_commercial_listing_pdfs.description</code></td></tr>
     <tr><td>メインの図面</td><td>Main PDF indicator.</td><td><code>rent_commercial_pdfs.is_main</code>; listing: <code>rent_commercial_listing_pdfs.is_main</code></td></tr>
   </tbody></table></div>
-  <p>Media tables also store record IDs and owner IDs; files themselves are stored outside the database. Listing media tables have partial unique indexes allowing at most one main picture and one main PDF per listing; their save paths also check that constraint. Property PDF records additionally have creation/update timestamps.</p>
+  <p>Media tables also store record IDs and owner IDs; files themselves are stored outside the database. Listing media tables do not enforce a single main picture or PDF per listing. Property PDF records additionally have creation/update timestamps.</p>
 
   <h2 id="schema">Schema and persistence notes</h2>
   <ul>
-    <li><strong>Property identifiers:</strong> the commercial property editor accepts 不動産番号 and 特定コード, and load reads <code>properties.fudousan_id</code> and <code>properties.fudousan_id_additional_code</code>, but its property upsert omits them. Changes to these fields are not written by that save path. The property upsert also omits <code>properties.location_postal_code</code>.</li>
-    <li><strong>Listing identifier:</strong> <code>rent_commercial_units.fudousan_id_additional_code</code> exists in the schema but has no listing editor input and is omitted from the listing upsert and active listing load. The loaded property identifier is a separate value from <code>properties.fudousan_id</code>.</li>
+    <li><strong>Property identifiers:</strong> the commercial property editor accepts 不動産番号 and 特定コード; commercial persistence reads and writes <code>properties.fudousan_id</code>, <code>properties.fudousan_id_additional_code</code>, and <code>properties.location_postal_code</code>.</li>
+    <li><strong>Listing identifier:</strong> the listing editor reads and writes its specific code in <code>rent_commercial_units.fudousan_id_additional_code</code>. The inherited property identifier is a separate value from <code>properties.fudousan_id</code>.</li>
     <li><strong>Schema-only parking:</strong> <code>rent_commercial_units.parking_available</code> has no listing editor input and is omitted from the listing upsert and active editor load.</li>
     <li>Property <code>rent_commercials.property_id</code> links to the shared property row; <code>rent_commercials.created_at</code> and <code>rent_commercials.updated_at</code> are timestamps. Listing <code>rent_commercial_units.listing_id</code>, <code>rent_commercial_units.property_id</code>, <code>rent_commercial_units.is_property_unit_ownership</code>, <code>rent_commercial_units.created_at</code> and <code>rent_commercial_units.updated_at</code> are identifiers, parent context or timestamps, not separate listing inputs.</li>
-    <li>SQLite storage types are not uniform: for example, listing <code>chinryou</code> is NUMERIC while several other fee values are TEXT; nullable columns and default values should be reviewed in the schema rather than inferred from the UI.</li>
+    <li>Listing rent and contract amounts (<code>chinryou</code>, <code>kyoueki_fee</code>, <code>shikikin</code>, <code>guarantee_deposit</code>, <code>reikin</code>, <code>rights_money</code>, <code>deposit_deduction</code>, <code>renewal_fee</code>, and <code>recontract_fee</code>) are nullable: blank is stored as NULL and zero is stored explicitly. Numeric rent and management-fee filters exclude unspecified amounts; no-deposit and no-key-money filters match zero, not NULL.</li>
+    <li>SQLite storage types are not uniform: listing <code>chinryou</code> is NUMERIC while the other amounts above are TEXT; nullable columns and default values should be reviewed in the schema rather than inferred from the UI.</li>
     <li>The parking-free explanatory text on the property facilities page is display-only, not a separate stored input. Property- and unit-ownership modes can affect which details are saved; inspect the current save path when reconstructing that behavior.</li>
   </ul>
 

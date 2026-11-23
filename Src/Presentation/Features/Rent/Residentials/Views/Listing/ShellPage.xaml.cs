@@ -17,6 +17,7 @@ using ZumenSearch.Infrastructure.Configuration.Contracts;
 using ZumenSearch.Infrastructure.DataAccess.Contracts;
 using ZumenSearch.Presentation.Services.Contracts;
 using ZumenSearch.Presentation.Factories.AbstractFactory;
+using ZumenSearch.Presentation.Navigation;
 
 namespace ZumenSearch.Presentation.Features.Rent.Residentials.Views.Listing;
 

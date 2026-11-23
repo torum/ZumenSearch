@@ -9,6 +9,7 @@ using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
 using ZumenSearch.Presentation.Factories.AbstractFactory;
+using ZumenSearch.Presentation.Navigation;
 using ZumenSearch.Presentation.Services.Contracts;
 using ZumenSearch.Presentation.Shell.Models;
 

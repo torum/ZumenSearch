@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
 		<TargetFramework>net11.0-windows10.0.26100.0</TargetFramework>
@@ -38,6 +38,7 @@
 	</PropertyGroup>
 	<ItemGroup>
 		<Content Include="Assets\App.ico" />
+		<None Update="FOLLOW-UP.md" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -93,9 +94,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<Folder Include="Application\Models\Rent\Commercials\" />
 		<Folder Include="Domain\Entities\Brokers\" />
 		<Folder Include="Domain\Entities\Rent\Lessors\" />
-		<Folder Include="Domain\Entities\Rent\Commercials\" />
 		<Folder Include="Domain\Entities\Rent\Parkings\" />
 		<Folder Include="Domain\Entities\Sale\Commercials\" />
 		<Folder Include="Domain\Entities\Sale\Residentials\" />

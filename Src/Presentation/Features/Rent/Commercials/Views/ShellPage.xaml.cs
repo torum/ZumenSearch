@@ -2,67 +2,72 @@
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
+using Microsoft.UI.Xaml.Navigation;
 using System.Collections.ObjectModel;
 using System.Runtime.InteropServices;
-using WinRT.Interop;
 using ZumenSearch.Domain.Enums;
 using ZumenSearch.Application.Configuration;
 using ZumenSearch.Application.Results;
 using ZumenSearch.Presentation.Shell.Models;
 using ZumenSearch.Presentation.Factories.AbstractFactory;
 using ZumenSearch.Presentation.Services.Contracts;
+using ZumenSearch.Presentation.Navigation;
 namespace ZumenSearch.Presentation.Features.Rent.Commercials.Views;
 
 public sealed partial class ShellPage : Page
 {
-    public ZumenSearch.Presentation.Features.Rent.Commercials.ViewModels.PropertyViewModel ViewModel { get; }
 
-    public EditorWindow Window { get; }
-
-    private bool _isClosing;
-    private bool _allowConfirmedClose;
-    private bool _nvigated;
-    private ZumenSearch.Presentation.Features.Rent.Commercials.Views.Listing.EditorWindow? _closingWindow;
-
-    private readonly INavigationGenericService _navigationService;
-    private readonly IDialogGenericService _dialogService;
-
+    // List of ValueTuple holding the Navigation Tag and the relative Navigation Page
     private readonly List<(string Tag, string Label, Type? Page)> _pages =
     [
-        (NavigationKeys.RentCommercialPropertyBasic, "基本", typeof(BasicPage)),
-        (NavigationKeys.RentCommercialPropertyLocation, "所在地", typeof(LocationPage)),
-        (NavigationKeys.RentCommercialPropertyTransportation, "交通", typeof(TransportationPage)),
-        (NavigationKeys.RentCommercialPropertyFacilities, "設備", typeof(FacilitiesPage)),
-        (NavigationKeys.RentCommercialPropertyManagement, "管理", typeof(KanriPage)),
-        (NavigationKeys.RentCommercialPropertyPictures, "写真", typeof(PictureListPage)),
-        (NavigationKeys.RentCommercialPropertyDocuments, "図面", typeof(ZumenListPage)),
-        (NavigationKeys.RentCommercialPropertyLessors, "貸主", typeof(LessorListPage)),
-        (NavigationKeys.RentCommercialPropertyBrokers, "宅建業者", typeof(BrokerListPage)),
-        (NavigationKeys.RentCommercialPropertyListings, "募集物件", typeof(UnitListPage))
+        ("building", "建物", null),
+        (NavigationKeys.RentCommercialPropertyBasic, "基本", typeof(ZumenSearch.Presentation.Features.Rent.Commercials.Views.BasicPage)),
+        (NavigationKeys.RentCommercialPropertyLocation, "所在地", typeof(ZumenSearch.Presentation.Features.Rent.Commercials.Views.LocationPage)),
+        (NavigationKeys.RentCommercialPropertyTransportation, "交通", typeof(ZumenSearch.Presentation.Features.Rent.Commercials.Views.TransportationPage)),
+        (NavigationKeys.RentCommercialPropertyFacilities, "設備", typeof(ZumenSearch.Presentation.Features.Rent.Commercials.Views.FacilitiesPage)),
+        (NavigationKeys.RentCommercialPropertyManagement, "管理", typeof(ZumenSearch.Presentation.Features.Rent.Commercials.Views.KanriPage)),
+        (NavigationKeys.RentCommercialPropertyPictures, "写真", typeof(ZumenSearch.Presentation.Features.Rent.Commercials.Views.PictureListPage)),
+        (NavigationKeys.RentCommercialPropertyDocuments, "図面", typeof(ZumenSearch.Presentation.Features.Rent.Commercials.Views.ZumenListPage)),
+        (NavigationKeys.RentCommercialPropertyLessors, "貸主", typeof(ZumenSearch.Presentation.Features.Rent.Commercials.Views.LessorListPage)),
+        (NavigationKeys.RentCommercialPropertyBrokers, "宅建業者", typeof(ZumenSearch.Presentation.Features.Rent.Commercials.Views.BrokerListPage)),
+        (NavigationKeys.RentCommercialPropertyListings, "募集物件", typeof(ZumenSearch.Presentation.Features.Rent.Commercials.Views.ListingListPage))
     ];
 
-    public ShellPage(ZumenSearch.Domain.Entities.Rent.Commercials.Property building, IAbstractFactory<ZumenSearch.Domain.Entities.Rent.Commercials.Property, INavigationGenericService, IDialogGenericService, ZumenSearch.Presentation.Features.Rent.Commercials.ViewModels.PropertyViewModel> vmFactory, INavigationGenericService navigationService, IDialogGenericService dialogService)
+    private bool _isClosing;
+    private bool _allowClose;
+    private ZumenSearch.Presentation.Features.Rent.Commercials.Views.Listing.EditorWindow? _closingWindow;
+    private bool _nvigated;
+
+    private readonly INavigationGenericService _navigationService;
+    private readonly IDispatcherService _dispatcherService;
+    private readonly IDialogGenericService _dialogService;
+
+    public ShellPage(ZumenSearch.Domain.Entities.Rent.Commercials.Property building, bool isDuplicate, IAbstractFactory<ZumenSearch.Domain.Entities.Rent.Commercials.Property, bool, INavigationGenericService, IDialogGenericService, ZumenSearch.Presentation.Features.Rent.Commercials.ViewModels.PropertyViewModel> vmFactory, INavigationGenericService navigationService, IDispatcherService dispatcherService, IDialogGenericService dialogService)
     {
+        //Debug.WriteLine($"ShellPage {building.Id}");
+
         _navigationService = navigationService;
+        _dispatcherService = dispatcherService;
         _dialogService = dialogService;
 
-        ViewModel = vmFactory.Create(building, _navigationService, _dialogService);
+        ViewModel = vmFactory.Create(building, isDuplicate, _navigationService, _dialogService);
 
-        Window = new EditorWindow(building.Id, ViewModel)
+        Window = new ZumenSearch.Presentation.Features.Rent.Commercials.Views.EditorWindow(building.Id, ViewModel)
         {
             Content = this
         };
 
         InitializeComponent();
 
-        _navigationService.Initialize(ContentFrame, _pages);
+        // Initialize the navigation service with the ContentFrame and pages.
+        _navigationService.Initialize(this.ContentFrame, _pages);
         ViewModel.PropertyChanged += ViewModel_PropertyChanged;
 
         this.Loaded += ShellPage_Loaded;
-        //this.Unloaded += ShellPage_Unloaded;
-        //this.BreadcrumbBar1.ItemClicked += BreadcrumbBar_ItemClicked;
+        this.BreadcrumbBar1.ItemClicked += BreadcrumbBar_ItemClicked;
 
         Window.Title = "賃貸事業用：建物";
         Window.ExtendsContentIntoTitleBar = true;
@@ -71,53 +76,48 @@ public sealed partial class ShellPage : Page
         Window.AppWindow.Closing += AppWindow_Closing;
     }
 
+    public ZumenSearch.Presentation.Features.Rent.Commercials.ViewModels.PropertyViewModel ViewModel { get; }
+    public ZumenSearch.Presentation.Features.Rent.Commercials.Views.EditorWindow Window { get; }
+    public Frame NavigationFrame => ContentFrame;
+
     public async Task ShowEditorCloseConfirmationDialog()
     {
         if (_isClosing) return;
-
         _isClosing = true;
-        ViewModel.SetClosing(true);
+
         try
         {
-            if (ViewModel.SaveCommand.IsRunning && ViewModel.SaveCommand.ExecutionTask is Task pendingSave)
-            {
-                await pendingSave;
-            }
-
-            await ViewModel.WaitForEditorOperationsAsync();
-            if (!ViewModel.CleanupIncompleteImports()) return;
+            var main = App.GetService<ZumenSearch.Presentation.Shell.ViewModels.MainViewModel>();
+            if (ViewModel.SaveCommand.IsRunning && ViewModel.SaveCommand.ExecutionTask is Task pendingSave) await pendingSave;
 
             foreach (var editor in ViewModel.UnsavedChildEditorList.ToList())
             {
                 _closingWindow = editor;
                 editor.Activate();
-                if (editor.Content is not ZumenSearch.Presentation.Features.Rent.Commercials.Views.Listing.ShellPage shell)
-                {
-                    ViewModel.InfoBarErrorMessage = "募集物件の編集画面を閉じることができませんでした。";
-                    ViewModel.IsInfoBarErrorOpen = true;
-                    return;
-                }
-
+                if (editor.Content is not ZumenSearch.Presentation.Features.Rent.Commercials.Views.Listing.ShellPage shell) return;
                 await shell.ShowEditorCloseConfirmationDialog();
-                if (ViewModel.UnsavedChildEditorList.Contains(editor)) return;
+                if (main.RentCommercialListingEditorList.Contains(editor)) return;
             }
-
             _closingWindow = null;
-            if (ViewModel.IsDiscardPending)
-            {
-                if (!ViewModel.DiscardChanges()) return;
-            }
-            else if (ViewModel.IsDirty)
+
+            if (ViewModel.IsDirty)
             {
                 var result = await _dialogService.ShowEditorCloseConfirmationDialog();
                 if (result == ContentDialogResult.Primary)
                 {
-                    await ViewModel.Save();
-                    if (ViewModel.IsDirty) return;
+                    if (ViewModel.IsDirty)
+                    {
+                        await ViewModel.Save();
+                        if (ViewModel.IsDirty) return;
+                        if (ViewModel.CleanupFailures.Count > 0)
+                        {
+                            WeakReferenceMessenger.Default.Send(new ZumenSearch.Presentation.Messaging.ShowErrorInfoBarInMainWindowMessage("保存しましたが、一部の削除済みファイルをクリーンアップできませんでした", string.Join(", ", ViewModel.CleanupFailures)));
+                        }
+                    }
                 }
                 else if (result == ContentDialogResult.Secondary)
                 {
-                    if (!ViewModel.DiscardChanges()) return;
+                    ViewModel.DiscardChanges();
                 }
                 else
                 {
@@ -125,33 +125,27 @@ public sealed partial class ShellPage : Page
                 }
             }
 
-            CloseAfterConfirmation();
-        }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or COMException or InvalidOperationException or ArgumentException or OperationCanceledException)
-        {
-            Debug.WriteLine($"Failed to finish commercial property operations before closing: {ex}");
-            ViewModel.InfoBarErrorMessage = $"編集画面を閉じる前に処理を完了できませんでした: {ex.Message}";
-            ViewModel.IsInfoBarErrorOpen = true;
-        }
-        finally
-        {
-            _closingWindow = null;
-            _isClosing = false;
-            ViewModel.SetClosing(false);
-        }
-    }
-
-    private void CloseAfterConfirmation()
-    {
-        _allowConfirmedClose = true;
-        try
-        {
+            _allowClose = true;
             Window.Close();
         }
         finally
         {
-            _allowConfirmedClose = false;
+            _allowClose = false;
+            _closingWindow = null;
+            _isClosing = false;
         }
+    }
+
+    private void ShellPage_Loaded(object sender, RoutedEventArgs e)
+    {
+        // XamlRoot is no longer null.
+        _dialogService.Initialize(this.XamlRoot, Window);
+        /*
+        if (ContentFrame.Navigate(typeof(ZumenSearch.Presentation.Features.Rent.Commercials.Views.BasicPage), ViewModel, new EntranceNavigationTransitionInfo()))
+        {
+
+        }
+        */
     }
 
     private void Window_Activated(object sender, Microsoft.UI.Xaml.WindowActivatedEventArgs args)
@@ -180,13 +174,60 @@ public sealed partial class ShellPage : Page
         visual.StartAnimation("Opacity", animation);
     }
 
-    private void ShellPage_Loaded(object sender, RoutedEventArgs e)
+    private async void AppWindow_Closing(Microsoft.UI.Windowing.AppWindow sender, Microsoft.UI.Windowing.AppWindowClosingEventArgs args)
     {
-        _dialogService.Initialize(this.XamlRoot, Window);
-
-        if (ContentFrame.Content is null)
+        if (_allowClose) return;
+        args.Cancel = true;
+        if (_isClosing)
         {
-            //ContentFrame.Navigate(typeof(BasicPage),ViewModel);
+            _closingWindow?.Activate();
+            return;
+        }
+        await ShowEditorCloseConfirmationDialog();
+    }
+
+    private void Window_Closed(object sender, WindowEventArgs args)
+    {
+        if (sender is not EditorWindow ewin)
+        {
+            return;
+        }
+
+        ewin.Activated -= Window_Activated;
+        ewin.Closed -= Window_Closed;
+        ewin.AppWindow.Closing -= AppWindow_Closing;
+        ViewModel.PropertyChanged -= ViewModel_PropertyChanged;
+
+        var mainVM = App.GetService<ZumenSearch.Presentation.Shell.ViewModels.MainViewModel>();
+        // Save window size and position.
+        var appWindow = ewin.AppWindow;
+        if (appWindow != null)
+        {
+            if (appWindow.Presenter is OverlappedPresenter)
+            {
+                mainVM.RentCommercialEditorWinHeight = (int)appWindow.Size.Height;
+                mainVM.RentCommercialEditorWinWidth = (int)appWindow.Size.Width;
+                mainVM.RentCommercialEditorWinTop = (int)appWindow.Position.Y;
+                mainVM.RentCommercialEditorWinLeft = (int)appWindow.Position.X;
+            }
+        }
+
+        // Update the selected search result and property window with the saved property state.
+        WeakReferenceMessenger.Default.Send(new ZumenSearch.Presentation.Messaging.WindowClosedMessage<Microsoft.UI.Xaml.Window>(ewin));
+
+        // AbstractFactory will manage instances and IHost dispose the AbstractFactory in turn dispose ViewModel when the app is shutdown,
+        // so we don't need to call Dispose() here.
+        // But let's do it here anyway.
+        ViewModel.Dispose();
+    }
+
+    private void BreadcrumbBar_ItemClicked(BreadcrumbBar sender, BreadcrumbBarItemClickedEventArgs args)
+    {
+        if (args.Index == 0)
+        {
+            //var hoge = args.Item as Breadcrumb;
+            //Debug.WriteLine("BreadcrumbBar_ItemClicked: " + hoge?.Name + ", Page: " + hoge?.Page);
+            //ViewModel?.GoToBldgShellPageCommand.Execute(null);
         }
     }
 
@@ -218,23 +259,10 @@ public sealed partial class ShellPage : Page
 
             NavView.SelectedItem = NavView.MenuItems.OfType<NavigationViewItem>().Where(n => n.Tag.Equals(NavigationKeys.RentCommercialPropertyBasic)).First();
         }
-        /*
-        if (ContentFrame.Content is null)
-        {
-            ContentFrame.Navigate(typeof(BasicPage), ViewModel);
-        }*/
     }
 
-    private void NavView_ItemInvoked(NavigationView sender,NavigationViewItemInvokedEventArgs args)
+    private void NavView_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
     {
-        /*
-        if (args.InvokedItemContainer?.Tag is string tag)
-        {
-            NavigateToPage(tag);
-        }
-        */
-
-
         if (_pages is null)
         {
             return;
@@ -275,20 +303,9 @@ public sealed partial class ShellPage : Page
         }
     }
 
-    private void NavigateToPage(string tag)
-    {
-        if (_navigationService.IsCurrentPageSameAs(tag))
-        {
-            return;
-        }
-
-        _navigationService.NavigateTo(tag, ViewModel);
-    }
-
     private void ViewModel_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
-        if (e.PropertyName != nameof(ViewModel.IsUnitOwnership) || !ViewModel.IsUnitOwnership) return;
-
+        if (e.PropertyName != nameof(ViewModel.IsUnitLevelOwnership) || !ViewModel.IsUnitLevelOwnership) return;
         PruneHiddenHistory();
         if (ContentFrame.SourcePageType == typeof(ZumenListPage) || ContentFrame.SourcePageType == typeof(LessorListPage) || ContentFrame.SourcePageType == typeof(BrokerListPage))
         {
@@ -299,7 +316,7 @@ public sealed partial class ShellPage : Page
 
     private void PruneHiddenHistory()
     {
-        if (!ViewModel.IsUnitOwnership) return;
+        if (!ViewModel.IsUnitLevelOwnership) return;
         for (var index = ContentFrame.BackStack.Count - 1; index >= 0; index--)
         {
             var page = ContentFrame.BackStack[index].SourcePageType;
@@ -307,84 +324,113 @@ public sealed partial class ShellPage : Page
         }
     }
 
-    private void NavView_BackRequested(NavigationView sender,NavigationViewBackRequestedEventArgs args)
+    private void NavView_BackRequested(NavigationView sender, NavigationViewBackRequestedEventArgs args)
     {
-        if (ContentFrame.CanGoBack)
-        {
-            ContentFrame.GoBack();
-        }
+        if (this.ContentFrame.CanGoBack) this.ContentFrame.GoBack();
     }
 
-    private void ContentFrame_Navigated(object sender,Microsoft.UI.Xaml.Navigation.NavigationEventArgs e)
+    private void ContentFrame_NavigationFailed(object sender, NavigationFailedEventArgs e)
+    {
+        //  CA2201 (Do not raise reserved exception types)
+        //throw new Exception("Failed to load Page " + e.SourcePageType.FullName);
+    }
+
+    private void ContentFrame_Navigated(object sender, NavigationEventArgs e)
     {
         PruneHiddenHistory();
-        NavView.IsBackEnabled = ContentFrame.CanGoBack;
-
+        this.NavView.IsBackEnabled = this.ContentFrame.CanGoBack;
         var page = _pages.FirstOrDefault(item => item.Page == e.SourcePageType);
-        if (page.Page is null)
+        if (page.Page is not null && ViewModel.BreadcrumbItems.Count > 1)
         {
-            return;
+            ViewModel.BreadcrumbItems[^1] = new Breadcrumb { Name = page.Label, Page = page.Tag };
         }
 
-        NavView.SelectedItem = NavView.MenuItems
-            .OfType<NavigationViewItem>()
-            .FirstOrDefault(item => Equals(item.Tag, page.Tag));
-
-        if (ViewModel.BreadcrumbItems is ObservableCollection<Breadcrumb> crumbs && crumbs.Count > 1)
+        if (this.ContentFrame.SourcePageType != null)
         {
-            crumbs[^1] = new Breadcrumb
+            var routeKey = _pages.FirstOrDefault(page => page.Page == this.ContentFrame.SourcePageType).Tag;
+            var selectedItem = FindNavigationViewItemWithTag(routeKey);
+            if (selectedItem != null)
             {
-                Name = page.Label,
-                Page = page.Tag
-            };
+                this.NavView.SelectedItem = selectedItem;
+                //NavigationViewControl.Header = ((NavigationViewItem)NavigationViewControl.SelectedItem)?.Content?.ToString();
+            }
+            else
+            {
+                Debug.WriteLine($"No menu item with tag matching the current page found in NavView. Current page: { ContentFrame.SourcePageType.FullName}");
+            }
         }
     }
 
-    private void ContentFrame_NavigationFailed(object sender,Microsoft.UI.Xaml.Navigation.NavigationFailedEventArgs e)
+    private NavigationViewItem? FindNavigationViewItemWithTag(string tag)
     {
-        throw new InvalidOperationException($"Failed to load page '{e.SourcePageType.FullName}'.");
+        foreach (var item in this.NavView.MenuItems.OfType<NavigationViewItem>())
+        {
+            if (item.Tag.Equals(tag))
+            {
+                this.NavView.SelectedItem = item;
+                return item;
+            }
+
+            if (item.MenuItems.Count > 0)
+            {
+                foreach (var subItem in item.MenuItems.OfType<NavigationViewItem>())
+                {
+                    if (subItem.Tag.Equals(tag))
+                    {
+                        this.NavView.SelectedItem = subItem;
+                        return subItem;
+                    }
+                }
+            }
+        }
+
+        foreach (var item in this.NavView.FooterMenuItems.OfType<NavigationViewItem>())
+        {
+            if (item.Tag.Equals(tag))
+            {
+                this.NavView.SelectedItem = item;
+                return item;
+            }
+        }
+
+        return null;
     }
 
-    private async void AppWindow_Closing(Microsoft.UI.Windowing.AppWindow sender, Microsoft.UI.Windowing.AppWindowClosingEventArgs args)
+    private async void KeyboardAccelerator_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
     {
-        if (_allowConfirmedClose) return;
+        //Debug.WriteLine("KeyboardAccelerator_Invoked");
 
-        args.Cancel = true;
-        if (_isClosing)
+        // set this first.
+        args.Handled = true;
+        if (!ViewModel.IsEditorEnabled) return;
+
+        if (args.KeyboardAccelerator.Modifiers == Windows.System.VirtualKeyModifiers.Menu)
         {
-            _closingWindow?.Activate();
-            return;
+            if (args.KeyboardAccelerator.Key == Windows.System.VirtualKey.Left)
+            {
+                if (this.ContentFrame != null && this.ContentFrame.CanGoBack)
+                {
+                    this.ContentFrame.GoBack();
+                }
+
+                return;
+            }
+
         }
 
-        await ShowEditorCloseConfirmationDialog();
-    }
-
-
-    private void Window_Closed(object sender, WindowEventArgs args)
-    {
-        if (sender is not EditorWindow editorWindow)
+        if (args.KeyboardAccelerator.Modifiers == Windows.System.VirtualKeyModifiers.Control)
         {
-            return;
+            if (args.KeyboardAccelerator.Key == Windows.System.VirtualKey.S)
+            {
+                if (ViewModel.SaveCommand.CanExecute(null))
+                {
+                    ViewModel.SaveCommand.Execute(null);
+                }
+
+                return;
+            }
+
         }
-
-        editorWindow.Activated -= Window_Activated;
-        editorWindow.Closed -= Window_Closed;
-        editorWindow.AppWindow.Closing -= AppWindow_Closing;
-        ViewModel.PropertyChanged -= ViewModel_PropertyChanged;
-
-        var mainViewModel = App.GetService<ZumenSearch.Presentation.Shell.ViewModels.MainViewModel>();
-        var appWindow = editorWindow.AppWindow;
-
-        if (appWindow?.Presenter is OverlappedPresenter)
-        {
-            mainViewModel.RentCommercialEditorWinHeight = (int)appWindow.Size.Height;
-            mainViewModel.RentCommercialEditorWinWidth = (int)appWindow.Size.Width;
-            mainViewModel.RentCommercialEditorWinTop = (int)appWindow.Position.Y;
-            mainViewModel.RentCommercialEditorWinLeft = (int)appWindow.Position.X;
-        }
-
-        WeakReferenceMessenger.Default.Send(new ZumenSearch.Presentation.Messaging.WindowClosedMessage<Microsoft.UI.Xaml.Window>(editorWindow));
-        ViewModel.Dispose();
     }
 
     #region == BringToFront ==

@@ -1,112 +1,75 @@
-﻿using System.Collections.ObjectModel;
 using ZumenSearch.Domain.Entities.Base;
-using ZumenSearch.Presentation.Features.Rent.Commercials.Models;
 using ZumenSearch.Domain.Enums;
+using ZumenSearch.Domain.Enums.Rent.Commercials;
 
 namespace ZumenSearch.Domain.Entities.Rent.Commercials;
 
-#pragma warning disable IDE0079 // Remove unnecessary suppression
-#pragma warning disable IDE0290 // Use primary constructor
-
-public sealed partial class PropertyPicture : PictureBase
+public sealed class PropertyPicture : EntityBase
 {
-    public ZumenSearch.Presentation.Features.Rent.Commercials.ViewModels.PropertyViewModel? ParentViewModel { get; set; }
+    public PropertyPicture(string id, string imageLocation, EntityStatus status) : base(id, status)
+    {
+        ImageFilename = imageLocation;
+        IsModified = false;
+    }
 
-    public ObservableCollection<PropertyPictureTypeLabel> CommercialPictureTypes { get;} =
-    [
-        new(PropertyPictureType.Unspecified),
-        new(PropertyPictureType.Exterior),
-        new(PropertyPictureType.Entrance),
-        new(PropertyPictureType.Neighborhood),
-        new(PropertyPictureType.Interior),
-        new(PropertyPictureType.Other)
-    ];
-
-    // Do not use SetProperty. PropertyChanged is being subscribed.
-    public PropertyPictureTypeLabel PictureType
+    public string ImageFilename
     {
         get;
         set
         {
             if (field == value) return;
-
-            if (value is not null)
-            {
-                // Set this before raize PropertyChanged.
-                IsModified = true;
-
-                // Raize PropertyChanged event here.
-                field = value;
-            }
-            else
-            {
-                // DO NOT DO THIS. This raize unneccesary property changed events that triggers IsDirty.
-                //field = new(EnumBuildingPictureType.Unspecified);
-            }
-
-            //OnPropertyChanged();
+            field = value;
+            IsModified = true;
         }
-    } = new(PropertyPictureType.Unspecified);
+    } = string.Empty;
 
-    // Do not use SetProperty.
+    public string BasePath { get; set; } = string.Empty;
+
+    public PropertyPictureType PictureType
+    {
+        get;
+        set
+        {
+            if (field == value) return;
+            field = value;
+            IsModified = true;
+        }
+    } = PropertyPictureType.Unspecified;
+
     public string Description
     {
         get;
         set
         {
+            value ??= string.Empty;
             if (field == value) return;
-
-            if (value is not null)
-            {
-                // Set this before raize PropertyChanged.
-                IsModified = true;
-
-                // Raize PropertyChanged event here.
-                field = value;
-            }
-            else
-            {
-                field = string.Empty;
-            }
-
-            //OnPropertyChanged();
+            field = value;
+            IsModified = true;
         }
     } = string.Empty;
 
-    // Do not use SetProperty.
     public bool IsMain
     {
         get;
         set
         {
             if (field == value) return;
-
-            // Set this before raize PropertyChanged.
-            IsModified = true;
-
-            // Raize PropertyChanged event here.
             field = value;
-
-            //OnPropertyChanged();
+            IsModified = true;
         }
     }
 
-    public PropertyPicture(string id, string imageLocation, EntityStatus status) : base(id, status)
+    public PropertyPicture Clone()
     {
-        ImageFilename = imageLocation;
-        PictureType = CommercialPictureTypes[0];
-
-        IsModified = false;
-    }
-
-    public PropertyPictureType? SetLabelFromString(string titleStr)
-    {
-        if (!Enum.TryParse<PropertyPictureType>(titleStr, out var result) || !Enum.IsDefined(result))
+        var clone = new PropertyPicture(Id, ImageFilename, Status)
         {
-            throw new FormatException($"Invalid commercial property picture type: {titleStr}");
-        }
+            BasePath = BasePath,
+            Description = Description,
+            PictureType = PictureType,
+            IsMain = IsMain
+        };
 
-        PictureType = CommercialPictureTypes.First(item => item.Key == result);
-        return result;
+        clone.SetIsModified(IsModified);
+        return clone;
     }
-};
+}

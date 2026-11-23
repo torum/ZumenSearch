@@ -471,7 +471,7 @@ public sealed partial class MainWindow : Window
             }
         }
 
-        if (isCancel)
+        if (isCancel || _viewModel.RentCommercialListingEditorList.Count > 0)
         {
             _isClosing = false;
             return;
@@ -536,7 +536,7 @@ public sealed partial class MainWindow : Window
             }
         }
 
-        if (isCancel)
+        if (isCancel || _viewModel.RentCommercialEditorList.Count > 0)
         {
             _isClosing = false;
             return;

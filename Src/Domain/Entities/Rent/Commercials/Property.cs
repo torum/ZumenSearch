@@ -1,9 +1,5 @@
-﻿using System.Collections.ObjectModel;
 using System.Globalization;
 using ZumenSearch.Domain.Entities.Base;
-using ZumenSearch.Domain.ValueObjects.Location;
-using ZumenSearch.Domain.ValueObjects.Transportation;
-using ZumenSearch.Presentation.Features.Rent.Commercials.Models;
 using ZumenSearch.Domain.Enums;
 
 namespace ZumenSearch.Domain.Entities.Rent.Commercials;
@@ -24,44 +20,49 @@ public sealed partial class Property : PropertyBase
 
     #region == 基本 ==
 
-    public PropertyTypeLabel CommercialKind
+    public PropertyKindType CommercialKind
     {
-        get => field ?? new(PropertyKindType.Unspecified);
-        set
+        get;
+        private set
         {
             field = value;
             IsModified = true;
         }
-    }
+    } = PropertyKindType.Unspecified;
 
     public bool IsUnitOwnership
     {
         get;
-        set
+        private set
         {
             field = value;
             IsModified = true;
         }
     }
 
-    public PropertyStructureTypeLabel PropertyStructure
+    public StructureType PropertyStructure
     {
-        get => field ?? new(StructureType.Unspecified);
-        set
+        get;
+        private set
         {
             field = value;
             IsModified = true;
         }
-    }
+    } = StructureType.Unspecified;
 
     public int FloorCountAboveGround
     {
         get;
-        set
+        private set
         {
             if (value < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(value), value, "Must be at least 0.");
+            }
+
+            if (field == value)
+            {
+                return;
             }
 
             field = value;
@@ -72,11 +73,16 @@ public sealed partial class Property : PropertyBase
     public int FloorCountBasement
     {
         get;
-        set
+        private set
         {
             if (value < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(value), value, "Must be at least 0.");
+            }
+
+            if (field == value)
+            {
+                return;
             }
 
             field = value;
@@ -87,7 +93,7 @@ public sealed partial class Property : PropertyBase
     public decimal TotalFloorArea
     {
         get;
-        set
+        private set
         {
             if (value < 0)
             {
@@ -102,7 +108,7 @@ public sealed partial class Property : PropertyBase
     public DateTimeOffset BuiltYearAndMonth
     {
         get;
-        set
+        private set
         {
             field = value;
             IsModified = true;
@@ -112,7 +118,7 @@ public sealed partial class Property : PropertyBase
     public string FudousanId
     {
         get => field ?? string.Empty;
-        set
+        private set
         {
             field = value;
             IsModified = true;
@@ -122,17 +128,17 @@ public sealed partial class Property : PropertyBase
     public string FudousanIdAdditionalCode
     {
         get => field ?? string.Empty;
-        set
+        private set
         {
             field = value;
             IsModified = true;
         }
-    }
+    } = "0000";
 
     public string Remarks
     {
         get => field ?? string.Empty;
-        set
+        private set
         {
             field = value;
             IsModified = true;
@@ -140,178 +146,6 @@ public sealed partial class Property : PropertyBase
     }
 
     #endregion
-
-    #region == Location ==
-
-    /*
-    public string MachiazaId { get; set; } = string.Empty;
-
-    public Prefecture? Pref
-    {
-        get;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
-        }
-    }
-
-    public CountyAndCity? City
-    {
-        get;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
-        }
-    }
-
-    public WardAndOaza? Town
-    {
-        get;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
-        }
-    }
-
-    public Choume? Chou
-    {
-        get;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
-        }
-    }
-
-    public string Edaban
-    {
-        get;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
-        }
-    } = string.Empty;
-
-    // TODO:
-    public string PostalCode
-    {
-        get;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
-        }
-    } = string.Empty;
-    */
-    /*
-    public string GeoUri
-    {
-        get
-        {
-            if (string.IsNullOrEmpty(LocationLatitude) || string.IsNullOrEmpty(LocationLongitude))
-            {
-                return "https://maps.google.co.jp/";
-            }
-
-            return $"https://maps.google.co.jp/?q={LocationLatitude},{LocationLongitude}";
-        }
-    }
-    */
-
-    #endregion
-    /*
-    #region == Transportation ==
-
-    public RailLine? RailLine1
-    {
-        get;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
-        }
-    }
-
-    public RailStation? RailStation1
-    {
-        get;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
-        }
-    }
-
-    public string EkiToho1
-    {
-        get => field ?? string.Empty;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
-        }
-    }
-
-    public string BusStop1
-    {
-        get => field ?? string.Empty;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
-        }
-    }
-
-    public string BusJyousya1
-    {
-        get => field ?? string.Empty;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
-        }
-    }
-
-    public string BusStopToho1
-    {
-        get => field ?? string.Empty;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-                IsModified = true;
-            }
-        }
-    }
-
-    #endregion
-    */
 
     #region == Facilities ==
 
@@ -398,16 +232,6 @@ public sealed partial class Property : PropertyBase
         }
     }
 
-    public bool HasElevator
-    {
-        get;
-        set
-        {
-            field = value;
-            IsModified = true;
-        }
-    }
-
     public bool HasSecurityCamera
     {
         get;
@@ -418,110 +242,35 @@ public sealed partial class Property : PropertyBase
         }
     }
 
-    public bool HasParcelLocker
-    {
-        get;
-        set
-        {
-            field = value;
-            IsModified = true;
-        }
-    }
-
     #endregion
 
-    #region == 電気 ==
+    public bool HasElectricity { get; set { field = value; IsModified = true; } }
+    public string ElectricityDetails { get => field ?? string.Empty; set { field = value; IsModified = true; } }
+    public bool HasGas { get; set { field = value; IsModified = true; } }
+    public GasSupplyType GasType { get; set { ValidateFacilityEnum(value); field = value; IsModified = true; } }
+    public string GasDetails { get => field ?? string.Empty; set { field = value; IsModified = true; } }
+    public bool HasWater { get; set { field = value; IsModified = true; } }
+    public WaterSupplyType WaterType { get; set { ValidateFacilityEnum(value); field = value; IsModified = true; } }
+    public string WaterDetails { get => field ?? string.Empty; set { field = value; IsModified = true; } }
+    public SewerageType SewerageType { get; set { ValidateFacilityEnum(value); field = value; IsModified = true; } }
+    public string SewerageDetails { get => field ?? string.Empty; set { field = value; IsModified = true; } }
+    public bool HasInternet { get; set { field = value; IsModified = true; } }
+    public bool HasFiber { get; set { field = value; IsModified = true; } }
+    public string InternetDetails { get => field ?? string.Empty; set { field = value; IsModified = true; } }
+    public bool HasFireSafety { get; set { field = value; IsModified = true; } }
+    public string FireSafetyDetails { get => field ?? string.Empty; set { field = value; IsModified = true; } }
+    public bool HasParking { get; set { field = value; IsModified = true; } }
+    public ParkingVacancyType ParkingVacancy { get; set { ValidateFacilityEnum(value); field = value; IsModified = true; } }
+    public int? ParkingSpaces { get; set { if (value < 0) throw new ArgumentOutOfRangeException(nameof(value)); field = value; IsModified = true; } }
+    public decimal? ParkingMonthlyFee { get; set { if (value < 0) throw new ArgumentOutOfRangeException(nameof(value)); field = value; IsModified = true; } }
+    public ParkingTaxType ParkingTax { get; set { ValidateFacilityEnum(value); field = value; IsModified = true; } }
+    public bool IsParkingFree { get; set { field = value; IsModified = true; } }
+    public string ParkingDetails { get => field ?? string.Empty; set { field = value; IsModified = true; } }
 
-    public enum EnumElectricType
+    private static void ValidateFacilityEnum<T>(T value) where T : struct, Enum
     {
-        Unspecified, AllElectric,
+        if (!Enum.IsDefined(value)) throw new ArgumentOutOfRangeException(nameof(value));
     }
-
-    public bool HasElectric
-    {
-        get;
-        set
-        {
-            field = value;
-            IsModified = true;
-        }
-    }
-
-    public EnumElectricType PropertyElectricKind
-    {
-        get;
-        set
-        {
-            field = value;
-            IsModified = true;
-        }
-    } = EnumElectricType.Unspecified;
-
-    public string ElectricDetail
-    {
-        get;
-        set
-        {
-            field = value;
-            IsModified = true;
-        }
-    } = string.Empty;
-
-    #endregion
-
-    #region == ガス ==
-
-    /*
-    public bool Ap_HasGas
-    {
-        get => _hasGas;
-        set => SetProperty(ref _hasGas, value);
-    }
-
-    public string Kind
-    {
-        get => _kind;
-        set => SetProperty(ref _kind, value);
-    }
-
-    public string Detail
-    {
-        get => _detail;
-        set => SetProperty(ref _detail, value);
-    }
-    */
-
-    #endregion
-
-    #region == 水道 ==
-
-    /*
-    public string TapWaterKind
-    {
-        get => _tapWaterKind;
-        set => SetProperty(ref _tapWaterKind, value);
-    }
-
-    public string SewerageKind
-    {
-        get => _sewerageKind;
-        set => SetProperty(ref _sewerageKind, value);
-    }
-
-    public string TapWaterDetail
-    {
-        get => _tapWaterDetail;
-        set => SetProperty(ref _tapWaterDetail, value);
-    }
-
-    public string SewerageDetail
-    {
-        get => _sewerageDetail;
-        set => SetProperty(ref _sewerageDetail, value);
-    }
-    */
-
-    #endregion
 
     #endregion
 
@@ -536,7 +285,7 @@ public sealed partial class Property : PropertyBase
     public EnumKanriShutai KanriShutai
     {
         get;
-        set
+        private set
         {
             if (!Enum.IsDefined(value)) throw new ArgumentOutOfRangeException(nameof(value));
             field = value;
@@ -544,21 +293,31 @@ public sealed partial class Property : PropertyBase
         }
     }
 
-    public bool KanriIsMaintenanceManagementIfIsKanriJisya { get; set { field = value; IsModified = true; } }
-    public bool KanriIsTenantManagementIfIsKanriJisya { get; set { field = value; IsModified = true; } }
-    public bool KanriIsPaymentManagementIfIsKanriJisya { get; set { field = value; IsModified = true; } }
-    public bool KanriIsOtherManagementIfIsKanriJisya { get; set { field = value; IsModified = true; } }
-    public string KanriRemarkIfIsKanriJisya { get => field ?? string.Empty; set { field = value; IsModified = true; } }
-    public string KanriNameOfCompanyIfIsKanriTasya { get => field ?? string.Empty; set { field = value; IsModified = true; } }
-    public string KanriContactInfoOfCompanyIfIsKanriTasya { get => field ?? string.Empty; set { field = value; IsModified = true; } }
-    public string KanriRemarkIfIsKanriTasya { get => field ?? string.Empty; set { field = value; IsModified = true; } }
-    public string KanriRemarkIfIsKanriKashinushi { get => field ?? string.Empty; set { field = value; IsModified = true; } }
+    public bool KanriIsMaintenanceManagementIfIsKanriJisya { get; private set { field = value; IsModified = true; } }
+    public bool KanriIsTenantManagementIfIsKanriJisya { get; private set { field = value; IsModified = true; } }
+    public bool KanriIsPaymentManagementIfIsKanriJisya { get; private set { field = value; IsModified = true; } }
+    public bool KanriIsOtherManagementIfIsKanriJisya { get; private set { field = value; IsModified = true; } }
+    public string KanriRemarkIfIsKanriJisya { get => field ?? string.Empty; private set { field = value; IsModified = true; } }
+    public string KanriNameOfCompanyIfIsKanriTasya { get => field ?? string.Empty; private set { field = value; IsModified = true; } }
+    public string KanriContactInfoOfCompanyIfIsKanriTasya { get => field ?? string.Empty; private set { field = value; IsModified = true; } }
+    public string KanriRemarkIfIsKanriTasya { get => field ?? string.Empty; private set { field = value; IsModified = true; } }
+    public string KanriRemarkIfIsKanriKashinushi { get => field ?? string.Empty; private set { field = value; IsModified = true; } }
 
     #endregion
 
-    #region == 写真 & 図面 ==
+    #region == 物件に属するリスト ==
 
-    public ObservableCollection<PropertyPicture> Pictures
+    // 物件に属する未保存の募集物件リスト
+    public List<Listing.Listing> ListingsToBeSaved { get; set; } = [];
+
+    // 物件に属する募集物件のサマリーリスト（一覧表示用）
+    public List<ListingSummary> ListingSummaries { get; } = [];
+
+    // 物件の保存時にDBから削除する募集物件のIDリスト
+    public List<string> ListingsToBeDeleted { get; set; } = [];
+
+    // 物件写真（建物）リスト
+    public List<PropertyPicture> Pictures
     {
         get;
         set
@@ -568,11 +327,11 @@ public sealed partial class Property : PropertyBase
         }
     } = [];
 
-    public ObservableCollection<PropertyPicture> PicturesToBeDeleted { get; set; } = [];
-
+    // DBへの更新時にDBから削除されるべき物件写真（建物）のIDリスト
+    public List<PropertyPicture> PicturesToBeDeleted { get; set; } = [];
 
     // 図面（建物）リスト
-    public ObservableCollection<PropertyPdf> Pdfs
+    public List<PropertyPdf> Pdfs
     {
         get;
         set
@@ -583,12 +342,10 @@ public sealed partial class Property : PropertyBase
     } = [];
 
     // DBへの更新時にDBから削除されるべき図面のIDリスト
-    public ObservableCollection<PropertyPdf> PdfsToBeDeleted { get; set; } = [];
-    #endregion
+    public List<PropertyPdf> PdfsToBeDeleted { get; set; } = [];
 
-    #region == Lessors ==
-
-    public ObservableCollection<PersonBase> Lessors
+    // 貸主のリスト
+    public List<PersonBase> Lessors
     {
         get;
         set
@@ -598,13 +355,11 @@ public sealed partial class Property : PropertyBase
         }
     } = [];
 
-    public ObservableCollection<PersonBase> LessorsToBeDeleted { get; set; } = [];
+    // DBへの更新時にDBから削除されるべき貸主のIDリスト
+    public List<PersonBase> LessorsToBeDeleted { get; set; } = [];
 
-    #endregion
-
-    #region == Brokers ==
-
-    public ObservableCollection<PersonBase> Brokers
+    // 宅建業者のリスト
+    public List<PersonBase> Brokers
     {
         get;
         set
@@ -614,21 +369,8 @@ public sealed partial class Property : PropertyBase
         }
     } = [];
 
-    public ObservableCollection<PersonBase> BrokersToBeDeleted { get; set; } = [];
-
-    #endregion
-
-    #region == Units ==
-
-    public ObservableCollection<string> ListingIds
-    {
-        get;
-        set
-        {
-            field = value;
-            IsModified = true;
-        }
-    } = [];
+    // DBへの更新時にDBから削除されるべき宅建業者のIDリスト
+    public List<PersonBase> BrokersToBeDeleted { get; set; } = [];
 
     #endregion
 
@@ -636,39 +378,159 @@ public sealed partial class Property : PropertyBase
 
     #region == Methods ==
 
-    public void SetCommercialKindFromString(string value)
+    public void SetCommercialKindTypeLabel(PropertyKindType value) => CommercialKind = value;
+
+    public void SetIsUnitOwnership(bool value) => IsUnitOwnership = value;
+
+    public void SetPropertyStructureTypeLabel(StructureType value) => PropertyStructure = value;
+
+    public void SetFloorCountAboveGroundFromString(string value)
     {
-        CommercialKind = Enum.TryParse(
-            value,
-            out PropertyKindType result)
-            ? new PropertyTypeLabel(result)
-            : new PropertyTypeLabel(PropertyKindType.Unspecified);
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            SetFloorCountAboveGround(0);
+            return;
+        }
+
+        if (!int.TryParse(value.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var result))
+        {
+            throw new ArgumentException("地上階の値が不正です。整数に変換出来ませんでした。", nameof(value));
+        }
+
+        SetFloorCountAboveGround(result);
     }
 
-    public void SetStructureTypeFromString(string value)
+    public void SetFloorCountAboveGround(int value)
     {
-        PropertyStructure = Enum.TryParse(
-            value,
-            out StructureType result)
-            ? new PropertyStructureTypeLabel(result)
-            : new PropertyStructureTypeLabel(StructureType.Unspecified);
+        if (value < 0)
+        {
+            throw new ArgumentException("地上階の値が不正です。0以上の整数である必要があります。", nameof(value));
+        }
+
+        FloorCountAboveGround = value;
     }
 
-    public void SetBuildYearMonthFromString(string value)
+    public void SetFloorCountBasementFromString(string value)
     {
-        BuiltYearAndMonth = string.IsNullOrWhiteSpace(value)
-            ? new DateTimeOffset(
-                1900,
-                1,
-                1,
-                0,
-                0,
-                0,
-                TimeSpan.Zero)
-            : DateTimeOffset.Parse(
-                value,
-                CultureInfo.InvariantCulture);
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            SetFloorCountBasement(0);
+            return;
+        }
+
+        if (!int.TryParse(value.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var result))
+        {
+            throw new ArgumentException("地下階の値が不正です。整数に変換出来ませんでした。", nameof(value));
+        }
+
+        SetFloorCountBasement(result);
     }
+
+    public void SetFloorCountBasement(int value)
+    {
+        if (value < 0)
+        {
+            throw new ArgumentException("地下階の値が不正です。0以上の整数である必要があります。", nameof(value));
+        }
+
+        FloorCountBasement = value;
+    }
+
+    public void SetTotalFloorArea(decimal value) => TotalFloorArea = value;
+
+    public void SetBuiltYearAndMonth(DateTimeOffset? value) => BuiltYearAndMonth = value ?? new DateTimeOffset(1900, 1, 1, 0, 0, 0, TimeSpan.Zero);
+
+    public void SetFudousanId(string value)
+    {
+        ArgumentNullException.ThrowIfNull(value);
+        var normalizedValue = value.Normalize(System.Text.NormalizationForm.FormKC).Trim();
+        if (normalizedValue.Length > 0 && !System.Text.RegularExpressions.Regex.IsMatch(normalizedValue, @"\A[0-9]{13}\z"))
+        {
+            throw new ArgumentException("不動産番号は半角数字13桁で入力してください。", nameof(value));
+        }
+        FudousanId = normalizedValue;
+    }
+
+    public void SetFudousanIdAdditionalCode(string value)
+    {
+        ArgumentNullException.ThrowIfNull(value);
+        var normalizedValue = value.Normalize(System.Text.NormalizationForm.FormKC).Trim().ToUpperInvariant();
+        if (normalizedValue.Length > 0 && !System.Text.RegularExpressions.Regex.IsMatch(normalizedValue, @"\A[A-Z0-9]{4}\z"))
+        {
+            throw new ArgumentException("特定コードは半角英数字4桁（英字は大文字）で入力してください。", nameof(value));
+        }
+        FudousanIdAdditionalCode = normalizedValue;
+    }
+
+    public void SetRemarks(string value)
+    {
+        Remarks = value;
+    }
+
+    public void SetKanriShutai(EnumKanriShutai value)
+    {
+        if (!Enum.IsDefined(value))
+        {
+            throw new ArgumentOutOfRangeException(nameof(value), value, "Invalid management type.");
+        }
+
+        KanriShutai = value;
+    }
+
+    public void SetKanriShutaiFromString(string value)
+    {
+        if (!Enum.TryParse<EnumKanriShutai>(value, out var result) || !Enum.IsDefined(result) || !string.Equals(value, result.ToString(), StringComparison.Ordinal))
+        {
+            throw new FormatException($"Invalid management type: {value}");
+        }
+
+        SetKanriShutai(result);
+    }
+
+    public void SetKanriIsMaintenanceManagementIfIsKanriJisya(bool value) => KanriIsMaintenanceManagementIfIsKanriJisya = value;
+    public void SetKanriIsTenantManagementIfIsKanriJisya(bool value) => KanriIsTenantManagementIfIsKanriJisya = value;
+    public void SetKanriIsPaymentManagementIfIsKanriJisya(bool value) => KanriIsPaymentManagementIfIsKanriJisya = value;
+    public void SetKanriIsOtherManagementIfIsKanriJisya(bool value) => KanriIsOtherManagementIfIsKanriJisya = value;
+    public void SetKanriRemarkIfIsKanriJisya(string value) => KanriRemarkIfIsKanriJisya = value;
+    public void SetKanriNameOfCompanyIfIsKanriTasya(string value) => KanriNameOfCompanyIfIsKanriTasya = value;
+    public void SetKanriContactInfoOfCompanyIfIsKanriTasya(string value) => KanriContactInfoOfCompanyIfIsKanriTasya = value;
+    public void SetKanriRemarkIfIsKanriTasya(string value) => KanriRemarkIfIsKanriTasya = value;
+    public void SetKanriRemarkIfIsKanriKashinushi(string value) => KanriRemarkIfIsKanriKashinushi = value;
+
+    public void SetCommercialKindTypeLabelFromString(string value)
+    {
+        SetCommercialKindTypeLabel(Enum.TryParse(value, out PropertyKindType result) ? result : PropertyKindType.Unspecified);
+    }
+
+    public void SetPropertyStructureTypeLabelFromString(string value)
+    {
+        SetPropertyStructureTypeLabel(Enum.TryParse(value, out StructureType result) ? result : StructureType.Unspecified);
+    }
+
+    public void SetBuiltYearAndMonthFromString(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            SetBuiltYearAndMonth(null);
+            return;
+        }
+
+        if (!DateTimeOffset.TryParse(value.Trim(), CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedValue))
+        {
+            throw new ArgumentException("築年月の値が不正です。有効な日付に変換出来ませんでした。", nameof(value));
+        }
+
+        SetBuiltYearAndMonth(parsedValue);
+    }
+
+    public void SetPictures(List<PropertyPicture> value) => Pictures = value;
+    public void SetPicturesToBeDeleted(List<PropertyPicture> value) => PicturesToBeDeleted = value;
+    public void SetPdfs(List<PropertyPdf> value) => Pdfs = value;
+    public void SetPdfsToBeDeleted(List<PropertyPdf> value) => PdfsToBeDeleted = value;
+    public void SetLessors(List<PersonBase> value) => Lessors = value;
+    public void SetLessorsToBeDeleted(List<PersonBase> value) => LessorsToBeDeleted = value;
+    public void SetBrokers(List<PersonBase> value) => Brokers = value;
+    public void SetBrokersToBeDeleted(List<PersonBase> value) => BrokersToBeDeleted = value;
 
     #endregion
 

@@ -1,5 +1,7 @@
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Navigation;
+
 
 namespace ZumenSearch.Presentation.Features.Rent.Commercials.Views.Listing;
 
@@ -14,9 +16,9 @@ public sealed partial class BrokerListPage : Page
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
-        if (e.Parameter is ZumenSearch.Presentation.Features.Rent.Commercials.ViewModels.ListingViewModel viewModel)
+        if (e.Parameter is ZumenSearch.Presentation.Features.Rent.Commercials.ViewModels.ListingViewModel vm)
         {
-            ViewModel = viewModel;
+            ViewModel = vm;
             Bindings.Update();
         }
 

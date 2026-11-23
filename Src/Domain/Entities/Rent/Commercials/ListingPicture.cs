@@ -1,75 +1,50 @@
-using System.Collections.ObjectModel;
 using ZumenSearch.Domain.Entities.Base;
-using ZumenSearch.Presentation.Features.Rent.Commercials.Models;
-using ZumenSearch.Presentation.Features.Rent.Commercials.Models.Listing;
 using ZumenSearch.Domain.Enums;
+using ZumenSearch.Domain.Enums.Rent.Commercials;
 
 namespace ZumenSearch.Domain.Entities.Rent.Commercials.Listing;
 
-public enum ListingPictureType
-{
-    Unspecified, Interior, Entrance, Equipment, Other
-}
-
-public sealed class ListingPictureTypeLabel(ListingPictureType key)
-{
-    public ListingPictureType Key => key;
-    public string Label => Key switch
-    {
-        ListingPictureType.Unspecified => "未指定",
-        ListingPictureType.Interior => "室内",
-        ListingPictureType.Entrance => "入口",
-        ListingPictureType.Equipment => "設備",
-        ListingPictureType.Other => "その他",
-        _ => throw new ArgumentOutOfRangeException(nameof(Key))
-    };
-}
-
-public sealed class ListingPicture : PictureBase
+public sealed class ListingPicture : EntityBase
 {
     public ListingPicture(string id, string imageLocation, EntityStatus status) : base(id, status)
     {
         ImageFilename = imageLocation;
-        PictureType = ListingPictureTypes[0];
-        SetIsModified(false);
+        IsModified = false;
     }
 
-    public ZumenSearch.Presentation.Features.Rent.Commercials.ViewModels.ListingViewModel? ParentViewModel { get; set; }
-    public ObservableCollection<ListingPictureTypeLabel> ListingPictureTypes { get; } =
-    [
-        new(ListingPictureType.Unspecified),
-        new(ListingPictureType.Interior),
-        new(ListingPictureType.Entrance),
-        new(ListingPictureType.Equipment),
-        new(ListingPictureType.Other)
-    ];
-
-    public ListingPictureTypeLabel PictureType
+    public string ImageFilename
     {
         get;
         set
         {
-            if (value is not null && field != value)
-            {
-                field = value;
-                IsModified = true;
-                //OnPropertyChanged();
-            }
+            if (field == value) return;
+            field = value;
+            IsModified = true;
         }
-    } = new(ListingPictureType.Unspecified);
+    } = string.Empty;
+
+    public string BasePath { get; set; } = string.Empty;
+
+    public ListingPictureType PictureType
+    {
+        get;
+        set
+        {
+            if (field == value) return;
+            field = value;
+            IsModified = true;
+        }
+    } = ListingPictureType.Unspecified;
 
     public string Description
     {
         get;
         set
         {
-            var description = value ?? string.Empty;
-            if (field != description)
-            {
-                field = description;
-                IsModified = true;
-                //OnPropertyChanged();
-            }
+            value ??= string.Empty;
+            if (field == value) return;
+            field = value;
+            IsModified = true;
         }
     } = string.Empty;
 
@@ -78,24 +53,23 @@ public sealed class ListingPicture : PictureBase
         get;
         set
         {
-            if (field != value)
-            {
-                field = value;
-                IsModified = true;
-                //OnPropertyChanged();
-            }
+            if (field == value) return;
+            field = value;
+            IsModified = true;
         }
     }
 
-    public ListingPictureType? SetLabelFromString(string value)
+    public ListingPicture Clone()
     {
-        if (!Enum.TryParse<ListingPictureType>(value, out var type) || !Enum.IsDefined(type) || int.TryParse(value, out _))
+        var clone = new ListingPicture(Id, ImageFilename, Status)
         {
-            throw new FormatException($"Invalid commercial listing picture type: {value}");
-        }
+            BasePath = BasePath,
+            Description = Description,
+            PictureType = PictureType,
+            IsMain = IsMain
+        };
 
-        PictureType = ListingPictureTypes.First(item => item.Key == type);
-        return type;
+        clone.SetIsModified(IsModified);
+        return clone;
     }
-
 }

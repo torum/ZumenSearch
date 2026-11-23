@@ -11,9 +11,7 @@ public sealed partial class PictureListPage : Page
     public PictureListPage()
     {
         InitializeComponent();
-
     }
-
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
@@ -26,25 +24,6 @@ public sealed partial class PictureListPage : Page
         base.OnNavigatedTo(e);
     }
 
-    /*
-    private void ItemsView_SelectionChanged(ItemsView sender, ItemsViewSelectionChangedEventArgs args)
-    {
-        if (ViewModel is null)
-        {
-            return;
-        }
-
-        if (sender.SelectedItem is not ZumenSearch.Presentation.Features.Rent.Residentials.Models.PictureBldg picbldg)
-        {
-            return;
-        }
-
-        //Debug.WriteLine($"PictureListPage ItemsView_SelectionChanged SelectedItem Changed to {picbldg.PictureType.Label}");
-
-        ViewModel?.Bldg.SelectedBuildingPicture = picbldg;//sender.SelectedItem as ZumenSearch.Presentation.Features.Rent.Residentials.Models.PictureBuilding;
-    }
-    */
-
     private async void AppBarButtonAddPicture_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
         if (ViewModel is null || sender is not AppBarButton button)
@@ -53,7 +32,6 @@ public sealed partial class PictureListPage : Page
         }
 
         button.IsEnabled = false;
-        ViewModel.BeginPicker();
 
         try
         {
@@ -80,20 +58,19 @@ public sealed partial class PictureListPage : Page
                 .Select(file => file.Path)
                 .ToList();
 
-            if (ViewModel.AddNewBuildingPicturesCommand.CanExecute(paths))
+            if (ViewModel.AddNewPropertyPicturesCommand.CanExecute(paths))
             {
-                await ViewModel.AddNewBuildingPicturesCommand.ExecuteAsync(paths);
+                await ViewModel.AddNewPropertyPicturesCommand.ExecuteAsync(paths);
             }
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Runtime.InteropServices.COMException or InvalidOperationException or ArgumentException)
         {
-            Debug.WriteLine($"Failed to import commercial property pictures: {ex}");
+            Debug.WriteLine($"Failed to import property pictures: {ex}");
             ViewModel.InfoBarErrorMessage = $"画像を読み込めませんでした: {ex.Message}";
             ViewModel.IsInfoBarErrorOpen = true;
         }
         finally
         {
-            ViewModel.EndPicker();
             button.IsEnabled = true;
         }
     }

@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using ZumenSearch.Domain.Enums;
 using ZumenSearch.Domain.ValueObjects.Location;
 using ZumenSearch.Infrastructure.DataAccess.Contracts;
+using ZumenSearch.Presentation.Navigation;
 using ZumenSearch.Presentation.Services.Contracts;
 using ZumenSearch.Presentation.Shell.Models;
 

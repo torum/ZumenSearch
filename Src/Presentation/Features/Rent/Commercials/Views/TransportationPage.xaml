@@ -12,23 +12,23 @@
                     <TextBlock Text="鉄道" Style="{ThemeResource SubtitleTextBlockStyle}" />
                     <Grid ColumnSpacing="12">
                         <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                        <TextBox Header="路線" IsReadOnly="True" Text="{x:Bind ViewModel.SelectedTransportation.RailLine.LineName, Mode=OneWay}" />
-                        <Button Grid.Column="1" Content="選択" VerticalAlignment="Bottom" Command="{x:Bind ViewModel.ShowRailLineSelectCommand}" />
+                        <TextBox Header="路線" IsReadOnly="True" Text="{x:Bind ViewModel.SelectedTransportation.RailLineName, Mode=OneWay}" />
+                        <Button Grid.Column="1" Content="選択" VerticalAlignment="Bottom" Command="{x:Bind ViewModel.SelectedTransportation.ShowRailLineSelectCommand, Mode=OneWay}" />
                     </Grid>
                     <Grid ColumnSpacing="12">
                         <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                        <TextBox Header="駅名" IsReadOnly="True" Text="{x:Bind ViewModel.SelectedTransportation.RailStation.StationName, Mode=OneWay}" />
-                        <Button Grid.Column="1" Content="選択" VerticalAlignment="Bottom" Command="{x:Bind ViewModel.ShowRailStationSelectCommand}" />
+                        <TextBox Header="駅名" IsReadOnly="True" Text="{x:Bind ViewModel.SelectedTransportation.RailStationName, Mode=OneWay}" />
+                        <Button Grid.Column="1" Content="選択" VerticalAlignment="Bottom" Command="{x:Bind ViewModel.SelectedTransportation.ShowRailStationSelectCommand, Mode=OneWay}" />
                     </Grid>
-                    <TextBox Header="駅から徒歩（分）" InputScope="Number" MaxLength="4" Text="{x:Bind ViewModel.SelectedTransportation.StationWalk, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox Header="駅から徒歩（分）" InputScope="Number" MaxLength="4" Text="{x:Bind ViewModel.SelectedTransportation.StationWalk, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Paste="TextBoxCleanNonDigitMax4_Paste" TextChanging="TextBox4DigitOrLess_TextChanging" TextChanged="TextBox4DigitOrLess_TextChanged" />
                 </StackPanel>
             </Border>
             <Border HorizontalAlignment="Stretch" Style="{StaticResource RoundCardBorderStyle}">
                 <StackPanel Spacing="12">
                     <TextBlock Text="バス" Style="{ThemeResource SubtitleTextBlockStyle}" />
                     <TextBox Header="バス停名" Text="{x:Bind ViewModel.SelectedTransportation.BusStop, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                    <TextBox Header="バス乗車時間（分）" InputScope="Number" MaxLength="4" Text="{x:Bind ViewModel.SelectedTransportation.BusRide, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                    <TextBox Header="バス停から徒歩（分）" InputScope="Number" MaxLength="4" Text="{x:Bind ViewModel.SelectedTransportation.BusWalk, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox Header="バス乗車時間（分）" InputScope="Number" MaxLength="4" Text="{x:Bind ViewModel.SelectedTransportation.BusRide, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Paste="TextBoxCleanNonDigitMax4_Paste" TextChanging="TextBox4DigitOrLess_TextChanging" TextChanged="TextBox4DigitOrLess_TextChanged" />
+                    <TextBox Header="バス停から徒歩（分）" InputScope="Number" MaxLength="4" Text="{x:Bind ViewModel.SelectedTransportation.BusWalk, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Paste="TextBoxCleanNonDigitMax4_Paste" TextChanging="TextBox4DigitOrLess_TextChanging" TextChanged="TextBox4DigitOrLess_TextChanged" />
                 </StackPanel>
             </Border>
         </StackPanel>

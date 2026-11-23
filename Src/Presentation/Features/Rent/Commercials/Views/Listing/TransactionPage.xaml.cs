@@ -14,11 +14,12 @@ public sealed partial class TransactionPage : Page
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
-        if (e.Parameter is ZumenSearch.Presentation.Features.Rent.Commercials.ViewModels.ListingViewModel viewModel)
+        if (e.Parameter is ZumenSearch.Presentation.Features.Rent.Commercials.ViewModels.ListingViewModel vm)
         {
-            ViewModel = viewModel;
+            ViewModel = vm;
             Bindings.Update();
         }
+
         base.OnNavigatedTo(e);
     }
 }
