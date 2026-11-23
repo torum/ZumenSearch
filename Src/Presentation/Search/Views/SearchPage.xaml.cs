@@ -186,8 +186,6 @@ public sealed partial class SearchPage : Page
 
     private void ItemsViewKeyboardAccelerator_Invoked(Microsoft.UI.Xaml.Input.KeyboardAccelerator sender, Microsoft.UI.Xaml.Input.KeyboardAcceleratorInvokedEventArgs args)
     {
-        args.Handled = true;
-
         if (args.Element is not FrameworkElement)
         {
             return;
@@ -209,13 +207,13 @@ public sealed partial class SearchPage : Page
             return;
         }
 
+        //Debug.WriteLine($"ItemContainerKeyboardAccelerator_Invoked");
 
-        Debug.WriteLine($"ItemContainerKeyboardAccelerator_Invoked");
-        /*
-        if (ViewModel.EditRentResidentialBldgCommand.CanExecute(searchresult))
+        if (ViewModel.EditPropertyCommand.CanExecute(searchresult))
         {
-            ViewModel.EditRentResidentialBldgCommand.Execute(searchresult);
+            ViewModel.EditPropertyCommand.Execute(searchresult);
+
+            args.Handled = true;
         }
-        */
     }
 }

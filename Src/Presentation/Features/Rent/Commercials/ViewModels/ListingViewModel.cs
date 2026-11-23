@@ -44,6 +44,13 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
     private readonly List<string> _unsavedListingPdfThumbnailFileList = [];
     private readonly List<string> _cleanupFailures = [];
 
+    // Keep unsaved removals separate from the listing owned by the parent editor.
+    private readonly List<ListingPicture> _picturesToBeDeleted = [];
+    private readonly List<ListingPdf> _pdfsToBeDeleted = [];
+    private readonly List<ZumenSearch.Domain.Entities.Base.PersonBase> _lessorsToBeDeleted = [];
+    private readonly List<ZumenSearch.Domain.Entities.Base.PersonBase> _brokersToBeDeleted = [];
+
+    private bool _isHandedOffToParentEditor;
     private bool _disposed;
 
     private readonly CancellationTokenSource _cts = new();
@@ -60,10 +67,11 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
 
     #endregion
 
-    public ListingViewModel(ZumenSearch.Domain.Entities.Rent.Commercials.Listing.Listing listing, bool isDuplicate, INavigationGenericService navigationService, IDialogGenericService dialogService, IDispatcherService dispatcherService, RentCommercialListingService rentCommercialListingService, PersonService personService)
+    public ListingViewModel(ZumenSearch.Domain.Entities.Rent.Commercials.Listing.Listing listing, bool isDuplicate, INavigationGenericService navigationService, IDialogGenericService dialogService, IDispatcherService dispatcherService, RentCommercialListingService rentCommercialListingService, PersonService personService, bool isHandedOffToParentEditor = false)
     {
         _listing = listing;
         _id = listing.Id;
+        _isHandedOffToParentEditor = isHandedOffToParentEditor;
 
         _navigationService = navigationService;
         _dialogService = dialogService;
@@ -491,6 +499,12 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         }
     }
 
+    [RelayCommand]
+    public void SetOccupancyStatusCheckedAtToToday()
+    {
+        OccupancyStatusCheckedAt = DateTimeOffset.Now;
+    }
+
     // 不動産番号 (13桁)
     public string FudousanId
     {
@@ -712,6 +726,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         if (property.Value is not ZumenSearch.Domain.Entities.Rent.Commercials.Property building || !building.Id.Equals(_listing.PropertyId, StringComparison.Ordinal)) return;
 
         _listing.SetPropertyStatus(building.Status);
+        if (building.Status == EntityStatus.Saved) _isHandedOffToParentEditor = false;
         _listing.SetPropertyName(building.Name);
         SetOwnershipVisibility(building.IsUnitOwnership);
 
@@ -832,6 +847,10 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         try
         {
             DiscardUnsavedFiles();
+            _picturesToBeDeleted.Clear();
+            _pdfsToBeDeleted.Clear();
+            _lessorsToBeDeleted.Clear();
+            _brokersToBeDeleted.Clear();
             IsDirty = false;
         }
         finally
@@ -1529,7 +1548,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         DeleteTrackedFiles(_unsavedListingPdfFileList, failures);
         DeleteTrackedFiles(_unsavedListingPdfThumbnailFileList, failures);
 
-        if (_listing.Status == EntityStatus.New && Directory.Exists(_listingDataDirectoryPath))
+        if (_listing.Status == EntityStatus.New && !_isHandedOffToParentEditor && Directory.Exists(_listingDataDirectoryPath))
         {
             try
             {
@@ -1662,11 +1681,43 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
             return;
         }
 
+        // Preserve the last saved media and contacts if applying values or the database save fails.
+        var previousPictures = _listing.Pictures.ToList();
+        var previousPdfs = _listing.Pdfs.ToList();
+        var previousLessors = _listing.Lessors.ToList();
+        var previousBrokers = _listing.Brokers.ToList();
         if (!SetValues())
         {
+            _listing.Pictures.Clear();
+            _listing.Pictures.AddRange(previousPictures);
+            _listing.Pdfs.Clear();
+            _listing.Pdfs.AddRange(previousPdfs);
+            _listing.Lessors.Clear();
+            _listing.Lessors.AddRange(previousLessors);
+            _listing.Brokers.Clear();
+            _listing.Brokers.AddRange(previousBrokers);
             return;
         }
 
+        var previousPictureDeletions = _listing.PicturesToBeDeleted.ToList();
+        var previousPdfDeletions = _listing.PdfsToBeDeleted.ToList();
+        var previousLessorDeletions = _listing.LessorsToBeDeleted.ToList();
+        var previousBrokerDeletions = _listing.BrokersToBeDeleted.ToList();
+        // Publish removals only on save; a contact re-added in the editor cancels its earlier removal.
+        _listing.PicturesToBeDeleted.AddRange(_picturesToBeDeleted);
+        _listing.PdfsToBeDeleted.AddRange(_pdfsToBeDeleted);
+        _listing.LessorsToBeDeleted.RemoveAll(person => _listing.Lessors.Any(item => item.Id.Equals(person.Id, StringComparison.Ordinal)));
+        _listing.BrokersToBeDeleted.RemoveAll(person => _listing.Brokers.Any(item => item.Id.Equals(person.Id, StringComparison.Ordinal)));
+        foreach (var person in _lessorsToBeDeleted)
+        {
+            if (!_listing.LessorsToBeDeleted.Any(item => item.Id.Equals(person.Id, StringComparison.Ordinal))) _listing.LessorsToBeDeleted.Add(person);
+        }
+        foreach (var person in _brokersToBeDeleted)
+        {
+            if (!_listing.BrokersToBeDeleted.Any(item => item.Id.Equals(person.Id, StringComparison.Ordinal))) _listing.BrokersToBeDeleted.Add(person);
+        }
+
+        // PropertyUpdatedMessage updates PropertyStatus when the parent is saved; subsequent listing saves are independent.
         bool isHandedOffToParentEditor;
         if (_listing.PropertyStatus == EntityStatus.New)
         {
@@ -1675,20 +1726,93 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
             // The parent property editor owns persistence until the property is saved. Let the parent property editor handle the save operation.
             // This also updates the selected search result and the property's listing list.
             WeakReferenceMessenger.Default.Send(new ZumenSearch.Presentation.Messaging.ListingUpdatedMessage(_listing));
+
+            // The parent now owns the handed-off listing, so discarding this editor must not delete its directory.
+            _isHandedOffToParentEditor = true;
+
+            // Stop tracking handed-off files as unsaved by this editor so discard preserves them.
+            foreach (var picture in _listing.Pictures)
+            {
+                _unsavedListingPictureFileList.Remove(Path.Combine(_listingDataDirectoryPath, picture.ImageFilename));
+            }
+            foreach (var pdf in _listing.Pdfs)
+            {
+                _unsavedListingPdfFileList.Remove(Path.Combine(_listingDataDirectoryPath, pdf.PdfFilename));
+                _unsavedListingPdfThumbnailFileList.Remove(Path.Combine(_listingDataDirectoryPath, pdf.ThumbnailFilename));
+            }
+
+            // Protect every filename still referenced by the handed-off listing, including PDF thumbnails.
+            var referencedFiles = new HashSet<string>(_listing.Pictures.Select(picture => picture.ImageFilename), StringComparer.OrdinalIgnoreCase);
+            foreach (var pdf in _listing.Pdfs)
+            {
+                referencedFiles.Add(pdf.PdfFilename);
+                referencedFiles.Add(pdf.ThumbnailFilename);
+            }
+
+            // Delete removed files only if they are no longer referenced; stop tracking each attempted deletion.
+            var deletedFiles = _listing.PicturesToBeDeleted.Select(picture => picture.ImageFilename)
+                .Concat(_listing.PdfsToBeDeleted.SelectMany(pdf => new[] { pdf.PdfFilename, pdf.ThumbnailFilename }));
+            foreach (var filename in deletedFiles.Distinct(StringComparer.OrdinalIgnoreCase))
+            {
+                if (referencedFiles.Contains(filename)) continue;
+                var path = Path.Combine(_listingDataDirectoryPath, filename);
+                TryDeleteFiles(new[] { path }, _cleanupFailures);
+                _unsavedListingPictureFileList.Remove(path);
+                _unsavedListingPdfFileList.Remove(path);
+                _unsavedListingPdfThumbnailFileList.Remove(path);
+            }
+            // These deletions have been processed; failures are reported below rather than retried automatically.
+            _listing.PicturesToBeDeleted.Clear();
+            _listing.PdfsToBeDeleted.Clear();
+            _picturesToBeDeleted.Clear();
+            _pdfsToBeDeleted.Clear();
+            // Contact deletions remain on the listing for the parent property's database save.
+            _lessorsToBeDeleted.Clear();
+            _brokersToBeDeleted.Clear();
+            if (_cleanupFailures.Count > 0)
+            {
+                ShowSimpleErrorInfoBar("保存しましたが、一部の削除済みファイルをクリーンアップできませんでした", $"{string.Join(", ", _cleanupFailures)}");
+            }
+            IsDirty = false;
             isHandedOffToParentEditor = true;
         }
         else
         {
             ZumenSearch.Application.Results.ResultWrapper resUpsert;
+            var saved = false;
             try
             {
                 resUpsert = await Task.Run(() => _rentCommercialListingService.Save(_listing.PropertyId, _listing), _cts.Token);
+                saved = !resUpsert.IsError;
             }
             catch (OperationCanceledException) when (_cts.Token.IsCancellationRequested)
             {
                 Debug.WriteLine("Save operation was canceled.");
                 // The queued operation did not start. Do not report a database failure.
                 return;
+            }
+            finally
+            {
+                if (!saved)
+                {
+                    // Restore the shared media and contact state; the editor retains its changes until saved or discarded.
+                    _listing.Pictures.Clear();
+                    _listing.Pictures.AddRange(previousPictures);
+                    _listing.Pdfs.Clear();
+                    _listing.Pdfs.AddRange(previousPdfs);
+                    _listing.PicturesToBeDeleted.Clear();
+                    _listing.PicturesToBeDeleted.AddRange(previousPictureDeletions);
+                    _listing.PdfsToBeDeleted.Clear();
+                    _listing.PdfsToBeDeleted.AddRange(previousPdfDeletions);
+                    _listing.Lessors.Clear();
+                    _listing.Lessors.AddRange(previousLessors);
+                    _listing.Brokers.Clear();
+                    _listing.Brokers.AddRange(previousBrokers);
+                    _listing.LessorsToBeDeleted.Clear();
+                    _listing.LessorsToBeDeleted.AddRange(previousLessorDeletions);
+                    _listing.BrokersToBeDeleted.Clear();
+                    _listing.BrokersToBeDeleted.AddRange(previousBrokerDeletions);
+                }
             }
 
             if (resUpsert.IsError)
@@ -1707,6 +1831,10 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
             {
                 Debug.WriteLine("No errors on update.");
 
+                _picturesToBeDeleted.Clear();
+                _pdfsToBeDeleted.Clear();
+                _lessorsToBeDeleted.Clear();
+                _brokersToBeDeleted.Clear();
                 IsDirty = false;
 
                 isHandedOffToParentEditor = false;
@@ -1952,7 +2080,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
 
             if (Pictures.Remove(picListing))
             {
-                _listing.PicturesToBeDeleted.Add(picListing.Model);
+                _picturesToBeDeleted.Add(picListing.Model);
                 IsDirty = true;
             }
         }
@@ -1979,7 +2107,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
             {
                 if (Pictures.Remove(picListing))
                 {
-                    _listing.PicturesToBeDeleted.Add(picListing.Model);
+                    _picturesToBeDeleted.Add(picListing.Model);
                     IsDirty = true;
                 }
             }
@@ -2167,7 +2295,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
 
             if (Pdfs.Remove(pdf))
             {
-                _listing.PdfsToBeDeleted.Add(pdf.Model);
+                _pdfsToBeDeleted.Add(pdf.Model);
                 IsDirty = true;
             }
         }
@@ -2193,7 +2321,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
             {
                 if (Pdfs.Remove(pdfProp))
                 {
-                    _listing.PdfsToBeDeleted.Add(pdfProp.Model);
+                    _pdfsToBeDeleted.Add(pdfProp.Model);
                     IsDirty = true;
                 }
             }
@@ -2294,7 +2422,8 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
                 return;
             }
 
-            foreach (var deleted in _listing.LessorsToBeDeleted.Where(person => person.Id == res.Person.Id).ToList()) _listing.LessorsToBeDeleted.Remove(deleted);
+            // Re-adding a contact cancels only this editor's unsaved removal.
+            _lessorsToBeDeleted.RemoveAll(person => person.Id.Equals(res.Person.Id, StringComparison.Ordinal));
 
             var lessorWrapper = new ZumenSearch.Presentation.Features.Rent.Commercials.ViewModels.ListingPersonViewModel(res.Person, this);
             LessorsWrapper.Add(lessorWrapper);
@@ -2343,7 +2472,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         if (LessorsWrapper.Remove(lessor))
         {
             IsDirty = true;
-            if (!_listing.LessorsToBeDeleted.Any(person => person.Id == lessor.Person.Id)) _listing.LessorsToBeDeleted.Add(lessor.Person);
+            if (!_lessorsToBeDeleted.Any(person => person.Id.Equals(lessor.Person.Id, StringComparison.Ordinal))) _lessorsToBeDeleted.Add(lessor.Person);
         }
     }
     private static bool CanDeleteLessor(ZumenSearch.Presentation.Features.Rent.Commercials.ViewModels.ListingPersonViewModel lessor)
@@ -2398,7 +2527,8 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
                 return;
             }
 
-            foreach (var deleted in _listing.BrokersToBeDeleted.Where(person => person.Id == res.Person.Id).ToList()) _listing.BrokersToBeDeleted.Remove(deleted);
+            // Re-adding a contact cancels only this editor's unsaved removal.
+            _brokersToBeDeleted.RemoveAll(person => person.Id.Equals(res.Person.Id, StringComparison.Ordinal));
 
             BrokersWrapper.Add(new ZumenSearch.Presentation.Features.Rent.Commercials.ViewModels.ListingPersonViewModel(res.Person, this));
 
@@ -2442,8 +2572,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
 
         if (BrokersWrapper.Remove(broker))
         {
-            _listing.Brokers.Remove(broker.Person);
-            if (!_listing.BrokersToBeDeleted.Any(person => person.Id == broker.Person.Id)) _listing.BrokersToBeDeleted.Add(broker.Person);
+            if (!_brokersToBeDeleted.Any(person => person.Id.Equals(broker.Person.Id, StringComparison.Ordinal))) _brokersToBeDeleted.Add(broker.Person);
 
             IsDirty = true;
         }

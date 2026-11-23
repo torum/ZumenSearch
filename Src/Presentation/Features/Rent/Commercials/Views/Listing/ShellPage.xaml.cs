@@ -42,7 +42,7 @@ public sealed partial class ShellPage : Page
     private readonly IDispatcherService _dispatcherService;
     private readonly IDialogGenericService _dialogService;
 
-    public ShellPage(ZumenSearch.Domain.Entities.Rent.Commercials.Listing.Listing listing, bool isDuplicate, IAbstractFactory<ZumenSearch.Domain.Entities.Rent.Commercials.Listing.Listing, bool, INavigationGenericService, IDialogGenericService, ZumenSearch.Presentation.Features.Rent.Commercials.ViewModels.ListingViewModel> vmFactory, INavigationGenericService navigationlService, IDispatcherService dispatcherService, IDialogGenericService dialogService)
+    public ShellPage(ZumenSearch.Domain.Entities.Rent.Commercials.Listing.Listing listing, bool isDuplicate, bool isHandedOffToParentEditor, IAbstractFactory<ZumenSearch.Domain.Entities.Rent.Commercials.Listing.Listing, bool, bool, INavigationGenericService, IDialogGenericService, ZumenSearch.Presentation.Features.Rent.Commercials.ViewModels.ListingViewModel> vmFactory, INavigationGenericService navigationlService, IDispatcherService dispatcherService, IDialogGenericService dialogService)
     {
         //Debug.WriteLine($"ShellPage {entry.Id}");
 
@@ -50,7 +50,7 @@ public sealed partial class ShellPage : Page
         _dispatcherService = dispatcherService;
         _dialogService = dialogService;
 
-        ViewModel = vmFactory.Create(listing, isDuplicate, _navigationlService, _dialogService);
+        ViewModel = vmFactory.Create(listing, isDuplicate, isHandedOffToParentEditor, _navigationlService, _dialogService);
 
         Window = new ZumenSearch.Presentation.Features.Rent.Commercials.Views.Listing.EditorWindow(listing.Id, listing.PropertyId, ViewModel)
         {

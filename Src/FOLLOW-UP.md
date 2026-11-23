@@ -2,24 +2,26 @@
 
 These are code-level observations and risks, not necessarily confirmed user-visible failures. Review Rent Residentials and Rent Commercials together unless a task identifies a different scope. Priorities are a suggested work order; confirm behavior and choose fixes before implementation. Paths below identify likely starting points, not an exhaustive list of files to edit.
 
-## 1. Obvious no-ops
+## 1. Pending listings, save handoff, and file ownership
+
+**Files:** Rent Residential and Commercial `PropertyViewModel.cs` and `ListingViewModel.cs`; their listing editor windows and media view models; `Infrastructure\DataAccess\DataAccessService.cs`.
+
+- [x] Update pending-listing handoff in both editors: replace existing queue entries, reopen handed-off listings from memory, track dependent windows, and remove deleted pending listings from the queue.
+- [x] Protect handed-off media from discard cleanup, clear the child editor's dirty state on handoff, and clean up removed media without deleting files still referenced by the listing.
+- [x] Stage media and lessor/broker removals in the listing editor until save; preserve the parent listing on discard and restore its previous media and contact state after a failed database save.
+- [x] Review shared mutable listing state between the property editor and open listing editors. Decided not to introduce full-object copying or broader coordination at this stage
+
+## 2. Obvious no-ops
 
 ### Commands and actions
 
 **Files:** `Presentation\Shell\ViewModels\MainViewModel.cs`; Residential, Commercial, and Sale Residential views; Rent Residential and Commercial listing and property view models.
 
-- [ ] Recent-properties Enter marks the accelerator handled without executing the edit command. Review keyboard handling for Rent Residentials, Rent Commercials, and Sale Residentials, including the context-menu accelerator.
-- [ ] The Residential listing's 本日確認 button has no action; Commercial copies that behavior. Determine and implement the action consistently.
-- [ ] The property listing duplication command is a no-op in Residentials. Determine the intended behavior for saved and pending listings and review Commercials alongside it.
+- [x] Recent-properties Enter marks the accelerator handled without executing the edit command. Review keyboard handling for Rent Residentials, Rent Commercials, and Sale Residentials, including the context-menu accelerator.
+- [x] The Residential listing's 本日確認 button has no action; Commercial copies that behavior. Determine and implement the action consistently.
+- [ ] The property listing duplication command is a no-op in Residentials and Commercials. Determine the intended behavior for saved and pending listings.
 
-## 2. Higher-severity risks: lost or inconsistent data
-
-### Pending listings, save handoff, and file ownership
-
-**Files:** Rent Residential and Commercial `PropertyViewModel.cs` and `ListingViewModel.cs`; their listing editor windows and media view models; `Infrastructure\DataAccess\DataAccessService.cs`.
-
-- [ ] Review the complete lifecycle of listings handed off to a new-property editor: queue ownership and replacement, child saves, reopening, deletion, parent persistence, and cleanup. The queue shares mutable listing objects and can share its list with the property. `Receive(ListingUpdatedMessage)` assigns the replacement only to a local variable, leaving the old list element in place; later child changes can be lost when the parent saves. Clearing the queue can also clear a shared list. An open child can hand off changes while the background property save uses the queue, disrupting persistence or having a late handoff cleared. Reopening a handed-off listing queries the database even though it has not yet been persisted. Deleting one leaves it queued for upsert before deletion, potentially leaving contact associations.
-- [ ] Coordinate dirty state and media ownership with that handoff. The child save does not clear its dirty state or perform listing post-save cleanup; choosing Save on close leaves the window open. Discard can delete unsaved files while the listing remains queued in the parent. After the parent persists it, an open child can still track those files as unsaved and delete files referenced by the saved listing when discarded.
+## 3. Higher-severity risks: lost or inconsistent data
 
 ### Windowing, concurrency, and deletion
 
@@ -54,7 +56,7 @@ These are code-level observations and risks, not necessarily confirmed user-visi
 - [ ] Residential stores unspecified listing floor area as empty text, which numeric search casts to zero; Commercial uses NULL, which does not match numeric bounds. Both commission upper-bound searches cast unspecified empty values to zero. Decide consistent unspecified-value semantics.
 - [ ] Residential management-fee search labels its maximum in yen but compares amounts without checking whether the unit is yen or months. Both searches accept a commission maximum without a unit and compare percentage and yen values against the same numeric bound. Review unit-aware filtering and intended unitless limits together, including Commercial behavior.
 
-## 3. Straightforward fixes and usability
+## 4. Straightforward fixes and usability
 
 ### Validation, display, and feedback
 
@@ -84,7 +86,7 @@ These are code-level observations and risks, not necessarily confirmed user-visi
 
 - [ ] Property duplication populates the editor name before prefixing the entity name; save copies the editor name back to the entity. Decide intended duplicate naming in both implementations.
 
-## 4. Edge cases and exception handling
+## 5. Edge cases and exception handling
 
 ### Save, initialization, and input timing
 

@@ -155,8 +155,8 @@ public partial class App : Microsoft.UI.Xaml.Application
 
                 services.AddTransient<ZumenSearch.Presentation.Features.Rent.Residentials.ViewModels.ListingViewModel>();
                 services.AddTransient<ZumenSearch.Presentation.Features.Rent.Residentials.Views.Listing.ShellPage>();
-                services.AddGenericFactory<ZumenSearch.Domain.Entities.Rent.Residentials.Listing, bool, INavigationGenericService, IDialogGenericService, ZumenSearch.Presentation.Features.Rent.Residentials.ViewModels.ListingViewModel>();
-                services.AddGenericFactory<ZumenSearch.Domain.Entities.Rent.Residentials.Listing, bool, ZumenSearch.Presentation.Features.Rent.Residentials.Views.Listing.ShellPage>();
+                services.AddGenericFactory<ZumenSearch.Domain.Entities.Rent.Residentials.Listing, bool, bool, INavigationGenericService, IDialogGenericService, ZumenSearch.Presentation.Features.Rent.Residentials.ViewModels.ListingViewModel>();
+                services.AddGenericFactory<ZumenSearch.Domain.Entities.Rent.Residentials.Listing, bool, bool, ZumenSearch.Presentation.Features.Rent.Residentials.Views.Listing.ShellPage>();
 
                 services.AddTransient<ZumenSearch.Presentation.Features.Rent.Commercials.ViewModels.PropertyViewModel>();
                 services.AddTransient<ZumenSearch.Presentation.Features.Rent.Commercials.Views.ShellPage>();
@@ -165,8 +165,8 @@ public partial class App : Microsoft.UI.Xaml.Application
 
                 services.AddTransient<ZumenSearch.Presentation.Features.Rent.Commercials.ViewModels.ListingViewModel>();
                 services.AddTransient<ZumenSearch.Presentation.Features.Rent.Commercials.Views.Listing.ShellPage>();
-                services.AddGenericFactory<ZumenSearch.Domain.Entities.Rent.Commercials.Listing.Listing, bool, INavigationGenericService, IDialogGenericService, ZumenSearch.Presentation.Features.Rent.Commercials.ViewModels.ListingViewModel>();
-                services.AddGenericFactory<ZumenSearch.Domain.Entities.Rent.Commercials.Listing.Listing, bool, ZumenSearch.Presentation.Features.Rent.Commercials.Views.Listing.ShellPage>();
+                services.AddGenericFactory<ZumenSearch.Domain.Entities.Rent.Commercials.Listing.Listing, bool, bool, INavigationGenericService, IDialogGenericService, ZumenSearch.Presentation.Features.Rent.Commercials.ViewModels.ListingViewModel>();
+                services.AddGenericFactory<ZumenSearch.Domain.Entities.Rent.Commercials.Listing.Listing, bool, bool, ZumenSearch.Presentation.Features.Rent.Commercials.Views.Listing.ShellPage>();
 
                 services.AddTransient<ZumenSearch.Presentation.Features.Rent.Lessors.ViewModels.LessorViewModel>();
                 services.AddTransient<ZumenSearch.Presentation.Features.Rent.Lessors.Views.ShellPage>();

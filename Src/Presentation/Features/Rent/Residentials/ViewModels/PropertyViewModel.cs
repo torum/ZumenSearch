@@ -55,7 +55,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
     private readonly List<string> _unsavedPropertyPdfThumbnailFileList = [];
     private readonly List<string> _cleanupFailures = [];
 
-    // Tmp listing list to hold unsaved listing where listing reside here while property is not yet saved. (if entry is discarded without saving, delete on close)
+    // While the property is new, this editor owns listings handed off by child editors and saves them with the property.
+    // Once the property is saved, it relinquishes ownership and notifies the listing editors.
     private readonly List<Listing> _unsavedListingList = [];
 
     private bool _isBusy;
@@ -67,7 +68,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
     #region == Services ==
 
-    private readonly IAbstractFactory<ZumenSearch.Domain.Entities.Rent.Residentials.Listing, bool, ZumenSearch.Presentation.Features.Rent.Residentials.Views.Listing.ShellPage> _shellFactory;
+    private readonly IAbstractFactory<ZumenSearch.Domain.Entities.Rent.Residentials.Listing, bool, bool, ZumenSearch.Presentation.Features.Rent.Residentials.Views.Listing.ShellPage> _shellFactory;
     private readonly RentResidentialPropertyService _rentResidentialPropertyService;
     private readonly RentResidentialListingService _rentResidentialListingService;
     private readonly PersonService _personService;
@@ -78,7 +79,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
     #endregion
 
-    public PropertyViewModel(ZumenSearch.Domain.Entities.Rent.Residentials.Property property, bool isDuplicate, INavigationGenericService navigationService, IDialogGenericService dialogService, IAbstractFactory<ZumenSearch.Domain.Entities.Rent.Residentials.Listing, bool, ZumenSearch.Presentation.Features.Rent.Residentials.Views.Listing.ShellPage> shellFactory, IDispatcherService dispatcherService, RentResidentialPropertyService rentResidentialPropertyService, RentResidentialListingService rentResidentialListingService, PersonService personService, ILocationRepository locationRepository)
+    public PropertyViewModel(ZumenSearch.Domain.Entities.Rent.Residentials.Property property, bool isDuplicate, INavigationGenericService navigationService, IDialogGenericService dialogService, IAbstractFactory<ZumenSearch.Domain.Entities.Rent.Residentials.Listing, bool, bool, ZumenSearch.Presentation.Features.Rent.Residentials.Views.Listing.ShellPage> shellFactory, IDispatcherService dispatcherService, RentResidentialPropertyService rentResidentialPropertyService, RentResidentialListingService rentResidentialListingService, PersonService personService, ILocationRepository locationRepository)
     {
         _property = property;
         _id = property.Id;
@@ -2261,11 +2262,11 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         }
 
         // Update the unsaved listing list with the new listing data.
-        var existingListing = _unsavedListingList.FirstOrDefault(item => item.Id.Equals(listing.Id, StringComparison.Ordinal));
-        if (existingListing is not null)
+        var existingListingIndex = _unsavedListingList.FindIndex(item => item.Id.Equals(listing.Id, StringComparison.Ordinal));
+        if (existingListingIndex >= 0)
         {
             Debug.WriteLine($"Updating existing listing {listing.Id} in unsaved listing list.");
-            existingListing = listing;
+            _unsavedListingList[existingListingIndex] = listing;
             IsDirty = true;
         }
         else
@@ -3942,7 +3943,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
     private void AddNewListing() 
     {
         var newId = Guid.CreateVersion7().ToString("N");
-        var editorShell = _shellFactory.Create(new ZumenSearch.Domain.Entities.Rent.Residentials.Listing(newId, EntityStatus.New, _property.Id, _property.Status, _property.IsUnitLevelOwnership, Name, _property.FudousanId), false);
+        var editorShell = _shellFactory.Create(new ZumenSearch.Domain.Entities.Rent.Residentials.Listing(newId, EntityStatus.New, _property.Id, _property.Status, _property.IsUnitLevelOwnership, Name, _property.FudousanId), false, false);
 
         // Apply the current IsUnitOwnership state because it may not be saved to the _room YET.
         //editorShell.ViewModel.SetIsPropertyUnitOwnership(this.IsUnitOwnership);
@@ -4035,21 +4036,24 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             }
         }
 
-        ZumenSearch.Domain.Entities.Rent.Residentials.Listing listing;
-
-        var result = await Task.Run(() => _rentResidentialListingService.GetById(_id, unitId), _cts.Token);
-        if (result.IsError)
+        var listing = _unsavedListingList.FirstOrDefault(item => item.Id.Equals(unitId, StringComparison.Ordinal));
+        var isHandedOffToParentEditor = listing is not null;
+        if (listing is null)
         {
-            ShowErrorInfoBar(result.Error);
-            return;
+            var result = await Task.Run(() => _rentResidentialListingService.GetById(_id, unitId), _cts.Token);
+            if (result.IsError)
+            {
+                ShowErrorInfoBar(result.Error);
+                return;
+            }
+            if (result.Listing is null)
+            {
+                ShowSimpleErrorInfoBar("エラー", "募集物件が見つかりませんでした。再読み込みしてください。");
+                return;
+            }
+            listing = result.Listing;
         }
-        if (result.Listing is null)
-        {
-            ShowSimpleErrorInfoBar("エラー", "募集物件が見つかりませんでした。再読み込みしてください。");
-            return;
-        }
-        listing = result.Listing;
-        var editorShell = _shellFactory.Create(listing, false);
+        var editorShell = _shellFactory.Create(listing, false, isHandedOffToParentEditor);
 
         // Apply the current IsUnitOwnership state because it may not be saved to the _listing YET.
         //editorShell.ViewModel.SetIsPropertyUnitOwnership(this.IsUnitOwnership);
@@ -4066,8 +4070,10 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
         mainVM.RentResidentialListingEditorList.Add(editorWindow);
 
-        // Let's not add it to the ChildEditorList because it is already saved which means it's got a own persistent id and can be saved independently.
-        //this.ChildEditorList.Add(editorWindow);
+        if (isHandedOffToParentEditor)
+        {
+            UnsavedChildEditorList.Add(editorWindow);
+        }
 
         editorWindow.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(mainVM.RentResidentialListingEditorWinLeft, mainVM.RentResidentialListingEditorWinTop, mainVM.RentResidentialListingEditorWinWidth, mainVM.RentResidentialListingEditorWinHeight));
         if (editorWindow.AppWindow.Presenter is OverlappedPresenter presenter)
@@ -4168,6 +4174,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             // Don't delete directly. Just mark it for deletion. It will be deleted when the property is saved.
             //if (_property.Rooms.Remove(listing)) { }
             _property.ListingsToBeDeleted.Add(listingSummary.Id);
+            _unsavedListingList.RemoveAll(item => item.Id.Equals(listingSummary.Id, StringComparison.Ordinal));
 
             _property.ListingSummaries.Remove(listingSummary);
 

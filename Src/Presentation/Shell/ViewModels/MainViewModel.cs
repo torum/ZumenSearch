@@ -58,10 +58,10 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
     #region == Services ==
 
     private readonly IAbstractFactory<ZumenSearch.Domain.Entities.Rent.Residentials.Property, bool, ZumenSearch.Presentation.Features.Rent.Residentials.Views.ShellPage> _shellRentResidentialPropertyFactory;
-    private readonly IAbstractFactory<ZumenSearch.Domain.Entities.Rent.Residentials.Listing, bool, ZumenSearch.Presentation.Features.Rent.Residentials.Views.Listing.ShellPage> _shellRentResidentialListingFactory;
+    private readonly IAbstractFactory<ZumenSearch.Domain.Entities.Rent.Residentials.Listing, bool, bool, ZumenSearch.Presentation.Features.Rent.Residentials.Views.Listing.ShellPage> _shellRentResidentialListingFactory;
 
     private readonly IAbstractFactory<ZumenSearch.Domain.Entities.Rent.Commercials.Property, bool, ZumenSearch.Presentation.Features.Rent.Commercials.Views.ShellPage> _shellRentCommercialPropertyFactory;
-    private readonly IAbstractFactory<ZumenSearch.Domain.Entities.Rent.Commercials.Listing.Listing, bool, ZumenSearch.Presentation.Features.Rent.Commercials.Views.Listing.ShellPage> _shellRentCommercialListingFactory;
+    private readonly IAbstractFactory<ZumenSearch.Domain.Entities.Rent.Commercials.Listing.Listing, bool, bool, ZumenSearch.Presentation.Features.Rent.Commercials.Views.Listing.ShellPage> _shellRentCommercialListingFactory;
     
     private readonly IAbstractFactory<ZumenSearch.Domain.Entities.Base.PersonBase, ZumenSearch.Presentation.Features.Rent.Lessors.Views.ShellPage> _shellRentLessorFactory;
     private readonly IAbstractFactory<ZumenSearch.Domain.Entities.Base.PersonBase, ZumenSearch.Presentation.Features.Brokers.Views.ShellPage> _shellBrokerFactory;
@@ -81,7 +81,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
 
     #endregion
 
-    public MainViewModel(IAbstractFactory<ZumenSearch.Domain.Entities.Rent.Residentials.Property, bool, ZumenSearch.Presentation.Features.Rent.Residentials.Views.ShellPage> shellRentResidentialPropertyFactory, IAbstractFactory<ZumenSearch.Domain.Entities.Rent.Residentials.Listing, bool, ZumenSearch.Presentation.Features.Rent.Residentials.Views.Listing.ShellPage> shellRentResidentialListingFactory, IAbstractFactory<ZumenSearch.Domain.Entities.Rent.Commercials.Property, bool, ZumenSearch.Presentation.Features.Rent.Commercials.Views.ShellPage> shellRentCommercialPropertyFactory, IAbstractFactory<ZumenSearch.Domain.Entities.Rent.Commercials.Listing.Listing, bool, ZumenSearch.Presentation.Features.Rent.Commercials.Views.Listing.ShellPage> shellRentCommercialListingFactory, IAbstractFactory<ZumenSearch.Domain.Entities.Base.PersonBase, ZumenSearch.Presentation.Features.Rent.Lessors.Views.ShellPage> shellRentLessorFactory, IAbstractFactory<ZumenSearch.Domain.Entities.Sale.Residentials.Property, ZumenSearch.Presentation.Features.Sale.Residentials.Views.ShellPage> shellSaleResidentialPropertyFactory, IAbstractFactory<ZumenSearch.Domain.Entities.Base.PersonBase, ZumenSearch.Presentation.Features.Brokers.Views.ShellPage> shellBrokerFactory, INavigationService navigationService, IDataAccessService dataAccessService, PropertySearchService propertySearchService, RentResidentialPropertyService rentResidentialPropertyService, RentResidentialListingService rentResidentialListingService, RentCommercialPropertyService rentCommercialPropertyService, RentCommercialListingService rentCommercialListingService, PersonService personService, IDispatcherService dispatcherService, IConfigurationService configurationService, IDialogGenericService dialogService)
+    public MainViewModel(IAbstractFactory<ZumenSearch.Domain.Entities.Rent.Residentials.Property, bool, ZumenSearch.Presentation.Features.Rent.Residentials.Views.ShellPage> shellRentResidentialPropertyFactory, IAbstractFactory<ZumenSearch.Domain.Entities.Rent.Residentials.Listing, bool, bool, ZumenSearch.Presentation.Features.Rent.Residentials.Views.Listing.ShellPage> shellRentResidentialListingFactory, IAbstractFactory<ZumenSearch.Domain.Entities.Rent.Commercials.Property, bool, ZumenSearch.Presentation.Features.Rent.Commercials.Views.ShellPage> shellRentCommercialPropertyFactory, IAbstractFactory<ZumenSearch.Domain.Entities.Rent.Commercials.Listing.Listing, bool, bool, ZumenSearch.Presentation.Features.Rent.Commercials.Views.Listing.ShellPage> shellRentCommercialListingFactory, IAbstractFactory<ZumenSearch.Domain.Entities.Base.PersonBase, ZumenSearch.Presentation.Features.Rent.Lessors.Views.ShellPage> shellRentLessorFactory, IAbstractFactory<ZumenSearch.Domain.Entities.Sale.Residentials.Property, ZumenSearch.Presentation.Features.Sale.Residentials.Views.ShellPage> shellSaleResidentialPropertyFactory, IAbstractFactory<ZumenSearch.Domain.Entities.Base.PersonBase, ZumenSearch.Presentation.Features.Brokers.Views.ShellPage> shellBrokerFactory, INavigationService navigationService, IDataAccessService dataAccessService, PropertySearchService propertySearchService, RentResidentialPropertyService rentResidentialPropertyService, RentResidentialListingService rentResidentialListingService, RentCommercialPropertyService rentCommercialPropertyService, RentCommercialListingService rentCommercialListingService, PersonService personService, IDispatcherService dispatcherService, IConfigurationService configurationService, IDialogGenericService dialogService)
     {
         _shellRentResidentialPropertyFactory = shellRentResidentialPropertyFactory;
         _shellRentResidentialListingFactory = shellRentResidentialListingFactory;
@@ -1413,7 +1413,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
             return;
         }
 
-        var editorShell = _shellRentResidentialListingFactory.Create(res.Listing, false);
+        var editorShell = _shellRentResidentialListingFactory.Create(res.Listing, false, false);
         var propertyEditor = RentResidentialEditorList.FirstOrDefault(editor => editor.Id == buildingId && editor.ViewModel is { IsActive: true });
         if (propertyEditor?.ViewModel is { } propertyViewModel) editorShell.ViewModel.SetOwnershipVisibility(propertyViewModel.IsUnitLevelOwnership);
         var editorWindow = editorShell.Window;
@@ -1520,7 +1520,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         }
 
         // use second parameter true to indicate this is a duplicated listing, so that the editor can handle it accordingly.
-        var editorShell = _shellRentResidentialListingFactory.Create(res.Listing, true);
+        var editorShell = _shellRentResidentialListingFactory.Create(res.Listing, true, false);
         var propertyEditor = RentResidentialEditorList.FirstOrDefault(editor => editor.Id == buildingId && editor.ViewModel is { IsActive: true });
         if (propertyEditor?.ViewModel is { } propertyViewModel) editorShell.ViewModel.SetOwnershipVisibility(propertyViewModel.IsUnitLevelOwnership);
         var editorWindow = editorShell.Window;
@@ -2090,7 +2090,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
             return;
         }
 
-        var editorShell = _shellRentCommercialListingFactory.Create(res.Listing, false);
+        var editorShell = _shellRentCommercialListingFactory.Create(res.Listing, false, false);
         var propertyEditor = RentCommercialEditorList.FirstOrDefault(editor => editor.Id == buildingId && editor.ViewModel is { IsActive: true });
         if (propertyEditor?.ViewModel is { } propertyViewModel) editorShell.ViewModel.SetOwnershipVisibility(propertyViewModel.IsUnitLevelOwnership);
         var editorWindow = editorShell.Window;
@@ -2197,7 +2197,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         }
 
         // use second parameter true to indicate this is a duplicated listing, so that the editor can handle it accordingly.
-        var editorShell = _shellRentCommercialListingFactory.Create(res.Listing, true);
+        var editorShell = _shellRentCommercialListingFactory.Create(res.Listing, true, false);
         var propertyEditor = RentCommercialEditorList.FirstOrDefault(editor => editor.Id == buildingId && editor.ViewModel is { IsActive: true });
         if (propertyEditor?.ViewModel is { } propertyViewModel) editorShell.ViewModel.SetOwnershipVisibility(propertyViewModel.IsUnitLevelOwnership);
         var editorWindow = editorShell.Window;

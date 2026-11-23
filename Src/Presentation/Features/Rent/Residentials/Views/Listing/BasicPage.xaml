@@ -149,7 +149,7 @@
                                 <CalendarDatePicker x:Name="CurrentStatusDatePicker" Header="現況確認日" Date="{x:Bind ViewModel.OccupancyStatusCheckedAt, Mode=TwoWay}" Margin="0" HorizontalAlignment="Left"/>
                             </Grid>
                             <Grid Grid.Row="0" Grid.Column="1">
-                                <Button Content="本日確認" Margin="6,0,0,0" Padding="6" VerticalAlignment="Bottom"/>
+                                <Button Content="本日確認" Command="{x:Bind ViewModel.SetOccupancyStatusCheckedAtToTodayCommand, Mode=OneWay}" Margin="6,0,0,0" Padding="6" VerticalAlignment="Bottom"/>
                             </Grid>
                         </Grid>
                     </Grid>

@@ -75,3 +75,16 @@ public partial class AbstractFactory<TParam1, TParam2, TParam3, TParam4, [Dynami
 
     public TResult Create(TParam1 param1, TParam2 param2, TParam3 param3, TParam4 param4) => ActivatorUtilities.CreateInstance<TResult>(_serviceProvider, param1!, param2!, param3!, param4!);
 }
+
+public partial class AbstractFactory<TParam1, TParam2, TParam3, TParam4, TParam5, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TResult> : IAbstractFactory<TParam1, TParam2, TParam3, TParam4, TParam5, TResult>
+    where TResult : class
+{
+    private readonly IServiceProvider _serviceProvider;
+
+    public AbstractFactory(IServiceProvider serviceProvider)
+    {
+        _serviceProvider = serviceProvider;
+    }
+
+    public TResult Create(TParam1 param1, TParam2 param2, TParam3 param3, TParam4 param4, TParam5 param5) => ActivatorUtilities.CreateInstance<TResult>(_serviceProvider, param1!, param2!, param3!, param4!, param5!);
+}
