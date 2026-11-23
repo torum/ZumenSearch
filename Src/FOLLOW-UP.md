@@ -118,4 +118,4 @@ These are code-level observations and risks, not necessarily confirmed user-visi
 
 **Files:** Rent Residential and Commercial `Views\Listing\ShellPage.xaml.cs`.
 
-- [ ] Listing shell navigation-failure handlers do not explicitly report the failure or mark it handled. Verify framework propagation and review error reporting together.
+- [x] Listing shell navigation-failure handlers do not explicitly report the failure or mark it handled. Verify framework propagation and review error reporting together.

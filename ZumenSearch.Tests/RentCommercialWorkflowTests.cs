@@ -979,24 +979,15 @@ public sealed class RentCommercialWorkflowTests
     }
 
     [TestMethod]
-    public async Task PropertyEditor_RemarksPreviewUpdatesAndSurvivesReopen()
+    public async Task PropertyEditor_RemarksSurviveReopenAndCanBeCleared()
     {
         using var db = new TestDatabase();
         var property = NewProperty($"remarks-{Guid.NewGuid():N}", "Commercial building");
         using var editor = new PropertyViewModel(property, false, new NavigationStub(), null!, null!, null!, new RentCommercialPropertyService(db.Properties), null!, null!, null!);
-        Assert.AreEqual("", editor.RemarksPreview);
-        var previewNotifications = 0;
-        editor.PropertyChanged += (sender, args) =>
-        {
-            if (args.PropertyName == nameof(editor.RemarksPreview)) previewNotifications++;
-        };
+        Assert.AreEqual("", editor.Remarks);
 
-        editor.Remarks = "12345678901234";
-        Assert.AreEqual("12345678901234", editor.RemarksPreview);
         editor.Remarks = "123456789012345";
-        Assert.AreEqual("12345678901234...", editor.RemarksPreview);
-        editor.Remarks = "123456789012345";
-        Assert.AreEqual(2, previewNotifications);
+        Assert.IsTrue(editor.IsDirty);
         await editor.Save();
         Assert.IsFalse(editor.IsDirty);
         var saved = db.Properties.SelectById(property.Id);
@@ -1005,9 +996,8 @@ public sealed class RentCommercialWorkflowTests
         Assert.AreEqual("123456789012345", saved.Property.Remarks);
         using var reopened = new PropertyViewModel(saved.Property, false, new NavigationStub(), null!, null!, null!, new RentCommercialPropertyService(db.Properties), null!, null!, null!);
         Assert.AreEqual("123456789012345", reopened.Remarks);
-        Assert.AreEqual("12345678901234...", reopened.RemarksPreview);
         reopened.Remarks = "";
-        Assert.AreEqual("", reopened.RemarksPreview);
+        Assert.IsTrue(reopened.IsDirty);
         await reopened.Save();
         Assert.IsFalse(reopened.IsDirty);
         var cleared = db.Properties.SelectById(property.Id);

@@ -302,8 +302,12 @@ public sealed partial class ShellPage : Page
 
     private void ContentFrame_NavigationFailed(object sender, NavigationFailedEventArgs e)
     {
-        //  CA2201 (Do not raise reserved exception types)
-        //throw new Exception("Failed to load Page " + e.SourcePageType.FullName);
+        e.Handled = true;
+        var pageName = e.SourcePageType?.FullName ?? "不明なページ";
+        ViewModel.InfoBarErrorTitle = "ページの読み込みに失敗しました";
+        ViewModel.InfoBarErrorMessage = $"{pageName}: {e.Exception.Message}";
+        ViewModel.InfoBarSeverity = InfoBarSeverity.Error;
+        ViewModel.IsInfoBarErrorOpen = true;
     }
 
     private void ContentFrame_Navigated(object sender, NavigationEventArgs e)

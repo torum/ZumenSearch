@@ -492,28 +492,9 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             if (SetProperty(ref field, value))
             {
                 IsDirty = true;
-                OnPropertyChanged(nameof(RemarksPreview));
             }
         }
     } = string.Empty;
-
-    public string RemarksPreview
-    {
-        get
-        {
-            string s;
-            if (Remarks.Length > 14)
-            {
-                s = Remarks[..14] + "...";
-            }
-            else
-            {
-                s = Remarks;
-            }
-
-            return s;
-        }
-    }
 
     #endregion
 
