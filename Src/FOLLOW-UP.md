@@ -9,7 +9,7 @@ These are code-level observations and risks, not necessarily confirmed user-visi
 - [x] Update pending-listing handoff in both editors: replace existing queue entries, reopen handed-off listings from memory, track dependent windows, and remove deleted pending listings from the queue.
 - [x] Protect handed-off media from discard cleanup, clear the child editor's dirty state on handoff, and clean up removed media without deleting files still referenced by the listing.
 - [x] Stage media and lessor/broker removals in the listing editor until save; preserve the parent listing on discard and restore its previous media and contact state after a failed database save.
-- [x] Review shared mutable listing state between the property editor and open listing editors. Decided not to introduce full-object copying or broader coordination at this stage
+- [x] Review shared mutable listing state between the property editor and open listing editors. -> Decided not to introduce full-object copying or broader coordination at this stage
 
 ## 2. Obvious no-ops
 
@@ -19,7 +19,7 @@ These are code-level observations and risks, not necessarily confirmed user-visi
 
 - [x] Recent-properties Enter marks the accelerator handled without executing the edit command. Review keyboard handling for Rent Residentials, Rent Commercials, and Sale Residentials, including the context-menu accelerator.
 - [x] The Residential listing's 本日確認 button has no action; Commercial copies that behavior. Determine and implement the action consistently.
-- [ ] The property listing duplication command is a no-op in Residentials and Commercials. Determine the intended behavior for saved and pending listings.
+- [x] Implement property-editor listing duplication in Residentials and Commercials using the database version; disable it for pending listings.
 
 ## 3. Higher-severity risks: lost or inconsistent data
 

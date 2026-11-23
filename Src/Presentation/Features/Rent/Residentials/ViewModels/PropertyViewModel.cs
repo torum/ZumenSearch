@@ -2275,6 +2275,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             {
                 Debug.WriteLine($"Adding new listing {listing.Id} to unsaved listing list.");
                 _unsavedListingList.Add(listing);
+                DuplicateSelectedListingCommand.NotifyCanExecuteChanged();
                 IsDirty = true;
             }
             else
@@ -3473,6 +3474,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
                 listing.SetIsModified(false);
             }
             _unsavedListingList.Clear();
+            DuplicateSelectedListingCommand.NotifyCanExecuteChanged();
 
             // Clear unsaved child editors and quit tracking them.
             UnsavedChildEditorList.Clear();
@@ -4101,15 +4103,58 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
         return true;
     }
 
-    [RelayCommand(CanExecute = nameof(DupeSelectedListingCanExecute))]
-    private void DupeSelectedListing(ListingSummary listingSummary)
+    [RelayCommand(CanExecute = nameof(DuplicateSelectedListingCanExecute))]
+    private async Task DuplicateSelectedListing(ListingSummary listingSummary)
     {
-        if (listingSummary is null) return;
+        if (!DuplicateSelectedListingCanExecute(listingSummary) || !ListingSummaries.Contains(listingSummary) || !IsEditorEnabled) return;
+
+        IsBusy = true;
+        try
+        {
+            // Load the database version, not unsaved changes in an open listing editor.
+            var result = await Task.Run(() => _rentResidentialListingService.GetById(_id, listingSummary.Id, true), _cts.Token);
+            if (result.IsError)
+            {
+                ShowErrorInfoBar(result.Error);
+                return;
+            }
+            if (result.Listing is null)
+            {
+                ShowSimpleErrorInfoBar("エラー", "募集物件が見つかりませんでした。再読み込みしてください。");
+                return;
+            }
+
+            // PopulateValues copies the original media into the duplicate's directory.
+            var sourceDirectory = Path.Combine(App.PropertyBlobDataFolder, _id, listingSummary.Id);
+            foreach (var picture in result.Listing.Pictures) picture.BasePath = sourceDirectory;
+            foreach (var pdf in result.Listing.Pdfs) pdf.BasePath = sourceDirectory;
+
+            var editorShell = _shellFactory.Create(result.Listing, true, false);
+            editorShell.ViewModel.SetOwnershipVisibility(IsUnitLevelOwnership);
+            var editorWindow = editorShell.Window;
+            var mainVM = App.GetService<ZumenSearch.Presentation.Shell.ViewModels.MainViewModel>();
+            mainVM.RentResidentialListingEditorList.Add(editorWindow);
+            editorWindow.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(mainVM.RentResidentialListingEditorWinLeft, mainVM.RentResidentialListingEditorWinTop, mainVM.RentResidentialListingEditorWinWidth, mainVM.RentResidentialListingEditorWinHeight));
+            if (editorWindow.AppWindow.Presenter is OverlappedPresenter presenter)
+            {
+                presenter.IsResizable = true;
+                presenter.IsModal = false;
+                presenter.IsAlwaysOnTop = false;
+                presenter.PreferredMinimumWidth = 1274;
+                presenter.PreferredMinimumHeight = 794;
+            }
+            editorWindow.AppWindow.Show();
+            editorWindow.Activate();
+            editorWindow.AppWindow.MoveInZOrderAtTop();
+        }
+        finally
+        {
+            IsBusy = false;
+        }
     }
-    public static bool DupeSelectedListingCanExecute(ListingSummary listingSummary)
+    public bool DuplicateSelectedListingCanExecute(ListingSummary? listingSummary)
     {
-        if (listingSummary is null) return false;
-        return true;
+        return listingSummary is not null && !_unsavedListingList.Any(item => item.Id.Equals(listingSummary.Id, StringComparison.Ordinal));
     }
 
     [RelayCommand(CanExecute = nameof(DeleteSelectedListingCanExecute))]
@@ -4175,6 +4220,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             //if (_property.Rooms.Remove(listing)) { }
             _property.ListingsToBeDeleted.Add(listingSummary.Id);
             _unsavedListingList.RemoveAll(item => item.Id.Equals(listingSummary.Id, StringComparison.Ordinal));
+            DuplicateSelectedListingCommand.NotifyCanExecuteChanged();
 
             _property.ListingSummaries.Remove(listingSummary);
 

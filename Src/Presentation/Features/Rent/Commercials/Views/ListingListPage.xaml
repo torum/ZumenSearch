@@ -13,7 +13,7 @@
                     <AppBarButton.Flyout>
                         <MenuFlyout Placement="Bottom">
                             <MenuFlyoutItem Text="編集" Icon="Edit" Command="{x:Bind ViewModel.EditSelectedListingCommand, Mode=OneWay}" CommandParameter="{x:Bind ListingsListView.SelectedItem, Mode=OneWay}"></MenuFlyoutItem>
-                            <MenuFlyoutItem Text="複製" Icon="Copy" Command="{x:Bind ViewModel.DupeSelectedListingCommand, Mode=OneWay}" CommandParameter="{x:Bind ListingsListView.SelectedItem, Mode=OneWay}"></MenuFlyoutItem>
+                            <MenuFlyoutItem Text="複製" Icon="Copy" Command="{x:Bind ViewModel.DuplicateSelectedListingCommand, Mode=OneWay}" CommandParameter="{x:Bind ListingsListView.SelectedItem, Mode=OneWay}"></MenuFlyoutItem>
                             <MenuFlyoutSeparator/>
                             <MenuFlyoutItem Text="削除" Icon="Delete" Command="{x:Bind ViewModel.DeleteSelectedListingCommand, Mode=OneWay}" CommandParameter="{x:Bind ListingsListView.SelectedItem, Mode=OneWay}"></MenuFlyoutItem>
                         </MenuFlyout>
@@ -32,7 +32,7 @@
                                     <KeyboardAccelerator Key="Enter" />
                                 </MenuFlyoutItem.KeyboardAccelerators>
                             </MenuFlyoutItem>
-                            <MenuFlyoutItem Text="複製" Icon="Copy" Command="{x:Bind ViewModel.DupeSelectedListingCommand, Mode=OneWay}" CommandParameter="{x:Bind ListingsListView.SelectedItem, Mode=OneWay}"></MenuFlyoutItem>
+                            <MenuFlyoutItem Text="複製" Icon="Copy" Command="{x:Bind ViewModel.DuplicateSelectedListingCommand, Mode=OneWay}" CommandParameter="{x:Bind ListingsListView.SelectedItem, Mode=OneWay}"></MenuFlyoutItem>
                             <MenuFlyoutSeparator/>
                             <MenuFlyoutItem Text="削除" Icon="Delete" Command="{x:Bind ViewModel.DeleteSelectedListingCommand, Mode=OneWay}" CommandParameter="{x:Bind ListingsListView.SelectedItem, Mode=OneWay}"></MenuFlyoutItem>
                         </MenuFlyout>
