@@ -80,7 +80,7 @@ public sealed partial class ShellPage : Page
 
     public async Task ShowEditorCloseConfirmationDialog()
     {
-        if (_isConfirmingClose)
+        if (_isConfirmingClose || ViewModel.IsBusy)
         {
             return;
         }
@@ -91,6 +91,7 @@ public sealed partial class ShellPage : Page
             if (ViewModel.IsDirty)
             {
                 var result = await _dialogService.ShowEditorCloseConfirmationDialog();
+                if (ViewModel.IsBusy) return;
 
                 if (result == ContentDialogResult.Primary)
                 {
@@ -114,6 +115,7 @@ public sealed partial class ShellPage : Page
                 }
             }
 
+            if (ViewModel.IsBusy) return;
             _allowClose = true;
             Window.Close();
         }

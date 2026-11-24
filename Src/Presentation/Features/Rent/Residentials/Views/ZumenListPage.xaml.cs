@@ -33,7 +33,6 @@ public sealed partial class ZumenListPage : Page
         }
 
         button.IsEnabled = false;
-        //ViewModel.BeginPicker();
 
         try
         {
@@ -44,16 +43,23 @@ public sealed partial class ZumenListPage : Page
             };
             openPicker.FileTypeFilter.Add(".pdf");
 
-            // Open the picker for the user to pick a file
-            var files = await openPicker.PickMultipleFilesAsync();
-            if (files.Count <= 0)
+            if (!ViewModel.TryBeginPicker()) return;
+            List<string> paths;
+            try
+            {
+                var files = await openPicker.PickMultipleFilesAsync();
+                paths = files.Select(file => file.Path).ToList();
+            }
+            finally
+            {
+                ViewModel.EndPicker();
+            }
+
+            if (paths.Count == 0)
             {
                 Debug.WriteLine("PickMultipleFilesAsync: Operation cancelled. @AppBarButtonAddPdf_Click");
                 return;
             }
-            var paths = files
-                .Select(file => file.Path)
-                .ToList();
 
             if (ViewModel.AddNewPropertyPdfsCommand.CanExecute(paths))
             {
@@ -69,7 +75,6 @@ public sealed partial class ZumenListPage : Page
         }
         finally
         {
-            //ViewModel.EndPicker();
             button.IsEnabled = true;
         }
     }

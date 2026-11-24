@@ -761,11 +761,11 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
 
         if (selected.PropertyContextType == PropertyContextType.RentResidential)
         {
-            await EditRentResidentialFromId(propertyId);
+            if (EditRentResidentialFromIdCommand.CanExecute(propertyId)) await EditRentResidentialFromIdCommand.ExecuteAsync(propertyId);
         }
         else if (selected.PropertyContextType == PropertyContextType.RentCommercial)
         {
-            await EditRentCommercialFromId(propertyId);
+            if (EditRentCommercialFromIdCommand.CanExecute(propertyId)) await EditRentCommercialFromIdCommand.ExecuteAsync(propertyId);
         }
         else if (selected.PropertyContextType == PropertyContextType.RentParking)
         {
@@ -1024,7 +1024,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
             return;
         }
 
-        await EditRentResidentialFromId(propertyId);
+        if (EditRentResidentialFromIdCommand.CanExecute(propertyId)) await EditRentResidentialFromIdCommand.ExecuteAsync(propertyId);
     }
     private static bool EditRentResidentialCanExecute(PropertySearchResultItemViewModel? selected)
     {
@@ -1388,6 +1388,22 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         var listingId = selected.Id;
         var buildingId = selected.PropertyId;
 
+        var editWin = RentResidentialListingEditorList.FirstOrDefault(editor => editor.Id == listingId);
+        if (editWin is not null)
+        {
+            try
+            {
+                editWin.Activate();
+                editWin.AppWindow.MoveInZOrderAtTop();
+            }
+            catch (System.Runtime.InteropServices.COMException ex)
+            {
+                Debug.WriteLine($"Failed to activate listing editor: {ex}");
+                ShowSimpleErrorInfoBar("エラー", "募集物件の編集画面を開けませんでした。既存の編集画面を確認してから再試行してください。");
+            }
+            return;
+        }
+
         //Debug.WriteLine($"EditRentResidentialRoomCommand executed for {selected.Id}");
 
         // Access Database to get the full entry data.
@@ -1701,7 +1717,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
             return;
         }
 
-        await EditRentCommercialFromId(propertyId);
+        if (EditRentCommercialFromIdCommand.CanExecute(propertyId)) await EditRentCommercialFromIdCommand.ExecuteAsync(propertyId);
     }
     private static bool EditRentCommercialCanExecute(PropertySearchResultItemViewModel? selected)
     {
@@ -2064,6 +2080,22 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
     {
         var listingId = selected.Id;
         var buildingId = selected.PropertyId;
+
+        var editWin = RentCommercialListingEditorList.FirstOrDefault(editor => editor.Id == listingId);
+        if (editWin is not null)
+        {
+            try
+            {
+                editWin.Activate();
+                editWin.AppWindow.MoveInZOrderAtTop();
+            }
+            catch (System.Runtime.InteropServices.COMException ex)
+            {
+                Debug.WriteLine($"Failed to activate listing editor: {ex}");
+                ShowSimpleErrorInfoBar("エラー", "募集物件の編集画面を開けませんでした。既存の編集画面を確認してから再試行してください。");
+            }
+            return;
+        }
 
         //Debug.WriteLine($"EditRentCommercialListingCommand executed for {selected.Id}");
 

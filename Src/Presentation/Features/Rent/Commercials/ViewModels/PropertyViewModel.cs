@@ -152,7 +152,6 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     // Keeps truck of "New" child window because it saves to the parent window/viewmodel.
     public List<ZumenSearch.Presentation.Features.Rent.Commercials.Views.Listing.EditorWindow> UnsavedChildEditorList { get; } = [];
 
-    public bool IsSaving { get; private set; }
     public bool IsBusy
     {
         get => _isBusy;
@@ -166,7 +165,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         }
     }
 
-    public bool IsEditorEnabled => !IsSaving && !_isBusy;
+    public bool IsEditorEnabled => !IsBusy;
 
     #region == 画面表示関連 ==
 
@@ -1723,6 +1722,15 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     #region == Public Methods ==
 
+    public bool TryBeginPicker()
+    {
+        if (IsBusy) return false;
+        IsBusy = true;
+        return true;
+    }
+
+    public void EndPicker() => IsBusy = false;
+
     public void DiscardChanges()
     {
         if (IsBusy) return;
@@ -2672,10 +2680,9 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     [RelayCommand(CanExecute = nameof(CanSave))]
     public async Task Save()
     {
-        if (IsSaving || IsBusy || !IsDirty) return;
+        if (IsBusy || !IsDirty) return;
 
         _cleanupFailures.Clear();
-        IsSaving = true;
         IsBusy = true;
         try
         {
@@ -2683,7 +2690,6 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         }
         finally
         {
-            IsSaving = false;
             IsBusy = false;
         }
     }
@@ -2875,7 +2881,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     }
     private bool CanSave()
     {
-        return IsDirty && !IsSaving && !_isBusy;
+        return IsDirty && !IsBusy;
     }
 
     #endregion
@@ -2888,7 +2894,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         // File open is handleed in the code behind since this ViewModel does not know about the Window which is required for the Picker.
 
         if (filePathList is null) return;
-        if (filePathList.Count == 0 || IsBusy || IsSaving) return;
+        if (filePathList.Count == 0 || IsBusy) return;
 
         IsBusy = true;
         try
@@ -3062,7 +3068,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     private async Task AddNewPropertyPdfs(List<string> filePathList)
     {
         if (filePathList is null) return;
-        if (filePathList.Count == 0 || IsUnitLevelOwnership || IsBusy || IsSaving) return;
+        if (filePathList.Count == 0 || IsUnitLevelOwnership || IsBusy) return;
         IsBusy = true;
         try
         {

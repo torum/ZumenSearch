@@ -88,13 +88,12 @@ public sealed partial class ShellPage : Page
 
     public async Task ShowEditorCloseConfirmationDialog()
     {
-        if (_isClosing) return;
+        if (_isClosing || ViewModel.IsBusy) return;
         _isClosing = true;
 
         try
         {
             var main = App.GetService<ZumenSearch.Presentation.Shell.ViewModels.MainViewModel>();
-            if (ViewModel.SaveCommand.IsRunning && ViewModel.SaveCommand.ExecutionTask is Task pendingSave) await pendingSave;
 
             foreach (var editor in ViewModel.UnsavedChildEditorList.ToList())
             {
@@ -105,10 +104,12 @@ public sealed partial class ShellPage : Page
                 if (main.RentResidentialListingEditorList.Contains(editor)) return;
             }
             _closingWindow = null;
+            if (ViewModel.IsBusy) return;
 
             if (ViewModel.IsDirty)
             {
                 var result = await _dialogService.ShowEditorCloseConfirmationDialog();
+                if (ViewModel.IsBusy) return;
                 if (result == ContentDialogResult.Primary)
                 {
                     if (ViewModel.IsDirty)
@@ -131,6 +132,7 @@ public sealed partial class ShellPage : Page
                 }
             }
 
+            if (ViewModel.IsBusy) return;
             _allowClose = true;
             Window.Close();
         }

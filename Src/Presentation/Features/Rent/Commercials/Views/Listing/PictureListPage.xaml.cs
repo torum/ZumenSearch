@@ -51,8 +51,18 @@ public sealed partial class PictureListPage : Page
             openPicker.FileTypeFilter.Add(".png");
             openPicker.FileTypeFilter.Add(".gif");
             openPicker.FileTypeFilter.Add(".webp");
-            var files = await openPicker.PickMultipleFilesAsync();
-            var paths = files.Select(file => file.Path).ToList();
+            if (!ViewModel.TryBeginPicker()) return;
+            List<string> paths;
+            try
+            {
+                var files = await openPicker.PickMultipleFilesAsync();
+                paths = files.Select(file => file.Path).ToList();
+            }
+            finally
+            {
+                ViewModel.EndPicker();
+            }
+
             if (paths.Count > 0 && ViewModel.AddNewListingPicturesCommand.CanExecute(paths))
             {
                 await ViewModel.AddNewListingPicturesCommand.ExecuteAsync(paths);

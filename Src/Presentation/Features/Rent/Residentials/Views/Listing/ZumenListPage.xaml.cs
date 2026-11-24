@@ -36,7 +36,6 @@ public sealed partial class ZumenListPage : Page
         if (sender is not AppBarButton button) return;
 
         button.IsEnabled = false;
-        //ViewModel.BeginPicker();
         try
         {
             var openPicker = new Microsoft.Windows.Storage.Pickers.FileOpenPicker(button.XamlRoot.ContentIslandEnvironment.AppWindowId)
@@ -45,8 +44,18 @@ public sealed partial class ZumenListPage : Page
                 SuggestedStartLocation = Microsoft.Windows.Storage.Pickers.PickerLocationId.Desktop
             };
             openPicker.FileTypeFilter.Add(".pdf");
-            var files = await openPicker.PickMultipleFilesAsync();
-            var paths = files.Select(file => file.Path).ToList();
+            if (!ViewModel.TryBeginPicker()) return;
+            List<string> paths;
+            try
+            {
+                var files = await openPicker.PickMultipleFilesAsync();
+                paths = files.Select(file => file.Path).ToList();
+            }
+            finally
+            {
+                ViewModel.EndPicker();
+            }
+
             if (paths.Count > 0 && ViewModel.AddNewListingPdfsCommand.CanExecute(paths))
             {
                 await ViewModel.AddNewListingPdfsCommand.ExecuteAsync(paths);
@@ -60,7 +69,6 @@ public sealed partial class ZumenListPage : Page
         }
         finally
         {
-            //ViewModel.EndPicker();
             button.IsEnabled = true;
         }
     }

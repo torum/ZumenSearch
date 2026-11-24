@@ -146,8 +146,6 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         }
     }
 
-    public bool IsSaving { get; private set; }
-
     public bool IsBusy
     {
         get;
@@ -161,7 +159,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         }
     }
 
-    public bool IsEditorEnabled => !IsSaving && !IsBusy;
+    public bool IsEditorEnabled => !IsBusy;
 
     public bool HasPendingEditorOperations => IsEditorEnabled;//tmp
 
@@ -839,6 +837,15 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
     #endregion
 
     #region == Public Methods ==
+
+    public bool TryBeginPicker()
+    {
+        if (IsBusy) return false;
+        IsBusy = true;
+        return true;
+    }
+
+    public void EndPicker() => IsBusy = false;
 
     public void DiscardChanges()
     {
@@ -1645,10 +1652,9 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
     [RelayCommand(CanExecute = nameof(CanSave))]
     public async Task Save()
     {
-        if (IsSaving || IsBusy || !IsDirty) return;
+        if (IsBusy || !IsDirty) return;
 
         _cleanupFailures.Clear();
-        IsSaving = true;
         IsBusy = true;
         try
         {
@@ -1656,7 +1662,6 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         }
         finally
         {
-            IsSaving = false;
             IsBusy = false;
         }
     }
@@ -1938,7 +1943,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
 
     private bool CanSave()
     {
-        return IsDirty && !IsSaving && !IsBusy;
+        return IsDirty && !IsBusy;
     }
 
     #endregion
