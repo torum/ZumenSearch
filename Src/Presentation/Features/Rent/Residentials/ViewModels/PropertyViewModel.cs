@@ -4167,7 +4167,7 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
 
             try
             {
-                ShowSimpleErrorInfoBar("募集物件の編集画面が開いています","募集物件の編集画面を閉じてから、建物を削除してください。");
+                ShowSimpleErrorInfoBar("募集物件の編集画面が開いています","募集物件の編集画面を閉じてから、募集物件を削除してください。");
 
                 editWin.Activate();
 
@@ -4195,26 +4195,39 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             return;
         }
 
-        if (!IsEditorEnabled) return;
+        if (!IsEditorEnabled || !ListingSummaries.Contains(listingSummary)) return;
         IsBusy = true;
         try
         {
-        if (await _dialogService.ShowDeleteConfirmationDialog("この募集物件を削除しますか？") != Microsoft.UI.Xaml.Controls.ContentDialogResult.Primary) return;
+            if (await _dialogService.ShowDeleteConfirmationDialog("この募集物件を直ちに削除しますか？建物の変更を破棄しても元に戻せません。") != Microsoft.UI.Xaml.Controls.ContentDialogResult.Primary) return;
 
-        if (ListingSummaries.Remove(listingSummary))
-        {
-            // Don't delete directly. Just mark it for deletion. It will be deleted when the property is saved.
-            //if (_property.Rooms.Remove(listing)) { }
-            _property.ListingsToBeDeleted.Add(listingSummary.Id);
+            var isUnsaved = _unsavedListingList.Any(item => item.Id.Equals(listingSummary.Id, StringComparison.Ordinal));
+            if (!isUnsaved)
+            {
+                var result = await Task.Run(() => _rentResidentialListingService.Delete(listingSummary.Id), _cts.Token);
+                if (result.IsError)
+                {
+                    ShowErrorInfoBar(result.Error);
+                    return;
+                }
+            }
+
+            ListingSummaries.Remove(listingSummary);
+            _property.ListingSummaries.RemoveAll(item => item.Id.Equals(listingSummary.Id, StringComparison.Ordinal));
             _unsavedListingList.RemoveAll(item => item.Id.Equals(listingSummary.Id, StringComparison.Ordinal));
             DuplicateSelectedListingCommand.NotifyCanExecuteChanged();
+            mainVM.RemoveResidentialListingSearchResults(_id, listingSummary.Id);
 
-            _property.ListingSummaries.Remove(listingSummary);
-
-            Debug.WriteLine($"Marked listing {listingSummary.Id} for deletion.");
-
-            IsDirty = true;
-        }
+            var listingDataDirectoryPath = Path.Combine(_propertyDataDirectoryPath, listingSummary.Id);
+            try
+            {
+                if (Directory.Exists(listingDataDirectoryPath)) Directory.Delete(listingDataDirectoryPath, true);
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                Debug.WriteLine($"Failed to delete listing attachments '{listingDataDirectoryPath}': {ex}");
+                ShowSimpleErrorInfoBar("添付ファイルの削除に失敗しました", $"募集物件は削除されましたが、添付ファイルを削除できませんでした: {listingDataDirectoryPath}。{ex.Message}");
+            }
         }
         finally
         {
