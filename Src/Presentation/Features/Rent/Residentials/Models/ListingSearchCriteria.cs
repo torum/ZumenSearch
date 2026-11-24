@@ -4,6 +4,7 @@ namespace ZumenSearch.Presentation.Features.Rent.Residentials.Models;
 
 public sealed class ListingSearchCriteria
 {
+    public string Keyword { get; set; } = string.Empty;
     public string PropertyName { get; set; } = string.Empty;
     public string Address { get; set; } = string.Empty;
     public string Station { get; set; } = string.Empty;
@@ -63,6 +64,7 @@ public sealed class ListingSearchCriteria
 
     public ZumenSearch.Application.SearchResults.RentResidentialListingSearchCriteria ToApplicationQuery() => new()
     {
+        Keyword = string.IsNullOrWhiteSpace(Keyword) ? "*" : Keyword.Trim(),
         PropertyName = PropertyName,
         Address = Address,
         Station = Station,

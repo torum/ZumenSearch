@@ -4,6 +4,7 @@ namespace ZumenSearch.Application.SearchResults;
 
 public sealed class RentResidentialListingSearchCriteria
 {
+    public string Keyword { get; set; } = string.Empty;
     public string PropertyName { get; set; } = string.Empty;
     public string Address { get; set; } = string.Empty;
     public string Station { get; set; } = string.Empty;

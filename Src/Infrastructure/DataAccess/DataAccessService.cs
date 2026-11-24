@@ -3094,6 +3094,15 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
                 "lessorName");
             AddTextFilter(criteria.FudousanId, "p.fudousan_id LIKE @fudousanId ESCAPE '\\'", "fudousanId");
 
+            if (!string.IsNullOrWhiteSpace(criteria.Keyword) && criteria.Keyword.Trim() != "*")
+            {
+                cmd.Parameters.AddWithValue("@keywordContextType", PropertyContextType.RentResidential.ToString());
+                AddTextFilter(criteria.Keyword, "(p.name LIKE @keyword ESCAPE '\\' OR l.name LIKE @keyword ESCAPE '\\' OR p.location_full LIKE @keyword ESCAPE '\\' OR p.fudousan_id LIKE @keyword ESCAPE '\\' OR " +
+                    "p.train1_station_name LIKE @keyword ESCAPE '\\' OR p.train2_station_name LIKE @keyword ESCAPE '\\' OR p.train3_station_name LIKE @keyword ESCAPE '\\' OR p.train4_station_name LIKE @keyword ESCAPE '\\' OR " +
+                    "EXISTS (SELECT 1 FROM rent_lessors_properties_listings AS relation INNER JOIN rent_lessors AS lessor ON lessor.lessor_id = relation.lessor_id " +
+                    "WHERE relation.property_id = p.property_id AND relation.property_context_type = @keywordContextType AND ((r.is_unit_ownership = 0 AND relation.listing_id = '') OR (r.is_unit_ownership = 1 AND relation.listing_id = l.listing_id)) AND lessor.name LIKE @keyword ESCAPE '\\'))", "keyword");
+            }
+
             // Rent and other numeric limits
             AddNumberFilter(criteria.MinimumRent, "l.chinryou", "minimumRent", ">=");
             AddNumberFilter(criteria.MaximumRent, "l.chinryou", "maximumRent", "<=");
@@ -5313,7 +5322,10 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
 
             if (!string.IsNullOrWhiteSpace(criteria.Keyword) && criteria.Keyword.Trim() != "*")
             {
-                AddTextFilter(criteria.Keyword.Trim(), "(p.name LIKE @keyword ESCAPE '\\' OR l.name LIKE @keyword ESCAPE '\\' OR p.location_full LIKE @keyword ESCAPE '\\' OR p.fudousan_id LIKE @keyword ESCAPE '\\')", "keyword");
+                AddTextFilter(criteria.Keyword, "(p.name LIKE @keyword ESCAPE '\\' OR l.name LIKE @keyword ESCAPE '\\' OR p.location_full LIKE @keyword ESCAPE '\\' OR p.fudousan_id LIKE @keyword ESCAPE '\\' OR " +
+                    "p.train1_station_name LIKE @keyword ESCAPE '\\' OR p.train2_station_name LIKE @keyword ESCAPE '\\' OR p.train3_station_name LIKE @keyword ESCAPE '\\' OR p.train4_station_name LIKE @keyword ESCAPE '\\' OR " +
+                    "EXISTS (SELECT 1 FROM rent_lessors_properties_listings AS relation INNER JOIN rent_lessors AS lessor ON lessor.lessor_id = relation.lessor_id " +
+                    "WHERE relation.property_id = p.property_id AND relation.property_context_type = @propertyContextType AND ((r.is_unit_ownership = 0 AND relation.listing_id = '') OR (r.is_unit_ownership = 1 AND relation.listing_id = l.listing_id)) AND lessor.name LIKE @keyword ESCAPE '\\'))", "keyword");
             }
 
             // Rent and other numeric limits

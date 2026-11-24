@@ -42,7 +42,7 @@ Unsaved ownership changes immediately reach open listing editors, which can save
 **Files:** Rent Residential and Commercial search criteria and pages.
 
 - [ ] Both search pages have no explicit way to clear selected handling type, transaction type, or commission unit. Selecting 未指定 for handling or transaction filters for listings stored with that value instead of removing the filter. Verify controls interactively and review reset behavior and labels.
-- [ ] Consider adapting Commercial keyword search (property name, listing name, full address, or real-estate ID) to Residentials.
+- [x] Residential and Commercial keyword searches cover property name, listing name, full address, real-estate ID, station name, and applicable lessor name; placeholders state the scope.
 
 ## 3. Edge cases and exception handling
 

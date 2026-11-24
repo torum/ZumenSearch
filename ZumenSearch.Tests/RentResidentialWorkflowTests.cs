@@ -156,6 +156,69 @@ public sealed class RentResidentialWorkflowTests
     }
 
     [TestMethod]
+    public void Search_KeywordMatchesSixFieldsAndOwnership()
+    {
+        using var db = new TestDatabase();
+        var buildingLessor = new PersonNatural("building-lessor", EntityStatus.New) { NameLast = "Building%_Owner" };
+        var unitLessor = new PersonNatural("unit-lessor", EntityStatus.New) { NameLast = "UnitOwner" };
+        foreach (var lessor in new[] { buildingLessor, unitLessor }) Assert.IsFalse(db.Access.UpsertRentLessor(lessor).IsError);
+
+        var building = NewProperty("building", "SakuraBuilding");
+        building.SetFudousanId("1234567890123");
+        building.Address.SetPrefecture("13", "130001", "TokyoAddress");
+        building.Train1.SetRailStation("line1", "station1", "FirstStation");
+        building.Train2.SetRailStation("line2", "station2", "SecondStation");
+        building.Train3.SetRailStation("line3", "station3", "ThirdStation");
+        building.Train4.SetRailStation("line4", "station4", "Fourth%_Station");
+        building.Lessors.Add(buildingLessor);
+        var units = NewProperty("units", "OtherBuilding");
+        units.SetIsUnitLevelOwnership(true);
+        units.Lessors.Add(buildingLessor);
+        Assert.IsFalse(db.Access.UpsertRentResidential(building).IsError);
+        Assert.IsFalse(db.Access.UpsertRentResidential(units).IsError);
+        var buildingA = NewListing(building, "building-a", "UniqueRoom");
+        var buildingB = NewListing(building, "building-b", "OtherRoom");
+        var unitA = NewListing(units, "unit-a", "UnitA");
+        var unitB = NewListing(units, "unit-b", "UnitB");
+        buildingA.Lessors.Add(unitLessor);
+        unitA.Lessors.Add(unitLessor);
+        foreach (var listing in new[] { buildingA, buildingB, unitA, unitB }) Assert.IsFalse(db.Access.UpsertRentResidentialListing(listing.PropertyId, listing).IsError);
+
+        (string Keyword, string[] Expected)[] cases =
+        [
+            ("Sakura", ["building-a", "building-b"]),
+            ("UniqueRoom", ["building-a"]),
+            ("TokyoAddress", ["building-a", "building-b"]),
+            ("456789", ["building-a", "building-b"]),
+            ("FirstStation", ["building-a", "building-b"]),
+            ("SecondStation", ["building-a", "building-b"]),
+            ("ThirdStation", ["building-a", "building-b"]),
+            ("Fourth%_", ["building-a", "building-b"]),
+            ("Building%_Owner", ["building-a", "building-b"]),
+            ("%_", ["building-a", "building-b"]),
+            ("UnitOwner", ["unit-a"]),
+            ("BuildingXXOwner", []),
+            ("FourthXXStation", []),
+            ("not found", []),
+            ("*", ["building-a", "building-b", "unit-a", "unit-b"]),
+            (" ", ["building-a", "building-b", "unit-a", "unit-b"])
+        ];
+        foreach (var (keyword, expected) in cases)
+        {
+            var result = db.Access.SelectRentResidentialListings(new RentResidentialListingSearchCriteria { Keyword = keyword });
+            Assert.IsFalse(result.IsError, result.Error.FullDump);
+            CollectionAssert.AreEquivalent(expected, result.ListingSearchResult.Select(item => item.Id).ToArray(), keyword);
+        }
+        var filtered = db.Access.SelectRentResidentialListings(new RentResidentialListingSearchCriteria { Keyword = "  FirstStation  ", PropertyName = "OtherBuilding" });
+        Assert.IsFalse(filtered.IsError, filtered.Error.FullDump);
+        Assert.AreEqual(0, filtered.ListingSearchResult.Count);
+        var criteria = new ZumenSearch.Presentation.Features.Rent.Residentials.Models.ListingSearchCriteria { Keyword = "  UniqueRoom  " };
+        Assert.AreEqual("UniqueRoom", criteria.Clone().ToApplicationQuery().Keyword);
+        criteria.Keyword = " ";
+        Assert.AreEqual("*", criteria.Clone().ToApplicationQuery().Keyword);
+    }
+
+    [TestMethod]
     public void Search_AvailableForRentFiltersListings()
     {
         using var db = new TestDatabase();

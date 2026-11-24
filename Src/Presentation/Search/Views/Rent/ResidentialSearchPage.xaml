@@ -54,6 +54,7 @@
             <ScrollViewer x:Name="BodyScrollViewer" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" HorizontalContentAlignment="Center" HorizontalAlignment="Stretch" Padding="0,0,0,0">
                 <StackPanel x:Name="BodyGrid" Width="{x:Bind BodyScrollViewer.ViewportWidth, Mode=OneWay}" MaxWidth="1100" HorizontalAlignment="Center" Spacing="12" Margin="0,24,0,24" Padding="{StaticResource ContentPadding}">
                     <TextBlock Text="基本条件" Style="{ThemeResource SubtitleTextBlockStyle}" Margin="0,12,0,0"/>
+                    <TextBox Header="キーワード" PlaceholderText="物件名・募集物件名・所在地・不動産ID・駅名・貸主名" Margin="0,0,0,16" Text="{x:Bind SearchCriteria.Keyword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                     <Grid x:Name="BasicFieldsGrid" SizeChanged="BasicFieldsGrid_SizeChanged">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
