@@ -1469,10 +1469,14 @@ public sealed class RentCommercialWorkflowTests
         var secondPicture = new PropertyPictureViewModel(new PropertyPicture("picture-2", "picture-2.jpg", EntityStatus.New), editor);
         var firstPdf = new PropertyPdfViewModel(new PropertyPdf("pdf-1", "pdf-1.pdf", "thumb-1.bmp", EntityStatus.New), editor);
         var secondPdf = new PropertyPdfViewModel(new PropertyPdf("pdf-2", "pdf-2.pdf", "thumb-2.bmp", EntityStatus.New), editor);
+        Assert.IsFalse(editor.PropertyPictureDeleteAllCommand.CanExecute(null));
+        Assert.IsFalse(editor.PropertyPdfDeleteAllCommand.CanExecute(null));
         editor.Pictures.Add(firstPicture);
         editor.Pictures.Add(secondPicture);
         editor.Pdfs.Add(firstPdf);
         editor.Pdfs.Add(secondPdf);
+        Assert.IsTrue(editor.PropertyPictureDeleteAllCommand.CanExecute(null));
+        Assert.IsTrue(editor.PropertyPdfDeleteAllCommand.CanExecute(null));
         Assert.IsTrue(editor.IsDirty);
         firstPicture.IsMain = true;
         secondPicture.IsMain = true;
@@ -1484,14 +1488,32 @@ public sealed class RentCommercialWorkflowTests
         Assert.IsTrue(secondPdf.IsMain);
         Assert.IsTrue(editor.Pictures.Remove(firstPicture));
         Assert.IsTrue(editor.Pdfs.Remove(firstPdf));
+        Assert.IsTrue(editor.PropertyPictureDeleteAllCommand.CanExecute(null));
+        Assert.IsTrue(editor.PropertyPdfDeleteAllCommand.CanExecute(null));
+        Assert.IsTrue(editor.Pictures.Remove(secondPicture));
+        Assert.IsTrue(editor.Pdfs.Remove(secondPdf));
+        Assert.IsFalse(editor.PropertyPictureDeleteAllCommand.CanExecute(null));
+        Assert.IsFalse(editor.PropertyPdfDeleteAllCommand.CanExecute(null));
         await editor.Save();
         Assert.IsFalse(editor.IsInfoBarErrorOpen, editor.InfoBarErrorMessage);
         Assert.IsFalse(editor.IsDirty);
         firstPicture.Description = "Removed picture";
         firstPdf.Description = "Removed PDF";
         Assert.IsFalse(editor.IsDirty);
-        secondPicture.Description = "Changed picture";
-        Assert.IsTrue(editor.IsDirty);
+
+        editor.Dispose();
+        secondPicture.Description = "Changed after disposal";
+        secondPdf.Description = "Changed after disposal";
+        Assert.IsFalse(editor.IsDirty);
+
+        if (Directory.Exists(Path.Combine(ZumenSearch.App.PropertyBlobDataFolder, property.Id)))
+        {
+            Directory.Delete(Path.Combine(ZumenSearch.App.PropertyBlobDataFolder, property.Id), true);
+        }
+        editor.OpenPropertyBlobDirectoryCommand.Execute(null);
+        Assert.IsTrue(editor.IsInfoBarErrorOpen);
+        Assert.AreEqual("フォルダーを開けませんでした", editor.InfoBarErrorTitle);
+        Assert.IsTrue(editor.InfoBarErrorMessage.Contains("データフォルダーが存在しません"));
     }
 
     [TestMethod]

@@ -64,8 +64,7 @@ public sealed partial class ZumenListPage : Page
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Runtime.InteropServices.COMException or InvalidOperationException or ArgumentException)
         {
             Debug.WriteLine($"Failed to import listing PDFs: {ex}");
-            ViewModel.InfoBarErrorMessage = $"PDFを読み込めませんでした: {ex.Message}";
-            ViewModel.IsInfoBarErrorOpen = true;
+            ViewModel.ShowSimpleErrorInfoBar("PDFの読み込みエラー", $"PDFを読み込めませんでした: {ex.Message}", InfoBarSeverity.Error);
         }
         finally
         {

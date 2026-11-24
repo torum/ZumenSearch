@@ -71,8 +71,7 @@ public sealed partial class PictureListPage : Page
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Runtime.InteropServices.COMException or InvalidOperationException or ArgumentException)
         {
             Debug.WriteLine($"Failed to import listing pictures: {ex}");
-            ViewModel.InfoBarErrorMessage = $"画像を読み込めませんでした: {ex.Message}";
-            ViewModel.IsInfoBarErrorOpen = true;
+            ViewModel.ShowSimpleErrorInfoBar("画像の読み込みエラー", $"画像を読み込めませんでした: {ex.Message}", InfoBarSeverity.Error);
         }
         finally
         {

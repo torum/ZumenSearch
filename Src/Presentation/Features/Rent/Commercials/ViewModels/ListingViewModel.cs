@@ -900,6 +900,14 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         Debug.WriteLine($"ListingViewModel.Dispose() called. Id={_id}");
     }
 
+    public void ShowSimpleErrorInfoBar(string title, string message, InfoBarSeverity severity = InfoBarSeverity.Warning)
+    {
+        InfoBarErrorTitle = title;
+        InfoBarErrorMessage = message;
+        InfoBarSeverity = severity;
+        IsInfoBarErrorOpen = true;
+    }
+
     #endregion
 
     #region == Private Methods ==
@@ -910,14 +918,6 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
         {
             IsDirty = true;
         }
-    }
-
-    private void ShowSimpleErrorInfoBar(string title, string message, InfoBarSeverity severity = InfoBarSeverity.Warning)
-    {
-        InfoBarErrorTitle = title;
-        InfoBarErrorMessage = message;
-        InfoBarSeverity = severity;
-        IsInfoBarErrorOpen = true;
     }
 
     private void ShowErrorInfoBar(ZumenSearch.Application.Results.ErrorInfo err)
@@ -1380,6 +1380,8 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
                         item.PropertyChanged += OnPicturePropertyChanged;
                     }
                 }
+
+                ListingPictureDeleteAllCommand.NotifyCanExecuteChanged();
             };
 
             // PDFs (don't use directly)
@@ -1445,6 +1447,8 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
                         item.PropertyChanged += OnPdfPropertyChanged;
                     }
                 }
+
+                ListingPdfDeleteAllCommand.NotifyCanExecuteChanged();
             };
 
             // (It is OK to use directly)
@@ -2345,17 +2349,21 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
     [RelayCommand(CanExecute = nameof(CanOpenBlobDirectory))]
     public void OpenBlobDirectory()
     {
-        if (Directory.Exists(_listingDataDirectoryPath))
+        if (!Directory.Exists(_listingDataDirectoryPath))
         {
-            try
-            {
-                Process.Start("explorer.exe", _listingDataDirectoryPath);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Error opening folder: {ex}");
-                ShowSimpleErrorInfoBar("フォルダーを開けませんでした",$"{ex.Message}");
-            }
+            OpenBlobDirectoryCommand.NotifyCanExecuteChanged();
+            ShowSimpleErrorInfoBar("フォルダーを開けませんでした", $"データフォルダーが存在しません。{Environment.NewLine}{_listingDataDirectoryPath}");
+            return;
+        }
+
+        try
+        {
+            Process.Start("explorer.exe", _listingDataDirectoryPath);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Error opening folder: {ex}");
+            ShowSimpleErrorInfoBar("フォルダーを開けませんでした", $"予期しないエラーが発生しました: {ex.Message}");
         }
     }
     private bool CanOpenBlobDirectory()

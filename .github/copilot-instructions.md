@@ -17,15 +17,16 @@ Strictly follow these boundaries:
 ## Code Style
 
 ### XAML formatting
-- Single line makes code folding easier. Keep each element's opening tag and all its attributes on a single line. Do not wrap an element's attributes across multiple lines. <Page> tags are exception.
+- Single line makes code folding easier. Keep each element's opening tag and all its attributes on a single line. Do not wrap an element's attributes across multiple lines. '<Page>' tags are exception.
 
 ### C# formatting
 - Priority is for humans to understand the code and follow the logic and flow. The maintainability is important but secondary. Follow the existing style, patterns, and conventions. 
 - Do not extract methods or helpers unnecessarily. It will become exponentially harder for a human to follow. Extract only if the same code is actually used in multiple places/methods/classes.
-- Code folding is very important for readability. Therefore, keep method, constructor, and lambda parameter lists on one line, even when the line is long. Keep argument lists on one line. Do not wrap argument lists. Do not put parameters on separate lines.
+- Code folding is very important for readability. Therefore, keep method, constructor, and lambda parameter lists on one line, even when the line is long. Keep argument lists on one line. Do not wrap argument lists. Do not put parameters on separate lines. This does not mean to make multiple statements on one line. Keep each statement on its own line.
 - Avoiding hard-coded enum member-name strings in parsers; use generic enum parsing so enum renames do not require updating duplicated string constants.
 - For enum choices that need human-readable labels, use a model label type containing the enum Key and localized Label, following PropertyKindTypeLabel, instead of displaying enum member names.
 - Follow existing setter conventions: typed-label properties use matching `Set...TypeLabel`/`Set...Label` methods and should have `FromString` counterparts when applicable; preserve the existing parsing pattern.
+- The code is organized into regions for readability. Follow the existing region structure and place new code within the appropriate regions.
 
 ## WinUI 3 & Windows App SDK Architecture Guidelines (.NET 11)
 

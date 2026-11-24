@@ -67,8 +67,7 @@ public sealed partial class TransportationPage : Page
             var pastedText = ZumenSearch.Presentation.Utilities.Common.NormalizeFullWidthCharacters(await clipboard.GetTextAsync());
             if (selectionChanged || vm.SelectedTransportationIndex != selectedTransportationIndex)
             {
-                vm.InfoBarErrorMessage = "交通の選択が変更されたため、貼り付けを中止しました。";
-                vm.IsInfoBarErrorOpen = true;
+                vm.ShowSimpleErrorInfoBar("貼り付けを中止しました", "交通の選択が変更されたため、貼り付けを中止しました。", InfoBarSeverity.Warning);
                 return;
             }
 
@@ -77,8 +76,7 @@ public sealed partial class TransportationPage : Page
             var normalized = ZumenSearch.Presentation.Utilities.Common.NormalizeFullWidthCharacters(candidate);
             if (normalized.Length > textBox.MaxLength || normalized.Any(character => character < '0' || character > '9'))
             {
-                vm.InfoBarErrorMessage = $"貼り付ける値は0以上の{textBox.MaxLength}桁以内の整数にしてください。";
-                vm.IsInfoBarErrorOpen = true;
+                vm.ShowSimpleErrorInfoBar("入力項目に誤りがあります", $"貼り付ける値は0以上の{textBox.MaxLength}桁以内の整数にしてください。", InfoBarSeverity.Warning);
                 return;
             }
 
@@ -88,8 +86,7 @@ public sealed partial class TransportationPage : Page
         catch (Exception ex) when (ex is System.Runtime.InteropServices.COMException or InvalidOperationException)
         {
             Debug.WriteLine($"Failed to paste clipboard text: {ex}");
-            vm.InfoBarErrorMessage = $"貼り付けできませんでした: {ex.Message}";
-            vm.IsInfoBarErrorOpen = true;
+            vm.ShowSimpleErrorInfoBar("クリップボードのエラー", $"貼り付けできませんでした: {ex.Message}", InfoBarSeverity.Error);
         }
         finally
         {

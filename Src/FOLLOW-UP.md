@@ -1,6 +1,6 @@
 # Follow-up work
 
-These are code-level observations and risks, not necessarily confirmed user-visible failures. Review Rent Residentials and Rent Commercials together unless a task identifies a different scope. Priorities are a suggested work order; confirm behavior and choose fixes before implementation. Paths below identify likely starting points, not an exhaustive list of files to edit.
+Review Rent Residentials and Rent Commercials together unless a task identifies a different scope. Priorities are not a suggested work order; confirm behavior and choose fixes before implementation. Paths below identify likely starting points, not an exhaustive list of files to edit.
 
 ## 1. Higher-severity risks: lost or inconsistent data
 
@@ -36,16 +36,6 @@ Unsaved ownership changes immediately reach open listing editors, which can save
 - [ ] Consider earlier property identifier validation: reject a non-empty 不動産番号 shorter than 13 digits or 特定コード shorter than 4 characters before applying editor values, and navigate to the basic page. Domain setters already reject incomplete values.
 - [ ] Both listing editors silently reject invalid 特定コード characters in view-model setters while their text boxes have no matching input handler. Displayed text may differ from the saved value; verify interactively and review feedback and input handling.
 - [ ] Coordinate input is validated by address setters during property save. Consider earlier validation and navigation to the location page in both editors.
-- [ ] Property and listing media-picker errors and property paste errors set only the InfoBar message and open state, potentially retaining an earlier title or severity. Review feedback consistently.
-- [ ] When property-editor listing deletion is blocked by an open listing editor, both implementations ask the user to close it before deleting the building rather than the listing. Correct the feedback consistently.
-- [ ] Property and listing folder-opening commands silently do nothing if the data directory is missing. Review user feedback, including a directory disappearing after command availability is checked.
-
-### Accessibility and command state
-
-**Files:** Rent Residential listing `Views\Listing\TransactionPage.xaml` and `Views\Listing\ContractPage.xaml`; Rent Residential and Commercial property and listing media view models and pages.
-
-- [ ] Add Residential automation names equivalent to Commercial's four commission fields and unit selectors, and its security-deposit, key-money, renewal-fee, and recontract-fee unit selectors. Review the Residential management-fee unit selector as well.
-- [ ] Property and listing delete-all media command availability depends on collection count, but the Residential template does not notify those commands when collections change. Verify enabled-state updates after add/remove in both implementations.
 
 ### Search usability
 
@@ -80,7 +70,6 @@ Unsaved ownership changes immediately reach open listing editors, which can save
 - [ ] Property and listing duplication continue after individual media copy failures and copy with overwrite enabled. If a PDF copies but its thumbnail fails, the PDF is omitted from the editor, and successful save clears tracking of the copied PDF, potentially leaving it unreferenced. Review partial copies, missing attachments, and destination collisions without automatically retrying deletion.
 - [ ] After a failed property or listing PDF import, both implementations report the import failure but only log subsequent failures to delete partial PDFs or thumbnails. Review cleanup failure reporting without automatically retrying deletion.
 - [ ] Property selection normally clears other main media, but property save does not validate pre-existing multiple main pictures or PDFs. Listing save validates at most one main PDF but not main pictures. Review pre-existing and imported records in both implementations.
-- [ ] Neither property editor unsubscribes picture and PDF property-change handlers on disposal. If a media view model remains referenced elsewhere, its handler could keep the disposed editor reachable; an unreachable reference cycle alone is collectible. Review lifetimes; a leak has not been confirmed.
 
 ### Unlikely edge cases
 
@@ -99,5 +88,11 @@ Unsaved ownership changes immediately reach open listing editors, which can save
 **Files:** Rent Residential and Commercial `PropertyViewModel.cs` and `ListingViewModel.cs`; their listing editor windows and media view models; `Infrastructure\DataAccess\DataAccessService.cs`.
 
 - [ ] Review shared mutable listing state between the property editor and open listing editors. Full-object copying and broader coordination are not planned at this stage.
+
+## 4. Future work
+
+### Accessibility
+
+- [ ] Review accessible names and screen-reader behavior throughout the app, and add or correct labels where needed. Include the Residential listing commission fields and unit selectors, and the contract fee-unit selectors, using Commercial as a reference.
 
 

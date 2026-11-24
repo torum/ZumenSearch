@@ -17,6 +17,35 @@ namespace ZumenSearch.Tests;
 public sealed class PropertyListingDuplicationTests
 {
     [TestMethod]
+    public async Task ResidentialPropertyEditor_DisposeUnsubscribesMediaPropertyHandlers()
+    {
+        var property = new Residential.Property("dispose-media", EntityStatus.New);
+        property.SetName("Building");
+        using var editor = new ZumenSearch.Presentation.Features.Rent.Residentials.ViewModels.PropertyViewModel(property, false, new NavigationStub(), null!, null!, null!, new RentResidentialPropertyService(new ResidentialPropertyRepository()), new RentResidentialListingService(new ResidentialListingRepository()), null!, null!);
+        var picture = new ZumenSearch.Presentation.Features.Rent.Residentials.ViewModels.PropertyPictureViewModel(new Residential.PropertyPicture("picture", "picture.jpg", EntityStatus.New), editor);
+        var pdf = new ZumenSearch.Presentation.Features.Rent.Residentials.ViewModels.PropertyPdfViewModel(new Residential.PropertyPdf("pdf", "document.pdf", "thumbnail.jpg", EntityStatus.New), editor);
+
+        editor.Pictures.Add(picture);
+        editor.Pdfs.Add(pdf);
+        await editor.Save();
+        Assert.IsFalse(editor.IsDirty);
+
+        editor.Dispose();
+        picture.Description = "Changed after disposal";
+        pdf.Description = "Changed after disposal";
+        Assert.IsFalse(editor.IsDirty);
+
+        if (Directory.Exists(Path.Combine(App.PropertyBlobDataFolder, property.Id)))
+        {
+            Directory.Delete(Path.Combine(App.PropertyBlobDataFolder, property.Id), true);
+        }
+        editor.OpenPropertyBlobDirectoryCommand.Execute(null);
+        Assert.IsTrue(editor.IsInfoBarErrorOpen);
+        Assert.AreEqual("フォルダーを開けませんでした", editor.InfoBarErrorTitle);
+        Assert.IsTrue(editor.InfoBarErrorMessage.Contains("データフォルダーが存在しません"));
+    }
+
+    [TestMethod]
     [DataRow(8, true)]
     [DataRow(97, true)]
     [DataRow(98, false)]

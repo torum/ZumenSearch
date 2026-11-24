@@ -1764,6 +1764,16 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
             entry.Dispose();
         }
 
+        foreach (var picture in Pictures)
+        {
+            picture.PropertyChanged -= OnPropertyPicturePropertyChanged;
+        }
+
+        foreach (var pdf in Pdfs)
+        {
+            pdf.PropertyChanged -= OnPropertyPdfPropertyChanged;
+        }
+
         WeakReferenceMessenger.Default.Unregister<ListingUpdatedMessage>(this);
         WeakReferenceMessenger.Default.Unregister<WindowClosedMessage<Microsoft.UI.Xaml.Window>>(this);
         WeakReferenceMessenger.Default.Unregister<ListingDeletedMessage>(this);
@@ -1776,6 +1786,14 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         _cts.Dispose();
 
         GC.SuppressFinalize(this);
+    }
+
+    public void ShowSimpleErrorInfoBar(string title, string message, InfoBarSeverity severity = InfoBarSeverity.Warning)
+    {
+        InfoBarErrorTitle = title;
+        InfoBarErrorMessage = message;
+        InfoBarSeverity = severity;
+        IsInfoBarErrorOpen = true;
     }
 
     #endregion
@@ -2024,6 +2042,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                         item.PropertyChanged += OnPropertyPicturePropertyChanged;
                     }
                 }
+
+                PropertyPictureDeleteAllCommand.NotifyCanExecuteChanged();
             };
 
             // PDFs (don't use directly)
@@ -2089,6 +2109,8 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                         item.PropertyChanged += OnPropertyPdfPropertyChanged;
                     }
                 }
+
+                PropertyPdfDeleteAllCommand.NotifyCanExecuteChanged();
             };
 
             // Lessors
@@ -2189,14 +2211,6 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
                 }
             }
         }
-    }
-
-    private void ShowSimpleErrorInfoBar(string title, string message, InfoBarSeverity severity = InfoBarSeverity.Warning)
-    {
-        InfoBarErrorTitle = title;
-        InfoBarErrorMessage = message;
-        InfoBarSeverity = severity;
-        IsInfoBarErrorOpen = true;
     }
 
     private void ShowErrorInfoBar(ZumenSearch.Application.Results.ErrorInfo err)
@@ -3287,17 +3301,21 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     [RelayCommand(CanExecute = nameof(CanOpenPropertyBlobDirectory))]
     private void OpenPropertyBlobDirectory()
     {
-        if (Directory.Exists(_propertyDataDirectoryPath))
+        if (!Directory.Exists(_propertyDataDirectoryPath))
         {
-            try
-            {
-                Process.Start("explorer.exe", _propertyDataDirectoryPath);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Error opening folder: {ex}");
-                ShowSimpleErrorInfoBar("エラー", $"フォルダーを開けませんでした。{ex.Message}");
-            }
+            OpenPropertyBlobDirectoryCommand.NotifyCanExecuteChanged();
+            ShowSimpleErrorInfoBar("フォルダーを開けませんでした", $"データフォルダーが存在しません。{Environment.NewLine}{_propertyDataDirectoryPath}");
+            return;
+        }
+
+        try
+        {
+            Process.Start("explorer.exe", _propertyDataDirectoryPath);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Error opening folder: {ex}");
+            ShowSimpleErrorInfoBar("フォルダーを開けませんでした", $"予期しないエラーが発生しました: {ex.Message}");
         }
     }
     private bool CanOpenPropertyBlobDirectory()

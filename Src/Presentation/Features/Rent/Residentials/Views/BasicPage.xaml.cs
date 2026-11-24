@@ -147,8 +147,7 @@ public sealed partial class BasicPage : Page
     {
         if (ViewModel is { } vm && !await Helpers.NumericPasteHelper.PasteAsync(textBox))
         {
-            vm.InfoBarErrorMessage = $"貼り付ける値は0以上の{textBox.MaxLength}桁以内の整数にしてください。";
-            vm.IsInfoBarErrorOpen = true;
+            vm.ShowSimpleErrorInfoBar("入力項目に誤りがあります", $"貼り付ける値は0以上の{textBox.MaxLength}桁以内の整数にしてください。", InfoBarSeverity.Warning);
         }
     }
 
@@ -181,8 +180,7 @@ public sealed partial class BasicPage : Page
         catch (Exception ex) when (ex is System.Runtime.InteropServices.COMException or InvalidOperationException)
         {
             Debug.WriteLine($"Failed to paste clipboard text: {ex}");
-            vm.InfoBarErrorMessage = $"貼り付けできませんでした: {ex.Message}";
-            vm.IsInfoBarErrorOpen = true;
+            vm.ShowSimpleErrorInfoBar("クリップボードのエラー", $"貼り付けできませんでした: {ex.Message}", InfoBarSeverity.Error);
         }
         finally
         {
