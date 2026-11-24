@@ -16,7 +16,7 @@ Unsaved ownership changes immediately reach open listing editors, which can save
 
 - [x] Listing deletion does not remove lessor and broker associations because the shared association tables do not reference listing rows. Review direct and property-editor deletion in both implementations; property-level contact searches can match remaining associations.
 - [X] Both property upserts mark individual pictures and PDFs saved and unmodified before transaction commit. If a later statement or commit fails, rollback does not restore those flags. Review callers and retries; defer state changes until successful commit where appropriate.
-- [ ] Both listing upserts resolve an ID conflict without verifying that the existing row belongs to the supplied property. An ID collision or inconsistent caller data can update another property's listing while child and association writes use the supplied property ID. Review identity and ownership checks, including property-editor handoffs.
+- [X] Both listing upserts resolve an ID conflict without verifying that the existing row belongs to the supplied property. An ID collision or inconsistent caller data can update another property's listing while child and association writes use the supplied property ID. Review identity and ownership checks, including property-editor handoffs.
 - [ ] Existing listing search results can retain old property names after a rename and deleted listings after property deletion or a property-editor listing deletion. Opening a missing listing only logs the absence. Review result synchronization and user-facing feedback in both workflows.
 
 ### Numeric input and search

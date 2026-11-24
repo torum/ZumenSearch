@@ -2588,6 +2588,11 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
 
     private static int DoUpsertRentResidentialListing(SqliteCommand cmd, string propertyId, ZumenSearch.Domain.Entities.Rent.Residentials.Listing listing)
     {
+        if (string.IsNullOrWhiteSpace(propertyId) || string.IsNullOrWhiteSpace(listing.Id) || !string.Equals(listing.PropertyId, propertyId, StringComparison.Ordinal))
+        {
+            throw new InvalidOperationException("Residential listing property ID does not match the supplied property ID.");
+        }
+
         cmd.CommandText = """
             INSERT INTO rent_residential_listings (
                 listing_id, property_id, is_property_unit_ownership, name, fudousan_id_additional_code,
@@ -2691,7 +2696,8 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
                 has_separate_washbasin = @has_separate_washbasin,
                 has_warm_water_toilet_seat = @has_warm_water_toilet_seat,
                 appliance_remarks = @appliance_remarks,
-                updated_at = @updated_at;
+                updated_at = @updated_at
+            WHERE property_id = excluded.property_id;
             """;
 
         // Clear parameters before setting new ones because this method can be called multiple times in a loop.
@@ -2772,6 +2778,10 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
         cmd.Parameters.AddWithValue("@updated_at", DateTimeOffset.UtcNow.ToString("s"));
 
         var result = cmd.ExecuteNonQuery();
+        if (result != 1)
+        {
+            throw new InvalidOperationException("Residential listing ID is already associated with a different property.");
+        }
 
         cmd.Parameters.Clear();
 
@@ -4824,6 +4834,11 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
 
     private static int DoUpsertRentCommercialListing(SqliteCommand cmd, string propertyId, ZumenSearch.Domain.Entities.Rent.Commercials.Listing.Listing listing)
     {
+        if (string.IsNullOrWhiteSpace(propertyId) || string.IsNullOrWhiteSpace(listing.Id) || !string.Equals(listing.PropertyId, propertyId, StringComparison.Ordinal))
+        {
+            throw new InvalidOperationException("Commercial listing property ID does not match the supplied property ID.");
+        }
+
         cmd.CommandText = """
             INSERT INTO rent_commercial_units (
                 listing_id, property_id, is_property_unit_ownership, name, fudousan_id_additional_code,
@@ -4928,7 +4943,8 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
                 permits_other = @permitsOther,
                 permitted_business_details = @permittedBusinessDetails,
                 facilities_remarks = @facilitiesRemarks,
-                updated_at = @updatedAt;
+                updated_at = @updatedAt
+            WHERE property_id = excluded.property_id;
             """;
 
         // Clear parameters before setting new ones because this method can be called multiple times in a loop.
@@ -5014,6 +5030,10 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
         cmd.Parameters.AddWithValue("@updatedAt", DateTimeOffset.UtcNow.ToString("s"));
 
         var result = cmd.ExecuteNonQuery();
+        if (result != 1)
+        {
+            throw new InvalidOperationException("Commercial listing ID is already associated with a different property.");
+        }
 
         cmd.Parameters.Clear();
 

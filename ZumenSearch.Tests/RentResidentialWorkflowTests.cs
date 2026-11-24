@@ -654,6 +654,62 @@ public sealed class RentResidentialWorkflowTests
     }
 
     [TestMethod]
+    public void DirectListingSave_RejectsListingIdOwnedByAnotherProperty()
+    {
+        using var db = new TestDatabase();
+        var owner = NewProperty("property-owner", "Owner Property");
+        var attemptedOwner = NewProperty("property-attempted-owner", "Attempted Property");
+        Assert.IsFalse(db.Access.UpsertRentResidential(owner).IsError);
+        Assert.IsFalse(db.Access.UpsertRentResidential(attemptedOwner).IsError);
+        var original = NewListing(owner, "shared-listing-id", "Original Listing");
+        original.SetChinryou(100000m);
+        Assert.IsFalse(db.Access.UpsertRentResidentialListing(owner.Id, original).IsError);
+        var conflicting = NewListing(attemptedOwner, original.Id, "Overwritten Listing");
+        conflicting.SetChinryou(999999m);
+        conflicting.Pictures.Add(new ListingPicture("conflicting-listing-picture", "conflict.jpg", EntityStatus.New));
+
+        var result = db.Access.UpsertRentResidentialListing(attemptedOwner.Id, conflicting);
+
+        Assert.IsTrue(result.IsError);
+        Assert.AreEqual(EntityStatus.New, conflicting.Status);
+        var ownerListing = db.Access.SelectRentResidentialListingById(owner.Id, original.Id);
+        Assert.IsFalse(ownerListing.IsError);
+        Assert.IsNotNull(ownerListing.Listing);
+        Assert.AreEqual("Original Listing", ownerListing.Listing.Name);
+        Assert.AreEqual(100000m, ownerListing.Listing.Chinryou);
+        Assert.AreEqual(0L, db.Count("SELECT COUNT(*) FROM rent_residential_listing_pictures WHERE picture_id = @id", "conflicting-listing-picture"));
+        Assert.IsNull(db.Access.SelectRentResidentialListingById(attemptedOwner.Id, original.Id).Listing);
+    }
+
+    [TestMethod]
+    public void PropertySave_RejectsHandedOffListingIdOwnedByAnotherProperty()
+    {
+        using var db = new TestDatabase();
+        var owner = NewProperty("property-owner", "Owner Property");
+        Assert.IsFalse(db.Access.UpsertRentResidential(owner).IsError);
+        var original = NewListing(owner, "shared-listing-id", "Original Listing");
+        original.SetChinryou(100000m);
+        Assert.IsFalse(db.Access.UpsertRentResidentialListing(owner.Id, original).IsError);
+        var attemptedOwner = NewProperty("property-attempted-owner", "Attempted Property");
+        var conflicting = NewListing(attemptedOwner, original.Id, "Overwritten Listing");
+        conflicting.SetChinryou(999999m);
+        conflicting.Pictures.Add(new ListingPicture("handed-off-listing-picture", "conflict.jpg", EntityStatus.New));
+        attemptedOwner.ListingsToBeSaved.Add(conflicting);
+
+        var result = db.Access.UpsertRentResidential(attemptedOwner);
+
+        Assert.IsTrue(result.IsError);
+        Assert.AreEqual(EntityStatus.New, attemptedOwner.Status);
+        Assert.AreEqual(0L, db.Count("SELECT COUNT(*) FROM properties WHERE property_id = @id", attemptedOwner.Id));
+        var ownerListing = db.Access.SelectRentResidentialListingById(owner.Id, original.Id);
+        Assert.IsFalse(ownerListing.IsError);
+        Assert.IsNotNull(ownerListing.Listing);
+        Assert.AreEqual("Original Listing", ownerListing.Listing.Name);
+        Assert.AreEqual(100000m, ownerListing.Listing.Chinryou);
+        Assert.AreEqual(0L, db.Count("SELECT COUNT(*) FROM rent_residential_listing_pictures WHERE picture_id = @id", "handed-off-listing-picture"));
+    }
+
+    [TestMethod]
     public void ConflictingAttachmentId_RollsBackListingChanges()
     {
         using var db = new TestDatabase();
