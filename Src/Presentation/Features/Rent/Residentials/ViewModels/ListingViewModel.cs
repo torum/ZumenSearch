@@ -1023,7 +1023,6 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
 
         if (!basicValid)
         {
-            ShowSimpleErrorInfoBar("入力項目に誤りがあります", "入力項目に誤りがあります。保存出来ませんでした。");
             if (!_navigationService.IsCurrentPageSameAs(BasicPageName))
             {
                 _navigationService.NavigateTo(BasicPageName, this);
@@ -1272,6 +1271,7 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
             IsAvailableForImmediateMoveIn = _listing.IsAvailableForImmediateMoveIn;
             IsAvailableForRentNow = _listing.IsAvailableForRentNow;
             OccupancyStatusCheckedAt = _listing.OccupancyStatusCheckedAt;
+            FudousanId = _listing.FudousanId;
             FudousanIdAdditionalCode = _listing.FudousanIdAdditionalCode;
             Remarks = _listing.Remarks;
 

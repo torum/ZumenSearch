@@ -3,11 +3,14 @@ using Microsoft.UI.Xaml.Controls;
 using ZumenSearch;
 using ZumenSearch.Domain.Enums;
 using ZumenSearch.Presentation.Factories.AbstractFactory;
+using ZumenSearch.Presentation.Messaging;
 using ZumenSearch.Presentation.Services.Contracts;
 using CommercialListing = ZumenSearch.Domain.Entities.Rent.Commercials.Listing.Listing;
 using CommercialListingViewModel = ZumenSearch.Presentation.Features.Rent.Commercials.ViewModels.ListingViewModel;
+using CommercialProperty = ZumenSearch.Domain.Entities.Rent.Commercials.Property;
 using ResidentialListing = ZumenSearch.Domain.Entities.Rent.Residentials.Listing;
 using ResidentialListingViewModel = ZumenSearch.Presentation.Features.Rent.Residentials.ViewModels.ListingViewModel;
+using ResidentialProperty = ZumenSearch.Domain.Entities.Rent.Residentials.Property;
 
 namespace ZumenSearch.Tests;
 
@@ -36,6 +39,68 @@ public sealed class ListingHandoffTests
         Assert.AreEqual(1, viewModel.Navigation);
         Assert.AreEqual(2L, viewModel.Dialog);
         Assert.AreSame(dependency, viewModel.Dependency);
+    }
+
+    [TestMethod]
+    [DataRow("1234567890123", false)]
+    [DataRow("", false)]
+    [DataRow("1234567890123", true)]
+    public void ResidentialEditor_InitializesAndUpdatesPropertyIdentifier(string initialId, bool isDuplicate)
+    {
+        var propertyId = $"listing-identifier-{Guid.NewGuid():N}";
+        var propertyDirectory = Path.Combine(App.PropertyBlobDataFolder, propertyId);
+        var directory = Path.Combine(propertyDirectory, "listing");
+        try
+        {
+            var listing = new ResidentialListing("listing", EntityStatus.Saved, propertyId, EntityStatus.Saved, false, "Building", initialId);
+            using var editor = new ResidentialListingViewModel(listing, isDuplicate, new NavigationStub(), null!, null!, null!, null!);
+            Assert.AreEqual(initialId, editor.FudousanId);
+            Assert.AreEqual(isDuplicate, editor.IsDirty);
+            Assert.AreEqual(isDuplicate, listing.IsModified);
+
+            var property = new ResidentialProperty(propertyId, EntityStatus.Saved);
+            property.SetFudousanId("9876543210123");
+            editor.Receive(new PropertyUpdatedMessage(property));
+            Assert.AreEqual(property.FudousanId, editor.FudousanId);
+            Assert.AreEqual(property.FudousanId, listing.FudousanId);
+            Assert.AreEqual(isDuplicate, editor.IsDirty);
+        }
+        finally
+        {
+            if (Directory.Exists(directory)) Directory.Delete(directory);
+            if (Directory.Exists(propertyDirectory)) Directory.Delete(propertyDirectory);
+        }
+    }
+
+    [TestMethod]
+    [DataRow("1234567890123", false)]
+    [DataRow("", false)]
+    [DataRow("1234567890123", true)]
+    public void CommercialEditor_InitializesAndUpdatesPropertyIdentifier(string initialId, bool isDuplicate)
+    {
+        var propertyId = $"listing-identifier-{Guid.NewGuid():N}";
+        var propertyDirectory = Path.Combine(App.PropertyBlobDataFolder, propertyId);
+        var directory = Path.Combine(propertyDirectory, "listing");
+        try
+        {
+            var listing = new CommercialListing("listing", EntityStatus.Saved, propertyId, EntityStatus.Saved, false, "Building", initialId);
+            using var editor = new CommercialListingViewModel(listing, isDuplicate, new NavigationStub(), null!, null!, null!, null!);
+            Assert.AreEqual(initialId, editor.FudousanId);
+            Assert.AreEqual(isDuplicate, editor.IsDirty);
+            Assert.AreEqual(isDuplicate, listing.IsModified);
+
+            var property = new CommercialProperty(propertyId, EntityStatus.Saved);
+            property.SetFudousanId("9876543210123");
+            editor.Receive(new PropertyUpdatedMessage(property));
+            Assert.AreEqual(property.FudousanId, editor.FudousanId);
+            Assert.AreEqual(property.FudousanId, listing.FudousanId);
+            Assert.AreEqual(isDuplicate, editor.IsDirty);
+        }
+        finally
+        {
+            if (Directory.Exists(directory)) Directory.Delete(directory);
+            if (Directory.Exists(propertyDirectory)) Directory.Delete(propertyDirectory);
+        }
     }
 
     [TestMethod]

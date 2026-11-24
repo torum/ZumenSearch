@@ -1786,12 +1786,20 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
     {
         try
         {
-            Name = _property.Name;
-
             if (isDuplicate)
             {
-                _property.SetName($"複製_{_property.Name}");
+                var duplicateName = $"複製_{_property.Name}";
+                if (duplicateName.Length <= 100)
+                {
+                    _property.SetName(duplicateName);
+                }
+                else
+                {
+                    ShowSimpleErrorInfoBar("物件名を確認してください", "物件名が長いため、複製の接頭辞を追加できませんでした。必要に応じて名前を変更してください。");
+                }
             }
+
+            Name = _property.Name;
 
             WindowTitle = string.Empty;
 

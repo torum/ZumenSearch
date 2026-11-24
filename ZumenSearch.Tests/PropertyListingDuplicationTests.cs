@@ -17,6 +17,62 @@ namespace ZumenSearch.Tests;
 public sealed class PropertyListingDuplicationTests
 {
     [TestMethod]
+    [DataRow(8, true)]
+    [DataRow(97, true)]
+    [DataRow(98, false)]
+    [DataRow(100, false)]
+    public async Task ResidentialPropertyDuplication_PreservesDisplayedNameWhenSaved(int nameLength, bool prefixExpected)
+    {
+        var propertyId = $"duplicate-name-{Guid.NewGuid():N}";
+        var directory = Path.Combine(App.PropertyBlobDataFolder, propertyId);
+        var property = new Residential.Property(propertyId, EntityStatus.New);
+        var originalName = new string('A', nameLength);
+        property.SetName(originalName);
+        try
+        {
+            using var editor = new ZumenSearch.Presentation.Features.Rent.Residentials.ViewModels.PropertyViewModel(property, true, new NavigationStub(), null!, null!, null!, new RentResidentialPropertyService(new ResidentialPropertyRepository()), new RentResidentialListingService(new ResidentialListingRepository()), null!, null!);
+            var expectedName = prefixExpected ? $"複製_{originalName}" : originalName;
+            Assert.AreEqual(expectedName, editor.Name);
+            Assert.AreEqual(!prefixExpected, editor.IsInfoBarErrorOpen);
+            await editor.Save();
+            Assert.IsFalse(editor.IsDirty);
+            Assert.AreEqual(expectedName, property.Name);
+        }
+        finally
+        {
+            if (Directory.Exists(directory)) Directory.Delete(directory);
+        }
+    }
+
+    [TestMethod]
+    [DataRow(8, true)]
+    [DataRow(97, true)]
+    [DataRow(98, false)]
+    [DataRow(100, false)]
+    public async Task CommercialPropertyDuplication_PreservesDisplayedNameWhenSaved(int nameLength, bool prefixExpected)
+    {
+        var propertyId = $"duplicate-name-{Guid.NewGuid():N}";
+        var directory = Path.Combine(App.PropertyBlobDataFolder, propertyId);
+        var property = new Commercial.Property(propertyId, EntityStatus.New);
+        var originalName = new string('A', nameLength);
+        property.SetName(originalName);
+        try
+        {
+            using var editor = new ZumenSearch.Presentation.Features.Rent.Commercials.ViewModels.PropertyViewModel(property, true, new NavigationStub(), null!, null!, null!, new RentCommercialPropertyService(new CommercialPropertyRepository()), new RentCommercialListingService(new CommercialListingRepository()), null!, null!);
+            var expectedName = prefixExpected ? $"複製_{originalName}" : originalName;
+            Assert.AreEqual(expectedName, editor.Name);
+            Assert.AreEqual(!prefixExpected, editor.IsInfoBarErrorOpen);
+            await editor.Save();
+            Assert.IsFalse(editor.IsDirty);
+            Assert.AreEqual(expectedName, property.Name);
+        }
+        finally
+        {
+            if (Directory.Exists(directory)) Directory.Delete(directory);
+        }
+    }
+
+    [TestMethod]
     public async Task ResidentialDuplication_DisablesPendingUntilPropertySaveAndRequestsDatabaseVersion()
     {
         var propertyId = $"duplicate-{Guid.NewGuid():N}";

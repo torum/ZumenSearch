@@ -1430,7 +1430,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         }
 
         var editorShell = _shellRentResidentialListingFactory.Create(res.Listing, false, false);
-        var propertyEditor = RentResidentialEditorList.FirstOrDefault(editor => editor.Id == buildingId && editor.ViewModel is { IsActive: true });
+        var propertyEditor = RentResidentialEditorList.FirstOrDefault(editor => editor.Id == buildingId);
         if (propertyEditor?.ViewModel is { } propertyViewModel) editorShell.ViewModel.SetOwnershipVisibility(propertyViewModel.IsUnitLevelOwnership);
         var editorWindow = editorShell.Window;
         if (editorWindow == null)
@@ -1537,7 +1537,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
 
         // use second parameter true to indicate this is a duplicated listing, so that the editor can handle it accordingly.
         var editorShell = _shellRentResidentialListingFactory.Create(res.Listing, true, false);
-        var propertyEditor = RentResidentialEditorList.FirstOrDefault(editor => editor.Id == buildingId && editor.ViewModel is { IsActive: true });
+        var propertyEditor = RentResidentialEditorList.FirstOrDefault(editor => editor.Id == buildingId);
         if (propertyEditor?.ViewModel is { } propertyViewModel) editorShell.ViewModel.SetOwnershipVisibility(propertyViewModel.IsUnitLevelOwnership);
         var editorWindow = editorShell.Window;
         if (editorWindow is null)
@@ -1610,6 +1610,8 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
             listingEditor.Activate();
             return;
         }
+
+        if (await _dialogService.ShowDeleteConfirmationDialog("この募集物件を削除しますか？") != Microsoft.UI.Xaml.Controls.ContentDialogResult.Primary) return;
 
         var res = await Task.Run(() => _rentResidentialListingService.Delete(selectedId), _cts.Token);
         if (res.IsError)
@@ -2123,7 +2125,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         }
 
         var editorShell = _shellRentCommercialListingFactory.Create(res.Listing, false, false);
-        var propertyEditor = RentCommercialEditorList.FirstOrDefault(editor => editor.Id == buildingId && editor.ViewModel is { IsActive: true });
+        var propertyEditor = RentCommercialEditorList.FirstOrDefault(editor => editor.Id == buildingId);
         if (propertyEditor?.ViewModel is { } propertyViewModel) editorShell.ViewModel.SetOwnershipVisibility(propertyViewModel.IsUnitLevelOwnership);
         var editorWindow = editorShell.Window;
         if (editorWindow == null)
@@ -2230,7 +2232,7 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
 
         // use second parameter true to indicate this is a duplicated listing, so that the editor can handle it accordingly.
         var editorShell = _shellRentCommercialListingFactory.Create(res.Listing, true, false);
-        var propertyEditor = RentCommercialEditorList.FirstOrDefault(editor => editor.Id == buildingId && editor.ViewModel is { IsActive: true });
+        var propertyEditor = RentCommercialEditorList.FirstOrDefault(editor => editor.Id == buildingId);
         if (propertyEditor?.ViewModel is { } propertyViewModel) editorShell.ViewModel.SetOwnershipVisibility(propertyViewModel.IsUnitLevelOwnership);
         var editorWindow = editorShell.Window;
         if (editorWindow is null)
@@ -2303,6 +2305,8 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
             listingEditor.Activate();
             return;
         }
+
+        if (await _dialogService.ShowDeleteConfirmationDialog("この募集物件を削除しますか？") != Microsoft.UI.Xaml.Controls.ContentDialogResult.Primary) return;
 
         var res = await Task.Run(() => _rentCommercialListingService.Delete(selectedId), _cts.Token);
         if (res.IsError)

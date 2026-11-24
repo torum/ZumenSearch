@@ -2,43 +2,13 @@
 
 These are code-level observations and risks, not necessarily confirmed user-visible failures. Review Rent Residentials and Rent Commercials together unless a task identifies a different scope. Priorities are a suggested work order; confirm behavior and choose fixes before implementation. Paths below identify likely starting points, not an exhaustive list of files to edit.
 
-## 1. Pending listings, save handoff, and file ownership
+## 1. Higher-severity risks: lost or inconsistent data
 
-**Files:** Rent Residential and Commercial `PropertyViewModel.cs` and `ListingViewModel.cs`; their listing editor windows and media view models; `Infrastructure\DataAccess\DataAccessService.cs`.
+### Ownership consistency
 
-- [x] Update pending-listing handoff in both editors: replace existing queue entries, reopen handed-off listings from memory, track dependent windows, and remove deleted pending listings from the queue.
-- [x] Protect handed-off media from discard cleanup, clear the child editor's dirty state on handoff, and clean up removed media without deleting files still referenced by the listing.
-- [x] Stage media and lessor/broker removals in the listing editor until save; preserve the parent listing on discard and restore its previous media and contact state after a failed database save.
-- [x] Review shared mutable listing state between the property editor and open listing editors. -> Decided not to introduce full-object copying or broader coordination at this stage
+**Files:** Rent Residential and Commercial property and listing view models.
 
-## 2. Obvious no-ops
-
-### Commands and actions
-
-**Files:** `Presentation\Shell\ViewModels\MainViewModel.cs`; Residential, Commercial, and Sale Residential views; Rent Residential and Commercial listing and property view models.
-
-- [x] Recent-properties Enter marks the accelerator handled without executing the edit command. Review keyboard handling for Rent Residentials, Rent Commercials, and Sale Residentials, including the context-menu accelerator.
-- [x] The Residential listing's 本日確認 button has no action; Commercial copies that behavior. Determine and implement the action consistently.
-- [x] Implement property-editor listing duplication in Residentials and Commercials using the database version; disable it for pending listings.
-
-## 3. Higher-severity risks: lost or inconsistent data
-
-### Windowing, concurrency, and deletion
-
-**Files:** `Presentation\Shell\ViewModels\MainViewModel.cs`, `Presentation\Shell\Views\MainWindow.xaml.cs`, Rent Residential and Commercial property and listing editor windows and view models, and search-result pages.
-
-- [x] Consolidate save and picker busy state and cancel editor close requests while busy. -> Decided to keep the content frame enabled during saves, accepting the risk that an edit during a save may be marked clean without being saved.
-- [x] Coordinate editor opening across entry points. Property opening checks for an existing window before asynchronous loading, so concurrent requests can both open editors. Search opens listings without the existing-editor check used by the property editor; multiple editors can overwrite each other's stale copies. Include simultaneous opens and openings from different entry points.
-- [x] Coordinate opening, confirmation, deletion, and saving. Direct property and listing deletion checks for editors before asynchronous work, allowing an editor already loading to open afterward. Property upserts report a missing property rather than recreating it, but a deleted listing can be recreated by a later listing upsert without its deleted attachments. A listing marked for deletion in a property editor can also be opened from search before property save, then recreated after deletion. Include opens during confirmation and concurrent saves.
-- [ ] Consider a shared busy flag to prevent overlapping opening, deletion, and saving operations across entry points.
-- [ ] Both search-result listing delete commands delete the listing and attachment directory without confirmation. Review confirmation alongside the concurrent-opening cases above.
-
-### Ownership and contact consistency
-
-**Files:** Rent Residential and Commercial property and listing view models; contact-selection dialogs and person view models; `Presentation\Shell\ViewModels\MainViewModel.cs`.
-
-- [ ] Review ownership mode propagation, save failures, discard, and editor opening together. Unsaved property ownership changes immediately reach open listing editors, which can save against that mode before the property is saved; discarding can leave ownership context or unit-specific data inconsistent. Applying property values mutates the entity before validation and persistence complete, so discard after a failed save can send an unsaved value instead of the last saved one. Search-result edit and duplicate paths synchronize from an open property editor only when its view model is active, but neither property editor appears to activate its view model.
-- [ ] Contact selection can race with contact updates or deletion while loading, and confirmation can overlap updates that replace the displayed wrapper. Review property and listing editors, including messages arriving during save.
+Unsaved ownership changes immediately reach open listing editors, which can save before the property is saved. This is a design choice; discarding the property change does not undo a completed listing save.
 
 ### Persistence and search consistency
 
@@ -57,7 +27,7 @@ These are code-level observations and risks, not necessarily confirmed user-visi
 - [ ] Residential stores unspecified listing floor area as empty text, which numeric search casts to zero; Commercial uses NULL, which does not match numeric bounds. Both commission upper-bound searches cast unspecified empty values to zero. Decide consistent unspecified-value semantics.
 - [ ] Residential management-fee search labels its maximum in yen but compares amounts without checking whether the unit is yen or months. Both searches accept a commission maximum without a unit and compare percentage and yen values against the same numeric bound. Review unit-aware filtering and intended unitless limits together, including Commercial behavior.
 
-## 4. Straightforward fixes and usability
+## 2. Straightforward fixes and usability
 
 ### Validation, display, and feedback
 
@@ -65,8 +35,6 @@ These are code-level observations and risks, not necessarily confirmed user-visi
 
 - [ ] Consider earlier property identifier validation: reject a non-empty 不動産番号 shorter than 13 digits or 特定コード shorter than 4 characters before applying editor values, and navigate to the basic page. Domain setters already reject incomplete values.
 - [ ] Both listing editors silently reject invalid 特定コード characters in view-model setters while their text boxes have no matching input handler. Displayed text may differ from the saved value; verify interactively and review feedback and input handling.
-- [ ] Both listing editors leave read-only 不動産番号 blank on initialization even when the listing has the property identifier; a later property-update message updates it. Review initial display and subsequent parent updates together.
-- [ ] Both listing editors replace specific name, floor-area, and floor-number validation messages with a generic message. Preserve actionable feedback and review navigation to the basic page.
 - [ ] Coordinate input is validated by address setters during property save. Consider earlier validation and navigation to the location page in both editors.
 - [ ] Property and listing media-picker errors and property paste errors set only the InfoBar message and open state, potentially retaining an earlier title or severity. Review feedback consistently.
 - [ ] When property-editor listing deletion is blocked by an open listing editor, both implementations ask the user to close it before deleting the building rather than the listing. Correct the feedback consistently.
@@ -78,16 +46,15 @@ These are code-level observations and risks, not necessarily confirmed user-visi
 
 - [ ] Add Residential automation names equivalent to Commercial's four commission fields and unit selectors, and its security-deposit, key-money, renewal-fee, and recontract-fee unit selectors. Review the Residential management-fee unit selector as well.
 - [ ] Property and listing delete-all media command availability depends on collection count, but the Residential template does not notify those commands when collections change. Verify enabled-state updates after add/remove in both implementations.
+
+### Search usability
+
+**Files:** Rent Residential and Commercial search criteria and pages.
+
 - [ ] Both search pages have no explicit way to clear selected handling type, transaction type, or commission unit. Selecting 未指定 for handling or transaction filters for listings stored with that value instead of removing the filter. Verify controls interactively and review reset behavior and labels.
 - [ ] Consider adapting Commercial keyword search (property name, listing name, full address, or real-estate ID) to Residentials.
 
-### Duplication naming
-
-**Files:** Rent Residential and Commercial `PropertyViewModel.cs` and property duplication entry points.
-
-- [ ] Property duplication populates the editor name before prefixing the entity name; save copies the editor name back to the entity. Decide intended duplicate naming in both implementations.
-
-## 5. Edge cases and exception handling
+## 3. Edge cases and exception handling
 
 ### Save, initialization, and input timing
 
@@ -115,8 +82,22 @@ These are code-level observations and risks, not necessarily confirmed user-visi
 - [ ] Property selection normally clears other main media, but property save does not validate pre-existing multiple main pictures or PDFs. Listing save validates at most one main PDF but not main pictures. Review pre-existing and imported records in both implementations.
 - [ ] Neither property editor unsubscribes picture and PDF property-change handlers on disposal. If a media view model remains referenced elsewhere, its handler could keep the disposed editor reachable; an unreachable reference cycle alone is collectible. Review lifetimes; a leak has not been confirmed.
 
-### Navigation failures
+### Unlikely edge cases
 
-**Files:** Rent Residential and Commercial `Views\Listing\ShellPage.xaml.cs`.
+**Files:** Rent Residential and Commercial property view models.
 
-- [x] Listing shell navigation-failure handlers do not explicitly report the failure or mark it handled. Verify framework propagation and review error reporting together.
+- [ ] Applying property values mutates the entity before validation and persistence complete, so discard after a failed save can send an unsaved ownership value instead of the last saved one. Review both property editors.
+
+**Files:** Rent Residential and Commercial property and listing view models; contact-selection dialogs and person view models; `Presentation\Shell\ViewModels\MainViewModel.cs`.
+
+- [ ] Contact selection can race with contact updates or deletion while loading, and confirmation can overlap updates that replace the displayed wrapper. Review property and listing editors, including messages arriving during save.
+
+**Files:** `Presentation\Shell\ViewModels\MainViewModel.cs`, `Presentation\Shell\Views\MainWindow.xaml.cs`, Rent Residential and Commercial property and listing editor windows and view models, and search-result pages.
+
+- [ ] Consider a shared busy flag to prevent overlapping opening, deletion, and saving operations across entry points.
+
+**Files:** Rent Residential and Commercial `PropertyViewModel.cs` and `ListingViewModel.cs`; their listing editor windows and media view models; `Infrastructure\DataAccess\DataAccessService.cs`.
+
+- [ ] Review shared mutable listing state between the property editor and open listing editors. Full-object copying and broader coordination are not planned at this stage.
+
+
