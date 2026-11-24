@@ -50,7 +50,6 @@ Unsaved ownership changes immediately reach open listing editors, which can save
 
 **Files:** Rent Residential and Commercial property and listing view models, `Views\Listing\BasicPage.xaml`, and Residential `Views\FacilitiesPage.xaml`.
 
-- [ ] Floor area, floor number, and remarks in both listing basic pages use two-way bindings updated on lost focus; Ctrl+S with a focused field may save an old value or leave Save disabled if that is the only edit. Residential property facilities has similar bindings. Verify save, keyboard, and close behavior interactively.
 - [ ] Property and listing editors catch and report population failures but can leave partially populated editors available for later changes and saves. Review initialization failure handling and protection against saving incomplete values in both implementations.
 - [ ] Address selection follows Residential location-master matching. Review behavior when master data is unavailable or incomplete, including saving unmatched components.
 - [ ] Listing contract and transaction typed-label selections use reference-based change detection. Investigate whether a different label instance with the same key can unnecessarily mark either editor dirty during binding updates.
@@ -64,14 +63,12 @@ Unsaved ownership changes immediately reach open listing editors, which can save
 
 ### Media and filesystem lifecycle
 
+### Unlikely edge cases
+
 **Files:** Rent Residential and Commercial property and listing view models, media view models, editor windows, and relevant data-access code.
 
-- [ ] New property and listing editors create data directories on opening but begin clean. Closing untouched editors skips discard cleanup and can leave empty directories. Include ownership of files handed off to a parent editor.
 - [ ] Property and listing duplication continue after individual media copy failures and copy with overwrite enabled. If a PDF copies but its thumbnail fails, the PDF is omitted from the editor, and successful save clears tracking of the copied PDF, potentially leaving it unreferenced. Review partial copies, missing attachments, and destination collisions without automatically retrying deletion.
 - [ ] After a failed property or listing PDF import, both implementations report the import failure but only log subsequent failures to delete partial PDFs or thumbnails. Review cleanup failure reporting without automatically retrying deletion.
-- [ ] Property selection normally clears other main media, but property save does not validate pre-existing multiple main pictures or PDFs. Listing save validates at most one main PDF but not main pictures. Review pre-existing and imported records in both implementations.
-
-### Unlikely edge cases
 
 **Files:** Rent Residential and Commercial property view models.
 

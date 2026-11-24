@@ -2978,6 +2978,23 @@ public sealed partial class PropertyViewModel : ObservableRecipient, IRecipient<
             }
         }
 
+        if (Pictures.Count(picture => picture.IsMain) > 1)
+        {
+            ShowSimpleErrorInfoBar("入力項目に誤りがあります", "メインの写真は1枚だけ選択してください。");
+            const string pageName = NavigationKeys.RentResidentialPropertyPictures;
+            if (!_navigationService.IsCurrentPageSameAs(pageName)) _navigationService.NavigateTo(pageName, this);
+            return false;
+        }
+
+        if (Pdfs.Count(pdf => pdf.IsMain) > 1)
+        {
+            var message = IsUnitLevelOwnership ? "メインの図面は1枚だけ選択してください。建物の所有形態を一括所有に変更して図面を修正した後、必要に応じて元に戻してください。" : "メインの図面は1枚だけ選択してください。";
+            ShowSimpleErrorInfoBar("入力項目に誤りがあります", message);
+            const string pageName = NavigationKeys.RentResidentialPropertyDocuments;
+            if (!IsUnitLevelOwnership && !_navigationService.IsCurrentPageSameAs(pageName)) _navigationService.NavigateTo(pageName, this);
+            return false;
+        }
+
         return true;
     }
 

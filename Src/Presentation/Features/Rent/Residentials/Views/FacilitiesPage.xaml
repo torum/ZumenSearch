@@ -24,20 +24,20 @@
                         <RadioButtons Header="種類" MaxColumns="3" Margin="0" ItemsSource="{x:Bind ViewModel.ElectricKinds}" SelectedItem="{x:Bind ViewModel.SelectedElectricKind, Mode=TwoWay}">
                             <RadioButtons.ItemTemplate><DataTemplate x:DataType="modresidencial:PropertyElectricKind"><TextBlock Text="{x:Bind Label, Mode=OneTime}" VerticalAlignment="Center" /></DataTemplate></RadioButtons.ItemTemplate>
                         </RadioButtons>
-                        <TextBox Header="詳細（事業者、住所、電話連絡先、容量[*アンペア]、メーター[専用・子・割当・他]）" Text="{x:Bind ViewModel.ElectricDetail, Mode=TwoWay}" Margin="0" HorizontalAlignment="Stretch" />
+                        <TextBox Header="詳細（事業者、住所、電話連絡先、容量[*アンペア]、メーター[専用・子・割当・他]）" Text="{x:Bind ViewModel.ElectricDetail, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0" HorizontalAlignment="Stretch" />
                     </StackPanel>
                 </Expander>
                 <Expander Header="ガス" Margin="0" Padding="24" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" IsExpanded="False">
                     <StackPanel Spacing="8" VerticalAlignment="Bottom">
                         <CheckBox Content="あり" IsChecked="{x:Bind ViewModel.HasGas, Mode=TwoWay}" />
                         <RadioButtons Header="種類" MaxColumns="3" ItemsSource="{x:Bind ViewModel.GasTypes}" SelectedItem="{x:Bind ViewModel.SelectedGasType, Mode=TwoWay}" ItemTemplate="{StaticResource GasTypeTemplate}" />
-                        <TextBox Header="詳細（供給会社、住所、電話連絡先、[都市ガス・プロパン[個別・集中]]、メーター[専用・子・割当・他]）" Text="{x:Bind ViewModel.GasDetail, Mode=TwoWay}" HorizontalAlignment="Stretch" />
+                        <TextBox Header="詳細（供給会社、住所、電話連絡先、[都市ガス・プロパン[個別・集中]]、メーター[専用・子・割当・他]）" Text="{x:Bind ViewModel.GasDetail, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" />
                     </StackPanel>
                 </Expander>
                 <Expander Header="水道" Margin="0" Padding="24" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" IsExpanded="False">
                     <StackPanel Spacing="20">
-                        <StackPanel><TextBlock Text="上水道" /><RadioButtons MaxColumns="4" ItemsSource="{x:Bind ViewModel.TapWaterTypes}" SelectedItem="{x:Bind ViewModel.SelectedTapWaterType, Mode=TwoWay}" ItemTemplate="{StaticResource TapWaterTypeTemplate}" /><TextBox Header="詳細（[公営・私営・井戸・他]、メーター[専用・子・割当・他]）" Text="{x:Bind ViewModel.TapWaterDetail, Mode=TwoWay}" /></StackPanel>
-                        <StackPanel><TextBlock Text="下水道" /><RadioButtons MaxColumns="4" ItemsSource="{x:Bind ViewModel.SewerageTypes}" SelectedItem="{x:Bind ViewModel.SelectedSewerageType, Mode=TwoWay}" ItemTemplate="{StaticResource SewerageTypeTemplate}" /><TextBox Header="詳細（公共下水・浄化槽・汲取・側溝・他）" Text="{x:Bind ViewModel.SewerageDetail, Mode=TwoWay}" /></StackPanel>
+                        <StackPanel><TextBlock Text="上水道" /><RadioButtons MaxColumns="4" ItemsSource="{x:Bind ViewModel.TapWaterTypes}" SelectedItem="{x:Bind ViewModel.SelectedTapWaterType, Mode=TwoWay}" ItemTemplate="{StaticResource TapWaterTypeTemplate}" /><TextBox Header="詳細（[公営・私営・井戸・他]、メーター[専用・子・割当・他]）" Text="{x:Bind ViewModel.TapWaterDetail, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" /></StackPanel>
+                        <StackPanel><TextBlock Text="下水道" /><RadioButtons MaxColumns="4" ItemsSource="{x:Bind ViewModel.SewerageTypes}" SelectedItem="{x:Bind ViewModel.SelectedSewerageType, Mode=TwoWay}" ItemTemplate="{StaticResource SewerageTypeTemplate}" /><TextBox Header="詳細（公共下水・浄化槽・汲取・側溝・他）" Text="{x:Bind ViewModel.SewerageDetail, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" /></StackPanel>
                     </StackPanel>
                 </Expander>
                 <Expander Header="共聴設備" Margin="0" Padding="24" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" IsExpanded="False">
@@ -54,8 +54,8 @@
                             <CheckBox Content="光ファイバー" IsChecked="{x:Bind ViewModel.Fiber, Mode=TwoWay}" />
                             <CheckBox Content="インターネット無料" IsChecked="{x:Bind ViewModel.InternetFree, Mode=TwoWay}" />
                         </controls:WrapPanel>
-                        <TextBox Header="TV アンテナ [有り（[UHF・VHF・BS・CS]）・無し・その他]" Text="{x:Bind ViewModel.TvAntennaDetail, Mode=TwoWay}" />
-                        <TextBox Header="インターネット [設備有り・無し・その他]" Text="{x:Bind ViewModel.InternetDetail, Mode=TwoWay}" />
+                        <TextBox Header="TV アンテナ [有り（[UHF・VHF・BS・CS]）・無し・その他]" Text="{x:Bind ViewModel.TvAntennaDetail, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBox Header="インターネット [設備有り・無し・その他]" Text="{x:Bind ViewModel.InternetDetail, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                 </Expander>
                 <Expander Header="駐車場" Margin="0" Padding="24" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" IsExpanded="False">
@@ -63,13 +63,13 @@
                         <controls:WrapPanel HorizontalSpacing="12"><CheckBox Content="あり" IsChecked="{x:Bind ViewModel.HasParking, Mode=TwoWay}" /><CheckBox Content="駐車場無料" IsChecked="{x:Bind ViewModel.IsParkingFree, Mode=TwoWay}" /></controls:WrapPanel>
                         <controls:WrapPanel VerticalSpacing="8" HorizontalSpacing="12">
                             <ComboBox Header="契約形態" ItemsSource="{x:Bind ViewModel.ParkingContractTypes}" SelectedItem="{x:Bind ViewModel.SelectedParkingContractType, Mode=TwoWay}" ItemTemplate="{StaticResource ParkingContractTypeTemplate}" />
-                            <TextBox Header="料金（円・月額）" Width="180" Text="{x:Bind ViewModel.ParkingFee, Mode=TwoWay}" />
+                            <TextBox Header="料金（円・月額）" Width="180" Text="{x:Bind ViewModel.ParkingFee, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                             <ComboBox Header="税区分" ItemsSource="{x:Bind ViewModel.TaxTypes}" SelectedItem="{x:Bind ViewModel.SelectedParkingFeeTaxType, Mode=TwoWay}" ItemTemplate="{StaticResource TaxTypeTemplate}" />
                             <ComboBox Header="現況" ItemsSource="{x:Bind ViewModel.AvailabilityTypes}" SelectedItem="{x:Bind ViewModel.SelectedParkingAvailability, Mode=TwoWay}" ItemTemplate="{StaticResource AvailabilityTypeTemplate}" />
-                            <TextBox Header="空き台数（台）" Width="110" Text="{x:Bind ViewModel.ParkingSpaces, Mode=TwoWay}" />
-                            <TextBox Header="距離（m）" Width="100" Text="{x:Bind ViewModel.ParkingDistance, Mode=TwoWay}" />
+                            <TextBox Header="空き台数（台）" Width="110" Text="{x:Bind ViewModel.ParkingSpaces, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            <TextBox Header="距離（m）" Width="100" Text="{x:Bind ViewModel.ParkingDistance, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                         </controls:WrapPanel>
-                        <TextBox Header="備考" Text="{x:Bind ViewModel.ParkingNotes, Mode=TwoWay}" HorizontalAlignment="Stretch" />
+                        <TextBox Header="備考" Text="{x:Bind ViewModel.ParkingNotes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" />
                     </StackPanel>
                 </Expander>
                 <Expander Header="駐輪場" Margin="0" Padding="24" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" IsExpanded="False">
@@ -77,10 +77,10 @@
                         <controls:WrapPanel HorizontalSpacing="12"><CheckBox Content="あり" IsChecked="{x:Bind ViewModel.HasBicycleParking, Mode=TwoWay}" /><CheckBox Content="駐輪場無料" IsChecked="{x:Bind ViewModel.IsBicycleParkingFree, Mode=TwoWay}" /></controls:WrapPanel>
                         <controls:WrapPanel VerticalSpacing="8" HorizontalSpacing="12">
                             <ComboBox Header="現況" ItemsSource="{x:Bind ViewModel.AvailabilityTypes}" SelectedItem="{x:Bind ViewModel.SelectedBicycleParkingAvailability, Mode=TwoWay}" ItemTemplate="{StaticResource AvailabilityTypeTemplate}" />
-                            <TextBox Header="料金（月額・円）" Width="180" Text="{x:Bind ViewModel.BicycleParkingFee, Mode=TwoWay}" />
+                            <TextBox Header="料金（月額・円）" Width="180" Text="{x:Bind ViewModel.BicycleParkingFee, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                             <ComboBox Header="税区分" ItemsSource="{x:Bind ViewModel.TaxTypes}" SelectedItem="{x:Bind ViewModel.SelectedBicycleParkingFeeTaxType, Mode=TwoWay}" ItemTemplate="{StaticResource TaxTypeTemplate}" />
                         </controls:WrapPanel>
-                        <TextBox Header="備考" Text="{x:Bind ViewModel.BicycleParkingNotes, Mode=TwoWay}" HorizontalAlignment="Stretch" />
+                        <TextBox Header="備考" Text="{x:Bind ViewModel.BicycleParkingNotes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" />
                     </StackPanel>
                 </Expander>
                 <Expander Header="バイク置き場" Margin="0" Padding="24" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" IsExpanded="False">
@@ -88,10 +88,10 @@
                         <controls:WrapPanel HorizontalSpacing="12"><CheckBox Content="あり" IsChecked="{x:Bind ViewModel.HasMotorcycleParking, Mode=TwoWay}" /><CheckBox Content="バイク置き場無料" IsChecked="{x:Bind ViewModel.IsMotorcycleParkingFree, Mode=TwoWay}" /></controls:WrapPanel>
                         <controls:WrapPanel VerticalSpacing="8" HorizontalSpacing="12">
                             <ComboBox Header="現況" ItemsSource="{x:Bind ViewModel.AvailabilityTypes}" SelectedItem="{x:Bind ViewModel.SelectedMotorcycleParkingAvailability, Mode=TwoWay}" ItemTemplate="{StaticResource AvailabilityTypeTemplate}" />
-                            <TextBox Header="料金（月額・円）" Width="180" Text="{x:Bind ViewModel.MotorcycleParkingFee, Mode=TwoWay}" />
+                            <TextBox Header="料金（月額・円）" Width="180" Text="{x:Bind ViewModel.MotorcycleParkingFee, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                             <ComboBox Header="税区分" ItemsSource="{x:Bind ViewModel.TaxTypes}" SelectedItem="{x:Bind ViewModel.SelectedMotorcycleParkingFeeTaxType, Mode=TwoWay}" ItemTemplate="{StaticResource TaxTypeTemplate}" />
                         </controls:WrapPanel>
-                        <TextBox Header="備考" Text="{x:Bind ViewModel.MotorcycleParkingNotes, Mode=TwoWay}" HorizontalAlignment="Stretch" />
+                        <TextBox Header="備考" Text="{x:Bind ViewModel.MotorcycleParkingNotes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" />
                     </StackPanel>
                 </Expander>
             </StackPanel>

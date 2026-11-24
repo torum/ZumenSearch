@@ -78,7 +78,7 @@
                                     <ColumnDefinition Width="Auto"></ColumnDefinition>
                                     <ColumnDefinition Width="*"></ColumnDefinition>
                                 </Grid.ColumnDefinitions>
-                                <TextBox Grid.Column="0" Header="専有面積（平米）" Text="{x:Bind ViewModel.FloorExclusiveAreaSqm, Mode=TwoWay}" MinWidth="120" Width="120" HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
+                                <TextBox Grid.Column="0" Header="専有面積（平米）" Text="{x:Bind ViewModel.FloorExclusiveAreaSqm, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MinWidth="120" Width="120" HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
                                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Bottom" Margin="6,0,0,0">
                                     <ComboBox Header="所在階" ItemsSource="{x:Bind ViewModel.FloorGroundTypes, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.SelectedFloorGroundType, Mode=TwoWay}" Margin="6,0,0,0" MinWidth="90" Width="90" HorizontalAlignment="Left" VerticalAlignment="Bottom" >
                                         <ComboBox.ItemTemplate>
@@ -87,7 +87,7 @@
                                             </DataTemplate>
                                         </ComboBox.ItemTemplate>
                                     </ComboBox>
-                                    <TextBox Text="{x:Bind ViewModel.FloorNumber, Mode=TwoWay}" Width="60" Margin="6,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Bottom" />
+                                    <TextBox Text="{x:Bind ViewModel.FloorNumber, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="60" Margin="6,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Bottom" />
                                 </StackPanel>
                             </Grid>
                         </Grid>
@@ -213,9 +213,9 @@
                 </Border>
 
                 <Border Style="{StaticResource RoundCardBorderStyle}">
-                    <TextBox Header="備考" Text="{x:Bind ViewModel.Remarks, Mode=TwoWay}" MinHeight="100" HorizontalAlignment="Stretch" VerticalAlignment="Top" AcceptsReturn="True" ScrollViewer.VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" />
+                    <TextBox Header="備考" Text="{x:Bind ViewModel.Remarks, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MinHeight="100" HorizontalAlignment="Stretch" VerticalAlignment="Top" AcceptsReturn="True" ScrollViewer.VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" />
                 </Border>
-                
+
             </StackPanel>
 
         </Grid>

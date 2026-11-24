@@ -1096,9 +1096,18 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
             return false;
         }
 
+        if (Pictures.Count(picture => picture.IsMain) > 1)
+        {
+            ShowSimpleErrorInfoBar("入力項目に誤りがあります", "メインの写真は1枚だけ選択してください。");
+            const string pageName = NavigationKeys.RentResidentialListingPictures;
+            if (!_navigationService.IsCurrentPageSameAs(pageName)) _navigationService.NavigateTo(pageName, this);
+            return false;
+        }
+
         if (Pdfs.Count(pdf => pdf.IsMain) > 1)
         {
-            ShowSimpleErrorInfoBar("入力項目に誤りがあります", "メインの図面は1枚だけ選択してください。");
+            var message = IsPropertyUnitLevelOwnership ? "メインの図面は1枚だけ選択してください。" : "メインの図面は1枚だけ選択してください。建物の編集画面で所有形態を区分所有に変更して図面を修正した後、必要に応じて元に戻してください。";
+            ShowSimpleErrorInfoBar("入力項目に誤りがあります", message);
             const string pageName = NavigationKeys.RentResidentialListingDocuments;
             if (IsPropertyUnitLevelOwnership && !_navigationService.IsCurrentPageSameAs(pageName)) _navigationService.NavigateTo(pageName, this);
             return false;
