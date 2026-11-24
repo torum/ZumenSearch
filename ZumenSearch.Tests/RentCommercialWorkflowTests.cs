@@ -75,6 +75,40 @@ public sealed class RentCommercialWorkflowTests
     }
 
     [TestMethod]
+    public void PropertySaveFailure_RollsBackMediaAndPreservesDirtyStateForRetry()
+    {
+        using var db = new TestDatabase();
+        var property = NewProperty("commercial-media-rollback", "Commercial building");
+        var picture = new PropertyPicture("commercial-picture-rollback", "property.jpg", EntityStatus.New) { Description = "Exterior" };
+        var pdf = new PropertyPdf("commercial-pdf-rollback", "property.pdf", "property.png", EntityStatus.New) { Description = "Plan" };
+        var missingLessor = new PersonNatural("missing-commercial-lessor", EntityStatus.New);
+        property.Pictures.Add(picture);
+        property.Pdfs.Add(pdf);
+        property.Lessors.Add(missingLessor);
+
+        var failedSave = db.Properties.Upsert(property);
+
+        Assert.IsTrue(failedSave.IsError, "The missing lessor should cause a foreign-key failure after media writes.");
+        Assert.AreEqual(EntityStatus.New, picture.Status);
+        Assert.IsTrue(picture.IsModified);
+        Assert.AreEqual(EntityStatus.New, pdf.Status);
+        Assert.IsTrue(pdf.IsModified);
+        Assert.AreEqual(0L, db.Count("SELECT COUNT(*) FROM rent_commercial_pictures WHERE picture_id = @id", picture.Id));
+        Assert.AreEqual(0L, db.Count("SELECT COUNT(*) FROM rent_commercial_pdfs WHERE pdf_id = @id", pdf.Id));
+
+        property.Lessors.Remove(missingLessor);
+        var retrySave = db.Properties.Upsert(property);
+
+        Assert.IsFalse(retrySave.IsError, retrySave.Error.FullDump);
+        Assert.AreEqual(EntityStatus.Saved, picture.Status);
+        Assert.IsFalse(picture.IsModified);
+        Assert.AreEqual(EntityStatus.Saved, pdf.Status);
+        Assert.IsFalse(pdf.IsModified);
+        Assert.AreEqual(1L, db.Count("SELECT COUNT(*) FROM rent_commercial_pictures WHERE picture_id = @id", picture.Id));
+        Assert.AreEqual(1L, db.Count("SELECT COUNT(*) FROM rent_commercial_pdfs WHERE pdf_id = @id", pdf.Id));
+    }
+
+    [TestMethod]
     public void ListingUpdate_RoundTripsFeeAndCommissionUnits()
     {
         using var db = new TestDatabase();
@@ -621,20 +655,42 @@ public sealed class RentCommercialWorkflowTests
     public void DeleteListingAndProperty_LeavesUnrelatedRecordsIntact()
     {
         using var db = new TestDatabase();
+        var propertyLessor = new PersonNatural("property-lessor", EntityStatus.New) { NameLast = "Property Lessor" };
+        var listingLessor = new PersonNatural("listing-lessor", EntityStatus.New) { NameLast = "Listing Lessor" };
+        var propertyBroker = new PersonNatural("property-broker", EntityStatus.New) { NameLast = "Property Broker" };
+        var listingBroker = new PersonNatural("listing-broker", EntityStatus.New) { NameLast = "Listing Broker" };
+        Assert.IsFalse(db.Access.UpsertRentLessor(propertyLessor).IsError);
+        Assert.IsFalse(db.Access.UpsertRentLessor(listingLessor).IsError);
+        Assert.IsFalse(db.Access.UpsertBroker(propertyBroker).IsError);
+        Assert.IsFalse(db.Access.UpsertBroker(listingBroker).IsError);
         var first = NewProperty("property-a", "Building A");
+        first.Lessors.Add(propertyLessor);
+        first.Brokers.Add(propertyBroker);
         var second = NewProperty("property-b", "Building B");
         Assert.IsFalse(db.Properties.Upsert(first).IsError);
         Assert.IsFalse(db.Properties.Upsert(second).IsError);
         var firstListing = NewListing(first, "listing-a", "Unit A");
         firstListing.Pictures.Add(new ListingPicture("listing-picture", "image.jpg", EntityStatus.New));
+        firstListing.Lessors.Add(listingLessor);
+        firstListing.Brokers.Add(listingBroker);
         Assert.IsFalse(db.Listings.Upsert(first.Id, firstListing).IsError);
         Assert.IsFalse(db.Listings.Upsert(first.Id, NewListing(first, "listing-b", "Unit B")).IsError);
         Assert.IsFalse(db.Listings.Upsert(second.Id, NewListing(second, "listing-c", "Unit C")).IsError);
+        Assert.AreEqual(1, db.Access.SelectPropertiesByKeyword("Listing Lessor", PropertySearchTarget.LessorName).PropertySearchResult.Count);
+        Assert.AreEqual(1, db.Access.SelectPropertiesByKeyword("Listing Broker", PropertySearchTarget.BrokerName).PropertySearchResult.Count);
 
         var listingDelete = db.Listings.Delete(firstListing.Id);
         Assert.IsFalse(listingDelete.IsError);
         Assert.AreEqual(1, listingDelete.AffectedCount);
         Assert.IsNull(db.Listings.SelectById(first.Id, firstListing.Id).Listing);
+        Assert.AreEqual(0L, db.Count("SELECT COUNT(*) FROM rent_lessors_commercial_listings WHERE listing_id = @id", firstListing.Id));
+        Assert.AreEqual(0L, db.Count("SELECT COUNT(*) FROM brokers_commercial_listings WHERE listing_id = @id", firstListing.Id));
+        Assert.AreEqual(1L, db.Count("SELECT COUNT(*) FROM rent_lessors_properties WHERE property_id = @id", first.Id));
+        Assert.AreEqual(1L, db.Count("SELECT COUNT(*) FROM brokers_properties WHERE property_id = @id", first.Id));
+        Assert.AreEqual(0, db.Access.SelectPropertiesByKeyword("Listing Lessor", PropertySearchTarget.LessorName).PropertySearchResult.Count);
+        Assert.AreEqual(0, db.Access.SelectPropertiesByKeyword("Listing Broker", PropertySearchTarget.BrokerName).PropertySearchResult.Count);
+        Assert.AreEqual(1, db.Access.SelectPropertiesByKeyword("Property Lessor", PropertySearchTarget.LessorName).PropertySearchResult.Count);
+        Assert.AreEqual(1, db.Access.SelectPropertiesByKeyword("Property Broker", PropertySearchTarget.BrokerName).PropertySearchResult.Count);
         Assert.IsNotNull(db.Listings.SelectById(first.Id, "listing-b").Listing);
         var propertyDelete = db.Properties.Delete(first.Id);
         Assert.IsFalse(propertyDelete.IsError);
@@ -643,6 +699,35 @@ public sealed class RentCommercialWorkflowTests
         Assert.IsNull(db.Listings.SelectById(first.Id, "listing-b").Listing);
         Assert.IsNotNull(db.Properties.SelectById(second.Id).Property);
         Assert.IsNotNull(db.Listings.SelectById(second.Id, "listing-c").Listing);
+    }
+
+    [TestMethod]
+    public void PropertySave_DeletesQueuedListingContacts()
+    {
+        using var db = new TestDatabase();
+        var lessor = new PersonNatural("lessor", EntityStatus.New) { NameLast = "Lessor" };
+        var broker = new PersonNatural("broker", EntityStatus.New) { NameLast = "Broker" };
+        Assert.IsFalse(db.Access.UpsertRentLessor(lessor).IsError);
+        Assert.IsFalse(db.Access.UpsertBroker(broker).IsError);
+        var property = NewProperty("property", "Commercial building");
+        property.Lessors.Add(lessor);
+        property.Brokers.Add(broker);
+        Assert.IsFalse(db.Properties.Upsert(property).IsError);
+        var listing = NewListing(property, "listing", "Unit A");
+        listing.Lessors.Add(lessor);
+        listing.Brokers.Add(broker);
+        Assert.IsFalse(db.Listings.Upsert(property.Id, listing).IsError);
+
+        property.ListingsToBeDeleted.Add(listing.Id);
+        Assert.IsFalse(db.Properties.Upsert(property).IsError);
+        Assert.IsNull(db.Listings.SelectById(property.Id, listing.Id).Listing);
+        Assert.AreEqual(0L, db.Count("SELECT COUNT(*) FROM rent_lessors_commercial_listings WHERE listing_id = @id", listing.Id));
+        Assert.AreEqual(0L, db.Count("SELECT COUNT(*) FROM brokers_commercial_listings WHERE listing_id = @id", listing.Id));
+        var loadedProperty = db.Properties.SelectById(property.Id);
+        Assert.IsFalse(loadedProperty.IsError);
+        Assert.IsNotNull(loadedProperty.Property);
+        Assert.AreEqual(lessor.Id, loadedProperty.Property.Lessors.Single().Id);
+        Assert.AreEqual(broker.Id, loadedProperty.Property.Brokers.Single().Id);
     }
 
     [TestMethod]
@@ -706,7 +791,7 @@ public sealed class RentCommercialWorkflowTests
         Assert.AreEqual(isDuplicate, property.IsModified);
         Assert.AreEqual(isDuplicate, editor.IsDirty);
         Assert.AreEqual(isDuplicate ? "複製_Commercial building" : "Commercial building", property.Name);
-        Assert.AreEqual("Commercial building", editor.Name);
+        Assert.AreEqual(isDuplicate ? "複製_Commercial building" : "Commercial building", editor.Name);
     }
 
     [TestMethod]
@@ -737,7 +822,7 @@ public sealed class RentCommercialWorkflowTests
             Assert.AreEqual(0, editor.Pictures.Count);
             Assert.AreEqual(isDuplicate, property.IsModified);
             Assert.AreEqual(isDuplicate, editor.IsDirty);
-            Assert.AreEqual("Commercial building", editor.Name);
+            Assert.AreEqual(isDuplicate ? "複製_Commercial building" : "Commercial building", editor.Name);
             Assert.AreEqual(isDuplicate ? "複製_Commercial building" : "Commercial building", property.Name);
         }
         finally
@@ -2445,6 +2530,16 @@ public sealed class RentCommercialWorkflowTests
         public TestDatabase()
         {
             Assert.IsFalse(Access.InitializeDatabase(_path).IsError, "Database initialization should succeed.");
+        }
+
+        public long Count(string sql, string id)
+        {
+            using var connection = new SqliteConnection($"Data Source={_path}");
+            connection.Open();
+            using var command = connection.CreateCommand();
+            command.CommandText = sql;
+            command.Parameters.AddWithValue("@id", id);
+            return (long)command.ExecuteScalar()!;
         }
 
         public void Dispose()

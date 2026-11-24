@@ -164,7 +164,7 @@
   </tbody></table></div>
 
   <h2 id="linked">Contacts and media</h2>
-  <p>See <a href="rent-lessors-spec.html#links">lessor associations</a> and <a href="brokers-spec.html#links">broker associations</a>. Commercial property links use an empty listing ID; listing links use the actual listing ID and the <code>RentCommercial</code> property context. Person details are stored separately.</p>
+  <p>Property contacts and Commercial listing contacts use separate association tables. Listing links reference both their property and listing, and are removed automatically when that listing is deleted. See <a href="rent-lessors-spec.html#links">lessor associations</a> and <a href="brokers-spec.html#links">broker associations</a>. Person details are stored separately.</p>
   <div class="table-wrap"><table><thead><tr><th scope="col">Input field</th><th scope="col">Description</th><th scope="col">Database columns</th></tr></thead><tbody>
     <tr><td>写真ファイル</td><td>Imported picture filename.</td><td><code>rent_commercial_pictures.filename</code>; listing: <code>rent_commercial_listing_pictures.filename</code></td></tr>
     <tr><td>タイプ（写真）</td><td>Picture category.</td><td><code>rent_commercial_pictures.type</code>; listing: <code>rent_commercial_listing_pictures.type</code></td></tr>

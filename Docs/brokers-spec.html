@@ -24,7 +24,7 @@
 <body>
   <nav aria-label="Index"><a href="index.html">Back to index</a></nav>
   <h1>Brokers: input and database specification</h1>
-  <p class="notice"><strong>Draft — implementation snapshot, not an approved schema.</strong> This sheet documents broker records and their property/listing associations as of 2026-11-22.</p>
+  <p class="notice"><strong>Draft — implementation snapshot, not an approved schema.</strong> This sheet documents broker records and their property/listing associations as of 2026-11-24.</p>
   <p>The editor's person kind, name, contact, address and remarks inputs are documented in the <a href="common-person-spec.html">common person specification</a>. Their broker columns are in <code>brokers</code>. See also <a href="rent-lessors-spec.html">Rent Lessors</a> and <a href="rent-residentials-spec.html#linked">Rent Residentials linked records</a>.</p>
   <nav aria-label="Contents"><ul><li><a href="#record">Broker record</a></li><li><a href="#links">Property and listing associations</a></li><li><a href="#notes">Notes and sources</a></li></ul></nav>
 
@@ -35,14 +35,13 @@
   </tbody></table></div>
 
   <h2 id="links">Property and listing associations</h2>
-  <p>The association table links a broker to a property or a particular listing. In the residential editor, an empty listing ID denotes a property-level link; an actual listing ID denotes a listing-level link. The same broker can have distinct links at both levels.</p>
-  <div class="table-wrap"><table><thead><tr><th scope="col">Field</th><th scope="col">Description</th><th scope="col">Database column</th></tr></thead><tbody>
-    <tr><td>Broker</td><td>Linked broker ID.</td><td><code>brokers_properties_listings.broker_id</code></td></tr>
-    <tr><td>Property</td><td>Linked property ID.</td><td><code>brokers_properties_listings.property_id</code></td></tr>
-    <tr><td>Property context</td><td>Context of the linked property.</td><td><code>brokers_properties_listings.property_context_type</code></td></tr>
-    <tr><td>Listing</td><td>Linked listing ID, or empty for a property-level link.</td><td><code>brokers_properties_listings.listing_id</code></td></tr>
+  <p>Property-level links are stored in <code>brokers_properties</code>. Listing-level links are stored separately for Residential and Commercial listings in <code>brokers_residential_listings</code> and <code>brokers_commercial_listings</code>. A broker can be linked at both levels.</p>
+  <div class="table-wrap"><table><thead><tr><th scope="col">Association</th><th scope="col">Columns</th><th scope="col">Constraint</th></tr></thead><tbody>
+    <tr><td>Property-level</td><td><code>broker_id</code>, <code>property_id</code>, <code>property_context_type</code></td><td>Primary key <code>(broker_id, property_id)</code>; foreign keys to broker and property cascade on delete.</td></tr>
+    <tr><td>Residential listing-level</td><td><code>broker_id</code>, <code>property_id</code>, <code>property_context_type</code>, <code>listing_id</code></td><td>Primary key <code>(broker_id, property_id, listing_id)</code>; foreign keys to broker and the matching Residential listing cascade on delete.</td></tr>
+    <tr><td>Commercial listing-level</td><td><code>broker_id</code>, <code>property_id</code>, <code>property_context_type</code>, <code>listing_id</code></td><td>Primary key <code>(broker_id, property_id, listing_id)</code>; foreign keys to broker and the matching Commercial listing cascade on delete.</td></tr>
   </tbody></table></div>
-  <p>The composite primary key is <code>(broker_id, property_id, listing_id)</code>. The schema declares a cascading foreign key to the broker table; it does not declare property or listing foreign keys.</p>
+  <p>Listing-level foreign keys reference the composite key <code>(property_id, listing_id)</code> on the corresponding listing table. Deleting a listing removes its broker links while leaving property-level links intact.</p>
 
   <h2 id="notes">Notes and sources</h2>
   <ul>

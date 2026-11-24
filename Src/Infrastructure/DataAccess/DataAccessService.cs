@@ -37,7 +37,10 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
         {
             // Don't think WAL mode is needed for this application. It is single-user, single-process, single-threading app with ReaderWriterLock.
             // WAL mode is more suitable for multi-threaded or multi-process scenarios where concurrent reads and writes are expected.
-            _connectionStringBuilder = new SqliteConnectionStringBuilder("Data Source=" + dataBaseFilePath);//+ ";Pooling=false" 
+            _connectionStringBuilder = new SqliteConnectionStringBuilder("Data Source=" + dataBaseFilePath)
+            {
+                ForeignKeys = true
+            };
 
             // Known issue. I personaly reported the issue to Microsoft.
             // https://github.com/dotnet/efcore/issues/38275
@@ -307,6 +310,7 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
 
                     "created_at TEXT NOT NULL DEFAULT (DATETIME('now'))," +
                     "updated_at TEXT NOT NULL DEFAULT (DATETIME('now'))," +
+                    "UNIQUE (property_id, listing_id)," +
                     "FOREIGN KEY (property_id) REFERENCES rent_residentials(property_id) ON DELETE CASCADE," + //?
                     "FOREIGN KEY (property_id) REFERENCES properties(property_id) ON DELETE CASCADE" +
                     " )";
@@ -513,6 +517,7 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
         remarks TEXT NOT NULL DEFAULT '',
         created_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc')),
         updated_at TEXT NOT NULL DEFAULT (DATETIME('now', 'utc')),
+        UNIQUE (property_id, listing_id),
         FOREIGN KEY (property_id)
             REFERENCES rent_commercials(property_id)
             ON DELETE CASCADE
@@ -619,39 +624,46 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
                     ")";
                 tableCmd.ExecuteNonQuery();
 
-                // A composite primary key
-                tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS rent_lessors_properties_listings (" +
-                    "lessor_id TEXT NOT NULL DEFAULT ''," +
-                    "property_id TEXT NOT NULL DEFAULT ''," +
-                    "property_context_type TEXT NOT NULL DEFAULT ''," +
-                    "listing_id TEXT NOT NULL DEFAULT ''," +
-
-                    "PRIMARY KEY (lessor_id, property_id, listing_id)," +
-
-                    "FOREIGN KEY (lessor_id) REFERENCES rent_lessors(lessor_id) ON DELETE CASCADE," +
-                    "FOREIGN KEY (property_id) REFERENCES properties(property_id) ON DELETE CASCADE" +
-                    ")";
-                tableCmd.ExecuteNonQuery();
-                /*
-                // Or
-                tableCmd.CommandText = "CREATE TABLE IF NOT EXISTS rent_lessors_properties_listings (" +
-                    "id INTEGER PRIMARY KEY AUTOINCREMENT" +
-                    "lessor_id TEXT NOT NULL," +
-                    "property_id TEXT NOT NULL," +
-                    "property_context_type TEXT NOT NULL," +
-                    "listing_id TEXT NOT NULL," +
-
-                    "UNIQUE(lessor_id, property_id, listing_id)" +
-                    ")";
-                tableCmd.ExecuteNonQuery();
-                */
-
                 tableCmd.CommandText = """
-                    CREATE INDEX IF NOT EXISTS ix_rent_lessors_properties_property_id
-                        ON rent_lessors_properties_listings(property_id);
+                    CREATE TABLE IF NOT EXISTS rent_lessors_properties (
+                        lessor_id TEXT NOT NULL,
+                        property_id TEXT NOT NULL,
+                        property_context_type TEXT NOT NULL DEFAULT '',
+                        PRIMARY KEY (lessor_id, property_id),
+                        FOREIGN KEY (lessor_id) REFERENCES rent_lessors(lessor_id) ON DELETE CASCADE,
+                        FOREIGN KEY (property_id) REFERENCES properties(property_id) ON DELETE CASCADE
+                    );
 
-                    CREATE INDEX IF NOT EXISTS ix_rent_lessors_properties_lessor_id
-                        ON rent_lessors_properties_listings(lessor_id);
+                    CREATE INDEX IF NOT EXISTS ix_rent_lessors_properties_property_id
+                        ON rent_lessors_properties(property_id);
+
+                    CREATE TABLE IF NOT EXISTS rent_lessors_residential_listings (
+                        lessor_id TEXT NOT NULL,
+                        property_id TEXT NOT NULL,
+                        property_context_type TEXT NOT NULL DEFAULT '',
+                        listing_id TEXT NOT NULL,
+                        PRIMARY KEY (lessor_id, property_id, listing_id),
+                        FOREIGN KEY (lessor_id) REFERENCES rent_lessors(lessor_id) ON DELETE CASCADE,
+                        FOREIGN KEY (property_id, listing_id)
+                            REFERENCES rent_residential_listings(property_id, listing_id) ON DELETE CASCADE
+                    );
+
+                    CREATE INDEX IF NOT EXISTS ix_rent_lessors_residential_listings_property_id
+                        ON rent_lessors_residential_listings(property_id);
+
+                    CREATE TABLE IF NOT EXISTS rent_lessors_commercial_listings (
+                        lessor_id TEXT NOT NULL,
+                        property_id TEXT NOT NULL,
+                        property_context_type TEXT NOT NULL DEFAULT '',
+                        listing_id TEXT NOT NULL,
+                        PRIMARY KEY (lessor_id, property_id, listing_id),
+                        FOREIGN KEY (lessor_id) REFERENCES rent_lessors(lessor_id) ON DELETE CASCADE,
+                        FOREIGN KEY (property_id, listing_id)
+                            REFERENCES rent_commercial_units(property_id, listing_id) ON DELETE CASCADE
+                    );
+
+                    CREATE INDEX IF NOT EXISTS ix_rent_lessors_commercial_listings_property_id
+                        ON rent_lessors_commercial_listings(property_id);
                     """;
                 tableCmd.ExecuteNonQuery();
 
@@ -812,20 +824,45 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
                 tableCmd.ExecuteNonQuery();
 
                 tableCmd.CommandText = """
-                    CREATE TABLE IF NOT EXISTS brokers_properties_listings (
-                        broker_id TEXT NOT NULL DEFAULT '',
-                        property_id TEXT NOT NULL DEFAULT '',
+                    CREATE TABLE IF NOT EXISTS brokers_properties (
+                        broker_id TEXT NOT NULL,
+                        property_id TEXT NOT NULL,
                         property_context_type TEXT NOT NULL DEFAULT '',
-                        listing_id TEXT NOT NULL DEFAULT '',
-                        PRIMARY KEY (broker_id, property_id, listing_id),
-                        FOREIGN KEY (broker_id)
-                            REFERENCES brokers(broker_id)
-                            ON DELETE CASCADE
+                        PRIMARY KEY (broker_id, property_id),
+                        FOREIGN KEY (broker_id) REFERENCES brokers(broker_id) ON DELETE CASCADE,
+                        FOREIGN KEY (property_id) REFERENCES properties(property_id) ON DELETE CASCADE
                     );
 
-                    CREATE INDEX IF NOT EXISTS
-                        ix_brokers_properties_listings_property_id
-                        ON brokers_properties_listings(property_id);
+                    CREATE INDEX IF NOT EXISTS ix_brokers_properties_property_id
+                        ON brokers_properties(property_id);
+
+                    CREATE TABLE IF NOT EXISTS brokers_residential_listings (
+                        broker_id TEXT NOT NULL,
+                        property_id TEXT NOT NULL,
+                        property_context_type TEXT NOT NULL DEFAULT '',
+                        listing_id TEXT NOT NULL,
+                        PRIMARY KEY (broker_id, property_id, listing_id),
+                        FOREIGN KEY (broker_id) REFERENCES brokers(broker_id) ON DELETE CASCADE,
+                        FOREIGN KEY (property_id, listing_id)
+                            REFERENCES rent_residential_listings(property_id, listing_id) ON DELETE CASCADE
+                    );
+
+                    CREATE INDEX IF NOT EXISTS ix_brokers_residential_listings_property_id
+                        ON brokers_residential_listings(property_id);
+
+                    CREATE TABLE IF NOT EXISTS brokers_commercial_listings (
+                        broker_id TEXT NOT NULL,
+                        property_id TEXT NOT NULL,
+                        property_context_type TEXT NOT NULL DEFAULT '',
+                        listing_id TEXT NOT NULL,
+                        PRIMARY KEY (broker_id, property_id, listing_id),
+                        FOREIGN KEY (broker_id) REFERENCES brokers(broker_id) ON DELETE CASCADE,
+                        FOREIGN KEY (property_id, listing_id)
+                            REFERENCES rent_commercial_units(property_id, listing_id) ON DELETE CASCADE
+                    );
+
+                    CREATE INDEX IF NOT EXISTS ix_brokers_commercial_listings_property_id
+                        ON brokers_commercial_listings(property_id);
                     """;
 
                 tableCmd.ExecuteNonQuery();
@@ -1265,8 +1302,8 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
             PropertySearchTarget.Station => "(p.train1_station_name LIKE @keyword ESCAPE '\\' OR p.train2_station_name LIKE @keyword ESCAPE '\\' OR p.train3_station_name LIKE @keyword ESCAPE '\\' OR p.train4_station_name LIKE @keyword ESCAPE '\\')",
             PropertySearchTarget.RailLine => "(p.train1_line_name LIKE @keyword ESCAPE '\\' OR p.train2_line_name LIKE @keyword ESCAPE '\\' OR p.train3_line_name LIKE @keyword ESCAPE '\\' OR p.train4_line_name LIKE @keyword ESCAPE '\\')",
             PropertySearchTarget.FudousanId => "p.fudousan_id LIKE @keyword ESCAPE '\\'",
-            PropertySearchTarget.BrokerName => "EXISTS (SELECT 1 FROM brokers_properties_listings AS relation INNER JOIN brokers AS broker ON broker.broker_id = relation.broker_id WHERE relation.property_id = p.property_id AND broker.name LIKE @keyword ESCAPE '\\')",
-            PropertySearchTarget.LessorName => "EXISTS (SELECT 1 FROM rent_lessors_properties_listings AS relation INNER JOIN rent_lessors AS lessor ON lessor.lessor_id = relation.lessor_id WHERE relation.property_id = p.property_id AND lessor.name LIKE @keyword ESCAPE '\\')",
+            PropertySearchTarget.BrokerName => "EXISTS (SELECT 1 FROM brokers AS broker WHERE broker.name LIKE @keyword ESCAPE '\\' AND (EXISTS (SELECT 1 FROM brokers_properties AS relation WHERE relation.property_id = p.property_id AND relation.broker_id = broker.broker_id) OR EXISTS (SELECT 1 FROM brokers_residential_listings AS relation WHERE relation.property_id = p.property_id AND relation.broker_id = broker.broker_id) OR EXISTS (SELECT 1 FROM brokers_commercial_listings AS relation WHERE relation.property_id = p.property_id AND relation.broker_id = broker.broker_id)))",
+            PropertySearchTarget.LessorName => "EXISTS (SELECT 1 FROM rent_lessors AS lessor WHERE lessor.name LIKE @keyword ESCAPE '\\' AND (EXISTS (SELECT 1 FROM rent_lessors_properties AS relation WHERE relation.property_id = p.property_id AND relation.lessor_id = lessor.lessor_id) OR EXISTS (SELECT 1 FROM rent_lessors_residential_listings AS relation WHERE relation.property_id = p.property_id AND relation.lessor_id = lessor.lessor_id) OR EXISTS (SELECT 1 FROM rent_lessors_commercial_listings AS relation WHERE relation.property_id = p.property_id AND relation.lessor_id = lessor.lessor_id)))",
             _ => throw new ArgumentOutOfRangeException(nameof(searchTarget), searchTarget, null)
         };
 
@@ -1351,6 +1388,8 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
     public ZumenSearch.Application.Results.ResultWrapper UpsertRentResidential(ZumenSearch.Domain.Entities.Rent.Residentials.Property property)
     {
         var res = new ResultWrapper();
+        var savedPictures = new List<ZumenSearch.Domain.Entities.Rent.Residentials.PropertyPicture>();
+        var savedPdfs = new List<ZumenSearch.Domain.Entities.Rent.Residentials.PropertyPdf>();
 
         if (string.IsNullOrEmpty(property.Id))
         {
@@ -1621,9 +1660,7 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
                         var r = cmd.ExecuteNonQuery();
                         if (r > 0)
                         {
-                            //pic.IsNew = false;
-                            pic.SetStatus(EntityStatus.Saved);
-                            pic.SetIsModified(false);
+                            savedPictures.Add(pic);
                         }
                     }
                 }
@@ -1686,9 +1723,7 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
                         var r = cmd.ExecuteNonQuery();
                         if (r > 0)
                         {
-                            //pic.IsNew = false;
-                            pic.SetStatus(EntityStatus.Saved);
-                            pic.SetIsModified(false);
+                            savedPdfs.Add(pic);
                         }
                     }
                 }
@@ -1718,26 +1753,21 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
 
                 cmd.Parameters.Clear();
 
-                // 貸主（建物）rent_lessors_properties_listings
+                // 貸主（建物）rent_lessors_properties
                 if (property.Lessors.Count > 0)
                 {
                     foreach (var psn in property.Lessors)
                     {
-                        var sqlUpsertLessor = "INSERT INTO rent_lessors_properties_listings (lessor_id, property_id, property_context_type, listing_id) ";
-                        sqlUpsertLessor += "VALUES (@lessor_id, @property_id, @property_context_type, @listing_id) ";
-                        sqlUpsertLessor += "ON CONFLICT (lessor_id, property_id, listing_id) ";
+                        var sqlUpsertLessor = "INSERT INTO rent_lessors_properties (lessor_id, property_id, property_context_type) ";
+                        sqlUpsertLessor += "VALUES (@lessor_id, @property_id, @property_context_type) ";
+                        sqlUpsertLessor += "ON CONFLICT (lessor_id, property_id) ";
                         sqlUpsertLessor += "DO NOTHING";
 
                         cmd.CommandText = sqlUpsertLessor;
-
-                        // ループなので、前のパラメーターをクリアする。
                         cmd.Parameters.Clear();
-
                         cmd.Parameters.AddWithValue("@lessor_id", psn.Id);
                         cmd.Parameters.AddWithValue("@property_id", property.Id);
                         cmd.Parameters.AddWithValue("@property_context_type", property.PropertyContextType.ToString());
-                        cmd.Parameters.AddWithValue("@listing_id", string.Empty);// since this is property.
-
                         cmd.ExecuteNonQuery();
                     }
                 }
@@ -1749,16 +1779,13 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
                 {
                     foreach (var psn in property.LessorsToBeDeleted)
                     {
-                        // 削除
                         cmd.Parameters.Clear();
-                        cmd.CommandText = "DELETE FROM rent_lessors_properties_listings WHERE lessor_id = @lessorId AND property_id = @propertyId AND listing_id = @listingId";
+                        cmd.CommandText = "DELETE FROM rent_lessors_properties WHERE lessor_id = @lessorId AND property_id = @propertyId";
                         cmd.Parameters.AddWithValue("@lessorId", psn.Id);
                         cmd.Parameters.AddWithValue("@propertyId", property.Id);
-                        cmd.Parameters.AddWithValue("@listingId", string.Empty);
                         var sqlResult = cmd.ExecuteNonQuery();
                         if (sqlResult > 0)
                         {
-                            // TODO:
                             Debug.WriteLine("Lessor deleted");
                         }
                     }
@@ -1766,26 +1793,21 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
 
                 cmd.Parameters.Clear();
 
-                // 宅建業者（建物）brokers_properties_listings
+                // 宅建業者（建物）brokers_properties
                 if (property.Brokers.Count > 0)
                 {
                     foreach (var psn in property.Brokers)
                     {
-                        var sqlUpsertBroker = "INSERT INTO brokers_properties_listings (broker_id, property_id, property_context_type, listing_id) ";
-                        sqlUpsertBroker += "VALUES (@broker_id, @property_id, @property_context_type, @listing_id) ";
-                        sqlUpsertBroker += "ON CONFLICT (broker_id, property_id, listing_id) ";
+                        var sqlUpsertBroker = "INSERT INTO brokers_properties (broker_id, property_id, property_context_type) ";
+                        sqlUpsertBroker += "VALUES (@broker_id, @property_id, @property_context_type) ";
+                        sqlUpsertBroker += "ON CONFLICT (broker_id, property_id) ";
                         sqlUpsertBroker += "DO NOTHING";
 
                         cmd.CommandText = sqlUpsertBroker;
-
-                        // ループなので、前のパラメーターをクリアする。
                         cmd.Parameters.Clear();
-
                         cmd.Parameters.AddWithValue("@broker_id", psn.Id);
                         cmd.Parameters.AddWithValue("@property_id", property.Id);
                         cmd.Parameters.AddWithValue("@property_context_type", property.PropertyContextType.ToString());
-                        cmd.Parameters.AddWithValue("@listing_id", string.Empty);// since this is property.
-
                         cmd.ExecuteNonQuery();
                     }
                 }
@@ -1797,16 +1819,13 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
                 {
                     foreach (var psn in property.BrokersToBeDeleted)
                     {
-                        // 削除
                         cmd.Parameters.Clear();
-                        cmd.CommandText = "DELETE FROM brokers_properties_listings WHERE broker_id = @brokerId AND property_id = @propertyId AND listing_id = @listingId";
+                        cmd.CommandText = "DELETE FROM brokers_properties WHERE broker_id = @brokerId AND property_id = @propertyId";
                         cmd.Parameters.AddWithValue("@brokerId", psn.Id);
                         cmd.Parameters.AddWithValue("@propertyId", property.Id);
-                        cmd.Parameters.AddWithValue("@listingId", string.Empty);
                         var sqlResult = cmd.ExecuteNonQuery();
                         if (sqlResult > 0)
                         {
-                            // TODO:
                             Debug.WriteLine("Broker deleted");
                         }
                     }
@@ -1870,6 +1889,17 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
         }
 
         if (res.IsError) return res;
+
+        foreach (var picture in savedPictures)
+        {
+            picture.SetStatus(EntityStatus.Saved);
+            picture.SetIsModified(false);
+        }
+        foreach (var pdf in savedPdfs)
+        {
+            pdf.SetStatus(EntityStatus.Saved);
+            pdf.SetIsModified(false);
+        }
 
         //Debug.WriteLine(string.Format("{0} Entries Inserted to DB", res.AffectedCount.ToString()));
 
@@ -2339,7 +2369,7 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
 
             // 貸主（建物）
             var lessorIdList = new List<string>();
-            cmd.CommandText = "SELECT * FROM rent_lessors_properties_listings WHERE property_id = @propertyId AND listing_id = ''";
+            cmd.CommandText = "SELECT * FROM rent_lessors_properties WHERE property_id = @propertyId";
             cmd.Parameters.Clear();
             cmd.Parameters.AddWithValue("@propertyId", propertyId);
             using (var reader = cmd.ExecuteReader())
@@ -2393,7 +2423,7 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
 
             // 宅建業者（建物）
             var brokerIdList = new List<string>();
-            cmd.CommandText = "SELECT * FROM brokers_properties_listings WHERE property_id = @propertyId AND listing_id = ''";
+            cmd.CommandText = "SELECT * FROM brokers_properties WHERE property_id = @propertyId";
             cmd.Parameters.Clear();
             cmd.Parameters.AddWithValue("@propertyId", propertyId);
             using (var reader = cmd.ExecuteReader())
@@ -2863,26 +2893,19 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
             //listing.UnitPicturesToBeDeleted.Clear();
         }
 
-        // 部屋貸主 rent_lessors_properties_listings - Insert or Update
+        // 部屋貸主 rent_lessors_residential_listings - Insert or Update
         if (listing.Lessors.Count > 0)
         {
             foreach (var psn in listing.Lessors)
             {
-                // Upsert 
-                var sqlUpsert = "INSERT INTO rent_lessors_properties_listings (lessor_id, property_id, property_context_type, listing_id) VALUES (@lessor_id, @property_id, @property_context_type, @listing_id) ";
-                sqlUpsert += "ON CONFLICT(lessor_id, property_id, listing_id) ";
-                sqlUpsert += "DO NOTHING";//"DO UPDATE SET lessor_id = @lessor_id, property_id = @property_id, property_context_type = @property_context_type, listing_id = @listing_id";
-
+                var sqlUpsert = "INSERT INTO rent_lessors_residential_listings (lessor_id, property_id, property_context_type, listing_id) VALUES (@lessor_id, @property_id, @property_context_type, @listing_id) ";
+                sqlUpsert += "ON CONFLICT(lessor_id, property_id, listing_id) DO NOTHING";
                 cmd.CommandText = sqlUpsert;
-
-                // ループなので、前のパラメーターをクリアする。
                 cmd.Parameters.Clear();
-
                 cmd.Parameters.AddWithValue("@lessor_id", psn.Id);
                 cmd.Parameters.AddWithValue("@property_id", propertyId);
                 cmd.Parameters.AddWithValue("@property_context_type", PropertyContextType.RentResidential.ToString());
                 cmd.Parameters.AddWithValue("@listing_id", listing.Id);
-
                 cmd.ExecuteNonQuery();
             }
         }
@@ -2893,23 +2916,22 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
             foreach (var psn in listing.LessorsToBeDeleted)
             {
                 cmd.Parameters.Clear();
-                cmd.CommandText = "DELETE FROM rent_lessors_properties_listings WHERE lessor_id = @id AND property_id = @propertyId AND listing_id = @listingId AND property_context_type = @propertyContextType";
+                cmd.CommandText = "DELETE FROM rent_lessors_residential_listings WHERE lessor_id = @id AND property_id = @propertyId AND listing_id = @listingId";
                 cmd.Parameters.AddWithValue("@id", psn.Id);
                 cmd.Parameters.AddWithValue("@propertyId", propertyId);
                 cmd.Parameters.AddWithValue("@listingId", listing.Id);
-                cmd.Parameters.AddWithValue("@propertyContextType", PropertyContextType.RentResidential.ToString());
                 cmd.ExecuteNonQuery();
             }
         }
 
-        // 部屋宅建業者 brokers_properties_listings - Insert or Update
+        // 部屋宅建業者 brokers_residential_listings - Insert or Update
         if (listing.Brokers.Count > 0)
         {
             foreach (var broker in listing.Brokers)
             {
                 cmd.Parameters.Clear();
                 cmd.CommandText = """
-                    INSERT INTO brokers_properties_listings
+                    INSERT INTO brokers_residential_listings
                         (broker_id, property_id, property_context_type, listing_id)
                     VALUES
                         (@brokerId, @propertyId, @propertyContextType, @listingId)
@@ -2930,16 +2952,12 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
             {
                 cmd.Parameters.Clear();
                 cmd.CommandText = """
-                    DELETE FROM brokers_properties_listings
-                    WHERE broker_id = @brokerId
-                      AND property_id = @propertyId
-                      AND listing_id = @listingId
-                      AND property_context_type = @propertyContextType;
+                    DELETE FROM brokers_residential_listings
+                    WHERE broker_id = @brokerId AND property_id = @propertyId AND listing_id = @listingId;
                     """;
                 cmd.Parameters.AddWithValue("@brokerId", broker.Id);
                 cmd.Parameters.AddWithValue("@propertyId", propertyId);
                 cmd.Parameters.AddWithValue("@listingId", listing.Id);
-                cmd.Parameters.AddWithValue("@propertyContextType", PropertyContextType.RentResidential.ToString());
                 cmd.ExecuteNonQuery();
             }
         }
@@ -3085,12 +3103,8 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
             AddTextFilter(criteria.Address, "p.location_full LIKE @address ESCAPE '\\'", "address");
             AddTextFilter(
                 criteria.LessorName,
-                "EXISTS (SELECT 1 FROM rent_lessors_properties_listings AS relation " +
-                "INNER JOIN rent_lessors AS lessor ON lessor.lessor_id = relation.lessor_id " +
-                "WHERE relation.property_id = p.property_id " +
-                "AND ((r.is_unit_ownership = 0 AND relation.listing_id = '') " +
-                "OR (r.is_unit_ownership = 1 AND relation.listing_id = l.listing_id)) " +
-                "AND lessor.name LIKE @lessorName ESCAPE '\\')",
+                "((r.is_unit_ownership = 0 AND EXISTS (SELECT 1 FROM rent_lessors_properties AS relation INNER JOIN rent_lessors AS lessor ON lessor.lessor_id = relation.lessor_id WHERE relation.property_id = p.property_id AND lessor.name LIKE @lessorName ESCAPE '\\')) " +
+                "OR (r.is_unit_ownership = 1 AND EXISTS (SELECT 1 FROM rent_lessors_residential_listings AS relation INNER JOIN rent_lessors AS lessor ON lessor.lessor_id = relation.lessor_id WHERE relation.property_id = p.property_id AND relation.listing_id = l.listing_id AND lessor.name LIKE @lessorName ESCAPE '\\')))",
                 "lessorName");
             AddTextFilter(criteria.FudousanId, "p.fudousan_id LIKE @fudousanId ESCAPE '\\'", "fudousanId");
 
@@ -3099,8 +3113,7 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
                 cmd.Parameters.AddWithValue("@keywordContextType", PropertyContextType.RentResidential.ToString());
                 AddTextFilter(criteria.Keyword, "(p.name LIKE @keyword ESCAPE '\\' OR l.name LIKE @keyword ESCAPE '\\' OR p.location_full LIKE @keyword ESCAPE '\\' OR p.fudousan_id LIKE @keyword ESCAPE '\\' OR " +
                     "p.train1_station_name LIKE @keyword ESCAPE '\\' OR p.train2_station_name LIKE @keyword ESCAPE '\\' OR p.train3_station_name LIKE @keyword ESCAPE '\\' OR p.train4_station_name LIKE @keyword ESCAPE '\\' OR " +
-                    "EXISTS (SELECT 1 FROM rent_lessors_properties_listings AS relation INNER JOIN rent_lessors AS lessor ON lessor.lessor_id = relation.lessor_id " +
-                    "WHERE relation.property_id = p.property_id AND relation.property_context_type = @keywordContextType AND ((r.is_unit_ownership = 0 AND relation.listing_id = '') OR (r.is_unit_ownership = 1 AND relation.listing_id = l.listing_id)) AND lessor.name LIKE @keyword ESCAPE '\\'))", "keyword");
+                    "EXISTS (SELECT 1 FROM rent_lessors AS lessor WHERE lessor.name LIKE @keyword ESCAPE '\\' AND ((r.is_unit_ownership = 0 AND EXISTS (SELECT 1 FROM rent_lessors_properties AS relation WHERE relation.property_id = p.property_id AND relation.property_context_type = @keywordContextType AND relation.lessor_id = lessor.lessor_id)) OR (r.is_unit_ownership = 1 AND EXISTS (SELECT 1 FROM rent_lessors_residential_listings AS relation WHERE relation.property_id = p.property_id AND relation.listing_id = l.listing_id AND relation.property_context_type = @keywordContextType AND relation.lessor_id = lessor.lessor_id)))))", "keyword");
             }
 
             // Rent and other numeric limits
@@ -3603,8 +3616,9 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
 
         // 部屋貸主
         var lessorIds = new List<string>();
-        cmd.CommandText = "SELECT * FROM rent_lessors_properties_listings WHERE listing_id = @listingId";
+        cmd.CommandText = "SELECT * FROM rent_lessors_residential_listings WHERE property_id = @propertyId AND listing_id = @listingId";
         cmd.Parameters.Clear();
+        cmd.Parameters.AddWithValue("@propertyId", listing.PropertyId);
         cmd.Parameters.AddWithValue("@listingId", listingId);
         using (var reader = cmd.ExecuteReader())
         {
@@ -3644,7 +3658,7 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
         // 宅建業者（部屋）
         cmd.CommandText = """
             SELECT b.broker_id, b.name, b.person_kind, b.name_last, b.name_first, b.name_company, b.name_company_type, b.name_company_type_position, b.phone_number, b.mobile_phone_number, b.contact_name, b.location_postal_code, b.location_full, b.location_machiaza_id, b.location_prefecture, b.location_county, b.location_city, b.location_ward, b.location_oaza, b.location_choume, b.location_edaban, b.remarks
-            FROM brokers_properties_listings AS association
+            FROM brokers_residential_listings AS association
             INNER JOIN brokers AS b ON b.broker_id = association.broker_id
             WHERE association.property_id = @propertyId AND association.listing_id = @listingId;
             """;
@@ -3740,6 +3754,8 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
     public ZumenSearch.Application.Results.ResultWrapper UpsertRentCommercial(ZumenSearch.Domain.Entities.Rent.Commercials.Property property)
     {
         var res = new ResultWrapper();
+        var savedPictures = new List<ZumenSearch.Domain.Entities.Rent.Commercials.PropertyPicture>();
+        var savedPdfs = new List<ZumenSearch.Domain.Entities.Rent.Commercials.PropertyPdf>();
 
         if (string.IsNullOrEmpty(property.Id))
         {
@@ -3988,9 +4004,7 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
                         var r = cmd.ExecuteNonQuery();
                         if (r > 0)
                         {
-                            //pic.IsNew = false;
-                            pic.SetStatus(EntityStatus.Saved);
-                            pic.SetIsModified(false);
+                            savedPictures.Add(pic);
                         }
                     }
                 }
@@ -4053,9 +4067,7 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
                         var r = cmd.ExecuteNonQuery();
                         if (r > 0)
                         {
-                            //pic.IsNew = false;
-                            pic.SetStatus(EntityStatus.Saved);
-                            pic.SetIsModified(false);
+                            savedPdfs.Add(pic);
                         }
                     }
                 }
@@ -4085,26 +4097,21 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
 
                 cmd.Parameters.Clear();
 
-                // 貸主（建物）rent_lessors_properties_listings
+                // 貸主（建物）rent_lessors_properties
                 if (property.Lessors.Count > 0)
                 {
                     foreach (var psn in property.Lessors)
                     {
-                        var sqlUpsertLessor = "INSERT INTO rent_lessors_properties_listings (lessor_id, property_id, property_context_type, listing_id) ";
-                        sqlUpsertLessor += "VALUES (@lessor_id, @property_id, @property_context_type, @listing_id) ";
-                        sqlUpsertLessor += "ON CONFLICT (lessor_id, property_id, listing_id) ";
+                        var sqlUpsertLessor = "INSERT INTO rent_lessors_properties (lessor_id, property_id, property_context_type) ";
+                        sqlUpsertLessor += "VALUES (@lessor_id, @property_id, @property_context_type) ";
+                        sqlUpsertLessor += "ON CONFLICT (lessor_id, property_id) ";
                         sqlUpsertLessor += "DO NOTHING";
 
                         cmd.CommandText = sqlUpsertLessor;
-
-                        // ループなので、前のパラメーターをクリアする。
                         cmd.Parameters.Clear();
-
                         cmd.Parameters.AddWithValue("@lessor_id", psn.Id);
                         cmd.Parameters.AddWithValue("@property_id", property.Id);
                         cmd.Parameters.AddWithValue("@property_context_type", property.PropertyContextType.ToString());
-                        cmd.Parameters.AddWithValue("@listing_id", string.Empty);// since this is property.
-
                         cmd.ExecuteNonQuery();
                     }
                 }
@@ -4116,16 +4123,13 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
                 {
                     foreach (var psn in property.LessorsToBeDeleted)
                     {
-                        // 削除
                         cmd.Parameters.Clear();
-                        cmd.CommandText = "DELETE FROM rent_lessors_properties_listings WHERE lessor_id = @lessorId AND property_id = @propertyId AND listing_id = @listingId";
+                        cmd.CommandText = "DELETE FROM rent_lessors_properties WHERE lessor_id = @lessorId AND property_id = @propertyId";
                         cmd.Parameters.AddWithValue("@lessorId", psn.Id);
                         cmd.Parameters.AddWithValue("@propertyId", property.Id);
-                        cmd.Parameters.AddWithValue("@listingId", string.Empty);
                         var sqlResult = cmd.ExecuteNonQuery();
                         if (sqlResult > 0)
                         {
-                            // TODO:
                             Debug.WriteLine("Lessor deleted");
                         }
                     }
@@ -4133,26 +4137,21 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
 
                 cmd.Parameters.Clear();
 
-                // 宅建業者（建物）brokers_properties_listings
+                // 宅建業者（建物）brokers_properties
                 if (property.Brokers.Count > 0)
                 {
                     foreach (var psn in property.Brokers)
                     {
-                        var sqlUpsertBroker = "INSERT INTO brokers_properties_listings (broker_id, property_id, property_context_type, listing_id) ";
-                        sqlUpsertBroker += "VALUES (@broker_id, @property_id, @property_context_type, @listing_id) ";
-                        sqlUpsertBroker += "ON CONFLICT (broker_id, property_id, listing_id) ";
+                        var sqlUpsertBroker = "INSERT INTO brokers_properties (broker_id, property_id, property_context_type) ";
+                        sqlUpsertBroker += "VALUES (@broker_id, @property_id, @property_context_type) ";
+                        sqlUpsertBroker += "ON CONFLICT (broker_id, property_id) ";
                         sqlUpsertBroker += "DO NOTHING";
 
                         cmd.CommandText = sqlUpsertBroker;
-
-                        // ループなので、前のパラメーターをクリアする。
                         cmd.Parameters.Clear();
-
                         cmd.Parameters.AddWithValue("@broker_id", psn.Id);
                         cmd.Parameters.AddWithValue("@property_id", property.Id);
                         cmd.Parameters.AddWithValue("@property_context_type", property.PropertyContextType.ToString());
-                        cmd.Parameters.AddWithValue("@listing_id", string.Empty);// since this is property.
-
                         cmd.ExecuteNonQuery();
                     }
                 }
@@ -4164,16 +4163,13 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
                 {
                     foreach (var psn in property.BrokersToBeDeleted)
                     {
-                        // 削除
                         cmd.Parameters.Clear();
-                        cmd.CommandText = "DELETE FROM brokers_properties_listings WHERE broker_id = @brokerId AND property_id = @propertyId AND listing_id = @listingId";
+                        cmd.CommandText = "DELETE FROM brokers_properties WHERE broker_id = @brokerId AND property_id = @propertyId";
                         cmd.Parameters.AddWithValue("@brokerId", psn.Id);
                         cmd.Parameters.AddWithValue("@propertyId", property.Id);
-                        cmd.Parameters.AddWithValue("@listingId", string.Empty);
                         var sqlResult = cmd.ExecuteNonQuery();
                         if (sqlResult > 0)
                         {
-                            // TODO:
                             Debug.WriteLine("Broker deleted");
                         }
                     }
@@ -4237,6 +4233,17 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
         }
 
         if (res.IsError) return res;
+
+        foreach (var picture in savedPictures)
+        {
+            picture.SetStatus(EntityStatus.Saved);
+            picture.SetIsModified(false);
+        }
+        foreach (var pdf in savedPdfs)
+        {
+            pdf.SetStatus(EntityStatus.Saved);
+            pdf.SetIsModified(false);
+        }
 
         //Debug.WriteLine(string.Format("{0} Entries Inserted to DB", res.AffectedCount.ToString()));
 
@@ -4598,7 +4605,7 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
 
             // 貸主（建物）
             var lessorIdList = new List<string>();
-            cmd.CommandText = "SELECT * FROM rent_lessors_properties_listings WHERE property_id = @propertyId AND listing_id = ''";
+            cmd.CommandText = "SELECT * FROM rent_lessors_properties WHERE property_id = @propertyId";
             cmd.Parameters.Clear();
             cmd.Parameters.AddWithValue("@propertyId", propertyId);
             using (var reader = cmd.ExecuteReader())
@@ -4652,7 +4659,7 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
 
             // 宅建業者（建物）
             var brokerIdList = new List<string>();
-            cmd.CommandText = "SELECT * FROM brokers_properties_listings WHERE property_id = @propertyId AND listing_id = ''";
+            cmd.CommandText = "SELECT * FROM brokers_properties WHERE property_id = @propertyId";
             cmd.Parameters.Clear();
             cmd.Parameters.AddWithValue("@propertyId", propertyId);
             using (var reader = cmd.ExecuteReader())
@@ -5128,26 +5135,19 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
             //listing.UnitPicturesToBeDeleted.Clear();
         }
 
-        // 募集物件貸主 rent_lessors_properties_listings - Insert or Update
+        // 募集物件貸主 rent_lessors_commercial_listings - Insert or Update
         if (listing.Lessors.Count > 0)
         {
             foreach (var psn in listing.Lessors)
             {
-                // Upsert
-                var sqlUpsert = "INSERT INTO rent_lessors_properties_listings (lessor_id, property_id, property_context_type, listing_id) VALUES (@lessor_id, @property_id, @property_context_type, @listing_id) ";
-                sqlUpsert += "ON CONFLICT(lessor_id, property_id, listing_id) ";
-                sqlUpsert += "DO NOTHING";//"DO UPDATE SET lessor_id = @lessor_id, property_id = @property_id, property_context_type = @property_context_type, listing_id = @listing_id";
-
+                var sqlUpsert = "INSERT INTO rent_lessors_commercial_listings (lessor_id, property_id, property_context_type, listing_id) VALUES (@lessor_id, @property_id, @property_context_type, @listing_id) ";
+                sqlUpsert += "ON CONFLICT(lessor_id, property_id, listing_id) DO NOTHING";
                 cmd.CommandText = sqlUpsert;
-
-                // ループなので、前のパラメーターをクリアする。
                 cmd.Parameters.Clear();
-
                 cmd.Parameters.AddWithValue("@lessor_id", psn.Id);
                 cmd.Parameters.AddWithValue("@property_id", propertyId);
                 cmd.Parameters.AddWithValue("@property_context_type", PropertyContextType.RentCommercial.ToString());
                 cmd.Parameters.AddWithValue("@listing_id", listing.Id);
-
                 cmd.ExecuteNonQuery();
             }
         }
@@ -5158,23 +5158,22 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
             foreach (var psn in listing.LessorsToBeDeleted)
             {
                 cmd.Parameters.Clear();
-                cmd.CommandText = "DELETE FROM rent_lessors_properties_listings WHERE lessor_id = @id AND property_id = @propertyId AND listing_id = @listingId AND property_context_type = @propertyContextType";
+                cmd.CommandText = "DELETE FROM rent_lessors_commercial_listings WHERE lessor_id = @id AND property_id = @propertyId AND listing_id = @listingId";
                 cmd.Parameters.AddWithValue("@id", psn.Id);
                 cmd.Parameters.AddWithValue("@propertyId", propertyId);
                 cmd.Parameters.AddWithValue("@listingId", listing.Id);
-                cmd.Parameters.AddWithValue("@propertyContextType", PropertyContextType.RentCommercial.ToString());
                 cmd.ExecuteNonQuery();
             }
         }
 
-        // 募集物件宅建業者 brokers_properties_listings - Insert or Update
+        // 募集物件宅建業者 brokers_commercial_listings - Insert or Update
         if (listing.Brokers.Count > 0)
         {
             foreach (var broker in listing.Brokers)
             {
                 cmd.Parameters.Clear();
                 cmd.CommandText = """
-                    INSERT INTO brokers_properties_listings
+                    INSERT INTO brokers_commercial_listings
                         (broker_id, property_id, property_context_type, listing_id)
                     VALUES
                         (@brokerId, @propertyId, @propertyContextType, @listingId)
@@ -5195,16 +5194,12 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
             {
                 cmd.Parameters.Clear();
                 cmd.CommandText = """
-                    DELETE FROM brokers_properties_listings
-                    WHERE broker_id = @brokerId
-                      AND property_id = @propertyId
-                      AND listing_id = @listingId
-                      AND property_context_type = @propertyContextType;
+                    DELETE FROM brokers_commercial_listings
+                    WHERE broker_id = @brokerId AND property_id = @propertyId AND listing_id = @listingId;
                     """;
                 cmd.Parameters.AddWithValue("@brokerId", broker.Id);
                 cmd.Parameters.AddWithValue("@propertyId", propertyId);
                 cmd.Parameters.AddWithValue("@listingId", listing.Id);
-                cmd.Parameters.AddWithValue("@propertyContextType", PropertyContextType.RentCommercial.ToString());
                 cmd.ExecuteNonQuery();
             }
         }
@@ -5311,12 +5306,8 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
             AddTextFilter(criteria.Address, "p.location_full LIKE @address ESCAPE '\\'", "address");
             AddTextFilter(
                 criteria.LessorName,
-                "EXISTS (SELECT 1 FROM rent_lessors_properties_listings AS relation " +
-                "INNER JOIN rent_lessors AS lessor ON lessor.lessor_id = relation.lessor_id " +
-                "WHERE relation.property_id = p.property_id AND relation.property_context_type = @propertyContextType " +
-                "AND ((r.is_unit_ownership = 0 AND relation.listing_id = '') " +
-                "OR (r.is_unit_ownership = 1 AND relation.listing_id = l.listing_id)) " +
-                "AND lessor.name LIKE @lessorName ESCAPE '\\')",
+                "((r.is_unit_ownership = 0 AND EXISTS (SELECT 1 FROM rent_lessors_properties AS relation INNER JOIN rent_lessors AS lessor ON lessor.lessor_id = relation.lessor_id WHERE relation.property_id = p.property_id AND relation.property_context_type = @propertyContextType AND lessor.name LIKE @lessorName ESCAPE '\\')) " +
+                "OR (r.is_unit_ownership = 1 AND EXISTS (SELECT 1 FROM rent_lessors_commercial_listings AS relation INNER JOIN rent_lessors AS lessor ON lessor.lessor_id = relation.lessor_id WHERE relation.property_id = p.property_id AND relation.listing_id = l.listing_id AND relation.property_context_type = @propertyContextType AND lessor.name LIKE @lessorName ESCAPE '\\')))",
                 "lessorName");
             AddTextFilter(criteria.FudousanId, "p.fudousan_id LIKE @fudousanId ESCAPE '\\'", "fudousanId");
 
@@ -5324,8 +5315,7 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
             {
                 AddTextFilter(criteria.Keyword, "(p.name LIKE @keyword ESCAPE '\\' OR l.name LIKE @keyword ESCAPE '\\' OR p.location_full LIKE @keyword ESCAPE '\\' OR p.fudousan_id LIKE @keyword ESCAPE '\\' OR " +
                     "p.train1_station_name LIKE @keyword ESCAPE '\\' OR p.train2_station_name LIKE @keyword ESCAPE '\\' OR p.train3_station_name LIKE @keyword ESCAPE '\\' OR p.train4_station_name LIKE @keyword ESCAPE '\\' OR " +
-                    "EXISTS (SELECT 1 FROM rent_lessors_properties_listings AS relation INNER JOIN rent_lessors AS lessor ON lessor.lessor_id = relation.lessor_id " +
-                    "WHERE relation.property_id = p.property_id AND relation.property_context_type = @propertyContextType AND ((r.is_unit_ownership = 0 AND relation.listing_id = '') OR (r.is_unit_ownership = 1 AND relation.listing_id = l.listing_id)) AND lessor.name LIKE @keyword ESCAPE '\\'))", "keyword");
+                    "EXISTS (SELECT 1 FROM rent_lessors AS lessor WHERE lessor.name LIKE @keyword ESCAPE '\\' AND ((r.is_unit_ownership = 0 AND EXISTS (SELECT 1 FROM rent_lessors_properties AS relation WHERE relation.property_id = p.property_id AND relation.property_context_type = @propertyContextType AND relation.lessor_id = lessor.lessor_id)) OR (r.is_unit_ownership = 1 AND EXISTS (SELECT 1 FROM rent_lessors_commercial_listings AS relation WHERE relation.property_id = p.property_id AND relation.listing_id = l.listing_id AND relation.property_context_type = @propertyContextType AND relation.lessor_id = lessor.lessor_id)))))", "keyword");
             }
 
             // Rent and other numeric limits
@@ -5846,8 +5836,9 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
 
         // 募集物件貸主
         var lessorIds = new List<string>();
-        cmd.CommandText = "SELECT * FROM rent_lessors_properties_listings WHERE listing_id = @listingId";
+        cmd.CommandText = "SELECT * FROM rent_lessors_commercial_listings WHERE property_id = @propertyId AND listing_id = @listingId";
         cmd.Parameters.Clear();
+        cmd.Parameters.AddWithValue("@propertyId", listing.PropertyId);
         cmd.Parameters.AddWithValue("@listingId", listingId);
         using (var reader = cmd.ExecuteReader())
         {
@@ -5887,7 +5878,7 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
         // 宅建業者（募集物件）
         cmd.CommandText = """
             SELECT b.broker_id, b.name, b.person_kind, b.name_last, b.name_first, b.name_company, b.name_company_type, b.name_company_type_position, b.phone_number, b.mobile_phone_number, b.contact_name, b.location_postal_code, b.location_full, b.location_machiaza_id, b.location_prefecture, b.location_county, b.location_city, b.location_ward, b.location_oaza, b.location_choume, b.location_edaban, b.remarks
-            FROM brokers_properties_listings AS association
+            FROM brokers_commercial_listings AS association
             INNER JOIN brokers AS b ON b.broker_id = association.broker_id
             WHERE association.property_id = @propertyId AND association.listing_id = @listingId;
             """;

@@ -280,21 +280,43 @@ public sealed class RentResidentialWorkflowTests
     public void DeleteListingAndProperty_LeavesUnrelatedRecordsIntact()
     {
         using var db = new TestDatabase();
+        var propertyLessor = new PersonNatural("property-lessor", EntityStatus.New) { NameLast = "Property Lessor" };
+        var listingLessor = new PersonNatural("listing-lessor", EntityStatus.New) { NameLast = "Listing Lessor" };
+        var propertyBroker = new PersonNatural("property-broker", EntityStatus.New) { NameLast = "Property Broker" };
+        var listingBroker = new PersonNatural("listing-broker", EntityStatus.New) { NameLast = "Listing Broker" };
+        Assert.IsFalse(db.Access.UpsertRentLessor(propertyLessor).IsError);
+        Assert.IsFalse(db.Access.UpsertRentLessor(listingLessor).IsError);
+        Assert.IsFalse(db.Access.UpsertBroker(propertyBroker).IsError);
+        Assert.IsFalse(db.Access.UpsertBroker(listingBroker).IsError);
         var first = NewProperty("property-a", "Building A");
+        first.Lessors.Add(propertyLessor);
+        first.Brokers.Add(propertyBroker);
         var second = NewProperty("property-b", "Building B");
         Assert.IsFalse(db.Access.UpsertRentResidential(first).IsError);
         Assert.IsFalse(db.Access.UpsertRentResidential(second).IsError);
         var firstListing = NewListing(first, "listing-a", "101");
         firstListing.Pictures.Add(new ListingPicture("listing-picture", "image.jpg", EntityStatus.New));
+        firstListing.Lessors.Add(listingLessor);
+        firstListing.Brokers.Add(listingBroker);
         Assert.IsFalse(db.Access.UpsertRentResidentialListing(first.Id, firstListing).IsError);
         Assert.IsFalse(db.Access.UpsertRentResidentialListing(first.Id, NewListing(first, "listing-b", "102")).IsError);
         Assert.IsFalse(db.Access.UpsertRentResidentialListing(second.Id, NewListing(second, "listing-c", "201")).IsError);
+        Assert.AreEqual(1, db.Access.SelectPropertiesByKeyword("Listing Lessor", PropertySearchTarget.LessorName).PropertySearchResult.Count);
+        Assert.AreEqual(1, db.Access.SelectPropertiesByKeyword("Listing Broker", PropertySearchTarget.BrokerName).PropertySearchResult.Count);
 
         var listingDelete = db.Access.DeleteRentResidentialListing("listing-a");
         Assert.IsFalse(listingDelete.IsError);
         Assert.AreEqual(1, listingDelete.AffectedCount);
         Assert.IsNull(db.Access.SelectRentResidentialListingById(first.Id, "listing-a").Listing);
         Assert.AreEqual(0L, db.Count("SELECT COUNT(*) FROM rent_residential_listing_pictures WHERE listing_id = @id", "listing-a"));
+        Assert.AreEqual(0L, db.Count("SELECT COUNT(*) FROM rent_lessors_residential_listings WHERE listing_id = @id", "listing-a"));
+        Assert.AreEqual(0L, db.Count("SELECT COUNT(*) FROM brokers_residential_listings WHERE listing_id = @id", "listing-a"));
+        Assert.AreEqual(1L, db.Count("SELECT COUNT(*) FROM rent_lessors_properties WHERE property_id = @id", first.Id));
+        Assert.AreEqual(1L, db.Count("SELECT COUNT(*) FROM brokers_properties WHERE property_id = @id", first.Id));
+        Assert.AreEqual(0, db.Access.SelectPropertiesByKeyword("Listing Lessor", PropertySearchTarget.LessorName).PropertySearchResult.Count);
+        Assert.AreEqual(0, db.Access.SelectPropertiesByKeyword("Listing Broker", PropertySearchTarget.BrokerName).PropertySearchResult.Count);
+        Assert.AreEqual(1, db.Access.SelectPropertiesByKeyword("Property Lessor", PropertySearchTarget.LessorName).PropertySearchResult.Count);
+        Assert.AreEqual(1, db.Access.SelectPropertiesByKeyword("Property Broker", PropertySearchTarget.BrokerName).PropertySearchResult.Count);
         Assert.IsNotNull(db.Access.SelectRentResidentialListingById(first.Id, "listing-b").Listing);
         var propertyDelete = db.Access.DeleteRentResidential(first.Id);
         Assert.IsFalse(propertyDelete.IsError);
@@ -358,6 +380,8 @@ public sealed class RentResidentialWorkflowTests
         Assert.IsFalse(db.Access.UpsertRentResidential(other).IsError);
         var listing1 = NewListing(property, "listing'1", "101");
         var listing2 = NewListing(property, "listing'2", "102");
+        listing1.Lessors.Add(lessor2);
+        listing1.Brokers.Add(broker2);
         Assert.IsFalse(db.Access.UpsertRentResidentialListing(property.Id, listing1).IsError);
         Assert.IsFalse(db.Access.UpsertRentResidentialListing(property.Id, listing2).IsError);
 
@@ -381,6 +405,8 @@ public sealed class RentResidentialWorkflowTests
         Assert.AreEqual(0, loaded.Property.Lessors.Count);
         Assert.AreEqual(0, loaded.Property.Brokers.Count);
         Assert.AreEqual(0, loaded.Property.ListingSummaries.Count);
+        Assert.AreEqual(0L, db.Count("SELECT COUNT(*) FROM rent_lessors_residential_listings WHERE listing_id = @id", listing1.Id));
+        Assert.AreEqual(0L, db.Count("SELECT COUNT(*) FROM brokers_residential_listings WHERE listing_id = @id", listing1.Id));
         var otherLoaded = db.Access.SelectRentResidentialById(other.Id);
         Assert.IsFalse(otherLoaded.IsError);
         Assert.IsNotNull(otherLoaded.Property);

@@ -24,7 +24,7 @@
 <body>
   <nav aria-label="Index"><a href="index.html">Back to index</a></nav>
   <h1>Rent Lessors: input and database specification</h1>
-  <p class="notice"><strong>Draft — implementation snapshot, not an approved schema.</strong> This sheet documents rental lessor records and their property/listing associations as of 2026-11-22.</p>
+  <p class="notice"><strong>Draft — implementation snapshot, not an approved schema.</strong> This sheet documents rental lessor records and their property/listing associations as of 2026-11-24.</p>
   <p>The editor's person kind, name, contact, address and remarks inputs are documented in the <a href="common-person-spec.html">common person specification</a>. Their lessor columns are in <code>rent_lessors</code>. See also <a href="brokers-spec.html">Brokers</a> and <a href="rent-residentials-spec.html#linked">Rent Residentials linked records</a>.</p>
   <nav aria-label="Contents"><ul><li><a href="#record">Lessor record</a></li><li><a href="#links">Property and listing associations</a></li><li><a href="#notes">Notes and sources</a></li></ul></nav>
 
@@ -35,14 +35,13 @@
   </tbody></table></div>
 
   <h2 id="links">Property and listing associations</h2>
-  <p>The association table links a lessor to a property or a particular listing. In the residential editor, an empty listing ID denotes a property-level link; an actual listing ID denotes a listing-level link. The same lessor can have distinct links at both levels.</p>
-  <div class="table-wrap"><table><thead><tr><th scope="col">Field</th><th scope="col">Description</th><th scope="col">Database column</th></tr></thead><tbody>
-    <tr><td>Lessor</td><td>Linked lessor ID.</td><td><code>rent_lessors_properties_listings.lessor_id</code></td></tr>
-    <tr><td>Property</td><td>Linked property ID.</td><td><code>rent_lessors_properties_listings.property_id</code></td></tr>
-    <tr><td>Property context</td><td>Context of the linked property.</td><td><code>rent_lessors_properties_listings.property_context_type</code></td></tr>
-    <tr><td>Listing</td><td>Linked listing ID, or empty for a property-level link.</td><td><code>rent_lessors_properties_listings.listing_id</code></td></tr>
+  <p>Property-level links are stored in <code>rent_lessors_properties</code>. Listing-level links are stored separately for Residential and Commercial listings in <code>rent_lessors_residential_listings</code> and <code>rent_lessors_commercial_listings</code>. A lessor can be linked at both levels.</p>
+  <div class="table-wrap"><table><thead><tr><th scope="col">Association</th><th scope="col">Columns</th><th scope="col">Constraint</th></tr></thead><tbody>
+    <tr><td>Property-level</td><td><code>lessor_id</code>, <code>property_id</code>, <code>property_context_type</code></td><td>Primary key <code>(lessor_id, property_id)</code>; foreign keys to lessor and property cascade on delete.</td></tr>
+    <tr><td>Residential listing-level</td><td><code>lessor_id</code>, <code>property_id</code>, <code>property_context_type</code>, <code>listing_id</code></td><td>Primary key <code>(lessor_id, property_id, listing_id)</code>; foreign keys to lessor and the matching Residential listing cascade on delete.</td></tr>
+    <tr><td>Commercial listing-level</td><td><code>lessor_id</code>, <code>property_id</code>, <code>property_context_type</code>, <code>listing_id</code></td><td>Primary key <code>(lessor_id, property_id, listing_id)</code>; foreign keys to lessor and the matching Commercial listing cascade on delete.</td></tr>
   </tbody></table></div>
-  <p>The composite primary key is <code>(lessor_id, property_id, listing_id)</code>. The schema declares cascading foreign keys to the lessor and property tables; it does not declare a listing foreign key.</p>
+  <p>Listing-level foreign keys reference the composite key <code>(property_id, listing_id)</code> on the corresponding listing table. Deleting a listing removes its lessor links while leaving property-level links intact.</p>
 
   <h2 id="notes">Notes and sources</h2>
   <ul>

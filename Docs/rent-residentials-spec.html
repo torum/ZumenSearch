@@ -179,7 +179,7 @@
   <p>Property <a href="common-property-spec.html#location">location</a> and <a href="common-property-spec.html#transport">transportation</a> fields are documented in the common property specification.</p>
 
   <h3>Property and listing — lessor and broker links</h3>
-  <p>The editor associates separately stored contacts with the property or listing. See the <a href="rent-lessors-spec.html#links">貸主 association</a> and <a href="brokers-spec.html#links">宅建業者 association</a> specifications, and the <a href="common-person-spec.html">common person fields</a>.</p>
+  <p>Property contacts and Residential listing contacts use separate association tables. Listing links reference both their property and listing, and are removed automatically when that listing is deleted. See the <a href="rent-lessors-spec.html#links">貸主 association</a> and <a href="brokers-spec.html#links">宅建業者 association</a> specifications, and the <a href="common-person-spec.html">common person fields</a>.</p>
 
   <h3>Property and listing — pictures and PDFs</h3>
   <p>Each row below applies to both the property and listing editor. Importing a file stores its filename in the appropriate metadata table; the file contents and storage path are not database columns. IDs and owner IDs are used to associate each record.</p>
