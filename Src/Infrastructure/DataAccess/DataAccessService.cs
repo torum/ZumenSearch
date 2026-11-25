@@ -1658,8 +1658,10 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
                         cmd.Parameters.Add(paramIsMain);
 
                         var r = cmd.ExecuteNonQuery();
+
                         if (r > 0)
                         {
+                            // Defer resetting states the pictures until after the database transaction is committed.
                             savedPictures.Add(pic);
                         }
                     }
@@ -1721,8 +1723,10 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
                         cmd.Parameters.Add(paramIsMain);
 
                         var r = cmd.ExecuteNonQuery();
+
                         if (r > 0)
                         {
+                            // Defer resetting states the pictures until after the database transaction is committed.
                             savedPdfs.Add(pic);
                         }
                     }
@@ -1890,11 +1894,14 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
 
         if (res.IsError) return res;
 
+        // Reset the status of saved pictures after the transaction is committed.
         foreach (var picture in savedPictures)
         {
             picture.SetStatus(EntityStatus.Saved);
             picture.SetIsModified(false);
         }
+
+        // Reset the status of saved PDFs after the transaction is committed.
         foreach (var pdf in savedPdfs)
         {
             pdf.SetStatus(EntityStatus.Saved);
@@ -2054,7 +2061,6 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
                 "rent_residentials.kanri_remark_tasya as kanri_remark_tasya, " +
                 "rent_residentials.kanri_remark_kashinushi as kanri_remark_kashinushi, " +
 
-                //"rent_residentials.updated_at as UpdatedAt, " +
                 "properties.property_id as propertyId " +
                 "FROM rent_residentials INNER JOIN properties USING (property_id) WHERE properties.property_id = @propertyId";
             cmd.Parameters.Clear();
@@ -2274,9 +2280,6 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
 
                     property.SetIsModified(false);
 
-                    //res.AffectedCount++;
-
-                    //break; // Assuming we only want the first match
                 }
             }
 
@@ -2714,7 +2717,7 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
         cmd.Parameters.AddWithValue("@floor_type", listing.FloorGround.ToString());
         cmd.Parameters.AddWithValue("@floor_number", listing.FloorNumber);
         cmd.Parameters.AddWithValue("@is_corner_room", listing.IsCornerRoom ? 1 : 0);
-        cmd.Parameters.AddWithValue("@main_exposure_direction", listing.SelectedExposureDirectionType.ToString());//listing.ExposureDirection.ToString());
+        cmd.Parameters.AddWithValue("@main_exposure_direction", listing.SelectedExposureDirectionType.ToString());
         cmd.Parameters.AddWithValue("@current_status", listing.SelectedCurrentStatusType.ToString());
         cmd.Parameters.AddWithValue("@is_available_for_rent", listing.IsAvailableForRentNow ? 1 : 0);
         cmd.Parameters.AddWithValue("@available_from_month", listing.SelectedAvailabilityMonthType.ToString());
@@ -2809,18 +2812,7 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
                     cmd.Parameters.AddWithValue("@filename", pic.ImageFilename);
                     cmd.Parameters.AddWithValue("@type", pic.PictureType.ToString());
                     cmd.Parameters.AddWithValue("@description", pic.Description);
-                    /*
-                    var paramIsMain = new SqliteParameter("@is_main", System.Data.DbType.Int32);
-                    if (pic.IsMain)
-                    {
-                        paramIsMain.Value = 1;
-                    }
-                    else
-                    {
-                        paramIsMain.Value = 0;
-                    }
-                    cmd.Parameters.Add(paramIsMain);
-                    */
+
                     cmd.Parameters.AddWithValue("@is_main", pic.IsMain ? 1 : 0); // bool to int
 
                     if (cmd.ExecuteNonQuery() != 1) throw new InvalidOperationException("Residential listing picture ID belongs to another listing.");
@@ -3020,51 +3012,14 @@ public sealed partial class DataAccessService : IDataAccessService, IPropertySea
                 cmd.Parameters.Add("@propertyId", SqliteType.Text).Value = propertyId;
 
                 cmd.ExecuteNonQuery();
-                /*
-                
-                // Upsert into rent_residential_listings
-                cmd.CommandText = """
-                    INSERT INTO rent_residential_listings (
-                        listing_id, property_id, is_property_unit_ownership, name, chinryou,
-                        room_count, floor_plan_type, floor_plan_extra_type, floor_area, floor_type, floor_number,
-                        is_corner_room, main_exposure_direction, current_status, is_available_for_rent,
-                        available_from_month, available_from_period, is_immediate_occupancy,
-                        current_status_checked_at, remarks)
-                    VALUES (
-                        @listing_id, @property_id, @is_property_unit_ownership, @name, @chinryou,
-                        @room_count, @floor_plan_type, @floor_plan_extra_type, @floor_area, @floor_type, @floor_number,
-                        @is_corner_room, @main_exposure_direction, @current_status, @is_available_for_rent,
-                        @available_from_month, @available_from_period, @is_immediate_occupancy,
-                        @current_status_checked_at, @remarks)
-                    ON CONFLICT(listing_id) DO UPDATE SET
-                        is_property_unit_ownership = @is_property_unit_ownership,
-                        name = @name,
-                        chinryou = @chinryou,
-                        room_count = @room_count,
-                        floor_plan_type = @floor_plan_type,
-                        floor_plan_extra_type = @floor_plan_extra_type,
-                        floor_area = @floor_area,
-                        floor_type = @floor_type,
-                        floor_number = @floor_number,
-                        is_corner_room = @is_corner_room,
-                        main_exposure_direction = @main_exposure_direction,
-                        current_status = @current_status,
-                        is_available_for_rent = @is_available_for_rent,
-                        available_from_month = @available_from_month,
-                        available_from_period = @available_from_period,
-                        is_immediate_occupancy = @is_immediate_occupancy,
-                        current_status_checked_at = @current_status_checked_at,
-                        remarks = @remarks,
-                        updated_at = @updated_at;
-                    """;
-                cmd.Parameters.Clear();
 
-                */
                 cmd.Parameters.Clear();
                 res.AffectedCount = DoUpsertRentResidentialListing(cmd, propertyId, listing);
 
                 // Commit
                 cmd.Transaction.Commit();
+
+                // Mark the listing and its related entities as saved after a successful commit.
                 MarkRentResidentialListingSaved(listing);
 
                 // Clear deletion queues only after the commit succeeds.

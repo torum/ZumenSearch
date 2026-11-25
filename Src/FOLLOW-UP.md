@@ -10,13 +10,16 @@ Review Rent Residentials and Rent Commercials together unless a task identifies 
 
 Unsaved ownership changes immediately reach open listing editors, which can save before the property is saved. This is a design choice; discarding the property change does not undo a completed listing save.
 
-### Persistence and search consistency
+### Persistence
 
 **Files:** `Infrastructure\DataAccess\DataAccessService.cs`; Rent Residential and Commercial repositories and search-result handling; property and listing view models.
 
 - [x] Listing deletion does not remove lessor and broker associations because the shared association tables do not reference listing rows. Review direct and property-editor deletion in both implementations; property-level contact searches can match remaining associations.
 - [X] Both property upserts mark individual pictures and PDFs saved and unmodified before transaction commit. If a later statement or commit fails, rollback does not restore those flags. Review callers and retries; defer state changes until successful commit where appropriate.
 - [X] Both listing upserts resolve an ID conflict without verifying that the existing row belongs to the supplied property. An ID collision or inconsistent caller data can update another property's listing while child and association writes use the supplied property ID. Review identity and ownership checks, including property-editor handoffs.
+
+### Search
+
 - [ ] Existing listing search results can retain old property names after a rename and deleted listings after property deletion or a property-editor listing deletion. Opening a missing listing only logs the absence. Review result synchronization and user-facing feedback in both workflows.
 
 ### Numeric input and search
@@ -27,7 +30,7 @@ Unsaved ownership changes immediately reach open listing editors, which can save
 - [ ] Residential stores unspecified listing floor area as empty text, which numeric search casts to zero; Commercial uses NULL, which does not match numeric bounds. Both commission upper-bound searches cast unspecified empty values to zero. Decide consistent unspecified-value semantics.
 - [ ] Residential management-fee search labels its maximum in yen but compares amounts without checking whether the unit is yen or months. Both searches accept a commission maximum without a unit and compare percentage and yen values against the same numeric bound. Review unit-aware filtering and intended unitless limits together, including Commercial behavior.
 
-## 2. Straightforward fixes and usability
+## 2. Usability
 
 ### Validation, display, and feedback
 
@@ -61,9 +64,7 @@ Unsaved ownership changes immediately reach open listing editors, which can save
 - [ ] Searches use double-precision bounds and SQLite numeric conversions; high-precision decimals or very large whole-yen rents may compare differently at a boundary than entered. Define supported ranges and required precision.
 - [ ] Building-age search compares years without construction month, so results can exceed the requested age. Unknown dates use a 1900 sentinel that sufficiently large limits can match and that is ambiguous with an actual 1900 date. Review boundary and unknown-date semantics.
 
-### Media and filesystem lifecycle
-
-### Unlikely edge cases
+### The Most unlikely and so-what edge cases
 
 **Files:** Rent Residential and Commercial property and listing view models, media view models, editor windows, and relevant data-access code.
 
