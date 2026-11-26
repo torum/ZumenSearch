@@ -1217,10 +1217,9 @@ public sealed class RentCommercialWorkflowTests
         await editor.Save();
         Assert.IsTrue(editor.IsDirty);
         Assert.IsTrue(editor.IsInfoBarErrorOpen);
-        Assert.AreEqual("入力値にエラーがあります。物件情報の保存が出来ませんでした。", editor.InfoBarErrorTitle);
-        Assert.AreEqual(InfoBarSeverity.Error, editor.InfoBarSeverity);
-        StringAssert.Contains(editor.InfoBarErrorMessage, "不動産番号");
-        StringAssert.Contains(editor.InfoBarErrorMessage, "SetValues");
+        Assert.AreEqual("入力項目に誤りがあります", editor.InfoBarErrorTitle);
+        Assert.AreEqual(InfoBarSeverity.Warning, editor.InfoBarSeverity);
+        Assert.AreEqual("不動産番号は半角数字13桁で入力してください。", editor.InfoBarErrorMessage);
         Assert.IsNull(db.Properties.SelectById(property.Id).Property);
 
         editor.FudousanId = "１２３４５６７８９０１２３";

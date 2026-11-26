@@ -201,24 +201,30 @@ public class Address
         IsModified = true;
     }
 
-    private static string NormalizeCoordinate(string value,string coordinateName,decimal minimum,decimal maximum)
+    public static bool IsValidLatitude(string value) => TryNormalizeCoordinate(value, -90m, 90m, out _);
+
+    public static bool IsValidLongitude(string value) => TryNormalizeCoordinate(value, -180m, 180m, out _);
+
+    private static string NormalizeCoordinate(string value, string coordinateName, decimal minimum, decimal maximum)
     {
-        if (string.IsNullOrWhiteSpace(value))
+        if (!TryNormalizeCoordinate(value, minimum, maximum, out var normalized))
         {
-            return string.Empty;
+            throw new ArgumentException($"{coordinateName} must be a decimal between {minimum} and {maximum}, or blank.", nameof(value));
         }
 
-        var normalized = value.Trim();
+        return normalized;
+    }
+
+    private static bool TryNormalizeCoordinate(string value, decimal minimum, decimal maximum, out string normalized)
+    {
+        normalized = string.Empty;
+        if (string.IsNullOrWhiteSpace(value)) return true;
+
         const NumberStyles styles = NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint;
+        if (!decimal.TryParse(value.Trim(), styles, CultureInfo.InvariantCulture, out var coordinate) || coordinate < minimum || coordinate > maximum) return false;
 
-        if (!decimal.TryParse(normalized, styles, CultureInfo.InvariantCulture, out var coordinate) || coordinate < minimum || coordinate > maximum)
-        {
-            throw new ArgumentException(
-                $"{coordinateName} must be a decimal between {minimum} and {maximum}, or blank.",
-                nameof(value));
-        }
-
-        return coordinate.ToString(CultureInfo.InvariantCulture);
+        normalized = coordinate.ToString(CultureInfo.InvariantCulture);
+        return true;
     }
 
     #endregion

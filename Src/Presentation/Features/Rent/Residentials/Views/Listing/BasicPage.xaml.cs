@@ -30,6 +30,36 @@ public sealed partial class BasicPage : Page
         this.TextBoxName.Focus(Microsoft.UI.Xaml.FocusState.Programmatic);
     }
 
+    private void AdditionalCode_TextChanging(TextBox sender, TextBoxTextChangingEventArgs args)
+    {
+        if (ViewModel is not { } vm) return;
+
+        var selectionStart = sender.SelectionStart;
+        vm.FudousanIdAdditionalCode = sender.Text;
+        if (sender.Text == vm.FudousanIdAdditionalCode) return;
+
+        sender.Text = vm.FudousanIdAdditionalCode;
+        sender.SelectionStart = Math.Min(selectionStart, sender.Text.Length);
+    }
+
+    private async void AdditionalCode_Paste(object sender, TextControlPasteEventArgs e)
+    {
+        e.Handled = true;
+        if (sender is not TextBox textBox || ViewModel is not { } vm) return;
+
+        try
+        {
+            if (!await ZumenSearch.Presentation.Helpers.AdditionalCodeInputHelper.PasteAsync(textBox))
+            {
+                vm.ShowSimpleErrorInfoBar("入力項目に誤りがあります", "特定コードは4文字以内の半角英数字で入力してください。英字は大文字に変換されます。");
+            }
+        }
+        catch (Exception ex) when (ex is System.Runtime.InteropServices.COMException or InvalidOperationException)
+        {
+            Debug.WriteLine($"Failed to paste listing additional code: {ex}");
+            vm.ShowSimpleErrorInfoBar("クリップボードのエラー", $"貼り付けできませんでした: {ex.Message}", InfoBarSeverity.Error);
+        }
+    }
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {

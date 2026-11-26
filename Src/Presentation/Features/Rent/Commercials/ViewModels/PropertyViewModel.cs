@@ -2254,6 +2254,20 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
         IsNameHasError = false;
 
+        if (FudousanId.Length > 0 && FudousanId.Length != 13)
+        {
+            ShowSimpleErrorInfoBar("入力項目に誤りがあります", "不動産番号は半角数字13桁で入力してください。");
+            if (!_navigationService.IsCurrentPageSameAs(BasicPageName)) _navigationService.NavigateTo(BasicPageName, this);
+            return false;
+        }
+
+        if (FudousanIdAdditionalCode.Length > 0 && FudousanIdAdditionalCode.Length != 4)
+        {
+            ShowSimpleErrorInfoBar("入力項目に誤りがあります", "特定コードは半角英数字4桁（英字は大文字）で入力してください。");
+            if (!_navigationService.IsCurrentPageSameAs(BasicPageName)) _navigationService.NavigateTo(BasicPageName, this);
+            return false;
+        }
+
         (string Label, string Value, int MaxLength)[] basicValues =
         [
             ("地上階数", FloorCountAboveGround, 4),
@@ -2274,6 +2288,22 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         {
             ShowSimpleErrorInfoBar("入力項目に誤りがあります", "延床面積には0以上の数値を入力してください。");
             if (!_navigationService.IsCurrentPageSameAs(BasicPageName)) _navigationService.NavigateTo(BasicPageName, this);
+            return false;
+        }
+
+        if (!ZumenSearch.Domain.ValueObjects.Location.Address.IsValidLatitude(LocationLatitude))
+        {
+            ShowSimpleErrorInfoBar("入力項目に誤りがあります", "緯度は-90以上90以下の半角数値で入力するか、空欄にしてください。小数点には「.」を使用してください。");
+            const string pageName = NavigationKeys.RentCommercialPropertyLocation;
+            if (!_navigationService.IsCurrentPageSameAs(pageName)) _navigationService.NavigateTo(pageName, this);
+            return false;
+        }
+
+        if (!ZumenSearch.Domain.ValueObjects.Location.Address.IsValidLongitude(LocationLongitude))
+        {
+            ShowSimpleErrorInfoBar("入力項目に誤りがあります", "経度は-180以上180以下の半角数値で入力するか、空欄にしてください。小数点には「.」を使用してください。");
+            const string pageName = NavigationKeys.RentCommercialPropertyLocation;
+            if (!_navigationService.IsCurrentPageSameAs(pageName)) _navigationService.NavigateTo(pageName, this);
             return false;
         }
 

@@ -582,11 +582,13 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
                 return;
             }
 
-            var text = ZumenSearch.Presentation.Utilities.Common.NormalizeFullWidthCharacters(value).Trim().ToUpperInvariant();
-            if (field == text || !Regex.IsMatch(text, @"\A[A-Z0-9]{0,4}\z"))
+            if (!ZumenSearch.Presentation.Helpers.AdditionalCodeInputHelper.TryNormalize(value, out var text))
             {
+                ShowSimpleErrorInfoBar("入力項目に誤りがあります", "特定コードは4文字以内の半角英数字で入力してください。英字は大文字に変換されます。");
                 return;
             }
+
+            if (field == text) return;
 
             field = text;
             IsDirty = true;
@@ -1019,6 +1021,12 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
                     basicValid = false;
                 }
             }
+        }
+
+        if (basicValid && FudousanIdAdditionalCode.Length > 0 && FudousanIdAdditionalCode.Length != 4)
+        {
+            ShowSimpleErrorInfoBar("入力項目に誤りがあります", "特定コードは半角英数字4桁（英字は大文字）で入力してください。");
+            basicValid = false;
         }
 
         if (!basicValid)

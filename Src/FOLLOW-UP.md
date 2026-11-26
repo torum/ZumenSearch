@@ -36,9 +36,9 @@ Unsaved ownership changes immediately reach open listing editors, which can save
 
 **Files:** Rent Residential and Commercial property and listing view models; their basic, location, and media pages.
 
-- [ ] Consider earlier property identifier validation: reject a non-empty 不動産番号 shorter than 13 digits or 特定コード shorter than 4 characters before applying editor values, and navigate to the basic page. Domain setters already reject incomplete values.
-- [ ] Both listing editors silently reject invalid 特定コード characters in view-model setters while their text boxes have no matching input handler. Displayed text may differ from the saved value; verify interactively and review feedback and input handling.
-- [ ] Coordinate input is validated by address setters during property save. Consider earlier validation and navigation to the location page in both editors.
+- [x] Both property editors reject a non-empty 不動産番号 shorter than 13 digits or 特定コード shorter than 4 characters before applying editor values, show field-specific feedback, and navigate to the basic page. Empty values remain allowed; input normalization and domain validation are preserved.
+- [ ] Both listing editors now reconcile 特定コード textbox text with the accepted normalized value, report invalid input, and validate pasted replacements before truncation. Saving an incomplete non-empty code is blocked before applying values and navigates to the basic page. Automated input/save regressions pass; interactive verification remains: typing, IME/full-width and lowercase input, invalid and overlong paste, selection replacement, deletion/clearing, and save/reopen in both workflows.
+- [x] Both property editors validate coordinates before applying editor values, show field-specific feedback, and navigate to the location page. Validation reuses the address setters' rules: blanks are allowed; invariant decimal syntax and latitude -90 to 90 / longitude -180 to 180 are preserved.
 
 ### Search usability
 
