@@ -7,17 +7,15 @@ Strictly follow these boundaries:
 - Before making any change, present a plan describing the intended edits and wait for the user's approval.
 
 ## General Guidelines
-- Follow .github/copilot-instructions.md
-- Follow and preserve the existing code, code style, design patterns and conventions strictly when making changes.
+- Preserve the existing code, follow the existing code style, design patterns and conventions strictly when making changes.
 - For the current database redesign, implement only the fresh database schema; do not add migration logic. The user will delete the existing database file and local cache.
 - Avoid presenting code changes as unified diff/patch blocks; use clear replacement code snippets with line numbers and file names and paths or concise prose instead.
 - Maintain the application as a single project for the foreseeable future, enforcing cleaner internal boundaries rather than splitting into multiple projects.
-- Update the spec files under Docs folder if database schema is changed.
 
 ## Code Style
 
 ### XAML formatting
-- Single line makes code folding easier. Keep each element's opening tag and all its attributes on a single line. Do not wrap an element's attributes across multiple lines. '<Page>' tags are exception.
+- Single line makes code folding easier. Keep each element's opening tag and all its attributes on a single line. Do not wrap an element's attributes across multiple lines. `<Page>` tags are exception.
 
 ### C# formatting
 - Priority is for humans to understand the code and follow the logic and flow. The maintainability is important but secondary. Follow the existing style, patterns, and conventions. 
@@ -29,10 +27,6 @@ Strictly follow these boundaries:
 - The code is organized into regions for readability. Follow the existing region structure and place new code within the appropriate regions.
 
 ## WinUI 3 & Windows App SDK Architecture Guidelines (.NET 11)
-
-### Core Ecosystem Rules
-- **Target Framework:** Only target `.NET 11.0` with the Windows-specific Target Framework Moniker (e.g., `net11.0-windows10.0.19041.0`).
-- **Namespaces:** Never output `Windows.UI.Xaml` (UWP). ALWAYS output `Microsoft.UI.Xaml` (WinUI 3)`.
 
 ### Native AOT
 - The app is AOT-compatible; code changes must remain compatible with trimming and Native AOT.
@@ -59,9 +53,4 @@ Strictly follow these boundaries:
 
 ### Fields
 - For fields, prefer typed enums defined in Models over string constants/options declared in XAML.
-
-
-
-
-
 

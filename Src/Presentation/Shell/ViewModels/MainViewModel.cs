@@ -407,6 +407,16 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
             item.SetName(building.Name);
             item.ThumbnailFilename = building.ThumbnailFilename;
         }
+
+        if (building.Status == EntityStatus.Saved)
+        {
+            foreach (var item in RentResidentialListingSearchResult.Concat(RentCommercialListingSearchResult))
+            {
+                if (item.PropertyContextType != building.PropertyContextType || !item.PropertyId.Equals(building.Id, StringComparison.Ordinal)) continue;
+
+                item.SetPropertyName(building.Name);
+            }
+        }
     }
 
     public void Receive(ListingUpdatedMessage message)
@@ -1303,6 +1313,11 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
                 RecentProperties.Remove(recentItem);
             }
 
+            foreach (var result in RentResidentialListingSearchResult.Where(result => result.PropertyId.Equals(selectedId, StringComparison.Ordinal)).ToList())
+            {
+                RentResidentialListingSearchResult.Remove(result);
+            }
+
             Debug.WriteLine($"DeleteRentResidentialCommand executed for {selectedId}");
 
             // clean up pics and pdfs.
@@ -1426,6 +1441,8 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         if (res.Listing is null)
         {
             Debug.WriteLine($"Listing for {listingId} is null. Cannot open editor.");
+            RemoveResidentialListingSearchResults(buildingId, listingId);
+            ShowSimpleErrorInfoBar("募集物件が見つかりません", "募集物件が存在しないため、検索結果から削除しました。再検索して最新の情報を確認してください。");
             return;
         }
 
@@ -1516,6 +1533,8 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         if (res.Listing is null)
         {
             Debug.WriteLine($"Listing for {listingId} is null. Cannot open editor.");
+            RemoveResidentialListingSearchResults(buildingId, listingId);
+            ShowSimpleErrorInfoBar("募集物件が見つかりません", "募集物件が存在しないため、検索結果から削除しました。再検索して最新の情報を確認してください。");
             return;
         }
 
@@ -1998,6 +2017,11 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
                 RecentProperties.Remove(recentItem);
             }
 
+            foreach (var result in RentCommercialListingSearchResult.Where(result => result.PropertyId.Equals(selectedId, StringComparison.Ordinal)).ToList())
+            {
+                RentCommercialListingSearchResult.Remove(result);
+            }
+
             Debug.WriteLine($"DeleteRentCommercialCommand executed for {selectedId}");
 
             // clean up pics and pdfs.
@@ -2121,6 +2145,8 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         if (res.Listing is null)
         {
             Debug.WriteLine($"Listing for {listingId} is null. Cannot open editor.");
+            RemoveCommercialListingSearchResults(buildingId, listingId);
+            ShowSimpleErrorInfoBar("募集物件が見つかりません", "募集物件が存在しないため、検索結果から削除しました。再検索して最新の情報を確認してください。");
             return;
         }
 
@@ -2211,6 +2237,8 @@ public partial class MainViewModel : ObservableRecipient, IRecipient<PropertyUpd
         if (res.Listing is null)
         {
             Debug.WriteLine($"Listing for {listingId} is null. Cannot open editor.");
+            RemoveCommercialListingSearchResults(buildingId, listingId);
+            ShowSimpleErrorInfoBar("募集物件が見つかりません", "募集物件が存在しないため、検索結果から削除しました。再検索して最新の情報を確認してください。");
             return;
         }
 

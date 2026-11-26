@@ -19,7 +19,8 @@ namespace ZumenSearch.Infrastructure.DataAccess;
 // </summary>
 
 // TODO:
-// * Translate error messages to Japanese for user-facing errors.
+// * [Class Layout] Use partial classes to separate different functionalities into different files for better maintainability.
+// * [Localization] Translate error messages to Japanese for user-facing errors.
 
 public sealed partial class DataAccessService : IDataAccessService, IPropertySearchRepository, IRentResidentialPropertyRepository, IPersonRepository, IRentResidentialListingRepository, IRentCommercialPropertyRepository, IRentCommercialListingRepository, IDisposable
 {

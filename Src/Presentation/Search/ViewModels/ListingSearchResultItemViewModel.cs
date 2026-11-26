@@ -32,4 +32,15 @@ public sealed partial class ListingSearchResultItemViewModel : ObservableObject
             OnPropertyChanged(nameof(Name));
         }
     }
+
+    public void SetPropertyName(string propertyName)
+    {
+        var previousName = _model.PropertyName;
+        _model.PropertyName = propertyName;
+        _model.SetIsModified(false);
+        if (previousName != _model.PropertyName)
+        {
+            OnPropertyChanged(nameof(PropertyName));
+        }
+    }
 }

@@ -20,7 +20,7 @@ Unsaved ownership changes immediately reach open listing editors, which can save
 
 ### Search
 
-- [ ] Existing listing search results can retain old property names after a rename and deleted listings after property deletion or a property-editor listing deletion. Opening a missing listing only logs the absence. Review result synchronization and user-facing feedback in both workflows.
+- [x] Both workflows update existing listing search results after a saved property rename and remove affected results after successful property or listing deletion, including property-editor listing deletion. Opening or duplicating a missing listing removes matching stale results and shows a warning; database errors preserve results and show error feedback. Existing result sets are synchronized in place; rerun the search to reapply filters or discover new matches.
 
 ### Numeric input and search
 

@@ -21,10 +21,10 @@ Webベースのクラウド型システムは、場所を問わず利用でき�
 ### 技術的設計方針
 
 * Windows App SDK（WinUI3）を使ったモダンUI。
-* MVVM (Model-View-ViewModel) アーキテクチャ設計パターンを使い、XAMLのUIレイヤーとドメインロジックの分離・疎結合化。
+* MVVM (Model-View-ViewModel) アーキテクチャパターンを使い、XAMLのUIレイヤーとドメインロジックの分離・疎結合化。
 * Generic Hostによるライフサイクル管理とDependency Injection（依存関係注入）。
 * Clean Architecture に基づく責務分離を意識したレイヤー構成。
-* DDD (Domain-Driven Design：ドメイン駆動設計) を現実的な限り適用。
+* DDD (Domain-Driven Design：ドメイン駆動設計) - ドメイン知識をベースにドメイン駆動設計。
 * RDBMSとしてはSQLiteを利用し、将来的にWebAPIを介してのクライアント・サーバー3層構成に移行する際はローカルキャシュとして扱う。
 * Native AOTによるコンパイルに対応し、起動速度の高速化とメモリフットプリントの最小化。
 * 単体実行形式に加え、MSIX等のストア公開可能なパッケージ形式にも対応。
