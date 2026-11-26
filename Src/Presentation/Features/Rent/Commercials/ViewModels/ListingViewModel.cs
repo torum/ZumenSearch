@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
 using System.Runtime.InteropServices;
@@ -284,29 +284,8 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
 
     public ListingFloorGroundTypeLabel SelectedFloorGroundType
     {
-        get => field ?? new(ListingFloorGroundType.AboveGround);
-        set
-        {
-            if (value is null) return;
-            if (SelectedFloorGroundType.Key == value.Key)
-            {
-                field = value;
-                return;
-            }
-
-            field = value;
-            OnPropertyChanged();
-            IsDirty = true;
-            /*
-             * DO not use SetProperty. These are reference types without value equality. 
-             * During Bindings.Update(), the ComboBox can write null or a different instance with the same key back to the view model. 
-             * SetProperty sees a reference change and sets IsDirty = true.
-            if (SetProperty(ref field, value))
-            {
-                IsDirty = true;
-            }
-            */
-        }
+        get => field ?? FloorGroundTypes.First(x => x.Key == ListingFloorGroundType.AboveGround);
+        set => SetSelection(ref field, value, SelectedFloorGroundType, FloorGroundTypes, static x => x.Key);
     }
 
     public string FloorArea
@@ -337,29 +316,8 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
 
     public ListingUseTypeLabel SelectedUseType
     {
-        get => field ?? new(ListingUseType.Unspecified);
-        set
-        {
-            if (value is null) return;
-            if (SelectedUseType.Key == value.Key)
-            {
-                field = value;
-                return;
-            }
-
-            field = value;
-            OnPropertyChanged();
-            IsDirty = true;
-            /*
-             * DO not use SetProperty. These are reference types without value equality. 
-             * During Bindings.Update(), the ComboBox can write null or a different instance with the same key back to the view model. 
-             * SetProperty sees a reference change and sets IsDirty = true.
-            if (SetProperty(ref field, value))
-            {
-                IsDirty = true;
-            }
-            */
-        }
+        get => field ?? UseTypes.First(x => x.Key == ListingUseType.Unspecified);
+        set => SetSelection(ref field, value, SelectedUseType, UseTypes, static x => x.Key);
     }
 
     public string UseDetails
@@ -378,87 +336,24 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
 
     public ListingAvailabilityStatusTypeLabel SelectedCurrentStatusType
     {
-        get => field ?? new(ListingAvailabilityStatusType.Unspecified);
-        set
-        {
-            if (value is null) return;
-            if (SelectedCurrentStatusType.Key == value.Key)
-            {
-                field = value;
-                return;
-            }
-
-            field = value;
-            OnPropertyChanged();
-            IsDirty = true;
-            /*
-             * DO not use SetProperty. These are reference types without value equality. 
-             * During Bindings.Update(), the ComboBox can write null or a different instance with the same key back to the view model. 
-             * SetProperty sees a reference change and sets IsDirty = true.
-            if (SetProperty(ref field, value))
-            {
-                IsDirty = true;
-            }
-            */
-        }
+        get => field ?? CurrentStatusTypes.First(x => x.Key == ListingAvailabilityStatusType.Unspecified);
+        set => SetSelection(ref field, value, SelectedCurrentStatusType, CurrentStatusTypes, static x => x.Key);
     }
 
     public IReadOnlyList<ListingAvailabilityMonthTypeLabel> AvailabilityMonthTypes { get; } = ListingAvailabilityMonthTypeLabel.GetAll();
 
     public ListingAvailabilityMonthTypeLabel SelectedAvailabilityMonthType
     {
-        get => field ?? new(ListingAvailabilityMonthType.Unspecified);
-        set
-        {
-            if (value is null) return;
-            if (SelectedAvailabilityMonthType.Key == value.Key)
-            {
-                field = value;
-                return;
-            }
-
-            field = value;
-            OnPropertyChanged();
-            IsDirty = true;
-            /*
-             * DO not use SetProperty. These are reference types without value equality. 
-             * During Bindings.Update(), the ComboBox can write null or a different instance with the same key back to the view model. 
-             * SetProperty sees a reference change and sets IsDirty = true.
-            if (SetProperty(ref field, value))
-            {
-                IsDirty = true;
-            }
-            */
-        }
+        get => field ?? AvailabilityMonthTypes.First(x => x.Key == ListingAvailabilityMonthType.Unspecified);
+        set => SetSelection(ref field, value, SelectedAvailabilityMonthType, AvailabilityMonthTypes, static x => x.Key);
     }
 
     public IReadOnlyList<ListingAvailabilityPeriodTypeLabel> AvailabilityPeriodTypes { get; } = ListingAvailabilityPeriodTypeLabel.GetAll();
 
     public ListingAvailabilityPeriodTypeLabel SelectedAvailabilityPeriodType
     {
-        get => field ?? new(ListingAvailabilityPeriodType.Unspecified);
-        set
-        {
-            if (value is null) return;
-            if (SelectedAvailabilityPeriodType.Key == value.Key)
-            {
-                field = value;
-                return;
-            }
-
-            field = value;
-            OnPropertyChanged();
-            IsDirty = true;
-            /*
-             * DO not use SetProperty. These are reference types without value equality. 
-             * During Bindings.Update(), the ComboBox can write null or a different instance with the same key back to the view model. 
-             * SetProperty sees a reference change and sets IsDirty = true.
-            if (SetProperty(ref field, value))
-            {
-                IsDirty = true;
-            }
-            */
-        }
+        get => field ?? AvailabilityPeriodTypes.First(x => x.Key == ListingAvailabilityPeriodType.Unspecified);
+        set => SetSelection(ref field, value, SelectedAvailabilityPeriodType, AvailabilityPeriodTypes, static x => x.Key);
     }
 
     public bool IsAvailableForImmediateMoveIn
@@ -567,8 +462,8 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
     public bool HasVentilation { get; set => SetContractValue(ref field, value); }
     public bool HasInternet { get; set => SetContractValue(ref field, value); }
     public string EquipmentDetails { get => field ?? string.Empty; set => SetContractValue(ref field, value); }
-    public ListingUnitConditionTypeLabel SelectedUnitCondition { get => field ?? UnitConditionOptions.First(x => x.Key == ListingUnitConditionType.Unspecified); set { if (value is not null) SetContractValue(ref field, value); } }
-    public ListingFixtureTransferTypeLabel SelectedFixtureTransfer { get => field ?? FixtureTransferOptions.First(x => x.Key == ListingFixtureTransferType.Unconfirmed); set { if (value is not null) SetContractValue(ref field, value); } }
+    public ListingUnitConditionTypeLabel SelectedUnitCondition { get => field ?? UnitConditionOptions.First(x => x.Key == ListingUnitConditionType.Unspecified); set => SetSelection(ref field, value, SelectedUnitCondition, UnitConditionOptions, static x => x.Key); }
+    public ListingFixtureTransferTypeLabel SelectedFixtureTransfer { get => field ?? FixtureTransferOptions.First(x => x.Key == ListingFixtureTransferType.Unconfirmed); set => SetSelection(ref field, value, SelectedFixtureTransfer, FixtureTransferOptions, static x => x.Key); }
     public string BusinessHoursRestrictions { get => field ?? string.Empty; set => SetContractValue(ref field, value); }
     public string UseConditions { get => field ?? string.Empty; set => SetContractValue(ref field, value); }
     public bool PermitsHeavyFoodService { get; set => SetContractValue(ref field, value); }
@@ -602,30 +497,30 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
     public string OtherFees { get => field ?? string.Empty; set => SetContractValue(ref field, value); }
     public string ContractConditions { get => field ?? string.Empty; set => SetContractValue(ref field, value); }
     public string ContractRemarks { get => field ?? string.Empty; set => SetContractValue(ref field, value); }
-    public ListingFeeUnitTypeLabel SelectedSecurityDepositUnit { get => field ?? FeeUnitTypes.First(x => x.Key == ListingFeeUnitType.Months); set { if (value is not null) SetContractValue(ref field, value); } }
-    public ListingFeeUnitTypeLabel SelectedGuaranteeDepositUnit { get => field ?? FeeUnitTypes.First(x => x.Key == ListingFeeUnitType.Months); set { if (value is not null) SetContractValue(ref field, value); } }
-    public ListingFeeUnitTypeLabel SelectedKeyMoneyUnit { get => field ?? FeeUnitTypes.First(x => x.Key == ListingFeeUnitType.Months); set { if (value is not null) SetContractValue(ref field, value); } }
-    public ListingFeeUnitTypeLabel SelectedRightsMoneyUnit { get => field ?? FeeUnitTypes.First(x => x.Key == ListingFeeUnitType.Months); set { if (value is not null) SetContractValue(ref field, value); } }
-    public ListingFeeUnitTypeLabel SelectedDepositDeductionUnit { get => field ?? FeeUnitTypes.First(x => x.Key == ListingFeeUnitType.Months); set { if (value is not null) SetContractValue(ref field, value); } }
-    public ListingFeeUnitTypeLabel SelectedRenewalFeeUnit { get => field ?? FeeUnitTypes.First(x => x.Key == ListingFeeUnitType.Months); set { if (value is not null) SetContractValue(ref field, value); } }
-    public ListingFeeUnitTypeLabel SelectedRecontractFeeUnit { get => field ?? FeeUnitTypes.First(x => x.Key == ListingFeeUnitType.Yen); set { if (value is not null) SetContractValue(ref field, value); } }
-    public ListingContractTaxTypeLabel SelectedRentTax { get => field ?? ContractTaxTypes.First(x => x.Key == ListingContractTaxType.Unconfirmed); set { if (value is not null) SetContractValue(ref field, value); } }
-    public ListingContractTaxTypeLabel SelectedManagementFeeTax { get => field ?? ContractTaxTypes.First(x => x.Key == ListingContractTaxType.Unconfirmed); set { if (value is not null) SetContractValue(ref field, value); } }
-    public ListingContractTypeLabel SelectedContractType { get => field ?? ContractTypes.First(x => x.Key == ListingContractType.Unspecified); set { if (value is not null) SetContractValue(ref field, value); } }
+    public ListingFeeUnitTypeLabel SelectedSecurityDepositUnit { get => field ?? FeeUnitTypes.First(x => x.Key == ListingFeeUnitType.Months); set => SetSelection(ref field, value, SelectedSecurityDepositUnit, FeeUnitTypes, static x => x.Key); }
+    public ListingFeeUnitTypeLabel SelectedGuaranteeDepositUnit { get => field ?? FeeUnitTypes.First(x => x.Key == ListingFeeUnitType.Months); set => SetSelection(ref field, value, SelectedGuaranteeDepositUnit, FeeUnitTypes, static x => x.Key); }
+    public ListingFeeUnitTypeLabel SelectedKeyMoneyUnit { get => field ?? FeeUnitTypes.First(x => x.Key == ListingFeeUnitType.Months); set => SetSelection(ref field, value, SelectedKeyMoneyUnit, FeeUnitTypes, static x => x.Key); }
+    public ListingFeeUnitTypeLabel SelectedRightsMoneyUnit { get => field ?? FeeUnitTypes.First(x => x.Key == ListingFeeUnitType.Months); set => SetSelection(ref field, value, SelectedRightsMoneyUnit, FeeUnitTypes, static x => x.Key); }
+    public ListingFeeUnitTypeLabel SelectedDepositDeductionUnit { get => field ?? FeeUnitTypes.First(x => x.Key == ListingFeeUnitType.Months); set => SetSelection(ref field, value, SelectedDepositDeductionUnit, FeeUnitTypes, static x => x.Key); }
+    public ListingFeeUnitTypeLabel SelectedRenewalFeeUnit { get => field ?? FeeUnitTypes.First(x => x.Key == ListingFeeUnitType.Months); set => SetSelection(ref field, value, SelectedRenewalFeeUnit, FeeUnitTypes, static x => x.Key); }
+    public ListingFeeUnitTypeLabel SelectedRecontractFeeUnit { get => field ?? FeeUnitTypes.First(x => x.Key == ListingFeeUnitType.Yen); set => SetSelection(ref field, value, SelectedRecontractFeeUnit, FeeUnitTypes, static x => x.Key); }
+    public ListingContractTaxTypeLabel SelectedRentTax { get => field ?? ContractTaxTypes.First(x => x.Key == ListingContractTaxType.Unconfirmed); set => SetSelection(ref field, value, SelectedRentTax, ContractTaxTypes, static x => x.Key); }
+    public ListingContractTaxTypeLabel SelectedManagementFeeTax { get => field ?? ContractTaxTypes.First(x => x.Key == ListingContractTaxType.Unconfirmed); set => SetSelection(ref field, value, SelectedManagementFeeTax, ContractTaxTypes, static x => x.Key); }
+    public ListingContractTypeLabel SelectedContractType { get => field ?? ContractTypes.First(x => x.Key == ListingContractType.Unspecified); set => SetSelection(ref field, value, SelectedContractType, ContractTypes, static x => x.Key); }
 
     public IReadOnlyList<ListingHandlingTypeLabel> HandlingTypes { get; } = ListingHandlingTypeLabel.GetAll();
     public IReadOnlyList<ListingTransactionTypeLabel> TransactionTypes { get; } = ListingTransactionTypeLabel.GetAll();
     public IReadOnlyList<ListingCommissionUnitTypeLabel> CommissionUnitTypes { get; } = ListingCommissionUnitTypeLabel.GetAll();
-    public ListingHandlingTypeLabel SelectedHandlingType { get => field ?? HandlingTypes.First(x => x.Key == ListingHandlingType.Unspecified); set { if (value is not null) SetContractValue(ref field, value); } }
-    public ListingTransactionTypeLabel SelectedTransactionType { get => field ?? TransactionTypes.First(x => x.Key == ListingTransactionType.Unspecified); set { if (value is not null) SetContractValue(ref field, value); } }
+    public ListingHandlingTypeLabel SelectedHandlingType { get => field ?? HandlingTypes.First(x => x.Key == ListingHandlingType.Unspecified); set => SetSelection(ref field, value, SelectedHandlingType, HandlingTypes, static x => x.Key); }
+    public ListingTransactionTypeLabel SelectedTransactionType { get => field ?? TransactionTypes.First(x => x.Key == ListingTransactionType.Unspecified); set => SetSelection(ref field, value, SelectedTransactionType, TransactionTypes, static x => x.Key); }
     public string LessorCommission { get => field ?? string.Empty; set => SetContractValue(ref field, value); }
     public string LesseeCommission { get => field ?? string.Empty; set => SetContractValue(ref field, value); }
     public string ListingBrokerCommission { get => field ?? string.Empty; set => SetContractValue(ref field, value); }
     public string TenantBrokerCommission { get => field ?? string.Empty; set => SetContractValue(ref field, value); }
-    public ListingCommissionUnitTypeLabel SelectedLessorCommissionUnit { get => field ?? CommissionUnitTypes.First(x => x.Key == ListingCommissionUnitType.Percent); set { if (value is not null) SetContractValue(ref field, value); } }
-    public ListingCommissionUnitTypeLabel SelectedLesseeCommissionUnit { get => field ?? CommissionUnitTypes.First(x => x.Key == ListingCommissionUnitType.Percent); set { if (value is not null) SetContractValue(ref field, value); } }
-    public ListingCommissionUnitTypeLabel SelectedListingBrokerCommissionUnit { get => field ?? CommissionUnitTypes.First(x => x.Key == ListingCommissionUnitType.Percent); set { if (value is not null) SetContractValue(ref field, value); } }
-    public ListingCommissionUnitTypeLabel SelectedTenantBrokerCommissionUnit { get => field ?? CommissionUnitTypes.First(x => x.Key == ListingCommissionUnitType.Percent); set { if (value is not null) SetContractValue(ref field, value); } }
+    public ListingCommissionUnitTypeLabel SelectedLessorCommissionUnit { get => field ?? CommissionUnitTypes.First(x => x.Key == ListingCommissionUnitType.Percent); set => SetSelection(ref field, value, SelectedLessorCommissionUnit, CommissionUnitTypes, static x => x.Key); }
+    public ListingCommissionUnitTypeLabel SelectedLesseeCommissionUnit { get => field ?? CommissionUnitTypes.First(x => x.Key == ListingCommissionUnitType.Percent); set => SetSelection(ref field, value, SelectedLesseeCommissionUnit, CommissionUnitTypes, static x => x.Key); }
+    public ListingCommissionUnitTypeLabel SelectedListingBrokerCommissionUnit { get => field ?? CommissionUnitTypes.First(x => x.Key == ListingCommissionUnitType.Percent); set => SetSelection(ref field, value, SelectedListingBrokerCommissionUnit, CommissionUnitTypes, static x => x.Key); }
+    public ListingCommissionUnitTypeLabel SelectedTenantBrokerCommissionUnit { get => field ?? CommissionUnitTypes.First(x => x.Key == ListingCommissionUnitType.Percent); set => SetSelection(ref field, value, SelectedTenantBrokerCommissionUnit, CommissionUnitTypes, static x => x.Key); }
     public string TransactionRemarks { get => field ?? string.Empty; set => SetContractValue(ref field, value); }
 
     public string Chinryou
@@ -913,6 +808,27 @@ public sealed partial class ListingViewModel : ObservableRecipient, IRecipient<P
     #endregion
 
     #region == Private Methods ==
+
+    private void SetSelection<TLabel, TKey>(ref TLabel? storage, TLabel? value, TLabel current, IReadOnlyList<TLabel> options, Func<TLabel, TKey> getKey, [System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null) where TLabel : class
+    {
+        if (value is null) return;
+
+        var key = getKey(value);
+        var selected = options.FirstOrDefault(item => EqualityComparer<TKey>.Default.Equals(getKey(item), key));
+        if (selected is null)
+        {
+            ShowSimpleErrorInfoBar("入力項目に誤りがあります", $"{propertyName}: 不明な選択肢です（{key}）。");
+            return;
+        }
+
+        var keyChanged = !EqualityComparer<TKey>.Default.Equals(getKey(current), key);
+        storage = selected;
+        if (!ReferenceEquals(current, selected))
+        {
+            OnPropertyChanged(propertyName);
+        }
+        if (keyChanged) IsDirty = true;
+    }
 
     private void SetContractValue<T>(ref T storage, T value, [System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
     {

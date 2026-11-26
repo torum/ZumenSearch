@@ -1388,7 +1388,7 @@ public sealed class RentCommercialWorkflowTests
     }
 
     [TestMethod]
-    public async Task PropertyEditor_NullManagementSelectionRetainsVisibilityAndSavesUnspecified()
+    public async Task PropertyEditor_NullManagementSelectionRetainsVisibilityAndSavesSelection()
     {
         using var db = new TestDatabase();
         var property = NewProperty("management-null", "Commercial building");
@@ -1406,7 +1406,7 @@ public sealed class RentCommercialWorkflowTests
         var saved = db.Properties.SelectById(property.Id);
         Assert.IsFalse(saved.IsError, saved.Error.FullDump);
         Assert.IsNotNull(saved.Property);
-        Assert.AreEqual(Property.EnumKanriShutai.Unspecified, saved.Property.KanriShutai);
+        Assert.AreEqual(Property.EnumKanriShutai.Tasya, saved.Property.KanriShutai);
     }
 
     [TestMethod]

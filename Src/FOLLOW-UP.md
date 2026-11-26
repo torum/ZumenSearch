@@ -53,9 +53,9 @@ Unsaved ownership changes immediately reach open listing editors, which can save
 
 **Files:** Rent Residential and Commercial property and listing view models, `Views\Listing\BasicPage.xaml`, and Residential `Views\FacilitiesPage.xaml`.
 
-- [ ] Property and listing editors catch and report population failures but can leave partially populated editors available for later changes and saves. Review initialization failure handling and protection against saving incomplete values in both implementations.
+- [ ] Property and listing editors catch and report population failures but can leave partially populated editors available for later changes and saves. Review initialization failure handling and protection against saving incomplete values in both implementations. In particular, report invalid saved typed-label keys and prevent saving a partially initialized editor that could overwrite the saved value.
 - [x] Both property editors warn when location master data is unavailable or saved components or IDs do not match. Saving uses the displayed master selections and removes unmatched components; lookup errors do not interrupt population of other fields. Automated regressions cover matching, failures, parent changes, and database round trips; verify warnings and selection cascades interactively in both workflows.
-- [ ] Listing contract and transaction typed-label selections use reference-based change detection. Investigate whether a different label instance with the same key can unnecessarily mark either editor dirty during binding updates.
+- [ ] Typed-label selections in Residential and Commercial property and listing editors compare keys and use their option-list instances; invalid assignments are reported. Automated regressions cover selection behavior; verify binding updates and navigation interactively.
 
 ### Search boundaries and dates
 
@@ -64,7 +64,7 @@ Unsaved ownership changes immediately reach open listing editors, which can save
 - [ ] Searches use double-precision bounds and SQLite numeric conversions; high-precision decimals or very large whole-yen rents may compare differently at a boundary than entered. Define supported ranges and required precision.
 - [ ] Building-age search compares years without construction month, so results can exceed the requested age. Unknown dates use a 1900 sentinel that sufficiently large limits can match and that is ambiguous with an actual 1900 date. Review boundary and unknown-date semantics.
 
-### The Most unlikely and so-what edge cases
+### The most unlikely and so-what edge cases
 
 **Files:** Rent Residential and Commercial property and listing view models, media view models, editor windows, and relevant data-access code.
 

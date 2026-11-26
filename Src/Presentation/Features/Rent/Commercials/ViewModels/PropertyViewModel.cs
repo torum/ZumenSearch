@@ -250,26 +250,31 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     public PropertyTypeLabel SelectedPropertyKind
     {
-        get => field ?? new(PropertyKindType.Unspecified);
+        get => field ?? PropertyKinds.First(item => item.Key == PropertyKindType.Unspecified);
         set
         {
-            if (value is null || field?.Key == value.Key)
+            if (value is null)
             {
                 return;
             }
 
-            field = value;
-            OnPropertyChanged();
-            IsDirty = true;
-            /*
-             * DO not use SetProperty. Kind and Structure are reference types without value equality. 
-             * During Bindings.Update(), the ComboBox can write null or a different instance with the same key back to the view model. 
-             * SetProperty sees a reference change and sets IsDirty = true.
-            if (SetProperty(ref field, value))
+            var selected = PropertyKinds.FirstOrDefault(item => item.Key == value.Key);
+            if (selected is null)
+            {
+                ShowSimpleErrorInfoBar("入力項目に誤りがあります", $"{nameof(SelectedPropertyKind)}: 不明な選択肢です（{value.Key}）。");
+                return;
+            }
+
+            var previous = SelectedPropertyKind;
+            field = selected;
+            if (!ReferenceEquals(previous, selected))
+            {
+                OnPropertyChanged();
+            }
+            if (previous.Key != selected.Key)
             {
                 IsDirty = true;
             }
-            */
         }
     }
 
@@ -308,26 +313,31 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
 
     public PropertyStructureTypeLabel SelectedStructureType
     {
-        get => field ?? new(StructureType.Unspecified);
+        get => field ?? StructureTypes.First(item => item.Key == StructureType.Unspecified);
         set
         {
-            if (value is null || field?.Key == value.Key)
+            if (value is null)
             {
                 return;
             }
 
-            field = value;
-            OnPropertyChanged();
-            IsDirty = true;
-            /*
-             * DO not use SetProperty. Kind and Structure are reference types without value equality. 
-             * During Bindings.Update(), the ComboBox can write null or a different instance with the same key back to the view model. 
-             * SetProperty sees a reference change and sets IsDirty = true.
-            if (SetProperty(ref field, value))
+            var selected = StructureTypes.FirstOrDefault(item => item.Key == value.Key);
+            if (selected is null)
+            {
+                ShowSimpleErrorInfoBar("入力項目に誤りがあります", $"{nameof(SelectedStructureType)}: 不明な選択肢です（{value.Key}）。");
+                return;
+            }
+
+            var previous = SelectedStructureType;
+            field = selected;
+            if (!ReferenceEquals(previous, selected))
+            {
+                OnPropertyChanged();
+            }
+            if (previous.Key != selected.Key)
             {
                 IsDirty = true;
             }
-            */
         }
     }
 
@@ -1147,21 +1157,28 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         get => field ?? GasTypeOptions[0];
         set
         {
-            if (value is null) return;
-            var selected = GasTypeOptions.FirstOrDefault(item => item.Key == value.Key);
-            if (selected is null) return;
-            if (SelectedGasType.Key == selected.Key)
+            if (value is null)
             {
-                if (!ReferenceEquals(field, selected))
-                {
-                    field = selected;
-                    OnPropertyChanged();
-                }
                 return;
             }
+
+            var selected = GasTypeOptions.FirstOrDefault(item => item.Key == value.Key);
+            if (selected is null)
+            {
+                ShowSimpleErrorInfoBar("入力項目に誤りがあります", $"{nameof(SelectedGasType)}: 不明な選択肢です（{value.Key}）。");
+                return;
+            }
+
+            var previous = SelectedGasType;
             field = selected;
-            OnPropertyChanged();
-            IsDirty = true;
+            if (!ReferenceEquals(previous, selected))
+            {
+                OnPropertyChanged();
+            }
+            if (previous.Key != selected.Key)
+            {
+                IsDirty = true;
+            }
         }
     }
     public string GasDetails { get; set { if (SetProperty(ref field, value)) IsDirty = true; } } = string.Empty;
@@ -1171,21 +1188,28 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         get => field ?? WaterTypeOptions[0];
         set
         {
-            if (value is null) return;
-            var selected = WaterTypeOptions.FirstOrDefault(item => item.Key == value.Key);
-            if (selected is null) return;
-            if (SelectedWaterType.Key == selected.Key)
+            if (value is null)
             {
-                if (!ReferenceEquals(field, selected))
-                {
-                    field = selected;
-                    OnPropertyChanged();
-                }
                 return;
             }
+
+            var selected = WaterTypeOptions.FirstOrDefault(item => item.Key == value.Key);
+            if (selected is null)
+            {
+                ShowSimpleErrorInfoBar("入力項目に誤りがあります", $"{nameof(SelectedWaterType)}: 不明な選択肢です（{value.Key}）。");
+                return;
+            }
+
+            var previous = SelectedWaterType;
             field = selected;
-            OnPropertyChanged();
-            IsDirty = true;
+            if (!ReferenceEquals(previous, selected))
+            {
+                OnPropertyChanged();
+            }
+            if (previous.Key != selected.Key)
+            {
+                IsDirty = true;
+            }
         }
     }
     public string WaterDetails { get; set { if (SetProperty(ref field, value)) IsDirty = true; } } = string.Empty;
@@ -1194,21 +1218,28 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         get => field ?? SewerageTypeOptions[0];
         set
         {
-            if (value is null) return;
-            var selected = SewerageTypeOptions.FirstOrDefault(item => item.Key == value.Key);
-            if (selected is null) return;
-            if (SelectedSewerageType.Key == selected.Key)
+            if (value is null)
             {
-                if (!ReferenceEquals(field, selected))
-                {
-                    field = selected;
-                    OnPropertyChanged();
-                }
                 return;
             }
+
+            var selected = SewerageTypeOptions.FirstOrDefault(item => item.Key == value.Key);
+            if (selected is null)
+            {
+                ShowSimpleErrorInfoBar("入力項目に誤りがあります", $"{nameof(SelectedSewerageType)}: 不明な選択肢です（{value.Key}）。");
+                return;
+            }
+
+            var previous = SelectedSewerageType;
             field = selected;
-            OnPropertyChanged();
-            IsDirty = true;
+            if (!ReferenceEquals(previous, selected))
+            {
+                OnPropertyChanged();
+            }
+            if (previous.Key != selected.Key)
+            {
+                IsDirty = true;
+            }
         }
     }
     public string SewerageDetails { get; set { if (SetProperty(ref field, value)) IsDirty = true; } } = string.Empty;
@@ -1223,21 +1254,28 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         get => field ?? ParkingVacancyOptions[0];
         set
         {
-            if (value is null) return;
-            var selected = ParkingVacancyOptions.FirstOrDefault(item => item.Key == value.Key);
-            if (selected is null) return;
-            if (SelectedParkingVacancy.Key == selected.Key)
+            if (value is null)
             {
-                if (!ReferenceEquals(field, selected))
-                {
-                    field = selected;
-                    OnPropertyChanged();
-                }
                 return;
             }
+
+            var selected = ParkingVacancyOptions.FirstOrDefault(item => item.Key == value.Key);
+            if (selected is null)
+            {
+                ShowSimpleErrorInfoBar("入力項目に誤りがあります", $"{nameof(SelectedParkingVacancy)}: 不明な選択肢です（{value.Key}）。");
+                return;
+            }
+
+            var previous = SelectedParkingVacancy;
             field = selected;
-            OnPropertyChanged();
-            IsDirty = true;
+            if (!ReferenceEquals(previous, selected))
+            {
+                OnPropertyChanged();
+            }
+            if (previous.Key != selected.Key)
+            {
+                IsDirty = true;
+            }
         }
     }
     public string ParkingSpaces { get; set { if (SetProperty(ref field, value)) IsDirty = true; } } = string.Empty;
@@ -1247,21 +1285,28 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         get => field ?? ParkingTaxOptions[0];
         set
         {
-            if (value is null) return;
-            var selected = ParkingTaxOptions.FirstOrDefault(item => item.Key == value.Key);
-            if (selected is null) return;
-            if (SelectedParkingTax.Key == selected.Key)
+            if (value is null)
             {
-                if (!ReferenceEquals(field, selected))
-                {
-                    field = selected;
-                    OnPropertyChanged();
-                }
                 return;
             }
+
+            var selected = ParkingTaxOptions.FirstOrDefault(item => item.Key == value.Key);
+            if (selected is null)
+            {
+                ShowSimpleErrorInfoBar("入力項目に誤りがあります", $"{nameof(SelectedParkingTax)}: 不明な選択肢です（{value.Key}）。");
+                return;
+            }
+
+            var previous = SelectedParkingTax;
             field = selected;
-            OnPropertyChanged();
-            IsDirty = true;
+            if (!ReferenceEquals(previous, selected))
+            {
+                OnPropertyChanged();
+            }
+            if (previous.Key != selected.Key)
+            {
+                IsDirty = true;
+            }
         }
     }
     public bool IsParkingFree
@@ -1298,21 +1343,33 @@ public sealed partial class PropertyViewModel : ObservableRecipient,
         get;
         set
         {
-            if (SetProperty(ref field, value))
+            if (value is null)
+            {
+                return;
+            }
+
+            var selected = KanriShutais.FirstOrDefault(item => item.Key == value.Key);
+            if (selected is null)
+            {
+                ShowSimpleErrorInfoBar("入力項目に誤りがあります", $"{nameof(SelectedKanriShutai)}: 不明な選択肢です（{value.Key}）。");
+                return;
+            }
+
+            var previous = field;
+            field = selected;
+            if (!ReferenceEquals(previous, selected))
+            {
+                OnPropertyChanged();
+            }
+            if (previous?.Key != selected.Key)
             {
                 IsDirty = true;
 
-                if (field is null)
-                {
-                    Debug.WriteLine("SelectedKanriShutai is null");
-                    return;
-                }
-
                 // Toggle Visibilities
-                IsKanriUnspecified = field.Key == ZumenSearch.Domain.Entities.Rent.Commercials.Property.EnumKanriShutai.Unspecified;
-                IsKanriJisya = field.Key == ZumenSearch.Domain.Entities.Rent.Commercials.Property.EnumKanriShutai.Jisya;
-                IsKanriTasya = field.Key == ZumenSearch.Domain.Entities.Rent.Commercials.Property.EnumKanriShutai.Tasya;
-                IsKanriKashinushi = field.Key == ZumenSearch.Domain.Entities.Rent.Commercials.Property.EnumKanriShutai.Kashinushi;
+                IsKanriUnspecified = selected.Key == ZumenSearch.Domain.Entities.Rent.Commercials.Property.EnumKanriShutai.Unspecified;
+                IsKanriJisya = selected.Key == ZumenSearch.Domain.Entities.Rent.Commercials.Property.EnumKanriShutai.Jisya;
+                IsKanriTasya = selected.Key == ZumenSearch.Domain.Entities.Rent.Commercials.Property.EnumKanriShutai.Tasya;
+                IsKanriKashinushi = selected.Key == ZumenSearch.Domain.Entities.Rent.Commercials.Property.EnumKanriShutai.Kashinushi;
             }
         }
     }
