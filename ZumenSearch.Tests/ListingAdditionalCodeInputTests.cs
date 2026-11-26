@@ -15,7 +15,7 @@ namespace ZumenSearch.Tests;
 [TestClass]
 public sealed class ListingAdditionalCodeInputTests
 {
-    public static IEnumerable<(string Input, string Expected, bool Rejected)> InputCases =>
+    public static (string Input, string Expected, bool Rejected)[] InputCases =>
     [
         ("A-12", "A123", true),
         ("あ１２３", "A123", true),
@@ -32,7 +32,7 @@ public sealed class ListingAdditionalCodeInputTests
         ("", "", false)
     ];
 
-    public static IEnumerable<(string Input, bool OnBasicPage)> SaveCases =>
+    public static (string Input, bool OnBasicPage)[] SaveCases =>
     [
         ("A", false), ("AB", false), ("AB1", true), ("ａ１", false),
         ("AB12", false), ("ａｂ１２", false), ("", false)

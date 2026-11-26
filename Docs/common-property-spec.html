@@ -48,7 +48,8 @@
     <tr><td>経度</td><td>Longitude.</td><td><code>properties.location_longitude</code></td></tr>
     <tr><td>Postal code (no input on these pages)</td><td>Address model's postal code; both rental property save paths write it.</td><td><code>properties.location_postal_code</code></td></tr>
   </tbody></table></div>
-  <p><code>location_machiaza_id</code> is one shared column for the selected address hierarchy, not a separate ID for each selection. <code>location_prefecture_code</code> stores the selected prefecture object's municipality code.</p>
+  <p><code>location_machiaza_id</code> is one shared column for the selected address hierarchy, not a separate ID for each selection. The editors save the selected chōme's master ID, or an empty ID if there is no selected chōme. <code>location_prefecture_code</code> stores the selected prefecture object's municipality code.</p>
+  <p>The location master is authoritative. When saved address components do not match it, the editors leave those components unselected and warn that saving removes the undisplayed components. Missing or unavailable master data is also reported; other property fields continue to load. Changing a parent selection clears its dependent selections. The remaining-address field and postal code are independent of these selections.</p>
 
   <h2 id="transport">Transportation</h2>
   <p>Both rental editors offer four entries, selected with 交通１–交通４. The selector is UI-only. In the table, <code>N</code> means 1, 2, 3 or 4: for example, <code>properties.train1_line_code</code>. The <code>buss</code> spelling and capital letters are the current schema names.</p>

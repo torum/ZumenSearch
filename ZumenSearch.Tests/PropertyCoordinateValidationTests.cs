@@ -16,7 +16,7 @@ namespace ZumenSearch.Tests;
 [TestClass]
 public sealed class PropertyCoordinateValidationTests
 {
-    public static IEnumerable<(bool Latitude, string Input, string? Expected, bool OnLocationPage)> CoordinateCases =>
+    public static (bool Latitude, string Input, string? Expected, bool OnLocationPage)[] CoordinateCases =>
     [
         (true, "-90", "-90", false),
         (true, "90", "90", false),

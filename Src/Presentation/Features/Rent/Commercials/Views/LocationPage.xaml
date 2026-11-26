@@ -10,10 +10,12 @@
     mc:Ignorable="d"
     xmlns:modlocation="using:ZumenSearch.Domain.ValueObjects.Location" 
     xmlns:framework="using:Microsoft.UI.Xaml"
+    xmlns:helpers="using:ZumenSearch.Presentation.Helpers"
     NavigationCacheMode="Required">
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled" Padding="36,0,36,24">
         <Grid x:Name="ContentArea">
             <StackPanel Spacing="12" Margin="0,24,0,0">
+                <InfoBar Severity="Warning" IsOpen="{x:Bind ViewModel.IsLocationWarningOpen, Mode=OneWay}" IsClosable="False" Title="住所を確認してください" Message="{x:Bind ViewModel.LocationWarning, Mode=OneWay}" helpers:InfoBarExtensions.IsTextSelectionEnabled="True"/>
                 <Border Style="{StaticResource RoundCardBorderStyle}">
 
                     <StackPanel>

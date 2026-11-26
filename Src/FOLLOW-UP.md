@@ -54,7 +54,7 @@ Unsaved ownership changes immediately reach open listing editors, which can save
 **Files:** Rent Residential and Commercial property and listing view models, `Views\Listing\BasicPage.xaml`, and Residential `Views\FacilitiesPage.xaml`.
 
 - [ ] Property and listing editors catch and report population failures but can leave partially populated editors available for later changes and saves. Review initialization failure handling and protection against saving incomplete values in both implementations.
-- [ ] Address selection follows Residential location-master matching. Review behavior when master data is unavailable or incomplete, including saving unmatched components.
+- [x] Both property editors warn when location master data is unavailable or saved components or IDs do not match. Saving uses the displayed master selections and removes unmatched components; lookup errors do not interrupt population of other fields. Automated regressions cover matching, failures, parent changes, and database round trips; verify warnings and selection cascades interactively in both workflows.
 - [ ] Listing contract and transaction typed-label selections use reference-based change detection. Investigate whether a different label instance with the same key can unnecessarily mark either editor dirty during binding updates.
 
 ### Search boundaries and dates

@@ -18,7 +18,7 @@ public class DataAccessLocationService : IDataAccessLocationService, ILocationRe
     public DataAccessLocationService()
     {
         string dbPath = Path.Combine(AppContext.BaseDirectory, "Data", "mt_town_all.db");
-        _connectionStringBuilder = new SqliteConnectionStringBuilder($"Data Source={dbPath}");
+        _connectionStringBuilder = new SqliteConnectionStringBuilder { DataSource = dbPath, Mode = SqliteOpenMode.ReadOnly };
     }
 
     public List<CountyAndCity> GetCountyAndCityByPref(string pref)

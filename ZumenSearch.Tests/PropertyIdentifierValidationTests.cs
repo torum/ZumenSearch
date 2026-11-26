@@ -14,7 +14,7 @@ namespace ZumenSearch.Tests;
 [TestClass]
 public sealed class PropertyIdentifierValidationTests
 {
-    public static IEnumerable<(string Id, string Code, bool Valid, bool OnBasicPage)> IdentifierCases =>
+    public static (string Id, string Code, bool Valid, bool OnBasicPage)[] IdentifierCases =>
     [
         ("1", "AB12", false, false),
         ("123456789012", "AB12", false, true),
