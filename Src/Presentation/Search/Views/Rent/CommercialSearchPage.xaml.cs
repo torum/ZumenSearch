@@ -41,7 +41,7 @@ public sealed partial class CommercialSearchPage : Page
 
     private void Page_Loaded(object sender, RoutedEventArgs e)
     {
-        this.TextBoxName.Focus(Microsoft.UI.Xaml.FocusState.Programmatic);
+        this.KeywordTextBox.Focus(Microsoft.UI.Xaml.FocusState.Programmatic);
     }
 
     private void SearchOption_Checked(object sender, RoutedEventArgs e)
